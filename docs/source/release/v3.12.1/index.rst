@@ -29,23 +29,23 @@ Please cite any usage of Mantid as follows:
 Changes in this version
 -----------------------
 
-* `22200 <https://github.com/mantidproject/mantid/pull/22200>`_ Fix unreliable tests: Disable ClearCache doc test 
-* `22205 <https://github.com/mantidproject/mantid/pull/22205>`_ Fix header for TOPAS files 
-* `22175 <https://github.com/mantidproject/mantid/pull/22175>`_ Fix failing Reflectometry doctests 
+* `22200 <https://github.com/mantidproject/mantid/pull/22200>`_ Fix unreliable tests: Disable ClearCache doc test
+* `22205 <https://github.com/mantidproject/mantid/pull/22205>`_ Fix header for TOPAS files
+* `22175 <https://github.com/mantidproject/mantid/pull/22175>`_ Fix failing Reflectometry doctests
 
 Summary of impact
 -----------------
 
-+-------+---------------------------------------------------+----------+--------------+
-| Issue | Impact                                            | Solution | Side Effect  |
-|       |                                                   |          | Probability  |
-+=======+===================================================+==========+==============+
-| 22200 | Fix unreliable tests: Disable ClearCache doc test |          | **unknown**  |
-+-------+---------------------------------------------------+----------+--------------+
-| 22205 | Fix header for TOPAS files                        |          | **unknown**  |
-+-------+---------------------------------------------------+----------+--------------+
-| 22175 | Fix failing Reflectometry doctests                |          | **unknown**  |
-+-------+---------------------------------------------------+----------+--------------+
++-------+---------------------------------------------------+---------------+--------------+
+| Issue | Impact                                            | Solution      | Side Effect  |
+|       |                                                   |               | Probability  |
++=======+===================================================+===============+==============+
+| 22200 | Fix unreliable tests: Disable ClearCache doc test |               | **unknown**  |
++-------+---------------------------------------------------+---------------+--------------+
+| 22205 | Fix header for TOPAS files                        |               | **unknown**  |
++-------+---------------------------------------------------+---------------+--------------+
+| 22175 | Fix failing Reflectometry doctests                | Update values | low          |
++-------+---------------------------------------------------+---------------+--------------+
 
 .. _download page: http://download.mantidproject.org
 
