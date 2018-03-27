@@ -34,6 +34,9 @@ then dependent on its requirements:
   - After further investigation we are not going to continue with this
     for the following reasons ... The author of this ticket has been
     informed.
+  - (If the issue is an **umbrella** issue, indicated by the
+    **Roadmap** label) All points in this issue have been addressed
+    elsewhere (see issues X, Y, Z)
 
 Creating an Issue
 ^^^^^^^^^^^^^^^^^
@@ -52,7 +55,7 @@ requests. Labelling your issues and pull requests adequately will
 ensure that they are picked up by the right people.
 
 Labels fall into several groups: (*please note that 'ticket' is used
-to refer to either an issue or a PR on this page)
+to refer to either an issue or a PR on this page*)
 
 - **Component** - which area of Mantid the ticket concerns. The ticket
   may be relevant to more than one area. Some commonly used
