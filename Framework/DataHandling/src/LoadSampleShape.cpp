@@ -1,4 +1,4 @@
-#include "MantidDataHandling/LoadShape.h"
+#include "MantidDataHandling/LoadSampleShape.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
@@ -19,13 +19,13 @@
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(LoadShape)
+DECLARE_ALGORITHM(LoadSampleShape)
 
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-void LoadShape::init() {
+void LoadSampleShape::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<API::InstrumentValidator>();
 
@@ -55,7 +55,7 @@ void LoadShape::init() {
 * @returns An integer specifying the confidence level. 0 indicates it will not
 * be used
 */
-int LoadShape::confidence(Kernel::FileDescriptor &descriptor) const {
+int LoadSampleShape::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filePath = descriptor.filename();
   const size_t filenameLength = filePath.size();
 
@@ -67,7 +67,7 @@ int LoadShape::confidence(Kernel::FileDescriptor &descriptor) const {
   return confidence;
 }
 
-void LoadShape::exec() {
+void LoadSampleShape::exec() {
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -101,7 +101,7 @@ void LoadShape::exec() {
 }
 
 std::unique_ptr<Geometry::MeshObject>
-LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {
+LoadSampleShape::readSTLSolid(std::ifstream &file, std::string &name) {
   // Read Solid name
   // We expect line after trimming to be "solid "+name.
   std::string line;
@@ -118,7 +118,7 @@ LoadShape::readSTLSolid(std::ifstream &file, std::string &name) {
   return nullptr;
 }
 
-std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream &file) {
+std::unique_ptr<MeshObject> LoadSampleShape::readSTLMeshObject(std::ifstream &file) {
   std::vector<uint16_t> triangleIndices;
   std::vector<V3D> vertices;
   V3D t1, t2, t3;
@@ -140,7 +140,7 @@ std::unique_ptr<MeshObject> LoadShape::readSTLMeshObject(std::ifstream &file) {
 }
 
 /* Reads triangle for STL file and returns true if triangle is found */
-bool LoadShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2,
+bool LoadSampleShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2,
                                 V3D &v3) {
 
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
@@ -156,7 +156,7 @@ bool LoadShape::readSTLTriangle(std::ifstream &file, V3D &v1, V3D &v2,
 }
 
 /* Reads vertex from STL file and returns true if vertex is found */
-bool LoadShape::readSTLVertex(std::ifstream &file, V3D &vertex) {
+bool LoadSampleShape::readSTLVertex(std::ifstream &file, V3D &vertex) {
   std::string line;
   if (getline(file, line)) {
     boost::trim(line);
@@ -175,7 +175,7 @@ bool LoadShape::readSTLVertex(std::ifstream &file, V3D &vertex) {
 }
 
 // Read, check and ignore line in STL file. Return true if line is read
-bool LoadShape::readSTLLine(std::ifstream &file, std::string const &type) {
+bool LoadSampleShape::readSTLLine(std::ifstream &file, std::string const &type) {
   std::string line;
   if (getline(file, line)) {
     boost::trim(line);
@@ -196,7 +196,7 @@ bool LoadShape::readSTLLine(std::ifstream &file, std::string const &type) {
 }
 
 // Adds vertex to list if distinct and returns index to vertex added or equal
-uint16_t LoadShape::addSTLVertex(V3D &vertex, std::vector<V3D> &vertices) {
+uint16_t LoadSampleShape::addSTLVertex(V3D &vertex, std::vector<V3D> &vertices) {
   for (uint16_t i = 0; i < vertices.size(); ++i) {
     if (areEqualVertices(vertex, vertices[i])) {
       return i;

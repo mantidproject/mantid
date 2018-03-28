@@ -4,7 +4,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/LoadShape.h"
+#include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
@@ -17,10 +17,10 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 
-class LoadShapeTest : public CxxTest::TestSuite {
+class LoadSampleShapeTest : public CxxTest::TestSuite {
 public:
-  static LoadShapeTest *createSuite() { return new LoadShapeTest(); }
-  static void destroySuite(LoadShapeTest *suite) { delete suite; }
+  static LoadSampleShapeTest *createSuite() { return new LoadSampleShapeTest(); }
+  static void destroySuite(LoadSampleShapeTest *suite) { delete suite; }
 
   void testName() { TS_ASSERT_EQUALS(loadShape.name(), "LoadShape"); }
 
@@ -36,32 +36,32 @@ public:
   }
 
   void testConfidence() {
-    LoadShape testLoadShape;
-    testLoadShape.initialize();
-    testLoadShape.setPropertyValue("Filename", "cube.stl");
-    std::string path = testLoadShape.getPropertyValue("Filename");
+    LoadSampleShape testLoadSampleShape;
+    testLoadSampleShape.initialize();
+    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
+    std::string path = testLoadSampleShape.getPropertyValue("Filename");
     auto *descriptor = new Kernel::FileDescriptor(path);
-    TS_ASSERT_EQUALS(90, testLoadShape.confidence(*descriptor));
+    TS_ASSERT_EQUALS(90, testLoadSampleShape.confidence(*descriptor));
     delete descriptor;
   }
 
   void testExec_2WS() {
-    LoadShape testLoadShape;
-    testLoadShape.initialize();
-    testLoadShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadShape, "InputWS", "OutputWS");
-    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
-    TS_ASSERT(testLoadShape.isExecuted());
+    LoadSampleShape testLoadSampleShape;
+    testLoadSampleShape.initialize();
+    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
+    prepareWorkspaces(testLoadSampleShape, "InputWS", "OutputWS");
+    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
+    TS_ASSERT(testLoadSampleShape.isExecuted());
     clearWorkspaces("InputWS", "OutputWS");
   }
 
   void testExec_1WS() {
-    LoadShape testLoadShape;
-    testLoadShape.initialize();
-    testLoadShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadShape, "InputWS", "InputWS");
-    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
-    TS_ASSERT(testLoadShape.isExecuted());
+    LoadSampleShape testLoadSampleShape;
+    testLoadSampleShape.initialize();
+    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
+    prepareWorkspaces(testLoadSampleShape, "InputWS", "InputWS");
+    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
+    TS_ASSERT(testLoadSampleShape.isExecuted());
     clearWorkspaces("InputWS", "InputWS");
   }
 
@@ -104,7 +104,7 @@ public:
 
 private:
   // Create workspaces and add them to algorithm properties
-  void prepareWorkspaces(LoadShape &alg, const std::string &inputWS,
+  void prepareWorkspaces(LoadSampleShape &alg, const std::string &inputWS,
                          const std::string &outputWS) {
     auto inWs =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
@@ -126,12 +126,12 @@ private:
   const MeshObject *loadMeshObject(const std::string &inputWS,
                                    const std::string &outputWS,
                                    const std::string filename) {
-    LoadShape testLoadShape;
-    testLoadShape.initialize();
-    testLoadShape.setPropertyValue("Filename", filename);
-    prepareWorkspaces(testLoadShape, inputWS, outputWS);
-    TS_ASSERT_THROWS_NOTHING(testLoadShape.execute());
-    TS_ASSERT(testLoadShape.isExecuted());
+    LoadSampleShape testLoadSampleShape;
+    testLoadSampleShape.initialize();
+    testLoadSampleShape.setPropertyValue("Filename", filename);
+    prepareWorkspaces(testLoadSampleShape, inputWS, outputWS);
+    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
+    TS_ASSERT(testLoadSampleShape.isExecuted());
     return getMeshObject(outputWS);
   }
 
@@ -159,7 +159,7 @@ private:
     }
   }
 
-  LoadShape loadShape;
+  LoadSampleShape loadShape;
 };
 
 class LoadShapeTestPerformance : public CxxTest::TestSuite {
@@ -173,7 +173,7 @@ public:
     }
   }
 
-  void testLoadShapePerformance() {
+  void testLoadSampleShapePerformance() {
     for (auto alg : loadAlgPtrs) {
       TS_ASSERT_THROWS_NOTHING(alg->execute());
     }
@@ -189,13 +189,13 @@ public:
   }
 
 private:
-  std::vector<LoadShape *> loadAlgPtrs;
+  std::vector<LoadSampleShape *> loadAlgPtrs;
   const int numberOfIterations = 5;
   const std::string inWsName = "InWS";
   const std::string outWsName = "OutWS";
 
-  LoadShape *setupAlg() {
-    LoadShape *loadAlg = new LoadShape();
+  LoadSampleShape *setupAlg() {
+    LoadSampleShape *loadAlg = new LoadSampleShape();
     loadAlg->initialize();
 
     loadAlg->setPropertyValue("Filename", "tube.stl");
