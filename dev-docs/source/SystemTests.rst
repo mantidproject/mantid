@@ -220,34 +220,6 @@ The data is managed by CMake's external data system that is described by
 new file <Data_Files_in_Mantid#Adding_A_New_File>`__ for how to add new
 files.
 
-Jenkins Test Schedule and Output
-################################
-
-They are run periodically as Jenkins jobs. If the tests pass, then the
-installer(s) relating to the version under test are copied to the
-`download server <http://download.mantidproject.org/>`__, where they are
-marked as the development build, and the subversion tag
-`'systemtested' <http://svn.mantidproject.org/viewvc/Mantid/tags/systemtested/>`__
-is update, which can be used by anyone wanting to build the latest
-tested version from source.
-
-If The Tests Have Failed
-------------------------
-
-If the tests fail, then an email indicating this, and showing which
-tests failed, is sent to the
-`mantid-developers <http://lists.mantidproject.org/mailman/listinfo/mantid-developers>`__
-mailing list. For further details, it is necessary to look at the
-Jenkins job for this failure. It should be noted that these tests are
-not designed to diagnose faults, only to detect when problems may arise.
-
-The appropriate action may be to correct an error in the code that's
-been inadvertently introduced, but equally it may be to replace the
-reference result in the repository with the new one if the change is due
-to a well-understood and expected improvement. Anticipation of this
-latter situation would be beneficial to keeping the available
-development download as up-to-date as possible.
-
 Best Practice
 #############
 
