@@ -28,7 +28,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 /** Constructor
  */
 LoadILLSANS::LoadILLSANS()
-    : m_supportedInstruments{"D33"}, m_defaultBinning{0, 0} {}
+    : m_supportedInstruments{"D11", "D22", "D33"}, m_defaultBinning{0, 0},
+      m_resMode("nominal") {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -67,7 +68,7 @@ int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
 void LoadILLSANS::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "Name of the SPE file to load");
+      "Name of the nexus file to load");
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace");
@@ -78,23 +79,21 @@ void LoadILLSANS::init() {
  */
 void LoadILLSANS::exec() {
   // Init
-  std::string filename = getPropertyValue("Filename");
+  const std::string filename = getPropertyValue("Filename");
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
 
-  std::string instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
+  const std::string instrumentPath =
+      m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
 
-  g_log.debug("Setting detector positions...");
-  DetectorPosition detPos = getDetectorPosition(firstEntry, instrumentPath);
-
-  initWorkSpace(firstEntry, instrumentPath);
-
-  // load the instrument from the IDF if it exists
-  runLoadInstrument();
-
-  // Move detectors
-  moveDetectors(detPos);
+  if (m_instrumentName == "D33") {
+    initWorkSpaceD33(firstEntry, instrumentPath);
+    runLoadInstrument();
+    const DetectorPosition detPos =
+        getDetectorPositionD33(firstEntry, instrumentPath);
+    moveDetectorsD33(std::move(detPos));
+  }
 
   setFinalProperties();
   // Set the output workspace property
@@ -114,6 +113,13 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
+  const auto inst = std::find(m_supportedInstruments.begin(),
+                              m_supportedInstruments.end(), m_instrumentName);
+  if (inst == m_supportedInstruments.end()) {
+    throw std::runtime_error(
+        "Instrument " + m_instrumentName +
+        " is not supported. Only D11, D22 and D33 are supported");
+  }
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
@@ -122,8 +128,8 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
  * @return a structure with the positions
  */
 DetectorPosition
-LoadILLSANS::getDetectorPosition(const NeXus::NXEntry &firstEntry,
-                                 const std::string &instrumentNamePath) {
+LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
+                                    const std::string &instrumentNamePath) {
   std::string detectorPath(instrumentNamePath + "/detector");
 
   DetectorPosition pos;
@@ -155,8 +161,8 @@ LoadILLSANS::getDetectorPosition(const NeXus::NXEntry &firstEntry,
   return pos;
 }
 
-void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
-                                const std::string &instrumentPath) {
+void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
+                                   const std::string &instrumentPath) {
 
   g_log.debug("Fetching data...");
 
@@ -390,7 +396,7 @@ void LoadILLSANS::runLoadInstrument() {
   }
 }
 
-void LoadILLSANS::moveDetectors(const DetectorPosition &detPos) {
+void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
 
   // Move in Z
   moveDetectorDistance(detPos.distanceSampleRear, "back_detector");

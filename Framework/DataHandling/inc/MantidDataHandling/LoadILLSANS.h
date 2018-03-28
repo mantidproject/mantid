@@ -9,9 +9,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadILLSANS
-
- To date this only supports ILL D33 SANS-TOF instrument
+/** LoadILLSANS; supports D11 (with 2 resolution modes), D22 and D33 (TOF/monochromatic)
 
  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -79,9 +77,10 @@ private:
   void init() override;
   void exec() override;
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
-  DetectorPosition getDetectorPosition(const NeXus::NXEntry &,
-                                       const std::string &);
-  void initWorkSpace(NeXus::NXEntry &, const std::string &);
+  DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &,
+                                          const std::string &);
+
+  void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(int, int);
 
   size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
@@ -94,18 +93,19 @@ private:
                                                 const std::vector<double> &,
                                                 size_t);
   void runLoadInstrument();
-  void moveDetectors(const DetectorPosition &);
+  void moveDetectorsD33(const DetectorPosition &);
   void moveDetectorDistance(double, const std::string &);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
   Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
 
-  LoadHelper m_loader;
+  LoadHelper m_loader;  
   std::string m_instrumentName; ///< Name of the instrument
   std::vector<std::string> m_supportedInstruments;
   API::MatrixWorkspace_sptr m_localWorkspace;
   std::vector<double> m_defaultBinning;
+  std::string m_resMode; ///< Resolution mode for D11
 
   double calculateQ(const double lambda, const double twoTheta) const;
   std::pair<double, double> calculateQMaxQMin();
