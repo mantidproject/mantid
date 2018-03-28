@@ -90,13 +90,14 @@ public:
   virtual signal_t getError() const = 0;
 
   /// Return a list of vertexes defining the volume pointed to
-  virtual coord_t *getVertexesArray(size_t &numVertices) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const = 0;
 
   /// Return a list of vertexes defining the volume pointed to, enable masking
   /// of dimensions.
-  virtual coord_t *getVertexesArray(size_t &numVertices,
-                                    const size_t outDimensions,
-                                    const bool *maskDim) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const = 0;
 
   /// Returns the position of the center of the box pointed to.
   virtual Mantid::Kernel::VMD getCenter() const = 0;
