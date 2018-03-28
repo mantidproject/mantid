@@ -441,10 +441,10 @@ void MaxEnt::exec() {
     // No errors
 
   } // Next spectrum
-  setProperty("EvolChi", removeZeros(outEvolChi, iterationCounts,
-                                     "Chi squared"));
-  setProperty("EvolAngle", removeZeros(outEvolTest, iterationCounts,
-                                       "Maximum Angle"));
+  setProperty("EvolChi",
+              removeZeros(outEvolChi, iterationCounts, "Chi squared"));
+  setProperty("EvolAngle",
+              removeZeros(outEvolTest, iterationCounts, "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }
