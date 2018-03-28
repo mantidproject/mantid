@@ -93,7 +93,7 @@ From the CMake gui ...
 Data Files Location
 -------------------
 
-Mantid used the CMake ExternalData system for managing testing data. See :ref:`UsefulTools` for further instructions.
+Mantid used the CMake ExternalData system for managing testing data. See :ref:`DataFiles` for further instructions.
 
 With Qt Creator ...
 -------------------
@@ -108,7 +108,7 @@ Building and working with CMake
 * '''Visual Studio users''': Use the ``visual-studio.bat`` generated in the build directory to start the IDE. This sets up the environment correctly.
 * You should typically never have to run CMake manually again (unless you want to create a new, separate build) - it will be run automatically if one of the CMake input files changes.
 * It should be rare that you will need to edit the CMake build (``CMakeLists.txt``) files. The most common occurrence will be when you add a new file. This must be added to the corresponding CMakeLists file, e.g. if you add a file to Kernel, edit ``Mantid/Framework/Kernel/CMakeLists.txt`` to add the source, header and test files to the long lists of filepaths at the top of the file.
-* The [[Useful_Tools_for_Developers#class_maker.py|class maker]] utility can edit the ``CMakeList.txt`` for you automatically
+* The class maker utility (:ref:`UsefulTools`) can edit the ``CMakeList.txt`` for you automatically
 * There are similar places in the Qt projects for ui files and files that need moc-ing.
 * If you add a new dependency, that will need to be added (this is less straightforward - do ask for help).
 * Cache variables can be added via the CMake Gui or by running ``ccmake``.
@@ -119,8 +119,6 @@ Building the installer package
 * For WIndows only, you first need to install NSIS, available at: http://nsis.sourceforge.net/Download. Ensure that the install directory is added to the PATH. You should be able to type ``makensis /?`` in a command prompt.
 * Run CMake with "ENABLE_CPACK" enabled. If using the GUI you need to click the "Advanced" checkbox to see this option.
 * You will now have a build target called "PACKAGE" available to create the installer package.
-
-More information can be found at: [[MantidPlot_Windows_Installer]]
 
 Troubleshooting on OSX
 ----------------------
