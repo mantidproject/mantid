@@ -139,18 +139,19 @@ void GetDetectorOffsets::exec() {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
     GetDetectorsOffset::PeakLinearFunction fit_result;
-    double offset = fitSpectra(wi, isAbsolute, m_Xmin, m_Xmax, fit_result);
-    g_log.debug() << "wi = " << wi << ": height = " << fit_result.height
-                  << "\n";
+    double offset =
+        fitSpectra(wi, isAbsolute, m_Xmin, m_Xmax, fit_result, false);
+    g_log.notice() << "wi = " << wi << ": height = " << fit_result.height
+                   << "\n";
 
-    if (fit_peak_twice && fit_result.fwhm > 0.5) {
-      double xmin = fit_result.center - 0.5 * fit_result.fwhm * 2.355;
-      double xmax = fit_result.center + 0.5 * fit_result.fwhm * 2.355;
+    if (fit_peak_twice && fit_result.sigma > 0.5 && fit_result.height > 1.E-1) {
+      double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
+      double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
       g_log.debug() << "[DB...BAT] ws-index " << wi
                     << " found: center = " << fit_result.center
-                    << ", FHWM = " << fit_result.fwhm
+                    << ", FHWM = " << fit_result.sigma
                     << "; new fit range: " << xmin << ", " << xmax << "\n";
-      offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result);
+      offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result, true);
     }
 
     double mask = 0.0;
@@ -184,7 +185,7 @@ void GetDetectorOffsets::exec() {
       }
       if (fit_result_table) {
         API::TableRow row = fit_result_table->getRow(wi);
-        row << static_cast<int>(wi) << fit_result.center << fit_result.fwhm
+        row << static_cast<int>(wi) << fit_result.center << fit_result.sigma
             << fit_result.height << fit_result.a0 << fit_result.a1;
       }
     }
@@ -230,16 +231,34 @@ void GetDetectorOffsets::exec() {
  *  @param xmin: minimum value in fit range
  *  @param xmax: maximum value in fit range
  *  @param fit_result: collection of fitting result
+ *  @param use_fit_result:
  *  @return The calculated offset value
  */
 double GetDetectorOffsets::fitSpectra(
     const int64_t s, bool isAbsolbute, const double xmin, const double xmax,
-    GetDetectorsOffset::PeakLinearFunction &fit_result) {
-  // Find point of peak centre
-  const auto &yValues = inputW->y(s);
-  auto it = std::max_element(yValues.cbegin(), yValues.cend());
-  const double peakHeight = *it;
-  const double peakLoc = inputW->x(s)[it - yValues.begin()];
+    GetDetectorsOffset::PeakLinearFunction &fit_result, bool use_fit_result) {
+
+  double bkgd_a0(0.), bkgd_a1(0.);
+  double peakHeight(0.), peakLoc(0.), peakSigma(-1);
+
+  if (use_fit_result) {
+    bkgd_a0 = fit_result.a0;
+    bkgd_a1 = fit_result.a1;
+    peakHeight = fit_result.height;
+    peakLoc = fit_result.center;
+    peakSigma = fit_result.sigma;
+  } else {
+    // Find point of peak centre
+    const auto &yValues = inputW->y(s);
+    auto it = std::max_element(yValues.cbegin(), yValues.cend());
+    peakHeight = *it;
+    peakLoc = inputW->x(s)[it - yValues.begin()];
+  }
+
+  //  double peakSigma(-1);
+  //  if (use_fit_result) {
+  //      peakSigma = fit_result.sigma;
+  //  }
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
   if (std::isnan(peakHeight))
@@ -253,7 +272,7 @@ double GetDetectorOffsets::fitSpectra(
     g_log.error("Can't locate Fit algorithm");
     throw;
   }
-  auto fun = createFunction(peakHeight, peakLoc);
+  auto fun = createFunction(peakHeight, peakLoc, peakSigma, bkgd_a0, bkgd_a1);
   fit_alg->setProperty("Function", fun);
 
   fit_alg->setProperty("InputWorkspace", inputW);
@@ -281,18 +300,22 @@ double GetDetectorOffsets::fitSpectra(
   // PeakCenter, Sigma
   std::vector<std::string> param_names = function->getParameterNames();
 
-  std::stringstream dbss;
-  dbss << "[Debug] ws-index = " << s << "\n";
-  for (size_t i = 0; i < function->nParams(); ++i) {
-    dbss << param_names[i] << "(" << i << "): " << function->getParameter(i)
-         << "\n";
+  if (use_fit_result) {
+    std::stringstream dbss;
+    dbss << "[Debug] ws-index = " << s << ". fit range: " << xmin << ", "
+         << xmax << "\n";
+    for (size_t i = 0; i < function->nParams(); ++i) {
+      dbss << param_names[i] << "(" << i << "): " << function->getParameter(i)
+           << "\n";
+    }
+    g_log.notice(dbss.str());
+    g_log.notice(fit_alg->asString());
   }
-  g_log.notice(dbss.str());
 
   // get fitted result
   double peak_center = function->getParameter(3);
   fit_result.center = peak_center;
-  fit_result.fwhm = function->getParameter(4);
+  fit_result.sigma = function->getParameter(4);
   fit_result.height = function->getParameter(2);
   fit_result.a0 = function->getParameter(0);
   fit_result.a1 = function->getParameter(1);
@@ -314,17 +337,30 @@ double GetDetectorOffsets::fitSpectra(
  * Create a function string from the given parameters and the algorithm inputs
  * @param peakHeight :: The height of the peak
  * @param peakLoc :: The location of the peak
+ * @param peakSigma ::
  */
 IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
-                                                  const double peakLoc) {
+                                                  const double peakLoc,
+                                                  const double peakSigma,
+                                                  const double a0,
+                                                  const double a1) {
+  // background
   FunctionFactoryImpl &creator = FunctionFactory::Instance();
   auto background = creator.createFunction("LinearBackground");
+  background->setParameter(0, a0);
+  background->setParameter(1, a1);
+
+  // peak
   auto peak = boost::dynamic_pointer_cast<IPeakFunction>(
       creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
-  const double sigma(10.0);
-  peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
+  if (peakSigma <= 0) {
+    const double sigma(10.0);
+    peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
+  } else {
+    peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * peakSigma);
+  }
 
   auto fitFunc = new CompositeFunction(); // Takes ownership of the functions
   fitFunc->addFunction(background);

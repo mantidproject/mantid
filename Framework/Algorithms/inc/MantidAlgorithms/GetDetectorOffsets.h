@@ -13,7 +13,7 @@ namespace Algorithms {
 namespace GetDetectorsOffset {
 struct PeakLinearFunction {
   double center;
-  double fwhm;
+  double sigma;
   double height;
   double a0;
   double a1;
@@ -71,11 +71,14 @@ private:
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
   double fitSpectra(const int64_t s, bool isAbsolbute, const double xmin,
                     const double xmax,
-                    GetDetectorsOffset::PeakLinearFunction &fit_result);
+                    GetDetectorsOffset::PeakLinearFunction &fit_result,
+                    bool use_fit_result);
   /// Create a function string from the given parameters and the algorithm
   /// inputs
   API::IFunction_sptr createFunction(const double peakHeight,
-                                     const double peakLoc);
+                                     const double peakLoc,
+                                     const double peakSigma, const double a0,
+                                     const double a1);
   /// Read in all the input parameters
   void retrieveProperties();
 
