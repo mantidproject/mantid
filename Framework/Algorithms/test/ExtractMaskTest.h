@@ -60,8 +60,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS->getName());
   }
 
-  void
-  test_That_Masked_Detector_List_Populated_When_Passed_A_Mask_Workspace() {
+  void test_That_Masked_Detector_List_Populated_When_Passed_A_Mask_Workspace() {
     // Create a simple test workspace
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputWS =
@@ -79,11 +78,13 @@ public:
     const std::string inputName("inputWSMask");
     AnalysisDataService::Instance().add(inputName, inputWS);
     MaskWorkspace_sptr inputWSMask = runExtractMask(inputName);
-    std::vector<Mantid::detid_t> expectedDetectorList = { 1, 6, 11, 21, 24, 31, 38, 41};
+    std::vector<Mantid::detid_t> expectedDetectorList = {1,  6,  11, 21,
+                                                         24, 31, 38, 41};
 
-	  std::vector<Mantid::detid_t> detectorList;
-  
-    TS_ASSERT_THROWS_NOTHING(detectorList = runExtractMaskReturnList(inputWSMask->getName()));
+    std::vector<Mantid::detid_t> detectorList;
+
+    TS_ASSERT_THROWS_NOTHING(
+        detectorList = runExtractMaskReturnList(inputWSMask->getName()));
     TS_ASSERT_EQUALS(detectorList, expectedDetectorList)
 
     AnalysisDataService::Instance().remove(inputName);
@@ -100,7 +101,7 @@ private:
     maskExtractor.setPropertyValue("OutputWorkspace", outputName);
     maskExtractor.setRethrows(true);
     maskExtractor.execute();
-    
+
     Workspace_sptr workspace =
         AnalysisDataService::Instance().retrieve(outputName);
     if (workspace) {
@@ -113,7 +114,8 @@ private:
     }
   }
 
-  std::vector<Mantid::detid_t> runExtractMaskReturnList(const std::string &inputName) {
+  std::vector<Mantid::detid_t>
+  runExtractMaskReturnList(const std::string &inputName) {
     ExtractMask maskExtractor;
     maskExtractor.initialize();
     maskExtractor.setPropertyValue("InputWorkspace", inputName);
@@ -121,7 +123,8 @@ private:
     maskExtractor.setPropertyValue("OutputWorkspace", outputName);
     maskExtractor.setRethrows(true);
     maskExtractor.execute();
-    std::vector<Mantid::detid_t> detectorList = maskExtractor.getProperty("DetectorList");
+    std::vector<Mantid::detid_t> detectorList =
+        maskExtractor.getProperty("DetectorList");
     AnalysisDataService::Instance().remove(outputName);
     return detectorList;
   }
