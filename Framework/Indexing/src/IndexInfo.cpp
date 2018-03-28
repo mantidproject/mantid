@@ -90,7 +90,8 @@ IndexInfo::~IndexInfo() = default;
 
 IndexInfo &IndexInfo::operator=(const IndexInfo &other) {
   auto copy(other);
-  return *this = std::move(copy);
+  *this = std::move(copy);
+  return *this;
 }
 
 IndexInfo &IndexInfo::operator=(IndexInfo &&) noexcept = default;

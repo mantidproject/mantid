@@ -13,7 +13,7 @@ import mantiddoc.directives.categories
 import mantiddoc.directives.diagram
 import mantiddoc.directives.interface
 import mantiddoc.directives.properties
-import mantiddoc.directives.seeAlso
+import mantiddoc.directives.relatedAlgorithms
 import mantiddoc.directives.sourcelink
 import mantiddoc.directives.summary
 
