@@ -171,7 +171,7 @@ public:
   template <size_t nd>
   void do_test_exec(bool FileBackEnd, bool deleteWorkspace = true,
                     double memory = 0, bool BoxStructureOnly = false) {
-    typedef MDLeanEvent<nd> MDE;
+    using MDE = MDLeanEvent<nd>;
 
     //------ Start by creating the file
     //----------------------------------------------

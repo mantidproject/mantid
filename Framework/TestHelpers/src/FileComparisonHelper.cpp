@@ -59,7 +59,7 @@ void logDifferenceError(char refChar, char testChar, size_t numNewLines,
   ((outError += "\nTest output:\n") += seenChars) += testChar;
 
   Mantid::Kernel::Logger g_log("FileComparisonHelper");
-  g_log.error(std::move(outError));
+  g_log.error(outError);
 }
 
 } // End of anonymous namespace

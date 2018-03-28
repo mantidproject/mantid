@@ -24,7 +24,7 @@ namespace DataHandling {
 namespace ANSTO {
 
 /// pointer to the vector of events
-typedef std::vector<Types::Event::TofEvent> *EventVector_pt;
+using EventVector_pt = std::vector<Types::Event::TofEvent> *;
 
 /// helper class to keep track of progress
 class ProgressTracker {

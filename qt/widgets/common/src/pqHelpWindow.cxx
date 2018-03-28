@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// Internal class used to add support to QWeb(Engine)View to load files from
 /// QHelpEngine.
 class pqHelpWindowNetworkReply : public QNetworkReply {
-  typedef QNetworkReply Superclass;
+  using Superclass = QNetworkReply;
 
 public:
   pqHelpWindowNetworkReply(const QUrl &url, QHelpEngineCore *helpEngine,
@@ -139,7 +139,7 @@ qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize) {
 // ****************************************************************************
 //-----------------------------------------------------------------------------
 class pqHelpWindow::pqNetworkAccessManager : public QNetworkAccessManager {
-  typedef QNetworkAccessManager Superclass;
+  using Superclass = QNetworkAccessManager;
   QPointer<QHelpEngineCore> Engine;
 
 public:

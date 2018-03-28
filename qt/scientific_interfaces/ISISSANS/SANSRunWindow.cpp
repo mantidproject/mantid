@@ -61,7 +61,7 @@ Logger g_log("SANSRunWindow");
 /// static logger for centre finding
 Logger g_centreFinderLog("CentreFinder");
 
-typedef boost::shared_ptr<Kernel::PropertyManager> ReductionSettings_sptr;
+using ReductionSettings_sptr = boost::shared_ptr<Kernel::PropertyManager>;
 
 /**
  * Returns the PropertyManager object that is used to store the settings
@@ -2145,8 +2145,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
       m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
 
       using namespace boost;
-      typedef tuple<QLineEdit *, function<double(const Sample *)>, std::string>
-          GeomSampleInfo;
+      using GeomSampleInfo =
+          tuple<QLineEdit *, function<double(const Sample *)>, std::string>;
 
       std::vector<GeomSampleInfo> sampleInfoList;
       sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,

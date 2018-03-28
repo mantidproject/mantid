@@ -247,9 +247,9 @@ private:
 };
 
 /// shared pointer to the composite function base class
-typedef boost::shared_ptr<CompositeFunction> CompositeFunction_sptr;
+using CompositeFunction_sptr = boost::shared_ptr<CompositeFunction>;
 /// shared pointer to the composite function base class (const version)
-typedef boost::shared_ptr<const CompositeFunction> CompositeFunction_const_sptr;
+using CompositeFunction_const_sptr = boost::shared_ptr<const CompositeFunction>;
 
 /** A Jacobian for individual functions
  */

@@ -203,9 +203,10 @@ protected:
                              RowData_sptr data);
   // Preprocess all option values where applicable
   void preprocessOptionValues(RowData_sptr data);
-  // Update the model with results from the algorithm
-  void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
-                                RowData_sptr data);
+  // Update the model with values used from the options and/or the results from
+  // the algorithm
+  void updateModelFromResults(Mantid::API::IAlgorithm_sptr alg,
+                              RowData_sptr data);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row

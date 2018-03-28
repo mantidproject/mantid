@@ -56,8 +56,8 @@ namespace Kernel {
 */
 template <typename DataType> class cow_ptr {
 public:
-  typedef boost::shared_ptr<DataType> ptr_type; ///< typedef for the storage
-  typedef DataType value_type;                  ///< typedef for the data type
+  using ptr_type = boost::shared_ptr<DataType>; ///< typedef for the storage
+  using value_type = DataType;                  ///< typedef for the data type
 
 private:
   ptr_type Data; ///< Real object Ptr
@@ -203,10 +203,10 @@ cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
 } // NAMESPACE Kernel
 
 /// typedef for the data storage used in Mantid matrix workspaces
-typedef std::vector<double> MantidVec;
+using MantidVec = std::vector<double>;
 
 /// typedef for the pointer to data storage used in Mantid matrix workspaces
-typedef Kernel::cow_ptr<MantidVec> MantidVecPtr;
+using MantidVecPtr = Kernel::cow_ptr<MantidVec>;
 
 } // NAMESPACE Mantid
 

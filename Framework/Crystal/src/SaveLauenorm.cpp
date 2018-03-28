@@ -10,6 +10,9 @@
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+
+#include "boost/math/special_functions/round.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -312,9 +315,9 @@ void SaveLauenorm::exec() {
             << 1.0 / lattice.a() << std::setw(12) << std::setprecision(4)
             << 1.0 / lattice.b() << std::setw(12) << std::setprecision(4)
             << 1.0 / lattice.c() << std::setw(9)
-            << static_cast<int>(lattice.alpha() + 0.5) << std::setw(9)
-            << static_cast<int>(lattice.beta() + 0.5) << std::setw(9)
-            << static_cast<int>(lattice.gamma() + 0.5) << "\n";
+            << boost::math::iround(lattice.alpha()) << std::setw(9)
+            << boost::math::iround(lattice.beta()) << std::setw(9)
+            << boost::math::iround(lattice.gamma()) << '\n';
         std::vector<int> systemNo = crystalSystem(lattice, peaks);
         out << "SYST    " << systemNo[0] << "   " << systemNo[1] << "   0   0"
             << "\n";
@@ -507,14 +510,14 @@ void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
   }
 }
 std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
-                                             std::vector<Peak> peaks) {
+                                             const std::vector<Peak> &peaks) {
   std::vector<int> systemVec;
-  int alpha = static_cast<int>(lattice.alpha() + 0.5);
-  int beta = static_cast<int>(lattice.beta() + 0.5);
-  int gamma = static_cast<int>(lattice.gamma() + 0.5);
-  int a = static_cast<int>(lattice.a() * 1000 + 0.5);
-  int b = static_cast<int>(lattice.b() * 1000 + 0.5);
-  int c = static_cast<int>(lattice.c() * 1000 + 0.5);
+  int alpha = boost::math::iround(lattice.alpha());
+  int beta = boost::math::iround(lattice.beta());
+  int gamma = boost::math::iround(lattice.gamma());
+  int a = boost::math::iround(lattice.a() * 1000);
+  int b = boost::math::iround(lattice.b() * 1000);
+  int c = boost::math::iround(lattice.c() * 1000);
   if (alpha == 90 && beta == 90 && gamma == 90) {
     if (a == b && a == c) {
       systemVec.push_back(7); // cubic I,F
@@ -541,10 +544,10 @@ std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
   int ac = 0;
   int r = 0;
   int total = 0;
-  for (size_t j = 0; j < peaks.size(); j++) {
-    int h = static_cast<int>(peaks[j].getH() + 0.5);
-    int k = static_cast<int>(peaks[j].getK() + 0.5);
-    int l = static_cast<int>(peaks[j].getL() + 0.5);
+  for (const auto &peak : peaks) {
+    int h = boost::math::iround(peak.getH());
+    int k = boost::math::iround(peak.getK());
+    int l = boost::math::iround(peak.getL());
     if (h + k + l == 0)
       continue;
     total++;

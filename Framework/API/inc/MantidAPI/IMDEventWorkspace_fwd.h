@@ -35,13 +35,13 @@ namespace API {
 /// forward declare of Mantid::API::IMDEventWorkspace
 class IMDEventWorkspace;
 /// Shared pointer to Mantid::API::IMDEventWorkspace
-typedef boost::shared_ptr<IMDEventWorkspace> IMDEventWorkspace_sptr;
+using IMDEventWorkspace_sptr = boost::shared_ptr<IMDEventWorkspace>;
 /// Shared pointer to Mantid::API::IMDEventWorkspace (const version)
-typedef boost::shared_ptr<const IMDEventWorkspace> IMDEventWorkspace_const_sptr;
+using IMDEventWorkspace_const_sptr = boost::shared_ptr<const IMDEventWorkspace>;
 /// unique pointer to Mantid::API::IMDEventWorkspace
-typedef std::unique_ptr<IMDEventWorkspace> IMDEventWorkspace_uptr;
+using IMDEventWorkspace_uptr = std::unique_ptr<IMDEventWorkspace>;
 /// unique pointer to Mantid::API::IMDEventWorkspace (const version)
-typedef std::unique_ptr<const IMDEventWorkspace> IMDEventWorkspace_const_uptr;
+using IMDEventWorkspace_const_uptr = std::unique_ptr<const IMDEventWorkspace>;
 
 } // namespace MDEvents
 } // namespace Mantid

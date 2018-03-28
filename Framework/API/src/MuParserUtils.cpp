@@ -41,7 +41,7 @@ void DLLExport addDefaultConstants(mu::Parser &parser) {
   }
 }
 
-typedef double (*oneVarFun)(double); // pointer to a function of one variable
+using oneVarFun = double (*)(double); // pointer to a function of one variable
 const std::map<std::string, oneVarFun> MUPARSER_ONEVAR_FUNCTIONS = {
     {"erf", gsl_sf_erf}, {"erfc", gsl_sf_erfc}};
 
