@@ -56,7 +56,7 @@ where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
 OSX
 ---
-The build environment on OS X is `described here <https://github.com/mantidproject/mantid/wiki/Build-environment-setup-on-OS-X-10.12-Sierra>`_.
+The build environment on OS X is described here :ref:`BuildingOnOSX`.
 
 Checking out the Mantid code
 ############################
