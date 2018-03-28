@@ -246,8 +246,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(sqw.setProperty("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING(
         sqw.setPropertyValue("OutputWorkspace", "__unused"));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw.setPropertyValue("QAxisBinning", "0,10,10"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("QAxisBinning", "0,10,10"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Direct"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EFixed", "25"));
     TS_ASSERT_THROWS_NOTHING(
