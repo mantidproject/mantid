@@ -1,11 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.simpleapi import AlgorithmManager, CreateWorkspace, DeleteWorkspace, SortXAxis
+
 
 class SortXAxisTest(unittest.TestCase):
+
 
     def test_x_ascending(self):
         dataX = [1, 2, 3] # In ascending order, so y and e will need to be reversed.
@@ -23,7 +23,6 @@ class SortXAxisTest(unittest.TestCase):
         self.assertEqual(dataE, sortedE.tolist())
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
-
 
     def test_x_descending(self):
         dataX = [3, 2, 1] # In descending order, so y and e will need to be reversed.
@@ -69,7 +68,6 @@ class SortXAxisTest(unittest.TestCase):
         self.assertEqual(dataE[3:], sortedE.tolist())
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
-
 
     def test_sorts_x_histogram_ascending(self):
         dataX = [1, 2, 3, 4]
@@ -136,6 +134,49 @@ class SortXAxisTest(unittest.TestCase):
         dataE.reverse()
         self.assertEqual(dataY, sortedY.tolist())
         self.assertEqual(dataE, sortedE.tolist())
+
+    def test_dx_multiple_spectrum(self):
+        dataX = [3, 2, 1, 3, 2, 1]  # In descending order, so y and e will need to be reversed.
+        dataY = [1, 2, 3, 1, 2, 3]
+        dx = [1, 2, 3, 1, 2, 3]
+        unsortedws = CreateWorkspace(DataX=dataX, DataY=dataY, Dx=dx, UnitX='TOF', Distribution=True, NSpec=2)
+        dataY.reverse()
+        dx.reverse()
+        # Run the algorithm
+        sortedws = SortXAxis(InputWorkspace=unsortedws)
+        # Check the resulting data values for 1st spectrum.
+        sortedX = sortedws.readX(0)
+        sortedY = sortedws.readY(0)
+        sortedDx = sortedws.readDx(0)
+        self.assertEqual(sorted(dataX[0:3]), sortedX.tolist())
+        self.assertEqual(dataY[0:3], sortedY.tolist())
+        self.assertEqual(dx[0:3], sortedDx.tolist())
+        # Check the resulting data values for 2nd spectrum.
+        sortedX = sortedws.readX(1)
+        sortedY = sortedws.readY(1)
+        sortedDx = sortedws.readE(1)
+        self.assertEqual(sorted(dataX[3:]), sortedX.tolist())
+        self.assertEqual(dataY[3:], sortedY.tolist())
+        self.assertEqual(dx[3:], sortedDx.tolist())
+        DeleteWorkspace(unsortedws)
+        DeleteWorkspace(sortedws)
+
+    def test_dx_histogram_ascending(self):
+        dataX = [1, 2, 3, 4]
+        dataY = [1, 2, 3]
+        dx = [1, 2, 3]
+        unsortedws = CreateWorkspace(DataX=dataX, DataY=dataY, Dx=dx, UnitX='TOF', Distribution=False)
+        # Run the algorithm
+        sortedws = SortXAxis(InputWorkspace=unsortedws)
+        sortedX = sortedws.readX(0)
+        sortedY = sortedws.readY(0)
+        sortedDx = sortedws.readDx(0)
+        # Check the resulting data values. Sorting operation should have resulted in no changes
+        self.assertEqual(dataX, sortedX.tolist())
+        self.assertEqual(dataY, sortedY.tolist())
+        self.assertEqual(dx, sortedDx.tolist())
+        DeleteWorkspace(unsortedws)
+        DeleteWorkspace(sortedws)
 
 if __name__ == '__main__':
     unittest.main()
