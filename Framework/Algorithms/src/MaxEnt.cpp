@@ -77,8 +77,6 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   }
 
   const size_t nspec = ws->getNumberHistograms();
-  MatrixWorkspace_sptr outWS =
-      WorkspaceFactory::Instance().create(ws, nspec, maxItCount, maxItCount);
   if (itCount.size() == 0) {
     return ws; // In case, we don't have any spectra
   }
