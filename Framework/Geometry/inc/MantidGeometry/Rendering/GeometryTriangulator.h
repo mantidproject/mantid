@@ -40,8 +40,8 @@ namespace detail {
 class MANTID_GEOMETRY_DLL GeometryTriangulator {
 private:
   bool m_isTriangulated;
-  size_t m_nFaces;
-  size_t m_nPoints;
+  size_t m_nFaces = 0;
+  size_t m_nPoints = 0;
   std::vector<double> m_points;        ///< double array or points
   std::vector<uint32_t> m_faces;       ///< Integer array of faces
   const CSGObject *m_csgObj = nullptr; ///< Input Object
