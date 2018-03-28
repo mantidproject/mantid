@@ -33,7 +33,7 @@ Linux
 
 Red Hat/Cent OS/Fedora
 ^^^^^^^^^^^^^^^^^^^^^^
-Follow the instructions at http://download.mantidproject.org/redhat.html to add the
+Follow the `Red Hat instructions <http://download.mantidproject.org/redhat.html>`_ to add the
 stable release yum repository and then install the ``mantid-developer`` package:
 
 .. code-block:: sh
@@ -42,7 +42,7 @@ stable release yum repository and then install the ``mantid-developer`` package:
 
 Ubuntu
 ^^^^^^
-Follow the instructions at http://download.mantidproject.org/ubuntu.html to add the
+Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_ to add the
 stable release repository and mantid ppa. Download the latest
 `mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
 package and install it:
