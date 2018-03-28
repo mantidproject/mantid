@@ -140,16 +140,16 @@ void GetDetectorOffsets::exec() {
     // Fit the peak
     GetDetectorsOffset::PeakLinearFunction fit_result;
     double offset = fitSpectra(wi, isAbsolute, m_Xmin, m_Xmax, fit_result);
-    g_log.notice() << "[DB..] wi = " << wi << ": height = " << fit_result.height
-                   << "\n";
+    g_log.debug() << "wi = " << wi << ": height = " << fit_result.height
+                  << "\n";
 
     if (fit_peak_twice && fit_result.fwhm > 0.5) {
-      double xmin = fit_result.center - 0.5 * fit_result.fwhm;
-      double xmax = fit_result.center + 0.5 * fit_result.fwhm;
-      g_log.notice() << "[DB...BAT] ws-index " << wi
-                     << " found: center = " << fit_result.center
-                     << ", FHWM = " << fit_result.fwhm
-                     << "; new fit range: " << xmin << ", " << xmax << "\n";
+      double xmin = fit_result.center - 0.5 * fit_result.fwhm * 2.355;
+      double xmax = fit_result.center + 0.5 * fit_result.fwhm * 2.355;
+      g_log.debug() << "[DB...BAT] ws-index " << wi
+                    << " found: center = " << fit_result.center
+                    << ", FHWM = " << fit_result.fwhm
+                    << "; new fit range: " << xmin << ", " << xmax << "\n";
       offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result);
     }
 
