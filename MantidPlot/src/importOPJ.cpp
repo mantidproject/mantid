@@ -1175,8 +1175,8 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
       vector<text> texts = opj.layerTexts(g, l);
       if (style != GraphOptions::Pie) {
         for (size_t i = 0; i < texts.size(); ++i) {
-          addText(texts[i], graph, 0, layerRect, fFontScaleFactor, fXScale,
-                  fYScale);
+          addText(texts[i], graph, nullptr, layerRect, fFontScaleFactor,
+                  fXScale, fYScale);
         }
       }
 

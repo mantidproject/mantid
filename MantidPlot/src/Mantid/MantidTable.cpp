@@ -35,7 +35,7 @@ MantidTable::MantidTable(ScriptingEnv *env,
                            : static_cast<int>(ws->rowCount()),
             transpose ? static_cast<int>(ws->rowCount() + 1)
                       : static_cast<int>(ws->columnCount()),
-            label, parent, "", 0),
+            label, parent, "", nullptr),
       m_ws(ws), m_wsName(ws->getName()), m_transposed(transpose) {
   d_table->blockResizing(true);
 

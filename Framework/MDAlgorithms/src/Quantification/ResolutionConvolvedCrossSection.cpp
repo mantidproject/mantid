@@ -101,7 +101,7 @@ void ResolutionConvolvedCrossSection::function(
         "Expected FunctionDomainMD in ResolutionConvolvedCrossSection");
   }
 
-  std::vector<API::IMDIterator *> iterators = m_inputWS->createIterators(
+  auto iterators = m_inputWS->createIterators(
       API::FrameworkManager::Instance().getNumOMPThreads());
   const int nthreads = static_cast<int>(iterators.size());
   std::vector<size_t> resultOffsets(nthreads, 0);
@@ -126,7 +126,7 @@ void ResolutionConvolvedCrossSection::function(
   bool exceptionThrown = false; // required for *_PARALLEL_* macros
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < nthreads; ++i) {
-    API::IMDIterator *boxIterator = iterators[i];
+    auto &boxIterator = iterators[i];
     const size_t resultsOffset = resultOffsets[i];
 
     size_t boxIndex(0);
@@ -141,10 +141,6 @@ void ResolutionConvolvedCrossSection::function(
     } while (boxIterator->next());
   }
   CHECK_PARALLEL_EXCEPTIONS // Not standard macros. See top of file for reason
-
-      for (auto boxIterator : iterators) {
-    delete boxIterator;
-  }
 }
 
 /**
