@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. seeAlso::
+.. relatedAlgorithms::
 
 .. properties::
 

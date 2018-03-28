@@ -11,7 +11,7 @@ Contributors:
 
 .. summary::
 
-.. seeAlso::
+.. relatedAlgorithms::
 
 .. properties::
 

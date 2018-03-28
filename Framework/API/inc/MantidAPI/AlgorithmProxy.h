@@ -85,7 +85,7 @@ public:
     return m_categorySeparator;
   }
   /// Function to return all of the seeAlso algorithms related to this algorithm
-  const std::vector<std::string> seeAlso() const { return m_seeAlso; };
+  const std::vector<std::string> seeAlso() const override { return m_seeAlso; };
   /// Aliases to the algorithm
   const std::string alias() const override { return m_alias; }
   /// Optional documentation URL for the real algorithm

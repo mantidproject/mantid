@@ -45,4 +45,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('seealso', SeeAlsoDirective)
+    app.add_directive('relatedAlgorithms', SeeAlsoDirective)

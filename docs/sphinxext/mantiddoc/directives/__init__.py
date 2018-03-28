@@ -30,6 +30,6 @@ def setup(app):
     diagram.setup(app)
     interface.setup(app)
     properties.setup(app)
-    seeAlso.setup(app)
+    relatedAlgorithms.setup(app)
     sourcelink.setup(app)
     summary.setup(app)
