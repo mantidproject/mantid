@@ -7,8 +7,8 @@ Getting Started with Mantid
 .. contents::
   :local:
 
-Prerequisites
-#############
+Environment
+###########
 
 Some intial setup is required before being able to build the code. This is platform
 specific and described here.
@@ -33,7 +33,6 @@ Linux
 
 Red Hat/Cent OS/Fedora
 ^^^^^^^^^^^^^^^^^^^^^^
-
 Follow the instructions at http://download.mantidproject.org/redhat.html to add the
 stable release yum repository and then install the ``mantid-developer`` package:
 
@@ -43,7 +42,6 @@ stable release yum repository and then install the ``mantid-developer`` package:
 
 Ubuntu
 ^^^^^^
-
 Follow the instructions at http://download.mantidproject.org/ubuntu.html to add the
 stable release repository and mantid ppa. Download the latest
 `mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
@@ -56,6 +54,9 @@ package and install it:
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
+OSX
+---
+The build environment on OS X is `described here <https://github.com/mantidproject/mantid/wiki/Build-environment-setup-on-OS-X-10.12-Sierra>`_.
 
 Checking out the Mantid code
 ############################
@@ -120,13 +121,13 @@ And some bonus ways to look at diffs (the one without a name is the default when
 
 Extra Windows Step (Do Not Skip This!)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-On Windows, third party libraries are automatically pulled in when cmake is run. This requires Git LFS to be installed first. Download `git lfs <https://git-lfs.github.com/>`_ and install it. At ISIS make sure you install this using the admin account in to Program Files.
+On Windows, third party libraries are automatically pulled in when cmake is run. This requires Git LFS to be installed first. Download `git lfs <https://git-lfs.github.com/>`_ and install it. At RAL make sure you install this using the admin account in to Program Files.
 
 Once the installation has competed open a new Git bash prompt and type ``git lfs install``.
 
 Cloning the repository
 ----------------------
-If you are at ISIS then please run the following commands before cloning the repository:
+If you are at RAL then please run the following commands before cloning the repository:
 
 .. code-block:: sh
 
@@ -140,31 +141,17 @@ There are a number of URLs via which the code can be checked out using various p
 
     git clone git@github.com:mantidproject/mantid.git
 
-If at ISIS now remove the config section above
+If at RAL now remove the config section above
 
 .. code-block:: sh
 
     git config --global --unset url.git@github.com:mantidproject
 
-Getting the dependencies (Linux and OS X)
-Additional information on this can be found at `Mantid Prerequisites <http://www.mantidproject.org/Mantid_Prerequisites>`_.
 
-Mac OSX
-^^^^^^^
-The procedure on OS X is `described here <https://github.com/mantidproject/mantid/wiki/Build-environment-setup-on-OS-X-10.12-Sierra>`_.
+Building Mantid
+###############
+See `Building with CMake <http://www.mantidproject.org/Building_with_CMake>`_ for information about building Mantid.
 
-Linux
-^^^^^
-Debian and RPM developer packages exist to pull in the dependencies.
-For example, those on RedHat just need to run ``sudo yum install mantid-developer``.
-
-
-
-
-Related documents:
-------------------
-
-* :ref:`BuildingTheMantidFrameworkCode`
-* :ref:`BuildingWithCMake`
-* :ref:`BuildingVATES`
-* :ref:`BuildingOnOSX`
+Building VATES
+##############
+See `Building VATES <https://www.mantidproject.org/Building_VATES>`_ for infromation about building VATES.
