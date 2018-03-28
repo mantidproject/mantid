@@ -1,8 +1,8 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
+from mantid.kernel import Direction
 import numpy as np
 
 
@@ -40,7 +40,7 @@ class SortXAxis(PythonAlgorithm):
             y_data = input_ws.readY(i)
             e_data = input_ws.readE(i)
 
-            indexes =  x_data.argsort()
+            indexes = x_data.argsort()
 
             x_ordered = x_data[indexes]
             if input_ws.isHistogramData():
@@ -54,7 +54,12 @@ class SortXAxis(PythonAlgorithm):
             output_ws.setY(i, y_ordered)
             output_ws.setE(i, e_ordered)
 
+            if input_ws.hasDx(i):
+                dx = input_ws.readDx(i)
+                dx_ordered = dx[indexes]
+                output_ws.setDx(i, dx_ordered)
+
         self.setProperty('OutputWorkspace', output_ws)
 
 
-AlgorithmFactory.subscribe(SortXAxis())
+AlgorithmFactory.subscribe(SortXAxis)
