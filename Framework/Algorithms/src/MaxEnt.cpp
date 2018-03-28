@@ -55,13 +55,11 @@ const double THRESHOLD = 1E-6;
 * @param ws :: [input] The input workspace with zeros
 * @param itCount [input] The number of iterations this alg used for each
 * spectrum
-* @param maxItCount :: [input] The max number of iteration this alg used
 * @param yLabel :: [input] y-label to use for returned ws
 * @return : ws cut down in lenght to maxIt
 */
 MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
                                  const std::vector<size_t> &itCount,
-                                 const size_t maxItCount,
                                  const ::std::string yLabel) {
 
   ws->setYUnitLabel(yLabel);
@@ -353,7 +351,6 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
 
   npoints = complexImage ? npoints * 2 : npoints;
-  size_t maxItCount = 0; // used to determine max iterations used by alg
   std::vector<size_t> iterationCounts;
   iterationCounts.reserve(nSpec);
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
@@ -403,9 +400,6 @@ void MaxEnt::exec() {
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
-      if (it > maxItCount) {
-        maxItCount = it;
-      }
 
       // Stop condition, solution found
       if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
@@ -447,11 +441,9 @@ void MaxEnt::exec() {
     // No errors
 
   } // Next spectrum
-  // add 1 to maxItCount to account for starting at 0
-  maxItCount++;
-  setProperty("EvolChi", removeZeros(outEvolChi, iterationCounts, maxItCount,
+  setProperty("EvolChi", removeZeros(outEvolChi, iterationCounts,
                                      "Chi squared"));
-  setProperty("EvolAngle", removeZeros(outEvolTest, iterationCounts, maxItCount,
+  setProperty("EvolAngle", removeZeros(outEvolTest, iterationCounts,
                                        "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
