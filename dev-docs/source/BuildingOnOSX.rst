@@ -16,9 +16,7 @@ OS X 10.9 using clang and macports
 *Disclaimer*
 
 This instruction considers that you either use macports or need them for your other development projects. It also 
-considers that you need to compile Mantid by yourself. In other cases please either [download a Mantid dmg package] 
-(http://download.mantidproject.org/) or follow the instructions [how to build Mantid with homebrew]
-(https://github.com/mantidproject/mantid/wiki/Building-Mantid-on-OS-X-10.9-&-10.10-using-clang-and-Xcode). Warning: 
+considers that you need to compile Mantid by yourself. In other cases please either `download a Mantid dmg package <http://download.mantidproject.org/>`_ or follow the instructions below. Warning: 
 it is not recommended to have both, homebrew and macports installed simultaneously on one mac.
 
 Instruction
@@ -29,32 +27,35 @@ Instruction
 
 3. Things to take care about:
 
-  * By default, POCO libraries in macports are missing libCrypto and libNetSSL. If you have the POCO libraries already installed, uninstall them: ``sudo port uninstall poco``, then install as: ``sudo port install poco +ssl``
-  * Install OpenCascade libraries as: ``sudo port install oce -tbb``
-  * libNeXus: macports do not contain libNeXus. 
-      1. Download the source code from the [developers website] (http://download.nexusformat.org/kits/)
-      2. Build and install it:
+- By default, POCO libraries in macports are missing libCrypto and libNetSSL. If you have the POCO libraries already installed, uninstall them: ``sudo port uninstall poco``, then install as: ``sudo port install poco +ssl``.
+- Install OpenCascade libraries as: ``sudo port install oce -tbb``.
 
-          .. code-block:: sh
+- libNeXus: macports do not contain libNeXus.
 
-            % ./configure --prefix=/opt/local
-            % make
-            % sudo make install
+  1. Download the source code from the `NeXus developers website <http://download.nexusformat.org/kits/>`_.
+  2. Build and install it:
+   
+     .. code-block:: sh
 
-         You may need to install additional packages to be able to build libNeXus.
-      3. Warning: libNeXus must be recompiled after update of the macports if it's dependencies have been updated. Otherwise it may depend on some non-existent libraries.
-  * jsoncpp: mantid/Code/Mantid/Framework/DataObjects/src/NoShape.cpp line 3 contains: ``#include <jsoncpp/json/json.h>`` 
-    but in macports there is no ``jsoncpp`` folder in the ``/opt/local/include``, ``json.h`` is located in ``/opt/local/include/json``. As a temporary solution, you may create a symbolic link:  
+       % ./configure --prefix=/opt/local
+       % make
+       % sudo make install
 
-          .. code-block:: sh
+      You may need to install additional packages to be able to build libNeXus.
+      
+  3. libNeXus must be recompiled after update of the macports if it's dependencies have been updated. Otherwise it may depend on some non-existent libraries.
+   
+- jsoncpp: ``mantid/Code/Mantid/Framework/DataObjects/src/NoShape.cpp`` line 3 contains: ``#include <jsoncpp/json/json.h>`` but in macports there is no ``jsoncpp`` folder in the ``/opt/local/include``, ``json.h`` is located in ``/opt/local/include/json``. As a temporary solution, you may create a symbolic link:  
 
-            % sudo mkdir /opt/local/include/jsoncpp
-            % cd /opt/local/include/jsoncpp
-            % sudo ln -s ../json
+  .. code-block:: sh
+
+    % sudo mkdir /opt/local/include/jsoncpp
+    % cd /opt/local/include/jsoncpp
+    % sudo ln -s ../json
 
 4. Run cmake. It may be needed to specify the compiler as well as the path to include files. I use the following cmake options:
 
-  .. code-block:: sh
+.. code-block:: sh
 
     cmake  -DCMAKE_C_COMPILER=/usr/bin/clang \  
       -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -G 'Unix Makefiles' \
@@ -105,19 +106,19 @@ These instructions are from the assumptions of a blank newly installed Mac and w
 
 1. First install Xcode and then clone the mantid git repository.
 
-  * The last version to support OS X Mavericks is Xcode 6.2
-  * The last version to support OS X Yosemite is Xcode 7.2.1
-  * As of August 1, 2016, our OS X El Capitan build server is running Xcode 7.3.1
+- The last version to support OS X Mavericks is Xcode 6.2
+- The last version to support OS X Yosemite is Xcode 7.2.1
+- As of August 1, 2016, our OS X El Capitan build server is running Xcode 7.3.1
 
 2. Install Apple's Command Line tools (without this then /usr/include will not exist)
 
-  .. code-block:: sh
+.. code-block:: sh
 
          xcode-select --install
 
 2. Install `Homebrew <http://brew.sh>`_. If you already have Homebrew and are upgrading the OS follow the `instructions here <http://ryantvenge.com/2014/09/ruby-homebrea-yosemite/>`_:
 
-  .. code-block:: sh
+.. code-block:: sh
 
          ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
@@ -125,7 +126,7 @@ These instructions are from the assumptions of a blank newly installed Mac and w
 
 In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have a couple of packages installed
 
-  .. code-block:: sh
+.. code-block:: sh
 
         brew install git
         brew install git-lfs
@@ -139,7 +140,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 5. Install required dependencies (will make a mantid-developer formula soon)
    If you plan on distributing your application bundle, change ``brew install`` to ``brew install --build-bottle``
 
-  .. code-block:: sh
+.. code-block:: sh
 
         brew cask install xquartz
         # mactex is optional, needed for parsing equations in qthelp documentation.
@@ -176,19 +177,19 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 
 6. Uninstall homebrew Python that some of the dependencies insist on installing
 
-  .. code-block:: sh
+.. code-block:: sh
 
         brew uninstall python
 
 6. Optional: for cmake-gui
 
-  .. code-block:: sh
+.. code-block:: sh
 
         brew cask install cmake
 
 7. Now to install the other python package dependencies:
 
-  .. code-block:: sh
+.. code-block:: sh
 
         sudo easy_install pip
         sudo -H pip install sphinx
@@ -207,56 +208,56 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 
 8. Install the theme for sphinx
 
-  .. code-block:: sh
+.. code-block:: sh
 
         sudo pip install sphinx_bootstrap_theme
 
 9. Install other python dependencies
 
 
-  .. code-block:: sh
+.. code-block:: sh
 
         sudo pip install psutil
         brew install h5py
 
 9. Add Homebrew’s site-packages to your python path.
 
-  .. code-block:: sh
+.. code-block:: sh
 
         mkdir -p ~/Library/Python/2.7/lib/python/site-packages
         echo '/usr/local/lib/python2.7/site-packages' > ~/Library/Python/2.7/lib/python/site-packages/homebrew.pth
 
 10. Now you need to patch a header in your python!
 
-  a. If building on the command line with make or ninja.
+- If building on the command line with make or ninja.
 
-    .. code-block:: sh
+  .. code-block:: sh
 
         cd /usr/include/python2.7
 
-    or
+  or
 
-    .. code-block:: sh
+  .. code-block:: sh
 
         cd /System/Library/Frameworks/Python.framework/Headers 
 
-    then
+  then
 
-    .. code-block:: sh
+  .. code-block:: sh
 
         sudo cp pyport.h pyport.h.original
         sudo patch pyport.h $MANTIDCHECKOUTROOT/buildconfig/pyport.patch
 
-  b. If building with Xcode on OS X Yosemite 
+- If building with Xcode on OS X Yosemite 
 
-    .. code-block:: sh
+  .. code-block:: sh
    
         cd /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7
 
 
-    then
+  then
 
-    .. code-block:: sh
+  .. code-block:: sh
 
         sudo cp pyport.h pyport.h.original
         sudo patch pyport.h $MANTIDCHECKOUTROOT/buildconfig/pyport.patch
@@ -290,13 +291,13 @@ The following instructions setup the build environment for mantid using clang co
 1. Install Xcode from AppStore
 2. Install Xcode command line tools 
 
-  .. code-block:: sh
+.. code-block:: sh
 
     xcode-select --install
 
 3. Install home-brew package manager
 
-  .. code-block:: sh
+.. code-block:: sh
 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
@@ -304,7 +305,7 @@ The following instructions setup the build environment for mantid using clang co
 
 In order to be able to 'tap' the `mantidproject/mantid` 'tap' we need to have a couple of packages installed
 
-  .. code-block:: sh
+.. code-block:: sh
 
     brew install git
     brew install git-lfs
@@ -316,7 +317,7 @@ In order to be able to 'tap' the `mantidproject/mantid` 'tap' we need to have a 
 
 5. Install the necessary dependencies. Note that some of these will bring brew python with them as dependency.
 
-  .. code-block:: sh
+.. code-block:: sh
 
     brew cask install xquartz
     brew cask install mactex
@@ -352,19 +353,19 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
 
 6. Uninstall the brew python if it has been previously installed
 
-  .. code-block:: sh
+.. code-block:: sh
 
     brew uninstall --ignore-dependencies python3
 
 7. Install pip python package manager
 
-  .. code-block:: sh
+.. code-block:: sh
 
     sudo easy_install pip
 
 8. Install necessary python packages with pip
 
-  .. code-block:: sh
+.. code-block:: sh
 
     sudo -H pip install sphinx --ignore-installed
     sudo -H pip install "ipython[notebook]==3.2.1"
@@ -379,13 +380,13 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
 
 9. Install h5py
 
-  .. code-block:: sh
+.. code-block:: sh
 
     brew install h5py
 
 10. Add Homebrew’s site-packages to your python path.
 
-  .. code-block:: sh
+.. code-block:: sh
 
     mkdir -p ~/Library/Python/2.7/lib/python/site-packages
     echo '/usr/local/lib/python2.7/site-packages' > ~/Library/Python/2.7/lib/python/site-packages/homebrew.pth
@@ -406,7 +407,7 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
 
 13. Now that SIP is disabled we can do the necessary patch:
 
-  .. code-block:: sh
+.. code-block:: sh
 
     cd /usr/include/python2.7
     sudo cp pyport.h pyport.h.original
@@ -414,13 +415,13 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
 
 14. Enable again the system integrity protection by repeating Step 12 and typing this time:
 
-  .. code-block:: sh
+.. code-block:: sh
 
     csrutil enable
 
 15. Open mantid project from Qt Creator, and you should be able to run cmake and build, given the right environment:
 
-  .. code-block:: sh
+.. code-block:: sh
 
     CC=/usr/bin/clang
     CXX=/usr/bin/clang++
@@ -431,7 +432,7 @@ Local bin contains the symlink to the brew packages, which have to come first in
 
 16. Add to your `.profile`
 
-  .. code-block:: sh
+.. code-block:: sh
 
     export PYTHONPATH=$BUILDMANTID/bin
 
