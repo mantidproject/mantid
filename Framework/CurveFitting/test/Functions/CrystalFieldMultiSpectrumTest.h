@@ -412,7 +412,8 @@ public:
         "FWHMX1=(0,1),FWHMY2=(5,6),Temperatures=(44,50),B20=0.37737";
     auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
     alg->initialize();
-    TS_ASSERT_THROWS(alg->setPropertyValue("Function", fun), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setPropertyValue("Function", fun),
+                     std::invalid_argument);
   }
 
   void test_underdefinded() {
