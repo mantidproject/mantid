@@ -46,7 +46,7 @@ void CreateWorkspace::init() {
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataY", required),
                   "Y-axis data values for workspace (measures).");
   declareProperty(make_unique<ArrayProperty<double>>("DataE"),
-                  "Error values for workspace. Optional.");
+                  "Error values for workspace.");
   declareProperty(make_unique<PropertyWithValue<int>>("NSpec", 1),
                   "Number of spectra to divide data into.");
   declareProperty("UnitX", "", "The unit to assign to the XAxis");
@@ -70,7 +70,7 @@ void CreateWorkspace::init() {
                                                    PropertyMode::Optional),
                   "Name of a parent workspace.");
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("Dx"),
-                  "X error values for workspace. Optional.");
+                  "X error values for workspace (optional).");
   std::vector<std::string> propOptions{
       Parallel::toString(Parallel::StorageMode::Cloned),
       Parallel::toString(Parallel::StorageMode::Distributed),
