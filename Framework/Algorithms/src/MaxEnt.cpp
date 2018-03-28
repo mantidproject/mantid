@@ -80,21 +80,17 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   MatrixWorkspace_sptr outWS =
       WorkspaceFactory::Instance().create(ws, nspec, maxItCount, maxItCount);
   if (itCount.size() == 0) {
-    return outWS; // In case, we don't have any spectra
+    return ws; // In case, we don't have any spectra
   }
   for (size_t spec = 0; spec < nspec; spec++) {
-    auto &inDataY = ws->dataY(spec);
-    outWS->setPoints(spec, Points(maxItCount, LinearGenerator(0.0, 1.0)));
-    outWS->setCounts(spec, std::vector<double>(inDataY.begin(),
-                                               inDataY.begin() + maxItCount));
-    auto &DataX = outWS->dataX(spec);
+    auto &DataX = ws->dataX(spec);
     DataX.resize(itCount[spec]);
-    auto &DataY = outWS->dataY(spec);
+    auto &DataY = ws->dataY(spec);
     DataY.resize(itCount[spec]);
-    auto &DataE = outWS->dataE(spec);
+    auto &DataE = ws->dataE(spec);
     DataE.resize(itCount[spec]);
   }
-  return outWS;
+  return ws;
 }
 }
 
@@ -360,7 +356,7 @@ void MaxEnt::exec() {
 
   npoints = complexImage ? npoints * 2 : npoints;
   size_t maxItCount = 0; // used to determine max iterations used by alg
-  std::vector<size_t> iterationCounts; // used to record iter used per spec
+  std::vector<size_t> iterationCounts;
   iterationCounts.reserve(nSpec);
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
 
@@ -417,7 +413,7 @@ void MaxEnt::exec() {
       if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
 
-        // it + 1 iterations have been done because we count from zero.
+        // it + 1 iterations have been done because we count from zero
         g_log.information() << "Stopped after " << it + 1 << " iterations"
                             << std::endl;
         iterationCounts.push_back(it + 1);
