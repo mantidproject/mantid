@@ -26,7 +26,6 @@ DECLARE_ALGORITHM(LoadIDFFromNexus)
 
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument;
 using Types::Core::DateAndTime;
 
 /// Empty default constructor

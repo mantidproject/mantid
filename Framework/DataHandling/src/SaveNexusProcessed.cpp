@@ -28,7 +28,7 @@ using namespace API;
 using namespace DataObjects;
 using Geometry::Instrument_const_sptr;
 
-typedef NeXus::NexusFileIO::optional_size_t optional_size_t;
+using optional_size_t = NeXus::NexusFileIO::optional_size_t;
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexusProcessed)

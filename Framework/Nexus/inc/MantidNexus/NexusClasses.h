@@ -471,17 +471,17 @@ private:
 };
 
 /// The integer dataset type
-typedef NXDataSetTyped<int> NXInt;
+using NXInt = NXDataSetTyped<int>;
 /// The float dataset type
-typedef NXDataSetTyped<float> NXFloat;
+using NXFloat = NXDataSetTyped<float>;
 /// The double dataset type
-typedef NXDataSetTyped<double> NXDouble;
+using NXDouble = NXDataSetTyped<double>;
 /// The char dataset type
-typedef NXDataSetTyped<char> NXChar;
+using NXChar = NXDataSetTyped<char>;
 /// The size_t dataset type
-typedef NXDataSetTyped<std::size_t> NXSize;
+using NXSize = NXDataSetTyped<std::size_t>;
 /// The size_t dataset type
-typedef NXDataSetTyped<unsigned int> NXUInt;
+using NXUInt = NXDataSetTyped<unsigned int>;
 
 //-------------------- classes --------------------------//
 

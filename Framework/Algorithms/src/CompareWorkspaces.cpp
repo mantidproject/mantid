@@ -15,6 +15,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/Unit.h"
+#include "MantidParallel/Communicator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -382,7 +383,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
   ews2.sortAll(PULSETIMETOF_SORT, m_progress.get());
 
   if (!m_progress) {
-    throw new std::runtime_error("The progress pointer was found to be null!");
+    throw std::runtime_error("The progress pointer was found to be null!");
   }
 
   // Determine the tolerance for "tof" attribute and "weight" of events
@@ -1194,6 +1195,13 @@ Parallel::ExecutionMode CompareWorkspaces::getParallelExecutionMode(
       return getCorrespondingExecutionMode(StorageMode::MasterOnly);
   }
   return ExecutionMode::Invalid;
+}
+
+void CompareWorkspaces::execMasterOnly() {
+  if (communicator().rank() == 0)
+    exec();
+  else
+    setProperty("Result", true);
 }
 
 } // namespace Algorithms

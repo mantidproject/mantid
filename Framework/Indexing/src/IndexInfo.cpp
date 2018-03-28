@@ -83,17 +83,18 @@ IndexInfo::IndexInfo(const IndexInfo &other)
       m_spectrumDefinitions(other.m_spectrumDefinitions),
       m_spectrumNumberTranslator(other.m_spectrumNumberTranslator) {}
 
-IndexInfo::IndexInfo(IndexInfo &&) = default;
+IndexInfo::IndexInfo(IndexInfo &&) noexcept = default;
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 IndexInfo::~IndexInfo() = default;
 
 IndexInfo &IndexInfo::operator=(const IndexInfo &other) {
   auto copy(other);
-  return *this = std::move(copy);
+  *this = std::move(copy);
+  return *this;
 }
 
-IndexInfo &IndexInfo::operator=(IndexInfo &&) = default;
+IndexInfo &IndexInfo::operator=(IndexInfo &&) noexcept = default;
 
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
@@ -109,9 +110,16 @@ size_t IndexInfo::globalSize() const {
   return m_spectrumNumberTranslator->globalSize();
 }
 
-/// Returns the spectrum number for given index.
+/// Returns the spectrum number for given *local* index, i.e., spectrum numbers
+/// for spectra in this partition.
 SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
   return m_spectrumNumberTranslator->spectrumNumber(index);
+}
+
+/// Returns a reference to the *global* vector of spectrum numbers, i.e., the
+/// spectrum numbers of spectra across all partitions.
+const std::vector<SpectrumNumber> &IndexInfo::spectrumNumbers() const {
+  return m_spectrumNumberTranslator->globalSpectrumNumbers();
 }
 
 /// Set a spectrum number for each index.

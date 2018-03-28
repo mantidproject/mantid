@@ -42,9 +42,31 @@ class InProcessJupyterConsole(RichJupyterWidget):
         """
         A constructor matching that of RichJupyterWidget
         :param args: Positional arguments passed directly to RichJupyterWidget
-        :param kwargs: Keyword arguments passed directly to RichJupyterWidget
+        :param kwargs: Keyword arguments. The following keywords are understood by this widget:
+
+          - banner: Replace the default banner with this text
+          - startup_code: A code snippet to run on startup. It is also added to the banner to inform the user.
+
+        the rest are passed to RichJupyterWidget
         """
+        banner = kwargs.pop("banner", "")
+        startup_code = kwargs.pop("startup_code", "")
         super(InProcessJupyterConsole, self).__init__(*args, **kwargs)
+
+        # adjust startup banner accordingly
+        # newer ipython has banner1 & banner2 and not just banner
+        two_ptr_banner = hasattr(self, 'banner1')
+        if not banner:
+            banner = self.banner1 if two_ptr_banner else self.banner
+        if startup_code:
+            banner += "\n" + \
+                "The following code has been executed at startup:\n\n" + \
+                startup_code
+        if two_ptr_banner:
+            self.banner1 = banner
+            self.banner2 = ''
+        else:
+            self.banner = banner
 
         # create an in-process kernel
         kernel_manager = QtInProcessKernelManager()
@@ -56,9 +78,11 @@ class InProcessJupyterConsole(RichJupyterWidget):
         shell = kernel.shell
         shell.run_code = async_wrapper(shell.run_code, shell)
 
-        # attach channels and start kenel
+        # attach channels, start kenel and run any startup code
         kernel_client = kernel_manager.client()
         kernel_client.start_channels()
+        if startup_code:
+            shell.ex(startup_code)
 
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client

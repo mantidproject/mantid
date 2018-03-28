@@ -27,39 +27,35 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 void EnggDiffFittingModel::addFocusedWorkspace(
-    const int runNumber, const size_t bank, const API::MatrixWorkspace_sptr ws,
+    const RunLabel &runLabel, const API::MatrixWorkspace_sptr ws,
     const std::string &filename) {
-  m_focusedWorkspaceMap.add(runNumber, bank, ws);
-  m_wsFilenameMap.add(runNumber, bank, filename);
+  m_focusedWorkspaceMap.add(runLabel, ws);
+  m_wsFilenameMap.add(runLabel, filename);
 }
 
 void EnggDiffFittingModel::addFitResults(
-    const int runNumber, const size_t bank,
-    const Mantid::API::ITableWorkspace_sptr ws) {
-  m_fitParamsMap.add(runNumber, bank, ws);
+    const RunLabel &runLabel, const Mantid::API::ITableWorkspace_sptr ws) {
+  m_fitParamsMap.add(runLabel, ws);
 }
 
 const std::string &
-EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
-                                           const size_t bank) const {
-  return m_wsFilenameMap.get(runNumber, bank);
+EnggDiffFittingModel::getWorkspaceFilename(const RunLabel &runLabel) const {
+  return m_wsFilenameMap.get(runLabel);
 }
 
 Mantid::API::ITableWorkspace_sptr
-EnggDiffFittingModel::getFitResults(const int runNumber,
-                                    const size_t bank) const {
-  return m_fitParamsMap.get(runNumber, bank);
+EnggDiffFittingModel::getFitResults(const RunLabel &runLabel) const {
+  return m_fitParamsMap.get(runLabel);
 }
 
 namespace {
 
 template <size_t S, typename T>
-void removeFromRunMapAndADS(const int runNumber, const size_t bank,
-                            RunMap<S, T> &map,
+void removeFromRunMapAndADS(const RunLabel &runLabel, RunMap<S, T> &map,
                             Mantid::API::AnalysisDataServiceImpl &ADS) {
-  if (map.contains(runNumber, bank)) {
-    const auto &name = map.get(runNumber, bank)->getName();
-    map.remove(runNumber, bank);
+  if (map.contains(runLabel)) {
+    const auto &name = map.get(runLabel)->getName();
+    map.remove(runLabel);
     if (ADS.doesExist(name)) {
       ADS.remove(name);
     }
@@ -68,20 +64,20 @@ void removeFromRunMapAndADS(const int runNumber, const size_t bank,
 
 } // anonymous namespace
 
-void EnggDiffFittingModel::removeRun(const int runNumber, const size_t bank) {
-  m_wsFilenameMap.remove(runNumber, bank);
+void EnggDiffFittingModel::removeRun(const RunLabel &runLabel) {
+  m_wsFilenameMap.remove(runLabel);
 
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
-  removeFromRunMapAndADS(runNumber, bank, m_focusedWorkspaceMap, ADS);
-  removeFromRunMapAndADS(runNumber, bank, m_fittedPeaksMap, ADS);
-  removeFromRunMapAndADS(runNumber, bank, m_alignedWorkspaceMap, ADS);
-  removeFromRunMapAndADS(runNumber, bank, m_fitParamsMap, ADS);
+  removeFromRunMapAndADS(runLabel, m_focusedWorkspaceMap, ADS);
+  removeFromRunMapAndADS(runLabel, m_fittedPeaksMap, ADS);
+  removeFromRunMapAndADS(runLabel, m_alignedWorkspaceMap, ADS);
+  removeFromRunMapAndADS(runLabel, m_fitParamsMap, ADS);
 }
 
 void EnggDiffFittingModel::setDifcTzero(
-    const int runNumber, const size_t bank,
+    const RunLabel &runLabel,
     const std::vector<GSASCalibrationParms> &calibParams) {
-  auto ws = getFocusedWorkspace(runNumber, bank);
+  auto ws = getFocusedWorkspace(runLabel);
   auto &run = ws->mutableRun();
   const std::string units = "none";
 
@@ -92,7 +88,7 @@ void EnggDiffFittingModel::setDifcTzero(
   } else {
     GSASCalibrationParms params(0, 0.0, 0.0, 0.0);
     for (const auto &paramSet : calibParams) {
-      if (paramSet.bankid == bank) {
+      if (paramSet.bankid == runLabel.bank) {
         params = paramSet;
         break;
       }
@@ -107,9 +103,9 @@ void EnggDiffFittingModel::setDifcTzero(
   }
 }
 
-void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
+void EnggDiffFittingModel::enggFitPeaks(const RunLabel &runLabel,
                                         const std::string &expectedPeaks) {
-  const auto ws = getFocusedWorkspace(runNumber, bank);
+  const auto ws = getFocusedWorkspace(runLabel);
   auto enggFitPeaksAlg =
       Mantid::API::AlgorithmManager::Instance().create("EnggFitPeaks");
 
@@ -124,27 +120,26 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto fitResultsTable =
       ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
-  addFitResults(runNumber, bank, fitResultsTable);
+  addFitResults(runLabel, fitResultsTable);
 }
 
 void EnggDiffFittingModel::saveDiffFittingAscii(
-    const int runNumber, const size_t bank, const std::string &filename) const {
-  const auto ws = getFitResults(runNumber, bank);
+    const RunLabel &runLabel, const std::string &filename) const {
+  const auto ws = getFitResults(runLabel);
   auto saveAlg =
       Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
   saveAlg->initialize();
   saveAlg->setProperty("InputWorkspace", ws);
-  saveAlg->setProperty("RunNumber", std::to_string(runNumber));
-  saveAlg->setProperty("Bank", std::to_string(bank));
+  saveAlg->setProperty("RunNumber", std::to_string(runLabel.runNumber));
+  saveAlg->setProperty("Bank", std::to_string(runLabel.bank));
   saveAlg->setProperty("OutMode", "AppendToExistingFile");
   saveAlg->setProperty("Filename", filename);
   saveAlg->execute();
 }
 
-void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
-                                               const size_t bank) {
-  const auto fitFunctionParams = getFitResults(runNumber, bank);
-  const auto focusedWS = getFocusedWorkspace(runNumber, bank);
+void EnggDiffFittingModel::createFittedPeaksWS(const RunLabel &runLabel) {
+  const auto fitFunctionParams = getFitResults(runLabel);
+  const auto focusedWS = getFocusedWorkspace(runLabel);
 
   const size_t numberOfPeaks = fitFunctionParams->rowCount();
 
@@ -161,8 +156,7 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
 
     cropWorkspace(singlePeakWSName, singlePeakWSName, 1, 1);
 
-    rebinToFocusedWorkspace(singlePeakWSName, runNumber, bank,
-                            singlePeakWSName);
+    rebinToFocusedWorkspace(singlePeakWSName, runLabel, singlePeakWSName);
 
     if (i == 0) {
       cloneWorkspace(focusedWS, FITTED_PEAKS_WS_NAME);
@@ -187,32 +181,30 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
 
   const auto fittedPeaksWS =
       ADS.retrieveWS<Mantid::API::MatrixWorkspace>(FITTED_PEAKS_WS_NAME);
-  m_fittedPeaksMap.add(runNumber, bank, fittedPeaksWS);
+  m_fittedPeaksMap.add(runLabel, fittedPeaksWS);
 
   const auto alignedFocusedWS =
       ADS.retrieveWS<Mantid::API::MatrixWorkspace>(alignedWSName);
-  m_alignedWorkspaceMap.add(runNumber, bank, alignedFocusedWS);
+  m_alignedWorkspaceMap.add(runLabel, alignedFocusedWS);
 }
 
 size_t EnggDiffFittingModel::getNumFocusedWorkspaces() const {
   return m_focusedWorkspaceMap.size();
 }
 
-bool EnggDiffFittingModel::hasFittedPeaksForRun(const int runNumber,
-                                                const size_t bank) const {
-  return m_fittedPeaksMap.contains(runNumber, bank);
+bool EnggDiffFittingModel::hasFittedPeaksForRun(
+    const RunLabel &runLabel) const {
+  return m_fittedPeaksMap.contains(runLabel);
 }
 
 Mantid::API::MatrixWorkspace_sptr
-EnggDiffFittingModel::getAlignedWorkspace(const int runNumber,
-                                          const size_t bank) const {
-  return m_alignedWorkspaceMap.get(runNumber, bank);
+EnggDiffFittingModel::getAlignedWorkspace(const RunLabel &runLabel) const {
+  return m_alignedWorkspaceMap.get(runLabel);
 }
 
 Mantid::API::MatrixWorkspace_sptr
-EnggDiffFittingModel::getFittedPeaksWS(const int runNumber,
-                                       const size_t bank) const {
-  return m_fittedPeaksMap.get(runNumber, bank);
+EnggDiffFittingModel::getFittedPeaksWS(const RunLabel &runLabel) const {
+  return m_fittedPeaksMap.get(runLabel);
 }
 
 void EnggDiffFittingModel::evaluateFunction(
@@ -246,15 +238,15 @@ void EnggDiffFittingModel::cropWorkspace(const std::string &inputWSName,
 }
 
 void EnggDiffFittingModel::rebinToFocusedWorkspace(
-    const std::string &wsToRebinName, const int runNumberToMatch,
-    const size_t bankToMatch, const std::string &outputWSName) {
+    const std::string &wsToRebinName, const RunLabel &runLabelToMatch,
+    const std::string &outputWSName) {
   auto rebinToWSAlg =
       Mantid::API::AlgorithmManager::Instance().create("RebinToWorkspace");
 
   rebinToWSAlg->initialize();
   rebinToWSAlg->setProperty("WorkspaceToRebin", wsToRebinName);
 
-  const auto wsToMatch = getFocusedWorkspace(runNumberToMatch, bankToMatch);
+  const auto wsToMatch = getFocusedWorkspace(runLabelToMatch);
   rebinToWSAlg->setProperty("WorkspaceToMatch", wsToMatch);
   rebinToWSAlg->setProperty("OutputWorkspace", outputWSName);
   rebinToWSAlg->execute();
@@ -388,9 +380,8 @@ void EnggDiffFittingModel::groupWorkspaces(
 }
 
 API::MatrixWorkspace_sptr
-EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
-                                          const size_t bank) const {
-  return m_focusedWorkspaceMap.get(runNumber, bank);
+EnggDiffFittingModel::getFocusedWorkspace(const RunLabel &runLabel) const {
+  return m_focusedWorkspaceMap.get(runLabel);
 }
 
 void EnggDiffFittingModel::mergeTables(
@@ -412,15 +403,12 @@ void EnggDiffFittingModel::addAllFitResultsToADS() const {
   auto fitParamsTable = Mantid::API::WorkspaceFactory::Instance().createTable();
   renameWorkspace(fitParamsTable, FIT_RESULTS_TABLE_NAME);
 
-  const auto runNumberBankPairs = getRunNumbersAndBankIDs();
+  const auto runLabels = getRunLabels();
 
-  for (const auto &runNumberBankPair : runNumberBankPairs) {
-    const int runNumber = runNumberBankPair.first;
-    const size_t bank = runNumberBankPair.second;
+  for (const auto &runLabel : runLabels) {
+    const auto singleWSFitResults = getFitResults(runLabel);
 
-    const auto singleWSFitResults = getFitResults(runNumber, bank);
-
-    if (runNumberBankPair == *runNumberBankPairs.begin()) {
+    if (runLabel == *runLabels.begin()) {
       // First element - copy column headings over
       const auto columnHeaders = singleWSFitResults->getColumnNames();
       for (const auto &header : columnHeaders) {
@@ -432,21 +420,16 @@ void EnggDiffFittingModel::addAllFitResultsToADS() const {
 }
 
 void EnggDiffFittingModel::addAllFittedPeaksToADS() const {
-  const auto runNumberBankPairs = getRunNumbersAndBankIDs();
-  if (runNumberBankPairs.size() < 1) {
+  const auto runLabels = getRunLabels();
+  if (runLabels.size() < 1) {
     return;
   }
-  const auto firstWSLabel = runNumberBankPairs[0];
-  auto fittedPeaksWS =
-      getFittedPeaksWS(firstWSLabel.first, firstWSLabel.second);
+  const auto firstWSLabel = runLabels[0];
+  auto fittedPeaksWS = getFittedPeaksWS(firstWSLabel);
   cloneWorkspace(fittedPeaksWS, FITTED_PEAKS_WS_NAME);
 
-  for (size_t i = 1; i < runNumberBankPairs.size(); ++i) {
-    const auto wsLabel = runNumberBankPairs[i];
-    const int runNumber = wsLabel.first;
-    const size_t bank = wsLabel.second;
-
-    auto wsToAppend = getFittedPeaksWS(runNumber, bank);
+  for (size_t i = 1; i < runLabels.size(); ++i) {
+    auto wsToAppend = getFittedPeaksWS(runLabels[i]);
     appendSpectra(FITTED_PEAKS_WS_NAME, wsToAppend->getName());
   }
 }
@@ -467,7 +450,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
   std::vector<std::string> filenames;
   boost::split(filenames, filenamesString, boost::is_any_of(","));
 
-  std::vector<std::pair<int, size_t>> collectedRunBankPairs;
+  std::vector<RunLabel> collectedRunLabels;
 
   for (const auto &filename : filenames) {
     // Set ws name to filename first, in case we need to guess bank ID from it
@@ -479,30 +462,28 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
 
     const auto bank = guessBankID(ws);
     const int runNumber = ws->getRunNumber();
+    RunLabel runLabel(runNumber, bank);
 
-    addFocusedWorkspace(runNumber, bank, ws, filename);
-    collectedRunBankPairs.push_back(std::make_pair(runNumber, bank));
+    addFocusedWorkspace(runLabel, ws, filename);
+    collectedRunLabels.push_back(runLabel);
   }
 
-  if (collectedRunBankPairs.size() == 1) {
-    auto ws = getFocusedWorkspace(collectedRunBankPairs[0].first,
-                                  collectedRunBankPairs[0].second);
+  if (collectedRunLabels.size() == 1) {
+    auto ws = getFocusedWorkspace(collectedRunLabels[0]);
     renameWorkspace(ws, FOCUSED_WS_NAME);
   } else {
     std::vector<std::string> workspaceNames;
-    std::transform(collectedRunBankPairs.begin(), collectedRunBankPairs.end(),
+    std::transform(collectedRunLabels.begin(), collectedRunLabels.end(),
                    std::back_inserter(workspaceNames),
-                   [&](const std::pair<int, size_t> &runBankPair) {
-                     return getFocusedWorkspace(runBankPair.first,
-                                                runBankPair.second)->getName();
+                   [&](const RunLabel &runLabel) {
+                     return getFocusedWorkspace(runLabel)->getName();
                    });
     groupWorkspaces(workspaceNames, FOCUSED_WS_NAME);
   }
 }
 
-std::vector<std::pair<int, size_t>>
-EnggDiffFittingModel::getRunNumbersAndBankIDs() const {
-  return m_focusedWorkspaceMap.getRunNumbersAndBankIDs();
+std::vector<RunLabel> EnggDiffFittingModel::getRunLabels() const {
+  return m_focusedWorkspaceMap.getRunLabels();
 }
 
 size_t

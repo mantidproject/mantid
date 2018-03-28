@@ -5,12 +5,12 @@
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 #include <boost/iterator/reverse_iterator.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cstddef>
 #include <string>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -52,8 +52,11 @@ private:
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
       m_componentRanges;
   boost::shared_ptr<const std::vector<size_t>> m_parentIndices;
+  boost::shared_ptr<std::vector<std::vector<size_t>>> m_children;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
-  Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+  Mantid::Kernel::cow_ptr<std::vector<
+      Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
   Mantid::Kernel::cow_ptr<std::vector<ComponentType>> m_componentType;
   boost::shared_ptr<const std::vector<std::string>> m_names;
@@ -86,27 +89,32 @@ private:
 
 public:
   ComponentInfo();
-  ComponentInfo(boost::shared_ptr<const std::vector<size_t>>
-                    assemblySortedDetectorIndices,
-                boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-                    detectorRanges,
-                boost::shared_ptr<const std::vector<size_t>>
-                    assemblySortedComponentIndices,
-                boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-                    componentRanges,
-                boost::shared_ptr<const std::vector<size_t>> parentIndices,
-                boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-                boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-                boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-                boost::shared_ptr<std::vector<ComponentType>> componentType,
-                boost::shared_ptr<const std::vector<std::string>> names,
-                int64_t sourceIndex, int64_t sampleIndex);
+  ComponentInfo(
+      boost::shared_ptr<const std::vector<size_t>>
+          assemblySortedDetectorIndices,
+      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+          detectorRanges,
+      boost::shared_ptr<const std::vector<size_t>>
+          assemblySortedComponentIndices,
+      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+          componentRanges,
+      boost::shared_ptr<const std::vector<size_t>> parentIndices,
+      boost::shared_ptr<std::vector<std::vector<size_t>>> children,
+      boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+      boost::shared_ptr<std::vector<
+          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
+          rotations,
+      boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
+      boost::shared_ptr<std::vector<ComponentType>> componentType,
+      boost::shared_ptr<const std::vector<std::string>> names,
+      int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
   /// Clone method
   std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;
+  const std::vector<size_t> &children(const size_t componentIndex) const;
   size_t size() const;
   bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();

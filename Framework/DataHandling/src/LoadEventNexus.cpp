@@ -318,7 +318,7 @@ void LoadEventNexus::setTopEntryName() {
     m_top_entry_name = nxentryProperty;
     return;
   }
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   try {
     string_map_t::const_iterator it;
     // assume we're at the top, otherwise: m_file->openPath("/");
@@ -861,11 +861,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     auto ws = m_ws->getSingleHeldWorkspace();
     m_file->close();
     try {
-      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames);
+      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames,
+                                event_id_is_spec);
+      g_log.information() << "Used ParallelEventLoader.\n";
       loaded = true;
       shortest_tof = 0.0;
       longest_tof = 1e10;
     } catch (const std::runtime_error &) {
+      g_log.warning()
+          << "ParallelEventLoader failed, falling back to default loader.\n";
     }
     safeOpenFile(m_filename);
   }
@@ -1139,7 +1143,7 @@ bool LoadEventNexus::hasEventMonitors() {
   try {
     m_file->openPath("/" + m_top_entry_name);
     // Start with the base entry
-    typedef std::map<std::string, std::string> string_map_t;
+    using string_map_t = std::map<std::string, std::string>;
     // Now we want to go through and find the monitors
     string_map_t entries = m_file->getEntries();
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
@@ -1149,9 +1153,10 @@ bool LoadEventNexus::hasEventMonitors() {
         break;
       }
     }
-    m_file->openData("event_id");
+    bool hasTotalCounts = false;
+    bool oldNeXusFileNames = false;
+    result = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames) > 0;
     m_file->closeGroup();
-    result = true;
   } catch (::NeXus::Exception &) {
     result = false;
   }
@@ -1413,7 +1418,7 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
   m_file->openPath("/");
   m_file->openGroup(entry_name, "NXentry");
 
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = m_file->getEntries();
 
   if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
@@ -1680,8 +1685,6 @@ bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
   if (m_ws->nPeriods() != 1)
     return false;
   if (haveWeights)
-    return false;
-  if (event_id_is_spec)
     return false;
   if (oldNeXusFileNames)
     return false;

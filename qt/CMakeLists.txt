@@ -20,7 +20,7 @@ function ( add_python_package pkg_name )
         set ( _startup_exe ${_egg_link_dir}/${pkg_name} )
       endif ()
   endif ()
-  set ( _outputs "${_egg_link} ${_startup_script} ${_startup_exe}" )
+  set ( _outputs ${_egg_link} ${_startup_script} ${_startup_exe} )
   add_custom_command ( OUTPUT ${_outputs}
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir}
       ${PYTHON_EXECUTABLE} ${_setup_py} develop

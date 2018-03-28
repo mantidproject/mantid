@@ -3,7 +3,6 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {

@@ -69,10 +69,15 @@ public:
 
 class IMDWorkspaceTester : public WorkspaceTester {
 public:
-  std::vector<IMDIterator *>
+  std::vector<std::unique_ptr<IMDIterator>>
   createIterators(size_t,
                   Mantid::Geometry::MDImplicitFunction *) const override {
-    return std::vector<IMDIterator *>(1, new IMDWorkspaceTesterIterator(this));
+
+    std::vector<std::unique_ptr<IMDIterator>> ret;
+    auto ptr = std::unique_ptr<IMDIterator>{
+        Kernel::make_unique<IMDWorkspaceTesterIterator>(this)};
+    ret.push_back(std::move(ptr));
+    return ret;
   }
 };
 

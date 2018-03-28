@@ -526,7 +526,7 @@ public:
     // Simple tests. Functionality tests cover this much better.
     MatrixWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
-    TS_ASSERT(outWS != NULL);
+    TS_ASSERT(outWS != nullptr);
   }
 };
 

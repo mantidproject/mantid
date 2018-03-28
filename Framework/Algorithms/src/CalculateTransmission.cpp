@@ -265,7 +265,7 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
   // means that lexical_cast cannot be used directly as the call is ambiguous
   // so we need to define a function pointer that can resolve the overloaded
   // lexical_cast function
-  typedef std::string (*from_size_t)(const size_t &);
+  using from_size_t = std::string (*)(const size_t &);
 
   std::transform(
       indices.begin(), indices.end(), indexStrings.begin(),

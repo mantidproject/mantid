@@ -78,7 +78,7 @@ public:
   uint64_t getNPoints() const override { return m_length; }
   /// get number of contributed events
   uint64_t getNEvents() const override;
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
@@ -426,7 +426,7 @@ private:
   }
 
   MDHistoWorkspace *doCloneEmpty() const override {
-    return new MDHistoWorkspace(0);
+    return new MDHistoWorkspace(nullptr);
   }
 
   void makeSingleBinWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
@@ -499,10 +499,10 @@ protected:
 };
 
 /// A shared pointer to a MDHistoWorkspace
-typedef boost::shared_ptr<MDHistoWorkspace> MDHistoWorkspace_sptr;
+using MDHistoWorkspace_sptr = boost::shared_ptr<MDHistoWorkspace>;
 
 /// A shared pointer to a const MDHistoWorkspace
-typedef boost::shared_ptr<const MDHistoWorkspace> MDHistoWorkspace_const_sptr;
+using MDHistoWorkspace_const_sptr = boost::shared_ptr<const MDHistoWorkspace>;
 
 } // namespace Mantid
 } // namespace DataObjects

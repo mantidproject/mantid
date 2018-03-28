@@ -3,8 +3,9 @@
 Ab-initio calculation of dynamical structure factor (S)
 =======================================================
 
+
 Introduction
-++++++++++++
+------------
 
 The purpose of this document is to explain the link between theoretical and experimental :math:`S(\mathbf{Q}, \omega)` and to
 describe the general idea how theoretical S from ab-initio is calculated by available plugins in Mantid.
@@ -12,7 +13,7 @@ describe the general idea how theoretical S from ab-initio is calculated by avai
 During an inelastic neutron scattering experiment sample is exposed to neutron flux and response of a sample in the
 form of dynamical structure factor  is recorded. In principle, one obtains phonon (vibrational) spectrum which is often
 quite  difficult to analyse. In order to better understand experimental results one can use modeling methods. One of the
-most successful theoretical method in predicting phonon spectrum is ab-initio method DFT [1].
+most successful theoretical method in predicting phonon spectrum is ab-initio method DFT [1]_.
 
 .. image:: ../images/dft_phonon_scheme.png
     :align: center
@@ -29,7 +30,7 @@ is calculated for each atom separately. Total S is sum over all partial atomic c
 
 
 Working equations
-+++++++++++++++++
+-----------------
 
 Powder
 ~~~~~~
@@ -39,7 +40,7 @@ Powder
 
 From DFT calculations one usually obtains phonon data for infinite single crystal (there are ways to perform
 calculations for molecule, e.g, gas phase). In order to compare it with experiment in which sample is in the form of
-powder one has to perform powder averaging. Usually semi-empirical formula is used [2], [3]:
+powder one has to perform powder averaging. Usually semi-empirical formula is used [2]_, [3]_:
 
 :math:`S^j (\mathbf{Q},\omega_i) = S^j (Q,\omega_i) = \frac{Q^2 TrB_{\omega_i}}{3} exp\left(-Q^2 \alpha^j_{\omega_i} coth^2\left(\frac{\hbar \omega_i}{2 k_B T}\right)  \right)\sigma^j`
 
@@ -84,7 +85,7 @@ consider transitions :math:`0 \rightarrow 2`, but also simultaneous transitions 
 order transitions form the following  set: :math:`\lbrace \omega_1 + \omega_1, \omega_1 + \omega_2, \omega_1 + \omega_3, \ldots,  \omega_p + \omega_p \rbrace`.
 Cardinality of this set is :math:`p^2`, where :math:`p` is a number of fundamentals. In practice one can reduce this number by taking into consideration realistic energy  window
 and neglecting those :math:`\omega_{ij}=\omega_i + \omega_j` for which :math:`S(Q, \omega_i)` is negligible.
-Within harmonic approximation each phonon is treated as independent harmonic quantum oscillator.  The formula for :math:`S(Q, \omega_{ik})` is as follows [4]:
+Within harmonic approximation each phonon is treated as independent harmonic quantum oscillator.  The formula for :math:`S(Q, \omega_{ik})` is as follows [4]_:
 
 :math:`S^j(Q, \omega_{ik}) = \frac{Q^4}{15  C}\left( TrB^j_{\omega_i}TrB^j_{\omega_k} + B^j_{\omega_i}:B^j_{\omega_k} + B^j_{\omega_k}:B^j_{\omega_i} \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ik}}{2 k_B T} \right) \right)\sigma^j`
 
@@ -146,20 +147,28 @@ with
 :math:`cos(\theta)` -- cosines of crystal analyser angle in radians
 
 Current implementation
-++++++++++++++++++++++
+----------------------
+
 Calculation of theoretical S from ab-initio results is implemented in :ref:`Abins <algm-Abins>`. At the moment Abins supports
 `CASTEP <http://www.castep.org/>`_ and `CRYSTAL <http://www.crystal.unito.it/index.php>`_ DFT programs. As it comes to instruments,
 `Tosca <http://www.isis.stfc.ac.uk/instruments/tosca/tosca4715.html>`_ and Tosca-like instruments are supported.
 
+Referencing Abins
+-----------------
+
+If Abins is used as part of your data analysis routines, please cite the relevant reference [5]_.
+
 References
-++++++++++
+----------
 
-[1] W. Kohn et al., *Inhomogeneous Electron Gas*, Phys. Rev. B {\bf 136}, 864 (1964).
+.. [1] W. Kohn et al., *Inhomogeneous Electron Gas*, Phys. Rev. B {\bf 136}, 864 (1964).
 
-[2] J. Howard, B.C. Boland, J. Tomkinson, *Intensities in inelastic neutron scattering spectra: a test of recent theory*, Chem. Phys. 77 (1983).
+.. [2] J. Howard, B.C. Boland, J. Tomkinson, *Intensities in inelastic neutron scattering spectra: a test of recent theory*, Chem. Phys. 77 (1983).
 
-[3] J. Howard and J. Tomkinson, *An analytical method for the calculation of the relative intensities of bending and stretching modes in inelastic neutron scattering spectra*, Chem. Phys. Letters 98 (1983).
+.. [3] J. Howard and J. Tomkinson, *An analytical method for the calculation of the relative intensities of bending and stretching modes in inelastic neutron scattering spectra*, Chem. Phys. Letters 98 (1983).
 
-[4] P. C H Mitchell, S. F. Parker, A. J. Ramirez-Cuesta, J. Tomkinson, *Vibrational Spectroscopy with Neutrons With Applications in Chemistry, Biology, Materials Science and Catalysis*, ISBN: 978-981-256-013-1
+.. [4] P. C H Mitchell, S. F. Parker, A. J. Ramirez-Cuesta, J. Tomkinson, *Vibrational Spectroscopy with Neutrons With Applications in Chemistry, Biology, Materials Science and Catalysis*, ISBN: 978-981-256-013-1
+
+.. [5] K. Dymkowski, S. F. Parker, F. Fernandez-Alonso and S. Mukhopadhyay,  “AbINS: The modern software for INS interpretation” , Physica B, doi:10.1016/j.physb.2018.02.034 (2018).
 
 .. categories:: Concepts

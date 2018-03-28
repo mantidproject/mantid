@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// Internal class used to add support to QWeb(Engine)View to load files from
 /// QHelpEngine.
 class pqHelpWindowNetworkReply : public QNetworkReply {
-  typedef QNetworkReply Superclass;
+  using Superclass = QNetworkReply;
 
 public:
   pqHelpWindowNetworkReply(const QUrl &url, QHelpEngineCore *helpEngine,
@@ -139,14 +139,14 @@ qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize) {
 // ****************************************************************************
 //-----------------------------------------------------------------------------
 class pqHelpWindow::pqNetworkAccessManager : public QNetworkAccessManager {
-  typedef QNetworkAccessManager Superclass;
+  using Superclass = QNetworkAccessManager;
   QPointer<QHelpEngineCore> Engine;
 
 public:
   pqNetworkAccessManager(QHelpEngineCore *helpEngine,
                          QNetworkAccessManager *manager, QObject *parentObject)
       : Superclass(parentObject), Engine(helpEngine) {
-    Q_ASSERT(manager != NULL && helpEngine != NULL);
+    Q_ASSERT(manager != nullptr && helpEngine != nullptr);
 
     this->setCache(manager->cache());
     this->setCookieJar(manager->cookieJar());
@@ -205,7 +205,7 @@ private:
 pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
                            Qt::WindowFlags parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
-  Q_ASSERT(engine != NULL);
+  Q_ASSERT(engine != nullptr);
 
   Ui::pqHelpWindow ui;
   ui.setupUi(this);

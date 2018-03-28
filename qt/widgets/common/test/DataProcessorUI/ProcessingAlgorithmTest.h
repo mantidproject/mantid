@@ -35,9 +35,9 @@ public:
     // Currently ws must be either MatrixWorkspace or Workspace but this can be
     // changed
     std::vector<QString> prefix = {"run_"};
-    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("Rebin", prefix));
-    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("ExtractSpectra", prefix));
-    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("ConvertUnits", prefix));
+    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("Rebin", prefix, 0));
+    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("ExtractSpectra", prefix, 0));
+    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("ConvertUnits", prefix, 0));
   }
 
   void test_invalid_algorithms() {
@@ -45,10 +45,10 @@ public:
     std::vector<QString> prefix = {"IvsQ_"};
 
     // Algorithms with no input workspace properties
-    TS_ASSERT_THROWS(ProcessingAlgorithm("Stitch1DMany", prefix),
+    TS_ASSERT_THROWS(ProcessingAlgorithm("Stitch1DMany", prefix, 0),
                      std::invalid_argument);
     // Algorithms with no output workspace properties
-    TS_ASSERT_THROWS(ProcessingAlgorithm("SaveAscii", prefix),
+    TS_ASSERT_THROWS(ProcessingAlgorithm("SaveAscii", prefix, 0),
                      std::invalid_argument);
   }
   void test_ReflectometryReductionOneAuto() {
@@ -59,27 +59,30 @@ public:
     // We should provide three prefixes, one for each ws
     std::vector<QString> prefixes;
     prefixes.emplace_back("IvsQ_binned_");
+    prefixes.emplace_back("IvsQ_");
     // This should throw
     TS_ASSERT_THROWS(
-        ProcessingAlgorithm(algName, prefixes, std::set<QString>()),
+        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
         std::invalid_argument);
 
-    prefixes.push_back("IvsQ_");
     // This should also throw
     TS_ASSERT_THROWS(
-        ProcessingAlgorithm(algName, prefixes, std::set<QString>()),
+        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
         std::invalid_argument);
     // But this should be OK
-    prefixes.push_back("IvsLam_");
+    prefixes.emplace_back("IvsLam_");
     TS_ASSERT_THROWS_NOTHING(
-        ProcessingAlgorithm(algName, prefixes, std::set<QString>()));
+        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()));
 
-    auto alg = ProcessingAlgorithm(algName, prefixes, std::set<QString>());
+    auto const postprocessedOutputPrefixIndex = 1;
+    auto alg = ProcessingAlgorithm(
+        algName, prefixes, postprocessedOutputPrefixIndex, std::set<QString>());
     TS_ASSERT_EQUALS(alg.name(), "ReflectometryReductionOneAuto");
     TS_ASSERT_EQUALS(alg.numberOfOutputProperties(), 3);
     TS_ASSERT_EQUALS(alg.prefix(0), "IvsQ_binned_");
     TS_ASSERT_EQUALS(alg.prefix(1), "IvsQ_");
     TS_ASSERT_EQUALS(alg.prefix(2), "IvsLam_");
+    TS_ASSERT_EQUALS(alg.postprocessedOutputPrefix(), "IvsQ_");
     TS_ASSERT_EQUALS(alg.inputPropertyName(0), "InputWorkspace");
     TS_ASSERT_EQUALS(alg.inputPropertyName(1), "FirstTransmissionRun");
     TS_ASSERT_EQUALS(alg.inputPropertyName(2), "SecondTransmissionRun");

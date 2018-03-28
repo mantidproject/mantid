@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -40,11 +41,11 @@ void SumOverlappingTubes::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
-  std::vector<std::string> outputTypes{"2D", "2DStraight", "1DStraight"};
+  std::vector<std::string> outputTypes{"2DTubes", "2D", "1D"};
   declareProperty("OutputType", "2D",
                   boost::make_shared<StringListValidator>(outputTypes),
-                  "Whether to have the output in 2D, 2D with straightened "
-                  "Debye-Scherrer cones, or 1D.");
+                  "Whether to have the output in raw 2D, with no "
+                  "Debye-Scherrer cone correction, 2D or 1D.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
           "ScatteringAngleBinning", "0.05",
@@ -58,12 +59,6 @@ void SumOverlappingTubes::init() {
       make_unique<PropertyWithValue<bool>>("CropNegativeScatteringAngles",
                                            false, Direction::Input),
       "If true the negative scattering angles are cropped (ignored).");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
-                      "ComponentForHeightAxis", "tube_1", Direction::Input),
-                  "The name of the component to use for the height axis, that "
-                  "is the name of a PSD tube to be used. If specifying this "
-                  "then there is no need to give a value for the HeightBinning "
-                  "option.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
           "HeightAxis", boost::make_shared<RebinParamsValidator>(true, true)),
@@ -71,8 +66,7 @@ void SumOverlappingTubes::init() {
       "the final y value. This can also be a single number, which "
       "is the y value step size. In this case, the boundary of binning will "
       "be determined by minimum and maximum y values present in the "
-      "workspaces. For the 1DStraight case only this can also be two numbers, "
-      "to give the range desired.");
+      "workspaces. This can also be two numbers to give the range desired.");
   declareProperty(
       make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
       "If true normalise to the number of entries added for a particular "
@@ -85,24 +79,6 @@ void SumOverlappingTubes::init() {
   declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
                   "The relative tolerance for the scattering angles before the "
                   "counts are split.");
-}
-
-std::map<std::string, std::string> SumOverlappingTubes::validateInputs() {
-  std::map<std::string, std::string> result;
-
-  const std::string componentForHeightAxis =
-      getProperty("ComponentForHeightAxis");
-  const std::string heightAxis = getProperty("HeightAxis");
-
-  if (componentForHeightAxis.empty() && heightAxis.empty()) {
-    std::string message =
-        "Either a component, such as a tube, must be specified "
-        "to get the height axis, or the binning given explicitly.";
-    result["ComponentForHeightAxis"] = message;
-    result["HeightBinning"] = message;
-  }
-
-  return result;
 }
 
 void SumOverlappingTubes::exec() {
@@ -155,20 +131,25 @@ void SumOverlappingTubes::getInputParameters() {
   m_workspaceList = combHelper.validateInputWorkspaces(workspaces, g_log);
 
   m_outputType = getPropertyValue("OutputType");
+  const auto &instrument = m_workspaceList.front()->getInstrument();
 
   // For D2B at the ILL the detectors are flipped when comparing with other
   // powder diffraction instruments such as D20. It is still desired to show
   // angles as positive however, so here we check if we need to multiple angle
   // calculations by -1.
   m_mirrorDetectors = 1;
-  auto mirrorDetectors =
-      m_workspaceList.front()->getInstrument()->getBoolParameter(
-          "mirror_detector_angles");
+  auto mirrorDetectors = instrument->getBoolParameter("mirror_detector_angles");
   if (!mirrorDetectors.empty() && mirrorDetectors[0])
     m_mirrorDetectors = -1;
 
+  std::string componentName = "";
+  auto componentNameParam =
+      instrument->getStringParameter("detector_for_height_axis");
+  if (!componentNameParam.empty())
+    componentName = componentNameParam[0];
+
   getScatteringAngleBinning();
-  getHeightAxis();
+  getHeightAxis(componentName);
 }
 
 void SumOverlappingTubes::getScatteringAngleBinning() {
@@ -222,32 +203,36 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
                       << m_endScatteringAngle << "\n";
 }
 
-void SumOverlappingTubes::getHeightAxis() {
-  const std::string componentName = getProperty("ComponentForHeightAxis");
+void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
   std::vector<double> heightBinning = getProperty("HeightAxis");
-  if (componentName.length() > 0 && heightBinning.empty()) {
+  if (componentName.length() == 0 && heightBinning.empty())
+    throw std::runtime_error("No detector_for_height_axis parameter for this "
+                             "instrument. Please enter a value for the "
+                             "HeightAxis parameter.");
+  if ((componentName.length() > 0 && heightBinning.empty()) ||
+      (m_outputType != "1D" && heightBinning.size() == 2)) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
-    const auto &ws = m_workspaceList.front();
-    const auto &inst = ws->getInstrument()->baseInstrument();
-    const auto comp = inst->getComponentByName(componentName);
-    if (!comp)
-      throw std::runtime_error("Component " + componentName +
-                               " could not be found.");
-    const auto &compAss = dynamic_cast<const ICompAssembly &>(*comp);
-    std::vector<IComponent_const_sptr> children;
-    compAss.getChildren(children, false);
-    for (const auto &thing : children)
-      m_heightAxis.push_back(thing->getPos().Y());
+    const auto &componentInfo = m_workspaceList.front()->componentInfo();
+    const auto componentIndex = componentInfo.indexOfAny(componentName);
+    const auto &detsInSubtree =
+        componentInfo.detectorsInSubtree(componentIndex);
+    for (const auto detIndex : detsInSubtree) {
+      const auto posY = componentInfo.position({detIndex, 0}).Y();
+      if (heightBinning.size() == 2 &&
+          (posY < heightBinning[0] || posY > heightBinning[1]))
+        continue;
+      m_heightAxis.push_back(posY);
+    }
   } else {
     if (heightBinning.size() != 3) {
-      if (heightBinning.size() == 2 && m_outputType == "1DStraight") {
+      if (heightBinning.size() == 2 && m_outputType == "1D") {
         m_heightAxis.push_back(heightBinning[0]);
         m_heightAxis.push_back(heightBinning[1]);
       } else
         throw std::runtime_error("Height binning must have start, step and end "
-                                 "values (except for 1DStraight option).");
-    } else if (m_outputType == "1DStraight") {
+                                 "values (except for 1D option).");
+    } else if (m_outputType == "1D") {
       m_heightAxis.push_back(heightBinning[0]);
       m_heightAxis.push_back(heightBinning[2]);
     } else {
@@ -262,7 +247,7 @@ void SumOverlappingTubes::getHeightAxis() {
   m_startHeight = *min_element(m_heightAxis.begin(), m_heightAxis.end());
   m_endHeight = *max_element(m_heightAxis.begin(), m_heightAxis.end());
 
-  if (m_outputType == "1DStraight")
+  if (m_outputType == "1D")
     m_heightAxis = {(m_heightAxis.front() + m_heightAxis.back()) * 0.5};
 
   m_numHistograms = m_heightAxis.size();
@@ -307,7 +292,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       }
 
       double angle;
-      if (m_outputType == "2D")
+      if (m_outputType == "2DTubes")
         angle = atan2(pos.X(), pos.Z());
       else
         angle = specInfo.signedTwoTheta(i);
@@ -329,10 +314,6 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       // counts are split between bins if outside this tolerance
       if (deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
-        g_log.debug() << "Splitting counts for workspace " << ws->getName()
-                      << " at spectrum " << i << " for angle " << angle
-                      << ".\n";
-
         int angleIndexNeighbor;
         if (distanceFromAngle(angleIndex - 1, angle) <
             distanceFromAngle(angleIndex + 1, angle))

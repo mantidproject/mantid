@@ -4,8 +4,16 @@ set ( SRC_FILES
 	EnggDiffFittingViewQtWidget.cpp
 	EnggDiffGSASFittingModel.cpp
 	EnggDiffGSASFittingPresenter.cpp
+	EnggDiffGSASFittingViewQtWidget.cpp
+	EnggDiffMultiRunFittingQtWidget.cpp
+	EnggDiffMultiRunFittingWidgetAdder.cpp
+	EnggDiffMultiRunFittingWidgetModel.cpp
+	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	GSASIIRefineFitPeaksOutputProperties.cpp
+	GSASIIRefineFitPeaksParameters.cpp
+	RunLabel.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -18,17 +26,30 @@ set ( INC_FILES
 	EnggDiffFittingViewQtWidget.h
 	EnggDiffGSASFittingModel.h
 	EnggDiffGSASFittingPresenter.h
+	EnggDiffGSASFittingViewQtWidget.h
 	EnggDiffGSASRefinementMethod.h
+	EnggDiffMultiRunFittingQtWidget.h
+	EnggDiffMultiRunFittingWidgetAdder.h
+	EnggDiffMultiRunFittingWidgetModel.h
+	EnggDiffMultiRunFittingWidgetPresenter.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	GSASIIRefineFitPeaksOutputProperties.cpp
+	GSASIIRefineFitPeaksParameters.h
 	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
 	IEnggDiffGSASFittingModel.h
 	IEnggDiffGSASFittingPresenter.h
 	IEnggDiffGSASFittingView.h
+	IEnggDiffMultiRunFittingWidgetAdder.h
+	IEnggDiffMultiRunFittingWidgetModel.h
+	IEnggDiffMultiRunFittingWidgetOwner.h
+	IEnggDiffMultiRunFittingWidgetPresenter.h
+	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	RunLabel.h
 	RunMap.h
 )
 
@@ -36,9 +57,11 @@ set ( MOC_FILES
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h
+    EnggDiffGSASFittingViewQtWidget.h
     EnggDiffractionPresenter.h
     EnggDiffractionPresWorker.h
     EnggDiffractionViewQtGUI.h
+    EnggDiffMultiRunFittingQtWidget.h
 )
 
 set ( UI_FILES
@@ -47,7 +70,9 @@ set ( UI_FILES
    EnggDiffractionQtTabFocus.ui
    EnggDiffractionQtTabPreproc.ui
    EnggDiffractionQtTabFitting.ui
+   EnggDiffractionQtTabGSAS.ui
    EnggDiffractionQtTabSettings.ui
+   EnggDiffMultiRunFittingWidget.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
@@ -77,5 +102,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt4
-)
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
 
+)

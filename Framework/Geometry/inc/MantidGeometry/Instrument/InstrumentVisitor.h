@@ -5,11 +5,11 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 #include <boost/shared_ptr.hpp>
 #include <cstddef>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -78,6 +78,9 @@ private:
   /// Index of the parent component
   boost::shared_ptr<std::vector<size_t>> m_parentComponentIndices;
 
+  /// Stores instrument tree structure by storing children of all Components
+  boost::shared_ptr<std::vector<std::vector<size_t>>> m_children;
+
   /// Only Assemblies and other NON-detectors yield detector ranges
   boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
 
@@ -99,10 +102,14 @@ private:
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_detectorPositions;
 
   /// Rotations for non-detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+  boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_rotations;
 
   /// Rotations for detectors
-  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_detectorRotations;
+  boost::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
+      m_detectorRotations;
 
   /// Monitor indexes for detectors
   boost::shared_ptr<std::vector<size_t>> m_monitorIndices;
@@ -161,8 +168,14 @@ public:
   virtual size_t registerGenericComponent(
       const Mantid::Geometry::IComponent &component) override;
 
+  virtual size_t registerInfiniteComponent(
+      const Mantid::Geometry::IComponent &component) override;
+
   virtual size_t registerGenericObjComponent(
       const Mantid::Geometry::IObjComponent &objComponent) override;
+
+  virtual size_t
+  registerInfiniteObjComponent(const IObjComponent &objComponent) override;
 
   virtual size_t
   registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;

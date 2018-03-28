@@ -16,6 +16,14 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace { // Helpers
 
+GSASIIRefineFitPeaksParameters createGSASIIRefineFitPeaksParameters(
+    const API::MatrixWorkspace_sptr &inputWS, const RunLabel &runLabel,
+    const GSASRefinementMethod &refinementMethod) {
+  return GSASIIRefineFitPeaksParameters(
+      inputWS, runLabel, refinementMethod, "", std::vector<std::string>({}), "",
+      "", boost::none, boost::none, boost::none, boost::none, false, false);
+}
+
 template <size_t numColumns, size_t numRows>
 API::ITableWorkspace_sptr createDummyTable(
     const std::array<std::string, numColumns> &columnHeadings,
@@ -36,76 +44,54 @@ API::ITableWorkspace_sptr createDummyTable(
 // Helper class with some protected methods exposed
 class TestEnggDiffGSASFittingModel : public EnggDiffGSASFittingModel {
 public:
-  bool containsFocusedRun(const int runNumber, const size_t bank) const;
+  void addGammaValue(const RunLabel &runLabel, const double gamma);
 
-  void addFittedPeaksWS(const int runNumber, const size_t bank,
-                        API::MatrixWorkspace_sptr ws);
-
-  void addFocusedWorkspace(const int runNumber, const size_t bank,
-                           API::MatrixWorkspace_sptr ws);
-
-  void addLatticeParamTable(const int runNumber, const size_t bank,
+  void addLatticeParamTable(const RunLabel &runLabel,
                             API::ITableWorkspace_sptr table);
 
-  void addRwpValue(const int runNumber, const size_t bank, const double rwp);
+  void addRwpValue(const RunLabel &runLabel, const double rwp);
+
+  void addSigmaValue(const RunLabel &runLabel, const double sigma);
 
 private:
-  inline boost::optional<double> doGSASRefinementAlgorithm(
-      API::MatrixWorkspace_sptr inputWorkspace,
-      const std::string &outputWorkspaceName,
-      const std::string &latticeParamsName, const std::string &refinementMethod,
-      const std::string &instParamFile,
-      const std::vector<std::string> &phaseFiles,
-      const std::string &pathToGSASII, const std::string &GSASIIProjectFile,
-      const double dMin, const double negativeWeight) override;
+  inline GSASIIRefineFitPeaksOutputProperties
+  doGSASRefinementAlgorithm(const std::string &fittedPeaksWSName,
+                            const std::string &latticeParamsWSName,
+                            const GSASIIRefineFitPeaksParameters &params,
+                            const std::string &refinementMethod) override;
 };
 
-inline void TestEnggDiffGSASFittingModel::addFittedPeaksWS(
-    const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
-  addFittedPeaks(runNumber, bank, ws);
-}
-
-inline void TestEnggDiffGSASFittingModel::addFocusedWorkspace(
-    const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
-  addFocusedRun(runNumber, bank, ws);
+inline void
+TestEnggDiffGSASFittingModel::addGammaValue(const RunLabel &runLabel,
+                                            const double gamma) {
+  addGamma(runLabel, gamma);
 }
 
 inline void TestEnggDiffGSASFittingModel::addLatticeParamTable(
-    const int runNumber, const size_t bank, API::ITableWorkspace_sptr table) {
-  addLatticeParams(runNumber, bank, table);
+    const RunLabel &runLabel, API::ITableWorkspace_sptr table) {
+  addLatticeParams(runLabel, table);
 }
 
-inline void TestEnggDiffGSASFittingModel::addRwpValue(const int runNumber,
-                                                      const size_t bank,
+inline void TestEnggDiffGSASFittingModel::addRwpValue(const RunLabel &runLabel,
                                                       const double rwp) {
-  addRwp(runNumber, bank, rwp);
+  addRwp(runLabel, rwp);
 }
 
-inline bool
-TestEnggDiffGSASFittingModel::containsFocusedRun(const int runNumber,
-                                                 const size_t bank) const {
-  return hasFocusedRun(runNumber, bank);
+inline void
+TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
+                                            const double sigma) {
+  addSigma(runLabel, sigma);
 }
 
-inline boost::optional<double>
+inline GSASIIRefineFitPeaksOutputProperties
 TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    API::MatrixWorkspace_sptr inputWorkspace,
-    const std::string &outputWorkspaceName,
-    const std::string &latticeParamsName, const std::string &refinementMethod,
-    const std::string &instParamFile,
-    const std::vector<std::string> &phaseFiles, const std::string &pathToGSASII,
-    const std::string &GSASIIProjectFile, const double dMin,
-    const double negativeWeight) {
+    const std::string &fittedPeaksWSName,
+    const std::string &latticeParamsWSName,
+    const GSASIIRefineFitPeaksParameters &params,
+    const std::string &refinementMethod) {
   // Mock method - just create some dummy output and ignore all the parameters
-  // Do some pointless casts to stifle unused parameter warnings
-  (void)GSASIIProjectFile;
-  (void)refinementMethod;
-  (void)dMin;
-  (void)phaseFiles;
-  (void)pathToGSASII;
-  (void)negativeWeight;
-  (void)inputWorkspace;
-  (void)instParamFile;
+  UNUSED_ARG(params);
+  UNUSED_ARG(refinementMethod);
 
   const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
   const static std::array<std::array<double, 3>, 1> targetTableValues = {
@@ -114,13 +100,13 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
       createDummyTable(columnHeadings, targetTableValues);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  ADS.add(latticeParamsName, latticeParams);
+  ADS.add(latticeParamsWSName, latticeParams);
 
   API::MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
-  ADS.add(outputWorkspaceName, ws);
+  ADS.add(fittedPeaksWSName, ws);
 
-  return 75;
+  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3);
 }
 
 } // Anonymous namespace
@@ -142,99 +128,69 @@ public:
     const static std::string inputFilename = "ENGINX_277208_focused_bank_2.nxs";
     TestEnggDiffGSASFittingModel model;
 
-    bool success = false;
-    TS_ASSERT_THROWS_NOTHING(success = model.loadFocusedRun(inputFilename));
-    TS_ASSERT(success);
-
-    TS_ASSERT(model.containsFocusedRun(277208, 2));
+    API::MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = model.loadFocusedRun(inputFilename));
+    TS_ASSERT(ws);
   }
 
   void test_invalidLoadRun() {
     const static std::string inputFilename = "ENGINX_277209_focused_bank_2.nxs";
     TestEnggDiffGSASFittingModel model;
 
-    bool success = false;
-    TS_ASSERT_THROWS_NOTHING(success = model.loadFocusedRun(inputFilename));
-    TS_ASSERT(!success);
-  }
-
-  void test_getFocusedRun() {
-    TestEnggDiffGSASFittingModel model;
-
-    API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-
-    model.addFocusedWorkspace(123, 1, ws);
-
-    boost::optional<API::MatrixWorkspace_sptr> retrievedWS;
-    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFocusedWorkspace(123, 1));
-    TS_ASSERT(retrievedWS);
-    TS_ASSERT_EQUALS(ws, *retrievedWS);
-
-    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFocusedWorkspace(456, 2));
-    TS_ASSERT_EQUALS(retrievedWS, boost::none);
-  }
-
-  void test_getRunLabels() {
-    TestEnggDiffGSASFittingModel model;
-
-    for (int i = 1; i < 5; i++) {
-      API::MatrixWorkspace_sptr ws =
-          API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-      model.addFocusedWorkspace(i * 111, i % 2 + 1, ws);
-    }
-
-    std::vector<std::pair<int, size_t>> runLabels;
-    TS_ASSERT_THROWS_NOTHING(runLabels = model.getRunLabels());
-
-    TS_ASSERT_EQUALS(runLabels.size(), 4);
-    for (int i = 1; i < 5; i++) {
-      TS_ASSERT_EQUALS(runLabels[i - 1],
-                       std::make_pair(i * 111, size_t(i % 2 + 1)));
-    }
-  }
-
-  void test_getFittedPeaks() {
-    TestEnggDiffGSASFittingModel model;
-
-    API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-
-    model.addFittedPeaksWS(123, 1, ws);
-
-    boost::optional<API::MatrixWorkspace_sptr> retrievedWS;
-    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFittedPeaks(123, 1));
-    TS_ASSERT(retrievedWS);
-    TS_ASSERT_EQUALS(ws, *retrievedWS);
-
-    TS_ASSERT_THROWS_NOTHING(retrievedWS = model.getFittedPeaks(456, 2));
-    TS_ASSERT_EQUALS(retrievedWS, boost::none);
-  }
-
-  void test_hasFittedPeaksForRun() {
-    TestEnggDiffGSASFittingModel model;
-
-    API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-
-    model.addFittedPeaksWS(123, 1, ws);
-    TS_ASSERT(model.hasFittedPeaksForRun(123, 1));
-    TS_ASSERT(!model.hasFittedPeaksForRun(456, 1));
+    API::MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_ANYTHING(ws = model.loadFocusedRun(inputFilename));
+    TS_ASSERT(!ws);
   }
 
   void test_getRwp() {
     TestEnggDiffGSASFittingModel model;
 
+    const RunLabel valid(123, 1);
     const double rwp = 75.5;
-    model.addRwpValue(123, 1, rwp);
+    model.addRwpValue(valid, rwp);
 
     auto retrievedRwp = boost::make_optional<double>(false, double());
-    TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(123, 1));
+    TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(valid));
     TS_ASSERT(retrievedRwp);
     TS_ASSERT_EQUALS(rwp, *retrievedRwp);
 
-    TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(456, 2));
+    const RunLabel invalid(456, 2);
+    TS_ASSERT_THROWS_NOTHING(retrievedRwp = model.getRwp(invalid));
     TS_ASSERT_EQUALS(retrievedRwp, boost::none);
+  }
+
+  void test_getGamma() {
+    TestEnggDiffGSASFittingModel model;
+
+    const RunLabel valid(123, 1);
+    const double gamma = 75.5;
+    model.addGammaValue(valid, gamma);
+
+    auto retrievedGamma = boost::make_optional<double>(false, double());
+    TS_ASSERT_THROWS_NOTHING(retrievedGamma = model.getGamma(valid));
+    TS_ASSERT(retrievedGamma);
+    TS_ASSERT_EQUALS(gamma, *retrievedGamma);
+
+    const RunLabel invalid(456, 2);
+    TS_ASSERT_THROWS_NOTHING(retrievedGamma = model.getGamma(invalid));
+    TS_ASSERT_EQUALS(retrievedGamma, boost::none);
+  }
+
+  void test_getSigma() {
+    TestEnggDiffGSASFittingModel model;
+
+    const RunLabel valid(123, 1);
+    const double sigma = 75.5;
+    model.addSigmaValue(valid, sigma);
+
+    auto retrievedSigma = boost::make_optional<double>(false, double());
+    TS_ASSERT_THROWS_NOTHING(retrievedSigma = model.getSigma(valid));
+    TS_ASSERT(retrievedSigma);
+    TS_ASSERT_EQUALS(sigma, *retrievedSigma);
+
+    const RunLabel invalid(456, 2);
+    TS_ASSERT_THROWS_NOTHING(retrievedSigma = model.getSigma(invalid));
+    TS_ASSERT_EQUALS(retrievedSigma, boost::none);
   }
 
   void test_getLatticeParams() {
@@ -245,11 +201,12 @@ public:
 
     TestEnggDiffGSASFittingModel model;
 
-    TS_ASSERT_THROWS_NOTHING(model.addLatticeParamTable(123, 1, table));
+    const RunLabel valid(123, 1);
+    TS_ASSERT_THROWS_NOTHING(model.addLatticeParamTable(valid, table));
 
     // auto retrievedTable = model.getLatticeParams(123, 1);
     boost::optional<API::ITableWorkspace_sptr> retrievedTable;
-    TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(123, 1));
+    TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(valid));
     TS_ASSERT(retrievedTable);
 
     API::TableRow row = (*retrievedTable)->getRow(0);
@@ -265,7 +222,8 @@ public:
     TS_ASSERT_EQUALS(b, expectedB);
     TS_ASSERT_EQUALS(c, expectedC);
 
-    TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(456, 2));
+    const RunLabel invalid(456, 2);
+    TS_ASSERT_THROWS_NOTHING(retrievedTable = model.getLatticeParams(invalid));
     TS_ASSERT_EQUALS(retrievedTable, boost::none);
   }
 
@@ -274,24 +232,28 @@ public:
     // is used properly. It tests that, given that the algorithm is used
     // properly, results are added to the appropriate maps in the model
     TestEnggDiffGSASFittingModel model;
+    const RunLabel runLabel(123, 1);
 
-    API::MatrixWorkspace_sptr ws =
+    API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-    model.addFocusedWorkspace(123, 1, ws);
 
-    bool success = false;
+    API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        success = model.doPawleyRefinement(
-            123, 1, "", std::vector<std::string>({}), "", "", 0, 0));
-    TS_ASSERT(success);
-
-    const auto rwp = model.getRwp(123, 1);
-    TS_ASSERT(rwp);
-
-    const auto fittedPeaks = model.getFittedPeaks(123, 1);
+        fittedPeaks =
+            model.doPawleyRefinement(createGSASIIRefineFitPeaksParameters(
+                inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
     TS_ASSERT(fittedPeaks);
 
-    const auto latticeParams = model.getLatticeParams(123, 1);
+    const auto rwp = model.getRwp(runLabel);
+    TS_ASSERT(rwp);
+
+    const auto sigma = model.getSigma(runLabel);
+    TS_ASSERT(sigma);
+
+    const auto gamma = model.getGamma(runLabel);
+    TS_ASSERT(gamma);
+
+    const auto latticeParams = model.getLatticeParams(runLabel);
     TS_ASSERT(latticeParams);
 
     API::AnalysisDataService::Instance().clear();
@@ -302,24 +264,28 @@ public:
     // is used properly. It tests that, given that the algorithm is used
     // properly, results are added to the appropriate maps in the model
     TestEnggDiffGSASFittingModel model;
+    const RunLabel runLabel(123, 1);
 
-    API::MatrixWorkspace_sptr ws =
+    API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-    model.addFocusedWorkspace(123, 1, ws);
 
-    bool success = false;
+    API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        success = model.doRietveldRefinement(
-            123, 1, "", std::vector<std::string>({}), "", ""));
-    TS_ASSERT(success);
-
-    const auto rwp = model.getRwp(123, 1);
-    TS_ASSERT(rwp);
-
-    const auto fittedPeaks = model.getFittedPeaks(123, 1);
+        fittedPeaks =
+            model.doRietveldRefinement(createGSASIIRefineFitPeaksParameters(
+                inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
     TS_ASSERT(fittedPeaks);
 
-    const auto latticeParams = model.getLatticeParams(123, 1);
+    const auto rwp = model.getRwp(runLabel);
+    TS_ASSERT(rwp);
+
+    const auto sigma = model.getSigma(runLabel);
+    TS_ASSERT(sigma);
+
+    const auto gamma = model.getGamma(runLabel);
+    TS_ASSERT(gamma);
+
+    const auto latticeParams = model.getLatticeParams(runLabel);
     TS_ASSERT(latticeParams);
 
     API::AnalysisDataService::Instance().clear();

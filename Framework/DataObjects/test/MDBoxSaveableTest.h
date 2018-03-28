@@ -254,7 +254,7 @@ public:
     MDBox<MDLeanEvent<3>, 3> *b =
         dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(gb->getChild(22));
     TSM_ASSERT_EQUALS("Child has 8 events", b->getNPoints(), 8);
-    TSM_ASSERT("The child is also saveabele", b->getISaveable() != NULL);
+    TSM_ASSERT("The child is also saveabele", b->getISaveable() != nullptr);
     if (!b->getISaveable())
       return;
 
@@ -753,7 +753,7 @@ public:
         bin.m_max[d] = 4.0;
         bin.m_signal = 0;
       }
-      c.centerpointBin(bin, NULL);
+      c.centerpointBin(bin, nullptr);
       TS_ASSERT_DELTA(bin.m_signal, 8.0, 1e-4);
       TS_ASSERT_DELTA(bin.m_errorSquared, 8.0, 1e-4);
     }
@@ -795,7 +795,7 @@ public:
    */
   void test_splitAllIfNeeded_fileBacked() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
-    typedef MDLeanEvent<2> MDE;
+    using MDE = MDLeanEvent<2>;
 
     // Create the grid box and make it file-backed.
     MDBoxBase<MDE, 2> *b = MDEventsTestHelper::makeMDGridBox<2>();
@@ -847,7 +847,7 @@ public:
       TS_ASSERT(mdbox);
 
       auto pIO = mdbox->getISaveable();
-      TS_ASSERT(pIO != NULL);
+      TS_ASSERT(pIO != nullptr);
       if (!pIO)
         continue;
 

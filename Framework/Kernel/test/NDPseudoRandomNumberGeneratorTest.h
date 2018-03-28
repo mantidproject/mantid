@@ -13,7 +13,7 @@ using Mantid::Kernel::NDRandomNumberGenerator;
 
 class NDPseudoRandomNumberGeneratorTest : public CxxTest::TestSuite {
 private:
-  typedef boost::shared_ptr<NDRandomNumberGenerator> NDGenerator_sptr;
+  using NDGenerator_sptr = boost::shared_ptr<NDRandomNumberGenerator>;
 
 public:
   void test_That_Next_Always_Returns_ND_Size_Array() {
@@ -63,7 +63,7 @@ private:
   createTestGenerator(const size_t seedValue, const double start = -1.0,
                       const double end = -1.0) {
     using namespace Mantid::Kernel;
-    typedef NDPseudoRandomNumberGenerator<MersenneTwister> NDMersenneTwister;
+    using NDMersenneTwister = NDPseudoRandomNumberGenerator<MersenneTwister>;
     const unsigned int ndims(3);
     if (start > 0.0 && end > 0.0)
       return boost::make_shared<NDMersenneTwister>(ndims, seedValue, start,
