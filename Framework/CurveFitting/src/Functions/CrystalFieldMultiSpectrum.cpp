@@ -195,7 +195,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     if (m_fwhmX.size() > iSpec) {
       m_fwhmX[iSpec].clear();
     } else {
-      throw std::runtime_error(
+      throw std::invalid_argument(
           "Temperatures must be defined before resolution model");
     }
   } else if (boost::regex_match(name, match, FWHMY_ATTR_REGEX)) {
@@ -203,7 +203,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     if (m_fwhmY.size() > iSpec) {
       m_fwhmY[iSpec].clear();
     } else {
-      throw std::runtime_error(
+      throw std::invalid_argument(
           "Temperatures must be defined before resolution model");
     }
   }
