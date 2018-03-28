@@ -60,15 +60,15 @@ Usage
      dataY = [1,2,3,4,5,6,7,8,9,10,11,12]
 
      # The workspace will be named "dataWS1", error values will be zero.
-     dataWS1 = CreateWorkspace(DataX=dataX, DataY=dataY, NSpec=4,UnitX="Wavelength")
+     dataWS1 = CreateWorkspace(DataX=dataX, DataY=dataY, NSpec=4, UnitX="Wavelength")
 
      # Create a workspace containing the following error values:
      dataE = [1,2,3,4,5,6,7,8,9,10,11,12]
-     dataWS2 = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4,UnitX="Wavelength")
+     dataWS2 = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4, UnitX="Wavelength")
 
      # Create a workspace containing Dx values:
      dX = [1,2,3,4,5,6,7,8,9,10,11,12]
-     dataWS3 = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4,UnitX="Wavelength", Dx=dX)
+     dataWS3 = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4, UnitX="Wavelength", Dx=dX)
 
 .. categories::
 
