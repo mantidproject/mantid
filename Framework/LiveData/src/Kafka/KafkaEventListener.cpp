@@ -1,8 +1,8 @@
 #include "MantidLiveData/Kafka/KafkaEventListener.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
+#include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 namespace {
@@ -14,20 +14,23 @@ namespace LiveData {
 
 DECLARE_LISTENER(KafkaEventListener)
 
-void KafkaEventListener::setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) {
+void KafkaEventListener::setAlgorithm(
+    const Mantid::API::IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
   // Get the instrument name from StartLiveData so we can sub to correct topics
   if (callingAlgorithm.existsProperty("Instrument")) {
     m_instrumentName = callingAlgorithm.getPropertyValue("Instrument");
   } else {
-    g_log.error("KafkaEventListener requires Instrument property to be set in calling algorithm");
+    g_log.error("KafkaEventListener requires Instrument property to be set in "
+                "calling algorithm");
   }
 }
 
 /// @copydoc ILiveListener::connect
 bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   if (m_instrumentName.empty()) {
-    g_log.error("KafkaEventListener::connect requires a non-empty instrument name");
+    g_log.error(
+        "KafkaEventListener::connect requires a non-empty instrument name");
   }
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
@@ -59,7 +62,8 @@ void KafkaEventListener::start(Types::Core::DateAndTime startTime) {
     startNow = false;
   } else if (startTime != 0) {
     g_log.warning() << "KafkaLiveListener does not currently support starting "
-                       "from arbitrary time." << std::endl;
+                       "from arbitrary time."
+                    << std::endl;
   }
   m_decoder->startCapture(startNow);
 }
