@@ -27,6 +27,18 @@ void addVertex(const Mantid::Geometry::ComponentInfo &compInfo, size_t detIndex,
              static_cast<GLfloat>(pos.Z()));
 }
 
+void setBankNormal(const Mantid::Kernel::V3D &pos1,
+                   const Mantid::Kernel::V3D &pos2,
+                   const Mantid::Kernel::V3D &basePos) {
+  // Set the bank normal to facilitate lighting effects
+  auto vec1 = pos1 - basePos;
+  auto vec2 = pos2 - basePos;
+  auto normal = vec1.cross_prod(vec2);
+  normal.normalize();
+  glNormal3f(static_cast<GLfloat>(normal.X()), static_cast<GLfloat>(normal.Y()),
+             static_cast<GLfloat>(normal.Z()));
+}
+
 void extractHexahedron(const Mantid::Geometry::IObject &shape,
                        std::vector<Mantid::Kernel::V3D> &hex) {
   const auto &shapeInfo = shape.getGeometryHandler()->shapeInfo();
@@ -45,7 +57,6 @@ void offsetHexahedronPosition(std::vector<Mantid::Kernel::V3D> &hex,
   for (auto &pos : hex)
     pos += offset;
 }
-
 } // namespace
 
 namespace MantidQt {
@@ -86,6 +97,10 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
 
   auto basePos = compInfo.position(bank.bottomLeft);
 
+  // Set the bank normal to facilitate lighting effects
+  setBankNormal(compInfo.position(bank.bottomRight),
+                compInfo.position(bank.topLeft), basePos);
+
   glTexCoord2f(0.0, 0.0);
   addVertex(compInfo, bank.bottomLeft, basePos, xstep, ystep);
 
@@ -115,9 +130,13 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
   const auto &columns = compInfo.children(index);
   auto colWidth = (columns.size()) * 3;
   auto baseIndex = compInfo.children(columns[0])[0];
-  auto basePos =
-      compInfo.shape(baseIndex).getGeometryHandler()->shapeInfo().points()[0];
+  const auto &baseShapeInfo =
+      compInfo.shape(baseIndex).getGeometryHandler()->shapeInfo();
+  auto basePos = baseShapeInfo.points()[0];
   std::vector<Mantid::Kernel::V3D> hex(4);
+
+  setBankNormal(baseShapeInfo.points()[1], baseShapeInfo.points()[3], basePos);
+
   for (size_t x = 0; x < colWidth; x += 3) {
     auto index = x / 3;
     const auto &column = compInfo.children(columns[index]);
