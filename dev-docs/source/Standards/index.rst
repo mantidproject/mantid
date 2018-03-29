@@ -1,6 +1,11 @@
-================
+.. _Standards:
+
+=========
+Standards
+=========
+
 Coding Standards
-================
+----------------
 
 Coding standards are vital for creating a maintainable and extensible
 system. However in order for them to be effective they have to be
@@ -18,8 +23,22 @@ procedure in a sensible manner to code generated automatically.
    UnitTestStandards
    PythonStandards
 
+Documentation Standards
+-----------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   DocumentationGuideForDevs
+   AlgorithmDocumentation
+   AlgorithmUsageExamples
+   InterfaceDocumentation
+
+
 Guidelines
 ----------
 
-- :ref:`dev-docs-gui-design-guidelines`
-- :ref:`dev-docs-libraries-guidelines`
+.. toctree::
+   :maxdepth: 1
+
+   Libraries

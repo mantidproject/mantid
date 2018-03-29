@@ -1,4 +1,4 @@
-.. _dev-docs-cpp-standards:
+.. _CppCodingStandards:
 
 ====================
 C++ Coding Standards
@@ -149,7 +149,7 @@ project) use of abbreviations.
   descriptive names. Type prefixes will not be used. variable names
   in Mantid are usually camelCase (starting with a lower case
   character and capital for each later word).
-- **Scope Prefixes**      
+- **Scope Prefixes**
    - Static member variables use a ``g_`` prefix.
    - Non-static member variables use an ``m_`` prefix.
 - **Local variables used as integer loop counters** As an exception,

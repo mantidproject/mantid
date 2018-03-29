@@ -1,7 +1,8 @@
-.. _dev-docs-mvp-python-views:
+.. _QtDesignerForPython:
 
-Using QtCreator to Generate Python GUI Layouts
-==============================================
+======================
+Qt Designer for Python
+======================
 
 Motivation
 ----------
@@ -9,7 +10,7 @@ Motivation
 Code for setting up individual widgets and the layout of a view can
 become large and difficult to maintain by hand. It usually easier to
 edit such code using a drag and drop WYSIWYG (What You See Is What You
-Get) editor such as Qt Creator. However, doing so requires some
+Get) editor such as Qt Creator/Designer. However, doing so requires some
 additional actions at build time.
 
 Implementation
@@ -46,11 +47,11 @@ For example the following CMakeLists.txt:
     UiToPy(UI_FILES CompileUISANSDataProcessorInterface)
 
 Produces a cmake target ``CompileUISANSDataProcessorInterface`` which
-when built runs
+when built runs::
 
-| ``pyuic4 sans_data_processor_window.ui -o ui_sans_data_processor_window.py``
-| ``pyuic4 settings_diagnostic_tab.ui -o ui_settings_diagnostic_tab.py``
-| ``pyuic4 masking_table.ui -o ui_masking_table.py``
+   pyuic4 sans_data_processor_window.ui -o ui_sans_data_processor_window.py
+   pyuic4 settings_diagnostic_tab.ui -o ui_settings_diagnostic_tab.py
+   pyuic4 masking_table.ui -o ui_masking_table.py
 
 The generated target also runs a script wrap_pyui.py which prepends
 ``#pylint: skip-file`` to the top of the generated file.
@@ -64,8 +65,8 @@ Using the Generated Script
 --------------------------
 
 When following the MVP design pattern as described at
-:ref:`dev-docs-mvp-intro`, the generated file alone is not sufficient
-as a :ref:`dev-docs-mvp-view`. Directly accessing the widgets and the
+:ref:`GuiDesignGuidelinesMVPIntro`, the generated file alone is not sufficient
+as a :ref:`GuiDesignGuidelinesMVPView`. Directly accessing the widgets and the
 signals defined on the view from the presenter moves the view
 implementation details into the presenter, which makes it harder to
 change the names and types of widgets used to display the
@@ -188,8 +189,8 @@ the build, the output should contain a line similar to the following:
 
 ``[1/1] Generating scripts/Interface/ui/sans/ui_my_widget.py``
 
-8. Add a separate python file containing the `View
-<dev-docs-mvp-view>`__ class which extends the generated one.
+8. Add a separate python file containing the `View <GuiDesignGuidelinesMVPView>`__
+class which extends the generated one.
 
 .. code:: python
 
