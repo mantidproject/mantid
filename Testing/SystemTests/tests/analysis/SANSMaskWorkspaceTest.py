@@ -11,6 +11,7 @@ from sans.common.enums import SANSFacility
 from sans.test_helper.test_director import TestDirector
 from sans.state.data import get_data_builder
 from sans.state.mask import get_mask_builder
+from sans.common.file_information import SANSFileInformationFactory
 
 
 def get_masked_spectrum_numbers(workspace):
@@ -95,7 +96,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_spectra_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
 
@@ -168,7 +171,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_block_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
 
@@ -210,7 +215,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_cross_block_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
 
@@ -264,7 +271,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         file_name = create_shape_xml_file(shape_xml)
 
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
         mask_builder = get_mask_builder(data_info)
@@ -293,7 +302,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_general_time_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
         mask_builder = get_mask_builder(data_info)
@@ -339,7 +350,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_detector_specific_time_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
         mask_builder = get_mask_builder(data_info)
@@ -379,7 +392,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_angle_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
 
@@ -427,7 +442,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_beam_stop_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
         mask_builder = get_mask_builder(data_info)
@@ -463,7 +480,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
     def test_that_cylinder_masking_is_applied(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00028827")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00028827")
         data_info = data_builder.build()
         mask_builder = get_mask_builder(data_info)
