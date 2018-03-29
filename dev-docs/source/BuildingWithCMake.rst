@@ -116,7 +116,7 @@ Building and working with CMake
 Building the installer package
 ##############################
 
-* For WIndows only, you first need to install NSIS, available at: http://nsis.sourceforge.net/Download. Ensure that the install directory is added to the PATH. You should be able to type ``makensis /?`` in a command prompt.
+* For Windows only, you first need to install NSIS, available at: http://nsis.sourceforge.net/Download. Ensure that the install directory is added to the PATH. You should be able to type ``makensis /?`` in a command prompt.
 * Run CMake with "ENABLE_CPACK" enabled. If using the GUI you need to click the "Advanced" checkbox to see this option.
 * You will now have a build target called "PACKAGE" available to create the installer package.
 
