@@ -71,9 +71,9 @@ private:
   bool readSTLLine(std::ifstream &file, std::string const &linetype);
   uint16_t addSTLVertex(Kernel::V3D &vertex,
                         std::vector<Kernel::V3D> &vertices);
-  bool areEqualVertices(Kernel::V3D &v1, Kernel::V3D &v2) {
+  bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const {
     Kernel::V3D diff = v1 - v2;
-    return diff.norm() < 0.0000001;
+    return diff.norm() < 1e-9;
   }
 };
 
