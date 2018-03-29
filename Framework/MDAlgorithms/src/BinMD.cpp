@@ -103,7 +103,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
     // There is a check that the number of events is enough for it to make sense
     // to do all this processing.
     size_t numVertexes = 0;
-    coord_t *vertexes = box->getVertexesArray(numVertexes);
+    auto vertexes = box->getVertexesArray(numVertexes);
 
     // All vertexes have to be within THE SAME BIN = have the same linear index.
     size_t lastLinearIndex = 0;
@@ -111,7 +111,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
 
     for (size_t i = 0; i < numVertexes; i++) {
       // Cache the center of the event (again for speed)
-      const coord_t *inCenter = vertexes + i * nd;
+      const coord_t *inCenter = vertexes.get() + i * nd;
 
       // Now transform to the output dimensions
       m_transform->apply(inCenter, outCenter);
@@ -153,8 +153,6 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       if (badOne)
         break;
     } // (for each vertex)
-
-    delete[] vertexes;
 
     if (!badOne) {
       // Yes, the entire box is within a single bin
