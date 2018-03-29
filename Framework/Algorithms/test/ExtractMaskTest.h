@@ -114,8 +114,8 @@ public:
 
     std::vector<Mantid::detid_t> detectorList;
 
-    TS_ASSERT_THROWS_NOTHING(
-        detectorList = runExtractMaskReturnList(inputName));
+    TS_ASSERT_THROWS_NOTHING(detectorList =
+                                 runExtractMaskReturnList(inputName));
     TS_ASSERT_EQUALS(detectorList, expectedDetectorList)
 
     AnalysisDataService::Instance().remove(inputName);

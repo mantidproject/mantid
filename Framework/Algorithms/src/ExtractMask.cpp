@@ -55,7 +55,8 @@ void ExtractMask::exec() {
   const auto &detInfo = inputWS->detectorInfo();
   const auto &detIds = detInfo.detectorIDs();
   for (size_t i = 0; i < detInfo.size(); ++i) {
-    if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) || detInfo.isMasked(i)) {
+    if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) ||
+        detInfo.isMasked(i)) {
       detectorList.push_back(detIds[i]);
     }
   }
