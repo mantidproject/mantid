@@ -63,8 +63,8 @@ Building the VSI
 - Get Paraview (see above)
 - Edit the CMake configuration for Mantid
 
-  - Via CMake enable '''MAKE_VATES''' (If editing from the GUI, press '''Configure''' after checking this)
-  - Via CMake set '''ParaView_DIR''' to the directory where paraview has been built.
+  - Via CMake enable ``MAKE_VATES`` (If editing from the GUI, press ``Configure`` after checking this)
+  - Via CMake set ``ParaView_DIR`` to the directory where paraview has been built.
 - Make Mantid
 
 This should produce the VSI related binaries for Mantid as well as plugins usable by ParaView.
