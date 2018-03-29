@@ -55,18 +55,6 @@ Configuring your build
 
 CMake encourages the use of 'out of source' builds. This means that all generated files are placed in a separate directory structure to the source files. This separation makes a full clean easier (you just delete everything) and means that you can have different types of build (Release, Debug, different compiler versions, ....) in separate places (N.B. For Visual Studio & XCode, you can still select the type of build from within the IDE).
 
-Red Hat Enterprise Linux (RHEL) 6 Special Notes
------------------------------------------------
-
-As RHEL6 contains versions of various software that are out of date, we need to use newer versions.  In order for these new versions to not interfere with the default versions on the system, we install them using something called `Software Collections <https://access.redhat.com/site/documentation//en-US/Red_Hat_Developer_Toolset/1/html/Software_Collections_Guide/index.html>`_.  The basic upshot of using these is that you have to prefix your configure and make commands with ``scl enable mantidlibs34``.  You always need to enclose the command you want to run in single quotes.
-So some examples of commands we might use are:
-
-.. code-block:: sh
-
-  scl enable mantidlibs34 'cmake-gui'
-  scl enable mantidlibs34 'cmake -G"Ninja" /path/to/Mantid'
-  scl enable mantidlibs34 'ninja -j10'
-
 From the command line
 ---------------------
 
