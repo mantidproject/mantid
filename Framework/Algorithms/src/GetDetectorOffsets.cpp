@@ -155,18 +155,20 @@ void GetDetectorOffsets::exec() {
     // fit peak for the second time
     bool mask_it(false);
     if (fit_peak_twice) {
-      offset =
-          fitPeakSecondTime(wi, isAbsolute, minimum_peak_height, fit_result);
-      if (offset <= 0.) {
-        mask_it = true;
-        if (offset < -1.9)
-          g_log.information() << "ws-index " << wi << " has NaN.";
+      double offset2 = fitPeakSecondTime(wi, isAbsolute, minimum_peak_height,
+                                         fit_result, mask_it);
+      if (mask_it) {
+        if (offset2 < -1.9)
+          g_log.notice() << "ws-index " << wi << " has NaN.";
         else
-          g_log.information() << "ws-index " << wi
-                              << " has either too-low peak ("
-                              << fit_result.height << ") or too-narrow peak ("
-                              << fit_result.sigma << ")\n";
+          g_log.notice() << "ws-index " << wi << " has either too-low peak ("
+                         << fit_result.height << ") or too-narrow peak ("
+                         << fit_result.sigma << ")\n";
       }
+
+      g_log.notice() << "[DB...BAT] ws-index " << wi << ": Offset = " << offset
+                     << "... Offset2 = " << offset2 << "\n";
+      offset = offset2;
     }
 
     double mask = 0.0;
@@ -244,31 +246,37 @@ void GetDetectorOffsets::exec() {
  * @param isAbsolute
  * @param minimum_peak_height
  * @param fit_result
+ * @param mask_it
  * @return
  */
 double GetDetectorOffsets::fitPeakSecondTime(
     size_t wi, const bool isAbsolute, const double minimum_peak_height,
-    GetDetectorsOffset::PeakLinearFunction &fit_result) {
+    GetDetectorsOffset::PeakLinearFunction &fit_result, bool &mask_it) {
   // check y
-  double offset(-1);
-  bool mask_it = false;
+  double offset(0);
+  mask_it = false;
 
   if (minimum_peak_height != EMPTY_DBL() &&
       fit_result.height < minimum_peak_height) {
     // doesn't meet the minumum peak height requirement
     mask_it = true;
+    g_log.warning() << "ws-index " << wi << " peak height " << fit_result.height
+                    << " too low!"
+                    << "\n";
   } else if (fit_result.sigma < 0.5) {
     // doesn't meet the minimum peak sigma
     mask_it = true;
   }
 
-  if (mask_it)
+  if (mask_it) {
+    offset = -1;
     return offset;
+  }
 
   // also check whether there is any nan in vector Y
   auto vec_y = inputW->histogram(wi).y();
   for (auto iter : vec_y) {
-    if (isnan(iter)) {
+    if (std::isnan(iter)) {
       mask_it = true;
       break;
     }
@@ -287,6 +295,8 @@ double GetDetectorOffsets::fitPeakSecondTime(
                 << ", FHWM = " << fit_result.sigma
                 << "; new fit range: " << xmin << ", " << xmax << "\n";
   offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result, true);
+  g_log.notice() << "[DB...BAT] ws-index " << wi << " 2nd-offset = " << offset
+                 << "\n";
 
   return offset;
 }
@@ -304,7 +314,8 @@ double GetDetectorOffsets::fitPeakSecondTime(
  */
 double GetDetectorOffsets::fitSpectra(
     const int64_t s, bool isAbsolbute, const double xmin, const double xmax,
-    GetDetectorsOffset::PeakLinearFunction &fit_result, bool use_fit_result) {
+    GetDetectorsOffset::PeakLinearFunction &fit_result,
+    const bool use_fit_result) {
 
   double bkgd_a0(0.), bkgd_a1(0.);
   double peakHeight(0.), peakLoc(0.), peakSigma(-1);
@@ -390,6 +401,10 @@ double GetDetectorOffsets::fitSpectra(
 
   double offset =
       -1. * peak_center * m_step / (m_dreference + peak_center * m_step);
+  if (use_fit_result) {
+    g_log.notice() << "[DB...BAT] Peak center = " << peak_center
+                   << ", step = " << m_step << ": offset = " << offset << "\n";
+  }
   // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
   // negative
 
