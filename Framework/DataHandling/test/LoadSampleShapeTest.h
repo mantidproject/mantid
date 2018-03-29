@@ -19,7 +19,9 @@ using namespace Mantid::Geometry;
 
 class LoadSampleShapeTest : public CxxTest::TestSuite {
 public:
-  static LoadSampleShapeTest *createSuite() { return new LoadSampleShapeTest(); }
+  static LoadSampleShapeTest *createSuite() {
+    return new LoadSampleShapeTest();
+  }
   static void destroySuite(LoadSampleShapeTest *suite) { delete suite; }
 
   void testName() { TS_ASSERT_EQUALS(loadShape.name(), "LoadShape"); }
