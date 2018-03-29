@@ -4,6 +4,9 @@
 Building VATES
 ==============
 
+.. contents::
+  :local:
+  
 What Is the VSI?
 ----------------
 
