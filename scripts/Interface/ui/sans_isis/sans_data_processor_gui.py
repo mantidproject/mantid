@@ -287,7 +287,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.settingsChanged()
 
     def _on_wavelength_step_type_changed(self):
-        if self.wavelength_step_type == RangeStepType.RangeLin:
+        if self.wavelength_step_type == RangeStepType.RangeLin or self.wavelength_step_type == RangeStepType.RangeLog:
             self.wavelength_stackedWidget.setCurrentIndex(1)
         else:
             self.wavelength_stackedWidget.setCurrentIndex(0)
@@ -948,14 +948,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @wavelength_range.setter
     def wavelength_range(self, value):
         self.update_simple_line_edit_field(line_edit="wavelength_range_line_edit", value=value)
-
-    @property
-    def wavelength_scale(self):
-        return self.get_simple_line_edit_field(line_edit="wavelength_scale_line_edit", expected_type=float)
-
-    @wavelength_scale.setter
-    def wavelength_scale(self, value):
-        self.update_simple_line_edit_field(line_edit="wavelength_scale_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale Group

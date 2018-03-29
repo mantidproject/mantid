@@ -21,7 +21,6 @@ class StateWavelength(StateBase):
     wavelength_step = PositiveFloatParameter()
     wavelength_step_type = ClassTypeParameter(RangeStepType)
     wavelength_range = StringWithNoneParameter()
-    wavelength_scale = PositiveFloatParameter()
 
     def __init__(self):
         super(StateWavelength, self).__init__()

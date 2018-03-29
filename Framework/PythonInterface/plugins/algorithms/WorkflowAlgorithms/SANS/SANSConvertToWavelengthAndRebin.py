@@ -143,6 +143,8 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
 
     def _perform_rebin(self, rebin_type, rebin_options, workspace):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         rebin_name = "Rebin" if rebin_type is RebinType.Rebin else "InterpolatingRebin"
         rebin_alg = create_unmanaged_algorithm(rebin_name, **rebin_options)
         rebin_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
