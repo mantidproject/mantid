@@ -13,22 +13,7 @@ setlocal enableextensions enabledelayedexpansion
 call cmake.exe --version
 echo %sha1%
 
-:: Find the grep tool for later
-for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
-set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
-set GREP_EXE=%GIT_ROOT_DIR%\usr\bin\grep.exe
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Environment setup
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Source the VS setup script
-set VS_VERSION=14
-:: 8.1 is backwards compatible with Windows 7. It allows us to target Windows 7
-:: when building on newer versions of Windows. This value must be supplied
-:: externally and cannot be supplied in the cmake configuration
-set SDK_VERSION=8.1
-call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %SDK_VERSION%
-set CM_GENERATOR=Visual Studio 14 2015 Win64
+:: ParaView version
 set PARAVIEW_DIR=%PARAVIEW_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -44,7 +29,6 @@ if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
   cd %WORKSPACE%
 )
 
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
 :: tree, which can be shared by multiple builds.
@@ -58,7 +42,7 @@ if NOT DEFINED MANTID_DATA_STORE (
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check job requirements from the name
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CLEANBUILD=
 set BUILDPKG=
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
@@ -90,8 +74,10 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 ::                            the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR=%WORKSPACE%\build
+call %~dp0setupcompiler.bat %BUILD_DIR%
 
 if "!CLEANBUILD!" == "yes" (
+  echo Removing build directory for a clean build
   rmdir /S /Q %BUILD_DIR%
 )
 
