@@ -38,14 +38,13 @@ void LoadSampleShape::init() {
   const std::vector<std::string> extensions{".stl"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
-      "The name of the file containing the shape. ");
+      "The path name of the file containing the shape.");
 
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
-                  "The name of the workspace that will be same as "
-                  "the input workspace but with shape added to it "
-                  "at the sample");
+                  "The name of the workspace that provides the" 
+                  "sample whose shape is being loaded");
 }
 
 /**
