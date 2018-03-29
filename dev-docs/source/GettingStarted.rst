@@ -150,8 +150,8 @@ If at RAL now remove the config section above
 
 Building Mantid
 ###############
-See `Building with CMake <http://www.mantidproject.org/Building_with_CMake>`_ for information about building Mantid.
+See :ref:`BuildingWithCMake` for information about building Mantid.
 
 Building VATES
 ##############
-See `Building VATES <https://www.mantidproject.org/Building_VATES>`_ for infromation about building VATES.
+See :ref:`BuildingVATES` for infromation about building VATES.
