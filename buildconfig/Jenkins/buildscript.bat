@@ -13,23 +13,7 @@ setlocal enableextensions enabledelayedexpansion
 call cmake.exe --version
 echo %sha1%
 
-:: Find the grep tool for later
-for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
-set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
-set GREP_EXE=%GIT_ROOT_DIR%\usr\bin\grep.exe
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Environment setup
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Source the VS setup script
-set VS_VERSION=14
-:: 8.1 is backwards compatible with Windows 7. It allows us to target Windows 7
-:: when building on newer versions of Windows. This value must be supplied
-:: externally and cannot be supplied in the cmake configuration
-set SDK_VERSION=8.1
-call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %SDK_VERSION%
-set UseEnv=true
-set CM_GENERATOR=Visual Studio 14 2015 Win64
+:: ParaView version
 set PARAVIEW_DIR=%PARAVIEW_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
