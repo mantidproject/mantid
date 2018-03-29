@@ -108,11 +108,6 @@ Building the installer package
 * Run CMake with "ENABLE_CPACK" enabled. If using the GUI you need to click the "Advanced" checkbox to see this option.
 * You will now have a build target called "PACKAGE" available to create the installer package.
 
-Troubleshooting on OSX
-----------------------
-
-* If you have problems building the package because macdeplotqt fails to find the plugins folder you need to update your homebrew version of Qt this `bug report <https://github.com/cartr/homebrew-qt4/issues/38>`_ for more details).
-
 Caveats and Known Issues
 ########################
 
