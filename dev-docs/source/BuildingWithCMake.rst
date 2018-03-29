@@ -93,7 +93,7 @@ From the CMake gui ...
 Data Files Location
 -------------------
 
-Mantid used the CMake ExternalData system for managing testing data. See :ref:`DataFiles` for further instructions.
+Mantid used the CMake ExternalData system for managing testing data. See :ref:`DataFilesForTesting` for further instructions.
 
 With Qt Creator ...
 -------------------
