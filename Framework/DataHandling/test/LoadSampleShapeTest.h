@@ -24,7 +24,7 @@ public:
   }
   static void destroySuite(LoadSampleShapeTest *suite) { delete suite; }
 
-  void testName() { TS_ASSERT_EQUALS(loadShape.name(), "LoadShape"); }
+  void testName() { TS_ASSERT_EQUALS(loadShape.name(), "LoadSampleShape"); }
 
   void testVersion() { TS_ASSERT_EQUALS(loadShape.version(), 1); }
 
