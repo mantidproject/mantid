@@ -26,8 +26,7 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleShape::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<API::InstrumentValidator>();
+  auto wsValidator = boost::make_shared<API::InstrumentValidator>();;
 
   // input workspace
   declareProperty(
