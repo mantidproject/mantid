@@ -8,12 +8,14 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
 #include <limits>
 #include <numeric> // std::accumulate
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -93,6 +95,12 @@ void LoadILLSANS::exec() {
     const DetectorPosition detPos =
         getDetectorPositionD33(firstEntry, instrumentPath);
     moveDetectorsD33(std::move(detPos));
+  } else {
+    initWorkSpace(firstEntry, instrumentPath);
+    runLoadInstrument();
+    double distance = m_loader.getDoubleFromNexusPath(
+        firstEntry, instrumentPath + "/detector/det_calc");
+    moveDetectorDistance(distance, "detector");
   }
 
   setFinalProperties();
@@ -127,7 +135,7 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
  * Get detector panel distances from the nexus file
  * @return a structure with the positions
  */
-DetectorPosition
+LoadILLSANS::DetectorPosition
 LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
   std::string detectorPath(instrumentNamePath + "/detector");
@@ -156,11 +164,33 @@ LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
                       firstEntry, detectorPath + "/OyB_actual") *
                   1e-3;
 
-  g_log.debug() << pos;
+  pos >> g_log.debug();
 
   return pos;
 }
 
+/**
+ * Loads data for D11 and D22
+ */
+void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
+                                const std::string &instrumentPath) {
+  g_log.debug("Fetching data...");
+  NXData dataGroup = firstEntry.openNXData("data");
+  NXInt data = dataGroup.openIntData();
+  data.load();
+  int numberOfHistograms = data.dim0() * data.dim1();
+  createEmptyWorkspace(numberOfHistograms + 2, 1);
+  loadMetaData(firstEntry, instrumentPath);
+  size_t nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, 0);
+  loadDataIntoWorkspaceFromHorizontalTubes(data, {0}, nextIndex);
+  if (data.dim0() == 128 && m_instrumentName == "D11") {
+    m_resMode = "low";
+  }
+}
+
+/**
+ * Loads data for D33
+ */
 void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
                                    const std::string &instrumentPath) {
 
@@ -245,8 +275,7 @@ size_t
 LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
                                                size_t firstIndex) {
 
-  // let's find the monitors
-  // For D33 should be monitor1 and monitor2
+  // let's find the monitors; should be monitor1 and monitor2
   for (std::vector<NXClassInfo>::const_iterator it =
            firstEntry.groups().begin();
        it != firstEntry.groups().end(); ++it) {
@@ -315,7 +344,6 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
       int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
       const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
       m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
-
       ++spec;
       progress.report();
     }
@@ -367,8 +395,10 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
   return spec;
 }
 
-/***
+/**
  * Create a workspace without any data in it
+ * @param numberOfHistograms : number of spectra
+ * @param numberOfChannels : number of TOF channels
  */
 void LoadILLSANS::createEmptyWorkspace(int numberOfHistograms,
                                        int numberOfChannels) {
@@ -380,20 +410,37 @@ void LoadILLSANS::createEmptyWorkspace(int numberOfHistograms,
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
+/**
+* Makes up the full path of the relevant IDF dependent on resolution mode
+* @param instName : the name of the instrument (including the resolution mode
+* suffix)
+* @return : the full path to the corresponding IDF
+*/
+std::string
+LoadILLSANS::getInstrumentFilePath(const std::string &instName) const {
+
+  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
+  Poco::Path file(instName + "_Definition.xml");
+  Poco::Path fullPath(directory, file);
+  return fullPath.toString();
+}
+
+/**
+ * Loads the instrument from the IDF
+ */
 void LoadILLSANS::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
+  if (m_resMode == "nominal") {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
-    loadInst->execute();
-  } catch (...) {
-    g_log.information("Cannot load the instrument definition.");
+  } else if (m_resMode == "low" && m_instrumentName == "D11") {
+    loadInst->setPropertyValue("Filename",
+                               getInstrumentFilePath(m_instrumentName + "lr"));
   }
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
+  loadInst->execute();
 }
 
 void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {

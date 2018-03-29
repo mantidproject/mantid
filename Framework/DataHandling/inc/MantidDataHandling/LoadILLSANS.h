@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadILLSANS; supports D11 (with 2 resolution modes), D22 and D33 (TOF/monochromatic)
+/** LoadILLSANS; supports D11, D22 and D33 (TOF/monochromatic)
 
  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -33,38 +33,14 @@ namespace DataHandling {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-struct DetectorPosition {
-  double distanceSampleRear;
-  double distanceSampleBottomTop;
-  double distanceSampleRightLeft;
-  double shiftLeft;
-  double shiftRight;
-  double shiftUp;
-  double shiftDown;
-};
-
-std::ostream &operator<<(std::ostream &strm, const DetectorPosition &p) {
-  return strm << "DetectorPosition : "
-              << "distanceSampleRear = " << p.distanceSampleRear << ", "
-              << "distanceSampleBottomTop = " << p.distanceSampleBottomTop
-              << ", "
-              << "distanceSampleRightLeft = " << p.distanceSampleRightLeft
-              << ", "
-              << "shiftLeft = " << p.shiftLeft << ", "
-              << "shiftRight = " << p.shiftRight << ", "
-              << "shiftUp = " << p.shiftUp << ", "
-              << "shiftDown = " << p.shiftDown << '\n';
-}
-
 class DLLExport LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLSANS();
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Loads a ILL nexus files for SANS instruments.";
+    return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
   }
-
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
     return {"LoadNexus"};
@@ -74,12 +50,33 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  struct DetectorPosition {
+    double distanceSampleRear;
+    double distanceSampleBottomTop;
+    double distanceSampleRightLeft;
+    double shiftLeft;
+    double shiftRight;
+    double shiftUp;
+    double shiftDown;
+    void operator>>(std::ostream &strm) {
+      strm << "DetectorPosition : "
+           << "distanceSampleRear = " << distanceSampleRear << ", "
+           << "distanceSampleBottomTop = " << distanceSampleBottomTop << ", "
+           << "distanceSampleRightLeft = " << distanceSampleRightLeft << ", "
+           << "shiftLeft = " << shiftLeft << ", "
+           << "shiftRight = " << shiftRight << ", "
+           << "shiftUp = " << shiftUp << ", "
+           << "shiftDown = " << shiftDown << '\n';
+    }
+  };
+
   void init() override;
   void exec() override;
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
   DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &,
                                           const std::string &);
 
+  void initWorkSpace(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(int, int);
 
@@ -99,6 +96,7 @@ private:
   void moveDetectorVertical(double, const std::string &);
   Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
+  std::string getInstrumentFilePath(const std::string &) const;
 
   LoadHelper m_loader;  
   std::string m_instrumentName; ///< Name of the instrument
