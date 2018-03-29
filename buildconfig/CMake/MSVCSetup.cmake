@@ -14,6 +14,8 @@ add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
 add_definitions ( -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
+  # Prevent deprecation errors from std::tr1 in googletest until it is fixed upstream. In MSVC 2017 and later
+add_definitions ( -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING )
 
 ##########################################################################
 # Additional compiler flags
