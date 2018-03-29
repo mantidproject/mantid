@@ -382,9 +382,11 @@ from converging. If the image is known to be real this property can be safely se
 
 Complex Data
 ------------
-If the input property "ComplexData* is set to *True*, the algorithm will assume complex data for the calculations. 
-Because the :math:`s` imaginary parts come after the :math:`s` real parts, workspaces with complex data cannot be combined by using
-the :ref:`algm-AppendSpectra` algorithm. The following usage example shows how to combine two workspaces with complex data.
+If the input property "ComplexData* is set to *True*, the algorithm will assume complex data for the calculations with all the
+real parts listed before all the imaginary parts. This means that if you have workspaces where the imaginary part immediately
+follow the real part, such workspaces cannot be combined by using the :ref:`algm-AppendSpectra` algorithm because the resulting
+output will not order the real and imaginary parts corrected as needed for this algorithm. The following usage example
+shows how to combine two workspaces with complex data.
 
 .. testcode:: ExComplexData
 
