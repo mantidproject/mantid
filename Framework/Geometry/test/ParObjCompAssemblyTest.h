@@ -107,7 +107,6 @@ public:
 
     TS_ASSERT_EQUALS(pcomp.type(), "ObjCompAssembly");
   }
-
   void testCreateOutlineCylinder() {
     std::stringstream obj_str;
     obj_str << "<cylinder id=\"stick\">";
