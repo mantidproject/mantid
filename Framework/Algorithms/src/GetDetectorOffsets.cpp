@@ -87,6 +87,13 @@ void GetDetectorOffsets::init() {
                   "If true, then a TableWorkspace containing all the fitted "
                   "parameters' values will be output with the name as "
                   "$OUTPUTWORKSPACE_FitResult");
+
+  declareProperty(
+      "MinimumPeakHeight", EMPTY_DBL(),
+      "If it is specified and FitEachPeakTwice is specified as true "
+      "then any spectrum having peak with height less this value in the "
+      "first-round "
+      "peak fitting will be masked.");
 }
 
 //-----------------------------------------------------------------------------------------
@@ -124,6 +131,7 @@ void GetDetectorOffsets::exec() {
 
   // fit each peak twice?
   bool fit_peak_twice = getProperty("FitEachPeakTwice");
+  double minimum_peak_height = getProperty("MinimumPeakHeight");
 
   // output fitting result?
   bool output_fit_result = getProperty("OutputFitResult");
@@ -144,18 +152,25 @@ void GetDetectorOffsets::exec() {
     g_log.notice() << "wi = " << wi << ": height = " << fit_result.height
                    << "\n";
 
-    if (fit_peak_twice && fit_result.sigma > 0.5 && fit_result.height > 1.E-1) {
-      double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
-      double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
-      g_log.debug() << "[DB...BAT] ws-index " << wi
-                    << " found: center = " << fit_result.center
-                    << ", FHWM = " << fit_result.sigma
-                    << "; new fit range: " << xmin << ", " << xmax << "\n";
-      offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result, true);
+    // fit peak for the second time
+    bool mask_it(false);
+    if (fit_peak_twice) {
+      offset =
+          fitPeakSecondTime(wi, isAbsolute, minimum_peak_height, fit_result);
+      if (offset <= 0.) {
+        mask_it = true;
+        if (offset < -1.9)
+          g_log.information() << "ws-index " << wi << " has NaN.";
+        else
+          g_log.information() << "ws-index " << wi
+                              << " has either too-low peak ("
+                              << fit_result.height << ") or too-narrow peak ("
+                              << fit_result.sigma << ")\n";
+      }
     }
 
     double mask = 0.0;
-    if (std::abs(offset) > m_maxOffset) {
+    if (mask_it || std::abs(offset) > m_maxOffset) {
       offset = 0.0;
       mask = 1.0;
     }
@@ -221,6 +236,59 @@ void GetDetectorOffsets::exec() {
         "information for each spectrum. ");
     setProperty("PeakFitResultTableWorkspace", fit_result_table);
   }
+}
+
+/** Fit the peak for the second time
+ * @brief GetDetectorOffsets::fitPeakSecondTime
+ * @param wi
+ * @param isAbsolute
+ * @param minimum_peak_height
+ * @param fit_result
+ * @return
+ */
+double GetDetectorOffsets::fitPeakSecondTime(
+    size_t wi, const bool isAbsolute, const double minimum_peak_height,
+    GetDetectorsOffset::PeakLinearFunction &fit_result) {
+  // check y
+  double offset(-1);
+  bool mask_it = false;
+
+  if (minimum_peak_height != EMPTY_DBL() &&
+      fit_result.height < minimum_peak_height) {
+    // doesn't meet the minumum peak height requirement
+    mask_it = true;
+  } else if (fit_result.sigma < 0.5) {
+    // doesn't meet the minimum peak sigma
+    mask_it = true;
+  }
+
+  if (mask_it)
+    return offset;
+
+  // also check whether there is any nan in vector Y
+  auto vec_y = inputW->histogram(wi).y();
+  for (auto iter : vec_y) {
+    if (isnan(iter)) {
+      mask_it = true;
+      break;
+    }
+  }
+  if (mask_it) {
+    // set offset to -2 to indicate it is an array with NaN in Y value
+    offset = -2;
+    return offset;
+  }
+
+  // fit second time!
+  double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
+  double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
+  g_log.debug() << "[DB...BAT] ws-index " << wi
+                << " found: center = " << fit_result.center
+                << ", FHWM = " << fit_result.sigma
+                << "; new fit range: " << xmin << ", " << xmax << "\n";
+  offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result, true);
+
+  return offset;
 }
 
 //-----------------------------------------------------------------------------------------

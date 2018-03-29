@@ -73,6 +73,10 @@ private:
                     const double xmax,
                     GetDetectorsOffset::PeakLinearFunction &fit_result,
                     bool use_fit_result);
+
+  double fitPeakSecondTime(size_t wi, const bool isAbsolute,
+                           const double minimum_peak_height,
+                           GetDetectorsOffset::PeakLinearFunction &fit_result);
   /// Create a function string from the given parameters and the algorithm
   /// inputs
   API::IFunction_sptr createFunction(const double peakHeight,
