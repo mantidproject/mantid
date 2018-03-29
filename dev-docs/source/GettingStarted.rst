@@ -58,12 +58,10 @@ OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
 
-Checking out the Mantid code
+Getting the Mantid code
 ############################
 We use `Git`_ as our version control system (VCS). The master copies of our repositories are located at `GitHub <http://github.com/mantidproject>`_. We have a number of repositories, of which the main one (the one containing all the source code for Mantid itself) is called simply `mantid <http://github.com/mantidproject/mantid>`_.
 
-Cloning the repository
-----------------------
 If you are not already set up with Git, you can follow these `instructions <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_.
 
 If you are at RAL then please run the following commands before cloning the repository:
