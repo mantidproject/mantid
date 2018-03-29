@@ -648,6 +648,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
     def _bkgDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform background diagnostics."""
+        if self.getProperty(common.PROP_EPP_WS).isDefault:
+            # With the AUTO option validateInputs might let missing EPPWorkspace pass.
+            raise RuntimeError('Missing ' + common.PROP_EPP_WS + '. Elastic peak positions are needed for background diagnostics.')
         eppWS = self.getProperty(common.PROP_EPP_WS).value
         sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
         integratedBkgs = _integrateBkgs(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
@@ -725,6 +728,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
     def _peakDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform elastic peak diagnostics."""
+        if self.getProperty(common.PROP_EPP_WS).isDefault:
+            # With the AUTO option validateInputs might let missing EPPWorkspace pass.
+            raise RuntimeError('Missing ' + common.PROP_EPP_WS + '. Elastic peak positions are needed for peak diagnostics.')
         eppWS = self.getProperty(common.PROP_EPP_WS).value
         sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
         integratedPeaksWS = _integrateElasticPeaks(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
