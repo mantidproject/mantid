@@ -43,7 +43,7 @@ class DLLExport LoadSampleShape
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "LoadShape"; };
+  const std::string name() const override { return "LoadSampleShape"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "The algorithm loads a shape into the instrument of a workspace "
