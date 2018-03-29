@@ -20,7 +20,7 @@ Account Creation
 - Sign up for the **Mantid Slack** channel; follow `this link <https://mantid.slack.com/>`_.
 - If you don't already have one, sign up for a **Github** account; follow `this link <https://github.com/>`_.
 	+ Remember that your username should be easily identifiable.
-	+ Contact one of the "Owners" on `this list <https://github.com/orgs/mantidproject/people>`_ to add you to the developer team.
+	+ Contact one of the "Owners" on `this list <https://github.com/orgs/mantidproject/people?query=role%3Aowner>`_ to add you to the developer team.
 	+ Set up Git on your workstation; see `this guide <https://help.github.com/articles/set-up-git/>`_.
 	+ The Git workflow is described on the :ref:`dev-docs-git-workflow` page.
 
@@ -60,4 +60,4 @@ These are notes for account admins on how to add new users.
     + User will be sent an email to verify.
 
 - **Github**
-	- Add the username provided to the mantid-developers team at `https://github.com/organizations/mantidproject/teams <https://github.com/organizations/mantidproject/teams>`_ Jenkins.
+	- Add the username provided to the mantid-developers team at `https://github.com/organizations/mantidproject/teams <https://github.com/organizations/mantidproject/teams>`_.
