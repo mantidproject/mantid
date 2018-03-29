@@ -149,8 +149,6 @@ void GetDetectorOffsets::exec() {
     GetDetectorsOffset::PeakLinearFunction fit_result;
     double offset =
         fitSpectra(wi, isAbsolute, m_Xmin, m_Xmax, fit_result, false);
-    g_log.notice() << "wi = " << wi << ": height = " << fit_result.height
-                   << "\n";
 
     // fit peak for the second time
     bool mask_it(false);
@@ -159,15 +157,13 @@ void GetDetectorOffsets::exec() {
                                          fit_result, mask_it);
       if (mask_it) {
         if (offset2 < -1.9)
-          g_log.notice() << "ws-index " << wi << " has NaN.";
+          g_log.debug() << "ws-index " << wi << " has NaN.";
         else
-          g_log.notice() << "ws-index " << wi << " has either too-low peak ("
-                         << fit_result.height << ") or too-narrow peak ("
-                         << fit_result.sigma << ")\n";
+          g_log.debug() << "ws-index " << wi << " has either too-low peak ("
+                        << fit_result.height << ") or too-narrow peak ("
+                        << fit_result.sigma << ")\n";
       }
 
-      g_log.notice() << "[DB...BAT] ws-index " << wi << ": Offset = " << offset
-                     << "... Offset2 = " << offset2 << "\n";
       offset = offset2;
     }
 
@@ -295,8 +291,6 @@ double GetDetectorOffsets::fitPeakSecondTime(
                 << ", FHWM = " << fit_result.sigma
                 << "; new fit range: " << xmin << ", " << xmax << "\n";
   offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result, true);
-  g_log.notice() << "[DB...BAT] ws-index " << wi << " 2nd-offset = " << offset
-                 << "\n";
 
   return offset;
 }
@@ -387,8 +381,7 @@ double GetDetectorOffsets::fitSpectra(
       dbss << param_names[i] << "(" << i << "): " << function->getParameter(i)
            << "\n";
     }
-    g_log.notice(dbss.str());
-    g_log.notice(fit_alg->asString());
+    g_log.debug(dbss.str());
   }
 
   // get fitted result
@@ -401,10 +394,6 @@ double GetDetectorOffsets::fitSpectra(
 
   double offset =
       -1. * peak_center * m_step / (m_dreference + peak_center * m_step);
-  if (use_fit_result) {
-    g_log.notice() << "[DB...BAT] Peak center = " << peak_center
-                   << ", step = " << m_step << ": offset = " << offset << "\n";
-  }
   // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
   // negative
 
@@ -416,11 +405,15 @@ double GetDetectorOffsets::fitSpectra(
   return offset;
 }
 
-/**
- * Create a function string from the given parameters and the algorithm inputs
- * @param peakHeight :: The height of the peak
- * @param peakLoc :: The location of the peak
- * @param peakSigma ::
+//-----------------------------------------------------------------------------------------
+/** Create a function string from the given parameters and the algorithm inputs
+ * @brief GetDetectorOffsets::createFunction
+ * @param peakHeight
+ * @param peakLoc
+ * @param peakSigma
+ * @param a0
+ * @param a1
+ * @return
  */
 IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
                                                   const double peakLoc,
