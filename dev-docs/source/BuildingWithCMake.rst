@@ -67,8 +67,8 @@ So some examples of commands we might use are:
   scl enable mantidlibs34 'cmake -G"Ninja" /path/to/Mantid'
   scl enable mantidlibs34 'ninja -j10'
 
-From the command line ...
--------------------------
+From the command line
+---------------------
 
 * If wanting an out of source build, create the directory you want to build in and ``cd`` into it.
 * On Windows, you may need to be in a Visual Studio Command Prompt.
@@ -77,8 +77,8 @@ From the command line ...
 * If you want to set the build type (e.g. Release, Debug) you can run cmake with the ``-i`` option or by passing the argument ``-DCMAKE_BUILD_TYPE=Debug`` to cmake. The default is Release.
 * Please note that the executable is called ``cmake3`` on Red Hat 7 / CentOS7.
 
-From the CMake gui ...
-----------------------
+From the CMake gui
+------------------
 
 * The cmake gui is available from, e.g., the Windows Program menu or the command line executable ``cmake-gui``.
 * Start it and click the "Browse Source" button to point to ``/path/to/Mantid``, or to ``/path/to/Mantid/Framework`` if you only want a build of the Framework (typically not recommended, but possible nonetheless).
@@ -95,8 +95,8 @@ Data Files Location
 
 Mantid used the CMake ExternalData system for managing testing data. See :ref:`DataFilesForTesting` for further instructions.
 
-With Qt Creator ...
--------------------
+With Qt Creator
+---------------
 
 `Qt Creator <http://qt.nokia.com/products/developer-tools/>`_ has some really nice features (it's cross-platform, you can directly open Qt Designer within it, you can highlight a Qt type and go directly to it's help page, it knows about Qt types when debugging....).
 The nice feature in this context is that it has CMake support built in. So you can just open the project by pointing to the main CMakeLists file and then run CMake all within the IDE itself.
