@@ -163,8 +163,7 @@ void LoadSampleShape::init() {
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
-                  "The name of the workspace that provides the"
-                  "sample whose shape is being loaded");
+                  "The name of the workspace that will contain the loaded shape of the sample");
 }
 
 /**
