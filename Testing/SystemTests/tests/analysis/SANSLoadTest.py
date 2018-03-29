@@ -50,7 +50,7 @@ class SANSLoadFactoryTest(unittest.TestCase):
         # Arrange
         load_factory = SANSLoadDataFactory()
         file_information_factory = SANSFileInformationFactory()
-        
+
         ws_name_sample = "SANS2D00022024"
         file_information = file_information_factory.create_sans_file_information(ws_name_sample)
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
@@ -82,7 +82,7 @@ class SANSLoadTest(unittest.TestCase):
                           can_scatter_period=None, can_trans_period=None, can_direct_period=None):
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information(sample_scatter)
-        
+
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter(sample_scatter)
 
