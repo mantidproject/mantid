@@ -328,6 +328,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
 
+        # FIXME TODO NOW3
+        # Add: self.ui.action2theta_Sigma ...
+        #      will pop out a general figure plot window... general1dviewer.ui
+
         # Validator ... (NEXT)
 
         # Declaration of class variable
@@ -2193,6 +2197,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    # TODO NOW3 - It works?
     def process_single_pt_scan_intensity(self, scan_pt_list):
         """
         process integrated single pt scan
@@ -2205,8 +2210,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # get intensities
         for scan_number, pt_number in scan_pt_list:
+            # self._single_pt_scan_intensity_dict: not been defined and used at all!
             intensity = self._single_pt_scan_intensity_dict[scan_number, pt_number]
-            self.add_single_pt_scan(scan_number, pt_number, intensity)
+            self.add_single_pt_scan(scan_number, pt_number, intensity)  # implement add_signal_pt_scan!
         # END-FOR
 
         return

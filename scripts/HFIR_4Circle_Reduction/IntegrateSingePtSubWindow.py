@@ -187,7 +187,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    # TEST FIXME NOW2
+    # TEST FIXME NOW3 - New feature!
     def do_retrieve_fwhm(self):
         """
         Get FWHM from integrated 'STRONG' peaks according to 2theta value
@@ -200,38 +200,47 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             if fwhm_i is not None and fwhm_i > 1.E-10:
                 continue
 
-            # get corresponding strong nuclear peak (complete scan number)
-            ref_scans = self.ui.tableView_summary.get_reference_scans(row_index)
-            if ref_scans is None:
-                # get scan number
-                scan_number = self.ui.tableView_summary.get_scan_number(row_index)
-                # get 2theta and set 2theta
-                two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, 1,
-                                                                  '2theta')
+            # use interpolation to curve
+            two_theta = self.ui.tableView_summary.get_two_theta(row_index)
+            # TODO NOW3 - Implement  calculate_peak_integration_sigma
+            status, ret_obj = self._controller.calculate_peak_integration_sigma(two_theta)   # need to set the controller PeakIntegrateWhatEver too!
 
-                # locate reference scan number
-                # TODO NOW3 consider to use interpolation to curve!
-                complete_peak_scan_numbers = self._controller.find_scans_by_2theta(self._exp_number,
-                                                                                   two_theta, resolution=0.05,
-                                                                                   excluded_scans=[scan_number])
+            # TODO NOW3 Implement
+            self.ui.tableView_summary.set_gaussian_sigma(whatever)
 
-                if len(complete_peak_scan_numbers) == 0:
-                    # no match.  stop!
-                    self.ui.tableView_summary.set_reference_scan_numbers(row_index, 'No match')
-                    continue
-                else:
-                    self.ui.tableView_summary.set_reference_scan_numbers(row_index, complete_peak_scan_numbers)
-                    reference_scan_number = complete_peak_scan_numbers[0]
-                # END-IF
-            else:
-                reference_scan_number = ref_scans[0]
-            # END-IF
-
-            # get integrated scan's FWHM
-            peak_info = \
-                self._controller.get_peak_info(self._exp_number, reference_scan_number)
-            if peak_info is not None and peak_info.gaussian_fwhm is not None:
-                self.ui.tableView_summary.set_fwhm(row_index, peak_info.gaussian_fwhm)
+            # The following will be deleted!
+            # # get corresponding strong nuclear peak (complete scan number)
+            # ref_scans = self.ui.tableView_summary.get_reference_scans(row_index)
+            # if ref_scans is None:
+            #     # get scan number
+            #     scan_number = self.ui.tableView_summary.get_scan_number(row_index)
+            #     # get 2theta and set 2theta
+            #     two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, 1,
+            #                                                       '2theta')
+            #
+            #     # locate reference scan number
+            #     # TODO NOW3 consider to use interpolation to curve!
+            #     complete_peak_scan_numbers = self._controller.find_scans_by_2theta(self._exp_number,
+            #                                                                        two_theta, resolution=0.05,
+            #                                                                        excluded_scans=[scan_number])
+            #
+            #     if len(complete_peak_scan_numbers) == 0:
+            #         # no match.  stop!
+            #         self.ui.tableView_summary.set_reference_scan_numbers(row_index, 'No match')
+            #         continue
+            #     else:
+            #         self.ui.tableView_summary.set_reference_scan_numbers(row_index, complete_peak_scan_numbers)
+            #         reference_scan_number = complete_peak_scan_numbers[0]
+            #     # END-IF
+            # else:
+            #     reference_scan_number = ref_scans[0]
+            # # END-IF
+            #
+            # # get integrated scan's FWHM
+            # peak_info = \
+            #     self._controller.get_peak_info(self._exp_number, reference_scan_number)
+            # if peak_info is not None and peak_info.gaussian_fwhm is not None:
+            #     self.ui.tableView_summary.set_fwhm(row_index, peak_info.gaussian_fwhm)
         # END-FOR
 
         return

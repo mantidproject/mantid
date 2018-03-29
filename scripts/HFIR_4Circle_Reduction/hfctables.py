@@ -1440,6 +1440,10 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         """
         return self._pt_row_dict.keys()
 
+    def get_two_theta(self):
+        # TODO NOW3
+        return None
+
     def save_intensities_to_file(self, out_file_name):
         """
         blabla

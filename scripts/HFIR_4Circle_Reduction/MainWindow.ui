@@ -213,7 +213,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -5617,7 +5617,14 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>Peak Integration</string>
     </property>
+    <widget class="QMenu" name="menuPlots">
+     <property name="title">
+      <string>Plots</string>
+     </property>
+     <addaction name="action2theta_Sigma"/>
+    </widget>
     <addaction name="actionSingle_Pt_Integration"/>
+    <addaction name="menuPlots"/>
    </widget>
    <widget class="QMenu" name="menuTables">
     <property name="title">
@@ -5764,6 +5771,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionSort_By_2Theta">
    <property name="text">
     <string>Sort By 2Theta</string>
+   </property>
+  </action>
+  <action name="action2theta_Sigma">
+   <property name="text">
+    <string>2theta-Sigma</string>
    </property>
   </action>
  </widget>

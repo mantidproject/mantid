@@ -969,7 +969,7 @@ class CWSCDReductionControl(object):
 
         return out_file_name
 
-    # TEST NOW2
+    # TEST NOW3 New!
     def find_scans_by_2theta(self, exp_number, two_theta, resolution, excluded_scans):
         """
         find scans by 2theta (same or similar)
