@@ -136,7 +136,7 @@ public:
         param->value<FitParameter>();
 
     // Info about fitting parameter is in string value, see FitParameter class
-    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    using tokenizer = Mantid::Kernel::StringTokenizer;
     tokenizer values(value, ",", tokenizer::TOK_TRIM);
     TS_ASSERT_EQUALS(fitParam.getFormula(), values[7]);
     TS_ASSERT_EQUALS(fitParam.getFunction(), values[1]);

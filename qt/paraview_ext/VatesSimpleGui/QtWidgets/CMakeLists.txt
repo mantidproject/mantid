@@ -51,6 +51,8 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/Libraries
     @loader_path/../../Contents/MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR}"
 )
 
 # Set the name of the generated library

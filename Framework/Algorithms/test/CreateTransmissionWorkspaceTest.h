@@ -10,7 +10,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
-#include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -22,7 +21,6 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
 using namespace WorkspaceCreationHelper;
 
 class CreateTransmissionWorkspaceTest : public CxxTest::TestSuite {

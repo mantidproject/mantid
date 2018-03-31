@@ -58,7 +58,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
   // This is currenly the case for algorithms that take an array of strings as
   // an input where each entry is the name of a workspace.
   if (this->useCustomWorkspaceProperty()) {
-    typedef std::vector<std::string> WorkspaceNameType;
+    using WorkspaceNameType = std::vector<std::string>;
 
     // Perform a check that the input property is the correct type.
     Property *inputProperty =
@@ -85,7 +85,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
                                         vecWorkspaceGroups);
     }
   } else {
-    typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
+    using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
     WorkspaceVector inWorkspaces;
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);

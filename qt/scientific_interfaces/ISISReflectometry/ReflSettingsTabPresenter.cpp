@@ -51,14 +51,32 @@ void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
     presenter->setInstrumentName(instName);
 }
 
+void ReflSettingsTabPresenter::onReductionResumed(int group) {
+  m_settingsPresenters[group]->onReductionResumed();
+}
+
+void ReflSettingsTabPresenter::onReductionPaused(int group) {
+  m_settingsPresenters[group]->onReductionPaused();
+}
+
 /** Returns values passed for 'Transmission run(s)'
 *
 * @param group :: The group from which to get the values
+* @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-std::string ReflSettingsTabPresenter::getTransmissionRuns(int group) const {
+OptionsQMap
+ReflSettingsTabPresenter::getOptionsForAngle(int group,
+                                             const double angle) const {
 
-  return m_settingsPresenters.at(group)->getTransmissionRuns();
+  return m_settingsPresenters.at(group)->getOptionsForAngle(angle);
+}
+
+/** Check whether per-angle transmission runs are specified
+ * @return :: true if per-angle transmission runs are specified
+ */
+bool ReflSettingsTabPresenter::hasPerAngleOptions(int group) const {
+  return m_settingsPresenters.at(group)->hasPerAngleOptions();
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'

@@ -32,6 +32,7 @@ set ( TEST_FILES
   test/ALCPeakFittingPresenterTest.h
   test/EnggDiffGSASFittingModelTest.h
   test/EnggDiffGSASFittingPresenterTest.h
+  test/EnggDiffMultiRunFittingWidgetModelTest.h
   test/EnggDiffMultiRunFittingWidgetPresenterTest.h
   test/EnggDiffFittingModelTest.h
   test/EnggDiffFittingPresenterTest.h
@@ -68,6 +69,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     inc
   TEST_HELPER_SRCS
     ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
     ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../Framework/TestHelpers/src/ScopedFileHelper.cpp

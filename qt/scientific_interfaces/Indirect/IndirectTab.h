@@ -139,14 +139,14 @@ protected:
 
   /// Extracts a map of column name to value in the specified spectra from the
   /// specified table workspace
-  QMap<QString, double>
+  QHash<QString, double>
   extractRowFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
-                      size_t wsIndex);
+                      const QSet<QString> &columnsToExtract, size_t wsIndex);
 
   /// Extracts the specified columns from the table workspace with the specified
   /// name, storing them in a map of row index to a map of column name to cell
   /// value.
-  QHash<QString, QHash<size_t, double>>
+  QHash<size_t, QHash<QString, double>>
   extractParametersFromTable(const std::string &tableWsName,
                              const QSet<QString> &columnsToExtract,
                              size_t minSpectrum, size_t maxSpectrum);
@@ -154,7 +154,7 @@ protected:
   /// Extracts the specified columns from the table workspace with the specified
   /// name, storing them in a map of row index to a map of column name to cell
   /// value.
-  QHash<QString, QHash<size_t, double>>
+  QHash<size_t, QHash<QString, double>>
   extractParametersFromTable(const std::string &tableWsName,
                              const QSet<QString> &columnsToExtract,
                              const std::vector<size_t> &spectraIndices);
@@ -162,18 +162,10 @@ protected:
   /// Extracts the specified columns from the specified table workspace,
   /// storing them in a map of row index to a map of column name to cell
   /// value.
-  QHash<QString, QHash<size_t, double>>
+  QHash<size_t, QHash<QString, double>>
   extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
                              const QSet<QString> &columnsToExtract,
                              const std::vector<size_t> &spectraIndices);
-
-  /// Extracts the column with the specified name from the specified
-  /// table workspace, storing it in a map from spectrum index to cell
-  /// value.
-  QHash<size_t, double>
-  extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
-                         const std::string &columnName,
-                         const std::vector<size_t> &spectraIndices);
 
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.

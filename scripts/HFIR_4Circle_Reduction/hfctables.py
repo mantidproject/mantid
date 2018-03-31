@@ -106,7 +106,10 @@ class MatrixTable(tableBase.NTableWidget):
 
         # think of reset
         if self.rowCount() != num_rows or self.columnCount() != num_cols:
-            raise RuntimeError('ASAP')
+            errmsg = 'Number of rows to set {0} is not equal to current number of rows {1} or ' \
+                     'Number of columns to set {2} is not equal to current number of columns {3}' \
+                     ''.format(self.rowCount(), num_rows, self.columnCount(), num_cols)
+            raise RuntimeError(errmsg)
 
         return
 
@@ -899,8 +902,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
     TableSetup = [('Scan', 'int'),
                   ('Status', 'str'),
                   ('Intensity', 'float'),
-                  ('Corrected', 'float'),  # Lorenzian corrected
-                  ('Error', 'float'),
+                  ('F2', 'float'),  # Lorenzian corrected
+                  ('F2 Error', 'float'),
                   ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
                   ('Mask', 'str'),  # '' for no mask
                   ('HKL', 'str'),
@@ -909,6 +912,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Wavelength', 'float'),
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
+
+    """
+    in scans processing tab, the column name of corrected will be changed to 'F2;'Error' will be modified to 'F2 Error'
+In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
+    """
 
     def __init__(self, parent):
         """
@@ -1357,7 +1365,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # set up column index
         self._colIndexScan = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
         self._colIndexIntensity = self.TableSetup.index(('Intensity', 'float'))
-        self._colIndexCorrInt = self.TableSetup.index(('Corrected', 'float'))
+        self._colIndexCorrInt = self.TableSetup.index(('F2', 'float'))
+        self._colIndexErrorBar = self.TableSetup.index(('F2 Error', 'float'))
         self._colIndexMask = self.TableSetup.index(('Mask', 'str'))
         self._colIndexIntType = self.TableSetup.index(('Integrate', 'str'))
         self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
@@ -1368,7 +1377,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))
         self._colIndexWaveLength = self.TableSetup.index(('Wavelength', 'float'))
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
-        self._colIndexErrorBar = self.TableSetup.index(('Error', 'float'))
         # self._colIndexWorkspace = self.TableSetup.index(('Workspace', 'str'))
 
         return

@@ -12,7 +12,7 @@ namespace Geometry {
 
 /**
   Models a Container is used to hold a sample in the beam. It gets most
-  of its functionality from Geometry::Object but can also hold a
+  of its functionality from wrapped Geometry::IObject but can also hold a
   definition of what the sample geometry itself would be. If the sample shape
   definition is set then we term this a constriained sample geometry.
 
@@ -39,7 +39,7 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL Container final : public IObject {
 public:
-  typedef std::unordered_map<std::string, double> ShapeArgs;
+  using ShapeArgs = std::unordered_map<std::string, double>;
 
   Container();
   Container(IObject_sptr shape);
@@ -62,13 +62,14 @@ public:
     return m_shape->calcValidType(Pt, uVec);
   }
   bool hasValidShape() const override { return m_shape->hasValidShape(); }
-  int setObject(const int ON, const std::string &Ln) override {
-    return m_shape->setObject(ON, Ln);
-  }
+
   IObject *clone() const override { return new Container(*this); }
 
+  IObject *cloneWithMaterial(const Kernel::Material &material) const override {
+    return m_shape->cloneWithMaterial(material);
+  }
+
   int getName() const override { return m_shape->getName(); }
-  void setName(const int nx) override { m_shape->setName(nx); }
 
   int interceptSurface(Geometry::Track &t) const override {
     return m_shape->interceptSurface(t);
@@ -102,34 +103,22 @@ public:
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
-  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const override {
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const override {
     m_shape->GetObjectGeom(type, vectors, myradius, myheight);
   }
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() override {
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();
   }
 
-  std::string getShapeXML() const override { return m_shape->getShapeXML(); }
-
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
-  void setVtkGeometryCacheReader(
-      boost::shared_ptr<vtkGeometryCacheReader> reader) override {
-    m_shape->setVtkGeometryCacheReader(reader);
-  }
-  void setVtkGeometryCacheWriter(
-      boost::shared_ptr<vtkGeometryCacheWriter> writer) override {
-    m_shape->setVtkGeometryCacheWriter(writer);
-  }
 
-  void setMaterial(const Kernel::Material &material) override {
-    m_shape->setMaterial(material);
-  }
   const Kernel::Material material() const override {
     return m_shape->material();
   }
-  void setID(const std::string &id) override { m_shape->setID(id); }
+  void setID(const std::string &id);
   const std::string &id() const override { return m_shape->id(); }
 
 private:
@@ -138,9 +127,9 @@ private:
 };
 
 /// Typdef for a shared pointer
-typedef boost::shared_ptr<Container> Container_sptr;
+using Container_sptr = boost::shared_ptr<Container>;
 /// Typdef for a shared pointer to a const object
-typedef boost::shared_ptr<const Container> Container_const_sptr;
+using Container_const_sptr = boost::shared_ptr<const Container>;
 
 } // namespace Geometry
 } // namespace Mantid

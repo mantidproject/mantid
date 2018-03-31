@@ -14,6 +14,7 @@ class FFTPresenter(object):
         self.view=view
         self.alg=alg
         self.load=load
+        self.thread = None
         # set data
         self.getWorkspaceNames()
         #connect
@@ -53,6 +54,9 @@ class FFTPresenter(object):
     # then executes them (see fft_model to see the order
     # of execution
     def handleButton(self):
+        if self.load.hasDataChanged():
+            self.getWorkspaceNames()
+            return
         # put this on its own thread so not to freeze Mantid
         self.thread=self.createThread()
         self.thread.started.connect(self.deactivate)
@@ -98,9 +102,12 @@ class FFTPresenter(object):
             if self.view.isRaw():
                 self.view.addRaw(FFTInputs,"OutputWorkspace")
         inputs["FFT"]=FFTInputs
-        self.thread.loadData(inputs)
-        self.thread.start()
-        self.view.setPhaseBox()
+        try:
+            self.thread.loadData(inputs)
+            self.thread.start()
+            self.view.setPhaseBox()
+        except:
+            pass
 
     # kills the thread at end of execution
     def handleFinished(self):

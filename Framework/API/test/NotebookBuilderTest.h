@@ -211,7 +211,7 @@ public:
 
   void test_Build_Unrolled() {
     std::string result_markdown =
-        "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+        R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
@@ -254,7 +254,7 @@ public:
 
   void test_Partially_Unrolled() {
     std::string result_markdown =
-        "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+        R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 

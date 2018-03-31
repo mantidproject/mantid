@@ -78,7 +78,7 @@ template <typename ElementType>
 class DLLExport TypedValidator<boost::shared_ptr<ElementType>>
     : public IValidator {
   /// Shared ptr type
-  typedef boost::shared_ptr<ElementType> ElementType_sptr;
+  using ElementType_sptr = boost::shared_ptr<ElementType>;
 
 protected:
   /// Override this function to check the validity of the type

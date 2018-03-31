@@ -102,7 +102,7 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
   }
 }
 
-typedef std::vector<double> VecDouble;
+using VecDouble = std::vector<double>;
 }
 
 namespace Mantid {

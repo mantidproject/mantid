@@ -495,7 +495,7 @@ void MantidEV::setDefaultState_slot() {
  */
 void MantidEV::help_slot() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("SCD Event Data Reduction"));
+      nullptr, QString("SCD Event Data Reduction"));
 }
 
 /**

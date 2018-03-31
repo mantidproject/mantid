@@ -378,7 +378,7 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   vecY.clear();
 
   // Go through all events to find out their positions
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
 
   bool scancell = true;
   size_t nextindex = 1;
@@ -429,8 +429,6 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
       scancell = false;
     }
   } // ENDOF(while)
-
-  delete (mditer);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -502,7 +500,7 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
+  outws->setHistogram(0, Points(vecX), Counts(vecY));
   auto &dataE = outws->mutableE(0);
   std::replace_if(dataE.begin(), dataE.end(),
                   [](double val) { return val < 1.0; }, 1.0);

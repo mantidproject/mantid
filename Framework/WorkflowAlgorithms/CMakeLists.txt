@@ -29,7 +29,6 @@ set ( SRC_FILES
 	src/MuonProcess.cpp
 	src/MuonPairAsymmetryCalculator.cpp
 	src/ProcessIndirectFitParameters.cpp
-	src/RefReduction.cpp
 	src/RefRoi.cpp
 	src/SANSBeamFinder.cpp
 	src/SANSBeamFluxCorrection.cpp
@@ -76,7 +75,6 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/MuonProcess.h
 	inc/MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h
-	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
@@ -126,7 +124,9 @@ set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflow
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties(WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(WorkflowAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

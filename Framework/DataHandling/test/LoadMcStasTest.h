@@ -36,29 +36,13 @@ public:
   }
 
   void testExec() {
-    if (!algToBeTested.isInitialized())
-      algToBeTested.initialize();
-
     outputSpace = "LoadMcStasTest";
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
 
-    // Now set it...
-    // specify name of file to load workspace from
-    inputFile = "mcstas_event_hist.h5";
-    algToBeTested.setPropertyValue("Filename", inputFile);
-
-    // mark the temp file to be deleted upon end of execution
-    { // limit variable scope
-      std::string tempFile = algToBeTested.getPropertyValue("Filename");
-      tempFile = tempFile.substr(0, tempFile.size() - 2) + "vtp";
-      Poco::TemporaryFile::registerForDeletion(tempFile);
-    }
-
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
-    TS_ASSERT(algToBeTested.isExecuted());
+    load_test("mcstas_event_hist.h5", outputSpace);
 
     std::string postfix = "_" + outputSpace;
     //
@@ -71,12 +55,7 @@ public:
     MatrixWorkspace_sptr outputItem1 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "EventData" + postfix);
-    TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 8192);
-    auto sum_total = 0.0;
-    for (size_t i = 0; i < outputItem1->getNumberHistograms(); i++)
-      sum_total += outputItem1->y(i)[0];
-    sum_total *= 1.0e22;
-    TS_ASSERT_DELTA(sum_total, 107163.7851, 0.0001);
+    const auto sum_total = extractSumAndTest(outputItem1, 107163.7851);
     //
     //
     MatrixWorkspace_sptr outputItem2 =
@@ -109,29 +88,63 @@ public:
     MatrixWorkspace_sptr outputItem6 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "k01_events_dat_list_p_x_y_n_id_t" + postfix);
-    TS_ASSERT_EQUALS(outputItem6->getNumberHistograms(), 8192);
-    auto sum_single = 0.0;
-    for (size_t i = 0; i < outputItem6->getNumberHistograms(); i++)
-      sum_single += outputItem6->y(i)[0];
-    sum_single *= 1.0e22;
-    TS_ASSERT_DELTA(sum_single, 107141.3295, 0.0001);
+    const auto sum_single = extractSumAndTest(outputItem6, 107141.3295);
     //
     //
     MatrixWorkspace_sptr outputItem7 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "k02_events_dat_list_p_x_y_n_id_t" + postfix);
-    TS_ASSERT_EQUALS(outputItem7->getNumberHistograms(), 8192);
-    auto sum_multiple = 0.0;
-    for (size_t i = 0; i < outputItem7->getNumberHistograms(); i++)
-      sum_multiple += outputItem7->y(i)[0];
-    sum_multiple *= 1.0e22;
-    TS_ASSERT_DELTA(sum_multiple, 22.4558, 0.0001);
+    const auto sum_multiple = extractSumAndTest(outputItem7, 22.4558);
 
     TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
+  }
 
-  } // testExec()
+  void testLoadMultiple() {
+    outputSpace = "LoadMcStasTest";
+    algToBeTested.setProperty("OutputWorkspace", outputSpace);
+    auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
+    TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
+    outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
+    TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 3);
+  }
+
+  void testLoadTwice() {
+    outputSpace = "LoadMcStasTest";
+    algToBeTested.setProperty("OutputWorkspace", outputSpace);
+    load_test("mccode_contains_one_bank.h5", outputSpace);
+    auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
+    TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
+  }
 
 private:
+  double extractSumAndTest(MatrixWorkspace_sptr workspace,
+                           const double &expectedSum) {
+    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 8192);
+    auto sum = 0.0;
+    for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
+      sum += workspace->y(i)[0];
+    sum *= 1.0e22;
+    TS_ASSERT_DELTA(sum, expectedSum, 0.0001);
+    return sum;
+  }
+  boost::shared_ptr<WorkspaceGroup> load_test(std::string fileName,
+                                              std::string outputName) {
+
+    // specify name of file to load workspace from
+    algToBeTested.setProperty("Filename", fileName);
+
+    // mark the temp file to be deleted upon end of execution
+    { // limit variable scope
+      std::string tempFile = algToBeTested.getPropertyValue("Filename");
+      tempFile = tempFile.substr(0, tempFile.size() - 2) + "vtp";
+      Poco::TemporaryFile::registerForDeletion(tempFile);
+    }
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    auto outputGroup(
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputName));
+    return outputGroup;
+  }
+
   LoadMcStas algToBeTested;
   std::string inputFile;
   std::string outputSpace;

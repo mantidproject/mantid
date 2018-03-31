@@ -83,7 +83,7 @@ protected:
   virtual std::string guessJobSubmissionAppName(const std::string &runnablePath,
                                                 const std::string &jobOptions);
 
-  typedef std::map<std::string, std::string> StringToStringMap;
+  using StringToStringMap = std::map<std::string, std::string>;
 
   /// method that deals with the actual HTTP(S) connection (convenient to
   /// mock up all inet messaging)
@@ -114,7 +114,7 @@ protected:
     std::string m_token_str;
   };
 
-  typedef std::pair<std::string, Token> UsernameToken;
+  using UsernameToken = std::pair<std::string, Token>;
 
   // store for username-token pairs
   static std::map<std::string, Token> g_tokenStash;

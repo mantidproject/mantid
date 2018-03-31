@@ -252,7 +252,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     workspace->setInstrument(instrument);
 
     std::string xmlShape = "<sphere id=\"shape\"> ";
-    xmlShape += "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> ";
+    xmlShape += R"(<centre x="0.0"  y="0.0" z="0.0" /> )";
     xmlShape += "<radius val=\"0.05\" /> ";
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape\" /> ";

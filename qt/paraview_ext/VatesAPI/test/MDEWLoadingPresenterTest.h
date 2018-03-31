@@ -33,7 +33,7 @@ private:
   */
   class ConcreteMDEWLoadingPresenter : public MDEWLoadingPresenter {
   private:
-    typedef MDEWLoadingPresenter BaseClass;
+    using BaseClass = MDEWLoadingPresenter;
 
   public:
     void

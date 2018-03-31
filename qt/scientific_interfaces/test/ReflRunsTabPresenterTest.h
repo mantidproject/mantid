@@ -336,13 +336,12 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
+    constexpr int GROUP_NUMBER = 0;
     // Expect that the main presenter is notified that data reduction is paused
-    EXPECT_CALL(
-        mockMainPresenter,
-        notify(IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag))
+    EXPECT_CALL(mockMainPresenter, notifyReductionPaused(GROUP_NUMBER))
         .Times(Exactly(1));
 
-    presenter.confirmReductionPaused();
+    presenter.confirmReductionPaused(GROUP_NUMBER);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -359,13 +358,12 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
+    auto GROUP_NUMBER = 0;
     // Expect that the main presenter is notified that data reduction is resumed
-    EXPECT_CALL(
-        mockMainPresenter,
-        notify(IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag))
+    EXPECT_CALL(mockMainPresenter, notifyReductionResumed(GROUP_NUMBER))
         .Times(Exactly(1));
 
-    presenter.confirmReductionResumed();
+    presenter.confirmReductionResumed(GROUP_NUMBER);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));

@@ -410,7 +410,7 @@ void StepScan::expandPlotVarCombobox(
     // Try to cast to an ITimeSeriesProperty
     auto tsp = dynamic_cast<const ITimeSeriesProperty *>(*log);
     // Move on to the next one if this is not a TSP
-    if (tsp == NULL)
+    if (tsp == nullptr)
       continue;
     // Don't keep ones with only one entry
     if (tsp->realSize() < 2)

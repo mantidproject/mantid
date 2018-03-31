@@ -26,7 +26,7 @@ private:
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
-typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;
+using MockWorkspace_sptr = boost::shared_ptr<MockWorkspace>;
 
 class ScopedWorkspaceTest : public CxxTest::TestSuite {
 public:

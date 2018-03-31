@@ -497,7 +497,9 @@ set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI
                                        COMPILE_DEFINITIONS IN_MANTID_API )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

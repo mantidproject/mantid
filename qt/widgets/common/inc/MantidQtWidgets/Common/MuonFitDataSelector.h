@@ -132,6 +132,7 @@ private:
   double m_endX;
   QStringList m_chosenGroups;
   QStringList m_chosenPeriods;
+  bool m_multiFit;
 
 private slots:
   /// Set normal cursor and enable input
