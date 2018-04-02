@@ -22,6 +22,36 @@ class HistogramY;
 
 namespace Algorithms {
 
+namespace FitPeaksAlgorithm {
+struct FitFunction {
+  API::IPeakFunction_sptr peakfunction;
+  API::IBackgroundFunction_sptr bkgdfunction;
+};
+
+class PeakFitResult {
+public:
+  PeakFitResult(size_t num_peaks, size_t num_params);
+  double getPeakPosition(size_t ipeak);
+  double getCost(size_t ipeak);
+  size_t getNumberParameters();
+  double getParameterValue(size_t ipeak, size_t iparam);
+  void setRecord(size_t ipeak, const double cost, const double peak_position,
+                 FitFunction fit_functions);
+  void setPosition(size_t ipeak, double position);
+  void setFunctionParameters(size_t ipeak, std::vector<double> &param_values);
+
+private:
+  /// number of function parameters
+  size_t function_parameters_number_;
+  // goodness of fitting
+  std::vector<double> costs;
+  // fitted peak positions
+  std::vector<double> fitted_peak_positions;
+  // fitted peak and background parameters
+  std::vector<std::vector<double>> function_parameters_vector;
+};
+}
+
 class DLLExport FitPeaks : public API::Algorithm {
 public:
   FitPeaks();
@@ -78,11 +108,13 @@ private:
   void fitPeaks();
 
   /// fit peaks in a same spectrum
-  void
-  fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
-                   std::vector<double> &fitted_peak_centers,
-                   std::vector<std::vector<double>> &fitted_function_parameters,
-                   std::vector<double> *peak_chi2_vec);
+  void fitSpectrumPeaks(
+      size_t wi, const std::vector<double> &expected_peak_centers,
+      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
+  //                   std::vector<double> &fitted_peak_centers,
+  //                   std::vector<std::vector<double>>
+  //                   &fitted_function_parameters,
+  //                   std::vector<double> *peak_chi2_vec);
 
   /// fit background
   bool fitBackground(const size_t &ws_index,
@@ -169,14 +201,20 @@ private:
                           size_t ipeak, size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
+  //  void processSinglePeakFitResult(
+  //      size_t wsindex, size_t peakindex,
+  //      const std::vector<double> &expected_peak_positions,
+  //      API::IPeakFunction_sptr peakfunction,
+  //      API::IBackgroundFunction_sptr bkgdfunction, double cost,
+  //      std::vector<double> &fitted_peak_positions,
+  //      std::vector<std::vector<double>> &function_parameters_vector,
+  //      std::vector<double> *peak_chi2_vec);
+
   void processSinglePeakFitResult(
-      size_t wsindex, size_t peakindex,
+      size_t wsindex, size_t peakindex, const double cost,
       const std::vector<double> &expected_peak_positions,
-      API::IPeakFunction_sptr peakfunction,
-      API::IBackgroundFunction_sptr bkgdfunction, double cost,
-      std::vector<double> &fitted_peak_positions,
-      std::vector<std::vector<double>> &function_parameters_vector,
-      std::vector<double> *peak_chi2_vec);
+      FitPeaksAlgorithm::FitFunction fitfunction,
+      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
 
   /// calculate peak+background for fitted
   void calculateFittedPeaks();
@@ -192,10 +230,13 @@ private:
   void processOutputs();
 
   /// Write result of peak fit per spectrum to output analysis workspaces
-  void writeFitResult(size_t wi, const std::vector<double> &expected_positions,
-                      std::vector<double> &fitted_positions,
-                      std::vector<std::vector<double>> &peak_parameters,
-                      std::vector<double> &peak_chi2_vec, bool noevents);
+  void writeFitResult(
+      size_t wi, const std::vector<double> &expected_positions,
+      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
+      //                      std::vector<double> &fitted_positions,
+      //                      std::vector<std::vector<double>> &peak_parameters,
+      //                      std::vector<double> &peak_chi2_vec,
+      bool noevents);
 
   //  /// set peak positions tolerance
   //  void setPeakPosTolerance(const std::vector<double> &peak_pos_tolerances);
