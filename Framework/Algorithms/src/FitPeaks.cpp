@@ -474,7 +474,7 @@ void FitPeaks::processInputFunctions() {
             API::FunctionFactory::Instance().createFunction(
                 "LinearBackground"));
   else
-    linear_background_function_ = 0;
+    linear_background_function_ = nullptr;
 
   // input peak parameters
   std::string partablename = getPropertyValue("PeakParameterValueTable");
@@ -861,7 +861,7 @@ void FitPeaks::fitSpectrumPeaks(
   compfunc->addFunction(bkgdfunction);
 
   // high background to reduce
-  API::IBackgroundFunction_sptr high_bkgd_func(0);
+  API::IBackgroundFunction_sptr high_bkgd_func(nullptr);
   if (linear_background_function_)
     high_bkgd_func = boost::dynamic_pointer_cast<API::IBackgroundFunction>(
         linear_background_function_->clone());
