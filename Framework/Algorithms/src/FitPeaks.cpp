@@ -2266,7 +2266,8 @@ void FitPeaks::writeFitResult(
       // case for fit peak with signals
       for (size_t iparam = 0;
            iparam <
-           fit_result->getNumberParameters(); // peak_parameters[ipeak].size();
+               fit_result
+                   ->getNumberParameters(); // peak_parameters[ipeak].size();
            ++iparam) {
         size_t col_index = iparam + 2;
         if (col_index >= m_fittedParamTable->columnCount()) {
