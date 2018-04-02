@@ -434,7 +434,7 @@ void FitPeaks::processInputs() {
   // about peak width and other peak parameter estimating method
   if (is_d_space_ && m_peakDSpacePercentage > 0)
     peak_width_estimate_approach_ = EstimatePeakWidth::InstrumentResolution;
-  else if (m_peakFunction->name().compare("Gaussian") == 0)
+  else if (m_peakFunction->name() == "Gaussian")
     peak_width_estimate_approach_ = EstimatePeakWidth::Observation;
   else
     peak_width_estimate_approach_ = EstimatePeakWidth::NoEstimation;
@@ -460,9 +460,9 @@ void FitPeaks::processInputFunctions() {
   // background functions
   std::string bkgdfunctiontype = getPropertyValue("BackgroundType");
   std::string bkgdname;
-  if (bkgdfunctiontype.compare("Linear") == 0)
+  if (bkgdfunctiontype == "Linear")
     bkgdname = "LinearBackground";
-  else if (bkgdfunctiontype.compare("Flat") == 0)
+  else if (bkgdfunctiontype == "Flat")
     bkgdname = "FlatBackground";
   else
     bkgdname = bkgdfunctiontype;
@@ -2307,17 +2307,20 @@ std::string FitPeaks::getPeakHeightParameterName(
   std::vector<std::string> peak_parameters = peak_function->getParameterNames();
   for (std::vector<std::string>::iterator it = peak_parameters.begin();
        it != peak_parameters.end(); ++it) {
-    if ((*it).compare("Height") == 0) {
+    if (*it == "Height") {
       height_name = "Height";
       break;
-    } else if ((*it).compare("I") == 0) {
+    } else if (*it == "I") {
       height_name = "I";
       break;
-    } else if ((*it).compare("Intensity") == 0) {
+    } else if (*it == "Intensity") {
       height_name = "Intensity";
       break;
     }
   }
+
+  if (height_name.size() == 0)
+    throw std::runtime_error("Peak height parameter name cannot be found.");
 
   return height_name;
 }
