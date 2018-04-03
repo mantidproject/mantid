@@ -5,6 +5,7 @@ from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorith
 from mantid.kernel import Direction, StringListValidator
 import numpy as np
 
+
 class SortXAxis(PythonAlgorithm):
 
     def category(self):
