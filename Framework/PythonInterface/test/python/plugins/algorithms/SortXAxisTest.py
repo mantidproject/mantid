@@ -140,23 +140,14 @@ class SortXAxisTest(unittest.TestCase):
         dataY = [1, 2, 3, 1, 2, 3]
         dx = [1, 2, 3, 1, 2, 3]
         unsortedws = CreateWorkspace(DataX=dataX, DataY=dataY, Dx=dx, UnitX='TOF', Distribution=True, NSpec=2)
-        dataY.reverse()
         dx.reverse()
         # Run the algorithm
         sortedws = SortXAxis(InputWorkspace=unsortedws)
         # Check the resulting data values for 1st spectrum.
-        sortedX = sortedws.readX(0)
-        sortedY = sortedws.readY(0)
         sortedDx = sortedws.readDx(0)
-        self.assertEqual(sorted(dataX[0:3]), sortedX.tolist())
-        self.assertEqual(dataY[0:3], sortedY.tolist())
         self.assertEqual(dx[0:3], sortedDx.tolist())
         # Check the resulting data values for 2nd spectrum.
-        sortedX = sortedws.readX(1)
-        sortedY = sortedws.readY(1)
-        sortedDx = sortedws.readE(1)
-        self.assertEqual(sorted(dataX[3:]), sortedX.tolist())
-        self.assertEqual(dataY[3:], sortedY.tolist())
+        sortedDx = sortedws.readDx(1)
         self.assertEqual(dx[3:], sortedDx.tolist())
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
@@ -168,12 +159,8 @@ class SortXAxisTest(unittest.TestCase):
         unsortedws = CreateWorkspace(DataX=dataX, DataY=dataY, Dx=dx, UnitX='TOF', Distribution=False)
         # Run the algorithm
         sortedws = SortXAxis(InputWorkspace=unsortedws)
-        sortedX = sortedws.readX(0)
-        sortedY = sortedws.readY(0)
         sortedDx = sortedws.readDx(0)
         # Check the resulting data values. Sorting operation should have resulted in no changes
-        self.assertEqual(dataX, sortedX.tolist())
-        self.assertEqual(dataY, sortedY.tolist())
         self.assertEqual(dx, sortedDx.tolist())
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
