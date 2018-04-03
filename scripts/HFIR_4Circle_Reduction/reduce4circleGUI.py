@@ -89,6 +89,7 @@ class MainWindow(QtGui.QMainWindow):
         self._singlePeakIntegrationDialogBuffer = ''
         self._dataDownloadDialog = None
         self._single_pt_peak_integration_window = None
+        self._general_1d_plot_window = None
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -327,12 +328,11 @@ class MainWindow(QtGui.QMainWindow):
                      self.menu_download_data)
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
-
-        # FIXME TODO NOW3
-        # Add: self.ui.action2theta_Sigma ...
-        #      will pop out a general figure plot window... general1dviewer.ui
+        #  pop out a general figure plot window
+        self.ui.action2theta_Sigma.triggered.connect(self.menu_pop_2theta_sigma_window)
 
         # Validator ... (NEXT)
+        # blabla... ...
 
         # Declaration of class variable
         # IPTS number
@@ -3688,6 +3688,26 @@ class MainWindow(QtGui.QMainWindow):
         # plot ROI on 2D plot
         self.ui.graphicsView_detector2dPlot.remove_roi()
         self.ui.graphicsView_detector2dPlot.set_roi(lower_left_corner, upper_right_corner)
+
+        return
+
+    def menu_pop_2theta_sigma_window(self):
+        """
+        pop out a general figure plot window for 2theta - sigma plot
+        :return:
+        """
+        # create new window or clear existing window
+        if self._general_1d_plot_window is None:
+            self._general_1d_plot_window = blabla()
+        else:
+            self._general_1d_plot_window.reset()
+        # show
+        self._general_1d_plot_window.show()
+
+        # set up the window
+        vec_x, vec_y = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel='sigma')
+        # get the latest (cached) vec_x and vec_y
+        self._general_1d_plot_window.plot(vec_x, vec_y)
 
         return
 

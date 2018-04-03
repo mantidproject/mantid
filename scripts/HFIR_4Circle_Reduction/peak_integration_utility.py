@@ -263,7 +263,7 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     else:
         # good
         assert isinstance(cov_matrix, numpy.ndarray), 'Covariance matrix must be a numpy array'
-        # calculate fitting error/standard deviation  TEST TODO NOW3
+        # calculate fitting error/standard deviation
         g_error_array = numpy.sqrt(numpy.diag(cov_matrix))
         # print('[DB...BAT] Gaussian fit error (type {0}): {1}'.format(type(g_error_array), g_error_array))
 
@@ -548,7 +548,7 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     return True, pt_dict
 
 
-# TODO/NOW3 - Find which method is using this! Set the output right!
+# TEST NOW3 - API changed!
 def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_ws_name,
                                 peak_center, mask_workspace_name, norm_type,
                                 intensity_scale_factor, background_pt_tuple):
@@ -557,7 +557,7 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     1. simple summation
     2. simple summation with gaussian fit
     3. integrate with fitted gaussian
-    :return: peak integration result in dictionary
+    :return: dictionary: peak integration result
     """
     def create_peak_integration_dict():
         """

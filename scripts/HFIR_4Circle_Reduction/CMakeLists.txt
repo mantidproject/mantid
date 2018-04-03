@@ -3,6 +3,7 @@ include(UiToPy)
 # List of UIs to Auto convert
 set( UI_FILES
   MainWindow.ui
+  general1dviewer.ui
   messagebox.ui
   View3DWidget.ui
   OptimizeLattice.ui

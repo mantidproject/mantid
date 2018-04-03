@@ -179,6 +179,7 @@ class CWSCDReductionControl(object):
         # single point peak integration related
         self._two_theta_scan_dict = dict()
         self._scan_2theta_set = set()
+        self._two_theta_sigma = None  # a 2-tuple vector for (2theta, gaussian-sigma)
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
@@ -396,7 +397,7 @@ class CWSCDReductionControl(object):
                                                                        self._single_pt_integration_dict.keys()))
 
         integration_record = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
-        integration_record.set_ref_fwhm(ref_fwhm)
+        # integration_record.set_ref_peak_width(ref_fwhm, is_fwhm)
 
         # params = integration_record
         #
@@ -438,6 +439,20 @@ class CWSCDReductionControl(object):
 
         return vec_x, vec_y, model_y
 
+    def calculate_peak_integration_sigma(self, two_theta):
+        """
+        calculate Gaussian-Sigma for single-measurement peak integration by linear interpolation
+        :param two_theta:
+        :return:
+        """
+        if self._two_theta_sigma is None:
+            raise RuntimeError('2-theta Gaussian-sigma curve has not been set')
+
+        # do a linear interpolation
+        interp_sigma = numpy.interp(two_theta, self._two_theta_sigma[0], self._two_theta_sigma[1])
+
+        return interp_sigma
+
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
@@ -464,8 +479,8 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_UB_Peak'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name,
-                                    index_from_spice=True, hkl_to_int=True)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
+        #                            index_from_spice=True, hkl_to_int=True)
 
         # Calculate UB matrix
         try:
@@ -1287,6 +1302,31 @@ class CWSCDReductionControl(object):
 
         return vec_x, vec_y
 
+    def get_peak_integration_parameters(self, xlabel='2theta', ylabel='sigma'):
+        """
+        get the parameters from peak integration
+        :param xlabel:
+        :param ylabel:
+        :return:
+        """
+        xye_list = list()
+        for (exp_number, scan_number) in self._myPeakInfoDict.keys():
+            peak_int_info = self._myPeakInfoDict[exp_number, scan_number]
+            x_value = peak_int_info.get_parameter(xlabel)[0]
+            y_value, e_value = peak_int_info.get_parameter(ylabel)
+
+            xye_list.append([x_value, y_value, e_value])
+        # END-FOR
+
+        # convert to 3 numpy vectors
+        xye_list.sort()
+        xye_matrix = numpy.array(xye_list)
+        xye_matrix = xye_matrix.transpose()
+
+        return xye_matrix[0], xye_matrix[1], xye_matrix[2]
+
+
+
     def generate_mask_workspace(self, exp_number, scan_number, roi_start, roi_end, mask_tag=None):
         """ Generate a mask workspace
         :param exp_number:
@@ -1463,14 +1503,20 @@ class CWSCDReductionControl(object):
         return has
 
     def import_2theta_gauss_sigma_file(self, twotheta_sigma_file_name):
-        """
-
+        """ import a 2theta-sigma column file
         :param twotheta_sigma_file_name:
-        :return:
+        :return: (numpy.array, numpy.array) : vector X and vector y
         """
-        # TODO NOW3 - Implement!
+        assert isinstance(twotheta_sigma_file_name, str), 'Input file name {0} must be a string but not a {1}.' \
+                                                          ''.format(twotheta_sigma_file_name,
+                                                                    type(twotheta_sigma_file_name))
+        if os.path.exists(twotheta_sigma_file_name) is False:
+            raise RuntimeError('2theta-sigma file {0} does not exist.'.format(twotheta_sigma_file_name))
 
-        return False, 'Not Implemented Yet'
+        vec_2theta, vec_sigma = numpy.loadtxt(twotheta_sigma_file_name, delimiter='', usecols=(0, 1), unpack=True)
+        self._two_theta_sigma = vec_2theta, vec_sigma
+
+        return vec_2theta, vec_sigma
 
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
@@ -1731,8 +1777,7 @@ class CWSCDReductionControl(object):
         # value_list[2] = cost
         # value_list[3] = params  # as x0, sigma, a, b
 
-        integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name,
-                                                                               pt_number)
+        integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name, pt_number)
         integrate_record.set_xy_vector(vec_x, vec_y)
         integrate_record.set_fit_cost(cost)
         integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
@@ -2666,6 +2711,33 @@ class CWSCDReductionControl(object):
 
         # Set up
         self._myUBMatrixDict[exp_number] = ub_matrix
+
+        return
+
+    def set_single_measure_peak_width(self, exp_number, scan_number, pt_number, roi_name, gauss_sigma, is_fhwm=False):
+        """
+        set peak width (Gaussian sigma value) to single-measurement peak
+        :param scan_number:
+        :param gauss_sigma:
+        :param is_fhwm:
+        :return:
+        """
+        # check input
+        fourcircle_utility.check_integer('Experiment number', exp_number)
+        fourcircle_utility.check_integer('Scan number', scan_number)
+        fourcircle_utility.check_float('Gaussian-sigma', gauss_sigma)
+        fourcircle_utility.check_string('ROI name', roi_name)
+
+        # get the single-measurement integration instance
+        dict_key = exp_number, scan_number, pt_number, roi_name
+        if dict_key in self._single_pt_integration_dict:
+            int_record = self._single_pt_integration_dict[dict_key]
+        else:
+            raise RuntimeError('Scan number {0} shall be in the single-pt integration dictionary.  Keys are {1}.'
+                               ''.format(scan_number, self._single_pt_integration_dict.keys()))
+
+        # set sigma: SinglePointPeakIntegration
+        int_record.set_ref_peak_width(gauss_sigma, is_fhwm)
 
         return
 

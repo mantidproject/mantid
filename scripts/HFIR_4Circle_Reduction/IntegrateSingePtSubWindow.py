@@ -2,6 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 from PyQt4.QtCore import pyqtSignal
 import HFIR_4Circle_Reduction.ui_SinglePtIntegrationWindow as window_ui
+import HFIR_4Circle_Reduction.guiutility as guiutility
 from PyQt4.QtGui import QMainWindow, QFileDialog
 import os
 
@@ -194,6 +195,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         row_number = self.ui.tableView_summary.rowCount()
+        error_messages = ''
         for row_index in range(row_number):
             # check whether FWHM value is set up
             fwhm_i = self.ui.tableView_summary.get_fwhm(row_index)
@@ -202,11 +204,21 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
             # use interpolation to curve
             two_theta = self.ui.tableView_summary.get_two_theta(row_index)
-            # TODO NOW3 - Implement  calculate_peak_integration_sigma
-            status, ret_obj = self._controller.calculate_peak_integration_sigma(two_theta)   # need to set the controller PeakIntegrateWhatEver too!
+            # TEST NOW3 - new method calculate_peak_integration_sigma
+            status, ret_obj = self._controller.calculate_peak_integration_sigma(two_theta)
 
-            # TODO NOW3 Implement
-            self.ui.tableView_summary.set_gaussian_sigma(whatever)
+            if status:
+                # set the value to the table and also controller
+                gauss_sigma = ret_obj
+                scan_number = self.ui.tableView_summary.get_scan_number(row_index)
+                self.ui.tableView_summary.set_gaussian_sigma(row_index, gauss_sigma)
+                self._controller.set_single_measure_peak_width(scan_number, gauss_sigma, is_fhwm=False)
+
+            else:
+                # error!
+                error_messages += ret_obj + '\n'
+                continue
+            # END-IF-ELSE
 
             # The following will be deleted!
             # # get corresponding strong nuclear peak (complete scan number)
@@ -219,7 +231,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             #                                                       '2theta')
             #
             #     # locate reference scan number
-            #     # TODO NOW3 consider to use interpolation to curve!
+            #     # consider to use interpolation to curve!
             #     complete_peak_scan_numbers = self._controller.find_scans_by_2theta(self._exp_number,
             #                                                                        two_theta, resolution=0.05,
             #                                                                        excluded_scans=[scan_number])
@@ -243,6 +255,10 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             #     self.ui.tableView_summary.set_fwhm(row_index, peak_info.gaussian_fwhm)
         # END-FOR
 
+        # show error message if necessary
+        if len(error_messages) > 0:
+            guiutility.show_message(self, error_messages)
+
         return
 
     def menu_load_gauss_sigma_file(self):
@@ -259,11 +275,12 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             return
 
         # set the file to controller
-        status, message = self._controller.import_2theta_gauss_sigma_file(twotheta_sigma_file_name)
-
-        # pop out error message if any
-        if not status:
-            raise RuntimeError(message)
+        try:
+            vec_x, vec_y = self._controller.import_2theta_gauss_sigma_file(twotheta_sigma_file_name)
+            # TODO NOW2 - show the figure in the general plot window
+        except RuntimeError as run_err:
+            guiutility.show_message(self, str(run_err))
+            return
 
         return
 

@@ -192,6 +192,68 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         return
 
 
+class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
+    """
+    Extended matplotlib based 1D plot viewer for general-purposed useage
+    """
+    def __init__(self, parent):
+        """
+        initialization
+        """
+        super(GeneralPurposedPlotView, self).__init__(parent)
+
+        # define interaction with the canvas
+        self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
+
+        # class variables
+        self._currentDataID = None
+
+        self._parent_window = None
+
+        return
+
+    def plot_data(self, vec_x, vec_y, title, label_x, label_y):
+        """
+        plot current data
+        :param vec_x:
+        :param vec_y:
+        :param title:
+        :param label_x:
+        :param label_y:
+        :return:
+        """
+
+
+    def reset_plots(self):
+        """
+        reset current plots
+        :return:
+        """
+        # clear all lines
+        self.clear_all_lines()
+
+        # reset handlers
+        self._currentDataID = None
+
+        return
+
+    def save_current_plot(self, line_id, file_name):
+        """
+        save the current plot
+        :param line_id:
+        :param file_name:
+        :return:
+        """
+        if self._currentDataID is None:
+            raise RuntimeError('No line on canvas to save!')
+
+        vec_x, vec_y = self.get_data(line_id)
+
+        numpy.savetxt(file_name,(vec_x, vec_y))
+
+        return
+
+
 class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
     """
     Single Pt peak integration viewer.  Extended from regular 1D view

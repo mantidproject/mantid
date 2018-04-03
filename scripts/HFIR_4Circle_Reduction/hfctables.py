@@ -1440,9 +1440,13 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         """
         return self._pt_row_dict.keys()
 
-    def get_two_theta(self):
-        # TODO NOW3
-        return None
+    def get_two_theta(self, row_index):
+        """
+        get two-theta value
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._2theta_index)
 
     def save_intensities_to_file(self, out_file_name):
         """
@@ -1462,6 +1466,17 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         out_file = open(out_file_name, 'w')
         out_file.write(out_buffer)
         out_file.close()
+
+        return
+    
+    def set_gaussian_sigma(self, row_index, sigma):
+        """
+        set the (Gaussian) sigma value to a row
+        :param row_index:
+        :param sigma: 
+        :return: 
+        """
+        self.update_cell_value(row_index, self._fwhm_index, sigma)
 
         return
 

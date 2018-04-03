@@ -768,6 +768,40 @@ def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
     return (index_h_r, index_k_r, index_l_r), round_error
 
 
+def check_integer(var_name, var_value):
+    """
+    check whether an input variable is an integer.
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, int), \
+        '{0} {1} must be an integer but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_float(var_name, var_value):
+    """ check whether an input variable is a float (or an integer allowed).
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, int) or isinstance(var_value, float), \
+        '{0} {1} must be a float but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_string(var_name, var_value):
+    """ check whether an input variable is an integer.
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, str), \
+        '{0} {1} must be a string but not a {2}'.format(var_name, var_value, type(var_value))
+
+
 def is_peak_nuclear(index_h, index_k, index_l, magnetic_tolerance=0.2):
     """
     Check whether a peak is a nuclear peak by checking its index close enough to integers

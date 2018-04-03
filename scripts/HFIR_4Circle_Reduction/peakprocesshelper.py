@@ -625,7 +625,7 @@ class SinglePointPeakIntegration(object):
         self._flag_b = None
 
         # reference peak width
-        self._ref_scan_fwhm  = None
+        self._ref_peak_sigma  = None
 
         # fitting cost (goodness)
         self._fit_cost = None
@@ -698,15 +698,18 @@ class SinglePointPeakIntegration(object):
         self._gauss_sigma = sigma
         self._flag_b = b
 
-    def set_ref_fwhm(self, ref_fwhm):
+    def set_ref_fwhm(self, ref_fwhm, is_fwhm):
         """
         set reference scan's FWHM from same/similar 2theta value
         :param ref_fwhm:
+        :param is_fwhm: flag whether the input is FWHM or Sigma
         :return:
         """
         check_float('Reference scan FWHM', ref_fwhm)
 
-        self._ref_scan_fwhm = ref_fwhm
+        self._ref_peak_sigma = ref_fwhm
+        if is_fwhm:
+            self._ref_peak_sigma /= 2.355
 
         return
 
@@ -753,17 +756,3 @@ def str_format(float_items):
 
     return format_str
 
-
-def check_integer(var_name, var_value):
-    assert isinstance(var_value, int), \
-        '{0} {1} must be an integer but not a {2}'.format(var_name, var_value, type(var_value))
-
-
-def check_float(var_name, var_value):
-    assert isinstance(var_value, int) or isinstance(var_value, float), \
-        '{0} {1} must be a float but not a {2}'.format(var_name, var_value, type(var_value))
-
-
-def check_string(var_name, var_value):
-    assert isinstance(var_value, str), \
-        '{0} {1} must be a string but not a {2}'.format(var_name, var_value, type(var_value))
