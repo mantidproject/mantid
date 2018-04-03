@@ -1,4 +1,5 @@
 set ( SRC_FILES
+        src/BankRenderingHelpers.cpp
 	src/BinDialog.cpp
 	src/CollapsiblePanel.cpp
 	src/ColorMapWidget.cpp
@@ -12,6 +13,7 @@ set ( SRC_FILES
 	src/InstrumentWidgetMaskTab.cpp
 	src/InstrumentWidgetPickTab.cpp
 	src/InstrumentWidgetRenderTab.cpp
+        src/InstrumentRenderer.cpp
 	src/InstrumentWidgetTab.cpp
 	src/InstrumentWidgetTreeTab.cpp
 	src/MantidGLWidget.cpp
@@ -62,6 +64,7 @@ set ( MOC_FILES
 )
 
 set ( INC_FILES
+	inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
 	inc/MantidQtWidgets/InstrumentView/BinDialog.h
 	inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
 	inc/MantidQtWidgets/InstrumentView/ColorMapWidget.h
@@ -73,6 +76,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
+        inc/MantidQtWidgets/InstrumentView/InstrumentRenderer.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h

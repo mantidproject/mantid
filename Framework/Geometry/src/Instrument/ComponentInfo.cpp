@@ -123,20 +123,27 @@ ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
                              "in ComponentInfo::quadrilateralComponent.");
 
   QuadrilateralComponent corners;
-  auto innerRangeComp =
-      m_componentInfo->componentRangeInSubtree(componentIndex);
+  const auto &innerRangeComp = m_componentInfo->children(componentIndex);
   // nSubComponents, subtract off self hence -1. nSubComponents = number of
   // horizontal columns.
-  corners.nX = innerRangeComp.end() - innerRangeComp.begin() - 1;
+  corners.nX = innerRangeComp.size();
   auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
   auto nSubDetectors =
       std::distance(innerRangeDet.begin(), innerRangeDet.end());
   corners.nY = nSubDetectors / corners.nX;
+  auto firstComp = innerRangeComp.front();
+  // The ranges contain the parent component as the last index
+  // therefore end() - 2
+  auto lastComp = innerRangeComp.back();
+  corners.bottomLeft =
+      *(m_componentInfo->detectorRangeInSubtree(firstComp).begin());
+  corners.topRight =
+      *(m_componentInfo->detectorRangeInSubtree(lastComp).end() - 1);
+  corners.topLeft =
+      *(m_componentInfo->detectorRangeInSubtree(firstComp).end() - 1);
+  corners.bottomRight =
+      *m_componentInfo->detectorRangeInSubtree(lastComp).begin();
 
-  corners.bottomLeft = *innerRangeDet.begin();
-  corners.topRight = corners.bottomLeft + nSubDetectors - 1;
-  corners.topLeft = corners.bottomLeft + (corners.nY - 1);
-  corners.bottomRight = corners.topRight - (corners.nY - 1);
   return corners;
 }
 
@@ -459,7 +466,8 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
     const auto compFlag = componentType(index);
     if (hasSource() && index == source()) {
       ++compIterator;
-    } else if (compFlag == Beamline::ComponentType::Rectangular) {
+    } else if (compFlag == Beamline::ComponentType::Rectangular ||
+               compFlag == Beamline::ComponentType::Structured) {
       growBoundingBoxAsRectuangularBank(index, reference, absoluteBB,
                                         detExclusions, compIterator);
     } else if (compFlag == Beamline::ComponentType::OutlineComposite) {

@@ -204,13 +204,13 @@ signal_t MatrixWorkspaceMDIterator::getError() const {
 
 //----------------------------------------------------------------------------------------------
 /// Return a list of vertexes defining the volume pointed to
-coord_t *
+std::unique_ptr<coord_t[]>
 MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/) const {
   throw std::runtime_error(
       "MatrixWorkspaceMDIterator::getVertexesArray() not implemented yet");
 }
 
-coord_t *
+std::unique_ptr<coord_t[]>
 MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/,
                                             const size_t /*outDimensions*/,
                                             const bool * /*maskDim*/) const {

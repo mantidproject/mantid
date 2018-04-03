@@ -286,16 +286,14 @@ public:
         new MDHistoDimension("X", "x", frame, -10, 10, 5));
     MDHistoWorkspace ws(dimX);
     size_t numVertices;
-    coord_t *v1 = ws.getVertexesArray(0, numVertices);
+    auto v1 = ws.getVertexesArray(0, numVertices);
     TS_ASSERT_EQUALS(numVertices, 2);
     TS_ASSERT_DELTA(v1[0], -10.0, 1e-5);
     TS_ASSERT_DELTA(v1[1], -6.0, 1e-5);
-    delete[] v1;
 
-    coord_t *v2 = ws.getVertexesArray(4, numVertices);
+    auto v2 = ws.getVertexesArray(4, numVertices);
     TS_ASSERT_DELTA(v2[0], 6.0, 1e-5);
     TS_ASSERT_DELTA(v2[1], 10.0, 1e-5);
-    delete[] v2;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -308,7 +306,7 @@ public:
     MDHistoWorkspace ws(dimX, dimY);
     size_t numVertices, i;
 
-    boost::scoped_array<coord_t> v1(ws.getVertexesArray(0, numVertices));
+    auto v1 = ws.getVertexesArray(0, numVertices);
     TS_ASSERT_EQUALS(numVertices, 4);
     i = 0 * 2;
     TS_ASSERT_DELTA(v1[i + 0], -10.0, 1e-5);
@@ -317,7 +315,7 @@ public:
     TS_ASSERT_DELTA(v1[i + 0], -6.0, 1e-5);
     TS_ASSERT_DELTA(v1[i + 1], -6.0, 1e-5);
     // The opposite corner
-    boost::scoped_array<coord_t> v2(ws.getVertexesArray(24, numVertices));
+    auto v2 = ws.getVertexesArray(24, numVertices);
     i = 0 * 2;
     TS_ASSERT_DELTA(v2[i + 0], 6.0, 1e-5);
     TS_ASSERT_DELTA(v2[i + 1], 6.0, 1e-5);
@@ -338,7 +336,7 @@ public:
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     size_t numVertices, i;
 
-    boost::scoped_array<coord_t> v(ws.getVertexesArray(0, numVertices));
+    auto v = ws.getVertexesArray(0, numVertices);
     TS_ASSERT_EQUALS(numVertices, 8);
     i = 0;
     TS_ASSERT_DELTA(v[i + 0], -10.0, 1e-5);
