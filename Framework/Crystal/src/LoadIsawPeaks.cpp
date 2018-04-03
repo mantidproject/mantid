@@ -213,8 +213,8 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     boost::erase_all(bankName, bankPart);
     int bank = 0;
     Strings::convert(bankName, bank);
-    for (size_t j = 0; j < det.size(); j++) {
-      if (bank == det[j]) {
+    for (int j : det) {
+      if (bank == j) {
         bank = 0;
         continue;
       }

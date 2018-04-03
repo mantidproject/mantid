@@ -28,16 +28,16 @@ public:
   NexusDescriptorTest() {
     using Mantid::Kernel::ConfigService;
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
-    for (auto it = dataPaths.begin(); it != dataPaths.end(); ++it) {
-      Poco::Path hdf5Path(*it, "CNCS_7860_event.nxs");
+    for (auto &dataPath : dataPaths) {
+      Poco::Path hdf5Path(dataPath, "CNCS_7860_event.nxs");
       if (Poco::File(hdf5Path).exists())
         m_testHDF5Path = hdf5Path.toString();
 
-      Poco::Path hdf4Path(*it, "argus0026287.nxs");
+      Poco::Path hdf4Path(dataPath, "argus0026287.nxs");
       if (Poco::File(hdf4Path).exists())
         m_testHDF4Path = hdf4Path.toString();
 
-      Poco::Path nonhdf5Path(*it, "CSP79590.raw");
+      Poco::Path nonhdf5Path(dataPath, "CSP79590.raw");
       if (Poco::File(nonhdf5Path).exists())
         m_testNonHDFPath = nonhdf5Path.toString();
 
