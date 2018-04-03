@@ -15,7 +15,7 @@ are sorted in a consistent way with the x-axis.
 
 This algorithm is for use with small workspaces loaded. It is
 particularly suitable for reformatting workspaces loaded via
-:ref:`LoadAscii <algm-LoadAscii>`. Input workspaces must be a distribution.
+:ref:`LoadAscii <algm-LoadAscii>`. Input workspaces must be point data.
 
 .. categories::
 
