@@ -16,7 +16,7 @@ the dataset using the algorithm :ref:`algm-RRFMuon`. Both algorithms are fully d
 by T.M. Riseman and J.H. Brewer [Hyp. Int., 65, (1990), 1107].
 
 
-.. relatedAlgorithms::
+.. relatedalgorithms::
 
 .. properties::
 

@@ -13,7 +13,7 @@ import mantiddoc.directives.categories
 import mantiddoc.directives.diagram
 import mantiddoc.directives.interface
 import mantiddoc.directives.properties
-import mantiddoc.directives.relatedAlgorithms
+import mantiddoc.directives.relatedalgorithms
 import mantiddoc.directives.sourcelink
 import mantiddoc.directives.summary
 
@@ -30,6 +30,6 @@ def setup(app):
     diagram.setup(app)
     interface.setup(app)
     properties.setup(app)
-    relatedAlgorithms.setup(app)
+    relatedalgorithms.setup(app)
     sourcelink.setup(app)
     summary.setup(app)

@@ -1,6 +1,6 @@
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 
-class relatedAlgorithmsDirective(AlgorithmBaseDirective):
+class relatedalgorithmsDirective(AlgorithmBaseDirective):
 
     """
     Obtains the see also section for a given algorithm based on it's name.
@@ -25,7 +25,7 @@ class relatedAlgorithmsDirective(AlgorithmBaseDirective):
                     link_rst += ":ref:`%s <algm-%s>`, " % (alg.name(), alg.name())
                 except RuntimeError:
                     env = self.state.document.settings.env
-                    env.app.warn('relatedAlgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'.format(
+                    env.app.warn('relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'.format(
                                  seeAlsoEntry,self.algorithm_name(), self.algorithm_version()))
                       
         if link_rst or alias:
@@ -45,4 +45,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('relatedAlgorithms', relatedAlgorithmsDirective)
+    app.add_directive('relatedalgorithms', relatedAlgorithmsDirective)

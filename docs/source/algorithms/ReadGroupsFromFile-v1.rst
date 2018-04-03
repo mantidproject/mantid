@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. relatedAlgorithms::
+.. relatedalgorithms::
 
 .. properties::
 
