@@ -2591,7 +2591,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   if (m_currentTab == m_uiForm.DataAnalysis) // Leaving DA tab
   {
     // Say MantidPlot to use default fit prop. browser
-    emit setFitPropertyBrowser(NULL);
+    emit setFitPropertyBrowser(nullptr);
 
     // Reset cached config option
     ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, m_cachedPeakRadius);
@@ -2909,7 +2909,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 
   // If closed while on DA tab, reassign fit property browser to default one
   if (m_currentTab == m_uiForm.DataAnalysis)
-    emit setFitPropertyBrowser(NULL);
+    emit setFitPropertyBrowser(nullptr);
 }
 
 /**

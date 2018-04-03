@@ -100,8 +100,8 @@ public:
     std::vector<Property *> properties = fitPeaks1D.getProperties();
     std::unordered_set<std::string> names;
 
-    for (size_t i = 0; i < properties.size(); ++i) {
-      names.insert(properties[i]->name());
+    for (auto &property : properties) {
+      names.insert(property->name());
     }
 
     TS_ASSERT_EQUALS(names.count("InputWorkspace"), 1);

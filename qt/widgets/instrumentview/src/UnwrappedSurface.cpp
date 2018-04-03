@@ -1,5 +1,6 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
@@ -205,7 +206,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 */
 void UnwrappedSurface::setColor(size_t index, bool picking) const {
   if (picking) {
-    auto c = InstrumentActor::makePickColor(index);
+    auto c = InstrumentRenderer::makePickColor(index);
     unsigned char r, g, b;
     c.get(r, g, b);
     glColor3ub(r, g, b);
@@ -459,7 +460,7 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
     QColor color;
     int index = int(i);
     if (picking) {
-      GLColor c = InstrumentActor::makePickColor(index);
+      GLColor c = InstrumentRenderer::makePickColor(index);
       unsigned char r, g, b;
       c.get(r, g, b);
       color = QColor(r, g, b);

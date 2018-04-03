@@ -134,7 +134,7 @@ public:
     MDHistoWorkspace_sptr c =
         boost::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
 
-    TS_ASSERT(c != NULL);
+    TS_ASSERT(c != nullptr);
     // Since A and B are equivalent, the mean Signal in C should be the same as
     // both A and B.
     double expectedSignalResults[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -157,7 +157,7 @@ public:
     MDHistoWorkspace_sptr out;
     out = BinaryOperationMDTestHelper::doTest("WeightedMeanMD", "histo_A",
                                               "histo_B", "out");
-    TS_ASSERT(out != NULL);
+    TS_ASSERT(out != nullptr);
   }
 
   /**

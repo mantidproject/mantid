@@ -107,8 +107,8 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
 
   Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
   spec.setHistogram(initializedHistogram);
-  for (size_t i = 0; i < data.size(); i++) {
-    data[i] = new Histogram1D(spec);
+  for (auto &i : data) {
+    i = new Histogram1D(spec);
   }
 
   // Add axes that reference the data

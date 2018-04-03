@@ -258,7 +258,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/CSGObject.h
 	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-    inc/MantidGeometry/Objects/MeshObject.h
+        inc/MantidGeometry/Objects/MeshObject.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -391,7 +391,7 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
-    	ShapeInfoTest.h
+        ShapeInfoTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h

@@ -122,6 +122,7 @@ private:
  * ------------------------------------------------------------------------------------------
  */
 struct DLLExport BackgroundStrategy {
+  virtual ~BackgroundStrategy() = default;
   virtual bool isBelowBackground(const double intensity,
                                  const HistogramData::HistogramY &y) const = 0;
 };
@@ -155,6 +156,7 @@ public:
                       const double minValue = EMPTY_DBL(),
                       const double maxValue = EMPTY_DBL(),
                       const XAxisUnit units = XAxisUnit::TOF);
+  virtual ~PeakFindingStrategy() = default;
   PeakList findSXPeaks(const HistogramData::HistogramX &x,
                        const HistogramData::HistogramY &y,
                        const int workspaceIndex) const;
@@ -219,6 +221,7 @@ private:
  */
 class DLLExport CompareStrategy {
 public:
+  virtual ~CompareStrategy() = default;
   virtual bool compare(const SXPeak &lhs, const SXPeak &rhs) const = 0;
 };
 
@@ -253,6 +256,7 @@ private:
 class DLLExport ReducePeakListStrategy {
 public:
   ReducePeakListStrategy(const CompareStrategy *compareStrategy);
+  virtual ~ReducePeakListStrategy() = default;
   virtual std::vector<SXPeak>
   reduce(const std::vector<SXPeak> &peaks,
          Mantid::Kernel::ProgressBase &progress) const = 0;

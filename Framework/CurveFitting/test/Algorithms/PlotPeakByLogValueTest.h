@@ -496,10 +496,10 @@ public:
     TS_ASSERT(fits->getNames().size() == 2);
 
     auto wsNames = fits->getNames();
-    for (size_t i = 0; i < wsNames.size(); ++i) {
+    for (const auto &wsName : wsNames) {
       auto fit =
           AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-              wsNames[i]);
+              wsName);
       TS_ASSERT(fit);
       TS_ASSERT(fit->getNumberHistograms() == 5);
     }
