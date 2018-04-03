@@ -82,7 +82,7 @@ debugger to running process.
 | 2. Run ctest with the appropriate arguments to run the test you are
   investigating.
 | 3. When the test pauses for input within visual studio select
-  Debug\Attach to Process... |AttachToProcess.PNG|
+  Debug\Attach to Process... |AttachToProcess.png|
 | 4. Select the test executable (e.g. DataHandlingTest.exe) from the
   list and click attach. Visual studio will change to debug mode.
 | 5. Set any breakpoints you want, go back to the runner.exe window and
@@ -91,4 +91,4 @@ debugger to running process.
 | 6. VERY IMPORTANT - Clean up when you have done, and do not check in
   with any paused tests!
 
-.. |AttachToProcess.PNG| image:: images/AttachToProcess.PNG
+.. |AttachToProcess.png| image:: images/AttachToProcess.png
