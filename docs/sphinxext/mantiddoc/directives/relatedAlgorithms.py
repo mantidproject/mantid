@@ -45,4 +45,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('relatedalgorithms', relatedAlgorithmsDirective)
+    app.add_directive('relatedalgorithms', relatedalgorithmsDirective)
