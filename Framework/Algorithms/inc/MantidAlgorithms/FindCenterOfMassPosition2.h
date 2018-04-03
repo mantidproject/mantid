@@ -50,9 +50,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (2); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SANSBeamCentreFinderMassMethod", "SANSBeamCentreFinder"};
-  }
+
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
 

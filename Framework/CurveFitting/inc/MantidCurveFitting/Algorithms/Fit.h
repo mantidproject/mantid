@@ -105,7 +105,7 @@ public:
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
     return {"FitGaussian", "UserFunction1D", "PlotPeakByLogValue",
-            "SplineBackground ", "EvaluateFunction"};
+            "SplineBackground", "EvaluateFunction"};
   }
 
 private:
