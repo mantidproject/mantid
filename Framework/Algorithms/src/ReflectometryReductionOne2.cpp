@@ -7,6 +7,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
@@ -361,6 +362,16 @@ void ReflectometryReductionOne2::init() {
                       "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
                   "Angle in degrees");
 
+  // Angle correction type
+  const std::vector<std::string> correctionType{"VerticalShift",
+                                                "RotateAroundSample"};
+  auto correctionTypeValidator = boost::make_shared<StringListValidator>(correctionType);
+  declareProperty(
+      "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
+      "Whether detectors should be shifted vertically or rotated around the "
+      "sample position if angle correction is applied.",
+      Direction::Input);
+
   // Processing instructions
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
@@ -460,6 +471,8 @@ void ReflectometryReductionOne2::exec() {
     m_normaliseMonitors = false;
     m_sum = false;
   }
+  // Angle correction must be done if ThetaIn is set
+  m_correctAngleInLambda = !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
 
   // Create the output workspace in wavelength
   MatrixWorkspace_sptr IvsLam = makeIvsLam();
@@ -623,6 +636,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
       g_log.debug("Normalising output workspace by transmission run\n");
       result = transOrAlgCorrection(result, true);
       outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
+    }
+    if (m_correctAngleInLambda) {
+      g_log.debug("Correcting the angles\n");
+      result = correctDetectorAngle(result);
     }
   }
 
@@ -1334,5 +1351,32 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
     }
   }
 }
+
+/** Apply angle correction to the detectors.
+
+  @param inputWS [in] :: A workspace to correct.
+  @return :: The corrected workspace.
+ */
+Mantid::API::MatrixWorkspace_sptr
+ReflectometryReductionOne2::correctDetectorAngle(
+    Mantid::API::MatrixWorkspace_sptr inputWS) {
+  const auto detectorIDs = inputWS->getSpectrum(0).getDetectorIDs();
+  auto result = inputWS;
+  double const thetaIn = getProperty("ThetaIn");
+  double const twoTheta = 2.0 * thetaIn;
+  const std::string correctionType = getProperty("DetectorCorrectionType");
+  for (auto detectorID : detectorIDs) {
+    auto correctAngle = this->createChildAlgorithm("SpecularReflectionPositionCorrect");
+    correctAngle->initialize();
+    correctAngle->setProperty("InputWorkspace", result);
+    correctAngle->setProperty("TwoTheta", twoTheta);
+    correctAngle->setProperty("DetectorCorrectionType", correctionType);
+    correctAngle->setProperty("DetectorID", detectorID);
+    correctAngle->execute();
+    result = correctAngle->getProperty("OutputWorkspace");
+  }
+  return result;
+}
+
 } // namespace Algorithms
 } // namespace Mantid

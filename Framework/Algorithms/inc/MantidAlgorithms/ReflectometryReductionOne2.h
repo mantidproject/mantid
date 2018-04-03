@@ -141,6 +141,10 @@ private:
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
                           const bool severe);
+  // Correct the detector angle
+  Mantid::API::MatrixWorkspace_sptr
+  correctDetectorAngle(Mantid::API::MatrixWorkspace_sptr inputWS);
+
 
   // Find and cache constants
   void findDetectorGroups();
@@ -162,6 +166,7 @@ private:
   bool m_normaliseMonitors;     // normalise by monitors and direct beam
   bool m_normaliseTransmission; // transmission or algorithmic correction
   bool m_sum;                   // whether to do summation
+  bool m_correctAngleInLambda;  // whether to correct the angle of detectors
   double m_theta0;              // horizon angle
   // groups of spectrum indices of the detectors of interest
   std::vector<std::vector<size_t>> m_detectorGroups;

@@ -7,6 +7,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -581,6 +583,82 @@ public:
     TS_ASSERT_DELTA(outQ->y(0)[7], 2.607359, 1e-6);
   }
 
+  void test_angle_correction() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1+2");
+    alg.setProperty("ThetaIn", 22.0);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 4.0, 1e-14);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 4.0, 1e-14);
+
+    auto detector = outLam->getDetector(0);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, -1, detector), 44.0, 1e-14);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, 2), 44.0, 1e-14);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, 3), 44.0, 1e-14);
+
+    auto shift2 = calculateShift(m_multiDetectorWS, outLam, 2);
+    TS_ASSERT_DELTA(shift2.X(), 0, 1e-14);
+    TS_ASSERT_DELTA(shift2.Y(), -0.0715561259, 1e-10);
+    TS_ASSERT_DELTA(shift2.Z(), 0, 1e-14);
+
+    auto shift3 = calculateShift(m_multiDetectorWS, outLam, 3);
+    TS_ASSERT_DELTA(shift3.X(), 0, 1e-14);
+    TS_ASSERT_DELTA(shift3.Y(), -0.1715561259, 1e-10);
+    TS_ASSERT_DELTA(shift3.Z(), 0, 1e-14);
+  }
+
+  void test_angle_correction_multi() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1:2");
+    alg.setProperty("ThetaIn", 22.0);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 14, 2);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 2.0, 1e-14);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.0, 1e-14);
+
+    auto detector = outLam->getDetector(0);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, -1, detector), 44.0, 1e-14);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, 2), 44.0, 1e-14);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, 3), 45.0, 1e-14);
+
+    auto shift2 = calculateShift(m_multiDetectorWS, outLam, 2);
+    TS_ASSERT_DELTA(shift2.X(), 0, 1e-14);
+    TS_ASSERT_DELTA(shift2.Y(), -0.0715561259, 1e-10);
+    TS_ASSERT_DELTA(shift2.Z(), 0, 1e-14);
+
+    auto shift3 = calculateShift(m_multiDetectorWS, outLam, 3);
+    TS_ASSERT_DELTA(shift3.X(), 0, 1e-14);
+    TS_ASSERT_DELTA(shift3.Y(), 0, 1e-10);
+    TS_ASSERT_DELTA(shift3.Z(), 0, 1e-14);
+  }
+
+  void test_angle_correction_rotation() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1+2");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.setProperty("DetectorCorrectionType", "RotateAroundSample");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 4.0, 1e-14);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 4.0, 1e-14);
+
+    auto detector = outLam->getDetector(0);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, -1, detector), 44.0, 1e-13);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, 2), 44.0, 1e-14);
+    TS_ASSERT_DELTA(calculateTwoTheta(outLam, 3), 44.0, 1e-14);
+
+    auto shift2 = calculateShift(m_multiDetectorWS, outLam, 2);
+    TS_ASSERT_DELTA(shift2.X(), 0.0358923903, 1e-10);
+    TS_ASSERT_DELTA(shift2.Y(), -0.0368952475, 1e-10);
+    TS_ASSERT_DELTA(shift2.Z(), 0, 1e-14);
+
+    auto shift3 = calculateShift(m_multiDetectorWS, outLam, 3);
+    TS_ASSERT_DELTA(shift3.X(), 0.0865005079, 1e-10);
+    TS_ASSERT_DELTA(shift3.Y(), -0.0880235564, 1e-10);
+    TS_ASSERT_DELTA(shift3.Z(), 0, 1e-14);
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,
@@ -660,6 +738,41 @@ private:
     TS_ASSERT_EQUALS(outQ->blocksize(), blocksize);
 
     return outQ;
+  }
+
+  // Calculate the two theta angle of a detector
+  double calculateTwoTheta(MatrixWorkspace_sptr ws, Mantid::detid_t detid,
+                           Mantid::Geometry::IDetector_const_sptr detector =
+                               Mantid::Geometry::IDetector_const_sptr()) {
+    auto instrument = ws->getInstrument();
+    auto sample = instrument->getComponentByName("some-surface-holder");
+    if (!detector) {
+      detector = instrument->getDetector(detid);
+    }
+    auto detSample = detector->getPos() - sample->getPos();
+
+    auto refFrame = instrument->getReferenceFrame();
+
+    const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
+    const double beamoffset =
+        refFrame->vecPointingAlongBeam().scalar_prod(detSample);
+
+    return std::atan2(upoffset, beamoffset) * 180 / M_PI;
+  }
+
+  // Calculate the shift in detector position
+  Mantid::Kernel::V3D calculateShift(MatrixWorkspace_sptr inputWS,
+                                     MatrixWorkspace_sptr outputWS,
+                                     Mantid::detid_t detid) {
+    auto inputInstrument = inputWS->getInstrument();
+    auto inputDetector = inputInstrument->getDetector(detid);
+    auto inPos = inputDetector->getPos();
+
+    auto outputInstrument = outputWS->getInstrument();
+    auto outputDetector = outputInstrument->getDetector(detid);
+    auto outPos = outputDetector->getPos();
+
+    return outPos - inPos;
   }
 };
 
