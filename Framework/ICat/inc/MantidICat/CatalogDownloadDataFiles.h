@@ -61,8 +61,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"DownloadFile", "CatalogGetDataFiles", 
-            "CatalogLogin"};
+    return {"DownloadFile", "CatalogGetDataFiles", "CatalogLogin"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
