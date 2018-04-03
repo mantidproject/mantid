@@ -483,7 +483,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             s2_dist = ws.getRun().getProperty("S2Distance").value
             s3_dist = ws.getRun().getProperty("S3Distance").value
         else:
-            logging.info("Slit distances were not found in the logs: using defaults")
             s1_dist = -2600.
             s2_dist = -2019.
             s3_dist = -714.
