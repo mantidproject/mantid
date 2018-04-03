@@ -2,9 +2,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
-from mantid.kernel import Direction
+from mantid.kernel import Direction, StringListValidator
 import numpy as np
-
 
 class SortXAxis(PythonAlgorithm):
 
@@ -22,6 +21,11 @@ class SortXAxis(PythonAlgorithm):
                              doc="Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output),
                              doc="Sorted Output Workspace")
+        self.declareProperty("Ordering",
+                             defaultValue="Ascending",
+                             validator=StringListValidator(["Ascending", "Descending"]),
+                             direction=Direction.Input,
+                             doc="Ascending or descending sorting")
 
     def PyExec(self):
         input_ws = self.getProperty('InputWorkspace').value
@@ -42,7 +46,12 @@ class SortXAxis(PythonAlgorithm):
 
             indexes = x_data.argsort()
 
+            if self.getPropertyValue("Ordering") == "Descending":
+                self.log().notice("Sort descending")
+                indexes = indexes[::-1]
+
             x_ordered = x_data[indexes]
+
             if input_ws.isHistogramData():
                 max_index = np.argmax(indexes)
                 indexes = np.delete(indexes, max_index)
