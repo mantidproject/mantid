@@ -106,9 +106,6 @@ class StateData(StateBase):
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
 def set_information_from_file(data_info, file_information):
-    # file_name = data_info.sample_scatter
-    # file_information_factory = SANSFileInformationFactory()
-    # file_information = file_information_factory.create_sans_file_information(file_name)
     instrument = file_information.get_instrument()
     facility = file_information.get_facility()
     run_number = file_information.get_run_number()
@@ -131,7 +128,8 @@ class StateDataBuilder(object):
         # Make sure that the product is in a valid state, ie not incomplete
         self.state.validate()
 
-        # There are some elements which need to be read from the file. This is currently:
+        # There are some elements which need to be read from the file information object.
+        #  This is currently:
         # 1. instrument
         # 2. sample_scatter_run_number
         set_information_from_file(self.state, self._file_information)
