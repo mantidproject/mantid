@@ -947,8 +947,9 @@ class MainWindow(QtGui.QMainWindow):
             # user specifies a non-exist directory. make an error message
             self.pop_one_button_dialog('Pre-processed directory {0} ({1}) does not exist.'
                                        ''.format(pre_process_dir, type(pre_process_dir)))
-            self._myControl.pre_processed_dir = None
+            self._myControl.pre_processed_dir = self._myControl.get_working_directory()
             self.ui.lineEdit_preprocessedDir.setStyleSheet('color: red;')
+            self.ui.lineEdit_preprocessedDir.setText(self._myControl.pre_processed_dir)
         # END-IF
 
         if len(error_message) > 0:
@@ -3698,7 +3699,9 @@ class MainWindow(QtGui.QMainWindow):
         """
         # create new window or clear existing window
         if self._general_1d_plot_window is None:
+            # TODO NOW3 - Fixme here!
             self._general_1d_plot_window = blabla()
+            pass
         else:
             self._general_1d_plot_window.reset()
         # show
@@ -3707,7 +3710,7 @@ class MainWindow(QtGui.QMainWindow):
         # set up the window
         vec_x, vec_y = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel='sigma')
         # get the latest (cached) vec_x and vec_y
-        self._general_1d_plot_window.plot(vec_x, vec_y)
+        # self._general_1d_plot_window.plot(vec_x, vec_y)
 
         return
 
