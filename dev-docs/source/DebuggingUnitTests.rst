@@ -1,6 +1,12 @@
 Debugging Unit Tests
 ====================
 
+.. contents::
+  :local:
+
+Using gdb
+---------
+
 Debugging typically requires the test executable to be run directly,
 rather than via ctest (which typically spawns off a separate process to
 run the actual tests). So an example of debugging from the command line
