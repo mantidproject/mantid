@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, WorkspaceGroup
 from sans.common.general_functions import (create_managed_non_child_algorithm, create_unmanaged_algorithm,
                                            get_output_name, get_base_name_from_multi_period_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode)
@@ -54,6 +54,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # Split into individual bundles which can be reduced individually. We split here if we have multiple periods or
     # sliced times for example.
     # ------------------------------------------------------------------------------------------------------------------
+    import pydevd
+    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -63,7 +65,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     single_reduction_options = {"UseOptimizations": use_optimizations}
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
     reduction_alg.setChild(False)
-
+    import pydevd
+    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     # Perform the data reduction
     for reduction_package in reduction_packages:
         # -----------------------------------
@@ -408,7 +411,8 @@ def get_reduction_packages(state, workspaces, monitors):
     if reduction_packages_require_splitting_for_event_slices(reduction_packages):
         reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
 
-    # TODO: Third: Split resulting reduction packages on a per-wave-length-range basis
+    if reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
+        reduction_packages = split_reduction_packages_for_wavelength_range(reduction_packages)
     return reduction_packages
 
 
@@ -433,6 +437,67 @@ def reduction_packages_require_splitting_for_event_slices(reduction_packages):
         requires_split = False
     return requires_split
 
+def reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
+    """
+        Creates reduction packages from a list of reduction packages by splitting up wavelength ranges.
+
+        The SANSSingleReduction algorithm can handle only a single wavelength range. For each wavelength range, we require an individual
+        reduction. Hence we split the states up at this point.
+        :param reduction_packages: a list of reduction packages.
+        :return: a list of reduction packages which has at least the same length as the input
+        """
+    # Determine if the event slice sub-state object contains multiple event slice requests. This is given
+    # by the number of elements in start_tof
+    reduction_package = reduction_packages[0]
+    state = reduction_package.state
+    wavelength_info = state.wavelength
+    start_wavelength = wavelength_info.wavelength_low
+    if start_wavelength is not None and len(start_wavelength) > 1:
+        requires_split = True
+    else:
+        requires_split = False
+    return requires_split
+
+def split_reduction_packages_for_wavelength_range(reduction_packages):
+    reduction_packages_split = []
+    for reduction_package in reduction_packages:
+        state = reduction_package.state
+        wavelength_info = state.wavelength
+        start_wavelength = wavelength_info.wavelength_low
+        end_wavelength = wavelength_info.wavelength_high
+
+        states = []
+        for start, end in zip(start_wavelength, end_wavelength):
+            state_copy = deepcopy(state)
+
+            state_copy.wavelength.wavelength_low = [start]
+            state_copy.wavelength.wavelength_high = [end]
+
+            state_copy.adjustment.normalize_to_monitor.wavelength_low = [start]
+            state_copy.adjustment.normalize_to_monitor.wavelength_high = [end]
+
+            state_copy.adjustment.calculate_transmission.wavelength_low = [start]
+            state_copy.adjustment.calculate_transmission.wavelength_high = [end]
+
+            state_copy.adjustment.wavelength_and_pixel_adjustment.wavelength_low = [start]
+            state_copy.adjustment.wavelength_and_pixel_adjustment.wavelength_high = [end]
+
+            states.append(state_copy)
+
+            workspaces = reduction_package.workspaces
+            monitors = reduction_package.monitors
+            is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
+            is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
+            for state in states:
+                new_state = deepcopy(state)
+                new_reduction_package = ReductionPackage(state=new_state,
+                                                         workspaces=workspaces,
+                                                         monitors=monitors,
+                                                         is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
+                                                         is_part_of_event_slice_reduction=is_part_of_event_slice_reduction,
+                                                         is_part_of_wavelength_range_reduction=True)
+                reduction_packages_split.append(new_reduction_package)
+    return reduction_packages_split
 
 def split_reduction_packages_for_event_slice_packages(reduction_packages):
     """
@@ -445,26 +510,25 @@ def split_reduction_packages_for_event_slice_packages(reduction_packages):
     # Since the state is the same for all reduction packages at this point we only need to create the split state once
     # for the first package and the apply to all the other packages. If we have 5 reduction packages and the user
     # requests 6 event slices, then we end up with 60 reductions!
-    reduction_package = reduction_packages[0]
-    state = reduction_package.state
-    slice_event_info = state.slice
-    start_time = slice_event_info.start_time
-    end_time = slice_event_info.end_time
-
-    states = []
-    for start, end in zip(start_time, end_time):
-        state_copy = deepcopy(state)
-        slice_event_info = state_copy.slice
-        slice_event_info.start_time = [start]
-        slice_event_info.end_time = [end]
-        states.append(state_copy)
-
-    # Now that we have all the states spread them across the packages
     reduction_packages_split = []
     for reduction_package in reduction_packages:
+        state = reduction_package.state
+        slice_event_info = state.slice
+        start_time = slice_event_info.start_time
+        end_time = slice_event_info.end_time
+
+        states = []
+        for start, end in zip(start_time, end_time):
+            state_copy = deepcopy(state)
+            slice_event_info = state_copy.slice
+            slice_event_info.start_time = [start]
+            slice_event_info.end_time = [end]
+            states.append(state_copy)
+
         workspaces = reduction_package.workspaces
         monitors = reduction_package.monitors
         is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
+
         for state in states:
             new_state = deepcopy(state)
             new_reduction_package = ReductionPackage(state=new_state,
@@ -562,8 +626,9 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     :param workspace_to_monitor: a workspace to monitor map
     """
     def _set_output_name(_reduction_alg, _reduction_package, _is_group, _reduction_mode, _property_name,
-                         _attr_out_name, _atrr_out_name_base, _suffix=None):
-        _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group)
+                         _attr_out_name, _atrr_out_name_base, multi_reduction_type, _suffix=None):
+        _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
+                                                    multi_reduction_type=multi_reduction_type)
 
         if _suffix is not None:
             _out_name += _suffix
@@ -576,33 +641,33 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     def _set_lab(_reduction_alg, _reduction_package, _is_group):
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
                          "OutputWorkspaceLABCan", "reduced_lab_can_name", "reduced_lab_can_base_name",
-                         LAB_CAN_SUFFIX)
+                         multi_reduction_type, LAB_CAN_SUFFIX)
 
         # Lab Can Count workspace - this is a partial workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
                          "OutputWorkspaceLABCanCount", "reduced_lab_can_count_name", "reduced_lab_can_count_base_name",
-                         LAB_CAN_COUNT_SUFFIX)
+                         multi_reduction_type, LAB_CAN_COUNT_SUFFIX)
 
         # Lab Can Norm workspace - this is a partial workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
                          "OutputWorkspaceLABCanNorm", "reduced_lab_can_norm_name", "reduced_lab_can_norm_base_name",
-                         LAB_CAN_NORM_SUFFIX)
+                         multi_reduction_type, LAB_CAN_NORM_SUFFIX)
 
     def _set_hab(_reduction_alg, _reduction_package, _is_group):
         # Hab Can Workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
                          "OutputWorkspaceHABCan", "reduced_hab_can_name", "reduced_hab_can_base_name",
-                         HAB_CAN_SUFFIX)
+                         multi_reduction_type, HAB_CAN_SUFFIX)
 
         # Hab Can Count workspace - this is a partial workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
                          "OutputWorkspaceHABCanCount", "reduced_hab_can_count_name", "reduced_hab_can_count_base_name",
-                         HAB_CAN_COUNT_SUFFIX)
+                          multi_reduction_type, HAB_CAN_COUNT_SUFFIX)
 
         # Hab Can Norm workspace - this is a partial workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
                          "OutputWorkspaceHABCanNorm", "reduced_hab_can_norm_name", "reduced_hab_can_norm_base_name",
-                         HAB_CAN_NORM_SUFFIX)
+                         multi_reduction_type, HAB_CAN_NORM_SUFFIX)
 
     # Go through the elements of the reduction package and set them on the reduction algorithm
     # Set the SANSState
@@ -627,27 +692,30 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     # ------------------------------------------------------------------------------------------------------------------
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-    is_group = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
+    is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
+    is_group = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or is_part_of_wavelength_range_reduction
+    multi_reduction_type = {"period": is_part_of_multi_period_reduction, "event_slice": is_part_of_event_slice_reduction,
+                            "wavelength_range": is_part_of_wavelength_range_reduction}
 
     reduction_mode = reduction_package.reduction_mode
     if reduction_mode is ISISReductionMode.Merged:
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.Merged,
-                         "OutputWorkspaceMerged", "reduced_merged_name", "reduced_merged_base_name")
+                         "OutputWorkspaceMerged", "reduced_merged_name", "reduced_merged_base_name", multi_reduction_type)
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
-                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", "_lab")
+                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
-                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", "_hab")
+                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
     elif reduction_mode is ISISReductionMode.LAB:
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
-                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name")
+                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
     elif reduction_mode is ISISReductionMode.HAB:
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
-                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name")
+                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
     elif reduction_mode is ISISReductionMode.All:
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
-                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name")
+                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
-                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name")
+                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
     else:
         raise RuntimeError("The reduction mode {0} is not known".format(reduction_mode))
 
@@ -705,7 +773,8 @@ def group_workspaces_if_required(reduction_package):
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
+    is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
+    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or is_part_of_wavelength_range_reduction
 
     reduced_lab = reduction_package.reduced_lab
     reduced_hab = reduction_package.reduced_hab
@@ -749,7 +818,11 @@ def add_to_group(workspace, name_of_group_workspace):
     name_of_workspace = workspace.name()
     if AnalysisDataService.doesExist(name_of_group_workspace):
         group_workspace = AnalysisDataService.retrieve(name_of_group_workspace)
-        group_workspace.add(name_of_workspace)
+        if type(group_workspace) is WorkspaceGroup:
+            group_workspace.add(name_of_workspace)
+        else:
+            name_of_group_workspace = name_of_group_workspace + "_group"
+            add_to_group(workspace, name_of_group_workspace)
     else:
         group_name = "GroupWorkspaces"
         group_options = {"InputWorkspaces": [name_of_workspace],
@@ -929,7 +1002,7 @@ class ReductionPackage(object):
     7. The reduced can and the reduced partial can workspaces (non have to exist, this is only for optimizations)
     """
     def __init__(self, state, workspaces, monitors, is_part_of_multi_period_reduction=False,
-                 is_part_of_event_slice_reduction=False):
+                 is_part_of_event_slice_reduction=False, is_part_of_wavelength_range_reduction=False):
         super(ReductionPackage, self).__init__()
         # -------------------------------------------------------
         # General Settings
@@ -939,6 +1012,7 @@ class ReductionPackage(object):
         self.monitors = monitors
         self.is_part_of_multi_period_reduction = is_part_of_multi_period_reduction
         self.is_part_of_event_slice_reduction = is_part_of_event_slice_reduction
+        self.is_part_of_wavelength_range_reduction = is_part_of_wavelength_range_reduction
         self.reduction_mode = state.reduction.reduction_mode
 
         # -------------------------------------------------------

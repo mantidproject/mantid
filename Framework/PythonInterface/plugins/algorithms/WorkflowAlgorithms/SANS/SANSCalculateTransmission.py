@@ -114,8 +114,8 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
         :return: a fitted workspace and an unfitted workspace
         """
 
-        wavelength_low = calculate_transmission_state.wavelength_low
-        wavelength_high = calculate_transmission_state.wavelength_high
+        wavelength_low = calculate_transmission_state.wavelength_low[0]
+        wavelength_high = calculate_transmission_state.wavelength_high[0]
         wavelength_step = calculate_transmission_state.wavelength_step
         wavelength_step_type = calculate_transmission_state.wavelength_step_type
         prefix = 1.0 if wavelength_step_type is RangeStepType.Lin else -1.0
@@ -281,8 +281,8 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             wavelength_low = calculate_transmission_state.wavelength_full_range_low
             wavelength_high = calculate_transmission_state.wavelength_full_range_high
         else:
-            wavelength_low = calculate_transmission_state.wavelength_low
-            wavelength_high = calculate_transmission_state.wavelength_high
+            wavelength_low = calculate_transmission_state.wavelength_low[0]
+            wavelength_high = calculate_transmission_state.wavelength_high[0]
 
         wavelength_step = calculate_transmission_state.wavelength_step
         rebin_type = calculate_transmission_state.rebin_type

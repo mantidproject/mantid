@@ -73,6 +73,10 @@ def all_list_elements_are_float_and_not_empty(value):
     typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=float)
     return typed_comparison(value)
 
+def all_list_elements_are_float_and_positive_and_not_empty(value):
+    typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=float,
+                               additional_comparison=lambda x: x >= 0)
+    return typed_comparison(value)
 
 def all_list_elements_are_string_and_not_empty(value):
     typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=str)
@@ -247,6 +251,16 @@ class FloatListParameter(TypedParameter):
                             " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
                                                                                str(value), type(value)))
 
+class PositiveFloatListParameter(TypedParameter):
+    def __init__(self):
+        super(PositiveFloatListParameter, self).__init__(list, all_list_elements_are_float_and_positive_and_not_empty)
+
+    def _type_check(self, value):
+
+        if not isinstance(value, self.parameter_type) or not all_list_elements_are_float_and_not_empty(value):
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
+                                                                               str(value), type(value)))
 
 class StringListParameter(TypedParameter):
         def __init__(self):
