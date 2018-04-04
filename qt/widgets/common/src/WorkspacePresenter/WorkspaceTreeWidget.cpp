@@ -734,7 +734,7 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
 
   if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
     auto members = group->getAllItems();
-    for (auto ws : members) {
+    for (const auto &ws : members) {
       auto *node = addTreeEntry(std::make_pair(ws->getName(), ws), item);
       excludeItemFromSort(node);
       if (shouldBeSelected(node->text(0)))
