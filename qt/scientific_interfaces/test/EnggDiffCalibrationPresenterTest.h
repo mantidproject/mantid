@@ -61,15 +61,16 @@ public:
     auto presenter = setUpPresenter();
     const auto filename = "TESTINST_123_456.prm";
     const GSASCalibrationParameters calibParams(1, 2, 3, 4);
+    const std::vector<GSASCalibrationParameters> calibParamsVec({calibParams});
 
     EXPECT_CALL(*m_mockView, getInputFilename())
         .WillOnce(Return(boost::make_optional<std::string>(filename)));
     EXPECT_CALL(*m_mockView, userWarning(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*m_mockModel, parseCalibrationFile(filename))
-        .WillOnce(Return(calibParams));
+        .WillOnce(Return(calibParamsVec));
     EXPECT_CALL(*m_mockView, displayLoadedVanadiumRunNumber("123"));
     EXPECT_CALL(*m_mockView, displayLoadedCeriaRunNumber("456"));
-    EXPECT_CALL(*m_mockModel, setCalibrationParams(calibParams));
+    EXPECT_CALL(*m_mockModel, setCalibrationParams(calibParamsVec));
 
     presenter->notify(
         IEnggDiffCalibrationPresenter::Notification::LoadCalibration);
