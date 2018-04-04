@@ -11,6 +11,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -637,10 +638,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
       result = transOrAlgCorrection(result, true);
       outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
     }
-    if (m_correctAngleInLambda) {
-      g_log.debug("Correcting the angles\n");
-      result = correctDetectorAngle(result);
-    }
   }
 
   return result;
@@ -806,24 +803,34 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
   return corrAlg->getProperty("OutputWorkspace");
 }
 
-/**
-* The input workspace (in wavelength) to convert to Q
-* @param inputWS : the input workspace to convert
+/** Convert a workspace to Q
+*
+* @param inputWS : The input workspace (in wavelength) to convert to Q
 * @return : output workspace in Q
 */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
-
-  // Convert to Q
-  auto convertUnits = this->createChildAlgorithm("ConvertUnits");
-  convertUnits->initialize();
-  convertUnits->setProperty("InputWorkspace", inputWS);
-  convertUnits->setProperty("Target", "MomentumTransfer");
-  convertUnits->setProperty("AlignBins", false);
-  convertUnits->execute();
-  MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
-
-  return IvsQ;
+  if (m_correctAngleInLambda) {
+    MatrixWorkspace_sptr IvsQ = inputWS->clone();
+    auto &XOut0 = IvsQ->mutableX(0);
+    const auto &XIn0 = inputWS->x(0);
+    double const theta = getProperty("ThetaIn");
+    double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
+    std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
+                   [factor](double x) { return factor / x; });
+    IvsQ->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+    return IvsQ;
+  } else {
+    auto convertUnits = this->createChildAlgorithm("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setProperty("InputWorkspace", inputWS);
+    convertUnits->setProperty("Target", "MomentumTransfer");
+    convertUnits->setProperty("AlignBins", false);
+    convertUnits->execute();
+    MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
+    return IvsQ;
+  }
 }
 
 /**
@@ -1350,32 +1357,6 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
       g_log.warning(message);
     }
   }
-}
-
-/** Apply angle correction to the detectors.
-
-  @param inputWS [in] :: A workspace to correct.
-  @return :: The corrected workspace.
- */
-Mantid::API::MatrixWorkspace_sptr
-ReflectometryReductionOne2::correctDetectorAngle(
-    Mantid::API::MatrixWorkspace_sptr inputWS) {
-  const auto detectorIDs = inputWS->getSpectrum(0).getDetectorIDs();
-  auto result = inputWS;
-  double const thetaIn = getProperty("ThetaIn");
-  double const twoTheta = 2.0 * thetaIn;
-  const std::string correctionType = getProperty("DetectorCorrectionType");
-  for (auto detectorID : detectorIDs) {
-    auto correctAngle = this->createChildAlgorithm("SpecularReflectionPositionCorrect");
-    correctAngle->initialize();
-    correctAngle->setProperty("InputWorkspace", result);
-    correctAngle->setProperty("TwoTheta", twoTheta);
-    correctAngle->setProperty("DetectorCorrectionType", correctionType);
-    correctAngle->setProperty("DetectorID", detectorID);
-    correctAngle->execute();
-    result = correctAngle->getProperty("OutputWorkspace");
-  }
-  return result;
 }
 
 } // namespace Algorithms

@@ -141,10 +141,6 @@ private:
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
                           const bool severe);
-  // Correct the detector angle
-  Mantid::API::MatrixWorkspace_sptr
-  correctDetectorAngle(Mantid::API::MatrixWorkspace_sptr inputWS);
-
 
   // Find and cache constants
   void findDetectorGroups();
