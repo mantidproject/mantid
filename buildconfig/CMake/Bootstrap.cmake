@@ -74,6 +74,7 @@ if( MSVC )
 
   # Set variables to help CMake find components
   set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY_DIR}/include" )
+  include_directories ( ${THIRD_PARTY_DIR}/include )
   set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY_DIR}/lib" )
   set ( CMAKE_PREFIX_PATH "${THIRD_PARTY_DIR};${THIRD_PARTY_DIR}/lib/qt4" )
   set ( BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}" )
