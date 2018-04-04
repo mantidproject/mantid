@@ -178,11 +178,11 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   NXData dataGroup = firstEntry.openNXData("data");
   NXInt data = dataGroup.openIntData();
   data.load();
-  int numberOfHistograms = data.dim0() * data.dim1();
-  createEmptyWorkspace(numberOfHistograms + 2, 1);
+  int numberOfHistograms = data.dim0() * data.dim1() + 2;
+  createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
   size_t nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, 0);
-  loadDataIntoWorkspaceFromHorizontalTubes(data, {0}, nextIndex);
+  loadDataIntoWorkspaceFromHorizontalTubes(data, m_defaultBinning, nextIndex);
   if (data.dim0() == 128 && m_instrumentName == "D11") {
     m_resMode = "low";
   }
@@ -258,9 +258,9 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
         m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "5");
   }
   g_log.debug("Loading the data into the workspace...");
-  size_t nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, 0);
-  nextIndex = loadDataIntoWorkspaceFromHorizontalTubes(dataRear, binningRear,
-                                                       nextIndex);
+
+  size_t nextIndex =
+      loadDataIntoWorkspaceFromHorizontalTubes(dataRear, binningRear, 0);
   nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataRight, binningRight,
                                                      nextIndex);
   nextIndex =
@@ -269,6 +269,8 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
                                                        nextIndex);
   nextIndex =
       loadDataIntoWorkspaceFromHorizontalTubes(dataUp, binningUp, nextIndex);
+
+  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
 }
 
 size_t
