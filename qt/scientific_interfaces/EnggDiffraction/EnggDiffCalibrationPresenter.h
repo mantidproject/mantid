@@ -27,6 +27,7 @@ private:
   std::tuple<std::string, std::string, std::string>
   parseCalibPath(const std::string &path) const;
 
+  void processCalibrate();
   void processLoadCalibration();
 
   std::unique_ptr<IEnggDiffCalibrationModel> m_model;

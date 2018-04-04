@@ -9,7 +9,8 @@ public:
   virtual ~IEnggDiffCalibrationPresenter() = default;
 
   enum class Notification {
-    LoadCalibration          ///< Load a calibration from file
+    Calibrate,      ///< Run a normal calibration
+    LoadCalibration ///< Load a calibration from file
   };
 
   virtual void

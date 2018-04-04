@@ -19,6 +19,11 @@ public:
 
   MOCK_CONST_METHOD0(getInputFilename, boost::optional<std::string>());
 
+  MOCK_CONST_METHOD0(getNewCalibCeriaRunNumber, boost::optional<std::string>());
+
+  MOCK_CONST_METHOD0(getNewCalibVanadiumRunNumber,
+                     boost::optional<std::string>());
+
   MOCK_METHOD2(userWarning, void(const std::string &warningTitle,
                                  const std::string &warningDescription));
 };

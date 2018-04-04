@@ -15,6 +15,10 @@ public:
   virtual ~IEnggDiffCalibrationModel() = default;
 
   virtual std::vector<GSASCalibrationParameters>
+  createCalibration(const std::string &vanadiumRunNumber,
+                    const std::string &ceriaRunNumber) const = 0;
+
+  virtual std::vector<GSASCalibrationParameters>
   parseCalibrationFile(const std::string &filePath) const = 0;
 
   virtual void setCalibrationParams(

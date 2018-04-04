@@ -12,6 +12,11 @@ using namespace MantidQt::CustomInterfaces;
 
 class MockEnggDiffCalibrationModel : public IEnggDiffCalibrationModel {
 public:
+  MOCK_CONST_METHOD2(createCalibration,
+                     std::vector<GSASCalibrationParameters>(
+                         const std::string &canadiumRunNumber,
+                         const std::string &ceriaRunNumber));
+
   MOCK_CONST_METHOD1(
       parseCalibrationFile,
       std::vector<GSASCalibrationParameters>(const std::string &filePath));

@@ -11,6 +11,10 @@ public:
 
   virtual boost::optional<std::string> getInputFilename() const = 0;
 
+  virtual boost::optional<std::string> getNewCalibCeriaRunNumber() const = 0;
+
+  virtual boost::optional<std::string> getNewCalibVanadiumRunNumber() const = 0;
+
   virtual void userWarning(const std::string &warningTitle,
                            const std::string &warningDescription) = 0;
 };

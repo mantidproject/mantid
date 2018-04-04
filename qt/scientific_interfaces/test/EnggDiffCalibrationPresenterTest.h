@@ -13,6 +13,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 using testing::Return;
+using testing::Throw;
 
 class EnggDiffCalibrationPresenterTest : public CxxTest::TestSuite {
 public:
@@ -74,6 +75,75 @@ public:
 
     presenter->notify(
         IEnggDiffCalibrationPresenter::Notification::LoadCalibration);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibRequiresVanadium() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, getNewCalibVanadiumRunNumber())
+        .WillOnce(Return(boost::none));
+    EXPECT_CALL(
+        *m_mockView,
+        userWarning("No vanadium entered",
+                    "Please enter a vanadium run number to calibrate against"));
+    EXPECT_CALL(*m_mockView, getNewCalibCeriaRunNumber()).Times(0);
+
+    presenter->notify(IEnggDiffCalibrationPresenter::Notification::Calibrate);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibRequiresCeria() {
+    auto presenter = setUpPresenter();
+
+    ON_CALL(*m_mockView, getNewCalibVanadiumRunNumber())
+        .WillByDefault(Return(boost::make_optional<std::string>("123")));
+    EXPECT_CALL(*m_mockView, getNewCalibCeriaRunNumber())
+        .WillOnce(Return(boost::none));
+    EXPECT_CALL(
+        *m_mockView,
+        userWarning("No ceria entered",
+                    "Please enter a ceria run number to calibrate against"));
+    EXPECT_CALL(*m_mockModel, createCalibration(testing::_, testing::_))
+        .Times(0);
+
+    presenter->notify(IEnggDiffCalibrationPresenter::Notification::Calibrate);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibHandlesErrorInModel() {
+    auto presenter = setUpPresenter();
+    ON_CALL(*m_mockView, getNewCalibVanadiumRunNumber())
+        .WillByDefault(Return(boost::make_optional<std::string>("123")));
+    ON_CALL(*m_mockView, getNewCalibCeriaRunNumber())
+        .WillByDefault(Return(boost::make_optional<std::string>("456")));
+
+    EXPECT_CALL(*m_mockModel, createCalibration("123", "456"))
+        .WillOnce(Throw(std::runtime_error("Failure reason")));
+    EXPECT_CALL(*m_mockView,
+                userWarning("Calibration failed", "Failure reason"));
+    EXPECT_CALL(*m_mockModel, setCalibrationParams(testing::_)).Times(0);
+
+    presenter->notify(IEnggDiffCalibrationPresenter::Notification::Calibrate);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_successfulCalibUpdatesModel() {
+    auto presenter = setUpPresenter();
+    const GSASCalibrationParameters calibParams(1, 2, 3, 4);
+    const std::vector<GSASCalibrationParameters> calibParamsVec({calibParams});
+
+    ON_CALL(*m_mockView, getNewCalibVanadiumRunNumber())
+        .WillByDefault(Return(boost::make_optional<std::string>("123")));
+    ON_CALL(*m_mockView, getNewCalibCeriaRunNumber())
+        .WillByDefault(Return(boost::make_optional<std::string>("456")));
+    ON_CALL(*m_mockModel, createCalibration(testing::_, testing::_))
+        .WillByDefault(Return(calibParamsVec));
+
+    EXPECT_CALL(*m_mockModel, setCalibrationParams(calibParamsVec));
+    EXPECT_CALL(*m_mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    presenter->notify(IEnggDiffCalibrationPresenter::Notification::Calibrate);
     assertMocksUsedCorrectly();
   }
 

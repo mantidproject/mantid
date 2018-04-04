@@ -35,6 +35,10 @@ void EnggDiffCalibrationPresenter::notify(
     IEnggDiffCalibrationPresenter::Notification notif) {
   switch (notif) {
 
+  case IEnggDiffCalibrationPresenter::Notification::Calibrate:
+    processCalibrate();
+    break;
+
   case IEnggDiffCalibrationPresenter::Notification::LoadCalibration:
     processLoadCalibration();
     break;
@@ -82,6 +86,32 @@ EnggDiffCalibrationPresenter::parseCalibPath(const std::string &path) const {
         castMsg + "the Ceria number part of the file name.\n\n" + explMsg);
   }
   return std::make_tuple(parts[0], parts[1], parts[2]);
+}
+
+void EnggDiffCalibrationPresenter::processCalibrate() {
+  const auto vanadiumRunNumber = m_view->getNewCalibVanadiumRunNumber();
+  if (!vanadiumRunNumber) {
+    m_view->userWarning(
+        "No vanadium entered",
+        "Please enter a vanadium run number to calibrate against");
+    return;
+  }
+
+  const auto ceriaRunNumber = m_view->getNewCalibCeriaRunNumber();
+  if (!ceriaRunNumber) {
+    m_view->userWarning("No ceria entered",
+                        "Please enter a ceria run number to calibrate against");
+    return;
+  }
+
+  std::vector<GSASCalibrationParameters> newCalib;
+  try {
+    newCalib = m_model->createCalibration(*vanadiumRunNumber, *ceriaRunNumber);
+  } catch (std::runtime_error &ex) {
+    m_view->userWarning("Calibration failed", ex.what());
+    return;
+  }
+  m_model->setCalibrationParams(newCalib);
 }
 
 void EnggDiffCalibrationPresenter::processLoadCalibration() {
