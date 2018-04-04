@@ -18,10 +18,10 @@ case "$TYPE" in
         exit $(git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.py)
     ;;
     cpp)
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h) || exit $FOUND
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp) || exit $FOUND
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx) || exit $FOUND
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc) || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc || exit $FOUND
         exit $NOTFOUND
     ;;
     dev-docs-only)
