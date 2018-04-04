@@ -21,6 +21,8 @@ Improvements
 Bug fixes
 #########
 
+* Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
+
 Features Removed
 ################
 
