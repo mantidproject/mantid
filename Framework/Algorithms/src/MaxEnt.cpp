@@ -60,7 +60,7 @@ const double THRESHOLD = 1E-6;
 */
 MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
                                  const std::vector<size_t> &itCount,
-                                 const ::std::string yLabel) {
+                                 const std::string yLabel) {
 
   ws->setYUnitLabel(yLabel);
   try {
@@ -75,16 +75,16 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   }
 
   const size_t nspec = ws->getNumberHistograms();
-  if (itCount.size() == 0) {
+  if (itCount.empty()) {
     return ws; // In case, we don't have any spectra
   }
   for (size_t spec = 0; spec < nspec; spec++) {
-    auto &DataX = ws->dataX(spec);
-    DataX.resize(itCount[spec]);
-    auto &DataY = ws->dataY(spec);
-    DataY.resize(itCount[spec]);
-    auto &DataE = ws->dataE(spec);
-    DataE.resize(itCount[spec]);
+    auto &dataX = ws->dataX(spec);
+    dataX.resize(itCount[spec]);
+    auto &dataY = ws->dataY(spec);
+    dataY.resize(itCount[spec]);
+    auto &dataE = ws->dataE(spec);
+    dataE.resize(itCount[spec]);
   }
   return ws;
 }
