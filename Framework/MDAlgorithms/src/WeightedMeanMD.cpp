@@ -28,10 +28,10 @@ void WeightedMeanMD::execHistoHisto(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   using DataObjects::MDHistoWorkspaceIterator;
-  MDHistoWorkspaceIterator *lhs_it =
-      dynamic_cast<MDHistoWorkspaceIterator *>(out->createIterator());
-  MDHistoWorkspaceIterator *rhs_it =
-      dynamic_cast<MDHistoWorkspaceIterator *>(operand->createIterator());
+  auto lhs = out->createIterator();
+  auto lhs_it = dynamic_cast<MDHistoWorkspaceIterator *>(lhs.get());
+  auto rhs = operand->createIterator();
+  auto rhs_it = dynamic_cast<MDHistoWorkspaceIterator *>(rhs.get());
 
   if (!lhs_it || !rhs_it) {
     throw std::logic_error("Histo iterators have wrong type.");
@@ -63,9 +63,6 @@ void WeightedMeanMD::execHistoHisto(
     out->setSignalAt(pos, signal);
     out->setErrorSquaredAt(pos, error_sq);
   } while (lhs_it->next() && rhs_it->next());
-
-  delete lhs_it;
-  delete rhs_it;
 }
 
 //----------------------------------------------------------------------------------------------

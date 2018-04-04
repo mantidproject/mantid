@@ -56,7 +56,7 @@ class DirectTest(unittest.TestCase):
 
     def test_configurematplotlib(self):
         defaultParams = directtools.defaultrcParams()
-        directtools.configurematplotlib(defaultParams)
+        directtools._configurematplotlib(defaultParams)
         for key in defaultParams:
             self.assertTrue(key in matplotlib.rcParams)
             self.assertEqual(matplotlib.rcParams[key], defaultParams[key])
@@ -98,7 +98,7 @@ class DirectTest(unittest.TestCase):
         self.assertEqual(outEs[2], 0.)
 
     def test_mantidsubplotsetup(self):
-        result = directtools.mantidsubplotsetup()
+        result = directtools._mantidsubplotsetup()
         self.assertEqual(result, {'projection': 'mantid'})
 
     def _nanminmaxSetup(self):

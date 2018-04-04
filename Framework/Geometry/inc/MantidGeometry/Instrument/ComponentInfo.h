@@ -87,6 +87,15 @@ private:
       const std::map<size_t, size_t> &detectorExclusions) const;
 
 public:
+  struct QuadrilateralComponent {
+    size_t topLeft;
+    size_t bottomLeft;
+    size_t bottomRight;
+    size_t topRight;
+    size_t nX;
+    size_t nY;
+  };
+
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
@@ -101,7 +110,10 @@ public:
   std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
+  const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
+  QuadrilateralComponent
+  quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;
   size_t indexOfAny(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
@@ -131,13 +143,15 @@ public:
   const std::string &name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Kernel::V3D &scaleFactor);
-  size_t root();
+  size_t root() const;
 
   const IComponent *componentID(const size_t componentIndex) const {
     return m_componentIds->operator[](componentIndex);
   }
   bool hasValidShape(const size_t componentIndex) const;
+
   const Geometry::IObject &shape(const size_t componentIndex) const;
+
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,

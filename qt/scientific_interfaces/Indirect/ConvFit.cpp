@@ -709,7 +709,7 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
 
     // If the analyser component is not already in the data file then load it
     // from the parameter file
-    if (inst->getComponentByName(analyser) == NULL ||
+    if (inst->getComponentByName(analyser) == nullptr ||
         inst->getComponentByName(analyser)
                 ->getNumberParameter("resolution")
                 .size() == 0) {
@@ -729,7 +729,7 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
 
       inst = workspace->getInstrument();
     }
-    if (inst->getComponentByName(analyser) != NULL) {
+    if (inst->getComponentByName(analyser) != nullptr) {
       resolution = inst->getComponentByName(analyser)
                        ->getNumberParameter("resolution")[0];
     } else {

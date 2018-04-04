@@ -327,7 +327,10 @@ class CrystalField(object):
         return out
 
     def makeMultiSpectrumFunction(self):
-        return re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
+        fun = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
+        fun = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun)
+        fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+        return fun
 
     @property
     def Ion(self):
@@ -1319,8 +1322,6 @@ class CrystalFieldFit(object):
         """
         from mantid.api import AlgorithmManager
         fun = self.model.makeMultiSpectrumFunction()
-        if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -1375,8 +1376,6 @@ class CrystalFieldFit(object):
             fun = str(self.model.function)
         else:
             fun = self.model.makeMultiSpectrumFunction()
-        if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)

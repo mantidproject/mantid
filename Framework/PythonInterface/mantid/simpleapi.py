@@ -266,6 +266,10 @@ def StartLiveData(*args, **kwargs):
         try:
             if value is None:
                 value = kwargs.pop(name)
+            else:
+                # We don't need the value, but still need to remove from kwargs
+                # so that this property isn't set again later
+                kwargs.pop(name, None)
             algm.setProperty(name, value)
 
         except ValueError as ve:

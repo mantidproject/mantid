@@ -1,9 +1,10 @@
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/Common/InputController.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -441,10 +442,8 @@ int ProjectionSurface::getDetectorID(int x, int y) const {
 }
 
 //------------------------------------------------------------------------------
-const Mantid::Geometry::IDetector &ProjectionSurface::getDetector(int x,
-                                                                  int y) const {
-  size_t pickID = getPickID(x, y);
-  return m_instrActor->getDetectorByPickID(pickID);
+size_t ProjectionSurface::getDetector(int x, int y) const {
+  return getPickID(x, y);
 }
 
 /**
@@ -500,7 +499,7 @@ size_t ProjectionSurface::getPickID(int x, int y) const {
   if (!m_pickImage || !m_pickImage->valid(x, y))
     return -1;
   QRgb pixel = m_pickImage->pixel(x, y);
-  return GLActor::decodePickColor(pixel);
+  return InstrumentRenderer::decodePickColor(pixel);
 }
 
 /**
@@ -769,7 +768,7 @@ void ProjectionSurface::clearComparisonPeaks() {
 */
 void ProjectionSurface::setPeakLabelPrecision(int n) {
   if (n < 1) {
-    QMessageBox::critical(NULL, "MantidPlot - Error",
+    QMessageBox::critical(nullptr, "MantidPlot - Error",
                           "Precision must be a positive number");
     return;
   }

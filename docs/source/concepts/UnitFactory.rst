@@ -61,7 +61,7 @@ here is the Bragg scattering angle (e.g. half of the
 Mantid z-axis)
 
 **Note on Wavelength**: If the emode property in
-:ref: `ConvertUnits <algm-ConvertUnits>`
+:ref:`ConvertUnits <algm-ConvertUnits>`
 is specified as inelastic Direct/Indirect (inelastic) then the
 conversion to wavelength will take into account the fixed initial/final
 energy respectively. Units conversion into elastic momentum transfer

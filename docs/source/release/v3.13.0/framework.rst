@@ -13,10 +13,17 @@ Framework Changes
 Algorithms
 ----------
 
+Bug fixes
+#########
+
+- The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
+
 Improved
 ########
 - :ref:`Maxent <algm-Maxent>` when outputting the results of the iterations, it no longer pads with zeroes but
   returns as many items as iterations done for each spectrum, making the iterations easy to count.
 - :ref:`ConvertToPointData <algm-ConvertToPointData>` and :ref:`ConvertToHistogram <algm-ConvertToHistogram>` now propagate the Dx errors to the output.
+- The algorithm :ref:`CreateWorkspace <algm-CreateWorkspace>` can now optionally receive the Dx errors.
+
 
 :ref:`Release 3.13.0 <v3.13.0>`

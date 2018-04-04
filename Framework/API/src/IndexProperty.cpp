@@ -33,8 +33,9 @@ std::string IndexProperty::isValid() const {
   return error;
 }
 
-std::string IndexProperty::operator=(const std::string &rhs) {
-  return setValue(rhs);
+IndexProperty &IndexProperty::operator=(const std::string &rhs) {
+  setValue(rhs);
+  return *this;
 }
 
 IndexProperty::operator Indexing::SpectrumIndexSet() const {
