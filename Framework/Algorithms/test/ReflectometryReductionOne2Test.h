@@ -605,6 +605,27 @@ public:
     }
   }
 
+  void test_no_angle_correction() {
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+
+    auto const &qX = outQ->x(0);
+    auto const &lamX = outLam->x(0);
+
+    std::vector<double> lamXinv(lamX.size() + 3);
+    std::reverse_copy(lamX.begin(), lamX.end(), lamXinv.begin());
+
+    auto factor = 4.0 * M_PI * sin(22.5 * M_PI / 180.0);
+    for (size_t i = 0; i < qX.size(); ++i) {
+      TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-14);
+    }
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,

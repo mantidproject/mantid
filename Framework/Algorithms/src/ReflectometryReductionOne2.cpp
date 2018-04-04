@@ -7,7 +7,6 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
@@ -363,17 +362,6 @@ void ReflectometryReductionOne2::init() {
                       "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
                   "Angle in degrees");
 
-  // Angle correction type
-  const std::vector<std::string> correctionType{"VerticalShift",
-                                                "RotateAroundSample"};
-  auto correctionTypeValidator =
-      boost::make_shared<StringListValidator>(correctionType);
-  declareProperty(
-      "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
-      "Whether detectors should be shifted vertically or rotated around the "
-      "sample position if angle correction is applied.",
-      Direction::Input);
-
   // Processing instructions
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
@@ -473,9 +461,6 @@ void ReflectometryReductionOne2::exec() {
     m_normaliseMonitors = false;
     m_sum = false;
   }
-  // Angle correction must be done if ThetaIn is set
-  m_correctAngleInLambda =
-      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
 
   // Create the output workspace in wavelength
   MatrixWorkspace_sptr IvsLam = makeIvsLam();
@@ -812,7 +797,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
 */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
-  if (m_correctAngleInLambda) {
+  bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
+  bool const shouldCorrectAngle =
+      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
+  if (shouldCorrectAngle && moreThanOneDetector) {
     MatrixWorkspace_sptr IvsQ = inputWS->clone();
     auto &XOut0 = IvsQ->mutableX(0);
     const auto &XIn0 = inputWS->x(0);
