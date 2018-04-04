@@ -30,8 +30,7 @@ from HFIR_4Circle_Reduction.downloaddialog import DataDownloadDialog
 import HFIR_4Circle_Reduction.refineubfftsetup as refineubfftsetup
 import HFIR_4Circle_Reduction.PeaksIntegrationReport as PeaksIntegrationReport
 import HFIR_4Circle_Reduction.IntegrateSingePtSubWindow as IntegrateSingePtSubWindow
-
-
+import HFIR_4Circle_Reduction.generalplotview as generalplotview
 # import line for the UI python class
 from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
 
@@ -3699,18 +3698,20 @@ class MainWindow(QtGui.QMainWindow):
         """
         # create new window or clear existing window
         if self._general_1d_plot_window is None:
-            # TODO NOW3 - Fixme here!
-            self._general_1d_plot_window = blabla()
+            self._general_1d_plot_window = generalplotview.GeneralPlotWindow(self)
             pass
         else:
-            self._general_1d_plot_window.reset()
+            self._general_1d_plot_window.reset_window()
         # show
         self._general_1d_plot_window.show()
 
         # set up the window
-        vec_x, vec_y = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel='sigma')
-        # get the latest (cached) vec_x and vec_y
-        # self._general_1d_plot_window.plot(vec_x, vec_y)
+        try:
+            vec_x, vec_y, vec_e = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel='sigma')
+            # get the latest (cached) vec_x and vec_y
+            self._general_1d_plot_window.plot(vec_x, vec_y, vec_e)
+        except RuntimeError as run_err:
+            self.pop_one_button_dialog(str(run_err))
 
         return
 

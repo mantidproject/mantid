@@ -1318,14 +1318,15 @@ class CWSCDReductionControl(object):
             xye_list.append([x_value, y_value, e_value])
         # END-FOR
 
+        if len(xye_list) == 0:
+            raise RuntimeError('No integrated peak is found')
+
         # convert to 3 numpy vectors
         xye_list.sort()
         xye_matrix = numpy.array(xye_list)
         xye_matrix = xye_matrix.transpose()
 
         return xye_matrix[0], xye_matrix[1], xye_matrix[2]
-
-
 
     def generate_mask_workspace(self, exp_number, scan_number, roi_start, roi_end, mask_tag=None):
         """ Generate a mask workspace

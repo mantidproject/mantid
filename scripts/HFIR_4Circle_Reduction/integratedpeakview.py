@@ -212,6 +212,15 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
 
         return
 
+    def on_mouse_press_event(self, event):
+        """
+
+        :param event:
+        :return:
+        """
+
+        return
+
     def plot_data(self, vec_x, vec_y, title, label_x, label_y):
         """
         plot current data
@@ -223,6 +232,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         :return:
         """
 
+        return
 
     def reset_plots(self):
         """

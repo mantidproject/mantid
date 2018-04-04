@@ -20,9 +20,10 @@ class GeneralPlotWindow(QMainWindow):
         self.ui.setupUi(self)
 
         # set up the event handling
-        self.ui.pushButton_exportPlot2File.clicked.connect()
-        self.ui.pushButton_quit.clicked.connect()
-        self.ui.actionReset.triggered.connect()
+        # TODO NOW3
+        # self.ui.pushButton_exportPlot2File.clicked.connect()
+        # self.ui.pushButton_quit.clicked.connect()
+        # self.ui.actionReset.triggered.connect()
 
         # class variables
         self._work_dir = os.getcwd()
@@ -76,5 +77,14 @@ class GeneralPlotWindow(QMainWindow):
             raise RuntimeError('Directory {0} does not exist.'.format(work_dir))
         else:
             self._work_dir = work_dir
+
+        return
+
+    def reset_window(self):
+        """
+
+        :return:
+        """
+        # TODO NOW3
 
         return
