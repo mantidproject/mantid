@@ -122,7 +122,7 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
     } else {
       try {
         ws->blocksize();
-      } catch (std::length_error) {
+      } catch (std::length_error &) {
         issues[INPUT_WORKSPACE_PROPERTY] +=
             "Workspace " + ws->getName() +
             " has different number of points per histogram\n";
@@ -254,8 +254,8 @@ void ConjoinXRuns::fillHistory() {
   if (!isChild()) {
     // Loop over the input workspaces, making the call that copies their
     // history to the output one
-    for (auto inWS = m_inputWS.begin(); inWS != m_inputWS.end(); ++inWS) {
-      m_outWS->history().addHistory((*inWS)->getHistory());
+    for (auto &inWS : m_inputWS) {
+      m_outWS->history().addHistory(inWS->getHistory());
     }
     // Add the history for the current algorithm to the output
     m_outWS->history().addHistory(m_history);

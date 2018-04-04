@@ -126,7 +126,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "temp");
     alg.execute();
     MatrixWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out_ws != NULL);
+    TS_ASSERT(out_ws != nullptr);
 
     const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "Wavelength");

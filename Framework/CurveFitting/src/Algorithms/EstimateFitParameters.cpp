@@ -322,9 +322,8 @@ void EstimateFitParameters::initConcrete() {
   declareProperty("NSamples", 100, "Number of samples.");
   declareProperty("Constraints", "",
                   "Additional constraints on tied parameters.");
-  declareProperty(
-      "Type", "Monte Carlo",
-      "Type of the algorithm: \"Monte Carlo\" or \"Cross Entropy\"");
+  declareProperty("Type", "Monte Carlo",
+                  R"(Type of the algorithm: "Monte Carlo" or "Cross Entropy")");
   declareProperty("NOutputs", 10, "Number of parameter sets to output to "
                                   "OutputWorkspace. Unused if OutputWorkspace "
                                   "isn't set. (Monte Carlo only)");
@@ -430,8 +429,8 @@ void EstimateFitParameters::execConcrete() {
         if (m_function->isActive(i)) {
           TableRow row = table->appendRow();
           row << m_function->parameterName(i);
-          for (size_t j = 0; j < output.size(); ++j) {
-            row << output[j][ia];
+          for (auto &j : output) {
+            row << j[ia];
           }
           ++ia;
         }

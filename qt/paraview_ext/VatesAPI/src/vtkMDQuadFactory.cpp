@@ -71,8 +71,8 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
 
     // Make iterator, which will use the desired normalization. Ensure
     // destruction in any eventuality.
-    boost::scoped_ptr<IMDIterator> it(
-        createIteratorWithNormalization(m_normalizationOption, imdws.get()));
+    auto it =
+        createIteratorWithNormalization(m_normalizationOption, imdws.get());
 
     // Create 4 points per box.
     vtkNew<vtkPoints> points;
@@ -112,9 +112,8 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 
-        auto coords = std::unique_ptr<coord_t[]>(
-            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
-
+        auto coords =
+            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
         // Iterate through all coordinates. Candidate for speed improvement.
         for (size_t v = 0; v < nVertexes; ++v) {
           coord_t *coord = coords.get() + v * 2;

@@ -107,13 +107,14 @@ operator=(const WorkspaceProperty &right) {
  * @return assigned PropertyWithValue
  */
 template <typename TYPE>
-boost::shared_ptr<TYPE> &WorkspaceProperty<TYPE>::
+WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::
 operator=(const boost::shared_ptr<TYPE> &value) {
   std::string wsName = value->getName();
   if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
     m_workspaceName = wsName;
   }
-  return Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(value);
+  Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(value);
+  return *this;
 }
 
 //--------------------------------------------------------------------------------------

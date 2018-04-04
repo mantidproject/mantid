@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>764</width>
-    <height>631</height>
+    <width>858</width>
+    <height>679</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -605,7 +605,11 @@
          <widget class="QLineEdit" name="lamMaxEdit"/>
         </item>
         <item row="0" column="1">
-         <widget class="QCheckBox" name="intMonCheckBox"/>
+         <widget class="QCheckBox" name="intMonCheckBox">
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="monBgMinLabel">

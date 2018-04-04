@@ -4,7 +4,6 @@ using std::ostream;
 
 namespace Mantid {
 namespace Types {
-using Core::DateAndTime;
 namespace Event {
 /** Comparison operator.
  * @param rhs: the other TofEvent to compare.

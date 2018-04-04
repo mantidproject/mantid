@@ -10,7 +10,7 @@ using Mantid::Algorithms::RebinByPulseTimes;
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-typedef RebinByTimeBaseTest<RebinByPulseTimes> Super;
+using Super = RebinByTimeBaseTest<RebinByPulseTimes>;
 class RebinByPulseTimesTest : public CxxTest::TestSuite, public Super {
 
 public:

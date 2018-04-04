@@ -732,7 +732,7 @@ void GroupDetectors2::processGroupingWorkspace(
     std::vector<int64_t> &unUsedSpec) {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
-  typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
+  using Group2SetMapType = std::map<size_t, std::set<size_t>>;
   Group2SetMapType group2WSIndexSetmap;
 
   const auto &spectrumInfo = groupWS->spectrumInfo();
@@ -785,7 +785,7 @@ void GroupDetectors2::processMatrixWorkspace(
     std::vector<int64_t> &unUsedSpec) {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
-  typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
+  using Group2SetMapType = std::map<size_t, std::set<size_t>>;
   Group2SetMapType group2WSIndexSetmap;
 
   const auto &spectrumInfo = groupWS->spectrumInfo();
@@ -1337,7 +1337,7 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
   const std::string pattern = getPropertyValue("GroupingPattern");
 
   boost::regex re(
-      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
+      R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
 
   try {
     if (!pattern.empty() && !boost::regex_match(pattern, re)) {

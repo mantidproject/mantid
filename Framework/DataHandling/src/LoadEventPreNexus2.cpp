@@ -744,7 +744,7 @@ void LoadEventPreNexus2::procEvents(
   std::vector<DasEvent *> buffers;
 
   /// Pointer to the vector of events
-  typedef std::vector<TofEvent> *EventVector_pt;
+  using EventVector_pt = std::vector<TofEvent> *;
   /// Bare array of arrays of pointers to the EventVectors
   EventVector_pt **eventVectors;
 

@@ -52,7 +52,7 @@ void RealFFT::init() {
   std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty(
       "Transform", "Forward", boost::make_shared<StringListValidator>(fft_dir),
-      "The direction of the transform: \"Forward\" or \"Backward\".");
+      R"(The direction of the transform: "Forward" or "Backward".)");
   declareProperty(
       "IgnoreXBins", false,
       "Ignores the requirement that X bins be linear and of the same size. "

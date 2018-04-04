@@ -211,7 +211,7 @@ private:
                                "<facilities>"
                                "  <facility name=\"" +
                                testFacilityName +
-                               "\" FileExtensions=\".xyz\">" + simpleInstStr +
+                               R"(" FileExtensions=".xyz">)" + simpleInstStr +
                                crStr + "  </facility>"
                                        "</facilities>";
 

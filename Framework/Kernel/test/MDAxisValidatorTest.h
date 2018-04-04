@@ -11,7 +11,7 @@
 #include "boost/make_shared.hpp"
 
 using Mantid::Kernel::MDAxisValidator;
-typedef boost::shared_ptr<MDAxisValidator> MDAxisValidator_sptr;
+using MDAxisValidator_sptr = boost::shared_ptr<MDAxisValidator>;
 
 class MDAxisValidatorTest : public CxxTest::TestSuite {
 public:
