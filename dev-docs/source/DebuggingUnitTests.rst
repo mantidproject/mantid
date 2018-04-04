@@ -4,10 +4,10 @@ Debugging Unit Tests
 Debugging typically requires the test executable to be run directly,
 rather than via ctest (which typically spawns off a separate process to
 run the actual tests). So an example of debugging from the command line
-using gdb would be:
+using gdb would be::
 
-| ``   ``\ **$**\ `` gdb bin/AlgorithmsTest``
-| ``   ``\ **(gdb)**\ `` r RebinTest``
+    $ gdb bin/AlgorithmsTest
+    (gdb) r RebinTest
 
 If you do need to run ctest in order to debug - if, for example, a test
 is failing when run in ctest, but not if run directly - then you can
@@ -17,10 +17,10 @@ test using, e.g., the method described for Visual Studio debugging
 below.
 
 If the issue is with a python unit test, the call is slightly more
-complicated
+complicated::
 
-| ``   ``\ **$**\ `` env PYTHONPATH=$PWD/bin gdb --args python2 /full/path/to/mantid/Framework/PythonInterface/test/python/mantid/kernel/TimeSeriesPropertyTest.py``
-| ``   ``\ **(gdb)**\ `` run``
+    $  env PYTHONPATH=$PWD/bin gdb --args python2 /full/path/to/mantid/Framework/PythonInterface/test/python/mantid/kernel/TimeSeriesPropertyTest.py
+    (gdb) run
 
 Within Eclipse
 --------------
@@ -75,9 +75,10 @@ involves a few steps, but it does work!
 interested in. This will make the test wait for keyboard input, all you
 need to do is hit enter, but you can use this delay to attach to the
 debugger to running process.
+::
 
-| ``   std::string s;``
-| ``   std::getline(std::cin,s);``
+  std::string s;
+  std::getline(std::cin,s);
 
 | 2. Run ctest with the appropriate arguments to run the test you are
   investigating.
