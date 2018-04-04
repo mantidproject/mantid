@@ -4,9 +4,11 @@
 #include <iomanip>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/regex.hpp>
+#include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include "MantidMDAlgorithms/LoadDNSSCD.h"
@@ -64,20 +66,14 @@ std::string parseTime(std::string &str) {
     auto time = time_from_string(str);
     return to_iso_extended_string(time);
   } catch (std::exception &) {
-    // if time is not in posix format
-    // change all sindle-digit days to 0d (otherwise get_time does not parse)
-    boost::regex expr("\\s+([0-9]\\s+)");
-    std::string fmt{" 0\\1"};
-    str = boost::regex_replace(str, expr, fmt);
-    std::istringstream ss(str);
-    std::tm t = {};
-    ss >> std::get_time(&t, "%a %b %d %H:%M:%S %Y");
-    std::string result("");
-    if (!ss.fail()) {
-      auto time = ptime_from_tm(t);
-      return to_iso_extended_string(time);
+    int tzd;
+    Poco::DateTime dt;
+    bool ok = Poco::DateTimeParser::tryParse(str, dt, tzd);
+    if (ok) {
+      auto time = Poco::DateTimeFormatter::format(dt, "%Y-%m-%dT%H:%M:%S");
+      return time;
     }
-
+    std::string result("");
     return result;
   }
 }
