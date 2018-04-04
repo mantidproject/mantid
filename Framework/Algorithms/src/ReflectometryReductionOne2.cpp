@@ -366,7 +366,8 @@ void ReflectometryReductionOne2::init() {
   // Angle correction type
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
-  auto correctionTypeValidator = boost::make_shared<StringListValidator>(correctionType);
+  auto correctionTypeValidator =
+      boost::make_shared<StringListValidator>(correctionType);
   declareProperty(
       "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
       "Whether detectors should be shifted vertically or rotated around the "
@@ -473,7 +474,8 @@ void ReflectometryReductionOne2::exec() {
     m_sum = false;
   }
   // Angle correction must be done if ThetaIn is set
-  m_correctAngleInLambda = !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
+  m_correctAngleInLambda =
+      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
 
   // Create the output workspace in wavelength
   MatrixWorkspace_sptr IvsLam = makeIvsLam();

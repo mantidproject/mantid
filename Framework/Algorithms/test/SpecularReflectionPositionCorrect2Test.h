@@ -161,7 +161,6 @@ public:
   }
 
   void test_correct_point_detector_via_detid_vertical_shift_default() {
-    try {
     // Omit the DetectorCorrectionType property to check that a vertical shift
     // is done by default
     SpecularReflectionPositionCorrect2 alg;
@@ -181,9 +180,6 @@ public:
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_EQUALS(detIn.Z(), detOut.Z());
     TS_ASSERT_DELTA(detOut.Y(), 0.06508, 1e-5);
-    } catch (std::exception &e) {
-      std::cerr << "Exception " << e.what() << std::endl;
-    }
   }
 
   void test_correct_point_detector_rotation() {

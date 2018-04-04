@@ -685,7 +685,6 @@ private:
 
     return outQ;
   }
-
 };
 
 #endif /* ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONE2TEST_H_ */
