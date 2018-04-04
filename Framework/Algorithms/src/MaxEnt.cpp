@@ -60,19 +60,14 @@ const double THRESHOLD = 1E-6;
 */
 MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
                                  const std::vector<size_t> &itCount,
-                                 const std::string yLabel) {
+                                 const std::string &yLabel) {
 
   ws->setYUnitLabel(yLabel);
-  try {
-    ws->getAxis(0)->unit() =
-        UnitFactory::Instance().create("Number of Iterations");
-  } catch (Exception::NotFoundError &) {
-    ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
-    Unit_sptr unit = ws->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(unit);
-    label->setLabel("Number of Iterations", "");
-  }
+  ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+  Unit_sptr unit = ws->getAxis(0)->unit();
+  boost::shared_ptr<Units::Label> label =
+      boost::dynamic_pointer_cast<Units::Label>(unit);
+  label->setLabel("Number of Iterations", "");
 
   const size_t nspec = ws->getNumberHistograms();
   if (itCount.empty()) {
