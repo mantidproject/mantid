@@ -48,7 +48,7 @@ class SortXAxis(PythonAlgorithm):
             indexes = x_data.argsort()
 
             if self.getPropertyValue("Ordering") == "Descending":
-                self.log().notice("Sort descending")
+                self.log().information("Sort descending")
                 indexes = indexes[::-1]
 
             x_ordered = x_data[indexes]
