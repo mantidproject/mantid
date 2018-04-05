@@ -10,10 +10,14 @@ namespace CustomInterfaces {
 
 class IEnggDiffCalibrationView {
 public:
+  /// Get crop type for cropped calibration - either North, South, or using
+  /// spectrum numbers
   virtual CalibCropType getCalibCropType() const = 0;
 
+  /// Get the custom bank name for cropped calib with spectrum numbers
   virtual std::string getCustomBankName() const = 0;
 
+  /// Get the name of the current calibration file
   virtual boost::optional<std::string> getInputFilename() const = 0;
 
   virtual std::string getNewCalibCeriaInput() const = 0;

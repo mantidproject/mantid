@@ -30,10 +30,16 @@ private:
 
   void displayCalibOutput(const GSASCalibrationParameters &calibParams);
 
+  /// Get ceria input from the view. Warn the user and return empty optional if
+  /// it is invalid
   boost::optional<std::string> getAndValidateCeriaInput() const;
 
+  /// Get vanadium input from the view. Warn the user and return empty optional
+  /// if it is invalid
   boost::optional<std::string> getAndValidateVanadiumInput() const;
 
+  /// Parse calibration filepath and extract instrument name, vanadium run
+  /// number and ceria run number
   std::tuple<std::string, std::string, std::string>
   parseCalibPath(const std::string &path) const;
 
