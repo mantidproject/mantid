@@ -80,34 +80,23 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), 7);
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
+    TSM_ASSERT("Output workspace must have dx values defined for tests", !out->hasDx(0));
 
     std::vector<double> spectrum = out->y(0).rawData();
     std::vector<double> error = out->e(0).rawData();
     std::vector<double> xaxis = out->x(0).rawData();
 
-    TS_ASSERT_EQUALS(spectrum[0], 2.);
-    TS_ASSERT_EQUALS(spectrum[1], 2.);
-    TS_ASSERT_EQUALS(spectrum[2], 2.);
-    TS_ASSERT_EQUALS(spectrum[3], 5.);
-    TS_ASSERT_EQUALS(spectrum[4], 5.);
-    TS_ASSERT_EQUALS(spectrum[5], 2.);
-    TS_ASSERT_EQUALS(spectrum[6], 5.);
+    std::vector<double> x{1., 2., 3., 1., 2., 1., 1.};
+    std::vector<double> y{2., 2., 2., 5., 5., 2., 5.};
+    std::vector<double> e{3., 3., 3., 4., 4., 3., 4.};
 
-    TS_ASSERT_EQUALS(error[0], 3.);
-    TS_ASSERT_EQUALS(error[1], 3.);
-    TS_ASSERT_EQUALS(error[2], 3.);
-    TS_ASSERT_EQUALS(error[3], 4.);
-    TS_ASSERT_EQUALS(error[4], 4.);
-    TS_ASSERT_EQUALS(error[5], 3.);
-    TS_ASSERT_EQUALS(error[6], 4.);
-
-    TS_ASSERT_EQUALS(xaxis[0], 1.);
-    TS_ASSERT_EQUALS(xaxis[1], 2.);
-    TS_ASSERT_EQUALS(xaxis[2], 3.);
-    TS_ASSERT_EQUALS(xaxis[3], 1.);
-    TS_ASSERT_EQUALS(xaxis[4], 2.);
-    TS_ASSERT_EQUALS(xaxis[5], 1.);
-    TS_ASSERT_EQUALS(xaxis[6], 1.);
+    //std::vector<double> dx = out->dx(0).rawData();
+    for (unsigned int i=0; i<spectrum.size(); ++i){
+      TS_ASSERT_EQUALS(xaxis[i], x[i]);
+      TS_ASSERT_EQUALS(spectrum[i], y[i]);
+      TS_ASSERT_EQUALS(error[i], e[i]);
+      //TS_ASSERT_EQUALS(dx[i], y[i]);
+    }
   }
 
   void testFailDifferentNumberBins() {

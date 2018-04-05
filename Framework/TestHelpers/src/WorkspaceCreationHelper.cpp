@@ -30,12 +30,14 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/HistogramDx.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_cow.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/V3D.h"
 
@@ -195,6 +197,17 @@ Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
   return outputWS;
 }
 
+/**
+ * @brief create2DWorkspaceWithValues
+ * @param nHist : Number of spectra
+ * @param nBins : Number of points (not bin edges!)
+ * @param isHist : Flag if it is a histogram or point data
+ * @param maskedWorkspaceIndices : Mask workspace indices
+ * @param xVal : bin edge or point
+ * @param yVal : y value
+ * @param eVal : error values
+ * @return A workspace filled with nBins bins or points and nHist spectra of the values yVal and the error eVal as well as Dx values which are copies of the y values
+ */
 Workspace2D_sptr
 create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             const std::set<int64_t> &maskedWorkspaceIndices,
@@ -203,12 +216,12 @@ create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
       isHist ? nBins + 1 : nBins, LinearGenerator(xVal, 1.0));
   Counts y1(nBins, yVal);
   CountStandardDeviations e1(nBins, eVal);
+  //auto dx = Kernel::make_cow<HistogramData::HistogramDx>(nBins, yVal);
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(nHist, isHist ? nBins + 1 : nBins, nBins);
+  retVal->initialize(nHist, createHisto(isHist, y1, e1));
   for (int i = 0; i < nHist; i++) {
-    retVal->setX(i, x1);
-    retVal->setCounts(i, y1);
-    retVal->setCountStandardDeviations(i, e1);
+    retVal->setSharedX(i, x1);
+    //retVal->setSharedDx(i, dx);
     retVal->getSpectrum(i).setDetectorID(i);
     retVal->getSpectrum(i).setSpectrumNo(i);
   }
