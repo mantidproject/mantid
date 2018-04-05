@@ -930,6 +930,7 @@ class RunTabPresenter(object):
         else:
             rows = range(number_of_rows)
         states = {}
+
         gui_state_director = GuiStateDirector(table_model, state_model, self._facility)
         for row in rows:
             self.sans_logger.information("Generating state for row {}".format(row))
