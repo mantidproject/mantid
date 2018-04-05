@@ -31,6 +31,15 @@ public:
     TS_ASSERT(ws->getSpectrum(0).hasDetectorID(100));
     TS_ASSERT(ws->getSpectrum(1).hasDetectorID(101));
   }
+
+  void test_create2DWorkspaceWithValues() {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(1, 2);
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(ws->size(), 2);
+    TS_ASSERT(ws->hasDx(0));
+    TS_ASSERT_EQUALS(ws->dx(0).rawData()[0], 2.);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_WORKSPACECREATIONHELPERTEST_H_ */

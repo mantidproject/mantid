@@ -206,7 +206,9 @@ Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
  * @param xVal : bin edge or point
  * @param yVal : y value
  * @param eVal : error values
- * @return A workspace filled with nBins bins or points and nHist spectra of the values yVal and the error eVal as well as Dx values which are copies of the y values
+ * @return A workspace filled with nBins bins or points and nHist spectra of the
+ * values yVal and the error eVal as well as Dx values which are copies of the y
+ * values
  */
 Workspace2D_sptr
 create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
@@ -216,12 +218,12 @@ create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
       isHist ? nBins + 1 : nBins, LinearGenerator(xVal, 1.0));
   Counts y1(nBins, yVal);
   CountStandardDeviations e1(nBins, eVal);
-  //auto dx = Kernel::make_cow<HistogramData::HistogramDx>(nBins, yVal);
+  auto dx = Kernel::make_cow<HistogramData::HistogramDx>(nBins, yVal);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nHist, createHisto(isHist, y1, e1));
   for (int i = 0; i < nHist; i++) {
     retVal->setSharedX(i, x1);
-    //retVal->setSharedDx(i, dx);
+    retVal->setSharedDx(i, dx);
     retVal->getSpectrum(i).setDetectorID(i);
     retVal->getSpectrum(i).setSpectrumNo(i);
   }
