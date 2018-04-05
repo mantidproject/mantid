@@ -14,8 +14,7 @@ public:
     LoadCalibration   ///< Load a calibration from file
   };
 
-  virtual void
-  notify(Notification notif) = 0;
+  virtual void notify(Notification notif) = 0;
 };
 
 } // CustomInterfaces
