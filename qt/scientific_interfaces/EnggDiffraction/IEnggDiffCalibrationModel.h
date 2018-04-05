@@ -17,9 +17,9 @@ public:
   /**
    * Run a normal (uncropped) calibration
    * @param vanadiumRun Vanadium run name (either a path to a file or
-   * <INSTNAME><RUNNUMBER>
+   * \<INSTNAME\>\<RUNNUMBER\>
    * @param ceriaRun Ceria run name (either a path to a file or
-   * <INSTNAME><RUNNUMBER>
+   * \<INSTNAME\>\<RUNNUMBER\>
    * @return Vector of calibrations corresponding to the banks used
    */
   virtual std::vector<GSASCalibrationParameters>
@@ -30,9 +30,9 @@ public:
    * Run a calibration on a single bank
    * @param bankID The bank ID - 1 for North, 2 for South
    * @param vanadiumRun Vanadium run name (either a path to a file or
-   * <INSTNAME><RUNNUMBER>
+   * \<INSTNAME\>\<RUNNUMBER\>
    * @param ceriaRun Ceria run name (either a path to a file or
-   * <INSTNAME><RUNNUMBER>
+   * \<INSTNAME\>\<RUNNUMBER\>
    * @return Vector of calibrations corresponding to the banks used
    */
   virtual std::vector<GSASCalibrationParameters>
@@ -44,9 +44,9 @@ public:
    * @param specNums The spectra to calibrate against
    * @param bankName A custom bank name for the calibration file
    * @param vanadiumRun Vanadium run name (either a path to a file or
-   * <INSTNAME><RUNNUMBER>
+   * \<INSTNAME\>\<RUNNUMBER\>
    * @param ceriaRun Ceria run name (either a path to a file or
-   * <INSTNAME><RUNNUMBER>
+   * \<INSTNAME\>\<RUNNUMBER\>
    * @return Vector of calibrations corresponding to the banks used
    */
   virtual std::vector<GSASCalibrationParameters> createCalibrationBySpectra(
