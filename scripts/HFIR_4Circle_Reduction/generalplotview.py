@@ -41,7 +41,7 @@ class GeneralPlotWindow(QMainWindow):
         if len(file_name) == 0:
             return
 
-        self.ui.graphicsView_plotView.save_current_plot(file_name)
+        self.ui.graphicsView_plotView.save_current_plot(None, file_name)
 
         return
 
@@ -60,6 +60,20 @@ class GeneralPlotWindow(QMainWindow):
         :return:
         """
         self.ui.graphicsView_plotView.reset_plots()
+
+        return
+
+    def plot_data(self, vec_x, vec_y, vec_e, x_label, y_label):  # '2theta', 'Gaussian-Sigma')
+        """
+        plot data on canvase
+        :param vec_x:
+        :param vec_y:
+        :param vec_e:
+        :param x_label:
+        :param y_label:
+        :return:
+        """
+        self.ui.graphicsView_plotView.plot_data(vec_x, vec_y, vec_e, 'No title', x_label, y_label)
 
         return
 

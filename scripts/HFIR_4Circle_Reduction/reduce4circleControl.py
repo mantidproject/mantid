@@ -3152,9 +3152,10 @@ class CWSCDReductionControl(object):
         # END-IF
 
         # create a PeakInfo instance if it does not exist
-        self._myPeakInfoDict[(exp_number, scan_number)] = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
         two_theta = self.get_sample_log_value(exp_number, scan_number, 1, '2theta')
         self._2thetaLookupTable[two_theta] = exp_number, scan_number
+        self._myPeakInfoDict[(exp_number, scan_number)] = PeakProcessRecord(exp_number, scan_number, peak_ws_name,
+                                                                            two_theta)
 
         # set the other information
         self._myPeakInfoDict[(exp_number, scan_number)].set_data_ws_name(md_ws_name)

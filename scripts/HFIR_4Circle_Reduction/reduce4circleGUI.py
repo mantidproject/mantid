@@ -3709,7 +3709,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             vec_x, vec_y, vec_e = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel='sigma')
             # get the latest (cached) vec_x and vec_y
-            self._general_1d_plot_window.plot(vec_x, vec_y, vec_e)
+            self._general_1d_plot_window.plot_data(vec_x, vec_y, vec_e, '2theta', 'Gaussian-Sigma')
         except RuntimeError as run_err:
             self.pop_one_button_dialog(str(run_err))
 

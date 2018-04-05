@@ -1162,7 +1162,8 @@ class Qt4MplCanvas(FigureCanvas):
             msg = 'Return from plot is a {0}-tuple: {1} with plot error is {2}\n'.format(len(r), r, plot_error)
             for i_r in range(len(r)):
                 msg += 'r[%d] = %s\n' % (i_r, str(r[i_r]))
-            raise NotImplementedError(msg)
+            print ('[DB] Deep in mplgraphicsview: {0}'.format(msg))
+
         else:
             assert len(r) > 0, 'There must be at least 1 figure returned'
             self._lineDict[line_key] = r[0]

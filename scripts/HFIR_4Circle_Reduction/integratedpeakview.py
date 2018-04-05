@@ -257,8 +257,14 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         :param file_name:
         :return:
         """
-        if self._currentDataID is None:
+        if line_id is None and self._currentDataID is None:
             raise RuntimeError('No line on canvas to save!')
+        if line_id is None:
+            line_id = self._currentDataID
+
+        # in case of error
+        if len(line_id) > 1:
+            line_id = line_id[0]
 
         vec_x, vec_y = self.get_data(line_id)
 

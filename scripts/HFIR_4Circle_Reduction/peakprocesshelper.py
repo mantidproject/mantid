@@ -17,7 +17,7 @@ class PeakProcessRecord(object):
     It does not contain peak workspace but will hold all the parameters about peak integration
     """
 
-    def __init__(self, exp_number, scan_number, peak_ws_name):
+    def __init__(self, exp_number, scan_number, peak_ws_name, two_theta):
         """ Initialization
         Purpose: set up unchanged parameters including experiment number, scan number and peak workspace's name
         """
@@ -33,6 +33,9 @@ class PeakProcessRecord(object):
         self._myExpNumber = exp_number
         self._myScanNumber = scan_number
         self._myPeakWorkspaceName = peak_ws_name
+
+        # related detector information
+        self._2theta = two_theta
 
         #
         self._myDataMDWorkspaceName = None
@@ -59,7 +62,7 @@ class PeakProcessRecord(object):
         self._gaussStdDev = 0.
         self._lorenzFactor = None
 
-        # Gaussian fitting relateds
+        # Gaussian fitting related
         self._gaussFWHM = None
         self._peakMotorCenter = None
         self._gaussBackground = None
@@ -256,6 +259,24 @@ class PeakProcessRecord(object):
             std_dev *= self._lorenzFactor
 
         return intensity, std_dev
+
+    def get_parameter(self, par_name):
+        """
+        get some parameters for peak fitting or etc
+        :param par_name:
+        :return:
+        """
+        # TODO FIXME NOW3 : how to get 2theta?
+        if par_name == '2theta':
+            par_value = self._2theta
+            par_error = 0
+        elif par_name == 'sigma':
+            par_value = self._integrationDict['gauss parameters']['s']
+            par_error = self._gaussIntegrationInfoDict['gauss errors']['s']
+        else:
+            raise RuntimeError('Parameter {0} is not set up for get_parameter()')
+
+        return par_value, par_error
 
     def get_peak_centre(self):
         """ get weighted peak centre
