@@ -54,8 +54,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # Split into individual bundles which can be reduced individually. We split here if we have multiple periods or
     # sliced times for example.
     # ------------------------------------------------------------------------------------------------------------------
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -65,8 +63,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     single_reduction_options = {"UseOptimizations": use_optimizations}
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
     reduction_alg.setChild(False)
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+
     # Perform the data reduction
     for reduction_package in reduction_packages:
         # -----------------------------------
