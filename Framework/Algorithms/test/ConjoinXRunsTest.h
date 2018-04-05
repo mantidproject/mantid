@@ -26,37 +26,26 @@ public:
   static void destroySuite(ConjoinXRunsTest *suite) { delete suite; }
 
   void setUp() override {
-    MatrixWorkspace_sptr ws1 = create2DWorkspace123(5, 3); // 3 points
-    MatrixWorkspace_sptr ws2 = create2DWorkspace154(5, 2); // 2 points
-    MatrixWorkspace_sptr ws3 = create2DWorkspace123(5, 1); // 1 point
-    MatrixWorkspace_sptr ws4 = create2DWorkspace154(5, 1); // 1 point
-    MatrixWorkspace_sptr ws5 = create2DWorkspace123(5, 3); // 3 points
-    MatrixWorkspace_sptr ws6 = create2DWorkspace123(5, 3); // 3 points
-
-    ws1->getAxis(0)->setUnit("TOF");
-    ws2->getAxis(0)->setUnit("TOF");
-    ws3->getAxis(0)->setUnit("TOF");
-    ws4->getAxis(0)->setUnit("TOF");
-    ws5->getAxis(0)->setUnit("TOF");
-    ws6->getAxis(0)->setUnit("TOF");
-
-    storeWS("ws1", ws1);
-    storeWS("ws2", ws2);
-    storeWS("ws3", ws3);
-    storeWS("ws4", ws4);
-    storeWS("ws5", ws5);
-    storeWS("ws6", ws6);
+    std::vector<MatrixWorkspace_sptr> ws(6);
+    ws[0] = create2DWorkspace123(5, 3); // 3 points
+    ws[1] = create2DWorkspace154(5, 2); // 2 points
+    ws[2] = create2DWorkspace123(5, 1); // 1 point
+    ws[3] = create2DWorkspace154(5, 1); // 1 point
+    ws[4] = create2DWorkspace123(5, 3); // 3 points
+    ws[5] = create2DWorkspace123(5, 3); // 3 points
 
     m_testWS = {"ws1", "ws2", "ws3", "ws4", "ws5", "ws6"};
+
+    for (unsigned int i; i<ws.size(); ++i){
+      ws[i]->getAxis(0)->setUnit("TOF");
+      storeWS(m_testWS[i], ws[i]);
+    }
   }
 
   void tearDown() override {
-    removeWS("ws1");
-    removeWS("ws2");
-    removeWS("ws3");
-    removeWS("ws4");
-    removeWS("ws5");
-    removeWS("ws6");
+    for (unsigned int i; i<m_testWS.size(); ++i){
+      removeWS(m_testWS[i]);
+    }
     m_testWS.clear();
   }
 
