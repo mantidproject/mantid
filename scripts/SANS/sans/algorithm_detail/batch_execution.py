@@ -771,7 +771,7 @@ def group_workspaces_if_required(reduction_package):
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
-    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or is_part_of_wavelength_range_reduction
+    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
 
     reduced_lab = reduction_package.reduced_lab
     reduced_hab = reduction_package.reduced_hab
@@ -818,8 +818,14 @@ def add_to_group(workspace, name_of_group_workspace):
         if type(group_workspace) is WorkspaceGroup:
             group_workspace.add(name_of_workspace)
         else:
-            name_of_group_workspace = name_of_group_workspace + "_group"
-            add_to_group(workspace, name_of_group_workspace)
+            group_name = "GroupWorkspaces"
+            group_options = {"InputWorkspaces": [name_of_workspace],
+                             "OutputWorkspace": name_of_group_workspace}
+            group_alg = create_unmanaged_algorithm(group_name, **group_options)
+            # At this point we are dealing with the ADS, hence we need to make sure that this is not called as
+            # a child algorithm
+            group_alg.setChild(False)
+            group_alg.execute()
     else:
         group_name = "GroupWorkspaces"
         group_options = {"InputWorkspaces": [name_of_workspace],
