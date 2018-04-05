@@ -239,7 +239,7 @@ Histogram::setUncertainties(const FrequencyStandardDeviations &e);
   @param y Optional Y data for the Histogram. Can be Counts or Frequencies.
   @param e Optional E data for the Histogram. Can be Variances or
   StandardDeviations for Counts or Frequencies. If not specified or null, the
-  standard deviations will be set as the suare root of the Y data.
+  standard deviations will be set as the square root of the Y data.
   */
 template <class TX, class TY, class TE>
 Histogram::Histogram(const TX &x, const TY &y, const TE &e) {

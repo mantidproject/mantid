@@ -9,7 +9,7 @@ namespace Algorithms {
 *  CreateWorkspace Algorithm
 *
 *  This algorithm constructs a MatrixWorkspace when passed a vector for each of
-*the X, Y, and E
+*the X, Y, E, and Dx
 *  data values. The unit for the X Axis can optionally be specified as any of
 *the units in the
 *  Kernel's UnitFactory.

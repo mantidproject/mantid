@@ -11,7 +11,6 @@ Framework Changes
 
 
 
-
 Algorithms
 ----------
 
@@ -27,7 +26,11 @@ New Algorithms
 Improved
 ########
 
+- :ref:`Maxent <algm-Maxent>` when outputting the results of the iterations, it no longer pads with zeroes but
+  returns as many items as iterations done for each spectrum, making the iterations easy to count.
 - :ref:`ConvertToPointData <algm-ConvertToPointData>` and :ref:`ConvertToHistogram <algm-ConvertToHistogram>` now propagate the Dx errors to the output.
+- The algorithm :ref:`CreateWorkspace <algm-CreateWorkspace>` can now optionally receive the Dx errors.
+- The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. Furthermore, Dx values will be considered if present. The documentation needed to be corrected.
 
 Bug fixes
 #########

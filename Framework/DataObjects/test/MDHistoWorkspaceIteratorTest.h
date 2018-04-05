@@ -79,9 +79,8 @@ public:
       TS_ASSERT_DELTA(it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
       TS_ASSERT_DELTA(it->getNormalizedError(), 1.0, 1e-5);
       size_t numVertices;
-      coord_t *vertexes = it->getVertexesArray(numVertices);
+      auto vertexes = it->getVertexesArray(numVertices);
       TS_ASSERT(vertexes);
-      delete[] vertexes;
       TS_ASSERT_EQUALS(it->getNumEvents(), 1);
       TS_ASSERT_EQUALS(it->getInnerDetectorID(0), 0);
       TS_ASSERT_EQUALS(it->getInnerRunIndex(0), 0);
@@ -659,9 +658,8 @@ public:
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(4, neighbourIndexes.size());
     std::vector<size_t> expected_neighbours = {0, 2, 5, 17};
-    for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
-         ++i) {
-      TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
+    for (auto &expected_neighbour : expected_neighbours) {
+      TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
     // Move to index 21
@@ -672,9 +670,8 @@ public:
     // Is completely enclosed
     expected_neighbours = {17, 20, 22, 25, 5, 37};
 
-    for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
-         ++i) {
-      TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
+    for (auto &expected_neighbour : expected_neighbours) {
+      TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
     // Move to index 63. The last index.
@@ -684,9 +681,8 @@ public:
     // Is on edge
     expected_neighbours = {47, 59, 62};
 
-    for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
-         ++i) {
-      TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
+    for (auto &expected_neighbour : expected_neighbours) {
+      TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
   }
 
@@ -738,9 +734,8 @@ public:
     TS_ASSERT_EQUALS(11, neighbourIndexes.size());
     std::vector<size_t> expected_neighbours = {0,  2,  4,  5,  6,  16,
                                                17, 18, 20, 21, 22, 22};
-    for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
-         ++i) {
-      TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
+    for (auto &expected_neighbour : expected_neighbours) {
+      TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
     // Move to index 21
@@ -752,9 +747,8 @@ public:
     expected_neighbours = {0,  1,  2,  4,  5,  6,  8,  9,  10, 16, 17, 18, 22,
                            20, 24, 25, 26, 32, 33, 34, 37, 38, 36, 41, 40, 42};
 
-    for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
-         ++i) {
-      TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
+    for (auto &expected_neighbour : expected_neighbours) {
+      TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
 
     // Move to index 63. The last index.
@@ -764,9 +758,8 @@ public:
     // Is on edge
     expected_neighbours = {42, 43, 46, 47, 58, 59, 62};
 
-    for (auto i = expected_neighbours.begin(); i != expected_neighbours.end();
-         ++i) {
-      TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
+    for (auto &expected_neighbour : expected_neighbours) {
+      TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
   }
 
@@ -1450,8 +1443,7 @@ public:
     do {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
-      coord_t *vertexes = it->getVertexesArray(numVertices);
-      delete[] vertexes;
+      auto vertexes = it->getVertexesArray(numVertices);
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());

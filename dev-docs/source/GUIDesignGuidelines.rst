@@ -1,3 +1,5 @@
+.. _dev-docs-gui-design-guidelines:
+
 =====================
 GUI Design Guidelines
 =====================

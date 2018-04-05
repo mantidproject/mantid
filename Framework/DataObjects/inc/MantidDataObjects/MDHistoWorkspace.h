@@ -174,7 +174,8 @@ public:
   void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction *function,
                              signal_t signal, signal_t errorSquared);
 
-  coord_t *getVertexesArray(size_t linearIndex, size_t &numVertices) const;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t linearIndex,
+                                              size_t &numVertices) const;
 
   Kernel::VMD getCenter(size_t linearIndex) const override;
 
