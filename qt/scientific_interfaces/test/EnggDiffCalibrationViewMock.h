@@ -12,17 +12,19 @@ using namespace MantidQt::CustomInterfaces;
 
 class MockEnggDiffCalibrationView : public IEnggDiffCalibrationView {
 public:
-  MOCK_METHOD1(displayLoadedCeriaRunNumber, void(const std::string &runNumber));
-
-  MOCK_METHOD1(displayLoadedVanadiumRunNumber,
-               void(const std::string &runNumber));
-
   MOCK_CONST_METHOD0(getInputFilename, boost::optional<std::string>());
 
-  MOCK_CONST_METHOD0(getNewCalibCeriaRunNumber, boost::optional<std::string>());
+  MOCK_CONST_METHOD0(getNewCalibCeriaInput, std::string());
 
-  MOCK_CONST_METHOD0(getNewCalibVanadiumRunNumber,
-                     boost::optional<std::string>());
+  MOCK_CONST_METHOD0(getNewCalibVanadiumInput, std::string());
+
+  MOCK_METHOD1(setCalibFilePath, void(const std::string &filePath));
+
+  MOCK_METHOD1(setCurrentCalibCeriaRunNumber,
+               void(const std::string &runNumber));
+
+  MOCK_METHOD1(setCurrentCalibVanadiumRunNumber,
+               void(const std::string &runNumber));
 
   MOCK_METHOD2(userWarning, void(const std::string &warningTitle,
                                  const std::string &warningDescription));

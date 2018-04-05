@@ -4,6 +4,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <algorithm>
+#include <cctype>
+
 namespace {
 
 boost::optional<std::string>
@@ -19,6 +22,12 @@ validateCalibPath(const boost::optional<std::string> &filename) {
     return "\"" + *filename + "\" is not a valid filename";
   }
   return boost::none;
+}
+
+/// Validate a run input, which should either be a numeric run number or a file
+bool isDigit(const std::string &runInput) {
+  return std::all_of(runInput.cbegin(), runInput.cend(),
+                     [](const auto &c) { return std::isdigit(c); });
 }
 }
 
@@ -89,29 +98,37 @@ EnggDiffCalibrationPresenter::parseCalibPath(const std::string &path) const {
 }
 
 void EnggDiffCalibrationPresenter::processCalibrate() {
-  const auto vanadiumRunNumber = m_view->getNewCalibVanadiumRunNumber();
-  if (!vanadiumRunNumber) {
+  auto vanadiumInput = m_view->getNewCalibVanadiumInput();
+  if (vanadiumInput.empty()) {
     m_view->userWarning(
         "No vanadium entered",
         "Please enter a vanadium run number to calibrate against");
     return;
+  } else if (isDigit(vanadiumInput)) {
+    vanadiumInput = m_userSettings->getInstName() + vanadiumInput;
   }
 
-  const auto ceriaRunNumber = m_view->getNewCalibCeriaRunNumber();
-  if (!ceriaRunNumber) {
+  auto ceriaInput = m_view->getNewCalibCeriaInput();
+  if (ceriaInput.empty()) {
     m_view->userWarning("No ceria entered",
                         "Please enter a ceria run number to calibrate against");
     return;
+  } else if (isDigit(ceriaInput)) {
+    ceriaInput = m_userSettings->getInstName() + ceriaInput;
   }
 
   std::vector<GSASCalibrationParameters> newCalib;
   try {
-    newCalib = m_model->createCalibration(*vanadiumRunNumber, *ceriaRunNumber);
+    newCalib = m_model->createCalibration(vanadiumInput, ceriaInput);
   } catch (std::runtime_error &ex) {
     m_view->userWarning("Calibration failed", ex.what());
     return;
   }
   m_model->setCalibrationParams(newCalib);
+
+  m_view->setCurrentCalibVanadiumRunNumber(newCalib[0].vanadiumRunNumber);
+  m_view->setCurrentCalibCeriaRunNumber(newCalib[0].ceriaRunNumber);
+  m_view->setCalibFilePath(newCalib[0].filePath);
 }
 
 void EnggDiffCalibrationPresenter::processLoadCalibration() {
@@ -135,8 +152,8 @@ void EnggDiffCalibrationPresenter::processLoadCalibration() {
   }
 
   const auto calibParams = m_model->parseCalibrationFile(*filename);
-  m_view->displayLoadedVanadiumRunNumber(vanadiumRunNumber);
-  m_view->displayLoadedCeriaRunNumber(ceriaRunNumber);
+  m_view->setCurrentCalibVanadiumRunNumber(vanadiumRunNumber);
+  m_view->setCurrentCalibCeriaRunNumber(ceriaRunNumber);
 
   m_model->setCalibrationParams(calibParams);
 }

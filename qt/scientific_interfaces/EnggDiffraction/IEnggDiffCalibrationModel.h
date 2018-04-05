@@ -14,10 +14,23 @@ class IEnggDiffCalibrationModel {
 public:
   virtual ~IEnggDiffCalibrationModel() = default;
 
+  /**
+   * Run a normal (uncropped) calibration
+   * @param vanadiumRun Vanadium run name (either a path to a file or
+   * <INSTNAME><RUNNUMBER>
+   * @param ceriaRun Ceria run name (either a path to a file or
+   * <INSTNAME><RUNNUMBER>
+   * @return Vector of calibrations corresponding to the banks used
+   */
   virtual std::vector<GSASCalibrationParameters>
-  createCalibration(const std::string &vanadiumRunNumber,
-                    const std::string &ceriaRunNumber) const = 0;
+  createCalibration(const std::string &vanadiumRun,
+                    const std::string &ceriaRun) const = 0;
 
+  /**
+   * Load a calibration from file
+   * @param filePath Path to the calibration file
+   * @return Vector of calibrations corresponding to the banks used
+   */
   virtual std::vector<GSASCalibrationParameters>
   parseCalibrationFile(const std::string &filePath) const = 0;
 

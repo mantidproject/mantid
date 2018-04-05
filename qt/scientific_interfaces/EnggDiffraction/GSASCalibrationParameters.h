@@ -3,17 +3,26 @@
 
 #include "DllConfig.h"
 
+#include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
 struct MANTIDQT_ENGGDIFFRACTION_DLL GSASCalibrationParameters {
   GSASCalibrationParameters(const size_t _bankID, const double _difa,
-                            const double _difc, const double _tzero);
+                            const double _difc, const double _tzero,
+                            const std::string &_vanadiumRunNumber,
+                            const std::string &_ceriaRunNumber,
+                            const std::string &_filePath);
 
   const size_t bankID;
   const double difa;
   const double difc;
   const double tzero;
+
+  const std::string vanadiumRunNumber;
+  const std::string ceriaRunNumber;
+  const std::string filePath;
 };
 
 MANTIDQT_ENGGDIFFRACTION_DLL bool
