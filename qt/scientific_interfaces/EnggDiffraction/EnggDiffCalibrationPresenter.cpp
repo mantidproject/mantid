@@ -27,7 +27,7 @@ validateCalibPath(const boost::optional<std::string> &filename) {
 /// Validate a run input, which should either be a numeric run number or a file
 bool isDigit(const std::string &runInput) {
   return std::all_of(runInput.cbegin(), runInput.cend(),
-                     [](const auto &c) { return std::isdigit(c); });
+                     [](const char &c) { return std::isdigit(c); });
 }
 }
 
