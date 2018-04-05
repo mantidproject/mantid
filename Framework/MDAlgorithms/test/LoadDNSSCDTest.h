@@ -192,8 +192,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("beta", 90.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("gamma", 120.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OmegaOffset", -43.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl1", "1,1,0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl2", "0,0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL1", "1,1,0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL2", "0,0,1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -320,8 +320,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("beta", 90.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("gamma", 120.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OmegaOffset", -43.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl1", "1,1,0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl2", "0,0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL1", "1,1,0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL2", "0,0,1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -406,8 +406,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("beta", 90.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("gamma", 120.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OmegaOffset", -43.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl1", "1,1,0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl2", "0,0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL1", "1,1,0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL2", "0,0,1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -588,8 +588,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("beta", 90.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("gamma", 120.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OmegaOffset", -43.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl1", "1,1,0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("hkl2", "0,0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL1", "1,1,0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKL2", "0,0,1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoThetaLimits", "20.0,55.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());

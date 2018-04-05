@@ -172,18 +172,18 @@ void LoadDNSSCD::init() {
                       "OmegaOffset", 0.0,
                       boost::make_shared<BoundedValidator<double>>(),
                       Direction::Input),
-                  "Angle in degrees between (hkl1) and the beam axis"
+                  "Angle in degrees between (HKL1) and the beam axis"
                   "if the goniometer is at zero.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("hkl1", u0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("HKL1", u0, mustBe3D),
       "Indices of the vector in reciprocal space in the horizontal plane at "
       "angle Omegaoffset, "
       "if the goniometer is at zero.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("hkl2", v0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("HKL2", v0, mustBe3D),
       "Indices of a second vector in reciprocal space in the horizontal plane "
-      "not parallel to hkl1");
+      "not parallel to HKL1");
 
   std::vector<double> ttl(2, 0);
   ttl[1] = 180.0;
@@ -394,8 +394,8 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   alpha = getProperty("alpha");
   beta = getProperty("beta");
   gamma = getProperty("gamma");
-  std::vector<double> u = getProperty("hkl1");
-  std::vector<double> v = getProperty("hkl2");
+  std::vector<double> u = getProperty("HKL1");
+  std::vector<double> v = getProperty("HKL2");
 
   // estimate extents
   double qmax = 4.0 * M_PI / wavelength;

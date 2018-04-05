@@ -76,7 +76,7 @@ Usage
    # load data to MDEventWorkspace
    ws, ws_norm, huber_ws = LoadDNSSCD(FileNames=filename, NormalizationWorkspace='ws_norm',
                                       Normalization='monitor', a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma,
-                                      OmegaOffset=omega_offset, hkl1=hkl1, hkl2=hkl2, SaveHuberTo='huber_ws')
+                                      OmegaOffset=omega_offset, HKL1=hkl1, HKL2=hkl2, SaveHuberTo='huber_ws')
 
    # print output workspace information
    print("Output Workspace Type is:  {}".format(ws.id()))
@@ -133,7 +133,7 @@ Usage
    # load data to MDEventWorkspace
    ws, ws_norm, huber_ws = LoadDNSSCD(FileNames=filename, NormalizationWorkspace='ws_norm',
                                       Normalization='monitor', a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma,
-                                      OmegaOffset=omega_offset, hkl1=hkl1, hkl2=hkl2, TwoThetaLimits=tth_limits)
+                                      OmegaOffset=omega_offset, HKL1=hkl1, HKL2=hkl2, TwoThetaLimits=tth_limits)
 
    # print output workspace information
    print("Output Workspace Type is:  {}".format(ws.id()))
@@ -179,7 +179,7 @@ Usage
    # load data to MDEventWorkspace
    ws, ws_norm, huber_ws = LoadDNSSCD(FileNames=filename, NormalizationWorkspace='ws_norm',
                                       Normalization='monitor', a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma,
-                                      OmegaOffset=omega_offset, hkl1=hkl1, hkl2=hkl2, LoadHuberFrom=table)
+                                      OmegaOffset=omega_offset, HKL1=hkl1, HKL2=hkl2, LoadHuberFrom=table)
 
    # print output workspace information
    print("Output Workspace Type is:  {}".format(ws.id()))
