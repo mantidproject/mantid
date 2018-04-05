@@ -1,14 +1,9 @@
 #ifndef MANTID_ALGORITHMS_WORKSPACECREATIONHELPERTEST_H_
 #define MANTID_ALGORITHMS_WORKSPACECREATIONHELPERTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/SpectraDetectorTypes.h"
 
-using namespace Mantid;
-using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 /** Test class for the helpers in MantidTestHelpers/WorkspaceCreationHelper.h */
