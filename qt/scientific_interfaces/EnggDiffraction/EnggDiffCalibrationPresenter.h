@@ -24,18 +24,23 @@ public:
   void notify(IEnggDiffCalibrationPresenter::Notification notif) override;
 
 private:
-  std::tuple<std::string, std::string, std::string>
-  parseCalibPath(const std::string &path) const;
-
   void processCalibrate();
   void processLoadCalibration();
+
+  void displayCalibOutput(const GSASCalibrationParameters &calibParams);
+
+  boost::optional<std::string> getAndValidateCeriaInput() const;
+
+  boost::optional<std::string> getAndValidateVanadiumInput() const;
+
+  std::tuple<std::string, std::string, std::string>
+  parseCalibPath(const std::string &path) const;
 
   std::unique_ptr<IEnggDiffCalibrationModel> m_model;
 
   boost::shared_ptr<EnggDiffUserSettings> m_userSettings;
-  
+
   boost::shared_ptr<IEnggDiffCalibrationView> m_view;
-  
 };
 
 } // CustomInterfaces
