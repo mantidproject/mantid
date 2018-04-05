@@ -1,4 +1,3 @@
-#include <regex>
 #include <map>
 #include <iterator>
 #include <iomanip>
@@ -346,9 +345,10 @@ void LoadDNSSCD::updateProperties(API::Run &run,
     TimeSeriesProperty<T> *timeSeries(nullptr);
     std::string name(it->first);
     std::string units;
-    std::regex reg("([a-zA-Z-_]+)\\[(.*)]");
-    std::smatch match;
-    if (std::regex_search(name, match, reg) && match.size() > 2) {
+    // std::regex does not work for rhel7, thus boost
+    boost::regex reg("([-_a-zA-Z]+)\\[(.*)]");
+    boost::smatch match;
+    if (boost::regex_search(name, match, reg) && match.size() > 2) {
       std::string new_name(match.str(1));
       units.assign(match.str(2));
       name = new_name;
@@ -506,9 +506,9 @@ void LoadDNSSCD::read_data(const std::string fname,
   std::string line;
   std::string::size_type n;
   std::string s;
-  std::regex reg1("^#\\s+(\\w+):(.*)");
-  std::regex reg2("^#\\s+((\\w+\\s)+)\\s+(-?\\d+(,\\d+)*(\\.\\d+(e\\d+)?)?)");
-  std::smatch match;
+  boost::regex reg1("^#\\s+(\\w+):(.*)");
+  boost::regex reg2("^#\\s+((\\w+\\s)+)\\s+(-?\\d+(,\\d+)*(\\.\\d+(e\\d+)?)?)");
+  boost::smatch match;
   getline(file, line);
   n = line.find("DNS");
   if (n == std::string::npos) {
@@ -529,13 +529,13 @@ void LoadDNSSCD::read_data(const std::string fname,
   while (getline(file, line)) {
     n = line.find("Lambda");
     if (n != std::string::npos) {
-      std::regex re("[\\s]+");
+      boost::regex re("[\\s]+");
       s = line.substr(5);
-      std::sregex_token_iterator it(s.begin(), s.end(), re, -1);
-      std::sregex_token_iterator reg_end;
+      boost::sregex_token_iterator it(s.begin(), s.end(), re, -1);
+      boost::sregex_token_iterator reg_end;
       getline(file, line);
       std::string s2 = line.substr(2);
-      std::sregex_token_iterator it2(s2.begin(), s2.end(), re, -1);
+      boost::sregex_token_iterator it2(s2.begin(), s2.end(), re, -1);
       for (; (it != reg_end) && (it2 != reg_end); ++it) {
         std::string token(it->str());
         if (token.find_first_not_of(' ') == std::string::npos) {
@@ -558,10 +558,10 @@ void LoadDNSSCD::read_data(const std::string fname,
       str_metadata.insert(std::make_pair("stop_time", parseTime(line)));
       getline(file, line);
     }
-    if (std::regex_search(line, match, reg1) && match.size() > 2) {
+    if (boost::regex_search(line, match, reg1) && match.size() > 2) {
       str_metadata.insert(std::make_pair(match.str(1), match.str(2)));
     }
-    if (std::regex_search(line, match, reg2) && match.size() > 2) {
+    if (boost::regex_search(line, match, reg2) && match.size() > 2) {
       s = match.str(1);
       s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(),
               s.end());
