@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/regex.hpp>
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/exception_ptr.hpp>
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
@@ -292,6 +294,7 @@ void LoadDNSSCD::exec() {
     } catch (...) {
       g_log.warning() << "Failed to read file " << fname;
       g_log.warning() << ". This file will be ignored. " << std::endl;
+      g_log.warning() << boost::current_exception_diagnostic_information() << std::endl;
     }
   }
 
