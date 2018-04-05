@@ -294,7 +294,8 @@ void LoadDNSSCD::exec() {
     } catch (...) {
       g_log.warning() << "Failed to read file " << fname;
       g_log.warning() << ". This file will be ignored. " << std::endl;
-      g_log.warning() << boost::current_exception_diagnostic_information() << std::endl;
+      g_log.warning() << boost::current_exception_diagnostic_information()
+                      << std::endl;
     }
   }
 
