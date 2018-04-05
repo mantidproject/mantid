@@ -48,6 +48,10 @@ void EnggDiffCalibrationPresenter::notify(
     processCalibrate();
     break;
 
+  case IEnggDiffCalibrationPresenter::Notification::CalibrateCropped:
+    processCalibrateCropped();
+    break;
+
   case IEnggDiffCalibrationPresenter::Notification::LoadCalibration:
     processLoadCalibration();
     break;
@@ -153,6 +157,52 @@ void EnggDiffCalibrationPresenter::processCalibrate() {
   m_model->setCalibrationParams(newCalib);
 
   displayCalibOutput(newCalib[0]);
+}
+
+void EnggDiffCalibrationPresenter::processCalibrateCropped() {
+  const auto vanadiumInput = getAndValidateVanadiumInput();
+  if (!vanadiumInput) {
+    return;
+  }
+  const auto ceriaInput = getAndValidateCeriaInput();
+  if (!ceriaInput) {
+    return;
+  }
+
+  const auto cropType = m_view->getCalibCropType();
+  std::vector<GSASCalibrationParameters> newCalib;
+
+  try {
+    switch (cropType) {
+    case CalibCropType::NORTH_BANK:
+      newCalib =
+          m_model->createCalibrationByBank(1, *vanadiumInput, *ceriaInput);
+      break;
+
+    case CalibCropType::SOUTH_BANK:
+      newCalib =
+          m_model->createCalibrationByBank(2, *vanadiumInput, *ceriaInput);
+      break;
+
+    case CalibCropType::SPEC_NUMS:
+      const auto specNums = m_view->getSpectrumNumbers();
+      if (specNums.empty()) {
+        m_view->userWarning(
+            "No spectrum numbers",
+            "Please enter a set of spectrum numbers to use for focusing");
+        return;
+      }
+      const auto bankName = m_view->getCustomBankName();
+      newCalib = m_model->createCalibrationBySpectra(
+          specNums, bankName, *vanadiumInput, *ceriaInput);
+      break;
+    }
+  } catch (std::runtime_error &ex) {
+    m_view->userWarning("Calibration failed", ex.what());
+  }
+
+  displayCalibOutput(newCalib[0]);
+  m_model->setCalibrationParams(newCalib);
 }
 
 void EnggDiffCalibrationPresenter::processLoadCalibration() {

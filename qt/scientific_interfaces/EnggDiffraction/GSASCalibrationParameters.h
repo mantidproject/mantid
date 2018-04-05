@@ -8,6 +8,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+enum class CalibCropType { NORTH_BANK, SOUTH_BANK, SPEC_NUMS };
+
 struct MANTIDQT_ENGGDIFFRACTION_DLL GSASCalibrationParameters {
   GSASCalibrationParameters(const size_t _bankID, const double _difa,
                             const double _difc, const double _tzero,

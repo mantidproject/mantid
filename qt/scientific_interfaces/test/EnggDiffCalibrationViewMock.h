@@ -12,11 +12,17 @@ using namespace MantidQt::CustomInterfaces;
 
 class MockEnggDiffCalibrationView : public IEnggDiffCalibrationView {
 public:
+  MOCK_CONST_METHOD0(getCalibCropType, CalibCropType());
+
+  MOCK_CONST_METHOD0(getCustomBankName, std::string());
+
   MOCK_CONST_METHOD0(getInputFilename, boost::optional<std::string>());
 
   MOCK_CONST_METHOD0(getNewCalibCeriaInput, std::string());
 
   MOCK_CONST_METHOD0(getNewCalibVanadiumInput, std::string());
+
+  MOCK_CONST_METHOD0(getSpectrumNumbers, std::string());
 
   MOCK_METHOD1(setCalibFilePath, void(const std::string &filePath));
 

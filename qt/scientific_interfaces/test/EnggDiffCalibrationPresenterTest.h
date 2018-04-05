@@ -96,8 +96,6 @@ public:
   void test_createCalibRequiresCeria() {
     auto presenter = setUpPresenter();
 
-    ON_CALL(*m_mockView, getNewCalibVanadiumInput())
-        .WillByDefault(Return("123"));
     EXPECT_CALL(*m_mockView, getNewCalibCeriaInput()).WillOnce(Return(""));
     EXPECT_CALL(
         *m_mockView,
@@ -113,12 +111,8 @@ public:
   void test_newCalibInputCanBeRunNumbers() {
     auto presenter = setUpPresenter();
 
-    ON_CALL(*m_mockView, getNewCalibVanadiumInput())
-        .WillByDefault(Return("123"));
-    ON_CALL(*m_mockView, getNewCalibCeriaInput()).WillByDefault(Return("456"));
-
     EXPECT_CALL(*m_mockModel,
-                createCalibration(INST_NAME + "123", INST_NAME + "456"));
+                createCalibration(INST_NAME + VAN_NUM, INST_NAME + CERIA_NUM));
 
     presenter->notify(IEnggDiffCalibrationPresenter::Notification::Calibrate);
     assertMocksUsedCorrectly();
@@ -129,10 +123,10 @@ public:
     const auto vanFile = "/path/to/van/file";
     const auto ceriaFile = "/path/to/ceria/file";
 
-    ON_CALL(*m_mockView, getNewCalibVanadiumInput())
-        .WillByDefault(Return(vanFile));
-    ON_CALL(*m_mockView, getNewCalibCeriaInput())
-        .WillByDefault(Return(ceriaFile));
+    EXPECT_CALL(*m_mockView, getNewCalibVanadiumInput())
+        .WillOnce(Return(vanFile));
+    EXPECT_CALL(*m_mockView, getNewCalibCeriaInput())
+        .WillOnce(Return(ceriaFile));
 
     EXPECT_CALL(*m_mockModel, createCalibration(vanFile, ceriaFile));
 
@@ -142,12 +136,9 @@ public:
 
   void test_createCalibHandlesErrorInModel() {
     auto presenter = setUpPresenter();
-    ON_CALL(*m_mockView, getNewCalibVanadiumInput())
-        .WillByDefault(Return("123"));
-    ON_CALL(*m_mockView, getNewCalibCeriaInput()).WillByDefault(Return("456"));
 
-    ON_CALL(*m_mockModel, createCalibration(testing::_, testing::_))
-        .WillByDefault(Throw(std::runtime_error("Failure reason")));
+    EXPECT_CALL(*m_mockModel, createCalibration(testing::_, testing::_))
+        .WillOnce(Throw(std::runtime_error("Failure reason")));
     EXPECT_CALL(*m_mockView,
                 userWarning("Calibration failed", "Failure reason"));
     EXPECT_CALL(*m_mockModel, setCalibrationParams(testing::_)).Times(0);
@@ -158,27 +149,124 @@ public:
 
   void test_successfulCalibUpdatesModelAndView() {
     auto presenter = setUpPresenter();
-    const auto vanInput = "123";
-    const auto ceriaInput = "456";
-    const auto calibFile = "/path/to/calib/file";
-    const GSASCalibrationParameters calibParams(1, 2, 3, 4, vanInput,
-                                                ceriaInput, calibFile);
-    const std::vector<GSASCalibrationParameters> calibParamsVec({calibParams});
 
-    ON_CALL(*m_mockView, getNewCalibVanadiumInput())
-        .WillByDefault(Return(vanInput));
-    ON_CALL(*m_mockView, getNewCalibCeriaInput())
-        .WillByDefault(Return(ceriaInput));
-    ON_CALL(*m_mockModel, createCalibration(testing::_, testing::_))
-        .WillByDefault(Return(calibParamsVec));
-
-    EXPECT_CALL(*m_mockModel, setCalibrationParams(calibParamsVec));
-    EXPECT_CALL(*m_mockView, setCurrentCalibVanadiumRunNumber(vanInput));
-    EXPECT_CALL(*m_mockView, setCurrentCalibCeriaRunNumber(ceriaInput));
-    EXPECT_CALL(*m_mockView, setCalibFilePath(calibFile));
+    EXPECT_CALL(*m_mockModel, setCalibrationParams(CALIB_PARAMS));
+    EXPECT_CALL(*m_mockView, setCurrentCalibVanadiumRunNumber(VAN_NUM));
+    EXPECT_CALL(*m_mockView, setCurrentCalibCeriaRunNumber(CERIA_NUM));
+    EXPECT_CALL(*m_mockView, setCalibFilePath(CALIB_PARAMS[0].filePath));
     EXPECT_CALL(*m_mockView, userWarning(testing::_, testing::_)).Times(0);
 
     presenter->notify(IEnggDiffCalibrationPresenter::Notification::Calibrate);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibCroppedRequiresVanadium() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, getNewCalibVanadiumInput()).WillOnce(Return(""));
+    EXPECT_CALL(
+        *m_mockView,
+        userWarning("No vanadium entered",
+                    "Please enter a vanadium run number to calibrate against"));
+    EXPECT_CALL(*m_mockView, getNewCalibCeriaInput()).Times(0);
+
+    presenter->notify(
+        IEnggDiffCalibrationPresenter::Notification::CalibrateCropped);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibCroppedRequiresCeria() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, getNewCalibCeriaInput()).WillOnce(Return(""));
+    EXPECT_CALL(
+        *m_mockView,
+        userWarning("No ceria entered",
+                    "Please enter a ceria run number to calibrate against"));
+    EXPECT_CALL(*m_mockModel, createCalibration(testing::_, testing::_))
+        .Times(0);
+
+    presenter->notify(
+        IEnggDiffCalibrationPresenter::Notification::CalibrateCropped);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibCroppedUpdatesViewAndModel() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, getCalibCropType())
+        .WillOnce(Return(CalibCropType::NORTH_BANK));
+    EXPECT_CALL(*m_mockModel, createCalibrationByBank(1, INST_NAME + VAN_NUM,
+                                                      INST_NAME + CERIA_NUM))
+        .WillOnce(Return(CALIB_PARAMS));
+
+    EXPECT_CALL(*m_mockModel, setCalibrationParams(CALIB_PARAMS));
+    EXPECT_CALL(*m_mockView, setCurrentCalibVanadiumRunNumber(VAN_NUM));
+    EXPECT_CALL(*m_mockView, setCurrentCalibCeriaRunNumber(CERIA_NUM));
+    EXPECT_CALL(*m_mockView, setCalibFilePath(CALIB_PARAMS[0].filePath));
+    EXPECT_CALL(*m_mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    presenter->notify(
+        IEnggDiffCalibrationPresenter::Notification::CalibrateCropped);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibCroppedHandlesErrorInModel() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, getCalibCropType())
+        .WillOnce(Return(CalibCropType::SOUTH_BANK));
+    EXPECT_CALL(*m_mockModel, createCalibrationByBank(2, INST_NAME + VAN_NUM,
+                                                      INST_NAME + CERIA_NUM))
+        .WillOnce(Throw(std::runtime_error("Failure reason")));
+    EXPECT_CALL(*m_mockView,
+                userWarning("Calibration failed", "Failure reason"));
+
+    presenter->notify(
+        IEnggDiffCalibrationPresenter::Notification::CalibrateCropped);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibSpecNumsRequiresSpecNums() {
+    auto presenter = setUpPresenter();
+
+    ON_CALL(*m_mockView, getCalibCropType())
+        .WillByDefault(Return(CalibCropType::SPEC_NUMS));
+    EXPECT_CALL(*m_mockView, getSpectrumNumbers()).WillOnce(Return(""));
+    EXPECT_CALL(
+        *m_mockView,
+        userWarning(
+            "No spectrum numbers",
+            "Please enter a set of spectrum numbers to use for focusing"));
+    EXPECT_CALL(*m_mockView, getCustomBankName()).Times(0);
+
+    presenter->notify(
+        IEnggDiffCalibrationPresenter::Notification::CalibrateCropped);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_createCalibSpecNumsUpdatesViewAndModel() {
+    auto presenter = setUpPresenter();
+
+    EXPECT_CALL(*m_mockView, getCalibCropType())
+        .WillOnce(Return(CalibCropType::SPEC_NUMS));
+
+    ON_CALL(*m_mockView, getSpectrumNumbers()).WillByDefault(Return("1,2,3"));
+    ON_CALL(*m_mockView, getCustomBankName()).WillByDefault(Return("cropped"));
+
+    EXPECT_CALL(*m_mockModel, createCalibrationBySpectra("1,2,3", "cropped",
+                                                         INST_NAME + VAN_NUM,
+                                                         INST_NAME + CERIA_NUM))
+        .WillOnce(Return(CALIB_PARAMS));
+
+    EXPECT_CALL(*m_mockModel, setCalibrationParams(CALIB_PARAMS));
+    EXPECT_CALL(*m_mockView, setCurrentCalibVanadiumRunNumber(VAN_NUM));
+    EXPECT_CALL(*m_mockView, setCurrentCalibCeriaRunNumber(CERIA_NUM));
+    EXPECT_CALL(*m_mockView, setCalibFilePath(CALIB_PARAMS[0].filePath));
+    EXPECT_CALL(*m_mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    presenter->notify(
+        IEnggDiffCalibrationPresenter::Notification::CalibrateCropped);
     assertMocksUsedCorrectly();
   }
 
@@ -187,6 +275,11 @@ private:
   MockEnggDiffCalibrationView *m_mockView;
 
   const std::string INST_NAME = "TESTINST";
+  const std::string VAN_NUM = "123";
+  const std::string CERIA_NUM = "456";
+  const std::vector<GSASCalibrationParameters> CALIB_PARAMS = {
+      GSASCalibrationParameters(1, 2, 3, 4, VAN_NUM, CERIA_NUM,
+                                "/path/to/calib/file")};
 
   void assertMocksUsedCorrectly() {
     TSM_ASSERT("View mock not used as expected: some EXPECT_CALL conditions "
@@ -205,6 +298,14 @@ private:
     auto mockView_sptr =
         boost::make_shared<testing::NiceMock<MockEnggDiffCalibrationView>>();
     m_mockView = mockView_sptr.get();
+
+    ON_CALL(*m_mockView, getNewCalibVanadiumInput())
+        .WillByDefault(Return(VAN_NUM));
+    ON_CALL(*m_mockView, getNewCalibCeriaInput())
+        .WillByDefault(Return(CERIA_NUM));
+
+    ON_CALL(*m_mockModel, createCalibration(testing::_, testing::_))
+        .WillByDefault(Return(CALIB_PARAMS));
 
     auto userSettings = boost::make_shared<EnggDiffUserSettings>(INST_NAME);
 

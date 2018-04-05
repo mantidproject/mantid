@@ -16,6 +16,18 @@ public:
                                             const std::string &vanadiumRun,
                                             const std::string &ceriaRun));
 
+  MOCK_CONST_METHOD3(createCalibrationByBank,
+                     std::vector<GSASCalibrationParameters>(
+                         const size_t bankID, const std::string &vanadiumRun,
+                         const std::string &ceriaRun));
+
+  MOCK_CONST_METHOD4(
+      createCalibrationBySpectra,
+      std::vector<GSASCalibrationParameters>(const std::string &specNums,
+                                             const std::string &bankName,
+                                             const std::string &vanadiumRun,
+                                             const std::string &ceriaRun));
+
   MOCK_CONST_METHOD1(
       parseCalibrationFile,
       std::vector<GSASCalibrationParameters>(const std::string &filePath));

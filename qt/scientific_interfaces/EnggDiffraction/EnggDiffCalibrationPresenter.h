@@ -25,6 +25,7 @@ public:
 
 private:
   void processCalibrate();
+  void processCalibrateCropped();
   void processLoadCalibration();
 
   void displayCalibOutput(const GSASCalibrationParameters &calibParams);
