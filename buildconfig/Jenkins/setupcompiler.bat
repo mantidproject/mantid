@@ -26,26 +26,36 @@ if !_grep_exe! == "" (
 )
 @echo Using grep: !_grep_exe!
 
-:: 8.1 is backwards compatible with Windows 7. It allows us to target Windows 7
+:: SDK 8.1 is backwards compatible with Windows 7. It allows us to target Windows 7
 :: when building on newer versions of Windows. This value must be supplied
 :: externally and cannot be supplied in the cmake configuration
 set _sdk_version=8.1
-set _vs_version=14
-call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %_sdk_version%
-:: Special variable to tell msbuild to use the existing environment
-set UseEnv=true
-set CM_GENERATOR=Visual Studio %_vs_version% 2015 Win64
 
+:: Find the compiler. Try the build tools first and fall back to the full IDE
+:: If the tools are not in the standard locations then we give up.
+set _vs_version=2017
+set _vcvarsall_bat="C:\Program Files (x86)\Microsoft Visual Studio\%_vs_version%\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+if NOT EXIST "!_vcvarsall_bat!" (
+  set _vcvarsall_bat="C:\Program Files (x86)\Microsoft Visual Studio\%_vs_version%\Community\VC\Auxiliary\Build\vcvarsall.bat"
+  if NOT EXIST "!_vcvarsall_bat!" (
+     echo Cannot find vcvarsall.bat from %_vs_version% BuildTools or Community edition. Please ensure one of them is installed in the standard location
+    exit /b 1
+  )
+)
+echo Using %_vcvarsall_bat%
+call !_vcvarsall_bat! amd64 %_sdk_version%
+set CM_GENERATOR=Visual Studio 15 2017 Win64
+
+:: If the previous build was a different generator then do a clean build
 set _builddir=%1
-echo %_builddir%
 if EXIST %_builddir%\CMakeCache.txt (
-  call "%_grep_exe%" CMAKE_LINKER:FILEPATH %_builddir%\CMakeCache.txt > %_builddir%\compiler_version.log
-  call "%_grep_exe%" %_vs_version% %_builddir%\compiler_version.log
+  call "%_grep_exe%" CMAKE_GENERATOR:INTERNAL %_builddir%\CMakeCache.txt > %_builddir%\cmake_generator.log
+  call "%_grep_exe%" -q "%CM_GENERATOR%" %_builddir%\cmake_generator.log
   if ERRORLEVEL 1 (
     set CLEANBUILD=yes
-    echo Previous build used a different compiler. Performing a clean build
+    echo Previous build used a different compiler. Performing a clean build.
   ) else (
     set CLEANBUILD=no
-    echo Previous build used the same compiler. No need to clean
+    echo Previous build used the same compiler. No need to clean.
   )
 )
