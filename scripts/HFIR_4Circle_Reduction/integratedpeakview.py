@@ -221,7 +221,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
 
         return
 
-    def plot_data(self, vec_x, vec_y, title, label_x, label_y):
+    def plot_data(self, vec_x, vec_y, vec_e, title, label_x, label_y):
         """
         plot current data
         :param vec_x:
@@ -231,6 +231,9 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         :param label_y:
         :return:
         """
+        self._currentDataID = self.add_plot_1d(vec_x=vec_x, vec_y=vec_y, y_err=vec_e,
+                                               color='red', label=title, x_label=label_x, y_label=label_y,
+                                               marker='.', line_style='--')
 
         return
 
@@ -259,7 +262,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
 
         vec_x, vec_y = self.get_data(line_id)
 
-        numpy.savetxt(file_name,(vec_x, vec_y))
+        numpy.savetxt(file_name, (vec_x, vec_y))
 
         return
 

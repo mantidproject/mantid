@@ -20,10 +20,9 @@ class GeneralPlotWindow(QMainWindow):
         self.ui.setupUi(self)
 
         # set up the event handling
-        # TODO NOW3
-        # self.ui.pushButton_exportPlot2File.clicked.connect()
-        # self.ui.pushButton_quit.clicked.connect()
-        # self.ui.actionReset.triggered.connect()
+        self.ui.pushButton_exportPlot2File.clicked.connect(self.do_export_plot)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
+        self.ui.actionReset.triggered.connect(self.reset_window)
 
         # class variables
         self._work_dir = os.getcwd()
@@ -82,9 +81,9 @@ class GeneralPlotWindow(QMainWindow):
 
     def reset_window(self):
         """
-
+        reset the window to the initial state, such that no plot is made on the canvas
         :return:
         """
-        # TODO NOW3
+        self.ui.graphicsView_plotView.reset_plots()
 
         return
