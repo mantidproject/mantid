@@ -180,8 +180,8 @@ public:
                                      1,   0, 15, 4,     0, 0.001, 2e-10,
                                      0,   8, 0,  1e-4,  1, 7,     11};
     m_YSum = 0;
-    for (int i = 0; i < specLength - 1; i++) {
-      m_YSum += yArray[i];
+    for (double i : yArray) {
+      m_YSum += i;
     }
 
     // most error values will be small so that they wont affect the tests
