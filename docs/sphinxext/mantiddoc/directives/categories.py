@@ -20,7 +20,7 @@ CATEGORIES_DIR = "categories"
 # List of category names that are considered the index for everything in that type
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
-INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
+INDEX_CATEGORIES = ["Algorithm Index", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
 
 class LinkItem(object):
     """
@@ -183,7 +183,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
         Returns:
           list: A list of strings containing the required categories
         """
-        category_list = ["Algorithms"]
+        category_list = ["Algorithm Index"]
         alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
             # double up the category separators so they are not treated as escape characters
@@ -354,7 +354,7 @@ def create_category_pages(app):
         #jinja appends .html to output name
         category_html_path_noext = posixpath.splitext(category.html_path)[0]
         yield (category_html_path_noext, context, template)
-
+      
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
@@ -367,6 +367,20 @@ def create_category_pages(app):
             category_html_path_noext = posixpath.join(document_dir, 'index')
             context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
+
+        if category.name == "Algorithm Index":
+            #create a Top level category page
+            all_top_categories = []
+            for top_name, top_category in iteritems(categories):
+              if "\\" not in top_name and top_name not in all_top_categories:
+                  all_top_categories.append(top_category)
+            
+            context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
+            context["pages"] = []
+            
+            top_html_dir = posixpath.join(category.name.lower(), 'Algorithms')
+            top_html_path_noext = posixpath.join(category_html_dir, 'Algorithms')
+            yield (top_html_path_noext, context, template)
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
