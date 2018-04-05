@@ -54,6 +54,8 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
   m_isHistogramData = ref->isHistogramData();
   m_isScanning = ref->detectorInfo().isScanning();
   m_instrumentName = ref->getInstrument()->getName();
+  for (unsigned int i=0; i<ref->getNumberHistograms(); ++i)
+    m_hasDx[i] = ref->hasDx(i);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -83,6 +85,11 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
               "detectors; ";
   if (ws->getInstrument()->getName() != m_instrumentName)
     errors += "different instrument names; ";
+  for (unsigned int i=0; i<m_numberSpectra; ++i){
+    if (m_hasDx[i] != ws->hasDx(i)){
+      errors += "spectra must have either Dx values or not; ";
+    }
+  }
   return errors;
 }
 
