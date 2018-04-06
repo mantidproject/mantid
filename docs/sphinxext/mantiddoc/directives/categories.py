@@ -14,6 +14,7 @@ import posixpath
 from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
+CATEGORY_HOMEPAGE_TEMPLATE = "categories_homepage.html"
 # relative to the directory containing the source file
 CATEGORIES_DIR = "categories"
 
@@ -365,26 +366,21 @@ def create_category_pages(app):
             # index in document directory
             document_dir = posixpath.dirname(category_html_dir)
             category_html_path_noext = posixpath.join(document_dir, 'index')
-            context['outpath'] = category_html_path_noext + '.html'
+            context['outpath'] = "../" + category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
 
         if category.name == "Algorithm Index":
             #create a Top level category page
             all_top_categories = []
-            #for top_name, top_category in iteritems(categories):
-            #    if "\\" not in top_name and top_name not in all_top_categories:
-            #        all_top_categories.append(top_category.name)
             for top_name, top_category in categories.iteritems():
                 if "\\" not in top_name and top_category not in all_top_categories:
                     all_top_categories.append(top_category)
             
             context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
             context["pages"] = []
-            
+            template = CATEGORY_HOMEPAGE_TEMPLATE 
             top_html_dir = posixpath.join(category.name.lower(), 'Algorithms')
-            #top_html_path_noext = posixpath.join(category_html_dir, 'Algorithms')
             top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
-            print(top_html_path_noext)
             yield (top_html_path_noext, context, template)
 # enddef
 
