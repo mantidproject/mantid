@@ -467,7 +467,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
 
   // Go though each element of m_data to convert to MDEvent
   for (ExpData ds : m_data) {
-    uint16_t runnumber = 1;
+    uint16_t runindex = 0;
     signal_t norm_signal(ds.norm);
     signal_t norm_error = std::sqrt(m_normfactor * norm_signal);
     double k = 2.0 / ds.wavelength;
@@ -487,11 +487,11 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
         millerindex[2] = static_cast<float>(hkl.Z());
         inserter.insertMDEvent(
             static_cast<float>(signal), static_cast<float>(error * error),
-            static_cast<uint16_t>(runnumber), detid, millerindex.data());
+            static_cast<uint16_t>(runindex), detid, millerindex.data());
 
         norm_inserter.insertMDEvent(static_cast<float>(norm_signal),
                                     static_cast<float>(norm_error * norm_error),
-                                    static_cast<uint16_t>(runnumber), detid,
+                                    static_cast<uint16_t>(runindex), detid,
                                     millerindex.data());
       }
     }
