@@ -1,4 +1,4 @@
-.. _dev-docs-git-workflow:
+.. _GitWorkflow:
 
 ===================
 Mantid Git Workflow
@@ -33,13 +33,13 @@ The steps for a new piece of work can be summarised as follows:
 1. Push up or `create <https://guides.github.com/features/issues>`_ an
    issue `here <https://github.com/mantidproject/mantid/issues>`__
 2. Create a branch from master, using the naming convention described
-   at :ref:`dev-docs-git-workflow-public-private-branches`
+   at :ref:`GitWorkflowPublicPrivateBranches`
 3. Do the work and commit changes to the branch. Push the branch
    regularly to GitHub to make sure no work is accidentally lost
 4. When you are finished with the work, ensure that all of the unit
    tests, documentation tests and system tests if necessary pass on
    your own machine
-5. Open a pull request (:ref:`dev-docs-git-workflow-pull-requests`)
+5. Open a pull request (:ref:`GitWorkflowPullRequests`)
    from the `GitHub branches
    <https://github.com/mantidproject/mantid/branches/>`_ page
 
@@ -48,7 +48,7 @@ The steps for a new piece of work can be summarised as follows:
    - If any issues come up, continue working on your branch and push
      to GitHub - the pull request will update automatically
 
-.. _dev-docs-git-workflow-public-private-branches:
+.. _GitWorkflowPublicPrivateBranches:
 
 Public and Private Branches
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -69,9 +69,9 @@ private branch and can be rebased, deleted, etc at the owner's
 whim. Changing a private branch is done by simply renaming the branch
 to drop the prefix.
 
-     
-.. _dev-docs-git-workflow-pull-requests:
-   
+
+.. _GitWorkflowPullRequests:
+
 Pull Requests
 ^^^^^^^^^^^^^
 
