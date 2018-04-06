@@ -371,17 +371,23 @@ def create_category_pages(app):
 
             #create a Top level category page
     all_top_categories = []
+    top_context = {}
     for top_name, top_category in categories.iteritems():
-        if top_category.name == "Algorithm Index":
-            if "\\" not in top_name and top_category not in all_top_categories:
-                all_top_categories.append(top_category)
+        if "\\" not in top_name and top_category not in all_top_categories:
+            all_top_categories.append(top_category)
             
-            context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
-            context["pages"] = []
-            template = CATEGORY_HOMEPAGE_TEMPLATE 
-            top_html_dir = posixpath.join(category.name.lower(), 'Algorithms')
+        top_context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
+        top_category_html_dir = posixpath.join(top_category.name.lower(), 'categories')
+        top_document_dir = posixpath.dirname(top_category_html_dir)
+        top_category_html_path_noext = posixpath.join(top_document_dir, 'index')
+        top_context['outpath'] = "../" + top_category_html_path_noext + '.html'
+        top_context["pages"] = []
+        template = CATEGORY_HOMEPAGE_TEMPLATE 
+        if top_category.name == "Algorithm Index":
+            top_html_dir = posixpath.join(top_category.name.lower(), 'Algorithms')
             top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
-            yield (top_html_path_noext, context, template)
+
+        yield (top_html_path_noext, top_context, template)
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------

@@ -32,24 +32,13 @@
 {%- endmacro %}
 
 {%- block body -%}
-    <h1> Category: {{ title }} </h1>
+    <h1> Algorithm Categories </h1>
     <blockquote> Welcome to the Mantid Algorithm Categories page. This page provides a list of the categories into which the algorithms are split.
     Categories broadly correspond to either the technique that the category is used for (e.g. SANSConvertToQ is under SANS), or for
     more general algorithms, the type of function it performs (e.g. Load is under Data Handling). There is also a full alphabetical
-    list of algorithms, which can be found <a href="https://docs.mantidproject.org/nightly/algorithms/index.html#algorithms-list">here.</a></blockquote>
+    list of algorithms, which can be found <a href="../index.html">here.</a></blockquote>
 
     <br>
     {{ split_to_three_columns(subcategories) }}
-
-    {% if pages %}
-    <h2> Pages </h2>
-      {% if pages|length > 10 %}
-        {{ split_to_three_columns(pages) }}
-      {% endif %}
-    {% endif %}
-    
-    {% if parentcategory %}
-    <p> {{ parentcategory }} </p>
-    {% endif %}
 
 {%- endblock -%}
