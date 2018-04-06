@@ -296,6 +296,15 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   m_outWS->mutableY(index) = spectrum;
   m_outWS->mutableE(index) = errors;
   m_outWS->mutableX(index) = axis;
+  for (const auto &input : m_inputWS) {
+    if (input->hasDx(index)) {
+      std::vector<double> xerrors;
+      xerrors.reserve(m_outWS->blocksize());
+      auto dx = input->dx(index).rawData();
+      xerrors.insert(xerrors.end(), dx.begin(), dx.end());
+      m_outWS->mutableDx(index) = xerrors;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------
