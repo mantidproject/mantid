@@ -57,16 +57,6 @@ public:
     clearWorkspaces("InputWS", "OutputWS");
   }
 
-  void testExec_1WS() {
-    LoadSampleShape testLoadSampleShape;
-    testLoadSampleShape.initialize();
-    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadSampleShape, "InputWS", "InputWS");
-    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
-    TS_ASSERT(testLoadSampleShape.isExecuted());
-    clearWorkspaces("InputWS", "InputWS");
-  }
-
   void test_output_workspace_has_MeshObject_2WS() {
     loadMeshObject("InputWS", "OutputWS", "cube.stl");
     clearWorkspaces("InputWS", "OutputWS");
