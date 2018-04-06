@@ -124,7 +124,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # Clean up other workspaces if the optimizations have not been turned on.
     # -----------------------------------------------------------------------
     if not use_optimizations:
-        delete_optimization_workspaces(reduction_packages)
+        delete_optimization_workspaces(reduction_packages[-1])
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -876,7 +876,7 @@ def delete_reduced_workspaces(reduction_packages):
         _delete_workspaces(delete_alg, [reduced_lab, reduced_hab, reduced_merged])
 
 
-def delete_optimization_workspaces(reduction_packages):
+def delete_optimization_workspaces(reduction_package):
     """
     Deletes all workspaces which are used for optimizations. This can be loaded workspaces or can optimizations
 
@@ -892,23 +892,22 @@ def delete_optimization_workspaces(reduction_packages):
     delete_options = {}
     delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
 
-    for reduction_package in reduction_packages:
-        # Delete loaded workspaces
-        workspaces_to_delete = list(reduction_package.workspaces.values())
-        _delete_workspaces(delete_alg, workspaces_to_delete)
+    # Delete loaded workspaces
+    workspaces_to_delete = list(reduction_package.workspaces.values())
+    _delete_workspaces(delete_alg, workspaces_to_delete)
 
-        # Delete loaded monitors
-        monitors_to_delete = list(reduction_package.monitors.values())
-        _delete_workspaces(delete_alg, monitors_to_delete)
+    # Delete loaded monitors
+    monitors_to_delete = list(reduction_package.monitors.values())
+    _delete_workspaces(delete_alg, monitors_to_delete)
 
-        # Delete can optimizations
-        optimizations_to_delete = [reduction_package.reduced_lab_can,
-                                   reduction_package.reduced_lab_can_count,
-                                   reduction_package.reduced_lab_can_norm,
-                                   reduction_package.reduced_hab_can,
-                                   reduction_package.reduced_hab_can_count,
-                                   reduction_package.reduced_hab_can_norm]
-        _delete_workspaces(delete_alg, optimizations_to_delete)
+    # Delete can optimizations
+    optimizations_to_delete = [reduction_package.reduced_lab_can,
+                               reduction_package.reduced_lab_can_count,
+                               reduction_package.reduced_lab_can_norm,
+                               reduction_package.reduced_hab_can,
+                               reduction_package.reduced_hab_can_count,
+                               reduction_package.reduced_hab_can_norm]
+    _delete_workspaces(delete_alg, optimizations_to_delete)
 
 
 def get_all_names_to_save(reduction_packages):
