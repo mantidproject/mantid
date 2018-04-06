@@ -241,6 +241,13 @@ public:
     TS_ASSERT_EQUALS(algv3.categories(), result);
   }
 
+  void testSeeAlso() {
+    std::vector<std::string> result{"rabbit"};
+    result.emplace_back("goldfish");
+    result.emplace_back("Spotted Hyena");
+    TS_ASSERT_EQUALS(alg.seeAlso(), result);
+  }
+
   void testAlias() { TS_ASSERT_EQUALS(alg.alias(), "Dog"); }
 
   void testIsChild() {
