@@ -15,3 +15,11 @@ Single Crystal Diffraction
 --------------------------
 
 - New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load single crystal diffraction data from the DNS instrument into MDEventWorkspace.
+
+Improvements
+############
+
+- PeaksWorkspace has column added for the unique peak number so peaks can be found after sorting or filtering.
+
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has option to use a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
+

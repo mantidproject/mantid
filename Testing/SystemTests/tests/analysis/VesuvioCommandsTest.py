@@ -22,6 +22,8 @@ def _is_old_boost_version():
     if any(dist):
         if 'Red Hat' in dist[0] and dist[1].startswith('7'):
             return True
+        if 'Scientific Linux' in dist[0] and dist[1].startswith('7'):
+            return True
         if dist[0] == 'Ubuntu' and dist[1] == '14.04':
             return True
 

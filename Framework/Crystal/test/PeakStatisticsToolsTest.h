@@ -178,6 +178,30 @@ public:
     TS_ASSERT_EQUALS(cleanIntensities[1], 31.0);
   }
 
+  void test_UniqueReflectionRemoveOutliersWeighted() {
+    UniqueReflection reflection =
+        getReflectionWithPeaks({30.0, 34.0, 32.0, 31.0}, {4.5, 6.5, 10.0, 2.3});
+
+    // standard deviation is 1.70782512765993
+    auto cleanReflection = reflection.removeOutliers(3.0, true);
+    TSM_ASSERT_EQUALS(
+        "UniqueReflection removed outlier although it should not.",
+        cleanReflection.count(), 3);
+
+    cleanReflection = reflection.removeOutliers(2.0, true);
+    TSM_ASSERT_EQUALS(
+        "UniqueReflection removed outlier although it should not.",
+        cleanReflection.count(), 2);
+
+    cleanReflection = reflection.removeOutliers(1.0, true);
+    TSM_ASSERT_EQUALS(
+        "UniqueReflection did not remove outliers although it should have.",
+        cleanReflection.count(), 1);
+
+    std::vector<double> cleanIntensities = cleanReflection.getIntensities();
+    TS_ASSERT_EQUALS(cleanIntensities[0], 32.0);
+  }
+
   void test_UniqueReflectionSetIntensityAndSigma() {
     UniqueReflection reflection =
         getReflectionWithPeaks({30.0, 34.0, 32.0, 31.0}, {4.5, 6.5, 10.0, 2.3});
