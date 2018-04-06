@@ -369,12 +369,12 @@ def create_category_pages(app):
             context['outpath'] = "../" + category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
 
-        if category.name == "Algorithm Index":
             #create a Top level category page
-            all_top_categories = []
-            for top_name, top_category in categories.iteritems():
-                if "\\" not in top_name and top_category not in all_top_categories:
-                    all_top_categories.append(top_category)
+    all_top_categories = []
+    for top_name, top_category in categories.iteritems():
+        if top_category.name == "Algorithm Index":
+            if "\\" not in top_name and top_category not in all_top_categories:
+                all_top_categories.append(top_category)
             
             context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
             context["pages"] = []
