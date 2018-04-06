@@ -3,25 +3,21 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <stdarg.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
-#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h>
 #include <MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h>
 #include "MantidTypes/SpectrumDefinition.h"

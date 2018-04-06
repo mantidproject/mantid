@@ -27,13 +27,13 @@ public:
 
   void setUp() override {
     std::vector<MatrixWorkspace_sptr> ws(6);
-    ws[0] = create2DWorkspace123(5, 3); // 3 points
-    ws[1] = create2DWorkspace154(5, 2); // 2 points
-    ws[2] = create2DWorkspace123(5, 1); // 1 point
-    ws[3] = create2DWorkspace154(5, 1); // 1 point
-    ws[4] = create2DWorkspace123(5, 3); // 3 points
-    ws[5] = create2DWorkspace123(5, 3); // 3 points
-
+    // Workspaces have 5 spectra must be point data, don't have masks and have dx
+    ws[0] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
+    ws[1] = create2DWorkspace154(5, 2, false, std::set<int64_t>(), true); // 2 points
+    ws[2] = create2DWorkspace123(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[3] = create2DWorkspace154(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[4] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
+    ws[5] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
     m_testWS = {"ws1", "ws2", "ws3", "ws4", "ws5", "ws6"};
 
     for (unsigned int i; i<ws.size(); ++i){
@@ -69,22 +69,21 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), 7);
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
-    TSM_ASSERT("Output workspace must have dx values defined for tests", !out->hasDx(0));
 
     std::vector<double> spectrum = out->y(0).rawData();
     std::vector<double> error = out->e(0).rawData();
     std::vector<double> xaxis = out->x(0).rawData();
+    std::vector<double> dx = out->dx(0).rawData();
 
     std::vector<double> x{1., 2., 3., 1., 2., 1., 1.};
     std::vector<double> y{2., 2., 2., 5., 5., 2., 5.};
     std::vector<double> e{3., 3., 3., 4., 4., 3., 4.};
 
-    //std::vector<double> dx = out->dx(0).rawData();
     for (unsigned int i=0; i<spectrum.size(); ++i){
       TS_ASSERT_EQUALS(xaxis[i], x[i]);
       TS_ASSERT_EQUALS(spectrum[i], y[i]);
       TS_ASSERT_EQUALS(error[i], e[i]);
-      //TS_ASSERT_EQUALS(dx[i], y[i]);
+      TSM_ASSERT_EQUALS("Dx and y values are the same", dx[i], y[i]);
     }
   }
 

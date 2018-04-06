@@ -199,13 +199,14 @@ Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
 /**
  * @brief create2DWorkspaceWithValues
- * @param nHist : Number of spectra
- * @param nBins : Number of points (not bin edges!)
- * @param isHist : Flag if it is a histogram or point data
- * @param maskedWorkspaceIndices : Mask workspace indices
- * @param xVal : bin edge or point
- * @param yVal : y value
- * @param eVal : error values
+ * @param nHist :: Number of spectra
+ * @param nBins :: Number of points (not bin edges!)
+ * @param isHist :: Flag if it is a histogram or point data
+ * @param maskedWorkspaceIndices :: Mask workspace indices
+ * @param xVal :: bin edge or point
+ * @param yVal :: y value
+ * @param eVal :: error values
+ * @param hasDx :: wether workspace has dx values defined (default is false)
  * @return A workspace filled with nBins bins or points and nHist spectra of the
  * values yVal and the error eVal as well as Dx values which are copies of the y
  * values
@@ -213,7 +214,8 @@ Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 Workspace2D_sptr
 create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             const std::set<int64_t> &maskedWorkspaceIndices,
-                            double xVal, double yVal, double eVal) {
+                            double xVal, double yVal, double eVal,
+                            bool hasDx = false) {
   auto x1 = Kernel::make_cow<HistogramData::HistogramX>(
       isHist ? nBins + 1 : nBins, LinearGenerator(xVal, 1.0));
   Counts y1(nBins, yVal);
@@ -223,7 +225,8 @@ create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
   retVal->initialize(nHist, createHisto(isHist, y1, e1));
   for (int i = 0; i < nHist; i++) {
     retVal->setSharedX(i, x1);
-    retVal->setSharedDx(i, dx);
+    if (hasDx)
+      retVal->setSharedDx(i, dx);
     retVal->getSpectrum(i).setDetectorID(i);
     retVal->getSpectrum(i).setSpectrumNo(i);
   }
@@ -246,16 +249,18 @@ Workspace2D_sptr create2DWorkspaceWithValuesAndXerror(
 
 Workspace2D_sptr
 create2DWorkspace123(int64_t nHist, int64_t nBins, bool isHist,
-                     const std::set<int64_t> &maskedWorkspaceIndices) {
-  return create2DWorkspaceWithValues(nHist, nBins, isHist,
-                                     maskedWorkspaceIndices, 1.0, 2.0, 3.0);
+                     const std::set<int64_t> &maskedWorkspaceIndices,
+                     bool hasDx) {
+  return create2DWorkspaceWithValues(
+      nHist, nBins, isHist, maskedWorkspaceIndices, 1.0, 2.0, 3.0, hasDx);
 }
 
 Workspace2D_sptr
 create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist,
-                     const std::set<int64_t> &maskedWorkspaceIndices) {
-  return create2DWorkspaceWithValues(nHist, nBins, isHist,
-                                     maskedWorkspaceIndices, 1.0, 5.0, 4.0);
+                     const std::set<int64_t> &maskedWorkspaceIndices,
+                     bool hasDx) {
+  return create2DWorkspaceWithValues(
+      nHist, nBins, isHist, maskedWorkspaceIndices, 1.0, 5.0, 4.0, hasDx);
 }
 
 Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
@@ -330,19 +335,24 @@ Workspace2D_sptr create2DWorkspaceBinned(int nhist, int numVals, double x0,
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = M_SQRT2w
+ * If hasDx is true, all spectra will have dx values, starting from 0.1 and
+ * increased by 0.1 for each bin.
  */
 Workspace2D_sptr create2DWorkspaceBinned(int nhist, const int numBoundaries,
-                                         const double xBoundaries[]) {
+                                         const double xBoundaries[],
+                                         bool hasDx) {
   BinEdges x(xBoundaries, xBoundaries + numBoundaries);
   const int numBins = numBoundaries - 1;
   Counts y(numBins, 2);
   CountStandardDeviations e(numBins, M_SQRT2);
+  auto dx = Kernel::make_cow<HistogramData::HistogramDx>(
+      numBins, LinearGenerator(0.1, .1));
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(nhist, numBins + 1, numBins);
+  retVal->initialize(nhist, createHisto(true, y, e));
   for (int i = 0; i < nhist; i++) {
     retVal->setBinEdges(i, x);
-    retVal->setCounts(i, y);
-    retVal->setCountStandardDeviations(i, e);
+    if (hasDx)
+      retVal->setSharedDx(i, dx);
   }
   return retVal;
 }
@@ -375,11 +385,11 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
  * from the centre of the
  * previous.
  * Data filled with: Y: 2.0, E: M_SQRT2, X: nbins of width 1 starting at 0
+ * The flag hasDx is responsible for creating dx values or not
  */
-Workspace2D_sptr
-create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
-                                    bool startYNegative, bool isHistogram,
-                                    const std::string &instrumentName) {
+Workspace2D_sptr create2DWorkspaceWithFullInstrument(
+    int nhist, int nbins, bool includeMonitors, bool startYNegative,
+    bool isHistogram, const std::string &instrumentName, bool hasDx) {
   if (includeMonitors && nhist < 2) {
     throw std::invalid_argument("Attempting to 2 include monitors for a "
                                 "workspace with fewer than 2 histograms");
@@ -388,9 +398,10 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   Workspace2D_sptr space;
   if (isHistogram)
     space = create2DWorkspaceBinned(
-        nhist, nbins); // A 1:1 spectra is created by default
+        nhist, nbins, hasDx); // A 1:1 spectra is created by default
   else
-    space = create2DWorkspace123(nhist, nbins, false);
+    space =
+        create2DWorkspace123(nhist, nbins, false, std::set<int64_t>(), hasDx);
   space->setTitle(
       "Test histogram"); // actually adds a property call run_title to the logs
   space->getAxis(0)->setUnit("TOF");

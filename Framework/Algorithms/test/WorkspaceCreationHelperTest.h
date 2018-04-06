@@ -33,7 +33,8 @@ public:
   }
 
   void test_create2DWorkspaceWithValues() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(1, 2);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(
+        1, 2, false, std::set<int64_t>(), true);
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(ws->size(), 2);
