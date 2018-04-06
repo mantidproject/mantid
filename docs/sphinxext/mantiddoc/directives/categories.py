@@ -371,15 +371,20 @@ def create_category_pages(app):
         if category.name == "Algorithm Index":
             #create a Top level category page
             all_top_categories = []
-            for top_name, top_category in iteritems(categories):
-              if "\\" not in top_name and top_name not in all_top_categories:
-                  all_top_categories.append(top_category)
+            #for top_name, top_category in iteritems(categories):
+            #    if "\\" not in top_name and top_name not in all_top_categories:
+            #        all_top_categories.append(top_category.name)
+            for top_name, top_category in categories.iteritems():
+                if "\\" not in top_name and top_category not in all_top_categories:
+                    all_top_categories.append(top_category)
             
             context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
             context["pages"] = []
             
             top_html_dir = posixpath.join(category.name.lower(), 'Algorithms')
-            top_html_path_noext = posixpath.join(category_html_dir, 'Algorithms')
+            #top_html_path_noext = posixpath.join(category_html_dir, 'Algorithms')
+            top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
+            print(top_html_path_noext)
             yield (top_html_path_noext, context, template)
 # enddef
 
