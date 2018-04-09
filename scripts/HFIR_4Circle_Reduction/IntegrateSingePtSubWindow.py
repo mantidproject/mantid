@@ -142,7 +142,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             ref_fwhm = self.ui.tableView_summary.get_fwhm(row_number)
 
             intensity = self._controller.calculate_intensity_single_pt(self._exp_number, scan_number, pt_number,
-                                                                       roi_name, ref_fwhm=ref_fwhm)
+                                                                       roi_name, ref_fwhm=ref_fwhm, is_fwhm=False)
 
             # add to table
             self.ui.tableView_summary.set_intensity(scan_number, pt_number, intensity)

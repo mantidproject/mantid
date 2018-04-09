@@ -266,7 +266,7 @@ class PeakProcessRecord(object):
         :param par_name:
         :return:
         """
-        # TODO FIXME NOW3 : how to get 2theta?
+        # TODO (future): Allow for more parameters
         if par_name == '2theta':
             par_value = self._2theta
             par_error = 0

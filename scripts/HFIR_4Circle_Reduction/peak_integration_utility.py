@@ -56,26 +56,36 @@ def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
     return motor_step
 
 
-def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
+def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
+                                   error_a_sigma=None):
     """
-    :except: raise RuntimeError if
-    :param integrated_pt_dict:
-    :param motor_pos_dict:
-    :return: motor_pos_vec, pt_intensity_vec
+    calculate the peak intensity, which is the area under the peak
+    if sigma == 1, then the integral is sqrt(pi);
+    then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
+    :param gauss_a:
+    :param gauss_sigma:
+    :param error_a_sq: error(a)**2
+    :param error_sigma_sq: error(sigma)**2
+    :param error_a_sigma: correlated error for a and sigma
+    :return:
     """
-    pt_list = sorted(integrated_pt_dict.keys())
+    integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
 
-    if len(motor_pos_dict) != len(pt_list):
-        raise RuntimeError('Integrated Pt intensities does not match motor positions')
+    if error_a_sq is not None:
+        # calculate integral intensity error by propagation
+        # check
+        assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
+        assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
+                                                  ''.format(type(error_sigma_sq))
+        assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
+                                                 ''.format(type(error_a_sigma))
+        # calculate
+        error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sigma
+        error = numpy.sqrt(error2)
+    else:
+        error = numpy.sqrt(integral)
 
-    pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
-    motor_pos_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
-
-    for i_pt, pt in enumerate(pt_list):
-        pt_intensity_vec[i_pt] = integrated_pt_dict[pt]
-        motor_pos_vec[i_pt] = motor_pos_dict[pt]
-
-    return motor_pos_vec, pt_intensity_vec
+    return integral, error
 
 
 def calculate_penalty(model_vec_y, exp_vec_y):
@@ -105,14 +115,48 @@ def calculate_penalty(model_vec_y, exp_vec_y):
     return cost
 
 
-# TODO FIXME NOW3 Implement!
-def calculate_single_pt_scan_peak_intensity(peak_heigh, fwhm, is_fwhm):
+def calculate_single_pt_scan_peak_intensity(peak_height, fwhm, is_fwhm):
     """
+    calculate peak intensity for single-measurement peak (1-measurement-1-scan)
+    :param peak_height:
+    :param fwhm:
+    :param is_fwhm:
+    :return:
     """
+    # check input
+    assert isinstance(fwhm, float), 'blabla'
 
-    peak_intensity = 1.
+    # convert fwhm
+    if is_fwhm:
+        sigma = fwhm / 2.355
+    else:
+        sigma = fwhm
+
+    peak_intensity, no_error = calculate_peak_intensity_gauss(peak_height, sigma)
 
     return peak_intensity
+
+
+def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
+    """
+    :except: raise RuntimeError if
+    :param integrated_pt_dict:
+    :param motor_pos_dict:
+    :return: motor_pos_vec, pt_intensity_vec
+    """
+    pt_list = sorted(integrated_pt_dict.keys())
+
+    if len(motor_pos_dict) != len(pt_list):
+        raise RuntimeError('Integrated Pt intensities does not match motor positions')
+
+    pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+    motor_pos_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+
+    for i_pt, pt in enumerate(pt_list):
+        pt_intensity_vec[i_pt] = integrated_pt_dict[pt]
+        motor_pos_vec[i_pt] = motor_pos_dict[pt]
+
+    return motor_pos_vec, pt_intensity_vec
         
 
 def estimate_background(pt_intensity_dict, bg_pt_list):
@@ -422,38 +466,6 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
                                                2 * gauss_a * gauss_sigma * error_a_s))
 
     return peak_intensity, intensity_error
-
-
-def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
-                                   error_a_sigma=None):
-    """
-    calculate the peak intensity, which is the area under the peak
-    if sigma == 1, then the integral is sqrt(pi);
-    then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
-    :param gauss_a:
-    :param gauss_sigma:
-    :param error_a_sq: error(a)**2
-    :param error_sigma_sq: error(sigma)**2
-    :param error_a_sigma: correlated error for a and sigma
-    :return:
-    """
-    integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
-
-    if error_a_sq is not None:
-        # calculate integral intensity error by propagation
-        # check
-        assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
-        assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
-                                                  ''.format(type(error_sigma_sq))
-        assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
-                                                 ''.format(type(error_a_sigma))
-        # calculate
-        error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sigma
-        error = numpy.sqrt(error2)
-    else:
-        error = numpy.sqrt(integral)
-
-    return integral, error
 
 
 def get_finer_grid(vec_x, factor):

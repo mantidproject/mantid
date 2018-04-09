@@ -348,9 +348,10 @@ def parse_integers_editors(line_edits, allow_blank=False):
                 int_value = int(str_value)
             except ValueError as value_err:
                 # TODO  NOW3 - Need better information
-                error_message += 'Unable to parse a line edit with value %s to integer. %s\n' % (str_value, value_err)
-                print ('[DB...BA]...')
-                raise blabla
+                error_message += 'Unable to parse a line edit {0} with value \'{1}\' to an integer due to {2}' \
+                                 ''.format(line_edit.objectName(), str_value, value_err)
+                # FIXME NOW3 Remove the following raise after testing!
+                raise NotImplementedError(error_message)
             else:
                 if str_value != '%d' % int_value:
                     error_message += 'Value %s is not a proper integer.\n' % str_value

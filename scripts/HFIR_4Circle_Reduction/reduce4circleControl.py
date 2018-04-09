@@ -372,7 +372,7 @@ class CWSCDReductionControl(object):
 
         return False, 'Unable to find first Pt file {0}'.format(first_xm_file)
 
-    def calculate_intensity_single_pt(self, exp_number, scan_number, pt_number, roi_name, ref_fwhm):
+    def calculate_intensity_single_pt(self, exp_number, scan_number, pt_number, roi_name, ref_fwhm, is_fwhm):
         """
         calculate single-point-measurement peak/scan's intensity
         :param exp_number:
@@ -380,6 +380,7 @@ class CWSCDReductionControl(object):
         :param pt_number:
         :param roi_name:
         :param ref_fwhm:
+        :param is_fwhm:
         :return:
         """
         # check inputs
@@ -406,9 +407,8 @@ class CWSCDReductionControl(object):
         # ref_exp_number, ref_scan_number, integrated_peak_params = self.get_integrated_scan_params(exp_number,
         #                                                                                           two_theta,
         #                                                                                           resolution=0.01)
-        # TODO FIXME NOW3 : method argument ) takes exactly 3 arguments (2 given)
         peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(
-            integration_record.get_pt_intensity(), ref_fwhm)
+            integration_record.get_pt_intensity(), ref_fwhm, is_fwhm)
         integration_record.set_peak_intensity(peak_intensity)
 
         return peak_intensity
@@ -451,7 +451,7 @@ class CWSCDReductionControl(object):
         # do a linear interpolation
         interp_sigma = numpy.interp(two_theta, self._two_theta_sigma[0], self._two_theta_sigma[1])
 
-        # TODO NOW3 : debug output for why always same sigma!
+        print ('[DB...BAT] 2theta = {0}: output sigma = {1}'.format(two_theta, interp_sigma))
 
         return interp_sigma
 
