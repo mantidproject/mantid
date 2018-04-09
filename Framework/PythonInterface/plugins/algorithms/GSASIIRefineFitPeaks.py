@@ -80,10 +80,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         self.declareProperty(name=self.PROP_XMIN, defaultValue=0.0, direction=Direction.Input,
                              doc="Minimum x value to use for refinement, in the same units as the input workspace. " +
-                                 "Leave blank to refine in the range 0.0 to {}".format(self.PROP_XMAX))
+                                 "Leave blank to refine from the start of the data to {0}. Note, if {1} corresponds to "
+                                 "a greater TOF value than this, then {1} is used".format(self.PROP_XMAX,
+                                                                                          self.PROP_PAWLEY_DMIN))
         self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0, direction=Direction.Input,
                              doc="Maximum x value to use for refinement, in the same units as the input workspace. " +
-                                 "Leave blank to refine in the range {} to the end of the range".format(self.PROP_XMIN))
+                                 "Leave blank to refine in the range {} to the end of the data".format(self.PROP_XMIN))
         self.declareProperty(name=self.PROP_REFINE_SIGMA, defaultValue=False, direction=Direction.Input,
                              doc="Whether to refine the sigma-1 profile coefficient")
         self.declareProperty(name=self.PROP_REFINE_GAMMA, defaultValue=False, direction=Direction.Input,
@@ -110,7 +112,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         self.declareProperty(name=self.PROP_PAWLEY_DMIN, defaultValue=1.0, direction=Direction.Input,
                              doc="For Pawley refiment: as defined in GSAS-II, the minimum d-spacing to be used in a "
-                                 "Pawley refinement. Please refer to the GSAS-II documentation for full details.")
+                                 "Pawley refinement. Please refer to the GSAS-II documentation for full details. Note, "
+                                 "if this corresponds to a TOF value less than {} or the lowest TOF value in the data, "
+                                 "the greatest of the 3 values is used".format(self.PROP_XMIN))
         self.declareProperty(name=self.PROP_PAWLEY_NEGATIVE_WEIGHT, defaultValue=0.0, direction=Direction.Input,
                              doc="For Pawley refinement: as defined in GSAS-II, the weight for a penalty function "
                                  "applied during a Pawley refinement on resulting negative intensities. "
