@@ -27,6 +27,8 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/ManageUserDirectories.h
 
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/RowLocation.h
+
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/LineViewer.h
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/PeaksPresenter.h

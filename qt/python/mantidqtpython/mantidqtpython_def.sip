@@ -5,6 +5,7 @@
 /**************************************************************************/
 
 %Include qwttypes.sip
+%Include vector.sip
 
 %ModuleHeaderCode
 #include "MantidQtWidgets/Common/PythonSystemHeader.h"
@@ -1496,6 +1497,30 @@ public:
 
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+namespace Batch
+{
+
+class RowLocation
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+%End
+public:
+RowLocation(std::vector<int>);
+std::vector<int> path() const;
+int rowRelativeToParent() const;
+bool isRoot() const;
+};
+
+};
+};
+};
+
 
 namespace MantidQt
 {
