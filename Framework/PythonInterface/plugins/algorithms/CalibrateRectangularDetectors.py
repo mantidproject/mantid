@@ -52,6 +52,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Calibration"
 
+    def seeAlso(self):
+        return [ "GetDetectorOffsets" ]
+
     def name(self):
         return "CalibrateRectangularDetectors"
 

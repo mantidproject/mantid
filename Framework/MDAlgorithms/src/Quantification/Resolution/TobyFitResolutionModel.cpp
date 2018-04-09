@@ -521,7 +521,6 @@ void TobyFitResolutionModel::preprocess(
   } while (iterator->next());
   g_log.debug() << "Done preprocessing loop:" << timer.elapsed()
                 << " seconds\n";
-  delete iterator;
 }
 
 /**

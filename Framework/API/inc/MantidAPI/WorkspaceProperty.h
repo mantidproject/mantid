@@ -95,8 +95,7 @@ public:
 
   WorkspaceProperty &operator=(const WorkspaceProperty &right);
 
-  boost::shared_ptr<TYPE> &
-  operator=(const boost::shared_ptr<TYPE> &value) override;
+  WorkspaceProperty &operator=(const boost::shared_ptr<TYPE> &value) override;
 
   WorkspaceProperty &operator+=(Kernel::Property const *) override;
 

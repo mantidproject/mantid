@@ -19,6 +19,9 @@ class MDNormSCDPreprocessIncoherent(DataProcessorAlgorithm):
     def category(self):
         return "MDAlgorithms\\Normalisation"
 
+    def seeAlso(self):
+        return [ "MDNormSCD","MDNormDirectSC" ]
+
     def name(self):
         return "MDNormSCDPreprocessIncoherent"
 

@@ -674,7 +674,7 @@ install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 # Create the properties file for the installer
 set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
-if ( APPLE )
+if ( APPLE AND ENABLE_MANTIDPLOT )
   set ( MANTID_ROOT ../.. )
 else ()
   set ( MANTID_ROOT .. )

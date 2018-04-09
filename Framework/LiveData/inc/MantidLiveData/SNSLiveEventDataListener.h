@@ -79,7 +79,7 @@ protected:
   bool rxPacket(const ADARA::VariableStringPkt &pkt) override;
   bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt) override;
   bool rxPacket(const ADARA::AnnotationPkt &pkt) override;
-  // virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
+  bool rxPacket(const ADARA::RunInfoPkt &pkt) override;
 
 private:
   // Workspace initialization needs to happen in 2 steps.  Part 1 must happen
