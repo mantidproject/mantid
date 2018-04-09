@@ -1397,12 +1397,34 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         return
 
-    def get_peak_intensities(self):
+    def get_fwhm(self, row_index):
+        """ get reference scan's FWHM
+        :param row_index:
+        :return:
         """
-        """
-        # TODO NOW3
+        return self.get_cell_value(row_index, self._fwhm_index)
 
-        return dict()
+    def get_peak_intensities(self):
+        """ get the summary on all peaks' intensities
+        :return: dictionary as scan number and peak intensity
+        """
+        peak_intensity_dict = dict()
+
+        for row_index in range(self.rowCount()):
+            scan_number = self.get_cell_value(row_index, self._scan_index)
+            intensity_i = self.get_cell_value(row_index, self._intensity_index)
+            peak_intensity_dict[scan_number] = intensity_i
+        # END-FOR
+
+        return peak_intensity_dict
+
+    def get_pt_number(self, row_index):
+        """
+        get PT number
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._pt_index)
 
     def get_reference_scans(self, row_index):
         """
@@ -1434,13 +1456,6 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         :return:
         """
         return self.get_cell_value(row_index, self._roi_index)
-
-    def get_fwhm(self, row_index):
-        """ get reference scan's FWHM
-        :param row_index:
-        :return:
-        """
-        return self.get_cell_value(row_index, self._fwhm_index)
 
     def get_scan_number(self, row_index):
         """

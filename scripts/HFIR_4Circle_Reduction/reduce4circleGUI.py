@@ -2197,7 +2197,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    # TODO NOW3 - It works?
     def process_single_pt_scan_intensity(self, scan_pt_list):
         """
         process integrated single pt scan
@@ -2205,14 +2204,16 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(scan_pt_list, list), 'Input scan-pt pairs {0} must be in a list but not a {1}' \
+        assert isinstance(scan_pt_list, dict), 'Input scan-pt pairs {0} must be in a dict but not a {1}' \
                                                ''.format(scan_pt_list, type(scan_pt_list))
 
         # get intensities
-        for scan_number, pt_number in scan_pt_list:
+        for scan_number in scan_pt_list:
             # self._single_pt_scan_intensity_dict: not been defined and used at all!
-            intensity = self._single_pt_scan_intensity_dict[scan_number, pt_number]
-            self.add_single_pt_scan(scan_number, pt_number, intensity)  # implement add_signal_pt_scan!
+            # TODO NOW3 : Check whether the intensity is recorded in the single_measurement already???
+            intensity = scan_pt_list[scan_number]
+            # TODO NOW3 : implement add_single_pt_scan!
+            self.add_single_pt_scan(scan_number, pt_number, intensity)
         # END-FOR
 
         return

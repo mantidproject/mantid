@@ -1510,6 +1510,15 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
+    def save(self, file_name):
+        """
+        save to image
+        :param file_name:
+        :return:
+        """
+        # FIXME (Future) many more options for figures to save
+        self.fig.savefig(file_name)
+
     def set_title(self, title, color, location='center'):
         """
         set title to the figure (canvas) with default location at center
@@ -1690,6 +1699,9 @@ class Qt4MplCanvas(FigureCanvas):
 
             # get vector for error
             vec_e = retrieve_error_bar(content[1])
+
+            # TODO FIXME NOW3 - This does not work correctly!
+            print ('Vector E = {0}'.format(vec_e))
 
         else:
             # not anywhere

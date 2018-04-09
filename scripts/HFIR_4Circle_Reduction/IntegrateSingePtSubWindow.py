@@ -131,12 +131,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         for row_number in range(self.ui.tableView_summary.rowCount()):
             # integrate counts on detector
             scan_number = self.ui.tableView_summary.get_scan_number(row_number)
-            pt_number = 1
-            # peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
-            #                                                         fit_gaussian=True)
-            # # add to table
-            # self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height)
-            # print ('[DB...BAT] SinglePt-Gaussian-Intensity = {0}'.format(peak_height))
+            pt_number = self.ui.tableView_summary.get_pt_number(row_number)
 
             # calculate peak intensity
             ref_fwhm = self.ui.tableView_summary.get_fwhm(row_number)
