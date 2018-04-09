@@ -31,6 +31,10 @@ void EnggDiffGSASFittingPresenter::notify(
     processLoadRun();
     break;
 
+  case IEnggDiffGSASFittingPresenter::RefineAll:
+    processRefineAll();
+    break;
+    
   case IEnggDiffGSASFittingPresenter::SelectRun:
     processSelectRun();
     break;
@@ -43,6 +47,19 @@ void EnggDiffGSASFittingPresenter::notify(
     processShutDown();
     break;
   }
+}
+
+std::vector<GSASIIRefineFitPeaksParameters>
+EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
+  const auto runLabels = m_multiRunWidget->getAllRunLabels();
+  std::vector<GSASIIRefineFitPeaksParameters> inputParams;
+  inputParams.reserve(runLabels.size());
+
+  for (const auto &runLabel : runLabels) {
+    const auto inputWS = *(m_multiRunWidget->getFocusedRun(runLabel));
+    inputParams.push_back(collectInputParameters(runLabel, inputWS));
+  }
+  return inputParams;
 }
 
 GSASIIRefineFitPeaksParameters
@@ -160,6 +177,18 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
   } catch (const std::exception &ex) {
     m_view->userWarning("Could not load file", ex.what());
   }
+}
+
+void EnggDiffGSASFittingPresenter::processRefineAll() {
+  const auto refinementParams = collectAllInputParameters();
+  if (refinementParams.size() == 0) {
+    m_view->userWarning("No runs loaded",
+                        "Please load at least one run before refining");
+    return;
+  }
+  m_view->showStatus("Refining run");
+  m_view->setEnabled(false);
+  doRefinements(refinementParams);
 }
 
 void EnggDiffGSASFittingPresenter::processSelectRun() {

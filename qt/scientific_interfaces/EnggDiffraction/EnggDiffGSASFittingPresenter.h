@@ -46,9 +46,13 @@ public:
 private:
   void processDoRefinement();
   void processLoadRun();
+  void processRefineAll();
   void processSelectRun();
   void processShutDown();
   void processStart();
+
+  /// Collect GSASIIRefineFitPeaks parameters for all runs loaded in
+  std::vector<GSASIIRefineFitPeaksParameters> collectAllInputParameters() const;
 
   /// Collect GSASIIRefineFitPeaks input parameters for a given run from the
   /// presenter's various children
