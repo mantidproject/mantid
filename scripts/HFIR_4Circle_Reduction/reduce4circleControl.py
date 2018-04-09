@@ -452,6 +452,7 @@ class CWSCDReductionControl(object):
         interp_sigma = numpy.interp(two_theta, self._two_theta_sigma[0], self._two_theta_sigma[1])
 
         print ('[DB...BAT] 2theta = {0}: output sigma = {1}'.format(two_theta, interp_sigma))
+        print ('[DB...BAT] X = {0}, Y = {1}'.format(self._two_theta_sigma[0], self._two_theta_sigma[1]))
 
         return interp_sigma
 

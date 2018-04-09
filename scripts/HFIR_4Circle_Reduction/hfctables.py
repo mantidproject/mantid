@@ -1397,6 +1397,13 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         return
 
+    def get_peak_intensities(self):
+        """
+        """
+        # TODO NOW3
+
+        return dict()
+
     def get_reference_scans(self, row_index):
         """
         get the reference scans (i.e., the scans having same/close 2theta to the single Pt scan
@@ -1469,9 +1476,9 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         out_buffer = ''
         for i_row in range(self.rowCount()):
-            pt_number = self.get_cell_value(i_row, self._pt_index)
+            scan_number = self.get_cell_value(i_row, self._scan_index)
             intensity = self.get_cell_value(i_row, self._intensity_index)
-            out_buffer += '{0} \t{1}\n'.format(pt_number, intensity)
+            out_buffer += '{0} \t{1}\n'.format(scan_number, intensity)
 
         out_file = open(out_file_name, 'w')
         out_file.write(out_buffer)

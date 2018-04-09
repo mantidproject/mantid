@@ -82,10 +82,10 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         # TEST NOW2
         # collect all scan/pt from table
-        scan_pt_list = self.ui.tableView_summary.get_scan_pt_list()
+        intensity_dict = self.ui.tableView_summary.get_peak_intensities()
 
         # add to table including calculate peak center in Q-space
-        self.scanIntegratedSignal.emit(scan_pt_list)
+        self.scanIntegratedSignal.emit(intensity_dict)
 
         return
 
