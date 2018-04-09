@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCOR_H_
-#define MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCOR_H_
+#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDES_H_
+#define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDES_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
@@ -12,7 +12,7 @@ class ISpectrum;
 
 namespace Algorithms {
 
-/** PolarizationEfficiencyCor : This algorithm corrects for non-ideal
+/** PolarizationCorrectionWildes : This algorithm corrects for non-ideal
   component efficiencies in polarized neutron analysis. It is based on
   [A. R. Wildes (2006) Neutron News, 17:2, 17-25,
   DOI: 10.1080/10448630600668738]
@@ -38,7 +38,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL PolarizationEfficiencyCor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionWildes : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -94,4 +94,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCOR_H_ */
+#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDES_H_ */

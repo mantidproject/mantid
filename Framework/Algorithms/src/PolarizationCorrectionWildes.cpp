@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/PolarizationEfficiencyCor.h"
+#include "MantidAlgorithms/PolarizationCorrectionWildes.h"
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
@@ -353,25 +353,25 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(PolarizationEfficiencyCor)
+DECLARE_ALGORITHM(PolarizationCorrectionWildes)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string PolarizationEfficiencyCor::name() const {
-  return "PolarizationEfficiencyCor";
+const std::string PolarizationCorrectionWildes::name() const {
+  return "PolarizationCorrectionWildes";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PolarizationEfficiencyCor::version() const { return 1; }
+int PolarizationCorrectionWildes::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PolarizationEfficiencyCor::category() const {
+const std::string PolarizationCorrectionWildes::category() const {
   return "Reflectometry";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string PolarizationEfficiencyCor::summary() const {
+const std::string PolarizationCorrectionWildes::summary() const {
   return "Corrects a group of polarization analysis workspaces for polarizer "
          "and analyzer efficiencies.";
 }
@@ -380,14 +380,14 @@ const std::string PolarizationEfficiencyCor::summary() const {
  * Count the non-nullptr workspaces
  * @return the count on non-nullptr workspaces.
  */
-size_t PolarizationEfficiencyCor::WorkspaceMap::size() const noexcept {
+size_t PolarizationCorrectionWildes::WorkspaceMap::size() const noexcept {
   return (mmWS ? 1 : 0) + (mpWS ? 1 : 0) + (pmWS ? 1 : 0) + (ppWS ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void PolarizationEfficiencyCor::init() {
+void PolarizationCorrectionWildes::init() {
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
                       Prop::INPUT_WS, "",
                       boost::make_shared<API::ADSValidator>(),
@@ -423,7 +423,7 @@ void PolarizationEfficiencyCor::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void PolarizationEfficiencyCor::exec() {
+void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = parseFlipperSetup(flipperProperty);
   const bool analyzer = flippers.front() != "0" && flippers.back() != "1";
@@ -456,7 +456,7 @@ void PolarizationEfficiencyCor::exec() {
  * Validate the algorithm's input properties.
  * @return a map from property names to discovered issues
  */
-std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
+std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
   const auto &factorAxis = factorWS->getAxis(1);
@@ -497,7 +497,7 @@ std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
  * Check that all workspaces in inputs have the same number of histograms.
  * @param inputs a set of workspaces to check
  */
-void PolarizationEfficiencyCor::checkConsistentNumberHistograms(
+void PolarizationCorrectionWildes::checkConsistentNumberHistograms(
     const WorkspaceMap &inputs) {
   size_t nHist{0};
   bool nHistValid{false};
@@ -532,7 +532,7 @@ void PolarizationEfficiencyCor::checkConsistentNumberHistograms(
  * @param inputs a set of workspaces to check
  * @param efficiencies efficiencies to check
  */
-void PolarizationEfficiencyCor::checkConsistentX(
+void PolarizationCorrectionWildes::checkConsistentX(
     const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   // Compare everything to F1 efficiency.
   const auto &F1x = efficiencies.F1->x();
@@ -586,7 +586,7 @@ void PolarizationEfficiencyCor::checkConsistentX(
  * @return a group workspace
  */
 API::WorkspaceGroup_sptr
-PolarizationEfficiencyCor::groupOutput(const WorkspaceMap &outputs) {
+PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
   if (outputs.mmWS) {
@@ -622,8 +622,8 @@ PolarizationEfficiencyCor::groupOutput(const WorkspaceMap &outputs) {
  * Make a convenience access object to the efficiency factors.
  * @return an EfficiencyMap object
  */
-PolarizationEfficiencyCor::EfficiencyMap
-PolarizationEfficiencyCor::efficiencyFactors() {
+PolarizationCorrectionWildes::EfficiencyMap
+PolarizationCorrectionWildes::efficiencyFactors() {
   EfficiencyMap e;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
   const auto &vertAxis = factorWS->getAxis(1);
@@ -650,8 +650,8 @@ PolarizationEfficiencyCor::efficiencyFactors() {
  * @param efficiencies a set of efficiency factors
  * @return set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap
-PolarizationEfficiencyCor::directBeamCorrections(
+PolarizationCorrectionWildes::WorkspaceMap
+PolarizationCorrectionWildes::directBeamCorrections(
     const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.ppWS, Flippers::Off);
@@ -688,8 +688,8 @@ PolarizationEfficiencyCor::directBeamCorrections(
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap
-PolarizationEfficiencyCor::analyzerlessCorrections(
+PolarizationCorrectionWildes::WorkspaceMap
+PolarizationCorrectionWildes::analyzerlessCorrections(
     const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::On);
@@ -753,8 +753,8 @@ PolarizationEfficiencyCor::analyzerlessCorrections(
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap
-PolarizationEfficiencyCor::twoInputCorrections(
+PolarizationCorrectionWildes::WorkspaceMap
+PolarizationCorrectionWildes::twoInputCorrections(
     const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
@@ -775,8 +775,8 @@ PolarizationEfficiencyCor::twoInputCorrections(
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap
-PolarizationEfficiencyCor::threeInputCorrections(
+PolarizationCorrectionWildes::WorkspaceMap
+PolarizationCorrectionWildes::threeInputCorrections(
     const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
@@ -799,8 +799,8 @@ PolarizationEfficiencyCor::threeInputCorrections(
  * @param efficiencies a set of efficiency factors
  * @return a set of corrected workspaces
  */
-PolarizationEfficiencyCor::WorkspaceMap
-PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs,
+PolarizationCorrectionWildes::WorkspaceMap
+PolarizationCorrectionWildes::fullCorrections(const WorkspaceMap &inputs,
                                            const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
@@ -865,8 +865,8 @@ PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs,
  * @param flippers a vector of flipper configurations
  * @return a set of workspaces to correct
  */
-PolarizationEfficiencyCor::WorkspaceMap
-PolarizationEfficiencyCor::mapInputsToDirections(
+PolarizationCorrectionWildes::WorkspaceMap
+PolarizationCorrectionWildes::mapInputsToDirections(
     const std::vector<std::string> &flippers) {
   const std::vector<std::string> inputNames = getProperty(Prop::INPUT_WS);
   WorkspaceMap inputs;
@@ -901,7 +901,7 @@ PolarizationEfficiencyCor::mapInputsToDirections(
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::threeInputsSolve01(
+void PolarizationCorrectionWildes::threeInputsSolve01(
     WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace Mantid::DataObjects;
   inputs.pmWS = create<Workspace2D>(*inputs.mpWS);
@@ -938,7 +938,7 @@ void PolarizationEfficiencyCor::threeInputsSolve01(
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::threeInputsSolve10(
+void PolarizationCorrectionWildes::threeInputsSolve10(
     WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   inputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
   const auto &F1 = efficiencies.F1->y();
@@ -975,7 +975,7 @@ void PolarizationEfficiencyCor::threeInputsSolve10(
  * @param inputs a set of input workspaces
  * @param efficiencies a set of efficiency factors
  */
-void PolarizationEfficiencyCor::twoInputsSolve01And10(
+void PolarizationCorrectionWildes::twoInputsSolve01And10(
     WorkspaceMap &fullInputs, const WorkspaceMap &inputs,
     const EfficiencyMap &efficiencies) {
   using namespace boost::math;

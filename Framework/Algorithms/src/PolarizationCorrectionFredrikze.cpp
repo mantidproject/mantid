@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/PolarizationCorrection.h"
+#include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -109,23 +109,23 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(PolarizationCorrection)
+DECLARE_ALGORITHM(PolarizationCorrectionFredrikze)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PolarizationCorrection::name() const {
-  return "PolarizationCorrection";
+const std::string PolarizationCorrectionFredrikze::name() const {
+  return "PolarizationCorrectionFredrikze";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PolarizationCorrection::version() const { return 1; }
+int PolarizationCorrectionFredrikze::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PolarizationCorrection::category() const {
+const std::string PolarizationCorrectionFredrikze::category() const {
   return "Reflectometry";
 }
 
-bool PolarizationCorrection::isPropertyDefault(
+bool PolarizationCorrectionFredrikze::isPropertyDefault(
     const std::string &propertyName) const {
   Property *prop = this->getProperty(propertyName);
   return prop->isDefault();
@@ -134,7 +134,7 @@ bool PolarizationCorrection::isPropertyDefault(
 /**
  * @return Return the algorithm summary.
  */
-const std::string PolarizationCorrection::summary() const {
+const std::string PolarizationCorrectionFredrikze::summary() const {
   return "Makes corrections for polarization efficiencies of the polarizer and "
          "analyzer in a reflectometry neutron spectrometer.";
 }
@@ -146,7 +146,7 @@ const std::string PolarizationCorrection::summary() const {
  * @return Multiplied Workspace.
  */
 MatrixWorkspace_sptr
-PolarizationCorrection::multiply(MatrixWorkspace_sptr &lhsWS,
+PolarizationCorrectionFredrikze::multiply(MatrixWorkspace_sptr &lhsWS,
                                  const double &rhs) {
   auto multiply = this->createChildAlgorithm("Multiply");
   auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
@@ -164,7 +164,7 @@ PolarizationCorrection::multiply(MatrixWorkspace_sptr &lhsWS,
  * @param rhs Value to add
  * @return Summed workspace
  */
-MatrixWorkspace_sptr PolarizationCorrection::add(MatrixWorkspace_sptr &lhsWS,
+MatrixWorkspace_sptr PolarizationCorrectionFredrikze::add(MatrixWorkspace_sptr &lhsWS,
                                                  const double &rhs) {
   auto plus = this->createChildAlgorithm("Plus");
   auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
@@ -179,7 +179,7 @@ MatrixWorkspace_sptr PolarizationCorrection::add(MatrixWorkspace_sptr &lhsWS,
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void PolarizationCorrection::init() {
+void PolarizationCorrectionFredrikze::init() {
   declareProperty(make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace to process.");
@@ -220,7 +220,7 @@ void PolarizationCorrection::init() {
                   "An output workspace.");
 }
 
-MatrixWorkspace_sptr PolarizationCorrection::execPolynomialCorrection(
+MatrixWorkspace_sptr PolarizationCorrectionFredrikze::execPolynomialCorrection(
     MatrixWorkspace_sptr &input, const VecDouble &coefficients) {
   auto polyCorr = this->createChildAlgorithm("PolynomialCorrection");
   polyCorr->initialize();
@@ -232,7 +232,7 @@ MatrixWorkspace_sptr PolarizationCorrection::execPolynomialCorrection(
 }
 
 MatrixWorkspace_sptr
-PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
+PolarizationCorrectionFredrikze::copyShapeAndFill(MatrixWorkspace_sptr &base,
                                          const double &value) {
   MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
   // Copy the x-array across to the new workspace.
@@ -244,7 +244,7 @@ PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
   return filled;
 }
 
-WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
+WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
 
   if (isPropertyDefault(cAlphaLabel())) {
     throw std::invalid_argument("Must provide as input for PA: " +
@@ -341,7 +341,7 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   return dataOut;
 }
 
-WorkspaceGroup_sptr PolarizationCorrection::execPNR(WorkspaceGroup_sptr inWS) {
+WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPNR(WorkspaceGroup_sptr inWS) {
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ip =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
@@ -377,7 +377,7 @@ WorkspaceGroup_sptr PolarizationCorrection::execPNR(WorkspaceGroup_sptr inWS) {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void PolarizationCorrection::exec() {
+void PolarizationCorrectionFredrikze::exec() {
   WorkspaceGroup_sptr inWS = getProperty("InputWorkspace");
   const std::string analysisMode = getProperty("PolarizationAnalysis");
   const size_t nWorkspaces = inWS->size();

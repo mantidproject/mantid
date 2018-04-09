@@ -1,9 +1,9 @@
-#ifndef MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCORTEST_H_
-#define MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCORTEST_H_
+#ifndef MANTID_ALGORITHMS_PolarizationCorrectionWildesTEST_H_
+#define MANTID_ALGORITHMS_PolarizationCorrectionWildesTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/PolarizationEfficiencyCor.h"
+#include "MantidAlgorithms/PolarizationCorrectionWildes.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -16,16 +16,16 @@
 
 #include <Eigen/Dense>
 
-using Mantid::Algorithms::PolarizationEfficiencyCor;
+using Mantid::Algorithms::PolarizationCorrectionWildes;
 
-class PolarizationEfficiencyCorTest : public CxxTest::TestSuite {
+class PolarizationCorrectionWildesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PolarizationEfficiencyCorTest *createSuite() {
-    return new PolarizationEfficiencyCorTest();
+  static PolarizationCorrectionWildesTest *createSuite() {
+    return new PolarizationCorrectionWildesTest();
   }
-  static void destroySuite(PolarizationEfficiencyCorTest *suite) {
+  static void destroySuite(PolarizationCorrectionWildesTest *suite) {
     delete suite;
   }
 
@@ -35,7 +35,7 @@ public:
   }
 
   void test_Init() {
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -65,7 +65,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -130,7 +130,7 @@ public:
                                                  wsList.front());
     AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -210,7 +210,7 @@ public:
                                                  wsList.front());
     AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
     auto effWS = idealEfficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -263,7 +263,7 @@ public:
     const std::vector<std::string> wsNames{{"ws00"}};
     AnalysisDataService::Instance().addOrReplace(wsNames.front(), ws00);
     auto effWS = idealEfficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -320,7 +320,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -371,7 +371,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -485,7 +485,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -551,7 +551,7 @@ public:
     const std::string wsName{"ws00"};
     AnalysisDataService::Instance().addOrReplace(wsName, ws00);
     auto effWS = efficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -615,7 +615,7 @@ public:
     axis->setLabel(2, "P1");
     axis->setLabel(3, "P2");
     effWS->replaceAxis(1, axis.release());
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -644,7 +644,7 @@ public:
     // Change a bin edge of one of the histograms.
     auto &xs = effWS->mutableX(0);
     xs[xs.size() / 2] *= 1.01;
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -678,7 +678,7 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -706,7 +706,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("ws00", ws00);
     AnalysisDataService::Instance().addOrReplace("ws01", ws01);
     AnalysisDataService::Instance().addOrReplace("ws11", ws11);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -793,7 +793,7 @@ private:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = idealEfficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -885,7 +885,7 @@ private:
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
     auto effWS = efficiencies(edges);
-    PolarizationEfficiencyCor alg;
+    PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -1842,7 +1842,7 @@ private:
   }
 };
 
-class PolarizationEfficiencyCorTestPerformance : public CxxTest::TestSuite {
+class PolarizationCorrectionWildesTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     using namespace Mantid::API;
@@ -1907,7 +1907,7 @@ public:
   void test_DirectBeamPerformance() {
     using namespace Mantid::API;
     for (int i = 0; i < 3000; ++i) {
-      PolarizationEfficiencyCor correction;
+      PolarizationCorrectionWildes correction;
       correction.setChild(true);
       correction.setRethrows(true);
       correction.initialize();
@@ -1922,7 +1922,7 @@ public:
   void test_ThreeInputsPerformanceMissing01() {
     using namespace Mantid::API;
     for (int i = 0; i < 3000; ++i) {
-      PolarizationEfficiencyCor correction;
+      PolarizationCorrectionWildes correction;
       correction.setChild(true);
       correction.setRethrows(true);
       correction.initialize();
@@ -1937,7 +1937,7 @@ public:
   void test_ThreeInputsPerformanceMissing10() {
     using namespace Mantid::API;
     for (int i = 0; i < 3000; ++i) {
-      PolarizationEfficiencyCor correction;
+      PolarizationCorrectionWildes correction;
       correction.setChild(true);
       correction.setRethrows(true);
       correction.initialize();
@@ -1952,7 +1952,7 @@ public:
   void test_TwoInputsNoAnalyzerPerformance() {
     using namespace Mantid::API;
     for (int i = 0; i < 3000; ++i) {
-      PolarizationEfficiencyCor correction;
+      PolarizationCorrectionWildes correction;
       correction.setChild(true);
       correction.setRethrows(true);
       correction.initialize();
@@ -1967,7 +1967,7 @@ public:
   void test_TwoInputsPerformance() {
     using namespace Mantid::API;
     for (int i = 0; i < 3000; ++i) {
-      PolarizationEfficiencyCor correction;
+      PolarizationCorrectionWildes correction;
       correction.setChild(true);
       correction.setRethrows(true);
       correction.initialize();
@@ -1987,4 +1987,4 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ws11;
 };
 
-#endif /* MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCORTEST_H_ */
+#endif /* MANTID_ALGORITHMS_PolarizationCorrectionWildesTEST_H_ */

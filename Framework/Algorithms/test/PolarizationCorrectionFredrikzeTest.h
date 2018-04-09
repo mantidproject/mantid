@@ -1,8 +1,8 @@
-#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_
-#define MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_
+#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_TEST_H_
+#define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PolarizationCorrection.h"
+#include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -16,43 +16,43 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace WorkspaceCreationHelper;
 
-class PolarizationCorrectionTest : public CxxTest::TestSuite {
+class PolarizationCorrectionFredrikzeTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PolarizationCorrectionTest *createSuite() {
-    return new PolarizationCorrectionTest();
+  static PolarizationCorrectionFredrikzeTest *createSuite() {
+    return new PolarizationCorrectionFredrikzeTest();
   }
-  static void destroySuite(PolarizationCorrectionTest *suite) { delete suite; }
+  static void destroySuite(PolarizationCorrectionFredrikzeTest *suite) { delete suite; }
 
   void test_Init() {
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
   void test_set_wrong_workspace_type_throws() {
     MatrixWorkspace_sptr ws = boost::make_shared<Workspace2D>();
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", ws),
                      std::invalid_argument &);
   }
 
   void test_set_analysis_to_PA() {
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PolarizationAnalysis", "PA"));
   }
 
   void test_set_analysis_to_PNR() {
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PolarizationAnalysis", "PNR"));
   }
 
   void test_set_analysis_to_invalid_throws() {
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS(alg.setProperty("PolarizationAnalysis", "_"),
                      std::invalid_argument &);
@@ -69,9 +69,9 @@ public:
         boost::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
-    std::string outWSName("PolarizationCorrectionTest_OutputWS");
+    std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
 
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
@@ -92,9 +92,9 @@ public:
         boost::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
-    std::string outWSName("PolarizationCorrectionTest_OutputWS");
+    std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
 
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
@@ -118,9 +118,9 @@ public:
                                                               // table workspace
 
     // Name of the output workspace.
-    std::string outWSName("PolarizationCorrectionTest_OutputWS");
+    std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
 
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
@@ -150,7 +150,7 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
 
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
@@ -186,7 +186,7 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
 
-    PolarizationCorrection alg;
+    PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
@@ -215,4 +215,4 @@ public:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_ */
+#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_TEST_H_ */

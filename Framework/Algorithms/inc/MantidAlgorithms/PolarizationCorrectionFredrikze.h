@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTION_H_
-#define MANTID_ALGORITHMS_POLARIZATIONCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
+#define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -13,8 +13,9 @@ class MatrixWorkspace;
 }
 namespace Algorithms {
 
-/** PolarizationCorrection : Algorithm to perform polarisation corrections on
- multi-period group workspaces.
+/** PolarizationCorrectionFredrikze : Algorithm to perform polarisation corrections on
+ multi-period group workspaces that implements the Fredrikze (Dutch) method.
+ Fredrikze, H, et al. “Calibration of a polarized neutron reflectometer” Physica B 297 (2001)
 
  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -37,7 +38,7 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport PolarizationCorrection : public API::Algorithm {
+class DLLExport PolarizationCorrectionFredrikze : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -69,4 +70,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTION_H_ */
+#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_ */
