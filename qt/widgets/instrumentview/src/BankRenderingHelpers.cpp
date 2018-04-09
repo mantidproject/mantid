@@ -7,6 +7,8 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Quat.h"
 
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
 namespace {
 Mantid::Kernel::Logger g_log("BankRenderingHelpers");
 
@@ -19,17 +21,15 @@ size_t roundToNearestPowerOfTwo(size_t val) {
 }
 
 void addVertex(const Mantid::Geometry::ComponentInfo &compInfo, size_t detIndex,
-               const Mantid::Kernel::V3D &basePos, double xstep, double ystep) {
+               const V3D &basePos, V3D offset, Quat &rot) {
   auto pos = compInfo.position(detIndex) - basePos;
-  pos += Mantid::Kernel::V3D(xstep * (+0.5), ystep * (-0.5),
-                             0.0); // Adjust to account for the size of a pixel
+  rot.rotate(offset); // rotate offset to account for rotation of bank
+  pos += offset;      // Adjust to account for the size of a pixel
   glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
              static_cast<GLfloat>(pos.Z()));
 }
 
-void setBankNormal(const Mantid::Kernel::V3D &pos1,
-                   const Mantid::Kernel::V3D &pos2,
-                   const Mantid::Kernel::V3D &basePos) {
+void setBankNormal(const V3D &pos1, const V3D &pos2, const V3D &basePos) {
   // Set the bank normal to facilitate lighting effects
   auto vec1 = pos1 - basePos;
   auto vec2 = pos2 - basePos;
@@ -40,20 +40,18 @@ void setBankNormal(const Mantid::Kernel::V3D &pos1,
 }
 
 void extractHexahedron(const Mantid::Geometry::IObject &shape,
-                       std::vector<Mantid::Kernel::V3D> &hex) {
+                       std::vector<V3D> &hex) {
   const auto &shapeInfo = shape.getGeometryHandler()->shapeInfo();
   const auto &points = shapeInfo.points();
   hex.assign(points.begin(), points.begin() + 4);
 }
 
-void rotateHexahedron(std::vector<Mantid::Kernel::V3D> &hex,
-                      const Mantid::Kernel::Quat &rotation) {
+void rotateHexahedron(std::vector<V3D> &hex, const Quat &rotation) {
   for (auto &pos : hex)
     rotation.rotate(pos);
 }
 
-void offsetHexahedronPosition(std::vector<Mantid::Kernel::V3D> &hex,
-                              const Mantid::Kernel::V3D &offset) {
+void offsetHexahedronPosition(std::vector<V3D> &hex, const V3D &offset) {
   for (auto &pos : hex)
     pos += offset;
 }
@@ -100,19 +98,23 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   // Set the bank normal to facilitate lighting effects
   setBankNormal(compInfo.position(bank.bottomRight),
                 compInfo.position(bank.topLeft), basePos);
-
+  auto rotation = compInfo.rotation(index);
   glTexCoord2f(0.0, 0.0);
-  addVertex(compInfo, bank.bottomLeft, basePos, xstep, ystep);
+  addVertex(compInfo, bank.bottomLeft, basePos,
+            V3D((xstep * -0.5), (ystep * -0.5), 0.0), rotation);
 
   glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
-  addVertex(compInfo, bank.bottomRight, basePos, xstep, ystep);
+  addVertex(compInfo, bank.bottomRight, basePos,
+            V3D((xstep * 0.5), (ystep * -0.5), 0.0), rotation);
 
   glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
                static_cast<GLfloat>(tex_frac_y));
-  addVertex(compInfo, bank.topRight, basePos, xstep, ystep);
+  addVertex(compInfo, bank.topRight, basePos,
+            V3D((xstep * 0.5), (ystep * 0.5), 0.0), rotation);
 
   glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
-  addVertex(compInfo, bank.topLeft, basePos, xstep, ystep);
+  addVertex(compInfo, bank.topLeft, basePos,
+            V3D((xstep * -0.5), (ystep * 0.5), 0.0), rotation);
 
   glEnd();
 
@@ -133,7 +135,7 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
   const auto &baseShapeInfo =
       compInfo.shape(baseIndex).getGeometryHandler()->shapeInfo();
   auto basePos = baseShapeInfo.points()[0];
-  std::vector<Mantid::Kernel::V3D> hex(4);
+  std::vector<V3D> hex(4);
 
   setBankNormal(baseShapeInfo.points()[1], baseShapeInfo.points()[3], basePos);
 
