@@ -39,19 +39,22 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.graphicsView_integration1DView.set_parent_window(self)
 
         # define event handlers for widgets
+        self.ui.pushButton_integrteDetectorCounts.clicked.connect(self.do_interate_detector_counts)
+        self.ui.pushButton_load2thetaSigmaFile.clicked.connect(self.menu_load_gauss_sigma_file)
+
         self.ui.pushButton_exportIntensityToFile.clicked.connect(self.do_save_intensity)
         self.ui.pushButton_exportIntensityToTable.clicked.connect(self.do_export_intensity_to_parent)
         self.ui.pushButton_refreshROI.clicked.connect(self.do_refresh_roi)
         self.ui.pushButton_retrieveFWHM.clicked.connect(self.do_retrieve_fwhm)
         self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_single_pt)
         self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
-        self.ui.pushButton_loadPeakInfoFile.clicked.connect(self.do_load_peak_integration_table)
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
         self.ui.actionSelect_All.triggered.connect(self.menu_table_select_all)
         self.ui.actionDe_select_All.triggered.connect(self.menu_table_select_none)
         self.ui.actionLoad_Gaussian_Sigma_File.triggered.connect(self.menu_load_gauss_sigma_file)
+        self.ui.actionLoad_Peak_Info_File.triggered.connect(self.do_load_peak_integration_table)
 
         # class variable
         self._working_dir = os.path.expanduser('~')
@@ -86,16 +89,16 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    def do_integrate_single_pt(self):
+    def do_interate_detector_counts(self):
         """
-        integrate the 2D data inside region of interest along both axis-0 and axis-1 individually.
-        and the result (as 1D data) will be saved to ascii file.
-        the X values will be the corresponding pixel index either along axis-0 or axis-1
+        integrate the (selected) scan's detector counts by ROI
         :return:
         """
+        # get ROI
         roi_name = str(self.ui.comboBox_roiList.currentText())
-        if len(roi_name) == 0:
-            raise RuntimeError('No ROI is selected or set')
+        if roi_name is None or roi_name == '':
+            guiutility.show_message('A region-of-interest must be chosen in order to integrate detector counts.')
+            return
 
         for row_number in range(self.ui.tableView_summary.rowCount()):
             # integrate counts on detector
@@ -103,9 +106,37 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             pt_number = 1
             peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
                                                                     fit_gaussian=True)
+
             # add to table
-            self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height)
-            print ('[DB...BAT] SinglePt-Gaussian-Intensity = {0}'.format(peak_height))
+            self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height, roi_name)
+            # print ('[DB...BAT] SinglePt-Gaussian-Intensity = {0}'.format(peak_height))
+
+        # END-FOR (row_number)
+
+        return
+
+    def do_integrate_single_pt(self):
+        """
+        integrate the 2D data inside region of interest along both axis-0 and axis-1 individually.
+        and the result (as 1D data) will be saved to ascii file.
+        the X values will be the corresponding pixel index either along axis-0 or axis-1
+        :return:
+        """
+        # get ROI
+        roi_name = str(self.ui.comboBox_roiList.currentText())
+        if roi_name is None or roi_name == '':
+            guiutility.show_message('A region-of-interest must be chosen in order to integrate detector counts.')
+            return
+
+        for row_number in range(self.ui.tableView_summary.rowCount()):
+            # integrate counts on detector
+            scan_number = self.ui.tableView_summary.get_scan_number(row_number)
+            pt_number = 1
+            # peak_height = self._controller.integrate_detector_image(self._exp_number, scan_number, pt_number, roi_name,
+            #                                                         fit_gaussian=True)
+            # # add to table
+            # self.ui.tableView_summary.set_peak_height(scan_number, pt_number, peak_height)
+            # print ('[DB...BAT] SinglePt-Gaussian-Intensity = {0}'.format(peak_height))
 
             # calculate peak intensity
             ref_fwhm = self.ui.tableView_summary.get_fwhm(row_number)
@@ -205,18 +236,17 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             # use interpolation to curve
             two_theta = self.ui.tableView_summary.get_two_theta(row_index)
             # TEST NOW3 - new method calculate_peak_integration_sigma
-            status, ret_obj = self._controller.calculate_peak_integration_sigma(two_theta)
-
-            if status:
-                # set the value to the table and also controller
-                gauss_sigma = ret_obj
+            try:
+                gauss_sigma = self._controller.calculate_peak_integration_sigma(two_theta)
                 scan_number = self.ui.tableView_summary.get_scan_number(row_index)
+                pt_number = 1
+                roi_name = self.ui.tableView_summary.get_region_of_interest_name(row_index)
                 self.ui.tableView_summary.set_gaussian_sigma(row_index, gauss_sigma)
-                self._controller.set_single_measure_peak_width(scan_number, gauss_sigma, is_fhwm=False)
+                self._controller.set_single_measure_peak_width(self._exp_number, scan_number, roi_name, gauss_sigma, is_fhwm=False)
 
-            else:
+            except RuntimeError as err:
                 # error!
-                error_messages += ret_obj + '\n'
+                error_messages += 'Unable to calculate sigma of row {0} due to {1}\n'.format(row_index, err)
                 continue
             # END-IF-ELSE
 

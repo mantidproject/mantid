@@ -3936,6 +3936,10 @@ class MainWindow(QtGui.QMainWindow):
             lattice_gamma = settings.value('gamma')
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
 
+            # last project
+            last_1_project_path = str(settings.value('last1path'))
+            self.ui.label_last1Path.setText(last_1_project_path)
+
             # calibrated instrument configurations
             user_wave_length = settings.value('wave_length')
             self.ui.lineEdit_userWaveLength.setText(user_wave_length)
@@ -3949,10 +3953,6 @@ class MainWindow(QtGui.QMainWindow):
             det_sample_distance = settings.value('det_sample_distance')
             self.ui.lineEdit_userDetSampleDistance.setText(det_sample_distance)
 
-            # last project
-            last_1_project_path = str(settings.value('last1path'))
-            self.ui.label_last1Path.setText(last_1_project_path)
-
             # survey
             survey_start = str(settings.value('survey_start_scan'))
             self.ui.lineEdit_surveyStartPt.setText(survey_start)
@@ -3960,7 +3960,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_surveyEndPt.setText(survey_stop)
 
         except TypeError as err:
-            self.pop_one_button_dialog(str(err))
+            self.pop_one_button_dialog('Failed to load previous session successfully due to {0}'.format(err))
             return
 
         return

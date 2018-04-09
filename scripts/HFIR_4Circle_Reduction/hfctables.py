@@ -1336,6 +1336,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
                    ('Pt-Sigma', 'float'),
                    ('Pt-I', 'float'),
                    ('Pt-B', 'float'),
+                   ('ROI', 'str'),  # name of ROI used to integrate counts on detector (single measurement)
                    ('Reference Scans', 'str'),
                    ('Selected', 'checkbox')]
 
@@ -1356,6 +1357,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self._intensity_index = None
         self._2thta_scans_index = None
         self._ref_scans_index = None
+        self._roi_index = None
 
         self._pt_row_dict = dict()
 
@@ -1381,7 +1383,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         assert isinstance(two_theta, float), '2theta {0} must be a float'
 
         # add a new row to the table
-        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., '',
+        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., '', '',
                                              False])
         if not status:
             raise RuntimeError(error_msg)
@@ -1417,6 +1419,14 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         ref_scan_list = [int(term) for term in terms]
 
         return ref_scan_list
+
+    def get_region_of_interest_name(self, row_index):
+        """
+        get ROI name
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._roi_index)
 
     def get_fwhm(self, row_index):
         """ get reference scan's FWHM
@@ -1532,6 +1542,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self._fwhm_index = SinglePtIntegrationTable.Table_Setup.index(('FWHM', 'float'))
         self._intensity_index = SinglePtIntegrationTable.Table_Setup.index(('Intensity', 'float'))
         self._ref_scans_index = SinglePtIntegrationTable.Table_Setup.index(('Reference Scans', 'str'))
+        self._roi_index = SinglePtIntegrationTable.Table_Setup.index(('ROI', 'str'))
 
         return
 
@@ -1550,7 +1561,8 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
     def set_intensity(self, scan_number, pt_number, intensity):
         """
-        blabla
+
+        :param scan_number:
         :param pt_number:
         :param intensity:
         :return:
@@ -1561,16 +1573,21 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
         return
 
-    def set_peak_height(self, scan_number, pt_number, peak_height):
-        """
-        blabla
+    def set_peak_height(self, scan_number, pt_number, peak_height, roi_name):
+        """ set the intensity of single measurement from the counts on the detector.
+        In the view as 3D peak, it is the cut on the center plane as the peak shape can be modeled by 3D Gaussian.
+        Thus the integrated value is used as the Gaussian's height.
+        :param scan_number:
         :param pt_number:
         :param peak_height:
+        :param roi_name: ROI is closed related to how a peak/single measurement's intensity is calculated
         :return:
         """
         row_number = self._pt_row_dict[scan_number, pt_number]
 
         self.update_cell_value(row_number, self._height_index, peak_height)
+        self.update_cell_value(row_number, self._roi_index, roi_name)
+
 
         return
 

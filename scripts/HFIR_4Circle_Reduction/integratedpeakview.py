@@ -262,13 +262,9 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         if line_id is None:
             line_id = self._currentDataID
 
-        # in case of error
-        if len(line_id) > 1:
-            line_id = line_id[0]
+        vec_x, vec_y, vec_e = self._myCanvas.get_data_error(line_id)
 
-        vec_x, vec_y = self.get_data(line_id)
-
-        numpy.savetxt(file_name, (vec_x, vec_y))
+        numpy.savetxt(file_name, (vec_x, vec_y, vec_e))
 
         return
 

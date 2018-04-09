@@ -11,6 +11,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
+import matplotlib.collections
 
 MplLineStyles = ['-', '--', '-.', ':', 'None', ' ', '']
 MplLineMarkers = [
@@ -1053,7 +1054,8 @@ class Qt4MplCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Variables to manage all lines/subplot
-        self._lineDict = {}
+        self._lineDict = dict()
+        self._errorBarDict = dict()  # containing two tuple: r[0] as line, r[2][0] as error bar offsets
         self._lineIndex = 0
 
         # legend and color bar
@@ -1159,11 +1161,14 @@ class Qt4MplCanvas(FigureCanvas):
         # Register
         line_key = self._lineIndex
         if plot_error:
-            msg = 'Return from plot is a {0}-tuple: {1} with plot error is {2}\n'.format(len(r), r, plot_error)
-            for i_r in range(len(r)):
-                msg += 'r[%d] = %s\n' % (i_r, str(r[i_r]))
-            print ('[DB] Deep in mplgraphicsview: {0}'.format(msg))
-
+            # plot with error bar
+            self._errorBarDict[line_key] = r[0], r[2][0]
+            # data_line = r[0]
+            # error_bar_line = r[2][0]
+            #
+            # msg = 'Return from plot is a {0}-tuple: {1} with plot error is {2}\n'.format(len(r), r, plot_error)
+            # for i_r in range(len(r)):
+            #     msg += 'r[%d] = %s\n' % (i_r, str(r[i_r]))
         else:
             assert len(r) > 0, 'There must be at least 1 figure returned'
             self._lineDict[line_key] = r[0]
@@ -1357,15 +1362,29 @@ class Qt4MplCanvas(FigureCanvas):
                         str(plot), len(self.axes.lines), str(e)))
                 del self._lineDict[ikey]
             else:
-                # error bar
-                plot[0].remove()
-                for line in plot[1]:
-                    line.remove()
-                for line in plot[2]:
-                    line.remove()
-                del self._lineDict[ikey]
+                # error bar: but not likely to be set to _lineDict
+                raise RuntimeError('It is not correct to set a line with error bar to _lineDict')
+                # plot[0].remove()
+                # for line in plot[1]:
+                #     line.remove()
+                # for line in plot[2]:
+                #     line.remove()
+                # del self._lineDict[ikey]
             # ENDIF(plot)
         # ENDFOR
+
+        # clear all 1D plot with error bar
+        for line_key in self._errorBarDict:
+            # check whether this line has been removed
+            if self._errorBarDict[line_key] is None:
+                del self._errorBarDict[line_key]
+                continue
+
+            # remove data line and error bar
+            line_obj, error_bar_obj = self._errorBarDict[line_key]
+            line_obj.remove()
+            error_bar_obj.remove()
+        # END-FOR
 
         self._setup_legend()
 
@@ -1609,16 +1628,74 @@ class Qt4MplCanvas(FigureCanvas):
         :param line_id:
         :return: 2-tuple as vector X and vector Y
         """
-        # check
-        if line_id not in self._lineDict:
+        if line_id in self._lineDict:
+            # single line
+            # get line and check
+            line = self._lineDict[line_id]
+            if line is None:
+                raise RuntimeError('Line ID %s has been removed.' % line_id)
+
+        elif line_id in self._errorBarDict:
+            # single line with error
+            # get line and check
+            content = self._errorBarDict[line_id]
+            if content is None:
+                raise RuntimeError('Line ID {0} has been removed from error-bar dict.'.format(line_id))
+            line = content[0]
+
+        else:
+            # not anywhere
             raise KeyError('Line ID %s does not exist.' % str(line_id))
 
-        # get line
-        line = self._lineDict[line_id]
-        if line is None:
-            raise RuntimeError('Line ID %s has been removed.' % line_id)
-
         return line.get_xdata(), line.get_ydata()
+
+    def get_data_error(self, line_id):
+        """
+        get data with error bar if there is an error bar set with data; otherwise, set error bar to None
+        :param line_id:
+        :return:
+        """
+        def retrieve_error_bar(error_bar_lineset):
+            """
+            retrieve error bar from a
+            :param error_bar_lineset:
+            :return:
+            """
+            # check input
+            assert isinstance(error_bar_lineset, matplotlib.collections.LineCollection), 'Error bar line set type'
+
+            segments = error_bar_lineset.get_segments()
+            vec_error = np.ndarray(shape=(len(segments),), dtype='float')
+            for iseg, segment in enumerate(segments):
+                error_i = segment[1, 1] - segment[0, 1]
+                vec_error[iseg] = error_i * 0.5
+
+            return vec_error
+
+        if line_id in self._lineDict:
+            # single line
+            # get line and check
+            line = self._lineDict[line_id]
+            if line is None:
+                raise RuntimeError('Line ID %s has been removed.' % line_id)
+            vec_e = None
+
+        elif line_id in self._errorBarDict:
+            # single line with error
+            # get line and check
+            content = self._errorBarDict[line_id]
+            if content is None:
+                raise RuntimeError('Line ID {0} has been removed from error-bar dict.'.format(line_id))
+            line = content[0]
+
+            # get vector for error
+            vec_e = retrieve_error_bar(content[1])
+
+        else:
+            # not anywhere
+            raise KeyError('Line ID %s does not exist.' % str(line_id))
+
+        return line.get_xdata(), line.get_ydata(), vec_e
 
     def getLineStyleList(self):
         """

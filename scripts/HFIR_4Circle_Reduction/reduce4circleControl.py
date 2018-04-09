@@ -443,7 +443,7 @@ class CWSCDReductionControl(object):
         """
         calculate Gaussian-Sigma for single-measurement peak integration by linear interpolation
         :param two_theta:
-        :return:
+        :return: float
         """
         if self._two_theta_sigma is None:
             raise RuntimeError('2-theta Gaussian-sigma curve has not been set')
@@ -1514,7 +1514,7 @@ class CWSCDReductionControl(object):
         if os.path.exists(twotheta_sigma_file_name) is False:
             raise RuntimeError('2theta-sigma file {0} does not exist.'.format(twotheta_sigma_file_name))
 
-        vec_2theta, vec_sigma = numpy.loadtxt(twotheta_sigma_file_name, delimiter='', usecols=(0, 1), unpack=True)
+        vec_2theta, vec_sigma = numpy.loadtxt(twotheta_sigma_file_name, delimiter=' ', usecols=(0, 1), unpack=True)
         self._two_theta_sigma = vec_2theta, vec_sigma
 
         return vec_2theta, vec_sigma
@@ -3319,7 +3319,7 @@ class CWSCDReductionControl(object):
         if AnalysisDataService.doesExist(group_name):
             ws_group = AnalysisDataService.retrieve(group_name)
             for table_name in spice_table_name_list:
-                ws_group.addWorkspace(table_name)
+                ws_group.add(table_name)
         else:
             mantidsimple.GroupWorkspaces(InputWorkspaces=spice_table_name_list,
                                          OutputWorkspace=group_name)
