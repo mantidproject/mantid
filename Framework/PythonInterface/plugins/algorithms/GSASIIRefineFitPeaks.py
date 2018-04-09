@@ -40,7 +40,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_XMIN = "XMin"
 
     LATTICE_TABLE_PARAMS = ["length_a", "length_b", "length_c", "angle_alpha", "angle_beta", "angle_gamma", "volume"]
-    REFINEMENT_METHODS = ["Pawley refinement", "Rietveld refinement", "Peak fitting"]
+    REFINEMENT_METHODS = ["Pawley refinement", "Rietveld refinement"]
 
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
@@ -124,16 +124,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                  "printed (not recommended, but can be useful for debugging)")
 
     def PyExec(self):
-        refinement_method = self.getPropertyValue(self.PROP_REFINEMENT_METHOD)
-        if refinement_method == self.REFINEMENT_METHODS[2]:  # Peak fitting
-            raise NotImplementedError("GSAS-II Peak fitting not yet implemented in Mantid")
-
         with self._suppress_stdout():
             gsas_proj = self._initialise_GSAS()
 
             rwp, lattice_params = \
                 self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
-                                                     do_pawley=refinement_method == self.REFINEMENT_METHODS[0])
+                                                     do_pawley=self._refinement_method_is_pawley())
 
             self._set_output_properties(lattice_params=lattice_params, rwp=rwp,
                                         fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj),
@@ -150,14 +146,16 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         table.addRow([float(lattice_params[param]) for param in self.LATTICE_TABLE_PARAMS])
         return table
 
-    def _create_refinement_params_dict(self, num_phases):
+    def _create_refinement_params_dict(self, num_phases, pawley_tmin=None):
         basic_refinement = {"set": {"Background": {"no.coeffs": 3, "refine": True},
                                     "Sample Parameters": ["Scale"]}}
 
+        input_ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         x_max = self.getProperty(self.PROP_XMAX).value
-        if x_max:
-            x_min = self.getProperty(self.PROP_XMIN).value
-            basic_refinement["set"].update({"Limits": [x_min, x_max]})
+        if not x_max:
+            x_max = max(input_ws.readX(0))
+        x_min = max(pawley_tmin, min(input_ws.readX(0)), self.getProperty(self.PROP_XMIN).value)
+        basic_refinement["set"].update({"Limits": [x_min, x_max]})
 
         scale_refinement = {"set": {"Scale": True},
                             "phases": range(1, num_phases)}
@@ -174,6 +172,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             profile_coeffs_refinement["set"]["Instrument Parameters"].append("X")
 
         return [basic_refinement, scale_refinement, unit_cell_refinement, profile_coeffs_refinement, {}]
+
+    def _refinement_method_is_pawley(self):
+        return self.getPropertyValue(self.PROP_REFINEMENT_METHOD) == self.REFINEMENT_METHODS[0]
 
     def _extract_spectrum_from_workspace(self):
         """
@@ -203,6 +204,26 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         fitted_peaks_ws.setY(0, fitted_peaks_y_unmasked)
         return fitted_peaks_ws
 
+    def _generate_pawley_reflections(self, phase):
+        # Note: this is pretty much just copied over from GSASIIphsGUI.UpdatePhaseData.OnPawleyLoad
+        # Once it is possible to do this from GSASIIscriptable, this method should be replaced
+        phase_data = phase.data["General"]
+        cell = phase_data["Cell"][1:7]
+        A = GSASIIlattice.cell2A(cell)
+        SGData = phase_data["SGData"]
+        dmin = phase_data["Pawley dmin"]
+
+        HKLd = numpy.array(GSASIIlattice.GenHLaue(dmin, SGData, A))
+
+        peaks = []
+        for h, k, l, d in HKLd:
+            ext, mul = GSASIIspc.GenHKLf([h, k, l], SGData)[:2]
+            if not ext:
+                mul *= 2
+                peaks.append([h, k, l, mul, d, True, 100.0, 1.0])
+        GSASIImath.sortArray(peaks, 4, reverse=True)
+        return peaks
+
     def _initialise_GSAS(self):
         """
         Initialise a GSAS project object with a spectrum and an instrument parameter file
@@ -211,7 +232,14 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         gsas_path = self.getPropertyValue(self.PROP_PATH_TO_GSASII)
         sys.path.append(gsas_path)
         try:
+            global GSASII
+            global GSASIIlattice
+            global GSASIIspc
+            global GSASIImath
             import GSASIIscriptable as GSASII
+            import GSASIIlattice
+            import GSASIIspc
+            import GSASIImath
         except ImportError:
             error_msg = "Could not import GSAS-II. Are you sure it's installed at {}?".format(gsas_path)
             logger.error(error_msg)
@@ -247,7 +275,13 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         :return: (R weighted profile, goodness-of-fit coefficient, table containing refined lattice parameters)
         """
         phase_paths = self.getPropertyValue(self.PROP_PATHS_TO_PHASE_FILES).split(",")
-        refinements = self._create_refinement_params_dict(num_phases=len(phase_paths))
+
+        pawley_tmin = None
+        if self._refinement_method_is_pawley():
+            pawley_dmin = float(self.getPropertyValue(self.PROP_PAWLEY_DMIN))
+            pawley_tmin = GSASIIlattice.Dsp2pos(Inst=gsas_proj.histogram(0).data["Instrument Parameters"][0],
+                                                dsp=pawley_dmin)
+        refinements = self._create_refinement_params_dict(num_phases=len(phase_paths), pawley_tmin=pawley_tmin)
         prog = Progress(self, start=0, end=1, nreports=len(refinements) + 1)
 
         prog.report("Reading phase files")
@@ -255,6 +289,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[gsas_proj.histograms()[0]])
             if do_pawley:
                 self._set_pawley_phase_parameters(phase)
+                pawley_reflections = self._generate_pawley_reflections(phase)
+                phase.data["Pawley ref"] = pawley_reflections
 
         for i, refinement in enumerate(refinements):
             prog.report("Step {} of refinement recipe".format(i + 1))
@@ -299,10 +335,10 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         phase_params["doPawley"] = True
 
         pawley_dmin = self.getPropertyValue(self.PROP_PAWLEY_DMIN)
-        phase_params["Pawley dmin"] = pawley_dmin
+        phase_params["Pawley dmin"] = float(pawley_dmin)
 
         pawley_neg_wt = self.getPropertyValue(self.PROP_PAWLEY_NEGATIVE_WEIGHT)
-        phase_params["Pawley neg wt"] = pawley_neg_wt
+        phase_params["Pawley neg wt"] = float(pawley_neg_wt)
 
     @contextmanager
     def _suppress_stdout(self):
