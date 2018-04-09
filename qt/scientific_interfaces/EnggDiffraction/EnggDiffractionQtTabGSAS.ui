@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
+    <width>560</width>
     <height>658</height>
    </rect>
   </property>
@@ -34,6 +34,13 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="1" column="1">
        <widget class="QLineEdit" name="lineEdit_instParamsFile"/>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="pushButton_browseGSASHome">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_instParamsFile">
@@ -146,20 +153,6 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="2">
-       <widget class="QPushButton" name="pushButton_browseGSASHome">
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="3">
-       <widget class="QPushButton" name="pushButton_doRefinement">
-        <property name="text">
-         <string>Run Refinement</string>
-        </property>
-       </widget>
-      </item>
       <item row="5" column="0">
        <widget class="QLabel" name="label_refinementMethod">
         <property name="toolTip">
@@ -167,6 +160,13 @@
         </property>
         <property name="text">
          <string>Refinement Method</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QPushButton" name="pushButton_doRefinement">
+        <property name="text">
+         <string>Run Refinement</string>
         </property>
        </widget>
       </item>

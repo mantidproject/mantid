@@ -134,8 +134,8 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
                                               latticeParams, params.runLabel);
 }
 
-void EnggDiffGSASFittingModel::doRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
+void EnggDiffGSASFittingModel::doRefinements(
+    const std::vector<GSASIIRefineFitPeaksParameters> &params) {
   m_workerThread = Mantid::Kernel::make_unique<QThread>(this);
   EnggDiffGSASFittingWorker *worker =
       new EnggDiffGSASFittingWorker(this, params);

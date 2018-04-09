@@ -90,9 +90,9 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   m_view->displayGamma(*gamma);
 }
 
-void EnggDiffGSASFittingPresenter::doRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
-  m_model->doRefinement(params);
+void EnggDiffGSASFittingPresenter::doRefinements(
+    const std::vector<GSASIIRefineFitPeaksParameters> &params) {
+  m_model->doRefinements(params);
 }
 
 void EnggDiffGSASFittingPresenter::notifyRefinementCancelled() {
@@ -146,7 +146,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
       collectInputParameters(*runLabel, *inputWSOptional);
 
   m_view->setEnabled(false);
-  doRefinement(refinementParams);
+  doRefinements({refinementParams});
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {

@@ -71,7 +71,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr, doRefinement(params)).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -88,7 +91,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr, doRefinement(params)).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();

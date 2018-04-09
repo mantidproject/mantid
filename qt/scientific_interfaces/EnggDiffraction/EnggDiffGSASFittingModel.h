@@ -20,7 +20,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
       public IEnggDiffGSASFittingModel {
   Q_OBJECT
 
-  friend void EnggDiffGSASFittingWorker::doRefinement();
+  friend void EnggDiffGSASFittingWorker::doRefinements();
 
 public:
   ~EnggDiffGSASFittingModel();
@@ -28,7 +28,8 @@ public:
   void setObserver(
       boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
 
-  void doRefinement(const GSASIIRefineFitPeaksParameters &params) override;
+  void doRefinements(
+      const std::vector<GSASIIRefineFitPeaksParameters> &params) override;
 
   boost::optional<Mantid::API::ITableWorkspace_sptr>
   getLatticeParams(const RunLabel &runLabel) const override;

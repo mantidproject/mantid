@@ -8,17 +8,19 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingWorker::EnggDiffGSASFittingWorker(
     EnggDiffGSASFittingModel *model,
-    const GSASIIRefineFitPeaksParameters &params)
+    const std::vector<GSASIIRefineFitPeaksParameters> &params)
     : m_model(model), m_refinementParams(params) {}
 
-void EnggDiffGSASFittingWorker::doRefinement() {
+void EnggDiffGSASFittingWorker::doRefinements() {
   try {
     qRegisterMetaType<
         MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
         "GSASIIRefineFitPeaksOutputProperties");
-    const auto outputProperties =
-        m_model->doGSASRefinementAlgorithm(m_refinementParams);
-    emit refinementSuccessful(outputProperties);
+    GSASIIRefineFitPeaksOutputProperties fitResults;
+    for (const auto params : m_refinementParams) {
+      fitResults = m_model->doGSASRefinementAlgorithm(params);
+    }
+    emit refinementSuccessful(fitResults);
   } catch (const Mantid::API::Algorithm::CancelException &) {
     emit refinementCancelled();
   } catch (const std::exception &e) {
