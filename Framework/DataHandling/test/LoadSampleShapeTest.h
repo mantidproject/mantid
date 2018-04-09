@@ -147,45 +147,31 @@ private:
   LoadSampleShape loadShape;
 };
 
-class LoadShapeTestPerformance : public CxxTest::TestSuite {
+class LoadSampleShapeTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     auto inWs =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
-    Mantid::API::AnalysisDataService::Instance().add(inWsName, inWs);
-    for (int i = 0; i < numberOfIterations; ++i) {
-      loadAlgPtrs.emplace_back(setupAlg());
-    }
+    alg = setupAlg(inWs);
   }
 
   void testLoadSampleShapePerformance() {
-    for (auto alg : loadAlgPtrs) {
+    for (int i = 0; i < numberOfIterations; ++i) {
       TS_ASSERT_THROWS_NOTHING(alg->execute());
     }
   }
 
-  void tearDown() override {
-    for (int i = 0; i < numberOfIterations; i++) {
-      delete loadAlgPtrs[i];
-      loadAlgPtrs[i] = nullptr;
-    }
-    API::AnalysisDataService::Instance().remove(outWsName);
-    API::AnalysisDataService::Instance().remove(inWsName);
-  }
-
 private:
-  std::vector<LoadSampleShape *> loadAlgPtrs;
+  LoadSampleShape *alg;
   const int numberOfIterations = 5;
-  const std::string inWsName = "InWS";
-  const std::string outWsName = "OutWS";
 
-  LoadSampleShape *setupAlg() {
+  LoadSampleShape *setupAlg(Workspace2D_sptr inputWS) {
     LoadSampleShape *loadAlg = new LoadSampleShape();
     loadAlg->initialize();
-
+    loadAlg->setChild(true);
+    loadAlg->setProperty("InputWorkspace", inputWS);
+    loadAlg->setPropertyValue("OutputWorkspace", "__dummy_unused");
     loadAlg->setPropertyValue("Filename", "tube.stl");
-    loadAlg->setProperty("InputWorkspace", inWsName);
-    loadAlg->setProperty("OutputWorkspace", outWsName);
 
     loadAlg->setRethrows(true);
     return loadAlg;
