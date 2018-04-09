@@ -1,14 +1,15 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-#include "MantidNexusGeometry/InstrumentBuilder.h"
-#include "MantidNexusGeometry/NexusShapeFactory.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include <boost/algorithm/string.hpp>
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidNexusGeometry/InstrumentBuilder.h"
+#include "MantidNexusGeometry/NexusShapeFactory.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
+#include <VSPerf.h>
+#include <boost/algorithm/string.hpp>
 #include <type_traits>
 
 namespace Mantid {
@@ -422,13 +423,13 @@ parseNexusMesh(const Group &shapeGroup) {
 
 std::pair<boost::shared_ptr<const Geometry::IObject>, Eigen::Vector3d> parseHex(const FaceV &face) {
   auto xlb = face[0].x();
-  auto xlf = face[3].x();
+  auto xlf = face[1].x();
   auto xrf = face[2].x();
-  auto xrb = face[1].x();
+  auto xrb = face[3].x();
   auto ylb = face[0].y();
-  auto ylf = face[3].y();
+  auto ylf = face[1].y();
   auto yrf = face[2].y();
-  auto yrb = face[1].y();
+  auto yrb = face[3].y();
 
   // calculate midpoint of trapeziod
   auto a = std::fabs(xrf - xlf);
