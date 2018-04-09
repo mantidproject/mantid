@@ -14,7 +14,7 @@ Diffraction Changes
 Single Crystal Diffraction
 --------------------------
 
-- New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load single crystal diffraction data from the DNS instrument into MDEventWorkspace.
+- New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load multiple single crystal diffraction data files from the DNS instrument into MDEventWorkspace.
 
 Improvements
 ############
