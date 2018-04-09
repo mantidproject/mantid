@@ -9,4 +9,9 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Engineering Diffraction
+-----------------------
+
+- GSASIIRefineFitPeaks is now run asynchronously in the GUI, so the GSAS tab no longer locks when a refinement is run
+
 :ref:`Release 3.13.0 <v3.13.0>`
