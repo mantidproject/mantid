@@ -211,20 +211,20 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     def _generate_pawley_reflections(self, phase):
         # Note: this is pretty much just copied over from GSASIIphsGUI.UpdatePhaseData.OnPawleyLoad
         # Once it is possible to do this from GSASIIscriptable, this method should be replaced
-        phase_data = phase.data["General"]
+        phase_data = phase.data["General"]  # Parameters corresponding to the 'General' tab in the GSASII GUI
         cell = phase_data["Cell"][1:7]
         A = GSASIIlattice.cell2A(cell)
-        SGData = phase_data["SGData"]
-        dmin = phase_data["Pawley dmin"]
+        space_group = phase_data["SGData"]
+        d_min = phase_data["Pawley dmin"]
 
-        HKLd = numpy.array(GSASIIlattice.GenHLaue(dmin, SGData, A))
+        reflections = numpy.array(GSASIIlattice.GenHLaue(d_min, space_group, A))
 
         peaks = []
-        for h, k, l, d in HKLd:
-            ext, mul = GSASIIspc.GenHKLf([h, k, l], SGData)[:2]
-            if not ext:
-                mul *= 2
-                peaks.append([h, k, l, mul, d, True, 100.0, 1.0])
+        for h, k, l, d in reflections:
+            forbidden_by_symmetry, multiplicity = GSASIIspc.GenHKLf([h, k, l], space_group)[:2]
+            if not forbidden_by_symmetry:
+                multiplicity *= 2
+                peaks.append([h, k, l, multiplicity, d, True, 100.0, 1.0])
         GSASIImath.sortArray(peaks, 4, reverse=True)
         return peaks
 
