@@ -43,9 +43,8 @@
 
 {%- block body -%}
     <h1> Category: {{ title }} </h1>
-    {% if title == "Concepts" %}
-        {% include 'concepts.html' %}
-    {% endif %}
+    {% set header_file = title ~ '.html' %}
+    {% include header_file ignore missing %}
     {% if subcategories %}
     <br>
     <h2> Subcategories </h2>
