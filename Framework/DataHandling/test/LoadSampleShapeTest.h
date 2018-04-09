@@ -130,17 +130,12 @@ private:
   }
 
   const MeshObject *getMeshObject(LoadSampleShape &alg) {
-    MatrixWorkspace_sptr ws = getOutputWorkspace(alg);
+    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
     const auto &s(ws->sample());
     auto &obj = s.getShape();
     auto mObj = dynamic_cast<const MeshObject *>(&obj);
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
     return mObj;
-  }
-
-  MatrixWorkspace_sptr getOutputWorkspace(LoadSampleShape &alg) {
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
-    return alg.getProperty("OutputWorkspace");
   }
 
   LoadSampleShape loadShape;
