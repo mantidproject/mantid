@@ -15,6 +15,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 class LoadSampleShapeTest : public CxxTest::TestSuite {
@@ -51,104 +52,96 @@ public:
     LoadSampleShape testLoadSampleShape;
     testLoadSampleShape.initialize();
     testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadSampleShape, "InputWS", "OutputWS");
+    prepareWorkspaces(testLoadSampleShape, false);
     TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
     TS_ASSERT(testLoadSampleShape.isExecuted());
-    clearWorkspaces("InputWS", "OutputWS");
+  }
+
+  void testExec_1WS() {
+    LoadSampleShape testLoadSampleShape;
+    testLoadSampleShape.initialize();
+    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
+    prepareWorkspaces(testLoadSampleShape, true);
+    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
+    TS_ASSERT(testLoadSampleShape.isExecuted());
   }
 
   void test_output_workspace_has_MeshObject_2WS() {
-    loadMeshObject("InputWS", "OutputWS", "cube.stl");
-    clearWorkspaces("InputWS", "OutputWS");
+    LoadSampleShape alg;
+    loadMeshObject(alg, false, "cube.stl");
   }
 
   void test_output_workspace_has_MeshObject_1WS() {
-    loadMeshObject("InputWS", "InputWS", "cube.stl");
-    clearWorkspaces("InputWS", "InputWS");
+    LoadSampleShape alg;
+    loadMeshObject(alg, true, "cube.stl");
   }
 
   void test_cube() {
-    auto cube = loadMeshObject("InputWS", "InputWS", "cube.stl");
+    LoadSampleShape alg;
+    auto cube = loadMeshObject(alg, true, "cube.stl");
     TS_ASSERT(cube->hasValidShape());
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
     TS_ASSERT_DELTA(cube->volume(), 3000, 0.001);
-    clearWorkspaces("InputWS", "InputWS");
   }
 
   void test_cylinder() {
-    auto cylinder = loadMeshObject("InputWS", "InputWS", "cylinder.stl");
+    LoadSampleShape alg;
+    auto cylinder = loadMeshObject(alg, true, "cylinder.stl");
     TS_ASSERT(cylinder->hasValidShape());
     TS_ASSERT_EQUALS(cylinder->numberOfVertices(), 722);
     TS_ASSERT_EQUALS(cylinder->numberOfTriangles(), 1440);
     TS_ASSERT_DELTA(cylinder->volume(), 589, 1);
-    clearWorkspaces("InputWS", "InputWS");
   }
 
   void test_tube() {
-    auto tube = loadMeshObject("InputWS", "InputWS", "tube.stl");
+    LoadSampleShape alg;
+    auto tube = loadMeshObject(alg, true, "tube.stl");
     TS_ASSERT(tube->hasValidShape());
     TS_ASSERT_EQUALS(tube->numberOfVertices(), 1080);
     TS_ASSERT_EQUALS(tube->numberOfTriangles(), 2160);
     TS_ASSERT_DELTA(tube->volume(), 7068, 1);
-    clearWorkspaces("InputWS", "InputWS");
   }
 
 private:
   // Create workspaces and add them to algorithm properties
-  void prepareWorkspaces(LoadSampleShape &alg, const std::string &inputWS,
-                         const std::string &outputWS) {
-    auto inWs =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
-    Mantid::API::AnalysisDataService::Instance().add(inputWS, inWs);
-    alg.setPropertyValue("InputWorkspace", inputWS);
-    alg.setPropertyValue("OutputWorkspace", outputWS);
-  }
-
-  void clearWorkspaces(const std::string &inputWS,
-                       const std::string &outputWS) {
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().remove(inputWS));
-    if (outputWS != inputWS) {
-      TS_ASSERT_THROWS_NOTHING(
-          Mantid::API::AnalysisDataService::Instance().remove(outputWS));
+  void prepareWorkspaces(LoadSampleShape &alg, 
+                         bool outputWsSameAsInputWs) {
+    const int nvectors(2), nbins(10);
+    MatrixWorkspace_sptr inputWS =
+      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
+    if (outputWsSameAsInputWs) {
+      alg.setProperty("OutputWorkspace", inputWS);
     }
   }
 
-  const MeshObject *loadMeshObject(const std::string &inputWS,
-                                   const std::string &outputWS,
+
+  const MeshObject *loadMeshObject(LoadSampleShape &alg,
+                                   bool outputWsSameAsInputWs,
                                    const std::string filename) {
-    LoadSampleShape testLoadSampleShape;
-    testLoadSampleShape.initialize();
-    testLoadSampleShape.setPropertyValue("Filename", filename);
-    prepareWorkspaces(testLoadSampleShape, inputWS, outputWS);
-    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
-    TS_ASSERT(testLoadSampleShape.isExecuted());
-    return getMeshObject(outputWS);
+    alg.initialize();
+    alg.setPropertyValue("Filename", filename);
+    prepareWorkspaces(alg, outputWsSameAsInputWs);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    return getMeshObject(alg);
   }
 
-  const MeshObject *getMeshObject(const std::string &outputWS) {
-    MatrixWorkspace_sptr ws = getWorkspace(outputWS);
-    Sample s;
-    TS_ASSERT_THROWS_NOTHING(s = ws->sample());
+  const MeshObject *getMeshObject(LoadSampleShape &alg) {
+    MatrixWorkspace_sptr ws = getOutputWorkspace(alg);
+    const auto & s(ws->sample());
     auto &obj = s.getShape();
-    auto mObj = dynamic_cast<const MeshObject *>(&obj);
+    auto mObj = dynamic_cast<const MeshObject * >(&obj);
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
     return mObj;
   }
 
-  MatrixWorkspace_sptr getWorkspace(const std::string &outputWS) {
+  MatrixWorkspace_sptr getOutputWorkspace(LoadSampleShape &alg) {
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
-    if (dataStore.doesExist(outputWS)) {
-      TS_ASSERT_EQUALS(dataStore.doesExist(outputWS), true);
-      Workspace_sptr output;
-      TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWS));
-      MatrixWorkspace_sptr outputWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(output);
-      return outputWorkspace;
-    } else {
-      return nullptr;
-    }
+    return alg.getProperty("OutputWorkspace");
   }
 
   LoadSampleShape loadShape;
