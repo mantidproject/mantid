@@ -366,30 +366,32 @@ def create_category_pages(app):
             # index in document directory
             document_dir = posixpath.dirname(category_html_dir)
             category_html_path_noext = posixpath.join(document_dir, 'index')
-            context['outpath'] = "../" + category_html_path_noext + '.html'
+            context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
 
-            #create a Top level category page
+    #create a Top level category page
+    # Intitalise the lists
     all_top_categories = []
     top_context = {}
+    # If the category is a top catergory it will not contain "\\"
     for top_name, top_category in categories.iteritems():
         if "\\" not in top_name and top_category not in all_top_categories:
             all_top_categories.append(top_category)
             
+        template = CATEGORY_HOMEPAGE_TEMPLATE 
         top_context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
+        # Set up the positions in the toc tree
         top_category_html_dir = posixpath.join(top_category.name.lower(), 'categories')
         top_document_dir = posixpath.dirname(top_category_html_dir)
         top_category_html_path_noext = posixpath.join(top_document_dir, 'index')
         top_context['outpath'] = "../" + top_category_html_path_noext + '.html'
         top_context["pages"] = []
-        template = CATEGORY_HOMEPAGE_TEMPLATE 
         if top_category.name == "Algorithm Index":
             top_html_dir = posixpath.join(top_category.name.lower(), 'Algorithms')
             top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
 
         yield (top_html_path_noext, top_context, template)
 # enddef
-
 #-----------------------------------------------------------------------------------------------------------
 
 def purge_categories(app, env, docname):
