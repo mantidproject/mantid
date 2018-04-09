@@ -8,7 +8,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
-#include <VSPerf.h>
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
 
