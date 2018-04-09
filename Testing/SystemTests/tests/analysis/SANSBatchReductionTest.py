@@ -110,7 +110,8 @@ class SANSBatchReductionTest(unittest.TestCase):
         # Build the data information
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information("SANS2D0005512")
-
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D0005512")
 

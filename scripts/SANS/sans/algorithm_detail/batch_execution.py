@@ -124,7 +124,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # Clean up other workspaces if the optimizations have not been turned on.
     # -----------------------------------------------------------------------
     if not use_optimizations:
-        delete_optimization_workspaces(reduction_packages[-1])
+        delete_optimization_workspaces(reduction_packages, workspaces, monitors)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -876,7 +876,7 @@ def delete_reduced_workspaces(reduction_packages):
         _delete_workspaces(delete_alg, [reduced_lab, reduced_hab, reduced_merged])
 
 
-def delete_optimization_workspaces(reduction_package):
+def delete_optimization_workspaces(reduction_packages, workspaces, monitors):
     """
     Deletes all workspaces which are used for optimizations. This can be loaded workspaces or can optimizations
 
@@ -888,26 +888,31 @@ def delete_optimization_workspaces(reduction_package):
             if _workspace_name_to_delete:
                 _delete_alg.setProperty("Workspace", _workspace_name_to_delete)
                 _delete_alg.execute()
+
+    def _delete_workspaces_from_dict(_delete_alg, workspaces):
+        for key, workspace_list in workspaces.iteritems():
+            workspace_names_to_delete = set([workspace.name() for workspace in workspace_list if workspace is not None])
+            for workspace_name_to_delete in workspace_names_to_delete:
+                if workspace_name_to_delete and AnalysisDataService.doesExist(workspace_name_to_delete):
+                    _delete_alg.setProperty("Workspace", workspace_name_to_delete)
+                    _delete_alg.execute()
     delete_name = "DeleteWorkspace"
     delete_options = {}
     delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
 
-    # Delete loaded workspaces
-    workspaces_to_delete = list(reduction_package.workspaces.values())
-    _delete_workspaces(delete_alg, workspaces_to_delete)
+    _delete_workspaces_from_dict(delete_alg, workspaces)
 
-    # Delete loaded monitors
-    monitors_to_delete = list(reduction_package.monitors.values())
-    _delete_workspaces(delete_alg, monitors_to_delete)
+    _delete_workspaces_from_dict(delete_alg, monitors)
 
-    # Delete can optimizations
-    optimizations_to_delete = [reduction_package.reduced_lab_can,
-                               reduction_package.reduced_lab_can_count,
-                               reduction_package.reduced_lab_can_norm,
-                               reduction_package.reduced_hab_can,
-                               reduction_package.reduced_hab_can_count,
-                               reduction_package.reduced_hab_can_norm]
-    _delete_workspaces(delete_alg, optimizations_to_delete)
+    for reduction_package in reduction_packages:
+        # Delete can optimizations
+        optimizations_to_delete = [reduction_package.reduced_lab_can,
+                                   reduction_package.reduced_lab_can_count,
+                                   reduction_package.reduced_lab_can_norm,
+                                   reduction_package.reduced_hab_can,
+                                   reduction_package.reduced_hab_can_count,
+                                   reduction_package.reduced_hab_can_norm]
+        _delete_workspaces(delete_alg, optimizations_to_delete)
 
 
 def get_all_names_to_save(reduction_packages):
