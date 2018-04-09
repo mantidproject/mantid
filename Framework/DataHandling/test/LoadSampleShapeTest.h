@@ -105,11 +105,11 @@ public:
 
 private:
   // Create workspaces and add them to algorithm properties
-  void prepareWorkspaces(LoadSampleShape &alg, 
-                         bool outputWsSameAsInputWs) {
+  void prepareWorkspaces(LoadSampleShape &alg, bool outputWsSameAsInputWs) {
     const int nvectors(2), nbins(10);
     MatrixWorkspace_sptr inputWS =
-      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inputWS);
     alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
@@ -117,7 +117,6 @@ private:
       alg.setProperty("OutputWorkspace", inputWS);
     }
   }
-
 
   const MeshObject *loadMeshObject(LoadSampleShape &alg,
                                    bool outputWsSameAsInputWs,
@@ -132,9 +131,9 @@ private:
 
   const MeshObject *getMeshObject(LoadSampleShape &alg) {
     MatrixWorkspace_sptr ws = getOutputWorkspace(alg);
-    const auto & s(ws->sample());
+    const auto &s(ws->sample());
     auto &obj = s.getShape();
-    auto mObj = dynamic_cast<const MeshObject * >(&obj);
+    auto mObj = dynamic_cast<const MeshObject *>(&obj);
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
     return mObj;
   }
