@@ -434,6 +434,7 @@ def reduction_packages_require_splitting_for_event_slices(reduction_packages):
         requires_split = False
     return requires_split
 
+
 def reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
     """
         Creates reduction packages from a list of reduction packages by splitting up wavelength ranges.
@@ -454,6 +455,7 @@ def reduction_packages_require_splitting_for_wavelength_range(reduction_packages
     else:
         requires_split = False
     return requires_split
+
 
 def split_reduction_packages_for_wavelength_range(reduction_packages):
     reduction_packages_split = []
@@ -495,6 +497,7 @@ def split_reduction_packages_for_wavelength_range(reduction_packages):
                                                          is_part_of_wavelength_range_reduction=True)
                 reduction_packages_split.append(new_reduction_package)
     return reduction_packages_split
+
 
 def split_reduction_packages_for_event_slice_packages(reduction_packages):
     """
@@ -659,7 +662,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         # Hab Can Count workspace - this is a partial workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
                          "OutputWorkspaceHABCanCount", "reduced_hab_can_count_name", "reduced_hab_can_count_base_name",
-                          multi_reduction_type, HAB_CAN_COUNT_SUFFIX)
+                         multi_reduction_type, HAB_CAN_COUNT_SUFFIX)
 
         # Hab Can Norm workspace - this is a partial workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
@@ -770,7 +773,6 @@ def group_workspaces_if_required(reduction_package):
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-    is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
     requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
 
     reduced_lab = reduction_package.reduced_lab

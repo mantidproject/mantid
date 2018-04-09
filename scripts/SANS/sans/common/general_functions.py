@@ -597,10 +597,6 @@ def get_ranges_for_rebin_array(rebin_array):
     step_value = abs(step_value)
     return get_ranges_for_rebin_setting(min_value, max_value, step_value, step_type)
 
-def parse_wavelength_range_string(wavelength_range):
-    wavelength_range = wavelength_range.split(',')
-    wavelength_min = wavelength_range[0] + wavelength_range[:-1]
-    wavelength_max = wavelength_range[-1] + wavelength_range[1:]
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names

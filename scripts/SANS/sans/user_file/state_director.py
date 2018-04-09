@@ -1264,7 +1264,6 @@ class StateDirectorISIS(object):
         # Set up the wavelength
         set_wavelength_limits(self._wavelength_and_pixel_adjustment_builder, user_file_items)
 
-
     def _set_up_compatibility(self, user_file_items):
         if LimitsId.events_binning in user_file_items:
             events_binning = user_file_items[LimitsId.events_binning]
