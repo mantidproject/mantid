@@ -1,9 +1,11 @@
+.. _UnitTestCodingStandards:
+
 ==========================
-Unit Test Coding standards
+Unit Test Coding Standards
 ==========================
 
 The code for unit test classes should follow the standards as set out
-in :ref:`dev-docs-cpp-standards` with the following differences.
+in :ref:`CppCodingStandards` with the following differences.
 
 - The file and class name should be of the form ``ClassNameTest``, for
   example ``WorkspaceTest``, ``LoggerTest``

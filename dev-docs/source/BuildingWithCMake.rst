@@ -26,13 +26,13 @@ For Linux either run either
 .. code-block:: sh
 
   sudo yum install ccache
-  
+
 on Red Hat, or
 
 .. code-block:: sh
 
   sudo apt-get install ccache
-  
+
 on Ubuntu.
 
 For macOS run:
@@ -96,7 +96,7 @@ Building and working with CMake
 * '''Visual Studio users''': Use the ``visual-studio.bat`` generated in the build directory to start the IDE. This sets up the environment correctly.
 * You should typically never have to run CMake manually again (unless you want to create a new, separate build) - it will be run automatically if one of the CMake input files changes.
 * It should be rare that you will need to edit the CMake build (``CMakeLists.txt``) files. The most common occurrence will be when you add a new file. This must be added to the corresponding CMakeLists file, e.g. if you add a file to Kernel, edit ``Mantid/Framework/Kernel/CMakeLists.txt`` to add the source, header and test files to the long lists of filepaths at the top of the file.
-* The class maker utility (:ref:`UsefulTools`) can edit the ``CMakeList.txt`` for you automatically
+* The class maker utility (:ref:`ToolsOverview`) can edit the ``CMakeList.txt`` for you automatically
 * There are similar places in the Qt projects for ui files and files that need moc-ing.
 * If you add a new dependency, that will need to be added (this is less straightforward - do ask for help).
 * Cache variables can be added via the CMake Gui or by running ``ccmake``.

@@ -61,6 +61,9 @@ public:
   const std::string category() const override {
     return "DataHandling\\DataAcquisition";
   }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FakeISISEventDAE"};
+  }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Simulates ISIS histogram DAE.";
