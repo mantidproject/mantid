@@ -41,6 +41,9 @@ public:
   const std::string name() const override { return "ExportTimeSeriesLog"; };
 
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"GetTimeSeriesLogInformation"};
+  }
 
   const std::string category() const override {
     return "Diffraction\\DataHandling;Events\\EventFiltering";

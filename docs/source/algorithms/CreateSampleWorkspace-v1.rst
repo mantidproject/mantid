@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ important set Random to false or uncheck the box.
   values should be set to a range symmetrical around x=0.
 
 Instrument
-~~~~~~~~~~
+##########
 
 The instrument created by CreateSample workspace is very simple and looks like
 this.

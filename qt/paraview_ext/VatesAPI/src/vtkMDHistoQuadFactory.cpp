@@ -88,10 +88,9 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
     coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
     coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
 
-    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(m_normalizationOption,
-                                            m_workspace.get())));
+    auto it = createIteratorWithNormalization(m_normalizationOption,
+                                              m_workspace.get());
+    auto iterator = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     if (!iterator) {
       throw std::runtime_error(
           "Could not convert IMDIterator to a MDHistoWorkspaceIterator");

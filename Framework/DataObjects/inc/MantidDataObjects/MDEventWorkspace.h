@@ -73,7 +73,7 @@ public:
   uint64_t getNEvents() const override { return getNPoints(); }
 
   /// Creates a new iterator pointing to the first cell (box) in the workspace
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 

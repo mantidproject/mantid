@@ -167,6 +167,12 @@ ComponentInfo::children(const size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_size; }
 
+size_t
+ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
+  auto range = detectorRangeInSubtree(componentIndex);
+  return std::distance(range.begin(), range.end());
+}
+
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   checkNoTimeDependence();
   if (isDetector(componentIndex)) {

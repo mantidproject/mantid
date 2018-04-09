@@ -54,8 +54,8 @@ private:
                      Mantid::Geometry::MDImplicitFunction *function);
 
   /// Get the range of signal, in parallel, given an iterator
-  QwtDoubleInterval
-  getRange(const std::vector<Mantid::API::IMDIterator *> &iterators);
+  QwtDoubleInterval getRange(
+      const std::vector<std::unique_ptr<Mantid::API::IMDIterator>> &iterators);
   /// Get the range of signal given an iterator
   QwtDoubleInterval getRange(Mantid::API::IMDIterator *it);
 

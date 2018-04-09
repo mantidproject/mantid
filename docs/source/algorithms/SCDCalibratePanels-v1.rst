@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ The panels and packs' parameters are optimized in parallel.
 An option is available to adjust the panel widths and heights for Rectangular Detectors in a second iteration with all the other parameters fixed.
 
 OUTPUT workspaces and files:
-============================
+############################
 
 1) The results are saved to an ISAW-like DetCal file and optionally in an xml
    file that can be used with the :ref:`LoadParameterFile <algm-LoadParameterFile>` algorithm.

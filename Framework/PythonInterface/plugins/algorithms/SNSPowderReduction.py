@@ -138,6 +138,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 
+    def seeAlso(self):
+        return [ "DiffractionFocussing","AlignAndFocusPowder" ]
+
     def name(self):
         return "SNSPowderReduction"
 

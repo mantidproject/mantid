@@ -289,8 +289,8 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 *
 */
 void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
-                                    const std::vector<double> &x,
-                                    const std::vector<double> &y, bool isZBeam,
+                                    std::vector<double> &&x,
+                                    std::vector<double> &&y, bool isZBeam,
                                     detid_t idStart, bool idFillByFirstY,
                                     int idStepByRow, int idStep) {
   if (m_map)
@@ -328,8 +328,8 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                 "z-axis aligned beams.");
 
   // Store vertices
-  m_xvalues = x;
-  m_yvalues = y;
+  m_xvalues = std::move(x);
+  m_yvalues = std::move(y);
 
   createDetectors();
 }
