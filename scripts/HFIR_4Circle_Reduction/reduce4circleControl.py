@@ -406,7 +406,7 @@ class CWSCDReductionControl(object):
         # ref_exp_number, ref_scan_number, integrated_peak_params = self.get_integrated_scan_params(exp_number,
         #                                                                                           two_theta,
         #                                                                                           resolution=0.01)
-
+        # TODO FIXME NOW3 : method argument ) takes exactly 3 arguments (2 given)
         peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(
             integration_record.get_pt_intensity(), ref_fwhm)
         integration_record.set_peak_intensity(peak_intensity)
@@ -450,6 +450,8 @@ class CWSCDReductionControl(object):
 
         # do a linear interpolation
         interp_sigma = numpy.interp(two_theta, self._two_theta_sigma[0], self._two_theta_sigma[1])
+
+        # TODO NOW3 : debug output for why always same sigma!
 
         return interp_sigma
 
@@ -2738,7 +2740,7 @@ class CWSCDReductionControl(object):
                                ''.format(scan_number, self._single_pt_integration_dict.keys()))
 
         # set sigma: SinglePointPeakIntegration
-        int_record.set_ref_peak_width(gauss_sigma, is_fhwm)
+        int_record.set_ref_fwhm(gauss_sigma, is_fhwm)
 
         return
 

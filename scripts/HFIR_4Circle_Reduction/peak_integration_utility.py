@@ -105,6 +105,16 @@ def calculate_penalty(model_vec_y, exp_vec_y):
     return cost
 
 
+# TODO FIXME NOW3 Implement!
+def calculate_single_pt_scan_peak_intensity(peak_heigh, fwhm, is_fwhm):
+    """
+    """
+
+    peak_intensity = 1.
+
+    return peak_intensity
+        
+
 def estimate_background(pt_intensity_dict, bg_pt_list):
     """
     Estimate background value by average the integrated counts of some Pt.

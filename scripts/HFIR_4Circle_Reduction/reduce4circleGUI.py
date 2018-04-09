@@ -434,7 +434,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(0)
 
         self.ui.radioButton_ubMantidStyle.setChecked(True)
-        self.ui.lineEdit_numSurveyOutput.setText('50')
+        self.ui.lineEdit_numSurveyOutput.setText('')
         self.ui.checkBox_sortDescending.setChecked(False)
         self.ui.radioButton_sortByCounts.setChecked(True)
         self.ui.radioButton_ubSelectNoScan.setChecked(True)

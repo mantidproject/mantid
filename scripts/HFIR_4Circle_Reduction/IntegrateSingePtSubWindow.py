@@ -242,7 +242,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
                 pt_number = 1
                 roi_name = self.ui.tableView_summary.get_region_of_interest_name(row_index)
                 self.ui.tableView_summary.set_gaussian_sigma(row_index, gauss_sigma)
-                self._controller.set_single_measure_peak_width(self._exp_number, scan_number, roi_name, gauss_sigma, is_fhwm=False)
+                self._controller.set_single_measure_peak_width(self._exp_number, scan_number, pt_number,
+                                                               roi_name, gauss_sigma, is_fhwm=False)
 
             except RuntimeError as err:
                 # error!
