@@ -195,6 +195,9 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = 
     _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
     type(view).output_mode = _output_mode
 
+    _wavelength_range = mock.PropertyMock(return_value='')
+    type(view).wavelength_range = _wavelength_range
+
     return view, settings_diagnostic_tab, masking_table
 
 
