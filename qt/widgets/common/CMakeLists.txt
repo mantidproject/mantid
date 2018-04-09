@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/VectorString.cpp
+  src/Batch/RowLocation.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
@@ -176,6 +177,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
+  inc/MantidQtWidgets/Common/Batch/RowLocation.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
