@@ -54,7 +54,7 @@ std::vector<RunLabel> EnggDiffMultiRunFittingQtWidget::getAllRunLabels() const {
   runLabels.reserve(m_ui.listWidget_runLabels->count());
 
   for (int i = 0; i < m_ui.listWidget_runLabels->count(); i++) {
-    const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
+    const auto currentLabel = m_ui.listWidget_runLabels->item(i)->text();
     runLabels.push_back(parseListWidgetItem(currentLabel));
   }
   return runLabels;

@@ -54,7 +54,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -216,6 +217,83 @@ public:
 
     presenter->notifyRefinementCancelled();
 
+    assertMocksUsedCorrectly();
+  }
+
+  void test_refineAllPassesParamsCorrectlyFromViewToModel() {
+    auto presenter = setUpPresenter();
+
+    const GSASIIRefineFitPeaksParameters params1(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100),
+        RunLabel(123, 1), GSASRefinementMethod::RIETVELD, "Instrument file",
+        {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", boost::none, boost::none,
+        10000, 40000, true, false);
+    const GSASIIRefineFitPeaksParameters params2(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200),
+        RunLabel(456, 2), GSASRefinementMethod::RIETVELD, "Instrument file",
+        {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", boost::none, boost::none,
+        10000, 40000, true, false);
+
+    const std::vector<RunLabel> runLabels({params1.runLabel, params2.runLabel});
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getAllRunLabels())
+        .WillOnce(Return(runLabels));
+
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getFocusedRun(testing::_))
+        .Times(2)
+        .WillOnce(Return(params1.inputWorkspace))
+        .WillOnce(Return(params2.inputWorkspace));
+    EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
+        .Times(1)
+        .WillOnce(Return(params1.refinementMethod));
+    EXPECT_CALL(*m_mockViewPtr, getInstrumentFileName())
+        .Times(1)
+        .WillOnce(Return(params1.instParamsFile));
+    EXPECT_CALL(*m_mockViewPtr, getPhaseFileNames())
+        .Times(1)
+        .WillOnce(Return(params1.phaseFiles));
+    EXPECT_CALL(*m_mockViewPtr, getPathToGSASII())
+        .Times(1)
+        .WillOnce(Return(params1.gsasHome));
+    EXPECT_CALL(*m_mockViewPtr, getGSASIIProjectPath())
+        .Times(1)
+        .WillOnce(Return(params1.gsasProjectFile));
+    EXPECT_CALL(*m_mockViewPtr, getPawleyDMin())
+        .Times(1)
+        .WillOnce(Return(params1.dMin));
+    EXPECT_CALL(*m_mockViewPtr, getPawleyNegativeWeight())
+        .Times(1)
+        .WillOnce(Return(params1.negativeWeight));
+    EXPECT_CALL(*m_mockViewPtr, getXMin())
+        .Times(1)
+        .WillOnce(Return(params1.xMin));
+    EXPECT_CALL(*m_mockViewPtr, getXMax())
+        .Times(1)
+        .WillOnce(Return(params1.xMax));
+    EXPECT_CALL(*m_mockViewPtr, getRefineSigma())
+        .Times(1)
+        .WillOnce(Return(params1.refineSigma));
+    EXPECT_CALL(*m_mockViewPtr, getRefineGamma())
+        .Times(1)
+        .WillOnce(Return(params1.refineGamma));
+
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Refining run"));
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(false));
+    EXPECT_CALL(*m_mockModelPtr,
+                doRefinements(std::vector<GSASIIRefineFitPeaksParameters>(
+                    {params1, params2})));
+
+    presenter->notify(IEnggDiffGSASFittingPresenter::RefineAll);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_refineAllWarnsIfNoRunsLoaded() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockMultiRunWidgetPtr, getAllRunLabels())
+        .WillOnce(Return(std::vector<RunLabel>()));
+    EXPECT_CALL(*m_mockViewPtr,
+                userWarning("No runs loaded",
+                            "Please load at least one run before refining"));
+    presenter->notify(IEnggDiffGSASFittingPresenter::RefineAll);
     assertMocksUsedCorrectly();
   }
 

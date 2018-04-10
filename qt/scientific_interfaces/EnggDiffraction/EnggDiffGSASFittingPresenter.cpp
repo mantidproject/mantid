@@ -55,9 +55,25 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   std::vector<GSASIIRefineFitPeaksParameters> inputParams;
   inputParams.reserve(runLabels.size());
 
+  const auto refinementMethod = m_view->getRefinementMethod();
+  const auto instParamFile = m_view->getInstrumentFileName();
+  const auto phaseFiles = m_view->getPhaseFileNames();
+  const auto pathToGSASII = m_view->getPathToGSASII();
+  const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
+
+  const auto dMin = m_view->getPawleyDMin();
+  const auto negativeWeight = m_view->getPawleyNegativeWeight();
+  const auto xMin = m_view->getXMin();
+  const auto xMax = m_view->getXMax();
+  const auto refineSigma = m_view->getRefineSigma();
+  const auto refineGamma = m_view->getRefineGamma();
+
   for (const auto &runLabel : runLabels) {
     const auto inputWS = *(m_multiRunWidget->getFocusedRun(runLabel));
-    inputParams.push_back(collectInputParameters(runLabel, inputWS));
+    inputParams.push_back(GSASIIRefineFitPeaksParameters(
+        inputWS, runLabel, refinementMethod, instParamFile, phaseFiles,
+        pathToGSASII, GSASIIProjectFile, dMin, negativeWeight, xMin, xMax,
+        refineSigma, refineGamma));
   }
   return inputParams;
 }

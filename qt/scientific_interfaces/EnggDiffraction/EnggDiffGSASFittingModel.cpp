@@ -146,7 +146,7 @@ void EnggDiffGSASFittingModel::doRefinements(
       "GSASIIRefineFitPeaksOutputProperties");
 
   connect(m_workerThread.get(), SIGNAL(started()), worker,
-          SLOT(doRefinement()));
+          SLOT(doRefinements()));
   connect(worker,
           SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
           this, SLOT(processRefinementSuccessful(
