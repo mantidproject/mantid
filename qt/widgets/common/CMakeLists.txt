@@ -78,6 +78,9 @@ set ( SRC_FILES
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/VectorString.cpp
   src/Batch/RowLocation.cpp
+  src/Batch/JobTreeView.cpp
+  src/Batch/QtStandardItemTreeAdapter.cpp
+  src/Batch/QtTreeCursorNavigation.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
@@ -178,6 +181,9 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
   inc/MantidQtWidgets/Common/Batch/RowLocation.h
+  inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
+  inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
+  inc/MantidQtWidgets/Common/Batch/JobTreeView.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
@@ -532,6 +538,9 @@ set( TEST_FILES
   test/DataProcessorUI/TwoLevelTreeManagerTest.h
   test/DataProcessorUI/WhiteListTest.h
   test/DataProcessorUI/GenericDataProcessorPresenterTest.h
+
+  test/Batch/QtAdaptedModelTest.h
+
   test/ParseKeyValueStringTest.h
   test/DataProcessorUI/QOneLevelTreeModelTest.h
   test/DataProcessorUI/QTwoLevelTreeModelTest.h
