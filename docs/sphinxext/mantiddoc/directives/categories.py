@@ -14,7 +14,6 @@ import posixpath
 from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
-CATEGORY_HOMEPAGE_TEMPLATE = "categories_homepage.html"
 # relative to the directory containing the source file
 CATEGORIES_DIR = "categories"
 
