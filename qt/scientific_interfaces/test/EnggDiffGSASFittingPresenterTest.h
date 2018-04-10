@@ -183,6 +183,14 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_notifyRefinementsComplete() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
+    presenter->notifyRefinementsComplete();
+    assertMocksUsedCorrectly();
+  }
+
   void test_notifyRefinementSuccessful() {
     auto presenter = setUpPresenter();
     const Mantid::API::MatrixWorkspace_sptr fittedPeaks(
@@ -195,8 +203,6 @@ public:
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr,
                 addFittedPeaks(runLabel, fittedPeaks));
-    EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
-    EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
 
     // make sure displayFitResults(runLabel) is getting called
     EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))

@@ -27,6 +27,8 @@ public slots:
   void doRefinements();
 
 signals:
+  void refinementsComplete();
+
   void refinementSuccessful(GSASIIRefineFitPeaksOutputProperties);
 
   void refinementFailed(std::string);

@@ -128,6 +128,13 @@ void EnggDiffGSASFittingPresenter::doRefinements(
   m_model->doRefinements(params);
 }
 
+void EnggDiffGSASFittingPresenter::notifyRefinementsComplete() {
+  if (!m_viewHasClosed) {
+    m_view->setEnabled(true);
+    m_view->showStatus("Ready");
+  }
+}
+
 void EnggDiffGSASFittingPresenter::notifyRefinementCancelled() {
   if (!m_viewHasClosed) {
     m_view->setEnabled(true);
@@ -147,8 +154,6 @@ void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
 void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   if (!m_viewHasClosed) {
-    m_view->setEnabled(true);
-    m_view->showStatus("Ready");
     m_multiRunWidget->addFittedPeaks(refinementResults.runLabel,
                                      refinementResults.fittedPeaksWS);
     displayFitResults(refinementResults.runLabel);

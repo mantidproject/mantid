@@ -63,6 +63,8 @@ protected:
   void addSigma(const RunLabel &runLabel, const double sigma);
 
 protected slots:
+  void processRefinementsComplete();
+
   void processRefinementFailed(const std::string &failureMessage);
 
   void processRefinementSuccessful(

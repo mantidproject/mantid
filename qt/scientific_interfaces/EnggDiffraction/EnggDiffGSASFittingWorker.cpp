@@ -16,11 +16,11 @@ void EnggDiffGSASFittingWorker::doRefinements() {
     qRegisterMetaType<
         MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
         "GSASIIRefineFitPeaksOutputProperties");
-    GSASIIRefineFitPeaksOutputProperties fitResults;
     for (const auto params : m_refinementParams) {
-      fitResults = m_model->doGSASRefinementAlgorithm(params);
+      const auto fitResults = m_model->doGSASRefinementAlgorithm(params);
+      emit refinementSuccessful(fitResults);
     }
-    emit refinementSuccessful(fitResults);
+    emit refinementsComplete();
   } catch (const Mantid::API::Algorithm::CancelException &) {
     emit refinementCancelled();
   } catch (const std::exception &e) {
