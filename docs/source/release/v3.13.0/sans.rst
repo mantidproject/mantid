@@ -21,6 +21,7 @@ Improvements
 Bug fixes
 #########
 * Fixed a bug where the beam stop arm was not being masked on LOQ.
+
 Features Removed
 ################
 
