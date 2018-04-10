@@ -378,7 +378,8 @@ def create_category_pages(app):
         if "\\" not in top_name and top_category not in all_top_categories:
             all_top_categories.append(top_category)
             
-        template = CATEGORY_HOMEPAGE_TEMPLATE 
+        template = CATEGORY_PAGE_TEMPLATE
+        top_context["text_page"] = "algorithm_categories.html"
         top_context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
         # Set up the positions in the toc tree
         top_category_html_dir = posixpath.join(top_category.name.lower(), 'categories')
@@ -387,6 +388,7 @@ def create_category_pages(app):
         top_context['outpath'] = "../" + top_category_html_path_noext + '.html'
         top_context["pages"] = []
         if top_category.name == "Algorithm Index":
+            top_context["title"] = top_category.name
             top_html_dir = posixpath.join(top_category.name.lower(), 'Algorithms')
             top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
 
