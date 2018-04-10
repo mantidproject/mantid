@@ -616,7 +616,7 @@ class SinglePointPeakIntegration(object):
     """
     simple class to store the result of a single point measurement peak integration
     """
-    def __init__(self, exp_number, scan_number, roi_name, pt_number=1):
+    def __init__(self, exp_number, scan_number, roi_name, pt_number, two_theta):
         """
         initialization
         :param exp_number:
@@ -629,11 +629,13 @@ class SinglePointPeakIntegration(object):
         check_integer('Scan number', scan_number)
         check_integer('Pt number', pt_number)
         check_string('ROI name', roi_name)
+        check_float('Two theta', two_theta)
 
         self._exp_number = exp_number
         self._scan_number = scan_number
         self._roi_name = roi_name
         self._pt_number = pt_number
+        self._two_theta = two_theta
 
         self._pt_intensity = None
         self._peak_intensity = None
@@ -643,16 +645,19 @@ class SinglePointPeakIntegration(object):
 
         self._gauss_x0 = None
         self._gauss_sigma = None
-        self._flag_b = None
+        self._flat_b = None
 
         # reference peak width
-        self._ref_peak_sigma  = None
+        self._ref_peak_sigma = None
 
         # fitting cost (goodness)
         self._fit_cost = None
 
+        self._spiceHKL = None
+
         return
 
+    # TODO FIXME NOW3 - Need to set up all the Gaussian/Background parameters
     def get_gaussian_parameters(self):
         """
         get the Gaussian
@@ -660,12 +665,85 @@ class SinglePointPeakIntegration(object):
         """
         return self._gauss_x0, self._gauss_sigma, self._pt_intensity, self._flat_b
 
+    def get_hkl(self, user_hkl):
+        """ Get HKL (originally from SPICE)
+        :param user_hkl: if selected, then return the HKL set from client (GUI). Otherwise, HKL is retrieved
+                        from original SPICE file.
+        :return:
+        """
+        # get HKL from SPICE file
+        # if self._spiceHKL is None:
+        self.retrieve_hkl_from_spice_table()
+        ret_hkl = self._spiceHKL
+        # END-IF-ELSE
+
+        return ret_hkl
+
     def get_pt_intensity(self):
         """
         get single-pt-can intensity
         :return:
         """
         return self._pt_intensity
+
+    def get_intensity(self, algorithm_type, lorentz_corrected):
+        """
+        get the integrated intensity with specified integration algorithm and whether
+        the result should be corrected by Lorentz correction factor
+        :param algorithm_type:
+        :param lorentz_corrected:
+        :return:
+        """
+        # check
+        if self._pt_intensity is None:
+            raise RuntimeError('SinglePtPeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup.'
+                               ''.format(self._exp_number, self._scan_number, self._roi_name, hex(id(self))))
+
+        # get intensity
+        intensity = self._pt_intensity
+        std_dev = numpy.sqrt(intensity)
+
+        if lorentz_corrected:
+            # use the instrument 2theta: L = sin(2theta)
+            lorentz_factor = numpy.sin(self._two_theta * numpy.pi / 180.)
+
+            intensity *= lorentz_factor
+            std_dev *= lorentz_factor
+
+        return intensity, std_dev
+
+    # TODO NOW3 Code Quality: this has a duplicate in the same file!
+    def retrieve_hkl_from_spice_table(self):
+        """ Get averaged HKL from SPICE table
+        HKL will be averaged from SPICE table by assuming the value in SPICE might be right
+        :return:
+        """
+        # get SPICE table
+        spice_table_name = get_spice_table_name(self._exp_number, self._scan_number)
+        assert AnalysisDataService.doesExist(spice_table_name), 'Spice table for Exp %d Scan %d cannot be found.' \
+                                                                '' % (self._exp_number, self._scan_number)
+
+        spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+
+        # get HKL column indexes
+        h_col_index = spice_table_ws.getColumnNames().index('h')
+        k_col_index = spice_table_ws.getColumnNames().index('k')
+        l_col_index = spice_table_ws.getColumnNames().index('l')
+
+        # scan each Pt.
+        hkl = numpy.array([0., 0., 0.])
+
+        num_rows = spice_table_ws.rowCount()
+        for row_index in range(num_rows):
+            mi_h = spice_table_ws.cell(row_index, h_col_index)
+            mi_k = spice_table_ws.cell(row_index, k_col_index)
+            mi_l = spice_table_ws.cell(row_index, l_col_index)
+            hkl += numpy.array([mi_h, mi_k, mi_l])
+        # END-FOR
+
+        self._spiceHKL = hkl/num_rows
+
+        return
 
     def set_xy_vector(self, vec_x, vec_y):
         """

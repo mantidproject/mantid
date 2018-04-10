@@ -334,6 +334,7 @@ class IntegratePeaksThread(QThread):
             return str(ass_err)
 
         # calculate lorentz correction
+        # TODO/FIXME/NOW2 : peak center Q shall be from calculation!
         lorentz_factor = peak_integration_utility.calculate_lorentz_correction_factor(peak_center_q, wavelength,
                                                                                       motor_step)
 

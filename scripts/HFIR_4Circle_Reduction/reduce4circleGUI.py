@@ -1282,27 +1282,29 @@ class MainWindow(QtGui.QMainWindow):
         exp_number = int(self.ui.lineEdit_exp.text())
         scan_number_list = list()
         for i_row in selected_rows:
-            scan_number_list.append(self.ui.tableWidget_mergeScans.get_scan_number(i_row))
+            # add both ROI and scan number
+            scan_i = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
+            roi_i = self.ui.tableWidget_mergeScans.get_mask(i_row)
+            scan_number_list.append((scan_i, roi_i))
 
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
             export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
 
-            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
-                                                                      user_header, export_absorption, fp_name,
-                                                                      self.ui.checkBox_fpHighPrecision.isChecked())
+            file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
+                                                              user_header, export_absorption, fp_name,
+                                                              self.ui.checkBox_fpHighPrecision.isChecked())
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
-            if status is False:
-                error_msg = file_content
-                if error_msg.startswith('Peak index error'):
-                    error_msg = 'You may forget to index peak\n' + error_msg
-                self.pop_one_button_dialog(error_msg)
         except AssertionError as a_err:
             self.pop_one_button_dialog(str(a_err))
-            return
         except KeyError as key_err:
             self.pop_one_button_dialog(str(key_err))
+        except RuntimeError as run_error:
+            error_msg = str(run_error)
+            if error_msg.count('Peak index error') > 0:
+                error_msg = 'You may forget to index peak\n' + error_msg
+            self.pop_one_button_dialog(error_msg)
 
         return
 
@@ -2197,22 +2199,23 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def process_single_pt_scan_intensity(self, scan_pt_list):
+    def process_single_pt_scan_intensity(self, scan_integrate_info_dict):
         """
         process integrated single pt scan
-        :param scan_pt_list:
+        :param scan_integrate_info_dict:
         :return:
         """
         # check inputs
-        assert isinstance(scan_pt_list, dict), 'Input scan-pt pairs {0} must be in a dict but not a {1}' \
-                                               ''.format(scan_pt_list, type(scan_pt_list))
+        assert isinstance(scan_integrate_info_dict, dict), 'Input scan-pt pairs {0} must be in a dict but not a {1}' \
+                                                           ''.format(scan_integrate_info_dict,
+                                                                     type(scan_integrate_info_dict))
 
         # get intensities
-        for scan_number in scan_pt_list:
+        for scan_number in scan_integrate_info_dict:
             # self._single_pt_scan_intensity_dict: not been defined and used at all!
             # TODO NOW3 : Check whether the intensity is recorded in the single_measurement already???
-            intensity = scan_pt_list[scan_number]
-            self.ui.tableWidget_mergeScans.add_single_measure_scan(scan_number, intensity)
+            intensity, roi_name = scan_integrate_info_dict[scan_number]
+            self.ui.tableWidget_mergeScans.add_single_measure_scan(scan_number, intensity, roi_name)
         # END-FOR
 
         return
@@ -2769,18 +2772,32 @@ class MainWindow(QtGui.QMainWindow):
         hkl_src = str(self.ui.comboBox_indexFrom.currentText())
 
         # loop through all rows
+        message = ''
         num_rows = self.ui.tableWidget_mergeScans.rowCount()
         for row_index in range(num_rows):
             # get scan number
             scan_i = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
-            peak_info_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i)
 
-            # skip non-merged sans
-            if peak_info_i is None:
-                continue
+            integral_type = self.ui.tableWidget_mergeScans.get_integration_type(row_index)
+            is_single_pt = False
+            if integral_type == 'single-pt':
+                roi_name = self.ui.tableWidget_mergeScans.get_roi_name(row_index)
+                peak_info_i = self._myControl.get_single_pt_info(exp_number, scan_number=scan_i, pt_number=1,
+                                                                 roi_name=roi_name)
+                is_single_pt = True
+            else:
+                peak_info_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i)
+                # skip non-merged sans
+                if peak_info_i is None:
+                    message += 'Row {0} Scan {1} is not integrated.\n'.format(row_index, scan_i)
+                    continue
+            
+            # TODO NOW3 - Debugging no index
+            print ('[DB...BAT] Index row {0} scan {1}.  Peak info = {2} of type {3}'
+                   ''.format(row_index, scan_i, peak_info_i, type(peak_info_i)))
 
             # get or calculate HKL
-            if hkl_src == 'From SPICE':
+            if is_single_pt or hkl_src == 'From SPICE':
                 # get HKL from SPICE (non-user-hkl)
                 hkl_i = peak_info_i.get_hkl(user_hkl=False)
             else:
@@ -2800,12 +2817,13 @@ class MainWindow(QtGui.QMainWindow):
                     error_msg = 'Scan %d: %s' % (scan_i, str(ret_tup))
                     self.ui.tableWidget_mergeScans.set_status(scan_i, error_msg)
                 # END-IF-ELSE(index)
+
+                # set to peak info
+                peak_info_i.set_hkl_np_array(hkl_i)
+
             # END-IF-ELSE (hkl_from_spice)
 
-            # set & show
-            peak_info_i.set_hkl_np_array(hkl_i)
-            # self._myControl.get_peak_info(exp_number, scan_i)
-            # round HKL?
+            # show by rounding HKL?
             if self.ui.checkBox_roundHKL.isChecked():
                 hkl_i = [hb3a_util.round_miller_index(hkl_i[0], 0.2),
                          hb3a_util.round_miller_index(hkl_i[1], 0.2),

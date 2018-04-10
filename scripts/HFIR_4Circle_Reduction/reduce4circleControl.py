@@ -455,6 +455,25 @@ class CWSCDReductionControl(object):
 
         return vec_x, vec_y, model_y
 
+    def get_single_pt_info(self, exp_number, scan_number, pt_number, roi_name):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :return:
+        """
+        try:
+            peak_info = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        except KeyError:
+            err_message = 'Exp {0} Scan {1} Pt {2} ROI {3} does not exit in Single-Pt-Integration dictionary ' \
+                          'which has keys: {4}'.format(exp_number, scan_number, pt_number, roi_name,
+                                                       self._single_pt_integration_dict.keys())
+            raise RuntimeError(err_message)
+
+        return peak_info
+
     def calculate_peak_integration_sigma(self, two_theta):
         """
         calculate Gaussian-Sigma for single-measurement peak integration by linear interpolation
@@ -869,33 +888,30 @@ class CWSCDReductionControl(object):
 
         return move_tup[1]
 
-    def export_to_fullprof(self, exp_number, scan_number_list, user_header,
+    # TEST NOW3 - This need a lot of work because of single-pt scans
+    def export_to_fullprof(self, exp_number, scan_roi_list, user_header,
                            export_absorption, fullprof_file_name, high_precision):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
-        :param scan_number_list:
+        :param scan_roi_list: list of 2-tuple: (1) scan number (2) roi/mask name
         :param user_header:
-        :param export_absorption:
+        :param export_absorption: requiring UB matrix
         :param fullprof_file_name:
         :param high_precision: flag to write peak intensity as f18.5 if true; otherwise, output as f8.2
         :return: 2-tuples. status and return object ((mixed) file content or error message)
         """
         # check
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
-        assert isinstance(scan_number_list, list), 'Scan number list must be a list but not %s.' \
-                                                   '' % str(type(scan_number_list))
-        assert len(scan_number_list) > 0, 'Scan number list must larger than 0, but ' \
-                                          'now %d. ' % len(scan_number_list)
+        assert isinstance(scan_roi_list, list), 'Scan number list must be a list but not %s.' \
+                                                '' % str(type(scan_roi_list))
+        assert len(scan_roi_list) > 0, 'Scan number list must larger than 0'
 
         # get wave-length
-        try:
-            exp_wave_length = self.get_wave_length(exp_number, scan_number_list)
-        except RuntimeError as error:
-            return False, 'RuntimeError: %s.' % str(error)
+        scan_number_list = [t[0] for t in scan_roi_list]
+        exp_wave_length = self.get_wave_length(exp_number, scan_number_list)
 
         # get the information whether there is any k-shift vector specified by user
-
         # form k-shift and peak intensity information
         scan_kindex_dict = dict()
         k_shift_dict = dict()
@@ -909,27 +925,45 @@ class CWSCDReductionControl(object):
 
         error_message = 'Number of scans with k-shift must either be 0 (no shift at all) or ' \
                         'equal to or larger than the number scans to export.'
-        assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) >= len(scan_number_list), error_message
+        assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) >= len(scan_roi_list), error_message
 
         # form peaks
         no_shift = len(scan_kindex_dict) == 0
 
-        # get ub matrix
-        ub_matrix = self.get_ub_matrix(exp_number)
+        # get ub matrix in the case of export absorption
+        if export_absorption:
+            try:
+                ub_matrix = self.get_ub_matrix(exp_number)
+            except RuntimeError as err:
+                raise RuntimeError('It is required to have UB matrix set up for exporting absorption\n(error '
+                                   'message: {0}'.format(err))
+        else:
+            ub_matrix = None
 
-        mixed_content = None
+        mixed_content = 'Nothing is written'
         for algorithm_type in ['simple', 'mixed', 'gauss']:
             # set list of peaks for exporting
             peaks = list()
-            for scan_number in scan_number_list:
+            for scan_number, roi_name in scan_roi_list:
+                # create a single peak information dictionary for
                 peak_dict = dict()
-                try:
-                    peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)].get_hkl(user_hkl=True)
-                except RuntimeError as run_err:
-                    return False, str('Peak index error: %s.' % run_err)
 
-                intensity, std_dev = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity(
-                    algorithm_type, lorentz_corrected=True)
+                # get peak-info object
+                if (exp_number, scan_number) in self._myPeakInfoDict:
+                    peak_info = self._myPeakInfoDict[exp_number, scan_number]
+                else:
+                    pt_number = 1
+                    peak_info = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+
+                # get HKL
+                try:
+                    peak_dict['hkl'] = peak_info.get_hkl(user_hkl=True)
+                    # self._myPeakInfoDict[(exp_number, scan_number)].get_hkl(user_hkl=True)
+                except RuntimeError as run_err:
+                    raise RuntimeError('Peak index error: {0}.'.format(run_err))
+
+                intensity, std_dev = peak_info.get_intensity(algorithm_type, lorentz_corrected=True)
+                # self._myPeakInfoDict[(exp_number, scan_number)]
 
                 if intensity < std_dev:
                     # error is huge, very likely bad gaussian fit
@@ -961,23 +995,18 @@ class CWSCDReductionControl(object):
             # get file name for this type
             this_file_name = fullprof_file_name.split('.')[0] + '_' + algorithm_type + '.dat'
 
-            try:
-                file_content = fputility.write_scd_fullprof_kvector(
-                    user_header=user_header, wave_length=exp_wave_length,
-                    k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                    fp_file_name=this_file_name, with_absorption=export_absorption,
-                    high_precision=high_precision)
-                if algorithm_type == 'mixed':
-                    mixed_content = file_content
-            except AssertionError as error:
-                return False, 'AssertionError: %s.' % str(error)
-            except RuntimeError as error:
-                return False, 'RuntimeError: %s.' % str(error)
+            file_content = fputility.write_scd_fullprof_kvector(
+                user_header=user_header, wave_length=exp_wave_length,
+                k_vector_dict=k_shift_dict, peak_dict_list=peaks,
+                fp_file_name=this_file_name, with_absorption=export_absorption,
+                high_precision=high_precision)
+            if algorithm_type == 'mixed':
+                mixed_content = file_content
 
             continue
         # END-FOR
 
-        return True, mixed_content
+        return mixed_content
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """
@@ -1003,7 +1032,6 @@ class CWSCDReductionControl(object):
 
         return out_file_name
 
-    # TEST NOW3 New!
     def find_scans_by_2theta(self, exp_number, two_theta, resolution, excluded_scans):
         """
         find scans by 2theta (same or similar)
@@ -1772,7 +1800,7 @@ class CWSCDReductionControl(object):
         vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
         vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[1], roi_lower_left[1]:roi_upper_right[1]].sum(axis=0)
 
-        # TODO/DEBUG/FIXME
+        # create matrix workspace to calculate center peak intensity (by fitting)
         mantidsimple.CreateWorkspace(DataX=vec_x, DataY=vec_y, DataE=numpy.sqrt(vec_y), NSpec=1,
                                      OutputWorkspace='SinglePt_Exp{0}_Scan{1}'.format(exp_number, scan_number))
 
@@ -1798,7 +1826,11 @@ class CWSCDReductionControl(object):
         # value_list[2] = cost
         # value_list[3] = params  # as x0, sigma, a, b
 
-        integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name, pt_number)
+        # get 2theta
+        two_theta = self.get_sample_log_value(self._expNumber, scan_number, pt_number, '2theta')
+
+        # create SinglePointPeakIntegration
+        integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name, pt_number, two_theta)
         integrate_record.set_xy_vector(vec_x, vec_y)
         integrate_record.set_fit_cost(cost)
         integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])

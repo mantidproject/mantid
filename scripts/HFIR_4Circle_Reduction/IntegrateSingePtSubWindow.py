@@ -39,7 +39,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.graphicsView_integration1DView.set_parent_window(self)
 
         # define event handlers for widgets
-        self.ui.pushButton_integrteDetectorCounts.clicked.connect(self.do_interate_detector_counts)
+        self.ui.pushButton_integrteDetectorCounts.clicked.connect(self.do_integrate_detector_counts)
         self.ui.pushButton_load2thetaSigmaFile.clicked.connect(self.menu_load_gauss_sigma_file)
 
         self.ui.pushButton_exportIntensityToFile.clicked.connect(self.do_save_intensity)
@@ -80,8 +80,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         export the integrated intensity to parent window's peak processing table
         :return:
         """
-        # TEST NOW2
-        # collect all scan/pt from table
+        # collect all scan/pt from table. value including intensity and ROI
         intensity_dict = self.ui.tableView_summary.get_peak_intensities()
 
         # add to table including calculate peak center in Q-space
@@ -89,7 +88,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    def do_interate_detector_counts(self):
+    def do_integrate_detector_counts(self):
         """
         integrate the (selected) scan's detector counts by ROI
         :return:
@@ -214,7 +213,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    # TEST FIXME NOW3 - New feature!
     def do_retrieve_fwhm(self):
         """
         Get FWHM from integrated 'STRONG' peaks according to 2theta value
@@ -230,7 +228,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
             # use interpolation to curve
             two_theta = self.ui.tableView_summary.get_two_theta(row_index)
-            # TEST NOW3 - new method calculate_peak_integration_sigma
             try:
                 gauss_sigma = self._controller.calculate_peak_integration_sigma(two_theta)
                 scan_number = self.ui.tableView_summary.get_scan_number(row_index)
@@ -245,41 +242,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
                 error_messages += 'Unable to calculate sigma of row {0} due to {1}\n'.format(row_index, err)
                 continue
             # END-IF-ELSE
-
-            # The following will be deleted!
-            # # get corresponding strong nuclear peak (complete scan number)
-            # ref_scans = self.ui.tableView_summary.get_reference_scans(row_index)
-            # if ref_scans is None:
-            #     # get scan number
-            #     scan_number = self.ui.tableView_summary.get_scan_number(row_index)
-            #     # get 2theta and set 2theta
-            #     two_theta = self._controller.get_sample_log_value(self._exp_number, scan_number, 1,
-            #                                                       '2theta')
-            #
-            #     # locate reference scan number
-            #     # consider to use interpolation to curve!
-            #     complete_peak_scan_numbers = self._controller.find_scans_by_2theta(self._exp_number,
-            #                                                                        two_theta, resolution=0.05,
-            #                                                                        excluded_scans=[scan_number])
-            #
-            #     if len(complete_peak_scan_numbers) == 0:
-            #         # no match.  stop!
-            #         self.ui.tableView_summary.set_reference_scan_numbers(row_index, 'No match')
-            #         continue
-            #     else:
-            #         self.ui.tableView_summary.set_reference_scan_numbers(row_index, complete_peak_scan_numbers)
-            #         reference_scan_number = complete_peak_scan_numbers[0]
-            #     # END-IF
-            # else:
-            #     reference_scan_number = ref_scans[0]
-            # # END-IF
-            #
-            # # get integrated scan's FWHM
-            # peak_info = \
-            #     self._controller.get_peak_info(self._exp_number, reference_scan_number)
-            # if peak_info is not None and peak_info.gaussian_fwhm is not None:
-            #     self.ui.tableView_summary.set_fwhm(row_index, peak_info.gaussian_fwhm)
-        # END-FOR
 
         # show error message if necessary
         if len(error_messages) > 0:
@@ -309,7 +271,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             return
 
         return
-
 
     def menu_table_select_all(self):
         """

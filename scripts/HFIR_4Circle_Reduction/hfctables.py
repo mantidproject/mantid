@@ -591,11 +591,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
 
-    """
-    in scans processing tab, the column name of corrected will be changed to 'F2;'Error' will be modified to 'F2 Error'
-In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
-    """
-
     def __init__(self, parent):
         """
         Initialization
@@ -619,7 +614,6 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         self._colIndexMotorStep = None
         self._colIndexWaveLength = None
         self._colIndexKIndex = None
-        self._colIndexWorkspace = None
 
         # cache dictionaries
         self._workspaceCacheDict = dict()
@@ -675,12 +669,12 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
 
         return
 
-    def add_single_measure_scan(self, scan_number, intensity):
+    def add_single_measure_scan(self, scan_number, intensity, roi_name):
         """
         add a single measurement peak scan
-        :param exp_number:
         :param scan_number:
         :param intensity:
+        :param roi_name:
         :return:
         """
         # construct a new row
@@ -688,9 +682,13 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         self.append_row(new_row)
 
         # set peak intensity
-        self.set_peak_intensity(row_number=self.rowCount()-1, peak_intensity=intensity,
+        row_number = self.rowCount()-1
+        self.set_peak_intensity(row_number=row_number, peak_intensity=intensity,
                                 corrected_intensity=intensity, standard_error=math.sqrt(abs(intensity)),
                                 integrate_method='single-pt')
+
+        # ROI: use the unused workspace column for this information
+        self.update_cell_value(row_number, self._colIndexMask, roi_name)
 
         return
 
@@ -727,7 +725,7 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
 
         return
 
-    def get_integration_type(self):
+    def get_integration_type(self, row_index):
         """
         get the peak integration type
         :return:
@@ -735,7 +733,7 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         if self.rowCount() == 0:
             raise RuntimeError('Empty table!')
 
-        integrate_type = self.get_cell_value(0, self._colIndexIntType)
+        integrate_type = self.get_cell_value(row_index, self._colIndexIntType)
 
         return integrate_type
 
@@ -812,6 +810,14 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
 
         return peak_index_h, peak_index_k, peak_index_l
 
+    def get_mask(self, row_index):
+        """
+        get the mask/ROI name that this integration is based on
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._colIndexMask)
+
     def get_merged_status(self, row_number):
         """ Get the status whether it is merged
         :param row_number:
@@ -838,6 +844,21 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         """
         #  return self.get_cell_value(i_row, self._colIndexWorkspace)
         return self._workspaceCacheDict[i_row]
+
+    def get_roi_name(self, row_index):
+        """
+        get ROI name if it is a single-pt scan
+        :except RuntimeError: if it is not!
+        :param row_index:
+        :return:
+        """
+        integral_type = self.get_integration_type(row_index)
+        if integral_type != 'single-pt':
+            raise RuntimeError('Non-single-pt is not applied to get roi name')
+
+        roi_name = self.get_cell_value(row_index, self._colIndexMask)
+
+        return roi_name
 
     def get_scan_list(self, output_row_number=True):
         """
@@ -996,7 +1017,7 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
         assert isinstance(integrate_method, str), 'Integrated method {0} must be a string but not {1}.' \
                                                   ''.format(integrate_method, type(integrate_method))
-        if integrate_method not in ['', 'simple', 'mixed', 'gaussian']:
+        if integrate_method not in ['', 'simple', 'mixed', 'gaussian', 'single-pt']:
             raise RuntimeError('Peak integration {0} not in list. Method must be in ["" (Not defined), "simple"'
                                ', "gaussian"]'.format(integrate_method))
 
@@ -1433,7 +1454,8 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         for row_index in range(self.rowCount()):
             scan_number = self.get_cell_value(row_index, self._scan_index)
             intensity_i = self.get_cell_value(row_index, self._intensity_index)
-            peak_intensity_dict[scan_number] = intensity_i
+            roi_i = self.get_cell_value(row_index, self._roi_index)
+            peak_intensity_dict[scan_number] = intensity_i, roi_i
         # END-FOR
 
         return peak_intensity_dict
@@ -1748,6 +1770,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     def get_hkl(self, row_index, is_spice_hkl):
         """
         Get reflection's miller index
+        :except RuntimeError:
         :param row_index:
         :param is_spice_hkl:
         :return: 3-tuple as H, K, L
@@ -1765,9 +1788,9 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         # convert the recorded string to HKL
         status, ret_obj = guiutility.parse_float_array(hkl_str)
         if not status:
-            raise RuntimeError(ret_obj)
+            raise RuntimeError('Unable to parse hkl (str) due to {0}'.format(ret_obj))
         elif len(ret_obj) != 3:
-            raise RuntimeError('Unable to parse array "{0}" to 3 floating points.'.format(hkl_str))
+            raise RuntimeError('Unable to convert array "{0}" to 3 floating points.'.format(hkl_str))
         else:
             m_h, m_k, m_l = ret_obj
 

@@ -22,15 +22,18 @@ def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
 
 def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     """
-
+    Lorenz correction = sin(2theta)
     :param q_sample:
     :param wavelength:
     :param motor_step:
     :return:
     """
+    # TODO/FIXME/NOW2 - Q sample shall be calculated from HKL and UB matrix but not from observation
     sin_theta = q_sample * wavelength / (4 * numpy.pi)
     theta = math.asin(sin_theta)
-    factor = numpy.sin(2 * theta) * motor_step
+    # MOTOR step does not make sense!
+    # factor = numpy.sin(2 * theta) * motor_step
+    factor = numpy.sin(2 * theta)
 
     return factor
 
