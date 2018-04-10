@@ -264,8 +264,15 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
 
         vec_x, vec_y, vec_e = self._myCanvas.get_data_error(line_id)
 
-        # FIXME TODO NOW - This is incorrect!  Orientation is 90 rotated! ... Refer to Jupiter Notebook
-        numpy.savetxt(file_name, (vec_x, vec_y, vec_e))
+        # convert vectors to a matrix to save
+        row_size = len(vec_x)
+
+        matrix = numpy.ndarray(shape=(row_size, 3), dtype='float')
+        matrix[:, 0] = vec_x
+        matrix[:, 1] = vec_y
+        matrix[:, 2] = vec_e
+
+        numpy.savetxt(file_name, matrix)
 
         return
 

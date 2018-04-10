@@ -1511,13 +1511,17 @@ class Qt4MplCanvas(FigureCanvas):
         return
 
     def save(self, file_name):
-        """
+        """ save the current figure to an image file
         save to image
         :param file_name:
         :return:
         """
+        assert isinstance(file_name, str), 'File name must be string.'
+
         # FIXME (Future) many more options for figures to save
         self.fig.savefig(file_name)
+
+        return
 
     def set_title(self, title, color, location='center'):
         """
@@ -1531,8 +1535,8 @@ class Qt4MplCanvas(FigureCanvas):
         assert isinstance(title, str), 'Title {0} must be a string but not a {1}.'.format(title, type(title))
         assert isinstance(color, str) and len(color) > 0, 'Color {0} must be a non-empty string but not a {1}.' \
                                                           ''.format(color, type(color))
-        assert isinstance(location, str) and len(location) > 0, 'Location {0} must be a non-empty string but not a {1}.' \
-                                                                ''.format(location, type(location))
+        assert isinstance(location, str) and len(location) > 0, 'Location {0} must be a non-empty string but not a' \
+                                                                ' {1}.'.format(location, type(location))
 
         # set title and re-draw to apply
         self.axes.set_title(title, loc=location, color=color)
@@ -1699,9 +1703,6 @@ class Qt4MplCanvas(FigureCanvas):
 
             # get vector for error
             vec_e = retrieve_error_bar(content[1])
-
-            # TODO FIXME NOW3 - This does not work correctly!
-            print ('Vector E = {0}'.format(vec_e))
 
         else:
             # not anywhere

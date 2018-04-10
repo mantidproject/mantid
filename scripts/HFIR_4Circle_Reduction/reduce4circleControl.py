@@ -64,6 +64,22 @@ def check_str_type(variable, var_name):
     return
 
 
+def check_float_type(variable, var_name):
+    """
+    check whether a variable is an integer
+    :except AssertionError:
+    :param variable:
+    :param var_name:
+    :return:
+    """
+    assert isinstance(var_name, str), 'Variable name {0} must be an integer but not a {1}' \
+                                      ''.format(var_name, type(var_name))
+    assert isinstance(variable, int) or isinstance(variable, float), '{0} {1} must be an integer but not a {2}' \
+                                                                     ''.format(var_name, variable, type(variable))
+
+    return
+
+
 def check_int_type(variable, var_name):
     """
     check whether a variable is an integer
@@ -389,7 +405,7 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_number, int), 'Scan number {0} must be an integer.'.format(scan_number)
         assert isinstance(pt_number, int), 'Pt number {0} must be an integer'.format(pt_number)
         assert isinstance(roi_name, str), 'ROI name {0} must be a string'.format(roi_name)
-        assert isinstance(ref_fwhm, float), 'blabla'
+        check_float_type(ref_fwhm, 'Reference FWHM')
 
         # check whether the detector counts has been calculated and get the value
         if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
@@ -1145,7 +1161,8 @@ class CWSCDReductionControl(object):
 
         if roi_name not in self._roiDict:
             # ROI: not saved
-            raise RuntimeError('ROI not here blabla')
+            raise RuntimeError('ROI {0} is not in ROI dictionary which has keys {1}'
+                               ''.format(roi_name, self._roiDict.keys()))
 
         # check...
         lower_left_corner = self._roiDict[roi_name].lower_left_corner

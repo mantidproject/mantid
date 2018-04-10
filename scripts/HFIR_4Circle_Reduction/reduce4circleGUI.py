@@ -2212,8 +2212,7 @@ class MainWindow(QtGui.QMainWindow):
             # self._single_pt_scan_intensity_dict: not been defined and used at all!
             # TODO NOW3 : Check whether the intensity is recorded in the single_measurement already???
             intensity = scan_pt_list[scan_number]
-            # TODO NOW3 : implement add_single_pt_scan!
-            self.add_single_pt_scan(scan_number, pt_number, intensity)
+            self.ui.tableWidget_mergeScans.add_single_measure_scan(scan_number, intensity)
         # END-FOR
 
         return

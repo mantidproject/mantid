@@ -6,8 +6,9 @@ import sys
 from HFIR_4Circle_Reduction import fourcircle_utility
 from HFIR_4Circle_Reduction import guiutility
 from PyQt4 import QtCore
-
+import math
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
+
 
 
 class KShiftTableWidget(tableBase.NTableWidget):
@@ -671,6 +672,25 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         # construct a row
         new_row = self._generate_empty_row(scan_number, ws_name=ws_name)
         self.append_row(new_row)
+
+        return
+
+    def add_single_measure_scan(self, scan_number, intensity):
+        """
+        add a single measurement peak scan
+        :param exp_number:
+        :param scan_number:
+        :param intensity:
+        :return:
+        """
+        # construct a new row
+        new_row = self._generate_empty_row(scan_number, ws_name='single-pt')
+        self.append_row(new_row)
+
+        # set peak intensity
+        self.set_peak_intensity(row_number=self.rowCount()-1, peak_intensity=intensity,
+                                corrected_intensity=intensity, standard_error=math.sqrt(abs(intensity)),
+                                integrate_method='single-pt')
 
         return
 
