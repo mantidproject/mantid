@@ -2,6 +2,20 @@
 #include "EnggDiffGSASRefinementMethod.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
+namespace {
+
+std::string addRunNumberToGSASIIProjectFile(
+    const std::string &filename,
+    const MantidQt::CustomInterfaces::RunLabel &runLabel) {
+  const auto dotPosition = filename.find_last_of(".");
+  return filename.substr(0, dotPosition) + "_" +
+         std::to_string(runLabel.runNumber) + "_" +
+         std::to_string(runLabel.bank) +
+         filename.substr(dotPosition, filename.length());
+}
+
+} // anonymous namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -34,7 +48,7 @@ void EnggDiffGSASFittingPresenter::notify(
   case IEnggDiffGSASFittingPresenter::RefineAll:
     processRefineAll();
     break;
-    
+
   case IEnggDiffGSASFittingPresenter::SelectRun:
     processSelectRun();
     break;
@@ -53,13 +67,23 @@ std::vector<GSASIIRefineFitPeaksParameters>
 EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   const auto runLabels = m_multiRunWidget->getAllRunLabels();
   std::vector<GSASIIRefineFitPeaksParameters> inputParams;
+  std::vector<std::string> GSASIIProjectFiles;
   inputParams.reserve(runLabels.size());
+  GSASIIProjectFiles.reserve(runLabels.size());
 
   const auto refinementMethod = m_view->getRefinementMethod();
   const auto instParamFile = m_view->getInstrumentFileName();
   const auto phaseFiles = m_view->getPhaseFileNames();
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
+  if (runLabels.size() == 1) {
+    GSASIIProjectFiles = std::vector<std::string>({GSASIIProjectFile});
+  } else {
+    for (const auto &runLabel : runLabels) {
+      GSASIIProjectFiles.push_back(
+          addRunNumberToGSASIIProjectFile(GSASIIProjectFile, runLabel));
+    }
+  }
 
   const auto dMin = m_view->getPawleyDMin();
   const auto negativeWeight = m_view->getPawleyNegativeWeight();
@@ -68,11 +92,13 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   const auto refineSigma = m_view->getRefineSigma();
   const auto refineGamma = m_view->getRefineGamma();
 
-  for (const auto &runLabel : runLabels) {
+  for (size_t i = 0; i < runLabels.size(); i++) {
+    const auto runLabel = runLabels[i];
     const auto inputWS = *(m_multiRunWidget->getFocusedRun(runLabel));
+
     inputParams.push_back(GSASIIRefineFitPeaksParameters(
-        inputWS, runLabel, refinementMethod, instParamFile, phaseFiles,
-        pathToGSASII, GSASIIProjectFile, dMin, negativeWeight, xMin, xMax,
+        inputWS, runLabels[i], refinementMethod, instParamFile, phaseFiles,
+        pathToGSASII, GSASIIProjectFiles[i], dMin, negativeWeight, xMin, xMax,
         refineSigma, refineGamma));
   }
   return inputParams;

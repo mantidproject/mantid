@@ -117,7 +117,7 @@
       <item row="3" column="0">
        <widget class="QLabel" name="label_gsasProjPath">
         <property name="toolTip">
-         <string>The name of a new *.gpx project to write refinement results out to. This can be opened and used for more complex refinements in GSAS-II</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of a new *.gpx project to write refinement results out to. This can be opened and used for more complex refinements in GSAS-II.&lt;/p&gt;&lt;p&gt;Note, if refining more than one run, the run number and bank ID will be appended to this&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string>New GSAS-II Project</string>

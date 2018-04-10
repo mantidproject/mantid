@@ -232,13 +232,13 @@ public:
     const GSASIIRefineFitPeaksParameters params1(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100),
         RunLabel(123, 1), GSASRefinementMethod::RIETVELD, "Instrument file",
-        {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", boost::none, boost::none,
-        10000, 40000, true, false);
+        {"Phase1", "Phase2"}, "GSASHOME", "GPX_123_1.gpx", boost::none,
+        boost::none, 10000, 40000, true, false);
     const GSASIIRefineFitPeaksParameters params2(
         WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200),
         RunLabel(456, 2), GSASRefinementMethod::RIETVELD, "Instrument file",
-        {"Phase1", "Phase2"}, "GSASHOME", "GPX.gpx", boost::none, boost::none,
-        10000, 40000, true, false);
+        {"Phase1", "Phase2"}, "GSASHOME", "GPX_456_2.gpx", boost::none,
+        boost::none, 10000, 40000, true, false);
 
     const std::vector<RunLabel> runLabels({params1.runLabel, params2.runLabel});
     EXPECT_CALL(*m_mockMultiRunWidgetPtr, getAllRunLabels())
@@ -262,7 +262,7 @@ public:
         .WillOnce(Return(params1.gsasHome));
     EXPECT_CALL(*m_mockViewPtr, getGSASIIProjectPath())
         .Times(1)
-        .WillOnce(Return(params1.gsasProjectFile));
+        .WillOnce(Return("GPX.gpx"));
     EXPECT_CALL(*m_mockViewPtr, getPawleyDMin())
         .Times(1)
         .WillOnce(Return(params1.dMin));
