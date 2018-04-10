@@ -82,6 +82,7 @@ set ( SRC_FILES
 	src/CreateLogTimeCorrection.cpp
 	src/CreatePSDBleedMask.cpp
 	src/CreatePeaksWorkspace.cpp
+	src/CreatePolarizationEfficiencies.cpp
 	src/CreateSampleWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
@@ -413,6 +414,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateLogTimeCorrection.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
+	inc/MantidAlgorithms/CreatePolarizationEfficiencies.h
 	inc/MantidAlgorithms/CreateSampleWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
@@ -760,6 +762,7 @@ set ( TEST_FILES
 	CreateLogTimeCorrectionTest.h
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
+	CreatePolarizationEfficienciesTest.h
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
 	CreateTransmissionWorkspace2Test.h
