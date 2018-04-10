@@ -13,8 +13,6 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::HistogramData::HistogramDx;
-using Mantid::Kernel::make_cow;
 
 class ConvertToPointDataTest : public CxxTest::TestSuite {
 
