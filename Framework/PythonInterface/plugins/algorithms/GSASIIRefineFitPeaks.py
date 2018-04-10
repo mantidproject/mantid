@@ -181,8 +181,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return the input workspace
         :return: Single-spectrum workspace
         """
-        ws = self.getPropertyValue(self.PROP_INPUT_WORKSPACE)
-        if mtd[ws].getNumberHistograms > 1:
+        ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
+        if ws.getNumberHistograms > 1:
             ws_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
             spectrum = mantid.ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=ws_index,
                                              EndWorkspaceIndex=ws_index, StoreInADS=False)
@@ -192,7 +192,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return spectrum
 
     def _generate_fitted_peaks_ws(self, gsas_proj):
-        input_ws = self.getPropertyValue(self.PROP_INPUT_WORKSPACE)
+        input_ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         fitted_peaks_ws_name = self.getPropertyValue(self.PROP_OUT_FITTED_PEAKS_WS)
         fitted_peaks_ws = mantid.CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=fitted_peaks_ws_name,
                                                 StoreInADS=False)
