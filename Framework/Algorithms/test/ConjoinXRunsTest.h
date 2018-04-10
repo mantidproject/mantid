@@ -36,12 +36,12 @@ public:
   void setUp() override {
     std::vector<MatrixWorkspace_sptr> ws(6);
     // Workspaces have 5 spectra must be point data, don't have masks and have dx
-    ws[0] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), false); // 3 points
-    ws[1] = create2DWorkspace154(5, 2, false, std::set<int64_t>(), false); // 2 points
-    ws[2] = create2DWorkspace123(5, 1, false, std::set<int64_t>(), false); // 1 point
-    ws[3] = create2DWorkspace154(5, 1, false, std::set<int64_t>(), false); // 1 point
-    ws[4] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), false); // 3 points
-    ws[5] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), false); // 3 points
+    ws[0] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
+    ws[1] = create2DWorkspace154(5, 2, false, std::set<int64_t>(), true); // 2 points
+    ws[2] = create2DWorkspace123(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[3] = create2DWorkspace154(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[4] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
+    ws[5] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
     m_testWS = {"ws1", "ws2", "ws3", "ws4", "ws5", "ws6"};
 
     for (unsigned int i; i<ws.size(); ++i){
@@ -80,7 +80,7 @@ public:
     auto spectrum = out->y(0);
     auto error = out->e(0);
     auto xaxis = out->x(0);
-    //HistogramDx dx = out->dx(0);
+    HistogramDx dx = out->dx(0);
     std::vector<double> x{1., 2., 3., 1., 2., 1., 1.};
     std::vector<double> y{2., 2., 2., 5., 5., 2., 5.};
     std::vector<double> e{3., 3., 3., 4., 4., 3., 4.};
@@ -88,7 +88,7 @@ public:
       TS_ASSERT_EQUALS(xaxis[j], x[j]);
       TS_ASSERT_EQUALS(spectrum[j], y[j]);
       TS_ASSERT_EQUALS(error[j], e[j]);
-      //TSM_ASSERT_EQUALS("Dx and y values are the same", dx[j], y[j]);
+      TSM_ASSERT_EQUALS("Dx and y values are the same", dx[j], y[j]);
     }
   }
 
