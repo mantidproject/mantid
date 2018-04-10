@@ -12,6 +12,6 @@ Diffraction Changes
 Engineering Diffraction
 -----------------------
 
-- :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks` now supports Pawley refinement as well as Rietveld
+- :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
 
 :ref:`Release 3.13.0 <v3.13.0>`
