@@ -125,16 +125,15 @@ public:
                      "different X units; different spectrum axis units; ");
   }
 
-  void testIncompatibleDx(){
-    // create a workspace with dx
-    MatrixWorkspace_sptr ws1 = create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "test", true);
-    this->setUnits(ws1);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws1), "corresponding spectra must have either Dx values or not; ");
+  void testIncompatibleDx() {
     // create a workspace where spectrum 1 has Dx
     MatrixWorkspace_sptr ws2 = m_reference->clone();
-    auto dx = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(3, 0.2);
+    auto dx =
+        Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(3, 0.2);
     ws2->setSharedDx(1, dx);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws2), "corresponding spectra must have either Dx values or not; ");
+    TS_ASSERT_EQUALS(
+        m_testee.checkCompatibility(ws2),
+        "corresponding spectra must have either Dx values or not; ");
   }
 
   void test_scanning_workspaces_throw_no_error() {

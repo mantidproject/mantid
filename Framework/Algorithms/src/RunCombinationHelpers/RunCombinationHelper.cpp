@@ -72,9 +72,12 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
   if (ws->getNumberHistograms() != m_numberSpectra && checkNumberHistograms)
     errors += "different number of histograms; ";
   else {
-    for (unsigned int i = 0; i < ws->getNumberHistograms(); ++i) {
+    for (unsigned int i = 0; i < m_numberSpectra; ++i) {
       if (m_hasDx[i] != ws->hasDx(i)) {
-        errors += "corresponding spectra must have either Dx values or not; ";
+        std::stringstream istr;
+        istr << i;
+        errors += "corresponding spectrum " + istr.str() +
+                  " must have either Dx values or not; ";
         continue;
       }
     }

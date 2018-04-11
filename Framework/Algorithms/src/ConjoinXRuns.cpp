@@ -293,9 +293,10 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
       xerrors.insert(xerrors.end(), dx.begin(), dx.end());
     }
   }
-  if (!xerrors.empty())
-     m_outWS->setPointStandardDeviations(index, m_outWS->blocksize());
-     m_outWS->mutableDx(index) = xerrors;
+  if (!xerrors.empty()) {
+    m_outWS->setPointStandardDeviations(index, m_outWS->blocksize());
+    m_outWS->mutableDx(index) = xerrors;
+  }
   m_outWS->mutableY(index) = spectrum;
   m_outWS->mutableE(index) = errors;
   m_outWS->mutableX(index) = axis;
