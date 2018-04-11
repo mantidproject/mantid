@@ -335,9 +335,10 @@ Workspace2D_sptr create2DWorkspaceBinned(int nhist, int numVals, double x0,
  * If hasDx is true, all spectra will have dx values, starting from 0.1 and
  * increased by 0.1 for each bin.
  */
-Workspace2D_sptr create2DWorkspaceNonUniformlyBinned(int nhist, const int numBoundaries,
-                                         const double xBoundaries[],
-                                         bool hasDx) {
+Workspace2D_sptr create2DWorkspaceNonUniformlyBinned(int nhist,
+                                                     const int numBoundaries,
+                                                     const double xBoundaries[],
+                                                     bool hasDx) {
   BinEdges x(xBoundaries, xBoundaries + numBoundaries);
   const int numBins = numBoundaries - 1;
   Counts y(numBins, 2);
