@@ -223,7 +223,8 @@ public:
     // calibrate detectors;
     auto &detectorInfo = ws1->mutableDetectorInfo();
     for (size_t i = 0; i < n_detectors; i++) {
-      size_t detIndex = detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
+      size_t detIndex =
+          detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
       detectorInfo.setPosition(
           detIndex, V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7));
     }
