@@ -5,6 +5,7 @@ add_subdirectory(reflectometer)
 add_subdirectory(sans)
 add_subdirectory(sans_isis)
 add_subdirectory(dataprocessorinterface)
+add_subdirectory(batchwidget)
 add_subdirectory(poldi)
 
 SET(UI_FILES
@@ -29,6 +30,7 @@ add_custom_target(CompileUIUI DEPENDS
   CompileUISANS
   CompileUISANSDataProcessorInterface
   CompileUIDataProcessorInterface
+  CompileUIBatchWidgetInterface
   CompileUIPoldi
 )
 
