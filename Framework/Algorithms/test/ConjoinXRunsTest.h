@@ -35,23 +35,30 @@ public:
 
   void setUp() override {
     std::vector<MatrixWorkspace_sptr> ws(6);
-    // Workspaces have 5 spectra must be point data, don't have masks and have dx
-    ws[0] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
-    ws[1] = create2DWorkspace154(5, 2, false, std::set<int64_t>(), true); // 2 points
-    ws[2] = create2DWorkspace123(5, 1, false, std::set<int64_t>(), true); // 1 point
-    ws[3] = create2DWorkspace154(5, 1, false, std::set<int64_t>(), true); // 1 point
-    ws[4] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
-    ws[5] = create2DWorkspace123(5, 3, false, std::set<int64_t>(), true); // 3 points
+    // Workspaces have 5 spectra must be point data, don't have masks and have
+    // dx
+    ws[0] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
+                                 true); // 3 points
+    ws[1] = create2DWorkspace154(5, 2, false, std::set<int64_t>(),
+                                 true); // 2 points
+    ws[2] =
+        create2DWorkspace123(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[3] =
+        create2DWorkspace154(5, 1, false, std::set<int64_t>(), true); // 1 point
+    ws[4] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
+                                 true); // 3 points
+    ws[5] = create2DWorkspace123(5, 3, false, std::set<int64_t>(),
+                                 true); // 3 points
     m_testWS = {"ws1", "ws2", "ws3", "ws4", "ws5", "ws6"};
 
-    for (unsigned int i; i<ws.size(); ++i){
+    for (unsigned int i; i < ws.size(); ++i) {
       ws[i]->getAxis(0)->setUnit("TOF");
       storeWS(m_testWS[i], ws[i]);
     }
   }
 
   void tearDown() override {
-    for (unsigned int i; i<m_testWS.size(); ++i){
+    for (unsigned int i; i < m_testWS.size(); ++i) {
       removeWS(m_testWS[i]);
     }
     m_testWS.clear();
@@ -109,9 +116,11 @@ public:
     MatrixWorkspace_sptr ws6 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws6");
 
-    Counts counts{{4, 9, 16}};
-    Points points{{0.4, 0.9, 1.1}};
-    ws6->setHistogram(3, points, counts);
+    for (auto i = 0; i < 5;
+         i++) { // modify all 5 spectra of ws6 in terms of y and x
+      ws6->mutableY(i) = {4., 9., 16.};
+      ws6->mutableX(i) = {0.4, 0.9, 1.1};
+    }
 
     m_testee.setProperty("InputWorkspaces",
                          std::vector<std::string>{"ws1", "ws6"});
@@ -128,55 +137,29 @@ public:
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
 
-    auto spectrum0 = out->y(0);
-    auto error0 = out->e(0);
-    auto xaxis0 = out->x(0);
+    // Check all 5 spectra
+    for (auto i = 0; i < 5; i++) {
+      TS_ASSERT_EQUALS(out->y(i)[0], 2.);
+      TS_ASSERT_EQUALS(out->y(i)[1], 2.);
+      TS_ASSERT_EQUALS(out->y(i)[2], 2.);
+      TS_ASSERT_EQUALS(out->y(i)[3], 4.); // or ws6->y(i)[3]
+      TS_ASSERT_EQUALS(out->y(i)[4], 9.);
+      TS_ASSERT_EQUALS(out->y(i)[5], 16.);
 
-    TS_ASSERT_EQUALS(spectrum0[0], 2.);
-    TS_ASSERT_EQUALS(spectrum0[1], 2.);
-    TS_ASSERT_EQUALS(spectrum0[2], 2.);
-    TS_ASSERT_EQUALS(spectrum0[3], 2.);
-    TS_ASSERT_EQUALS(spectrum0[4], 2.);
-    TS_ASSERT_EQUALS(spectrum0[5], 2.);
+      TS_ASSERT_EQUALS(out->e(i)[0], 3.);
+      TS_ASSERT_EQUALS(out->e(i)[1], 3.);
+      TS_ASSERT_EQUALS(out->e(i)[2], 3.);
+      TS_ASSERT_EQUALS(out->e(i)[3], 3.);
+      TS_ASSERT_EQUALS(out->e(i)[4], 3.);
+      TS_ASSERT_EQUALS(out->e(i)[5], 3.);
 
-    TS_ASSERT_EQUALS(error0[0], 3.);
-    TS_ASSERT_EQUALS(error0[1], 3.);
-    TS_ASSERT_EQUALS(error0[2], 3.);
-    TS_ASSERT_EQUALS(error0[3], 3.);
-    TS_ASSERT_EQUALS(error0[4], 3.);
-    TS_ASSERT_EQUALS(error0[5], 3.);
-
-    TS_ASSERT_EQUALS(xaxis0[0], 1.);
-    TS_ASSERT_EQUALS(xaxis0[1], 2.);
-    TS_ASSERT_EQUALS(xaxis0[2], 3.);
-    TS_ASSERT_EQUALS(xaxis0[3], 1.);
-    TS_ASSERT_EQUALS(xaxis0[4], 2.);
-    TS_ASSERT_EQUALS(xaxis0[5], 3.);
-
-    auto spectrum3 = out->y(3);
-    auto error3 = out->e(3);
-    auto xaxis3 = out->x(3);
-
-    TS_ASSERT_EQUALS(spectrum3[0], 2.);
-    TS_ASSERT_EQUALS(spectrum3[1], 2.);
-    TS_ASSERT_EQUALS(spectrum3[2], 2.);
-    TS_ASSERT_EQUALS(spectrum3[3], 4.);
-    TS_ASSERT_EQUALS(spectrum3[4], 9.);
-    TS_ASSERT_EQUALS(spectrum3[5], 16.);
-
-    TS_ASSERT_EQUALS(error3[0], 3.);
-    TS_ASSERT_EQUALS(error3[1], 3.);
-    TS_ASSERT_EQUALS(error3[2], 3.);
-    TS_ASSERT_EQUALS(error3[3], 2.);
-    TS_ASSERT_EQUALS(error3[4], 3.);
-    TS_ASSERT_EQUALS(error3[5], 4.);
-
-    TS_ASSERT_EQUALS(xaxis3[0], 1.);
-    TS_ASSERT_EQUALS(xaxis3[1], 2.);
-    TS_ASSERT_EQUALS(xaxis3[2], 3.);
-    TS_ASSERT_EQUALS(xaxis3[3], 0.4);
-    TS_ASSERT_EQUALS(xaxis3[4], 0.9);
-    TS_ASSERT_EQUALS(xaxis3[5], 1.1);
+      TS_ASSERT_EQUALS(out->x(i)[0], 1.);
+      TS_ASSERT_EQUALS(out->x(i)[1], 2.);
+      TS_ASSERT_EQUALS(out->x(i)[2], 3.);
+      TS_ASSERT_EQUALS(out->x(i)[3], 0.4);
+      TS_ASSERT_EQUALS(out->x(i)[4], 0.9);
+      TS_ASSERT_EQUALS(out->x(i)[5], 1.1);
+    }
   }
 
   void testFailWithNumLog() {
