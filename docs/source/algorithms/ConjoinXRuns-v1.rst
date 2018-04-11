@@ -160,7 +160,6 @@ Output:
 
     The differences in the wavelength of the inputs are more than the allowed tolerance
 
-
 Related Algorithms
 ------------------
 :ref:`MergeRuns <algm-MergeRuns>` sums the spectra of many workspaces while handling the merging of the sample logs.
