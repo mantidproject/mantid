@@ -1,8 +1,8 @@
 .. _v3.12.1:
 
-==========================
+===========================
 Mantid 3.12.1 Release Notes
-==========================
+===========================
 
 .. contents:: Table of Contents
    :local:
@@ -31,6 +31,7 @@ Changes in this version
 
 * `22205 <https://github.com/mantidproject/mantid/pull/22205>`_ Fix header for TOPAS files
 * `22213 <https://github.com/mantidproject/mantid/pull/22215>`_ Fix bug when using StartLiveData through Python API
+
 Summary of impact
 -----------------
 
