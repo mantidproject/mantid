@@ -11,7 +11,10 @@ This is a patch release that corrects some significant issues since :ref:`versio
 
 The main changes are:
 
-**ADD SUMMARY HERE**
+* Several fixes to the Muon Analysis GUI, including when generating the results table and fixing when fitting is disabled.
+* Several issues which caused mantid to crash have been fixed.
+* Allowing the live listener funtionality to be used outside ISIS and from the python API.
+* Fixing the header for TOPAS files.
 
 Citation
 --------
