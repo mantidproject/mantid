@@ -6,6 +6,7 @@
 
 %Include qwttypes.sip
 %Include vector.sip
+%Include string.sip
 
 %ModuleHeaderCode
 #include "MantidQtWidgets/Common/PythonSystemHeader.h"
@@ -1512,9 +1513,65 @@ class RowLocation
 %End
 public:
 RowLocation(std::vector<int>);
-std::vector<int> path() const;
+const std::vector<int>& path() const;
 int rowRelativeToParent() const;
 bool isRoot() const;
+};
+
+class JobTreeViewSubscriber {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
+%End
+public:
+  virtual void notifyCellChanged(const RowLocation& itemIndex, int column,
+                                 const std::string& newValue) = 0;
+  virtual void notifyRowInserted(const RowLocation& itemIndex) = 0;
+  virtual void notifyRemoveRowsRequested(
+    const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
+};
+
+class JobTreeView : public QTreeView
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
+%End
+public:
+    JobTreeView(const QStringList &columnHeadings, QWidget *parent = nullptr);
+    void subscribe(JobTreeViewSubscriber& subscriber);
+    void insertChildRowOf(const RowLocation &parent, int beforeRow,
+                          const std::vector<std::string> &rowText);
+    void insertChildRowOf(const RowLocation &parent, int beforeRow);
+    void appendChildRowOf(const RowLocation &parent);
+    void appendChildRowOf(const RowLocation &parentLocation,
+                          const std::vector<std::string> &rowText);
+    void removeRowAt(const RowLocation &location);
+    void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
+    std::vector<std::string> rowTextAt(const RowLocation &location) const;
+    void setRowTextAt(const RowLocation &location,
+                      const std::vector<std::string> &rowText);
+    std::string textAt(RowLocation location, int column);
+    void setTextAt(RowLocation location, int column, const std::string &cellText);
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
+};
+
+class JobTreeViewSignalAdapter : public QObject, public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h"
+%End
+public:
+  JobTreeViewSignalAdapter(JobTreeView &view, QObject *parent = nullptr);
+  virtual void notifyCellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
+                                 const std::string &newValue);
+  virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  virtual void notifyRemoveRowsRequested(
+      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
+signals:
+  void cellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
+                   std::string newValue);
+  void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  void removeRowsRequested(
+      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
+
 };
 
 };

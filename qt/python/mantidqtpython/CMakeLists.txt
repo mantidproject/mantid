@@ -28,6 +28,8 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/ManageUserDirectories.h
 
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/RowLocation.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/JobTreeView.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
 
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/LineViewer.h

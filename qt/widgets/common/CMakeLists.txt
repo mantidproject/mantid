@@ -79,6 +79,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/VectorString.cpp
   src/Batch/RowLocation.cpp
   src/Batch/JobTreeView.cpp
+  src/Batch/JobTreeViewSignalAdapter.cpp
   src/Batch/QtStandardItemTreeAdapter.cpp
   src/Batch/QtTreeCursorNavigation.cpp
 	src/DataSelector.cpp
@@ -184,6 +185,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
   inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
   inc/MantidQtWidgets/Common/Batch/JobTreeView.h
+  inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
