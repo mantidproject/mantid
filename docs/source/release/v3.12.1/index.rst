@@ -30,7 +30,6 @@ Changes in this version
 -----------------------
 
 * `22205 <https://github.com/mantidproject/mantid/pull/22205>`_ Fix header for TOPAS files
-* `22175 <https://github.com/mantidproject/mantid/pull/22175>`_ Fix failing Reflectometry doctests
 * `22213 <https://github.com/mantidproject/mantid/pull/22215>`_ Fix bug when using StartLiveData through Python API
 Summary of impact
 -----------------
@@ -40,8 +39,6 @@ Summary of impact
 |       |                                                    |                 | Probability  |
 +=======+====================================================+=================+==============+
 | 22205 | Fix header for TOPAS files                         |                 | medium       |
-+-------+----------------------------------------------------+-----------------+--------------+
-| 22175 | Fix failing Reflectometry doctests                 | Update values   | low          |
 +-------+----------------------------------------------------+-----------------+--------------+
 | 22215 | Fix bug when using StartLiveData through Python API| Extra else check| medium       |
 +-------+----------------------------------------------------+-----------------+--------------+
