@@ -9,6 +9,8 @@ namespace CustomInterfaces {
 class IEnggDiffGSASFittingObserver {
 
 public:
+  virtual ~IEnggDiffGSASFittingObserver() = default;
+
   virtual void notifyRefinementSuccessful(
       const GSASIIRefineFitPeaksOutputProperties &refinementResults) = 0;
 
