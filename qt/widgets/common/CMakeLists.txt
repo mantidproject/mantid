@@ -540,6 +540,7 @@ set( TEST_FILES
   test/DataProcessorUI/GenericDataProcessorPresenterTest.h
 
   test/Batch/QtAdaptedModelTest.h
+  test/Batch/RowLocationTest.h
 
   test/ParseKeyValueStringTest.h
   test/DataProcessorUI/QOneLevelTreeModelTest.h
