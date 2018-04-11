@@ -29,23 +29,22 @@ Please cite any usage of Mantid as follows:
 Changes in this version
 -----------------------
 
-* `22200 <https://github.com/mantidproject/mantid/pull/22200>`_ Fix unreliable tests: Disable ClearCache doc test
 * `22205 <https://github.com/mantidproject/mantid/pull/22205>`_ Fix header for TOPAS files
 * `22175 <https://github.com/mantidproject/mantid/pull/22175>`_ Fix failing Reflectometry doctests
-
+* `22213 <https://github.com/mantidproject/mantid/pull/22215>`_ Fix bug when using StartLiveData through Python API
 Summary of impact
 -----------------
 
-+-------+---------------------------------------------------+---------------+--------------+
-| Issue | Impact                                            | Solution      | Side Effect  |
-|       |                                                   |               | Probability  |
-+=======+===================================================+===============+==============+
-| 22200 | Fix unreliable tests: Disable ClearCache doc test |               | **unknown**  |
-+-------+---------------------------------------------------+---------------+--------------+
-| 22205 | Fix header for TOPAS files                        |               | **unknown**  |
-+-------+---------------------------------------------------+---------------+--------------+
-| 22175 | Fix failing Reflectometry doctests                | Update values | low          |
-+-------+---------------------------------------------------+---------------+--------------+
++-------+----------------------------------------------------+-----------------+--------------+
+| Issue | Impact                                             | Solution        | Side Effect  |
+|       |                                                    |                 | Probability  |
++=======+====================================================+=================+==============+
+| 22205 | Fix header for TOPAS files                         |                 | medium       |
++-------+----------------------------------------------------+-----------------+--------------+
+| 22175 | Fix failing Reflectometry doctests                 | Update values   | low          |
++-------+----------------------------------------------------+-----------------+--------------+
+| 22215 | Fix bug when using StartLiveData through Python API| Extra else check| medium       |
++-------+----------------------------------------------------+-----------------+--------------+
 
 .. _download page: http://download.mantidproject.org
 
