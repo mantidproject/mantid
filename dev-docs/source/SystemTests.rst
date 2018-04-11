@@ -64,8 +64,8 @@ For example:
 
 .. code-block:: python
 
-   def validateMethod(self):
-      return "WorkspaceToNeXus"
+    def validateMethod(self):
+        return 'WorkspaceToNeXus'
 
 No Workspace Validation
 -----------------------
@@ -96,8 +96,8 @@ a minimum RAM specification by overriding requiredMemoryMB:
 
 .. code-block:: python
 
-   def requiredMemoryMB(self):
-      return 2000
+   def requiredMemoryMB(self):
+       return 2000
 
 The above function limits the test to run on a machine where there is at
 least 2GB of free memory.
@@ -112,8 +112,8 @@ are not available then the tests are skipped.
 
 .. code-block:: python
 
-   def requiredFiles(self):
-      return ["a.nxs", "b.nxs"]
+   def requiredFiles(self):
+       return ['a.nxs', 'b.nxs']
 
 The above function limits the test to run on a machine that can find the
 files 'a.nxs' & 'b.nxs'

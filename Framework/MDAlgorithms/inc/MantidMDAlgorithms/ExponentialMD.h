@@ -42,6 +42,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"PowerMD", "LogarithmMD"};
+  }
 
 private:
   /// Check the inputs and throw if the algorithm cannot be run

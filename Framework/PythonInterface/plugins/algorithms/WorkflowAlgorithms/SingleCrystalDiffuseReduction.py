@@ -25,6 +25,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 
+    def seeAlso(self):
+        return [ "ConvertToMD","MDNormSCD" ]
+
     def name(self):
         return "SingleCrystalDiffuseReduction"
 
