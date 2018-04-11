@@ -7,6 +7,7 @@
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 #include "IEnggDiffMultiRunFittingWidgetPresenter.h"
+#include "IEnggDiffractionCalibration.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -24,8 +25,8 @@ public:
   EnggDiffGSASFittingPresenter(
       std::unique_ptr<IEnggDiffGSASFittingModel> model,
       IEnggDiffGSASFittingView *view,
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
-          multiRunWidget);
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+      boost::shared_ptr<IEnggDiffractionCalibration> calibSettings);
 
   EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
@@ -74,6 +75,8 @@ private:
    @param runLabel Run number and bank ID of the run to display
   */
   void displayFitResults(const RunLabel &runLabel);
+
+  boost::shared_ptr<IEnggDiffractionCalibration> m_calibSettings;
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 

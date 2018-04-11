@@ -5,6 +5,7 @@
 #include "EnggDiffMultiRunFittingQtWidget.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffractionCalibration.h"
 #include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 
@@ -25,7 +26,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
 public:
   EnggDiffGSASFittingViewQtWidget(
       boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
+      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
+      boost::shared_ptr<IEnggDiffractionCalibration> calibSettings);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
 
@@ -43,8 +45,6 @@ public:
   std::vector<std::string> getFocusedFileNames() const override;
 
   std::string getGSASIIProjectPath() const override;
-
-  std::string getInstrumentFileName() const override;
 
   std::string getPathToGSASII() const override;
 
@@ -78,7 +78,6 @@ private slots:
   void browseFocusedRun();
   void browseGSASHome();
   void browseGSASProj();
-  void browseInstParams();
   void browsePhaseFiles();
   void disableLoadIfInputEmpty();
   void doRefinement();

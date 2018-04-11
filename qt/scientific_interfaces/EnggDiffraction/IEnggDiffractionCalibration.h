@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONCALIBRATION_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONCALIBRATION_H_
 
+#include <string>
 #include <vector>
 
 namespace MantidQt {
@@ -12,13 +13,15 @@ namespace CustomInterfaces {
  * algorithm AlignDetectors for example.
  */
 struct GSASCalibrationParms {
-  GSASCalibrationParms(size_t bid, double dc, double da, double tz)
-      : bankid(bid), difc(dc), difa(da), tzero(tz) {}
+  GSASCalibrationParms(size_t bid, double dc, double da, double tz,
+                       const std::string &fn)
+      : bankid(bid), difc(dc), difa(da), tzero(tz), filename(fn) {}
 
-  size_t bankid{0};
-  double difc{0};
-  double difa{0};
-  double tzero{0};
+  size_t bankid = 0;
+  double difc = 0;
+  double difa = 0;
+  double tzero = 0;
+  std::string filename = 0;
 };
 
 /**

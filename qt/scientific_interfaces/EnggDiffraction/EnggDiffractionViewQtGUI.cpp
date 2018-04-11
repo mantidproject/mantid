@@ -1,10 +1,10 @@
 #include "EnggDiffractionViewQtGUI.h"
+#include "EnggDiffractionPresenter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
-#include "EnggDiffractionPresenter.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -92,7 +92,8 @@ void EnggDiffractionViewQtGUI::initLayout() {
       m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
-  m_gsasWidget = new EnggDiffGSASFittingViewQtWidget(sharedView, sharedView);
+  m_gsasWidget =
+      new EnggDiffGSASFittingViewQtWidget(sharedView, sharedView, fullPres);
   m_ui.tabMain->addTab(m_gsasWidget, QString("GSAS-II Refinement"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);

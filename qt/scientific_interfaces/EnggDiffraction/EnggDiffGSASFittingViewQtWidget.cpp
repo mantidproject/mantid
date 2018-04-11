@@ -16,7 +16,8 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
+    boost::shared_ptr<IEnggDiffractionCalibration> calibSettings)
     : m_userMessageProvider(userMessageProvider) {
 
   auto multiRunWidgetModel =
@@ -37,7 +38,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   auto *model_ptr = model.get();
   m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
-      std::move(model), this, multiRunWidgetPresenter);
+      std::move(model), this, multiRunWidgetPresenter, calibSettings);
   model_ptr->setObserver(m_presenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
@@ -75,13 +76,6 @@ void EnggDiffGSASFittingViewQtWidget::browseGSASProj() {
     filename.append(".gpx");
   }
   m_ui.lineEdit_gsasProjPath->setText(filename);
-}
-
-void EnggDiffGSASFittingViewQtWidget::browseInstParams() {
-  const auto filename(
-      QFileDialog::getOpenFileName(this, tr("Instrument parameter file"), "",
-                                   "Instrument parameter file (*.par *.prm)"));
-  m_ui.lineEdit_instParamsFile->setText(filename);
 }
 
 void EnggDiffGSASFittingViewQtWidget::browsePhaseFiles() {
@@ -137,10 +131,6 @@ EnggDiffGSASFittingViewQtWidget::getFocusedFileNames() const {
 
 std::string EnggDiffGSASFittingViewQtWidget::getGSASIIProjectPath() const {
   return m_ui.lineEdit_gsasProjPath->text().toStdString();
-}
-
-std::string EnggDiffGSASFittingViewQtWidget::getInstrumentFileName() const {
-  return m_ui.lineEdit_instParamsFile->text().toStdString();
 }
 
 std::string EnggDiffGSASFittingViewQtWidget::getPathToGSASII() const {
@@ -278,9 +268,6 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.pushButton_browseRunFile->setEnabled(enabled);
   setLoadEnabled(enabled && !runFileLineEditEmpty());
 
-  m_ui.lineEdit_instParamsFile->setEnabled(enabled);
-  m_ui.pushButton_browseInstParams->setEnabled(enabled);
-
   m_ui.lineEdit_phaseFiles->setEnabled(enabled);
   m_ui.pushButton_browsePhaseFiles->setEnabled(enabled);
 
@@ -333,8 +320,6 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
   connect(m_ui.lineEdit_runFile, SIGNAL(textChanged(const QString &)), this,
           SLOT(disableLoadIfInputEmpty()));
 
-  connect(m_ui.pushButton_browseInstParams, SIGNAL(clicked()), this,
-          SLOT(browseInstParams()));
   connect(m_ui.pushButton_browsePhaseFiles, SIGNAL(clicked()), this,
           SLOT(browsePhaseFiles()));
   connect(m_ui.pushButton_gsasProjPath, SIGNAL(clicked()), this,

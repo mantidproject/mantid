@@ -32,27 +32,14 @@
       <string>Input Files</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_instParamsFile"/>
-      </item>
-      <item row="4" column="2">
+      <item row="3" column="2">
        <widget class="QPushButton" name="pushButton_browseGSASHome">
         <property name="text">
          <string>Browse</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_instParamsFile">
-        <property name="toolTip">
-         <string>GSAS-style instrument file (extension *.prm)</string>
-        </property>
-        <property name="text">
-         <string>Instrument Parameter File</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
+      <item row="4" column="1">
        <widget class="QComboBox" name="comboBox_refinementMethod">
         <item>
          <property name="text">
@@ -66,7 +53,7 @@
         </item>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="label_phaseFiles">
         <property name="toolTip">
          <string>*.cif files containing the phases to refine</string>
@@ -83,7 +70,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="label_gsasHome">
         <property name="toolTip">
          <string>Directory containing GSAS-II installation. This directory must contain GSASIIscriptable.py</string>
@@ -93,14 +80,14 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
+      <item row="2" column="2">
        <widget class="QPushButton" name="pushButton_gsasProjPath">
         <property name="text">
          <string>Browse</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
+      <item row="1" column="2">
        <widget class="QPushButton" name="pushButton_browsePhaseFiles">
         <property name="text">
          <string>Browse</string>
@@ -114,7 +101,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="label_gsasProjPath">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of a new *.gpx project to write refinement results out to. This can be opened and used for more complex refinements in GSAS-II.&lt;/p&gt;&lt;p&gt;Note, if refining more than one run, the run number and bank ID will be appended to this&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -124,7 +111,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="3" column="1">
        <widget class="QLineEdit" name="lineEdit_gsasHome"/>
       </item>
       <item row="0" column="0">
@@ -137,23 +124,16 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="1">
        <widget class="QLineEdit" name="lineEdit_gsasProjPath"/>
       </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEdit_runFile"/>
       </item>
-      <item row="2" column="1">
+      <item row="1" column="1">
        <widget class="QLineEdit" name="lineEdit_phaseFiles"/>
       </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="pushButton_browseInstParams">
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_refinementMethod">
         <property name="toolTip">
          <string>Rietveld or Pawley</string>
@@ -163,14 +143,14 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
+      <item row="4" column="2">
        <widget class="QPushButton" name="pushButton_doRefinement">
         <property name="text">
          <string>Run Refinement</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="3">
+      <item row="4" column="3">
        <widget class="QPushButton" name="pushButton_refineAll">
         <property name="text">
          <string>Refine All</string>
