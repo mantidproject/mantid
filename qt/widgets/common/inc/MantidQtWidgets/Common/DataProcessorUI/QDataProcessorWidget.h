@@ -10,6 +10,9 @@
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
 #include "MantidQtWidgets/Common/HintStrategy.h"
+#include "MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -184,6 +187,9 @@ private:
   QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
 
+  Batch::JobTreeViewSignalAdapter *m_treeViewSignals;
+  Batch::JobTreeView *m_treeView;
+
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
   void ranPythonAlgorithm(const QString &pythonCode);
@@ -191,6 +197,9 @@ signals:
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
   void setModel(QString const &name) override;
+
+  void onRemoveRowsRequested(
+      std::vector<Batch::RowLocation> const &locationsOfRowsToRemove);
 
 private slots:
   void rowsUpdated(const QModelIndex &parent, int first, int last);
