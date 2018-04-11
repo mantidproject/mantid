@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
+#include <algorithm>
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -12,7 +13,47 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings, QWidget *parent)
     : QTreeView(parent), m_model(this) {
   setModel(&m_model);
   setHeaderLabels(columnHeadings);
+  setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
+
+std::vector<RowLocation> JobTreeView::selectedRowLocations() const {
+  auto selection = selectionModel()->selectedRows();
+  std::vector<RowLocation> rowSelection;
+  rowSelection.reserve(selection.size());
+  std::transform(selection.begin(), selection.end(),
+                 std::back_inserter(rowSelection),
+                 [&](QModelIndex const &index)
+                     -> RowLocation { return rowLocationAt(index); });
+  return rowSelection;
+}
+
+void JobTreeView::removeSelectedRequested() {
+  m_notifyee->notifyRemoveRowsRequested(selectedRowLocations());
+}
+
+void JobTreeView::removeRows(std::vector<RowLocation> rowsToRemove) {
+  std::sort(rowsToRemove.begin(), rowsToRemove.end());
+  for (auto rowIt = rowsToRemove.crbegin(); rowIt < rowsToRemove.crend(); ++rowIt)
+    removeRowAt(*rowIt);
+}
+
+std::string JobTreeView::textAt(RowLocation location, int column) const {
+  return std::string();
+}
+
+void JobTreeView::setTextAt(RowLocation location, int column, std::string const &cellText) {
+
+}
+
+void JobTreeView::setRowTextAt(RowLocation const &location,
+                    std::vector<std::string> const &rowText) {
+
+}
+
+std::vector<std::string> JobTreeView::rowTextAt(RowLocation const &location) const {
+  return std::vector<std::string>();
+}
+
 
 void JobTreeView::setHeaderLabels(QStringList const &columnHeadings) {
   m_model.setHorizontalHeaderLabels(columnHeadings);
@@ -21,7 +62,7 @@ void JobTreeView::setHeaderLabels(QStringList const &columnHeadings) {
     resizeColumnToContents(i);
 }
 
-void JobTreeView::subscribe(IJobTreeViewSubscriber &subscriber) {
+void JobTreeView::subscribe(JobTreeViewSubscriber &subscriber) {
   m_notifyee = &subscriber;
 }
 
@@ -48,7 +89,7 @@ RowLocation JobTreeView::rowLocationAt(QModelIndex const &index) const {
     auto currentIndex = index;
     while (currentIndex.isValid()) {
       pathComponents.insert(pathComponents.begin(), currentIndex.row());
-      currentIndex = index.parent();
+      currentIndex = currentIndex.parent();
     }
     return RowLocation(pathComponents);
   } else {
@@ -125,6 +166,8 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
       auto below = findOrMakeCellBelow(currentIndex());
       editAt(expanded(below));
     }
+  } else if (event->key() == Qt::Key_Delete) {
+    removeSelectedRequested();
   } else {
     QTreeView::keyPressEvent(event);
   }

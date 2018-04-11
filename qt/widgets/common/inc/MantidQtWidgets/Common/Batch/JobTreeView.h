@@ -11,14 +11,13 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-class IJobTreeViewSubscriber {
+class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSubscriber {
 public:
-  virtual void notifyCellChanged(RowLocation itemIndex, int column,
-                                 std::string newValue) = 0;
-  virtual void notifyRowInserted(RowLocation itemIndex) = 0;
-  virtual void notifyRowRemoved(RowLocation itemIndex) = 0;
-  virtual void
-  notifySelectedRowsChanged(std::vector<RowLocation> const &selection) = 0;
+  virtual void notifyCellChanged(RowLocation const& itemIndex, int column,
+                                 std::string const& newValue) = 0;
+  virtual void notifyRowInserted(RowLocation const& itemIndex) = 0;
+  virtual void notifyRemoveRowsRequested(std::vector<RowLocation> const& locationsOfRowsToRemove) = 0;
+  virtual ~JobTreeViewSubscriber() = default;
 };
 
 class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView {
@@ -27,7 +26,7 @@ public:
   // JobTreeView(QWidget *parent = nullptr);
   JobTreeView(QStringList const &columnHeadings, QWidget *parent = nullptr);
 
-  void subscribe(IJobTreeViewSubscriber &subscriber);
+  void subscribe(JobTreeViewSubscriber &subscriber);
 
   void insertChildRowOf(RowLocation const &parent, int beforeRow,
                         std::vector<std::string> const &rowText);
@@ -37,20 +36,26 @@ public:
                         std::vector<std::string> const &rowText);
 
   void removeRowAt(RowLocation const &location);
+  void removeRows(std::vector<RowLocation> rowsToRemove);
+
+  template <typename InputIterator>
+  void removeRows(InputIterator begin, InputIterator end);
 
   std::vector<std::string> rowTextAt(RowLocation const &location) const;
   void setRowTextAt(RowLocation const &location,
                     std::vector<std::string> const &rowText);
 
-  std::string textAt(RowLocation location, int column);
+  std::string textAt(RowLocation location, int column) const;
   void setTextAt(RowLocation location, int column, std::string const &cellText);
 
   QModelIndex moveCursor(CursorAction cursorAction,
                          Qt::KeyboardModifiers modifiers) override;
+  std::vector<RowLocation> selectedRowLocations() const;
 
 protected:
   void keyPressEvent(QKeyEvent *event) override;
   void setHeaderLabels(QStringList const &columnHeadings);
+  void removeSelectedRequested();
 
 private:
   void make(QModelIndex const &){};
@@ -75,9 +80,14 @@ private:
   QtStandardItemMutableTreeAdapter adaptedModel();
   QtStandardItemTreeAdapter const adaptedModel() const;
 
-  IJobTreeViewSubscriber *m_notifyee;
+  JobTreeViewSubscriber *m_notifyee;
   QStandardItemModel m_model;
 };
+
+template <typename InputIterator>
+void JobTreeView::removeRows(InputIterator begin, InputIterator end) {
+  removeRows(std::vector<RowLocation>(begin, end));
+}
 }
 }
 }

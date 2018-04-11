@@ -1,6 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_ROWLOCATION_H_
 #define MANTIDQTMANTIDWIDGETS_ROWLOCATION_H_
 #include <vector>
+#include <ostream>
 #include "MantidQtWidgets/Common/DllOption.h"
 namespace MantidQt {
 namespace MantidWidgets {
@@ -18,6 +19,14 @@ public:
 private:
   RowPath m_path;
 };
+
+std::ostream& EXPORT_OPT_MANTIDQT_COMMON operator<<(std::ostream& os, RowLocation const& location);
+bool EXPORT_OPT_MANTIDQT_COMMON operator==(RowLocation const& lhs, RowLocation const& rhs);
+bool EXPORT_OPT_MANTIDQT_COMMON operator!=(RowLocation const& lhs, RowLocation const& rhs);
+bool EXPORT_OPT_MANTIDQT_COMMON operator<(RowLocation const& lhs, RowLocation const& rhs);
+bool EXPORT_OPT_MANTIDQT_COMMON operator<=(RowLocation const& lhs, RowLocation const& rhs);
+bool EXPORT_OPT_MANTIDQT_COMMON operator>(RowLocation const& lhs, RowLocation const& rhs);
+bool EXPORT_OPT_MANTIDQT_COMMON operator>=(RowLocation const& lhs, RowLocation const& rhs);
 }
 }
 }
