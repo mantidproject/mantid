@@ -1,6 +1,7 @@
 import argparse
 import os
 import pip
+import shutil
 import site
 import subprocess
 import urllib2
@@ -53,8 +54,12 @@ def install_package(package_name):
     pip.main(["install", package_name])
 
 
-def install_gsasii(install_directory, revision_number):
+def install_gsasii(install_directory, revision_number, force_overwrite):
     gsas_home_dir = os.path.join(install_directory, GSAS_HOME_DIR_NAME)
+
+    if force_overwrite and os.path.exists(gsas_home_dir):
+        print("Removing {}".format(gsas_home_dir))
+        shutil.rmtree(gsas_home_dir)
 
     if not os.path.exists(gsas_home_dir):
         # This is the first time installing GSAS-II, so we have to make a home directory and download the SVN kit
@@ -107,6 +112,13 @@ if __name__ == "__main__":
                         help="Build server mode. Install GSAS-II in Python user site package directory "
                              "and don't wait for prompt before exiting")
 
+    parser.add_argument("-f", "--force-overwrite",
+                        action="store_true",
+                        default=False,
+                        dest="force_overwrite",
+                        help="Force overwrite mode. If a GSAS-II installation is found at the requested "
+                             "directory, remove it and perform a fresh install")
+
     args = parser.parse_args()
 
     if args.build_server_mode:
@@ -114,4 +126,4 @@ if __name__ == "__main__":
     else:
         install_dir = args.install_dir
 
-    install_gsasii(install_directory=install_dir, revision_number=args.version)
+    install_gsasii(install_directory=install_dir, revision_number=args.version, force_overwrite=args.force_overwrite)
