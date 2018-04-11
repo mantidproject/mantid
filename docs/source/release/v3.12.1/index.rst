@@ -31,18 +31,48 @@ Changes in this version
 
 * `22205 <https://github.com/mantidproject/mantid/pull/22205>`_ Fix header for TOPAS files
 * `22213 <https://github.com/mantidproject/mantid/pull/22215>`_ Fix bug when using StartLiveData through Python API
+* `22195 <https://github.com/mantidproject/mantid/pull/22195>`_ CrystalField Multi-spectrum resolution model segfault
+* `22194 <https://github.com/mantidproject/mantid/pull/22194>`_ SofQW3 segfault
+* `22190 <https://github.com/mantidproject/mantid/pull/22190>`_ OSX Muon Interface (No need for data)
+* `22182 <https://github.com/mantidproject/mantid/pull/22182>`_ Update mslice to fix issue with matplotlib < 1.5
+* `22200 <https://github.com/mantidproject/mantid/pull/22200>`_ Fix unreliable tests: Disable ClearCache doc test
+* `22244 <https://github.com/mantidproject/mantid/pull/22244>`_ MR: correct dQ
+* `22178 <https://github.com/mantidproject/mantid/pull/22178>`_ Muon Analysis bug that disabled fit menu
+* `22177 <https://github.com/mantidproject/mantid/pull/22177>`_ Muon analysis and results table
+* `21655 <https://github.com/mantidproject/mantid/pull/21655>`_ Remove dependence of Kafka Live Listener on ISIS specific event data
+* `22226 <https://github.com/mantidproject/mantid/pull/22226>`_ Error when deleting a workspace group in MantidPlot
 
 Summary of impact
 -----------------
 
-+-------+----------------------------------------------------+-----------------+--------------+
-| Issue | Impact                                             | Solution        | Side Effect  |
-|       |                                                    |                 | Probability  |
-+=======+====================================================+=================+==============+
-| 22205 | Fix header for TOPAS files                         |                 | medium       |
-+-------+----------------------------------------------------+-----------------+--------------+
-| 22215 | Fix bug when using StartLiveData through Python API| Extra else check| medium       |
-+-------+----------------------------------------------------+-----------------+--------------+
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| Issue | Impact                                                                    | Solution                  | Side Effect  |
+|       |                                                                           |                           | Probability  |
++=======+===========================================================================+===========================+==============+
+| 22205 | Fix header for TOPAS files                                                | Check for header type     | **low**      |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22215 | Fix bug when using StartLiveData through Python API                       | Remove kwarg if None      | **medium**   |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22195 | CrystalField Multi-spectrum resolution model segfault                     | Check sizes               | **low**      |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22194 | SofQW3 segfault no longer occurs                                          | Indexing change           | **medium**   |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22190 | OSX Muon Interface data requirments fixed                                 | GUI changes               | **low**      |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22182 | Update mslice to fix issue with matplotlib < 1.5                          | Update sha1               | **medium**   |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22200 | Fix unreliable tests: Disable ClearCache doc test                         | Clear cache before build  | **low**      |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22244 | Fix dQ calculation in MR Reduction                                        | Now uses radians          | **low**      |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22178 | Fix menu is Muon Analysis not disabled                                    | Change enabled conditions | **medium**   |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22177 | Muon analysis results table generated correctly                           | Additional checks         | **medium**   |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 21655 | Remove dependence of Kafka Live Listener on ISIS specific event data      | Remove dependence         | **low**      |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
+| 22226 | Error when deleting a workspace group in MantidPlot                       | Better thread safety      | **low**      |
++-------+---------------------------------------------------------------------------+---------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org
 
