@@ -104,8 +104,9 @@ public:
     double xBoundaries[11] = {0.0,  1.0,  3.0,  5.0,  6.0, 7.0,
                               10.0, 13.0, 16.0, 17.0, 17.5};
     const int numSpectra(2);
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
-        numSpectra, 11, xBoundaries);
+    Workspace2D_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(
+            numSpectra, 11, xBoundaries);
     const size_t numBins = testWS->blocksize();
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
 
@@ -145,8 +146,9 @@ public:
     double xBoundaries[numBins] = {0.0,  1.0,  3.0,  5.0,  6.0, 7.0,
                                    10.0, 13.0, 16.0, 17.0, 17.5};
     constexpr int numSpectra{2};
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
-        numSpectra, numBins, xBoundaries, true);
+    Workspace2D_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(
+            numSpectra, numBins, xBoundaries, true);
     TS_ASSERT(testWS->isHistogramData())
     double xErrors[numBins - 1] = {0.1, 0.2, 0.3, 0.4, 0.5,
                                    0.6, 0.7, 0.8, 0.9, 1.0};

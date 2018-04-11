@@ -69,39 +69,39 @@ public:
     TS_ASSERT(m_testee.isInitialized());
   }
 
-  void testWSWithoutDxValues(){
-      // Workspaces have 5 spectra must be point data
-      MatrixWorkspace_sptr ws0 = create2DWorkspace123(5, 3); // 3 points
-      MatrixWorkspace_sptr ws1 = create2DWorkspace154(5, 2); // 2 points
-      ws0->getAxis(0)->setUnit("TOF");
-      ws1->getAxis(0)->setUnit("TOF");
-      storeWS("ws_0", ws0);
-      storeWS("ws_1", ws1);
-      m_testee.setProperty("InputWorkspaces",
-                           std::vector<std::string>{"ws_0", "ws_1"});
-      m_testee.setProperty("OutputWorkspace", "out");
-      TS_ASSERT_THROWS_NOTHING(m_testee.execute());
-      TS_ASSERT(m_testee.isExecuted());
+  void testWSWithoutDxValues() {
+    // Workspaces have 5 spectra must be point data
+    MatrixWorkspace_sptr ws0 = create2DWorkspace123(5, 3); // 3 points
+    MatrixWorkspace_sptr ws1 = create2DWorkspace154(5, 2); // 2 points
+    ws0->getAxis(0)->setUnit("TOF");
+    ws1->getAxis(0)->setUnit("TOF");
+    storeWS("ws_0", ws0);
+    storeWS("ws_1", ws1);
+    m_testee.setProperty("InputWorkspaces",
+                         std::vector<std::string>{"ws_0", "ws_1"});
+    m_testee.setProperty("OutputWorkspace", "out");
+    TS_ASSERT_THROWS_NOTHING(m_testee.execute());
+    TS_ASSERT(m_testee.isExecuted());
 
-      MatrixWorkspace_sptr out =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    MatrixWorkspace_sptr out =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
-      TS_ASSERT(out);
-      TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
-      TS_ASSERT_EQUALS(out->blocksize(), 5);
-      TS_ASSERT(!out->isHistogramData());
-      TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
-      auto spectrum = out->y(0);
-      auto error = out->e(0);
-      auto xaxis = out->x(0);
-      std::vector<double> x{1., 2., 3., 1., 2.};
-      std::vector<double> y{2., 2., 2., 5., 5.};
-      std::vector<double> e{3., 3., 3., 4., 4.};
-      for (size_t j = 0; j < 5; ++j) {
-        TS_ASSERT_EQUALS(xaxis[j], x[j]);
-        TS_ASSERT_EQUALS(spectrum[j], y[j]);
-        TS_ASSERT_EQUALS(error[j], e[j]);
-      }
+    TS_ASSERT(out);
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(out->blocksize(), 5);
+    TS_ASSERT(!out->isHistogramData());
+    TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
+    auto spectrum = out->y(0);
+    auto error = out->e(0);
+    auto xaxis = out->x(0);
+    std::vector<double> x{1., 2., 3., 1., 2.};
+    std::vector<double> y{2., 2., 2., 5., 5.};
+    std::vector<double> e{3., 3., 3., 4., 4.};
+    for (size_t j = 0; j < 5; ++j) {
+      TS_ASSERT_EQUALS(xaxis[j], x[j]);
+      TS_ASSERT_EQUALS(spectrum[j], y[j]);
+      TS_ASSERT_EQUALS(error[j], e[j]);
+    }
   }
 
   void testHappyCase() {

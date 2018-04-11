@@ -301,17 +301,17 @@ public:
 
   MergeRunsTest() {
     AnalysisDataService::Instance().add(
-        "in1", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
+        "in1", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1.));
     AnalysisDataService::Instance().add(
-        "in2", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
+        "in2", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1.));
     AnalysisDataService::Instance().add(
-        "in3", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
+        "in3", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1.));
     AnalysisDataService::Instance().add(
-        "in4", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 20));
+        "in4", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 20.));
     AnalysisDataService::Instance().add(
-        "in5", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 3.5, 2));
+        "in5", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 3.5, 2.));
     AnalysisDataService::Instance().add(
-        "in6", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 3, 2, 2));
+        "in6", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 3, 2., 2.));
   }
 
   void checkOutput(std::string wsname) {

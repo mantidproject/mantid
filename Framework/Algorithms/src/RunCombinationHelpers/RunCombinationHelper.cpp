@@ -54,9 +54,11 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
   m_isHistogramData = ref->isHistogramData();
   m_isScanning = ref->detectorInfo().isScanning();
   m_instrumentName = ref->getInstrument()->getName();
-  m_hasDx.reserve(m_numberSpectra);
-  for (unsigned int i = 0; i < m_numberSpectra; ++i)
-    m_hasDx.push_back(ref->hasDx(i));
+  if (m_numberSpectra) {
+    m_hasDx.reserve(m_numberSpectra);
+    for (unsigned int i = 0; i < m_numberSpectra; ++i)
+      m_hasDx.push_back(ref->hasDx(i));
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -68,20 +70,9 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
 std::string
 RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
                                          bool checkNumberHistograms) {
-  std::string errors = "";
+  std::string errors;
   if (ws->getNumberHistograms() != m_numberSpectra && checkNumberHistograms)
     errors += "different number of histograms; ";
-  else {
-    for (unsigned int i = 0; i < m_numberSpectra; ++i) {
-      if (m_hasDx[i] != ws->hasDx(i)) {
-        std::stringstream istr;
-        istr << i;
-        errors += "corresponding spectrum " + istr.str() +
-                  " must have either Dx values or not; ";
-        continue;
-      }
-    }
-  }
   if (ws->getAxis(0)->unit()->unitID() != m_xUnit)
     errors += "different X units; ";
   if (ws->getAxis(1)->unit()->unitID() != m_spectrumAxisUnit)
@@ -97,6 +88,16 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
               "detectors; ";
   if (ws->getInstrument()->getName() != m_instrumentName)
     errors += "different instrument names; ";
+  if (ws->getNumberHistograms() == m_numberSpectra) {
+    if (!m_hasDx.empty()) {
+      for (unsigned int i = 0; i < m_numberSpectra; ++i) {
+        if (m_hasDx[i] != ws->hasDx(i)) {
+          errors += "spectra must have either Dx values or not; ";
+          break;
+        }
+      }
+    }
+  }
   return errors;
 }
 

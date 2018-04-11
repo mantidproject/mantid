@@ -166,7 +166,7 @@ create2DWorkspaceBinned(int nhist, int numVals, double x0 = 0.0,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceBinned(int nhist, const int numBoundaries,
+create2DWorkspaceNonUniformlyBinned(int nhist, const int numBoundaries,
                         const double xBoundaries[], bool hasDx = false);
 
 struct returnOne {

@@ -133,7 +133,7 @@ public:
     ws2->setSharedDx(1, dx);
     TS_ASSERT_EQUALS(
         m_testee.checkCompatibility(ws2),
-        "corresponding spectra must have either Dx values or not; ");
+        "spectra must have either Dx values or not; ");
   }
 
   void test_scanning_workspaces_throw_no_error() {

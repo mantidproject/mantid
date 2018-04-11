@@ -323,12 +323,9 @@ Workspace2D_sptr create2DWorkspaceBinned(int nhist, int numVals, double x0,
   Counts y(numVals, 2);
   CountStandardDeviations e(numVals, M_SQRT2);
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(nhist, numVals + 1, numVals);
-  for (int i = 0; i < nhist; i++) {
+  retVal->initialize(nhist, createHisto(true, y, e));
+  for (int i = 0; i < nhist; i++)
     retVal->setBinEdges(i, x);
-    retVal->setCounts(i, y);
-    retVal->setCountStandardDeviations(i, e);
-  }
   return retVal;
 }
 
@@ -338,7 +335,7 @@ Workspace2D_sptr create2DWorkspaceBinned(int nhist, int numVals, double x0,
  * If hasDx is true, all spectra will have dx values, starting from 0.1 and
  * increased by 0.1 for each bin.
  */
-Workspace2D_sptr create2DWorkspaceBinned(int nhist, const int numBoundaries,
+Workspace2D_sptr create2DWorkspaceNonUniformlyBinned(int nhist, const int numBoundaries,
                                          const double xBoundaries[],
                                          bool hasDx) {
   BinEdges x(xBoundaries, xBoundaries + numBoundaries);
