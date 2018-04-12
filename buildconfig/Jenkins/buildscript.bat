@@ -158,10 +158,14 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Remove the user properties file just in case anything polluted it
+:: Remove any user configuration and create a blank user properties file
+:: This prevents race conditions when creating the user config directory
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-
+set CONFIGDIR=%APPDATA%\mantidproject\mantid
+rmdir /S /Q %CONFIGDIR%
+mkdir %CONFIGDIR%
+call cmake.exe -E touch %USERPROPS%
 call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
