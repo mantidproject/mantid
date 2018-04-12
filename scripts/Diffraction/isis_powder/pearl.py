@@ -30,7 +30,7 @@ class Pearl(AbstractInst):
         focused_run = self._focus(run_number_string=self._inst_settings.run_number,
                                   do_absorb_corrections=self._inst_settings.absorb_corrections,
                                   do_van_normalisation=self._inst_settings.van_norm)
-        self._inst_settings = self._default_inst_settings
+        self._inst_settings = copy.deepcopy(self._default_inst_settings)
         return focused_run
 
     def create_vanadium(self, **kwargs):
@@ -45,7 +45,7 @@ class Pearl(AbstractInst):
         else:
             self._run_create_vanadium()
 
-        self._inst_settings = self._default_inst_settings
+        self._inst_settings = copy.deepcopy(self._default_inst_settings)
 
     def create_cal(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
@@ -71,7 +71,7 @@ class Pearl(AbstractInst):
                                                                 rebin_2_params=self._inst_settings.cal_rebin_2,
                                                                 cross_correlate_params=cross_correlate_params,
                                                                 get_det_offset_params=get_detector_offsets_params)
-        self._inst_settings = self._default_inst_settings
+        self._inst_settings = copy.deepcopy(self._default_inst_settings)
         return calibration
 
     def _run_create_vanadium(self):
