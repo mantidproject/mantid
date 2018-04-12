@@ -10,6 +10,10 @@
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -271,28 +275,32 @@ void ConjoinXRuns::fillHistory() {
 * @param wsIndex : the workspace index
 */
 void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
-  std::vector<double> spectrum;
-  std::vector<double> errors;
-  std::vector<double> axis;
+  std::vector<double> spectrum, errors, axis, x, xerrors;
   spectrum.reserve(m_outWS->blocksize());
   errors.reserve(m_outWS->blocksize());
   axis.reserve(m_outWS->blocksize());
   size_t index = static_cast<size_t>(wsIndex);
-
   for (const auto &input : m_inputWS) {
-    auto y = input->y(index).rawData();
-    auto e = input->e(index).rawData();
-    std::vector<double> x;
+    HistogramData::HistogramY y = input->y(index);
+    spectrum.insert(spectrum.end(), y.begin(), y.end());
+    auto e = input->e(index);
+    errors.insert(errors.end(), e.begin(), e.end());
     if (m_logEntry.empty()) {
-      x = input->x(index).rawData();
+      auto x = input->x(index);
+      axis.insert(axis.end(), x.begin(), x.end());
     } else {
       x = m_axisCache[input->getName()];
+      axis.insert(axis.end(), x.begin(), x.end());
     }
-    spectrum.insert(spectrum.end(), y.begin(), y.end());
-    errors.insert(errors.end(), e.begin(), e.end());
-    axis.insert(axis.end(), x.begin(), x.end());
+    if (input->hasDx(index)) {
+      auto dx = input->dx(index);
+      xerrors.insert(xerrors.end(), dx.begin(), dx.end());
+    }
   }
-
+  if (!xerrors.empty()) {
+    m_outWS->setPointStandardDeviations(index, m_outWS->blocksize());
+    m_outWS->mutableDx(index) = xerrors;
+  }
   m_outWS->mutableY(index) = spectrum;
   m_outWS->mutableE(index) = errors;
   m_outWS->mutableX(index) = axis;

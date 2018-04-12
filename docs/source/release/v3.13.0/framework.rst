@@ -31,6 +31,7 @@ Improved
 - :ref:`ConvertToPointData <algm-ConvertToPointData>` and :ref:`ConvertToHistogram <algm-ConvertToHistogram>` now propagate the Dx errors to the output.
 - The algorithm :ref:`algm-Stitch1D` can now receive point data as input workspaces and does apply a full overlap while keeping corresponding Dx values.
 - The algorithm :ref:`CreateWorkspace <algm-CreateWorkspace>` can now optionally receive the Dx errors.
+- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` joins Dx errors if present
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. Furthermore, Dx values will be considered if present. The documentation needed to be corrected.
 
 Bug fixes
