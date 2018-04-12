@@ -54,7 +54,6 @@ Output:
 .. testoutput:: ExExtractMask
 
     Masked Detectors
-    Masked Detectors
     n ws    ws2
     0 True  True
     1 False False
