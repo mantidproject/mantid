@@ -158,7 +158,7 @@ void QDataProcessorWidget::createTable() {
   connect(m_treeViewSignals, SIGNAL(removeRowsRequested(std::vector<Batch::RowLocation> const &)),
           this, SLOT(onRemoveRowsRequested(std::vector<Batch::RowLocation> const &)));
 
-  m_treeView->appendChildRowOf(Batch::RowLocation({}));
+  m_treeView->appendChildRowOf(Batch::RowLocation());
   ui.layoutButtonsTable->insertWidget(1, m_treeView);
 }
 

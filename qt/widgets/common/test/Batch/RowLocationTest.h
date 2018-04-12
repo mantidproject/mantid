@@ -18,10 +18,14 @@ public:
   static RowLocationTest *createSuite() { return new RowLocationTest(); }
   static void destroySuite(RowLocationTest *suite) { delete suite; }
 
+  void testDefaultIsRoot() {
+    TS_ASSERT(RowLocation().isRoot());
+  }
+
   void testEqualityIsBasedOnPaths() {
     TS_ASSERT(RowLocation({0, 1, 2}) == RowLocation({0, 1, 2}));
-    TS_ASSERT(RowLocation({}) == RowLocation({}));
-    TS_ASSERT(!(RowLocation({}) == RowLocation({1})));
+    TS_ASSERT(RowLocation() == RowLocation());
+    TS_ASSERT(!(RowLocation() == RowLocation({1})));
     TS_ASSERT(!(RowLocation({1, 2}) == RowLocation({1})));
 
     TS_ASSERT(RowLocation({0, 0, 2}) != RowLocation({0, 1, 2}));
@@ -30,7 +34,7 @@ public:
   }
 
   void testOrderingIsLexographicalBasedOnPath() {
-    TS_ASSERT(RowLocation({}) < RowLocation({0}));
+    TS_ASSERT(RowLocation() < RowLocation({0}));
     TS_ASSERT(RowLocation({0}) < RowLocation({1}));
     TS_ASSERT(RowLocation({0}) < RowLocation({0, 1}));
     TS_ASSERT(RowLocation({0, 1}) < RowLocation({1, 0}));
@@ -41,7 +45,7 @@ public:
   void testOrderingIsLexographicalBasedOnPathSort() {
     // clang-format off
     auto items = std::vector<RowLocation>({
-      RowLocation({}),
+      RowLocation(),
       RowLocation({1, 0}),
       RowLocation({1, 0, 2}),
       RowLocation({2, 0}),
@@ -52,7 +56,7 @@ public:
     });
 
     auto expected = std::vector<RowLocation>({
-      RowLocation({}),
+      RowLocation(),
       RowLocation({1, 0}),
       RowLocation({1, 0, 2}),
       RowLocation({1, 2}),

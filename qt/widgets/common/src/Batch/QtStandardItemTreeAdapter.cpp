@@ -84,6 +84,10 @@ QtStandardItemMutableTreeAdapter::insertEmptyChildRow(QModelIndex const &parent,
   return insertChildRow(parent, row, emptyRow());
 }
 
+void QtStandardItemMutableTreeAdapter::setTextAtCell(QModelIndex index, std::string const& newText) {
+  modelItemFromIndex(index)->setText(QString::fromStdString(newText));
+}
+
 QList<QStandardItem *> QtStandardItemTreeAdapter::emptyRow() const {
   auto cells = QList<QStandardItem *>();
   for (auto i = 0; i < model().columnCount(); ++i)
@@ -105,11 +109,14 @@ QtStandardItemTreeAdapter::rowTextFromRow(QModelIndex firstCellIndex) const {
   rowText.reserve(model().columnCount());
 
   for (auto i = 0; i < model().columnCount(); i++) {
-    auto *cell =
-        modelItemFromIndex(firstCellIndex.sibling(firstCellIndex.row(), i));
-    rowText.emplace_back(cell->text().toStdString());
+    auto cellIndex = firstCellIndex.sibling(firstCellIndex.row(), i);
+    rowText.emplace_back(textFromCell(cellIndex));
   }
   return rowText;
+}
+
+std::string QtStandardItemTreeAdapter::textFromCell(QModelIndex index) const {
+  return modelItemFromIndex(index)->text().toStdString();
 }
 
 QStandardItemModel const &QtStandardItemTreeAdapter::model() const {

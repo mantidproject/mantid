@@ -38,19 +38,21 @@ void JobTreeView::removeRows(std::vector<RowLocation> rowsToRemove) {
 }
 
 std::string JobTreeView::textAt(RowLocation location, int column) const {
-  return std::string();
+  auto const cellIndex = modelIndexAt(location, column);
+  return adaptedModel().textFromCell(cellIndex);
 }
 
-void JobTreeView::setTextAt(RowLocation location, int column, std::string const &cellText) {
-
+void JobTreeView::setTextAt(RowLocation location, int column,
+                            std::string const &cellText) {
+  auto const cellIndex = modelIndexAt(location, column);
+  adaptedModel().setTextAtCell(cellIndex, cellText);
 }
 
 void JobTreeView::setRowTextAt(RowLocation const &location,
-                    std::vector<std::string> const &rowText) {
+                               std::vector<std::string> const &rowText) {}
 
-}
-
-std::vector<std::string> JobTreeView::rowTextAt(RowLocation const &location) const {
+std::vector<std::string>
+JobTreeView::rowTextAt(RowLocation const &location) const {
   return std::vector<std::string>();
 }
 
@@ -93,7 +95,7 @@ RowLocation JobTreeView::rowLocationAt(QModelIndex const &index) const {
     }
     return RowLocation(pathComponents);
   } else {
-    return RowLocation({});
+    return RowLocation();
   }
 }
 

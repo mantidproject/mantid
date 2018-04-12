@@ -6,6 +6,7 @@ namespace Batch {
 JobTreeViewSignalAdapter::JobTreeViewSignalAdapter(JobTreeView &view,
                                                    QObject *parent)
     : QObject(parent) {
+  qRegisterMetaType<RowLocation>("MantidQt::MantidWidgets::Batch::RowLocation");
   qRegisterMetaType<std::vector<RowLocation>>("std::vector<MantidQt::MantidWidgets::Batch::RowLocation>");
   view.subscribe(*this);
 }

@@ -17,6 +17,8 @@ public:
 
   QList<QStandardItem *>
   rowFromRowText(std::vector<std::string> const &rowText) const;
+
+  std::string textFromCell(QModelIndex index) const;
   std::vector<std::string> rowTextFromRow(QModelIndex firstCellIndex) const;
 
   QList<QStandardItem *> emptyRow() const;
@@ -43,6 +45,7 @@ public:
   QModelIndex insertEmptyChildRow(QModelIndex const &parent, int column);
   QStandardItem *modelItemFromIndex(QModelIndex const &index);
 
+  void setTextAtCell(QModelIndex index, std::string const& newText);
   void removeRowAt(QModelIndex const &index);
 
 private:
