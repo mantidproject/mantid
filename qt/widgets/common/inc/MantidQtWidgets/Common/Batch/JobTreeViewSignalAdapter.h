@@ -5,7 +5,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
-class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSignalAdapter : public QObject, public JobTreeViewSubscriber {
+class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSignalAdapter
+    : public QObject,
+      public JobTreeViewSubscriber {
   Q_OBJECT
 public:
   JobTreeViewSignalAdapter(JobTreeView &view, QObject *parent = nullptr);
@@ -15,12 +17,20 @@ public:
   void notifyRowInserted(RowLocation const &itemIndex) override;
   void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) override;
+  void notifyCopyRowsRequested(
+      std::vector<RowLocation> const &locationsOfRowsToCopy) override;
 signals:
-  void cellChanged(RowLocation const &itemIndex, int column,
-                   std::string newValue);
-  void rowInserted(RowLocation const &itemIndex);
+  void cellChanged(
+      MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
+      int column, std::string newValue);
+  void rowInserted(
+      MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex);
   void removeRowsRequested(
-      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locationsOfRowsToRemove);
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
+          locationsOfRowsToRemove);
+  void copyRowsRequested(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
+          locationsOfRowsToRemove);
 };
 }
 }

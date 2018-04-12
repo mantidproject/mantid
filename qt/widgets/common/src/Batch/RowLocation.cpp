@@ -8,6 +8,7 @@ RowLocation::RowLocation(RowPath path) : m_path(std::move(path)) {}
 RowPath const &RowLocation::path() const { return m_path; }
 int RowLocation::rowRelativeToParent() const { return m_path.back(); }
 bool RowLocation::isRoot() const { return m_path.empty(); }
+std::size_t RowLocation::depth() const { return m_path.size(); }
 
 std::ostream &operator<<(std::ostream &os, RowLocation const &location) {
   auto &path = location.path();
@@ -33,18 +34,17 @@ bool operator<(RowLocation const &lhs, RowLocation const &rhs) {
   return boost::algorithm::lexicographical_compare(lhsPath, rhsPath);
 }
 
-bool operator<=(RowLocation const& lhs, RowLocation const& rhs) {
+bool operator<=(RowLocation const &lhs, RowLocation const &rhs) {
   return lhs < rhs || lhs == rhs;
 }
 
-bool operator>=(RowLocation const& lhs, RowLocation const& rhs) {
+bool operator>=(RowLocation const &lhs, RowLocation const &rhs) {
   return !(lhs < rhs);
 }
 
-bool operator>(RowLocation const& lhs, RowLocation const& rhs) {
+bool operator>(RowLocation const &lhs, RowLocation const &rhs) {
   return !(lhs <= rhs);
 }
-
 }
 }
 }

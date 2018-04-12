@@ -25,6 +25,11 @@ void JobTreeViewSignalAdapter::notifyRemoveRowsRequested(
     std::vector<RowLocation> const &locationsOfRowsToRemove) {
   emit removeRowsRequested(locationsOfRowsToRemove);
 }
+
+void JobTreeViewSignalAdapter::notifyCopyRowsRequested(
+    std::vector<RowLocation> const &locationsOfRowsToCopy) {
+  emit copyRowsRequested(locationsOfRowsToCopy);
+}
 }
 }
 }

@@ -1516,6 +1516,7 @@ RowLocation(std::vector<int>);
 const std::vector<int>& path() const;
 int rowRelativeToParent() const;
 bool isRoot() const;
+unsigned int depth() const;
 };
 
 class JobTreeViewSubscriber {
@@ -1528,6 +1529,8 @@ public:
   virtual void notifyRowInserted(const RowLocation& itemIndex) = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
+  virtual void notifyCopyRowsRequested(
+    const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToCopy) = 0;
 };
 
 class JobTreeView : public QTreeView
@@ -1565,11 +1568,15 @@ public:
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
+  virtual void notifyCopyRowsRequested(
+      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToCopy);
 signals:
   void cellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
                    std::string newValue);
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void removeRowsRequested(
+      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
+  void copyRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
 
 };

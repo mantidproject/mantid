@@ -13,10 +13,13 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSubscriber {
 public:
-  virtual void notifyCellChanged(RowLocation const& itemIndex, int column,
-                                 std::string const& newValue) = 0;
-  virtual void notifyRowInserted(RowLocation const& itemIndex) = 0;
-  virtual void notifyRemoveRowsRequested(std::vector<RowLocation> const& locationsOfRowsToRemove) = 0;
+  virtual void notifyCellChanged(RowLocation const &itemIndex, int column,
+                                 std::string const &newValue) = 0;
+  virtual void notifyRowInserted(RowLocation const &itemIndex) = 0;
+  virtual void notifyRemoveRowsRequested(
+      std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
+  virtual void notifyCopyRowsRequested(
+      std::vector<RowLocation> const &locationsOfRowsToCopy) = 0;
   virtual ~JobTreeViewSubscriber() = default;
 };
 
@@ -52,13 +55,21 @@ public:
                          Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const;
 
+  using QTreeView::edit;
 protected:
   void keyPressEvent(QKeyEvent *event) override;
+  bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
   void setHeaderLabels(QStringList const &columnHeadings);
   void removeSelectedRequested();
+  void copySelectedRequested();
+
+protected slots:
+  void commitData(QWidget *) override;
 
 private:
   void make(QModelIndex const &){};
+  void appendAndEditAtChildRow();
+  void appendAndEditAtRowBelow();
 
   QModelIndex expanded(QModelIndex const &index);
   QModelIndex editAt(QModelIndex const &index);
@@ -82,6 +93,7 @@ private:
 
   JobTreeViewSubscriber *m_notifyee;
   QStandardItemModel m_model;
+  QModelIndex m_lastEdited;
 };
 
 template <typename InputIterator>

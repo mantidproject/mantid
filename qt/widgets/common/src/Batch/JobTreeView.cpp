@@ -5,6 +5,7 @@
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 #include <algorithm>
+#include <iostream>
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -14,6 +15,23 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings, QWidget *parent)
   setModel(&m_model);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+}
+
+void JobTreeView::commitData(QWidget *editor) {
+  QTreeView::commitData(editor);
+
+  auto location = rowLocationAt(m_lastEdited);
+  auto *const cell = adaptedModel().modelItemFromIndex(m_lastEdited);
+  auto cellText = cell->text().toStdString();
+
+  m_notifyee->notifyCellChanged(rowLocationAt(m_lastEdited),
+                                m_lastEdited.column(), cellText);
+}
+
+bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
+                       QEvent *event) {
+  m_lastEdited = index;
+  return QTreeView::edit(index, trigger, event);
 }
 
 std::vector<RowLocation> JobTreeView::selectedRowLocations() const {
@@ -31,9 +49,14 @@ void JobTreeView::removeSelectedRequested() {
   m_notifyee->notifyRemoveRowsRequested(selectedRowLocations());
 }
 
+void JobTreeView::copySelectedRequested() {
+  m_notifyee->notifyCopyRowsRequested(selectedRowLocations());
+}
+
 void JobTreeView::removeRows(std::vector<RowLocation> rowsToRemove) {
   std::sort(rowsToRemove.begin(), rowsToRemove.end());
-  for (auto rowIt = rowsToRemove.crbegin(); rowIt < rowsToRemove.crend(); ++rowIt)
+  for (auto rowIt = rowsToRemove.crbegin(); rowIt < rowsToRemove.crend();
+       ++rowIt)
     removeRowAt(*rowIt);
 }
 
@@ -55,7 +78,6 @@ std::vector<std::string>
 JobTreeView::rowTextAt(RowLocation const &location) const {
   return std::vector<std::string>();
 }
-
 
 void JobTreeView::setHeaderLabels(QStringList const &columnHeadings) {
   m_model.setHorizontalHeaderLabels(columnHeadings);
@@ -124,9 +146,10 @@ void JobTreeView::appendChildRowOf(RowLocation const &parent,
 }
 
 QModelIndex JobTreeView::editAt(QModelIndex const &index) {
+  auto parentIndex = index.parent();
   clearSelection();
   setCurrentIndex(index);
-  edit(index);
+  QTreeView::edit(index);
   return index;
 }
 
@@ -153,23 +176,40 @@ QtTreeCursorNavigation JobTreeView::navigation() const {
 
 QModelIndex JobTreeView::findOrMakeCellBelow(QModelIndex const &index) {
   if (navigation().isNotLastRowInThisNode(index)) {
-    return moveCursor(QAbstractItemView::MoveDown, Qt::NoModifier);
+    return index.sibling(index.row() + 1, index.column());
   } else {
     return adaptedModel().appendEmptySiblingRow(index);
   }
 }
 
+void JobTreeView::appendAndEditAtChildRow() {
+  auto const child = adaptedModel().appendEmptyChildRow(currentIndex());
+  editAt(expanded(child));
+  m_notifyee->notifyRowInserted(rowLocationAt(child));
+}
+
+void JobTreeView::appendAndEditAtRowBelow() {
+  auto const below = findOrMakeCellBelow(currentIndex());
+  editAt(below);
+  m_notifyee->notifyRowInserted(rowLocationAt(below));
+}
+
+
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Return) {
     event->accept();
     if (event->modifiers() & Qt::ControlModifier)
-      editAt(adaptedModel().appendEmptyChildRow(currentIndex()));
-    else {
-      auto below = findOrMakeCellBelow(currentIndex());
-      editAt(expanded(below));
-    }
+      appendAndEditAtChildRow();
+    else
+      appendAndEditAtRowBelow();
   } else if (event->key() == Qt::Key_Delete) {
+    event->accept();
     removeSelectedRequested();
+  } else if (event->key() == Qt::Key_C) {
+    if (event->modifiers() & Qt::ControlModifier) {
+      event->accept();
+      copySelectedRequested();
+    }
   } else {
     QTreeView::keyPressEvent(event);
   }
