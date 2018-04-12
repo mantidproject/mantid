@@ -10,6 +10,7 @@
 Description
 -----------
 
+
 This algorithm corrects for non-ideal instrument component efficiencies in a polarization analysis experiment by following the procedure and conventions introduced by Wildes [#WILDES]_. In the full polarization analysis case it solves the corrected count rates :math:`\Sigma^{++}`, :math:`\Sigma^{+-}`, :math:`\Sigma^{-+}` and :math:`\Sigma^{--}` from the equation
 
 .. math::
