@@ -221,10 +221,10 @@ private:
   void processOutputs();
 
   /// Write result of peak fit per spectrum to output analysis workspaces
-  void writeFitResult(
-      size_t wi, const std::vector<double> &expected_positions,
-      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
-      bool noevents);
+  void
+  writeFitResult(size_t wi, const std::vector<double> &expected_positions,
+                 boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
+                 bool noevents);
 
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
