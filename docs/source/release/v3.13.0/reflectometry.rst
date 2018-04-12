@@ -34,6 +34,8 @@ Algorithms
 New features
 ############
 
+* Added algorithm CreatePolarizationEfficiencies to calculate polarixation efficiencies as histograms from polynomial coefficients.
+
 
 Improvements
 ############
