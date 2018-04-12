@@ -1267,6 +1267,8 @@ int FitPeaks::estimatePeakParameters(
     // use values from background to locate FWHM
     peakfunction->setCentre(peak_center);
     peakfunction->setHeight(peak_height);
+  } else {
+    g_log.debug() << "Observation result is NOT good but " << result << "\n";
   }
 
   // Estimate FHWM (peak width)
@@ -1536,8 +1538,8 @@ double FitPeaks::fitIndividualPeak(
   } else {
     // fit peak and background
     cost = fitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
-                         fitwindow.first, fitwindow.second, observe_peak_width,
-                         true);
+                         fitwindow.first, fitwindow.second,
+                         expected_peak_center, observe_peak_width, true);
   }
 
   return cost;
@@ -1556,6 +1558,7 @@ double FitPeaks::fitIndividualPeak(
  * @param wsindex
  * @param xmin
  * @param xmax
+ * @param expected_peak_center
  * @param observe_peak_width
  * @param estimate_background
  * @return
@@ -1565,6 +1568,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
                                API::IBackgroundFunction_sptr bkgd_function,
                                API::MatrixWorkspace_sptr dataws, size_t wsindex,
                                double xmin, double xmax,
+                               const double &expected_peak_center,
                                bool observe_peak_width,
                                bool estimate_background) {
 
@@ -1579,8 +1583,11 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
       bkgd_function->setParameter(n, 0);
 
   // Estimate peak profile parameter
-  estimatePeakParameters(dataws, wsindex, peak_window, peak_function,
-                         bkgd_function, observe_peak_width);
+  int result =
+      estimatePeakParameters(dataws, wsindex, peak_window, peak_function,
+                             bkgd_function, observe_peak_width);
+  if (result != GOOD)
+    peak_function->setCentre(expected_peak_center);
 
   // Create the composition function
   CompositeFunction_sptr comp_func =
@@ -1756,9 +1763,9 @@ double FitPeaks::fitFunctionHighBackground(
       createMatrixWorkspace(vec_x, vec_y, vec_e);
 
   // Fit peak with background
-  double cost =
-      fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
-                    vec_x.front(), vec_x.back(), observe_peak_width, false);
+  double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
+                              vec_x.front(), vec_x.back(), expected_peak_center,
+                              observe_peak_width, false);
 
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) +

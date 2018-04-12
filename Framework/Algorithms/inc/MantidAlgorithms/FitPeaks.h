@@ -136,8 +136,9 @@ private:
                        API::IPeakFunction_sptr peak_function,
                        API::IBackgroundFunction_sptr bkgd_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax, bool observe_peak_width,
-                       bool estimate_background);
+                       double xmin, double xmax,
+                       const double &expected_peak_center,
+                       bool observe_peak_width, bool estimate_background);
 
   double fitFunctionMD(API::IFunction_sptr fit_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
