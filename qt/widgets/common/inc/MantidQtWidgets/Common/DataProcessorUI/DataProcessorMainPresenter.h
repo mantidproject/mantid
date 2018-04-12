@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <QSet>
 #include <QString>
@@ -81,6 +82,10 @@ public:
   /// Handle data reduction paused/resumed confirmation
   virtual void confirmReductionPaused(int group) { UNUSED_ARG(group); }
   virtual void confirmReductionResumed(int group) { UNUSED_ARG(group); }
+  virtual void completedGroupReductionSuccessfully(GroupData const &,
+                                                   std::string const &){};
+  virtual void completedRowReductionSuccessfully(GroupData const &,
+                                                 std::string const &){};
 };
 }
 }

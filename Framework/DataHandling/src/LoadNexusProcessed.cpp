@@ -1155,6 +1155,14 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         if (ival != -1)
           peakWS->getPeak(r).setRunNumber(ival);
       }
+    } else if (str == "column_17") {
+      NXInt nxInt = nx_tw.openNXInt(str);
+      nxInt.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        peakWS->getPeak(r).setPeakNumber(ival);
+      }
     } else if (str == "column_15") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();

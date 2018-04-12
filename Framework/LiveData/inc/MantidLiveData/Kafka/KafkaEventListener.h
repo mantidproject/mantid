@@ -1,5 +1,5 @@
-#ifndef MANTID_LIVEDATA_ISISKAFKAEVENTLISTENER_H_
-#define MANTID_LIVEDATA_ISISKAFKAEVENTLISTENER_H_
+#ifndef MANTID_LIVEDATA_KAFKAEVENTLISTENER_H_
+#define MANTID_LIVEDATA_KAFKAEVENTLISTENER_H_
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -10,6 +10,11 @@
 //----------------------------------------------------------------------
 
 namespace Mantid {
+
+namespace API {
+class IAlgorithm;
+}
+
 namespace LiveData {
 class KafkaEventStreamDecoder;
 
@@ -38,8 +43,7 @@ class KafkaEventStreamDecoder;
  */
 class DLLExport KafkaEventListener : public API::LiveListener {
 public:
-  KafkaEventListener();
-  /// Destructor. Should handle termination of any socket connections.
+  KafkaEventListener() = default;
   ~KafkaEventListener() override = default;
 
   //----------------------------------------------------------------------
@@ -61,6 +65,7 @@ public:
   void start(
       Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
+  void setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) override;
 
   //----------------------------------------------------------------------
   // State flags
@@ -71,9 +76,10 @@ public:
 
 private:
   std::unique_ptr<KafkaEventStreamDecoder> m_decoder = nullptr;
+  std::string m_instrumentName;
 };
 
 } // namespace LiveData
 } // namespace Mantid
 
-#endif /*MANTID_LIVEDATA_ISISKAFKAEVENTLISTENER_H_*/
+#endif /*MANTID_LIVEDATA_KAFKAEVENTLISTENER_H_*/

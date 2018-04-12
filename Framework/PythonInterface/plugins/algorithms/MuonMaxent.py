@@ -35,6 +35,9 @@ class MuonMaxent(PythonAlgorithm):
     def category(self):
         return "Muon;Arithmetic\\FFT"
 
+    def seeAlso(self):
+        return [ "PhaseQuad","FFT" ]
+
     def PyInit(self):
         self.declareProperty(
             WorkspaceProperty("InputWorkspace",

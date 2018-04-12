@@ -4,6 +4,7 @@ from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
                                FitType)
+from sans.user_file.settings_tags import (det_fit_range)
 
 
 class StateGuiModelTest(unittest.TestCase):
@@ -129,7 +130,7 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.All)
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Reduction range
+    # Merge range
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_merge_mask_is_false_by_default(self):
         state_gui_model = StateGuiModel({"test": [1]})
@@ -152,6 +153,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model = StateGuiModel({"test": [1]})
         state_gui_model.merge_min = 78.9
         self.assertTrue(state_gui_model.merge_min == 78.9)
+
+    def test_that_merge_range_set_correctly(self):
+        state_gui_model = StateGuiModel({DetectorId.merge_range: [det_fit_range(use_fit=True, start=0.13, stop=0.15)]})
+        self.assertEqual(state_gui_model.merge_min, 0.13)
+        self.assertEqual(state_gui_model.merge_max, 0.15)
+        self.assertTrue(state_gui_model.merge_mask)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reduction dimensionality

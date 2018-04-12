@@ -13,6 +13,9 @@ class USANSSimulation(PythonAlgorithm):
     def category(self):
         return "SANS"
 
+    def seeAlso(self):
+        return [ "USANSReduction" ]
+
     def name(self):
         return "USANSSimulation"
 

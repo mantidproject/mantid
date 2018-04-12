@@ -1,10 +1,12 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGPRESENTER_H_
 
+#include "IEnggDiffGSASFittingObserver.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IEnggDiffGSASFittingPresenter {
+class IEnggDiffGSASFittingPresenter : public IEnggDiffGSASFittingObserver {
 
 public:
   virtual ~IEnggDiffGSASFittingPresenter() = default;
@@ -28,6 +30,13 @@ public:
    * @param notif Type of notification to process.
    */
   virtual void notify(IEnggDiffGSASFittingPresenter::Notification notif) = 0;
+
+  void notifyRefinementSuccessful(const GSASIIRefineFitPeaksOutputProperties &
+                                      refinementResults) override = 0;
+
+  void notifyRefinementFailed(const std::string &failureMessage) override = 0;
+
+  void notifyRefinementCancelled() override = 0;
 };
 
 } // namespace CustomInterfaces

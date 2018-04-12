@@ -274,6 +274,7 @@ void PredictPeaks::exec() {
     HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
 
     size_t allowedPeakCount = 0;
+    int seqNum = 1;
 
     bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
     if (useExtendedDetectorSpace &&
@@ -284,8 +285,9 @@ void PredictPeaks::exec() {
 
     for (auto &possibleHKL : possibleHKLs) {
       if (lambdaFilter.isAllowed(possibleHKL)) {
+        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix,
+                                 seqNum);
         ++allowedPeakCount;
-        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
       }
       prog.report();
     }
@@ -471,10 +473,12 @@ void PredictPeaks::setStructureFactorCalculatorFromSample(
  * @param hkl
  * @param orientedUB
  * @param goniometerMatrix
+ * @param seqNum
  */
 void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
                                             const DblMatrix &orientedUB,
-                                            const DblMatrix &goniometerMatrix) {
+                                            const DblMatrix &goniometerMatrix,
+                                            int &seqNum) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
@@ -535,6 +539,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Save the run number found before.
   peak->setRunNumber(m_runNumber);
   peak->setHKL(hkl * m_qConventionFactor);
+  peak->setPeakNumber(seqNum);
+  seqNum++;
 
   if (m_sfCalculator) {
     peak->setIntensity(m_sfCalculator->getFSquared(hkl));

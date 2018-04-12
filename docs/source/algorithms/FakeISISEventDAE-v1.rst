@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,7 +25,10 @@ Usage
 
 **Example:**
 
-.. testcode:: exFakeISISEventDAE
+.. This test is currently hanging on macOS as the MonitorLiveData algorithm
+   is taking a long time to cancel
+
+.. code-block:: python
 
     from threading import Thread
     import time

@@ -17,6 +17,9 @@ class SANSSubtract(PythonAlgorithm):
         """
         return "SANS"
 
+    def seeAlso(self):
+        return [ "SANSStitch","SANSFitShiftScale" ]
+
     def name(self):
         """
             Return name

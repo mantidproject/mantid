@@ -76,6 +76,8 @@ public:
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
   Workspace_sptr getItem(const std::string wsName) const;
+  /// Return all workspaces in the group as one call for thread safety
+  std::vector<Workspace_sptr> getAllItems() const;
   /// Remove a workspace from the group
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
