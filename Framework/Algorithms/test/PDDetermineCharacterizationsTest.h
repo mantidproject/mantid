@@ -213,8 +213,8 @@ public:
 
     const std::vector<Property *> &expectedProps = expected->getProperties();
 
-    for (std::size_t i = 0; i < expectedProps.size(); ++i) {
-      const std::string name = expectedProps[i]->name();
+    for (auto expectedProp : expectedProps) {
+      const std::string name = expectedProp->name();
       TS_ASSERT_EQUALS(expected->getPropertyValue(name),
                        observed->getPropertyValue(name));
     }

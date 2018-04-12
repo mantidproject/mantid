@@ -1040,7 +1040,7 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
   if (workspaceName.endsWith("_Workspace"))
     return false;
 
-  return dynamic_cast<MatrixWorkspace *>(ws.get()) != 0;
+  return dynamic_cast<MatrixWorkspace *>(ws.get()) != nullptr;
 }
 
 void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {

@@ -79,11 +79,13 @@ public:
   const std::string category() const override { return m_category; }
   /// Function to return all of the categories that contain this algorithm
   const std::vector<std::string> categories() const override;
-  /// Function to return the sperator token for the category string. A default
+  /// Function to return the seperator token for the category string. A default
   /// implementation ',' is provided
   const std::string categorySeparator() const override {
     return m_categorySeparator;
   }
+  /// Function to return all of the seeAlso algorithms related to this algorithm
+  const std::vector<std::string> seeAlso() const override { return m_seeAlso; };
   /// Aliases to the algorithm
   const std::string alias() const override { return m_alias; }
   /// Optional documentation URL for the real algorithm
@@ -183,9 +185,10 @@ private:
   const std::string m_name;     ///< name of the real algorithm
   const std::string m_category; ///< category of the real algorithm
   const std::string
-      m_categorySeparator;     ///< category seperator of the real algorithm
-  const std::string m_alias;   ///< alias to the algorithm
-  const std::string m_helpURL; ///< Optional documentation URL
+      m_categorySeparator; ///< category seperator of the real algorithm
+  const std::vector<std::string> m_seeAlso; ///< seeAlso of the real algorithm
+  const std::string m_alias;                ///< alias to the algorithm
+  const std::string m_helpURL;              ///< Optional documentation URL
   const std::string m_summary; ///<Message to display in GUI and help.
   const int m_version;         ///< version of the real algorithm
 

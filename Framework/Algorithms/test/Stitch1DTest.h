@@ -391,8 +391,7 @@ public:
       TS_ASSERT_DELTA(2., *itr, 0.000001);
     }
     // Output Error values should all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
@@ -421,8 +420,7 @@ public:
       TS_ASSERT_DELTA(3., *itr, 0.000001);
     }
     // Output Error values should all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
@@ -452,8 +450,7 @@ public:
       TS_ASSERT_DELTA(2., *itr, 0.000001);
     }
     // Output Error values should all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
@@ -483,9 +480,8 @@ public:
       TS_ASSERT_DELTA(3., *itr, 0.000001);
     }
     // Output Error values should all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
-      TS_ASSERT_EQUALS(temp, 0.);
+    for (double temp : stitched_e) {
+      TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
     // truncate the input and oputput x values to 6 decimal places to eliminate

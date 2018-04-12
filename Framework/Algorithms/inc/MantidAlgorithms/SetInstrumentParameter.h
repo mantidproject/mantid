@@ -46,6 +46,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"RotateInstrumentComponent", "MoveInstrumentComponent"};
+  }
   const std::string category() const override;
   std::map<std::string, std::string> validateInputs() override;
 

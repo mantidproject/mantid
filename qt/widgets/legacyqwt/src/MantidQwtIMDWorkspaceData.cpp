@@ -316,7 +316,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
         regularBinnedMDWorkspace = atLeastOneDimNotIntegrated;
       }
 
-      if (NULL !=
+      if (nullptr !=
               boost::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(
                   originalWS) ||
           regularBinnedMDWorkspace) {

@@ -159,9 +159,9 @@ private:
       }
     }
     auto &xp = cheb.xPoints();
-    for (size_t i = 0; i < xp.size(); ++i) {
+    for (double i : xp) {
       // std::cerr << xp[i] << ' ' << cheb(xp[i]) - fun(xp[i]) << '\n';
-      TS_ASSERT_DELTA(cheb(xp[i]), fun(xp[i]), accur2);
+      TS_ASSERT_DELTA(cheb(i), fun(i), accur2);
     }
   }
 };

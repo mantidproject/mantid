@@ -23,6 +23,9 @@ public:
   } ///< Algorithm's category for identification
   const std::string alias() const override { return "Dog"; }
   const std::string summary() const override { return "Test summary"; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"rabbit", "goldfish", "Spotted Hyena"};
+  }
 
   void init() override {
     declareProperty("prop1", "value");

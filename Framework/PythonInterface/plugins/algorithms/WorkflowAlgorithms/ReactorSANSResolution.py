@@ -14,6 +14,9 @@ class ReactorSANSResolution(PythonAlgorithm):
     def category(self):
         return "SANS"
 
+    def seeAlso(self):
+        return [ "EQSANSResolution" ]
+
     def name(self):
         return "ReactorSANSResolution"
 

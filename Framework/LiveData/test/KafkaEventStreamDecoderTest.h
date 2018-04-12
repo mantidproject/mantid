@@ -54,7 +54,7 @@ public:
   //----------------------------------------------------------------------------
   void test_Single_Period_Event_Stream() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
     using Mantid::API::Workspace_sptr;
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
@@ -92,7 +92,7 @@ public:
 
   void test_Multiple_Period_Event_Stream() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
     using Mantid::API::Workspace_sptr;
     using Mantid::API::WorkspaceGroup;
     using Mantid::DataObjects::EventWorkspace;
@@ -134,7 +134,7 @@ public:
 
   void test_End_Of_Run_Reported_After_Run_Stop_Reached() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
     using Mantid::API::Workspace_sptr;
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
@@ -173,7 +173,7 @@ public:
   void
   test_Get_All_Run_Events_When_Run_Stop_Message_Received_Before_Last_Event_Message() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
     using Mantid::API::Workspace_sptr;
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
@@ -211,7 +211,7 @@ public:
 
   void test_Sample_Log_From_Event_Stream() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
     using Mantid::API::Workspace_sptr;
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
@@ -244,7 +244,7 @@ public:
 
   void test_Empty_Event_Stream_Waits() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
@@ -260,12 +260,44 @@ public:
     TS_ASSERT(!decoder->isCapturing());
   }
 
+  void
+  test_No_Exception_When_Event_Message_Without_Facility_Data_Is_Processed() {
+    using namespace ::testing;
+    using namespace KafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeEventSubscriber))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    startCapturing(*decoder, 2);
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // Check we did process the event message and extract the events
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
+
+    TSM_ASSERT_EQUALS("Expected 3 events from the event message", 3,
+                      eventWksp->getNumberEvents());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Error_In_Stream_Extraction_Throws_Error_On_ExtractData() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
@@ -283,7 +315,7 @@ public:
 
   void test_Empty_SpDet_Stream_Throws_Error_On_ExtractData() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
@@ -301,7 +333,7 @@ public:
 
   void test_Empty_RunInfo_Stream_Throws_Error_On_ExtractData() {
     using namespace ::testing;
-    using namespace ISISKafkaTesting;
+    using namespace KafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
