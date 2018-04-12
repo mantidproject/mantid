@@ -827,18 +827,11 @@ void FitPeaks::fitPeaks() {
  * @brief FitPeaks::fitSpectrumPeaks
  * @param wi
  * @param expected_peak_centers
- * @param fitted_peak_centers
- * @param fitted_function_parameters
- * @param peak_chi2_vec
+ * @param fit_result
  */
 void FitPeaks::fitSpectrumPeaks(
     size_t wi, const std::vector<double> &expected_peak_centers,
     boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result) {
-
-  //    std::vector<double> &fitted_peak_centers,
-  //    std::vector<std::vector<double>> &fitted_function_parameters,
-  //    std::vector<double> *peak_chi2_vec) {
-
   // Set up sub algorithm Fit for peak and background
   IAlgorithm_sptr peak_fitter; // both peak and background (combo)
   try {
@@ -960,43 +953,19 @@ bool FitPeaks::decideToEstimatePeakWidth(
 //----------------------------------------------------------------------------------------------
 /** retrieve the fitted peak information from functions and set to output
  * vectors
- * @brief FitPeaks::ProcessSinglePeakFitResult
+ * @brief FitPeaks::processSinglePeakFitResult
  * @param wsindex
  * @param peakindex
- * @param expected_peak_positions
- * @param peakfunction
- * @param bkgdfunction
  * @param cost
- * @param fitted_peak_positions
- * @param function_parameters_vector
- * @param peak_chi2_vec
+ * @param expected_peak_positions
+ * @param fitfunction
+ * @param fit_result
  */
 void FitPeaks::processSinglePeakFitResult(
     size_t wsindex, size_t peakindex, const double cost,
     const std::vector<double> &expected_peak_positions,
     FitPeaksAlgorithm::FitFunction fitfunction,
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>
-        fit_result) // , std::vector<double> *peak_chi2_vec
-
-/*void FitPeaks::processSinglePeakFitResult(
-    size_t wsindex, size_t peakindex,
-    const std::vector<double> &expected_peak_positions,
-    API::IPeakFunction_sptr peakfunction,
-    API::IBackgroundFunction_sptr bkgdfunction, double cost,
-    std::vector<double> &fitted_peak_positions,
-    std::vector<std::vector<double>> &function_parameters_vector,
-    std::vector<double> *peak_chi2_vec) */
-{
-  // check input
-  // VZ TODO Move to FitResult object
-  //  if (peakindex >= fitted_peak_positions.size() ||
-  //      peakindex >= function_parameters_vector.size() ||
-  //      peakindex >= peak_chi2_vec->size()) {
-  //    throw std::runtime_error("peak index size is out of boundary for fitted
-  //    "
-  //                             "peaks positions, peak parameters or chi2s");
-  //  }
-
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result) {
   // determine peak position tolerance
   double postol(DBL_MAX);
   bool case23(false);
@@ -2191,18 +2160,12 @@ void FitPeaks::estimateLinearBackground(API::MatrixWorkspace_sptr dataws,
  * @brief FitPeaks::writeFitResult
  * @param wi
  * @param expected_positions
- * @param fitted_positions
- * @param peak_parameters
- * @param peak_chi2_vec
+ * @param fit_result
  * @param noevents
  */
 void FitPeaks::writeFitResult(
     size_t wi, const std::vector<double> &expected_positions,
     boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
-    //                              std::vector<double> &fitted_positions,
-    //                              std::vector<std::vector<double>>
-    //                              &peak_parameters,
-    //                              std::vector<double> &peak_chi2_vec,
     bool noevents) {
 
   // convert to
