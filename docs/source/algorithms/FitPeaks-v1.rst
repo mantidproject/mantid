@@ -2,8 +2,6 @@
 
 .. summary::
 
-.. alias::
-
 .. properties::
 
 Description

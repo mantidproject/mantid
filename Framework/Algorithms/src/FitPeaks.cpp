@@ -157,7 +157,7 @@ size_t findXIndex(const HistogramX &vecx, double x) {
   return index;
 }
 
-enum { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
+enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
 //----------------------------------------------------------------------------------------------
 /** constructor
@@ -420,9 +420,9 @@ void FitPeaks::processInputs() {
   m_peakDSpacePercentage = getProperty("PeakWidthPercent");
   if (isEmpty(m_peakDSpacePercentage))
     m_peakDSpacePercentage = -1;
-  else if (m_peakDSpacePercentage < 0)
+  else if (m_peakDSpacePercentage <= 0)
     throw std::invalid_argument(
-        "Peak D-spacing percentage cannot be negative!");
+        "Peak D-spacing percentage cannot be negative or zero!");
   g_log.debug() << "DeltaD/D = " << m_peakDSpacePercentage << "\n";
 
   // set up background
@@ -777,18 +777,6 @@ void FitPeaks::fitPeaks() {
     // initialize output for this
     size_t numfuncparams =
         m_peakFunction->nParams() + m_bkgdFunction->nParams();
-    //    // main output: center
-    //    std::vector<double> fitted_peak_centers(m_numPeaksToFit, -1);
-    //    // others
-    //    std::vector<std::vector<double>> fitted_parameters(
-    //        m_numPeaksToFit); // peak+background
-    //    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-    //      std::vector<double> peak_i(numfuncparams);
-    //      fitted_parameters[ipeak] = peak_i;
-    //    }
-    //    // goodness of fitting
-    //    std::vector<double> peak_chi2_vec(m_numPeaksToFit, DBL_MAX);
-
     boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
         boost::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
                                                              numfuncparams);
@@ -902,9 +890,6 @@ void FitPeaks::fitSpectrumPeaks(
 
     processSinglePeakFitResult(wi, peak_index, cost, expected_peak_centers,
                                fit_function, fit_result);
-    //        wi, peak_index, cost, expected_peak_centers, peakfunction,
-    //        bkgdfunction, cost,
-    //        fitted_peak_centers, fitted_function_parameters, peak_chi2_vec);
   }
 
   return;
@@ -934,13 +919,7 @@ bool FitPeaks::decideToEstimatePeakWidth(
       }
     } else {
       // using the fitted paramters from the previous fitting result
-      // TODO FIXME - Disable to output fitted result after debugging
-      //      std::stringstream dbss;
-      //      for (size_t i = 0; i < peak_function->nParams(); ++i)
-      //        dbss << peak_function->getParameterNames()[i] << " = "
-      //             << peak_function->getParameter(i) << ", ";
-      //      g_log.notice() << "[DB...BAT] Last fit parameters: " << dbss.str()
-      //                     << "\n";
+      // do noting
     }
   } else {
     // by observation
@@ -1522,12 +1501,11 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
  * @return
  */
 double FitPeaks::fitIndividualPeak(
-    size_t wi, API::IAlgorithm_sptr fitter, const double &expected_peak_center,
-    const std::pair<double, double> &fitwindow, const bool &high,
+    size_t wi, API::IAlgorithm_sptr fitter, const double expected_peak_center,
+    const std::pair<double, double> &fitwindow, const bool high,
     API::IBackgroundFunction_sptr high_background_function,
-    const bool &observe_peak_width, API::IPeakFunction_sptr peakfunction,
+    const bool observe_peak_width, API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunc) {
-
   double cost(DBL_MAX);
 
   if (high) {
