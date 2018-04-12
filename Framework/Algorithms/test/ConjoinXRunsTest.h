@@ -8,20 +8,24 @@
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidAlgorithms/ConjoinXRuns.h"
-#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::AddSampleLog;
 using Mantid::Algorithms::AddTimeSeriesLog;
-using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::Points;
 using namespace Mantid::API;
 using namespace WorkspaceCreationHelper;
 using namespace Mantid::HistogramData;
