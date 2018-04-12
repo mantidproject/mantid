@@ -2,10 +2,8 @@
 #define MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
 
 #include "MantidAPI/Column.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/System.h"
+#include "MantidWorkflowAlgorithms/QENSFitSequential.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -34,31 +32,36 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvolutionFitSequential : public API::DataProcessorAlgorithm {
+class DLLExport ConvolutionFitSequential : public QENSFitSequential {
 public:
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
 
-private:
-  void init() override;
-  void exec() override;
+protected:
+  std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const override;
+  API::ITableWorkspace_sptr performFit(const std::string &input) override;
 
-  bool checkForTwoLorentz(const std::string &);
-  std::vector<std::string> findValuesFromFunction(const std::string &);
+private:
+  void initConcrete() override;
+  void setup() override;
+  void postExec(API::MatrixWorkspace_sptr result) override;
+  Kernel::IValidator_sptr functionValidator() const override;
+  std::vector<std::string> getFitParameterNames() const override;
+
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
   std::vector<double> squareVector(std::vector<double>);
   std::vector<double> cloneVector(const std::vector<double> &);
-  void convertInputToElasticQ(API::MatrixWorkspace_sptr &, const std::string &);
   void calculateEISF(API::ITableWorkspace_sptr &);
-  std::string convertBackToShort(const std::string &);
-  std::string convertFuncToShort(const std::string &);
   void extractMembers(Mantid::API::MatrixWorkspace_sptr inputWs,
                       Mantid::API::WorkspaceGroup_sptr resultGroupWs,
                       const std::vector<std::string> &convolvedMembers,
                       const std::string &outputWsName);
+
+  bool m_deltaUsed;
+  std::size_t m_lorentzianCount;
 };
 
 } // namespace Algorithms

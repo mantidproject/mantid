@@ -2,9 +2,9 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
@@ -23,7 +23,95 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
+
+using namespace Mantid::API;
+
+MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
+                                         const std::string &outputName) {
+  auto convSpec =
+      AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
+  convSpec->setAlwaysStoreInADS(true);
+  convSpec->setProperty("InputWorkSpace", inputWorkspace);
+  convSpec->setProperty("OutputWorkSpace", outputName);
+  convSpec->setProperty("Target", "ElasticQ");
+  convSpec->setProperty("EMode", "Indirect");
+  convSpec->execute();
+  return convSpec->getProperty("OutputWorkspace");
 }
+
+MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
+                                    const std::string &outputName) {
+  auto cloneWs = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
+  cloneWs->setAlwaysStoreInADS(true);
+  cloneWs->setProperty("InputWorkspace", inputWorkspace);
+  cloneWs->setProperty("OutputWorkspace", outputName);
+  cloneWs->execute();
+  return cloneWs->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr convertInputToElasticQ(MatrixWorkspace_sptr inputWorkspace,
+                                            const std::string &outputName) {
+  auto axis = inputWorkspace->getAxis(1);
+  if (axis->isSpectra())
+    return convertSpectrumAxis(inputWorkspace, outputName);
+  else if (axis->isNumeric()) {
+    if (axis->unit()->unitID() != "MomentumTransfer")
+      throw std::runtime_error("Input must have axis values of Q");
+    return cloneWorkspace(inputWorkspace, outputName);
+  } else
+    throw std::runtime_error(
+        "Input workspace must have either spectra or numeric axis.");
+}
+
+IFunction_sptr lastFunction(IFunction_sptr function) {
+  const auto composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(function);
+
+  if (composite) {
+    if (composite->nFunctions() > 0)
+      return composite->getFunction(composite->nFunctions() - 1);
+    return nullptr;
+  }
+  return function;
+}
+
+std::size_t numberOfFunctions(CompositeFunction_sptr composite,
+                              const std::string &functionName) {
+  std::size_t count = 0;
+  for (auto i = 0u; i < composite->nFunctions(); ++i) {
+    if (composite->getFunction(i)->name() == functionName)
+      count += 1;
+  }
+  return count;
+}
+
+std::size_t numberOfFunctions(IFunction_sptr function,
+                              const std::string &functionName) {
+  const auto composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  if (composite)
+    return numberOfFunctions(composite, functionName);
+  return function->name() == functionName ? 1 : 0;
+}
+
+bool containsFunction(CompositeFunction_sptr composite,
+                      const std::string &functionName) {
+  for (auto i = 0u; i < composite->nFunctions(); ++i) {
+    if (composite->getFunction(i)->name() == functionName)
+      return true;
+  }
+  return false;
+}
+
+bool containsFunction(IFunction_sptr function,
+                      const std::string &functionName) {
+  const auto composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  if (composite)
+    return containsFunction(composite, functionName);
+  return function->name() == functionName;
+}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -57,290 +145,85 @@ const std::string ConvolutionFitSequential::summary() const {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void ConvolutionFitSequential::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace for the fit.");
-
-  auto scv = boost::make_shared<StringContainsValidator>();
-  auto requires = std::vector<std::string>{"Convolution", "Resolution"};
-  scv->setRequiredStrings(requires);
-
-  declareProperty("Function", "", scv,
-                  "The function that describes the parameters of the fit.",
-                  Direction::Input);
-
-  declareProperty("PassWSIndexToFunction", false,
-                  "For each spectrum in Input pass its workspace index to all "
-                  "functions that have attribute WorkspaceIndex.");
-
+void ConvolutionFitSequential::initConcrete() {
   std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
                   boost::make_shared<StringListValidator>(backType),
                   "The Type of background used in the fitting",
                   Direction::Input);
-
-  declareProperty(
-      "StartX", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
-      "The start of the range for the fit function.", Direction::Input);
-
-  declareProperty(
-      "EndX", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
-      "The end of the range for the fit function.", Direction::Input);
-
-  auto boundedV = boost::make_shared<BoundedValidator<int>>();
-  boundedV->setLower(0);
-
-  declareProperty("SpecMin", 0, boundedV, "The first spectrum to be used in "
-                                          "the fit. Spectra values can not be "
-                                          "negative",
-                  Direction::Input);
-
-  declareProperty("SpecMax", 0, boundedV, "The final spectrum to be used in "
-                                          "the fit. Spectra values can not be "
-                                          "negative",
-                  Direction::Input);
-
-  declareProperty(
-      "Convolve", true,
-      "If true, output fitted model components will be convolved with "
-      "the resolution.",
-      Direction::Input);
-
-  declareProperty(
-      "ExtractMembers", false,
-      "If true, then each member of the convolution fit will be extracted"
-      ", into their own workspace. These workspaces will have a histogram"
-      " for each spectrum (Q-value) and will be grouped.",
-      Direction::Input);
-
-  declareProperty("Minimizer", "Levenberg-Marquardt",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
-                  "Minimizer to use for fitting. Minimizers available are "
-                  "'Levenberg-Marquardt', 'Simplex', 'FABADA',\n"
-                  "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate "
-                  "gradient (Polak-Ribiere imp.)' and 'BFGS'");
-
-  declareProperty("MaxIterations", 500, boundedV,
-                  "The maximum number of iterations permitted",
-                  Direction::Input);
-  declareProperty("PeakRadius", 0,
-                  "A value of the peak radius the peak functions should use. A "
-                  "peak radius defines an interval on the x axis around the "
-                  "centre of the peak where its values are calculated. Values "
-                  "outside the interval are not calculated and assumed zeros."
-                  "Numerically the radius is a whole number of peak widths "
-                  "(FWHM) that fit into the interval on each side from the "
-                  "centre. The default value of 0 means the whole x axis.");
-
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
-                  "The OutputWorkspace containing the results of the fit.");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Execute the algorithm.
- */
-void ConvolutionFitSequential::exec() {
-  // Initialise variables with properties
-  MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
-  const std::string function = getProperty("Function");
-  const bool passIndex = getProperty("PassWSIndexToFunction");
-  const std::string backType =
-      convertBackToShort(getProperty("backgroundType"));
-  const double startX = getProperty("StartX");
-  const double endX = getProperty("EndX");
-  const int specMin = getProperty("SpecMin");
-  const int specMax = getProperty("Specmax");
-  const bool convolve = getProperty("Convolve");
-  const bool doExtractMembers = getProperty("ExtractMembers");
-  const int maxIter = getProperty("MaxIterations");
-  const std::string minimizer = getProperty("Minimizer");
-  const int peakRadius = getProperty("PeakRadius");
+IValidator_sptr ConvolutionFitSequential::functionValidator() const {
+  auto scv = boost::make_shared<StringContainsValidator>();
+  auto requires = std::vector<std::string>{"Convolution", "Resolution"};
+  scv->setRequiredStrings(requires);
+  return scv;
+}
 
-  // Inspect function to obtain fit Type and background
-  const auto functionValues = findValuesFromFunction(function);
-  const auto LorentzNum = functionValues[0];
-  const auto funcName = functionValues[1];
-  std::vector<std::string> convolvedMembers;
+void ConvolutionFitSequential::setup() {
+  IFunction_sptr function = getProperty("Function");
+  m_deltaUsed = containsFunction(function, "DeltaFunction");
+  m_lorentzianCount = numberOfFunctions(function, "Lorentzian");
+}
 
-  // Check if a delta function is being used
-  auto delta = false;
-  std::string usingDelta = "false";
-  auto pos = function.find("Delta");
-  if (pos != std::string::npos) {
-    delta = true;
-    usingDelta = "true";
-    convolvedMembers.emplace_back("DeltaFunction");
+std::vector<std::string>
+ConvolutionFitSequential::getFitParameterNames() const {
+  std::vector<std::string> parameters;
+
+  if (m_deltaUsed)
+    parameters.emplace_back("Height");
+
+  IFunction_sptr function = getProperty("Function");
+  auto last = lastFunction(function);
+  auto lastParameters = last->getParameterNames();
+  if (last->name() == "Lorentzian") {
+    auto position =
+        find(lastParameters.begin(), lastParameters.end(), "PeakCentre");
+    lastParameters.erase(position);
+    parameters.emplace_back("EISF");
   }
 
-  if (LorentzNum == "0")
-    convolvedMembers.emplace_back(funcName);
-  else if (LorentzNum == "1")
-    convolvedMembers.emplace_back("Lorentzian");
-  else {
-    convolvedMembers.emplace_back("Lorentzian1");
-    convolvedMembers.emplace_back("Lorentzian2");
+  parameters.insert(std::end(parameters), std::begin(lastParameters),
+                    std::end(lastParameters));
+  return parameters;
+}
+
+std::vector<MatrixWorkspace_sptr>
+ConvolutionFitSequential::getWorkspaces() const {
+  auto workspaces = QENSFitSequential::getWorkspaces();
+
+  for (auto i = 0u; i < workspaces.size(); ++i) {
+    const std::string tempFitWsName = "__convfit_fit_ws" + std::to_string(i);
+    workspaces[i] = convertInputToElasticQ(workspaces[i], tempFitWsName);
   }
+  return workspaces;
+}
 
-  // Log information to result log
-  m_log.information("Input files: " + inputWs->getName());
-  m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
-                    LorentzNum);
-  m_log.information("Background type: " + backType);
+ITableWorkspace_sptr
+ConvolutionFitSequential::performFit(const std::string &input) {
+  auto parameterWorkspace = QENSFitSequential::performFit(input);
+  if (m_deltaUsed)
+    calculateEISF(parameterWorkspace);
+  return parameterWorkspace;
+}
 
-  // Output workspace name
-  auto outputWsName = inputWs->getName();
-  pos = outputWsName.rfind('_');
-  if (pos != std::string::npos) {
-    outputWsName = outputWsName.substr(0, pos + 1);
-  }
-  outputWsName += "conv_";
-  if (delta) {
-    outputWsName += "Delta";
-  }
-  if (LorentzNum != "0") {
-    outputWsName += LorentzNum + "L";
-  } else {
-    outputWsName += convertFuncToShort(funcName);
-  }
-  outputWsName += backType + "_s";
-  outputWsName += std::to_string(specMin);
-
-  if (specMin != specMax) {
-    outputWsName += "_to_";
-    outputWsName += std::to_string(specMax);
-  }
-
-  // Convert input workspace to get Q axis
-  const std::string tempFitWsName = "__convfit_fit_ws";
-  convertInputToElasticQ(inputWs, tempFitWsName);
-
-  Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
-  // Construct plotpeak string
-  std::string plotPeakInput;
-  for (int i = specMin; i < specMax + 1; i++) {
-    auto nextWs = tempFitWsName + ",i";
-    nextWs += std::to_string(i);
-    plotPeakInput += nextWs + ";";
-    plotPeakStringProg.report("Constructing PlotPeak name");
-  }
-
-  // Run PlotPeaksByLogValue
-  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
-  plotPeaks->setProperty("Input", plotPeakInput);
-  plotPeaks->setProperty("OutputWorkspace", outputWsName);
-  plotPeaks->setProperty("Function", function);
-  plotPeaks->setProperty("StartX", startX);
-  plotPeaks->setProperty("EndX", endX);
-  plotPeaks->setProperty("FitType", "Sequential");
-  plotPeaks->setProperty("CreateOutput", true);
-  plotPeaks->setProperty("OutputCompositeMembers", true);
-  plotPeaks->setProperty("ConvolveMembers", convolve);
-  plotPeaks->setProperty("MaxIterations", maxIter);
-  plotPeaks->setProperty("Minimizer", minimizer);
-  plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
-  plotPeaks->setProperty("PeakRadius", peakRadius);
-  plotPeaks->executeAsChildAlg();
-  ITableWorkspace_sptr outputWs = plotPeaks->getProperty("OutputWorkspace");
-
-  // Delete workspaces
-  Progress deleteProgress(this, 0.90, 0.91, 2);
-  auto deleter = createChildAlgorithm("DeleteWorkspace", -1.0, -1.0, false);
-  deleter->setProperty("WorkSpace",
-                       outputWsName + "_NormalisedCovarianceMatrices");
-  deleter->executeAsChildAlg();
-  deleteProgress.report("Deleting PlotPeak Output");
-
-  deleter->setProperty("Workspace", tempFitWsName);
-  deleter->executeAsChildAlg();
-
-  deleter->setProperty("WorkSpace", outputWsName + "_Parameters");
-  deleter->executeAsChildAlg();
-  deleteProgress.report("Deleting PlotPeak Output");
-
-  const auto paramTableName = outputWsName + "_Parameters";
-  AnalysisDataService::Instance().addOrReplace(paramTableName, outputWs);
-
-  // Construct output workspace
-  const auto resultWsName = outputWsName + "_Result";
-
-  Progress workflowProg(this, 0.91, 0.94, 4);
-  auto paramNames = std::vector<std::string>();
-  if (funcName == "DeltaFunction") {
-    paramNames.emplace_back("Height");
-  } else {
-    auto func = FunctionFactory::Instance().createFunction(funcName);
-    if (delta) {
-      paramNames.emplace_back("Height");
-    }
-    for (size_t i = 0; i < func->nParams(); i++) {
-      paramNames.push_back(func->parameterName(i));
-      workflowProg.report("Finding parameters to process");
-    }
-    if (funcName == "Lorentzian") {
-      // remove peak centre
-      size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
-                   paramNames.begin();
-      paramNames.erase(paramNames.begin() + pos);
-      paramNames.emplace_back("EISF");
-    }
-  }
-
-  // Run calcEISF if Delta
-  if (delta) {
-    calculateEISF(outputWs);
-  }
-
-  // Construct comma separated list for ProcessIndirectFitParameters
-  std::string paramNamesList;
-  const size_t maxNames = paramNames.size();
-  for (size_t i = 0; i < maxNames; i++) {
-    paramNamesList += paramNames.at(i);
-    if (i != (maxNames - 1)) {
-      paramNamesList += ",";
-    }
-    workflowProg.report("Constructing indirectFitParams input");
-  }
-
-  // Run ProcessIndirectFitParameters
-  auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", 0.94, 0.96, true);
-  pifp->setProperty("InputWorkspace", outputWs);
-  pifp->setProperty("ColumnX", "axis-1");
-  pifp->setProperty("XAxisUnit", "MomentumTransfer");
-  pifp->setProperty("ParameterNames", paramNamesList);
-  pifp->setProperty("OutputWorkspace", resultWsName);
-  pifp->executeAsChildAlg();
-
-  MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
-  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
-
-  // Handle sample logs
-  auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
-  logCopier->setProperty("InputWorkspace", inputWs);
-  logCopier->setProperty("OutputWorkspace", resultWs);
-  logCopier->executeAsChildAlg();
-
-  resultWs = logCopier->getProperty("OutputWorkspace");
-
-  // Create Sample Log
+void ConvolutionFitSequential::postExec(API::MatrixWorkspace_sptr result) {
   auto sampleLogStrings = std::map<std::string, std::string>();
-  sampleLogStrings["sample_filename"] = inputWs->getName();
-  sampleLogStrings["convolve_members"] = (convolve == 1) ? "true" : "false";
+  sampleLogStrings["sample_filename"] = getPropertyValue("InputWorkspace");
+  sampleLogStrings["convolve_members"] = getPropertyValue("ConvolveMembers");
   sampleLogStrings["fit_program"] = "ConvFit";
-  sampleLogStrings["background"] = backType;
-  sampleLogStrings["delta_function"] = usingDelta;
+  sampleLogStrings["background"] = getPropertyValue("BackgroundType");
+  sampleLogStrings["delta_function"] = m_deltaUsed ? "true" : "false";
   auto sampleLogNumeric = std::map<std::string, std::string>();
   sampleLogNumeric["lorentzians"] =
-      boost::lexical_cast<std::string>(LorentzNum);
+      boost::lexical_cast<std::string>(m_lorentzianCount);
 
-  Progress logAdderProg(this, 0.96, 0.97, 6);
+  Progress logAdderProg(this, 0.99, 1.00, 6);
   // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
   for (auto &sampleLogString : sampleLogStrings) {
-    logAdder->setProperty("Workspace", resultWs);
+    logAdder->setProperty("Workspace", result);
     logAdder->setProperty("LogName", sampleLogString.first);
     logAdder->setProperty("LogText", sampleLogString.second);
     logAdder->setProperty("LogType", "String");
@@ -350,94 +233,13 @@ void ConvolutionFitSequential::exec() {
 
   // Add Numeric Logs
   for (auto &logItem : sampleLogNumeric) {
-    logAdder->setProperty("Workspace", resultWs);
+    logAdder->setProperty("Workspace", result);
     logAdder->setProperty("LogName", logItem.first);
     logAdder->setProperty("LogText", logItem.second);
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");
   }
-
-  // Copy Logs to GroupWorkspace
-  logCopier = createChildAlgorithm("CopyLogs", 0.97, 0.98, false);
-  logCopier->setProperty("InputWorkspace", resultWs);
-  std::string groupName = outputWsName + "_Workspaces";
-  logCopier->setProperty("OutputWorkspace", groupName);
-  logCopier->executeAsChildAlg();
-
-  // Rename Workspaces in group
-  WorkspaceGroup_sptr groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
-                                                                 "_Workspaces");
-  const auto groupWsNames = groupWs->getNames();
-  auto renamer = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  Progress renamerProg(this, 0.98, 1.0, specMax + 1);
-  for (int i = specMin; i < specMax + 1; i++) {
-    renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
-    auto outName = outputWsName;
-
-    // Check if multiple spectrum were fit.
-    if (specMin != specMax) {
-      outName += "_" + std::to_string(i);
-    }
-    outName += "_Workspace";
-    renamer->setProperty("OutputWorkspace", outName);
-    renamer->executeAsChildAlg();
-    renamerProg.report("Renaming group workspaces");
-  }
-
-  // Check whether to extract members into their own workspaces.
-  if (doExtractMembers)
-    extractMembers(inputWs, groupWs, convolvedMembers,
-                   outputWsName + "_Members");
-
-  setProperty("OutputWorkspace", resultWs);
-}
-
-/**
- * Check function to establish if it is for one lorentzian or Two
- * @param subFunction The unchecked substring of the function
- * @return true if the function is two lorentzian false if one lorentzian
- */
-bool ConvolutionFitSequential::checkForTwoLorentz(
-    const std::string &subFunction) {
-  auto pos = subFunction.rfind("Lorentzian");
-  return pos != std::string::npos;
-}
-
-/**
- * Finds specific values embedded in the function supplied to the algorithm
- * @param function The full function string
- * @return all values of interest from the function (0 - fitType,  1 -
- * functionName)
- */
-std::vector<std::string>
-ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
-  std::vector<std::string> result;
-  std::string fitType;
-  std::string functionName;
-  auto startPos = function.rfind("name=");
-  if (startPos != std::string::npos) {
-    fitType = function.substr(startPos, function.size());
-    auto nextPos = fitType.find_first_of(',');
-    fitType = fitType.substr(5, nextPos - 5);
-    functionName = fitType;
-    if (fitType == "Lorentzian") {
-      std::string newSub = function.substr(0, startPos);
-      bool isTwoL = checkForTwoLorentz(newSub);
-      if (isTwoL) {
-        fitType = "2";
-      } else {
-        fitType = "1";
-      }
-    } else {
-      fitType = "0";
-    }
-    result.push_back(fitType);
-  }
-
-  result.push_back(functionName);
-  return result;
 }
 
 /**
@@ -451,7 +253,7 @@ std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
     const std::string &suffix, const std::vector<std::string> &columns) {
   auto fitParams = std::vector<std::string>();
   const size_t totalColumns = columns.size();
-  for (size_t i = 0; i < totalColumns; i++) {
+  for (auto i = 0u; i < totalColumns; ++i) {
     auto pos = columns.at(i).rfind(suffix);
     if (pos != std::string::npos) {
       auto endCheck = pos + suffix.size();
@@ -486,46 +288,10 @@ ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
 }
 
 /**
- * Converts the input workspaces to spectrum axis to ElasticQ and adds it to the
- * ADS to be used by PlotPeakBylogValue
- * @param inputWs - The MatrixWorkspace to be converted
- * @param wsName - The desired name of the output workspace
- */
-void ConvolutionFitSequential::convertInputToElasticQ(
-    API::MatrixWorkspace_sptr &inputWs, const std::string &wsName) {
-  auto axis = inputWs->getAxis(1);
-  if (axis->isSpectra()) {
-    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis");
-    // Store in ADS to allow use by PlotPeakByLogValue
-    convSpec->setAlwaysStoreInADS(true);
-    convSpec->setProperty("InputWorkSpace", inputWs);
-    convSpec->setProperty("OutputWorkSpace", wsName);
-    convSpec->setProperty("Target", "ElasticQ");
-    convSpec->setProperty("EMode", "Indirect");
-    convSpec->executeAsChildAlg();
-  } else if (axis->isNumeric()) {
-    // Check that units are Momentum Transfer
-    if (axis->unit()->unitID() != "MomentumTransfer") {
-      throw std::runtime_error("Input must have axis values of Q");
-    }
-    auto cloneWs = createChildAlgorithm("CloneWorkspace");
-    // Store in ADS to allow use by PlotPeakByLogValue
-    cloneWs->setAlwaysStoreInADS(true);
-    cloneWs->setProperty("InputWorkspace", inputWs);
-    cloneWs->setProperty("OutputWorkspace", wsName);
-    cloneWs->executeAsChildAlg();
-  } else {
-    throw std::runtime_error(
-        "Input workspace must have either spectra or numeric axis.");
-  }
-}
-
-/**
  * Calculates the EISF if the fit includes a Delta function
  * @param tableWs - The TableWorkspace to append the EISF calculation to
  */
-void ConvolutionFitSequential::calculateEISF(
-    API::ITableWorkspace_sptr &tableWs) {
+void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs) {
   // Get height data from parameter table
   const auto columns = tableWs->getColumnNames();
   const auto height = searchForFitParams("Height", columns).at(0);
@@ -647,49 +413,6 @@ void ConvolutionFitSequential::extractMembers(
   extractMembersAlg->setProperty("RenameConvolvedMembers", convolved);
   extractMembersAlg->setProperty("ConvolvedMembers", convolvedMembers);
   extractMembersAlg->execute();
-}
-
-/**
- * Converts the user input for background into short hand for use in the
- * workspace naming
- * @param original - The original user input to the function
- * @return The short hand of the users input
- */
-std::string
-ConvolutionFitSequential::convertBackToShort(const std::string &original) {
-  auto result = original.substr(0, 3);
-  const auto pos = original.find(' ');
-  if (pos != std::string::npos) {
-    result += original.at(pos + 1);
-  }
-  return result;
-}
-
-/**
- * Converts the user input for function into short hand for use in the workspace
- * naming
- * @param original - The original user input to the function
- * @return The short hand of the users input
- */
-std::string
-ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
-  std::string result;
-  if (original != "DeltaFunction") {
-    if (original.at(0) == 'E') {
-      result += "E";
-    } else if (original.at(0) == 'I') {
-      result += "I";
-    } else {
-      return "SFT";
-    }
-    const auto pos = original.find("Circle");
-    if (pos != std::string::npos) {
-      result += "DC";
-    } else {
-      result += "DS";
-    }
-  }
-  return result;
 }
 
 } // namespace Algorithms
