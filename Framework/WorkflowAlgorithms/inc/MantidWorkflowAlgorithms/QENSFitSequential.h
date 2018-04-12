@@ -44,7 +44,7 @@ private:
   virtual void initConcrete();
   virtual void setup();
   void exec() override;
-  virtual void postExec(MatrixWorkspace_sptr result);
+  virtual void postExec(API::MatrixWorkspace_sptr result);
   virtual Kernel::IValidator_sptr functionValidator() const;
 
   std::string getInputString(

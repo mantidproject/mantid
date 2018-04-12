@@ -20,6 +20,11 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("QENSFitSequential");
 
+void extractConvolvedNames(CompositeFunction_sptr function,
+                           std::vector<std::string> &names);
+void extractConvolvedNames(IFunction_sptr function,
+                           std::vector<std::string> &names);
+
 void extractConvolvedNamesFromConvolution(CompositeFunction_sptr convolution,
                                           std::vector<std::string> &names) {
   for (auto i = 0u; i < convolution->nFunctions(); ++i) {
