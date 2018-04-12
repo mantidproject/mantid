@@ -87,19 +87,13 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), 7);
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
-    auto spectrum = out->y(0);
-    auto error = out->e(0);
-    auto xaxis = out->x(0);
-    HistogramDx dx = out->dx(0);
     std::vector<double> x{1., 2., 3., 1., 2., 1., 1.};
     std::vector<double> y{2., 2., 2., 5., 5., 2., 5.};
     std::vector<double> e{3., 3., 3., 4., 4., 3., 4.};
-    for (size_t j = 0; j < 7; ++j) {
-      TS_ASSERT_EQUALS(xaxis[j], x[j]);
-      TS_ASSERT_EQUALS(spectrum[j], y[j]);
-      TS_ASSERT_EQUALS(error[j], e[j]);
-      TSM_ASSERT_EQUALS("Dx and y values are the same", dx[j], y[j]);
-    }
+    TS_ASSERT_EQUALS(out->x(0).rawData(), x);
+    TS_ASSERT_EQUALS(out->y(0).rawData(), y);
+    TS_ASSERT_EQUALS(out->e(0).rawData(), e);
+    TSM_ASSERT_EQUALS("Dx and y values are the same", out->dx(0).rawData(), y);
   }
 
   void testWSWithoutDxValues() {
@@ -124,17 +118,12 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), 5);
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
-    auto spectrum = out->y(0);
-    auto error = out->e(0);
-    auto xaxis = out->x(0);
     std::vector<double> x{1., 2., 3., 1., 2.};
     std::vector<double> y{2., 2., 2., 5., 5.};
     std::vector<double> e{3., 3., 3., 4., 4.};
-    for (size_t j = 0; j < 5; ++j) {
-      TS_ASSERT_EQUALS(xaxis[j], x[j]);
-      TS_ASSERT_EQUALS(spectrum[j], y[j]);
-      TS_ASSERT_EQUALS(error[j], e[j]);
-    }
+    TS_ASSERT_EQUALS(out->x(0).rawData(), x);
+    TS_ASSERT_EQUALS(out->y(0).rawData(), y);
+    TS_ASSERT_EQUALS(out->e(0).rawData(), e);
   }
 
   void testFailDifferentNumberBins() {
@@ -175,28 +164,16 @@ public:
     TS_ASSERT(!out->isHistogramData());
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "TOF");
 
+    std::vector<double> x_vec{1., 2., 3., .4, .9, 1.1};
+    std::vector<double> y_vec{2., 2., 2., 4., 9., 16.};
+    std::vector<double> e_vec{3., 3., 3., 3., 3., 3.};
+    std::vector<double> dx_vec{2., 2., 2., 2., 2., 2.};
     // Check all 5 spectra
     for (auto i = 0; i < 5; i++) {
-      TS_ASSERT_EQUALS(out->y(i)[0], 2.);
-      TS_ASSERT_EQUALS(out->y(i)[1], 2.);
-      TS_ASSERT_EQUALS(out->y(i)[2], 2.);
-      TS_ASSERT_EQUALS(out->y(i)[3], 4.); // or ws6->y(i)[3]
-      TS_ASSERT_EQUALS(out->y(i)[4], 9.);
-      TS_ASSERT_EQUALS(out->y(i)[5], 16.);
-
-      TS_ASSERT_EQUALS(out->e(i)[0], 3.);
-      TS_ASSERT_EQUALS(out->e(i)[1], 3.);
-      TS_ASSERT_EQUALS(out->e(i)[2], 3.);
-      TS_ASSERT_EQUALS(out->e(i)[3], 3.);
-      TS_ASSERT_EQUALS(out->e(i)[4], 3.);
-      TS_ASSERT_EQUALS(out->e(i)[5], 3.);
-
-      TS_ASSERT_EQUALS(out->x(i)[0], 1.);
-      TS_ASSERT_EQUALS(out->x(i)[1], 2.);
-      TS_ASSERT_EQUALS(out->x(i)[2], 3.);
-      TS_ASSERT_EQUALS(out->x(i)[3], 0.4);
-      TS_ASSERT_EQUALS(out->x(i)[4], 0.9);
-      TS_ASSERT_EQUALS(out->x(i)[5], 1.1);
+      TS_ASSERT_EQUALS(out->y(i).rawData(), y_vec);
+      TS_ASSERT_EQUALS(out->e(i).rawData(), e_vec);
+      TS_ASSERT_EQUALS(out->x(i).rawData(), x_vec);
+      TS_ASSERT_EQUALS(out->dx(i).rawData(), dx_vec);
     }
   }
 
@@ -248,16 +225,12 @@ public:
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(out->getAxis(0)->unit()->unitID(), "Energy");
 
-    auto xaxis = out->x(0);
-    auto spectrum = out->y(0);
-    auto error = out->e(0);
-
-    TS_ASSERT_EQUALS(xaxis[0], 0.7);
-    TS_ASSERT_EQUALS(xaxis[1], 1.1);
-    TS_ASSERT_EQUALS(spectrum[0], 2.);
-    TS_ASSERT_EQUALS(spectrum[1], 5.);
-    TS_ASSERT_EQUALS(error[0], 3.);
-    TS_ASSERT_EQUALS(error[1], 4.);
+    TS_ASSERT_EQUALS(out->x(0)[0], 0.7);
+    TS_ASSERT_EQUALS(out->x(0)[1], 1.1);
+    TS_ASSERT_EQUALS(out->y(0)[0], 2.);
+    TS_ASSERT_EQUALS(out->y(0)[1], 5.);
+    TS_ASSERT_EQUALS(out->e(0)[0], 3.);
+    TS_ASSERT_EQUALS(out->e(0)[1], 4.);
   }
 
   void testFailWithStringLog() {
@@ -318,27 +291,13 @@ public:
     TS_ASSERT_EQUALS(out->blocksize(), 5);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 5);
 
-    auto spectrum = out->y(0);
-    auto xaxis = out->x(0);
-    auto error = out->e(0);
-
-    TS_ASSERT_EQUALS(spectrum[0], 2.);
-    TS_ASSERT_EQUALS(spectrum[1], 2.);
-    TS_ASSERT_EQUALS(spectrum[2], 2.);
-    TS_ASSERT_EQUALS(spectrum[3], 5.);
-    TS_ASSERT_EQUALS(spectrum[4], 5.);
-
-    TS_ASSERT_EQUALS(error[0], 3.);
-    TS_ASSERT_EQUALS(error[1], 3.);
-    TS_ASSERT_EQUALS(error[2], 3.);
-    TS_ASSERT_EQUALS(error[3], 4.);
-    TS_ASSERT_EQUALS(error[4], 4.);
-
-    TS_ASSERT_EQUALS(xaxis[0], 5.7);
-    TS_ASSERT_EQUALS(xaxis[1], 6.1);
-    TS_ASSERT_EQUALS(xaxis[2], 6.7);
-    TS_ASSERT_EQUALS(xaxis[3], 8.3);
-    TS_ASSERT_EQUALS(xaxis[4], 9.5);
+    std::vector<double> y_vec{2., 2., 2., 5., 5.};
+    std::vector<double> x_vec{5.7, 6.1, 6.7, 8.3, 9.5};
+    std::vector<double> e_vec{3., 3., 3., 4., 4.};
+    TS_ASSERT_EQUALS(out->y(0).rawData(), y_vec);
+    TS_ASSERT_EQUALS(out->x(0).rawData(), x_vec);
+    TS_ASSERT_EQUALS(out->e(0).rawData(), e_vec);
+    TS_ASSERT_EQUALS(out->dx(0).rawData(), y_vec)
   }
 
   void testFailWithNumSeriesLog() {

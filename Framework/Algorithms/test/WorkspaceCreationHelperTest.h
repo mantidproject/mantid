@@ -40,6 +40,9 @@ public:
     TS_ASSERT_EQUALS(ws->size(), 2);
     TS_ASSERT(ws->hasDx(0));
     TS_ASSERT_EQUALS(ws->dx(0).rawData()[0], 2.);
+    Workspace2D_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(
+        1, 2, false, std::set<int64_t>(), false);
+    TS_ASSERT(!ws2->hasDx(0));
   }
 };
 
