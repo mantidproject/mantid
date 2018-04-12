@@ -30,15 +30,18 @@ class ThreadModel(QThread):
         self.wait()
 
     def run(self):
+        self.user_cancel=False
         try:
            self.model.execute()
            self.model.output()
         except KeyboardInterrupt:
-            print ("moo ")
             pass
         except Exception as error:
-            print("waa ",error.__class__.__name__)
-            self.sendSignal(error)
+            if self.user_cancel:
+                print("User ended job")
+            else:
+                #print("waa ",self.user_cancel,error.__class__.__name__)
+                self.sendSignal(error)
             pass
 
     def sendSignal(self,error):
@@ -51,6 +54,7 @@ class ThreadModel(QThread):
             raise self.exception
 
     def cancel(self):
+        self.user_cancel=True
         self.model.cancel()
 
     # if there is one set of inputs (1 alg)

@@ -88,22 +88,9 @@ class MaxEntPresenter(object):
             self.view.addPhaseTable(maxentInputs)
      
         inputs["maxent"] = maxentInputs
-        try:
-            self.thread.loadData(inputs)
-            self.thread.start() 
-           # if error is not None:
-            #   raise error
-            #self.thread.join()
-        except:
-            print("moo")
-            #message_box.warning(error)
-            self.handeleFinished()
-            pass
-        #except KeyboardInterrupt:
-        #    pass
-        #except:
-        #    pass
-
+        self.thread.loadData(inputs)
+        self.thread.start() 
+        
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
