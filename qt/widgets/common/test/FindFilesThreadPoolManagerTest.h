@@ -29,7 +29,7 @@ public:
     int argc = 1;
     char name[] = "DummyTestingApplication";
     char *argv = name;
-    QApplication app(argc, &argv);
+    QCoreApplication app(argc, &argv);
     // Arrange
     FakeMWRunFiles *widget = new FakeMWRunFiles();
 
@@ -56,7 +56,7 @@ public:
     poolManager.createWorker(widget, parameters);
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-    QApplication::processEvents();
+    QCoreApplication::processEvents();
 
     // Assert
     const auto results = widget->getResults();
@@ -72,7 +72,7 @@ public:
     int argc = 1;
     char name[] = "DummyTestingApplication";
     char *argv = name;
-    QApplication app(argc, &argv);
+    QCoreApplication app(argc, &argv);
     // Arrange
     FakeMWRunFiles widget;
 
@@ -118,7 +118,7 @@ public:
 
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-    QApplication::processEvents();
+    QCoreApplication::processEvents();
 
     // Assert
     const auto results = widget.getResults();

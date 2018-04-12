@@ -14,11 +14,11 @@ Workflow
 
 Every piece of work starts with an open issue. To find issues that are
 assigned to you see the section
-:ref:`dev-docs-issue-tracking-your-issues`. How an issue is closed is
+:ref:`IssueTrackingYourIssues`. How an issue is closed is
 then dependent on its requirements:
 
 - Code changes required: generate a **pull request**
-  (:ref:`dev-docs-git-workflow-pull-requests`)
+  (:ref:`GitWorkflowPullRequests`)
 
   - Make sure the issue is referenced with ``#issue-number``. It will
     then be closed when the pull request is merged
@@ -43,10 +43,10 @@ Creating an Issue
 
 Go `here <https://github.com/mantidproject/mantid/issues/new>`__ to
 create a new issue. Make sure you assign the appropriate labels (see
-:ref:`dev-docs-issue-tracking-labels`) and milestone.
+:ref:`IssueTrackingLabels`) and milestone.
 
-.. _dev-docs-issue-tracking-labels:
-     
+.. _IssueTrackingLabels:
+
 Labels
 ^^^^^^
 
@@ -110,7 +110,7 @@ GitHub has a powerful issue filtering system that is described `here
 some common searches that developers will need. It is advised to
 bookmark these URLs.
 
-.. _dev-docs-issue-tracking-your-issues:
+.. _IssueTrackingYourIssues:
 
 Your Issues
 -----------
