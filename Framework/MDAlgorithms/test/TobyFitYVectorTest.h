@@ -45,8 +45,8 @@ public:
                             "DetectorArea",  "DetectionTime"};
 
     TobyFitYVector yVector;
-    for (unsigned int i = 0; i < 8; ++i) {
-      yVector.setAttribute(attrs[i], IFunction::Attribute(false));
+    for (auto &attr : attrs) {
+      yVector.setAttribute(attr, IFunction::Attribute(false));
     }
 
     std::vector<double> randNums(yVector.requiredRandomNums(), 0.5);

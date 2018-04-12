@@ -162,8 +162,8 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
       std::remove_if(peaks.begin(), peaks.end(), [&ip, badPeaks](Peak &pk) {
         (void)pk;
         ip++;
-        for (auto ibp = badPeaks.begin(); ibp != badPeaks.end(); ++ibp) {
-          if (*ibp == ip)
+        for (int badPeak : badPeaks) {
+          if (badPeak == ip)
             return true;
         }
         return false;
@@ -630,6 +630,7 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("Col");
   addPeakColumn("QLab");
   addPeakColumn("QSample");
+  addPeakColumn("PeakNumber");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -694,6 +695,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> dSpacing(np);
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
+  std::vector<int> peakNumber(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 
@@ -715,6 +717,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
     dSpacing[i] = p.getDSpacing();
     TOF[i] = p.getTOF();
     runNumber[i] = p.getRunNumber();
+    peakNumber[i] = p.getPeakNumber();
     {
       Matrix<double> gm = p.getGoniometerMatrix();
       goniometerMatrix[9 * i] = gm[0][0];
@@ -857,6 +860,14 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->writeData("column_14", runNumber);
   file->openData("column_14");
   file->putAttr("name", "Run Number");
+  file->putAttr("interpret_as", specifyInteger);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Peak Number column
+  file->writeData("column_17", peakNumber);
+  file->openData("column_17");
+  file->putAttr("name", "Peak Number");
   file->putAttr("interpret_as", specifyInteger);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();

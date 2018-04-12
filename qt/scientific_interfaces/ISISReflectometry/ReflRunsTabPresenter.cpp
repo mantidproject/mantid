@@ -159,6 +159,16 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+void ReflRunsTabPresenter::completedGroupReductionSuccessfully(
+    GroupData const &group, std::string const &workspaceName) {
+  m_mainPresenter->completedGroupReductionSuccessfully(group, workspaceName);
+}
+
+void ReflRunsTabPresenter::completedRowReductionSuccessfully(
+    GroupData const &group, std::string const &workspaceNames) {
+  m_mainPresenter->completedRowReductionSuccessfully(group, workspaceNames);
+}
+
 /** Pushes the list of commands (actions) */
 void ReflRunsTabPresenter::pushCommands() {
 

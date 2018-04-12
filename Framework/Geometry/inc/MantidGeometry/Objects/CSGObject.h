@@ -259,6 +259,7 @@ private:
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> m_handler;
   friend class GeometryHandler;
+  friend class GeometryRenderer;
   /// Is geometry caching enabled?
   bool bGeometryCaching;
   /// a pointer to a class for reading from the geometry cache

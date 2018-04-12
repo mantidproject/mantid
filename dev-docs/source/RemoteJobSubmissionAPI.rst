@@ -1,5 +1,11 @@
+.. _RemoteJobSubmissionAPI:
+
+=========================
 Remote Job Submission API
 =========================
+
+.. contents::
+  :local:
 
 This document describes the web service API that the Mantid Framework uses to submit algorithms to remote compute
 resources. The API is designed to be flexible enough that it can be implemented for just about any compute resource at
@@ -12,30 +18,6 @@ that the 'compute resource' will be used to execute tasks that are impractical t
 
 The reference implementation is the Fermi cluster at the Oak Ridge Spallation Neutron Source (fermi.ornl.gov). Specific
 details of the implementation on Fermi are used as examples throughout this document.
-
-Contents
-========
-
--  `1 Basic Requirements For API Implementations <#Basic_Requirements_For_API_Implementations>`__
--  `2 Versioning <#Versioning>`__
--  `3 Authentication <#Authentication>`__
--  `4 Transactions <#Transactions>`__
--  `5 A Note About File Uploads <#A_Note_About_File_Uploads>`__
--  `6 API v1 URL's <#API_v1_URL.27s>`__
-
-   -  `6.1 Information <#Information>`__
-   -  `6.2 Authentication <#Authentication_2>`__
-   -  `6.3 Transactions <#Transactions_2>`__
-   -  `6.4 File Transfer <#File_Transfer>`__
-   -  `6.5 File Listing <#File_Listing>`__
-   -  `6.6 Job Submission <#Job_Submission>`__
-   -  `6.7 Job Query <#Job_Query>`__
-   -  `6.8 Job Abort <#Job_Abort>`__
-
--  `7 API v1 Extensions <#API_v1_Extensions>`__
-
-   -  `7.1 JOB_DATES <#JOB_DATES>`__
-   -  `7.2 AUTH_USER_NAME <#AUTH_USER_NAME>`__
 
 Basic Requirements For API Implementations
 ==========================================

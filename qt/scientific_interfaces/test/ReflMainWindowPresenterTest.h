@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "../ISISReflectometry/ReflMainWindowPresenter.h"
+#include "MantidKernel/make_unique.h"
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -33,10 +34,11 @@ public:
     MockRunsTabPresenter mockRunsTabPresenter;
     MockEventTabPresenter mockEventTabPresenter;
     MockSettingsTabPresenter mockSettingsTabPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
+    auto mockSaveTabPresenter =
+        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsTabPresenter, &mockEventTabPresenter,
-        &mockSettingsTabPresenter, &mockSaveTabPresenter);
+        &mockSettingsTabPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the values
     double angle = 0.5;
@@ -60,10 +62,11 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
+    auto mockSaveTabPresenter =
+        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
+        &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the options
     EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(0))
@@ -85,10 +88,11 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
+    auto mockSaveTabPresenter =
+        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
+        &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the options
     EXPECT_CALL(mockSettingsPresenter, getReductionOptions(0))
@@ -111,10 +115,11 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
+    auto mockSaveTabPresenter =
+        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
+        &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the options
     EXPECT_CALL(mockSettingsPresenter, getStitchOptions(0)).Times(Exactly(1));
@@ -131,10 +136,11 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
+    auto mockSaveTabPresenter =
+        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
+        &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     EXPECT_CALL(mockView, giveUserCritical("Prompt", "Title"))
         .Times(Exactly(1));
@@ -147,10 +153,11 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
+    auto mockSaveTabPresenter =
+        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
+        &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     EXPECT_CALL(mockView, giveUserInfo("Prompt", "Title")).Times(Exactly(1));
     presenter.giveUserInfo("Prompt", "Title");
@@ -162,10 +169,11 @@ public:
     MockRunsTabPresenter mockRunsPresenter;
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
+    auto mockSaveTabPresenter =
+        Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
         &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
+        &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     EXPECT_CALL(mockView, runPythonAlgorithm("Python code to run"))
         .Times(Exactly(1));

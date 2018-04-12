@@ -45,6 +45,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SetUB", "HasUB"};
+  }
   const std::string category() const override;
 
 protected:

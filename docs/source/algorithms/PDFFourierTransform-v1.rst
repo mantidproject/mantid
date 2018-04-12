@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,7 @@ Output Options
 --------------
 
 **G(r)**
-'''''''''
+########
 
 .. raw:: html
 
@@ -84,7 +84,7 @@ otherwise
 
 
 **g(r)**
-''''''''
+########
 
 .. raw:: html
 
@@ -111,7 +111,7 @@ transforms to
 
 
 **RDF(r)**
-''''''''''
+##########
 
 .. raw:: html
 
