@@ -54,14 +54,14 @@ public:
                                  true); // 3 points
     m_testWS = {"ws1", "ws2", "ws3", "ws4", "ws5", "ws6"};
 
-    for (unsigned int i; i < ws.size(); ++i) {
+    for (unsigned int i = 0; i < ws.size(); ++i) {
       ws[i]->getAxis(0)->setUnit("TOF");
       storeWS(m_testWS[i], ws[i]);
     }
   }
 
   void tearDown() override {
-    for (unsigned int i; i < m_testWS.size(); ++i) {
+    for (unsigned int i = 0; i < m_testWS.size(); ++i) {
       removeWS(m_testWS[i]);
     }
     m_testWS.clear();
