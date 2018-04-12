@@ -15,6 +15,7 @@ The main changes are:
 * Several issues which caused mantid to crash have been fixed.
 * Allowing the live listener funtionality to be used outside ISIS and from the python API.
 * Fixing the header for TOPAS files.
+* Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``
 
 Citation
 --------
@@ -44,38 +45,43 @@ Changes in this version
 * `22177 <https://github.com/mantidproject/mantid/pull/22177>`_ Muon analysis and results table
 * `21655 <https://github.com/mantidproject/mantid/pull/21655>`_ Remove dependence of Kafka Live Listener on ISIS specific event data
 * `22226 <https://github.com/mantidproject/mantid/pull/22226>`_ Error when deleting a workspace group in MantidPlot
+* `20997 <https://github.com/mantidproject/mantid/pull/20997>`_ Re #20991: Updated Reflectometry IDFs
 
 Summary of impact
 -----------------
 
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| Issue | Impact                                                                    | Solution                  | Side Effect  |
-|       |                                                                           |                           | Probability  |
-+=======+===========================================================================+===========================+==============+
-| 22205 | Fix header for TOPAS files                                                | Check for header type     | **low**      |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22215 | Fix bug when using StartLiveData through Python API                       | Remove kwarg if None      | **medium**   |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22195 | CrystalField Multi-spectrum resolution model segfault                     | Check sizes               | **low**      |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22194 | SofQW3 segfault no longer occurs                                          | Indexing change           | **medium**   |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22190 | OSX Muon Interface data requirments fixed                                 | GUI changes               | **low**      |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22182 | Update mslice to fix issue with matplotlib < 1.5                          | Update sha1               | **medium**   |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22200 | Fix unreliable tests: Disable ClearCache doc test                         | Clear cache before build  | **low**      |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22244 | Fix dQ calculation in MR Reduction                                        | Now uses radians          | **low**      |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22178 | Fix menu is Muon Analysis not disabled                                    | Change enabled conditions | **medium**   |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22177 | Muon analysis results table generated correctly                           | Additional checks         | **medium**   |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 21655 | Remove dependence of Kafka Live Listener on ISIS specific event data      | Remove dependence         | **low**      |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
-| 22226 | Error when deleting a workspace group in MantidPlot                       | Better thread safety      | **low**      |
-+-------+---------------------------------------------------------------------------+---------------------------+--------------+
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| Issue | Impact                                                                                  | Solution                  | Side Effect  |
+|       |                                                                                         |                           | Probability  |
++=======+=========================================================================================+===========================+==============+
+| 22205 | Fix header for TOPAS files                                                              | Check for header type     | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22215 | Fix bug when using StartLiveData through Python API                                     | Remove kwarg if None      | **medium**   |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22195 | CrystalField Multi-spectrum resolution model segfault                                   | Check sizes               | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22194 | SofQW3 segfault no longer occurs                                                        | Indexing change           | **medium**   |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22190 | OSX Muon Interface data requirments fixed                                               | GUI changes               | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22182 | Update mslice to fix issue with matplotlib < 1.5                                        | Update sha1               | **medium**   |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22200 | Fix unreliable tests: Disable ClearCache doc test                                       | Clear cache before build  | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22244 | Fix dQ calculation in MR Reduction                                                      | Now uses radians          | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22178 | Fix menu is Muon Analysis not disabled                                                  | Change enabled conditions | **medium**   |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22177 | Muon analysis results table generated correctly                                         | Additional checks         | **medium**   |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 21655 | Remove dependence of Kafka Live Listener on ISIS specific event data                    | Remove dependence         | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22226 | Error when deleting a workspace group in MantidPlot                                     | Better thread safety      | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 20997 | Updated Reflectometry IDFs                                                              | Changed IDFs              | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 20997 | Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``| Removed old algorithms    | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org
 
