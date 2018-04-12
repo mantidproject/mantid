@@ -66,7 +66,7 @@ Output:
     7 False False
     8 True  True
     
-    Masked detectors from list
+    Masked detector IDs
     [ 9 11 13 15 17]
 
 .. categories::
