@@ -18,6 +18,8 @@ new MatrixWorkspace with a single X bin where:
 The spectra containing 0 are also marked as masked and the instrument
 link is preserved so that the instrument view functions correctly.
 
+A list of masked detector IDs is also output. Note this contains the detector IDs which 
+are masked rather than the index or spectrum number. 
 
 Usage
 -----
