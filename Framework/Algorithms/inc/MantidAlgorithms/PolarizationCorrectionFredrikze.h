@@ -48,9 +48,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> execPolynomialCorrection(
-      boost::shared_ptr<Mantid::API::MatrixWorkspace> &input,
-      const std::vector<double> &coefficients);
+  boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  getEfficiencyWorkspace(const std::string &label);
   boost::shared_ptr<Mantid::API::WorkspaceGroup>
   execPA(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
   boost::shared_ptr<Mantid::API::WorkspaceGroup>
@@ -61,10 +60,6 @@ private:
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   multiply(boost::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
            const double &rhs);
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
-  copyShapeAndFill(boost::shared_ptr<Mantid::API::MatrixWorkspace> &base,
-                   const double &value);
-  bool isPropertyDefault(const std::string &propertyName) const;
 };
 
 } // namespace Algorithms

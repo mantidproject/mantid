@@ -2,14 +2,20 @@
 #define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+
+#include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
 #include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include <boost/make_shared.hpp>
+#include "MantidKernel/OptionalBool.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
+
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -23,7 +29,10 @@ public:
   static PolarizationCorrectionFredrikzeTest *createSuite() {
     return new PolarizationCorrectionFredrikzeTest();
   }
-  static void destroySuite(PolarizationCorrectionFredrikzeTest *suite) { delete suite; }
+  static void destroySuite(PolarizationCorrectionFredrikzeTest *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
 
   void test_Init() {
     PolarizationCorrectionFredrikze alg;
@@ -64,12 +73,35 @@ public:
     return group;
   }
 
+  MatrixWorkspace_sptr makeEfficiencies(Workspace_sptr inWS,
+                                        const std::string &rho,
+                                        const std::string &pp,
+                                        const std::string &alpha = "",
+                                        const std::string &ap = "") {
+    CreatePolarizationEfficiencies alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("CRho", rho);
+    alg.setPropertyValue("CPp", pp);
+    if (!ap.empty()) {
+      alg.setPropertyValue("CAp", ap);
+      alg.setPropertyValue("CAlpha", alpha);
+    }
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    return outWS;
+  }
+
   void test_throw_if_PA_and_group_is_wrong_size_throws() {
     Mantid::API::WorkspaceGroup_sptr inWS =
         boost::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -77,10 +109,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setPropertyValue("CRho", "1,1,1,1");
-    alg.setPropertyValue("CAlpha", "1,1,1,1");
-    alg.setPropertyValue("CAp", "1,1,1,1");
-    alg.setPropertyValue("CPp", "1,1,1,1");
+    alg.setProperty("Efficiencies", efficiencies);
 
     alg.setPropertyValue("OutputWorkspace", outWSName);
     TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw",
@@ -93,6 +122,7 @@ public:
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -101,10 +131,7 @@ public:
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setPropertyValue("CRho", "1,1,1,1");
-    alg.setPropertyValue("CAlpha", "1,1,1,1");
-    alg.setPropertyValue("CAp", "1,1,1,1");
-    alg.setPropertyValue("CPp", "1,1,1,1");
+    alg.setProperty("Efficiencies", efficiencies);
     TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw",
                       alg.execute(), std::invalid_argument &);
   }
@@ -119,6 +146,7 @@ public:
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -127,10 +155,7 @@ public:
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setPropertyValue("CRho", "1,1,1,1");
-    alg.setPropertyValue("CAlpha", "1,1,1,1");
-    alg.setPropertyValue("CAp", "1,1,1,1");
-    alg.setPropertyValue("CPp", "1,1,1,1");
+    alg.setProperty("Efficiencies", efficiencies);
     TSM_ASSERT_THROWS("Wrong workspace types in group", alg.execute(),
                       std::invalid_argument &);
   }
@@ -149,6 +174,7 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -157,10 +183,7 @@ public:
     alg.setProperty("InputWorkspace", groupWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setPropertyValue("CRho", "1,0,0,0");
-    alg.setPropertyValue("CAlpha", "1,0,0,0");
-    alg.setPropertyValue("CAp", "1,0,0,0");
-    alg.setPropertyValue("CPp", "1,0,0,0");
+    alg.setProperty("Efficiencies", efficiencies);
     alg.execute();
     WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
 
@@ -181,10 +204,79 @@ public:
     }
   }
 
+  void setInstrument(Workspace_sptr ws, const std::string &instrument_name) {
+    auto alg = AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+    AnalysisDataService::Instance().addOrReplace("dummy", ws);
+    alg->initialize();
+    alg->setProperty("Workspace", "dummy");
+    alg->setProperty("InstrumentName", instrument_name);
+    alg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+    alg->execute();
+  }
+
+  void test_run_PA_default() {
+    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    setInstrument(groupWS, "POLREF");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", efficiencies);
+    alg.execute();
+    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(),
+                      groupWS->size());
+
+    for (size_t i = 0; i < outWS->size(); ++i) {
+      std::cout << "Checking equivalent workspaces at index : " << i << '\n';
+      auto checkAlg =
+          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+      checkAlg->initialize();
+      checkAlg->setChild(true);
+      checkAlg->setProperty("Workspace1", groupWS->getItem(i));
+      checkAlg->setProperty("Workspace2", outWS->getItem(i));
+      checkAlg->setProperty("Tolerance", 3e-16);
+      checkAlg->execute();
+      TS_ASSERT(!checkAlg->getProperty("Result"));
+    }
+  }
+
+  void test_run_PA_default_no_instrument_parameters() {
+    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", efficiencies);
+    TSM_ASSERT_THROWS("Instrument doesn't have default efficiencies, should throw",
+                  alg.execute(), std::invalid_argument &);
+
+  }
+
   void test_run_PNR_unity() {
     auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -193,8 +285,7 @@ public:
     alg.setProperty("InputWorkspace", groupWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setPropertyValue("CRho", "1,0,0,0");
-    alg.setPropertyValue("CPp", "1,0,0,0");
+    alg.setProperty("Efficiencies", efficiencies);
     alg.execute();
     WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
 

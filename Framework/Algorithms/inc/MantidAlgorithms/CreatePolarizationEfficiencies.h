@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
-#define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
+#ifndef MANTID_ALGORITHMS_CREATEPOLARIZATIONEFFICIENCIES_H_
+#define MANTID_ALGORITHMS_CREATEPOLARIZATIONEFFICIENCIES_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -7,10 +7,6 @@
 #include <boost/optional.hpp>
 
 namespace Mantid {
-namespace API {
-class WorkspaceGroup;
-class MatrixWorkspace;
-}
 namespace Algorithms {
 
 /** CreatePolarizationEfficiencies
@@ -51,4 +47,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_ */
+#endif /* MANTID_ALGORITHMS_CREATEPOLARIZATIONEFFICIENCIES_H_ */
