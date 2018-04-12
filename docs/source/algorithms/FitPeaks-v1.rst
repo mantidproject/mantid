@@ -102,21 +102,21 @@ Peak positions
 
 One of only one of the following will be taken.
 
- * A :py:obj:mantid.api.MatrixWorkspace
-   * Number of spectra shall be the same as the number of spectra of the workspace containing peaks to fit for.  Or the number of spectra is the same as the number of spectra of the input workspace.
-   * X value is the index of the peak.
-   * Y value is the position of the peaks to fit.
-   * Peak centers are stored in **m_peakCenterWorkspace**.
-   - Spectra can be a subset of all spectra because FitPeaks can work on partial spectra.
+* A :py:obj:mantid.api.MatrixWorkspace
+  * Number of spectra shall be the same as the number of spectra of the workspace containing peaks to fit for.  Or the number of spectra is the same as the number of spectra of the input workspace.
+  * X value is the index of the peak.
+  * Y value is the position of the peaks to fit.
+  * Peak centers are stored in **m_peakCenterWorkspace**.
+  - Spectra can be a subset of all spectra because FitPeaks can work on partial spectra.
 
- * An array of double as the positions of the peaks to fit.
+* An array of double as the positions of the peaks to fit.
 
-   * Peak centers are stored in **m_peakCenters**
+  * Peak centers are stored in **m_peakCenters**
 
 
- **Peaks' positions must be given in ascending order**
+**Peaks' positions must be given in ascending order**
 
- Parameter ``FitFromRight`` deontes start fits from right most peak rather than left most peak.
+Parameter ``FitFromRight`` deontes start fits from right most peak rather than left most peak.
 
 
 
@@ -125,8 +125,8 @@ Fit Window
 
 There are two input parameters that are associated with fitting window.
 
- * FitWindowBoundaryList
- * FitPeakWindowWorkspace
+* FitWindowBoundaryList
+* FitPeakWindowWorkspace
 
 
 If FitWindows is defined, then a peak's range to fit (i.e., x-min and
@@ -163,10 +163,10 @@ Tolerance will be always checked!
 Algorithm Configurations
 ########################
 
- * Peak profile starting value will be given as 
+* Peak profile starting value will be given as 
 
-    - an array ``PeakParameterValues`` such that the starting values are uniform among all spectra.
-    - a table (workspace) ``PeakParameterValueTable`` such that the starting values are not necessary same among all spectra.
+   - an array ``PeakParameterValues`` such that the starting values are uniform among all spectra.
+   - a table (workspace) ``PeakParameterValueTable`` such that the starting values are not necessary same among all spectra.
 
 
 Calculation of starting value of peak profile and background parameters
@@ -268,16 +268,16 @@ OutputWorkspace
 
 It is a py:obj:mantid.api.MatrixWorkspace containing the peak positions expected and fitted.
 
-- The output workspace has *N* spectra corresponding to the spectra that are specified by user via ``MinimumWorkspaceIndex`` and ``MaximumWorkspaceIndex``.
-- If there are *m* peaks that are required to fit for, then each spectrum in the output workspace has *m* data points.
-- In each spectrum, *x(i)* is the expected position of *i-th* peak; *y(i)* is the fitted position of *i-th* peak; and *e(i)* is the cost from fitting.
-- There are several cases that the fitting could fail.  A negative peak position *y(i)* combined with *e(i)* equal to *DBL_MAX* denote such failure.
-- Cause of fitting failure is denoted by different negative value of *y(i)*
-  * -1: empty spectrum
-  * -2: spectrum with too few counts
-  * -3: peak is low
-  * -4: TODO : find out the answer
-  * -5: TODO : find out the answer
+* The output workspace has *N* spectra corresponding to the spectra that are specified by user via ``MinimumWorkspaceIndex`` and ``MaximumWorkspaceIndex``.
+* If there are *m* peaks that are required to fit for, then each spectrum in the output workspace has *m* data points.
+* In each spectrum, *x(i)* is the expected position of *i-th* peak; *y(i)* is the fitted position of *i-th* peak; and *e(i)* is the cost from fitting.
+* There are several cases that the fitting could fail.  A negative peak position *y(i)* combined with *e(i)* equal to *DBL_MAX* denote such failure.
+* Cause of fitting failure is denoted by different negative value of *y(i)*
+  - -1: empty spectrum
+  - -2: spectrum with too few counts
+  - -3: peak is low
+  - -4: TODO : find out the answer
+  - -5: TODO : find out the answer
 
 
 
