@@ -19,6 +19,7 @@
 #include "MantidKernel/StringContainsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -28,21 +29,23 @@ using namespace Mantid::API;
 
 MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
                                          const std::string &outputName) {
-  auto convSpec =
-      AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
-  convSpec->setAlwaysStoreInADS(true);
-  convSpec->setProperty("InputWorkSpace", inputWorkspace);
-  convSpec->setProperty("OutputWorkSpace", outputName);
+  auto convSpec = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+  convSpec->setLogging(false);
+  convSpec->setProperty("InputWorkspace", inputWorkspace);
+  convSpec->setProperty("OutputWorkspace", outputName);
   convSpec->setProperty("Target", "ElasticQ");
   convSpec->setProperty("EMode", "Indirect");
   convSpec->execute();
-  return convSpec->getProperty("OutputWorkspace");
+  // Attempting to use getProperty("OutputWorkspace") on algorithm results in a
+  // nullptr being returned
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      outputName);
 }
 
 MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
                                     const std::string &outputName) {
-  auto cloneWs = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
-  cloneWs->setAlwaysStoreInADS(true);
+  auto cloneWs = AlgorithmManager::Instance().create("CloneWorkspace");
+  cloneWs->setLogging(false);
   cloneWs->setProperty("InputWorkspace", inputWorkspace);
   cloneWs->setProperty("OutputWorkspace", outputName);
   cloneWs->execute();
@@ -61,18 +64,6 @@ MatrixWorkspace_sptr convertInputToElasticQ(MatrixWorkspace_sptr inputWorkspace,
   } else
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
-}
-
-IFunction_sptr lastFunction(IFunction_sptr function) {
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
-
-  if (composite) {
-    if (composite->nFunctions() > 0)
-      return composite->getFunction(composite->nFunctions() - 1);
-    return nullptr;
-  }
-  return function;
 }
 
 std::size_t numberOfFunctions(CompositeFunction_sptr composite,
@@ -94,10 +85,12 @@ std::size_t numberOfFunctions(IFunction_sptr function,
   return function->name() == functionName ? 1 : 0;
 }
 
+bool containsFunction(IFunction_sptr function, const std::string &functionName);
+
 bool containsFunction(CompositeFunction_sptr composite,
                       const std::string &functionName) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
-    if (composite->getFunction(i)->name() == functionName)
+    if (containsFunction(composite->getFunction(i), functionName))
       return true;
   }
   return false;
@@ -107,9 +100,37 @@ bool containsFunction(IFunction_sptr function,
                       const std::string &functionName) {
   const auto composite =
       boost::dynamic_pointer_cast<CompositeFunction>(function);
-  if (composite)
+  if (function->name() == functionName)
+    return true;
+  else if (composite)
     return containsFunction(composite, functionName);
-  return function->name() == functionName;
+  return false;
+}
+
+std::string shortParameterName(const std::string &longName) {
+  return longName.substr(longName.rfind('.') + 1, longName.size() - 1);
+}
+
+template <typename Filter>
+std::vector<std::string> getUniqueShortParameterNames(IFunction_sptr function,
+                                                      const Filter &filter) {
+  std::unordered_set<std::string> nameSet;
+  std::vector<std::string> names;
+  names.reserve(function->nParams());
+
+  for (auto i = 0u; i < function->nParams(); ++i) {
+    auto name = shortParameterName(function->parameterName(i));
+
+    if (filter(name) && nameSet.find(name) == nameSet.end()) {
+      names.emplace_back(name);
+      nameSet.insert(name);
+    }
+  }
+  return names;
+}
+
+std::string temporaryName(std::size_t index) {
+  return "__convfit_fit_ws" + std::to_string(index);
 }
 } // namespace
 
@@ -154,11 +175,14 @@ void ConvolutionFitSequential::initConcrete() {
                   Direction::Input);
 }
 
-IValidator_sptr ConvolutionFitSequential::functionValidator() const {
-  auto scv = boost::make_shared<StringContainsValidator>();
-  auto requires = std::vector<std::string>{"Convolution", "Resolution"};
-  scv->setRequiredStrings(requires);
-  return scv;
+std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
+  std::map<std::string, std::string> errors;
+  IFunction_sptr function = getProperty("Function");
+  if (!containsFunction(function, "Convolution") ||
+      !containsFunction(function, "Resolution"))
+    errors["Function"] = "Function provided does not contain convolution with "
+                         "a resolution function.";
+  return errors;
 }
 
 void ConvolutionFitSequential::setup() {
@@ -169,43 +193,48 @@ void ConvolutionFitSequential::setup() {
 
 std::vector<std::string>
 ConvolutionFitSequential::getFitParameterNames() const {
-  std::vector<std::string> parameters;
-
-  if (m_deltaUsed)
-    parameters.emplace_back("Height");
-
   IFunction_sptr function = getProperty("Function");
-  auto last = lastFunction(function);
-  auto lastParameters = last->getParameterNames();
-  if (last->name() == "Lorentzian") {
-    auto position =
-        find(lastParameters.begin(), lastParameters.end(), "PeakCentre");
-    lastParameters.erase(position);
-    parameters.emplace_back("EISF");
-  }
+  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto model = composite->getFunction(composite->nFunctions() - 1);
 
-  parameters.insert(std::end(parameters), std::begin(lastParameters),
-                    std::end(lastParameters));
-  return parameters;
+  auto names = getUniqueShortParameterNames(model, [](const std::string &name) {
+    return !boost::ends_with(name, "Centre");
+  });
+
+  if (m_lorentzianCount > 0)
+    names.emplace_back("EISF");
+  return names;
 }
 
 std::vector<MatrixWorkspace_sptr>
 ConvolutionFitSequential::getWorkspaces() const {
   auto workspaces = QENSFitSequential::getWorkspaces();
-
-  for (auto i = 0u; i < workspaces.size(); ++i) {
-    const std::string tempFitWsName = "__convfit_fit_ws" + std::to_string(i);
-    workspaces[i] = convertInputToElasticQ(workspaces[i], tempFitWsName);
-  }
+  for (auto i = 0u; i < workspaces.size(); ++i)
+    workspaces[i] = convertInputToElasticQ(workspaces[i], temporaryName(i));
   return workspaces;
 }
 
 ITableWorkspace_sptr
-ConvolutionFitSequential::performFit(const std::string &input) {
-  auto parameterWorkspace = QENSFitSequential::performFit(input);
+ConvolutionFitSequential::performFit(const std::string &input,
+                                     const std::string &output) {
+  auto parameterWorkspace = QENSFitSequential::performFit(input, output);
   if (m_deltaUsed)
     calculateEISF(parameterWorkspace);
   return parameterWorkspace;
+}
+
+void ConvolutionFitSequential::deleteTemporaryWorkspaces(
+    const std::string &outputBaseName) {
+  QENSFitSequential::deleteTemporaryWorkspaces(outputBaseName);
+  auto deleter = createChildAlgorithm("DeleteWorkspace", -1.0, -1.0, false);
+  std::size_t i = 0;
+  auto name = temporaryName(i);
+
+  while (AnalysisDataService::Instance().doesExist(name)) {
+    deleter->setProperty("Workspace", name);
+    deleter->executeAsChildAlg();
+    name = temporaryName(i++);
+  }
 }
 
 void ConvolutionFitSequential::postExec(API::MatrixWorkspace_sptr result) {
@@ -387,32 +416,6 @@ void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs) {
       errCol->cell<double>(j) = eisfErr.at(j);
     }
   }
-}
-
-/*
- * Extracts the convolution fit members from the specified result group
- * workspace, given the specified input workspace used for the fit, each into a
- * workspace, stored inside a group workspace of the specified name.
- *
- * @param inputWs       The input workspace used in the convolution fit.
- * @param resultGroupWs The result group workspace produced by the convolution
- *                      fit; from which to extract the members.
- * @param outputWsName  The name of the output group workspace to store the
- *                      member workspaces.
- */
-void ConvolutionFitSequential::extractMembers(
-    MatrixWorkspace_sptr inputWs, WorkspaceGroup_sptr resultGroupWs,
-    const std::vector<std::string> &convolvedMembers,
-    const std::string &outputWsName) {
-  bool convolved = getProperty("Convolve");
-  auto extractMembersAlg =
-      AlgorithmManager::Instance().create("ExtractQENSMembers");
-  extractMembersAlg->setProperty("InputWorkspace", inputWs);
-  extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
-  extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
-  extractMembersAlg->setProperty("RenameConvolvedMembers", convolved);
-  extractMembersAlg->setProperty("ConvolvedMembers", convolvedMembers);
-  extractMembersAlg->execute();
 }
 
 } // namespace Algorithms

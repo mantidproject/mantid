@@ -41,13 +41,15 @@ public:
 
 protected:
   std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const override;
-  API::ITableWorkspace_sptr performFit(const std::string &input) override;
+  API::ITableWorkspace_sptr performFit(const std::string &input,
+                                       const std::string &output) override;
+  void deleteTemporaryWorkspaces(const std::string &outputBaseName) override;
 
 private:
+  std::map<std::string, std::string> validateInputs() override;
   void initConcrete() override;
   void setup() override;
   void postExec(API::MatrixWorkspace_sptr result) override;
-  Kernel::IValidator_sptr functionValidator() const override;
   std::vector<std::string> getFitParameterNames() const override;
 
   std::vector<std::string> searchForFitParams(const std::string &,
@@ -55,10 +57,6 @@ private:
   std::vector<double> squareVector(std::vector<double>);
   std::vector<double> cloneVector(const std::vector<double> &);
   void calculateEISF(API::ITableWorkspace_sptr &);
-  void extractMembers(Mantid::API::MatrixWorkspace_sptr inputWs,
-                      Mantid::API::WorkspaceGroup_sptr resultGroupWs,
-                      const std::vector<std::string> &convolvedMembers,
-                      const std::string &outputWsName);
 
   bool m_deltaUsed;
   std::size_t m_lorentzianCount;
