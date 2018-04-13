@@ -301,7 +301,7 @@ def mask_angle(mask_info, workspace):
 
 def mask_beam_stop(mask_info, workspace, instrument, detector_names):
     """
-    The beam stop is being masked here. Note that this is only implemented for SANS2D
+    The beam stop is being masked here.
 
     :param mask_info: a SANSStateMask object.
     :param workspace: the workspace which is to be masked.
