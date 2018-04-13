@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/Stitch1D.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -374,11 +375,18 @@ MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr &inOne,
  @param inWS :: Input workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inWS) {
-  auto conjoinX = this->createChildAlgortihm("ConjoinXRuns");
-  conjoinX->setProperty("InputWorkspace", inWS);
+MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
+                                            MatrixWorkspace_sptr &inTwo) {
+  std::string in1 = "__Stitch1D_intermediate_workspace_1__";
+  std::string in2 = "__Stitch1D_intermediate_workspace_2__";
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(in1, inOne);
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(in2, inTwo);
+  auto conjoinX = this->createChildAlgorithm("ConjoinXRuns");
+  conjoinX->setProperty("InputWorkspace", std::vector<std::string>{in1, in2});
   conjoinX->execute();
   MatrixWorkspace_sptr outWS = conjoinX->getProperty("OutputWorkspace");
+  Mantid::API::AnalysisDataService::Instance().remove(in1);
+  Mantid::API::AnalysisDataService::Instance().remove(in2);
   return outWS;
 }
 
@@ -387,7 +395,7 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inWS) {
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::sortXAxis(MatrixWorkspace_sptr &inWS) {
-  auto sortX = this->createChildAlgortihm("SortXAxis");
+  auto sortX = this->createChildAlgorithm("SortXAxis");
   sortX->setProperty("InputWorkspace", inWS);
   sortX->execute();
   MatrixWorkspace_sptr outWS = sortX->getProperty("OutputWorkspace");
@@ -585,7 +593,8 @@ void Stitch1D::exec() {
     // If the input workspaces are point data ...
     if (!rhsWS->isHistogramData() && !lhsWS->isHistogramData()) {
       // Sort according to x values
-      overlapave = sortXAxis(conjoinXaxis(overlap1, overlap2));
+      auto ws = conjoinXAxis(overlap1, overlap2);
+      overlapave = sortXAxis(ws);
     } else {
       g_log.error("Input workspaces must be both histograms or point data");
       throw std::invalid_argument(

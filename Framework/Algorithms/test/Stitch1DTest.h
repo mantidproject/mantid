@@ -8,10 +8,10 @@
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidHistogramData/HistogramX.h"
-#include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
 #include <algorithm>
