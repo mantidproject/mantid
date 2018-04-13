@@ -55,11 +55,11 @@ void ProcessIndirectFitParameters::init() {
       "ColumnX", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "The column in the table to use for the x values.", Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<std::string>>(
-                      "ParameterNames", "",
-                      boost::make_shared<MandatoryValidator<std::string>>(),
-                      Direction::Input),
-                  "List of the parameter names to add to the workspace.");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>(
+          "ParameterNames",
+          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+      "List of the parameter names to add to the workspace.");
 
   declareProperty("XAxisUnit", "",
                   boost::make_shared<StringListValidator>(unitOptions),
