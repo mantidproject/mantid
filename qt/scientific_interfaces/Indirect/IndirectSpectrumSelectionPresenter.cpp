@@ -3,141 +3,120 @@
 #include "MantidKernel/ArrayProperty.h"
 
 #include <algorithm>
+#include <iterator>
 #include <sstream>
 
+#include <boost/numeric/conversion/cast.hpp>
+
 namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
 
-template <typename T>
-std::vector<T> vectorFromString(const std::string &listString) {
-  try {
-    return Mantid::Kernel::ArrayProperty<T>("vector", listString);
-  } catch (const std::runtime_error &) {
-    return std::vector<T>();
+struct SetViewSpectra : boost::static_visitor<> {
+  SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
+
+  void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
+    m_view->displaySpectra(spectra.first, spectra.second);
   }
-}
 
-template <template <class...> typename Map, typename Key, typename Value,
-          typename... Ts>
-const Value &getValueOr(const Map<Key, Value, Ts...> &map, const Key &key,
-                        const Value &value) {
-  const auto iterator = map.find(key);
-  return iterator == map.end() ? value : iterator->second;
-}
-
-template <typename T, typename... Ts>
-std::vector<T, Ts...> outOfRange(const std::vector<T, Ts...> &values,
-                                 const T &minimum, const T &maximum) {
-  std::vector<T, Ts...> result;
-  for (auto &&value : values) {
-    if (value < minimum || value > maximum)
-      result.emplace_back(value);
+  void operator()(const std::string &spectra) const {
+    m_view->displaySpectra(spectra);
   }
-  return result;
-}
 
-template <typename T>
-std::string commaSeparatedList(const std::vector<T> &values) {
-  std::stringstream stream;
-  std::copy(values.begin(), values.end(),
-            std::ostream_iterator<T>(stream, ","));
-  return stream.str();
-}
+private:
+  IndirectSpectrumSelectionView *m_view;
+};
 
-} // namespace
+}; // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 namespace Regexes {
-const std::string SPACE = "(\\s*)";
-const std::string COMMA = "(" + SPACE + "," + SPACE + ")";
-const std::string MINUS = "(" + SPACE + "\\-" + SPACE + ")";
-const std::string NUMBER = "([1-9][0-9]*)";
+const std::string EMPTY = "^$";
+const std::string SPACE = "(\\s)*";
+const std::string COMMA = SPACE + "," + SPACE;
+const std::string MINUS = SPACE + "\\-" + SPACE;
+const std::string NUMBER = "(0|[1-9][0-9]*)";
 const std::string RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
-const std::string NUMBER_OR_RANGE = "(" + NUMBER + "|" + RANGE + ")";
-const std::string LIST = "(" + NUMBER_OR_RANGE + "(" + NUMBER_OR_RANGE + ")*)";
-const std::string RANGE_LIST = "(" + RANGE + "(" + RANGE + ")*)";
+const std::string NUMBER_OR_RANGE = "(" + RANGE + "|" + NUMBER + ")";
+const std::string SPECTRA_LIST =
+    "(" + NUMBER_OR_RANGE + "(" + COMMA + NUMBER_OR_RANGE + ")*)";
+const std::string MASK_LIST =
+    "(" + RANGE + "(" + COMMA + RANGE + ")*" + ")|" + EMPTY;
 } // namespace Regexes
 
 IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
-    IndirectSpectrumSelectionView *view)
-    : QObject(nullptr), m_view(view) {
+    IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
+    : QObject(nullptr), m_model(model), m_view(view) {
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
           this, SLOT(updateSpectraList(const std::string &)));
   connect(m_view.get(),
           SIGNAL(selectedSpectraChanged(std::size_t, std::size_t)), this,
           SLOT(updateSpectraRange(std::size_t, std::size_t)));
+
   connect(m_view.get(), SIGNAL(maskChanged(std::size_t, const std::string &)),
           this, SLOT(setBinMask(std::size_t, const std::string &)));
+  connect(m_view.get(), SIGNAL(maskChanged(std::size_t, const std::string &)),
+          this, SLOT(setMaskSpectraList(std::size_t, const std::string &)));
   connect(m_view.get(), SIGNAL(maskSpectrumChanged(std::size_t)), this,
           SLOT(displayBinMask(std::size_t index)));
 
   connect(m_view.get(), SIGNAL(maskChanged(std::size_t, const std::string &)),
           this, SIGNAL(maskChanged(std::size_t, const std::string &)));
 
-  m_view->setSpectraRegex(Regexes::LIST);
-  m_view->setMaskBinsRegex(Regexes::RANGE_LIST);
+  m_view->setSpectraRegex(Regexes::SPECTRA_LIST);
+  m_view->setMaskBinsRegex(Regexes::MASK_LIST);
+
+  if (nullptr == model->getWorkspace(0))
+    view->setEnabled(false);
 }
 
 IndirectSpectrumSelectionPresenter::~IndirectSpectrumSelectionPresenter() {}
 
-std::pair<std::size_t, std::size_t>
-IndirectSpectrumSelectionPresenter::spectraRange() const {
-  return std::make_pair(m_minimumSpectrum, m_maximumSpectrum);
-}
-
-Spectra IndirectSpectrumSelectionPresenter::selectedSpectra() const {
-  return selectedSpectra(m_view->selectionMode());
-}
-
-Spectra IndirectSpectrumSelectionPresenter::selectedSpectra(
-    SpectrumSelectionMode mode) const {
-  if (mode == SpectrumSelectionMode::RANGE)
-    return m_spectraRange;
-  else
-    return m_spectraList;
-}
-
-const std::unordered_map<std::size_t, std::string> &
-IndirectSpectrumSelectionPresenter::binMasks() const {
-  return m_binMasks;
-}
-
-void IndirectSpectrumSelectionPresenter::setSpectrumRange(std::size_t minimum,
-                                                          std::size_t maximum) {
-  m_minimumSpectrum = minimum;
-  m_maximumSpectrum = maximum;
-  m_view->setSpectrumRange(minimum, maximum);
-  m_view->setMaskSpectrumRange(minimum, maximum);
-}
-
-void IndirectSpectrumSelectionPresenter::setSpectraList(
-    const std::string &spectraList) {
-  m_spectraList = vectorFromString<std::size_t>(m_view->spectraString());
-  auto validator = validateSpectraString();
-
-  if (!validator.isAllInputValid()) {
-    m_spectraList.clear();
-    emit invalidSpectraString(validator.generateErrorMessage());
-  }
+void IndirectSpectrumSelectionPresenter::setActiveModelIndex(
+    std::size_t index) {
+  const auto workspace = m_model->getWorkspace(index);
+  setSpectraRange(0, workspace->getNumberHistograms());
+  boost::apply_visitor(SetViewSpectra(m_view.get()), m_model->getSpectra(index));
+  m_activeIndex = index;
+  m_view->setEnabled(workspace ? true : false);
 }
 
 void IndirectSpectrumSelectionPresenter::setSpectraRange(std::size_t minimum,
                                                          std::size_t maximum) {
-  m_spectraRange = std::make_pair(minimum, maximum);
+  int minimumInt = boost::numeric_cast<int>(minimum);
+  int maximumInt = boost::numeric_cast<int>(maximum);
+  m_view->setSpectraRange(minimumInt, maximumInt);
+  m_view->setMaskSpectraRange(minimumInt, maximumInt);
+}
+
+void IndirectSpectrumSelectionPresenter::setModelSpectra(
+    const Spectra &spectra) {
+  try {
+    m_model->setSpectra(m_view->spectraString(), m_activeIndex);
+    m_spectraError.clear();
+  } catch (const std::runtime_error &ex) {
+    m_spectraError = ex.what();
+    m_view->showSpectraErrorLabel();
+  }
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     const std::string &spectraList) {
-  setSpectraList(spectraList);
-  emit spectraChanged(m_spectraList);
+  setModelSpectra(spectraList);
+  emit spectraChanged(Spectra(spectraList));
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraRange(
     std::size_t minimum, std::size_t maximum) {
-  setSpectraRange(minimum, maximum);
-  emit spectraChanged(m_spectraRange);
+  setModelSpectra(std::make_pair(minimum, maximum));
+  emit spectraChanged(Spectra(std::make_pair(minimum, maximum)));
+}
+
+void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
+    std::size_t, const std::string &maskString) {
+  m_view->setMaskSpectraList(vectorFromString<std::size_t>(maskString));
 }
 
 void IndirectSpectrumSelectionPresenter::setBinMask(
@@ -145,26 +124,27 @@ void IndirectSpectrumSelectionPresenter::setBinMask(
   auto validator = validateMaskBinsString();
 
   if (validator.isAllInputValid())
-    m_binMasks[index] = maskString;
+    m_model->setExcludeRegion(maskString, m_activeIndex, index);
   else
     emit invalidMaskBinsString(validator.generateErrorMessage());
 }
 
 void IndirectSpectrumSelectionPresenter::displayBinMask(std::size_t index) {
-  m_view->setMaskString(getValueOr(m_binMasks, index, std::string()));
+  m_view->setMaskString(m_model->getExcludeRegion(index));
+}
+
+UserInputValidator &
+IndirectSpectrumSelectionPresenter::validate(UserInputValidator &validator) {
+  auto uiv = validateSpectraString();
+  return m_view->validateMaskBinsString(validator);
 }
 
 UserInputValidator IndirectSpectrumSelectionPresenter::validateSpectraString() {
   UserInputValidator uiv;
   uiv = m_view->validateSpectraString(uiv);
-  const auto notInRange =
-      outOfRange(m_spectraList, m_minimumSpectrum, m_maximumSpectrum);
 
-  if (!notInRange.empty()) {
-    auto message = "Spectra out of range: " + commaSeparatedList(notInRange);
-    uiv.addErrorMessage(QString::fromStdString(message));
-    m_view->showSpectraErrorLabel();
-  }
+  if (!m_spectraError.empty())
+    uiv.addErrorMessage(QString::fromStdString(m_spectraError));
   return uiv;
 }
 

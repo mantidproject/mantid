@@ -6,16 +6,15 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <cstddef>
-
-#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-enum SpectrumSelectionMode { RANGE, STRING };
+enum class SpectrumSelectionMode { RANGE, STRING };
 
 /** IndirectSpectrumSelectionView
 
@@ -40,10 +39,10 @@ enum SpectrumSelectionMode { RANGE, STRING };
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IndirectSpectrumSelectionView : public QObject {
+class DLLExport IndirectSpectrumSelectionView : public API::MantidWidget {
   Q_OBJECT
 public:
-  IndirectSpectrumSelectionView(Ui::IndirectSpectrumSelector *selector);
+  IndirectSpectrumSelectionView(QWidget *parent = nullptr);
   ~IndirectSpectrumSelectionView() override;
 
   SpectrumSelectionMode selectionMode() const;
@@ -55,8 +54,11 @@ public:
   std::string spectraString() const;
   std::string maskString() const;
 
-  void setSpectrumRange(std::size_t minimum, std::size_t maximum);
-  void setMaskSpectrumRange(std::size_t minimum, std::size_t maximum);
+  void displaySpectra(const std::string &spectraString);
+  void displaySpectra(int minimum, int maximum);
+
+  void setSpectraRange(int minimum, int maximum);
+  void setMaskSpectraRange(int minimum, int maximum);
 
   void setSpectraRegex(const std::string &regex);
   void setMaskBinsRegex(const std::string &regex);
@@ -74,6 +76,7 @@ public slots:
 
   void setSpectraString(const std::string &spectraString);
   void setMaskString(const std::string &maskString);
+  void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra);
 
 signals:
   void selectedSpectraChanged(const std::string &);
@@ -83,14 +86,18 @@ signals:
 
 private slots:
   void emitMaskSpectrumChanged(int spectrum);
+  void emitMaskSpectrumChanged(const QString& spectrum);
   void emitMaskChanged(const QString &mask);
+  void emitSpectraChanged(int modeIndex);
   void emitSpectraStringChanged();
   void emitSpectraRangeChanged();
+  void setSpectraRangeMiniMax(int value);
+  void setSpectraRangeMaxiMin(int value);
 
 private:
   QValidator *createValidator(const QString &regex);
 
-  Ui::IndirectSpectrumSelector *m_selector;
+  std::unique_ptr<Ui::IndirectSpectrumSelector> m_selector;
 };
 
 } // namespace IDA

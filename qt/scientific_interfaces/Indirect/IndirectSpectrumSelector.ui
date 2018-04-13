@@ -45,7 +45,7 @@
    <item>
     <widget class="QStackedWidget" name="swSpectraSelection">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="loSpectraRange">
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -104,7 +104,22 @@
     </widget>
    </item>
    <item>
-    <widget class="QSpinBox" name="spMaskSpectrum"/>
+    <widget class="QStackedWidget" name="swMaskSpectrumSelection">
+     <widget class="QWidget" name="loMaskSpectrumSp">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QSpinBox" name="spMaskSpectrum"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="loMaskSpectrumCb">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QComboBox" name="cbMaskSpectrum"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item>
     <widget class="QLineEdit" name="leMaskBins"/>
@@ -133,6 +148,22 @@
     <hint type="destinationlabel">
      <x>519</x>
      <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSelectionMode</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swMaskSpectrumSelection</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>95</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>452</x>
+     <y>63</y>
     </hint>
    </hints>
   </connection>

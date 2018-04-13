@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
 
+#include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionView.h"
 
 #include "../General/UserInputValidator.h"
@@ -13,37 +14,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-
-using Spectra =
-    const boost::variant<const std::vector<std::size_t> &,
-                         const std::pair<std::size_t, std::size_t> &>;
-
-/*
-template <typename RangeFunctor>
-using RangeResult = typename std::result_of<RangeFunctor(
-    const std::pair<std::size_t, std::size_t> &)>::type;
-
-template <typename RangeFunctor, typename VectorFunctor>
-class SpectraVisitor : public boost::static_visitor<RangeResult<RangeFunctor>> {
-public:
-  SpectraVisitor(RangeFunctor &&rangeFunctor, VectorFunctor &&vectorFunctor)
-      : m_rangeFunctor(rangeFunctor), m_vectorFunctor(vectorFunctor) {}
-
-  RangeResult<RangeFunctor>
-  operator()(const std::pair<std::size_t, std::size_t> &range) const {
-    return m_rangeFunctor(range);
-  }
-
-  RangeResult<RangeFunctor>
-  operator()(const std::vector<std::size_t> &list) const {
-    return m_vectorFunctor(list);
-  }
-
-private:
-  RangeFunctor m_rangeFunctor;
-  VectorFunctor m_vectorFunctor;
-};
-*/
 
 /** IndirectSpectrumSelectionPresenter
 
@@ -71,42 +41,38 @@ private:
 class DLLExport IndirectSpectrumSelectionPresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectSpectrumSelectionPresenter(IndirectSpectrumSelectionView *view);
+  IndirectSpectrumSelectionPresenter(IndirectFittingModel *model,
+                                     IndirectSpectrumSelectionView *view);
   ~IndirectSpectrumSelectionPresenter() override;
-
-  std::pair<std::size_t, std::size_t> spectraRange() const;
-  Spectra selectedSpectra() const;
-  const std::unordered_map<std::size_t, std::string> &binMasks() const;
-
-  void setSpectrumRange(std::size_t minimum, std::size_t maximum);
+  UserInputValidator &validate(UserInputValidator &validator);
 
 signals:
-  void spectraChanged(const std::vector<std::size_t> &);
-  void spectraChanged(const std::pair<std::size_t, std::size_t> &);
+  void spectraChanged(Spectra spectra);
   void maskSpectrumChanged(std::size_t);
   void invalidSpectraString(const QString &errorMessage);
   void invalidMaskBinsString(const QString &errorMessage);
 
+public slots:
+  void setActiveModelIndex(std::size_t index);
+
 private slots:
   void setBinMask(std::size_t index, const std::string &maskString);
+  void setMaskSpectraList(std::size_t, const std::string &maskString);
   void displayBinMask(std::size_t index);
   void updateSpectraList(const std::string &spectraList);
   void updateSpectraRange(std::size_t minimum, std::size_t maximum);
 
 private:
-  Spectra selectedSpectra(SpectrumSelectionMode mode) const;
-  void setSpectraList(const std::string &spectraList);
   void setSpectraRange(std::size_t minimum, std::size_t maximum);
+  void setModelSpectra(const Spectra &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator validateMaskBinsString();
 
-  std::size_t m_minimumSpectrum;
-  std::size_t m_maximumSpectrum;
-  std::vector<std::size_t> m_spectraList;
-  std::pair<std::size_t, std::size_t> m_spectraRange;
-  std::unordered_map<std::size_t, std::string> m_binMasks;
+  IndirectFittingModel *m_model;
   std::unique_ptr<IndirectSpectrumSelectionView> m_view;
+  std::size_t m_activeIndex;
+  std::string m_spectraError;
 };
 
 } // namespace IDA
