@@ -1,3 +1,4 @@
+#!/bin/bash -ex
 if [ -z "$BUILD_DIR" ]; then
  if [ -z "$WORKSPACE" ]; then
      echo "WORKSPACE not set. Cannot continue"
@@ -48,7 +49,6 @@ if [ -d dev-docs/html ]; then
   cd -
 else
   echo "Cloning developer site"
-  #git clone git@github.com-mantid-builder:mantidproject/developer.git dev-docs/html || exit -1
   git clone git@github.com:mantidproject/developer.git dev-docs/html || exit -1
   cd dev-docs/html
   git checkout gh-pages
