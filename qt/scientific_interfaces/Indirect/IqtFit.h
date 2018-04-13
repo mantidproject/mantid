@@ -2,6 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
 #include "IndirectFitAnalysisTab.h"
+#include "IndirectIqtFitModel.h"
+
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_IqtFit.h"
@@ -25,8 +27,6 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
-  Mantid::API::MatrixWorkspace_sptr fitWorkspace() const override;
-
   bool doPlotGuess() const override;
 
 private:
@@ -35,16 +35,6 @@ private:
   void loadSettings(const QSettings &settings) override;
 
 protected:
-  int minimumSpectrum() const override;
-  int maximumSpectrum() const override;
-
-  QHash<QString, double> createDefaultValues() const override;
-  std::string createSingleFitOutputName() const override;
-  std::string createSequentialFitOutputName() const override;
-  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
-  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
-  void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                        int maxIterations) const override;
   void enablePlotResult() override;
   void disablePlotResult() override;
   void enableSaveResult() override;
@@ -78,17 +68,9 @@ private:
 
   void updateIntensityTie();
   void updateIntensityTie(const QString &intensityTie);
-  std::string createIntensityTie(Mantid::API::IFunction_sptr function) const;
-  std::vector<std::string>
-  getParameters(Mantid::API::IFunction_sptr function,
-                const std::string &shortParameterName) const;
-  std::string constructBaseName() const;
   std::string fitTypeString() const;
-  Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
-                                               const size_t &specMax) const;
-  Mantid::API::IAlgorithm_sptr
-  replaceInfinityAndNaN(Mantid::API::MatrixWorkspace_sptr inputWS) const;
 
+  IndirectIqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;
   QString m_tiedParameter;
 };

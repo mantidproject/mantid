@@ -28,9 +28,12 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectFitAnalysisTab(parent), m_uiForm(new Ui::IqtFit) {
+    : IndirectFitAnalysisTab(new IndirectIqtFitModel, parent),
+      m_uiForm(new Ui::IqtFit) {
   m_uiForm->setupUi(parent);
-  IndirectFitAnalysisTab::addPropertyBrowserToUI(m_uiForm.get());
+  m_iqtFittingModel = dynamic_cast<IndirectIqtFitModel *>(fittingModel());
+  setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  addPropertyBrowserToUI(m_uiForm.get());
 }
 
 void IqtFit::setup() {
@@ -104,10 +107,6 @@ void IqtFit::setup() {
           SLOT(customBoolUpdated(const QString &, bool)));
 }
 
-int IqtFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
-
-int IqtFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
-
 void IqtFit::fitFunctionChanged() {
   auto backRangeSelector =
       m_uiForm->ppPlotTop->getRangeSelector("IqtFitBackRange");
@@ -136,11 +135,10 @@ void IqtFit::customBoolUpdated(const QString &key, bool value) {
 }
 
 void IqtFit::updateIntensityTie() {
-  const auto function = fitFunction();
-
-  if (function) {
+  if (m_iqtFittingModel->getFittingFunction()) {
     removeTie(m_tiedParameter);
-    const auto tie = QString::fromStdString(createIntensityTie(fitFunction()));
+    const auto tie =
+        QString::fromStdString(m_iqtFittingModel->createIntensityTie());
     updateIntensityTie(tie);
   } else {
     setCustomBoolSetting("ConstrainIntensities", false);
@@ -181,107 +179,6 @@ std::string IqtFit::fitTypeString() const {
   return "";
 }
 
-MatrixWorkspace_sptr IqtFit::fitWorkspace() const {
-  auto replaceAlg = replaceInfinityAndNaN(inputWorkspace());
-  replaceAlg->execute();
-  return replaceAlg->getProperty("OutputWorkspace");
-}
-
-std::string IqtFit::constructBaseName() const {
-  auto outputName = inputWorkspace()->getName();
-
-  // Remove _red
-  const auto cutIndex = outputName.find_last_of('_');
-  if (cutIndex != std::string::npos)
-    outputName = outputName.substr(0, cutIndex);
-
-  outputName += "_IqtFit_" + fitTypeString();
-
-  if (boolSettingValue("ConstrainBeta"))
-    outputName += "mult";
-  return outputName + "_s";
-}
-
-std::string IqtFit::createSingleFitOutputName() const {
-  return constructBaseName() + std::to_string(selectedSpectrum());
-}
-
-std::string IqtFit::createSequentialFitOutputName() const {
-  const auto minSpectrum = std::to_string(minimumSpectrum());
-  const auto maxSpectrum = std::to_string(maximumSpectrum());
-  return constructBaseName() + minSpectrum + "_to_" + maxSpectrum;
-}
-
-IAlgorithm_sptr IqtFit::singleFitAlgorithm() const {
-  size_t specNo = static_cast<size_t>(m_uiForm->spPlotSpectrum->value());
-  return iqtFitAlgorithm(specNo, specNo);
-}
-
-IAlgorithm_sptr IqtFit::sequentialFitAlgorithm() const {
-  size_t specMin = static_cast<size_t>(m_uiForm->spSpectraMin->value());
-  size_t specMax = static_cast<size_t>(m_uiForm->spSpectraMax->value());
-  return iqtFitAlgorithm(specMin, specMax);
-}
-
-IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
-                                        const size_t &specMax) const {
-  const auto outputName = outputWorkspaceName(specMin);
-  const bool constrainBeta = boolSettingValue("ConstrainBeta");
-  const bool constrainIntens = boolSettingValue("ConstrainIntensities");
-  const bool extractMembers = boolSettingValue("ExtractMembers");
-
-  IAlgorithm_sptr iqtFitAlg;
-
-  if (constrainBeta)
-    iqtFitAlg = AlgorithmManager::Instance().create("IqtFitMultiple");
-  else
-    iqtFitAlg = AlgorithmManager::Instance().create("IqtFitSequential");
-
-  iqtFitAlg->initialize();
-  iqtFitAlg->setProperty("FitType", fitTypeString() + "_s");
-  iqtFitAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
-  iqtFitAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
-  iqtFitAlg->setProperty("ConstrainIntensities", constrainIntens);
-  iqtFitAlg->setProperty("ExtractMembers", extractMembers);
-  iqtFitAlg->setProperty("OutputResultWorkspace", outputName + "_Result");
-  iqtFitAlg->setProperty("OutputParameterWorkspace",
-                         outputName + "_Parameters");
-  iqtFitAlg->setProperty("OutputWorkspaceGroup", outputName + "_Workspaces");
-  return iqtFitAlg;
-}
-
-std::string IqtFit::createIntensityTie(IFunction_sptr function) const {
-  std::string tieString = "1";
-  const auto backIndex = backgroundIndex();
-  const auto intensityParameters = getParameters(function, "Height");
-
-  if (backIndex && !intensityParameters.empty())
-    tieString += "-f" + std::to_string(backIndex.get()) + ".A0";
-  else if (intensityParameters.size() < 2)
-    return "";
-
-  for (auto i = 1u; i < intensityParameters.size(); ++i)
-    tieString += "-" + intensityParameters[i];
-  return intensityParameters[0] + "=" + tieString;
-}
-
-std::vector<std::string>
-IqtFit::getParameters(IFunction_sptr function,
-                      const std::string &shortParameterName) const {
-  std::vector<std::string> parameters;
-
-  for (const auto &longName : function->getParameterNames()) {
-    if (boost::algorithm::ends_with(longName, shortParameterName))
-      parameters.push_back(longName);
-  }
-  return parameters;
-}
-
-void IqtFit::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
-                              int maxIterations) const {
-  fitAlgorithm->setProperty("MaxIterations", static_cast<long>(maxIterations));
-}
-
 void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
@@ -304,16 +201,13 @@ void IqtFit::disablePlotPreview() {
  * Plot workspace based on user input
  */
 void IqtFit::plotWorkspace() {
-  IndirectFitAnalysisTab::plotResult(outputWorkspaceName() + "_Result",
-                                     m_uiForm->cbPlotType->currentText());
+  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
 }
 
 /**
  * Save the result of the algorithm
  */
-void IqtFit::saveResult() {
-  IndirectFitAnalysisTab::saveResult(outputWorkspaceName() + "_Result");
-}
+void IqtFit::saveResult() { m_iqtFittingModel->saveResult(); }
 
 /**
  * Handles completion of the IqtFitMultiple algorithm.
@@ -330,8 +224,7 @@ void IqtFit::algorithmComplete(bool error) {
     return;
   }
 
-  IndirectFitAnalysisTab::fitAlgorithmComplete(outputWorkspaceName() +
-                                               "_Parameters");
+  IndirectFitAnalysisTab::fitAlgorithmComplete();
   m_uiForm->pbPlot->setEnabled(true);
   m_uiForm->pbSave->setEnabled(true);
   m_uiForm->cbPlotType->setEnabled(true);
@@ -385,7 +278,7 @@ void IqtFit::newDataLoaded(const QString wsName) {
 }
 
 void IqtFit::backgroundSelectorChanged(double val) {
-  setDefaultPropertyValue("A0", val);
+  m_iqtFittingModel->setDefaultParameterValue("A0", val, 0);
   setParameterValue("LinearBackground", "A0", val);
   setParameterValue("FlatBackground", "A0", val);
 }
@@ -413,32 +306,6 @@ void IqtFit::updatePlotRange() {
     const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
     rangeSelector->setRange(range.first, range.second);
   }
-}
-
-QHash<QString, double> IqtFit::createDefaultValues() const {
-  QHash<QString, double> defaultValues;
-  // intensity is always 1-background
-  double height = 1.0;
-  if (background() != nullptr)
-    height -= background()->getParameter("A0");
-  defaultValues["Height"] = height;
-
-  auto inputWs = inputWorkspace();
-  double tau = 0;
-
-  if (inputWs) {
-    auto x = inputWs->x(0);
-    auto y = inputWs->y(0);
-
-    if (x.size() > 4) {
-      tau = -x[4] / log(y[4]);
-    }
-  }
-
-  defaultValues["Lifetime"] = tau;
-  defaultValues["Stretching"] = 1.0;
-  defaultValues["A0"] = 0.0;
-  return defaultValues;
 }
 
 /**
@@ -488,18 +355,6 @@ void IqtFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
 void IqtFit::removeGuessPlot() {
   m_uiForm->ppPlotTop->removeSpectrum("Guess");
   m_uiForm->ckPlotGuess->setChecked(false);
-}
-
-IAlgorithm_sptr
-IqtFit::replaceInfinityAndNaN(MatrixWorkspace_sptr inputWS) const {
-  auto replaceAlg = AlgorithmManager::Instance().create("ReplaceSpecialValues");
-  replaceAlg->setChild(true);
-  replaceAlg->initialize();
-  replaceAlg->setProperty("InputWorkspace", inputWS);
-  replaceAlg->setProperty("NaNValue", 0.0);
-  replaceAlg->setProperty("InfinityError", 0.0);
-  replaceAlg->setProperty("OutputWorkspace", inputWS->getName() + "_nospecial");
-  return replaceAlg;
 }
 } // namespace IDA
 } // namespace CustomInterfaces
