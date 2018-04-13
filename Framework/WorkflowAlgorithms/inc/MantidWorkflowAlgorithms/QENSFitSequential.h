@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_QENSFITSEQUENTIAL_H_
 #define MANTID_ALGORITHMS_QENSFITSEQUENTIAL_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -27,7 +27,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport QENSFitSequential : public API::Algorithm {
+class DLLExport QENSFitSequential : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -36,8 +36,10 @@ public:
 
 protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
+  virtual std::vector<std::string> getFitParameterNames() const;
   virtual void deleteTemporaryWorkspaces(const std::string &outputBaseName);
-  virtual API::ITableWorkspace_sptr performFit(const std::string &input);
+  virtual API::ITableWorkspace_sptr performFit(const std::string &input,
+                                               const std::string &output);
 
 private:
   void init() override;
@@ -45,11 +47,10 @@ private:
   virtual void setup();
   void exec() override;
   virtual void postExec(API::MatrixWorkspace_sptr result);
-  virtual Kernel::IValidator_sptr functionValidator() const;
 
+  std::string getOutputBaseName() const;
   std::string getInputString(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
-  virtual std::vector<std::string> getFitParameterNames() const;
   API::MatrixWorkspace_sptr
   processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
 
