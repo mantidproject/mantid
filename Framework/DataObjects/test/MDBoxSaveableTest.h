@@ -254,7 +254,7 @@ public:
     MDBox<MDLeanEvent<3>, 3> *b =
         dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(gb->getChild(22));
     TSM_ASSERT_EQUALS("Child has 8 events", b->getNPoints(), 8);
-    TSM_ASSERT("The child is also saveabele", b->getISaveable() != NULL);
+    TSM_ASSERT("The child is also saveabele", b->getISaveable() != nullptr);
     if (!b->getISaveable())
       return;
 
@@ -753,7 +753,7 @@ public:
         bin.m_max[d] = 4.0;
         bin.m_signal = 0;
       }
-      c.centerpointBin(bin, NULL);
+      c.centerpointBin(bin, nullptr);
       TS_ASSERT_DELTA(bin.m_signal, 8.0, 1e-4);
       TS_ASSERT_DELTA(bin.m_errorSquared, 8.0, 1e-4);
     }
@@ -840,14 +840,13 @@ public:
     size_t numOnDisk = 0;
     uint64_t eventsOnDisk = 0;
     uint64_t maxFilePos = 0;
-    for (size_t i = 0; i < boxes.size(); i++) {
-      API::IMDNode *box = boxes[i];
+    for (auto box : boxes) {
       TS_ASSERT_EQUALS(box->getNPoints(), num_repeat);
       auto mdbox = dynamic_cast<MDBox<MDE, 2> *>(box);
       TS_ASSERT(mdbox);
 
       auto pIO = mdbox->getISaveable();
-      TS_ASSERT(pIO != NULL);
+      TS_ASSERT(pIO != nullptr);
       if (!pIO)
         continue;
 

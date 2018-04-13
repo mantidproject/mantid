@@ -132,7 +132,7 @@ void TransposeMD::exec() {
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
-    auto inIterator = std::unique_ptr<IMDIterator>(iterators[it]);
+    auto inIterator = iterators[it].get();
     do {
       auto center = inIterator->getCenter();
       const coord_t *incoords = center.getBareArray();

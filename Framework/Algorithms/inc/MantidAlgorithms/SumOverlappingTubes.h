@@ -48,6 +48,9 @@ public:
            "supported.";
   }
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SumSpectra"};
+  }
 
 private:
   void init() override;

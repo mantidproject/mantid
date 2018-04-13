@@ -11,6 +11,9 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
     def category(self):
         return 'ILL\\Diffraction;Diffraction\\Utility'
 
+    def seeAlso(self):
+        return [ "PowderDiffILLDetEffCorr","LoadILLDiffraction" ]
+
     def name(self):
         return 'ApplyDetectorScanEffCorr'
 

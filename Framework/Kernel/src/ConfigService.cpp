@@ -1774,8 +1774,9 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
 
   // look through all the possible files
   for (; instrDir != directoryNames.end(); ++instrDir) {
-    std::string filename = (*instrDir) + "Facilities.xml";
-
+    Poco::Path p(*instrDir);
+    p.append("Facilities.xml");
+    std::string filename = p.toString();
     Poco::File fileObj(filename);
     // stop when you find the first one
     if (fileObj.exists())

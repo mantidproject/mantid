@@ -501,7 +501,7 @@ bool ImportOPJ::importNotes(const OPJFile &opj) {
   int visible_count = 0;
   for (int n = 0; n < opj.numNotes(); n++) {
     QString name = opj.noteName(n);
-    QRegExp rx("^@\\((\\S+)\\)$");
+    QRegExp rx(R"(^@\((\S+)\)$)");
     if (rx.indexIn(name) == 0)
       name = rx.cap(1);
 
@@ -1175,8 +1175,8 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
       vector<text> texts = opj.layerTexts(g, l);
       if (style != GraphOptions::Pie) {
         for (size_t i = 0; i < texts.size(); ++i) {
-          addText(texts[i], graph, 0, layerRect, fFontScaleFactor, fXScale,
-                  fYScale);
+          addText(texts[i], graph, nullptr, layerRect, fFontScaleFactor,
+                  fXScale, fYScale);
         }
       }
 
@@ -1358,8 +1358,8 @@ QString ImportOPJ::parseOriginText(const QString &str) {
 QString ImportOPJ::parseOriginTags(const QString &str) {
   QString line = str;
   // Lookbehind conditions are not supported - so need to reverse string
-  QRegExp rx("\\)[^\\)\\(]*\\((?!\\s*[buig\\+\\-]\\s*\\\\)");
-  QRegExp rxfont("\\)[^\\)\\(]*\\((?![^\\:]*\\:f\\s*\\\\)");
+  QRegExp rx(R"(\)[^\)\(]*\((?!\s*[buig\+\-]\s*\\))");
+  QRegExp rxfont(R"(\)[^\)\(]*\((?![^\:]*\:f\s*\\))");
   QString linerev = strreverse(line);
   QString lBracket = strreverse("&lbracket;");
   QString rBracket = strreverse("&rbracket;");
@@ -1396,10 +1396,10 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
 
   // replace \b(...), \i(...), \u(...), \g(...), \+(...), \-(...), \f:font(...)
   // tags
-  QString rxstr[] = {"\\\\\\s*b\\s*\\(",      "\\\\\\s*i\\s*\\(",
-                     "\\\\\\s*u\\s*\\(",      "\\\\\\s*g\\s*\\(",
-                     "\\\\\\s*\\+\\s*\\(",    "\\\\\\s*\\-\\s*\\(",
-                     "\\\\\\s*f\\:[^\\(]*\\("};
+  QString rxstr[] = {R"(\\\s*b\s*\()",     R"(\\\s*i\s*\()",
+                     R"(\\\s*u\s*\()",     R"(\\\s*g\s*\()",
+                     R"(\\\s*\+\s*\()",    R"(\\\s*\-\s*\()",
+                     R"(\\\s*f\:[^\(]*\()"};
   int postag[] = {0, 0, 0, 0, 0, 0, 0};
   QString ltag[] = {"<b>", "<i>", "<u>", "<font face=Symbol>", "<sup>", "<sub>",
                     "<font face=%1>"};
@@ -1407,7 +1407,7 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
                     "</sup>", "</sub>", "</font>"};
   QRegExp rxtags[7];
   for (int i = 0; i < 7; ++i)
-    rxtags[i].setPattern(rxstr[i] + "[^\\(\\)]*\\)");
+    rxtags[i].setPattern(rxstr[i] + R"([^\(\)]*\))");
 
   bool flag = true;
   while (flag) {

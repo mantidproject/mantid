@@ -135,10 +135,12 @@ Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123(
     int64_t nHist, int64_t nBins, bool isHist = false,
-    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
+    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>(),
+    bool hasDx = false);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace154(
     int64_t nHist, int64_t nBins, bool isHist = false,
-    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
+    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>(),
+    bool hasDx = false);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithValuesAndXerror(
     int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,
     double eVal, double dxVal,
@@ -164,8 +166,9 @@ create2DWorkspaceBinned(int nhist, int numVals, double x0 = 0.0,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceBinned(int nhist, const int numBoundaries,
-                        const double xBoundaries[]);
+create2DWorkspaceNonUniformlyBinned(int nhist, const int numBoundaries,
+                                    const double xBoundaries[],
+                                    bool hasDx = false);
 
 struct returnOne {
   double operator()(const double, size_t) { return 1; }
@@ -228,7 +231,8 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     int nhist, int nbins, bool includeMonitors = false,
     bool startYNegative = false, bool isHistogram = true,
-    const std::string &instrumentName = std::string("testInst"));
+    const std::string &instrumentName = std::string("testInst"),
+    bool hasDx = false);
 
 /**
  * Create a workspace as for create2DWorkspaceWithFullInstrument, but including

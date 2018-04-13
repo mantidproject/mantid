@@ -384,8 +384,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
@@ -416,8 +415,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
@@ -449,8 +447,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
@@ -482,8 +479,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.

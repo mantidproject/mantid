@@ -36,7 +36,7 @@ public:
 public slots:
   void sendComponentSelectedSignal(const QModelIndex);
 signals:
-  void componentSelected(const Mantid::Geometry::ComponentID);
+  void componentSelected(size_t);
 
 private:
   InstrumentWidget *m_instrWidget;

@@ -38,6 +38,7 @@ Bug fixes
 #########
 
 - Log values are no longer filtered by start time when loaded into muon analysis.
+- Different options under `Settings`>`Data Binning` give different options for input (OSX bug, see Issue ##22167). Fixed in patch.
 
 Algorithms
 ----------

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,19 +22,19 @@ is that the same number of output workspaces are also given so that CutMD knows
 what to call each output workspace created.
 
 MDEventWorkspaces
-~~~~~~~~~~~~~~~~~~~
+#################
 
 For input of type :ref:`MDEventWorkspace <MDWorkspace>` the algorithm uses :ref:`algm-BinMD` or
 :ref:`algm-SliceMD` to achieve the binning of the data. The choice of child
 algorithm used for slicing in this case is controlled by the NoPix option. 
 
 MDHistoWorkspaces
-~~~~~~~~~~~~~~~~~~~
+#################
 
 If the input is an :ref:`MDHistoWorkspace <MDHistoWorkspace>` :ref:`algm-BinMD` and :ref:`algm-SliceMD` are not made available as they needto get hold of the original MDEvents associated with an :ref:`MDEventWorkspace <MDWorkspace>` in order to perform the rebinning. As this information is missing from the MDHistoWorkspace images, those operations are forbidden. Instead, a limited subset of the operations are allowed, and are performed via :ref:`algm-IntegrateMDHistoWorkspace`. In this case, the Projection and NoPix properties are ignored. See :ref:`algm-IntegrateMDHistoWorkspace` for how the binning parameters are used.
 
 Projection Binning
-~~~~~~~~~~~~~~~~~~
+##################
 
 The 'PnBin' property, where n is between 1 and 5, is used to specify the binning for the nth dimension of the output workspace.
 The dimension will be truncated to have extents 'minimum' and 'maximum', with 'stepsize' specifying the size of the bins inbetween.
@@ -64,7 +64,7 @@ For ease of use, when using the python interface only, the 'PBins' keyword can b
 PBins accepts a tuple, or list, of PnBins parameters. The position in the list determines the dimension it corresponds to. See the Usage_ examples below.
 
 Creating Projections
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 Projections are used by CutMD to transform the multidimensional data prior to
 cutting it. Projections are provided to CutMD in the form of a :ref:`TableWorkspace <Table Workspaces>`.
@@ -124,7 +124,7 @@ call the created workspace:
    CutMD(..., Projection=proj.createWorkspace(), ...)
 
 Workflow
-~~~~~~~~
+########
 
 .. diagram:: CutMD-v1_wkflw.dot
 

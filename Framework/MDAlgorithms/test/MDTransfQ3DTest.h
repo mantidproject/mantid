@@ -116,8 +116,8 @@ public:
     // testing purposes here
     auto &TwoTheta = const_cast<std::vector<double> &>(
         WSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));
-    for (size_t i = 0; i < TwoTheta.size(); i++) {
-      TwoTheta[i] = 0;
+    for (double &i : TwoTheta) {
+      i = 0;
     }
 
     TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",

@@ -12,7 +12,7 @@ public:
                                   const std::string &yDimensionIdMapping,
                                   const std::string &zDimensionIdMapping,
                                   const std::string &tDimensionIdMapping) {
-    return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
+    return std::string(R"(<?xml version="1.0" encoding="utf-8"?>)") +
            "<DimensionSet>" + "<Dimension ID=\"en\">" + "<Name>Energy</Name>" +
            "<UpperBounds>150</UpperBounds>" + "<LowerBounds>0</LowerBounds>" +
            "<NumberOfBins>1</NumberOfBins>" + "</Dimension>" +

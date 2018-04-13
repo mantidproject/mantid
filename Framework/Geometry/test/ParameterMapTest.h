@@ -513,7 +513,7 @@ public:
     Parameter_sptr fetchedValue =
         pmap.getByType(comp.get(), ParameterMap::pDouble());
     TSM_ASSERT("Should not be able to find a double type parameter",
-               fetchedValue == NULL);
+               fetchedValue == nullptr);
   }
 
   void test_lookup_via_type() {
@@ -551,7 +551,7 @@ public:
     // Find it via the component
     Parameter_sptr fetchedValue =
         pmap.getRecursiveByType(component.get(), ParameterMap::pBool());
-    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT(fetchedValue != nullptr);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
@@ -568,7 +568,7 @@ public:
     // Find it via the child
     Parameter_sptr fetchedValue =
         pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
-    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT(fetchedValue != nullptr);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
@@ -589,7 +589,7 @@ public:
     // Find it via the child
     Parameter_sptr fetchedValue =
         pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
-    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT(fetchedValue != nullptr);
     TSM_ASSERT_EQUALS(
         "Has not searched through parameters with the correct priority", "A",
         fetchedValue->name());
@@ -639,7 +639,7 @@ private:
                                           const ValueType &newValue) {
     ParameterMap pmap;
     const std::string name = "Parameter";
-    pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue, NULL);
+    pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue, nullptr);
 
     ParameterMap copy(pmap); // invoke copy constructor
 

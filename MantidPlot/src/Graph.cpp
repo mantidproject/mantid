@@ -3094,7 +3094,7 @@ void Graph::removePie() {
 
   QList<PieLabel *> labels = pieCurve->labelsList();
   foreach (PieLabel *l, labels)
-    l->setPieCurve(0);
+    l->setPieCurve(nullptr);
 
   d_plot->removeCurve(c_keys[0]);
   d_plot->replot();

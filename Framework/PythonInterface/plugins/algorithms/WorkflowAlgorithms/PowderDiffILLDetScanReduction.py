@@ -16,6 +16,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
     def summary(self):
         return 'Performs powder diffraction data reduction for D2B and D20 (when doing a detector scan).'
 
+    def seeAlso(self):
+        return [ "PowderDiffILLReduction" ]
+
     def name(self):
         return "PowderDiffILLDetScanReduction"
 

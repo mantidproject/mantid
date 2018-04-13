@@ -39,6 +39,8 @@ public:
     TS_ASSERT_THROWS(builder.build(), std::logic_error);
     builder.setY(6);
     TS_ASSERT_THROWS(builder.build(), std::logic_error);
+    builder.setDx(3);
+    TS_ASSERT_THROWS(builder.build(), std::logic_error);
   }
 
   void test_build_from_size() {
@@ -62,6 +64,31 @@ public:
     TS_ASSERT_EQUALS(hist.y().size(), 5);
     TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points);
     TS_ASSERT_EQUALS(hist.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_build_Dx() {
+    HistogramBuilder builder;
+    builder.setX(5);
+    builder.setY(5);
+    builder.setDx(5);
+    const auto hist = builder.build();
+    TS_ASSERT_EQUALS(hist.x().size(), 5);
+    TS_ASSERT_EQUALS(hist.y().size(), 5);
+    TS_ASSERT_EQUALS(hist.e().size(), 5);
+    TS_ASSERT_EQUALS(hist.dx().size(), 5);
+  }
+
+  void test_build_Dx_with_bin_edges() {
+    HistogramBuilder builder;
+    builder.setX(5);
+    builder.setY(4);
+    builder.setDx(4);
+    const auto hist = builder.build();
+    TS_ASSERT_EQUALS(hist.x().size(), 5);
+    TS_ASSERT_EQUALS(hist.y().size(), 4);
+    TS_ASSERT_EQUALS(hist.e().size(), 4);
+    TS_ASSERT_EQUALS(hist.dx().size(), 4);
+    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::BinEdges);
   }
 };
 

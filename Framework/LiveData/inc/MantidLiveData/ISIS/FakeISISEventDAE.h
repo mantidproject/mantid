@@ -55,6 +55,9 @@ public:
   const std::string category() const override {
     return "DataHandling\\DataAcquisition";
   }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FakeISISHistoDAE"};
+  }
 
   /// Algorithm's summary
   const std::string summary() const override {

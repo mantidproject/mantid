@@ -76,6 +76,9 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         return "Performs detector efficiency correction calculation for scanning " \
                "monochromatic powder diffraction instruments D20 and D2B at ILL."
 
+    def seeAlso(self):
+        return [ "ApplyDetectorScanEffCorr","PowderDiffILLReduction" ]
+
     def name(self):
         return "PowderDiffILLDetEffCorr"
 

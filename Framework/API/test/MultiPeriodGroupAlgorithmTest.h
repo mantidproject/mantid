@@ -214,7 +214,7 @@ public:
     WorkspaceGroup_sptr wsgroup =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "outWS");
-    TS_ASSERT(wsgroup != NULL);
+    TS_ASSERT(wsgroup != nullptr);
     TS_ASSERT_EQUALS(a->size(), wsgroup->size());
   }
 
@@ -241,7 +241,7 @@ public:
     WorkspaceGroup_sptr wsgroup =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "outWS");
-    TS_ASSERT(wsgroup != NULL);
+    TS_ASSERT(wsgroup != nullptr);
     TS_ASSERT_EQUALS(a->size(), wsgroup->size());
   }
 };

@@ -118,7 +118,7 @@ public:
             AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 
-    IMDIterator *mditer = outws->createIterator();
+    auto mditer = outws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 7400);
 
     size_t numexpinfo = outws->getNumExperimentInfo();
@@ -157,7 +157,7 @@ public:
             AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 
-    IMDIterator *mditer = outws->createIterator();
+    auto mditer = outws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 7400);
 
     size_t numexpinfo = outws->getNumExperimentInfo();
