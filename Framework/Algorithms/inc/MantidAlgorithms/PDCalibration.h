@@ -1,10 +1,11 @@
 #ifndef MANTID_ALGORITHMS_PDCALIBRATION_H_
 #define MANTID_ALGORITHMS_PDCALIBRATION_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include <map>
 
@@ -71,6 +72,15 @@ private:
                            const std::vector<double> &height2, double &difc,
                            double &t0, double &difa);
   API::MatrixWorkspace_sptr calculateResolutionTable();
+
+  /// NEW: convert peak positions in dSpacing to peak centers workspace
+  API::MatrixWorkspace_sptr
+  createTOFPeakCenterWorkspace(API::MatrixWorkspace_sptr dataws,
+                               const std::vector<double> &peak_positions);
+  /// NEW: convert single peak window in dSpacing to peak windows workspace
+  API::MatrixWorkspace_sptr
+  createTOFPeakFitWindowWorkspace(API::MatrixWorkspace_sptr dataws,
+                                  const std::vector<double> &peak_window);
 
   API::ITableWorkspace_sptr
   sortTableWorkspace(API::ITableWorkspace_sptr &table);

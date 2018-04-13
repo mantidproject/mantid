@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/PDCalibration.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -21,6 +22,8 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include <algorithm>
 #include <cassert>
 #include <gsl/gsl_multifit_nlin.h>
@@ -210,25 +213,14 @@ void PDCalibration::init() {
       "The maximum window (in d space) around peak to look for peak.");
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
 
-  // copy FitPeaks properties
+  // Copy FitPeaks properties
+  // --------------------------------------------------------->
   // properties about peak positions to fit
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakCenters"),
-                  "List of peak centers to fit against.");
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "PeakCentersWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "MatrixWorkspace containing peak centers");
-
-  std::string peakcentergrp("Peak Positions");
-  setPropertyGroup("PeakCenters", peakcentergrp);
-  setPropertyGroup("PeakCentersWorkspace", peakcentergrp);
-
-  // properties about peak profile
-  std::vector<std::string> peakNames =
-      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
+                                     "Lorentzian", "PseudoVoigt"};
   declareProperty("PeakFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peakNames));
-  vector<string> bkgdtypes{"Flat", "Linear", "Quadratic"};
+                  boost::make_shared<StringListValidator>(peaktypes));
+  vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -237,18 +229,6 @@ void PDCalibration::init() {
   setPropertyGroup("PeakFunction", funcgroup);
   setPropertyGroup("BackgroundType", funcgroup);
 
-  // properties about peak range including fitting window and peak width
-  // (percentage)
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("FitWindowBoundaryList"),
-      "List of left boundaries of the peak fitting window corresponding to "
-      "PeakCenters.");
-
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "FitPeakWindowWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
-                  "MatrixWorkspace for of peak windows");
-
   auto min = boost::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
@@ -256,71 +236,10 @@ void PDCalibration::init() {
                   "percentage of the d-spacing "
                   "of the center of the peak.");
 
-  std::string fitrangeegrp("Peak Range Setup");
-  setPropertyGroup("PeakWidthPercent", fitrangeegrp);
-  setPropertyGroup("FitWindowBoundaryList", fitrangeegrp);
-  setPropertyGroup("FitPeakWindowWorkspace", fitrangeegrp);
-
-  // properties about peak parameters' names and value
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("PeakParameterNames"),
-      "List of peak parameters' names");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
-      "List of peak parameters' value");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "PeakParameterValueTable", "", Direction::Input,
-                      PropertyMode::Optional),
-                  "Name of the an optional workspace, whose each column "
-                  "corresponds to given peak parameter names"
-                  ", and each row corresponds to a subset of spectra.");
-
-  std::string startvaluegrp("Strting Parameters Setup");
-  setPropertyGroup("PeakParameterNames", startvaluegrp);
-  setPropertyGroup("PeakParameterValues", startvaluegrp);
-  setPropertyGroup("PeakParameterValueTable", startvaluegrp);
-
-  // optimization setup
-  declareProperty("FitFromRight", true,
-                  "Flag for the order to fit peaks.  If true, peaks are fitted "
-                  "from rightmost;"
-                  "Otherwise peaks are fitted from leftmost.");
-
-  std::vector<std::string> minimizerOptions =
-      API::FuncMinimizerFactory::Instance().getKeys();
-  declareProperty("Minimizer", "Levenberg-Marquardt",
-                  Kernel::IValidator_sptr(
-                      new Kernel::StartsWithValidator(minimizerOptions)),
-                  "Minimizer to use for fitting. Minimizers available are "
-                  "\"Levenberg-Marquardt\", \"Simplex\","
-                  "\"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate "
-                  "gradient (Polak-Ribiere imp.)\", \"BFGS\", and "
-                  "\"Levenberg-MarquardtMD\"");
-
-  std::array<string, 2> costFuncOptions = {{"Least squares", "Rwp"}};
-  declareProperty("CostFunction", "Least squares",
-                  Kernel::IValidator_sptr(
-                      new Kernel::ListValidator<std::string>(costFuncOptions)),
-                  "Cost functions");
-
-  std::string optimizergrp("Optimization Setup");
-  setPropertyGroup("Minimizer", optimizergrp);
-  setPropertyGroup("CostFunction", optimizergrp);
-
-  // other helping information
-  declareProperty(
-      "FindBackgroundSigma", 1.0,
-      "Multiplier of standard deviations of the variance for convergence of "
-      "peak elimination.  Default is 1.0. ");
-
-  declareProperty("HighBackground", true,
-                  "Flag whether the data has high background comparing to "
-                  "peaks' intensities. "
-                  "For example, vanadium peaks usually have high background.");
-
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "EventNumberWorkspace", "", Direction::Input, PropertyMode::Optional),
+          "EventNumberWorkspace", "", Direction::Input,
+          API::PropertyMode::Optional),
       "Name of an optional workspace, whose each spectrum corresponds to each "
       "spectrum "
       "in input workspace. "
@@ -342,10 +261,6 @@ void PDCalibration::init() {
       "(highest Y value position) and "
       "the peak width either estimted by observation or calculate.");
 
-  std::string helpgrp("Additional Information");
-
-  setPropertyGroup("EventNumberWorkspace", helpgrp);
-
   // additional output for reviewing
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputPeakParametersWorkspace", "", Direction::Output),
@@ -354,7 +269,7 @@ void PDCalibration::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FittedPeaksWorkspace", "", Direction::Output,
-          PropertyMode::Optional),
+          API::PropertyMode::Optional),
       "Name of the output matrix workspace with fitted peak. "
       "This output workspace have the same dimesion as the input workspace."
       "The Y values belonged to peaks to fit are replaced by fitted value. "
@@ -435,29 +350,32 @@ void PDCalibration::init() {
 
   // make group for FitPeaks properties
   std::string fitPeaksGroup("Peak fitting properties");
-  setPropertyGroup("PeakCenters", fitPeaksGroup);
-  setPropertyGroup("PeakCentersWorkspace", fitPeaksGroup);
-  setPropertyGroup("PeakFunction", fitPeaksGroup);
-  setPropertyGroup("BackgroundType", fitPeaksGroup);
-  setPropertyGroup("FitWindowBoundaryList", fitPeaksGroup);
-  setPropertyGroup("FitPeakWindowWorkspace", fitPeaksGroup);
-  setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
-  setPropertyGroup("FitWindowBoundaryList", fitPeaksGroup);
-  setPropertyGroup("FitPeakWindowWorkspace", fitPeaksGroup);
-  setPropertyGroup("PeakParameterNames", fitPeaksGroup);
-  setPropertyGroup("PeakParameterValues", fitPeaksGroup);
-  setPropertyGroup("PeakParameterValueTable", fitPeaksGroup);
-  setPropertyGroup("FitFromRight", fitPeaksGroup);
-  setPropertyGroup("", fitPeaksGroup);
-  setPropertyGroup("", fitPeaksGroup);
-  setPropertyGroup("", fitPeaksGroup);
+
+  setPropertyGroup("PeakWindow", fitPeaksGroup);
+
+  //  setPropertyGroup("PeakCenters", fitPeaksGroup);
+  //  setPropertyGroup("PeakCentersWorkspace", fitPeaksGroup);
+  //  setPropertyGroup("PeakFunction", fitPeaksGroup);
+  //  setPropertyGroup("BackgroundType", fitPeaksGroup);
+  //  setPropertyGroup("FitWindowBoundaryList", fitPeaksGroup);
+  //  setPropertyGroup("FitPeakWindowWorkspace", fitPeaksGroup);
+  //  setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
+  //  setPropertyGroup("FitWindowBoundaryList", fitPeaksGroup);
+  //  setPropertyGroup("FitPeakWindowWorkspace", fitPeaksGroup);
+  //  setPropertyGroup("PeakParameterNames", fitPeaksGroup);
+  //  setPropertyGroup("PeakParameterValues", fitPeaksGroup);
+  //  setPropertyGroup("PeakParameterValueTable", fitPeaksGroup);
+  //  setPropertyGroup("FitFromRight", fitPeaksGroup);
+  //  setPropertyGroup("", fitPeaksGroup);
+  //  setPropertyGroup("", fitPeaksGroup);
+  //  setPropertyGroup("", fitPeaksGroup);
 
   // Note: changes of properties from FindPeaks to FitPeaks
-  // PeakPositions --> PeakCenters, PeakCentersWorkspace
-  // PeakWindow    --> FitWindowBoundaryList, FitPeakWindowWorkspace
+  // PeakPositions (keep) --> PeakCenters, PeakCentersWorkspace
+  // PeakWindow    (keep) --> FitWindowBoundaryList, FitPeakWindowWorkspace
   // FWHM          --> PeakWidthPercent
   // MinGuessedPeakWidth --> PeakParameterNames, PeakParameterValues,
-  // PeakParameterValueTable
+  //                         PeakParameterValueTable
   // MaxGuessedPeakWidth --> (as above)
   // Tolerance     -->
   // PeakFunction  --> PeakFunction
@@ -634,6 +552,54 @@ void PDCalibration::exec() {
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
   API::Progress prog(this, 0.0, 1.0, NUMHIST);
 
+  // create TOF peak centers workspace
+  API::MatrixWorkspace_sptr tof_peak_center_ws =
+      createTOFPeakCenterWorkspace(m_uncalibratedWS, m_peaksInDspacing);
+  API::MatrixWorkspace_sptr peak_window_ws =
+      createTOFPeakFitWindowWorkspace(m_uncalibratedWS, windowsInDSpacing);
+
+  // NEW ---------->>>>>>>>>>>----------------->>>>>
+  double peak_width_percent = getProperty("PeakWidthPercent");
+
+  // TODO/FIXME why not do FitPeaks just once?  I don't see the benefit to
+  // call FitPeaks numerous time.
+  auto alg = createChildAlgorithm("FitPeaks");
+  alg->setLoggingOffset(3);
+
+  alg->setProperty("InputWorkspace", m_uncalibratedWS);
+  // theoretical peak center
+  alg->setProperty("PeakCentersWorkspace", tof_peak_center_ws);
+
+  // peak and background functions
+  alg->setProperty<std::string>("PeakFunction", peakFunction);
+  alg->setProperty<std::string>("BackgroundType",
+                                getProperty("BackgroundType"));
+  // peak range setup
+  alg->setProperty("FitPeakWindowWorkspace", peak_window_ws);
+  alg->setProperty("PeakWidthPercent", peak_width_percent);
+  // some fitting strategy
+  alg->setProperty("FitFromRight", true);
+  alg->setProperty("HighBackground", false);
+  alg->setProperty("ConstrainPeakPositions",
+                   false); // TODO Pete: need to test this option
+  //  optimization setup // TODO : need to test LM or LM-MD
+  alg->setProperty("Minimizer", "Levenberg-Marquardt");
+  alg->setProperty("CostFunction", "Least squares");
+  // additional information if input is EventWorkspace
+  // alg->setProperty("EventNumberWorkspace", spec_event_ws);
+  // Analysis output
+  std::string fit_param_table =
+      getPropertyValue("OutputPeakParametersWorkspace");
+  if (fit_param_table.size() > 0)
+    alg->setPropertyValue("OutputPeakParametersWorkspace", fit_param_table);
+  std::string fit_peak_matrix = getPropertyValue("FittedPeaksWorkspace");
+  if (fit_peak_matrix.size() > 0)
+    alg->setPropertyValue("FittedPeaksWorkspace", fit_peak_matrix);
+
+  // run and get the result
+  alg->executeAsChildAlg();
+  API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
+
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
@@ -652,16 +618,6 @@ void PDCalibration::exec() {
 
     // TODO/FIXME why not do FitPeaks just once?  I don't see the benefit to
     // call FitPeaks numerous time.
-    auto alg = createChildAlgorithm("FitPeaks");
-    alg->setLoggingOffset(3);
-    alg->setProperty("InputWorkspace", m_uncalibratedWS);
-    alg->setProperty("StartWorkspaceIndex", static_cast<int>(wkspIndex));
-    alg->setProperty("StopWorkspaceIndex", static_cast<int>(wkspIndex));
-    // theoretical peak centers
-    alg->setProperty("PeakCenters", peaks.inTofPos);
-    // fit window
-    alg->setProperty("FitWindowBoundaryList", peaks.inTofWindows);
-
     //    auto alg = createChildAlgorithm("FindPeaks");
     //    alg->setLoggingOffset(3);
     //    alg->setProperty("InputWorkspace", m_uncalibratedWS);
@@ -684,7 +640,7 @@ void PDCalibration::exec() {
     //    alg->setProperty<bool>("StartFromObservedPeakCentre",
     //                           getProperty("StartFromObservedPeakCentre"));
     //    alg->executeAsChildAlg();
-    API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
+    //    API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
 
     // includes peaks that aren't used in the fit
     const size_t numPeaks = m_peaksInDspacing.size();
@@ -1356,6 +1312,39 @@ PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
   table = alg->getProperty("OutputWorkspace");
 
   return table;
+}
+
+/// NEW: convert peak positions in dSpacing to peak centers workspace
+API::MatrixWorkspace_sptr PDCalibration::createTOFPeakCenterWorkspace(
+    API::MatrixWorkspace_sptr dataws,
+    const std::vector<double> &peak_positions) {
+
+    size_t numspec = dataws->getNumberHistograms();
+    size_t numpeaks = peak_positions.size();
+
+    MatrixWorkspace_sptr matrix_ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", numspec, numpeaks, numpeaks);
+
+    // blabla...
+
+    return matrix_ws;
+
+}
+
+/// NEW: convert single peak window in dSpacing to peak windows workspace
+API::MatrixWorkspace_sptr PDCalibration::createTOFPeakFitWindowWorkspace(
+    API::MatrixWorkspace_sptr dataws, const std::vector<double> &peak_window) {
+
+    size_t numspec = dataws->getNumberHistograms();
+    size_t numpeaks = peak_window.size();
+
+    MatrixWorkspace_sptr matrix_ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", numspec, numpeaks, numpeaks);
+
+    // blabla...
+
+    return matrix_ws;
+
 }
 
 } // namespace Algorithms

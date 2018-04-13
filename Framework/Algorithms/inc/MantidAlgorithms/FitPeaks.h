@@ -124,11 +124,10 @@ private:
 
   // Peak fitting suite
   double fitIndividualPeak(
-      size_t wi, API::IAlgorithm_sptr fitter,
-      const double &expected_peak_center,
-      const std::pair<double, double> &fitwindow, const bool &high,
+      size_t wi, API::IAlgorithm_sptr fitter, const double expected_peak_center,
+      const std::pair<double, double> &fitwindow, const bool high,
       API::IBackgroundFunction_sptr high_background_function,
-      const bool &observe_peak_width, API::IPeakFunction_sptr peakfunction,
+      const bool observe_peak_width, API::IPeakFunction_sptr peakfunction,
       API::IBackgroundFunction_sptr bkgdfunc);
 
   /// Methods to fit functions (general)
@@ -136,8 +135,9 @@ private:
                        API::IPeakFunction_sptr peak_function,
                        API::IBackgroundFunction_sptr bkgd_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax, bool observe_peak_width,
-                       bool estimate_background);
+                       double xmin, double xmax,
+                       const double &expected_peak_center,
+                       bool observe_peak_width, bool estimate_background);
 
   double fitFunctionMD(API::IFunction_sptr fit_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
@@ -201,15 +201,6 @@ private:
                           size_t ipeak, size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
-  //  void processSinglePeakFitResult(
-  //      size_t wsindex, size_t peakindex,
-  //      const std::vector<double> &expected_peak_positions,
-  //      API::IPeakFunction_sptr peakfunction,
-  //      API::IBackgroundFunction_sptr bkgdfunction, double cost,
-  //      std::vector<double> &fitted_peak_positions,
-  //      std::vector<std::vector<double>> &function_parameters_vector,
-  //      std::vector<double> *peak_chi2_vec);
-
   void processSinglePeakFitResult(
       size_t wsindex, size_t peakindex, const double cost,
       const std::vector<double> &expected_peak_positions,
@@ -230,16 +221,10 @@ private:
   void processOutputs();
 
   /// Write result of peak fit per spectrum to output analysis workspaces
-  void writeFitResult(
-      size_t wi, const std::vector<double> &expected_positions,
-      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
-      //                      std::vector<double> &fitted_positions,
-      //                      std::vector<std::vector<double>> &peak_parameters,
-      //                      std::vector<double> &peak_chi2_vec,
-      bool noevents);
-
-  //  /// set peak positions tolerance
-  //  void setPeakPosTolerance(const std::vector<double> &peak_pos_tolerances);
+  void
+  writeFitResult(size_t wi, const std::vector<double> &expected_positions,
+                 boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
+                 bool noevents);
 
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces

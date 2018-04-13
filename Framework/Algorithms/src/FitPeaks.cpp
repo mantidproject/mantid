@@ -157,7 +157,7 @@ size_t findXIndex(const HistogramX &vecx, double x) {
   return index;
 }
 
-enum { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
+enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
 //----------------------------------------------------------------------------------------------
 /** constructor
@@ -420,9 +420,9 @@ void FitPeaks::processInputs() {
   m_peakDSpacePercentage = getProperty("PeakWidthPercent");
   if (isEmpty(m_peakDSpacePercentage))
     m_peakDSpacePercentage = -1;
-  else if (m_peakDSpacePercentage < 0)
+  else if (m_peakDSpacePercentage <= 0)
     throw std::invalid_argument(
-        "Peak D-spacing percentage cannot be negative!");
+        "Peak D-spacing percentage cannot be negative or zero!");
   g_log.debug() << "DeltaD/D = " << m_peakDSpacePercentage << "\n";
 
   // set up background
@@ -777,18 +777,6 @@ void FitPeaks::fitPeaks() {
     // initialize output for this
     size_t numfuncparams =
         m_peakFunction->nParams() + m_bkgdFunction->nParams();
-    //    // main output: center
-    //    std::vector<double> fitted_peak_centers(m_numPeaksToFit, -1);
-    //    // others
-    //    std::vector<std::vector<double>> fitted_parameters(
-    //        m_numPeaksToFit); // peak+background
-    //    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-    //      std::vector<double> peak_i(numfuncparams);
-    //      fitted_parameters[ipeak] = peak_i;
-    //    }
-    //    // goodness of fitting
-    //    std::vector<double> peak_chi2_vec(m_numPeaksToFit, DBL_MAX);
-
     boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
         boost::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
                                                              numfuncparams);
@@ -902,9 +890,6 @@ void FitPeaks::fitSpectrumPeaks(
 
     processSinglePeakFitResult(wi, peak_index, cost, expected_peak_centers,
                                fit_function, fit_result);
-    //        wi, peak_index, cost, expected_peak_centers, peakfunction,
-    //        bkgdfunction, cost,
-    //        fitted_peak_centers, fitted_function_parameters, peak_chi2_vec);
   }
 
   return;
@@ -934,13 +919,7 @@ bool FitPeaks::decideToEstimatePeakWidth(
       }
     } else {
       // using the fitted paramters from the previous fitting result
-      // TODO FIXME - Disable to output fitted result after debugging
-      //      std::stringstream dbss;
-      //      for (size_t i = 0; i < peak_function->nParams(); ++i)
-      //        dbss << peak_function->getParameterNames()[i] << " = "
-      //             << peak_function->getParameter(i) << ", ";
-      //      g_log.notice() << "[DB...BAT] Last fit parameters: " << dbss.str()
-      //                     << "\n";
+      // do noting
     }
   } else {
     // by observation
@@ -1267,6 +1246,8 @@ int FitPeaks::estimatePeakParameters(
     // use values from background to locate FWHM
     peakfunction->setCentre(peak_center);
     peakfunction->setHeight(peak_height);
+  } else {
+    g_log.debug() << "Observation result is NOT good but " << result << "\n";
   }
 
   // Estimate FHWM (peak width)
@@ -1520,12 +1501,11 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
  * @return
  */
 double FitPeaks::fitIndividualPeak(
-    size_t wi, API::IAlgorithm_sptr fitter, const double &expected_peak_center,
-    const std::pair<double, double> &fitwindow, const bool &high,
+    size_t wi, API::IAlgorithm_sptr fitter, const double expected_peak_center,
+    const std::pair<double, double> &fitwindow, const bool high,
     API::IBackgroundFunction_sptr high_background_function,
-    const bool &observe_peak_width, API::IPeakFunction_sptr peakfunction,
+    const bool observe_peak_width, API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunc) {
-
   double cost(DBL_MAX);
 
   if (high) {
@@ -1536,8 +1516,8 @@ double FitPeaks::fitIndividualPeak(
   } else {
     // fit peak and background
     cost = fitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
-                         fitwindow.first, fitwindow.second, observe_peak_width,
-                         true);
+                         fitwindow.first, fitwindow.second,
+                         expected_peak_center, observe_peak_width, true);
   }
 
   return cost;
@@ -1556,6 +1536,7 @@ double FitPeaks::fitIndividualPeak(
  * @param wsindex
  * @param xmin
  * @param xmax
+ * @param expected_peak_center
  * @param observe_peak_width
  * @param estimate_background
  * @return
@@ -1565,6 +1546,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
                                API::IBackgroundFunction_sptr bkgd_function,
                                API::MatrixWorkspace_sptr dataws, size_t wsindex,
                                double xmin, double xmax,
+                               const double &expected_peak_center,
                                bool observe_peak_width,
                                bool estimate_background) {
 
@@ -1579,8 +1561,11 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
       bkgd_function->setParameter(n, 0);
 
   // Estimate peak profile parameter
-  estimatePeakParameters(dataws, wsindex, peak_window, peak_function,
-                         bkgd_function, observe_peak_width);
+  int result =
+      estimatePeakParameters(dataws, wsindex, peak_window, peak_function,
+                             bkgd_function, observe_peak_width);
+  if (result != GOOD)
+    peak_function->setCentre(expected_peak_center);
 
   // Create the composition function
   CompositeFunction_sptr comp_func =
@@ -1756,9 +1741,9 @@ double FitPeaks::fitFunctionHighBackground(
       createMatrixWorkspace(vec_x, vec_y, vec_e);
 
   // Fit peak with background
-  double cost =
-      fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
-                    vec_x.front(), vec_x.back(), observe_peak_width, false);
+  double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
+                              vec_x.front(), vec_x.back(), expected_peak_center,
+                              observe_peak_width, false);
 
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) +

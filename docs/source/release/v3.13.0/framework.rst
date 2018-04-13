@@ -32,6 +32,7 @@ Improved
 - The algorithm :ref:`CreateWorkspace <algm-CreateWorkspace>` can now optionally receive the Dx errors.
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. Furthermore, Dx values will be considered if present. The documentation needed to be corrected.
 
+
 Bug fixes
 #########
 
