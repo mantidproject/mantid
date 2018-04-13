@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/HFIRLoad.cpp
 	src/HFIRSANSNormalise.cpp
 	src/IMuonAsymmetryCalculator.cpp
+        src/IqtFitSequential.cpp
 	src/LoadEventAndCompress.cpp
 	src/MuonGroupAsymmetryCalculator.cpp
 	src/MuonGroupCalculator.cpp
@@ -69,6 +70,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h
+        inc/MantidWorkflowAlgorithms/IqtFitSequential.h
 	inc/MantidWorkflowAlgorithms/LoadEventAndCompress.h
 	inc/MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCalculator.h
