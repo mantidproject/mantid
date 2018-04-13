@@ -275,32 +275,34 @@ void ConjoinXRuns::fillHistory() {
 * @param wsIndex : the workspace index
 */
 void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
-  std::vector<double> spectrum, errors, axis, x, xerrors;
+  std::vector<double> spectrum;
+  std::vector<double> errors;
+  std::vector<double> axis;
+  std::vector<double> x;
+  std::vector<double> xerrors;
   spectrum.reserve(m_outWS->blocksize());
   errors.reserve(m_outWS->blocksize());
   axis.reserve(m_outWS->blocksize());
   size_t index = static_cast<size_t>(wsIndex);
   for (const auto &input : m_inputWS) {
-    HistogramData::HistogramY y = input->y(index);
+    const auto &y = input->y(index);
     spectrum.insert(spectrum.end(), y.begin(), y.end());
-    auto e = input->e(index);
+    const auto &e = input->e(index);
     errors.insert(errors.end(), e.begin(), e.end());
     if (m_logEntry.empty()) {
-      auto x = input->x(index);
+      const auto &x = input->x(index);
       axis.insert(axis.end(), x.begin(), x.end());
     } else {
       x = m_axisCache[input->getName()];
       axis.insert(axis.end(), x.begin(), x.end());
     }
     if (input->hasDx(index)) {
-      auto dx = input->dx(index);
+      const auto &dx = input->dx(index);
       xerrors.insert(xerrors.end(), dx.begin(), dx.end());
     }
   }
-  if (!xerrors.empty()) {
-    m_outWS->setPointStandardDeviations(index, m_outWS->blocksize());
-    m_outWS->mutableDx(index) = xerrors;
-  }
+  if (!xerrors.empty())
+    m_outWS->setPointStandardDeviations(index, xerrors);
   m_outWS->mutableY(index) = spectrum;
   m_outWS->mutableE(index) = errors;
   m_outWS->mutableX(index) = axis;
