@@ -37,4 +37,10 @@ Bug fixes
 
 - The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
 
+New
+###
+
+- Algorithm :ref:`FitPeaks <algm-FitPeaks>` is implemented as a generalized multiple-spectra multiple-peak fitting algorithm.
+
+
 :ref:`Release 3.13.0 <v3.13.0>`
