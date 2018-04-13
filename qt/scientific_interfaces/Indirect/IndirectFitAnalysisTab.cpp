@@ -1040,7 +1040,7 @@ IFunction_sptr IndirectFitAnalysisTab::fitFunction() const {
  *                  browser, to the name of a function in the selected model.
  */
 QHash<QString, QString>
-    IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
+IndirectFitAnalysisTab::functionNameChanges(IFunction_sptr) const {
   return QHash<QString, QString>();
 }
 
@@ -1091,10 +1091,15 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "Minimizer",
                        m_fitPropertyBrowser->minimizer(true));
   setMaxIterations(fitAlgorithm, m_fitPropertyBrowser->maxIterations());
-  setAlgorithmProperty(fitAlgorithm, "Convolve",
+  setAlgorithmProperty(fitAlgorithm, "ConvolveMembers",
                        m_fitPropertyBrowser->convolveMembers());
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
+  setAlgorithmProperty(fitAlgorithm, "CostFunction",
+                       m_fitPropertyBrowser->costFunction());
+
+  if (m_fitPropertyBrowser->isHistogramFit())
+    setAlgorithmProperty(fitAlgorithm, "EvaluationType", "Histogram");
 
   auto fittingFunction = m_fitPropertyBrowser->getFittingFunction();
   m_appendResults = false;
