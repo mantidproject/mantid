@@ -74,13 +74,11 @@ private:
   API::MatrixWorkspace_sptr calculateResolutionTable();
 
   /// NEW: convert peak positions in dSpacing to peak centers workspace
-  API::MatrixWorkspace_sptr
-  createTOFPeakCenterWorkspace(API::MatrixWorkspace_sptr dataws,
-                               const std::vector<double> &peak_positions);
-  /// NEW: convert single peak window in dSpacing to peak windows workspace
-  API::MatrixWorkspace_sptr
-  createTOFPeakFitWindowWorkspace(API::MatrixWorkspace_sptr dataws,
-                                  const std::vector<double> &peak_window);
+  std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
+  createTOFPeakCenterFitWindowWorkspaces(
+      API::MatrixWorkspace_sptr dataws,
+      const std::vector<double> &peak_positions,
+      const double peakWindowMaxInDSpacing);
 
   API::ITableWorkspace_sptr
   sortTableWorkspace(API::ITableWorkspace_sptr &table);
