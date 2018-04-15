@@ -130,7 +130,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("DiagnosticWorkspaces", "diag"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -182,7 +183,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -236,7 +238,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO+DIFA"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
