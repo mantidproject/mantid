@@ -518,6 +518,7 @@ void FitPeaks::processInputFitRanges() {
   // get peak fit window
   std::vector<double> peakwindow = getProperty("FitWindowBoundaryList");
   std::string peakwindowname = getPropertyValue("FitPeakWindowWorkspace");
+  API::MatrixWorkspace_const_sptr peakwindowws = getProperty("FitPeakWindowWorkspace");
 
   // in most case, calculate window by instrument resolution is False
   calculate_window_instrument_ = false;
@@ -557,7 +558,7 @@ void FitPeaks::processInputFitRanges() {
       }
     } // END-FOR
     // END for uniform peak window
-  } else if (peakwindow.size() == 0 && peakwindowname.size() > 0) {
+  } else if (peakwindow.size() == 0 && peakwindowws != nullptr) {
     // use matrix workspace for non-uniform peak windows
     m_peakWindowWorkspace = getProperty("FitPeakWindowWorkspace");
     m_uniformPeakWindows = false;
@@ -643,13 +644,17 @@ void FitPeaks::processInputFitRanges() {
 void FitPeaks::processInputPeakCenters() {
   // peak centers
   m_peakCenters = getProperty("PeakCenters");
+  API::MatrixWorkspace_const_sptr peakcenterws = getProperty("PeakCentersWorkspace");
+  if (!peakcenterws)
+    g_log.error("There is no peak center workspace");
+
   std::string peakpswsname = getPropertyValue("PeakCentersWorkspace");
-  if (m_peakCenters.size() > 0 && peakpswsname.size() == 0) {
+  if (m_peakCenters.size() > 0 && peakcenterws == nullptr) {
     // peak positions are uniform among all spectra
     m_uniformPeakPositions = true;
     // number of peaks to fit!
     m_numPeaksToFit = m_peakCenters.size();
-  } else if (m_peakCenters.size() == 0 && peakpswsname.size() > 0) {
+  } else if (m_peakCenters.size() == 0 && peakcenterws != nullptr) {
     // peak positions can be different among spectra
     m_uniformPeakPositions = false;
     m_peakCenterWorkspace = getProperty("PeakCentersWorkspace");
