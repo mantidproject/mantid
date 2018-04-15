@@ -518,7 +518,8 @@ void FitPeaks::processInputFitRanges() {
   // get peak fit window
   std::vector<double> peakwindow = getProperty("FitWindowBoundaryList");
   std::string peakwindowname = getPropertyValue("FitPeakWindowWorkspace");
-  API::MatrixWorkspace_const_sptr peakwindowws = getProperty("FitPeakWindowWorkspace");
+  API::MatrixWorkspace_const_sptr peakwindowws =
+      getProperty("FitPeakWindowWorkspace");
 
   // in most case, calculate window by instrument resolution is False
   calculate_window_instrument_ = false;
@@ -644,7 +645,8 @@ void FitPeaks::processInputFitRanges() {
 void FitPeaks::processInputPeakCenters() {
   // peak centers
   m_peakCenters = getProperty("PeakCenters");
-  API::MatrixWorkspace_const_sptr peakcenterws = getProperty("PeakCentersWorkspace");
+  API::MatrixWorkspace_const_sptr peakcenterws =
+      getProperty("PeakCentersWorkspace");
   if (!peakcenterws)
     g_log.error("There is no peak center workspace");
 
