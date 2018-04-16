@@ -193,13 +193,9 @@ std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
       !containsFunction(function, "Resolution"))
     errors["Function"] = "Function provided does not contain convolution with "
                          "a resolution function.";
-  return errors;
-}
-
-void ConvolutionFitSequential::setup() {
-  IFunction_sptr function = getProperty("Function");
   m_deltaUsed = containsFunction(function, "DeltaFunction");
   m_lorentzianCount = numberOfFunctions(function, "Lorentzian");
+  return errors;
 }
 
 bool ConvolutionFitSequential::throwIfElasticQConversionFails() const {

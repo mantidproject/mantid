@@ -319,13 +319,7 @@ void QENSFitSequential::init() {
           new Kernel::ListValidator<std::string>(evaluationTypes)),
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
-
-  initConcrete();
 }
-
-void QENSFitSequential::initConcrete() {}
-
-void QENSFitSequential::setup() {}
 
 void QENSFitSequential::exec() {
   const auto outputBaseName = getOutputBaseName();
@@ -336,7 +330,6 @@ void QENSFitSequential::exec() {
   if (getPropertyValue("OutputWorkspaceGroup").empty())
     setProperty("OutputWorkspaceGroup", outputBaseName + "_Workspaces");
 
-  setup();
   auto workspaces = convertInputToElasticQ(getWorkspaces());
   auto inputString = getInputString(workspaces);
   auto spectra = getSpectra(inputString);

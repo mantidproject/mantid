@@ -41,8 +41,6 @@ protected:
 
 private:
   void init() override;
-  virtual void initConcrete();
-  virtual void setup();
   void exec() override;
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
   virtual void postExec(API::MatrixWorkspace_sptr result);
