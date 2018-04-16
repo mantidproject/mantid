@@ -88,5 +88,5 @@ class ILLPowderDiffDetScanReductionTest(stresstesting.MantidStressTest):
         GroupWorkspaces([ws_2d_tubes[0], ws_2d[0], ws_1d[0]], OutputWorkspace='grouped_output')
 
     def validate(self):
-        self._tolerance = 0.0001
+        self.tolerance = 0.0001
         return 'grouped_output', 'D2B_scan_test.nxs'
