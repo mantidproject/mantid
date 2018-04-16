@@ -5,30 +5,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <mutex>
-
-namespace Poco {
-namespace Net {
-class TCPServer;
-}
-}
 
 namespace Mantid {
 namespace LiveData {
 /**
     Simulates ISIS histogram DAE. It runs continuously until canceled and
-   listens to port 6789 for
-    ISIS DAE commands.
+    listens to port 6789 for ISIS DAE commands.
 
     Data is generated starting at 10000 microseconds Time of flight, and each
-   bin requested covers 100 microseconds.
+    bin requested covers 100 microseconds.
     The algorithm silently defines three additional spectra with numbers
-   NSpectra+1, NSpectra+2 and NSpectra+3 in a
+    NSpectra+1, NSpectra+2 and NSpectra+3 in a
     different time regime (they have different binning to the rest of the
-   spectra).
+    spectra).
 
     Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -50,13 +42,10 @@ namespace LiveData {
 */
 class DLLExport FakeISISHistoDAE : public API::Algorithm {
 public:
-  FakeISISHistoDAE();
-  ~FakeISISHistoDAE() override;
-
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "FakeISISHistoDAE"; };
+  const std::string name() const override { return "FakeISISHistoDAE"; }
   /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return 1; };
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "DataHandling\\DataAcquisition";
@@ -73,10 +62,6 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  /// Poco TCP server
-  Poco::Net::TCPServer *m_server;
-  /// Mutex
-  std::mutex m_mutex;
 };
 
 } // namespace LiveData
