@@ -235,6 +235,8 @@ void ISISLiveEventDataListener::run() {
       // get the header with the type of the packet
       Receive(events.head, "Events header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       if (!(events.head.type == TCPStreamEventHeader::Neutron)) {
         // don't know what to do with it - stop
         throw std::runtime_error("Unknown packet type.");
@@ -244,6 +246,8 @@ void ISISLiveEventDataListener::run() {
       // get the header with the sream size
       Receive(events.head_n, "Neutrons header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       CollectJunk(events.head_n);
 
       // absolute pulse (frame) time
