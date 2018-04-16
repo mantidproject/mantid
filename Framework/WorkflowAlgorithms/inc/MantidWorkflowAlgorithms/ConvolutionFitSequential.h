@@ -40,22 +40,17 @@ public:
   const std::string summary() const override;
 
 protected:
-  std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const override;
   API::ITableWorkspace_sptr performFit(const std::string &input,
                                        const std::string &output) override;
-  void deleteTemporaryWorkspaces(const std::string &outputBaseName) override;
 
 private:
   std::map<std::string, std::string> validateInputs() override;
-  void initConcrete() override;
   void setup() override;
   void postExec(API::MatrixWorkspace_sptr result) override;
-  std::vector<std::string> getFitParameterNames() const override;
+  bool isFitParameter(const std::string &name) const;
 
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
-  std::vector<double> squareVector(std::vector<double>);
-  std::vector<double> cloneVector(const std::vector<double> &);
   void calculateEISF(API::ITableWorkspace_sptr &);
 
   bool m_deltaUsed;
