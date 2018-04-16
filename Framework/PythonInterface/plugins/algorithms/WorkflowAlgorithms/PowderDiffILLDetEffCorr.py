@@ -100,7 +100,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                              doc='Choose sequential for D20 (1D detector), global for D2B (2D detector).')
 
         self.declareProperty(name='InterpolateOverlappingAngles', defaultValue=False,
-                             doc='Wheter to interpolate scattering angle values in overlapping regions.')
+                             doc='Whether to interpolate scattering angle values in overlapping regions (D20 only).')
 
         self.declareProperty(name='NormaliseTo',
                              defaultValue='None',
@@ -117,7 +117,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
 
         self.declareProperty(FloatArrayProperty(name='ExcludedRange', values=[], validator=thetaRangeValidator),
                              doc='Scattering angle regions to exclude from the computation of '
-                                 'relative calibration constants, e.g. beam stop [degrees]. ')
+                                 'relative calibration constants; for example, the beam stop [degrees]. ')
 
         pixelRangeValidator = CompositeValidator()
         greaterThanOne = IntArrayBoundedValidator()
@@ -130,8 +130,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         pixelRangeValidator.add(orderedPairsValidator)
 
         self.declareProperty(IntArrayProperty(name='PixelRange', values=[1,3072], validator=pixelRangeValidator),
-                             doc='Range of the pixel numbers to compute the calibration factors for. '
-                                 'For the other pixels outside the range, the factor will be set to 1.')
+                             doc='Range of the pixel numbers to compute the calibration factors for (D20 only); '
+                                 'for the other pixels outside the range, the factor will be set to 1.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputResponseWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
@@ -144,7 +144,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self.declareProperty(name='NumberOfIterations',
                              defaultValue=1,
                              validator=IntBoundedValidator(lower=0, upper=10),
-                             doc='Number of iterations to perform. 0 means auto; i.e. the '
+                             doc='Number of iterations to perform (D2B only): 0 means auto; that is, the '
                                  'iterations will terminate after reaching some Chi2/NdoF.')
 
     def validateInputs(self):
@@ -297,9 +297,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         start = self._pixels_to_trim
         end = self._n_pixels_per_tube - self._pixels_to_trim
         y = mtd[calib_current].extractY()[:,start:end]
-        ones = np.ones(y.shape)
-        diff = np.absolute(y - ones)
-        diff *= diff
+        diff = (y-1)**2
         chi2 = np.sum(diff)
         ndof = (self._n_pixels_per_tube - 2 * self._pixels_to_trim) * self._n_tubes
         return chi2/ndof
@@ -574,6 +572,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self._derive_calibration_sequential(ws_2d, constants_ws, response_ws)
         DeleteWorkspace(ws_2d)
         self._perform_absolute_normalisation(constants_ws)
+        mtd[constants_ws].getAxis(1).setUnit('Label').setLabel('Cell #', '')
+        mtd[constants_ws].setYUnitLabel('Calibration constant')
 
     def _process_global(self):
         """
@@ -582,7 +582,6 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             2. Loop over tubes, make ratios wrt reference, obtain constants
             3. Apply the constants, and iterate over if requested
         """
-        mon_ws = self._hide('mon')
         constants_ws = self._hide('constants')
         response_ws = self._hide('resp')
         calib_ws = self._hide('calib')
@@ -602,8 +601,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 self._configure_global(ws_name)
             if self._normalise_to == 'Monitor':
                 NormaliseToMonitor(InputWorkspace=ws_name, OutputWorkspace=ws_name, MonitorID=0)
-            ExtractMonitors(InputWorkspace=ws_name, DetectorWorkspace=ws_name, MonitorWorkspace=mon_ws)
-            DeleteWorkspace(mon_ws)
+            ExtractMonitors(InputWorkspace=ws_name, DetectorWorkspace=ws_name)
             ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
             if self._calib_file:
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_ws, OutputWorkspace=ws_name)
@@ -620,7 +618,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         CloneWorkspace(InputWorkspace=constants_ws, OutputWorkspace=calib_current)
 
         iteration = 0
-        chi2_ndof = 10000. # set a large number to start with
+        chi2_ndof = np.inf # set a large number to start with
         self._pixels_to_trim = 28
         chi2_ndof_threshold = 1.
         inst = mtd[numors[0]].getInstrument()
@@ -650,6 +648,9 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         DeleteWorkspace(ref_ws)
         DeleteWorkspaces(numors)
         DeleteWorkspace(calib_current)
+        mtd[constants_ws].getAxis(0).setUnit('Label').setLabel('Tube #', '')
+        mtd[constants_ws].getAxis(1).setUnit('Label').setLabel('Pixel #', '')
+        mtd[constants_ws].setYUnitLabel('Calibration constant')
 
     def _derive_calibration_global(self, numors):
         """
@@ -738,6 +739,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             self._input_files = self._input_files.replace(',','+')
             LoadAndMerge(Filename=self._input_files, OutputWorkspace=raw_ws, LoaderName='LoadILLDiffraction')
             if not mtd[raw_ws].getInstrument().getName().startswith('D20'):
+                DeleteWorkspace(raw_ws)
                 raise RuntimeError('Sequential reference method is not supported for the instrument given')
             self._validate_scan(raw_ws)
             self._configure_sequential(raw_ws)
