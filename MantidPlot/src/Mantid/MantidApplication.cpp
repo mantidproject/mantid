@@ -78,9 +78,10 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   }
 
   if (error) {
-    QString pythonCode("from ErrorReporter.errorreport import "
-                       "CrashReportPage\npage = "
-                       "CrashReportPage()\npage.show()");
+    QString pythonCode("from ErrorReporter.error_report_presenter import ErrorReporterPresenter"
+                       "\nfrom ErrorReporter.errorreport import CrashReportPage"
+                       "\npage = CrashReportPage()"
+                       "\npresenter = ErrorReporterPresenter(page)");
 
     emit runAsPythonScript(pythonCode);
   }
