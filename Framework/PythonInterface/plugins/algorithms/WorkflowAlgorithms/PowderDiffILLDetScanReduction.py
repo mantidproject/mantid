@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
-    FloatArrayProperty, StringListValidator
+    FloatArrayProperty, StringListValidator, IntBoundedValidator
 from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty, FileProperty, FileAction
 from mantid.simpleapi import *
 
@@ -76,6 +76,34 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                                     direction=Direction.Output),
                              doc='Output workspace containing the reduced data.')
 
+        self.declareProperty(name='PixelsToMask', defaultValue=0, validator=IntBoundedValidator(lower=0, upper=64),
+                             doc='Number of pixels to mask from the bottom and the top of each tube.')
+
+        self.declareProperty(name='ComponentsToMask', defaultValue='',
+                             doc='Comma separated list of component names to mask, for instance: tube_1, tube_2')
+
+    def _generate_mask(self, n_pix, instrument):
+        """
+        Generates the DetectorList input for MaskDetectors
+        Masks the bottom and top n_pix pixels in each tube
+        @param n_pix : Number of pixles to mask from top and bottom of each tube
+        @param instrument : Instrument
+        """
+        mask = ''
+        det = instrument.getComponentByName('detectors')
+        tube = instrument.getComponentByName('tube_1')
+        n_tubes = det.nelements()
+        n_pixels = tube.nelements()
+        for tube in range(n_tubes):
+            start_bottom = tube * n_pixels + 1
+            end_bottom = start_bottom + n_pix - 1
+            start_top = (tube + 1) * n_pixels - n_pix + 1
+            end_top = start_top + n_pix - 1
+            mask += str(start_bottom)+'-'+str(end_bottom)+','
+            mask += str(start_top)+'-'+str(end_top)+','
+        self.log().debug('Preparing to mask with DetectorList='+mask[:-1])
+        return mask[:-1]
+
     def PyExec(self):
         data_type = 'Raw'
         if self.getProperty('UseCalibratedData').value:
@@ -112,9 +140,18 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
             LoadNexusProcessed(Filename=calib_file, OutputWorkspace='__det_eff')
             for ws in input_group:
                 name = ws.getName()
-                ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name, MonitorWorkspace='__mon')
-                DeleteWorkspace('__mon')
+                ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
                 ApplyDetectorScanEffCorr(InputWorkspace=name,DetectorEfficiencyWorkspace='__det_eff',OutputWorkspace=name)
+
+        pixels_to_mask = self.getProperty('PixelsToMask').value
+        if pixels_to_mask != 0:
+            mask = self._generate_mask(pixels_to_mask, input_group[0].getInstrument())
+            for ws in input_group:
+                MaskDetectors(Workspace=ws, DetectorList=mask)
+        components_to_mask = self.getPropertyValue('ComponentsToMask')
+        if components_to_mask:
+            for ws in input_group:
+                MaskDetectors(Workspace=ws, ComponentList=components_to_mask)
 
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
