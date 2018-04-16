@@ -44,7 +44,8 @@ MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
   cloneWs->setProperty("InputWorkspace", inputWorkspace);
   cloneWs->setProperty("OutputWorkspace", outputName);
   cloneWs->execute();
-  return cloneWs->getProperty("OutputWorkspace");
+  Workspace_sptr outputWorkspace = cloneWs->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
 MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
