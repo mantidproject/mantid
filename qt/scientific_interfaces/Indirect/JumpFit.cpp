@@ -250,6 +250,7 @@ void JumpFit::updatePlotRange() {
 
 std::string JumpFit::createSingleFitOutputName() const {
   auto outputName = inputWorkspace()->getName();
+  outputName = outputName.substr(0, outputName.rfind("_Result"));
 
   // Remove _red
   const auto cutIndex = outputName.find_last_of('_');
