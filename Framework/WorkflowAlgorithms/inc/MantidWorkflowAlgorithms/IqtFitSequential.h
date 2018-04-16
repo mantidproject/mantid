@@ -29,6 +29,12 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+
+protected:
+  virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
+
+private:
+  void postExec(API::MatrixWorkspace_sptr result) override;
 };
 
 } // namespace Algorithms
