@@ -15,7 +15,7 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
         calibration_ws = CreateWorkspace(DataX=calibration_x, DataY=calibration_y, Nspec=calibration_y.size)
 
         calibrated_ws = ApplyDetectorScanEffCorr(input_ws, calibration_ws)
-        for i in range(0, 6):
+        for i in range(6):
             self.assertEquals(calibrated_ws.readY(i), input_ws.readY(i) * (i+1))
             self.assertEquals(calibrated_ws.readE(i), input_ws.readE(i) * (i+1))
 
@@ -30,7 +30,7 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
 
         expected = np.repeat(calibration_y, 2)
         calibrated_ws = ApplyDetectorScanEffCorr(input_ws, calibration_ws)
-        for i in range(0, 12):
+        for i in range(12):
             self.assertEquals(calibrated_ws.readY(i), input_ws.readY(i) * expected[i])
             self.assertEquals(calibrated_ws.readE(i), input_ws.readE(i) * expected[i])
 

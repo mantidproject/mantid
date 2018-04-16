@@ -128,10 +128,7 @@ void SumOverlappingTubes::exec() {
 void SumOverlappingTubes::getInputParameters() {
 
   // This is flag for flipping the sign of 2theta
-  m_mirrorDetectors = 1;
-  if (getProperty("MirrorScatteringAngles")) {
-    m_mirrorDetectors = -1;
-  }
+  m_mirrorDetectors = getProperty("MirrorScatteringAngles") ? -1 : 1;
 
   const std::vector<std::string> inputWorkspaces =
       getProperty("InputWorkspaces");

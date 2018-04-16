@@ -150,6 +150,8 @@ D20 Workflow
 
 .. diagram:: PowderDiffILLDetEffCorr-v1_D20_wkflw.dot
 
+.. include:: ../usagedata-note.txt
+
 **Example - D20**
 
 .. code-block:: python

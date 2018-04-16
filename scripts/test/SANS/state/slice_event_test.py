@@ -6,6 +6,7 @@ from sans.state.slice_event import (StateSliceEvent, get_slice_event_builder)
 from sans.state.data import get_data_builder
 from sans.common.enums import (SANSFacility, SANSInstrument)
 from state_test_helper import (assert_validate_error)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -44,7 +45,8 @@ class StateSliceEventBuilderTest(unittest.TestCase):
     def test_that_slice_event_state_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LOQ74044")
         data_info = data_builder.build()
 

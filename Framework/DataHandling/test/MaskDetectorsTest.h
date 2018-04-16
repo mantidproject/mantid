@@ -668,7 +668,7 @@ public:
     // Make workspace to act as mask
     const auto numMaskWSSpec = inputWS->getInstrument()->getNumberDetectors();
     auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(
-        static_cast<int>(numMaskWSSpec), 1, 0, 0);
+        static_cast<int>(numMaskWSSpec), 1, 0., 0.);
     maskWs->setInstrument(inputWS->getInstrument());
     for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
       maskWs->mutableY(i)[0] = 1.0;
@@ -736,7 +736,7 @@ public:
     // Make workspace to act as mask
     const auto numMaskWSSpec = inputWS->getInstrument()->getNumberDetectors();
     auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(
-        static_cast<int>(numMaskWSSpec), 1, 0, 0);
+        static_cast<int>(numMaskWSSpec), 1, 0., 0.);
     maskWs->setInstrument(inputWS->getInstrument());
     for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
       maskWs->mutableY(i)[0] = 1.0;
