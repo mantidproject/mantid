@@ -39,13 +39,9 @@ MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
 
 MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
                                     const std::string &outputName) {
-  auto cloneWs = AlgorithmManager::Instance().create("CloneWorkspace");
-  cloneWs->setLogging(false);
-  cloneWs->setProperty("InputWorkspace", inputWorkspace);
-  cloneWs->setProperty("OutputWorkspace", outputName);
-  cloneWs->execute();
-  Workspace_sptr outputWorkspace = cloneWs->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
+  Workspace_sptr workspace = inputWorkspace->clone();
+  AnalysisDataService::Instance().addOrReplace(outputName, workspace);
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
