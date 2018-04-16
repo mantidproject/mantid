@@ -143,7 +143,6 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", 0);
@@ -151,7 +150,8 @@ public:
     alg.setProperty("Convolve", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace", "Result");
+    alg.setProperty("OutputWorkspace",
+                    "ReductionWs_conv_1LFixF_s0_to_5_Result");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -221,7 +221,6 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 5.0);
     alg.setProperty("SpecMin", 0);
@@ -229,7 +228,7 @@ public:
     alg.setProperty("Convolve", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace", "Result");
+    alg.setProperty("OutputWorkspace", "SqwWs_conv_1LFixF_s0_Result");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -263,6 +262,9 @@ public:
     size_t specMin = 0;
     size_t specMax = 5;
 
+    auto outputName = runName + "_conv_1LFixF_s" + std::to_string(specMin) +
+                      "_to_" + std::to_string(specMax) + "_Result";
+
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
@@ -273,7 +275,6 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", boost::numeric_cast<int>(specMin));
@@ -282,7 +283,7 @@ public:
     alg.setProperty("ExtractMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace", "Result");
+    alg.setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
