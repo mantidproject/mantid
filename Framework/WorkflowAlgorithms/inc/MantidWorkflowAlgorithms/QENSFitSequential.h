@@ -36,8 +36,6 @@ public:
 
 protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
-  virtual std::vector<std::string> getFitParameterNames() const;
-  virtual void deleteTemporaryWorkspaces(const std::string &outputBaseName);
   virtual API::ITableWorkspace_sptr performFit(const std::string &input,
                                                const std::string &output);
 
@@ -46,13 +44,19 @@ private:
   virtual void initConcrete();
   virtual void setup();
   void exec() override;
+  void deleteTemporaryWorkspaces(const std::string &outputBaseName);
   virtual void postExec(API::MatrixWorkspace_sptr result);
 
+  virtual bool isFitParameter(const std::string &parameterName) const;
+  std::vector<std::string> getFitParameterNames() const;
   std::string getOutputBaseName() const;
   std::string getInputString(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
   API::MatrixWorkspace_sptr
   processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
+
+  std::vector<API::MatrixWorkspace_sptr> convertInputToElasticQ(
+      const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
 
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
                         const std::vector<std::string> &spectra);
@@ -66,6 +70,8 @@ private:
   API::IAlgorithm_sptr
   extractMembersAlgorithm(API::WorkspaceGroup_sptr resultGroupWs,
                           const std::string &outputWsName) const;
+
+  std::string getTemporaryName() const;
 };
 
 } // namespace Algorithms
