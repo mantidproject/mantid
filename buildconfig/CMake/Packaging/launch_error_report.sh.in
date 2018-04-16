@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour
+#
+# Script is configured by CMake
+
+mantidpython error_dialog_app.py
