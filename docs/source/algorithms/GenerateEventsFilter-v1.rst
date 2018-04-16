@@ -169,6 +169,12 @@ If option *centre* is taken, then for each interval,
 
 It is a shift to left.
 
+Parameter: *FastLog*
+####################
+
+When *FastLog* is set to True, a :ref:`MatrixWorkspace <MatrixWorkspace>` will be used to store the event
+splitters, which is more appropriate for fast changing logs. (see above for details).
+
 Parameter: *MinimumLogValue*, *MaximumLogValue*, *LogValueTolerance* and *LogValueInterval*
 ###########################################################################################
 
