@@ -47,6 +47,7 @@ private:
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
   virtual void postExec(API::MatrixWorkspace_sptr result);
 
+  virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &parameterName) const;
   std::vector<std::string> getFitParameterNames() const;
   std::string getOutputBaseName() const;

@@ -35,6 +35,7 @@ protected:
 
 private:
   void postExec(API::MatrixWorkspace_sptr result) override;
+  bool throwIfElasticQConversionFails() const override;
 };
 
 } // namespace Algorithms

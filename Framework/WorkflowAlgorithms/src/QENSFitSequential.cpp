@@ -48,7 +48,8 @@ MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
 }
 
 MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
-                                       const std::string &outputName) {
+                                       const std::string &outputName,
+                                       bool doThrow) {
   auto axis = inputWorkspace->getAxis(1);
   if (axis->isSpectra())
     return convertSpectrumAxis(inputWorkspace, outputName);
@@ -56,9 +57,10 @@ MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
     if (axis->unit()->unitID() != "MomentumTransfer")
       throw std::runtime_error("Input must have axis values of Q");
     return cloneWorkspace(inputWorkspace, outputName);
-  } else
+  } else if (doThrow)
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
+  return cloneWorkspace(inputWorkspace, outputName);
 }
 
 void extractFunctionNames(CompositeFunction_sptr composite,
@@ -374,6 +376,8 @@ std::string QENSFitSequential::getOutputBaseName() const {
   return base;
 }
 
+bool QENSFitSequential::throwIfElasticQConversionFails() const { return false; }
+
 bool QENSFitSequential::isFitParameter(const std::string &) const {
   return true;
 }
@@ -497,14 +501,16 @@ std::vector<MatrixWorkspace_sptr> QENSFitSequential::getWorkspaces() const {
 
 std::vector<MatrixWorkspace_sptr> QENSFitSequential::convertInputToElasticQ(
     const std::vector<MatrixWorkspace_sptr> &workspaces) const {
+  bool doThrow = throwIfElasticQConversionFails();
+
   std::vector<MatrixWorkspace_sptr> elasticInput;
   elasticInput.reserve(workspaces.size());
   elasticInput.emplace_back(
-      convertToElasticQ(workspaces[0], getTemporaryName()));
+      convertToElasticQ(workspaces[0], getTemporaryName(), doThrow));
 
   for (auto i = 1u; i < workspaces.size(); ++i)
     elasticInput.emplace_back(convertToElasticQ(
-        workspaces[i], getTemporaryName() + std::to_string(i)));
+        workspaces[i], getTemporaryName() + std::to_string(i), doThrow));
   return elasticInput;
 }
 

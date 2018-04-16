@@ -202,6 +202,10 @@ void ConvolutionFitSequential::setup() {
   m_lorentzianCount = numberOfFunctions(function, "Lorentzian");
 }
 
+bool ConvolutionFitSequential::throwIfElasticQConversionFails() const {
+  return true;
+}
+
 bool ConvolutionFitSequential::isFitParameter(const std::string &name) const {
   return name.rfind("Centre") == std::string::npos;
 }

@@ -47,7 +47,9 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void setup() override;
   void postExec(API::MatrixWorkspace_sptr result) override;
-  bool isFitParameter(const std::string &name) const;
+
+  bool throwIfElasticQConversionFails() const override;
+  bool isFitParameter(const std::string &name) const override;
 
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
