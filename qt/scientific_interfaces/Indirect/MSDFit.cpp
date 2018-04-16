@@ -130,7 +130,7 @@ IAlgorithm_sptr MSDFit::msdFitAlgorithm(int specMin, int specMax) const {
   msdAlg->setProperty("SpecMax", specMax);
   msdAlg->setProperty(
       "OutputWorkspace",
-      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)));
+      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)) + "_Result");
   return msdAlg;
 }
 
