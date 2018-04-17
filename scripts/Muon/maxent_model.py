@@ -3,19 +3,21 @@ from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 import mantid.simpleapi as mantid
-from Muon import message_box
+
 
 class MaxEntWrapper(object):
+
     """
     A class to wrap the different parts
     of the MaxEnt and its preprocessing.
     This keeps the main MaxEnt class simple.
     """
-    def __init__(self,maxent):
+
+    def __init__(self, maxent):
         self.name = "MaxEnt"
         self.model = maxent
 
-    def loadData(self,inputs):
+    def loadData(self, inputs):
         """
         store the data in the wrapper for later
         """
@@ -38,6 +40,7 @@ class MaxEntWrapper(object):
 
         if self.maxent is not None:
             self.model.MaxEntAlg(self.maxent)
+
     def cancel(self):
         self.model.cancel()
 
@@ -46,59 +49,66 @@ class MaxEntWrapper(object):
 
 
 class MaxEntModel(object):
+
     """
     A simple class which executes
     the relevant algorithms for
     the analysis.
     """
+
     def __init__(self):
         self.name = "MaxEnt"
         self.alg = None
 
-    def setRun(self,run):
-        self.run=run
+    def setRun(self, run):
+        self.run = run
 
-    def MaxEntAlg(self,inputs):
+    def MaxEntAlg(self, inputs):
         """
         Use the MaxEnt alg
         """
         self.alg = mantid.AlgorithmManager.create("MuonMaxent")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
-        for name,value in iteritems(inputs):
-            self.alg.setProperty(name,value)
+        for name, value in iteritems(inputs):
+            self.alg.setProperty(name, value)
         self.alg.execute()
-        self.addOutput(inputs,self.alg,"OutputWorkspace")
-        self.addOutput(inputs,self.alg,"OutputPhaseTable")
-        self.addOutput(inputs,self.alg,"OutputDeadTimeTable")
-        self.addOutput(inputs,self.alg,"ReconstructedSpectra")
-        self.addOutput(inputs,self.alg,"PhaseConvergenceTable")
+        self.addOutput(inputs, self.alg, "OutputWorkspace")
+        self.addOutput(inputs, self.alg, "OutputPhaseTable")
+        self.addOutput(inputs, self.alg, "OutputDeadTimeTable")
+        self.addOutput(inputs, self.alg, "ReconstructedSpectra")
+        self.addOutput(inputs, self.alg, "PhaseConvergenceTable")
         self.alg = None
- 
-    def makePhaseTable(self,inputs):
+
+    def makePhaseTable(self, inputs):
         """
         generates a phase table from CalMuonDetectorPhases
         """
-        self.alg=mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+        self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
-        
-        for name,value in iteritems(inputs):
-            self.alg.setProperty(name,value)
+
+        for name, value in iteritems(inputs):
+            self.alg.setProperty(name, value)
         if inputs["InputWorkspace"] != "MuonAnalysis":
-            raise ValueError("Cannot currently generate phase table from this data using CalMuonDetectorPhases")
+            raise ValueError(
+                "Cannot currently generate phase table from this data using CalMuonDetectorPhases")
         self.alg.execute()
-        name="DetectorTable"
-        mantid.AnalysisDataService.addOrReplace( inputs[name],self.alg.getProperty(name).value)
+        name = "DetectorTable"
+        mantid.AnalysisDataService.addOrReplace(
+            inputs[name],
+            self.alg.getProperty(name).value)
         self.alg = None
 
-    def addOutput(self,inputs,alg,name):
+    def addOutput(self, inputs, alg, name):
         if name in inputs:
-            mantid.AnalysisDataService.addOrReplace(inputs[name],alg.getProperty(name).value)
+            mantid.AnalysisDataService.addOrReplace(
+                inputs[name],
+                alg.getProperty(name).value)
         else:
             return
         if mantid.AnalysisDataService.doesExist(self.run):
-            group=mantid.AnalysisDataService.retrieve(self.run)
+            group = mantid.AnalysisDataService.retrieve(self.run)
         else:
             mantid.GroupWorkspaces(OutputWorkspace=self.run)
 

@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4.QtCore import QThread
 from PyQt4 import QtCore
 from Muon import message_box
- 
+
+
 class ThreadModel(QThread):
 
     """
@@ -11,58 +12,56 @@ class ThreadModel(QThread):
     the MaxEnt models.
     """
     exceptionSignal = QtCore.pyqtSignal(object)
-    def __init__(self,model):
+
+    def __init__(self, model):
         QThread.__init__(self)
-        self.model=model
+        self.model = model
 
     def __del__(self):
         self.wait()
 
     def run(self):
-        self.user_cancel=False
+        self.user_cancel = False
         try:
-           self.model.execute()
-           self.model.output()
+            self.model.execute()
+            self.model.output()
         except KeyboardInterrupt:
             pass
         except Exception as error:
             if self.user_cancel:
                 print("User ended job")
             else:
-                #print("waa ",self.user_cancel,error.__class__.__name__)
+                # print("waa ",self.user_cancel,error.__class__.__name__)
                 self.sendSignal(error)
             pass
 
-    def sendSignal(self,error):
-            self.exceptionSignal.emit(error)
-            #pass
- 
+    def sendSignal(self, error):
+        self.exceptionSignal.emit(error)
+        # pass
+
     def join(self):
         print(self.exception)
         if self.exception is not None:
             raise self.exception
 
     def cancel(self):
-        self.user_cancel=True
+        self.user_cancel = True
         self.model.cancel()
 
     # if there is one set of inputs (1 alg)
-    def setInputs(self,inputs,runName):
-        self.model.setInputs(inputs,runName)
+    def setInputs(self, inputs, runName):
+        self.model.setInputs(inputs, runName)
 
     # if there are multiple inputs (alg>1)
-    def loadData(self,inputs):
+    def loadData(self, inputs):
         self.model.loadData(inputs)
 
-
-    def threadWrapperSetUp(self,startSlot,endSlot):
+    def threadWrapperSetUp(self, startSlot, endSlot):
         self.started.connect(startSlot)
         self.finished.connect(endSlot)
-        self.exceptionSignal.connect(message_box.warning)  
+        self.exceptionSignal.connect(message_box.warning)
 
-    def threadWrapperTearDown(self,startSlot,endSlot):
+    def threadWrapperTearDown(self, startSlot, endSlot):
         self.started.disconnect(startSlot)
         self.finished.disconnect(endSlot)
-        self.exceptionSignal.disconnect(message_box.warning)  
-
-
+        self.exceptionSignal.disconnect(message_box.warning)
