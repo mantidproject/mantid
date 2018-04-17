@@ -98,6 +98,7 @@ set ( TEST_FILES
 	LoadEventAndCompressTest.h
 	MuonProcessTest.h
 	ProcessIndirectFitParametersTest.h
+        QENSFitSequentialTest.h
 	SANSSolidAngleCorrectionTest.h
 	StepScanTest.h
 )
