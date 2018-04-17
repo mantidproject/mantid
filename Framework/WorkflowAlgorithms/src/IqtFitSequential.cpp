@@ -66,7 +66,7 @@ std::vector<API::MatrixWorkspace_sptr> IqtFitSequential::getWorkspaces() const {
   return workspaces;
 }
 
-void IqtFitSequential::postExec(MatrixWorkspace_sptr result) {
+void IqtFitSequential::addAdditionalLogs(MatrixWorkspace_sptr result) {
   auto logs = std::unordered_map<std::string, std::string>();
   logs["start_x"] = getPropertyValue("StartX");
   logs["end_x"] = getPropertyValue("EndX");

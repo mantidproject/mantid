@@ -45,7 +45,7 @@ protected:
 
 private:
   std::map<std::string, std::string> validateInputs() override;
-  void postExec(API::MatrixWorkspace_sptr result) override;
+  void addAdditionalLogs(API::MatrixWorkspace_sptr result) override;
 
   bool throwIfElasticQConversionFails() const override;
   bool isFitParameter(const std::string &name) const override;

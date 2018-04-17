@@ -43,7 +43,7 @@ private:
   void init() override;
   void exec() override;
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
-  virtual void postExec(API::MatrixWorkspace_sptr result);
+  virtual void addAdditionalLogs(API::MatrixWorkspace_sptr result);
 
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &parameterName) const;
@@ -60,8 +60,9 @@ private:
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
                         const std::vector<std::string> &spectra);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
-                API::WorkspaceGroup_sptr resultGroup,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
+  void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
+                API::WorkspaceGroup_sptr resultGroup);
   void extractMembers(API::WorkspaceGroup_sptr resultGroupWs,
                       const std::vector<API::MatrixWorkspace_sptr> &workspaces,
                       const std::string &outputWsName);

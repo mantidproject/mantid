@@ -34,7 +34,7 @@ protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
 
 private:
-  void postExec(API::MatrixWorkspace_sptr result) override;
+  void addAdditionalLogs(API::MatrixWorkspace_sptr result) override;
   bool throwIfElasticQConversionFails() const override;
 };
 

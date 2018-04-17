@@ -215,7 +215,8 @@ ConvolutionFitSequential::performFit(const std::string &input,
   return parameterWorkspace;
 }
 
-void ConvolutionFitSequential::postExec(API::MatrixWorkspace_sptr result) {
+void ConvolutionFitSequential::addAdditionalLogs(
+    API::MatrixWorkspace_sptr result) {
   IFunction_sptr function = getProperty("Function");
   auto logStrings = std::map<std::string, std::string>();
   logStrings["sample_filename"] = getPropertyValue("InputWorkspace");
