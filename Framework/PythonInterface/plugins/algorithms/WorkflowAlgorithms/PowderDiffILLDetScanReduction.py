@@ -173,6 +173,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                                 HeightAxis=height_range,
                                                 MirrorScatteringAngles=mirror_angles,
                                                 CropNegativeScatteringAngles=crop_negative,
+                                                ScatteringAngleTolerance=1000,
                                                 OutputWorkspace=output_workspace_name + '_2DTubes')
             output_workspaces.append(output2DTubes)
 
@@ -183,6 +184,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                            HeightAxis=height_range,
                                            MirrorScatteringAngles=mirror_angles,
                                            CropNegativeScatteringAngles=crop_negative,
+                                           ScatteringAngleTolerance=1000,
                                            OutputWorkspace = output_workspace_name + '_2D')
             output_workspaces.append(output2D)
 

@@ -19,6 +19,7 @@
 #include <H5Cpp.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/round.hpp>
 #include <nexus/napi.h>
 #include <numeric>
 
@@ -103,6 +104,7 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
+  declareProperty("FlipEvenTubes", true, "Flip the numbering of tubes at even index.");
 }
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
@@ -272,6 +274,47 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
 
   const auto instrumentWorkspace = loadEmptyInstrument();
   const auto &instrument = instrumentWorkspace->getInstrument();
+  auto &params = instrumentWorkspace->instrumentParameters();
+
+  const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
+  if (!tubeAnglesStr.empty() && false) {
+    std::vector<std::string> tubeAngles;
+    boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
+    const double ref = -165.;
+    for (size_t i = 1; i <= 128; ++i) {
+      const std::string compName = "tube_" + std::to_string(i);
+      Geometry::IComponent_const_sptr component =
+          instrument->getComponentByName(compName);
+      double r, theta, phi;
+      V3D oldPos = component->getPos();
+      oldPos.getSpherical(r, theta, phi);
+      V3D newPos;
+      const double angle = std::stod(tubeAngles[i - 1]);
+      newPos.spherical(r, (ref - angle) / RAD_TO_DEG, phi);
+      auto &compInfo = instrumentWorkspace->mutableComponentInfo();
+      const auto componentIndex = compInfo.indexOf(component->getComponentID());
+      compInfo.setPosition(componentIndex, newPos);
+    }
+  }
+
+  const auto tubeCentersStr = params.getString("D2B", "tube_centers");
+  if (!tubeCentersStr.empty()) {
+    std::vector<std::string> tubeCenters;
+    boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
+    for (size_t i = 1; i <= 128; ++i) {
+      const std::string compName = "tube_" + std::to_string(i);
+      Geometry::IComponent_const_sptr component =
+          instrument->getComponentByName(compName);
+      const double offset = std::stod(tubeCenters[i - 1]) - 63.5;
+      V3D translation(0, -offset * 0.00277, 0);
+      V3D pos = component->getPos() + translation;
+      g_log.debug() << "Moving " << compName << " to " << translation.Y()
+                    << "\n";
+      auto &compInfo = instrumentWorkspace->mutableComponentInfo();
+      const auto componentIndex = compInfo.indexOf(component->getComponentID());
+      compInfo.setPosition(componentIndex, pos);
+    }
+  }
 
   auto scanningWorkspaceBuilder = DataObjects::ScanningWorkspaceBuilder(
       instrument, nTimeIndexes, nBins, isPointData);
@@ -389,19 +432,42 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
     }
   }
 
-  // Then load the detector spectra
-  for (size_t i = NUMBER_MONITORS;
-       i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
-    for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-      const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
-                            static_cast<int>(pixelInTubeNumber));
-      const auto wsIndex = j + i * m_numberScanPoints;
-      m_outWorkspace->mutableY(wsIndex) = y;
-      m_outWorkspace->mutableE(wsIndex) = sqrt(y);
-      m_outWorkspace->mutableX(wsIndex) = axis;
-    }
+  bool flip = getProperty("FlipEvenTubes");
+
+  if (flip) {
+      // Then load the detector spectra
+      for (size_t i = NUMBER_MONITORS;
+           i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
+        for (size_t j = 0; j < m_numberScanPoints; ++j) {
+          const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
+          auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+          if (tubeNumber % 2 == 1) {
+            pixelInTubeNumber = 127 - pixelInTubeNumber;
+          }
+          unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
+                                static_cast<int>(pixelInTubeNumber));
+          const auto wsIndex = j + i * m_numberScanPoints;
+          m_outWorkspace->mutableY(wsIndex) = y;
+          m_outWorkspace->mutableE(wsIndex) = sqrt(y);
+          m_outWorkspace->mutableX(wsIndex) = axis;
+        }
+      }
+  }
+  else {
+      // Then load the detector spectra
+      for (size_t i = NUMBER_MONITORS;
+           i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
+        for (size_t j = 0; j < m_numberScanPoints; ++j) {
+          const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
+          const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+          unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
+                                static_cast<int>(pixelInTubeNumber));
+          const auto wsIndex = j + i * m_numberScanPoints;
+          m_outWorkspace->mutableY(wsIndex) = y;
+          m_outWorkspace->mutableE(wsIndex) = sqrt(y);
+          m_outWorkspace->mutableX(wsIndex) = axis;
+        }
+      }
   }
 }
 
