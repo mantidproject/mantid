@@ -2,12 +2,12 @@ import sys
 from PyQt4 import QtGui, QtCore
 import mantid
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter
-from ErrorReporter.errorreport import CrashReportPage
+from ErrorReporter.error_report_outside import CrashReportPage
 
 def main():
     app = QtGui.QApplication(sys.argv)  # A new instance of QApplication
     form = CrashReportPage()
-    presenter = ErrorReporterPresenter(form)            # We set the form to be our ExampleApp (design)                       # Show the form
+    presenter = ErrorReporterPresenter(form, sys.argv[1])            # We set the form to be our ExampleApp (design)                       # Show the form
     app.exec_()                         # and execute the app
 
 if __name__ == '__main__':              # if we're running file directly and not importing it
