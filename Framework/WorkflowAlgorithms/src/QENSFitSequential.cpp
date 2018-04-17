@@ -154,9 +154,9 @@ std::string replaceWorkspace(const std::string &input,
   return newInput.str();
 }
 
-void renameWorkspace(IAlgorithm_sptr renamer, const std::string &oldName,
+void renameWorkspace(IAlgorithm_sptr renamer, Workspace_sptr workspace,
                      const std::string &newName) {
-  renamer->setProperty("InputWorkspace", oldName);
+  renamer->setProperty("InputWorkspace", workspace);
   renamer->setProperty("OutputWorkspace", newName);
   renamer->executeAsChildAlg();
 }
@@ -174,6 +174,23 @@ void deleteTemporaries(IAlgorithm_sptr deleter, const std::string &base) {
 
 std::string shortParameterName(const std::string &longName) {
   return longName.substr(longName.rfind('.') + 1, longName.size());
+}
+
+template <typename F, typename Renamer>
+void renameWorkspacesWith(WorkspaceGroup_sptr groupWorkspace, F const &getName,
+                          Renamer const &renamer) {
+  std::unordered_map<std::string, std::size_t> nameCount;
+  for (auto i = 0u; i < groupWorkspace->size(); ++i) {
+    const auto name = getName(i);
+    auto count = nameCount.find(name);
+
+    if (count == nameCount.end()) {
+      renamer(groupWorkspace->getItem(i), name);
+      nameCount[name] = 1;
+    } else
+      renamer(groupWorkspace->getItem(i),
+              name + "(" + std::to_string(++count->second) + ")");
+  }
 }
 } // namespace
 
@@ -236,6 +253,9 @@ void QENSFitSequential::init() {
       "or values using the notation described in the description section of "
       "the help page.");
 
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "The output result workspace");
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputParameterWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
@@ -244,9 +264,7 @@ void QENSFitSequential::init() {
                       "OutputWorkspaceGroup", "", Direction::Output,
                       PropertyMode::Optional),
                   "The output group workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The output result workspace");
+
   declareProperty(
       make_unique<FunctionProperty>("Function"),
       "The fitting function, common for all workspaces in the input.");
@@ -342,7 +360,7 @@ void QENSFitSequential::exec() {
       getPropertyValue("OutputWorkspace"), resultWs);
 
   renameWorkspaces(groupWs, spectra);
-  resultWs = copyLogs(resultWs, workspaces);
+  copyLogs(resultWs, groupWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
   if (doExtractMembers)
@@ -418,31 +436,26 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
 
 void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra) {
-  auto renamer = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  const auto groupNames = outputGroup->getNames();
-  const std::string outputBase = getPropertyValue("OutputWorkspaceGroup");
-  std::unordered_map<std::string, std::size_t> spectrumCount;
+  auto renameAlgorithm =
+      createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  const auto groupName = getPropertyValue("OutputWorkspaceGroup");
+  const auto outputBase = groupName.substr(0, groupName.rfind("_Workspaces"));
 
   Progress renamerProg(this, 0.98, 1.0, spectra.size());
   renamerProg.report("Renaming group workspaces...");
 
-  for (auto i = 0u; i < spectra.size(); ++i) {
-    std::ostringstream name;
-    auto count = spectrumCount.find(spectra[i]);
+  auto getName = [&](std::size_t i) {
+    return outputBase + "_" + spectra[i] + "_Workspace";
+  };
 
-    if (count == spectrumCount.end()) {
-      name << outputBase << "_" << spectra[i] << "_Workspace";
-      spectrumCount[spectra[i]] = 1;
-    } else
-      name << outputBase << "_" << spectra[i] << "(" << ++count->second << ")"
-           << "_Workspace";
-
-    renameWorkspace(renamer, groupNames[i], name.str());
+  auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
+    renameWorkspace(renameAlgorithm, workspace, name);
     renamerProg.report("Renamed workspace in group.");
-  }
+  };
+  renameWorkspacesWith(outputGroup, getName, renamer);
 
-  if (outputGroup->getName() != outputBase)
-    renameWorkspace(renamer, outputGroup->getName(), outputBase);
+  if (outputGroup->getName() != groupName)
+    renameWorkspace(renameAlgorithm, outputGroup, groupName);
 }
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
@@ -518,8 +531,8 @@ void QENSFitSequential::extractMembers(
   extractAlgorithm->execute();
 }
 
-MatrixWorkspace_sptr QENSFitSequential::copyLogs(
-    MatrixWorkspace_sptr resultWorkspace,
+void QENSFitSequential::copyLogs(
+    MatrixWorkspace_sptr resultWorkspace, WorkspaceGroup_sptr resultGroup,
     const std::vector<MatrixWorkspace_sptr> &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("OutputWorkspace", resultWorkspace->getName());
@@ -528,7 +541,10 @@ MatrixWorkspace_sptr QENSFitSequential::copyLogs(
     logCopier->setProperty("InputWorkspace", workspace);
     logCopier->executeAsChildAlg();
   }
-  return resultWorkspace;
+
+  logCopier->setProperty("InputWorkspace", resultWorkspace);
+  logCopier->setProperty("OutputWorkspace", resultGroup);
+  logCopier->executeAsChildAlg();
 }
 
 IAlgorithm_sptr QENSFitSequential::extractMembersAlgorithm(
