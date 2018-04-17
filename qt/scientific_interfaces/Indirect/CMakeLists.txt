@@ -6,7 +6,7 @@ set ( SRC_FILES
 	ConvFit.cpp
 	CorrectionsTab.cpp
 	DensityOfStates.cpp
-    Elwin.cpp
+        Elwin.cpp
 	ILLEnergyTransfer.cpp
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
@@ -14,13 +14,18 @@ set ( SRC_FILES
 	IndirectBayes.cpp
 	IndirectBayesTab.cpp
 	IndirectCorrections.cpp
+	IndirectConvFitModel.cpp
 	IndirectDataAnalysis.cpp
 	IndirectDataAnalysisTab.cpp
 	IndirectDataReduction.cpp
 	IndirectDataReductionTab.cpp
 	IndirectDiffractionReduction.cpp
 	IndirectFitAnalysisTab.cpp
+	IndirectFitData.cpp
+	IndirectFitOutput.cpp
+	IndirectFittingModel.cpp
 	IndirectLoadILL.cpp
+        IndirectIqtFitModel.cpp
 	IndirectMolDyn.cpp
 	IndirectMoments.cpp
 	IndirectSassena.cpp
@@ -55,7 +60,7 @@ set ( INC_FILES
 	ConvFit.h
 	CorrectionsTab.h
 	DensityOfStates.h
-    Elwin.h
+        Elwin.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
@@ -63,12 +68,17 @@ set ( INC_FILES
 	IndirectBayes.h
 	IndirectBayesTab.h
 	IndirectCorrections.h
+	IndirectConvFitModel.h
 	IndirectDataAnalysis.h
 	IndirectDataAnalysisTab.h
 	IndirectDataReduction.h
 	IndirectDataReductionTab.h
 	IndirectDiffractionReduction.h
 	IndirectFitAnalysisTab.h
+	IndirectFitData.h
+	IndirectFitOutput.h
+  	IndirectFittingModel.h
+        IndirectIqtFitModel.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
 	IndirectMoments.h
@@ -111,15 +121,15 @@ set ( MOC_FILES
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDiffractionReduction.h
-	IndirectFitAnalysisTab.h
+    IndirectFitAnalysisTab.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
     IndirectSassena.h
     IndirectSimulation.h
     IndirectSimulationTab.h
-	IndirectSpectrumSelectionPresenter.h
-	IndirectSpectrumSelectionView.h
+    IndirectSpectrumSelectionPresenter.h
+    IndirectSpectrumSelectionView.h
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTransmission.h
