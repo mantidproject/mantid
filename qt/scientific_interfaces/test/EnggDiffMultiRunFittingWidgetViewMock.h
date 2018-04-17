@@ -36,6 +36,8 @@ public:
 
   MOCK_METHOD0(resetCanvas, void());
 
+  MOCK_METHOD1(setEnabled, void(const bool));
+
   MOCK_METHOD1(
       setMessageProvider,
       void(boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider));

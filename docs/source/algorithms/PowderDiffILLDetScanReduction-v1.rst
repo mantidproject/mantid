@@ -85,7 +85,7 @@ Output:
 
 .. testoutput:: ExPowderDiffDetScanILLReduction
 
-    '2DTubes' output workspace has 128 diffractograms having 3250 bins each
+    '2DTubes' output workspace has 128 diffractograms having 3025 bins each
     '2D' output workspace has 128 diffractograms having 3025 bins each
     '1D' output workspace has 1 diffractograms having 3025 bins each
 

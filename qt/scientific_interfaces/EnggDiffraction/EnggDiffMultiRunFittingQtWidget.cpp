@@ -174,6 +174,14 @@ void EnggDiffMultiRunFittingQtWidget::resetPlotZoomLevel() {
   m_zoomTool->setZoomBase(true);
 }
 
+void EnggDiffMultiRunFittingQtWidget::setEnabled(const bool enabled) {
+  m_ui.listWidget_runLabels->setEnabled(enabled);
+  m_ui.pushButton_removeRun->setEnabled(enabled);
+  m_ui.pushButton_plotToSeparateWindow->setEnabled(enabled);
+  m_ui.checkBox_plotFittedPeaks->setEnabled(enabled);
+  m_zoomTool->setEnabled(enabled);
+}
+
 void EnggDiffMultiRunFittingQtWidget::setMessageProvider(
     boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) {
   m_userMessageProvider = messageProvider;

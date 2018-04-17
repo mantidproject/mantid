@@ -46,6 +46,8 @@ public:
 
   void resetCanvas() override;
 
+  void setEnabled(const bool enabled) override;
+
   void setMessageProvider(
       boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;
 

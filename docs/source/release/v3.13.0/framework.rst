@@ -10,7 +10,6 @@ Framework Changes
     improvements, followed by bug fixes.
 
 
-
 Algorithms
 ----------
 
@@ -38,5 +37,6 @@ Bug fixes
 #########
 
 - The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
+- The :ref:`ExtractMask <algm-ExtractMask>` algorithm now returns a non-empty list of detector ID's when given a MaskWorkspace.
 
 :ref:`Release 3.13.0 <v3.13.0>`
