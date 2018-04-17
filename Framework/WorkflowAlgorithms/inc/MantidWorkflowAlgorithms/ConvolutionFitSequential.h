@@ -42,10 +42,11 @@ public:
 protected:
   API::ITableWorkspace_sptr performFit(const std::string &input,
                                        const std::string &output) override;
+  std::map<std::string, std::string> getAdditionalLogStrings() const override;
+  std::map<std::string, std::string> getAdditionalLogNumbers() const override;
 
 private:
   std::map<std::string, std::string> validateInputs() override;
-  void addAdditionalLogs(API::MatrixWorkspace_sptr result) override;
 
   bool throwIfElasticQConversionFails() const override;
   bool isFitParameter(const std::string &name) const override;

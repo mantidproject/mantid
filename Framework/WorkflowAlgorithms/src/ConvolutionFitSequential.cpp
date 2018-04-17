@@ -215,42 +215,18 @@ ConvolutionFitSequential::performFit(const std::string &input,
   return parameterWorkspace;
 }
 
-void ConvolutionFitSequential::addAdditionalLogs(
-    API::MatrixWorkspace_sptr result) {
-  IFunction_sptr function = getProperty("Function");
-  auto logStrings = std::map<std::string, std::string>();
-  logStrings["sample_filename"] = getPropertyValue("InputWorkspace");
-  logStrings["convolve_members"] = getPropertyValue("ConvolveMembers");
-  logStrings["fit_program"] = "ConvFit";
-  logStrings["background"] = extractBackgroundType(function);
-  logStrings["delta_function"] = m_deltaUsed ? "true" : "false";
-  logStrings["fit_mode"] = "Sequential";
+std::map<std::string, std::string>
+ConvolutionFitSequential::getAdditionalLogStrings() const {
+  auto logs = QENSFitSequential::getAdditionalLogStrings();
+  logs["delta_function"] = m_deltaUsed ? "true" : "false";
+  return logs;
+}
 
-  auto logNumbers = std::map<std::string, std::string>();
-  logNumbers["lorentzians"] =
-      boost::lexical_cast<std::string>(m_lorentzianCount);
-
-  Progress logAdderProg(this, 0.99, 1.00, 6);
-  // Add String Logs
-  auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
-  for (auto &sampleLogString : logStrings) {
-    logAdder->setProperty("Workspace", result);
-    logAdder->setProperty("LogName", sampleLogString.first);
-    logAdder->setProperty("LogText", sampleLogString.second);
-    logAdder->setProperty("LogType", "String");
-    logAdder->executeAsChildAlg();
-    logAdderProg.report("Add text logs");
-  }
-
-  // Add Numeric Logs
-  for (auto &logItem : logNumbers) {
-    logAdder->setProperty("Workspace", result);
-    logAdder->setProperty("LogName", logItem.first);
-    logAdder->setProperty("LogText", logItem.second);
-    logAdder->setProperty("LogType", "Number");
-    logAdder->executeAsChildAlg();
-    logAdderProg.report("Adding Numerical logs");
-  }
+std::map<std::string, std::string>
+ConvolutionFitSequential::getAdditionalLogNumbers() const {
+  auto logs = QENSFitSequential::getAdditionalLogNumbers();
+  logs["lorentzians"] = boost::lexical_cast<std::string>(m_lorentzianCount);
+  return logs;
 }
 
 /**

@@ -36,6 +36,8 @@ public:
 
 protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
+  virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
+  virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
   virtual API::ITableWorkspace_sptr performFit(const std::string &input,
                                                const std::string &output);
 
@@ -43,7 +45,7 @@ private:
   void init() override;
   void exec() override;
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
-  virtual void addAdditionalLogs(API::MatrixWorkspace_sptr result);
+  void addAdditionalLogs(API::MatrixWorkspace_sptr result);
 
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &parameterName) const;

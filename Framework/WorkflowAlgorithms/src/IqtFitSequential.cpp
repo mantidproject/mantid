@@ -66,21 +66,5 @@ std::vector<API::MatrixWorkspace_sptr> IqtFitSequential::getWorkspaces() const {
   return workspaces;
 }
 
-void IqtFitSequential::addAdditionalLogs(MatrixWorkspace_sptr result) {
-  auto logs = std::unordered_map<std::string, std::string>();
-  logs["start_x"] = getPropertyValue("StartX");
-  logs["end_x"] = getPropertyValue("EndX");
-  logs["fit_mode"] = "Sequential";
-
-  auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
-  for (auto log : logs) {
-    logAdder->setProperty("Workspace", result);
-    logAdder->setProperty("LogName", log.first);
-    logAdder->setProperty("LogText", log.second);
-    logAdder->setProperty("LogType", "String");
-    logAdder->executeAsChildAlg();
-  }
-}
-
 } // namespace Algorithms
 } // namespace Mantid

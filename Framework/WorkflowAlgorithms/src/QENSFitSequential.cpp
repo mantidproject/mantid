@@ -376,7 +376,49 @@ void QENSFitSequential::exec() {
   setProperty("OutputWorkspaceGroup", groupWs);
 }
 
-void QENSFitSequential::addAdditionalLogs(MatrixWorkspace_sptr) {}
+std::map<std::string, std::string>
+QENSFitSequential::getAdditionalLogStrings() const {
+  bool convolve = getProperty("ConvolveMembers");
+  auto fitProgram = name();
+  fitProgram = fitProgram.substr(0, fitProgram.rfind("Sequential"));
+
+  auto logs = std::map<std::string, std::string>();
+  logs["sample_filename"] = getPropertyValue("InputWorkspace");
+  logs["convolve_members"] = convolve ? "true" : "false";
+  logs["fit_program"] = fitProgram;
+  logs["fit_mode"] = "Sequential";
+  logs["fit_start_x"] = getPropertyValue("StartX");
+  logs["fit_end_x"] = getPropertyValue("EndX");
+  return logs;
+}
+
+std::map<std::string, std::string>
+QENSFitSequential::getAdditionalLogNumbers() const {
+  return std::map<std::string, std::string>();
+}
+
+void QENSFitSequential::addAdditionalLogs(
+    MatrixWorkspace_sptr resultWorkspace) {
+  auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
+  logAdder->setProperty("Workspace", resultWorkspace);
+
+  Progress logAdderProg(this, 0.99, 1.00, 6);
+  logAdder->setProperty("LogType", "String");
+  for (const auto log : getAdditionalLogStrings()) {
+    logAdder->setProperty("LogName", log.first);
+    logAdder->setProperty("LogText", log.second);
+    logAdder->executeAsChildAlg();
+    logAdderProg.report("Add text logs");
+  }
+
+  logAdder->setProperty("LogType", "Number");
+  for (const auto log : getAdditionalLogNumbers()) {
+    logAdder->setProperty("LogName", log.first);
+    logAdder->setProperty("LogText", log.second);
+    logAdder->executeAsChildAlg();
+    logAdderProg.report("Add number logs");
+  }
+}
 
 std::string QENSFitSequential::getOutputBaseName() const {
   const auto base = getPropertyValue("OutputWorkspace");
