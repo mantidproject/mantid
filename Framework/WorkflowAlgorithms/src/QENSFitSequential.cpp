@@ -14,6 +14,7 @@
 #include <boost/regex.hpp>
 
 #include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace {
@@ -335,6 +336,29 @@ void QENSFitSequential::init() {
       Kernel::Direction::Input);
 }
 
+std::map<std::string, std::string> QENSFitSequential::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  if (getPropertyValue("Input").empty()) {
+    MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
+    if (!workspace)
+      errors["InputWorkspace"] =
+          "No input string or input workspace was provided.";
+
+    int specMin = getProperty("SpecMin");
+    int specMax = getProperty("SpecMax");
+    if (specMin > specMax)
+      errors["SpecMin"] = "SpecMin must be less than or equal to SpecMax.";
+  }
+
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  if (startX >= endX)
+    errors["StartX"] = "StartX must be less than EndX";
+
+  return errors;
+}
+
 void QENSFitSequential::exec() {
   const auto outputBaseName = getOutputBaseName();
 
@@ -350,12 +374,12 @@ void QENSFitSequential::exec() {
 
   if (workspaces.empty() || spectra.empty() ||
       (workspaces.size() > 1 && workspaces.size() != spectra.size()))
-    throw std::runtime_error("A malformed input string was provided.");
+    throw std::invalid_argument("A malformed input string was provided.");
 
   auto outputWs = performFit(inputString, outputBaseName);
   auto resultWs = processIndirectFitParameters(outputWs);
   auto groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      getPropertyValue("OutputWorkspaceGroup"));
+      outputBaseName + "_Workspaces");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
@@ -387,14 +411,15 @@ QENSFitSequential::getAdditionalLogStrings() const {
   logs["convolve_members"] = convolve ? "true" : "false";
   logs["fit_program"] = fitProgram;
   logs["fit_mode"] = "Sequential";
-  logs["start_x"] = getPropertyValue("StartX");
-  logs["end_x"] = getPropertyValue("EndX");
   return logs;
 }
 
 std::map<std::string, std::string>
 QENSFitSequential::getAdditionalLogNumbers() const {
-  return std::map<std::string, std::string>();
+  std::map<std::string, std::string> logs;
+  logs["start_x"] = getPropertyValue("StartX");
+  logs["end_x"] = getPropertyValue("EndX");
+  return logs;
 }
 
 void QENSFitSequential::addAdditionalLogs(

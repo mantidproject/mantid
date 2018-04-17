@@ -11,6 +11,8 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
+  QENSFitSequential - Performs a sequential QENS fit
+
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
   This file is part of Mantid.
@@ -35,6 +37,7 @@ public:
   const std::string summary() const override;
 
 protected:
+  std::map<std::string, std::string> validateInputs() override;
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
   virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;

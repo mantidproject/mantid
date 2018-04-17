@@ -188,7 +188,7 @@ const std::string ConvolutionFitSequential::summary() const {
 }
 
 std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
-  std::map<std::string, std::string> errors;
+  auto errors = QENSFitSequential::validateInputs();
   IFunction_sptr function = getProperty("Function");
   if (!containsFunction(function, "Convolution") ||
       !containsFunction(function, "Resolution"))

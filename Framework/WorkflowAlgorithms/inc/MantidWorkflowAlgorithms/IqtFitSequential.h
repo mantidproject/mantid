@@ -34,6 +34,7 @@ protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
 
 private:
+  std::map<std::string, std::string> validateInputs() override;
   bool throwIfElasticQConversionFails() const override;
 };
 
