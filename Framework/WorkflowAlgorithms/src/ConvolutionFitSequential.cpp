@@ -144,7 +144,7 @@ std::string extractBackgroundType(IFunction_sptr function) {
     return "None";
 
   auto backgroundType = background->name();
-  auto position = backgroundType.rfind(" Background");
+  auto position = backgroundType.rfind("Background");
 
   if (position != std::string::npos)
     backgroundType = backgroundType.substr(0, position);
