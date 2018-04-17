@@ -178,7 +178,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFittingModel::IndirectFittingModel() : m_previousModelSelected(false) {}
+IndirectFittingModel::IndirectFittingModel()
+    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
 
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
@@ -229,7 +230,7 @@ std::size_t IndirectFittingModel::numberOfSpectra() const {
 }
 
 std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
-  if(m_fitFunction)
+  if (m_fitFunction)
     return m_fitFunction->getParameterNames();
   return std::vector<std::string>();
 }
