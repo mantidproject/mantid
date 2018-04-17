@@ -171,7 +171,8 @@ private:
                  std::vector<int64_t> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
-  void processFile(const std::string &fname, API::MatrixWorkspace_const_sptr workspace,
+  void processFile(const std::string &fname,
+                   API::MatrixWorkspace_const_sptr workspace,
                    std::vector<int64_t> &unUsedSpec);
   /// gets groupings from XML file
   void processXMLFile(const std::string &fname,
@@ -194,7 +195,8 @@ private:
 
   /// used while reading the file reads reads spectra numbers from the string
   /// and returns spectra indexes
-  void readSpectraIndexes(const std::string &line, const spec2index_map &specs2index,
+  void readSpectraIndexes(const std::string &line,
+                          const spec2index_map &specs2index,
                           std::vector<size_t> &output,
                           std::vector<int64_t> &unUsedSpec,
                           const std::string &seperator = "#");

@@ -77,10 +77,12 @@ createCappedCylinder(double radius, double height,
                      const Mantid::Kernel::V3D &axis, const std::string &id);
 
 /// Add a spherical sample at samplePos to given instrument.
-void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &samplePos);
+void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
+                           const Mantid::Kernel::V3D &samplePos);
 
 /// Add a source with given name and sourcePos to given instrument
-void addSourceToInstrument(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &sourcePos,
+void addSourceToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
+                           const Mantid::Kernel::V3D &sourcePos,
                            const std::string &name = "moderator");
 
 /**

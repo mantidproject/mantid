@@ -60,9 +60,7 @@ public:
     FrameworkManager::Instance();
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testSetup() {
     GroupDetectors2 gd;
@@ -932,7 +930,9 @@ public:
     createTestWorkspace(inputWSName, 0);
     // Use ConvertSpectrumAxis to replace the vertical axis with a
     // NumericAxis.
-    auto convertAxis = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
+    auto convertAxis =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "ConvertSpectrumAxis");
     convertAxis->initialize();
     convertAxis->setChild(true);
     convertAxis->setRethrows(true);
@@ -974,9 +974,10 @@ public:
     const int numBanks{1};
     const int bankWidthInPixels{3};
     const bool clearEvents{false};
-    auto ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks, bankWidthInPixels, clearEvents);
+    auto ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+        numBanks, bankWidthInPixels, clearEvents);
     // Number of events from WorkspaceCreationHelpers::
-    //createEventWorkspaceWithStartTime, numEvents = 100, eventPatter = 2.
+    // createEventWorkspaceWithStartTime, numEvents = 100, eventPatter = 2.
     const int numEvents{200};
     auto newAxis = new NumericAxis(ws->getNumberHistograms());
     for (size_t i = 0; i < newAxis->length(); ++i) {
@@ -990,7 +991,8 @@ public:
 
     // Set the properties
     TS_ASSERT_THROWS_NOTHING(group.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("OutputWorkspace", "GDEventsOut"))
+    TS_ASSERT_THROWS_NOTHING(
+        group.setPropertyValue("OutputWorkspace", "GDEventsOut"))
     TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("GroupingPattern", "2-4"))
     TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("Behaviour", "Average"))
     TS_ASSERT_THROWS_NOTHING(group.setProperty("PreserveEvents", true))

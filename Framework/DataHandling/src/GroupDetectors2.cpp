@@ -892,8 +892,8 @@ int GroupDetectors2::readInt(const std::string &line) {
 * @param ignoreGroupNumber :: ignore group numbers when numbering spectra
 * @throw invalid_argument if there is any problem with the file
 */
-void GroupDetectors2::readFile(const spec2index_map &specs2index, std::istream &File,
-                               size_t &lineNum,
+void GroupDetectors2::readFile(const spec2index_map &specs2index,
+                               std::istream &File, size_t &lineNum,
                                std::vector<int64_t> &unUsedSpec,
                                const bool ignoreGroupNumber) {
   // go through the rest of the file reading in lists of spectra number to group
