@@ -52,6 +52,7 @@ An important aspect of examining the :math:`S(Q,E)` workspace is to plot cuts at
 
    import directtools as dt
    from mantid.simpleapi import *
+   import warnings
    
    DirectILLCollectData(Run='ILL/IN4/084447.nxs', OutputWorkspace='data')
    DirectILLReduction(InputWorkspace='data', OutputWorkspace='SofQW')
