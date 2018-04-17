@@ -50,9 +50,9 @@ void ExtractQENSMembers::init() {
                                        PropertyMode::Optional),
       "The input workspace used in the fit. Ignored if 'InputWorkspaces' "
       "property is provided.");
-  declareProperty(make_unique<ArrayProperty<std::string>>(
-                      "InputWorkspaces", boost::make_shared<ADSValidator>()),
-                  "List of the workspaces used in the fit.");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>("InputWorkspaces", ""),
+      "List of the workspaces used in the fit.");
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "ResultWorkspace", "", Direction::Input),
                   "The result group workspace produced in a QENS fit.");
