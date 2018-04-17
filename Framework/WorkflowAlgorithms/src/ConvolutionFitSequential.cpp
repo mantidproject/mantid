@@ -27,13 +27,14 @@ Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+std::size_t numberOfFunctions(IFunction_sptr function,
+                              const std::string &functionName);
+
 std::size_t numberOfFunctions(CompositeFunction_sptr composite,
                               const std::string &functionName) {
   std::size_t count = 0;
-  for (auto i = 0u; i < composite->nFunctions(); ++i) {
-    if (composite->getFunction(i)->name() == functionName)
-      count += 1;
-  }
+  for (auto i = 0u; i < composite->nFunctions(); ++i)
+    count += numberOfFunctions(composite->getFunction(i), functionName);
   return count;
 }
 
