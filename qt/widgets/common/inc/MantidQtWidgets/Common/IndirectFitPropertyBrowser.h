@@ -117,10 +117,7 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
-  void updateParameterValues(const QHash<QString, double> &parameterValues);
-
-  void updateParameterValues(PropertyHandler *functionHandler,
-                             const QHash<QString, double> &parameterValues);
+  void updateErrors();
 
   void removeFunction(PropertyHandler *handler) override;
 

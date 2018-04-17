@@ -389,50 +389,6 @@ void IndirectFitPropertyBrowser::setCustomSettingEnabled(
 }
 
 /**
- * Updates the values of the function parameters in this fit property browser,
- * using the specified map from parameter name to updated value.
- *
- * @param parameterValues A map from the name of a parameter to its updated
- *                        value.
- */
-void IndirectFitPropertyBrowser::updateParameterValues(
-    const QHash<QString, double> &parameterValues) {
-  updateParameterValues(getHandler(), parameterValues);
-}
-
-/**
- * Updates the values of the parameters of the function held by the specified
- * property handler, using the specified map from parameter name to updated
- * value.
- *
- * @param functionHandler The property handler containing the function.
- * @param parameterValues A map from the name of a parameter to its updated
- *                        value.
- */
-void IndirectFitPropertyBrowser::updateParameterValues(
-    PropertyHandler *functionHandler,
-    const QHash<QString, double> &parameterValues) {
-  auto function = functionHandler->function();
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-
-  if (composite) {
-    if (composite->nFunctions() == 0)
-      return;
-    else if (composite->nFunctions() == 1)
-      function = composite->getFunction(0);
-  }
-
-  for (const auto &parameterName : parameterValues.keys()) {
-    const auto parameter = parameterName.toStdString();
-
-    if (function->hasParameter(parameter))
-      function->setParameter(parameter, parameterValues[parameterName]);
-  }
-
-  updateParameters();
-}
-
-/**
  * Sets the available background options in this indirect fit property browser.
  *
  * @param backgrounds A list of the names of available backgrouns to set.
