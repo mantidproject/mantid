@@ -187,6 +187,11 @@ const std::string ConvolutionFitSequential::summary() const {
   return "Performs a sequential fit for a convolution workspace";
 }
 
+/// Algorithm's see also for related algorithms. @see Algorithm::seeAlso
+const std::vector<std::string> ConvolutionFitSequential::seeAlso() const {
+  return {"QENSFitSequential"};
+}
+
 std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
   auto errors = QENSFitSequential::validateInputs();
   IFunction_sptr function = getProperty("Function");

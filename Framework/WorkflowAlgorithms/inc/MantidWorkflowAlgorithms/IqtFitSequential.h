@@ -29,6 +29,7 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override;
 
 protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;

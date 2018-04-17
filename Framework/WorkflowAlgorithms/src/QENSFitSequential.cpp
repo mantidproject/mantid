@@ -222,6 +222,11 @@ const std::string QENSFitSequential::summary() const {
   return "Performs a sequential fit for QENS data";
 }
 
+/// Algorithm's see also for related algorithms. @see Algorithm::seeAlso
+const std::vector<std::string> QENSFitSequential::seeAlso() const {
+  return {"ConvolutionFitSequential", "IqtFitSequential", "PlotPeakByLogValue"};
+}
+
 void QENSFitSequential::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
