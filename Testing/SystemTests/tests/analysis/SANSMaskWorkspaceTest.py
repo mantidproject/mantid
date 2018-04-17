@@ -478,6 +478,44 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         # Assert
         self._do_assert(workspace, expected_spectra)
 
+    def test_that_beam_stop_masking_is_applied_for_LOQ(self):
+        # Arrange
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("LOQ74044")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
+        data_builder.set_sample_scatter("LOQ74044")
+        data_info = data_builder.build()
+        mask_builder = get_mask_builder(data_info)
+
+        beam_stop_arm_width = .01
+        beam_stop_arm_angle = 180.0
+        beam_stop_arm_pos1 = 0.0
+        beam_stop_arm_pos2 = 0.0
+
+        # Expected_spectra, again the tubes are shifted and that will produce the slightly strange masking
+        expected_spectra = []
+        expected_spectra.extend((7811 + x for x in range(0, 63)))
+        expected_spectra.extend((7939 + x for x in range(0, 63)))
+
+        mask_builder.set_beam_stop_arm_width(beam_stop_arm_width)
+        mask_builder.set_beam_stop_arm_angle(beam_stop_arm_angle)
+        mask_builder.set_beam_stop_arm_pos1(beam_stop_arm_pos1)
+        mask_builder.set_beam_stop_arm_pos2(beam_stop_arm_pos2)
+
+        mask_info = mask_builder.build()
+
+        test_director = TestDirector()
+        test_director.set_states(data_state=data_info, mask_state=mask_info)
+        state = test_director.construct()
+
+        workspace = self._load_workspace(state, move_workspace=False)
+
+        # Act
+        workspace = self._run_mask(state, workspace, "LAB")
+
+        # Assert
+        self._do_assert(workspace, expected_spectra)
+
     def test_that_cylinder_masking_is_applied(self):
         # Arrange
         file_information_factory = SANSFileInformationFactory()

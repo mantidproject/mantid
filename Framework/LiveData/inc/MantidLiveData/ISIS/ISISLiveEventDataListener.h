@@ -19,7 +19,7 @@
 const long RECV_TIMEOUT = 30;
 // Sleep time in case we need to wait for the data to become available (in
 // milliseconds)
-const long RECV_WAIT = 1;
+const long RECV_WAIT = 10;
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -164,6 +164,8 @@ protected:
   void Receive(T &buffer, const std::string &head, const std::string &msg) {
     long timeout = 0;
     while (m_socket.available() < static_cast<int>(sizeof(buffer))) {
+      if (m_stopThread)
+        return;
       Poco::Thread::sleep(RECV_WAIT);
       timeout += RECV_WAIT;
       if (timeout > RECV_TIMEOUT * 1000)
@@ -190,7 +192,7 @@ protected:
   /// Thread that reads events from the DAE in the background
   Poco::Thread m_thread;
   /// background thread checks this periodically.  If true, the thread exits
-  bool m_stopThread;
+  std::atomic<bool> m_stopThread;
   /// Holds on to any exceptions that were thrown in the background thread so
   /// that we
   /// can re-throw them in the forground thread
