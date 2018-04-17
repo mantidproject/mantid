@@ -301,7 +301,7 @@ void QENSFitSequential::init() {
                   "are 'Least squares' and 'Ignore positive peaks'",
                   Direction::InOut);
 
-  declareProperty("MaxIterations", 500,
+  declareProperty("MaxIterations", 500, boundedV,
                   "Stop after this number of iterations if a good fit is not "
                   "found");
   declareProperty("PeakRadius", 0,
