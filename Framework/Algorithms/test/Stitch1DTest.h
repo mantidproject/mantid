@@ -20,13 +20,13 @@
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::Stitch1D;
-using namespace Mantid::DataObjects;
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::LinearGenerator;
 
 double roundSix(double i) { return floor(i * 1000000. + 0.5) / 1000000.; }
@@ -44,8 +44,7 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
     outWS->mutableY(i) = yData;
     outWS->mutableE(i) = eData;
     outWS->mutableX(i) = xData;
-    outWS->setPointStandardDeviations(i, yData.size());
-    outWS->mutableDx(i) = Dx;
+    outWS->setPointStandardDeviations(i, Dx);
   }
 
   outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
@@ -240,22 +239,49 @@ public:
                       std::runtime_error &);
   }
 
-  void test_lhsworkspace_must_be_histogram() {
-    auto lhs_ws = make_arbitrary_point_ws();
-    auto rhs_ws = make_arbitrary_histogram_ws();
-    TSM_ASSERT_THROWS(
-        "Both ws must be either histogram or point data",
-        do_stitch1D(lhs_ws, rhs_ws, -1., 1., std::vector<double>(1., 0.2)),
-        std::invalid_argument &);
+  void test_point_workspaces_pass() {
+    auto point_ws = make_arbitrary_point_ws();
+    const auto &x = HistogramX(3, LinearGenerator(-.5, 0.2));
+    const auto &y = HistogramY(3, LinearGenerator(1., 1.0));
+    const auto &e = HistogramE(3, 1.);
+    const auto &dx = HistogramDx(3, LinearGenerator(-3., 0.1));
+    auto point_ws_2 = createWorkspace(x, y, e, dx);
+    TSM_ASSERT_THROWS_NOTHING("Point workspaces should pass",
+                              do_stitch1D(point_ws, point_ws_2));
   }
 
-  void test_rhsworkspace_must_be_histogram() {
-    auto lhs_ws = make_arbitrary_histogram_ws();
-    auto rhs_ws = make_arbitrary_point_ws();
-    TSM_ASSERT_THROWS(
-        "Both ws must be either histogram or point data",
-        do_stitch1D(lhs_ws, rhs_ws, -1., 1., std::vector<double>(1., 0.2)),
-        std::invalid_argument &);
+  void test_histogram_workspaces_pass() {
+    auto histo_ws = make_arbitrary_histogram_ws();
+    const auto &x = HistogramX(3, LinearGenerator(-1.2, 0.2));
+    const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
+    const auto &e = HistogramE(2, 1.);
+    const auto &dx = HistogramDx(2, LinearGenerator(-3., 0.1));
+    auto histo_ws_2 = createWorkspace(x, y, e, dx);
+    TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass",
+                              do_stitch1D(histo_ws_2, histo_ws));
+  }
+
+  void test_input_validation() {
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", make_arbitrary_point_ws());
+    alg.setProperty("RHSWorkspace", make_arbitrary_histogram_ws());
+    alg.setProperty("StartOverlap", -1);
+    alg.setProperty("EndOverlap", 1);
+    alg.setProperty("Params", std::vector<double>(1., 0.2));
+    alg.setProperty("ScaleRHSWorkspace", true);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    TSM_ASSERT("RHSWorkspace must be point data.",
+               !alg.isExecuted());
+
+    alg.setProperty("LHSWorkspace", make_arbitrary_histogram_ws());
+    alg.setProperty("RHSWorkspace", make_arbitrary_point_ws());
+    alg.execute();
+    TSM_ASSERT("RHSWorkspace must be a histogram.",
+               !alg.isExecuted());
   }
 
   void test_stitching_uses_supplied_params() {
@@ -549,7 +575,6 @@ public:
     TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
 
     // Run it again with all zeros
-
     e = HistogramE(9, 0.);
     ws = createWorkspace(x, y, e, dx, nspectrum);
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));

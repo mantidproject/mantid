@@ -48,6 +48,8 @@ public:
   }
   /// Does the x-axis have non-zero errors
   bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Helper typedef. For storing indexes of special values per spectra per
