@@ -31,16 +31,13 @@ class ThreadModel(QThread):
             if self.user_cancel:
                 print("User ended job")
             else:
-                # print("waa ",self.user_cancel,error.__class__.__name__)
                 self.sendSignal(error)
             pass
 
     def sendSignal(self, error):
         self.exceptionSignal.emit(error)
-        # pass
 
     def join(self):
-        print(self.exception)
         if self.exception is not None:
             raise self.exception
 
