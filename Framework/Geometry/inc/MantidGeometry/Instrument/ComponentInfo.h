@@ -5,7 +5,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/shared_ptr.hpp>
-#include <map>
 #include <unordered_map>
 #include <vector>
 

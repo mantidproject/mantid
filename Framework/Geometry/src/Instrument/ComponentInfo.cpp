@@ -394,7 +394,6 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
   }
 
   BoundingBox absoluteBB;
-  std::map<size_t, size_t> detExclusions{}; // Dummy HACK!
   const auto compFlag = componentType(componentIndex);
   if (hasSource() && componentIndex == source()) {
     // Do nothing
