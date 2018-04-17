@@ -243,10 +243,10 @@ class MaxEntView(QtGui.QWidget):
     def getLastGoodData(self):
         return float(self.last_good.text())
     # turn button on and off
-    def activateButton(self):
+    def activateCalculateButton(self):
         self.button.setEnabled(True)
         self.cancel.setEnabled(False)
 
-    def deactivateButton(self):
+    def deactivateCalculateButton(self):
         self.button.setEnabled(False)
         self.cancel.setEnabled(True)

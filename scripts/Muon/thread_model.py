@@ -3,17 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4.QtCore import QThread
 from PyQt4 import QtCore
 from Muon import message_box
-
-def ThreadWrapperSetUp(thread,startSlot,endSlot):
-    thread.started.connect(startSlot)
-    thread.finished.connect(endSlot)
-    thread.exceptionSignal.connect(message_box.warning)  
-
-def ThreadWrapperTearDown(thread,startSlot,endSlot):
-    thread.started.disconnect(startSlot)
-    thread.finished.disconnect(endSlot)
-    thread.exceptionSignal.disconnect(message_box.warning)  
-
  
 class ThreadModel(QThread):
 
@@ -64,3 +53,16 @@ class ThreadModel(QThread):
     # if there are multiple inputs (alg>1)
     def loadData(self,inputs):
         self.model.loadData(inputs)
+
+
+    def threadWrapperSetUp(self,startSlot,endSlot):
+        self.started.connect(startSlot)
+        self.finished.connect(endSlot)
+        self.exceptionSignal.connect(message_box.warning)  
+
+    def threadWrapperTearDown(self,startSlot,endSlot):
+        self.started.disconnect(startSlot)
+        self.finished.disconnect(endSlot)
+        self.exceptionSignal.disconnect(message_box.warning)  
+
+

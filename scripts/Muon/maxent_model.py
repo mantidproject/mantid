@@ -64,7 +64,7 @@ class MaxEntModel(object):
         """
         self.alg = mantid.AlgorithmManager.create("MuonMaxent")
         self.alg.initialize()
-        self.alg.setChild(True)
+        self.alg.setAlwaysStoreInADS(False)
         for name,value in iteritems(inputs):
             self.alg.setProperty(name,value)
         self.alg.execute()
@@ -81,7 +81,7 @@ class MaxEntModel(object):
         """
         self.alg=mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         self.alg.initialize()
-        self.alg.setChild(True)
+        self.alg.setAlwaysStoreInADS(False)
         
         for name,value in iteritems(inputs):
             self.alg.setProperty(name,value)

@@ -39,11 +39,11 @@ class MaxEntPresenter(object):
 
     # turn on button
     def activate(self):
-        self.view.activateButton()
+        self.view.activateCalculateButton()
 
     # turn off button
     def deactivate(self):
-        self.view.deactivateButton()
+        self.view.deactivateCalculateButton()
 
     def handlePhase(self,row,col):
         if col==1 and row == 4:
@@ -62,9 +62,7 @@ class MaxEntPresenter(object):
             return
         # put this on its own thread so not to freeze Mantid
         self.thread=self.createThread()
-        thread_model.ThreadWrapperSetUp(self.thread,self.deactivate,self.handleFinished)
-        #self.thread.started.connect(self.deactivate)
-        #self.thread.finished.connect(self.handleFinished)
+        self.thread.threadWrapperSetUp(self.deactivate,self.handleFinished)
 
         # make some inputs
         inputs={}
@@ -94,7 +92,7 @@ class MaxEntPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        thread_model.ThreadWrapperTearDown(self.thread,self.deactivate,self.handleFinished)
+        self.thread.threadWrapperTearDown(self.deactivate,self.handleFinished)
         self.thread.deleteLater()
         self.thread=None
 
