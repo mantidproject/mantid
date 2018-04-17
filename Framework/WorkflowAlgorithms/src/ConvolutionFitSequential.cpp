@@ -217,8 +217,10 @@ ConvolutionFitSequential::performFit(const std::string &input,
 
 std::map<std::string, std::string>
 ConvolutionFitSequential::getAdditionalLogStrings() const {
+  IFunction_sptr function = getProperty("Function");
   auto logs = QENSFitSequential::getAdditionalLogStrings();
   logs["delta_function"] = m_deltaUsed ? "true" : "false";
+  logs["background"] = extractBackgroundType(function);
   return logs;
 }
 
