@@ -387,8 +387,8 @@ QENSFitSequential::getAdditionalLogStrings() const {
   logs["convolve_members"] = convolve ? "true" : "false";
   logs["fit_program"] = fitProgram;
   logs["fit_mode"] = "Sequential";
-  logs["fit_start_x"] = getPropertyValue("StartX");
-  logs["fit_end_x"] = getPropertyValue("EndX");
+  logs["start_x"] = getPropertyValue("StartX");
+  logs["end_x"] = getPropertyValue("EndX");
   return logs;
 }
 
