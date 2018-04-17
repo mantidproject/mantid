@@ -121,11 +121,11 @@ ExtractQENSMembers::getInputWorkspaces() const {
 /**
  * Extracts the Q-Values from the specified workspace.
  *
- * @param workspace The workspace whose Q-Values to extract.
- * @return          The extracted Q-Values.
+ * @param workspaces The workspaces whose Q-Values to extract.
+ * @return            The extracted Q-Values.
  */
-std::vector<double>
-ExtractQENSMembers::getQValues(std::vector<MatrixWorkspace_sptr> workspaces) {
+std::vector<double> ExtractQENSMembers::getQValues(
+    const std::vector<MatrixWorkspace_sptr> &workspaces) {
   std::vector<double> qValues;
 
   for (const auto &workspace : workspaces) {

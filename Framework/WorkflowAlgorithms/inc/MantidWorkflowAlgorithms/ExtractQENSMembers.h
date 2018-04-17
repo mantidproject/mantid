@@ -45,7 +45,7 @@ private:
   std::vector<Mantid::API::MatrixWorkspace_sptr> getInputWorkspaces() const;
 
   std::vector<double>
-  getQValues(std::vector<Mantid::API::MatrixWorkspace_sptr> workspaces);
+  getQValues(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces);
 
   std::vector<std::string>
   getAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,
