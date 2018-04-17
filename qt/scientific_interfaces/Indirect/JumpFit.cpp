@@ -252,7 +252,7 @@ std::string JumpFit::createSingleFitOutputName() const {
   auto outputName = inputWorkspace()->getName();
   auto position = outputName.rfind("_Result");
 
-  if(position != std::string::npos)
+  if (position != std::string::npos)
     outputName = outputName.substr(0, position) +
                  outputName.substr(position + 7, outputName.size());
   return outputName + "_" + selectedFitType().toStdString() + "_JumpFit";
