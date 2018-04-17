@@ -51,7 +51,7 @@ MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
   if (axis->isSpectra())
     return convertSpectrumAxis(inputWorkspace, outputName);
   else if (axis->isNumeric()) {
-    if (axis->unit()->unitID() != "MomentumTransfer")
+    if (axis->unit()->unitID() != "MomentumTransfer" && doThrow)
       throw std::runtime_error("Input must have axis values of Q");
     return cloneWorkspace(inputWorkspace, outputName);
   } else if (doThrow)
