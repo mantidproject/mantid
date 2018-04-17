@@ -10,7 +10,9 @@
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
@@ -35,6 +37,7 @@
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
+using detail::ShapeInfo;
 
 namespace {
 // -----------------------------------------------------------------------------
@@ -83,23 +86,22 @@ public:
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
-    int objType(-1);
+    ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
+    auto handler = original.getGeometryHandler();
+    TS_ASSERT(handler->hasShapeInfo());
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject copy(original);
-    // The copy should be a primitive object with a GluGeometryHandler
-    objType = -1;
+    // The copy should be a primitive object with a GeometryHandler
     copy.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        copy.getGeometryHandler()));
+    auto handlerCopy = copy.getGeometryHandler();
+    TS_ASSERT(handlerCopy->hasShapeInfo());
+    TS_ASSERT_EQUALS(handler->shapeInfo(), handlerCopy->shapeInfo());
     TS_ASSERT_EQUALS(copy.getName(), original.getName());
     // Check the string representation is the same
     TS_ASSERT_EQUALS(copy.str(), original.str());
@@ -110,24 +112,24 @@ public:
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
-    int objType(-1);
+    ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
+    auto handler = original.getGeometryHandler();
+    TS_ASSERT(handler->hasShapeInfo());
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject lhs;  // initialize
     lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
-    objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", lhs.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        lhs.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
+    auto handlerCopy = lhs.getGeometryHandler();
+    TS_ASSERT(handlerCopy->hasShapeInfo());
+    TS_ASSERT_EQUALS(handlerCopy->shapeInfo(), handler->shapeInfo());
   }
 
   void testCreateUnitCube() {
@@ -793,10 +795,11 @@ public:
   {
     boost::shared_ptr<CSGObject> geom_obj = createSmallCappedCylinder();
     // Want to test triangulation so setup a geometry handler
-    boost::shared_ptr<GluGeometryHandler> h =
-        boost::shared_ptr<GluGeometryHandler>(
-            new GluGeometryHandler(geom_obj.get()));
-    h->setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
+    auto h = boost::make_shared<GeometryHandler>(geom_obj);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005,
+                          0.003);
+    h->setShapeInfo(std::move(shapeInfo));
     geom_obj->setGeometryHandler(h);
 
     double satol(1e-8); // tolerance for solid angle
@@ -1147,7 +1150,7 @@ public:
 
 private:
   /// Surface type
-  typedef std::map<int, boost::shared_ptr<Surface>> STYPE;
+  using STYPE = std::map<int, boost::shared_ptr<Surface>>;
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest = false;
@@ -1240,7 +1243,7 @@ private:
 
     // PLANE SURFACES:
 
-    typedef std::pair<int, std::string> SCompT;
+    using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
     if (desired.find("60001") != std::string::npos)
       SurfLine.push_back(SCompT(60001, "px -1"));
@@ -1268,12 +1271,12 @@ private:
       SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"
-    for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
-      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
+    for (const auto &vc : SurfLine) {
+      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc.second);
       TSM_ASSERT("Expected a non-null surface from the factory", A);
-      A->setName(vc->first);
-      SMap.insert(STYPE::value_type(vc->first,
-                                    boost::shared_ptr<Surface>(A.release())));
+      A->setName(vc.first);
+      SMap.insert(
+          STYPE::value_type(vc.first, boost::shared_ptr<Surface>(A.release())));
     }
 
     return;
@@ -1441,9 +1444,11 @@ private:
 
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.
-    auto handler = boost::make_shared<GluGeometryHandler>(retVal);
-    handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
-                           hex.rft, hex.rbt);
+    auto handler = boost::make_shared<GeometryHandler>(retVal);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt,
+                            hex.lft, hex.rft, hex.rbt);
+    handler->setShapeInfo(std::move(shapeInfo));
     retVal->setGeometryHandler(handler);
 
     retVal->setObject(68, ObjHex);

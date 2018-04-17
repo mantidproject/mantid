@@ -112,7 +112,7 @@ void IndirectTab::exportPythonScript() {
   // Create an algorithm dialog for the script export algorithm
   MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialogFromName(
-      "GeneratePythonScript", -1, NULL, false, props, "", enabled);
+      "GeneratePythonScript", -1, nullptr, false, props, "", enabled);
 
   // Show the dialog
   dlg->show();

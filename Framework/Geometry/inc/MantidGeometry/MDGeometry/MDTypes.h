@@ -40,7 +40,7 @@ namespace Mantid {
  * We can change this in order to compare
  * performance/memory/accuracy requirements.
  */
-typedef float coord_t;
+using coord_t = float;
 
 /// Define indicating that the coord_t type is a float (not double)
 //#undef COORDT_IS_FLOAT
@@ -49,7 +49,7 @@ typedef float coord_t;
 /** Typedef for the signal recorded in a MDBox, etc.
  * Note: MDEvents use 'float' internally to save memory
  */
-typedef double signal_t;
+using signal_t = double;
 
 /** Macro TMDE to make declaring template functions
  * faster. Put this macro before function declarations.

@@ -46,6 +46,9 @@ class ExportGeometry(PythonAlgorithm):
     def category(self):
         return "Utility\\Instrument"
 
+    def seeAlso(self):
+        return [ "LoadInstrument" ]
+
     def name(self):
         return "ExportGeometry"
 

@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/HFIRLoad.cpp
 	src/HFIRSANSNormalise.cpp
 	src/IMuonAsymmetryCalculator.cpp
+        src/IqtFitSequential.cpp
 	src/LoadEventAndCompress.cpp
 	src/MuonGroupAsymmetryCalculator.cpp
 	src/MuonGroupCalculator.cpp
@@ -29,7 +30,7 @@ set ( SRC_FILES
 	src/MuonProcess.cpp
 	src/MuonPairAsymmetryCalculator.cpp
 	src/ProcessIndirectFitParameters.cpp
-	src/RefReduction.cpp
+        src/QENSFitSequential.cpp
 	src/RefRoi.cpp
 	src/SANSBeamFinder.cpp
 	src/SANSBeamFluxCorrection.cpp
@@ -69,6 +70,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h
+        inc/MantidWorkflowAlgorithms/IqtFitSequential.h
 	inc/MantidWorkflowAlgorithms/LoadEventAndCompress.h
 	inc/MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/MuonGroupCalculator.h
@@ -76,7 +78,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/MuonProcess.h
 	inc/MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h
 	inc/MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h
-	inc/MantidWorkflowAlgorithms/RefReduction.h
+        inc/MantidWorkflowAlgorithms/QENSFitSequential.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
@@ -96,6 +98,7 @@ set ( TEST_FILES
 	LoadEventAndCompressTest.h
 	MuonProcessTest.h
 	ProcessIndirectFitParametersTest.h
+        QENSFitSequentialTest.h
 	SANSSolidAngleCorrectionTest.h
 	StepScanTest.h
 )

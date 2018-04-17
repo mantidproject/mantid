@@ -108,8 +108,8 @@ public:
       // the detectors parameters
       MDTransf.calcYDepCoordinates(locCoord, i);
 
-      for (size_t k = 0; k < range.size(); k++) {
-        MDTransf.calcMatrixCoord(range[k], locCoord, signal, errorSq);
+      for (double k : range) {
+        MDTransf.calcMatrixCoord(k, locCoord, signal, errorSq);
         for (size_t j = 0; j < nDims; j++) {
           if (locCoord[j] < minCoord[j])
             minCoord[j] = locCoord[j];

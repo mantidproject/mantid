@@ -74,7 +74,7 @@ protected:
   std::string m_profileFunctionCenterParameterName;
 };
 
-typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
+using PawleyParameterFunction_sptr = boost::shared_ptr<PawleyParameterFunction>;
 
 /** @class PawleyFunction
 
@@ -171,7 +171,7 @@ protected:
   int m_peakRadius;
 };
 
-typedef boost::shared_ptr<PawleyFunction> PawleyFunction_sptr;
+using PawleyFunction_sptr = boost::shared_ptr<PawleyFunction>;
 
 } // namespace Functions
 } // namespace CurveFitting

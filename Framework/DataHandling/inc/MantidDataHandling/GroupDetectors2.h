@@ -120,6 +120,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SpatialGrouping"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Grouping"; }
 
@@ -149,7 +152,7 @@ private:
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  typedef std::map<specnum_t, std::vector<size_t>> storage_map;
+  using storage_map = std::map<specnum_t, std::vector<size_t>>;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed

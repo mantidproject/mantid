@@ -51,6 +51,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertUnits"};
+  }
   const std::string category() const override;
 
 protected:
@@ -72,7 +75,7 @@ private:
     double value;
     bool isGeometric;
   };
-  typedef boost::shared_ptr<Variable> Variable_ptr;
+  using Variable_ptr = boost::shared_ptr<Variable>;
 
   void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
   void calculateValues(mu::Parser &p, std::vector<double> &vec,

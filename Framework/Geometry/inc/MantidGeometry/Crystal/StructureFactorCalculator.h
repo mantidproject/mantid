@@ -59,8 +59,8 @@ protected:
   crystalStructureSetHook(const CrystalStructure &crystalStructure);
 };
 
-typedef boost::shared_ptr<StructureFactorCalculator>
-    StructureFactorCalculator_sptr;
+using StructureFactorCalculator_sptr =
+    boost::shared_ptr<StructureFactorCalculator>;
 
 namespace StructureFactorCalculatorFactory {
 /// Small templated factory function that creates the desired calculator

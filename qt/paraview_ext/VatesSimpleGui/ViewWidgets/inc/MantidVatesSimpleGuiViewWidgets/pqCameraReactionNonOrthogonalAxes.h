@@ -71,7 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
     pqCameraReactionNonOrthogonalAxes : public pqReaction {
   Q_OBJECT
-  typedef pqReaction Superclass;
+  using Superclass = pqReaction;
 
 public:
   enum Mode {

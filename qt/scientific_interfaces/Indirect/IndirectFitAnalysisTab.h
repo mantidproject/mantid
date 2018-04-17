@@ -203,6 +203,7 @@ protected:
 
   virtual void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
+  virtual void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
   void updateGuessPlots(Mantid::API::IFunction_sptr guessFunction);
 
   void updatePlotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
@@ -234,9 +235,6 @@ protected:
 
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
-
-  virtual void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                                int maxIterations) const;
 
   virtual void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
   virtual void removeGuessPlot() = 0;

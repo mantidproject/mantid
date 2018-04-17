@@ -210,7 +210,7 @@ namespace detail {
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value,
              std::true_type) {
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer values(strvalue, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   value.clear();
@@ -224,7 +224,7 @@ template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value,
              std::false_type) {
   // Split up comma-separated properties
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer values(strvalue, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
@@ -263,7 +263,7 @@ template <typename T>
 void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
              const std::string &outerDelimiter = ",",
              const std::string &innerDelimiter = "+") {
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer tokens(strvalue, outerDelimiter,
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 

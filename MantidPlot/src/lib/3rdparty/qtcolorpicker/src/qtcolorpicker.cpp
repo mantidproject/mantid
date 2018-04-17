@@ -605,10 +605,7 @@ void ColorPickerPopup::insertColor(const QColor &col, const QString &text,
 QColor ColorPickerPopup::color(int index) const {
   if (index < 0 || index > (int)items.count() - 1)
     return QColor();
-
-  // cppcheck-suppress cstyleCast
-  ColorPickerPopup *that = (ColorPickerPopup *)this;
-  return that->items.at(index)->color();
+  return this->items.at(index)->color();
 }
 
 /*! \internal

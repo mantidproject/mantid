@@ -79,7 +79,7 @@ template <class SingleValueParameterType>
 Mantid::API::ImplicitFunctionParameter *
 SingleValueParameterParser<SingleValueParameterType>::createParameter(
     Poco::XML::Element *parameterElement) {
-  typedef typename SingleValueParameterType::ValueType ValType;
+  using ValType = typename SingleValueParameterType::ValueType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName) {
     return m_successor->createParameter(parameterElement);
@@ -101,7 +101,7 @@ template <class SingleValueParameterType>
 SingleValueParameterType *
 SingleValueParameterParser<SingleValueParameterType>::createWithoutDelegation(
     Poco::XML::Element *parameterElement) {
-  typedef typename SingleValueParameterType::ValueType ValType;
+  using ValType = typename SingleValueParameterType::ValueType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName) {
     throw std::runtime_error("The attempted ::createWithoutDelegation failed. "

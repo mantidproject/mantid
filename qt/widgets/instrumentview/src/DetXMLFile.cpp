@@ -21,7 +21,7 @@ DetXMLFile::DetXMLFile(const std::vector<int> &detector_list,
   m_delete = false;
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
-  out << "<group name=\"sum\"> <detids val=\"";
+  out << R"(<group name="sum"> <detids val=")";
   std::vector<int>::const_iterator idet = detector_list.begin();
   for (; idet != detector_list.end(); ++idet) {
     if (!exclude.contains(*idet)) {
@@ -82,7 +82,7 @@ void DetXMLFile::makeListFile(const QList<int> &dets) {
 void DetXMLFile::makeSumFile(const QList<int> &dets) {
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
-  out << "<group name=\"sum\"> <detids val=\"";
+  out << R"(<group name="sum"> <detids val=")";
   foreach (int det, dets) { out << det << ','; }
   out << "\"/> </group> \n</detector-grouping>\n";
 }

@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <string>
 
@@ -49,11 +50,19 @@ public:
   virtual void notifyReductionPaused(int group) = 0;
   virtual void notifyReductionResumed(int group) = 0;
 
+  virtual void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
+
+  virtual void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) = 0;
+
   /// Transmission runs for a specific run angle
-  virtual std::string getTransmissionRunsForAngle(int group,
-                                                  const double angle) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(int group, const double angle) const = 0;
   /// Whether there are per-angle transmission runs specified
-  virtual bool hasPerAngleTransmissionRuns(int group) const = 0;
+  virtual bool hasPerAngleOptions(int group) const = 0;
   /// Pre-processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions(int group) const = 0;

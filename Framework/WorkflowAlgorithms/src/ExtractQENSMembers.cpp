@@ -1,5 +1,6 @@
 #include "MantidWorkflowAlgorithms/ExtractQENSMembers.h"
 
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
 
@@ -45,8 +46,13 @@ const std::string ExtractQENSMembers::summary() const {
  */
 void ExtractQENSMembers::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace used in the fit.");
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
+      "The input workspace used in the fit. Ignored if 'InputWorkspaces' "
+      "property is provided.");
+  declareProperty(make_unique<ArrayProperty<std::string>>(
+                      "InputWorkspaces", boost::make_shared<ADSValidator>()),
+                  "List of the workspaces used in the fit.");
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "ResultWorkspace", "", Direction::Input),
                   "The result group workspace produced in a QENS fit.");
@@ -64,11 +70,11 @@ void ExtractQENSMembers::init() {
 }
 
 void ExtractQENSMembers::exec() {
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  auto inputWorkspaces = getInputWorkspaces();
   WorkspaceGroup_sptr resultWS = getProperty("ResultWorkspace");
   MatrixWorkspace_sptr initialWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(0));
-  auto qValues = getQValues(inputWS);
+  auto qValues = getQValues(inputWorkspaces);
   auto members = getAxisLabels(initialWS, 1);
 
   bool renameConvolved = getProperty("RenameConvolvedMembers");
@@ -89,6 +95,29 @@ void ExtractQENSMembers::exec() {
   setProperty("OutputWorkspace", groupWorkspaces(workspaceNames));
 }
 
+std::vector<MatrixWorkspace_sptr>
+ExtractQENSMembers::getInputWorkspaces() const {
+  std::vector<MatrixWorkspace_sptr> workspaces;
+  std::vector<std::string> workspaceNames = getProperty("InputWorkspaces");
+
+  for (const auto &name : workspaceNames)
+    workspaces.emplace_back(
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
+
+  if (!workspaces.empty()) {
+    workspaces.reserve(workspaceNames.size());
+    for (const auto &name : workspaceNames)
+      workspaces.emplace_back(
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
+  } else if (MatrixWorkspace_sptr workspace = getProperty("InputWorkspace"))
+    workspaces.emplace_back(workspace);
+
+  if (workspaces.empty())
+    throw std::runtime_error("Neither the InputWorkspace or InputWorkspaces "
+                             "property have been defined.");
+  return workspaces;
+}
+
 /**
  * Extracts the Q-Values from the specified workspace.
  *
@@ -96,11 +125,17 @@ void ExtractQENSMembers::exec() {
  * @return          The extracted Q-Values.
  */
 std::vector<double>
-ExtractQENSMembers::getQValues(MatrixWorkspace_sptr workspace) {
-  auto getQs = createChildAlgorithm("GetQsInQENSData", -1.0, -1.0, false);
-  getQs->setProperty("InputWorkspace", workspace);
-  getQs->executeAsChildAlg();
-  return getQs->getProperty("Qvalues");
+ExtractQENSMembers::getQValues(std::vector<MatrixWorkspace_sptr> workspaces) {
+  std::vector<double> qValues;
+
+  for (const auto &workspace : workspaces) {
+    auto getQs = createChildAlgorithm("GetQsInQENSData", -1.0, -1.0, false);
+    getQs->setProperty("InputWorkspace", workspace);
+    getQs->executeAsChildAlg();
+    std::vector<double> values = getQs->getProperty("Qvalues");
+    qValues.insert(std::end(qValues), std::begin(values), std::end(values));
+  }
+  return qValues;
 }
 
 /**

@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -259,8 +260,8 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
   if (resetGeometry || !surface) {
     if (setDefaultView) {
       // set the view type to the instrument's default view
-      QString defaultView = QString::fromStdString(
-          m_instrumentActor->getInstrument()->getDefaultView());
+      QString defaultView =
+          QString::fromStdString(m_instrumentActor->getDefaultView());
       if (defaultView == "3D" &&
           Mantid::Kernel::ConfigService::Instance().getString(
               "MantidOptions.InstrumentView.UseOpenGL") != "On") {
@@ -400,13 +401,11 @@ void InstrumentWidget::setSurfaceType(int type) {
     // If anything throws during surface creation, store error message here
     QString errorMessage;
     try {
-      Mantid::Geometry::Instrument_const_sptr instr =
-          m_instrumentActor->getInstrument();
-      Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
-      if (!sample) {
+      const auto &componentInfo = m_instrumentActor->componentInfo();
+      if (!componentInfo.hasSample()) {
         throw InstrumentHasNoSampleError();
       }
-      Mantid::Kernel::V3D sample_pos = sample->getPos();
+      auto sample_pos = componentInfo.samplePosition();
       auto axis = getSurfaceAxis(surfaceType);
 
       // create the surface
@@ -824,11 +823,10 @@ void InstrumentWidget::setBinRange(double xmin, double xmax) {
 * is visible the rest of the instrument is hidden.
 * @param id :: The component id.
 */
-void InstrumentWidget::componentSelected(ComponentID id) {
+void InstrumentWidget::componentSelected(size_t componentIndex) {
   auto surface = getSurface();
   if (surface) {
-    surface->componentSelected(id);
-    // surface->updateView();
+    surface->componentSelected(componentIndex);
     updateInstrumentView();
   }
 }
@@ -1215,8 +1213,7 @@ QString InstrumentWidget::getSettingsGroupName() const {
 */
 QString InstrumentWidget::getInstrumentSettingsGroupName() const {
   return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
-         QString::fromStdString(
-             getInstrumentActor().getInstrument()->getName());
+         QString::fromStdString(getInstrumentActor().getInstrumentName());
 }
 
 bool InstrumentWidget::hasWorkspace(const std::string &wsName) const {

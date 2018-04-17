@@ -20,6 +20,9 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         return "Workflow\\Diffraction\\DataHandling"
 
+    def seeAlso(self):
+        return [ "SaveGSS" ]
+
     def name(self):
         """ name of algorithm
         """

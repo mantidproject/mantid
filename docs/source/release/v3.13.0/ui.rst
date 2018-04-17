@@ -10,3 +10,9 @@ UI & Usability Changes
     improvements, followed by bug fixes.
 
 :ref:`Release 3.13.0 <v3.13.0>`
+
+
+MantidPlot
+----------
+
+- MantidPlot's pyplot API has been removed.

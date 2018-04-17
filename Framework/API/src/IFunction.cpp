@@ -944,6 +944,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
         applyTies();
         function(domain, plusStep);
         setActiveParameter(iP, val);
+        applyTies();
       }
 
       step = paramPstep - val;

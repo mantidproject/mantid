@@ -57,6 +57,9 @@ public:
     return "Calculates the background due to gamma rays produced when neutrons "
            "are absorbed by shielding.";
   }
+  const std::vector<std::string> seeAlso() const override {
+    return {"VesuvioCorrections"};
+  }
 
   int version() const override;
   const std::string category() const override;

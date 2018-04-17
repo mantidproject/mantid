@@ -159,6 +159,16 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+void ReflRunsTabPresenter::completedGroupReductionSuccessfully(
+    GroupData const &group, std::string const &workspaceName) {
+  m_mainPresenter->completedGroupReductionSuccessfully(group, workspaceName);
+}
+
+void ReflRunsTabPresenter::completedRowReductionSuccessfully(
+    GroupData const &group, std::string const &workspaceNames) {
+  m_mainPresenter->completedRowReductionSuccessfully(group, workspaceNames);
+}
+
 /** Pushes the list of commands (actions) */
 void ReflRunsTabPresenter::pushCommands() {
 
@@ -475,18 +485,15 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 * by the main presenter
 * @return :: Transmission run(s) as a comma-separated list
 */
-QString
-ReflRunsTabPresenter::getTransmissionRunsForAngle(const double angle) const {
-  return QString::fromStdString(m_mainPresenter->getTransmissionRunsForAngle(
-      m_view->getSelectedGroup(), angle));
+OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle) const {
+  return m_mainPresenter->getOptionsForAngle(m_view->getSelectedGroup(), angle);
 }
 
 /** Check whether there are per-angle transmission runs in the settings
  * @return :: true if there are per-angle transmission runs
  */
-bool ReflRunsTabPresenter::hasPerAngleTransmissionRuns() const {
-  return m_mainPresenter->hasPerAngleTransmissionRuns(
-      m_view->getSelectedGroup());
+bool ReflRunsTabPresenter::hasPerAngleOptions() const {
+  return m_mainPresenter->hasPerAngleOptions(m_view->getSelectedGroup());
 }
 
 /** Tells the view to update the enabled/disabled state of all relevant widgets

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,3 +39,7 @@ Output:
 .. code-block:: none
 
     ws has 1966080 spectrum and 1 point in units Wavelength
+
+.. categories::
+
+.. sourcelink::
