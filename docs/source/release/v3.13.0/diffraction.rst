@@ -9,6 +9,12 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New Features
+------------
+
+- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to compute the detector efficiencies also for the 2-dimensional scanning diffractometer D2B at the ILL.
+
+
 Engineering Diffraction
 -----------------------
 
