@@ -320,7 +320,9 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
       oldPos.getSpherical(r, theta, phi);
       V3D newPos;
       const double angle = std::stod(tubeAngles[i - 1]);
-      newPos.spherical(r, (ref - angle) / RAD_TO_DEG, phi);
+      const double finalAngle = fabs(ref - angle);
+      g_log.debug() << "Rotatint " << compName << "to " << finalAngle << "rad\n";
+      newPos.spherical(r, finalAngle, phi);
       const auto componentIndex = compInfo.indexOf(component->getComponentID());
       compInfo.setPosition(componentIndex, newPos);
     }
