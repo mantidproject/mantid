@@ -747,12 +747,12 @@ void LoadILLDiffraction::resolveInstrument() {
                                  m_instName);
       }
       if (m_resolutionMode == 1) {
-        m_instName += "_lr";
+        m_resSuffix = "_lr";
       } else if (m_resolutionMode == 3) {
-        m_instName += "_hr";
+        m_resSuffix = "_hr";
       }
     }
-    g_log.debug() << "Instrument name is " << m_instName << " and has "
+    g_log.debug() << "Instrument suffix is " << m_resSuffix << " and has "
                   << m_numberDetectorsActual << " actual detectors.\n";
   }
 }
@@ -816,7 +816,7 @@ std::string
 LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 
   Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
-  Poco::Path file(instName + "_Definition.xml");
+  Poco::Path file(instName + "_Definition" + m_resSuffix + ".xml");
   Poco::Path fullPath(directory, file);
   return fullPath.toString();
 }

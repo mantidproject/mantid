@@ -119,6 +119,7 @@ private:
 
   std::string m_instName;               ///< instrument name to load the IDF
   std::set<std::string> m_instNames;    ///< supported instruments
+  std::string m_resSuffix;              ///< suffix for alternative resolution modes
   std::string m_filename;               ///< file name to load
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
