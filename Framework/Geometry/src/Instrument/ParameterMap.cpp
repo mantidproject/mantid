@@ -1197,7 +1197,7 @@ size_t ParameterMap::componentIndex(const ComponentID componentId) const {
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.
 void ParameterMap::setInstrument(const Instrument *instrument) {
-  if (instrument->isPhysicalInstrument()) {
+  if (instrument != nullptr && instrument->isPhysicalInstrument()) {
     throw std::runtime_error("A ParameterMap cannot be associated with a "
                              "Physical Instrument, only a neturonic one");
   }
