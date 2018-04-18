@@ -56,6 +56,7 @@ public:
     inputWS->getSpectrum(0).setDetectorID(1);
 
     Mantid::Algorithms::DetectorEfficiencyCor grouper;
+    grouper.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(grouper.initialize());
     TS_ASSERT(grouper.isInitialized());
     grouper.setChild(true);
@@ -136,6 +137,7 @@ private:
     }
     ObjComponent *sample = new ObjComponent("sample", shape, nullptr);
     sample->setPos(0, 0, 0);
+    instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
     const int nspecs(1);

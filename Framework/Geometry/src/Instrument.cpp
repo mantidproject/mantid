@@ -521,6 +521,8 @@ auto find(T &map, const detid_t key) -> decltype(map.begin()) {
 *  @throw   NotFoundError If no detector is found for the detector ID given
 */
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
+  if (m_isPhysicalInstrument)
+    throw std::runtime_error("Cannot fetch detector from physical instrument");
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detector_id);
   if (it == baseInstr.m_detectorCache.end()) {
