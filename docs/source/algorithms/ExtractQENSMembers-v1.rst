@@ -55,10 +55,10 @@ Usage
 
 .. testcleanup:: ExExtractQENSMembers
 
-  DeleteWorkspace(output_ws_name + "_Workspaces")
+  DeleteWorkspace(result_group)
   DeleteWorkspace(output_ws_name + "_Parameters")
   DeleteWorkspace(output_ws_name + "_Members")
-  DeleteWorkspace(result_ws)
+  DeleteWorkspace(output_ws_name)
   DeleteWorkspace(sample)
   DeleteWorkspace(resolution)
 
@@ -110,7 +110,7 @@ Output:
   DeleteWorkspace(output_ws_name + "_Workspaces")
   DeleteWorkspace(output_ws_name + "_Parameters")
   DeleteWorkspace(output_ws_name + "_Members")
-  DeleteWorkspace(result_ws)
+  DeleteWorkspace(output_ws_name)
   DeleteWorkspace(sample)
   DeleteWorkspace(resolution)
 
