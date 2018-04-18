@@ -384,6 +384,7 @@ def create_category_pages(app):
         template = CATEGORY_PAGE_TEMPLATE
         top_context["text_page"] = "algorithm_categories.html"
         top_context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
+        top_html_path_noext = ""
         # Set up the positions in the toc tree
         top_category_html_dir = posixpath.join(top_category.name.lower(), 'categories')
         top_document_dir = posixpath.dirname(top_category_html_dir)
@@ -395,7 +396,7 @@ def create_category_pages(app):
             top_html_dir = posixpath.join(top_category.name.lower(), 'Algorithms')
             top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
 
-        if top_html_path_noext is None:
+        if len(top_html_path_noext) == 0:
             continue
         else:
             yield (top_html_path_noext, top_context, template)
