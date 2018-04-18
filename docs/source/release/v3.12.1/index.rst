@@ -50,7 +50,6 @@ Changes in this version
 * `22152 <https://github.com/mantidproject/mantid/pull/22152>`_ Updated IDF for D2B
 * `22175 <https://github.com/mantidproject/mantid/pull/22175>`_ Fix failing Reflectometry doctests
 
-
 Summary of impact
 -----------------
 
