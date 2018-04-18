@@ -209,7 +209,9 @@ bool ConvolutionFitSequential::throwIfElasticQConversionFails() const {
 }
 
 bool ConvolutionFitSequential::isFitParameter(const std::string &name) const {
-  return name.rfind("Centre") == std::string::npos;
+  bool isBackgroundParameter = name.rfind("A0") != std::string::npos ||
+                               name.rfind("A1") != std::string::npos;
+  return name.rfind("Centre") == std::string::npos && !isBackgroundParameter;
 }
 
 ITableWorkspace_sptr

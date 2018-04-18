@@ -61,6 +61,42 @@ MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
   return cloneWorkspace(inputWorkspace, outputName);
 }
 
+struct ElasticQAppender {
+  ElasticQAppender(std::vector<MatrixWorkspace_sptr> &elasticInput)
+      : m_elasticInput(elasticInput), m_converted() {}
+
+  void operator()(MatrixWorkspace_sptr workspace, const std::string &outputBase,
+                  bool doThrow) {
+    auto it = m_converted.find(workspace.get());
+    if (it != m_converted.end())
+      m_elasticInput.emplace_back(it->second);
+    else {
+      auto elasticQ = convertToElasticQ(
+          workspace, outputBase + std::to_string(m_converted.size() + 1),
+          doThrow);
+      m_elasticInput.emplace_back(elasticQ);
+      m_converted[workspace.get()] = elasticQ;
+    }
+  }
+
+private:
+  std::vector<MatrixWorkspace_sptr> &m_elasticInput;
+  std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
+};
+
+std::vector<MatrixWorkspace_sptr>
+convertToElasticQ(const std::vector<MatrixWorkspace_sptr> &workspaces,
+                  const std::string &outputBaseName, bool doThrow) {
+  std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> converted;
+  std::vector<MatrixWorkspace_sptr> elasticInput;
+  auto appendElasticQWorkspace = ElasticQAppender(elasticInput);
+  appendElasticQWorkspace(workspaces[0], outputBaseName, doThrow);
+
+  for (auto i = 1u; i < workspaces.size(); ++i)
+    appendElasticQWorkspace(workspaces[i], outputBaseName, doThrow);
+  return elasticInput;
+}
+
 void extractFunctionNames(CompositeFunction_sptr composite,
                           std::vector<std::string> &names) {
   for (auto i = 0u; i < composite->nFunctions(); ++i)
@@ -122,7 +158,7 @@ std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
 
 std::vector<std::string> getSpectra(const std::string &input) {
   std::vector<std::string> spectra;
-  boost::regex reg(",[i|sp](0|[1-9][0-9]*);");
+  boost::regex reg(",[i|sp](0|[1-9][0-9]*);?");
   std::copy(boost::sregex_token_iterator(input.begin(), input.end(), reg, 1),
             boost::sregex_token_iterator(), std::back_inserter(spectra));
   return spectra;
@@ -130,7 +166,7 @@ std::vector<std::string> getSpectra(const std::string &input) {
 
 std::vector<std::string> getSuffices(const std::string &input) {
   std::vector<std::string> suffices;
-  boost::regex reg(",[i|sp](0|[1-9][0-9]*);");
+  boost::regex reg(",[i|sp](0|[1-9][0-9]*);?");
   std::copy(boost::sregex_token_iterator(input.begin(), input.end(), reg, 0),
             boost::sregex_token_iterator(), std::back_inserter(suffices));
   return suffices;
@@ -146,15 +182,6 @@ replaceWorkspaces(const std::string &input,
   return newInput.str();
 }
 
-std::string replaceWorkspace(const std::string &input,
-                             const std::string &workspace) {
-  const auto suffices = getSuffices(input);
-  std::stringstream newInput;
-  for (auto i = 0u; i < suffices.size(); ++i)
-    newInput << workspace << suffices[i];
-  return newInput.str();
-}
-
 void renameWorkspace(IAlgorithm_sptr renamer, Workspace_sptr workspace,
                      const std::string &newName) {
   renamer->setProperty("InputWorkspace", workspace);
@@ -163,8 +190,8 @@ void renameWorkspace(IAlgorithm_sptr renamer, Workspace_sptr workspace,
 }
 
 void deleteTemporaries(IAlgorithm_sptr deleter, const std::string &base) {
-  std::size_t i = 1;
-  auto name = base;
+  auto name = base + std::to_string(1);
+  std::size_t i = 2;
 
   while (AnalysisDataService::Instance().doesExist(name)) {
     deleter->setProperty("Workspace", name);
@@ -175,6 +202,15 @@ void deleteTemporaries(IAlgorithm_sptr deleter, const std::string &base) {
 
 std::string shortParameterName(const std::string &longName) {
   return longName.substr(longName.rfind('.') + 1, longName.size());
+}
+
+bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
+  const auto &first = workspaces.front();
+  for (const auto &workspace : workspaces) {
+    if (workspace != first)
+      return true;
+  }
+  return false;
 }
 
 template <typename F, typename Renamer>
@@ -192,6 +228,31 @@ void renameWorkspacesWith(WorkspaceGroup_sptr groupWorkspace, F const &getName,
       renamer(groupWorkspace->getItem(i),
               name + "(" + std::to_string(++count->second) + ")");
   }
+}
+
+template <typename F>
+void renameWorkspacesInQENSFit(Algorithm *qensFit,
+                               IAlgorithm_sptr renameAlgorithm,
+                               WorkspaceGroup_sptr outputGroup,
+                               const F &getNameSuffix) {
+  const auto groupName = qensFit->getPropertyValue("OutputWorkspaceGroup");
+  auto outputBase = groupName.substr(0, groupName.rfind("_Workspaces"));
+
+  Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
+  renamerProg.report("Renaming group workspaces...");
+
+  auto getName = [&](std::size_t i) {
+    return outputBase + "_" + getNameSuffix(i);
+  };
+
+  auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
+    renameWorkspace(renameAlgorithm, workspace, name);
+    renamerProg.report("Renamed workspace in group.");
+  };
+  renameWorkspacesWith(outputGroup, getName, renamer);
+
+  if (outputGroup->getName() != groupName)
+    renameWorkspace(renameAlgorithm, outputGroup, groupName);
 }
 } // namespace
 
@@ -274,16 +335,19 @@ void QENSFitSequential::init() {
   declareProperty(
       make_unique<FunctionProperty>("Function"),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "", "Name of the log value to plot the "
-                                  "parameters against. Default: use spectra "
-                                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
-                                         "boundary of, the first bin to "
-                                         "include in\n"
-                                         "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
-                                       "of, the last bin the fitting range\n"
-                                       "(default the highest value of x)");
+  declareProperty("LogValue", "",
+                  "Name of the log value to plot the "
+                  "parameters against. Default: use spectra "
+                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
@@ -370,7 +434,8 @@ void QENSFitSequential::exec() {
   if (getPropertyValue("OutputWorkspaceGroup").empty())
     setProperty("OutputWorkspaceGroup", outputBaseName + "_Workspaces");
 
-  auto workspaces = convertInputToElasticQ(getWorkspaces());
+  auto inputWorkspaces = getWorkspaces();
+  auto workspaces = convertInputToElasticQ(inputWorkspaces);
   auto inputString = getInputString(workspaces);
   auto spectra = getSpectra(inputString);
 
@@ -385,7 +450,10 @@ void QENSFitSequential::exec() {
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
-  renameWorkspaces(groupWs, spectra);
+  if (containsMultipleData(workspaces))
+    renameWorkspaces(groupWs, spectra, inputWorkspaces);
+  else
+    renameWorkspaces(groupWs, spectra);
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -506,27 +574,20 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
 }
 
 void QENSFitSequential::renameWorkspaces(
+    WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
+    const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
+  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  auto getNameSuffix = [&](std::size_t i) {
+    return inputWorkspaces[i]->getName() + "_" + spectra[i] + "_Workspace";
+  };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+}
+
+void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra) {
-  auto renameAlgorithm =
-      createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  const auto groupName = getPropertyValue("OutputWorkspaceGroup");
-  const auto outputBase = groupName.substr(0, groupName.rfind("_Workspaces"));
-
-  Progress renamerProg(this, 0.98, 1.0, spectra.size());
-  renamerProg.report("Renaming group workspaces...");
-
-  auto getName = [&](std::size_t i) {
-    return outputBase + "_" + spectra[i] + "_Workspace";
-  };
-
-  auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
-    renameWorkspace(renameAlgorithm, workspace, name);
-    renamerProg.report("Renamed workspace in group.");
-  };
-  renameWorkspacesWith(outputGroup, getName, renamer);
-
-  if (outputGroup->getName() != groupName)
-    renameWorkspace(renameAlgorithm, outputGroup, groupName);
+  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + "_Workspace"; };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
 }
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
@@ -575,17 +636,8 @@ std::vector<MatrixWorkspace_sptr> QENSFitSequential::getWorkspaces() const {
 
 std::vector<MatrixWorkspace_sptr> QENSFitSequential::convertInputToElasticQ(
     const std::vector<MatrixWorkspace_sptr> &workspaces) const {
-  bool doThrow = throwIfElasticQConversionFails();
-
-  std::vector<MatrixWorkspace_sptr> elasticInput;
-  elasticInput.reserve(workspaces.size());
-  elasticInput.emplace_back(
-      convertToElasticQ(workspaces[0], getTemporaryName(), doThrow));
-
-  for (auto i = 1u; i < workspaces.size(); ++i)
-    elasticInput.emplace_back(convertToElasticQ(
-        workspaces[i], getTemporaryName() + std::to_string(i), doThrow));
-  return elasticInput;
+  return convertToElasticQ(workspaces, getTemporaryName(),
+                           throwIfElasticQConversionFails());
 }
 
 void QENSFitSequential::extractMembers(

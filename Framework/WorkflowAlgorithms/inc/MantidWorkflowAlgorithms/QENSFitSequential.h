@@ -65,6 +65,9 @@ private:
 
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
                         const std::vector<std::string> &spectra);
+  void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
+                        const std::vector<std::string> &spectra,
+                        const std::vector<API::MatrixWorkspace_sptr> &names);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
