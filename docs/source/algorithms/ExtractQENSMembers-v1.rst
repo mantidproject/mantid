@@ -29,7 +29,6 @@ Usage
   (composite=Convolution,FixResolution=true,NumDeriv=true;
   name=Resolution,Workspace=resolution,WorkspaceIndex=0;
   name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175)"""
-  bgType = "Fixed Flat"
   startX = -0.547608
   endX = 0.543217
   specMin = 0
@@ -40,14 +39,14 @@ Usage
   output_ws_name = "irs26176_graphite002_conv_1LFixF_s0_to_9"
 
   # Run ConvolutionFitSequential algorithm
-  result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
-                                       PassWSIndexToFunction=True, BackgroundType=bgType,
-                                       StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
-                                       Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt,
-                                       OutputWorkspace=output_ws_name)
+  _, _, result_group = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
+                                                PassWSIndexToFunction=True, StartX=startX, EndX=endX,
+                                                SpecMin=specMin, SpecMax=specMax, ConvolveMembers=convolve,
+                                                Minimizer=minimizer, MaxIterations=maxIt,
+                                                OutputWorkspace=output_ws_name)
 
   # Extract members from the output of the ConvolutionFitSequential algorithm
-  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name+"_Workspaces",
+  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=result_group,
                                   RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"],
                                   OutputWorkspace=output_ws_name+"_Members")
 
@@ -86,7 +85,6 @@ Output:
   (composite=Convolution,FixResolution=true,NumDeriv=true;
   name=Resolution,Workspace=resolution,WorkspaceIndex=0;
   name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175)"""
-  bgType = "Fixed Flat"
   startX = -0.547608
   endX = 0.543217
   specMin = 0
@@ -97,11 +95,10 @@ Output:
   output_ws_name = "irs26176_graphite002_conv_1LFixF_s0_to_9"
 
   # Run ConvolutionFitSequential algorithm with ExtractMembers property
-  result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
-                                       PassWSIndexToFunction=True, BackgroundType=bgType,
-                                       StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
-                                       Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt,
-                                       ExtractMembers=True, OutputWorkspace=output_ws_name)
+  ConvolutionFitSequential(InputWorkspace=sample, Function=function, PassWSIndexToFunction=True,
+                           StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
+                           ConvolveMembers=convolve, Minimizer=minimizer, MaxIterations=maxIt,
+                           ExtractMembers=True, OutputWorkspace=output_ws_name)
 
   members_ws = mtd[output_ws_name + "_Members"]
 
