@@ -55,7 +55,7 @@ Usage
 
 .. testcleanup:: ExExtractQENSMembers
 
-  DeleteWorkspace(result_group)
+  DeleteWorkspace(output_ws_name + "_Workspaces")
   DeleteWorkspace(output_ws_name + "_Parameters")
   DeleteWorkspace(output_ws_name + "_Members")
   DeleteWorkspace(output_ws_name)
