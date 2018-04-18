@@ -25,17 +25,14 @@ public:
   }
   static void destroySuite(LoadSampleShapeTest *suite) { delete suite; }
 
-  void testName() { TS_ASSERT_EQUALS(loadShape.name(), "LoadSampleShape"); }
-
-  void testVersion() { TS_ASSERT_EQUALS(loadShape.version(), 1); }
-
   void testInit() {
 
-    TS_ASSERT_THROWS_NOTHING(loadShape.initialize());
-    TS_ASSERT(loadShape.isInitialized());
+    LoadSampleShape alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
     TSM_ASSERT_EQUALS("should be 3 properties here", 3,
-                      (size_t)(loadShape.getProperties().size()));
+                      (size_t)(alg.getProperties().size()));
   }
 
   void test_output_workspace_has_MeshObject_when_different_from_input_workspace() {
@@ -110,7 +107,6 @@ private:
     return mObj;
   }
 
-  LoadSampleShape loadShape;
 };
 
 class LoadSampleShapeTestPerformance : public CxxTest::TestSuite {
