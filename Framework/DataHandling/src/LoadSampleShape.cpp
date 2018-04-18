@@ -30,7 +30,7 @@ namespace {
 
 bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) {
   Kernel::V3D diff = v1 - v2;
-  return diff.norm() < 1e-9;
+  return diff.norm() < 1e-9; // This is 1 nanometre for a unit of a metre.
 }
 
 // Read, check and ignore line in STL file. Return true if line is read
@@ -158,7 +158,7 @@ void LoadSampleShape::init() {
   const std::vector<std::string> extensions{".stl"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
-      "The path name of the file containing the shape.");
+      "The path name of the file containing the shape");
 
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",

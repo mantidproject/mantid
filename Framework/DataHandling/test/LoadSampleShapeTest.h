@@ -48,7 +48,7 @@ public:
     delete descriptor;
   }
 
-  void testExec_2WS() {
+  void testExec_for_output_workspace_different_from_input_workspace() {
     LoadSampleShape testLoadSampleShape;
     testLoadSampleShape.initialize();
     testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
@@ -57,7 +57,7 @@ public:
     TS_ASSERT(testLoadSampleShape.isExecuted());
   }
 
-  void testExec_1WS() {
+  void testExec_for_output_workspace_the_same_as_input_workspace() {
     LoadSampleShape testLoadSampleShape;
     testLoadSampleShape.initialize();
     testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
@@ -66,12 +66,12 @@ public:
     TS_ASSERT(testLoadSampleShape.isExecuted());
   }
 
-  void test_output_workspace_has_MeshObject_2WS() {
+  void test_output_workspace_has_MeshObject_when_different_from_input_workspace() {
     LoadSampleShape alg;
     loadMeshObject(alg, false, "cube.stl");
   }
 
-  void test_output_workspace_has_MeshObject_1WS() {
+  void test_output_workspace_has_MeshObject_when_the_same_as_input_workspace() {
     LoadSampleShape alg;
     loadMeshObject(alg, true, "cube.stl");
   }
