@@ -5,10 +5,12 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/function.hpp>
@@ -630,6 +632,21 @@ public:
     TS_ASSERT_EQUALS(a->value<bool>(), true);
     auto oldA = oldPMap.get(oldComp.get(), "A");
     TS_ASSERT_EQUALS(oldA->value<bool>(), false);
+  }
+
+  void test_cannot_set_physical_instrument_on_pmap() {
+    auto neutronicInstrument =
+        Mantid::Kernel::make_unique<Mantid::Geometry::Instrument>();
+    neutronicInstrument->setPhysicalInstrument(
+        Mantid::Kernel::make_unique<Mantid::Geometry::Instrument>());
+    ParameterMap map1;
+    TSM_ASSERT_THROWS_NOTHING("Setting neutronic instrument is OK",
+                              map1.setInstrument(neutronicInstrument.get()));
+    ParameterMap map2;
+    TSM_ASSERT_THROWS(
+        "Should not be able to set a physical instrument on a parameter map",
+        map2.setInstrument(neutronicInstrument->getPhysicalInstrument().get()),
+        std::runtime_error &);
   }
 
 private:
