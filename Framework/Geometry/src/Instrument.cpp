@@ -829,7 +829,7 @@ std::vector<detid_t> Instrument::getMonitors() const {
 void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
 
-    if (m_map->hasComponentInfo(this->baseInstrument().get())) {
+    if (m_map->hasComponentInfo()) {
       assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }
@@ -1270,7 +1270,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
   const auto &baseInstr = m_map ? *m_instr : *this;
 
-  if (!getParameterMap()->hasComponentInfo(&baseInstr))
+  if (!getParameterMap()->hasComponentInfo())
     return pmap;
 
   // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
@@ -1388,7 +1388,7 @@ void Instrument::parseTreeAndCacheBeamline() {
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
   // If we have source and it has Beamline objects just copy them
-  if (source && source->hasComponentInfo(this))
+  if (source && source->hasComponentInfo())
     return makeWrappers(pmap, source->componentInfo(), source->detectorInfo());
   // If pmap is empty and base instrument has Beamline objects just copy them
   if (pmap.empty() && m_componentInfo)

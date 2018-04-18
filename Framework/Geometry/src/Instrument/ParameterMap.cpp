@@ -1150,9 +1150,7 @@ bool ParameterMap::hasDetectorInfo(const Instrument *instrument) const {
 /** Only for use by ExperimentInfo. Returns returns true if this instrument
  contains a ComponentInfo.
 */
-bool ParameterMap::hasComponentInfo(const Instrument *instrument) const {
-  if (instrument != m_instrument)
-    return false;
+bool ParameterMap::hasComponentInfo() const {
   return static_cast<bool>(m_componentInfo);
 }
 
@@ -1172,7 +1170,7 @@ Geometry::DetectorInfo &ParameterMap::mutableDetectorInfo() {
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
 const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
-  if (!hasComponentInfo(m_instrument)) {
+  if (!hasComponentInfo()) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
   return *m_componentInfo;
@@ -1180,7 +1178,7 @@ const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
 Geometry::ComponentInfo &ParameterMap::mutableComponentInfo() {
-  if (!hasComponentInfo(m_instrument)) {
+  if (!hasComponentInfo()) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
   return *m_componentInfo;

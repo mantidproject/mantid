@@ -311,13 +311,7 @@ size_t Component::index() const {
   return m_map->componentIndex(this->getComponentID());
 }
 
-bool Component::hasComponentInfo() const {
-  const IComponent *root = m_base;
-  while (auto parent = root->getBareParent())
-    root = parent;
-  auto instrument = dynamic_cast<const Instrument *>(root);
-  return m_map->hasComponentInfo(instrument);
-}
+bool Component::hasComponentInfo() const { return m_map->hasComponentInfo(); }
 
 /// Return the relative position to the parent Component
 Kernel::V3D Component::getRelativePos() const {
