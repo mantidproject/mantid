@@ -9,15 +9,18 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/HistogramDx.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_cow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::RunCombinationHelper;
 using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
 
@@ -120,6 +123,16 @@ public:
     ws->getAxis(1)->unit() = UnitFactory::Instance().create("QSquared");
     TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
                      "different X units; different spectrum axis units; ");
+  }
+
+  void testIncompatibleDx() {
+    // create a workspace where spectrum 1 has Dx
+    MatrixWorkspace_sptr ws2 = m_reference->clone();
+    auto dx =
+        Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(3, 0.2);
+    ws2->setSharedDx(1, dx);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws2),
+                     "spectra must have either Dx values or not; ");
   }
 
   void test_scanning_workspaces_throw_no_error() {

@@ -145,11 +145,12 @@ size_t findXIndex(const HistogramX &vecx, double x) {
   } else if (x >= vecx.back()) {
     index = vecx.size() - 1;
   } else {
-    vector<double>::const_iterator fiter;
-    fiter = lower_bound(vecx.begin(), vecx.end(), x);
-    index = static_cast<size_t>(fiter - vecx.begin());
-    if (index == 0)
+    vector<double>::const_iterator fiter =
+        lower_bound(vecx.begin(), vecx.end(), x);
+    if (fiter == vecx.end())
       throw runtime_error("It seems impossible to have this value. ");
+
+    index = static_cast<size_t>(fiter - vecx.begin());
     if (x - vecx[index - 1] < vecx[index] - x)
       --index;
   }
@@ -164,7 +165,7 @@ enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
  * @brief FitPeaks::FitPeaks
  */
 FitPeaks::FitPeaks()
-    : fit_peaks_from_right_(true), m_numPeaksToFit(0), m_minPeakHeight(20.),
+    : m_fitPeaksFromRight(true), m_numPeaksToFit(0), m_minPeakHeight(20.),
       m_bkgdSimga(1.), m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
@@ -379,14 +380,15 @@ void FitPeaks::processInputs() {
   // input workspaces
   m_inputMatrixWS = getProperty("InputWorkspace");
   std::string event_ws_name = getPropertyValue("EventNumberWorkspace");
-  if (event_ws_name.size() > 0)
-    m_eventNumberWS = getProperty("EventNumberWorkspace");
-  else
+  if (event_ws_name.empty())
     m_eventNumberWS = nullptr;
-  if (m_inputMatrixWS->getAxis(0)->unit()->unitID() == "dSpacing")
-    is_d_space_ = true;
   else
-    is_d_space_ = false;
+    m_eventNumberWS = getProperty("EventNumberWorkspace");
+
+  if (m_inputMatrixWS->getAxis(0)->unit()->unitID() == "dSpacing")
+    m_inputIsDSpace = true;
+  else
+    m_inputIsDSpace = false;
 
   // spectra to fit
   int start_wi = getProperty("StartWorkspaceIndex");
@@ -408,8 +410,8 @@ void FitPeaks::processInputs() {
   // optimizer, cost function and fitting scheme
   m_minimizer = getPropertyValue("Minimizer");
   m_costFunction = getPropertyValue("CostFunction");
-  fit_peaks_from_right_ = getProperty("FitFromRight");
-  constrain_peaks_position_ = getProperty("ConstrainPeakPositions");
+  m_fitPeaksFromRight = getProperty("FitFromRight");
+  m_constrainPeaksPosition = getProperty("ConstrainPeakPositions");
 
   // Peak centers, tolerance and fitting range
   processInputPeakCenters();
@@ -432,12 +434,12 @@ void FitPeaks::processInputs() {
   // Set up peak and background functions
   processInputFunctions();
   // about peak width and other peak parameter estimating method
-  if (is_d_space_ && m_peakDSpacePercentage > 0)
-    peak_width_estimate_approach_ = EstimatePeakWidth::InstrumentResolution;
+  if (m_inputIsDSpace && m_peakDSpacePercentage > 0)
+    m_peakWidthEstimateApproach = EstimatePeakWidth::InstrumentResolution;
   else if (m_peakFunction->name() == "Gaussian")
-    peak_width_estimate_approach_ = EstimatePeakWidth::Observation;
+    m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
   else
-    peak_width_estimate_approach_ = EstimatePeakWidth::NoEstimation;
+    m_peakWidthEstimateApproach = EstimatePeakWidth::NoEstimation;
   g_log.debug() << "Process inputs [3] peak type: " << m_peakFunction->name()
                 << ", background type: " << m_bkgdFunction->name() << "\n";
 
@@ -469,17 +471,17 @@ void FitPeaks::processInputFunctions() {
   m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
       API::FunctionFactory::Instance().createFunction(bkgdname));
   if (m_highBackground)
-    linear_background_function_ =
+    m_linearBackgroundFunction =
         boost::dynamic_pointer_cast<IBackgroundFunction>(
             API::FunctionFactory::Instance().createFunction(
                 "LinearBackground"));
   else
-    linear_background_function_ = nullptr;
+    m_linearBackgroundFunction = nullptr;
 
   // input peak parameters
   std::string partablename = getPropertyValue("PeakParameterValueTable");
   m_peakParamNames = getProperty("PeakParameterNames");
-  if (partablename.size() == 0 && m_peakParamNames.size() > 0) {
+  if (partablename.empty() && (!m_peakParamNames.empty())) {
     // use uniform starting value of peak parameters
     m_initParamValues = getProperty("PeakParameterValues");
     // check whether given parameter names and initial values match
@@ -490,11 +492,11 @@ void FitPeaks::processInputFunctions() {
     convertParametersNameToIndex();
     // set the flag
     m_uniformProfileStartingValue = true;
-  } else if (partablename.size() > 0 && m_peakParamNames.size() == 0) {
+  } else if ((!partablename.empty()) && m_peakParamNames.empty()) {
     // use non-uniform starting value of peak parameters
     m_uniformProfileStartingValue = false;
     m_profileStartingValueTable = getProperty(partablename);
-  } else if (partablename.size() > 0 && m_peakParamNames.size() > 0) {
+  } else if ((!partablename.empty()) && m_peakParamNames.size() > 0) {
     // user specifies both of them causing confusion
     throw std::invalid_argument("Parameter value table and initial parameter "
                                 "name/value vectors cannot be given "
@@ -522,9 +524,9 @@ void FitPeaks::processInputFitRanges() {
       getProperty("FitPeakWindowWorkspace");
 
   // in most case, calculate window by instrument resolution is False
-  calculate_window_instrument_ = false;
+  m_calculateWindowInstrument = false;
 
-  if (peakwindow.size() > 0 && peakwindowname.size() == 0) {
+  if ((!peakwindow.empty()) && peakwindowname.empty()) {
     // Peak windows are uniform among spectra: use vector for peak windows
     m_uniformPeakWindows = true;
 
@@ -559,7 +561,7 @@ void FitPeaks::processInputFitRanges() {
       }
     } // END-FOR
     // END for uniform peak window
-  } else if (peakwindow.size() == 0 && peakwindowws != nullptr) {
+  } else if (peakwindow.empty() && peakwindowws != nullptr) {
     // use matrix workspace for non-uniform peak windows
     m_peakWindowWorkspace = getProperty("FitPeakWindowWorkspace");
     m_uniformPeakWindows = false;
@@ -613,11 +615,11 @@ void FitPeaks::processInputFitRanges() {
         }
       }
     }
-  } else if (peakwindow.size() == 0) {
+  } else if (peakwindow.empty()) {
     // no peak window is defined, then the peak window will be estimated by
     // delta(D)/D
-    if (is_d_space_ && m_peakDSpacePercentage > 0)
-      calculate_window_instrument_ = true;
+    if (m_inputIsDSpace && m_peakDSpacePercentage > 0)
+      m_calculateWindowInstrument = true;
     else
       throw std::invalid_argument("Without definition of peak window, the "
                                   "input workspace must be in unit of dSpacing "
@@ -651,12 +653,12 @@ void FitPeaks::processInputPeakCenters() {
     g_log.error("There is no peak center workspace");
 
   std::string peakpswsname = getPropertyValue("PeakCentersWorkspace");
-  if (m_peakCenters.size() > 0 && peakcenterws == nullptr) {
+  if ((!m_peakCenters.empty()) && peakcenterws == nullptr) {
     // peak positions are uniform among all spectra
     m_uniformPeakPositions = true;
     // number of peaks to fit!
     m_numPeaksToFit = m_peakCenters.size();
-  } else if (m_peakCenters.size() == 0 && peakcenterws != nullptr) {
+  } else if (m_peakCenters.empty() && peakcenterws != nullptr) {
     // peak positions can be different among spectra
     m_uniformPeakPositions = false;
     m_peakCenterWorkspace = getProperty("PeakCentersWorkspace");
@@ -664,7 +666,7 @@ void FitPeaks::processInputPeakCenters() {
     m_numPeaksToFit = m_peakCenterWorkspace->x(0).size();
 
     // check matrix worksapce for peak positions
-    size_t numhist = m_peakCenterWorkspace->getNumberHistograms();
+    const size_t numhist = m_peakCenterWorkspace->getNumberHistograms();
     if (numhist == m_inputMatrixWS->size())
       m_partialSpectra = false;
     else if (numhist == m_stopWorkspaceIndex - m_startWorkspaceIndex + 1)
@@ -702,7 +704,7 @@ void FitPeaks::processInputPeakTolerance() {
   // peak tolerance
   m_peakPosTolerances = getProperty("PositionTolerance");
 
-  if (m_peakPosTolerances.size() == 0) {
+  if (m_peakPosTolerances.empty()) {
     // case 2, 3, 4
     m_peakPosTolerances.clear();
     m_peakPosTolCase234 = true;
@@ -747,15 +749,15 @@ void FitPeaks::convertParametersNameToIndex() {
     m_peakParamNames = m_profileStartingValueTable->getColumnNames();
 
   // map the input parameter names to parameter indexes
-  for (size_t i = 0; i < m_peakParamNames.size(); ++i) {
+  for (const auto &paramName : m_peakParamNames) {
     std::map<std::string, size_t>::iterator locator =
-        parname_index_map.find(m_peakParamNames[i]);
+        parname_index_map.find(paramName);
     if (locator != parname_index_map.end())
       m_initParamIndexes.push_back(locator->second);
     else {
       // a parameter name that is not defined in the peak profile function.  An
       // out-of-range index is thus set to this
-      g_log.warning() << "Given peak parameter " << m_peakParamNames[i]
+      g_log.warning() << "Given peak parameter " << paramName
                       << " is not an allowed parameter of peak "
                          "function " << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
@@ -850,9 +852,9 @@ void FitPeaks::fitSpectrumPeaks(
 
   // high background to reduce
   API::IBackgroundFunction_sptr high_bkgd_func(nullptr);
-  if (linear_background_function_)
+  if (m_linearBackgroundFunction)
     high_bkgd_func = boost::dynamic_pointer_cast<API::IBackgroundFunction>(
-        linear_background_function_->clone());
+        m_linearBackgroundFunction->clone());
 
   // set up properties of algorithm (reference) 'Fit'
   peak_fitter->setProperty("Minimizer", m_minimizer);
@@ -863,7 +865,7 @@ void FitPeaks::fitSpectrumPeaks(
 
     // convert fit index to peak index (in ascending order)
     size_t peak_index(fit_index);
-    if (fit_peaks_from_right_)
+    if (m_fitPeaksFromRight)
       peak_index = m_numPeaksToFit - fit_index - 1;
 
     // get expected peak position
@@ -915,7 +917,7 @@ bool FitPeaks::decideToEstimatePeakWidth(
     size_t peak_index, API::IPeakFunction_sptr peak_function) {
   bool observe_peak_width(false);
 
-  if (m_initParamIndexes.size() > 0) {
+  if (!m_initParamIndexes.empty()) {
     // user specifies starting value of peak parameters
     if (peak_index == 0) {
       // first peak.  using the user-specified value
@@ -1008,7 +1010,7 @@ void FitPeaks::processSinglePeakFitResult(
                              expected_peak_positions[peakindex]);
       if (left_bound < 0)
         left_bound = right_bound;
-      if (right_bound < 0)
+      if (right_bound < left_bound)
         right_bound = left_bound;
       if (left_bound < 0 || right_bound < 0)
         throw std::runtime_error("Code logic error such that left or right "
@@ -1038,8 +1040,6 @@ void FitPeaks::processSinglePeakFitResult(
     adjust_cost = DBL_MAX;
   }
 
-  // double peak_position = peak_pos;
-
   // reset cost
   if (adjust_cost > DBL_MAX - 1) {
     fitfunction.peakfunction->setIntensity(0);
@@ -1047,23 +1047,6 @@ void FitPeaks::processSinglePeakFitResult(
 
   // chi2
   fit_result->setRecord(peakindex, adjust_cost, peak_pos, fitfunction);
-  // (*peak_chi2_vec)[peakindex] = cost;
-
-  //  // set peak position
-  //  // fitted_peak_positions[peakindex] = peak_position;
-
-  //  // transfer from peak function to vector
-  //  size_t peak_num_params = m_peakFunction->nParams();
-  //  for (size_t ipar = 0; ipar < peak_num_params; ++ipar) {
-  //    // peak function
-  //    function_parameters_vector[peakindex][ipar] =
-  //        peakfunction->getParameter(ipar);
-  //  }
-  //  for (size_t ipar = 0; ipar < m_bkgdFunction->nParams(); ++ipar) {
-  //    // background function
-  //    function_parameters_vector[peakindex][ipar + peak_num_params] =
-  //        bkgdfunction->getParameter(ipar);
-  //  }
 
   return;
 }
@@ -1168,22 +1151,6 @@ void FitPeaks::estimateBackground(MatrixWorkspace_sptr dataws, size_t wi,
   if (peak_window_v[0] >= peak_window_v[1])
     peak_window_v.clear();
 
-  // NOTE: In future, a test shall be made with algorithm FindPeakBackground
-  // It is diabled now because its result does not seem correct
-  //  Mantid::Algorithms::FindPeakBackground bkgd_finder;
-  //  // set values
-  //  bkgd_finder.setFitWindow(peak_window_v);
-  //  bkgd_finder.setBackgroundOrder(2);
-  //  bkgd_finder.setSigma(m_bkgdSimga);
-  //  // find fit window indexes
-  //  size_t l0, n;
-  //  auto histogram = m_inputMatrixWS->histogram(wi);
-  //  bkgd_finder.findWindowIndex(histogram, l0, n);
-  //  // find background
-  //  int find_bkgd = bkgd_finder.findBackground(histogram, l0, n,
-  //                                             peak_min_max_indexes,
-  //                                             vector_bkgd);
-
   // use the simple way to find linear background
   double bkgd_a1, bkgd_a0;
   this->estimateLinearBackground(dataws, wi, peak_window.first,
@@ -1239,14 +1206,14 @@ int FitPeaks::estimatePeakParameters(
   FunctionValues bkgd_values(domain);
   bkgdfunction->function(domain, bkgd_values);
 
-  auto vector_y = dataws->y(wi);
+  const auto vector_y = dataws->y(wi);
 
   // Estimate peak center
   double peak_center, peak_height;
   size_t peak_center_index;
   int result = observePeakCenter(vector_x, vector_y, bkgd_values, start_index,
-                                 stop_index, &peak_center, &peak_center_index,
-                                 &peak_height);
+                                 stop_index, peak_center, peak_center_index,
+                                 peak_height);
 
   // set the peak center
   if (result == GOOD) {
@@ -1259,7 +1226,7 @@ int FitPeaks::estimatePeakParameters(
 
   // Estimate FHWM (peak width)
   if (result == GOOD && observe_peak_width &&
-      peak_width_estimate_approach_ != EstimatePeakWidth::NoEstimation) {
+      m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation) {
     // observe peak width
     double peak_width =
         observePeakWidth(vector_x, vector_y, bkgd_values, peak_height,
@@ -1285,17 +1252,17 @@ int FitPeaks::estimatePeakParameters(
  * @param peak_height
  * @return
  */
-int FitPeaks::observePeakCenter(HistogramData::HistogramX &vector_x,
-                                HistogramData::HistogramY &vector_y,
+int FitPeaks::observePeakCenter(const HistogramData::HistogramX &vector_x,
+                                const HistogramData::HistogramY &vector_y,
                                 FunctionValues &bkgd_values, size_t start_index,
-                                size_t stop_index, double *peak_center,
-                                size_t *peak_center_index,
-                                double *peak_height) {
+                                size_t stop_index, double &peak_center,
+                                size_t &peak_center_index,
+                                double &peak_height) {
   // initialize paramters
   double peak_bkgd_max = 0;
-  *peak_height = 0;
-  *peak_center_index = -1;
-  *peak_center = 0;
+  peak_height = 0;
+  peak_center_index = -1;
+  peak_center = 0;
 
   // locate highest pure peakk position
   size_t num_pts = min(stop_index - start_index, bkgd_values.size());
@@ -1309,10 +1276,10 @@ int FitPeaks::observePeakCenter(HistogramData::HistogramX &vector_x,
 
     // get Y value, reduce by background and check against max Y value
     double y = vector_y[curr_index] - bkgd_values.getCalculated(i);
-    if (y > *peak_height) {
-      *peak_height = y;
-      *peak_center = vector_x[curr_index];
-      *peak_center_index = curr_index;
+    if (y > peak_height) {
+      peak_height = y;
+      peak_center = vector_x[curr_index];
+      peak_center_index = curr_index;
     }
     if (vector_y[curr_index] > peak_bkgd_max)
       peak_bkgd_max = vector_y[curr_index];
@@ -1325,11 +1292,11 @@ int FitPeaks::observePeakCenter(HistogramData::HistogramX &vector_x,
   if (peak_bkgd_max < 1.0E-10) {
     // none-event, but no signal within region
     result = NOSIGNAL;
-  } else if (*peak_height < m_minPeakHeight) {
+  } else if (peak_height < m_minPeakHeight) {
     // peak too low
     result = LOWPEAK;
-  } else if ((*peak_center_index - start_index) < MAGIC3 ||
-             (stop_index - *peak_center_index) < MAGIC3) {
+  } else if ((peak_center_index - start_index) < MAGIC3 ||
+             (stop_index - peak_center_index) < MAGIC3) {
     // peak not at center
     result = OUTOFBOUND;
   } else {
@@ -1351,23 +1318,21 @@ int FitPeaks::observePeakCenter(HistogramData::HistogramX &vector_x,
  * @param istop
  * @return peak width as double
  */
-double FitPeaks::observePeakWidth(HistogramData::HistogramX &vector_x,
-                                  HistogramData::HistogramY &vector_y,
+double FitPeaks::observePeakWidth(const HistogramData::HistogramX &vector_x,
+                                  const HistogramData::HistogramY &vector_y,
                                   FunctionValues &bkgd_values,
                                   double peak_height, size_t ipeak,
                                   size_t istart, size_t istop) {
   double peak_width(-0.);
 
-  if (peak_width_estimate_approach_ ==
-      EstimatePeakWidth::InstrumentResolution) {
+  if (m_peakWidthEstimateApproach == EstimatePeakWidth::InstrumentResolution) {
     // width from guessing from delta(D)/D
     double peak_center = vector_x[ipeak];
     peak_width = peak_center * m_peakDSpacePercentage;
-  } else if (peak_width_estimate_approach_ == EstimatePeakWidth::Observation) {
+  } else if (m_peakWidthEstimateApproach == EstimatePeakWidth::Observation) {
     // observe peak width by estimating FWHM from observation
     // the approach is to locate the first bin with intensity larger than half
-    // peak height
-    // from left and right
+    // peak height from left and right
     // check input
     if (istart >= ipeak || ipeak >= istop)
       throw std::runtime_error(
@@ -1451,9 +1416,9 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
   size_t expected_peak_index =
       findXIndex(m_inputMatrixWS->histogram(ws_index).x(), expected_peak_pos);
 
-  // treat 5 as a magic number
+  // treat 5 as a magic number - TODO explain why
   bool good_fit(false);
-  if (expected_peak_index - start_index > 10 &&
+  if (expected_peak_index - start_index > 10 && // TODO explain why 10
       stop_index - expected_peak_index - stop_index > 10) {
     // enough data points left for multi-domain fitting
     // set a smaller fit window
@@ -1589,7 +1554,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
   fit->setProperty("StartX", xmin);
   fit->setProperty("EndX", xmax);
 
-  if (constrain_peaks_position_) {
+  if (m_constrainPeaksPosition) {
     // set up a constraint on peak position
     double peak_center = peak_function->centre();
     double peak_width = peak_function->fwhm();
@@ -1626,12 +1591,6 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
     chi2 = fit->getProperty("OutputChi2overDoF");
     fitfunc = fit->getProperty("Function");
   }
-
-  // Debug information
-  //  m_sstream << "[F1201] FitSingleDomain Fitted-Function " <<
-  //  fitfunc->asString()
-  //            << ": Fit-status = " << fitStatus << ", chi^2 = " << chi2 <<
-  //            ".\n";
 
   return chi2;
 }
@@ -1704,7 +1663,6 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
 
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
-  //  m_sstream << "[DB] Multi-domain fit status: " << fitStatus << ".\n";
 
   double chi2 = DBL_MAX;
   if (fitStatus == "success") {
@@ -1738,10 +1696,10 @@ double FitPeaks::fitFunctionHighBackground(
 
   // Get partial of the data
   std::vector<double> vec_x, vec_y, vec_e;
-  getRangeData(ws_index, fit_window, &vec_x, &vec_y, &vec_e);
+  getRangeData(ws_index, fit_window, vec_x, vec_y, vec_e);
 
   // Reduce the background
-  reduceBackground(high_bkgd_function, vec_x, &vec_y);
+  reduceBackground(high_bkgd_function, vec_x, vec_y);
 
   // Create a new workspace
   API::MatrixWorkspace_sptr reduced_bkgd_ws =
@@ -1798,7 +1756,7 @@ void FitPeaks::generateOutputPeakPositionWS() {
   // create output workspace for peak positions: can be partial spectra to input
   // workspace
   size_t num_hist = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
-  output_peak_position_workspace_ = WorkspaceFactory::Instance().create(
+  m_outputPeakPositionWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", num_hist, m_numPeaksToFit, m_numPeaksToFit);
   // set default
   for (size_t wi = 0; wi < num_hist; ++wi) {
@@ -1808,7 +1766,7 @@ void FitPeaks::generateOutputPeakPositionWS() {
     size_t inp_wi = wi + m_startWorkspaceIndex;
     std::vector<double> expected_position = getExpectedPeakPositions(inp_wi);
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      output_peak_position_workspace_->dataX(wi)[ipeak] =
+      m_outputPeakPositionWorkspace->dataX(wi)[ipeak] =
           expected_position[ipeak];
     }
   }
@@ -1828,7 +1786,7 @@ void FitPeaks::generateFittedParametersValueWorkspace() {
   // check whether it is not asked to create such table workspace
   if (param_table_name.size() == 0) {
     // Skip if it is not specified
-    m_fittedParamTable = 0;
+    m_fittedParamTable = nullptr;
     return;
   }
 
@@ -1869,7 +1827,7 @@ void FitPeaks::generateCalculatedPeaksWS() {
   std::string fit_ws_name = getPropertyValue("FittedPeaksWorkspace");
   if (fit_ws_name.size() == 0) {
     // skip if user does not specify
-    m_fittedPeakWS = 0;
+    m_fittedPeakWS = nullptr;
     return;
   }
 
@@ -1891,7 +1849,7 @@ void FitPeaks::generateCalculatedPeaksWS() {
  * @brief FitPeaks::setOutputProperties
  */
 void FitPeaks::processOutputs() {
-  setProperty("OutputWorkspace", output_peak_position_workspace_);
+  setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
 
   // optional
   if (m_fittedParamTable)
@@ -1964,7 +1922,7 @@ std::pair<double, double> FitPeaks::getPeakFitWindow(size_t wi, size_t ipeak) {
   }
 
   double left(0), right(0);
-  if (calculate_window_instrument_) {
+  if (m_calculateWindowInstrument) {
     // calcualte peak window by delta(d)/d
     double peak_pos = getExpectedPeakPositions(wi)[ipeak];
     // calcalate expected peak width
@@ -2004,9 +1962,9 @@ std::pair<double, double> FitPeaks::getPeakFitWindow(size_t wi, size_t ipeak) {
  */
 void FitPeaks::getRangeData(size_t iws,
                             const std::pair<double, double> &fit_window,
-                            std::vector<double> *vec_x,
-                            std::vector<double> *vec_y,
-                            std::vector<double> *vec_e) {
+                            std::vector<double> &vec_x,
+                            std::vector<double> &vec_y,
+                            std::vector<double> &vec_e) {
 
   // get the original vector of X and determine the start and end index
   const vector<double> orig_x = m_inputMatrixWS->histogram(iws).x().rawData();
@@ -2027,9 +1985,9 @@ void FitPeaks::getRangeData(size_t iws,
 
   // copy X, Y and E
   size_t num_elements = right_index - left_index;
-  vec_x->resize(num_elements);
+  vec_x.resize(num_elements);
   std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index,
-            vec_x->begin());
+            vec_x.begin());
 
   // modify right_index if it is at the end
   if (m_inputMatrixWS->isHistogramData() && right_index == orig_x.size() - 1) {
@@ -2045,12 +2003,12 @@ void FitPeaks::getRangeData(size_t iws,
       m_inputMatrixWS->histogram(iws).y().rawData();
   const std::vector<double> orig_e =
       m_inputMatrixWS->histogram(iws).e().rawData();
-  vec_y->resize(num_elements);
-  vec_e->resize(num_elements);
+  vec_y.resize(num_elements);
+  vec_e.resize(num_elements);
   std::copy(orig_y.begin() + left_index, orig_y.begin() + right_index,
-            vec_y->begin());
+            vec_y.begin());
   std::copy(orig_e.begin() + left_index, orig_e.begin() + right_index,
-            vec_e->begin());
+            vec_e.begin());
 
   return;
 }
@@ -2060,18 +2018,18 @@ void FitPeaks::getRangeData(size_t iws,
 // find 1 local minima: a flat background
 void FitPeaks::reduceBackground(API::IBackgroundFunction_sptr bkgd_func,
                                 const std::vector<double> &vec_x,
-                                std::vector<double> *vec_y) {
+                                std::vector<double> &vec_y) {
 
   // find out all local minima
   std::vector<size_t> local_min_indices;
-  if ((*vec_y)[0] <= (*vec_y)[1])
+  if ((vec_y)[0] <= (vec_y)[1])
     local_min_indices.push_back(0);
-  for (size_t i = 1; i < vec_y->size() - 1; ++i) {
-    if ((*vec_y)[i] <= (*vec_y)[i - 1] && (*vec_y)[i] <= (*vec_y)[i + 1])
+  for (size_t i = 1; i < vec_y.size() - 1; ++i) {
+    if ((vec_y)[i] <= (vec_y)[i - 1] && (vec_y)[i] <= (vec_y)[i + 1])
       local_min_indices.push_back(i);
   }
-  size_t lastindex = vec_y->size() - 1;
-  if ((*vec_y)[lastindex] <= (*vec_y)[lastindex - 1])
+  size_t lastindex = vec_y.size() - 1;
+  if ((vec_y)[lastindex] <= (vec_y)[lastindex - 1])
     local_min_indices.push_back(lastindex);
 
   if (local_min_indices.size() == 0)
@@ -2083,10 +2041,9 @@ void FitPeaks::reduceBackground(API::IBackgroundFunction_sptr bkgd_func,
   bkgd_func->function(vectorx, vector_bkgd);
 
   // Reduce the background from the calculated background
-  for (size_t i = 0; i < vec_y->size(); ++i) {
-    (*vec_y)[i] -= vector_bkgd[i];
-    // double e_sq = max((*vec_y)[i], 1.0);
-    // (*vec_e)[i] = 1.0; // std::sqrt(e_sq);
+  for (size_t i = 0; i < vec_y.size(); ++i) {
+    (vec_y)[i] -= vector_bkgd[i];
+    // it is better not to mess up with E here
   }
 
   return;
@@ -2102,12 +2059,11 @@ void FitPeaks::reduceBackground(API::IBackgroundFunction_sptr bkgd_func,
 size_t FitPeaks::getXIndex(size_t wi, double x) {
   // check input
   if (wi >= m_inputMatrixWS->getNumberHistograms()) {
-    g_log.error() << "getXIndex(): given workspace index " << wi
-                  << " is out of range [0, "
-                  << m_inputMatrixWS->getNumberHistograms() << ")"
-                  << "\n";
-    throw std::runtime_error(
-        "getXIndex() is given an out-of-range workspace index");
+    std::stringstream errss;
+    errss << "getXIndex(): given workspace index " << wi
+          << " is out of worspace range [0, "
+          << m_inputMatrixWS->getNumberHistograms() << ")";
+    throw std::runtime_error(errss.str());
   }
 
   // get value
@@ -2162,11 +2118,11 @@ void FitPeaks::writeFitResult(
 
   // convert to
   size_t out_wi = wi - m_startWorkspaceIndex;
-  if (out_wi >= output_peak_position_workspace_->getNumberHistograms()) {
+  if (out_wi >= m_outputPeakPositionWorkspace->getNumberHistograms()) {
     g_log.error() << "workspace index " << wi
                   << " is out of output peak position workspace "
                   << "range of spectra, which contains "
-                  << output_peak_position_workspace_->getNumberHistograms()
+                  << m_outputPeakPositionWorkspace->getNumberHistograms()
                   << " spectra"
                   << "\n";
     throw std::runtime_error(
@@ -2184,9 +2140,9 @@ void FitPeaks::writeFitResult(
       peak_chi2 = fit_result->getCost(ipeak); // peak_chi2_vec[ipeak];
     }
 
-    output_peak_position_workspace_->mutableX(out_wi)[ipeak] = exp_peak_pos;
-    output_peak_position_workspace_->mutableY(out_wi)[ipeak] = fitted_peak_pos;
-    output_peak_position_workspace_->mutableE(out_wi)[ipeak] = peak_chi2;
+    m_outputPeakPositionWorkspace->mutableX(out_wi)[ipeak] = exp_peak_pos;
+    m_outputPeakPositionWorkspace->mutableY(out_wi)[ipeak] = fitted_peak_pos;
+    m_outputPeakPositionWorkspace->mutableE(out_wi)[ipeak] = peak_chi2;
   }
 
   // return if it is not asked to write fitted peak parameters
@@ -2232,8 +2188,8 @@ void FitPeaks::writeFitResult(
                  << m_fittedParamTable->columnCount() << ")";
           const std::vector<std::string> &col_names =
               m_fittedParamTable->getColumnNames();
-          for (auto iter = col_names.begin(); iter != col_names.end(); ++iter)
-            err_ss << *iter << "  ";
+          for (const auto &name : col_names)
+            err_ss << name << "  ";
           throw std::runtime_error(err_ss.str());
         }
         m_fittedParamTable->cell<double>(row_index, col_index) =
@@ -2242,7 +2198,6 @@ void FitPeaks::writeFitResult(
       // set chi2
       m_fittedParamTable->cell<double>(row_index, chi2_index) =
           fit_result->getCost(ipeak);
-      //    peak_chi2_vec[ipeak];
     }
   }
 
@@ -2260,21 +2215,20 @@ std::string FitPeaks::getPeakHeightParameterName(
   std::string height_name("");
 
   std::vector<std::string> peak_parameters = peak_function->getParameterNames();
-  for (std::vector<std::string>::iterator it = peak_parameters.begin();
-       it != peak_parameters.end(); ++it) {
-    if (*it == "Height") {
+  for (const auto &name : peak_parameters) {
+    if (name == "Height") {
       height_name = "Height";
       break;
-    } else if (*it == "I") {
+    } else if (name == "I") {
       height_name = "I";
       break;
-    } else if (*it == "Intensity") {
+    } else if (name == "Intensity") {
       height_name = "Intensity";
       break;
     }
   }
 
-  if (height_name.size() == 0)
+  if (height_name.empty())
     throw std::runtime_error("Peak height parameter name cannot be found.");
 
   return height_name;

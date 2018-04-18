@@ -103,6 +103,7 @@ private:
   std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
 
   enum EstimatePeakWidth { NoEstimation, Observation, InstrumentResolution };
+  enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
   /// suites of method to fit peaks
   void fitPeaks();
@@ -111,10 +112,6 @@ private:
   void fitSpectrumPeaks(
       size_t wi, const std::vector<double> &expected_peak_centers,
       boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
-  //                   std::vector<double> &fitted_peak_centers,
-  //                   std::vector<std::vector<double>>
-  //                   &fitted_function_parameters,
-  //                   std::vector<double> *peak_chi2_vec);
 
   /// fit background
   bool fitBackground(const size_t &ws_index,
@@ -154,13 +151,13 @@ private:
 
   /// get vector X, Y and E in a given range
   void getRangeData(size_t iws, const std::pair<double, double> &fit_window,
-                    std::vector<double> *vec_x, std::vector<double> *vec_y,
-                    std::vector<double> *vec_e);
+                    std::vector<double> &vec_x, std::vector<double> &vec_y,
+                    std::vector<double> &vec_e);
 
   /// Reduce background
   void reduceBackground(API::IBackgroundFunction_sptr bkgd_func,
                         const std::vector<double> &vec_x,
-                        std::vector<double> *vec_y);
+                        std::vector<double> &vec_y);
 
   API::MatrixWorkspace_sptr
   createMatrixWorkspace(const std::vector<double> &vec_x,
@@ -188,15 +185,15 @@ private:
                                  API::IPeakFunction_sptr peak_function);
 
   /// observe peak center
-  int observePeakCenter(HistogramData::HistogramX &vector_x,
-                        HistogramData::HistogramY &vector_y,
+  int observePeakCenter(const HistogramData::HistogramX &vector_x,
+                        const HistogramData::HistogramY &vector_y,
                         API::FunctionValues &bkgd_values, size_t start_index,
-                        size_t stop_index, double *peak_center,
-                        size_t *peak_center_index, double *peak_intensity);
+                        size_t stop_index, double &peak_center,
+                        size_t &peak_center_index, double &peak_intensity);
 
   /// Observe peak width
-  double observePeakWidth(HistogramData::HistogramX &vector_x,
-                          HistogramData::HistogramY &vector_y,
+  double observePeakWidth(const HistogramData::HistogramX &vector_x,
+                          const HistogramData::HistogramY &vector_y,
                           API::FunctionValues &bkgd_values, double peak_height,
                           size_t ipeak, size_t istart, size_t istop);
 
@@ -229,12 +226,12 @@ private:
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
   API::MatrixWorkspace_sptr m_inputMatrixWS;
-  bool is_d_space_;
+  bool m_inputIsDSpace;
   /// event workspace for input
   DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
   /// output workspace for peak positions
   API::MatrixWorkspace_sptr
-      output_peak_position_workspace_; // output workspace for peak positions
+      m_outputPeakPositionWorkspace; // output workspace for peak positions
   /// matrix workspace contains number of events of each spectrum
   API::MatrixWorkspace_const_sptr m_eventNumberWS;
   /// optional output analysis workspaces
@@ -242,8 +239,7 @@ private:
   API::ITableWorkspace_sptr m_fittedParamTable;
   /// matrix workspace contained calcalated peaks+background from fitted result
   /// it has same number of spectra of input workspace even if only part of
-  /// spectra
-  /// to have peaks to fit
+  /// spectra to have peaks to fit
   API::MatrixWorkspace_sptr m_fittedPeakWS;
 
   //-------- Functions ------------------------------------------------------
@@ -251,15 +247,15 @@ private:
   API::IPeakFunction_sptr m_peakFunction;
   /// Background function
   API::IBackgroundFunction_sptr m_bkgdFunction;
-  /// Linear background function for high backgroun fitting
-  API::IBackgroundFunction_sptr linear_background_function_;
+  /// Linear background function for high background fitting
+  API::IBackgroundFunction_sptr m_linearBackgroundFunction;
 
   /// Minimzer
   std::string m_minimizer;
   /// Cost function
   std::string m_costFunction;
   /// Fit from right or left
-  bool fit_peaks_from_right_;
+  bool m_fitPeaksFromRight;
 
   //-------- Input param init values --------------------------------
   /// input starting parameters' indexes in peak function
@@ -285,8 +281,8 @@ private:
 
   /// Flag for observing peak width: there are 3 states (1) no estimation (2)
   /// from 'observation' (3) calculated from instrument resolution
-  EstimatePeakWidth peak_width_estimate_approach_;
-  bool constrain_peaks_position_;
+  EstimatePeakWidth m_peakWidthEstimateApproach;
+  bool m_constrainPeaksPosition;
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;
@@ -294,7 +290,7 @@ private:
   bool m_uniformPeakWindows;
   bool m_partialWindowSpectra;
   /// flag to calcualte peak fit window from instrument resolution
-  bool calculate_window_instrument_;
+  bool m_calculateWindowInstrument;
 
   /// input peak parameters' names
   std::vector<std::string> m_peakParamNames;
@@ -318,8 +314,6 @@ private:
   //----- Result criterias ---------------
   /// peak positon tolerance case b, c and d
   bool m_peakPosTolCase234;
-
-  std::stringstream m_sstream;
 };
 
 } // namespace Algorithms
