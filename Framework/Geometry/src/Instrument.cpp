@@ -202,6 +202,10 @@ void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
                              "parametrized instrument.");
 }
 
+bool Instrument::isPhysicalInstrument() const {
+  return this->m_isPhysicalInstrument;
+}
+
 //------------------------------------------------------------------------------------------
 /**	Fills a copy of the detector cache
 * @returns a map of the detectors hold by the instrument
