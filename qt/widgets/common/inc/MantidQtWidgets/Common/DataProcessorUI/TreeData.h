@@ -26,15 +26,15 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+#include <QStringList>
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
-
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -144,6 +144,7 @@ private:
 
 using GroupData = std::map<int, RowData_sptr>;
 using TreeData = std::map<int, GroupData>;
+EXPORT_OPT_MANTIDQT_COMMON bool canPostprocess(GroupData const &group);
 }
 }
 }
