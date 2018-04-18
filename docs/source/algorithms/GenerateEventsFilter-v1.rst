@@ -95,12 +95,12 @@ Generate event filters by time
 ##############################
 
 Event filters can be created by defining start time, stop time and time intervals. 
-The three input properties for them are *StartTime*, *StopTime* and *TimeInterval*, 
+The three input properties for them are ``StartTime``, ``StopTime`` and ``TimeInterval``, 
 respectively. 
 
-*TimeInterval* accepts an array of doubles.  
+``TimeInterval`` accepts an array of doubles.  
 If the array size is zero, then there will be one and only splitter will be 
-created from *StartTime* and *StopTime*.  
+created from ``StartTime`` and ``StopTime``.  
 If the size of the array is one, then all event splitters will have the same duration
 of time. 
 In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`, 
@@ -115,7 +115,7 @@ Unit of time
 ============
 
 There are three types of units that are supported for time. 
-They are second, nanosecond and percentage of duration from *StartTime* to *StopTime*. 
+They are second, nanosecond and percentage of duration from ``StartTime`` to ``StopTime``. 
 
 .. _filterbylogv-GenerateEventFilter-ref:
 
@@ -158,19 +158,25 @@ Algorithm Parameters and Examples
 Here are the introductions to some important parameters (i.e., algorithm's properties). 
 
 
-Parameter: *Centre*
-###################
+Parameter: ``Centre``
+#####################
 
-The input Boolean parameter *centre* is for filtering by log value(s).
-If option *centre* is taken, then for each interval,
+The input Boolean parameter ``centre`` is for filtering by log value(s).
+If option ``centre`` is taken, then for each interval,
 
 -  starting time = log\_time - tolerance\_time;
 -  stopping time = log\_time - tolerance\_time;
 
 It is a shift to left.
 
-Parameter: *MinimumLogValue*, *MaximumLogValue*, *LogValueTolerance* and *LogValueInterval*
-###########################################################################################
+Parameter: ``FastLog``
+######################
+
+When ``FastLog`` is set to True, a :ref:`MatrixWorkspace <MatrixWorkspace>` will be used to store the event
+splitters, which is more appropriate for fast changing logs. (see above for details).
+
+Parameter: ``MinimumLogValue``, ``MaximumLogValue``, ``LogValueTolerance`` and ``LogValueInterval``
+###################################################################################################
 
 These four parameters are used to determine the log value intervals for
 filtering events.
@@ -191,11 +197,11 @@ Integer value log
 
 It is a little bit different for sample log recorded with integer. 
 
-- *MinimumLogValue* and *MaximumLogValue* can be same such that only entries with exacly the same log value 
+- ``MinimumLogValue`` and ``MaximumLogValue`` can be same such that only entries with exacly the same log value 
   will be considered;
-- If *LogValueInterval* is not give (i.e., default value is used), then any log enetry with log value
-  larger and equal to *MinimumLogValue* and smaller and equal to *MaximumLogValue* will be considered. 
-  Be noticed that in the same case for double value log, log entry with value equal to *MaximumLogValue*
+- If ``LogValueInterval`` is not give (i.e., default value is used), then any log enetry with log value
+  larger and equal to ``MinimumLogValue`` and smaller and equal to ``MaximumLogValue`` will be considered. 
+  Be noticed that in the same case for double value log, log entry with value equal to ``MaximumLogValue``
   will be excluded. 
 
 
