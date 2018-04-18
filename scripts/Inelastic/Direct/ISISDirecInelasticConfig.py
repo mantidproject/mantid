@@ -261,7 +261,13 @@ class UserProperties(object):
             cycle = convert_cycle_int(cycle)
         if isinstance(cycle, str):
             if len(cycle) == 11:
-                cycle = cycle.upper()
+                last_letter = cycle[-1];
+                if not last_letter.upper() in {'A','B','C','D','E'}:
+                    raise  RuntimeError("Cycle should be a string in the form CYCLEYYYYN[A,B,C,D]"
+                                       "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "
+                                       "but it is {0}".format(cycle))
+                else:
+                    cycle = cycle.upper()
             elif len(cycle) < 10:
                 cycle = cycle.replace('_', '')
                 try:
