@@ -32,7 +32,7 @@ public:
   const std::vector<std::string> seeAlso() const override;
 
 protected:
-  virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
+  std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const override;
 
 private:
   std::map<std::string, std::string> validateInputs() override;
