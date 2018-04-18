@@ -337,7 +337,7 @@ public:
   pmap_it end() { return m_map.end(); }
   pmap_cit end() const { return m_map.end(); }
 
-  bool hasDetectorInfo(const Instrument *instrument) const;
+  bool hasDetectorInfo() const;
   bool hasComponentInfo() const;
   const Geometry::DetectorInfo &detectorInfo() const;
   Geometry::DetectorInfo &mutableDetectorInfo();

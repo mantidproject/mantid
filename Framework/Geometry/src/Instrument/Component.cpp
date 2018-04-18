@@ -316,7 +316,6 @@ bool Component::hasComponentInfo() const { return m_map->hasComponentInfo(); }
 /// Return the relative position to the parent Component
 Kernel::V3D Component::getRelativePos() const {
   if (m_map) {
-
     if (hasComponentInfo()) {
       return m_map->componentInfo().relativePosition(index());
     } else {

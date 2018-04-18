@@ -575,7 +575,7 @@ public:
     const auto legacyMap = instr->makeLegacyParameterMap();
     // 3 bank parameters + 2 det parameters + 1 scale parameter
     TS_ASSERT_EQUALS(legacyMap->size(), 6);
-    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
+    TS_ASSERT(!legacyMap->hasDetectorInfo());
     Instrument legacyInstrument(baseInstrument, legacyMap);
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(),
@@ -642,7 +642,7 @@ public:
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 2);
-    TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
+    TS_ASSERT(!legacyMap->hasDetectorInfo());
     Instrument legacyInstrument(baseInstrument, legacyMap);
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(),

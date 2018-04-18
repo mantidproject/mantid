@@ -1135,35 +1135,24 @@ ParameterMap::create(const std::string &className,
   return ParameterFactory::create(className, name);
 }
 
-/** Only for use by ExperimentInfo. Returns returns true if this instrument
- contains a DetectorInfo.
-
- The `instrument` argument is needed for the special case of having a neutronic
- *and* a physical instrument. `Instrument` uses the same parameter map for both,
- but the DetectorInfo is only for the neutronic instrument. */
-bool ParameterMap::hasDetectorInfo(const Instrument *instrument) const {
-  if (instrument != m_instrument)
-    return false;
+bool ParameterMap::hasDetectorInfo() const {
   return static_cast<bool>(m_detectorInfo);
 }
 
-/** Only for use by ExperimentInfo. Returns returns true if this instrument
- contains a ComponentInfo.
-*/
 bool ParameterMap::hasComponentInfo() const {
   return static_cast<bool>(m_componentInfo);
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 const Geometry::DetectorInfo &ParameterMap::detectorInfo() const {
-  if (!hasDetectorInfo(m_instrument))
+  if (!hasDetectorInfo())
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 Geometry::DetectorInfo &ParameterMap::mutableDetectorInfo() {
-  if (!hasDetectorInfo(m_instrument))
+  if (!hasDetectorInfo())
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
