@@ -396,7 +396,8 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
   BoundingBox absoluteBB;
   const auto compFlag = componentType(componentIndex);
   if (hasSource() && componentIndex == source()) {
-    // Do nothing
+    // Do nothing. Source is not considered part of the beamline for bounding
+    // box calculations.
   } else if (compFlag == Beamline::ComponentType::Unstructured) {
     for (const auto &childIndex : this->children(componentIndex)) {
       absoluteBB.grow(boundingBox(childIndex, reference));
