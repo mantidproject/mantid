@@ -72,8 +72,8 @@ public:
       const auto &spectrumDefinition = (*spectrumDefinitions)[i];
       std::vector<size_t> detectorIndices;
 
-      for (size_t j = 0; j < spectrumDefinition.size(); ++j) {
-        size_t detectorIndex = spectrumDefinition[j].first;
+      for (const auto &j : spectrumDefinition) {
+        size_t detectorIndex = j.first;
         detectorIndices.emplace_back(std::move(detectorIndex));
       }
 
@@ -133,8 +133,7 @@ public:
       ws.setBinEdges(i, std::move(binEdgeData));
 
       SpectrumDefinition specDef;
-      for (size_t j = 0; j < detectorIndices.size(); ++j) {
-        size_t detectorIndex = detectorIndices[j];
+      for (auto detectorIndex : detectorIndices) {
         specDef.add(detectorIndex);
       }
       spectrumDefinitions.emplace_back(std::move(specDef));

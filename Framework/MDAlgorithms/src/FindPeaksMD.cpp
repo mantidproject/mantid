@@ -746,6 +746,10 @@ void FindPeaksMD::exec() {
   criteria.push_back(std::pair<std::string, bool>("bincount", false));
   peakWS->sort(criteria);
 
+  for (auto i = 0; i != peakWS->getNumberPeaks(); ++i) {
+    Peak &p = peakWS->getPeak(i);
+    p.setPeakNumber(i + 1);
+  }
   // Save the output
   setProperty("OutputWorkspace", peakWS);
 }

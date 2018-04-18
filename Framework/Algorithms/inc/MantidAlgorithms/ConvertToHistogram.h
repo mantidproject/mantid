@@ -46,7 +46,9 @@ public:
     return "Converts a workspace containing point data into one containing "
            "histograms.";
   }
-
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToPointData"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Axes"; }
 

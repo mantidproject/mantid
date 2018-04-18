@@ -1,3 +1,5 @@
+.. _GuiDesignGuidelines:
+
 =====================
 GUI Design Guidelines
 =====================
@@ -12,7 +14,7 @@ This page describes guidelines that should be followed when
 implementing an interface in MantidPlot. The aim is to encourage a
 consistent approach to developing interfaces.
 
-.. _dev-docs-mvp-intro:
+.. _GuiDesignGuidelinesMVPIntro:
 
 MVP (Model View Presenter)
 ##########################
@@ -29,7 +31,7 @@ is given below.
 To illustrate MVP, a simple example of a calculator GUI has been
 created using Python (the concepts of MVP can be applied to any
 programming language). This example can be found in
-:ref:`dev-docs-gui-calculator-example`, and you can run it with
+:ref:`MVPCalculatorGUIExample`, and you can run it with
 ``python Calculator.py``.
 
 It is good practice to have model, view or presenter (as appropriate)
@@ -55,7 +57,7 @@ maintenance easier.
 It is important to note that the values used in the calculations
 should be received from the presenter (more of which below).
 
-.. _dev-docs-mvp-view:
+.. _GuiDesignGuidelinesMVPView:
 
 View
 ----
@@ -276,7 +278,7 @@ file would look like:
 
 where ``FooGUI`` is the ``MainWindow`` for the interface. Some more
 detailed documentation on creating GUIs in Python can be found at
-:ref:`dev-docs-mvp-python-views`.
+:ref:`QtDesignerForPython`.
 
 Designer
 --------

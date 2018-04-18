@@ -1,16 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.simpleapi import AlgorithmManager, CreateWorkspace, DeleteWorkspace, SortXAxis
+
 
 class SortXAxisTest(unittest.TestCase):
 
+
     def test_x_ascending(self):
-        dataX = [1, 2, 3] # In ascending order, so y and e will need to be reversed.
-        dataY = [1, 2, 3]
-        dataE = [1, 2, 3]
+        dataX = [1., 2., 3.] # In ascending order, so y and e will need to be reversed.
+        dataY = [1., 2., 3.]
+        dataE = [1., 2., 3.]
         unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=True)
         # Run the algorithm
         sortedws = SortXAxis(InputWorkspace=unsortedws)
@@ -24,11 +24,10 @@ class SortXAxisTest(unittest.TestCase):
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
 
-
     def test_x_descending(self):
-        dataX = [3, 2, 1] # In descending order, so y and e will need to be reversed.
-        dataY = [1, 2, 3]
-        dataE = [1, 2, 3]
+        dataX = [3., 2., 1.] # In descending order, so y and e will need to be reversed.
+        dataY = [1., 2., 3.]
+        dataE = [1., 2., 3.]
         unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=True)
         # Run the algorithm
         sortedws = SortXAxis(InputWorkspace=unsortedws)
@@ -45,9 +44,9 @@ class SortXAxisTest(unittest.TestCase):
         DeleteWorkspace(sortedws)
 
     def test_on_multiple_spectrum(self):
-        dataX = [3, 2, 1, 3, 2, 1] # In descending order, so y and e will need to be reversed.
-        dataY = [1, 2, 3, 1, 2, 3]
-        dataE = [1, 2, 3, 1, 2, 3]
+        dataX = [3., 2., 1., 3., 2., 1.] # In descending order, so y and e will need to be reversed.
+        dataY = [1., 2., 3., 1., 2., 3.]
+        dataE = [1., 2., 3., 1., 2., 3.]
         unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=True, NSpec=2)
         dataY.reverse()
         dataE.reverse()
@@ -70,11 +69,10 @@ class SortXAxisTest(unittest.TestCase):
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
 
-
     def test_sorts_x_histogram_ascending(self):
-        dataX = [1, 2, 3, 4]
-        dataY = [1, 2, 3]
-        dataE = [1, 2, 3]
+        dataX = [1., 2., 3., 4.]
+        dataY = [1., 2., 3.]
+        dataE = [1., 2., 3.]
         unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=False)
         # Run the algorithm
         sortedws = SortXAxis(InputWorkspace=unsortedws)
@@ -90,9 +88,9 @@ class SortXAxisTest(unittest.TestCase):
         DeleteWorkspace(sortedws)
 
     def test_sorts_x_histogram_descending(self):
-        dataX = [4, 3, 2, 1]
-        dataY = [1, 2, 3]
-        dataE = [1, 2, 3]
+        dataX = [4., 3., 2., 1.]
+        dataY = [1., 2., 3.]
+        dataE = [1., 2., 3.]
         unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=False)
         # Run the algorithm
         sortedws = SortXAxis(InputWorkspace=unsortedws)
@@ -113,9 +111,9 @@ class SortXAxisTest(unittest.TestCase):
         # Create unsorted workspace
         parent = AlgorithmManager.createUnmanaged('Load')
         create_ws_alg = parent.createChildAlgorithm("CreateWorkspace")
-        dataX = [4, 3, 2, 1]
-        dataY = [1, 2, 3]
-        dataE = [1, 2, 3]
+        dataX = [4., 3., 2., 1.]
+        dataY = [1., 2., 3.]
+        dataE = [1., 2., 3.]
         create_ws_alg.setProperty("DataX", dataX)
         create_ws_alg.setProperty("DataY", dataY)
         create_ws_alg.setProperty("DataE", dataE)
@@ -136,6 +134,50 @@ class SortXAxisTest(unittest.TestCase):
         dataE.reverse()
         self.assertEqual(dataY, sortedY.tolist())
         self.assertEqual(dataE, sortedE.tolist())
+
+    def test_dx_multiple_spectrum(self):
+        dataX = [3, 2, 1, 3, 2, 1]  # In descending order, so y and e will need to be reversed.
+        dataY = [1, 2, 3, 1, 2, 3]
+        dx = [1, 2, 3, 1, 2, 3]
+        unsortedws = CreateWorkspace(DataX=dataX, DataY=dataY, Dx=dx, UnitX='TOF', Distribution=True, NSpec=2)
+        dx.reverse()
+        # Run the algorithm
+        sortedws = SortXAxis(InputWorkspace=unsortedws)
+        # Check the resulting data values for 1st spectrum.
+        sortedDx = sortedws.readDx(0)
+        self.assertEqual(dx[0:3], sortedDx.tolist())
+        # Check the resulting data values for 2nd spectrum.
+        sortedDx = sortedws.readDx(1)
+        self.assertEqual(dx[3:], sortedDx.tolist())
+        DeleteWorkspace(unsortedws)
+        DeleteWorkspace(sortedws)
+
+    def test_dx_histogram_ascending(self):
+        dataX = [1., 2., 3., 4.]
+        dataY = [1., 2., 3.]
+        dx = [1., 2., 3.]
+        unsortedws = CreateWorkspace(DataX=dataX, DataY=dataY, Dx=dx, UnitX='TOF', Distribution=False)
+        # Run the algorithm
+        sortedws = SortXAxis(InputWorkspace=unsortedws)
+        sortedDx = sortedws.readDx(0)
+        # Check the resulting data values. Sorting operation should have resulted in no changes
+        self.assertEqual(dx, sortedDx.tolist())
+        DeleteWorkspace(unsortedws)
+        DeleteWorkspace(sortedws)
+
+    def test_sort_descending(self):
+        dataX = [1., 2., 3., 4.]
+        dataY = [1., 2., 3.]
+        unsortedws = CreateWorkspace(DataX=dataX, DataY=dataY, UnitX='TOF', Distribution=False)
+        # Run the algorithm
+        sortedws = SortXAxis(InputWorkspace=unsortedws, Ordering="Descending")
+        sortedX = sortedws.readX(0)
+        sortedY = sortedws.readY(0)
+        # Check the resulting data values. Sorting operation should have resulted in no changes
+        self.assertEqual([4., 3., 2., 1.], sortedX.tolist())
+        self.assertEqual([3., 2., 1.], sortedY.tolist())
+        DeleteWorkspace(unsortedws)
+        DeleteWorkspace(sortedws)
 
 if __name__ == '__main__':
     unittest.main()

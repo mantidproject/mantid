@@ -13,6 +13,9 @@ class Mean(PythonAlgorithm):
     def category(self):
         return "Arithmetic"
 
+    def seeAlso(self):
+        return [ "MostLikelyMean","WeightedMean","WeightedMeanOfWorkspace" ]
+
     def name(self):
         return "Mean"
 
