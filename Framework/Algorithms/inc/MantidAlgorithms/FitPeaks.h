@@ -103,6 +103,7 @@ private:
   std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
 
   enum EstimatePeakWidth { NoEstimation, Observation, InstrumentResolution };
+  enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
   /// suites of method to fit peaks
   void fitPeaks();
@@ -184,15 +185,15 @@ private:
                                  API::IPeakFunction_sptr peak_function);
 
   /// observe peak center
-  int observePeakCenter(HistogramData::HistogramX &vector_x,
-                        HistogramData::HistogramY &vector_y,
+  int observePeakCenter(const HistogramData::HistogramX &vector_x,
+                        const HistogramData::HistogramY &vector_y,
                         API::FunctionValues &bkgd_values, size_t start_index,
                         size_t stop_index, double &peak_center,
                         size_t &peak_center_index, double &peak_intensity);
 
   /// Observe peak width
-  double observePeakWidth(HistogramData::HistogramX &vector_x,
-                          HistogramData::HistogramY &vector_y,
+  double observePeakWidth(const HistogramData::HistogramX &vector_x,
+                          const HistogramData::HistogramY &vector_y,
                           API::FunctionValues &bkgd_values, double peak_height,
                           size_t ipeak, size_t istart, size_t istop);
 
