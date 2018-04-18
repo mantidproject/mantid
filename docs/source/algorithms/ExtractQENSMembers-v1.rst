@@ -39,14 +39,14 @@ Usage
   output_ws_name = "irs26176_graphite002_conv_1LFixF_s0_to_9"
 
   # Run ConvolutionFitSequential algorithm
-  _, _, result_group = ConvolutionFitSequential(InputWorkspace=sample, Function=function,
-                                                PassWSIndexToFunction=True, StartX=startX, EndX=endX,
-                                                SpecMin=specMin, SpecMax=specMax, ConvolveMembers=convolve,
-                                                Minimizer=minimizer, MaxIterations=maxIt,
-                                                OutputWorkspace=output_ws_name)
+  ConvolutionFitSequential(InputWorkspace=sample, Function=function,
+                           PassWSIndexToFunction=True, StartX=startX, EndX=endX,
+                           SpecMin=specMin, SpecMax=specMax, ConvolveMembers=convolve,
+                           Minimizer=minimizer, MaxIterations=maxIt,
+                           OutputWorkspace=output_ws_name)
 
   # Extract members from the output of the ConvolutionFitSequential algorithm
-  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=result_group,
+  members_ws = ExtractQENSMembers(InputWorkspace=sample, ResultWorkspace=output_ws_name+"_Workspaces",
                                   RenameConvolvedMembers=True, ConvolvedMembers=["Lorentzian"],
                                   OutputWorkspace=output_ws_name+"_Members")
 
