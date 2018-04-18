@@ -39,8 +39,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport LoadSampleShape
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadSampleShape : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadSampleShape"; };
@@ -60,8 +59,6 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
-  /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   // Implement abstract Algorithm methods

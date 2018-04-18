@@ -167,24 +167,6 @@ void LoadSampleShape::init() {
                   "shape of the sample");
 }
 
-/**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
-int LoadSampleShape::confidence(Kernel::FileDescriptor &descriptor) const {
-  const std::string &filePath = descriptor.filename();
-  const size_t filenameLength = filePath.size();
-
-  // Avoid some known file types that have different loaders
-  int confidence(0);
-  if (filePath.compare(filenameLength - 4, 4, ".stl") == 0) {
-    confidence = 90;
-  }
-  return confidence;
-}
-
 void LoadSampleShape::exec() {
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
