@@ -205,8 +205,11 @@ void LoadILLDiffraction::loadDataScan() {
   resolveInstrument();
   computeThetaOffset();
 
+  std::string start_time = firstEntry.getString("start_time");
+  start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
+
   if (m_scanType == DetectorScan) {
-    initMovingWorkspace(scan);
+    initMovingWorkspace(scan, start_time);
     fillMovingInstrumentScan(data, scan);
   } else {
     initStaticWorkspace();
@@ -266,22 +269,49 @@ void LoadILLDiffraction::initStaticWorkspace() {
  * Use the ScanningWorkspaceBuilder to create a time indexed workspace.
  *
  * @param scan : scan data
+ * @param start_time : start time in ISO format string
  */
-void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
+void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
+                                             const std::string &start_time) {
   const size_t nTimeIndexes = m_numberScanPoints;
   const size_t nBins = 1;
   const bool isPointData = true;
 
-  const auto instrumentWorkspace = loadEmptyInstrument();
+  const auto instrumentWorkspace = loadEmptyInstrument(start_time);
   const auto &instrument = instrumentWorkspace->getInstrument();
   auto &params = instrumentWorkspace->instrumentParameters();
 
+  const auto &referenceComponentPosition =
+      getReferenceComponentPosition(instrumentWorkspace);
+
+  double refR, refTheta, refPhi;
+  referenceComponentPosition.getSpherical(refR, refTheta, refPhi);
+
+  auto &compInfo = instrumentWorkspace->mutableComponentInfo();
+
+  Geometry::IComponent_const_sptr detectors =
+      instrument->getComponentByName("detectors");
+  const auto detCompIndex = compInfo.indexOf(detectors->getComponentID());
+  const auto tubes = compInfo.children(detCompIndex);
+  const size_t nTubes = tubes.size();
+  Geometry::IComponent_const_sptr tube1 =
+      instrument->getComponentByName("tube_1");
+  const auto tube1CompIndex = compInfo.indexOf(tube1->getComponentID());
+  const auto pixels = compInfo.children(tube1CompIndex);
+  const size_t nPixels = pixels.size();
+
+  Geometry::IComponent_const_sptr pixel =
+      instrument->getComponentByName("standard_pixel");
+  Geometry::BoundingBox bb;
+  pixel->getBoundingBox(bb);
+  const double pixelHeight = bb.yMax() - bb.yMin();
+
   const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
-  if (!tubeAnglesStr.empty() && false) {
+  if (!tubeAnglesStr.empty()) {
     std::vector<std::string> tubeAngles;
     boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
-    const double ref = -165.;
-    for (size_t i = 1; i <= 128; ++i) {
+    const double ref = -refTheta;
+    for (size_t i = 1; i <= nTubes; ++i) {
       const std::string compName = "tube_" + std::to_string(i);
       Geometry::IComponent_const_sptr component =
           instrument->getComponentByName(compName);
@@ -291,7 +321,6 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
       V3D newPos;
       const double angle = std::stod(tubeAngles[i - 1]);
       newPos.spherical(r, (ref - angle) / RAD_TO_DEG, phi);
-      auto &compInfo = instrumentWorkspace->mutableComponentInfo();
       const auto componentIndex = compInfo.indexOf(component->getComponentID());
       compInfo.setPosition(componentIndex, newPos);
     }
@@ -301,16 +330,16 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   if (!tubeCentersStr.empty()) {
     std::vector<std::string> tubeCenters;
     boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
-    for (size_t i = 1; i <= 128; ++i) {
+    for (size_t i = 1; i <= nTubes; ++i) {
       const std::string compName = "tube_" + std::to_string(i);
       Geometry::IComponent_const_sptr component =
           instrument->getComponentByName(compName);
-      const double offset = std::stod(tubeCenters[i - 1]) - 63.5;
-      V3D translation(0, -offset * 0.00277, 0);
+      const double offset =
+          std::stod(tubeCenters[i - 1]) - (double(nPixels) / 2 - 0.5);
+      V3D translation(0, -offset * pixelHeight, 0);
       V3D pos = component->getPos() + translation;
       g_log.debug() << "Moving " << compName << " to " << translation.Y()
                     << "\n";
-      auto &compInfo = instrumentWorkspace->mutableComponentInfo();
       const auto componentIndex = compInfo.indexOf(component->getComponentID());
       compInfo.setPosition(componentIndex, pos);
     }
@@ -329,14 +358,12 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String() << "\n";
+                       .toISO8601String()
+                << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
       getScannedVaribleByPropertyName(scan, "Position");
-
-  const auto &referenceComponentPosition =
-      getReferenceComponentPosition(instrumentWorkspace);
 
   // Convert the tube positions to relative rotations for all detectors
   calculateRelativeRotations(tubeAngles, referenceComponentPosition);
@@ -742,17 +769,22 @@ void LoadILLDiffraction::loadStaticInstrument() {
 }
 
 /**
- * Runs LoadEmptyInstrument and returns a workspace with the instrument, to be
+ * Runs LoadInstrument and returns a workspace with the instrument, to be
  *used in the ScanningWorkspaceBuilder.
- *
+ * @param start_time : start time in ISO formatted string
  * @return A MatrixWorkspace containing the correct instrument
  */
-MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument() {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadEmptyInstrument");
+MatrixWorkspace_sptr
+LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", m_instName);
+  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  auto &run = ws->mutableRun();
+  run.addProperty("run_start", start_time);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
-
-  return loadInst->getProperty("OutputWorkspace");
+  return loadInst->getProperty("Workspace");
 }
 
 /**

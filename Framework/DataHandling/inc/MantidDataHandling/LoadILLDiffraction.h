@@ -93,10 +93,11 @@ private:
                                   const std::string &propertyName) const;
 
   void initStaticWorkspace();
-  void initMovingWorkspace(const NeXus::NXDouble &scan);
+  void initMovingWorkspace(const NeXus::NXDouble &scan,
+                           const std::string &start_time);
 
   void loadDataScan();
-  API::MatrixWorkspace_sptr loadEmptyInstrument();
+  API::MatrixWorkspace_sptr loadEmptyInstrument(const std::string &start_time);
   void loadMetaData();
   void loadScanVars();
   void loadStaticInstrument();
