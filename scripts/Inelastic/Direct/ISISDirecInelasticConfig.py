@@ -261,7 +261,7 @@ class UserProperties(object):
             cycle = convert_cycle_int(cycle)
         if isinstance(cycle, str):
             if len(cycle) == 11:
-                cycle = cycle.upper();
+                cycle = cycle.upper()
             elif len(cycle) < 10:
                 cycle = cycle.replace('_', '')
                 try:
@@ -387,7 +387,7 @@ class MantidConfigDirectInelastic(object):
         # instrument and cycle number.
         # the common part of all strings, generated dynamically as function of input class parameters.
         self._dynamic_options_base = ['default.facility=ISIS']
-        # Path to python scripts, defined and used by mantid wrt to Mantid Root (this path may be version specific)
+        # Path to python scripts, defined and used by Mantid wrt to Mantid Root (this path may be version specific)
         self._python_mantid_path = ['scripts/Calibration/', 'scripts/Examples/', 'scripts/Interface/', 'scripts/Vates/']
         # Static paths to user scripts, defined wrt script repository root
         self._python_user_scripts = set(['direct_inelastic/ISIS/qtiGenie/'])
@@ -656,7 +656,7 @@ class MantidConfigDirectInelastic(object):
         # does not work if user is not defined
         if self._user is None:
             return None
-        # parse job description file, fail down on default behavior if
+        # parse job description file, fail down on default behaviour if
         # user files description is not there
         try:
             domObj = minidom.parse(job_description_file)
