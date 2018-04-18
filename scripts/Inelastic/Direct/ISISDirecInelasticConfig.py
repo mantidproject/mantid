@@ -82,7 +82,8 @@ class UserProperties(object):
         self._rb_exist[recent_date_id] = rb_exist
 
         # a data which define the cycle ID e.g 2014_3 or something
-        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]), str(cycle[9:10]))
+        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]), str(cycle[9:]))
+
         self._instrument[recent_date_id] = str(instrument).upper()
         self._rb_dirs[recent_date_id] = rb_folder_or_id
         if self._recent_dateID:
@@ -277,7 +278,9 @@ class UserProperties(object):
         if isinstance(cycle, int):
             cycle = convert_cycle_int(cycle)
         if isinstance(cycle, str):
-            if len(cycle) != 10:
+            if len(cycle) == 11:
+                cycle = cycle.upper();
+            elif len(cycle) < 10:
                 cycle = cycle.replace('_', '')
                 try:
                     cycle = int(cycle)
@@ -682,11 +685,13 @@ class MantidConfigDirectInelastic(object):
            (cycle ID)
            The agreement on the naming as currently in ISIS:
            e.g: /archive/NDXMERLIN/Instrument/data/cycle_08_1
+
+            Note: will fail if cycle numbers ever become a 2-digit numbers e.g. cycle_22_10
         """
         # cycle folder have short form without leading numbers
         cycle_fold_n = int(cycle_ID[0]) - 2000
         folder = os.path.join(self._root_data_folder, 'NDX' + instr.upper(),
-                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n, str(cycle_ID[1])))
+                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n, str(cycle_ID[1][0])))
         return folder
 
     def is_inelastic(self, instr_name):
