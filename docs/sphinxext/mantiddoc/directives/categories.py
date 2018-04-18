@@ -391,7 +391,10 @@ def create_category_pages(app):
             top_html_dir = posixpath.join(top_category.name.lower(), 'Algorithms')
             top_html_path_noext = posixpath.join(top_html_dir, 'Algorithms')
 
-        yield (top_html_path_noext, top_context, template)
+        if top_html_path_noext is None:
+            continue
+        else:
+            yield (top_html_path_noext, top_context, template)
 # enddef
 #-----------------------------------------------------------------------------------------------------------
 
