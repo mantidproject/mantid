@@ -146,15 +146,6 @@ replaceWorkspaces(const std::string &input,
   return newInput.str();
 }
 
-std::string replaceWorkspace(const std::string &input,
-                             const std::string &workspace) {
-  const auto suffices = getSuffices(input);
-  std::stringstream newInput;
-  for (auto i = 0u; i < suffices.size(); ++i)
-    newInput << workspace << suffices[i];
-  return newInput.str();
-}
-
 void renameWorkspace(IAlgorithm_sptr renamer, Workspace_sptr workspace,
                      const std::string &newName) {
   renamer->setProperty("InputWorkspace", workspace);
