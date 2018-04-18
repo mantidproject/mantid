@@ -8,4 +8,4 @@
 SCRIPTFILE=$(readlink -f "$0")
 INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
 
-$INSTALLDIR/mantidpython $INSTALLDIR/error_dialog_app.py $1
+$INSTALLDIR/python $INSTALLDIR/error_dialog_app.py --exitcode=$1
