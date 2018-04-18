@@ -38,34 +38,6 @@ public:
                       (size_t)(loadShape.getProperties().size()));
   }
 
-  void testConfidence() {
-    LoadSampleShape testLoadSampleShape;
-    testLoadSampleShape.initialize();
-    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
-    std::string path = testLoadSampleShape.getPropertyValue("Filename");
-    auto *descriptor = new Kernel::FileDescriptor(path);
-    TS_ASSERT_EQUALS(90, testLoadSampleShape.confidence(*descriptor));
-    delete descriptor;
-  }
-
-  void testExec_for_output_workspace_different_from_input_workspace() {
-    LoadSampleShape testLoadSampleShape;
-    testLoadSampleShape.initialize();
-    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadSampleShape, false);
-    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
-    TS_ASSERT(testLoadSampleShape.isExecuted());
-  }
-
-  void testExec_for_output_workspace_the_same_as_input_workspace() {
-    LoadSampleShape testLoadSampleShape;
-    testLoadSampleShape.initialize();
-    testLoadSampleShape.setPropertyValue("Filename", "cube.stl");
-    prepareWorkspaces(testLoadSampleShape, true);
-    TS_ASSERT_THROWS_NOTHING(testLoadSampleShape.execute());
-    TS_ASSERT(testLoadSampleShape.isExecuted());
-  }
-
   void test_output_workspace_has_MeshObject_when_different_from_input_workspace() {
     LoadSampleShape alg;
     loadMeshObject(alg, false, "cube.stl");
