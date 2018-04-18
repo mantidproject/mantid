@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
-import os
 import posixpath
 from six import iteritems, itervalues
 
@@ -21,6 +20,7 @@ CATEGORIES_DIR = "categories"
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
 INDEX_CATEGORIES = ["Algorithm Index", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
+
 
 class LinkItem(object):
     """
@@ -76,6 +76,7 @@ class LinkItem(object):
 
 # endclass
 
+
 class PageRef(LinkItem):
     """
     Store details of a single page reference
@@ -85,6 +86,7 @@ class PageRef(LinkItem):
         super(PageRef, self).__init__(name, location)
 
 #endclass
+
 
 class Category(LinkItem):
     """
@@ -301,6 +303,7 @@ def to_unix_style_path(path):
 
 #---------------------------------------------------------------------------------
 
+
 def html_collect_pages(app):
     """
     Callback for the 'html-collect-pages' Sphinx event. Adds category
@@ -318,6 +321,7 @@ def html_collect_pages(app):
     for name, context, template in create_category_pages(app):
         yield (name, context, template)
 # enddef
+
 
 def create_category_pages(app):
     """
@@ -354,7 +358,7 @@ def create_category_pages(app):
         #jinja appends .html to output name
         category_html_path_noext = posixpath.splitext(category.html_path)[0]
         yield (category_html_path_noext, context, template)
-      
+
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
@@ -376,7 +380,7 @@ def create_category_pages(app):
     for top_name, top_category in iteritems(categories):
         if "\\" not in top_name and top_category not in all_top_categories:
             all_top_categories.append(top_category)
-            
+
         template = CATEGORY_PAGE_TEMPLATE
         top_context["text_page"] = "algorithm_categories.html"
         top_context["subcategories"] = sorted(all_top_categories, key = lambda x: x.name)
@@ -397,6 +401,7 @@ def create_category_pages(app):
             yield (top_html_path_noext, top_context, template)
 # enddef
 #-----------------------------------------------------------------------------------------------------------
+
 
 def purge_categories(app, env, docname):
     """
@@ -423,6 +428,8 @@ def purge_categories(app, env, docname):
             pages.remove(deadref)
 
 #------------------------------------------------------------------------------
+
+
 def setup(app):
     # Add categories directive
     app.add_directive('categories', CategoriesDirective)
