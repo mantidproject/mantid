@@ -752,8 +752,7 @@ void FitPeaks::convertParametersNameToIndex() {
       // out-of-range index is thus set to this
       g_log.warning() << "Given peak parameter " << paramName
                       << " is not an allowed parameter of peak "
-                         "function "
-                      << m_peakFunction->name() << "\n";
+                         "function " << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
     }
   }
