@@ -7,7 +7,6 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Quat.h"
 
-
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
 namespace {
@@ -27,7 +26,6 @@ size_t roundToNearestPowerOfTwo(size_t val) {
     rounded *= 2;
   return rounded;
 }
-
 
 Corners findCorners(const Mantid::Geometry::ComponentInfo &compInfo,
                     size_t bankIndex) {

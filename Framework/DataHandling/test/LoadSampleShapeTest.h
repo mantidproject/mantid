@@ -35,7 +35,8 @@ public:
                       (size_t)(alg.getProperties().size()));
   }
 
-  void test_output_workspace_has_MeshObject_when_different_from_input_workspace() {
+  void
+  test_output_workspace_has_MeshObject_when_different_from_input_workspace() {
     LoadSampleShape alg;
     loadMeshObject(alg, false, "cube.stl");
   }
@@ -134,7 +135,6 @@ private:
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
     return mObj;
   }
-
 };
 
 class LoadSampleShapeTestPerformance : public CxxTest::TestSuite {
