@@ -47,9 +47,8 @@ createAxisFromRebinParams(const std::vector<double> &params,
       }();
   double xs;
   int ibound(2), istep(1), inew(1);
-  int ibounds = static_cast<int>(
-      fullParams
-          .size()); // highest index in params array containing a bin boundary
+  // highest index in params array containing a bin boundary
+  int ibounds = static_cast<int>(fullParams.size());
   int isteps = ibounds - 1; // highest index in params array containing a step
   xnew.clear();
 

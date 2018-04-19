@@ -169,7 +169,7 @@ SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
                    2. * incidentK * minK * std::cos(maxTheta));
   q[2] = std::sqrt(incidentKSq + maxKSq -
                    2. * incidentK * maxK * std::cos(minTheta));
-  q[4] = std::sqrt(incidentKSq + maxKSq -
+  q[3] = std::sqrt(incidentKSq + maxKSq -
                    2. * incidentK * maxK * std::cos(maxTheta));
   const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
   return std::make_pair(*minmaxQ.first, *minmaxQ.second);
