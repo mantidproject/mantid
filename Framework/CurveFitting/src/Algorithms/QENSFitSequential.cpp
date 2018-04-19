@@ -389,7 +389,7 @@ void QENSFitSequential::init() {
 
   declareProperty(
       make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and ExtractMembers is true members of any "
+      "If true and OutputCompositeMembers is true members of any "
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
@@ -605,7 +605,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
-  plotPeaks->setProperty("OutputCompositeMembers", extractMembers);
+  plotPeaks->setProperty("OutputCompositeMembers", true);
   plotPeaks->setProperty("ConvolveMembers", convolveMembers);
   plotPeaks->setProperty("MaxIterations", getPropertyValue("MaxIterations"));
   plotPeaks->setProperty("Minimizer", getPropertyValue("Minimizer"));

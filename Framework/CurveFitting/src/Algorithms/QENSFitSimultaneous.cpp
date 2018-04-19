@@ -153,6 +153,13 @@ void deleteTemporaries(IAlgorithm_sptr deleter, const std::string &base) {
   }
 }
 
+void renameWorkspace(IAlgorithm_sptr renamer, Workspace_sptr workspace,
+                     const std::string &newName) {
+  renamer->setProperty("InputWorkspace", workspace);
+  renamer->setProperty("OutputWorkspace", newName);
+  renamer->executeAsChildAlg();
+}
+
 template <typename F, typename Renamer>
 void renameWorkspacesWith(WorkspaceGroup_sptr groupWorkspace, F const &getName,
                           Renamer const &renamer) {
@@ -312,7 +319,7 @@ void QENSFitSimultaneous::initConcrete() {
       Direction::Input);
   declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
                       "ConvolveMembers", false),
-                  "If true and OutputCompositeMembers is true members of any "
+                  "If true members of any "
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
 
@@ -393,7 +400,7 @@ ITableWorkspace_sptr QENSFitSimultaneous::performFit(
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
   fit->setPropertyValue("CalcErrors", getPropertyValue("CalcErrors"));
-  fit->setProperty("OutputCompositeMembers", extractMembers);
+  fit->setProperty("OutputCompositeMembers", true);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
   fit->setProperty("Output", output);

@@ -11,8 +11,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
-#include "MantidCurveFitting/Algorithms/QENSFitSimultaneous.h"
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSimultaneous.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -102,8 +102,8 @@ std::vector<double> multiplyVectors(const std::vector<T, Ts...> &vec,
 
 template <typename T, typename... Ts>
 std::vector<T, Ts...> squareVector(const std::vector<T, Ts...> &vec) {
-  auto target = cloneVector(vec);
-  std::transform(target.begin(), target.end(), target.begin(),
+  auto target = std::vector<T, Ts...>();
+  std::transform(vec.begin(), vec.end(), std::back_inserter(target.begin()),
                  VectorHelper::Squares<T>());
   return target;
 }
@@ -170,7 +170,8 @@ template <> const std::string ConvolutionFit<QENSFitSequential>::name() const {
   return "ConvolutionFitSequential";
 }
 
-template <> const std::string ConvolutionFit<QENSFitSimultaneous>::name() const {
+template <>
+const std::string ConvolutionFit<QENSFitSimultaneous>::name() const {
   return "ConvolutionFitSimultaneous";
 }
 
@@ -193,7 +194,8 @@ const std::string ConvolutionFit<QENSFitSequential>::summary() const {
   return "Performs a sequential fit for a convolution workspace";
 }
 
-template <> const std::string ConvolutionFit<QENSFitSimultaneous>::summary() const {
+template <>
+const std::string ConvolutionFit<QENSFitSimultaneous>::summary() const {
   return "Performs a simultaneous fit across convolution workspaces";
 }
 
@@ -210,7 +212,8 @@ ConvolutionFit<QENSFitSequential>::seeAlso() const {
 }
 
 template <>
-const std::vector<std::string> ConvolutionFit<QENSFitSimultaneous>::seeAlso() const {
+const std::vector<std::string>
+ConvolutionFit<QENSFitSimultaneous>::seeAlso() const {
   return {"QENSSimultaneousFit"};
 }
 
@@ -256,7 +259,7 @@ template <typename Base>
 std::map<std::string, std::string>
 ConvolutionFit<Base>::getAdditionalLogStrings() const {
   IFunction_sptr function = getProperty("Function");
-  auto logs = QENSFitSequential::getAdditionalLogStrings();
+  auto logs = Base::getAdditionalLogStrings();
   logs["delta_function"] = m_deltaUsed ? "true" : "false";
   logs["background"] = extractBackgroundType(function);
   return logs;
@@ -265,7 +268,7 @@ ConvolutionFit<Base>::getAdditionalLogStrings() const {
 template <typename Base>
 std::map<std::string, std::string>
 ConvolutionFit<Base>::getAdditionalLogNumbers() const {
-  auto logs = QENSFitSequential::getAdditionalLogNumbers();
+  auto logs = Base::getAdditionalLogNumbers();
   logs["lorentzians"] = boost::lexical_cast<std::string>(m_lorentzianCount);
   return logs;
 }
