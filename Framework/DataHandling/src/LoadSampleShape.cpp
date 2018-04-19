@@ -187,9 +187,8 @@ void LoadSampleShape::exec() {
   boost::shared_ptr<MeshObject> shape = nullptr;
   try {
     shape = readSTLSolid(file, solidName);
-  } catch (std::exception &) {
-    throw Exception::FileError(
-        "Failed to recognize this file as a valid STL file: ", filename);
+  } catch (std::exception &e) {
+    throw Exception::FileError(e.what(), filename);
   }
 
   // Put shape into sample.

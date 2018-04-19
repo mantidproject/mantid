@@ -72,6 +72,26 @@ public:
     TS_ASSERT_DELTA(tube->volume(), 7068, 1);
   }
 
+  void test_fail_invalid_solid() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "invalid_solid.stl");
+  }
+
+  void test_fail_invalid_keyword() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "invalid_keyword.stl");
+  }
+
+  void test_fail_invalid_vertex() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "invalid_vertex.stl");
+  }
+
+  void test_fail_invalid_triangle() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "invalid_triangle.stl");
+  }
+
 private:
   // Create workspaces and add them to algorithm properties
   void prepareWorkspaces(LoadSampleShape &alg, bool outputWsSameAsInputWs) {
@@ -96,6 +116,14 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     return getMeshObject(alg);
+  }
+
+  void loadFailureTest(LoadSampleShape &alg, const std::string filename) {
+    alg.initialize();
+    alg.setPropertyValue("Filename", filename);
+    prepareWorkspaces(alg, true);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
   }
 
   const MeshObject *getMeshObject(LoadSampleShape &alg) {
