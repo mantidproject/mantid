@@ -587,7 +587,6 @@ void QENSFitSequential::renameWorkspaces(
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
-  bool extractMembers = getProperty("ExtractMembers");
   bool convolveMembers = getProperty("ConvolveMembers");
   bool passWsIndex = getProperty("PassWSIndexToFunction");
 
