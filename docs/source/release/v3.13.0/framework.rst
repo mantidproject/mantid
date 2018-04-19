@@ -32,6 +32,11 @@ Improved
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` joins Dx errors if present
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. Furthermore, Dx values will be considered if present. The documentation needed to be corrected.
 
+New
+###
+
+- Algorithm :ref:`FitPeaks <algm-FitPeaks>` is implemented as a generalized multiple-spectra multiple-peak fitting algorithm.
+
 Bug fixes
 #########
 
