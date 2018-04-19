@@ -4,12 +4,12 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
-// Two small routines used by all SofQW algorithms intended to provide united
+// Routines used by all SofQW algorithms intended to provide united
 // user interface to all SofQ algorihtms.
 namespace Mantid {
 namespace Algorithms {
 
-struct SofQCommon {
+struct DLLExport SofQCommon {
 
   /// E Mode
   int m_emode;
@@ -26,6 +26,12 @@ struct SofQCommon {
 
   /// Get the efixed value for the given detector
   double getEFixed(const Geometry::IDetector &det) const;
+
+  /// Get global minimum and maximum X from given ws.
+  std::pair<double, double> eBinHints(const API::MatrixWorkspace &ws) const;
+  /// Estimate minimum and maximum momentum transfer.
+  std::pair<double, double> qBinHints(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
+
 };
 }
 }
