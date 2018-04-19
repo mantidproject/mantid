@@ -85,7 +85,8 @@ private:
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", 0);
-    alg.setProperty("SpecMax", inputWorkspace->getNumberHistograms());
+    alg.setProperty(
+        "SpecMax", static_cast<int>(inputWorkspace->getNumberHistograms() - 1));
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
