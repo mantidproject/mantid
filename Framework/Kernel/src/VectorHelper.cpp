@@ -25,28 +25,31 @@ namespace VectorHelper {
  *  @param[in] xMaxHint x_2 if params contains only delta_1.
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
-                                        std::vector<double> &xnew,
-                                        const bool resize_xnew,
-                                        const bool full_bins_only,
-                                        const double xMinHint,
-                                        const double xMaxHint) {
+int DLLExport
+createAxisFromRebinParams(const std::vector<double> &params,
+                          std::vector<double> &xnew, const bool resize_xnew,
+                          const bool full_bins_only, const double xMinHint,
+                          const double xMaxHint) {
   std::vector<double> tmp;
-  const std::vector<double> &fullParams = [&params, &tmp, xMinHint, xMaxHint]() {
-    if (params.size() == 1) {
-      if (std::isnan(xMinHint) || std::isnan(xMaxHint)) {
-        throw std::runtime_error("createAxisFromRebinParams: xMinHint and xMaxHint must be supplied if params contains only the bin width.");
-      }
-      tmp.resize(3);
-      tmp = {xMinHint, params.front(), xMaxHint};
-      return tmp;
-    }
-    return params;
-  }();
+  const std::vector<double> &fullParams =
+      [&params, &tmp, xMinHint, xMaxHint]() {
+        if (params.size() == 1) {
+          if (std::isnan(xMinHint) || std::isnan(xMaxHint)) {
+            throw std::runtime_error("createAxisFromRebinParams: xMinHint and "
+                                     "xMaxHint must be supplied if params "
+                                     "contains only the bin width.");
+          }
+          tmp.resize(3);
+          tmp = {xMinHint, params.front(), xMaxHint};
+          return tmp;
+        }
+        return params;
+      }();
   double xs;
   int ibound(2), istep(1), inew(1);
   int ibounds = static_cast<int>(
-      fullParams.size()); // highest index in params array containing a bin boundary
+      fullParams
+          .size()); // highest index in params array containing a bin boundary
   int isteps = ibounds - 1; // highest index in params array containing a step
   xnew.clear();
 

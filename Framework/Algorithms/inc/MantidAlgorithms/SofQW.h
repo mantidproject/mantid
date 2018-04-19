@@ -65,12 +65,10 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
-  static API::MatrixWorkspace_sptr
-  setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace,
-                       const std::vector<double> &qbinParams,
-                       std::vector<double> &qAxis,
-                       const std::vector<double> &ebinParams,
-                       const SofQCommon &emodeProperties);
+  static API::MatrixWorkspace_sptr setUpOutputWorkspace(
+      const API::MatrixWorkspace_const_sptr &inputWorkspace,
+      const std::vector<double> &qbinParams, std::vector<double> &qAxis,
+      const std::vector<double> &ebinParams, const SofQCommon &emodeProperties);
   /// Create the input properties on the given algorithm object
   static void createCommonInputProperties(API::Algorithm &alg);
 

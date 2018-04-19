@@ -99,14 +99,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
     const std::vector<double> eBinParams{-0.5, 0.1, -0.1, 0.2, 0.4};
-    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2, -0.1, 0.1, 0.3, 0.4};
+    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2,
+                                                -0.1, 0.1,  0.3,  0.4};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EAxisBinning", eBinParams))
     const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+                                                1.2, 1.4, 1.6, 1.8, 2.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outWS =
+        alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -146,11 +149,13 @@ public:
     expectedEBinEdges.emplace_back(lastEdge);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EAxisBinning", eBinParams))
     const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+                                                1.2, 1.4, 1.6, 1.8, 2.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outWS =
+        alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -182,7 +187,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outWS =
+        alg.getProperty("OutputWorkspace");
     const auto axis = outWS->getAxis(1);
     // Test only the Q bin width, not the actual edges.
     for (size_t i = 0; i < axis->length() - 1; ++i) {

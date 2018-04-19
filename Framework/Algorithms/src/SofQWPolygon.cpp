@@ -42,9 +42,9 @@ void SofQWPolygon::exec() {
 
   m_EmodeProperties.initCachedValues(*inputWS, this);
 
-  MatrixWorkspace_sptr outputWS =
-      SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout,
-                                  getProperty("EAxisBinning"), m_EmodeProperties);
+  MatrixWorkspace_sptr outputWS = SofQW::setUpOutputWorkspace(
+      inputWS, getProperty("QAxisBinning"), m_Qout, getProperty("EAxisBinning"),
+      m_EmodeProperties);
   setProperty("OutputWorkspace", outputWS);
   const size_t nenergyBins = inputWS->blocksize();
 

@@ -65,16 +65,15 @@ void SofQWCentre::exec() {
   const int emode = m_EmodeProperties.m_emode;
 
   std::vector<double> verticalAxis;
-  MatrixWorkspace_sptr outputWorkspace =
-      SofQW::setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"),
-                                  verticalAxis, getProperty("EAxisBinning"), m_EmodeProperties);
+  MatrixWorkspace_sptr outputWorkspace = SofQW::setUpOutputWorkspace(
+      inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
+      getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWorkspace);
   const auto &xAxis = outputWorkspace->binEdges(0).rawData();
 
   // Holds the spectrum-detector mapping
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
-
 
   const auto &detectorInfo = inputWorkspace->detectorInfo();
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();

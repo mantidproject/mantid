@@ -91,7 +91,8 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
  * @param ws a workspace
  * @return a pair containing the global minimum and maximum X
  */
-std::pair<double, double> SofQCommon::eBinHints(const API::MatrixWorkspace &ws) const {
+std::pair<double, double>
+SofQCommon::eBinHints(const API::MatrixWorkspace &ws) const {
   auto min = std::numeric_limits<double>::max();
   auto max = std::numeric_limits<double>::lowest();
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
@@ -113,7 +114,9 @@ std::pair<double, double> SofQCommon::eBinHints(const API::MatrixWorkspace &ws) 
  * @param maxE maximum energy transfer in ws
  * @return a pair containing global minimun and maximum Q
  */
-std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws, const double minE, const double maxE) const {
+std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws,
+                                                const double minE,
+                                                const double maxE) const {
   if (m_emode == 1) {
     return qBinHintsDirect(ws, minE, maxE);
   }
@@ -128,7 +131,9 @@ std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws, 
  * @param maxE maximum energy transfer in ws
  * @return a pair containing global minimun and maximum Q
  */
-std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const {
+std::pair<double, double>
+SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
+                            const double maxE) const {
   using namespace Mantid::PhysicalConstants;
   auto minTheta = std::numeric_limits<double>::max();
   auto maxTheta = std::numeric_limits<double>::lowest();
@@ -146,7 +151,8 @@ std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace
     }
   }
   if (minTheta == std::numeric_limits<double>::max()) {
-    throw std::runtime_error("Could not determine Q binning: workspace does not contain usable spectra.");
+    throw std::runtime_error("Could not determine Q binning: workspace does "
+                             "not contain usable spectra.");
   }
   const auto incidentKSq = m_efixed / E_mev_toNeutronWavenumberSq;
   const auto incidentK = std::sqrt(incidentKSq);
@@ -157,10 +163,14 @@ std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace
   const auto maxKSq = maxEnergy / E_mev_toNeutronWavenumberSq;
   const auto maxK = std::sqrt(maxKSq);
   std::array<double, 4> q;
-  q[0] = std::sqrt(incidentKSq + minKSq - 2. * incidentK * minK * std::cos(minTheta));
-  q[1] = std::sqrt(incidentKSq + minKSq - 2. * incidentK * minK * std::cos(maxTheta));
-  q[2] = std::sqrt(incidentKSq + maxKSq - 2. * incidentK * maxK * std::cos(minTheta));
-  q[4] = std::sqrt(incidentKSq + maxKSq - 2. * incidentK * maxK * std::cos(maxTheta));
+  q[0] = std::sqrt(incidentKSq + minKSq -
+                   2. * incidentK * minK * std::cos(minTheta));
+  q[1] = std::sqrt(incidentKSq + minKSq -
+                   2. * incidentK * minK * std::cos(maxTheta));
+  q[2] = std::sqrt(incidentKSq + maxKSq -
+                   2. * incidentK * maxK * std::cos(minTheta));
+  q[4] = std::sqrt(incidentKSq + maxKSq -
+                   2. * incidentK * maxK * std::cos(maxTheta));
   const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
   return std::make_pair(*minmaxQ.first, *minmaxQ.second);
 }
@@ -175,7 +185,9 @@ std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace
  * @param maxE maximum energy transfer in ws
  * @return a pair containing global minimun and maximum Q
  */
-std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const {
+std::pair<double, double>
+SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
+                              const double maxE) const {
   using namespace Mantid::PhysicalConstants;
   auto minQSq = std::numeric_limits<double>::max();
   auto maxQSq = std::numeric_limits<double>::lowest();
@@ -205,10 +217,10 @@ std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspa
     }
   }
   if (minQSq == std::numeric_limits<double>::max()) {
-    throw std::runtime_error("Could not determine Q binning: workspace does not contain usable spectra.");
+    throw std::runtime_error("Could not determine Q binning: workspace does "
+                             "not contain usable spectra.");
   }
   return std::make_pair(std::sqrt(minQSq), std::sqrt(maxQSq));
 }
-
 }
 }

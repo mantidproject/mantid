@@ -17,7 +17,6 @@ using namespace Mantid::API;
 
 class SofQWTest : public CxxTest::TestSuite {
 public:
-
   static Mantid::API::MatrixWorkspace_sptr loadTestFile() {
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
@@ -45,8 +44,7 @@ public:
     // Cannot be marked as child or history is not recorded
     TS_ASSERT_THROWS_NOTHING(sqw.setProperty("InputWorkspace", inWS));
     const std::string wsname{"_tmp_"};
-    TS_ASSERT_THROWS_NOTHING(
-        sqw.setPropertyValue("OutputWorkspace", wsname));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("OutputWorkspace", wsname));
     TS_ASSERT_THROWS_NOTHING(
         sqw.setPropertyValue("QAxisBinning", "0.5,0.25,2"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Indirect"));
@@ -58,8 +56,7 @@ public:
     TS_ASSERT(sqw.isExecuted());
 
     auto &dataStore = Mantid::API::AnalysisDataService::Instance();
-    auto result =
-        dataStore.retrieveWS<Mantid::API::MatrixWorkspace>(wsname);
+    auto result = dataStore.retrieveWS<Mantid::API::MatrixWorkspace>(wsname);
     dataStore.remove(wsname);
 
     return result;
@@ -146,11 +143,14 @@ public:
     Mantid::Algorithms::SofQCommon emodeProperties;
     emodeProperties.initCachedValues(*inWS, &alg);
     const std::vector<double> eBinParams{-0.5, 0.1, -0.1, 0.2, 0.4};
-    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2, -0.1, 0.1, 0.3, 0.4};
+    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2,
+                                                -0.1, 0.1,  0.3,  0.4};
     const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+                                                1.2, 1.4, 1.6, 1.8, 2.};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace(inWS, qBinParams, qAxis, eBinParams, emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace(
+        inWS, qBinParams, qAxis, eBinParams, emodeProperties);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -188,9 +188,11 @@ public:
     }
     expectedEBinEdges.emplace_back(lastEdge);
     const std::vector<double> qBinParams{0.5, 0.25, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.75, 1., 1.25, 1.5, 1.75, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.75, 1., 1.25,
+                                                1.5, 1.75, 2.};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace(inWS, qBinParams, qAxis, eBinParams, emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace(
+        inWS, qBinParams, qAxis, eBinParams, emodeProperties);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -221,7 +223,8 @@ public:
     const double dQ{0.023};
     const std::vector<double> qBinParams{dQ};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace(inWS, qBinParams, qAxis, eBinParams, emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace(
+        inWS, qBinParams, qAxis, eBinParams, emodeProperties);
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
       for (size_t j = 0; j < x.size(); ++j) {
@@ -242,7 +245,7 @@ public:
 
 private:
   static bool isAlgorithmInHistory(const Mantid::API::MatrixWorkspace &result,
-                            const std::string &name) {
+                                   const std::string &name) {
     // Loaded nexus file has 13 other entries
     const auto &wsHistory = result.getHistory();
     const auto &lastAlg = wsHistory.getAlgorithmHistory(wsHistory.size() - 1);

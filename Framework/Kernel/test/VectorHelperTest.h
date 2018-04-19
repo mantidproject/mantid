@@ -170,7 +170,8 @@ public:
   void test_CreateAxisFromRebinParams_xMinXMaxHints() {
     const std::vector<double> rbParams = {1.0};
     std::vector<double> axis;
-    TS_ASSERT_THROWS_NOTHING(VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true, -5., 3.))
+    TS_ASSERT_THROWS_NOTHING(VectorHelper::createAxisFromRebinParams(
+        rbParams, axis, true, true, -5., 3.))
     const std::vector<double> expectedAxis = {-5, -4, -3, -2, -1, 0, 1, 2, 3};
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }

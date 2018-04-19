@@ -419,7 +419,8 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     xAxis = inputWorkspace.binEdges(0);
   } else if (ebinParams.size() == 1) {
     eHints = m_EmodeProperties.eBinHints(inputWorkspace);
-    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true, eHints.first, eHints.second);
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true,
+                              eHints.first, eHints.second);
   } else {
     createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
   }
@@ -431,8 +432,10 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     if (std::isnan(eHints.first)) {
       eHints = m_EmodeProperties.eBinHints(inputWorkspace);
     }
-    const auto qHints = m_EmodeProperties.qBinHints(inputWorkspace, eHints.first, eHints.second);
-    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true, qHints.first, qHints.second);
+    const auto qHints = m_EmodeProperties.qBinHints(
+        inputWorkspace, eHints.first, eHints.second);
+    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true,
+                                        qHints.first, qHints.second);
   } else {
     yLength = createAxisFromRebinParams(qbinParams, qAxis);
   }

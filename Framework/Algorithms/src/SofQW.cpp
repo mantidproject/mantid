@@ -142,8 +142,7 @@ void SofQW::exec() {
 API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(
     const API::MatrixWorkspace_const_sptr &inputWorkspace,
     const std::vector<double> &qbinParams, std::vector<double> &qAxis,
-    const std::vector<double> &ebinParams,
-    const SofQCommon &emodeProperties) {
+    const std::vector<double> &ebinParams, const SofQCommon &emodeProperties) {
   using Kernel::VectorHelper::createAxisFromRebinParams;
   // Create vector to hold the new X axis values
   HistogramData::BinEdges xAxis(0);
@@ -154,10 +153,11 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(
     xLength = static_cast<int>(xAxis.size());
   } else if (ebinParams.size() == 1) {
     eHints = emodeProperties.eBinHints(*inputWorkspace);
-    xLength = createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true, eHints.first, eHints.second);
+    xLength =
+        createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true,
+                                  true, eHints.first, eHints.second);
   } else {
-    xLength = createAxisFromRebinParams(
-        ebinParams, xAxis.mutableRawData());
+    xLength = createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
   }
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
@@ -166,8 +166,10 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(
     if (std::isnan(eHints.first)) {
       eHints = emodeProperties.eBinHints(*inputWorkspace);
     }
-    const auto qHints = emodeProperties.qBinHints(*inputWorkspace, eHints.first, eHints.second);
-    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true, qHints.first, qHints.second);
+    const auto qHints =
+        emodeProperties.qBinHints(*inputWorkspace, eHints.first, eHints.second);
+    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true,
+                                        qHints.first, qHints.second);
   } else {
     yLength = createAxisFromRebinParams(qbinParams, qAxis);
   }
@@ -196,7 +198,6 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(
 
   return outputWorkspace;
 }
-
 
 } // namespace Algorithms
 } // namespace Mantid

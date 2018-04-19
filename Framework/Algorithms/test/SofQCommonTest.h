@@ -86,8 +86,8 @@ public:
     Algorithms::SofQW alg;
     alg.initialize();
     alg.setProperty("EMode", "Indirect");
-    //const double Ei{2.3};
-    //alg.setProperty("EFixed", Ei);
+    // const double Ei{2.3};
+    // alg.setProperty("EFixed", Ei);
     Algorithms::SofQCommon s;
     const size_t nHist{13};
     auto ws = create2DWorkspaceWithFullInstrument(nHist, 1);
@@ -185,8 +185,10 @@ public:
     setEFixed(ws, "pixel-1)", eFixed1);
     const auto minDeltaE = ws->x(0).front();
     const auto maxDeltaE = ws->x(0).back();
-    const auto minQ = std::min(indirectQ(eFixed0, minDeltaE, twoTheta0), indirectQ(eFixed1, minDeltaE, twoTheta1));
-    const auto maxQ = std::max(indirectQ(eFixed0, maxDeltaE, twoTheta1), indirectQ(eFixed1, maxDeltaE, twoTheta1));
+    const auto minQ = std::min(indirectQ(eFixed0, minDeltaE, twoTheta0),
+                               indirectQ(eFixed1, minDeltaE, twoTheta1));
+    const auto maxQ = std::max(indirectQ(eFixed0, maxDeltaE, twoTheta1),
+                               indirectQ(eFixed1, maxDeltaE, twoTheta1));
     s.initCachedValues(*ws, &alg);
     const auto minmaxE = s.eBinHints(*ws);
     const auto minmaxQ = s.qBinHints(*ws, minmaxE.first, minmaxE.second);
@@ -195,7 +197,6 @@ public:
   }
 
 private:
-
   static double k(const double E) {
     using namespace Mantid;
     using PhysicalConstants::h_bar;
@@ -204,23 +205,27 @@ private:
     return std::sqrt(2 * NeutronMass * E * meV) / h_bar * 1e-10;
   }
 
-  static double indirectQ(const double Ef, const double DeltaE, const double twoTheta = 0.) {
+  static double indirectQ(const double Ef, const double DeltaE,
+                          const double twoTheta = 0.) {
     const auto kf = k(Ef);
     const auto Ei = Ef + DeltaE;
     const auto ki = k(Ei);
     return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
   }
 
-  static double directQ(const double Ei, const double DeltaE, const double twoTheta = 0.) {
+  static double directQ(const double Ei, const double DeltaE,
+                        const double twoTheta = 0.) {
     const auto ki = k(Ei);
     const auto Ef = Ei - DeltaE;
     const auto kf = k(Ef);
     return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
   }
 
-  static void setEFixed(Mantid::API::MatrixWorkspace_sptr ws, const std::string &component, const double eFixed) {
+  static void setEFixed(Mantid::API::MatrixWorkspace_sptr ws,
+                        const std::string &component, const double eFixed) {
     using namespace Mantid;
-    auto alg = API::AlgorithmManager::Instance().createUnmanaged("SetInstrumentParameter");
+    auto alg = API::AlgorithmManager::Instance().createUnmanaged(
+        "SetInstrumentParameter");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
