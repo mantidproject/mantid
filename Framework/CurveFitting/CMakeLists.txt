@@ -330,6 +330,7 @@ set ( TEST_FILES
 	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
+        Algorithms/ConvolutionFitSequentialTest.h
 	Algorithms/EstimateFitParametersTest.h
 	Algorithms/EstimatePeakErrorsTest.h
 	Algorithms/EvaluateFunctionTest.h
@@ -340,6 +341,7 @@ set ( TEST_FILES
 	Algorithms/NormaliseByPeakAreaTest.h
 	Algorithms/PawleyFitTest.h
 	Algorithms/PlotPeakByLogValueTest.h
+        Algorithms/QENSFitSequentialTest.h
 	Algorithms/RefinePowderInstrumentParameters3Test.h
 	Algorithms/RefinePowderInstrumentParametersTest.h
 	Algorithms/SeqDomainSpectrumCreatorTest.h
