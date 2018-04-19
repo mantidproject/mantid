@@ -1135,44 +1135,31 @@ ParameterMap::create(const std::string &className,
   return ParameterFactory::create(className, name);
 }
 
-/** Only for use by ExperimentInfo. Returns returns true if this instrument
- contains a DetectorInfo.
-
- The `instrument` argument is needed for the special case of having a neutronic
- *and* a physical instrument. `Instrument` uses the same parameter map for both,
- but the DetectorInfo is only for the neutronic instrument. */
-bool ParameterMap::hasDetectorInfo(const Instrument *instrument) const {
-  if (instrument != m_instrument)
-    return false;
+bool ParameterMap::hasDetectorInfo() const {
   return static_cast<bool>(m_detectorInfo);
 }
 
-/** Only for use by ExperimentInfo. Returns returns true if this instrument
- contains a ComponentInfo.
-*/
-bool ParameterMap::hasComponentInfo(const Instrument *instrument) const {
-  if (instrument != m_instrument)
-    return false;
+bool ParameterMap::hasComponentInfo() const {
   return static_cast<bool>(m_componentInfo);
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 const Geometry::DetectorInfo &ParameterMap::detectorInfo() const {
-  if (!hasDetectorInfo(m_instrument))
+  if (!hasDetectorInfo())
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 Geometry::DetectorInfo &ParameterMap::mutableDetectorInfo() {
-  if (!hasDetectorInfo(m_instrument))
+  if (!hasDetectorInfo())
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
 const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
-  if (!hasComponentInfo(m_instrument)) {
+  if (!hasComponentInfo()) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
   return *m_componentInfo;
@@ -1180,7 +1167,7 @@ const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
 Geometry::ComponentInfo &ParameterMap::mutableComponentInfo() {
-  if (!hasComponentInfo(m_instrument)) {
+  if (!hasComponentInfo()) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
   return *m_componentInfo;
@@ -1197,6 +1184,11 @@ size_t ParameterMap::componentIndex(const ComponentID componentId) const {
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.
 void ParameterMap::setInstrument(const Instrument *instrument) {
+  if (instrument != nullptr && instrument->isPhysicalInstrument()) {
+    throw std::runtime_error("A ParameterMap cannot be associated with a "
+                             "Physical Instrument, only a neturonic one");
+  }
+
   if (instrument == m_instrument)
     return;
   if (!instrument) {

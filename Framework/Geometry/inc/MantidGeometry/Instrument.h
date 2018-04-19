@@ -213,6 +213,7 @@ public:
   // where the physical instrument differs from the 'neutronic' one
   boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
   void setPhysicalInstrument(std::unique_ptr<Instrument>);
+  bool isPhysicalInstrument() const;
 
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                double &beamline_norm,

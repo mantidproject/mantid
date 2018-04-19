@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(ws.getInstrument()->type(), "Instrument");
 
     // Should be set even though we have just an empty instrument.
-    TS_ASSERT(i->getParameterMap()->hasDetectorInfo(i->baseInstrument().get()));
+    TS_ASSERT(i->getParameterMap()->hasDetectorInfo());
   }
 
   void test_GetSetInstrument_default() {

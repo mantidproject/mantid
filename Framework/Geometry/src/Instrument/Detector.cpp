@@ -138,13 +138,7 @@ size_t Detector::registerContents(ComponentVisitor &componentVisitor) const {
   return componentVisitor.registerDetector(*this);
 }
 
-bool Detector::hasDetectorInfo() const {
-  const IComponent *root = m_base;
-  while (auto parent = root->getBareParent())
-    root = parent;
-  auto instrument = dynamic_cast<const Instrument *>(root);
-  return m_map->hasDetectorInfo(instrument);
-}
+bool Detector::hasDetectorInfo() const { return m_map->hasDetectorInfo(); }
 
 } // Namespace Geometry
 } // Namespace Mantid

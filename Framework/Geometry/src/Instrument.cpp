@@ -202,6 +202,10 @@ void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
                              "parametrized instrument.");
 }
 
+bool Instrument::isPhysicalInstrument() const {
+  return this->m_isPhysicalInstrument;
+}
+
 //------------------------------------------------------------------------------------------
 /**	Fills a copy of the detector cache
 * @returns a map of the detectors hold by the instrument
@@ -517,6 +521,8 @@ auto find(T &map, const detid_t key) -> decltype(map.begin()) {
 *  @throw   NotFoundError If no detector is found for the detector ID given
 */
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
+  if (m_isPhysicalInstrument)
+    throw std::runtime_error("Cannot fetch detector from physical instrument");
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detector_id);
   if (it == baseInstr.m_detectorCache.end()) {
@@ -825,7 +831,7 @@ std::vector<detid_t> Instrument::getMonitors() const {
 void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
 
-    if (m_map->hasComponentInfo(this->baseInstrument().get())) {
+    if (m_map->hasComponentInfo()) {
       assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }
@@ -1266,7 +1272,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
   const auto &baseInstr = m_map ? *m_instr : *this;
 
-  if (!getParameterMap()->hasComponentInfo(&baseInstr))
+  if (!getParameterMap()->hasComponentInfo())
     return pmap;
 
   // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
@@ -1384,7 +1390,7 @@ void Instrument::parseTreeAndCacheBeamline() {
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
   // If we have source and it has Beamline objects just copy them
-  if (source && source->hasComponentInfo(this))
+  if (source && source->hasComponentInfo())
     return makeWrappers(pmap, source->componentInfo(), source->detectorInfo());
   // If pmap is empty and base instrument has Beamline objects just copy them
   if (pmap.empty() && m_componentInfo)

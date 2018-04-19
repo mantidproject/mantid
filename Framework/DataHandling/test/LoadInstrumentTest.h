@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -11,7 +10,10 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
@@ -379,19 +381,36 @@ public:
     // paramaterized instrument
     TS_ASSERT(!physicalInst->isParametrized());
 
-    // Check the positions of the 6 detectors in the physical instrument
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->getPos(), V3D(0, 0, 0));
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1001)->getPos(), V3D(0, 1, 0));
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1002)->getPos(), V3D(1, 0, 0));
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1003)->getPos(), V3D(1, 1, 0));
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1004)->getPos(), V3D(2, 0, 0));
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1005)->getPos(), V3D(2, 1, 0));
+    auto infos = InstrumentVisitor::makeWrappers(*physicalInst);
+    auto physicalDetectorInfo = std::move(infos.second);
+    auto physicalComponentInfo = std::move(infos.first);
 
-    // Check the right instrument ended up on the workspace
+    // Check the positions of the 6 detectors in the physical instrument
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1000))),
+        V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1001))),
+        V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1002))),
+        V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1003))),
+        V3D(1, 1, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1004))),
+        V3D(2, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1005))),
+        V3D(2, 1, 0));
+
+    // Check the right instruments ended up on the workspace
     TS_ASSERT_EQUALS(neutronicInst.get(),
                      ws->getInstrument()->baseInstrument().get());
     // Check the neutronic positions
     const auto &detectorInfo = ws->detectorInfo();
+    const auto &componentInfo = ws->componentInfo();
     TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1000)),
                      V3D(2, 2, 0));
     TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1001)),
@@ -408,35 +427,54 @@ public:
 
     // Check that the first 2 detectors share the same shape in the physical
     // instrument...
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     physicalInst->getDetector(1001)->shape())
+    TS_ASSERT_EQUALS(
+        &physicalComponentInfo->shape(physicalDetectorInfo->indexOf(1000)),
+        &physicalComponentInfo->shape(physicalDetectorInfo->indexOf(1001)));
     // ...but not in the neutronic instrument
-    TS_ASSERT_DIFFERS(detectorInfo.detector(detectorInfo.indexOf(1000)).shape(),
-                      neutronicInst->getDetector(1001)->shape())
+    TS_ASSERT_DIFFERS(&componentInfo.shape(detectorInfo.indexOf(1000)),
+                      &componentInfo.shape(detectorInfo.indexOf(1001)));
     // Also, the same shape is shared between the corresponding '1000'
     // detectors
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     detectorInfo.detector(detectorInfo.indexOf(1000)).shape())
+    TS_ASSERT_EQUALS(
+        &physicalComponentInfo->shape(physicalDetectorInfo->indexOf(1000)),
+        &componentInfo.shape(detectorInfo.indexOf(1000)))
 
     // Check the monitor is in the same place in each instrument
-    TS_ASSERT_EQUALS(physicalInst->getDetector(1)->getPos(),
-                     detectorInfo.position(detectorInfo.indexOf(1)));
-    // ...but is not the same object
-    TS_ASSERT_DIFFERS(physicalInst->getDetector(1).get(),
-                      neutronicInst->getDetector(1).get());
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf(1)),
+        detectorInfo.position(detectorInfo.indexOf(1)));
 
     // Physical instrument obtained via workspace: Make sure we do *not* get
     // positions from DetectorInfo.
     auto physInstFromWS = ws->getInstrument()->getPhysicalInstrument();
+
+    infos = InstrumentVisitor::makeWrappers(*physInstFromWS);
+    physicalComponentInfo = std::move(infos.first);
+    physicalDetectorInfo = std::move(infos.second);
+
     TS_ASSERT(physInstFromWS->isParametrized());
-    TS_ASSERT_DIFFERS(physInstFromWS->getDetector(1003)->getPos(),
-                      detectorInfo.position(detectorInfo.indexOf(1003)));
-    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1000)->getPos(), V3D(0, 0, 0));
-    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1001)->getPos(), V3D(0, 1, 0));
-    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1002)->getPos(), V3D(1, 0, 0));
-    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1003)->getPos(), V3D(1, 1, 0));
-    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1004)->getPos(), V3D(2, 0, 0));
-    TS_ASSERT_EQUALS(physInstFromWS->getDetector(1005)->getPos(), V3D(2, 1, 0));
+    TS_ASSERT_DIFFERS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf(1003)),
+        detectorInfo.position(detectorInfo.indexOf(1003)));
+
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1000))),
+        V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1001))),
+        V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1002))),
+        V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1003))),
+        V3D(1, 1, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1004))),
+        V3D(2, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo->position(physicalDetectorInfo->indexOf((1005))),
+        V3D(2, 1, 0));
 
     // Clean up
     IDS.clear();
