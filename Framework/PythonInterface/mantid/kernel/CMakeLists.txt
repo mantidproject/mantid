@@ -179,7 +179,7 @@ copy_files_to_dir ( ${MPISETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
                     PYTHON_INSTALL_FILES )
 
 # Package version
-if ( WIN32 OR APPLE )
+if ( WIN32 OR (APPLE AND ENABLE_MANTIDPLOT) )
   # NeXus library is in the same place relative to the Python library
   get_filename_component ( NEXUSLIB_FILE ${NEXUSLIB} NAME )
   set ( NEXUSLIB ../../${NEXUSLIB_FILE} )

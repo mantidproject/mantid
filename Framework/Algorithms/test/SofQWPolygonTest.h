@@ -59,7 +59,7 @@ public:
 
     // Spectra-detector mapping
     const size_t nspectra(6);
-    typedef std::set<int> IDSet;
+    using IDSet = std::set<int>;
     std::vector<IDSet> expectedIDs(nspectra);
     IDSet s1 = {3};
     expectedIDs[0] = s1;

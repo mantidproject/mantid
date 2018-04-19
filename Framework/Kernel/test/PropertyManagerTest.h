@@ -90,12 +90,12 @@ public:
     TS_ASSERT_EQUALS(manager.propertyCount(), 3);
 
     const std::vector<Property *> &props = manager.getProperties();
-    for (auto iter = props.begin(); iter != props.end(); ++iter) {
-      Property *prop = *iter;
+    for (auto iter : props) {
+      Property *prop = iter;
       std::string msg = "Property " + prop->name() +
                         " has not been changed to a FilteredTimeSeries";
       auto filteredProp =
-          dynamic_cast<FilteredTimeSeriesProperty<double> *>(*iter);
+          dynamic_cast<FilteredTimeSeriesProperty<double> *>(iter);
       TSM_ASSERT(msg, filteredProp);
     }
 
@@ -248,7 +248,7 @@ public:
     mgr.declareProperty(
         Mantid::Kernel::make_unique<ArrayProperty<double>>("ArrayProp"));
 
-    std::string jsonString = "{\"ArrayProp\":\"10,12,23\"}";
+    std::string jsonString = R"({"ArrayProp":"10,12,23"})";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("ArrayProp"), "10,12,23");
   }
@@ -581,13 +581,13 @@ public:
     TS_ASSERT_EQUALS(d, 23.4);
     TS_ASSERT_EQUALS(i, 22);
 
-    mgr.setPropertiesWithString("{\"double\": 14.0, \"int\":33}");
+    mgr.setPropertiesWithString(R"({"double": 14.0, "int":33})");
     d = mgr.getProperty("double");
     i = mgr.getProperty("int");
     TS_ASSERT_EQUALS(d, 14.0);
     TS_ASSERT_EQUALS(i, 33);
 
-    mgr.setPropertiesWithString("{\"double\": 12.3 ,\"int\":11}", {"int"});
+    mgr.setPropertiesWithString(R"({"double": 12.3 ,"int":11})", {"int"});
     d = mgr.getProperty("double");
     i = mgr.getProperty("int");
     TS_ASSERT_EQUALS(d, 12.3);

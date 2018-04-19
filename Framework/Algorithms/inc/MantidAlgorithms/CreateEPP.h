@@ -36,6 +36,9 @@ class MANTID_ALGORITHMS_DLL CreateEPP : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"FindEPP"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

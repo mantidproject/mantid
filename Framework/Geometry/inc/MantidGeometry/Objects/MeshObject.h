@@ -7,6 +7,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Material.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "BoundingBox.h"
 #include <map>
 #include <memory>
@@ -21,7 +22,6 @@ class V3D;
 }
 
 namespace Geometry {
-class CacheGeometryHandler;
 class CompGrp;
 class GeometryHandler;
 class Track;
@@ -139,14 +139,15 @@ public:
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
-  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const override;
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const override;
 
   /// Read access to mesh object for rendering
-  int numberOfVertices() const;
-  double *getVertices() const;
-  int numberOfTriangles() const;
-  int *getTriangles() const;
+  size_t numberOfVertices() const;
+  std::vector<double> getVertices() const;
+  size_t numberOfTriangles() const;
+  std::vector<uint32_t> getTriangles() const;
 
   void updateGeometryHandler();
 

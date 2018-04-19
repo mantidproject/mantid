@@ -5,15 +5,15 @@
 
 #include "MantidAlgorithms/SumOverlappingTubes.h"
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
@@ -98,14 +98,15 @@ public:
     return testWS;
   }
 
-  void verifySuccessCase(double expectedCounts = 2.0) {
+  void verifySuccessCase(double expectedCounts = 2.0,
+                         double expectedErrors = sqrt(2.0)) {
     MatrixWorkspace_sptr outWS =
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES);
     verifyHeightAxis(outWS);
-    verifySpectraHaveSameCounts(outWS, expectedCounts);
+    verifySpectraHaveSameCounts(outWS, expectedCounts, expectedErrors);
   }
 
   void verifyScatteringAngleAxis(const MatrixWorkspace_sptr &outWS,
@@ -127,13 +128,13 @@ public:
 
   void verifySpectraHaveSameCounts(MatrixWorkspace_sptr outWS,
                                    double expectedCounts = 2.0,
+                                   double expectedErrors = sqrt(2.0),
                                    bool checkErrors = true) {
     for (size_t i = 0; i < N_TUBES; ++i)
       for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
         TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], expectedCounts, 1e-6)
         if (checkErrors)
-          TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(expectedCounts),
-                          1e-6)
+          TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], expectedErrors, 1e-6)
       }
   }
 
@@ -196,6 +197,7 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("MirrorScatteringAngles", true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -209,7 +211,7 @@ public:
       TS_ASSERT_DELTA(xAxis->getValue(i), 22.5 * double(i), 1e-6)
 
     verifyHeightAxis(outWS);
-    verifySpectraHaveSameCounts(outWS, 2.0);
+    verifySpectraHaveSameCounts(outWS, 2.0, sqrt(2.0));
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -318,7 +320,7 @@ public:
     alg.setProperty("ScatteringAngleBinning", "22.5");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    verifySuccessCase(6.0);
+    verifySuccessCase(2.0, sqrt(6) / 3.);
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -490,7 +492,7 @@ public:
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
     verifyHeightAxis(outWS);
 
-    verifySpectraHaveSameCounts(outWS, 6.0, false);
+    verifySpectraHaveSameCounts(outWS, 2.0, sqrt(2.0), false);
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -518,35 +520,33 @@ public:
 
     size_t bin = 0;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0) * 3.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0), 1e-6)
     }
 
     bin = 1;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0) * 3.0 / 2.0,
-                      1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0) / 2.0, 1e-6)
     }
 
     for (size_t i = 2; i < 5; ++i) {
       for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
-        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
-        TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(6.0), 1e-6)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 2.0, 1e-6)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(6.0) / 3., 1e-6)
       }
     }
 
     bin = 5;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0) * 3.0 / 2.0,
-                      1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0) / 2.0, 1e-6)
     }
 
     bin = 6;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0) * 3.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0), 1e-6)
     }
 
     AnalysisDataService::Instance().remove("testWS");
@@ -567,6 +567,7 @@ public:
     alg.setProperty("Normalise", false);
     if (oneDimensional)
       alg.setProperty("OutputType", "1D");
+    alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(

@@ -53,6 +53,9 @@ public:
   }
 
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"StatisticsOfPeaksWorkspace"};
+  }
 
   const std::string category() const override { return "Crystal\\Peaks"; };
 

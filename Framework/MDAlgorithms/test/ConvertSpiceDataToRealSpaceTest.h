@@ -143,7 +143,7 @@ public:
     size_t numevents = mdws->getNEvents();
     TS_ASSERT_EQUALS(numevents, 44 * 61);
 
-    IMDIterator *mditer = mdws->createIterator();
+    auto mditer = mdws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 44 * 61);
 
     double y0 = mditer->getInnerSignal(0);
@@ -333,7 +333,7 @@ public:
     size_t numevents = mdws->getNEvents();
     TS_ASSERT_EQUALS(numevents, 44 * 61);
 
-    IMDIterator *mditer = mdws->createIterator();
+    auto mditer = mdws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 44 * 61);
 
     double y0 = mditer->getInnerSignal(0);

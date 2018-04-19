@@ -6,23 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-#include <mutex>
-
-namespace Poco {
-namespace Net {
-class TCPServer;
-}
-}
-
 namespace Mantid {
 namespace LiveData {
 /**
     Simulates ISIS histogram DAE. It runs continuously until canceled and
-   listens to port 6789 for
-    ISIS DAE commands.
+    listens to port 6789 for ISIS DAE commands.
 
     Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,9 +35,6 @@ namespace LiveData {
 */
 class FakeISISEventDAE : public API::Algorithm {
 public:
-  FakeISISEventDAE();
-  ~FakeISISEventDAE() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FakeISISEventDAE"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -54,6 +42,9 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "DataHandling\\DataAcquisition";
+  }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FakeISISHistoDAE"};
   }
 
   /// Algorithm's summary
@@ -64,10 +55,6 @@ public:
 private:
   void init() override;
   void exec() override;
-  /// Poco TCP server
-  Poco::Net::TCPServer *m_server;
-  /// Mutex
-  std::mutex m_mutex;
 };
 
 } // namespace LiveData

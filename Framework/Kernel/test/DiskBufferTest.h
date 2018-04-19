@@ -115,9 +115,8 @@ public:
   }
 
   void tearDown() override {
-    for (size_t i = 0; i < data.size(); i++) {
-      delete data[i];
-      data[i] = NULL;
+    for (auto &i : data) {
+      delete i;
     }
   }
   void xest_nothing() {
@@ -171,8 +170,8 @@ public:
   ////--------------------------------------------------------------------------------
   ///** Sorts by file position when writing to a file */
   void test_writesOutInFileOrder() {
-    for (size_t i = 0; i < data.size(); i++) {
-      data[i]->setDataChanged();
+    for (auto &i : data) {
+      i->setDataChanged();
     }
     // Room for 2 objects of size 2 in the to-write cache
     DiskBuffer dbuf(2 * 2);
@@ -796,9 +795,9 @@ public:
   void test_withFakeSeeking_withWriteBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(10);
-    for (int i = 0; i < int(dataSeek.size()); i++) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
-      dataSeek[i]->load(dbuf);
+      i->load(dbuf);
     }
     std::cout << tim << " to load " << dataSeek.size()
               << " into MRU with fake seeking. \n";
@@ -809,9 +808,9 @@ public:
   void test_withFakeSeeking_noWriteBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (int i = 0; i < int(dataSeek.size()); i++) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
-      dataSeek[i]->load(dbuf);
+      i->load(dbuf);
     }
     std::cout << tim << " to load " << dataSeek.size()
               << " into MRU with fake seeking. \n";
@@ -823,10 +822,10 @@ public:
     CPUTimer tim;
     DiskBuffer dbuf(20);
     dbuf.setFileLength(dataSeek.size());
-    for (int i = 0; i < int(dataSeek.size()); i++) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
-      dataSeek[i]->grow(dbuf, true);
-      dbuf.toWrite(dataSeek[i]);
+      i->grow(dbuf, true);
+      dbuf.toWrite(i);
     }
     std::cout << "About to flush the cache to finish writes.\n";
     dbuf.flushCache();
@@ -840,10 +839,10 @@ public:
   void test_withFakeSeeking_growingData_savingWithoutUsingMRU() {
     CPUTimer tim;
     DiskBuffer dbuf(dataSeek.size());
-    for (int i = 0; i < int(dataSeek.size()); i++) {
+    for (auto &i : dataSeek) {
       // Pretend you just loaded the data
-      dataSeek[i]->grow(dbuf, false);
-      dataSeek[i]->save();
+      i->grow(dbuf, false);
+      i->save();
     }
     std::cout << tim << " to grow " << dataSeek.size()
               << " into MRU with fake seeking. \n";

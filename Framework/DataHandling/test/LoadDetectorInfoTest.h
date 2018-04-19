@@ -69,13 +69,14 @@ void writeSmallDatFile(const std::string &filename) {
           "    w_y         w_z         f_x         f_y         f_z         a_x "
           "        a_y         a_z        det_1       det_2       det_3       "
           "det4\n";
-  for (int i = 0; i < SmallTestDatFile::NDETECTS; ++i) {
-    file << i << "\t" << delta[i] << "\t" << det_l2[i] << "\t" << code[i]
-         << "\t" << det_theta[i] << "\t" << det_phi[i] << "\t" << NOTUSED
-         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
+  for (int detector = 0; detector < SmallTestDatFile::NDETECTS; ++detector) {
+    file << detector << "\t" << delta[detector] << "\t" << det_l2[detector]
+         << "\t" << code[detector] << "\t" << det_theta[detector] << "\t"
+         << det_phi[detector] << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
          << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
-         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[i] << "\t"
-         << wallThick[i] << "\t" << NOTUSED << '\n';
+         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
+         << NOTUSED << "\t" << pressure[detector] << "\t" << wallThick[detector]
+         << "\t" << NOTUSED << '\n';
   }
   file.close();
 }
@@ -301,8 +302,8 @@ public:
 
     // read the parameters from some random detectors, they're parameters are
     // all set to the same thing
-    for (int i = 0; i < NUMRANDOM; ++i) {
-      const size_t detIndex = detInfo.indexOf(DETECTS[i]);
+    for (int detector : DETECTS) {
+      const size_t detIndex = detInfo.indexOf(detector);
 
       const auto &det = detInfo.detector(detIndex);
       Parameter_sptr par = pmap.getRecursive(&det, "TubePressure");

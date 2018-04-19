@@ -219,7 +219,7 @@ ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
 }
 
 /// Typedef for the shared pointer
-typedef boost::shared_ptr<Parameter> Parameter_sptr;
+using Parameter_sptr = boost::shared_ptr<Parameter>;
 
 } // namespace Geometry
 } // namespace Mantid

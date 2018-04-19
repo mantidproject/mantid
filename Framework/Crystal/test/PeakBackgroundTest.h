@@ -48,10 +48,12 @@ public:
   MOCK_CONST_METHOD0(getNormalizedSignalWithMask, signal_t());
   MOCK_CONST_METHOD0(getSignal, signal_t());
   MOCK_CONST_METHOD0(getError, signal_t());
-  MOCK_CONST_METHOD1(getVertexesArray, coord_t *(size_t &numVertices));
+  MOCK_CONST_METHOD1(getVertexesArray,
+                     std::unique_ptr<coord_t[]>(size_t &numVertices));
   MOCK_CONST_METHOD3(getVertexesArray,
-                     coord_t *(size_t &numVertices, const size_t outDimensions,
-                               const bool *maskDim));
+                     std::unique_ptr<coord_t[]>(size_t &numVertices,
+                                                const size_t outDimensions,
+                                                const bool *maskDim));
   MOCK_CONST_METHOD0(getCenter, Mantid::Kernel::VMD());
   MOCK_CONST_METHOD0(getNumEvents, size_t());
   MOCK_CONST_METHOD1(getInnerRunIndex, uint16_t(size_t index));

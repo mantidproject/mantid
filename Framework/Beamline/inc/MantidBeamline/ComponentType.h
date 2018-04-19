@@ -6,6 +6,7 @@ namespace Mantid {
 namespace Beamline {
 enum class ComponentType {
   Generic,
+  Infinite,
   Rectangular,
   Structured,
   Unstructured,

@@ -34,13 +34,13 @@ namespace API {
 /// forward declare of Mantid::API::MatrixWorkspace
 class MatrixWorkspace;
 /// shared pointer to Mantid::API::MatrixWorkspace
-typedef boost::shared_ptr<MatrixWorkspace> MatrixWorkspace_sptr;
+using MatrixWorkspace_sptr = boost::shared_ptr<MatrixWorkspace>;
 /// shared pointer to Mantid::API::MatrixWorkspace (const version)
-typedef boost::shared_ptr<const MatrixWorkspace> MatrixWorkspace_const_sptr;
+using MatrixWorkspace_const_sptr = boost::shared_ptr<const MatrixWorkspace>;
 /// unique pointer to Mantid::API::MatrixWorkspace
-typedef std::unique_ptr<MatrixWorkspace> MatrixWorkspace_uptr;
+using MatrixWorkspace_uptr = std::unique_ptr<MatrixWorkspace>;
 /// unique pointer to Mantid::API::MatrixWorkspace (const version)
-typedef std::unique_ptr<const MatrixWorkspace> MatrixWorkspace_const_uptr;
+using MatrixWorkspace_const_uptr = std::unique_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid

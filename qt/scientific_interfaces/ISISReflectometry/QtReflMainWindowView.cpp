@@ -3,7 +3,10 @@
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
 #include "QtReflSettingsTabView.h"
+#include "ReflSaveTabPresenter.h"
 #include "ReflMainWindowPresenter.h"
+#include "ReflAsciiSaver.h"
+#include "MantidKernel/make_unique.h"
 
 #include <QMessageBox>
 
@@ -38,8 +41,9 @@ void QtReflMainWindowView::initLayout() {
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
 
   // Create the presenter
-  m_presenter.reset(new ReflMainWindowPresenter(
-      this, runsPresenter, eventPresenter, settingsPresenter, savePresenter));
+  m_presenter = Mantid::Kernel::make_unique<ReflMainWindowPresenter>(
+      this, runsPresenter, eventPresenter, settingsPresenter,
+      std::move(savePresenter));
 }
 
 void QtReflMainWindowView::helpPressed() {
@@ -84,12 +88,13 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 /** Creates the 'Save ASCII' tab and returns a pointer to its presenter
 * @return :: A pointer to the presenter managing the 'Save ASCII' tab
 */
-IReflSaveTabPresenter *QtReflMainWindowView::createSaveTab() {
+std::unique_ptr<IReflSaveTabPresenter> QtReflMainWindowView::createSaveTab() {
+  auto saveTabView = Mantid::Kernel::make_unique<QtReflSaveTabView>(this);
+  m_ui.mainTab->addTab(saveTabView.get(), QString("Save ASCII"));
 
-  QtReflSaveTabView *saveTab = new QtReflSaveTabView(this);
-  m_ui.mainTab->addTab(saveTab, QString("Save ASCII"));
-
-  return saveTab->getPresenter();
+  auto saver = Mantid::Kernel::make_unique<ReflAsciiSaver>();
+  return Mantid::Kernel::make_unique<ReflSaveTabPresenter>(
+      std::move(saver), std::move(saveTabView));
 }
 
 /**
