@@ -62,7 +62,7 @@ MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
 }
 
 struct ElasticQAppender {
-  ElasticQAppender(std::vector<MatrixWorkspace_sptr> &elasticInput)
+  explicit ElasticQAppender(std::vector<MatrixWorkspace_sptr> &elasticInput)
       : m_elasticInput(elasticInput), m_converted() {}
 
   void operator()(MatrixWorkspace_sptr workspace, const std::string &outputBase,
@@ -87,7 +87,6 @@ private:
 std::vector<MatrixWorkspace_sptr>
 convertToElasticQ(const std::vector<MatrixWorkspace_sptr> &workspaces,
                   const std::string &outputBaseName, bool doThrow) {
-  std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> converted;
   std::vector<MatrixWorkspace_sptr> elasticInput;
   auto appendElasticQWorkspace = ElasticQAppender(elasticInput);
   appendElasticQWorkspace(workspaces[0], outputBaseName, doThrow);
