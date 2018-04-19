@@ -304,7 +304,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
       instrument->getComponentByName("standard_pixel");
   Geometry::BoundingBox bb;
   pixel->getBoundingBox(bb);
-  const double pixelHeight = bb.yMax() - bb.yMin();
+  m_pixelHeight = bb.yMax() - bb.yMin();
 
   const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
   if (!tubeAnglesStr.empty()) {
@@ -321,7 +321,8 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
       V3D newPos;
       const double angle = std::stod(tubeAngles[i - 1]);
       const double finalAngle = fabs(ref - angle);
-      g_log.debug() << "Rotatint " << compName << "to " << finalAngle << "rad\n";
+      g_log.debug() << "Rotating " << compName << "to " << finalAngle
+                    << "rad\n";
       newPos.spherical(r, finalAngle, phi);
       const auto componentIndex = compInfo.indexOf(component->getComponentID());
       compInfo.setPosition(componentIndex, newPos);
@@ -331,6 +332,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
   const auto tubeCentersStr = params.getString("D2B", "tube_centers");
   if (!tubeCentersStr.empty()) {
     std::vector<std::string> tubeCenters;
+    double maxYOffset = 0.;
     boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
     for (size_t i = 1; i <= nTubes; ++i) {
       const std::string compName = "tube_" + std::to_string(i);
@@ -338,13 +340,17 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
           instrument->getComponentByName(compName);
       const double offset =
           std::stod(tubeCenters[i - 1]) - (double(nPixels) / 2 - 0.5);
-      V3D translation(0, -offset * pixelHeight, 0);
+      const double y = -offset * m_pixelHeight;
+      V3D translation(0, y, 0);
+      if (std::fabs(y) > maxYOffset) {
+        maxYOffset = std::fabs(y);
+      }
+      g_log.debug() << "Moving " << compName << " to " << y << "\n";
       V3D pos = component->getPos() + translation;
-      g_log.debug() << "Moving " << compName << " to " << translation.Y()
-                    << "\n";
       const auto componentIndex = compInfo.indexOf(component->getComponentID());
       compInfo.setPosition(componentIndex, pos);
     }
+    m_maxHeight = nPixels * m_pixelHeight / 2 + maxYOffset;
   }
 
   auto scanningWorkspaceBuilder = DataObjects::ScanningWorkspaceBuilder(
@@ -854,6 +860,13 @@ void LoadILLDiffraction::setSampleLogs() {
   run.addLogData(new PropertyWithValue<double>("Ei", eFixed));
   run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors",
                                                m_numberDetectorsActual));
+
+  if (m_pixelHeight != 0.) {
+    run.addLogData(new PropertyWithValue<double>("PixelHeight", m_pixelHeight));
+  }
+  if (m_maxHeight != 0.) {
+    run.addLogData(new PropertyWithValue<double>("MaxHeight", m_maxHeight));
+  }
 }
 
 /**

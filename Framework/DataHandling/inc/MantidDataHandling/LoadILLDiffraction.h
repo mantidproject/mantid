@@ -123,6 +123,8 @@ private:
   std::string m_filename;               ///< file name to load
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
+  double m_pixelHeight{0.};                 ///< height of the pixel in D2B
+  double m_maxHeight{0.};                   ///< maximum absolute height of the D2B tubes
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata

@@ -8,7 +8,6 @@ from mantid.simpleapi import *
 
 class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
     _progress = None
-    _tolerance = 0.
 
     def category(self):
         return "ILL\\Diffraction;Diffraction\\Reduction"
@@ -76,8 +75,11 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                                     direction=Direction.Output),
                              doc='Output workspace containing the reduced data.')
 
-        self.declareProperty(name='PixelsToMask', defaultValue=0, validator=IntBoundedValidator(lower=0, upper=64),
-                             doc='Number of pixels to mask from the bottom and the top of each tube.')
+        self.declareProperty(name='InitialMask', defaultValue=20, validator=IntBoundedValidator(lower=0, upper=64),
+                             doc='Number of pixels to mask from the bottom and the top of each tube before superposition.')
+
+        self.declareProperty(name='FinalMask', defaultValue=30, validator=IntBoundedValidator(lower=0, upper=70),
+                             doc='Number of spectra to mask from the bottom and the top of the result of 2D options.')
 
         self.declareProperty(name='ComponentsToMask', defaultValue='',
                              doc='Comma separated list of component names to mask, for instance: tube_1, tube_2')
@@ -128,7 +130,6 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                 raise RuntimeError('Output2DTubes is not supported for D20 (1D detector)')
             if self.getProperty('Output2D').value:
                 raise RuntimeError('Output2D is not supported for D20 (1D detector)')
-            self._tolerance = 1000.
 
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
@@ -143,7 +144,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                 ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
                 ApplyDetectorScanEffCorr(InputWorkspace=name,DetectorEfficiencyWorkspace='__det_eff',OutputWorkspace=name)
 
-        pixels_to_mask = self.getProperty('PixelsToMask').value
+        pixels_to_mask = self.getProperty('InitialMask').value
         if pixels_to_mask != 0:
             mask = self._generate_mask(pixels_to_mask, input_group[0].getInstrument())
             for ws in input_group:
@@ -155,7 +156,13 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
-        if (len(height_range_prop) == 2):
+        if not height_range_prop:
+            run = mtd["input_group"].getItem(0).getRun()
+            pixelHeight = run.getLogData("PixelHeight").value
+            maxHeight = run.getLogData("MaxHeight").value
+            if pixelHeight is not None and maxHeight is not None:
+                height_range = str(-maxHeight) + ',' + str(pixelHeight) + ',' + str(maxHeight)
+        elif len(height_range_prop) == 2:
             height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
 
         output_workspaces = []
@@ -166,26 +173,41 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if instrument.hasParameter("mirror_scattering_angles"):
             mirror_angles = instrument.getBoolParameter("mirror_scattering_angles")[0]
 
+        scatterting_angle_tol = 1000.
+        final_mask = self.getProperty('FinalMask').value
+
         self._progress.report('Doing Output2DTubes Option')
         if self.getProperty('Output2DTubes').value:
+            output2DtubesName = output_workspace_name + '_2DTubes'
             output2DTubes = SumOverlappingTubes(InputWorkspaces=input_group,
                                                 OutputType='2DTubes',
                                                 HeightAxis=height_range,
                                                 MirrorScatteringAngles=mirror_angles,
                                                 CropNegativeScatteringAngles=crop_negative,
-                                                ScatteringAngleTolerance=1000,
-                                                OutputWorkspace=output_workspace_name + '_2DTubes')
+                                                ScatteringAngleTolerance=scatterting_angle_tol,
+                                                OutputWorkspace=output2DtubesName)
+            if final_mask != 0.:
+                nSpec = mtd[output2DtubesName].getNumberHistograms()
+                mask_list = '0-{0},{1}-{2}'.format(final_mask,nSpec-final_mask,nSpec-1)
+                MaskDetectors(Workspace=output2DtubesName,WorkspaceIndexList=mask_list)
+
             output_workspaces.append(output2DTubes)
 
         self._progress.report('Doing Output2D Option')
         if self.getProperty('Output2D').value:
+            output2DName = output_workspace_name + '_2D'
             output2D = SumOverlappingTubes(InputWorkspaces=input_group,
                                            OutputType='2D',
                                            HeightAxis=height_range,
                                            MirrorScatteringAngles=mirror_angles,
                                            CropNegativeScatteringAngles=crop_negative,
-                                           ScatteringAngleTolerance=1000,
-                                           OutputWorkspace = output_workspace_name + '_2D')
+                                           ScatteringAngleTolerance=scatterting_angle_tol,
+                                           OutputWorkspace = output2DName)
+            if final_mask != 0.:
+                nSpec = mtd[output2DName].getNumberHistograms()
+                mask_list = '0-{0},{1}-{2}'.format(final_mask,nSpec-final_mask,nSpec-1)
+                MaskDetectors(Workspace=output2DName,WorkspaceIndexList=mask_list)
+
             output_workspaces.append(output2D)
 
         self._progress.report('Doing Output1D Option')
@@ -196,7 +218,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                            MirrorScatteringAngles=mirror_angles,
                                            CropNegativeScatteringAngles=crop_negative,
                                            OutputWorkspace=output_workspace_name + '_1D',
-                                           ScatteringAngleTolerance=self._tolerance)
+                                           ScatteringAngleTolerance=scatterting_angle_tol)
             output_workspaces.append(output1D)
         DeleteWorkspace('input_group')
 
