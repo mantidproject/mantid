@@ -70,7 +70,7 @@ public:
     std::vector<std::string> names = {"first_red", "second_red"};
     auto outputBaseName = runMultipleFit(
         createReducedWorkspaces(names, totalBins, totalHist), peakFunction());
-    testFitOutput(outputBaseName, names.size() * 2);
+    testFitOutput(outputBaseName, names.size() * 3);
     AnalysisDataService::Instance().clear();
   }
 
@@ -111,7 +111,7 @@ private:
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace", "MultiQENSFitSequential");
+    alg.setProperty("OutputWorkspace", "MultiQENSFitSequential_Result");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
