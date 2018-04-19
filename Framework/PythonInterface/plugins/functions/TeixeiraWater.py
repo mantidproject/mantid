@@ -49,5 +49,5 @@ class TeixeiraWater(IFunction1D):
         return (self.hbar/tau) * q2l2 / (6 + q2l2)
 
 
-# Required to have Mantid recognise the new function
+# Required to have Mantid recognise the new function.
 FunctionFactory.subscribe(TeixeiraWater)
