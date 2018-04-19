@@ -42,7 +42,10 @@ private:
   void init() override;
   void exec() override;
 
-  std::vector<double> getQValues(Mantid::API::MatrixWorkspace_sptr workspace);
+  std::vector<Mantid::API::MatrixWorkspace_sptr> getInputWorkspaces() const;
+
+  std::vector<double>
+  getQValues(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces);
 
   std::vector<std::string>
   getAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,

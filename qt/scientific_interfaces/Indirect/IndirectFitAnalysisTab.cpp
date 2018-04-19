@@ -1052,18 +1052,6 @@ MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
 }
 
 /**
- * Sets the MaxIterations property of the specified algorithm, to the specified
- * integer value.
- *
- * @param fitAlgorithm  The fit algorithm whose MaxIterations property to set.
- * @param maxIterations The value to set.
- */
-void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
-                                              int maxIterations) const {
-  setAlgorithmProperty(fitAlgorithm, "MaxIterations", maxIterations);
-}
-
-/**
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void IndirectFitAnalysisTab::run() { executeSequentialFit(); }
@@ -1090,11 +1078,17 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
   setAlgorithmProperty(fitAlgorithm, "Minimizer",
                        m_fitPropertyBrowser->minimizer(true));
-  setMaxIterations(fitAlgorithm, m_fitPropertyBrowser->maxIterations());
-  setAlgorithmProperty(fitAlgorithm, "Convolve",
+  setAlgorithmProperty(fitAlgorithm, "MaxIterations",
+                       m_fitPropertyBrowser->maxIterations());
+  setAlgorithmProperty(fitAlgorithm, "ConvolveMembers",
                        m_fitPropertyBrowser->convolveMembers());
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
+  setAlgorithmProperty(fitAlgorithm, "CostFunction",
+                       m_fitPropertyBrowser->costFunction());
+
+  if (m_fitPropertyBrowser->isHistogramFit())
+    setAlgorithmProperty(fitAlgorithm, "EvaluationType", "Histogram");
 
   auto fittingFunction = m_fitPropertyBrowser->getFittingFunction();
   m_appendResults = false;
