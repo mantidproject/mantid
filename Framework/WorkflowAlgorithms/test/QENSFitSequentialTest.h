@@ -59,23 +59,18 @@ public:
         createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
 
     auto outputBaseName = runConvolutionFit(inputWorkspace, resolution);
+    testFitOutput(outputBaseName, inputWorkspace->getNumberHistograms());
+    AnalysisDataService::Instance().clear();
+  }
 
-    WorkspaceGroup_sptr groupWorkspace;
+  void test_multiple_fit() {
+    const int totalBins = 6;
+    const int totalHist = 5;
 
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            outputBaseName + "_Parameters"));
-    TS_ASSERT_THROWS_NOTHING(
-        groupWorkspace =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                outputBaseName + "_Workspaces"));
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputBaseName + "_Result"));
-
-    TS_ASSERT_EQUALS(groupWorkspace->size(),
-                     inputWorkspace->getNumberHistograms());
-
+    std::vector<std::string> names = {"first_red", "second_red"};
+    auto outputBaseName = runMultipleFit(
+        createReducedWorkspaces(names, totalBins, totalHist), peakFunction());
+    testFitOutput(outputBaseName, names.size() * 2);
     AnalysisDataService::Instance().clear();
   }
 
@@ -90,7 +85,7 @@ private:
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", 0);
-    alg.setProperty("SpecMax", 5);
+    alg.setProperty("SpecMax", inputWorkspace->getNumberHistograms());
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
@@ -102,7 +97,72 @@ private:
     return "ReductionWs_conv_1LFixF_s0_to_5";
   }
 
-  std::string convolutionFunction(const std::string &resolutionName) {
+  std::string runMultipleFit(
+      const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+      const std::string &function) {
+    Mantid::Algorithms::QENSFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setProperty("Input", createMultipleFitInput(workspaces));
+    alg.setProperty("Function", function);
+    alg.setProperty("StartX", 0.0);
+    alg.setProperty("EndX", 3.0);
+    alg.setProperty("ConvolveMembers", true);
+    alg.setProperty("Minimizer", "Levenberg-Marquardt");
+    alg.setProperty("MaxIterations", 500);
+    alg.setProperty("OutputWorkspace", "MultiQENSFitSequential");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    return "MultiQENSFitSequential";
+  }
+
+  void testFitOutput(const std::string &outputBaseName,
+                     std::size_t expectedGroupSize) {
+    WorkspaceGroup_sptr groupWorkspace;
+
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            outputBaseName + "_Parameters"));
+    TS_ASSERT_THROWS_NOTHING(
+        groupWorkspace =
+            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+                outputBaseName + "_Workspaces"));
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputBaseName + "_Result"));
+
+    TS_ASSERT_EQUALS(groupWorkspace->size(), expectedGroupSize);
+  }
+
+  std::vector<Mantid::API::MatrixWorkspace_sptr>
+  createReducedWorkspaces(const std::vector<std::string> &names, int totalBins,
+                          int totalHist) {
+    std::vector<Mantid::API::MatrixWorkspace_sptr> workspaces;
+
+    for (const auto &name : names) {
+      workspaces.emplace_back(createReducedWorkspace(totalBins, totalHist));
+      AnalysisDataService::Instance().addOrReplace(name, workspaces.back());
+    }
+    return workspaces;
+  }
+
+  std::string createMultipleFitInput(
+      const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces) const {
+    std::ostringstream input;
+
+    for (const auto &workspace : workspaces)
+      input << workspace->getName() << ",i1;" << workspace->getName() << ",i"
+            << std::to_string(workspace->getNumberHistograms() / 2) << ";";
+    return input.str();
+  }
+
+  std::string peakFunction() const {
+    return "name=LinearBackground,A0=0,A1=0;name=Lorentzian,Amplitude=1,"
+           "PeakCentre=0,FWHM=0.0175";
+  }
+
+  std::string convolutionFunction(const std::string &resolutionName) const {
     return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);("
            "composite=Convolution,FixResolution=true,NumDeriv=true;name="
            "Resolution,Workspace=" +
@@ -111,7 +171,7 @@ private:
            "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175)))";
   }
 
-  MatrixWorkspace_sptr createReducedWorkspace(int xlen, int ylen) {
+  MatrixWorkspace_sptr createReducedWorkspace(int xlen, int ylen) const {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         xlen, xlen - 1, false, false, true, "testInst");
     ws->initialize(ylen, xlen, xlen - 1);
@@ -130,9 +190,9 @@ private:
     return ws;
   }
 
-  MatrixWorkspace_sptr createResolutionWorkspace(std::size_t totalBins,
-                                                 std::size_t totalHist,
-                                                 const std::string &name) {
+  MatrixWorkspace_sptr
+  createResolutionWorkspace(std::size_t totalBins, std::size_t totalHist,
+                            const std::string &name) const {
     auto resolution =
         createWorkspace<Workspace2D>(totalHist + 1, totalBins + 1, totalBins);
     addBinsAndCountsToWorkspace(resolution, totalBins + 1, totalBins, 0.0, 3.0);
@@ -143,7 +203,7 @@ private:
   void addBinsAndCountsToWorkspace(Workspace2D_sptr workspace,
                                    std::size_t totalBinEdges,
                                    std::size_t totalCounts, double binValue,
-                                   double countValue) {
+                                   double countValue) const {
     BinEdges x1(totalBinEdges, binValue);
     Counts y1(totalCounts, countValue);
     CountStandardDeviations e1(totalCounts, sqrt(countValue));
