@@ -114,42 +114,76 @@ std::pair<double, double> SofQCommon::eBinHints(const API::MatrixWorkspace &ws) 
  * @return a pair containing global minimun and maximum Q
  */
 std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws, const double minE, const double maxE) const {
-  using namespace Mantid::PhysicalConstants;
   if (m_emode == 1) {
-    // Direct geometry
-    auto minTheta = std::numeric_limits<double>::max();
-    auto maxTheta = std::numeric_limits<double>::lowest();
-    const auto &spectrumInfo = ws.spectrumInfo();
-    for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-      const auto theta = spectrumInfo.twoTheta(i);
-      if (theta < minTheta) {
-        minTheta = theta;
-      }
-      if (theta > maxTheta) {
-        maxTheta = theta;
-      }
-    }
-    const auto incidentKSq = m_efixed / E_mev_toNeutronWavenumberSq;
-    const auto incidentK = std::sqrt(incidentKSq);
-    const auto minEnergy = m_efixed - maxE;
-    const auto maxEnergy = m_efixed - minE;
-    const auto minKSq = minEnergy / E_mev_toNeutronWavenumberSq;
-    const auto minK = std::sqrt(minKSq);
-    const auto maxKSq = maxEnergy / E_mev_toNeutronWavenumberSq;
-    const auto maxK = std::sqrt(maxKSq);
-    std::array<double, 4> q;
-    q[0] = std::sqrt(incidentKSq + minKSq - 2. * incidentK * minK * std::cos(minTheta));
-    q[1] = std::sqrt(incidentKSq + minKSq - 2. * incidentK * minK * std::cos(maxTheta));
-    q[2] = std::sqrt(incidentKSq + maxKSq - 2. * incidentK * maxK * std::cos(minTheta));
-    q[4] = std::sqrt(incidentKSq + maxKSq - 2. * incidentK * maxK * std::cos(maxTheta));
-    const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
-    return std::make_pair(*minmaxQ.first, *minmaxQ.second);
+    return qBinHintsDirect(ws, minE, maxE);
   }
-  // Indirect geometry
+  return qBinHintsIndirect(ws, minE, maxE);
+}
+
+/**
+ * Return a pair of (minimum Q, maximum Q) for given
+ * direct geometry workspace.
+ * @param ws a workspace
+ * @param minE minimum energy transfer in ws
+ * @param maxE maximum energy transfer in ws
+ * @return a pair containing global minimun and maximum Q
+ */
+std::pair<double, double> SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const {
+  using namespace Mantid::PhysicalConstants;
+  auto minTheta = std::numeric_limits<double>::max();
+  auto maxTheta = std::numeric_limits<double>::lowest();
+  const auto &spectrumInfo = ws.spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+    const auto theta = spectrumInfo.twoTheta(i);
+    if (theta < minTheta) {
+      minTheta = theta;
+    }
+    if (theta > maxTheta) {
+      maxTheta = theta;
+    }
+  }
+  if (minTheta == std::numeric_limits<double>::max()) {
+    throw std::runtime_error("Could not determine Q binning: workspace does not contain usable spectra.");
+  }
+  const auto incidentKSq = m_efixed / E_mev_toNeutronWavenumberSq;
+  const auto incidentK = std::sqrt(incidentKSq);
+  const auto minEnergy = m_efixed - maxE;
+  const auto maxEnergy = m_efixed - minE;
+  const auto minKSq = minEnergy / E_mev_toNeutronWavenumberSq;
+  const auto minK = std::sqrt(minKSq);
+  const auto maxKSq = maxEnergy / E_mev_toNeutronWavenumberSq;
+  const auto maxK = std::sqrt(maxKSq);
+  std::array<double, 4> q;
+  q[0] = std::sqrt(incidentKSq + minKSq - 2. * incidentK * minK * std::cos(minTheta));
+  q[1] = std::sqrt(incidentKSq + minKSq - 2. * incidentK * minK * std::cos(maxTheta));
+  q[2] = std::sqrt(incidentKSq + maxKSq - 2. * incidentK * maxK * std::cos(minTheta));
+  q[4] = std::sqrt(incidentKSq + maxKSq - 2. * incidentK * maxK * std::cos(maxTheta));
+  const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
+  return std::make_pair(*minmaxQ.first, *minmaxQ.second);
+}
+
+/**
+ * Return a pair of (minimum Q, maximum Q) for given
+ * indirect geometry workspace. Estimates the Q range from all detectors.
+ * If workspace contains grouped detectors/not all detectors are linked
+ * to a spectrum, the returned interval may be larger than actually needed.
+ * @param ws a workspace
+ * @param minE minimum energy transfer in ws
+ * @param maxE maximum energy transfer in ws
+ * @return a pair containing global minimun and maximum Q
+ */
+std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const {
+  using namespace Mantid::PhysicalConstants;
   auto minQSq = std::numeric_limits<double>::max();
   auto maxQSq = std::numeric_limits<double>::lowest();
   const auto &detectorInfo = ws.detectorInfo();
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (detectorInfo.isMasked(i) || detectorInfo.isMonitor(i)) {
+      continue;
+    }
     const auto costheta = std::cos(detectorInfo.twoTheta(i));
     const auto eFixed = getEFixed(detectorInfo.detector(i));
     const auto minEnergy = eFixed + minE;
@@ -169,6 +203,9 @@ std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws, 
     if (minmaxQSq.second > maxQSq) {
       maxQSq = minmaxQSq.second;
     }
+  }
+  if (minQSq == std::numeric_limits<double>::max()) {
+    throw std::runtime_error("Could not determine Q binning: workspace does not contain usable spectra.");
   }
   return std::make_pair(std::sqrt(minQSq), std::sqrt(maxQSq));
 }

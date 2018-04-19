@@ -32,6 +32,9 @@ struct DLLExport SofQCommon {
   /// Estimate minimum and maximum momentum transfer.
   std::pair<double, double> qBinHints(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
 
+private:
+  std::pair<double, double> qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
+  std::pair<double, double> qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE, const double maxE) const;
 };
 }
 }

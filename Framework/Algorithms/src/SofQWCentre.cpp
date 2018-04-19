@@ -61,10 +61,13 @@ void SofQWCentre::exec() {
         "The input workspace must have common binning across all spectra");
   }
 
+  m_EmodeProperties.initCachedValues(*inputWorkspace, this);
+  const int emode = m_EmodeProperties.m_emode;
+
   std::vector<double> verticalAxis;
   MatrixWorkspace_sptr outputWorkspace =
       SofQW::setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"),
-                                  verticalAxis, getProperty("EAxisBinning"));
+                                  verticalAxis, getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWorkspace);
   const auto &xAxis = outputWorkspace->binEdges(0).rawData();
 
@@ -72,8 +75,6 @@ void SofQWCentre::exec() {
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
-  m_EmodeProperties.initCachedValues(*inputWorkspace, this);
-  int emode = m_EmodeProperties.m_emode;
 
   const auto &detectorInfo = inputWorkspace->detectorInfo();
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();

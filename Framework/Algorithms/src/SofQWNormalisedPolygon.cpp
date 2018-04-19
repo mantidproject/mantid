@@ -13,6 +13,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -72,6 +73,9 @@ void SofQWNormalisedPolygon::exec() {
         "The input workspace must have common binning across all spectra");
   }
 
+  // Compute input caches
+  m_EmodeProperties.initCachedValues(*inputWS, this);
+
   RebinnedOutput_sptr outputWS =
       this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout,
                                  getProperty("EAxisBinning"));
@@ -87,9 +91,6 @@ void SofQWNormalisedPolygon::exec() {
   const size_t nreports(nHistos * nEnergyBins);
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
-
-  // Compute input caches
-  m_EmodeProperties.initCachedValues(*inputWS, this);
 
   std::vector<double> par =
       inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
@@ -223,14 +224,15 @@ double SofQWNormalisedPolygon::calculateQ(const double efixed, int emode,
                                           const double deltaE,
                                           const double twoTheta,
                                           const double azimuthal) const {
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
   double ki = 0.0;
   double kf = 0.0;
   if (emode == 1) {
-    ki = std::sqrt(efixed * SofQW::energyToK());
-    kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
+    ki = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
+    kf = std::sqrt((efixed - deltaE) / E_mev_toNeutronWavenumberSq);
   } else if (emode == 2) {
-    ki = std::sqrt((deltaE + efixed) * SofQW::energyToK());
-    kf = std::sqrt(efixed * SofQW::energyToK());
+    ki = std::sqrt((deltaE + efixed) / E_mev_toNeutronWavenumberSq);
+    kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
   }
   const double Qx = ki - kf * std::cos(twoTheta);
   const double Qy = -kf * std::sin(twoTheta) * std::cos(azimuthal);
@@ -411,18 +413,29 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
   using Kernel::VectorHelper::createAxisFromRebinParams;
 
   HistogramData::BinEdges xAxis(0);
+  auto eHints = std::make_pair<double, double>(std::nan(""), std::nan(""));
   // Create vector to hold the new X axis values
   if (ebinParams.empty()) {
     xAxis = inputWorkspace.binEdges(0);
+  } else if (ebinParams.size() == 1) {
+    eHints = m_EmodeProperties.eBinHints(inputWorkspace);
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true, eHints.first, eHints.second);
   } else {
-    static_cast<void>(
-        createAxisFromRebinParams(ebinParams, xAxis.mutableRawData()));
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
   }
 
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
-  const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(qbinParams, qAxis));
+  int yLength;
+  if (qbinParams.size() == 1) {
+    if (std::isnan(eHints.first)) {
+      eHints = m_EmodeProperties.eBinHints(inputWorkspace);
+    }
+    const auto qHints = m_EmodeProperties.qBinHints(inputWorkspace, eHints.first, eHints.second);
+    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true, qHints.first, qHints.second);
+  } else {
+    yLength = createAxisFromRebinParams(qbinParams, qAxis);
+  }
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
   auto outputWorkspace =

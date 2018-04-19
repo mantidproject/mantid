@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,6 +47,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+class SofQCommon;
+
 class DLLExport SofQW : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name
@@ -64,19 +66,16 @@ public:
   setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace,
                        const std::vector<double> &qbinParams,
                        std::vector<double> &qAxis,
-                       const std::vector<double> &ebinParams);
+                       const std::vector<double> &ebinParams,
+                       const SofQCommon &emodeProperties);
   /// Create the input properties on the given algorithm object
   static void createCommonInputProperties(API::Algorithm &alg);
-  /// Energy to K constant
-  static double energyToK();
 
 private:
   /// Initialization code
   void init() override;
   /// Execution code
   void exec() override;
-
-  SofQCommon m_EmodeProperties;
 };
 
 } // namespace Algorithms

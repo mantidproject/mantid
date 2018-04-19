@@ -4,10 +4,11 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,9 +40,11 @@ void SofQWPolygon::exec() {
         "The input workspace must have common binning across all spectra");
   }
 
+  m_EmodeProperties.initCachedValues(*inputWS, this);
+
   MatrixWorkspace_sptr outputWS =
       SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout,
-                                  getProperty("EAxisBinning"));
+                                  getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWS);
   const size_t nenergyBins = inputWS->blocksize();
 
@@ -159,8 +162,9 @@ void SofQWPolygon::exec() {
 double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
                                       const double twoTheta,
                                       const double psi) const {
-  const double ki = std::sqrt(efixed * SofQW::energyToK());
-  const double kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
+  const double ki = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
+  const double kf = std::sqrt((efixed - deltaE) / E_mev_toNeutronWavenumberSq);
   const double Qx = ki - kf * std::cos(twoTheta);
   const double Qy = -kf * std::sin(twoTheta) * std::cos(psi);
   const double Qz = -kf * std::sin(twoTheta) * std::sin(psi);
@@ -168,7 +172,7 @@ double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
 }
 
 /**
- * Calculate the Q value for a direct instrument
+ * Calculate the Q value for an  indirect instrument
  * @param efixed An efixed value
  * @param deltaE The energy change
  * @param twoTheta The value of the scattering angle
@@ -180,8 +184,9 @@ double SofQWPolygon::calculateIndirectQ(const double efixed,
                                         const double twoTheta,
                                         const double psi) const {
   UNUSED_ARG(psi);
-  const double ki = std::sqrt((efixed + deltaE) * SofQW::energyToK());
-  const double kf = std::sqrt(efixed * SofQW::energyToK());
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
+  const double ki = std::sqrt((efixed + deltaE) / E_mev_toNeutronWavenumberSq);
+  const double kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
   const double Qx = ki - kf * std::cos(twoTheta);
   const double Qy = -kf * std::sin(twoTheta);
   return std::sqrt(Qx * Qx + Qy * Qy);

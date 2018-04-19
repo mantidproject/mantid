@@ -8,6 +8,7 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -15,7 +16,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -25,15 +25,6 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQW)
-
-/// Energy to K constant
-double SofQW::energyToK() {
-  static const double energyToK = 8.0 * M_PI * M_PI *
-                                  PhysicalConstants::NeutronMass *
-                                  PhysicalConstants::meV * 1e-20 /
-                                  (PhysicalConstants::h * PhysicalConstants::h);
-  return energyToK;
-}
 
 using namespace Kernel;
 using namespace API;
@@ -93,10 +84,9 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       make_unique<ArrayProperty<double>>(
           "QAxisBinning", boost::make_shared<RebinParamsValidator>()),
       "The bin parameters to use for the q axis (in the format used by the "
-      ":ref:`algm-Rebin` algorithm, except that bin width-only is "
-      "unsupported).");
+      ":ref:`algm-Rebin` algorithm).");
 
-  std::vector<std::string> propOptions{"Direct", "Indirect"};
+  const std::vector<std::string> propOptions{"Direct", "Indirect"};
   alg.declareProperty("EMode", "",
                       boost::make_shared<StringListValidator>(propOptions),
                       "The energy transfer analysis mode (Direct/Indirect)");
@@ -114,8 +104,7 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       make_unique<ArrayProperty<double>>(
           "EAxisBinning", boost::make_shared<RebinParamsValidator>(true)),
       "The bin parameters to use for the E axis (optional, in the format "
-      "used by the :ref:`algm-Rebin` algorithm, except that bin width-only is "
-      "unsupported).");
+      "used by the :ref:`algm-Rebin` algorithm).");
 }
 
 void SofQW::exec() {
@@ -153,21 +142,35 @@ void SofQW::exec() {
 API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(
     const API::MatrixWorkspace_const_sptr &inputWorkspace,
     const std::vector<double> &qbinParams, std::vector<double> &qAxis,
-    const std::vector<double> &ebinParams) {
+    const std::vector<double> &ebinParams,
+    const SofQCommon &emodeProperties) {
+  using Kernel::VectorHelper::createAxisFromRebinParams;
   // Create vector to hold the new X axis values
   HistogramData::BinEdges xAxis(0);
+  auto eHints = std::make_pair<double, double>(std::nan(""), std::nan(""));
   int xLength;
   if (ebinParams.empty()) {
     xAxis = inputWorkspace->refX(0);
     xLength = static_cast<int>(xAxis.size());
+  } else if (ebinParams.size() == 1) {
+    eHints = emodeProperties.eBinHints(*inputWorkspace);
+    xLength = createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true, eHints.first, eHints.second);
   } else {
-    xLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(
-        ebinParams, xAxis.mutableRawData()));
+    xLength = createAxisFromRebinParams(
+        ebinParams, xAxis.mutableRawData());
   }
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
-  const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(qbinParams, qAxis));
+  int yLength;
+  if (qbinParams.size() == 1) {
+    if (std::isnan(eHints.first)) {
+      eHints = emodeProperties.eBinHints(*inputWorkspace);
+    }
+    const auto qHints = emodeProperties.qBinHints(*inputWorkspace, eHints.first, eHints.second);
+    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true, qHints.first, qHints.second);
+  } else {
+    yLength = createAxisFromRebinParams(qbinParams, qAxis);
+  }
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
@@ -193,6 +196,7 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(
 
   return outputWorkspace;
 }
+
 
 } // namespace Algorithms
 } // namespace Mantid
