@@ -64,8 +64,8 @@ public:
   }
 
   void test_multiple_fit() {
-    const int totalBins = 6;
-    const int totalHist = 5;
+    const int totalBins = 15;
+    const int totalHist = 10;
 
     std::vector<std::string> names = {"first_red", "second_red"};
     auto outputBaseName = runMultipleFit(
@@ -107,7 +107,7 @@ private:
     alg.setProperty("Input", createMultipleFitInput(workspaces));
     alg.setProperty("Function", function);
     alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 3.0);
+    alg.setProperty("EndX", 10.0);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
@@ -153,8 +153,10 @@ private:
     std::ostringstream input;
 
     for (const auto &workspace : workspaces)
-      input << workspace->getName() << ",i1;" << workspace->getName() << ",i"
-            << std::to_string(workspace->getNumberHistograms() / 2) << ";";
+      input << workspace->getName() << ",i0;" << workspace->getName() << ",i"
+            << std::to_string(workspace->getNumberHistograms() / 2) << ";"
+            << workspace->getName() << ",i"
+            << std::to_string(workspace->getNumberHistograms() - 1) << ";";
     return input.str();
   }
 
