@@ -12,8 +12,8 @@ Description
 Teixeira's model for water [1]_.
 
 Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion
-coefficients (D), residence times (tau) and jump lengths (length) to extract the
-associated long range diffusive motions of molecules.
+coefficients (D), residence times (tau) and jump lengths (length) to extract
+the associated long range diffusive motions of molecules.
 
 This model (1961) has the form:
 
