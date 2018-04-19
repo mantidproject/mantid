@@ -1,15 +1,14 @@
-#ifndef MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
-#define MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
+#ifndef MANTID_ALGORITHMS_CONVOLUTIONFIT_H_
+#define MANTID_ALGORITHMS_CONVOLUTIONFIT_H_
 
 #include "MantidAPI/Column.h"
 #include "MantidKernel/System.h"
-#include "MantidWorkflowAlgorithms/QENSFitSequential.h"
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
-/** ConvolutionFitSequential : Performs a sequential fit for a convolution
-  workspace
+/** ConvolutionFit : Performs a QENS convolution fit
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,7 +31,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvolutionFitSequential : public QENSFitSequential {
+template <typename Base> class DLLExport ConvolutionFit : public Base {
 public:
   const std::string name() const override;
   int version() const override;
@@ -41,8 +40,8 @@ public:
   const std::vector<std::string> seeAlso() const override;
 
 protected:
-  API::ITableWorkspace_sptr performFit(const std::string &input,
-                                       const std::string &output) override;
+  virtual API::ITableWorkspace_sptr
+  processParameterTable(API::ITableWorkspace_sptr parameterTable) const;
   std::map<std::string, std::string> getAdditionalLogStrings() const override;
   std::map<std::string, std::string> getAdditionalLogNumbers() const override;
 
@@ -52,15 +51,17 @@ private:
   bool throwIfElasticQConversionFails() const override;
   bool isFitParameter(const std::string &name) const override;
 
-  std::vector<std::string> searchForFitParams(const std::string &,
-                                              const std::vector<std::string> &);
-  void calculateEISF(API::ITableWorkspace_sptr &);
+  std::vector<std::string>
+  searchForFitParams(const std::string &,
+                     const std::vector<std::string> &) const;
+  void calculateEISF(API::ITableWorkspace_sptr &) const;
 
   bool m_deltaUsed;
   std::size_t m_lorentzianCount;
 };
 
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_ */
