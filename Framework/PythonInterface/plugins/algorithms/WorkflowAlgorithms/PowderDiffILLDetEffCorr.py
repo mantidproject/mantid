@@ -79,9 +79,6 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
     def seeAlso(self):
         return [ "ApplyDetectorScanEffCorr","PowderDiffILLReduction" ]
 
-    def seeAlso(self):
-        return [ "ApplyDetectorScanEffCorr","PowderDiffILLReduction" ]
-
     def name(self):
         return "PowderDiffILLDetEffCorr"
 
