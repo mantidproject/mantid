@@ -48,13 +48,12 @@ void SofQWPolygon::exec() {
   // Compute input caches
   this->initCachedValues(inputWS);
 
-  MatrixWorkspace_sptr outputWS = SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
-      *inputWS, getProperty("QAxisBinning"), m_Qout, getProperty("EAxisBinning"),
-      m_EmodeProperties);
+  MatrixWorkspace_sptr outputWS =
+      SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+          *inputWS, getProperty("QAxisBinning"), m_Qout,
+          getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWS);
   const size_t nenergyBins = inputWS->blocksize();
-
-
 
   const size_t nTheta = m_thetaPts.size();
   const auto &X = inputWS->x(0);

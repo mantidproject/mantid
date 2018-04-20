@@ -71,7 +71,7 @@ public:
 private:
   /// Convert the workspace to a distribution
   static void makeDistribution(API::MatrixWorkspace &outputWS,
-                        const std::vector<double> &qAxis);
+                               const std::vector<double> &qAxis);
   /// Initialization code
   void init() override;
   /// Execution code

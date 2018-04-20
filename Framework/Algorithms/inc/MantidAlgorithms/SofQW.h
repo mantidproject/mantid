@@ -72,7 +72,7 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
-  template<typename Workspace>
+  template <typename Workspace>
   static std::unique_ptr<Workspace> setUpOutputWorkspace(
       const API::MatrixWorkspace &inputWorkspace,
       const std::vector<double> &qbinParams, std::vector<double> &qAxis,
@@ -98,7 +98,7 @@ private:
  *              to the input workspace and calling algorithm
  *  @return A pointer to the newly-created workspace
  */
-template<typename Workspace>
+template <typename Workspace>
 std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
     const API::MatrixWorkspace &inputWorkspace,
     const std::vector<double> &qbinParams, std::vector<double> &qAxis,
@@ -112,8 +112,8 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
     xAxis = inputWorkspace.binEdges(0);
   } else if (ebinParams.size() == 1) {
     inputWorkspace.getXMinMax(eMin, eMax);
-    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true,
-                              true, eMin, eMax);
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true,
+                              eMin, eMax);
   } else {
     createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
   }
@@ -128,8 +128,8 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
     double qMax;
     std::tie(qMin, qMax) =
         emodeProperties.qBinHints(inputWorkspace, eMin, eMax);
-    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true,
-                                        qMin, qMax);
+    yLength =
+        createAxisFromRebinParams(qbinParams, qAxis, true, true, qMin, qMax);
   } else {
     yLength = createAxisFromRebinParams(qbinParams, qAxis);
   }
@@ -143,7 +143,8 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Set the axis units
-  verticalAxis->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  verticalAxis->unit() =
+      Kernel::UnitFactory::Instance().create("MomentumTransfer");
   verticalAxis->title() = "|Q|";
 
   // Set the X axis title (for conversion to MD)

@@ -71,9 +71,9 @@ void SofQWNormalisedPolygon::exec() {
   // Compute input caches
   m_EmodeProperties.initCachedValues(*inputWS, this);
 
-  RebinnedOutput_sptr outputWS =
-      SofQW::setUpOutputWorkspace<RebinnedOutput>(*inputWS, getProperty("QAxisBinning"), m_Qout,
-                                 getProperty("EAxisBinning"), m_EmodeProperties);
+  RebinnedOutput_sptr outputWS = SofQW::setUpOutputWorkspace<RebinnedOutput>(
+      *inputWS, getProperty("QAxisBinning"), m_Qout,
+      getProperty("EAxisBinning"), m_EmodeProperties);
   g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();

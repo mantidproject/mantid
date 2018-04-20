@@ -40,9 +40,10 @@ void SofQWCentre::exec() {
   const int emode = m_EmodeProperties.m_emode;
 
   std::vector<double> verticalAxis;
-  MatrixWorkspace_sptr outputWorkspace = SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
-      *inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
-      getProperty("EAxisBinning"), m_EmodeProperties);
+  MatrixWorkspace_sptr outputWorkspace =
+      SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+          *inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
+          getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWorkspace);
   const auto &xAxis = outputWorkspace->binEdges(0).rawData();
 

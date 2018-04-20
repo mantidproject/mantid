@@ -150,8 +150,9 @@ public:
     const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
                                                 1.2, 1.4, 1.6, 1.8, 2.};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<Mantid::DataObjects::Workspace2D>(
-        *inWS, qBinParams, qAxis, eBinParams, emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<
+        Mantid::DataObjects::Workspace2D>(*inWS, qBinParams, qAxis, eBinParams,
+                                          emodeProperties);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -192,8 +193,9 @@ public:
     const std::vector<double> expectedQBinEdges{0.5, 0.75, 1., 1.25,
                                                 1.5, 1.75, 2.};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<Mantid::DataObjects::Workspace2D>(
-        *inWS, qBinParams, qAxis, eBinParams, emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<
+        Mantid::DataObjects::Workspace2D>(*inWS, qBinParams, qAxis, eBinParams,
+                                          emodeProperties);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -224,8 +226,9 @@ public:
     const double dQ{0.023};
     const std::vector<double> qBinParams{dQ};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<Mantid::DataObjects::Workspace2D>(
-        *inWS, qBinParams, qAxis, eBinParams, emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<
+        Mantid::DataObjects::Workspace2D>(*inWS, qBinParams, qAxis, eBinParams,
+                                          emodeProperties);
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
       for (size_t j = 0; j < x.size(); ++j) {

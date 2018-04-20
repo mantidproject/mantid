@@ -139,10 +139,14 @@ SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
   Kernel::Units::DeltaE DeltaEUnit;
   Kernel::Units::MomentumTransfer QUnit;
   std::array<double, 4> q;
-  q[0] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., minTheta, directEMode, m_efixed);
-  q[1] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., maxTheta, directEMode, m_efixed);
-  q[2] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., minTheta, directEMode, m_efixed);
-  q[3] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., maxTheta, directEMode, m_efixed);
+  q[0] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., minTheta,
+                                     directEMode, m_efixed);
+  q[1] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., maxTheta,
+                                     directEMode, m_efixed);
+  q[2] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., minTheta,
+                                     directEMode, m_efixed);
+  q[3] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., maxTheta,
+                                     directEMode, m_efixed);
   const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
   return std::make_pair(*minmaxQ.first, *minmaxQ.second);
 }
@@ -173,8 +177,10 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
     const Kernel::DeltaEMode::Type indirectEMode{Kernel::DeltaEMode::Indirect};
     Kernel::Units::DeltaE DeltaEUnit;
     Kernel::Units::MomentumTransfer QUnit;
-    const auto Q1 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., theta, indirectEMode, eFixed);
-    const auto Q2 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., theta, indirectEMode, eFixed);
+    const auto Q1 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0.,
+                                                theta, indirectEMode, eFixed);
+    const auto Q2 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0.,
+                                                theta, indirectEMode, eFixed);
     const auto minmaxQ = std::minmax(Q1, Q2);
     if (minmaxQ.first < minQ) {
       minQ = minmaxQ.first;
