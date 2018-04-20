@@ -158,9 +158,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         height_range_prop = self.getProperty('HeightRange').value
         if not height_range_prop:
             run = mtd["input_group"].getItem(0).getRun()
-            pixelHeight = run.getLogData("PixelHeight").value
-            maxHeight = run.getLogData("MaxHeight").value
-            if pixelHeight is not None and maxHeight is not None:
+            if run.hasProperty("PixelHeight") and run.hasProperty("MaxHeight"):
+                pixelHeight = run.getLogData("PixelHeight").value
+                maxHeight = run.getLogData("MaxHeight").value
                 height_range = str(-maxHeight) + ',' + str(pixelHeight) + ',' + str(maxHeight)
         elif len(height_range_prop) == 2:
             height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])

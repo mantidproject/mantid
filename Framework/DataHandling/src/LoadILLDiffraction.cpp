@@ -104,7 +104,6 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
-  declareProperty("FlipEvenTubes", true, "Flip the numbering of tubes at even index.");
 }
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
@@ -350,7 +349,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
       const auto componentIndex = compInfo.indexOf(component->getComponentID());
       compInfo.setPosition(componentIndex, pos);
     }
-    m_maxHeight = nPixels * m_pixelHeight / 2 + maxYOffset;
+    m_maxHeight = double(nPixels) * m_pixelHeight / 2 + maxYOffset;
   }
 
   auto scanningWorkspaceBuilder = DataObjects::ScanningWorkspaceBuilder(
@@ -467,42 +466,19 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
     }
   }
 
-  bool flip = getProperty("FlipEvenTubes");
-
-  if (flip) {
-      // Then load the detector spectra
-      for (size_t i = NUMBER_MONITORS;
-           i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
-        for (size_t j = 0; j < m_numberScanPoints; ++j) {
-          const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-          auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-          if (tubeNumber % 2 == 1) {
-            pixelInTubeNumber = 127 - pixelInTubeNumber;
-          }
-          unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
-                                static_cast<int>(pixelInTubeNumber));
-          const auto wsIndex = j + i * m_numberScanPoints;
-          m_outWorkspace->mutableY(wsIndex) = y;
-          m_outWorkspace->mutableE(wsIndex) = sqrt(y);
-          m_outWorkspace->mutableX(wsIndex) = axis;
-        }
-      }
-  }
-  else {
-      // Then load the detector spectra
-      for (size_t i = NUMBER_MONITORS;
-           i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
-        for (size_t j = 0; j < m_numberScanPoints; ++j) {
-          const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-          const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-          unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
-                                static_cast<int>(pixelInTubeNumber));
-          const auto wsIndex = j + i * m_numberScanPoints;
-          m_outWorkspace->mutableY(wsIndex) = y;
-          m_outWorkspace->mutableE(wsIndex) = sqrt(y);
-          m_outWorkspace->mutableX(wsIndex) = axis;
-        }
-      }
+  // Then load the detector spectra
+  for (size_t i = NUMBER_MONITORS;
+       i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
+    for (size_t j = 0; j < m_numberScanPoints; ++j) {
+      const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
+      const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
+                            static_cast<int>(pixelInTubeNumber));
+      const auto wsIndex = j + i * m_numberScanPoints;
+      m_outWorkspace->mutableY(wsIndex) = y;
+      m_outWorkspace->mutableE(wsIndex) = sqrt(y);
+      m_outWorkspace->mutableX(wsIndex) = axis;
+    }
   }
 }
 
