@@ -629,6 +629,7 @@ class StateDirectorISIS(object):
             self._mask_builder.set_beam_stop_arm_width(width)
             self._mask_builder.set_beam_stop_arm_angle(angle)
             self._mask_builder.set_beam_stop_arm_pos1(pos1)
+            self._mask_builder.set_beam_stop_arm_pos2(pos2)
 
         # ---------------------------------
         # 2. General time mask

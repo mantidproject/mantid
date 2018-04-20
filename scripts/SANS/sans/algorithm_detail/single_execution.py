@@ -6,7 +6,7 @@ from sans.common.general_functions import (create_child_algorithm,
 from sans.common.enums import (ISISReductionMode, DetectorType, DataType, OutputParts)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
-from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle)
+from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle, OutputTransmissionBundle)
 from mantid.kernel import mpisetup
 import sys
 
@@ -47,6 +47,8 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     output_workspace = reduction_alg.getProperty("OutputWorkspace").value
     output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
     output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
+    output_calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
+    output_unfitted_transmission_workspace = reduction_alg.getProperty("UnfittedTransmissionWorkspace").value
     # Pull the result out of the workspace
     output_bundle = OutputBundle(state=reduction_setting_bundle.state,
                                  data_type=reduction_setting_bundle.data_type,
@@ -58,7 +60,12 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
                                             reduction_mode=reduction_setting_bundle.reduction_mode,
                                             output_workspace_count=output_workspace_count,
                                             output_workspace_norm=output_workspace_norm)
-    return output_bundle, output_parts_bundle
+
+    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
+                                                          calculated_transmission_workspace=output_calculated_transmission_workspace,
+                                                          unfitted_transmission_workspace=output_unfitted_transmission_workspace
+                                                          )
+    return output_bundle, output_parts_bundle, output_transmission_bundle
 
 
 def get_final_output_workspaces(output_bundles, parent_alg):

@@ -153,6 +153,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         # COMPATIBILITY END
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         state = user_file_director.construct()
+        state.adjustment.show_transmission = True
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor, \
@@ -170,10 +171,17 @@ class SANSSingleReductionTest(unittest.TestCase):
                                                           can_direct=can_direct,
                                                           output_settings=output_settings)
         output_workspace = single_reduction_alg.getProperty("OutputWorkspaceLAB").value
+        calculated_transmission = single_reduction_alg.getProperty("OutputWorkspaceCalculatedTransmission").value
+        unfitted_transmission = single_reduction_alg.getProperty("OutputWorkspaceUnfittedTransmission").value
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_LAB_1D.nxs"
         self._compare_workspace(output_workspace, reference_file_name)
+
+        calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference_LAB.nxs"
+        unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference_LAB.nxs"
+        self._compare_workspace(calculated_transmission, calculated_transmission_reference_file)
+        self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
 
     def test_that_single_reduction_evaluates_HAB(self):
         # Arrange
