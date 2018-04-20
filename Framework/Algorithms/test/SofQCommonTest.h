@@ -125,22 +125,6 @@ public:
     }
   }
 
-  void test_eBinHints() {
-    using namespace Mantid;
-    using namespace WorkspaceCreationHelper;
-    Algorithms::SofQW alg;
-    alg.initialize();
-    alg.setProperty("EMode", "Direct");
-    Algorithms::SofQCommon s;
-    const size_t nBins{23};
-    auto ws = create2DWorkspaceWithFullInstrument(1, nBins);
-    ws->mutableRun().addProperty("Ei", 0.);
-    s.initCachedValues(*ws, &alg);
-    const auto minmaxE = s.eBinHints(*ws);
-    TS_ASSERT_EQUALS(minmaxE.first, 0.)
-    TS_ASSERT_EQUALS(minmaxE.second, nBins)
-  }
-
   void test_qBinHintsDirect() {
     using namespace Mantid;
     using namespace WorkspaceCreationHelper;
@@ -157,8 +141,10 @@ public:
     const auto minQ = directQ(Ei, minDeltaE);
     const auto maxQ = directQ(Ei, maxDeltaE);
     s.initCachedValues(*ws, &alg);
-    const auto minmaxE = s.eBinHints(*ws);
-    const auto minmaxQ = s.qBinHints(*ws, minmaxE.first, minmaxE.second);
+    double minE;
+    double maxE;
+    ws->getXMinMax(minE, maxE);
+    const auto minmaxQ = s.qBinHints(*ws, minE, maxE);
     TS_ASSERT(minmaxQ.first < minmaxQ.second)
     TS_ASSERT_EQUALS(minmaxQ.first, minQ)
     TS_ASSERT_DELTA(minmaxQ.second, maxQ, 1e-12)
@@ -188,8 +174,10 @@ public:
     const auto maxQ = std::max(indirectQ(eFixed0, maxDeltaE, twoTheta1),
                                indirectQ(eFixed1, maxDeltaE, twoTheta1));
     s.initCachedValues(*ws, &alg);
-    const auto minmaxE = s.eBinHints(*ws);
-    const auto minmaxQ = s.qBinHints(*ws, minmaxE.first, minmaxE.second);
+    double minE;
+    double maxE;
+    ws->getXMinMax(minE, maxE);
+    const auto minmaxQ = s.qBinHints(*ws, minE, maxE);
     TS_ASSERT_EQUALS(minmaxQ.first, minQ)
     TS_ASSERT_DELTA(minmaxQ.second, maxQ, 1e-12)
   }

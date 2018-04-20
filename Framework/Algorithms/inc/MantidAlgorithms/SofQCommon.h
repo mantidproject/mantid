@@ -27,8 +27,6 @@ struct DLLExport SofQCommon {
   /// Get the efixed value for the given detector
   double getEFixed(const Geometry::IDetector &det) const;
 
-  /// Get global minimum and maximum X from given ws.
-  std::pair<double, double> eBinHints(const API::MatrixWorkspace &ws) const;
   /// Estimate minimum and maximum momentum transfer.
   std::pair<double, double> qBinHints(const API::MatrixWorkspace &ws,
                                       const double minE,

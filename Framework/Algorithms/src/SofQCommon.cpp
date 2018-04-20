@@ -87,27 +87,6 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
 }
 
 /**
- * Return a pair of (minimum DeltaE, maximum DeltaE)
- * @param ws a workspace
- * @return a pair containing the global minimum and maximum X
- */
-std::pair<double, double>
-SofQCommon::eBinHints(const API::MatrixWorkspace &ws) const {
-  auto min = std::numeric_limits<double>::max();
-  auto max = std::numeric_limits<double>::lowest();
-  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    const auto &x = ws.x(i);
-    if (x.front() < min) {
-      min = x.front();
-    }
-    if (x.back() > max) {
-      max = x.back();
-    }
-  }
-  return std::make_pair(min, max);
-}
-
-/**
  * Return a pair of (minimum Q, maximum Q) for given workspace.
  * @param ws a workspace
  * @param minE minimum energy transfer in ws

@@ -106,13 +106,14 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
   using Kernel::VectorHelper::createAxisFromRebinParams;
   // Create vector to hold the new X axis values
   HistogramData::BinEdges xAxis(0);
-  auto eHints = std::make_pair<double, double>(std::nan(""), std::nan(""));
+  double eMin{std::nan("")};
+  double eMax{std::nan("")};
   if (ebinParams.empty()) {
     xAxis = inputWorkspace.binEdges(0);
   } else if (ebinParams.size() == 1) {
-    eHints = emodeProperties.eBinHints(inputWorkspace);
+    inputWorkspace.getXMinMax(eMin, eMax);
     createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true,
-                              true, eHints.first, eHints.second);
+                              true, eMin, eMax);
   } else {
     createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
   }
@@ -120,13 +121,15 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
   // that
   int yLength;
   if (qbinParams.size() == 1) {
-    if (std::isnan(eHints.first)) {
-      eHints = emodeProperties.eBinHints(inputWorkspace);
+    if (std::isnan(eMin)) {
+      inputWorkspace.getXMinMax(eMin, eMax);
     }
-    const auto qHints =
-        emodeProperties.qBinHints(inputWorkspace, eHints.first, eHints.second);
+    double qMin;
+    double qMax;
+    std::tie(qMin, qMax) =
+        emodeProperties.qBinHints(inputWorkspace, eMin, eMax);
     yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true,
-                                        qHints.first, qHints.second);
+                                        qMin, qMax);
   } else {
     yLength = createAxisFromRebinParams(qbinParams, qAxis);
   }
