@@ -134,16 +134,12 @@ void SofQWNormalisedPolygon::exec() {
       const double dE_j = X[j];
       const double dE_jp1 = X[j + 1];
 
-      const double lrQ =
-          m_EmodeProperties.q(dE_jp1, thetaLower, det);
+      const double lrQ = m_EmodeProperties.q(dE_jp1, thetaLower, det);
 
-      const V2D ll(dE_j,
-                   m_EmodeProperties.q(dE_j, thetaLower, det));
+      const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, det));
       const V2D lr(dE_jp1, lrQ);
-      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper,
-                                            det));
-      const V2D ul(dE_j,
-                   m_EmodeProperties.q(dE_j, thetaUpper, det));
+      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
+      const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
         logStream << "Spectrum=" << specNo << ", theta=" << theta
                   << ",thetaWidth=" << thetaWidth << ", phi=" << phi

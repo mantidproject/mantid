@@ -92,10 +92,11 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
  * Calculate the Q value
  * @param deltaE The energy transfer in meV
  * @param twoTheta The scattering angle in radians
- * @param psi The off-plane angle in radians
+ * @param det A reference to the detector
  * @return The momentum transfer in A-1
  */
-double SofQCommon::q(const double deltaE, const double twoTheta, const Geometry::IDetector &det) const {
+double SofQCommon::q(const double deltaE, const double twoTheta,
+                     const Geometry::IDetector &det) const {
   if (m_emode == 1) {
     return directQ(deltaE, twoTheta);
   }
@@ -122,34 +123,31 @@ std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws,
  * Calculate the Q value for a direct instrument
  * @param deltaE The energy change
  * @param twoTheta The value of the scattering angle
- * @param psi The value of the azimuth
  * @return The value of Q
  */
-double SofQCommon::directQ(const double deltaE,
-                        const double twoTheta) const {
+double SofQCommon::directQ(const double deltaE, const double twoTheta) const {
   using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
   const double ki = std::sqrt(m_efixed / E_mev_toNeutronWavenumberSq);
-  const double kf = std::sqrt((m_efixed - deltaE) / E_mev_toNeutronWavenumberSq);
+  const double kf =
+      std::sqrt((m_efixed - deltaE) / E_mev_toNeutronWavenumberSq);
   return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
 }
 
 /**
  * Calculate the Q value for an  indirect instrument
- * @param efixed An efixed value
  * @param deltaE The energy change
  * @param twoTheta The value of the scattering angle
- * @param psi The value of the azimuth
+ * @param det A reference to Detector
  * @return The value of Q
  */
-double SofQCommon::indirectQ(const double deltaE,
-                          const double twoTheta, const Geometry::IDetector &det) const {
+double SofQCommon::indirectQ(const double deltaE, const double twoTheta,
+                             const Geometry::IDetector &det) const {
   using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
   const auto efixed = getEFixed(det);
   const double ki = std::sqrt((efixed + deltaE) / E_mev_toNeutronWavenumberSq);
   const double kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
   return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
 }
-
 
 /**
  * Return a pair of (minimum Q, maximum Q) for given

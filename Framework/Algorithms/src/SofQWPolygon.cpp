@@ -62,7 +62,6 @@ void SofQWPolygon::exec() {
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
-
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
        ++i) // signed for openmp
@@ -92,8 +91,7 @@ void SofQWPolygon::exec() {
 
       const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, det));
       const V2D lr(dE_jp1, lrQ);
-      const V2D ur(dE_jp1,
-                   m_EmodeProperties.q(dE_jp1, thetaUpper, det));
+      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
       const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
