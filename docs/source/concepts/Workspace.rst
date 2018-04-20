@@ -10,43 +10,32 @@ Workspace
 What are Workspaces?
 --------------------
 
-Workspaces are the nouns of Mantid (while :ref:`algorithms <algorithm>` are
-the verbs). Workspaces hold the data in Mantid.
+Workspaces store data that :ref:`algorithms <algorithm>` operate on. Workspaces are usually stored in-memory. An algorithm can manipulate a workspace in-place or create a new one as an output. 
 
-They come in several forms, but the most common by far is the
-:ref:`MatrixWorkspace <MatrixWorkspace>` which contains measured or derived
-data with associated errors. Matrix Workspaces are typically created
+Workspace is as loose term that encompases a range of possible data structures. The most common type of workspace by far is the
+:ref:`Matrix Workspace <MatrixWorkspace>` which contains measured (or derived)
+data with associated errors and an axis giving information about where the the measurement was made. Matrix Workspaces are typically created
 initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example
 :ref:`LoadRaw <algm-LoadRaw>`
 or
-:ref:`LoadNexus <algm-LoadNexus>`,
-or they are the output of algorithms which took a matrix workspace as
-input. In `MantidPlot <http://www.mantidproject.org/MantidPlot:_Help>`__ the data from the workspace
-can viewed as a table, and graphed in many ways.
+:ref:`LoadNexus <algm-LoadNexus>` 
 
-Another form of workspace is the :ref:`TableWorkspace <Table Workspaces>`.
+.. tip:: In `MantidPlot <http://www.mantidproject.org/MantidPlot:_Help>`__ the data from the workspaces can be graphically viewed, inspected, and plotted in many ways.
+
+Another common form of workspace is the :ref:`TableWorkspace <Table Workspaces>`.
 This stores data of (somewhat) arbitrary type in rows and columns, much
 like a spreadsheet. These typically are created as the output of certain
 specialized algorithms (e.g. curve fitting).
 
-In addition to data, workspaces hold a :ref:`workspace  history <Workspace-Workspace_History>`,
-which details the algorithms which have been run on this workspace.
+.. note:: In addition to data, workspaces hold a :ref:`workspace  history <Workspace-Workspace_History>`, which details the algorithms which have been run on this workspace. This means workspaces carry all the meta-information to fully recreate themeselves.
 
-In software engineering terms, the 'abstract' concept of a workspace is
-an 'interface', in that it defines common properties that are
-implemented by various 'concrete' workspaces. Interaction with
-workspaces is typically through an interface. The concrete workspaces
-themselves are loaded in via Mantid's :ref:`plugin <plugin>` mechanism and
-are created using the Workspace Factory.
-
-Example Workspaces
+Workspaces Types
 ------------------
 
--  :ref:`MatrixWorkspace <MatrixWorkspace>` - A base class that contains
-   among others:
+-  :ref:`Matrix Workspace <MatrixWorkspace>` - A base catagory for 2D measurement data. The following are sorts of Matrix Workspace:
 
    -  :ref:`Workspace2D <Workspace2D>` - A workspace for holding two
-      dimensional data in memory, this is the most commonly used
+      dimensional histogram data in memory, this is the most commonly used
       workspace.
    -  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the
       individual neutron event data.
@@ -60,27 +49,21 @@ Example Workspaces
 Working with Workspaces in Python
 ---------------------------------
 
-Workspace is an abstract description of an specific workspace implementation. It provides access to a few common properties without any knowledge of what the type of the workspace.
-
 .. _Workspace-Accessing_Workspaces:
 
 Accessing Workspaces
 ####################
 
-You can access workspaces using the ``mtd["worskpace_name"]`` command for a specific workspace, or using the ``mtd.ImportAll()`` to create python variables for every workspace in Mantid.  More explanation can be found in `Accessing Workspaces From Python <http://www.mantidproject.org/Accessing_Workspaces_From_Python>`_.
+In ``mantid.simpleapi``, you can access existing workspaces as a dictionary using the ``mtd["worskpace_name"]`` command for a specific workspace name key.  More explanation can be found in `Accessing Workspaces From Python <http://www.mantidproject.org/Accessing_Workspaces_From_Python>`_.
 
 .. testcode:: AccessingWorkspaces
 
     # This creates a workspace without explicitly capturing the output
-    CreateSampleWorkspace(OutputWorkspace="MyNewWorkspace")
+    CreateSampleWorkspace(OutputWorkspace="my_new_workspace")
 
     # You can get a python variable pointing to the workspace with the command
-    myWS = mtd["MyNewWorkspace"]
+    myWS = mtd["my_new_workspace"]
     print("The variable myWS now points to the workspace called " + str(myWS))
-
-    # You can also ask Mantid to create matching python variables for all of it's workspaces
-    mtd.importAll()
-    print("MyNewWorkspace has been created that also points to the workspace called " + str(MyNewWorkspace))
 
     # You can assign a python variable when calling an algorithm and the workspace will match the variable name
     myOtherWS = CreateSampleWorkspace()
@@ -91,8 +74,8 @@ Output:
 .. testoutput:: AccessingWorkspaces
     :options: +NORMALIZE_WHITESPACE
 
-    The variable myWS now points to the workspace called MyNewWorkspace
-    MyNewWorkspace has been created that also points to the workspace called MyNewWorkspace
+    The variable myWS now points to the workspace called my_new_workspace
+    my_new_workspace has been created that also points to the workspace called my_new_workspace
     myOtherWS now points to the workspace called myOtherWS
 
 Workspace Properties
@@ -209,8 +192,6 @@ The full documentation for workspace history can be found at the :class:`~mantid
 Writing you own workspace
 -------------------------
 
-This is perfectly possible, but not as easy as creating your own
-algorithm. Please talk to a member of the development team if you wish
-to implement you own workspace.
+:ref:`Table Workspace` is the best solution at present for customising the data structures you need. Changes beyond that are at present not trivial. For specialisation of exisiting data structures, or new data requirements, please contact the Mantid Team for help.
 
 .. categories:: Concepts
