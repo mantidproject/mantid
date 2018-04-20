@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
+#include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 
 namespace MantidQt {
@@ -68,10 +69,10 @@ QModelIndex QtStandardItemMutableTreeAdapter::appendEmptyChildRow(
 QModelIndex
 QtStandardItemMutableTreeAdapter::appendChildRow(QModelIndex const &parent,
                                                  QList<QStandardItem *> cells) {
-  auto realParent = parent.sibling(parent.row(), 0);
-  auto *const parentItem = modelItemFromIndex(realParent);
+  auto parentRow = firstCellOnRowOf(parent);
+  auto *const parentItem = modelItemFromIndex(parentRow);
   parentItem->appendRow(cells);
-  return model().index(model().rowCount(realParent) - 1, 0, realParent);
+  return lastChildRowOf(parentRow, model());
 }
 
 QModelIndex QtStandardItemMutableTreeAdapter::insertChildRow(

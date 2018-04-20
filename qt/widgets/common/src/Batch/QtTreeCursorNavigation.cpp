@@ -3,7 +3,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-QtTreeCursorNavigation::QtTreeCursorNavigation(QAbstractItemModel const *model) : model(model) {}
+QtTreeCursorNavigation::QtTreeCursorNavigation(QAbstractItemModel const *model)
+    : model(model) {}
 
 QtTreeCursorNavigationResult
 QtTreeCursorNavigation::withoutAppendedRow(QModelIndex const &index) const {
@@ -43,17 +44,17 @@ QModelIndex QtTreeCursorNavigation::moveCursorPrevious(
 
 bool QtTreeCursorNavigation::isNotFirstCellInThisRow(
     QModelIndex const &index) const {
-  return index.column() > 0;
+  return hasCellOnTheLeft(index);
 }
 
 bool QtTreeCursorNavigation::isNotFirstRowInThisNode(
     QModelIndex const &index) const {
-  return index.row() > 0;
+  return hasRowAbove(index);
 }
 
 QModelIndex
 QtTreeCursorNavigation::previousCellInThisRow(QModelIndex const &index) const {
-  return index.sibling(index.row(), index.column() - 1);
+  return leftOf(index);
 }
 
 QModelIndex
@@ -61,9 +62,13 @@ QtTreeCursorNavigation::lastCellInPreviousRow(QModelIndex const &index) const {
   return index.sibling(index.row() - 1, model->columnCount() - 1);
 }
 
+QModelIndex lastChildRowOf(QModelIndex const &parent, QAbstractItemModel const& model) {
+  return model.index(model.rowCount(parent) - 1, 0, parent);
+}
+
 QModelIndex
 QtTreeCursorNavigation::lastRowInThisNode(QModelIndex const &parent) const {
-  return model->index(model->rowCount(parent) - 1, 0, parent);
+  return lastChildRowOf(parent, *model);
 }
 
 QModelIndex QtTreeCursorNavigation::lastCellInParentRowElseNone(
@@ -82,17 +87,49 @@ QtTreeCursorNavigation::firstCellOnNextRow(QModelIndex const &index) const {
 
 QModelIndex
 QtTreeCursorNavigation::nextCellOnThisRow(QModelIndex const &index) const {
-  return index.sibling(index.row(), index.column() + 1);
+  return rightOf(index);
 }
 
 bool QtTreeCursorNavigation::isNotLastCellOnThisRow(
     QModelIndex const &index) const {
-  return index.column() + 1 < model->columnCount();
+  return hasCellOnTheRight(index);
 }
 
 bool QtTreeCursorNavigation::isNotLastRowInThisNode(
     QModelIndex const &index) const {
-  return index.row() + 1 < model->rowCount(index.parent());
+  return hasRowBelow(index);
+}
+
+QModelIndex below(QModelIndex const &index) {
+  return index.sibling(index.row() + 1, index.column());
+}
+
+QModelIndex above(QModelIndex const &index) {
+  return index.sibling(index.row() - 1, index.column());
+}
+
+QModelIndex leftOf(QModelIndex const &index) {
+  return index.sibling(index.row(), index.column() - 1);
+}
+
+QModelIndex rightOf(QModelIndex const &index) {
+  return index.sibling(index.row(), index.column() + 1);
+}
+
+bool hasCellOnTheLeft(QModelIndex const &index) { return index.column() > 0; }
+
+bool hasCellOnTheRight(QModelIndex const &index) {
+  return index.column() + 1 < index.model()->columnCount();
+}
+
+bool hasRowAbove(QModelIndex const &index) { return index.row() > 0; }
+
+bool hasRowBelow(QModelIndex const &index) {
+  return index.row() + 1 < index.model()->rowCount(index.parent());
+}
+
+QModelIndex firstCellOnRowOf(QModelIndex const &index) {
+  return index.sibling(index.row(), 0);
 }
 }
 }

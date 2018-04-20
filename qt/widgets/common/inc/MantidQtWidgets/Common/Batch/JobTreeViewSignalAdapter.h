@@ -19,6 +19,8 @@ public:
       std::vector<RowLocation> const &locationsOfRowsToRemove) override;
   void notifyCopyRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToCopy) override;
+  void notifyPasteRowsRequested(
+      std::vector<RowLocation> const &locationsOfSelectedRows) override;
 signals:
   void cellChanged(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
                    int column, std::string newValue);
@@ -30,6 +32,9 @@ signals:
   void copyRowsRequested(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
           locationsOfRowsToRemove);
+  void pasteRowsRequested(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
+          locationsOfSelectedRows);
 };
 }
 }

@@ -57,8 +57,18 @@ void JobTreeView::copySelectedRequested() {
   m_notifyee->notifyCopyRowsRequested(selectedRowLocations());
 }
 
+void JobTreeView::pasteSelectedRequested() {
+  m_notifyee->notifyPasteRowsRequested(selectedRowLocations());
+}
+
 void JobTreeView::removeRows(std::vector<RowLocation> rowsToRemove) {
   std::sort(rowsToRemove.begin(), rowsToRemove.end());
+
+  std::cout << "\n\n";
+  for (auto &&loc : rowsToRemove)
+    std::cout << loc << '\n';
+  std::cout << std::endl;
+
   for (auto rowIt = rowsToRemove.crbegin(); rowIt < rowsToRemove.crend();
        ++rowIt)
     removeRowAt(*rowIt);
@@ -80,7 +90,83 @@ void JobTreeView::setRowTextAt(RowLocation const &location,
 
 std::vector<std::string>
 JobTreeView::rowTextAt(RowLocation const &location) const {
-  return std::vector<std::string>();
+  return adaptedModel().rowTextFromRow(modelIndexAt(location));
+}
+
+void JobTreeView::replaceRows(
+    std::vector<RowLocation> toRemove,
+    std::vector<RowLocation> toInsert,
+    std::vector<std::vector<std::string>> textToInsert) {
+  std::sort(toRemove.begin(), toRemove.end());
+  auto rootsToRemoveIterators = findRootNodes(toRemove).value();
+
+  auto selectionBase = [&]() -> QModelIndex {
+    if (rootsToRemoveIterators.empty()) {
+      return adaptedModel().rootModelIndex();
+    } else {
+      auto firstSelectionRoot = *rootsToRemoveIterators.begin();
+      return modelIndexAt(firstSelectionRoot).parent();
+    }
+  }();
+
+  // TODO Differentiate between nodes with no children and nodes which have
+  // children?
+
+  std::sort(toInsert.begin(), toInsert.end());
+  auto rootsToInsertIterators = findRootNodes(toInsert).value();
+
+  auto rootsToRemoveIteratorsIt = rootsToRemoveIterators.cbegin();
+  auto rootsToInsertIteratorsIt = rootsToInsertIterators.cbegin();
+
+  while (rootsToRemoveIteratorsIt != rootsToRemoveIterators.cend() &&
+         rootsToInsertIteratorsIt != rootsToInsertIterators.cend()) {
+    auto rootToRemoveIterator = *rootsToRemoveIteratorsIt;
+    auto rootToInsertIterator = *rootsToInsertIteratorsIt;
+
+    auto offset = std::distance(regionToReplace.cbegin(), replaceableRootIt);
+    insertSubtree(/*toRemove=*/rootToRemoveIterator,
+                  /*toInsert=*/selectionRootsIt);
+                  /*toInsertLocations=*/replacementRowText);
+
+    ++replaceableRootsIteratorIt;
+    ++selectionRootIt;
+  }
+
+  if (replaceableRoots.size() > selectionRoots.size()) {
+    removeRows(replaceableRootIt, replaceableRootIt.cend());
+  } else if (replaceableRoots.size() < selectionRoots.size()) {
+    // Easy Case, Then Insert After
+  } else {
+    // Easy 1:1 mapping of replacement roots.
+  }
+
+  // For each root of the region to replace, while not at the end of the roots
+  // of the
+  // replacement locations ...
+  // Replace the root from the region to replace with the tree from the
+  // replacement.
+
+  //
+
+  std::cout << "Nodes To Be Replaced: \n";
+  for (auto &&root : selectionRoots)
+    std::cout << root << '\n';
+
+  // auto replacementLocationRoots =
+  // findRootNodes(replacementLocations).value();
+  // std::cout << "Roots Of Copied Selection: \n";
+  // for (auto&& root : replacementLocationRoots)
+  // std::cout << root << '\n';
+
+  std::cout << std::endl;
+
+  // auto replacementRoot = commonParentOf(regionToReplace);
+  // removeEverthingIn(regionToReplace);
+  //
+  // rerootStructure(replacementLocations);
+  //
+  // insertPreservingStructureAt(replacementRoot, replacementLocations,
+  // replacementRowText);
 }
 
 void JobTreeView::setHeaderLabels(QStringList const &columnHeadings) {
@@ -151,10 +237,10 @@ bool JobTreeView::rowRemovalWouldBeIneffective(
 
 QModelIndex
 JobTreeView::siblingIfExistsElseParent(QModelIndex const &index) const {
-  if (navigation().isNotFirstRowInThisNode(index)) {
-    return index.sibling(index.row() - 1, index.column());
-  } else if (navigation().isNotLastRowInThisNode(index)) {
-    return index.sibling(index.row() + 1, index.column());
+  if (hasRowAbove(index)) {
+    return above(index);
+  } else if (hasRowBelow(index)) {
+    return below(index);
   } else {
     return index.parent();
   }
@@ -177,9 +263,8 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
                 "Attempted to delete the only child of the invisible root "
                 "item. Try removeAllRows() instead.");
   if (rowRemovalWouldBeIneffective(indexToRemove)) {
-    auto loc = rowLocationAt(siblingIfExistsElseParent(indexToRemove));
-    std::cout << "Setting current index to " << loc << std::endl;
-    setCurrentIndex(siblingIfExistsElseParent(indexToRemove));
+    auto rowIndexToSwitchTo = siblingIfExistsElseParent(indexToRemove);
+    setCurrentIndex(rowIndexToSwitchTo);
   }
   adaptedModel().removeRowAt(indexToRemove);
 }
@@ -233,14 +318,10 @@ QtTreeCursorNavigation JobTreeView::navigation() const {
 
 std::pair<QModelIndex, bool>
 JobTreeView::findOrMakeCellBelow(QModelIndex const &index) {
-  if (navigation().isNotLastRowInThisNode(index)) {
-    return std::make_pair(index.sibling(index.row() + 1, index.column()),
-                          false);
-  } else {
-    std::cout << "input index for appendEmptySiblingRow is " << index.column()
-              << std::endl;
+  if (hasRowBelow(index))
+    return std::make_pair(below(index), false);
+  else
     return std::make_pair(adaptedModel().appendEmptySiblingRow(index), true);
-  }
 }
 
 void JobTreeView::appendAndEditAtChildRow() {
@@ -265,6 +346,7 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
       appendAndEditAtChildRow();
     } else if (event->modifiers() & Qt::ShiftModifier) {
       // Go to row above
+      // prependAndEditAtRowAbove();
     } else {
       appendAndEditAtRowBelow();
     }
@@ -273,6 +355,10 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
   } else if (event->key() == Qt::Key_C) {
     if (event->modifiers() & Qt::ControlModifier) {
       copySelectedRequested();
+    }
+  } else if (event->key() == Qt::Key_V) {
+    if (event->modifiers() & Qt::ControlModifier) {
+      pasteSelectedRequested();
     }
   } else {
     QTreeView::keyPressEvent(event);
@@ -284,15 +370,13 @@ JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult const &result) {
   auto shouldMakeNewRowBelow = result.first;
   if (shouldMakeNewRowBelow) {
     auto newIndex = adaptedModel().appendEmptySiblingRow(result.second);
-    auto newRowIndex = newIndex.sibling(newIndex.row(), 0);
+    auto newRowIndex = firstCellOnRowOf(newIndex);
     auto newRowLocation = rowLocationAt(newRowIndex);
 
     m_notifyee->notifyRowInserted(newRowLocation);
 
-    if (modelIndexIfExistsAt(newRowLocation).is_initialized())
-      return expanded(newRowIndex);
-    else
-      return QModelIndex();
+    return expanded(
+        modelIndexIfExistsAt(newRowLocation).get_value_or(QModelIndex()));
   } else {
     return result.second;
   }

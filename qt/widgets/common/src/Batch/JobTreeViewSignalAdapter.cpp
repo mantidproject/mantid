@@ -32,6 +32,11 @@ void JobTreeViewSignalAdapter::notifyCopyRowsRequested(
     std::vector<RowLocation> const &locationsOfRowsToCopy) {
   emit copyRowsRequested(locationsOfRowsToCopy);
 }
+
+void JobTreeViewSignalAdapter::notifyPasteRowsRequested(
+    std::vector<RowLocation> const &locationsOfSelectedRows) {
+  emit pasteRowsRequested(locationsOfSelectedRows);
+}
 }
 }
 }

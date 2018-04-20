@@ -23,6 +23,8 @@ public:
 
   QList<QStandardItem *> emptyRow() const;
 
+//  int childRowCount(QModelIndex location);
+
 private:
   QStandardItemModel const &model() const;
   QStandardItemModel const* m_model;

@@ -19,9 +19,10 @@ public:
   virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
   virtual void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
-
   virtual void notifyCopyRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToCopy) = 0;
+  virtual void notifyPasteRowsRequested(
+      std::vector<RowLocation> const &locationsOfSelectedRows) = 0;
   virtual ~JobTreeViewSubscriber() = default;
 };
 
@@ -39,12 +40,18 @@ public:
   void appendChildRowOf(RowLocation const &parent);
   void appendChildRowOf(RowLocation const &parentLocation,
                         std::vector<std::string> const &rowText);
+  int childRowCount() const;
 
   void removeRowAt(RowLocation const &location);
   void removeRows(std::vector<RowLocation> rowsToRemove);
+  bool isOnlyChildOfRoot(RowLocation const &index) const;
 
   template <typename InputIterator>
   void removeRows(InputIterator begin, InputIterator end);
+
+  void replaceRows(std::vector<RowLocation> regionToReplace,
+                   std::vector<RowLocation> replacementLocations,
+                   std::vector<std::vector<std::string>> replacementRowText);
 
   std::vector<std::string> rowTextAt(RowLocation const &location) const;
   void setRowTextAt(RowLocation const &location,
@@ -57,11 +64,6 @@ public:
                          Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const;
 
-  bool isOnlyChild(QModelIndex const &index) const;
-  bool isOnlyChildOfRoot(QModelIndex const &index) const;
-  QModelIndex siblingIfExistsElseParent(QModelIndex const &index) const;
-  bool rowRemovalWouldBeIneffective(QModelIndex const &indexToRemove) const;
-
   using QTreeView::edit;
 
 protected:
@@ -71,6 +73,7 @@ protected:
   void setHeaderLabels(QStringList const &columnHeadings);
   void removeSelectedRequested();
   void copySelectedRequested();
+  void pasteSelectedRequested();
 
 protected slots:
   void commitData(QWidget *) override;
@@ -80,6 +83,11 @@ private:
   void appendAndEditAtChildRow();
   void appendAndEditAtRowBelow();
   bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
+
+  bool isOnlyChild(QModelIndex const &index) const;
+  bool isOnlyChildOfRoot(QModelIndex const &index) const;
+  QModelIndex siblingIfExistsElseParent(QModelIndex const &index) const;
+  bool rowRemovalWouldBeIneffective(QModelIndex const &indexToRemove) const;
 
   QModelIndex expanded(QModelIndex const &index);
   void editAt(QModelIndex const &index);
@@ -92,7 +100,8 @@ private:
   std::vector<std::string> rowTextFromRow(QModelIndex firstCellIndex) const;
 
   QModelIndex modelIndexAt(RowLocation const &location, int column = 0) const;
-  boost::optional<QModelIndex> modelIndexIfExistsAt(RowLocation const &location, int column = 0) const;
+  boost::optional<QModelIndex> modelIndexIfExistsAt(RowLocation const &location,
+                                                    int column = 0) const;
   RowLocation rowLocationAt(QModelIndex const &index) const;
   QStandardItem *modelItemAt(RowLocation const &location, int column = 0) const;
 

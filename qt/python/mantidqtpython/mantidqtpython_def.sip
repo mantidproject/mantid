@@ -1531,10 +1531,13 @@ public:
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToCopy) = 0;
+  virtual void notifyPasteRowsRequested(
+    const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfSelectedRows) = 0;
 };
 
 class JobTreeView : public QTreeView
 {
+
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 %End
@@ -1549,6 +1552,11 @@ public:
                           const std::vector<std::string> &rowText);
     void removeRowAt(const RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
+
+    void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> regionToReplace,
+                     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementLocations,
+                     std::vector<std::vector<std::string>> replacementRowText);
+
     std::vector<std::string> rowTextAt(const RowLocation &location) const;
     void setRowTextAt(const RowLocation &location,
                       const std::vector<std::string> &rowText);
@@ -1570,6 +1578,8 @@ public:
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToCopy);
+  virtual void notifyPasteRowsRequested(
+      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfSelectedRows);
 signals:
   void cellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
                    std::string newValue);

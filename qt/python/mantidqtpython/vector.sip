@@ -385,8 +385,7 @@ template<TYPE>
 
 %ConvertToTypeCode
     // Check if type is compatible
-    if (sipIsErr == NULL)
-    {
+    if (sipIsErr == NULL) {
         // Must be any iterable
         PyObject *i = PyObject_GetIter(sipPy);
         bool iterable = (i != NULL);
@@ -446,5 +445,113 @@ template<TYPE>
 
     *sipCppPtr = V;
     return sipGetState(sipTransferObj);
+%End
+};
+
+// ****************************************************
+// Specialization for std::vector<std::vector<std::string>>
+// ****************************************************
+
+%MappedType std::vector<std::vector<std::string>>
+{
+%TypeHeaderCode
+#include <vector>
+#include <string>
+#include <memory>
+%End
+
+%ConvertFromTypeCode
+  PyObject *outerListPy = nullptr;
+  if ((outerListPy = PyList_New((SIP_SSIZE_T)sipCpp->size())) != nullptr) {
+    auto outerListIndex = 0;
+    for (auto&& innerListCpp : *sipCpp) {
+      PyObject* innerListPy = PyList_New((SIP_SSIZE_T)innerListCpp.size());
+      if (innerListPy != nullptr) {
+        auto innerListIndex = 0;
+        for (auto&& itemCpp : innerListCpp) {
+          PyObject* itemPy = PyUnicode_DecodeUTF8(itemCpp.c_str(), itemCpp.length(), nullptr);
+          if (itemPy != nullptr) {
+            PyErr_Clear();
+            itemPy = PyString_FromString(itemCpp.c_str());
+            if (itemPy != nullptr) {
+              PyList_SET_ITEM(innerListPy, innerListIndex, itemPy);
+            } else {
+              return nullptr;
+            }
+            ++innerListIndex;
+          } else {
+            return nullptr;
+          }
+        }
+        PyList_SET_ITEM(outerListPy, outerListIndex, innerListPy);
+        ++outerListIndex;
+      } else {
+        return nullptr;
+      }
+    }
+    return outerListPy;
+  } else {
+    return nullptr;
+  }
+%End
+
+%ConvertToTypeCode
+  // Check if type is compatible
+  if (sipIsErr == nullptr) {
+    // Must be any iterable
+    PyObject *i = PyObject_GetIter(sipPy);
+    bool iterable = (i != nullptr);
+    Py_XDECREF(i);
+    return iterable;
+  } else {
+    auto outerListLength = static_cast<int>(PyObject_Size(sipPy));
+    auto outerListCpp = std::make_unique<std::vector<std::vector<std::string>>>();
+    outerListCpp->reserve(outerListLength);
+    if (outerListLength > 0) {
+      PyObject *outerListIteratorPy = PyObject_GetIter(sipPy);
+      if (outerListIteratorPy != nullptr) {
+        PyObject *innerListPy = nullptr;
+        while ((innerListPy = PyIter_Next(outerListIteratorPy))) {
+          PyObject *innerListIteratorPy = PyObject_GetIter(innerListPy);
+          if (innerListIteratorPy != nullptr) {
+            auto innerListCpp = std::vector<std::string>();
+            auto innerListLength = static_cast<int>(PyObject_Size(innerListPy));
+            innerListCpp.reserve(innerListLength);
+
+            PyObject *itemPy = nullptr;
+            while ((itemPy = PyIter_Next(innerListIteratorPy))) {
+              auto itemString = std::string("");
+            	if (itemPy == Py_None) {
+            	} else if (PyUnicode_Check(itemPy)) {
+                PyObject* s = PyUnicode_AsEncodedString(itemPy, "UTF-8", "");
+                itemString = std::string(PyString_AS_STRING(s));
+                Py_DECREF(s);
+            	} else if (PyString_Check(itemPy)) {
+                itemString = std::string(PyString_AS_STRING(itemPy));
+            	}
+              innerListCpp.emplace_back(std::move(itemString));
+            }
+            Py_DECREF(innerListIteratorPy);
+            Py_DECREF(innerListPy);
+            outerListCpp->emplace_back(std::move(innerListCpp));
+          } else {
+            *sipIsErr = 1;
+            PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to iterable.");
+            Py_DECREF(innerListIteratorPy);
+            Py_DECREF(outerListIteratorPy);
+            return 0;
+          }
+        }
+        Py_DECREF(outerListIteratorPy);
+      } else {
+        *sipIsErr = 1;
+        PyErr_Format(PyExc_TypeError, "failed to convert object expected to be not iterable.");
+        Py_DECREF(outerListIteratorPy);
+        return 0;
+      }
+    }
+    *sipCppPtr = outerListCpp.release();
+    return sipGetState(sipTransferObj);
+  }
 %End
 };
