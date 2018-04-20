@@ -192,8 +192,7 @@ void PolarizationCorrectionFredrikze::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           efficienciesLabel, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors CPp, CAp, CRho and CAlpha "
-      "as "
-      "histograms");
+      "as histograms");
 
   declareProperty(make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),

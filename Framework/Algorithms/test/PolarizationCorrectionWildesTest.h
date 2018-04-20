@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_PolarizationCorrectionWildesTEST_H_
-#define MANTID_ALGORITHMS_PolarizationCorrectionWildesTEST_H_
+#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDESTEST_H_
+#define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -1987,4 +1987,4 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ws11;
 };
 
-#endif /* MANTID_ALGORITHMS_PolarizationCorrectionWildesTEST_H_ */
+#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDESTEST_H_ */

@@ -487,8 +487,11 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = parseFlipperSetup(flipperProperty);
   if (inputs.size() != flippers.size()) {
-    issues[Prop::FLIPPERS] = "The number of flipper configurations does not "
-                             "match the number of input workspaces";
+    issues[Prop::FLIPPERS] =
+        "The number of flipper configurations (" +
+        std::to_string(flippers.size()) +
+        ") does not match the number of input workspaces (" +
+        std::to_string(inputs.size()) + ")";
   }
   return issues;
 }
