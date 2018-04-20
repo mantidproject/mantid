@@ -46,6 +46,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/PointVariances.h
 	inc/MantidHistogramData/Points.h
+	inc/MantidHistogramData/QuadraticGenerator.h
 	inc/MantidHistogramData/Rebin.h
 	inc/MantidHistogramData/Scalable.h
 	inc/MantidHistogramData/Slice.h
@@ -85,6 +86,7 @@ set ( TEST_FILES
 	PointStandardDeviationsTest.h
 	PointVariancesTest.h
 	PointsTest.h
+	QuadraticGeneratorTest.h
 	RebinTest.h
 	ScalableTest.h
 	SliceTest.h
@@ -122,7 +124,7 @@ endif ()
 set_property ( TARGET HistogramData PROPERTY FOLDER "MantidFramework" )
 
 target_include_directories ( HistogramData PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${GSL_LIBRARIES} ${MANTIDLIBS} )
 
 # Add the unit tests directory
