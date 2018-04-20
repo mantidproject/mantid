@@ -103,15 +103,15 @@ std::vector<double> multiplyVectors(const std::vector<T, Ts...> &vec,
 template <typename T, typename... Ts>
 std::vector<T, Ts...> squareVector(const std::vector<T, Ts...> &vec) {
   auto target = std::vector<T, Ts...>();
-  std::transform(vec.begin(), vec.end(), std::back_inserter(target.begin()),
+  std::transform(vec.begin(), vec.end(), std::back_inserter(target),
                  VectorHelper::Squares<T>());
   return target;
 }
 
 template <typename T, typename... Ts>
 std::vector<T, Ts...> squareRootVector(const std::vector<T, Ts...> &vec) {
-  auto target = cloneVector(vec);
-  std::transform(target.begin(), target.end(), target.begin(),
+  auto target = std::vector<T, Ts...>();
+  std::transform(vec.begin(), vec.end(), std::back_inserter(target),
                  static_cast<T (*)(T)>(sqrt));
   return target;
 }
