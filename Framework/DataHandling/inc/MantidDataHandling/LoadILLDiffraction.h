@@ -117,14 +117,14 @@ private:
   size_t m_numberScanPoints;      ///< number of scan points
   size_t m_resolutionMode;        ///< resolution mode; 1:low, 2:nominal, 3:high
 
-  std::string m_instName;               ///< instrument name to load the IDF
-  std::set<std::string> m_instNames;    ///< supported instruments
-  std::string m_resSuffix;              ///< suffix for alternative resolution modes
-  std::string m_filename;               ///< file name to load
+  std::string m_instName;            ///< instrument name to load the IDF
+  std::set<std::string> m_instNames; ///< supported instruments
+  std::string m_resSuffix; ///< suffix for alternative resolution modes
+  std::string m_filename;  ///< file name to load
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
-  double m_pixelHeight{0.};                 ///< height of the pixel in D2B
-  double m_maxHeight{0.};                   ///< maximum absolute height of the D2B tubes
+  double m_pixelHeight{0.};             ///< height of the pixel in D2B
+  double m_maxHeight{0.}; ///< maximum absolute height of the D2B tubes
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata
