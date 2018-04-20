@@ -37,27 +37,22 @@ static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
 static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
                               const std::string &name);
 
-struct ones {
-  double operator()(const double, size_t) {
-    return 1.0;
-  } // don't care about Y values, just use 1.0 everywhere
-};
-
 static Mantid::API::MatrixWorkspace_sptr
 createTestWorkspace(const size_t nhist, const double x0, const double x1,
                     const double dx, const NoiseType noise,
                     const bool singleMassSpectrum, const bool addFoilChanger) {
   bool isHist(false);
   auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-      ones(), static_cast<int>(nhist), x0, x1, dx, isHist);
+      [](const double, std::size_t) { return 1.0; }, static_cast<int>(nhist),
+      x0, x1, dx, isHist);
   ws2d->getAxis(0)->setUnit("TOF");
   if (singleMassSpectrum) {
     // Generate a test mass profile with some noise so any calculated spectrum
     // won't exactly match
     const double peakCentre(164.0), sigmaSq(16 * 16), peakHeight(0.2);
     for (size_t i = 0; i < nhist; ++i) {
-      auto &dataXi = ws2d->dataX(i);
-      auto &dataYi = ws2d->dataY(i);
+      auto &dataXi = ws2d->mutableX(i);
+      auto &dataYi = ws2d->mutableY(i);
       for (auto xit = std::begin(dataXi), yit = std::begin(dataYi);
            xit != std::end(dataXi); ++xit, ++yit) {
         *yit = peakHeight *exp(-0.5 * pow(*xit - peakCentre, 2.) / sigmaSq);
@@ -68,7 +63,7 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
       std::mt19937 rng(1);
       std::uniform_real_distribution<double> flat(0.0, 1.0);
       for (size_t i = 0; i < nhist; ++i) {
-        auto &dataYi = ws2d->dataY(i);
+        auto &dataYi = ws2d->mutableY(i);
         for (auto &y : dataYi) {
           const double r(flat(rng));
           if (r > 0.5)
