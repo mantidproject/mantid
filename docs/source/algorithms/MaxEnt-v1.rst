@@ -174,7 +174,7 @@ and the reconstructed image, i.e. Fourier transform (right).
 Output:
 
 .. testoutput:: ExFourierCoeffs
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    First  reconstructed coefficient: 0.847
    Second reconstructed coefficient: 0.846
@@ -224,7 +224,7 @@ and :ref:`algm-FFT` (right).
 Output:
 
 .. testoutput:: ExMUSR00022725
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at -1.359: 0.100
    Image at 0.000: 0.009
@@ -260,7 +260,7 @@ and its imaginary part (right).
 Output:
 
 .. testoutput:: ExEMU00020884
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image (real part) at -1.389: -0.063
    Image (real part) at  0.000:  0.035
@@ -307,7 +307,7 @@ the original and reconstructed data (left), and the reconstructed image (right).
 Output:
 
 .. testoutput:: ExRealImage
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image (real part) at 0.318: 0.000
    Image (real part) at 0.477: 5.862
@@ -363,7 +363,7 @@ image in order to obtain smooth results).
 Output:
 
 .. testoutput:: ExRealPosImage
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
    Image at 0.477: 5.862 (PositiveImage=False), 5.913 (PositiveImage=True)
@@ -448,7 +448,7 @@ shows how to combine two workspaces with complex data.
 Output:
 
 .. testoutput:: ExComplexData
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Number of iterations dataset1 separate: ...
    Number of iterations dataset2 separate: ...
@@ -485,7 +485,7 @@ from the default 1.0; the dataset contains 270 data points and here set to be sl
 Output:
 
 .. testoutput:: ExResolutionFactor
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at 0.000: 0.035 (ResolutionFactor=1)
    Image at 0.000: 0.068 (ResolutionFactor=2)
@@ -517,7 +517,7 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
 Output:
 
 .. testoutput:: ExResolutionFactor2
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Number of iterations: ...
    Number of iterations: ...

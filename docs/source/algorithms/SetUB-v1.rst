@@ -47,7 +47,7 @@ Usage
 Output:
 
 .. testoutput:: SetUB
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     UB matrix
     [[...     ...     0.143]

@@ -58,7 +58,7 @@ used to generate Bragg reflections that are expected for the crystal structure o
 Executing the script produces some output with information about the fit:
 
 .. testoutput:: ExSiliconTheoretical
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     Refined lattice parameter: a = 5.4311946 +/- ...
     Difference from expected value: a_observed - a_expected = 0.0

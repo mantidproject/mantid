@@ -28,7 +28,7 @@ The algorithm calculates the crystal field energies and wave functions. The exam
       print('Hamiltonian:\n{}'.format(ham))
 
 .. testoutput::
-   :options: +ELLIPSIS
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
      energies:
      [ 29.32611185  29.32611185  44.3412485   44.3412485 ]
