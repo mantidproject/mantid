@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-import mantid.simpleapi as mantid
 from Muon import dummy_view
 from Muon import dummy_presenter
 
