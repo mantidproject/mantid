@@ -5,6 +5,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -133,23 +135,14 @@ SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
     throw std::runtime_error("Could not determine Q binning: workspace does "
                              "not contain usable spectra.");
   }
-  const auto incidentKSq = m_efixed / E_mev_toNeutronWavenumberSq;
-  const auto incidentK = std::sqrt(incidentKSq);
-  const auto minEnergy = m_efixed - maxE;
-  const auto maxEnergy = m_efixed - minE;
-  const auto minKSq = minEnergy / E_mev_toNeutronWavenumberSq;
-  const auto minK = std::sqrt(minKSq);
-  const auto maxKSq = maxEnergy / E_mev_toNeutronWavenumberSq;
-  const auto maxK = std::sqrt(maxKSq);
+  const Kernel::DeltaEMode::Type directEMode{Kernel::DeltaEMode::Direct};
+  Kernel::Units::DeltaE DeltaEUnit;
+  Kernel::Units::MomentumTransfer QUnit;
   std::array<double, 4> q;
-  q[0] = std::sqrt(incidentKSq + minKSq -
-                   2. * incidentK * minK * std::cos(minTheta));
-  q[1] = std::sqrt(incidentKSq + minKSq -
-                   2. * incidentK * minK * std::cos(maxTheta));
-  q[2] = std::sqrt(incidentKSq + maxKSq -
-                   2. * incidentK * maxK * std::cos(minTheta));
-  q[3] = std::sqrt(incidentKSq + maxKSq -
-                   2. * incidentK * maxK * std::cos(maxTheta));
+  q[0] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., minTheta, directEMode, m_efixed);
+  q[1] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., maxTheta, directEMode, m_efixed);
+  q[2] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., minTheta, directEMode, m_efixed);
+  q[3] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., maxTheta, directEMode, m_efixed);
   const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
   return std::make_pair(*minmaxQ.first, *minmaxQ.second);
 }
@@ -168,38 +161,33 @@ std::pair<double, double>
 SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
                               const double maxE) const {
   using namespace Mantid::PhysicalConstants;
-  auto minQSq = std::numeric_limits<double>::max();
-  auto maxQSq = std::numeric_limits<double>::lowest();
+  auto minQ = std::numeric_limits<double>::max();
+  auto maxQ = std::numeric_limits<double>::lowest();
   const auto &detectorInfo = ws.detectorInfo();
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMasked(i) || detectorInfo.isMonitor(i)) {
       continue;
     }
-    const auto costheta = std::cos(detectorInfo.twoTheta(i));
+    const auto theta = detectorInfo.twoTheta(i) / 2.;
     const auto eFixed = getEFixed(detectorInfo.detector(i));
-    const auto minEnergy = eFixed + minE;
-    const auto maxEnergy = eFixed + maxE;
-    const auto minKSq = minEnergy / E_mev_toNeutronWavenumberSq;
-    const auto minK = std::sqrt(minKSq);
-    const auto maxKSq = maxEnergy / E_mev_toNeutronWavenumberSq;
-    const auto maxK = std::sqrt(maxKSq);
-    const auto finalKSq = eFixed / E_mev_toNeutronWavenumberSq;
-    const auto finalK = std::sqrt(finalKSq);
-    const auto QSq1 = minKSq + finalKSq - 2. * minK * finalK * costheta;
-    const auto QSq2 = maxKSq + finalKSq - 2. * maxK * finalK * costheta;
-    const auto minmaxQSq = std::minmax(QSq1, QSq2);
-    if (minmaxQSq.first < minQSq) {
-      minQSq = minmaxQSq.first;
+    const Kernel::DeltaEMode::Type indirectEMode{Kernel::DeltaEMode::Indirect};
+    Kernel::Units::DeltaE DeltaEUnit;
+    Kernel::Units::MomentumTransfer QUnit;
+    const auto Q1 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., theta, indirectEMode, eFixed);
+    const auto Q2 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., theta, indirectEMode, eFixed);
+    const auto minmaxQ = std::minmax(Q1, Q2);
+    if (minmaxQ.first < minQ) {
+      minQ = minmaxQ.first;
     }
-    if (minmaxQSq.second > maxQSq) {
-      maxQSq = minmaxQSq.second;
+    if (minmaxQ.second > maxQ) {
+      maxQ = minmaxQ.second;
     }
   }
-  if (minQSq == std::numeric_limits<double>::max()) {
+  if (minQ == std::numeric_limits<double>::max()) {
     throw std::runtime_error("Could not determine Q binning: workspace does "
                              "not contain usable spectra.");
   }
-  return std::make_pair(std::sqrt(minQSq), std::sqrt(maxQSq));
+  return std::make_pair(minQ, maxQ);
 }
 }
 }
