@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CountStandardDeviations.cpp
 	src/CountVariances.cpp
 	src/Counts.cpp
+	src/EstimatePolynomial.cpp
 	src/Exception.cpp
 	src/Frequencies.cpp
 	src/FrequencyStandardDeviations.cpp
@@ -23,6 +24,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/CountVariances.h
 	inc/MantidHistogramData/Counts.h
 	inc/MantidHistogramData/EValidation.h
+	inc/MantidHistogramData/EstimatePolynomial.h
 	inc/MantidHistogramData/Exception.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Frequencies.h
@@ -32,8 +34,8 @@ set ( INC_FILES
 	inc/MantidHistogramData/HistogramBuilder.h
 	inc/MantidHistogramData/HistogramDx.h
 	inc/MantidHistogramData/HistogramE.h
-        inc/MantidHistogramData/HistogramItem.h
-        inc/MantidHistogramData/HistogramIterator.h
+	inc/MantidHistogramData/HistogramItem.h
+	inc/MantidHistogramData/HistogramIterator.h
 	inc/MantidHistogramData/HistogramMath.h
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/HistogramY.h
@@ -65,6 +67,7 @@ set ( TEST_FILES
 	CountVariancesTest.h
 	CountsTest.h
 	EValidationTest.h
+	EstimatePolynomialTest.h
 	FixedLengthVectorTest.h
 	FrequenciesTest.h
 	FrequencyStandardDeviationsTest.h
@@ -72,7 +75,7 @@ set ( TEST_FILES
 	HistogramBuilderTest.h
 	HistogramDxTest.h
 	HistogramETest.h
-        HistogramIteratorTest.h
+	HistogramIteratorTest.h
 	HistogramMathTest.h
 	HistogramTest.h
 	HistogramXTest.h
