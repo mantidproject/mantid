@@ -112,7 +112,8 @@ void SofQWNormalisedPolygon::exec() {
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto *det = m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
+    const auto *det =
+        m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
 
     const double theta = this->m_theta[i];
     const double phi = this->m_phi[i];

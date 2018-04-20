@@ -76,7 +76,8 @@ void SofQWPolygon::exec() {
     }
 
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    const auto *det = m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
+    const auto *det =
+        m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
     const double halfWidth(0.5 * m_thetaWidth);
     const double thetaLower = theta - halfWidth;
     const double thetaUpper = theta + halfWidth;

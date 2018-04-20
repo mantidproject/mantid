@@ -92,7 +92,8 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
  * Calculate the Q value
  * @param deltaE The energy transfer in meV
  * @param twoTheta The scattering angle in radians
- * @param det A reference to the detector
+ * @param det A pointer to the corresponding detector, can be nullptr
+ *        for direct emode.
  * @return The momentum transfer in A-1
  */
 double SofQCommon::q(const double deltaE, const double twoTheta,
@@ -137,7 +138,7 @@ double SofQCommon::directQ(const double deltaE, const double twoTheta) const {
  * Calculate the Q value for an  indirect instrument
  * @param deltaE The energy change
  * @param twoTheta The value of the scattering angle
- * @param det A reference to Detector
+ * @param det A pointer to the corresponding Detector
  * @return The value of Q
  */
 double SofQCommon::indirectQ(const double deltaE, const double twoTheta,
