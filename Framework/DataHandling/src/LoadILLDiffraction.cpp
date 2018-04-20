@@ -286,70 +286,74 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
   double refR, refTheta, refPhi;
   referenceComponentPosition.getSpherical(refR, refTheta, refPhi);
 
-  auto &compInfo = instrumentWorkspace->mutableComponentInfo();
+  if (m_instName == "D2B") {
+    auto &compInfo = instrumentWorkspace->mutableComponentInfo();
 
-  Geometry::IComponent_const_sptr detectors =
-      instrument->getComponentByName("detectors");
-  const auto detCompIndex = compInfo.indexOf(detectors->getComponentID());
-  const auto tubes = compInfo.children(detCompIndex);
-  const size_t nTubes = tubes.size();
-  Geometry::IComponent_const_sptr tube1 =
-      instrument->getComponentByName("tube_1");
-  const auto tube1CompIndex = compInfo.indexOf(tube1->getComponentID());
-  const auto pixels = compInfo.children(tube1CompIndex);
-  const size_t nPixels = pixels.size();
+    Geometry::IComponent_const_sptr detectors =
+        instrument->getComponentByName("detectors");
+    const auto detCompIndex = compInfo.indexOf(detectors->getComponentID());
+    const auto tubes = compInfo.children(detCompIndex);
+    const size_t nTubes = tubes.size();
+    Geometry::IComponent_const_sptr tube1 =
+        instrument->getComponentByName("tube_1");
+    const auto tube1CompIndex = compInfo.indexOf(tube1->getComponentID());
+    const auto pixels = compInfo.children(tube1CompIndex);
+    const size_t nPixels = pixels.size();
 
-  Geometry::IComponent_const_sptr pixel =
-      instrument->getComponentByName("standard_pixel");
-  Geometry::BoundingBox bb;
-  pixel->getBoundingBox(bb);
-  m_pixelHeight = bb.yMax() - bb.yMin();
+    Geometry::IComponent_const_sptr pixel =
+        instrument->getComponentByName("standard_pixel");
+    Geometry::BoundingBox bb;
+    pixel->getBoundingBox(bb);
+    m_pixelHeight = bb.yMax() - bb.yMin();
 
-  const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
-  if (!tubeAnglesStr.empty()) {
-    std::vector<std::string> tubeAngles;
-    boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
-    const double ref = -refTheta;
-    for (size_t i = 1; i <= nTubes; ++i) {
-      const std::string compName = "tube_" + std::to_string(i);
-      Geometry::IComponent_const_sptr component =
-          instrument->getComponentByName(compName);
-      double r, theta, phi;
-      V3D oldPos = component->getPos();
-      oldPos.getSpherical(r, theta, phi);
-      V3D newPos;
-      const double angle = std::stod(tubeAngles[i - 1]);
-      const double finalAngle = fabs(ref - angle);
-      g_log.debug() << "Rotating " << compName << "to " << finalAngle
-                    << "rad\n";
-      newPos.spherical(r, finalAngle, phi);
-      const auto componentIndex = compInfo.indexOf(component->getComponentID());
-      compInfo.setPosition(componentIndex, newPos);
-    }
-  }
-
-  const auto tubeCentersStr = params.getString("D2B", "tube_centers");
-  if (!tubeCentersStr.empty()) {
-    std::vector<std::string> tubeCenters;
-    double maxYOffset = 0.;
-    boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
-    for (size_t i = 1; i <= nTubes; ++i) {
-      const std::string compName = "tube_" + std::to_string(i);
-      Geometry::IComponent_const_sptr component =
-          instrument->getComponentByName(compName);
-      const double offset =
-          std::stod(tubeCenters[i - 1]) - (double(nPixels) / 2 - 0.5);
-      const double y = -offset * m_pixelHeight;
-      V3D translation(0, y, 0);
-      if (std::fabs(y) > maxYOffset) {
-        maxYOffset = std::fabs(y);
+    const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
+    if (!tubeAnglesStr.empty()) {
+      std::vector<std::string> tubeAngles;
+      boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
+      const double ref = -refTheta;
+      for (size_t i = 1; i <= nTubes; ++i) {
+        const std::string compName = "tube_" + std::to_string(i);
+        Geometry::IComponent_const_sptr component =
+            instrument->getComponentByName(compName);
+        double r, theta, phi;
+        V3D oldPos = component->getPos();
+        oldPos.getSpherical(r, theta, phi);
+        V3D newPos;
+        const double angle = std::stod(tubeAngles[i - 1]);
+        const double finalAngle = fabs(ref - angle);
+        g_log.debug() << "Rotating " << compName << "to " << finalAngle
+                      << "rad\n";
+        newPos.spherical(r, finalAngle, phi);
+        const auto componentIndex =
+            compInfo.indexOf(component->getComponentID());
+        compInfo.setPosition(componentIndex, newPos);
       }
-      g_log.debug() << "Moving " << compName << " to " << y << "\n";
-      V3D pos = component->getPos() + translation;
-      const auto componentIndex = compInfo.indexOf(component->getComponentID());
-      compInfo.setPosition(componentIndex, pos);
     }
-    m_maxHeight = double(nPixels) * m_pixelHeight / 2 + maxYOffset;
+
+    const auto tubeCentersStr = params.getString("D2B", "tube_centers");
+    if (!tubeCentersStr.empty()) {
+      std::vector<std::string> tubeCenters;
+      double maxYOffset = 0.;
+      boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
+      for (size_t i = 1; i <= nTubes; ++i) {
+        const std::string compName = "tube_" + std::to_string(i);
+        Geometry::IComponent_const_sptr component =
+            instrument->getComponentByName(compName);
+        const double offset =
+            std::stod(tubeCenters[i - 1]) - (double(nPixels) / 2 - 0.5);
+        const double y = -offset * m_pixelHeight;
+        V3D translation(0, y, 0);
+        if (std::fabs(y) > maxYOffset) {
+          maxYOffset = std::fabs(y);
+        }
+        g_log.debug() << "Moving " << compName << " to " << y << "\n";
+        V3D pos = component->getPos() + translation;
+        const auto componentIndex =
+            compInfo.indexOf(component->getComponentID());
+        compInfo.setPosition(componentIndex, pos);
+      }
+      m_maxHeight = double(nPixels) * m_pixelHeight / 2 + maxYOffset;
+    }
   }
 
   auto scanningWorkspaceBuilder = DataObjects::ScanningWorkspaceBuilder(
