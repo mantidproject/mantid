@@ -573,6 +573,11 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
   return pifp->getProperty("OutputWorkspace");
 }
 
+ITableWorkspace_sptr QENSFitSequential::processParameterTable(
+    ITableWorkspace_sptr parameterTable) const {
+  return parameterTable;
+}
+
 void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
     const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
