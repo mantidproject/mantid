@@ -186,7 +186,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                                 CropNegativeScatteringAngles=crop_negative,
                                                 ScatteringAngleTolerance=scatterting_angle_tol,
                                                 OutputWorkspace=output2DtubesName)
-            if final_mask != 0.:
+            if final_mask != 0:
                 nSpec = mtd[output2DtubesName].getNumberHistograms()
                 mask_list = '0-{0},{1}-{2}'.format(final_mask,nSpec-final_mask,nSpec-1)
                 MaskDetectors(Workspace=output2DtubesName,WorkspaceIndexList=mask_list)
@@ -203,7 +203,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                                            CropNegativeScatteringAngles=crop_negative,
                                            ScatteringAngleTolerance=scatterting_angle_tol,
                                            OutputWorkspace = output2DName)
-            if final_mask != 0.:
+            if final_mask != 0:
                 nSpec = mtd[output2DName].getNumberHistograms()
                 mask_list = '0-{0},{1}-{2}'.format(final_mask,nSpec-final_mask,nSpec-1)
                 MaskDetectors(Workspace=output2DName,WorkspaceIndexList=mask_list)
