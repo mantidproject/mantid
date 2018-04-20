@@ -597,7 +597,7 @@ void QENSFitSequential::renameWorkspaces(
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
-  bool extractMembers = getProperty("ExtractMembers");
+  IFunction_sptr function = getProperty("Function");
   bool convolveMembers = getProperty("ConvolveMembers");
   bool passWsIndex = getProperty("PassWSIndexToFunction");
 
@@ -605,7 +605,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
   plotPeaks->setProperty("Input", input);
   plotPeaks->setProperty("OutputWorkspace", output);
-  plotPeaks->setProperty("Function", getPropertyValue("Function"));
+  plotPeaks->setProperty("Function", function);
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
   plotPeaks->setProperty("FitType", "Sequential");
