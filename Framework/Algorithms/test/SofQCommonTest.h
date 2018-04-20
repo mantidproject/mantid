@@ -182,6 +182,51 @@ public:
     TS_ASSERT_DELTA(minmaxQ.second, maxQ, 1e-12)
   }
 
+  void testDirectQ() {
+    using namespace Mantid;
+    using namespace WorkspaceCreationHelper;
+    Algorithms::SofQW alg;
+    alg.initialize();
+    alg.setProperty("EMode", "Direct");
+    Algorithms::SofQCommon s;
+    const size_t nBins{1};
+    auto ws = create2DWorkspaceWithFullInstrument(5, nBins);
+    const auto Ei = 4.2;
+    ws->mutableRun().addProperty("Ei", Ei);
+    s.initCachedValues(*ws, &alg);
+    const auto &detectorInfo = ws->detectorInfo();
+    const auto testDeltaE = -Ei / 1.8;
+    for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      const auto &det = detectorInfo.detector(i);
+      const auto twoTheta = detectorInfo.twoTheta(i);
+      const auto expected = directQ(Ei, testDeltaE, twoTheta);
+      TS_ASSERT_EQUALS(s.q(testDeltaE, twoTheta, det), expected)
+    }
+  }
+
+  void testIndirectQ() {
+    using namespace Mantid;
+    using namespace WorkspaceCreationHelper;
+    Algorithms::SofQW alg;
+    alg.initialize();
+    alg.setProperty("EMode", "Indirect");
+    Algorithms::SofQCommon s;
+    const size_t nBins{1};
+    auto ws = create2DWorkspaceWithFullInstrument(2, nBins);
+    const std::array<double, 2> Ef{3.7, 2.3};
+    setEFixed(ws, "pixel-0)", Ef[0]);
+    setEFixed(ws, "pixel-1)", Ef[1]);
+    s.initCachedValues(*ws, &alg);
+    const auto &detectorInfo = ws->detectorInfo();
+    const auto testDeltaE = -1.8;
+    for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      const auto &det = detectorInfo.detector(i);
+      const auto twoTheta = detectorInfo.twoTheta(i);
+      const auto expected = indirectQ(Ef[i], testDeltaE, twoTheta);
+      TS_ASSERT_DELTA(s.q(testDeltaE, twoTheta, det), expected, 1e-12)
+    }
+  }
+
 private:
   static double k(const double E) {
     using namespace Mantid;

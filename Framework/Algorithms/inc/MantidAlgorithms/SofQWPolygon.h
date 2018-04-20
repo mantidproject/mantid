@@ -80,12 +80,6 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-  /// Calculate the Q value for a direct instrument
-  double calculateDirectQ(const double efixed, const double deltaE,
-                          const double twoTheta, const double psi) const;
-  /// Calculate the Q value for an indirect instrument
-  double calculateIndirectQ(const double efixed, const double deltaE,
-                            const double twoTheta, const double psi) const;
   /// Init variables cache base on the given workspace
   void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
   /// Init the theta index

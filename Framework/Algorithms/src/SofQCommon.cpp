@@ -76,7 +76,7 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
     if (m_efixedGiven)
       efixed = m_efixed; // user provided a value
     else {
-      std::vector<double> param = det.getNumberParameter("EFixed");
+      const std::vector<double> param = det.getNumberParameter("EFixed");
       if (param.empty())
         throw std::runtime_error(
             "Cannot find EFixed parameter for component \"" + det.getName() +
@@ -86,6 +86,20 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
     }
   }
   return efixed;
+}
+
+/**
+ * Calculate the Q value
+ * @param deltaE The energy transfer in meV
+ * @param twoTheta The scattering angle in radians
+ * @param psi The off-plane angle in radians
+ * @return The momentum transfer in A-1
+ */
+double SofQCommon::q(const double deltaE, const double twoTheta, const Geometry::IDetector &det) const {
+  if (m_emode == 1) {
+    return directQ(deltaE, twoTheta);
+  }
+  return indirectQ(deltaE, twoTheta, det);
 }
 
 /**
@@ -103,6 +117,39 @@ std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws,
   }
   return qBinHintsIndirect(ws, minE, maxE);
 }
+
+/**
+ * Calculate the Q value for a direct instrument
+ * @param deltaE The energy change
+ * @param twoTheta The value of the scattering angle
+ * @param psi The value of the azimuth
+ * @return The value of Q
+ */
+double SofQCommon::directQ(const double deltaE,
+                        const double twoTheta) const {
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
+  const double ki = std::sqrt(m_efixed / E_mev_toNeutronWavenumberSq);
+  const double kf = std::sqrt((m_efixed - deltaE) / E_mev_toNeutronWavenumberSq);
+  return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
+}
+
+/**
+ * Calculate the Q value for an  indirect instrument
+ * @param efixed An efixed value
+ * @param deltaE The energy change
+ * @param twoTheta The value of the scattering angle
+ * @param psi The value of the azimuth
+ * @return The value of Q
+ */
+double SofQCommon::indirectQ(const double deltaE,
+                          const double twoTheta, const Geometry::IDetector &det) const {
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
+  const auto efixed = getEFixed(det);
+  const double ki = std::sqrt((efixed + deltaE) / E_mev_toNeutronWavenumberSq);
+  const double kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
+  return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
+}
+
 
 /**
  * Return a pair of (minimum Q, maximum Q) for given
@@ -135,27 +182,18 @@ SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
     throw std::runtime_error("Could not determine Q binning: workspace does "
                              "not contain usable spectra.");
   }
-  const Kernel::DeltaEMode::Type directEMode{Kernel::DeltaEMode::Direct};
-  Kernel::Units::DeltaE DeltaEUnit;
-  Kernel::Units::MomentumTransfer QUnit;
   std::array<double, 4> q;
-  q[0] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., minTheta,
-                                     directEMode, m_efixed);
-  q[1] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0., maxTheta,
-                                     directEMode, m_efixed);
-  q[2] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., minTheta,
-                                     directEMode, m_efixed);
-  q[3] = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0., maxTheta,
-                                     directEMode, m_efixed);
+  q[0] = directQ(minE, minTheta);
+  q[1] = directQ(minE, maxTheta);
+  q[2] = directQ(maxE, minTheta);
+  q[3] = directQ(maxE, maxTheta);
   const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
   return std::make_pair(*minmaxQ.first, *minmaxQ.second);
 }
 
 /**
  * Return a pair of (minimum Q, maximum Q) for given
- * indirect geometry workspace. Estimates the Q range from all detectors.
- * If workspace contains grouped detectors/not all detectors are linked
- * to a spectrum, the returned interval may be larger than actually needed.
+ * indirect geometry workspace.
  * @param ws a workspace
  * @param minE minimum energy transfer in ws
  * @param maxE maximum energy transfer in ws
@@ -167,20 +205,15 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
   using namespace Mantid::PhysicalConstants;
   auto minQ = std::numeric_limits<double>::max();
   auto maxQ = std::numeric_limits<double>::lowest();
-  const auto &detectorInfo = ws.detectorInfo();
-  for (size_t i = 0; i < detectorInfo.size(); ++i) {
-    if (detectorInfo.isMasked(i) || detectorInfo.isMonitor(i)) {
+  const auto &spectrumInfo = ws.spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto theta = detectorInfo.twoTheta(i) / 2.;
-    const auto eFixed = getEFixed(detectorInfo.detector(i));
-    const Kernel::DeltaEMode::Type indirectEMode{Kernel::DeltaEMode::Indirect};
-    Kernel::Units::DeltaE DeltaEUnit;
-    Kernel::Units::MomentumTransfer QUnit;
-    const auto Q1 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, minE, 0., 0.,
-                                                theta, indirectEMode, eFixed);
-    const auto Q2 = Kernel::UnitConversion::run(DeltaEUnit, QUnit, maxE, 0., 0.,
-                                                theta, indirectEMode, eFixed);
+    const auto theta = spectrumInfo.twoTheta(i);
+    const auto &det = spectrumInfo.detector(i);
+    const auto Q1 = indirectQ(minE, theta, det);
+    const auto Q2 = indirectQ(maxE, theta, det);
     const auto minmaxQ = std::minmax(Q1, Q2);
     if (minmaxQ.first < minQ) {
       minQ = minmaxQ.first;

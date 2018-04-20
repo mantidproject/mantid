@@ -99,7 +99,6 @@ void SofQWNormalisedPolygon::exec() {
   }
 
   const auto &X = inputWS->x(0);
-  int emode = m_EmodeProperties.m_emode;
 
   const auto &inputIndices = inputWS->indexInfo();
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -113,23 +112,19 @@ void SofQWNormalisedPolygon::exec() {
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
+    const auto &det = spectrumInfo.detector(i);
 
-    double theta = this->m_theta[i];
-    double phi = this->m_phi[i];
-    double thetaWidth = this->m_thetaWidths[i];
-    double phiWidth = this->m_phiWidths[i];
+    const double theta = this->m_theta[i];
+    const double phi = this->m_phi[i];
+    const double thetaWidth = this->m_thetaWidths[i];
+    const double phiWidth = this->m_phiWidths[i];
 
     // Compute polygon points
-    double thetaHalfWidth = 0.5 * thetaWidth;
-    double phiHalfWidth = 0.5 * phiWidth;
+    const double thetaHalfWidth = 0.5 * thetaWidth;
 
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
 
-    const double phiLower = phi - phiHalfWidth;
-    const double phiUpper = phi + phiHalfWidth;
-
-    const double efixed = m_EmodeProperties.getEFixed(spectrumInfo.detector(i));
     const auto specNo = static_cast<specnum_t>(inputIndices.spectrumNumber(i));
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
@@ -140,15 +135,15 @@ void SofQWNormalisedPolygon::exec() {
       const double dE_jp1 = X[j + 1];
 
       const double lrQ =
-          this->calculateQ(efixed, emode, dE_jp1, thetaLower, phiLower);
+          m_EmodeProperties.q(dE_jp1, thetaLower, det);
 
       const V2D ll(dE_j,
-                   this->calculateQ(efixed, emode, dE_j, thetaLower, phiLower));
+                   m_EmodeProperties.q(dE_j, thetaLower, det));
       const V2D lr(dE_jp1, lrQ);
-      const V2D ur(dE_jp1, this->calculateQ(efixed, emode, dE_jp1, thetaUpper,
-                                            phiUpper));
+      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper,
+                                            det));
       const V2D ul(dE_j,
-                   this->calculateQ(efixed, emode, dE_j, thetaUpper, phiUpper));
+                   m_EmodeProperties.q(dE_j, thetaUpper, det));
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
         logStream << "Spectrum=" << specNo << ", theta=" << theta
                   << ",thetaWidth=" << thetaWidth << ", phi=" << phi
@@ -205,35 +200,6 @@ void SofQWNormalisedPolygon::exec() {
   }
 }
 
-/**
- * Calculate the Q value for a given set of energy transfer, scattering
- * and azimuthal angle.
- * @param efixed :: An fixed energy value
- * @param emode  :: the energy evaluation mode
- * @param deltaE :: The energy change
- * @param twoTheta :: The value of the scattering angle
- * @param azimuthal :: The value of the azimuthual angle
- * @return The value of Q
- */
-double SofQWNormalisedPolygon::calculateQ(const double efixed, int emode,
-                                          const double deltaE,
-                                          const double twoTheta,
-                                          const double azimuthal) const {
-  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
-  double ki = 0.0;
-  double kf = 0.0;
-  if (emode == 1) {
-    ki = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
-    kf = std::sqrt((efixed - deltaE) / E_mev_toNeutronWavenumberSq);
-  } else if (emode == 2) {
-    ki = std::sqrt((deltaE + efixed) / E_mev_toNeutronWavenumberSq);
-    kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
-  }
-  const double Qx = ki - kf * std::cos(twoTheta);
-  const double Qy = -kf * std::sin(twoTheta) * std::cos(azimuthal);
-  const double Qz = -kf * std::sin(twoTheta) * std::sin(azimuthal);
-  return std::sqrt(Qx * Qx + Qy * Qy + Qz * Qz);
-}
 /**
  * A map detector ID and Q ranges
  * This method looks unnecessary as it could be calculated on the fly but

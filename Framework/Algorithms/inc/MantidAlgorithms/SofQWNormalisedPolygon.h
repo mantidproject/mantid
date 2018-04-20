@@ -79,9 +79,6 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  /// Calculate the Q value for given conditions.
-  double calculateQ(const double efixed, const int emode, const double deltaE,
-                    const double twoTheta, const double azimuthal) const;
   /// Init the theta index
   void
   initAngularCachesNonPSD(const API::MatrixWorkspace_const_sptr &workspace);
