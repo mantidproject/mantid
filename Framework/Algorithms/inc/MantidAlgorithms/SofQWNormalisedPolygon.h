@@ -94,13 +94,6 @@ private:
   /// Get angles and calculate angular widths.
   void initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace);
 
-  /// Create the output workspace
-  DataObjects::RebinnedOutput_sptr
-  setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace,
-                       const std::vector<double> &qbinParams,
-                       std::vector<double> &qAxis,
-                       const std::vector<double> &ebinParams);
-
   SofQCommon m_EmodeProperties;
   /// Output Q axis
   std::vector<double> m_Qout;

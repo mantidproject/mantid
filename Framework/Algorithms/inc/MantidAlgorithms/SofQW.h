@@ -6,6 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DataProcessorAlgorithm.h"
 
+#include "MantidAlgorithms/SofQCommon.h"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
+
 namespace Mantid {
 namespace Algorithms {
 /** Converts a 2D workspace that has axes of energy transfer against spectrum
@@ -65,8 +72,9 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
-  static API::MatrixWorkspace_sptr setUpOutputWorkspace(
-      const API::MatrixWorkspace_const_sptr &inputWorkspace,
+  template<typename Workspace>
+  static std::unique_ptr<Workspace> setUpOutputWorkspace(
+      const API::MatrixWorkspace &inputWorkspace,
       const std::vector<double> &qbinParams, std::vector<double> &qAxis,
       const std::vector<double> &ebinParams, const SofQCommon &emodeProperties);
   /// Create the input properties on the given algorithm object
@@ -78,6 +86,71 @@ private:
   /// Execution code
   void exec() override;
 };
+
+/** Creates the output workspace, setting the axes according to the input
+ * binning parameters
+ *  @tparam     Workspace The type of the workspace to create
+ *  @param[in]  inputWorkspace The input workspace
+ *  @param[in]  qbinParams The q-bin parameters from the user
+ *  @param[out] qAxis The 'vertical' (q) axis defined by the given parameters
+ *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
+ *  @param[in]  emodeProperties The initialized SofQCommon object corresponding
+ *              to the input workspace and calling algorithm
+ *  @return A pointer to the newly-created workspace
+ */
+template<typename Workspace>
+std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
+    const API::MatrixWorkspace &inputWorkspace,
+    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
+    const std::vector<double> &ebinParams, const SofQCommon &emodeProperties) {
+  using Kernel::VectorHelper::createAxisFromRebinParams;
+  // Create vector to hold the new X axis values
+  HistogramData::BinEdges xAxis(0);
+  auto eHints = std::make_pair<double, double>(std::nan(""), std::nan(""));
+  if (ebinParams.empty()) {
+    xAxis = inputWorkspace.binEdges(0);
+  } else if (ebinParams.size() == 1) {
+    eHints = emodeProperties.eBinHints(inputWorkspace);
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true,
+                              true, eHints.first, eHints.second);
+  } else {
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
+  }
+  // Create a vector to temporarily hold the vertical ('y') axis and populate
+  // that
+  int yLength;
+  if (qbinParams.size() == 1) {
+    if (std::isnan(eHints.first)) {
+      eHints = emodeProperties.eBinHints(inputWorkspace);
+    }
+    const auto qHints =
+        emodeProperties.qBinHints(inputWorkspace, eHints.first, eHints.second);
+    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true,
+                                        qHints.first, qHints.second);
+  } else {
+    yLength = createAxisFromRebinParams(qbinParams, qAxis);
+  }
+
+  // Create output workspace, bin edges are same as in inputWorkspace index 0
+  auto outputWorkspace =
+      DataObjects::create<Workspace>(inputWorkspace, yLength - 1, xAxis);
+
+  // Create a binned numeric axis to replace the default vertical one
+  API::Axis *const verticalAxis = new API::BinEdgeAxis(qAxis);
+  outputWorkspace->replaceAxis(1, verticalAxis);
+
+  // Set the axis units
+  verticalAxis->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  verticalAxis->title() = "|Q|";
+
+  // Set the X axis title (for conversion to MD)
+  outputWorkspace->getAxis(0)->title() = "Energy transfer";
+
+  outputWorkspace->setYUnit("");
+  outputWorkspace->setYUnitLabel("Intensity");
+
+  return outputWorkspace;
+}
 
 } // namespace Algorithms
 } // namespace Mantid

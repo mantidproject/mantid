@@ -6,7 +6,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/FractionalRebinning.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -77,8 +76,8 @@ void SofQWNormalisedPolygon::exec() {
   m_EmodeProperties.initCachedValues(*inputWS, this);
 
   RebinnedOutput_sptr outputWS =
-      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout,
-                                 getProperty("EAxisBinning"));
+      SofQW::setUpOutputWorkspace<RebinnedOutput>(*inputWS, getProperty("QAxisBinning"), m_Qout,
+                                 getProperty("EAxisBinning"), m_EmodeProperties);
   g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();
@@ -396,69 +395,6 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     this->m_thetaWidths[i] = thetaWidth;
     this->m_phiWidths[i] = phiWidth;
   }
-}
-
-/** Creates the output workspace, setting the axes according to the input
- * binning parameters
- *  @param[in]  inputWorkspace The input workspace
- *  @param[in]  qbinParams The q-bin parameters from the user
- *  @param[out] qAxis The 'vertical' (q) axis defined by the given parameters
- *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
- *  @return A pointer to the newly-created workspace
- */
-RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
-    const API::MatrixWorkspace &inputWorkspace,
-    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
-    const std::vector<double> &ebinParams) {
-  using Kernel::VectorHelper::createAxisFromRebinParams;
-
-  HistogramData::BinEdges xAxis(0);
-  auto eHints = std::make_pair<double, double>(std::nan(""), std::nan(""));
-  // Create vector to hold the new X axis values
-  if (ebinParams.empty()) {
-    xAxis = inputWorkspace.binEdges(0);
-  } else if (ebinParams.size() == 1) {
-    eHints = m_EmodeProperties.eBinHints(inputWorkspace);
-    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true,
-                              eHints.first, eHints.second);
-  } else {
-    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
-  }
-
-  // Create a vector to temporarily hold the vertical ('y') axis and populate
-  // that
-  int yLength;
-  if (qbinParams.size() == 1) {
-    if (std::isnan(eHints.first)) {
-      eHints = m_EmodeProperties.eBinHints(inputWorkspace);
-    }
-    const auto qHints = m_EmodeProperties.qBinHints(
-        inputWorkspace, eHints.first, eHints.second);
-    yLength = createAxisFromRebinParams(qbinParams, qAxis, true, true,
-                                        qHints.first, qHints.second);
-  } else {
-    yLength = createAxisFromRebinParams(qbinParams, qAxis);
-  }
-
-  // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace =
-      create<RebinnedOutput>(inputWorkspace, yLength - 1, xAxis);
-
-  // Create a binned numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new BinEdgeAxis(qAxis);
-  outputWorkspace->replaceAxis(1, verticalAxis);
-
-  // Set the axis units
-  verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxis->title() = "|Q|";
-
-  // Set the X axis title (for conversion to MD)
-  outputWorkspace->getAxis(0)->title() = "Energy transfer";
-
-  outputWorkspace->setYUnit("");
-  outputWorkspace->setYUnitLabel("Intensity");
-
-  return std::move(outputWorkspace);
 }
 
 } // namespace Mantid

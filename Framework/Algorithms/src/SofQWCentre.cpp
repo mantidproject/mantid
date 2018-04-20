@@ -1,9 +1,7 @@
 #include "MantidAlgorithms/SofQWCentre.h"
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
@@ -11,8 +9,11 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -65,8 +66,8 @@ void SofQWCentre::exec() {
   const int emode = m_EmodeProperties.m_emode;
 
   std::vector<double> verticalAxis;
-  MatrixWorkspace_sptr outputWorkspace = SofQW::setUpOutputWorkspace(
-      inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
+  MatrixWorkspace_sptr outputWorkspace = SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+      *inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
       getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWorkspace);
   const auto &xAxis = outputWorkspace->binEdges(0).rawData();
