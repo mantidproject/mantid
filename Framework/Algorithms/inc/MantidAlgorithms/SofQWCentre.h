@@ -67,15 +67,11 @@ public:
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
-  /// Convert the workspace to a distribution
-  void makeDistribution(API::MatrixWorkspace_sptr outputWS,
-                        const std::vector<double> qAxis);
-  /// Create the input properties on the given algorithm object
-  static void createInputProperties(API::Algorithm &alg);
-  /// Energy to K constant
-  static double energyToK();
 
 private:
+  /// Convert the workspace to a distribution
+  static void makeDistribution(API::MatrixWorkspace &outputWS,
+                        const std::vector<double> &qAxis);
   /// Initialization code
   void init() override;
   /// Execution code

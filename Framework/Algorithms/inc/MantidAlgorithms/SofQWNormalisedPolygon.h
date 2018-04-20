@@ -4,10 +4,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin2D.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidDataObjects/RebinnedOutput.h"
-#include <list>
 #include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid {
@@ -86,8 +82,6 @@ private:
   /// Calculate the Q value for given conditions.
   double calculateQ(const double efixed, const int emode, const double deltaE,
                     const double twoTheta, const double azimuthal) const;
-  /// Init variables cache base on the given workspace
-  void initCachedValues(const API::MatrixWorkspace_const_sptr &workspace);
   /// Init the theta index
   void
   initAngularCachesNonPSD(const API::MatrixWorkspace_const_sptr &workspace);

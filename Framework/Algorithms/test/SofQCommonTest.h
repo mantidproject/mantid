@@ -86,8 +86,6 @@ public:
     Algorithms::SofQW alg;
     alg.initialize();
     alg.setProperty("EMode", "Indirect");
-    // const double Ei{2.3};
-    // alg.setProperty("EFixed", Ei);
     Algorithms::SofQCommon s;
     const size_t nHist{13};
     auto ws = create2DWorkspaceWithFullInstrument(nHist, 1);

@@ -1,10 +1,8 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -13,8 +11,6 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {

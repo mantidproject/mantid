@@ -5,8 +5,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAlgorithms/Rebin2D.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/IDetector.h"
 #include <list>
 
 namespace Mantid {
@@ -94,7 +92,6 @@ private:
   void initThetaCache(const API::MatrixWorkspace &workspace);
 
   SofQCommon m_EmodeProperties;
-  //---------------------------------------------------------------------------------
   /// Output Q axis
   std::vector<double> m_Qout;
   /// Input theta points
