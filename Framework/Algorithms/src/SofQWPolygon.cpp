@@ -8,7 +8,9 @@
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -59,8 +61,7 @@ void SofQWPolygon::exec() {
   const auto &X = inputWS->x(0);
 
   // Holds the spectrum-detector mapping
-  std::vector<specnum_t> specNumberMapping;
-  std::vector<detid_t> detIDMapping;
+  std::vector<SpectrumDefinition> detIDMapping(outputWS->getNumberHistograms());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
@@ -75,7 +76,7 @@ void SofQWPolygon::exec() {
     }
 
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    const auto &det = spectrumInfo.detector(i);
+    const auto *det = m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
     const double halfWidth(0.5 * m_thetaWidth);
     const double thetaLower = theta - halfWidth;
     const double thetaUpper = theta + halfWidth;
@@ -104,9 +105,11 @@ void SofQWPolygon::exec() {
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
-          specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
-          detIDMapping.push_back(det.getID());
+          // Could do a more complete merge of spectrum definitions here, but
+          // historically only the ID of the first detector in the spectrum is
+          // used, so I am keeping that for now.
+          detIDMapping[qIndex - 1].add(
+              spectrumInfo.spectrumDefinition(i)[0].first);
         }
       }
     }
@@ -119,8 +122,9 @@ void SofQWPolygon::exec() {
                                                     m_progress);
 
   // Set the output spectrum-detector mapping
-  SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
-  outputWS->updateSpectraUsing(outputDetectorMap);
+  auto outputIndices = outputWS->indexInfo();
+  outputIndices.setSpectrumDefinitions(std::move(detIDMapping));
+  outputWS->setIndexInfo(outputIndices);
 
   // Replace any NaNs in outputWorkspace with zeroes
   if (this->getProperty("ReplaceNaNs")) {

@@ -197,10 +197,9 @@ public:
     const auto &detectorInfo = ws->detectorInfo();
     const auto testDeltaE = -Ei / 1.8;
     for (size_t i = 0; i < detectorInfo.size(); ++i) {
-      const auto &det = detectorInfo.detector(i);
       const auto twoTheta = detectorInfo.twoTheta(i);
       const auto expected = directQ(Ei, testDeltaE, twoTheta);
-      TS_ASSERT_EQUALS(s.q(testDeltaE, twoTheta, det), expected)
+      TS_ASSERT_EQUALS(s.q(testDeltaE, twoTheta, nullptr), expected)
     }
   }
 
@@ -223,7 +222,7 @@ public:
       const auto &det = detectorInfo.detector(i);
       const auto twoTheta = detectorInfo.twoTheta(i);
       const auto expected = indirectQ(Ef[i], testDeltaE, twoTheta);
-      TS_ASSERT_DELTA(s.q(testDeltaE, twoTheta, det), expected, 1e-12)
+      TS_ASSERT_DELTA(s.q(testDeltaE, twoTheta, &det), expected, 1e-12)
     }
   }
 

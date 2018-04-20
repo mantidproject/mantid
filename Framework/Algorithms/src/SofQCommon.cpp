@@ -96,7 +96,7 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
  * @return The momentum transfer in A-1
  */
 double SofQCommon::q(const double deltaE, const double twoTheta,
-                     const Geometry::IDetector &det) const {
+                     const Geometry::IDetector *det) const {
   if (m_emode == 1) {
     return directQ(deltaE, twoTheta);
   }
@@ -141,9 +141,12 @@ double SofQCommon::directQ(const double deltaE, const double twoTheta) const {
  * @return The value of Q
  */
 double SofQCommon::indirectQ(const double deltaE, const double twoTheta,
-                             const Geometry::IDetector &det) const {
+                             const Geometry::IDetector *det) const {
   using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
-  const auto efixed = getEFixed(det);
+  if (!det) {
+    throw std::runtime_error("indirectQ: det is nullptr.");
+  }
+  const auto efixed = getEFixed(*det);
   const double ki = std::sqrt((efixed + deltaE) / E_mev_toNeutronWavenumberSq);
   const double kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
   return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
@@ -161,37 +164,39 @@ std::pair<double, double>
 SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
                             const double maxE) const {
   using namespace Mantid::PhysicalConstants;
-  auto minTheta = std::numeric_limits<double>::max();
-  auto maxTheta = std::numeric_limits<double>::lowest();
+  auto minTwoTheta = std::numeric_limits<double>::max();
+  auto maxTwoTheta = std::numeric_limits<double>::lowest();
   const auto &spectrumInfo = ws.spectrumInfo();
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto theta = spectrumInfo.twoTheta(i);
-    if (theta < minTheta) {
-      minTheta = theta;
+    const auto twoTheta = spectrumInfo.twoTheta(i);
+    if (twoTheta < minTwoTheta) {
+      minTwoTheta = twoTheta;
     }
-    if (theta > maxTheta) {
-      maxTheta = theta;
+    if (twoTheta > maxTwoTheta) {
+      maxTwoTheta = twoTheta;
     }
   }
-  if (minTheta == std::numeric_limits<double>::max()) {
+  if (minTwoTheta == std::numeric_limits<double>::max()) {
     throw std::runtime_error("Could not determine Q binning: workspace does "
                              "not contain usable spectra.");
   }
   std::array<double, 4> q;
-  q[0] = directQ(minE, minTheta);
-  q[1] = directQ(minE, maxTheta);
-  q[2] = directQ(maxE, minTheta);
-  q[3] = directQ(maxE, maxTheta);
+  q[0] = directQ(minE, minTwoTheta);
+  q[1] = directQ(minE, maxTwoTheta);
+  q[2] = directQ(maxE, minTwoTheta);
+  q[3] = directQ(maxE, maxTwoTheta);
   const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
   return std::make_pair(*minmaxQ.first, *minmaxQ.second);
 }
 
 /**
  * Return a pair of (minimum Q, maximum Q) for given
- * indirect geometry workspace.
+ * indirect geometry workspace. Estimates the Q range from all detectors.
+ * If workspace contains grouped detectors/not all detectors are linked
+ * to a spectrum, the returned interval may be larger than actually needed.
  * @param ws a workspace
  * @param minE minimum energy transfer in ws
  * @param maxE maximum energy transfer in ws
@@ -203,15 +208,15 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
   using namespace Mantid::PhysicalConstants;
   auto minQ = std::numeric_limits<double>::max();
   auto maxQ = std::numeric_limits<double>::lowest();
-  const auto &spectrumInfo = ws.spectrumInfo();
-  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-    if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
+  const auto &detectorInfo = ws.detectorInfo();
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (detectorInfo.isMasked(i) || detectorInfo.isMonitor(i)) {
       continue;
     }
-    const auto theta = spectrumInfo.twoTheta(i);
-    const auto &det = spectrumInfo.detector(i);
-    const auto Q1 = indirectQ(minE, theta, det);
-    const auto Q2 = indirectQ(maxE, theta, det);
+    const auto twoTheta = detectorInfo.twoTheta(i);
+    const auto &det = detectorInfo.detector(i);
+    const auto Q1 = indirectQ(minE, twoTheta, &det);
+    const auto Q2 = indirectQ(maxE, twoTheta, &det);
     const auto minmaxQ = std::minmax(Q1, Q2);
     if (minmaxQ.first < minQ) {
       minQ = minmaxQ.first;

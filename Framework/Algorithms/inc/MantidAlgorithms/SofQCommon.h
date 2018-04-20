@@ -29,7 +29,7 @@ struct DLLExport SofQCommon {
 
   /// Calculate the Q value
   double q(const double deltaE, const double twoTheta,
-           const Geometry::IDetector &det) const;
+           const Geometry::IDetector *det) const;
 
   /// Estimate minimum and maximum momentum transfer.
   std::pair<double, double> qBinHints(const API::MatrixWorkspace &ws,
@@ -39,7 +39,7 @@ struct DLLExport SofQCommon {
 private:
   double directQ(const double deltaE, const double twoTheta) const;
   double indirectQ(const double deltaE, const double twoTheta,
-                   const Geometry::IDetector &det) const;
+                   const Geometry::IDetector *det) const;
   std::pair<double, double> qBinHintsDirect(const API::MatrixWorkspace &ws,
                                             const double minE,
                                             const double maxE) const;
