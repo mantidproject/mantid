@@ -30,7 +30,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport QENSFitSimultaneous : public CurveFitting::IFittingAlgorithm {
+class DLLExport QENSFitSimultaneous : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -39,7 +39,7 @@ public:
   const std::vector<std::string> seeAlso() const override;
 
 protected:
-  virtual std::vector<Mantid::API::MatrixWorkspace_sptr> getWorkspaces() const;
+  virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &name) const;
   std::vector<std::string> getFitParameterNames() const;
@@ -53,17 +53,15 @@ private:
   void execConcrete() override;
   std::vector<API::MatrixWorkspace_sptr> convertInputToElasticQ(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
-  API::ITableWorkspace_sptr
+  std::pair<API::ITableWorkspace_sptr, API::WorkspaceGroup_sptr>
   performFit(const std::vector<API::MatrixWorkspace_sptr> &workspaces,
              const std::string &output);
   API::MatrixWorkspace_sptr
   processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
-                        API::ITableWorkspace_sptr parameterWorkspace,
                         const std::vector<std::string> &indices);
   void
   renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
-                   API::ITableWorkspace_sptr parameterWorkspace,
                    const std::vector<std::string> &indices,
                    const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
@@ -73,7 +71,6 @@ private:
   void extractMembers(API::WorkspaceGroup_sptr resultGroupWs,
                       const std::vector<API::MatrixWorkspace_sptr> &workspaces,
                       const std::string &outputWsName);
-  void deleteTemporaryWorkspaces(const std::string &outputBaseName);
   void addAdditionalLogs(API::MatrixWorkspace_sptr result);
 
   API::IAlgorithm_sptr
