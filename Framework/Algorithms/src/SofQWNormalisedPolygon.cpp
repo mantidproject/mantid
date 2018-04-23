@@ -27,10 +27,6 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-/// Default constructor
-SofQWNormalisedPolygon::SofQWNormalisedPolygon()
-    : Rebin2D(), m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1) {}
-
 /**
  * @return the name of the Algorithm
  */

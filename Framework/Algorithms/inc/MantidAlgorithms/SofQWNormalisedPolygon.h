@@ -55,7 +55,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport SofQWNormalisedPolygon : public Rebin2D {
 public:
   /// Default constructor
-  SofQWNormalisedPolygon();
+  SofQWNormalisedPolygon() = default;
   /// Algorithm's name for identification
   const std::string name() const override;
   const std::string alias() const override { return "SofQW3"; }
@@ -88,8 +88,6 @@ private:
   SofQCommon m_EmodeProperties;
   /// Output Q axis
   std::vector<double> m_Qout;
-  /// Single value theta width
-  double m_thetaWidth;
   /// Array for the two theta angles
   std::vector<double> m_theta;
   /// Array for the azimuthal angles
@@ -99,7 +97,7 @@ private:
   /// Array for the azimuthal widths
   std::vector<double> m_phiWidths;
   /// Offset for finding neighbor in nearest tube
-  int m_detNeighbourOffset;
+  int m_detNeighbourOffset{-1};
 };
 
 } // namespace Algorithms

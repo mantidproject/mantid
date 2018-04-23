@@ -55,7 +55,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class SofQCommon;
+struct SofQCommon;
 
 class DLLExport SofQW : public API::DataProcessorAlgorithm {
 public:

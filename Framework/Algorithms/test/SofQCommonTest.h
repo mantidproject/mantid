@@ -212,7 +212,7 @@ public:
     Algorithms::SofQCommon s;
     const size_t nBins{1};
     auto ws = create2DWorkspaceWithFullInstrument(2, nBins);
-    const std::array<double, 2> Ef{3.7, 2.3};
+    const std::array<double, 2> Ef{{3.7, 2.3}};
     setEFixed(ws, "pixel-0)", Ef[0]);
     setEFixed(ws, "pixel-1)", Ef[1]);
     s.initCachedValues(*ws, &alg);
