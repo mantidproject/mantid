@@ -6,8 +6,6 @@
 
 #include <gmock/gmock.h>
 
-using namespace MantidQt::CustomInterfaces;
-
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 using namespace MantidQt::CustomInterfaces;

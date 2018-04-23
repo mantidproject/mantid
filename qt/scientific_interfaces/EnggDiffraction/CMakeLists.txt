@@ -1,4 +1,5 @@
 set ( SRC_FILES
+        EnggDiffCalibrationPresenter.cpp
 	EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
@@ -10,8 +11,10 @@ set ( SRC_FILES
 	EnggDiffMultiRunFittingWidgetAdder.cpp
 	EnggDiffMultiRunFittingWidgetModel.cpp
 	EnggDiffMultiRunFittingWidgetPresenter.cpp
+	EnggDiffUserSettings.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	GSASCalibrationParameters.cpp
 	GSASIIRefineFitPeaksOutputProperties.cpp
 	GSASIIRefineFitPeaksParameters.cpp
 	RunLabel.cpp
@@ -20,6 +23,7 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
+        EnggDiffCalibrationPresenter.h
 	EnggDiffCalibSettings.h
 	EnggDiffFittingModel.h
 	EnggDiffFittingPresWorker.h
@@ -34,11 +38,16 @@ set ( INC_FILES
 	EnggDiffMultiRunFittingWidgetAdder.h
 	EnggDiffMultiRunFittingWidgetModel.h
 	EnggDiffMultiRunFittingWidgetPresenter.h
+	EnggDiffUserSettings.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	GSASCalibrationParameters.h
 	GSASIIRefineFitPeaksOutputProperties.cpp
 	GSASIIRefineFitPeaksParameters.h
+	IEnggDiffCalibrationModel.h
+	IEnggDiffCalibrationPresenter.h
+	IEnggDiffCalibrationView.h
 	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
 	IEnggDiffGSASFittingModel.h
