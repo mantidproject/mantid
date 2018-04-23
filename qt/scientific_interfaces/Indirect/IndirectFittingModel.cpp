@@ -4,6 +4,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 
 #include <numeric>
@@ -41,6 +42,9 @@ extractFunctions(const CompositeFunction &composite) {
     functions.emplace_back(composite.getFunction(i));
   return functions;
 }
+
+bool equivalentFunctions(IFunction_const_sptr func1,
+                         IFunction_const_sptr func2);
 
 /*
  * Checks whether the specified composite functions have the same composition.
@@ -105,7 +109,7 @@ excludeRegionsStringToVector(const std::string &excludeRegions) {
 
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
-  const auto &name = fitData->workspace->getName();
+  const auto &name = fitData->workspace()->getName();
   auto addToStream = [&](std::size_t spectrum) {
     stream << name << ",i" << spectrum << ";";
   };
@@ -139,7 +143,7 @@ void addInputDataToSimultaneousFit(IAlgorithm_sptr fitAlgorithm,
 void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
     const std::unique_ptr<IndirectFitData> &fitData) {
-  const auto workspace = fitData->workspace;
+  const auto workspace = fitData->workspace();
 
   const auto addData = [&](std::size_t i, std::size_t spectrum) {
     const auto suffix = i == 0 ? "" : "_" + std::to_string(i);
@@ -172,6 +176,18 @@ template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
     combined[it.first] = it.second;
   return combined;
 }
+
+IFunction_sptr createMultiDomainFunction(IFunction_sptr function,
+                                         std::size_t numberOfDomains) {
+
+  auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+
+  for (auto i = 0u; i < numberOfDomains; ++i) {
+    multiDomainFunction->addFunction(function);
+    multiDomainFunction->setDomainIndex(i, i);
+  }
+  return multiDomainFunction;
+}
 } // namespace
 
 namespace MantidQt {
@@ -194,17 +210,8 @@ std::string IndirectFittingModel::getExcludeRegion(std::size_t index) const {
   return m_fittingData[index]->excludeRegionString(index);
 }
 
-std::vector<std::string> IndirectFittingModel::inputDisplayNames(
-    const std::string &formatString, const std::string &rangeDelimiter) const {
-  std::vector<std::string> displayNames;
-  for (const auto &fitData : m_fittingData)
-    displayNames.emplace_back(
-        fitData->displayName(formatString, rangeDelimiter));
-  return displayNames;
-}
-
 std::string
-IndirectFittingModel::inputDisplayName(const std::string &formatString,
+IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
                                        std::size_t dataIndex) const {
   return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
@@ -292,7 +299,11 @@ void IndirectFittingModel::setFitFunction(IFunction_sptr model,
 }
 
 void IndirectFittingModel::setFitFunction(IFunction_sptr function) {
-  m_activeFunction = function;
+  if (m_fittingMode == FittingMode::SEQUENTIAL)
+    m_activeFunction = function;
+  else
+    m_activeFunction =
+        createMultiDomainFunction(function, numberOfWorkspaces());
   m_previousModelSelected = isPreviousModelSelected();
 }
 
@@ -417,6 +428,16 @@ IndirectFittingModel::getSingleFitAlgorithm(std::size_t dataIndex,
   input << fitData->workspace()->getName() << ",i"
         << std::to_string(fitData->getSpectrum(spectrum)) << ";";
   return createSequentialFit(m_activeFunction, input.str(), fitData.get());
+}
+
+Mantid::API::IAlgorithm_sptr
+IndirectFittingModel::sequentialFitAlgorithm() const {
+  return AlgorithmManager::Instance().create("QENSFitSequential");
+}
+
+Mantid::API::IAlgorithm_sptr
+IndirectFittingModel::simultaneousFitAlgorithm() const {
+  return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }
 
 IAlgorithm_sptr

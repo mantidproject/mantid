@@ -29,7 +29,7 @@ template <typename F>
 void applyEnumeratedData(
     const F &functor,
     const std::vector<std::unique_ptr<IndirectFitData>> &fitData) {
-  auto start = 0u;
+  std::size_t start = 0;
   for (const auto &inputData : fitData)
     start = inputData->applyEnumeratedSpectra(functor(inputData.get()), start);
 }
@@ -74,12 +74,18 @@ Map mapKeys(const Map &map, const KeyMap &keyMap) {
   Map newMap;
 
   for (const auto unmapped : map) {
-    const auto mapped = keyMap.find(key);
-    if (mapped != keyMap.end())
-      newMap[mapped->second] = unmapped.second;
+    const auto mapping = keyMap.find(unmapped.first);
+    if (mapping != keyMap.end())
+      newMap[mapping->second] = unmapped.second;
     newMap[unmapped.first] = unmapped.second;
   }
   return newMap;
+}
+
+template <typename Map2D, typename KeyMap>
+void mapInnerKeys(Map2D &map, const KeyMap &keyMap) {
+  for (const auto it : map)
+    map[it.first] = mapKeys(it.second, keyMap);
 }
 } // namespace
 
@@ -155,12 +161,11 @@ void IndirectFitOutput::updateParameters(
 void IndirectFitOutput::updateParameters(
     ITableWorkspace_sptr parameterTable,
     const std::vector<std::unique_ptr<IndirectFitData>> &fitData,
-    const std::unordered_map<std::string, std::string> parameterNameChanges) {
+    const std::unordered_map<std::string, std::string> &parameterNameChanges) {
   extractParametersFromTable(parameterTable, fitData, m_parameters);
 
-  for (const auto parameters : m_parameters)
-    m_parameters[parameters.first] =
-        mapKeys(parameters.second, parameterNameChanges);
+  for (auto parameters : m_parameters)
+    mapInnerKeys(parameters.second, parameterNameChanges);
 }
 
 void IndirectFitOutput::updateFitResults(

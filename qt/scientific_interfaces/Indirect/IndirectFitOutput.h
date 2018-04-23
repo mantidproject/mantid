@@ -15,6 +15,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 struct ParameterValue {
+  ParameterValue() : value(0) {}
   ParameterValue(double val) : value(val) {}
   ParameterValue(double val, double err) : value(val), error(err) {}
   double value;
@@ -22,9 +23,10 @@ struct ParameterValue {
 };
 
 struct ResultLocation {
-  ResultLocation(boost::weak_ptr<WorkspaceGroup> group, std::size_t i)
+  ResultLocation(boost::weak_ptr<Mantid::API::WorkspaceGroup> group,
+                 std::size_t i)
       : result(group), index(i) {}
-  boost::weak_ptr<WorkspaceGroup> result;
+  boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
   std::size_t index;
 };
 
@@ -75,13 +77,13 @@ private:
   void updateParameters(
       Mantid::API::ITableWorkspace_sptr parameterTable,
       const std::vector<std::unique_ptr<IndirectFitData>> &fitData,
-      const std::unordered_map<std::string, std::string> parameterNameChanges);
+      const std::unordered_map<std::string, std::string> &parameterNameChanges);
   void updateFitResults(
       Mantid::API::WorkspaceGroup_sptr resultGroup,
       const std::vector<std::unique_ptr<IndirectFitData>> &fitData);
 
-  boost::weak_ptr<WorkspaceGroup> m_resultGroup;
-  boost::weak_ptr<MatrixWorkspace> m_resultWorkspace;
+  boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_resultWorkspace;
   std::unordered_map<IndirectFitData *, ParameterValues> m_parameters;
   std::unordered_map<IndirectFitData *, ResultLocations>
       m_outputResultLocations;

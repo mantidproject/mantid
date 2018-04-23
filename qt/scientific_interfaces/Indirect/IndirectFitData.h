@@ -11,8 +11,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
-
 using Spectra =
     boost::variant<std::string, std::pair<std::size_t, std::size_t>>;
 
@@ -88,11 +86,11 @@ public:
   std::vector<double> excludeRegionsVector(std::size_t spectrum) const;
 
   template <typename F> void applySpectra(F &&functor) const {
-    return boost::apply_visitor(ApplySpectra<F>(functor), m_spectra);
+    boost::apply_visitor(ApplySpectra<F>(functor), m_spectra);
   }
 
   template <typename F>
-  void applyEnumeratedSpectra(F &&functor, std::size_t start = 0) const {
+  std::size_t applyEnumeratedSpectra(F &&functor, std::size_t start = 0) const {
     return boost::apply_visitor(ApplyEnumeratedSpectra<F>(functor, start),
                                 m_spectra);
   }

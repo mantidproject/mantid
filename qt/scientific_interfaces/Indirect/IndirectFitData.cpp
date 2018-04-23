@@ -20,7 +20,7 @@ std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
 std::vector<double>
 excludeRegionsStringToVector(const std::string &excludeRegions) {
   std::vector<std::string> regionStrings;
-  boost::split(regionStrings, excludeRegions, boost::is_any_of("\,,-"));
+  boost::split(regionStrings, excludeRegions, boost::is_any_of(",-"));
   std::vector<double> regions;
   std::transform(
       regionStrings.begin(), regionStrings.end(), std::back_inserter(regions),
@@ -46,9 +46,9 @@ struct SpectraOutOfRange : boost::static_visitor<std::vector<T>> {
 
   std::vector<T> operator()(const std::pair<T, T> &range) const {
     std::vector<T> notInRange;
-    if (range.first < minimum)
+    if (range.first < m_minimum)
       notInRange.emplace_back(m_minimum);
-    else if (range.second > maximum)
+    else if (range.second > m_maximum)
       notInRange.emplace_back(m_maximum);
     return notInRange;
   }
@@ -129,11 +129,12 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
 struct GetSpectrum : boost::static_visitor<std::size_t> {
   GetSpectrum(std::size_t index) : m_index(index) {}
 
-  std::size_t operator()(const std::pair<std::size_t, std::size_t> &spectra) {
+  std::size_t
+  operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     return spectra.first + m_index;
   }
 
-  std::size_t operator()(const std::string &spectra) {
+  std::size_t operator()(const std::string &spectra) const {
     return vectorFromString<std::size_t>(spectra)[m_index];
   }
 

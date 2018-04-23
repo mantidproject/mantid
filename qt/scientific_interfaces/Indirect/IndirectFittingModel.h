@@ -24,10 +24,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getWorkspace(std::size_t index) const;
   const Spectra &getSpectra(std::size_t index) const;
   std::string getExcludeRegion(std::size_t index) const;
-  std::vector<std::string>
-  inputDisplayNames(const std::string &formatString,
-                    const std::string &rangeDelimiter) const;
-  std::string inputDisplayName(const std::string &formatString,
+  std::string createOutputName(const std::string &formatString,
                                const std::string &rangeDelimiter,
                                std::size_t dataIndex) const;
   bool isMultiFit() const;
@@ -89,8 +86,8 @@ private:
   createSequentialFit(Mantid::API::IFunction_sptr function,
                       const std::string &input,
                       IndirectFitData *initialFitData) const;
-  virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const = 0;
-  virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const = 0;
+  virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
+  virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
   virtual std::string sequentialFitOutputName() const = 0;
   virtual std::string simultaneousFitOutputName() const = 0;
 
