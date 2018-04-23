@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
 #include "IndirectFitAnalysisTab.h"
-#include "IndirectIqtFitModel.h"
+#include "IqtFitModel.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -48,8 +48,6 @@ protected slots:
   void newDataLoaded(const QString wsName);
   void updatePreviewPlots() override;
   void updatePlotRange() override;
-  void specMinChanged(int value);
-  void specMaxChanged(int value);
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
   void backgroundSelectorChanged(double val);
@@ -57,7 +55,6 @@ protected slots:
   void algorithmComplete(bool error) override;
   void updatePlotOptions() override;
   void plotWorkspace();
-  void saveResult();
   void fitFunctionChanged();
   void parameterUpdated(const Mantid::API::IFunction *function);
   void customBoolUpdated(const QString &key, bool value);
@@ -70,7 +67,7 @@ private:
   void updateIntensityTie(const QString &intensityTie);
   std::string fitTypeString() const;
 
-  IndirectIqtFitModel *m_iqtFittingModel;
+  IqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;
   QString m_tiedParameter;
 };

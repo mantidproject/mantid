@@ -23,8 +23,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectFitAnalysisTab(parent), m_uiForm(new Ui::MSDFit) {
+    : IndirectFitAnalysisTab(new MSDFitModel, parent), m_uiForm(new Ui::MSDFit) {
   m_uiForm->setupUi(parent);
+  m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
+  setSpectrumSelectionView(m_uiForm->svSpectrumView);
   IndirectFitAnalysisTab::addPropertyBrowserToUI(m_uiForm.get());
 }
 
@@ -55,23 +57,14 @@ void MSDFit::setup() {
   connect(m_uiForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePreviewPlots()));
 
-  connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
-          SLOT(specMinChanged(int)));
-  connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
-          SLOT(specMaxChanged(int)));
-
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm->pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(updatePlotGuess()));
 }
-
-int MSDFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
-
-int MSDFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
 
 bool MSDFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
@@ -80,60 +73,6 @@ bool MSDFit::doPlotGuess() const {
 
 void MSDFit::singleFit() { executeSingleFit(); }
 
-std::string MSDFit::createSingleFitOutputName() const {
-  return constructBaseName() + std::to_string(selectedSpectrum());
-}
-
-std::string MSDFit::createSequentialFitOutputName() const {
-  const auto specMin = std::to_string(minimumSpectrum());
-  const auto specMax = std::to_string(maximumSpectrum());
-  return constructBaseName() + specMin + "_to_" + specMax;
-}
-
-std::string MSDFit::constructBaseName() const {
-  auto outputName = inputWorkspace()->getName();
-  const auto model = selectedFitType().toStdString();
-
-  const auto cutIndex = outputName.find_last_of('_');
-  if (cutIndex != std::string::npos)
-    outputName = outputName.substr(0, cutIndex);
-  return outputName + "_MSD_" + model + "_s";
-}
-
-IAlgorithm_sptr MSDFit::singleFitAlgorithm() const {
-  const auto fitSpec = m_uiForm->spPlotSpectrum->value();
-  return msdFitAlgorithm(fitSpec, fitSpec);
-}
-
-IAlgorithm_sptr MSDFit::sequentialFitAlgorithm() const {
-  const auto specMin = m_uiForm->spSpectraMin->value();
-  const auto specMax = m_uiForm->spSpectraMax->value();
-  return msdFitAlgorithm(specMin, specMax);
-}
-
-/*
- * Creates an initialized MSDFit Algorithm, using the model with the
- * specified name, to be run from the specified minimum spectrum to
- * the specified maximum spectrum.
- *
- * @param specMin The minimum spectrum to fit.
- * @param specMax The maximum spectrum to fit.
- * @return        An MSDFit Algorithm using the specified model, which
- *                will run across all spectrum between the specified
- *                minimum and maximum.
- */
-IAlgorithm_sptr MSDFit::msdFitAlgorithm(int specMin, int specMax) const {
-  IAlgorithm_sptr msdAlg =
-      AlgorithmManager::Instance().create("QENSFitSequential");
-  msdAlg->initialize();
-  msdAlg->setProperty("SpecMin", specMin);
-  msdAlg->setProperty("SpecMax", specMax);
-  msdAlg->setProperty(
-      "OutputWorkspace",
-      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)) + "_Result");
-  return msdAlg;
-}
-
 bool MSDFit::validate() {
   UserInputValidator uiv;
 
@@ -141,11 +80,6 @@ bool MSDFit::validate() {
 
   auto range = std::make_pair(startX(), endX());
   uiv.checkValidRange("Fitting Range", range);
-
-  int specMin = m_uiForm->spSpectraMin->value();
-  int specMax = m_uiForm->spSpectraMax->value();
-  auto specRange = std::make_pair(specMin, specMax + 1);
-  uiv.checkValidRange("Spectrum Range", specRange);
 
   // In the future the MSDFit algorithm should be modified to allow this
   if (selectedFitType() == "None")
@@ -170,8 +104,7 @@ void MSDFit::algorithmComplete(bool error) {
   if (error)
     return;
 
-  IndirectFitAnalysisTab::fitAlgorithmComplete(outputWorkspaceName() +
-                                               "_Parameters");
+  IndirectFitAnalysisTab::fitAlgorithmComplete();
   // Enable plot and save
   m_uiForm->pbPlot->setEnabled(true);
   m_uiForm->pbSave->setEnabled(true);
@@ -231,42 +164,12 @@ void MSDFit::newDataLoaded(const QString wsName) {
   auto const &workspace = inputWorkspace();
   int maxWsIndex = 0;
 
-  if (workspace) {
+  if (workspace)
     maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
-  }
 
   m_uiForm->spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm->spPlotSpectrum->setMinimum(0);
   m_uiForm->spPlotSpectrum->setValue(0);
-
-  m_uiForm->spSpectraMin->setMaximum(maxWsIndex);
-  m_uiForm->spSpectraMin->setMinimum(0);
-
-  m_uiForm->spSpectraMax->setMaximum(maxWsIndex);
-  m_uiForm->spSpectraMax->setMinimum(0);
-  m_uiForm->spSpectraMax->setValue(maxWsIndex);
-}
-
-/**
- * Handles the user entering a new minimum spectrum index.
- *
- * Prevents the user entering an overlapping spectra range.
- *
- * @param value Minimum spectrum index
- */
-void MSDFit::specMinChanged(int value) {
-  m_uiForm->spSpectraMax->setMinimum(value);
-}
-
-/**
- * Handles the user entering a new maximum spectrum index.
- *
- * Prevents the user entering an overlapping spectra range.
- *
- * @param value Maximum spectrum index
- */
-void MSDFit::specMaxChanged(int value) {
-  m_uiForm->spSpectraMin->setMaximum(value);
 }
 
 void MSDFit::startXChanged(double startX) {
@@ -282,17 +185,10 @@ void MSDFit::endXChanged(double endX) {
 }
 
 /**
- * Handles saving of workspace
- */
-void MSDFit::saveClicked() {
-  IndirectFitAnalysisTab::saveResult(outputWorkspaceName());
-}
-
-/**
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult(outputWorkspaceName(), "All");
+  IndirectFitAnalysisTab::plotResult("All");
 }
 
 } // namespace IDA

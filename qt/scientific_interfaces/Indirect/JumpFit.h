@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
 #include "IndirectFitAnalysisTab.h"
+#include "JumpFitModel.h"
 #include "ui_JumpFit.h"
 
 #include "MantidAPI/IFunction.h"
@@ -29,9 +30,7 @@ protected slots:
   /// Handle when the sample input is ready
   void handleSampleInputReady(const QString &filename);
   /// Slot to handle plotting a different spectrum of the workspace
-  void handleWidthChange(const QString &text);
-  /// Find all spectra with width data in the workspace
-  void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
+  void handleWidthChange(int);
   /// Handles plotting results of algorithm on miniplot
   void algorithmComplete(bool error) override;
   /// Handles plotting and saving
@@ -39,25 +38,10 @@ protected slots:
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
   void updatePlotRange() override;
-  void saveClicked();
   void plotClicked();
   void updatePlotOptions() override;
 
 protected:
-  size_t getWidth() const;
-  int minimumSpectrum() const override;
-  int maximumSpectrum() const override;
-
-  std::string createSingleFitOutputName() const override;
-  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
-
-  Mantid::API::IAlgorithm_sptr
-  deleteWorkspaceAlgorithm(const std::string &workspaceName);
-
-  Mantid::API::IAlgorithm_sptr
-  scaleAlgorithm(const std::string &workspaceToScale,
-                 const std::string &outputName, double scaleFactor);
-
   void enablePlotResult() override;
   void disablePlotResult() override;
   void enableSaveResult() override;
@@ -68,19 +52,13 @@ protected:
   void removeGuessPlot() override;
 
 private:
-  std::map<std::string, size_t>
-  findAxisLabelsWithSubstrings(Mantid::API::TextAxis *axis,
-                               const std::vector<std::string> &substrings,
-                               const size_t &maximumNumber) const;
-
+  void setAvailableWidths(const std::vector<std::string> &widths);
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
   // The UI form
+  JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
-
-  /// Map of axis labels to spectrum number
-  std::map<std::string, size_t> m_spectraList;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

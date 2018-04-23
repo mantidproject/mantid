@@ -156,6 +156,22 @@
           <number>0</number>
          </property>
          <item>
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true"/>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QPushButton" name="pbPlotPreview">
            <property name="text">
             <string>Plot Current Preview</string>
@@ -246,6 +262,12 @@
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
+   <extends>QWidget</extends>
+   <header>IndirectSpectrumSelectionView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

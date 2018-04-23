@@ -28,10 +28,10 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new IndirectIqtFitModel, parent),
+    : IndirectFitAnalysisTab(new IqtFitModel, parent),
       m_uiForm(new Ui::IqtFit) {
   m_uiForm->setupUi(parent);
-  m_iqtFittingModel = dynamic_cast<IndirectIqtFitModel *>(fittingModel());
+  m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   addPropertyBrowserToUI(m_uiForm.get());
 }
@@ -86,11 +86,6 @@ void IqtFit::setup() {
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePreviewPlots()));
-
-  connect(m_uiForm->spSpectraMin, SIGNAL(valueChanged(int)), this,
-          SLOT(specMinChanged(int)));
-  connect(m_uiForm->spSpectraMax, SIGNAL(valueChanged(int)), this,
-          SLOT(specMaxChanged(int)));
 
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
@@ -205,11 +200,6 @@ void IqtFit::plotWorkspace() {
 }
 
 /**
- * Save the result of the algorithm
- */
-void IqtFit::saveResult() { m_iqtFittingModel->saveResult(); }
-
-/**
  * Handles completion of the IqtFitMultiple algorithm.
  * @param error True if the algorithm was stopped due to error, false otherwise
  * @param outputWsName The name of the output workspace
@@ -268,13 +258,6 @@ void IqtFit::newDataLoaded(const QString wsName) {
   m_uiForm->spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm->spPlotSpectrum->setMinimum(0);
   m_uiForm->spPlotSpectrum->setValue(0);
-
-  m_uiForm->spSpectraMin->setMaximum(maxWsIndex);
-  m_uiForm->spSpectraMin->setMinimum(0);
-
-  m_uiForm->spSpectraMax->setMaximum(maxWsIndex);
-  m_uiForm->spSpectraMax->setMinimum(0);
-  m_uiForm->spSpectraMax->setValue(maxWsIndex);
 }
 
 void IqtFit::backgroundSelectorChanged(double val) {
@@ -306,28 +289,6 @@ void IqtFit::updatePlotRange() {
     const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
     rangeSelector->setRange(range.first, range.second);
   }
-}
-
-/**
- * Handles the user entering a new minimum spectrum index.
- *
- * Prevents the user entering an overlapping spectra range.
- *
- * @param value Minimum spectrum index
- */
-void IqtFit::specMinChanged(int value) {
-  m_uiForm->spSpectraMax->setMinimum(value);
-}
-
-/**
- * Handles the user entering a new maximum spectrum index.
- *
- * Prevents the user entering an overlapping spectra range.
- *
- * @param value Maximum spectrum index
- */
-void IqtFit::specMaxChanged(int value) {
-  m_uiForm->spSpectraMin->setMaximum(value);
 }
 
 void IqtFit::startXChanged(double startX) {

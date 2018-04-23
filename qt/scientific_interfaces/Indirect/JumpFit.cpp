@@ -21,9 +21,13 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectFitAnalysisTab(parent), m_uiForm(new Ui::JumpFit) {
+    : IndirectFitAnalysisTab(new JumpFitModel, parent),
+      m_uiForm(new Ui::JumpFit) {
   m_uiForm->setupUi(parent);
+  m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
   IndirectFitAnalysisTab::addPropertyBrowserToUI(m_uiForm.get());
+  m_uiForm->svSpectrumView->hideSpectrumSelector();
+  setSpectrumSelectionView(m_uiForm->svSpectrumView);
 }
 
 void JumpFit::setup() {
@@ -55,11 +59,11 @@ void JumpFit::setup() {
   connect(m_uiForm->dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleSampleInputReady(const QString &)));
   // Connect width selector to handler method
-  connect(m_uiForm->cbWidth, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(handleWidthChange(const QString &)));
+  connect(m_uiForm->cbWidth, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(handleWidthChange(int)));
 
   // Handle plotting and saving
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm->pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
@@ -67,14 +71,6 @@ void JumpFit::setup() {
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(updatePlotGuess()));
 }
-
-size_t JumpFit::getWidth() const {
-  return m_spectraList.at(m_uiForm->cbWidth->currentText().toStdString());
-}
-
-int JumpFit::minimumSpectrum() const { return static_cast<int>(getWidth()); }
-
-int JumpFit::maximumSpectrum() const { return static_cast<int>(getWidth()); }
 
 bool JumpFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
@@ -91,7 +87,7 @@ bool JumpFit::validate() {
   uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSample);
 
   // this workspace doesn't have any valid widths
-  if (m_spectraList.empty())
+  if (m_jumpFittingModel->getWidths().empty())
     uiv.addErrorMessage(
         "Sample Input: Workspace doesn't appear to contain any width data");
 
@@ -115,9 +111,7 @@ void JumpFit::algorithmComplete(bool error) {
   m_uiForm->pbPlot->setEnabled(true);
   m_uiForm->pbSave->setEnabled(true);
 
-  // Process the parameters table
-  const auto paramWsName = outputWorkspaceName() + "_Parameters";
-  IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName);
+  IndirectFitAnalysisTab::fitAlgorithmComplete();
 }
 
 /**
@@ -137,24 +131,19 @@ void JumpFit::loadSettings(const QSettings &settings) {
  * @param filename :: The name of the workspace to plot
  */
 void JumpFit::handleSampleInputReady(const QString &filename) {
-  // Scale to convert to HWHM
-  const auto sample = filename + "_HWHM";
-  scaleAlgorithm(filename.toStdString(), sample.toStdString(), 0.5)->execute();
-
-  IndirectFitAnalysisTab::newInputDataLoaded(sample);
+  IndirectFitAnalysisTab::newInputDataLoaded(filename);
+  setAvailableWidths(m_jumpFittingModel->getWidths());
 
   QPair<double, double> res;
   QPair<double, double> range = m_uiForm->ppPlotTop->getCurveRange("Sample");
-  auto bounds = getResolutionRangeFromWs(sample, res) ? res : range;
+  auto bounds = getResolutionRangeFromWs(filename, res) ? res : range;
   auto qRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
   qRangeSelector->setMinimum(bounds.first);
   qRangeSelector->setMaximum(bounds.second);
 
-  findAllWidths(inputWorkspace());
-
-  if (m_spectraList.size() > 0) {
+  if (m_jumpFittingModel->getWorkspace(0)) {
     m_uiForm->cbWidth->setEnabled(true);
-    const auto width = static_cast<int>(getWidth());
+    const auto width = m_jumpFittingModel->getWidthSpectrum(0);
     setMinimumSpectrum(width);
     setMaximumSpectrum(width);
     setSelectedSpectrum(width);
@@ -164,44 +153,11 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   }
 }
 
-/**
- * Find all of the spectra in the workspace that have width data
- *
- * @param ws :: The workspace to search
- */
-void JumpFit::findAllWidths(MatrixWorkspace_const_sptr ws) {
+void JumpFit::setAvailableWidths(const std::vector<std::string> &widths) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm->cbWidth);
   m_uiForm->cbWidth->clear();
-
-  auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
-
-  if (axis) {
-    m_spectraList = findAxisLabelsWithSubstrings(axis, {".Width", ".FWHM"}, 3);
-
-    for (const auto &iter : m_spectraList)
-      m_uiForm->cbWidth->addItem(QString::fromStdString(iter.first));
-  } else
-    m_spectraList.clear();
-}
-
-std::map<std::string, size_t> JumpFit::findAxisLabelsWithSubstrings(
-    TextAxis *axis, const std::vector<std::string> &substrings,
-    const size_t &maximumNumber) const {
-  std::map<std::string, size_t> labels;
-
-  for (size_t i = 0u; i < axis->length(); ++i) {
-    const auto label = axis->label(i);
-    size_t substringIndex = 0;
-    size_t foundIndex = std::string::npos;
-
-    while (substringIndex < substrings.size() &&
-           foundIndex == std::string::npos && labels.size() < maximumNumber)
-      foundIndex = label.find(substrings[substringIndex++]);
-
-    if (foundIndex != std::string::npos)
-      labels[label] = i;
-  }
-  return labels;
+  for (const auto &width : widths)
+    m_uiForm->cbWidth->addItem(QString::fromStdString(width));
 }
 
 /**
@@ -209,11 +165,11 @@ std::map<std::string, size_t> JumpFit::findAxisLabelsWithSubstrings(
  *
  * @param text :: The name spectrum index to plot
  */
-void JumpFit::handleWidthChange(const QString &text) {
-  const auto width = text.toStdString();
-
-  if (m_spectraList.find(width) != m_spectraList.end())
-    setSelectedSpectrum(static_cast<int>(m_spectraList[width]));
+void JumpFit::handleWidthChange(int widthIndex) {
+  auto index = static_cast<std::size_t>(widthIndex);
+  auto spectrum = static_cast<int>(m_jumpFittingModel->getWidthSpectrum(index));
+  m_jumpFittingModel->setActiveWidth(index);
+  setSelectedSpectrum(spectrum);
 }
 
 void JumpFit::startXChanged(double startX) {
@@ -248,47 +204,6 @@ void JumpFit::updatePlotRange() {
   }
 }
 
-std::string JumpFit::createSingleFitOutputName() const {
-  auto outputName = inputWorkspace()->getName();
-  auto position = outputName.rfind("_Result");
-
-  if (position != std::string::npos)
-    outputName = outputName.substr(0, position) +
-                 outputName.substr(position + 7, outputName.size());
-  return outputName + "_" + selectedFitType().toStdString() + "_JumpFit";
-}
-
-IAlgorithm_sptr JumpFit::singleFitAlgorithm() const {
-  const auto widthText = m_uiForm->cbWidth->currentText().toStdString();
-  const auto width = m_spectraList.at(widthText);
-
-  auto fitAlg = AlgorithmManager::Instance().create("QENSFitSequential");
-  fitAlg->initialize();
-  fitAlg->setProperty("SpecMin", static_cast<int>(width));
-  fitAlg->setProperty("SpecMax", static_cast<int>(width));
-  fitAlg->setProperty("OutputWorkspace",
-                      createSingleFitOutputName() + "_Result");
-  return fitAlg;
-}
-
-IAlgorithm_sptr
-JumpFit::deleteWorkspaceAlgorithm(const std::string &workspaceName) {
-  auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->setProperty("Workspace", workspaceName);
-  return deleteAlg;
-}
-
-IAlgorithm_sptr JumpFit::scaleAlgorithm(const std::string &workspaceToScale,
-                                        const std::string &outputName,
-                                        double scaleFactor) {
-  auto scaleAlg = AlgorithmManager::Instance().create("Scale");
-  scaleAlg->initialize();
-  scaleAlg->setProperty("InputWorkspace", workspaceToScale);
-  scaleAlg->setProperty("OutputWorkspace", outputName);
-  scaleAlg->setProperty("Factor", scaleFactor);
-  return scaleAlg;
-}
-
 void JumpFit::updatePlotOptions() {}
 
 void JumpFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
@@ -318,16 +233,7 @@ void JumpFit::removeGuessPlot() {
  * Handles mantid plotting
  */
 void JumpFit::plotClicked() {
-  const auto outWsName = outputWorkspaceName() + "_Workspace";
-  IndirectFitAnalysisTab::plotResult(outWsName, "All");
-}
-
-/**
- * Handles saving of workspace
- */
-void JumpFit::saveClicked() {
-  const auto outWsName = outputWorkspaceName() + "_Workspace";
-  IndirectFitAnalysisTab::saveResult(outWsName);
+  IndirectFitAnalysisTab::plotResult("All");
 }
 
 } // namespace IDA
