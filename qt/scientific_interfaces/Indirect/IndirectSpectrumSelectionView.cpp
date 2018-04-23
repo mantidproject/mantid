@@ -172,6 +172,18 @@ UserInputValidator &IndirectSpectrumSelectionView::validateMaskBinsString(
   return uiv;
 }
 
+void IndirectSpectrumSelectionView::hideSpectrumSelector() {
+  m_selector->lbSelectionMode->hide();
+  m_selector->cbSelectionMode->hide();
+  m_selector->swSpectraSelection->hide();
+}
+
+void IndirectSpectrumSelectionView::showSpectrumSelector() {
+  m_selector->lbSelectionMode->show();
+  m_selector->cbSelectionMode->show();
+  m_selector->swSpectraSelection->show();
+}
+
 void IndirectSpectrumSelectionView::emitSpectraChanged(int modeIndex) {
   const auto selectionMode = static_cast<SpectrumSelectionMode>(modeIndex);
   if (selectionMode == SpectrumSelectionMode::RANGE)

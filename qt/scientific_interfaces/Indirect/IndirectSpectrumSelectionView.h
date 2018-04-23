@@ -78,6 +78,9 @@ public slots:
   void setMaskString(const std::string &maskString);
   void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra);
 
+  void hideSpectrumSelector();
+  void showSpectrumSelector();
+
 signals:
   void selectedSpectraChanged(const std::string &);
   void selectedSpectraChanged(std::size_t, std::size_t);
