@@ -1,9 +1,10 @@
 #ifndef MANTID_ALGORITHMS_IQTFITSEQUENTIAL_H_
 #define MANTID_ALGORITHMS_IQTFITSEQUENTIAL_H_
 
-#include "MantidWorkflowAlgorithms/QENSFitSequential.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
 /**
@@ -23,7 +24,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IqtFitSequential : public QENSFitSequential {
+template <typename Base> class DLLExport IqtFit : public Base {
 public:
   const std::string name() const override;
   int version() const override;
@@ -40,6 +41,7 @@ private:
 };
 
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid
 
 #endif

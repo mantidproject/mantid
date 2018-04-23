@@ -123,6 +123,7 @@ if [[ "$CLEANBUILD" == true ]]; then
 fi
 if [ -d $BUILD_DIR ]; then
   rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
+  find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*
@@ -300,10 +301,13 @@ fi
 ###############################################################################
 # Run the unit tests
 ###############################################################################
+# Prevent race conditions when creating the user config directory
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+mkdir -p $userconfig_dir
+touch $userconfig_dir/Mantid.user.properties
+
 if [[ ${DO_UNITTESTS} == true ]]; then
-  # Remove any Mantid.user.properties file
-  userprops=~/.mantid/Mantid.user.properties
-  rm -f $userprops
   $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 fi
 

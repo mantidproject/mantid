@@ -1,5 +1,3 @@
-#include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -12,6 +10,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSimultaneous.h"
+
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -22,10 +24,11 @@
 #include <cmath>
 
 namespace {
-Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
+Mantid::Kernel::Logger g_log("ConvolutionFit");
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::MantidVec;
 
 std::size_t numberOfFunctions(IFunction_sptr function,
                               const std::string &functionName);
@@ -69,18 +72,23 @@ bool containsFunction(IFunction_sptr function,
   return false;
 }
 
-template <typename T, typename... Ts>
-std::vector<T, Ts...> cloneVector(const std::vector<T, Ts...> &vec) {
-  return std::vector<double>(vec.begin(), vec.end());
+template <typename T, typename F, typename... Ts>
+std::vector<T, Ts...> transformVector(const std::vector<T, Ts...> &vec,
+                                      F const &functor) {
+  auto target = std::vector<T, Ts...>();
+  target.reserve(vec.size());
+  std::transform(vec.begin(), vec.end(), std::back_inserter(target), functor);
+  return target;
 }
 
 template <typename T, typename F, typename... Ts>
 std::vector<T, Ts...> combineVectors(const std::vector<T, Ts...> &vec,
                                      const std::vector<T, Ts...> &vec2,
                                      F const &combinator) {
-  auto combined = cloneVector(vec);
-  std::transform(vec.begin(), vec.end(), vec2.begin(), combined.begin(),
-                 combinator);
+  auto combined = std::vector<T, Ts...>();
+  combined.reserve(vec.size());
+  std::transform(vec.begin(), vec.end(), vec2.begin(),
+                 std::back_inserter(combined), combinator);
   return combined;
 }
 
@@ -104,18 +112,12 @@ std::vector<double> multiplyVectors(const std::vector<T, Ts...> &vec,
 
 template <typename T, typename... Ts>
 std::vector<T, Ts...> squareVector(const std::vector<T, Ts...> &vec) {
-  auto target = cloneVector(vec);
-  std::transform(target.begin(), target.end(), target.begin(),
-                 VectorHelper::Squares<T>());
-  return target;
+  return transformVector(vec, VectorHelper::Squares<T>());
 }
 
 template <typename T, typename... Ts>
 std::vector<T, Ts...> squareRootVector(const std::vector<T, Ts...> &vec) {
-  auto target = cloneVector(vec);
-  std::transform(target.begin(), target.end(), target.begin(),
-                 static_cast<T (*)(T)>(sqrt));
-  return target;
+  return transformVector(vec, static_cast<T (*)(T)>(sqrt));
 }
 
 IFunction_sptr extractFirstBackground(IFunction_sptr function);
@@ -156,44 +158,116 @@ std::string extractBackgroundType(IFunction_sptr function) {
     backgroundType = "Fit " + backgroundType;
   return backgroundType;
 }
+
+std::vector<std::size_t>
+searchForFitParameters(const std::string &suffix,
+                       ITableWorkspace_sptr tableWorkspace) {
+  auto indices = std::vector<std::size_t>();
+
+  for (auto i = 0u; i < tableWorkspace->columnCount(); ++i) {
+    auto name = tableWorkspace->getColumn(i)->name();
+    auto position = name.rfind(suffix);
+    if (position != std::string::npos &&
+        position + suffix.size() == name.size())
+      indices.emplace_back(i);
+  }
+  return indices;
+}
+
+std::pair<MantidVec, MantidVec>
+calculateEISFAndError(const MantidVec &height, const MantidVec &heightError,
+                      const MantidVec &amplitude,
+                      const MantidVec &amplitudeError) {
+  auto total = addVectors(height, amplitude);
+  auto eisfY = divideVectors(height, total);
+
+  auto heightESq = squareVector(heightError);
+
+  auto ampErrSq = squareVector(amplitudeError);
+  auto totalErr = addVectors(heightESq, ampErrSq);
+
+  auto heightYSq = squareVector(height);
+  auto totalSq = squareVector(total);
+
+  auto errOverTotalSq = divideVectors(totalErr, totalSq);
+  auto heightESqOverYSq = divideVectors(heightESq, heightYSq);
+
+  auto sqrtESqOverYSq = squareRootVector(heightESqOverYSq);
+  auto eisfYSumRoot = multiplyVectors(eisfY, sqrtESqOverYSq);
+
+  return {eisfY, addVectors(eisfYSumRoot, errOverTotalSq)};
+}
 } // namespace
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
 using namespace API;
 using namespace Kernel;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvolutionFitSequential)
-
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ConvolutionFitSequential::name() const {
+template <> const std::string ConvolutionFit<QENSFitSequential>::name() const {
   return "ConvolutionFitSequential";
 }
 
+template <>
+const std::string ConvolutionFit<QENSFitSimultaneous>::name() const {
+  return "ConvolutionFitSimultaneous";
+}
+
+template <typename Base> const std::string ConvolutionFit<Base>::name() const {
+  return "ConvolutionFit";
+}
+
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvolutionFitSequential::version() const { return 1; }
+template <typename Base> int ConvolutionFit<Base>::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvolutionFitSequential::category() const {
+template <typename Base>
+const std::string ConvolutionFit<Base>::category() const {
   return "Workflow\\MIDAS";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ConvolutionFitSequential::summary() const {
+template <>
+const std::string ConvolutionFit<QENSFitSequential>::summary() const {
   return "Performs a sequential fit for a convolution workspace";
 }
 
+template <>
+const std::string ConvolutionFit<QENSFitSimultaneous>::summary() const {
+  return "Performs a simultaneous fit across convolution workspaces";
+}
+
+template <typename Base>
+const std::string ConvolutionFit<Base>::summary() const {
+  return "Performs a convolution fit";
+}
+
 /// Algorithm's see also for related algorithms. @see Algorithm::seeAlso
-const std::vector<std::string> ConvolutionFitSequential::seeAlso() const {
+template <>
+const std::vector<std::string>
+ConvolutionFit<QENSFitSequential>::seeAlso() const {
   return {"QENSFitSequential"};
 }
 
-std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
-  auto errors = QENSFitSequential::validateInputs();
+template <>
+const std::vector<std::string>
+ConvolutionFit<QENSFitSimultaneous>::seeAlso() const {
+  return {"QENSSimultaneousFit"};
+}
+
+template <typename Base>
+const std::vector<std::string> ConvolutionFit<Base>::seeAlso() const {
+  return {};
+}
+
+template <typename Base>
+std::map<std::string, std::string> ConvolutionFit<Base>::validateInputs() {
+  auto errors = Base::validateInputs();
   IFunction_sptr function = getProperty("Function");
   if (!containsFunction(function, "Convolution") ||
       !containsFunction(function, "Resolution"))
@@ -204,113 +278,74 @@ std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
   return errors;
 }
 
-bool ConvolutionFitSequential::throwIfElasticQConversionFails() const {
+template <typename Base>
+bool ConvolutionFit<Base>::throwIfElasticQConversionFails() const {
   return true;
 }
 
-bool ConvolutionFitSequential::isFitParameter(const std::string &name) const {
+template <typename Base>
+bool ConvolutionFit<Base>::isFitParameter(const std::string &name) const {
   bool isBackgroundParameter = name.rfind("A0") != std::string::npos ||
                                name.rfind("A1") != std::string::npos;
   return name.rfind("Centre") == std::string::npos && !isBackgroundParameter;
 }
 
-ITableWorkspace_sptr
-ConvolutionFitSequential::performFit(const std::string &input,
-                                     const std::string &output) {
-  auto parameterWorkspace = QENSFitSequential::performFit(input, output);
+template <typename Base>
+ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
+    ITableWorkspace_sptr parameterTable) const {
   if (m_deltaUsed)
-    calculateEISF(parameterWorkspace);
-  return parameterWorkspace;
+    calculateEISF(parameterTable);
+  return parameterTable;
 }
 
+template <typename Base>
 std::map<std::string, std::string>
-ConvolutionFitSequential::getAdditionalLogStrings() const {
+ConvolutionFit<Base>::getAdditionalLogStrings() const {
   IFunction_sptr function = getProperty("Function");
-  auto logs = QENSFitSequential::getAdditionalLogStrings();
+  auto logs = Base::getAdditionalLogStrings();
   logs["delta_function"] = m_deltaUsed ? "true" : "false";
   logs["background"] = extractBackgroundType(function);
   return logs;
 }
 
+template <typename Base>
 std::map<std::string, std::string>
-ConvolutionFitSequential::getAdditionalLogNumbers() const {
-  auto logs = QENSFitSequential::getAdditionalLogNumbers();
+ConvolutionFit<Base>::getAdditionalLogNumbers() const {
+  auto logs = Base::getAdditionalLogNumbers();
   logs["lorentzians"] = boost::lexical_cast<std::string>(m_lorentzianCount);
   return logs;
-}
-
-/**
- * Searchs for a given fit parameter within the a vector of columnNames
- * @param suffix - The string to search for within the columnName
- * @param columns - A vector of column names to be searched through
- * @return A vector of all the column names that contained the given suffix
- * string
- */
-std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
-    const std::string &suffix, const std::vector<std::string> &columns) {
-  auto fitParams = std::vector<std::string>();
-  const size_t totalColumns = columns.size();
-  for (auto i = 0u; i < totalColumns; ++i) {
-    auto pos = columns.at(i).rfind(suffix);
-    if (pos != std::string::npos) {
-      auto endCheck = pos + suffix.size();
-      if (endCheck == columns.at(i).size()) {
-        fitParams.push_back(columns.at(i));
-      }
-    }
-  }
-  return fitParams;
 }
 
 /**
  * Calculates the EISF if the fit includes a Delta function
  * @param tableWs - The TableWorkspace to append the EISF calculation to
  */
-void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs) {
+template <typename Base>
+void ConvolutionFit<Base>::calculateEISF(ITableWorkspace_sptr &tableWs) const {
   // Get height data from parameter table
-  const auto columns = tableWs->getColumnNames();
-  const auto height = searchForFitParams("Height", columns).at(0);
-  const auto heightErr = searchForFitParams("Height_Err", columns).at(0);
+  const auto height = searchForFitParameters("Height", tableWs).at(0);
+  const auto heightErr = searchForFitParameters("Height_Err", tableWs).at(0);
   auto heightY = tableWs->getColumn(height)->numeric_fill<>();
   auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
 
   // Get amplitude column names
-  const auto ampNames = searchForFitParams("Amplitude", columns);
-  const auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
+  const auto ampIndices = searchForFitParameters("Amplitude", tableWs);
+  const auto ampErrorIndices = searchForFitParameters("Amplitude_Err", tableWs);
 
   // For each lorentzian, calculate EISF
-  size_t maxSize = ampNames.size();
-  if (ampErrorNames.size() > maxSize) {
-    maxSize = ampErrorNames.size();
-  }
-  for (auto i = 0u; i < maxSize; i++) {
+  auto maxSize = ampIndices.size();
+  if (ampErrorIndices.size() > maxSize)
+    maxSize = ampErrorIndices.size();
+
+  for (auto i = 0u; i < maxSize; ++i) {
     // Get amplitude from column in table workspace
-    const auto ampName = ampNames.at(i);
-    auto ampY = tableWs->getColumn(ampName)->numeric_fill<>();
-    const auto ampErrorName = ampErrorNames.at(i);
-    auto ampErr = tableWs->getColumn(ampErrorName)->numeric_fill<>();
-
-    // Calculate EISF and EISF error
-    auto total = addVectors(heightY, ampY);
-    auto eisfY = divideVectors(heightY, total);
-
-    auto heightESq = squareVector(heightE);
-
-    auto ampErrSq = squareVector(ampErr);
-    auto totalErr = addVectors(heightESq, ampErr);
-
-    auto heightYSq = squareVector(heightY);
-    auto totalSq = squareVector(total);
-
-    auto errOverTotalSq = divideVectors(totalErr, totalSq);
-    auto heightESqOverYSq = divideVectors(heightESq, heightYSq);
-
-    auto sqrtESqOverYSq = squareRootVector(heightESqOverYSq);
-    auto eisfYSumRoot = multiplyVectors(eisfY, sqrtESqOverYSq);
-
-    auto eisfErr = addVectors(eisfYSumRoot, errOverTotalSq);
+    auto ampY = tableWs->getColumn(ampIndices[i])->numeric_fill<>();
+    auto ampErr = tableWs->getColumn(ampErrorIndices[i])->numeric_fill<>();
+    auto eisfAndError = calculateEISFAndError(heightY, heightE, ampY, ampErr);
 
     // Append the calculated values to the table workspace
+    auto ampName = tableWs->getColumn(ampIndices[i])->name();
+    auto ampErrorName = tableWs->getColumn(ampErrorIndices[i])->name();
     auto columnName =
         ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
     columnName += "EISF";
@@ -320,19 +355,30 @@ void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs) {
 
     tableWs->addColumn("double", columnName);
     tableWs->addColumn("double", errorColumnName);
-    auto maxEisf = eisfY.size();
-    if (eisfErr.size() > maxEisf) {
-      maxEisf = eisfErr.size();
+    auto maxEisf = eisfAndError.first.size();
+    if (eisfAndError.second.size() > maxEisf) {
+      maxEisf = eisfAndError.second.size();
     }
 
     auto col = tableWs->getColumn(columnName);
     auto errCol = tableWs->getColumn(errorColumnName);
     for (auto j = 0u; j < maxEisf; j++) {
-      col->cell<double>(j) = eisfY.at(j);
-      errCol->cell<double>(j) = eisfErr.at(j);
+      col->cell<double>(j) = eisfAndError.first.at(j);
+      errCol->cell<double>(j) = eisfAndError.second.at(j);
     }
   }
 }
 
+// Register the algorithms into the AlgorithmFactory
+template class ConvolutionFit<QENSFitSequential>;
+template class ConvolutionFit<QENSFitSimultaneous>;
+
+using ConvolutionFitSequential = ConvolutionFit<QENSFitSequential>;
+using ConvolutionFitSimultaneous = ConvolutionFit<QENSFitSimultaneous>;
+
+DECLARE_ALGORITHM(ConvolutionFitSequential)
+DECLARE_ALGORITHM(ConvolutionFitSimultaneous)
+
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid

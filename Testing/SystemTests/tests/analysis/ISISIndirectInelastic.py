@@ -789,8 +789,6 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
             raise RuntimeError("num_bins should be an int")
         if not isinstance(self.func, str):
             raise RuntimeError("Function should be a string.")
-        if not isinstance(self.ftype, str):
-            raise RuntimeError("Function type should be a string.")
         if not isinstance(self.startx, float):
             raise RuntimeError("startx should be a float")
         if not isinstance(self.endx, float):

@@ -1,4 +1,4 @@
-#include "MantidWorkflowAlgorithms/QENSFitSequential.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -62,7 +62,7 @@ MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
 }
 
 struct ElasticQAppender {
-  ElasticQAppender(std::vector<MatrixWorkspace_sptr> &elasticInput)
+  explicit ElasticQAppender(std::vector<MatrixWorkspace_sptr> &elasticInput)
       : m_elasticInput(elasticInput), m_converted() {}
 
   void operator()(MatrixWorkspace_sptr workspace, const std::string &outputBase,
@@ -87,7 +87,6 @@ private:
 std::vector<MatrixWorkspace_sptr>
 convertToElasticQ(const std::vector<MatrixWorkspace_sptr> &workspaces,
                   const std::string &outputBaseName, bool doThrow) {
-  std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> converted;
   std::vector<MatrixWorkspace_sptr> elasticInput;
   auto appendElasticQWorkspace = ElasticQAppender(elasticInput);
   appendElasticQWorkspace(workspaces[0], outputBaseName, doThrow);
@@ -257,6 +256,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
 } // namespace
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
 using namespace API;
@@ -382,14 +382,14 @@ void QENSFitSequential::init() {
 
   declareProperty(
       "ExtractMembers", false,
-      "If true, then each member of the convolution fit will be extracted"
+      "If true, then each member of the fit will be extracted"
       ", into their own workspace. These workspaces will have a histogram"
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
 
   declareProperty(
       make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and ExtractMembers is true members of any "
+      "If true and OutputCompositeMembers is true members of any "
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
@@ -443,8 +443,8 @@ void QENSFitSequential::exec() {
       (workspaces.size() > 1 && workspaces.size() != spectra.size()))
     throw std::invalid_argument("A malformed input string was provided.");
 
-  auto outputWs = performFit(inputString, outputBaseName);
-  auto resultWs = processIndirectFitParameters(outputWs);
+  auto parameterWs = performFit(inputString, outputBaseName);
+  auto resultWs = processIndirectFitParameters(parameterWs);
   auto groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       outputBaseName + "_Workspaces");
   AnalysisDataService::Instance().addOrReplace(
@@ -466,7 +466,7 @@ void QENSFitSequential::exec() {
   copyLogs(resultWs, groupWs);
 
   setProperty("OutputWorkspace", resultWs);
-  setProperty("OutputParameterWorkspace", outputWs);
+  setProperty("OutputParameterWorkspace", parameterWs);
   setProperty("OutputWorkspaceGroup", groupWs);
 }
 
@@ -573,6 +573,11 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
   return pifp->getProperty("OutputWorkspace");
 }
 
+ITableWorkspace_sptr QENSFitSequential::processParameterTable(
+    ITableWorkspace_sptr parameterTable) const {
+  return parameterTable;
+}
+
 void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
     const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
@@ -592,7 +597,6 @@ void QENSFitSequential::renameWorkspaces(
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
-  bool extractMembers = getProperty("ExtractMembers");
   bool convolveMembers = getProperty("ConvolveMembers");
   bool passWsIndex = getProperty("PassWSIndexToFunction");
 
@@ -600,12 +604,12 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
   plotPeaks->setProperty("Input", input);
   plotPeaks->setProperty("OutputWorkspace", output);
-  plotPeaks->setProperty("Function", getPropertyValue("Function"));
+  plotPeaks->setPropertyValue("Function", getPropertyValue("Function"));
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
-  plotPeaks->setProperty("OutputCompositeMembers", extractMembers);
+  plotPeaks->setProperty("OutputCompositeMembers", true);
   plotPeaks->setProperty("ConvolveMembers", convolveMembers);
   plotPeaks->setProperty("MaxIterations", getPropertyValue("MaxIterations"));
   plotPeaks->setProperty("Minimizer", getPropertyValue("Minimizer"));
@@ -697,4 +701,5 @@ std::string QENSFitSequential::getTemporaryName() const {
 }
 
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid

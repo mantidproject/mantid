@@ -7,9 +7,10 @@ from sans.algorithm_detail.scale_helpers import (DivideByVolumeFactory, DivideBy
                                                  MultiplyByAbsoluteScaleFactory, MultiplyByAbsoluteScaleLOQ,
                                                  MultiplyByAbsoluteScaleISIS)
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.enums import (SampleShape, SANSFacility, DataType)
+from sans.common.enums import (SampleShape, SANSFacility, DataType, SANSInstrument)
 from sans.state.scale import get_scale_builder
 from sans.state.data import get_data_builder
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class ScaleHelperTest(unittest.TestCase):
@@ -44,11 +45,13 @@ class ScaleHelperTest(unittest.TestCase):
     def test_that_divide_uses_settings_from_workspace(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024, height=8.0,
+                                                   width=8.0, thickness=1.0, shape=SampleShape.CylinderAxisAlong)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_state = data_builder.build()
 
-        scale_builder = get_scale_builder(data_state)
+        scale_builder = get_scale_builder(data_state, file_information)
         scale_state = scale_builder.build()
 
         test_director = TestDirector()
@@ -78,11 +81,12 @@ class ScaleHelperTest(unittest.TestCase):
     def test_that_divide_uses_settings_from_state_if_they_are_set(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_state = data_builder.build()
 
-        scale_builder = get_scale_builder(data_state)
+        scale_builder = get_scale_builder(data_state, file_information)
         width = 10.
         height = 5.
         thickness = 2.
@@ -123,11 +127,12 @@ class ScaleHelperTest(unittest.TestCase):
     def test_that_correct_scale_strategy_is_selected_for_loq(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LOQ74044")
         data_state = data_builder.build()
 
-        scale_builder = get_scale_builder(data_state)
+        scale_builder = get_scale_builder(data_state, file_information)
         scale_state = scale_builder.build()
 
         test_director = TestDirector()
@@ -144,11 +149,12 @@ class ScaleHelperTest(unittest.TestCase):
     def test_that_correct_scale_strategy_is_selected_for_loq_2(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LOQ74044")
         data_state = data_builder.build()
 
-        scale_builder = get_scale_builder(data_state)
+        scale_builder = get_scale_builder(data_state, file_information)
         scale_builder.set_scale(2.4)
         scale_state = scale_builder.build()
 
