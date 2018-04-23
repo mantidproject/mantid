@@ -48,7 +48,7 @@ void setGoniometerMatrix(IPeak &self, const object &data) {
 
 void export_IPeak() {
   // return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::MatrixToNumpy> return_copy_to_numpy;
+  using return_copy_to_numpy = return_value_policy<Policies::MatrixToNumpy>;
 
   register_ptr_to_python<IPeak *>();
 
@@ -61,9 +61,16 @@ void export_IPeak() {
            "cache values related to it.")
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"),
            "Return the run number this peak was measured at")
+      .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"),
+           "Return the peak number for this peak")
+      .def("getBankName", &IPeak::getBankName, arg("self"),
+           "Return the bank name for this peak")
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
+      .def("setPeakNumber", &IPeak::setPeakNumber,
+           (arg("self"), arg("peak_number")),
+           "Set the peak number for this peak")
       .def("getMonitorCount", &IPeak::getMonitorCount, arg("self"),
            "Get the monitor count set for this peak")
       .def("setMonitorCount", &IPeak::setMonitorCount,
@@ -89,7 +96,8 @@ void export_IPeak() {
            ":class:`~mantid.geometry.Goniometer` rotation was NOT taken "
            "out.\n"
            "Note: There is no 2*pi factor used, so \\|Q| = 1/wavelength.")
-      .def("findDetector", &IPeak::findDetector, arg("self"),
+      .def("findDetector", (bool (IPeak::*)()) & IPeak::findDetector,
+           arg("self"),
            "Using the :class:`~mantid.geometry.Instrument` set in the peak, "
            "perform ray tracing to find "
            "the exact :class:`~mantid.geometry.Detector`.")
@@ -125,6 +133,8 @@ void export_IPeak() {
            "Return the incident wavelength")
       .def("getScattering", &IPeak::getScattering, arg("self"),
            "Calculate the scattering angle of the peak")
+      .def("getAzimuthal", &IPeak::getAzimuthal, arg("self"),
+           "Calculate the azimuthal angle of the peak")
       .def("getDSpacing", &IPeak::getDSpacing, arg("self"),
            "Calculate the d-spacing of the peak, in 1/Angstroms")
       .def("getTOF", &IPeak::getTOF, arg("self"),

@@ -52,7 +52,7 @@ private:
   virtual bool useCustomInputPropertyName() const { return false; }
 
   /// Convenience typdef for workspace names.
-  typedef MultiPeriodGroupWorker::VecWSGroupType VecWSGroupType;
+  using VecWSGroupType = MultiPeriodGroupWorker::VecWSGroupType;
   /// multi period group workspaces.
   VecWSGroupType m_multiPeriodGroups;
   /// Multiperiod group worker.

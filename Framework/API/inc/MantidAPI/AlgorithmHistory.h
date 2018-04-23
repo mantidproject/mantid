@@ -34,10 +34,10 @@ template <class T> struct CompareHistory {
 }
 
 // typedefs for algorithm history pointers
-typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
-typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
-typedef std::set<AlgorithmHistory_sptr,
-                 Detail::CompareHistory<AlgorithmHistory>> AlgorithmHistories;
+using AlgorithmHistory_sptr = boost::shared_ptr<AlgorithmHistory>;
+using AlgorithmHistory_const_sptr = boost::shared_ptr<const AlgorithmHistory>;
+using AlgorithmHistories =
+    std::set<AlgorithmHistory_sptr, Detail::CompareHistory<AlgorithmHistory>>;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 

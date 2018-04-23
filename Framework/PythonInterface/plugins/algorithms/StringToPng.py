@@ -11,6 +11,9 @@ class StringToPng(mantid.api.PythonAlgorithm):
         """
         return "DataHandling\\Plots"
 
+    def seeAlso(self):
+        return [ "SavePlot1D" ]
+
     def name(self):
         """ Algorithm name
         """

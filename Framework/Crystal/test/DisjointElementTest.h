@@ -139,8 +139,8 @@ public:
   }
 
   void test_complex() {
-    typedef boost::shared_ptr<DisjointElement> DisjointElement_sptr;
-    typedef std::vector<DisjointElement_sptr> VecDisjointElement;
+    using DisjointElement_sptr = boost::shared_ptr<DisjointElement>;
+    using VecDisjointElement = std::vector<DisjointElement_sptr>;
 
     // Create elements from 0-9
     VecDisjointElement vecElements;

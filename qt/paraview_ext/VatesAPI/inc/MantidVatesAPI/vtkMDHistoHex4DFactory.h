@@ -74,11 +74,9 @@ protected:
   void validate() const override;
 
 private:
-  typedef std::vector<std::vector<std::vector<UnstructuredPoint>>> PointMap;
-
-  typedef std::vector<std::vector<UnstructuredPoint>> Plane;
-
-  typedef std::vector<UnstructuredPoint> Column;
+  using PointMap = std::vector<std::vector<std::vector<UnstructuredPoint>>>;
+  using Plane = std::vector<std::vector<UnstructuredPoint>>;
+  using Column = std::vector<UnstructuredPoint>;
 
   /// timestep obtained from framework.
   double m_timestep;

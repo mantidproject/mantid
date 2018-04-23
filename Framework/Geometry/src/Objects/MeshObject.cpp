@@ -1,7 +1,5 @@
 #include "MantidGeometry/Objects/MeshObject.h"
-
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
@@ -45,7 +43,7 @@ void MeshObject::initialize() {
         "Too many vertices (" + std::to_string(m_vertices.size()) +
         "). MeshObject cannot have more than 65535 vertices.");
   }
-  m_handler = boost::make_shared<CacheGeometryHandler>(this);
+  m_handler = boost::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -567,7 +565,7 @@ void MeshObject::draw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Render();
+  m_handler->render();
 }
 
 /**
@@ -579,7 +577,7 @@ void MeshObject::initDraw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Initialize();
+  m_handler->initialize();
 }
 
 /**
@@ -601,18 +599,16 @@ void MeshObject::updateGeometryHandler() {
 /**
 * Output functions for rendering, may also be used internally
 */
-int MeshObject::numberOfTriangles() const {
-  return static_cast<int>(m_triangles.size() / 3);
-}
+size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 
 /**
 * get faces
 */
-int *MeshObject::getTriangles() const {
-  int *faces = nullptr;
+std::vector<uint32_t> MeshObject::getTriangles() const {
+  std::vector<uint32_t> faces;
   size_t nFaceCorners = m_triangles.size();
   if (nFaceCorners > 0) {
-    faces = new int[static_cast<std::size_t>(nFaceCorners)];
+    faces.resize(static_cast<std::size_t>(nFaceCorners));
     for (size_t i = 0; i < nFaceCorners; ++i) {
       faces[i] = static_cast<int>(m_triangles[i]);
     }
@@ -623,18 +619,18 @@ int *MeshObject::getTriangles() const {
 /**
 * get number of points
 */
-int MeshObject::numberOfVertices() const {
+size_t MeshObject::numberOfVertices() const {
   return static_cast<int>(m_vertices.size());
 }
 
 /**
 * get vertices
 */
-double *MeshObject::getVertices() const {
-  double *points = nullptr;
+std::vector<double> MeshObject::getVertices() const {
+  std::vector<double> points;
   size_t nPoints = m_vertices.size();
   if (nPoints > 0) {
-    points = new double[static_cast<std::size_t>(nPoints) * 3];
+    points.resize(static_cast<std::size_t>(nPoints) * 3);
     for (size_t i = 0; i < nPoints; ++i) {
       V3D pnt = m_vertices[i];
       points[i * 3 + 0] = pnt.X();
@@ -648,12 +644,13 @@ double *MeshObject::getVertices() const {
 /**
 * get info on standard shapes (none for Mesh Object)
 */
-void MeshObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                               std::vector<Kernel::V3D> &vectors,
                                double &myradius, double &myheight) const {
   // In practice, this outputs type = -1,
   // to indicate not a "standard" object (cuboid/cone/cyl/sphere).
   // Retained for possible future use.
-  type = 0;
+  type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
   m_handler->GetObjectGeom(type, vectors, myradius, myheight);

@@ -45,6 +45,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
+    def seeAlso(self):
+        return [ "LoadGSS","SaveGSS","Fit","EnggFitPeaks" ]
+
     def name(self):
         return "GSASIIRefineFitPeaks"
 
@@ -279,14 +282,13 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         :return: (R weighted profile, goodness-of-fit coefficient, table containing refined lattice parameters)
         """
         phase_paths = self.getPropertyValue(self.PROP_PATHS_TO_PHASE_FILES).split(",")
-
         pawley_tmin = None
         if self._refinement_method_is_pawley():
             pawley_dmin = float(self.getPropertyValue(self.PROP_PAWLEY_DMIN))
             pawley_tmin = GSASIIlattice.Dsp2pos(Inst=gsas_proj.histogram(0).data["Instrument Parameters"][0],
                                                 dsp=pawley_dmin)
         refinements = self._create_refinement_params_dict(num_phases=len(phase_paths), pawley_tmin=pawley_tmin)
-        prog = Progress(self, start=0, end=1, nreports=len(refinements) + 1)
+        prog = Progress(self, start=0, end=1, nreports=2)
 
         prog.report("Reading phase files")
         for phase_path in phase_paths:
@@ -296,8 +298,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                 pawley_reflections = self._generate_pawley_reflections(phase)
                 phase.data["Pawley ref"] = pawley_reflections
 
-        for i, refinement in enumerate(refinements):
-            prog.report("Step {} of refinement recipe".format(i + 1))
+        prog.report("Running {} refinement steps".format(len(refinements)))
+        for refinement in refinements:
             gsas_proj.do_refinements([refinement])
         gsas_proj.save()
 

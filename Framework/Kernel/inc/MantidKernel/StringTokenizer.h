@@ -50,9 +50,9 @@ public:
     TOK_IGNORE_FINAL_EMPTY_TOKEN =
         4 ///< ignore an empty token at the end of the string.
   };
-  typedef std::vector<std::string> TokenVec;
-  typedef std::vector<std::string>::iterator Iterator;
-  typedef std::vector<std::string>::const_iterator ConstIterator;
+  using TokenVec = std::vector<std::string>;
+  using Iterator = std::vector<std::string>::iterator;
+  using ConstIterator = std::vector<std::string>::const_iterator;
   /// Constructs an object from an empty string.
   StringTokenizer() = default;
   /// Constructor requiring a string to tokenize and a string of separators.

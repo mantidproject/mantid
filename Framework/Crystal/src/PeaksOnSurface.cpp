@@ -3,7 +3,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::Kernel;
-typedef std::vector<double> VecDouble;
+using VecDouble = std::vector<double>;
 
 namespace Mantid {
 namespace Crystal {

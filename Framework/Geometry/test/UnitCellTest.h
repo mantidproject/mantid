@@ -142,6 +142,12 @@ public:
     }
   }
 
+  void testReciprocalAngle0() {
+    UnitCell cell(5.45, 5.45, 5.45);
+    TS_ASSERT_EQUALS(cell.recAngle(0., 4., 0., 0., 4., 0.), 0.);
+    TS_ASSERT_EQUALS(cell.recAngle(0., -4., 0., 0., 4., 0.), 180.);
+  }
+
   void testStrToUnitCell() {
     UnitCell cell(2.0, 4.0, 5.0, 90.0, 100.0, 102.0);
     std::string cellString = unitCellToStr(cell);

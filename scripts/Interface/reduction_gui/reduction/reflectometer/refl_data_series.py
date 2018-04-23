@@ -7,7 +7,6 @@ from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
-from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 
 
 class DataSeries(BaseScriptElement):
@@ -24,18 +23,7 @@ class DataSeries(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script = "import os\n"
-        script += "import time\n"
-        script += "t0=time.time()\n"
-        script += "from reduction.command_interface import ReductionSingleton\n"
-        script += "ReductionSingleton.clean()\n"
-
-        for item in self.data_sets:
-            script += item.to_script()
-            script += "\n"
-        script += "print \"Reduction time: %g\\n\" % (time.time()-t0)\n"
-
-        return script
+        raise RuntimeError("refl_data_series.DataSeries.to_script is deprecated")
 
     def update(self):
         """
@@ -47,12 +35,12 @@ class DataSeries(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<DataSeries>\n"
+        _xml  = "<DataSeries>\n"
         for item in self.data_sets:
-            xml += item.to_xml()
-        xml += "</DataSeries>\n"
+            _xml += item.to_xml()
+        _xml += "</DataSeries>\n"
 
-        return xml
+        return _xml
 
     def from_xml(self, xml_str):
         """
@@ -70,9 +58,6 @@ class DataSeries(BaseScriptElement):
         element_list = dom.getElementsByTagName("Data")
         if len(element_list)==0:
             element_list = dom.getElementsByTagName("RefLData")
-        if len(element_list)==0:
-            self._data_class = REFMDataSets
-            element_list = dom.getElementsByTagName("RefMData")
 
         if len(element_list)>0:
             for item in element_list:

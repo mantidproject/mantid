@@ -50,7 +50,7 @@ private:
 
 public:
   /// Type of MDEvent used by the MDEventWorkspace.
-  typedef typename MDEW_SPTR::element_type::MDEventType MDEventType;
+  using MDEventType = typename MDEW_SPTR::element_type::MDEventType;
 
   /**
   Constructor

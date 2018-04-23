@@ -37,6 +37,9 @@ public:
   const std::string name() const override final;
 
   int version() const override final;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadFITS", "SaveNXTomo"};
+  }
 
   const std::string category() const override final;
 

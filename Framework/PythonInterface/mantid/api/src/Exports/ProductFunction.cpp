@@ -8,11 +8,13 @@ using namespace boost::python;
 
 namespace {
 
-typedef double (ProductFunction::*getParameterType1)(size_t) const;
-typedef double (ProductFunction::*getParameterType2)(const std::string &) const;
+using getParameterType1 = double (ProductFunction::*)(size_t) const;
+using getParameterType2 =
+    double (ProductFunction::*)(const std::string &) const;
 
-typedef void (ProductFunction::*setParameterType2)(const std::string &,
-                                                   const double &, bool);
+using setParameterType2 = void (ProductFunction::*)(const std::string &,
+                                                    const double &, bool);
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
 }

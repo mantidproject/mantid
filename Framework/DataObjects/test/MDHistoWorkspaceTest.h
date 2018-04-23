@@ -33,7 +33,7 @@ private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
   size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
-    Mantid::API::IMDIterator *it = ws->createIterator(NULL);
+    auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
     for (; counter < it->getDataSize(); ++counter) {
@@ -42,7 +42,6 @@ private:
       }
       it->next(1);
     }
-    delete it;
     return numberMasked;
   }
 
@@ -287,16 +286,14 @@ public:
         new MDHistoDimension("X", "x", frame, -10, 10, 5));
     MDHistoWorkspace ws(dimX);
     size_t numVertices;
-    coord_t *v1 = ws.getVertexesArray(0, numVertices);
+    auto v1 = ws.getVertexesArray(0, numVertices);
     TS_ASSERT_EQUALS(numVertices, 2);
     TS_ASSERT_DELTA(v1[0], -10.0, 1e-5);
     TS_ASSERT_DELTA(v1[1], -6.0, 1e-5);
-    delete[] v1;
 
-    coord_t *v2 = ws.getVertexesArray(4, numVertices);
+    auto v2 = ws.getVertexesArray(4, numVertices);
     TS_ASSERT_DELTA(v2[0], 6.0, 1e-5);
     TS_ASSERT_DELTA(v2[1], 10.0, 1e-5);
-    delete[] v2;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -309,7 +306,7 @@ public:
     MDHistoWorkspace ws(dimX, dimY);
     size_t numVertices, i;
 
-    boost::scoped_array<coord_t> v1(ws.getVertexesArray(0, numVertices));
+    auto v1 = ws.getVertexesArray(0, numVertices);
     TS_ASSERT_EQUALS(numVertices, 4);
     i = 0 * 2;
     TS_ASSERT_DELTA(v1[i + 0], -10.0, 1e-5);
@@ -318,7 +315,7 @@ public:
     TS_ASSERT_DELTA(v1[i + 0], -6.0, 1e-5);
     TS_ASSERT_DELTA(v1[i + 1], -6.0, 1e-5);
     // The opposite corner
-    boost::scoped_array<coord_t> v2(ws.getVertexesArray(24, numVertices));
+    auto v2 = ws.getVertexesArray(24, numVertices);
     i = 0 * 2;
     TS_ASSERT_DELTA(v2[i + 0], 6.0, 1e-5);
     TS_ASSERT_DELTA(v2[i + 1], 6.0, 1e-5);
@@ -339,7 +336,7 @@ public:
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     size_t numVertices, i;
 
-    boost::scoped_array<coord_t> v(ws.getVertexesArray(0, numVertices));
+    auto v = ws.getVertexesArray(0, numVertices);
     TS_ASSERT_EQUALS(numVertices, 8);
     i = 0;
     TS_ASSERT_DELTA(v[i + 0], -10.0, 1e-5);
@@ -413,17 +410,15 @@ public:
     MDHistoDimension_sptr dimZ(
         new MDHistoDimension("Z", "z", frame, -8, 10, 10));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
-    IMDIterator *it = ws.createIterator();
+    auto it = ws.createIterator();
     TS_ASSERT(it);
     MDHistoWorkspaceIterator *hwit =
-        dynamic_cast<MDHistoWorkspaceIterator *>(it);
+        dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     TS_ASSERT(hwit);
     TS_ASSERT(it->next());
-    delete it;
     boost::scoped_ptr<MDImplicitFunction> mdfunction(new MDImplicitFunction);
     it = ws.createIterator(mdfunction.get());
     TS_ASSERT(it);
-    delete it;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -1263,10 +1258,10 @@ public:
     IMDHistoWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IMDHistoWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IMDHistoWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -1274,9 +1269,9 @@ public:
     IMDHistoWorkspace_const_sptr wsCastConst;
     IMDHistoWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDHistoWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDHistoWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

@@ -66,8 +66,8 @@ private:
   // Do not use default methods
 };
 
-typedef Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>
-    TransformScaleFactory;
+using TransformScaleFactory =
+    Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

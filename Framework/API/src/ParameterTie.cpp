@@ -81,7 +81,7 @@ void ParameterTie::set(const std::string &expr) {
   }
 
   // Create the template m_expression
-  boost::regex rx("\\b(([[:alpha:]]|_)([[:alnum:]]|_|\\.)*)\\b(?!(\\s*\\())");
+  boost::regex rx(R"(\b(([[:alpha:]]|_)([[:alnum:]]|_|\.)*)\b(?!(\s*\()))");
   std::string input = expr;
   boost::smatch res;
   std::string::const_iterator start = input.begin();

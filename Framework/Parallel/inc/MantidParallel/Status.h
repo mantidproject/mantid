@@ -44,7 +44,8 @@ class ThreadingBackend;
 class MANTID_PARALLEL_DLL Status {
 public:
 #ifdef MPI_EXPERIMENTAL
-  Status(const boost::mpi::status &status) : m_status(status) {}
+  Status(const boost::mpi::status &status)
+      : m_status(status), m_threadingBackend{false} {}
 #endif
 
   template <typename T> boost::optional<int> count() const {
@@ -56,12 +57,14 @@ public:
   }
 
 private:
-  Status(const size_t size) : m_size(size), m_threadingBackend(true) {}
+  Status(const size_t size) : m_size(size) {}
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::status m_status;
 #endif
   const size_t m_size{0};
-  const bool m_threadingBackend{false};
+#ifdef MPI_EXPERIMENTAL
+  bool m_threadingBackend{true};
+#endif
   // For accessing constructor based on size.
   friend class detail::ThreadingBackend;
 };

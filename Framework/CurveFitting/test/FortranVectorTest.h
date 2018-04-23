@@ -9,8 +9,8 @@
 
 using Mantid::CurveFitting::FortranVector;
 using Mantid::CurveFitting::ComplexType;
-typedef FortranVector<Mantid::CurveFitting::GSLVector> FortranDoubleVector;
-typedef FortranVector<Mantid::CurveFitting::ComplexVector> FortranComplexVector;
+using FortranDoubleVector = FortranVector<Mantid::CurveFitting::GSLVector>;
+using FortranComplexVector = FortranVector<Mantid::CurveFitting::ComplexVector>;
 
 class FortranVectorTest : public CxxTest::TestSuite {
 public:
@@ -207,7 +207,7 @@ public:
   }
 
   void test_int_array() {
-    typedef FortranVector<std::vector<int>> FortranIntVector;
+    using FortranIntVector = FortranVector<std::vector<int>>;
     FortranIntVector ivec(1, 3);
     ivec(1) = 11;
     ivec(2) = 22;

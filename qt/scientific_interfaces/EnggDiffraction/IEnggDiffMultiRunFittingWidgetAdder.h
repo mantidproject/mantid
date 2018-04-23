@@ -9,6 +9,7 @@ namespace CustomInterfaces {
 class IEnggDiffMultiRunFittingWidgetAdder {
 
 public:
+  virtual ~IEnggDiffMultiRunFittingWidgetAdder() = default;
   virtual void operator()(IEnggDiffMultiRunFittingWidgetOwner &owner) = 0;
 };
 
