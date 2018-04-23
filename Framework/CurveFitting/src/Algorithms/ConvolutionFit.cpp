@@ -28,6 +28,7 @@ Mantid::Kernel::Logger g_log("ConvolutionFit");
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::MantidVec;
 
 std::size_t numberOfFunctions(IFunction_sptr function,
                               const std::string &functionName);
@@ -72,6 +73,15 @@ bool containsFunction(IFunction_sptr function,
 }
 
 template <typename T, typename F, typename... Ts>
+std::vector<T, Ts...> transformVector(const std::vector<T, Ts...> &vec,
+                                      F const &functor) {
+  auto target = std::vector<T, Ts...>();
+  target.reserve(vec.size());
+  std::transform(vec.begin(), vec.end(), std::back_inserter(target), functor);
+  return target;
+}
+
+template <typename T, typename F, typename... Ts>
 std::vector<T, Ts...> combineVectors(const std::vector<T, Ts...> &vec,
                                      const std::vector<T, Ts...> &vec2,
                                      F const &combinator) {
@@ -102,18 +112,12 @@ std::vector<double> multiplyVectors(const std::vector<T, Ts...> &vec,
 
 template <typename T, typename... Ts>
 std::vector<T, Ts...> squareVector(const std::vector<T, Ts...> &vec) {
-  auto target = std::vector<T, Ts...>();
-  std::transform(vec.begin(), vec.end(), std::back_inserter(target),
-                 VectorHelper::Squares<T>());
-  return target;
+  return transformVector(vec, VectorHelper::Squares<T>());
 }
 
 template <typename T, typename... Ts>
 std::vector<T, Ts...> squareRootVector(const std::vector<T, Ts...> &vec) {
-  auto target = std::vector<T, Ts...>();
-  std::transform(vec.begin(), vec.end(), std::back_inserter(target),
-                 static_cast<T (*)(T)>(sqrt));
-  return target;
+  return transformVector(vec, static_cast<T (*)(T)>(sqrt));
 }
 
 IFunction_sptr extractFirstBackground(IFunction_sptr function);
@@ -153,6 +157,45 @@ std::string extractBackgroundType(IFunction_sptr function) {
   else
     backgroundType = "Fit " + backgroundType;
   return backgroundType;
+}
+
+std::vector<std::size_t>
+searchForFitParameters(const std::string &suffix,
+                       ITableWorkspace_sptr tableWorkspace) {
+  auto indices = std::vector<std::size_t>();
+
+  for (auto i = 0u; i < tableWorkspace->columnCount(); ++i) {
+    auto name = tableWorkspace->getColumn(i)->name();
+    auto position = name.rfind(suffix);
+    if (position != std::string::npos &&
+        position + suffix.size() == name.size())
+      indices.emplace_back(i);
+  }
+  return indices;
+}
+
+std::pair<MantidVec, MantidVec>
+calculateEISFAndError(const MantidVec &height, const MantidVec &heightError,
+                      const MantidVec &amplitude,
+                      const MantidVec &amplitudeError) {
+  auto total = addVectors(height, amplitude);
+  auto eisfY = divideVectors(height, total);
+
+  auto heightESq = squareVector(heightError);
+
+  auto ampErrSq = squareVector(amplitudeError);
+  auto totalErr = addVectors(heightESq, ampErrSq);
+
+  auto heightYSq = squareVector(height);
+  auto totalSq = squareVector(total);
+
+  auto errOverTotalSq = divideVectors(totalErr, totalSq);
+  auto heightESqOverYSq = divideVectors(heightESq, heightYSq);
+
+  auto sqrtESqOverYSq = squareRootVector(heightESqOverYSq);
+  auto eisfYSumRoot = multiplyVectors(eisfY, sqrtESqOverYSq);
+
+  return {eisfY, addVectors(eisfYSumRoot, errOverTotalSq)};
 }
 } // namespace
 
@@ -274,79 +317,35 @@ ConvolutionFit<Base>::getAdditionalLogNumbers() const {
 }
 
 /**
- * Searchs for a given fit parameter within the a vector of columnNames
- * @param suffix - The string to search for within the columnName
- * @param columns - A vector of column names to be searched through
- * @return A vector of all the column names that contained the given suffix
- * string
- */
-template <typename Base>
-std::vector<std::string> ConvolutionFit<Base>::searchForFitParams(
-    const std::string &suffix, const std::vector<std::string> &columns) const {
-  auto fitParams = std::vector<std::string>();
-  const size_t totalColumns = columns.size();
-  for (auto i = 0u; i < totalColumns; ++i) {
-    auto pos = columns.at(i).rfind(suffix);
-    if (pos != std::string::npos) {
-      auto endCheck = pos + suffix.size();
-      if (endCheck == columns.at(i).size()) {
-        fitParams.push_back(columns.at(i));
-      }
-    }
-  }
-  return fitParams;
-}
-
-/**
  * Calculates the EISF if the fit includes a Delta function
  * @param tableWs - The TableWorkspace to append the EISF calculation to
  */
 template <typename Base>
 void ConvolutionFit<Base>::calculateEISF(ITableWorkspace_sptr &tableWs) const {
   // Get height data from parameter table
-  const auto columns = tableWs->getColumnNames();
-  const auto height = searchForFitParams("Height", columns).at(0);
-  const auto heightErr = searchForFitParams("Height_Err", columns).at(0);
+  const auto height = searchForFitParameters("Height", tableWs).at(0);
+  const auto heightErr = searchForFitParameters("Height_Err", tableWs).at(0);
   auto heightY = tableWs->getColumn(height)->numeric_fill<>();
   auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
 
   // Get amplitude column names
-  const auto ampNames = searchForFitParams("Amplitude", columns);
-  const auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
+  const auto ampIndices = searchForFitParameters("Amplitude", tableWs);
+  const auto ampErrorIndices = searchForFitParameters("Amplitude_Err", tableWs);
 
   // For each lorentzian, calculate EISF
-  size_t maxSize = ampNames.size();
-  if (ampErrorNames.size() > maxSize) {
-    maxSize = ampErrorNames.size();
-  }
-  for (auto i = 0u; i < maxSize; i++) {
+  auto maxSize = ampIndices.size();
+  if (ampErrorIndices.size() > maxSize)
+    maxSize = ampErrorIndices.size();
+
+  for (auto i = 0u; i < maxSize; ++i) {
     // Get amplitude from column in table workspace
-    const auto ampName = ampNames.at(i);
-    auto ampY = tableWs->getColumn(ampName)->numeric_fill<>();
-    const auto ampErrorName = ampErrorNames.at(i);
-    auto ampErr = tableWs->getColumn(ampErrorName)->numeric_fill<>();
-
-    // Calculate EISF and EISF error
-    auto total = addVectors(heightY, ampY);
-    auto eisfY = divideVectors(heightY, total);
-
-    auto heightESq = squareVector(heightE);
-
-    auto ampErrSq = squareVector(ampErr);
-    auto totalErr = addVectors(heightESq, ampErr);
-
-    auto heightYSq = squareVector(heightY);
-    auto totalSq = squareVector(total);
-
-    auto errOverTotalSq = divideVectors(totalErr, totalSq);
-    auto heightESqOverYSq = divideVectors(heightESq, heightYSq);
-
-    auto sqrtESqOverYSq = squareRootVector(heightESqOverYSq);
-    auto eisfYSumRoot = multiplyVectors(eisfY, sqrtESqOverYSq);
-
-    auto eisfErr = addVectors(eisfYSumRoot, errOverTotalSq);
+    auto ampY = tableWs->getColumn(ampIndices[i])->numeric_fill<>();
+    auto ampErr = tableWs->getColumn(ampErrorIndices[i])->numeric_fill<>();
+    auto eisfAndError = calculateEISFAndError(heightY, heightE, ampY, ampErr);
 
     // Append the calculated values to the table workspace
+    auto ampName = tableWs->getColumn(ampIndices[i])->name();
+    auto ampErrorName = tableWs->getColumn(ampErrorIndices[i])->name();
     auto columnName =
         ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
     columnName += "EISF";
@@ -356,16 +355,16 @@ void ConvolutionFit<Base>::calculateEISF(ITableWorkspace_sptr &tableWs) const {
 
     tableWs->addColumn("double", columnName);
     tableWs->addColumn("double", errorColumnName);
-    auto maxEisf = eisfY.size();
-    if (eisfErr.size() > maxEisf) {
-      maxEisf = eisfErr.size();
+    auto maxEisf = eisfAndError.first.size();
+    if (eisfAndError.second.size() > maxEisf) {
+      maxEisf = eisfAndError.second.size();
     }
 
     auto col = tableWs->getColumn(columnName);
     auto errCol = tableWs->getColumn(errorColumnName);
     for (auto j = 0u; j < maxEisf; j++) {
-      col->cell<double>(j) = eisfY.at(j);
-      errCol->cell<double>(j) = eisfErr.at(j);
+      col->cell<double>(j) = eisfAndError.first.at(j);
+      errCol->cell<double>(j) = eisfAndError.second.at(j);
     }
   }
 }

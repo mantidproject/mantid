@@ -50,10 +50,6 @@ private:
 
   bool throwIfElasticQConversionFails() const override;
   bool isFitParameter(const std::string &name) const override;
-
-  std::vector<std::string>
-  searchForFitParams(const std::string &,
-                     const std::vector<std::string> &) const;
   void calculateEISF(API::ITableWorkspace_sptr &) const;
 
   bool m_deltaUsed;
