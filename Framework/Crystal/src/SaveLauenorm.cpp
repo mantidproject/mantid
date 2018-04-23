@@ -10,7 +10,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-
 #include "boost/math/special_functions/round.hpp"
 
 #include <fstream>
@@ -36,13 +35,13 @@ DECLARE_ALGORITHM(SaveLauenorm)
 /** Initialize the algorithm's properties.
  */
 void SaveLauenorm::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
   declareProperty(
       make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save),
       "Select the directory and base name for the output files.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
                   "Multiply FSQ and sig(FSQ) by scaleFactor");
@@ -50,8 +49,8 @@ void SaveLauenorm::init() {
   declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
   declareProperty("MaxWavelength", EMPTY_DBL(),
                   "Maximum wavelength (Angstroms)");
-  std::vector<std::string> histoTypes{"Bank", "RunNumber",
-                                      "Both Bank and RunNumber"};
+  std::vector<std::string> histoTypes{ "Bank", "RunNumber",
+                                       "Both Bank and RunNumber" };
   declareProperty("SortFilesBy", histoTypes[0],
                   boost::make_shared<StringListValidator>(histoTypes),
                   "Sort into files by bank(default), run number or both.");
@@ -65,10 +64,36 @@ void SaveLauenorm::init() {
                                         "SetDetScale.\n"
                                         "If false, no change (default).");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
-                                                      Direction::Input),
+      Kernel::make_unique<ArrayProperty<std::string> >("EliminateBankNumbers",
+                                                       Direction::Input),
       "Comma deliminated string of bank numbers to exclude for example 1,2,5");
   declareProperty("LaueScaleFormat", false, "New format for Lauescale");
+  std::vector<std::string> type_list;
+  type_list.push_back("TRICLINIC");
+  type_list.push_back("MONOCLINIC");
+  type_list.push_back("ORTHORHOMBIC");
+  type_list.push_back("TETRAGONAL");
+  type_list.push_back("HEXAGONAL");
+  type_list.push_back("RHOMBOHEDRAL");
+  type_list.push_back("CUBIC");
+
+  declareProperty("CellType", type_list[0],
+                  boost::make_shared<Kernel::StringListValidator>(type_list),
+                  "The conventional cell type to use");
+
+  std::vector<std::string> centering_list;
+  centering_list.push_back("P");
+  centering_list.push_back("A");
+  centering_list.push_back("B");
+  centering_list.push_back("C");
+  centering_list.push_back("I");
+  centering_list.push_back("F");
+  centering_list.push_back("R");
+
+  declareProperty(
+      "Centering", centering_list[0],
+      boost::make_shared<Kernel::StringListValidator>(centering_list),
+      "The centering for the conventional cell");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -89,7 +114,32 @@ void SaveLauenorm::exec() {
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
   bool newFormat = getProperty("LaueScaleFormat");
-
+  std::string cellType = getProperty("CellType");
+  std::vector<std::string> type_list;
+  type_list.push_back("TRICLINIC");
+  type_list.push_back("MONOCLINIC");
+  type_list.push_back("ORTHORHOMBIC");
+  type_list.push_back("TETRAGONAL");
+  type_list.push_back("HEXAGONAL");
+  type_list.push_back("RHOMBOHEDRAL");
+  type_list.push_back("CUBIC");
+  long int cellNo =
+      std::distance(type_list.begin(),
+                    std::find(type_list.begin(), type_list.end(), cellType)) +
+      1;
+  std::string center = getProperty("Centering");
+  std::vector<std::string> centering_list;
+  centering_list.push_back("P");
+  centering_list.push_back("A");
+  centering_list.push_back("B");
+  centering_list.push_back("C");
+  centering_list.push_back("I");
+  centering_list.push_back("F");
+  centering_list.push_back("R");
+  long int centerNo = std::distance(centering_list.begin(),
+                                    std::find(centering_list.begin(),
+                                              centering_list.end(), center)) +
+                      1;
   // sequenceNo and run number
   int sequenceNo = 0;
   int oldSequence = -1;
@@ -98,7 +148,7 @@ void SaveLauenorm::exec() {
   std::ostringstream ss;
 
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool>> criteria;
+  std::vector<std::pair<std::string, bool> > criteria;
   if (type.compare(0, 2, "Ba") == 0)
     criteria.push_back(std::pair<std::string, bool>("BankName", true));
   else if (type.compare(0, 2, "Ru") == 0)
@@ -318,8 +368,8 @@ void SaveLauenorm::exec() {
             << boost::math::iround(lattice.alpha()) << std::setw(9)
             << boost::math::iround(lattice.beta()) << std::setw(9)
             << boost::math::iround(lattice.gamma()) << '\n';
-        std::vector<int> systemNo = crystalSystem(lattice, peaks);
-        out << "SYST    " << systemNo[0] << "   " << systemNo[1] << "   0   0"
+
+        out << "SYST    " << cellNo << "   " << centerNo << "   1   3"
             << "\n";
         out << "RAST      0.050"
             << "\n";
@@ -508,102 +558,6 @@ void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nRows = static_cast<int>(grandchildren.size());
     nCols = static_cast<int>(children.size());
   }
-}
-std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
-                                             const std::vector<Peak> &peaks) {
-  std::vector<int> systemVec;
-  int alpha = boost::math::iround(lattice.alpha());
-  int beta = boost::math::iround(lattice.beta());
-  int gamma = boost::math::iround(lattice.gamma());
-  int a = boost::math::iround(lattice.a() * 1000);
-  int b = boost::math::iround(lattice.b() * 1000);
-  int c = boost::math::iround(lattice.c() * 1000);
-  if (alpha == 90 && beta == 90 && gamma == 90) {
-    if (a == b && a == c) {
-      systemVec.push_back(7); // cubic I,F
-    } else if (a == b) {
-      systemVec.push_back(4); // tetragonal I
-    } else {
-      systemVec.push_back(3); // orthorhombic I,A,B,C,F
-    }
-  } else if (alpha == 90 && beta == 90 && gamma == 120 && a == b) {
-    systemVec.push_back(6); // hexagonal
-  } else if ((alpha == 90 && beta == 90) || (alpha == 90 && gamma == 90) ||
-             (beta == 90 && gamma == 90)) {
-    systemVec.push_back(2); // monoclinic I,A,B,C
-  } else if (alpha == 90 && beta == 90 && gamma != 90 && a == b && a == c) {
-    systemVec.push_back(5); // rhombohedral R
-  } else {
-    systemVec.push_back(1); // triclinic
-  }
-  int i = 0;
-  int fp = 0;
-  int fm = 0;
-  int cc = 0;
-  int bc = 0;
-  int ac = 0;
-  int r = 0;
-  int total = 0;
-  for (const auto &peak : peaks) {
-    int h = boost::math::iround(peak.getH());
-    int k = boost::math::iround(peak.getK());
-    int l = boost::math::iround(peak.getL());
-    if (h + k + l == 0)
-      continue;
-    total++;
-    if ((h + k + l) % 2 == 0) {
-      i++;
-    }
-    if (h % 2 == 0 && k % 2 == 0 && l % 2 == 0) {
-      fp++;
-    }
-    if (h % 2 != 0 && k % 2 != 0 && l % 2 != 0) {
-      fm++;
-    }
-    if ((h + k) % 2 == 0) {
-      cc++;
-    }
-    if ((h + l) % 2 == 0) {
-      bc++;
-    }
-    if ((k + l) % 2 == 0) {
-      ac++;
-    }
-    if ((-h + k + l) % 3 == 0) {
-      r++;
-    }
-  }
-  int maxCen = 1;
-  int maxPeaks = 0;
-  if (maxPeaks < i) {
-    maxCen = 2; // I
-    maxPeaks = i;
-  }
-  if (maxPeaks < ac) {
-    maxCen = 3; // A
-    maxPeaks = ac;
-  }
-  if (maxPeaks < bc) {
-    maxCen = 4; // B
-    maxPeaks = bc;
-  }
-  if (maxPeaks < cc) {
-    maxCen = 5; // C
-    maxPeaks = cc;
-  }
-  if (maxPeaks < fp || maxPeaks < fm) {
-    maxCen = 6; // F
-    maxPeaks = std::max(fp, fm);
-  }
-  if (maxPeaks < r) {
-    maxCen = 7; // R
-    maxPeaks = r;
-  }
-  if (maxPeaks < 6 * total / 10) {
-    maxCen = 1; // P
-  }
-  systemVec.push_back(maxCen); // P
-  return systemVec;
 }
 
 } // namespace Mantid
