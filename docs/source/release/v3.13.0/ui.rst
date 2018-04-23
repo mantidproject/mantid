@@ -11,6 +11,11 @@ UI & Usability Changes
 
 :ref:`Release 3.13.0 <v3.13.0>`
 
+Improvements
+------------
+
+- The :code:`matplotlib` version shipped with the Windows package has been updated to version 2.2.2.
+
 
 MantidPlot
 ----------
