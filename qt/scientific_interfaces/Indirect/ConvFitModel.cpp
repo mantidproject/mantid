@@ -1,4 +1,4 @@
-#include "IndirectConvFitModel.h"
+#include "ConvFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
