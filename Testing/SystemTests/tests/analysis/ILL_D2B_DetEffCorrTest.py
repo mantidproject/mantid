@@ -22,7 +22,19 @@ class ILL_D2B_DetEffCorrTest(stresstesting.MantidStressTest):
     def tearDown(self):
         mtd.clear()
 
+    def testAutoMasking(self):
+        PowderDiffILLDetEffCorr(CalibrationRun='532008,532009',
+                                DerivationMethod='GlobalSummedReference2D',
+                                ExcludedRange=[-5,10],
+                                OutputWorkspace='masked',
+                                MaskCriterion=[0.3,3])
+        data = mtd['masked'].extractY().flatten()
+        coeff_max = data.max()
+        self.assertTrue(coeff_max == 3.)
+
     def runTest(self):
+
+        self.testAutoMasking()
 
         PowderDiffILLDetEffCorr(CalibrationRun='532008,532009',
                                 DerivationMethod='GlobalSummedReference2D',
