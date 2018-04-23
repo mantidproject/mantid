@@ -170,9 +170,9 @@ ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
     auto row = transposed->appendRow().m_row;
 
     for (auto j = 0u; j < numberOfParameters; ++j) {
-      auto column = i + j;
-      transposed->Double(row, column) = table->Double(column, 1);
-      transposed->Double(row, column) = table->Double(column, 2);
+      auto column = 1 + j * 2;
+      transposed->Double(row, column) = table->Double(i + j, 1);
+      transposed->Double(row, column + 1) = table->Double(i + j, 2);
     }
   }
   return transposed;
@@ -392,13 +392,18 @@ void QENSFitSimultaneous::extractMembers(
     const std::vector<MatrixWorkspace_sptr> &workspaces,
     const std::string &outputWsName) {
   std::vector<std::string> workspaceNames;
-  std::transform(
-      workspaces.begin(), workspaces.end(), std::back_inserter(workspaceNames),
-      [](API::MatrixWorkspace_sptr workspace) { return workspace->getName(); });
+  for (auto i = 0u; i < workspaces.size(); ++i) {
+    auto name = "__result_members_" + std::to_string(i);
+    AnalysisDataService::Instance().addOrReplace(name, workspaces[i]);
+    workspaceNames.emplace_back(name);
+  }
 
   auto extractAlgorithm = extractMembersAlgorithm(resultGroupWs, outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
+
+  for (const auto &workspaceName : workspaceNames)
+    AnalysisDataService::Instance().remove(workspaceName);
 }
 
 void QENSFitSimultaneous::addAdditionalLogs(
