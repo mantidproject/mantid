@@ -58,12 +58,6 @@ private:
              const std::string &output);
   API::MatrixWorkspace_sptr
   processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
-  void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
-                        const std::vector<std::string> &indices);
-  void
-  renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
-                   const std::vector<std::string> &indices,
-                   const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
