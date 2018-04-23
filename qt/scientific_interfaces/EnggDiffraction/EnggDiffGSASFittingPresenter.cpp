@@ -226,10 +226,10 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     return;
   }
 
-  m_view->showStatus("Refining run");
   const auto refinementParams =
       collectInputParameters(*runLabel, *inputWSOptional);
 
+  m_view->showStatus("Refining run");
   m_view->setEnabled(false);
   doRefinements({refinementParams});
 }
@@ -249,6 +249,7 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
 
 void EnggDiffGSASFittingPresenter::processRefineAll() {
   const auto refinementParams = collectAllInputParameters();
+
   if (refinementParams.size() == 0) {
     m_view->userWarning("No runs loaded",
                         "Please load at least one run before refining");
