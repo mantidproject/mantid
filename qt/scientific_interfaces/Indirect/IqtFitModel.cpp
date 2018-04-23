@@ -1,4 +1,4 @@
-#include "IndirectIqtFitModel.h"
+#include "IqtFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -53,36 +53,36 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-void IndirectIqtFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
+void IqtFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                        const Spectra &spectra) {
   IndirectFittingModel::addWorkspace(replaceInfinityAndNaN(workspace), spectra);
 }
 
-IAlgorithm_sptr IndirectIqtFitModel::sequentialFitAlgorithm() const {
+IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   return AlgorithmManager::Instance().create("IqtFitSequential");
 }
 
-IAlgorithm_sptr IndirectIqtFitModel::simultaneousFitAlgorithm() const {
+IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("IqtFitSimultaneous");
 }
 
-std::string IndirectIqtFitModel::sequentialFitOutputName() const {
+std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType;
-  return inputDisplayName("%1%_IqtFit_" + m_fitType + "_s%2%", "_to_", 0);
+  return createOutputName("%1%_IqtFit_" + m_fitType + "_s%2%", "_to_", 0);
 }
 
-std::string IndirectIqtFitModel::simultaneousFitOutputName() const {
+std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType;
-  return inputDisplayName("%1%_IqtFit_mult" + m_fitType + "_s%2%", "_to_", 0);
+  return createOutputName("%1%_IqtFit_mult" + m_fitType + "_s%2%", "_to_", 0);
 }
 
-void IndirectIqtFitModel::setFitTypeString(const std::string &fitType) {
+void IqtFitModel::setFitTypeString(const std::string &fitType) {
   m_fitType = fitType;
 }
 
-std::string IndirectIqtFitModel::createIntensityTie() const {
+std::string IqtFitModel::createIntensityTie() const {
   const auto intensityParameters =
       getParameters(getFittingFunction(), "Height");
   const auto backgroundParameters = getParameters(getFittingFunction(), "A0");
@@ -103,7 +103,7 @@ std::string IndirectIqtFitModel::createIntensityTie() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectIqtFitModel::getDefaultParameters(std::size_t index) const {
+IqtFitModel::getDefaultParameters(std::size_t index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
   auto background = getFirstInCategory(getFittingFunction(), "Background");
 

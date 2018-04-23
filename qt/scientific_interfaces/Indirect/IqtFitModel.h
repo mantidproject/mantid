@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTIQTFITMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTIQTFITMODEL_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFITMODEL_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_IQTFITMODEL_H_
 
 #include "IndirectFittingModel.h"
 
@@ -7,7 +7,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectIqtFitModel : public IndirectFittingModel {
+class DLLExport IqtFitModel : public IndirectFittingModel {
 public:
   void setFitTypeString(const std::string &fitType);
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
