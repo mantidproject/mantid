@@ -13,12 +13,14 @@ class DummyWidget(object):
         model=None
         self.presenter = dummy_presenter.DummyPresenter(view,model)
 
-    def getPresneter(self):
+    @property
+    def presneter(self):
         return self.presenter
 
-    def getWidget(self):
-        return self.presenter.getWidget()
+    @property
+    def widget(self):
+        return self.presenter.widget
 
     def setButtonConnection(self,slot):
-        view=self.presenter.getWidget()
+        view=self.presenter.widget
         view.buttonSignal.connect(slot)

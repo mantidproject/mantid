@@ -20,19 +20,19 @@ class DockWidget(QtGui.QWidget):
 
     def __init__(self, parent=None):
         super(DockWidget, self).__init__(parent)
-        self.widget = QtGui.QWidget()
+        self.dockWidget = QtGui.QWidget()
 
         self.dock_view = dock_view.DockView(self)
 
         self.btn = dummy_widget.DummyWidget("moo", self)
-        self.dock_view.addDock(self.btn.getWidget(), "first")
+        self.dock_view.addDock(self.btn.widget, "first")
         self.btn.setButtonConnection(self.handleButton)
 
         self.label = dummy_label_widget.DummyLabelWidget("boo", self)
-        self.dock_view.addDock(self.label.getWidget(), "second")
+        self.dock_view.addDock(self.label.widget, "second")
 
         self.btn2 = dummy_widget.DummyWidget("waaa", self)
-        self.dock_view.addDock(self.btn2.getWidget(), "third")
+        self.dock_view.addDock(self.btn2.widget, "third")
         self.btn2.setButtonConnection(self.handleButton)
 
         self.dock_view.makeTabs()
@@ -41,13 +41,14 @@ class DockWidget(QtGui.QWidget):
         QHbox = QtGui.QHBoxLayout()
         QHbox.addWidget(self.dock_view)
 
-        self.widget.setLayout(QHbox)
+        self.dockWidget.setLayout(QHbox)
 
     def handleButton(self, message):
         self.label.updateLabel(message)
 
-    def getWidget(self):
-        return self.widget
+    @property
+    def widget(self):
+        return self.dockWidget
 
     def closeEvent(self, event):
         self.dock_view.closeEvent(event)

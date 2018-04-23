@@ -8,7 +8,8 @@ class DummyLabelPresenter(object):
         self.view=view
         self.model=model
 
-    def getWidget(self):
+    @property
+    def widget(self):
         return self.view
 
     def updateLabel(self,message):

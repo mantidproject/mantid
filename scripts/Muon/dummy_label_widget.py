@@ -7,19 +7,18 @@ from Muon import dummy_label_presenter
 
 class DummyLabelWidget(object):
 
-    """
-    """
 
     def __init__(self, name, parent=None):
         view = dummy_label_view.DummyLabelView(name, parent)
         model = None
         self.presenter = dummy_label_presenter.DummyLabelPresenter(view, model)
 
-    def getPresneter(self):
+    def getPresenter(self):
         return self.presenter
 
-    def getWidget(self):
-        return self.presenter.getWidget()
+    @property
+    def widget(self):
+        return self.presenter.widget
 
     def updateLabel(self, message):
         self.presenter.updateLabel(message)

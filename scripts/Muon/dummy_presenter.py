@@ -8,5 +8,6 @@ class DummyPresenter(object):
         self.view=view
         self.model=model
 
-    def getWidget(self):
+    @property
+    def widget(self):
         return self.view

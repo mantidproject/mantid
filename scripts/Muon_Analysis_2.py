@@ -21,9 +21,9 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         helpWidget = dummy_label_widget.DummyLabelWidget("Help dummy", self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(loadWidget.getWidget())
-        splitter.addWidget(self.dockWidget.getWidget())
-        splitter.addWidget(helpWidget.getWidget())
+        splitter.addWidget(loadWidget.widget)
+        splitter.addWidget(self.dockWidget.widget)
+        splitter.addWidget(helpWidget.widget)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
