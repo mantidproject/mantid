@@ -14,11 +14,11 @@ if exist %RELEASE_PYTHON_EXE% goto runRelease
 goto commonExit
 
 :runDev
-%DEV_PYTHON_EXE% install_gsas_proxy.py %*
+%DEV_PYTHON_EXE% %~dp0install_gsas_proxy.py %*
 goto commonExit
 
 :runRelease
-%RELEASE_PYTHON_EXE% install_gsas_proxy.py %*
+%RELEASE_PYTHON_EXE% %~dp0install_gsas_proxy.py %*
 goto commonExit
 
 :commonExit
