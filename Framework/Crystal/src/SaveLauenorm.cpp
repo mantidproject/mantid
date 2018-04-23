@@ -415,10 +415,10 @@ void SaveLauenorm::exec() {
         out << "BULG    0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000 \n";
         out << "CTOF     " << L2 << "\n";
-        out << "YSCA     0.00000     0.00000     0.00000     0.00000     "
-               "0.00000     0.00000\n";
-        out << "CRAT     0.00000     0.00000     0.00000     0.00000     "
-               "0.00000     0.00000\n";
+        out << "YSCA     1.00000     1.00000     1.00000     1.00000     "
+               "1.00000     1.00000\n";
+        out << "CRAT     1.00000     1.00000     1.00000     1.00000     "
+               "1.00000     1.00000\n";
         out << "MINI          ";
         if (minIntensity != EMPTY_DBL()) {
           out << minIntensity << "\n";
@@ -471,7 +471,7 @@ void SaveLauenorm::exec() {
     out << std::setw(10) << std::fixed << std::setprecision(5) << lambda;
     if (newFormat) {
       // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
-      out << " 1 0 0 0 0 0 0 0 0 0 ";
+      out << " 1 0 0 0 0 0 0 0 0.0 0 ";
     }
 
     if (newFormat) {
