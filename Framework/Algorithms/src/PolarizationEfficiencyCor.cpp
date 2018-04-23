@@ -117,14 +117,14 @@ void PolarizationEfficiencyCor::init() {
   const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
   const std::string directBeam = Flippers::Off;
   const std::vector<std::string> setups{
-      {full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
+      {"", full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
   declareProperty(
-      Prop::FLIPPERS, full,
+      Prop::FLIPPERS, "",
       boost::make_shared<Kernel::ListValidator<std::string>>(setups),
       "Flipper configurations of the input workspaces.");
 
-  std::vector<std::string> propOptions{"PA", "PNR"};
-  declareProperty("PolarizationAnalysis", "PA",
+  std::vector<std::string> propOptions{"", "PA", "PNR"};
+  declareProperty("PolarizationAnalysis", "",
                   boost::make_shared<StringListValidator>(propOptions),
                   "What Polarization mode will be used?\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
@@ -145,10 +145,6 @@ void PolarizationEfficiencyCor::exec() {
   } else {
     execFredrikze();
   }
-
-  auto outWS = boost::make_shared<WorkspaceGroup>();
-
-  setProperty("OutputWorkspace", outWS);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -163,7 +159,8 @@ void PolarizationEfficiencyCor::execWildes() {
   if (!isDefault(Prop::FLIPPERS)) {
     alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));
   }
-  alg->setPropertyValue("OutputWorkspace", getPropertyValue(Prop::OUTPUT_WORKSPACES));
+  alg->setPropertyValue("OutputWorkspace",
+                        getPropertyValue(Prop::OUTPUT_WORKSPACES));
   alg->execute();
   API::WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
   setProperty(Prop::OUTPUT_WORKSPACES, outWS);
@@ -179,9 +176,11 @@ void PolarizationEfficiencyCor::execFredrikze() {
   alg->setProperty("InputWorkspace", group);
   alg->setProperty("Efficiencies", efficiencies);
   if (!isDefault(Prop::POLARIZATION_ANALYSIS)) {
-    alg->setPropertyValue("PolarizationAnalysis", getPropertyValue(Prop::POLARIZATION_ANALYSIS));
+    alg->setPropertyValue("PolarizationAnalysis",
+                          getPropertyValue(Prop::POLARIZATION_ANALYSIS));
   }
-  alg->setPropertyValue("OutputWorkspace", getPropertyValue(Prop::OUTPUT_WORKSPACES));
+  alg->setPropertyValue("OutputWorkspace",
+                        getPropertyValue(Prop::OUTPUT_WORKSPACES));
   alg->execute();
   API::WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
   setProperty(Prop::OUTPUT_WORKSPACES, outWS);
@@ -192,15 +191,19 @@ void PolarizationEfficiencyCor::execFredrikze() {
  */
 void PolarizationEfficiencyCor::checkWildesProperties() const {
   if (isDefault(Prop::INPUT_WORKSPACES)) {
-    throw std::invalid_argument("Wildes method expects a list of input workspace names.");
+    throw std::invalid_argument(
+        "Wildes method expects a list of input workspace names.");
   }
 
   if (!isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
-    throw std::invalid_argument("Wildes method doesn't allow to use a WorkspaceGroup for input.");
+    throw std::invalid_argument(
+        "Wildes method doesn't allow to use a WorkspaceGroup for input.");
   }
 
-  MatrixWorkspace_sptr efficiencies = getProperty(Prop::EFFICIENCIES);
-
+  if (!isDefault(Prop::POLARIZATION_ANALYSIS)) {
+    throw std::invalid_argument(
+        "Property PolarizationAnalysis canot be used with the Wildes method.");
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -208,11 +211,18 @@ void PolarizationEfficiencyCor::checkWildesProperties() const {
  */
 void PolarizationEfficiencyCor::checkFredrikzeProperties() const {
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
-    throw std::invalid_argument("Fredrikze method doesn't allow to use a list of names for input.");
+    throw std::invalid_argument(
+        "Fredrikze method doesn't allow to use a list of names for input.");
   }
 
   if (isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
-    throw std::invalid_argument("Fredrikze method expects a WorkspaceGroup as input.");
+    throw std::invalid_argument(
+        "Fredrikze method expects a WorkspaceGroup as input.");
+  }
+
+  if (!isDefault(Prop::FLIPPERS)) {
+    throw std::invalid_argument(
+        "Property Flippers canot be used with the Fredrikze method.");
   }
 }
 
