@@ -68,4 +68,4 @@ set PKGDIR=%WORKSPACE%\build
 :: A completely clean build will not have Mantid installed but will need Python to
 :: run the testing setup scripts. Assume it is in the PATH
 set PYTHON_EXE=python.exe
-%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%
+%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% %EXTRA_ARGS%
