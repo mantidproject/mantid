@@ -86,7 +86,8 @@ def install_gsasii(install_directory, revision_number, force_overwrite):
         install_package("wxPython")
 
     print("Installing GSAS-II")
-    subprocess.call(["python", bootstrap_file_name])
+    bootstrap_process = subprocess.Popen(["python", bootstrap_file_name], stdin=subprocess.PIPE)
+    bootstrap_process.communicate(input="\n\n")
 
 
 if __name__ == "__main__":
