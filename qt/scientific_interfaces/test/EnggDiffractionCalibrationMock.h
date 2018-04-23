@@ -14,7 +14,6 @@ class MockEnggDiffractionCalibration : public IEnggDiffractionCalibration {
 
 public:
   MOCK_CONST_METHOD0(currentCalibration, std::vector<GSASCalibrationParms>());
-
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
