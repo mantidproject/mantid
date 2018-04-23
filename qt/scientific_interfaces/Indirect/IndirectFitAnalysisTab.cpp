@@ -119,7 +119,7 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
     IndirectSpectrumSelectionView *view) {
   m_spectrumPresenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
-      m_fittingModel, view);
+      m_fittingModel.get(), view);
 }
 
 IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
@@ -741,7 +741,8 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
                        m_fitPropertyBrowser->convolveMembers());
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
-  setAlgorithmProperty(fitAlgorithm, "CostFunction", m_fitPropertyBrowser->costFunction());
+  setAlgorithmProperty(fitAlgorithm, "CostFunction",
+                       m_fitPropertyBrowser->costFunction());
 
   if (m_fitPropertyBrowser->isHistogramFit())
     setAlgorithmProperty(fitAlgorithm, "EvaluationType", "Histogram");

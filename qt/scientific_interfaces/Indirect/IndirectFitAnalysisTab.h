@@ -192,8 +192,6 @@ protected:
 
   void fitAlgorithmComplete();
 
-  void saveResult();
-
   void plotResult(const QString &plotType);
 
   void fillPlotTypeComboBox(QComboBox *comboBox);
@@ -204,6 +202,7 @@ protected:
   virtual void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   virtual void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
+  virtual void removeGuessPlot() = 0;
   void updateGuessPlots(Mantid::API::IFunction_sptr guessFunction);
 
   void updatePlotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
@@ -235,9 +234,6 @@ protected:
 
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
-
-  virtual void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
-  virtual void removeGuessPlot() = 0;
 
   virtual void enablePlotResult() = 0;
   virtual void disablePlotResult() = 0;
@@ -302,6 +298,8 @@ protected slots:
   void emitCustomBoolChanged(const QString &key, bool value);
 
   void updateResultOptions();
+
+  void saveResult();
 
 private:
   /// Overidden by child class.
