@@ -32,7 +32,7 @@ ConvFit::ConvFit(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
       m_uiForm(new Ui::ConvFit), m_confitResFileType() {
   m_uiForm->setupUi(parent);
-  m_convFittingModel = dynamic_cast<IndirectConvFitModel *>(fittingModel());
+  m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   addPropertyBrowserToUI(m_uiForm.get());
 }
@@ -422,7 +422,8 @@ void ConvFit::backgLevel(double val) {
 }
 
 void ConvFit::updateHWHMFromResolution() {
-  auto resolution = m_convFittingModel->getInstrumentResolution(0);
+  auto resolution =
+      m_convFittingModel->getInstrumentResolution(0).get_value_or(0);
   if (resolution > 0 && selectedFitType().contains("Lorentzian"))
     hwhmMaxChanged(resolution / 2.0);
 }

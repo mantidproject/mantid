@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTCONVFITMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTCONVFITMODEL_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 
 #include "IndirectFittingModel.h"
 
@@ -7,12 +7,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectConvFitModel : public IndirectFittingModel {
+class DLLExport ConvFitModel : public IndirectFittingModel {
 public:
-  IndirectConvFitModel();
-  ~IndirectConvFitModel() override;
+  ConvFitModel();
+  ~ConvFitModel() override;
 
-  double getInstrumentResolution(std::size_t dataIndex) const;
+  boost::optional<double> getInstrumentResolution(std::size_t dataIndex) const;
 
   void setFitFunction(Mantid::API::IFunction_sptr model,
                       Mantid::API::IFunction_sptr background) override;
