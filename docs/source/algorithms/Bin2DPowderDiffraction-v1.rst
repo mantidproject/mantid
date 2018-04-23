@@ -108,13 +108,14 @@ Usage
 Output:
 
 .. testoutput:: Bin2DPowderDiffractionExample
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     Y values without normalization:
-    [[ 278.    0.]
-     [  14.  145.]]
+    [[ ... ...]
+     [  ... ...]]
     Y values with normalization by bin area:
-    [[ 69.5    0.  ]
-     [  3.5   36.25]]
+    [[ ... ...]
+     [ ... ...]]
 
 
 References

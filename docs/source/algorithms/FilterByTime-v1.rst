@@ -60,10 +60,11 @@ Usage
 Output:
 
 .. testoutput:: ExFilter
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-    The number of events within the relative Filter: 950
-    The number of events within the Aboslute Filter: 315
-    Compared to the number in the unfiltered workspace: 1900
+    The number of events within the relative Filter: 95...
+    The number of events within the Aboslute Filter: 3...
+    Compared to the number in the unfiltered workspace: 190...
 
 
 .. categories::

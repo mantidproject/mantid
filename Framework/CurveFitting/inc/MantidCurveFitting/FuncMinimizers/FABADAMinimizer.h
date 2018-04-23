@@ -7,9 +7,6 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
 namespace Mantid {
 namespace CurveFitting {
 namespace CostFunctions {
