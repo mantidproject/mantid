@@ -53,12 +53,7 @@ public:
 
   void addSigmaValue(const RunLabel &runLabel, const double sigma);
 
-private:
-  inline GSASIIRefineFitPeaksOutputProperties
-  doGSASRefinementAlgorithm(const std::string &fittedPeaksWSName,
-                            const std::string &latticeParamsWSName,
-                            const GSASIIRefineFitPeaksParameters &params,
-                            const std::string &refinementMethod) override;
+  void doRefinement(const GSASIIRefineFitPeaksParameters &params) override;
 };
 
 inline void
@@ -83,15 +78,10 @@ TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
   addSigma(runLabel, sigma);
 }
 
-inline GSASIIRefineFitPeaksOutputProperties
-TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    const std::string &fittedPeaksWSName,
-    const std::string &latticeParamsWSName,
-    const GSASIIRefineFitPeaksParameters &params,
-    const std::string &refinementMethod) {
+void TestEnggDiffGSASFittingModel::doRefinement(
+    const GSASIIRefineFitPeaksParameters &params) {
   // Mock method - just create some dummy output and ignore all the parameters
   UNUSED_ARG(params);
-  UNUSED_ARG(refinementMethod);
 
   const static std::array<std::string, 3> columnHeadings = {{"a", "b", "c"}};
   const static std::array<std::array<double, 3>, 1> targetTableValues = {
@@ -100,13 +90,14 @@ TestEnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
       createDummyTable(columnHeadings, targetTableValues);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  ADS.add(latticeParamsWSName, latticeParams);
+  ADS.add("LATTICEPARAMS", latticeParams);
 
   API::MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
-  ADS.add(fittedPeaksWSName, ws);
+  ADS.add("FITTEDPEAKS", ws);
 
-  return GSASIIRefineFitPeaksOutputProperties(1, 2, 3);
+  processRefinementSuccessful(GSASIIRefineFitPeaksOutputProperties(
+      1, 2, 3, ws, latticeParams, params.runLabel));
 }
 
 } // Anonymous namespace
@@ -237,12 +228,9 @@ public:
     API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
-    API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks =
-            model.doPawleyRefinement(createGSASIIRefineFitPeaksParameters(
-                inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
-    TS_ASSERT(fittedPeaks);
+        model.doRefinement(createGSASIIRefineFitPeaksParameters(
+            inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);
@@ -269,12 +257,9 @@ public:
     API::MatrixWorkspace_sptr inputWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
-    API::MatrixWorkspace_sptr fittedPeaks;
     TS_ASSERT_THROWS_NOTHING(
-        fittedPeaks =
-            model.doRietveldRefinement(createGSASIIRefineFitPeaksParameters(
-                inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
-    TS_ASSERT(fittedPeaks);
+        model.doRefinement(createGSASIIRefineFitPeaksParameters(
+            inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
 
     const auto rwp = model.getRwp(runLabel);
     TS_ASSERT(rwp);

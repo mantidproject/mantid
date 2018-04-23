@@ -6,7 +6,7 @@ Building VATES
 
 .. contents::
   :local:
-  
+
 What Is the VSI?
 ----------------
 
@@ -20,7 +20,7 @@ The VSI components are part of the Mantid distribution.
 ParaView
 --------
 
-The visualisation components for the VSI require the ParaView visualisation platform. However, the CMake option ``MAKE_VATES``, can be used to turn off its use. The patch files used in this section as well as build scripts for Windows & OSX/Linux which automate the steps described below can be found `here <https://github.com/mantidproject/paraview-build>`_.
+The visualisation components for the VSI require the ParaView visualisation platform. However, the CMake option ``MAKE_VATES``, can be used to turn off its use. The patch files used in this section as well as build scripts for Windows & OSX/Linux which automate the steps described below can be found `here <https://github.com/mantidproject/paraview-build>`__.
 
 - Execute the following lines from the command prompt
 
@@ -42,14 +42,14 @@ The VSI uses a custom data array layout to minimize memory copies. The name and 
   SIGNAL_NAME=vtkArrayDispatch_extra_arrays=vtkMDHWSignalArray\<double\>
   SIGNAL_HEADER=vtkArrayDispatch_extra_headers=<path to vtkMDHWSignalArray.h>
 
-Everyone is encouraged to apply the `additional patchfiles <https://github.com/mantidproject/paraview-build/tree/875fe2a3c800996b75591c8dbe26909b51bdf963/patches>`_ in our buildscript.
+Everyone is encouraged to apply the `additional patchfiles <https://github.com/mantidproject/paraview-build/tree/875fe2a3c800996b75591c8dbe26909b51bdf963/patches>`__ in our buildscript.
 
 Building ParaView
 ------------------
 
 This is the visualisation plugins to build and use. This works on Windows/Linux/Mac. Download the source code and build using CMake out of source. You'll need the Qt development libraries, in order to build the GUI and also python. For Windows user, the Third_Party directory contains qmake as well as all the development libraries you should need to build Paraview.
 
-The scripts and cmake cache files used by the build servers are available `here <https://github.com/mantidproject/paraview-build/tree/875fe2a3c800996b75591c8dbe26909b51bdf963>`_.
+The scripts and cmake cache files used by the build servers are available `here <https://github.com/mantidproject/paraview-build/tree/875fe2a3c800996b75591c8dbe26909b51bdf963>`__.
 
 .. code-block:: sh
 
@@ -111,11 +111,11 @@ Troubleshooting
 
   - Have you built both Mantid and Paraview to be either Debug or Release (both the same)?
   - Do you have the Mantid binaries present and in the right order in the system path (windows)?
- 
+
 - Can't start-up Paraview
 
   - Try deleting or temporarily renaming the ParaView directory in ``%APPDATA/Roaming%`` Paraview may be crashing as it's trying to autoload plugins that are causing problems.
- 
+
 - Cannot complete the loading of a file
 
-  - Check you have MANTIDPATH set correctly.
+  - Check you have ``MANTIDPATH`` set correctly.

@@ -75,40 +75,31 @@ DO_BUILD_DEVDOCS=true
 DO_BUILD_PKG=true
 DO_SYSTEMTESTS=false
 if [[ ${PRBUILD} == true ]]; then
+  if ${SCRIPT_DIR}/check_for_changes dev-docs-only || ${SCRIPT_DIR}/check_for_changes user-docs-only; then
+    DO_BUILD_CODE=false
+    DO_UNITTESTS=false
+  fi
   DO_DOCTESTS_USER=false
   DO_BUILD_DEVDOCS=false
-  DO_BUILD_PKG=false
+  DO_BUILD_PKG=${BUILD_PACKAGE:-false}
   DO_SYSTEMTESTS=false
 
-  # check job parameter
-  if [[ -n ${BUILD_PACKAGE} ]]; then
-    DO_BUILD_PKG=${BUILD_PACKAGE}
-  fi
-  # ubuntu does docs testing
-  if [[ ${ON_UBUNTU} == true ]]; then
-    DO_DOCTESTS_USER=true
-    if ${SCRIPT_DIR}/check_for_changes dev-docs-only; then
-      DO_BUILD_CODE=false
-      DO_UNITTESTS=false
-      DO_DOCTESTS_USER=false
-      DO_BUILD_DEVDOCS=true
-    fi
-    if ${SCRIPT_DIR}/check_for_changes user-docs-only; then
-      DO_BUILD_CODE=true # make sure code is up to date on this node
-      DO_UNITTESTS=false
-    fi
-  fi
-  # rhel does system testing
   if [[ ${ON_RHEL7} == true ]]; then
-    if ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
-      DO_SYSTEMTESTS=false
-    else
+    # rhel does system testing
+    if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
       DO_BUILD_PKG=true
       DO_SYSTEMTESTS=true
     fi
+  elif [[ ${ON_UBUNTU} == true ]]; then
+    # ubuntu does the docs build
+    if ${SCRIPT_DIR}/check_for_changes dev-docs-only; then
+      DO_BUILD_CODE=false
+      DO_DOCTESTS_USER=false
+    else
+      DO_BUILD_CODE=true # code needs to be up to date
+      DO_DOCTESTS_USER=true
+    fi
   fi
-
-
 fi
 
 ###############################################################################
@@ -132,6 +123,7 @@ if [[ "$CLEANBUILD" == true ]]; then
 fi
 if [ -d $BUILD_DIR ]; then
   rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
+  find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*
@@ -309,10 +301,13 @@ fi
 ###############################################################################
 # Run the unit tests
 ###############################################################################
+# Prevent race conditions when creating the user config directory
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+mkdir -p $userconfig_dir
+touch $userconfig_dir/Mantid.user.properties
+
 if [[ ${DO_UNITTESTS} == true ]]; then
-  # Remove any Mantid.user.properties file
-  userprops=~/.mantid/Mantid.user.properties
-  rm -f $userprops
   $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 fi
 

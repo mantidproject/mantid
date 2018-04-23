@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -14,11 +14,11 @@ defines new boundaries in intervals :math:`x_i-x_{i+1}\,`. Positive
 :math:`\Delta x_i\,` make constant width bins, whilst negative ones
 create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`
-
+ 
 This algorithms is useful both in data reduction, but also in remapping
 :ref:`ragged workspace <Ragged_Workspace>` to a regular set of bin
 boundaries.
-
+ 
 Unless the FullBinsOnly option is enabled, the bin immediately before
 the specified boundaries :math:`x_2`, :math:`x_3`, ... :math:`x_i` is
 likely to have a different width from its neighbours because there can
@@ -136,7 +136,7 @@ Output:
    The 2nd and 3rd rebinned X values are: [ 1.5   2.25]
 
 **Example - custom two regions rebinning:**
-
+ 
 .. testcode:: ExHistCustom
 
    # create histogram workspace

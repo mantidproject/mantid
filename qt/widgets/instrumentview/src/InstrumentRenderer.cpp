@@ -144,10 +144,16 @@ void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {
 
   auto bank = compInfo.quadrilateralComponent(bankIndex);
   auto pos = compInfo.position(bank.bottomLeft);
-
   auto scale = compInfo.scaleFactor(bankIndex);
   glTranslated(pos.X(), pos.Y(), pos.Z());
   glScaled(scale[0], scale[1], scale[2]);
+
+  auto rot = compInfo.rotation(bankIndex);
+  if (!(rot.isNull())) {
+    double deg, ax0, ax1, ax2;
+    rot.getAngleAxis(deg, ax0, ax1, ax2);
+    glRotated(deg, ax0, ax1, ax2);
+  }
 
   auto ti = m_reverseTextureIndexMap[bankIndex];
   glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);

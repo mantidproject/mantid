@@ -80,7 +80,7 @@ private:
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
   /// Creates the 'Save ASCII' tab
-  IReflSaveTabPresenter *createSaveTab();
+  std::unique_ptr<IReflSaveTabPresenter> createSaveTab();
 
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;

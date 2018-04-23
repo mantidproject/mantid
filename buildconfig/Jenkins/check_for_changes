@@ -18,29 +18,35 @@ case "$TYPE" in
         exit $(git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.py)
     ;;
     cpp)
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h) || exit $FOUND
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp) || exit $FOUND
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx) || exit $FOUND
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc) || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx || exit $FOUND
+        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc || exit $FOUND
         exit $NOTFOUND
     ;;
+    # For the -only cases FOUND=1 means that there were other changes besides the case
+    # Note that these checks CANNOT be replaced with "git diff --quiet ... dev-docs" because this only
+    # checks if there were changes in a given directory and not if they are the ONLY changes
     dev-docs-only)
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- dev-docs || exit $FOUND
-        exit $NOTFOUND
+        if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^dev-docs/'; then
+            exit $FOUND
+        else
+            exit $NOTFOUND
+        fi
     ;;
     user-docs-only)
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- docs || exit $FOUND
-        exit $NOTFOUND
+        if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/'; then
+            exit $FOUND
+        else
+            exit $NOTFOUND
+        fi
     ;;
     docs-gui-only)
-	# FOUND=1 iff changes are limited to docs or GUI only
-	# Find all changed files and grep for required type. -v inverts match so grep=0 means
-	# there are other changes besides this
-	if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/|^dev-docs/|^qt/|^MantidPlot/'; then
-	    exit $FOUND
-	else
-	    exit $NOTFOUND
-	fi
+        if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/|^dev-docs/|^qt/|^MantidPlot/'; then
+            exit $FOUND
+        else
+            exit $NOTFOUND
+        fi
     ;;
     *)
         echo "do not have case for type \"$TYPE\""
