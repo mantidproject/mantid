@@ -1,0 +1,97 @@
+#ifndef MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
+#define MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
+
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include <vector>
+
+using namespace Mantid::API;
+
+namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
+namespace Algorithms {
+/** Multiple scattering absorption correction, originally used to
+    correct vanadium spectrum at IPNS.  Algorithm originally worked
+    out by Jack Carpenter and Asfia Huq and implmented in Java by
+    Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
+
+    @author Dennis Mikkelson
+    @date 17/08/2010
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory &
+    NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at:
+                  <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
+class DLLExport CarpenterSampleCorrection : public API::DistributedAlgorithm {
+public:
+  /// Algorithm's name for identification overriding a virtual method
+  const std::string name() const override;
+
+  /// Algorithm's version for identification overriding a virtual method
+  int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return { "CalculateCarpenterSampleCorrection", "CylinderAbsorption",
+             "MonteCarloAbsorption",               "MayersSampleCorrection",
+             "PearlMCAbsorption",                  "VesuvioCalculateMS" };
+  }
+
+  /// Algorithm's category for identification overriding a virtual method
+  const std::string category() const override;
+
+  /// Summary of algorithms purpose
+  const std::string summary() const override {
+    return "Applies both absorption and multiple scattering corrections, "
+           "originally used to correct vanadium spectrum at IPNS.";
+  }
+
+  // Algorithm's alias for identification overriding a virtual method
+  const std::string alias() const {
+    return "MultipleScatteringCylinderAbsorption";
+  }
+
+private:
+  // Overridden Algorithm methods
+  void init() override;
+  void exec() override;
+
+  WorkspaceGroup_sptr calculateCorrection(MatrixWorkspace_sptr &inputWksp,
+                                          double radius, double coeff1,
+                                          double coeff2, double coeff3,
+                                          bool doAbs, bool doMS);
+
+  MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhsWS,
+                             const MatrixWorkspace_sptr rhsWS);
+  MatrixWorkspace_sptr multiply(const MatrixWorkspace_sptr lhsWS,
+                                const MatrixWorkspace_sptr rhsWS);
+  MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhsWS,
+                              const MatrixWorkspace_sptr rhsWS);
+};
+
+} // namespace Algorithm
+} // namespace Mantid
+
+#endif /*MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_*/
