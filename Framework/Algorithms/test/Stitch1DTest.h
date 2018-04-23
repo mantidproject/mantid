@@ -66,7 +66,7 @@ private:
   MatrixWorkspace_sptr a;
   MatrixWorkspace_sptr b;
   std::vector<double> x;
-  typedef boost::tuple<MatrixWorkspace_sptr, double> ResultType;
+  using ResultType = boost::tuple<MatrixWorkspace_sptr, double>;
 
   MatrixWorkspace_sptr make_arbitrary_point_ws() {
     const auto &x = HistogramX(3, LinearGenerator(-1, 0.2));
@@ -384,8 +384,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
@@ -416,8 +415,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
@@ -449,8 +447,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
@@ -482,8 +479,7 @@ public:
     }
     // Check that the output E-Values are correct. Output Error values should
     // all be zero
-    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr) {
-      double temp = *itr;
+    for (double temp : stitched_e) {
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.

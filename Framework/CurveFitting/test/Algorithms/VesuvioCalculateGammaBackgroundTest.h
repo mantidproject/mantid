@@ -31,8 +31,8 @@ public:
 
     MatrixWorkspace_sptr backgroundWS = alg->getProperty("BackgroundWorkspace");
     MatrixWorkspace_sptr correctedWS = alg->getProperty("CorrectedWorkspace");
-    TS_ASSERT(backgroundWS != 0);
-    TS_ASSERT(correctedWS != 0);
+    TS_ASSERT(backgroundWS != nullptr);
+    TS_ASSERT(correctedWS != nullptr);
     TS_ASSERT(backgroundWS != correctedWS);
 
     // Test some values in the range
@@ -81,8 +81,8 @@ public:
 
     MatrixWorkspace_sptr backgroundWS = alg->getProperty("BackgroundWorkspace");
     MatrixWorkspace_sptr correctedWS = alg->getProperty("CorrectedWorkspace");
-    TS_ASSERT(backgroundWS != 0);
-    TS_ASSERT(correctedWS != 0);
+    TS_ASSERT(backgroundWS != nullptr);
+    TS_ASSERT(correctedWS != nullptr);
     TS_ASSERT(backgroundWS != correctedWS);
 
     // Test some values in the range
@@ -125,8 +125,8 @@ public:
 
     MatrixWorkspace_sptr backgroundWS = alg->getProperty("BackgroundWorkspace");
     MatrixWorkspace_sptr correctedWS = alg->getProperty("CorrectedWorkspace");
-    TS_ASSERT(backgroundWS != 0);
-    TS_ASSERT(correctedWS != 0);
+    TS_ASSERT(backgroundWS != nullptr);
+    TS_ASSERT(correctedWS != nullptr);
     TS_ASSERT(backgroundWS != correctedWS);
 
     TS_ASSERT_EQUALS(1, backgroundWS->getNumberHistograms());

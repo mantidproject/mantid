@@ -1022,8 +1022,11 @@ class SANSFileInformationFactory(object):
         super(SANSFileInformationFactory, self).__init__()
 
     def create_sans_file_information(self, file_name):
+        if not file_name:
+            raise ValueError("The filename given to FileInformation is empty")
 
         full_file_name = find_sans_file(file_name)
+
         if is_isis_nexus_single_period(full_file_name) or is_isis_nexus_multi_period(full_file_name):
             file_information = SANSFileInformationISISNexus(full_file_name)
         elif is_raw_single_period(full_file_name) or is_raw_multi_period(full_file_name):

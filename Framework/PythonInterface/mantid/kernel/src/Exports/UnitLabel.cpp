@@ -16,7 +16,7 @@ using namespace boost::python;
 namespace {
 boost::shared_ptr<UnitLabel>
 createLabel(const object &ascii, const object &utf8, const object &latex) {
-  typedef UnitLabel::Utf8String::value_type Utf8Char;
+  using Utf8Char = UnitLabel::Utf8String::value_type;
   if (PyUnicode_Check(utf8.ptr())) {
     auto length = PyUnicode_GetSize(utf8.ptr());
     boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);

@@ -42,11 +42,14 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreatePeaksWorkspace"};
+  }
   const std::string category() const override;
 
 private:
   /// Typedef for the function to get the variable we're filtering against
-  typedef std::function<double(const Geometry::IPeak &)> FilterFunction;
+  using FilterFunction = std::function<double(const Geometry::IPeak &)>;
 
   /// Override for algorithm init
   void init() override;

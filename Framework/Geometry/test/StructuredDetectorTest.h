@@ -125,7 +125,7 @@ public:
     std::vector<double> y{0, 0, 0, 1, 1, 1, 2, 2, 2};
 
     // Initialize with these parameters
-    det->initialize(2, 2, x, y, true, 0, true, 2, 1);
+    det->initialize(2, 2, std::move(x), std::move(y), true, 0, true, 2, 1);
 
     do_test_on(det);
 
@@ -145,10 +145,11 @@ public:
     std::vector<double> x{0, 1, 2, 0, 1, 2, 0, 1, 2};
     std::vector<double> y{0, 0, 0, 1, 1, 1, 2, 2, 2};
 
-    TSM_ASSERT_THROWS("StructuredDetectors created with beams not aligned "
-                      "along the z-axis should fail.",
-                      det->initialize(2, 2, x, y, false, 0, true, 2, 1),
-                      std::invalid_argument);
+    TSM_ASSERT_THROWS(
+        "StructuredDetectors created with beams not aligned "
+        "along the z-axis should fail.",
+        det->initialize(2, 2, std::move(x), std::move(y), false, 0, true, 2, 1),
+        std::invalid_argument);
 
     delete det;
   }
@@ -162,19 +163,27 @@ public:
     std::vector<double> x{0, 1, 2, 0, 1, 2};
     std::vector<double> y{0, 0, 0, 1, 1, 1};
 
+    auto x2 = x;
+    auto y2 = y;
+
     // Initialize with these parameters
-    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, true, 0, true, 2, 1),
+    TS_ASSERT_THROWS(
+        det->initialize(2, 2, std::move(x), std::move(y), true, 0, true, 2, 1),
+        std::invalid_argument);
+
+    x2.resize(3);
+    auto x3 = x2;
+    auto y3 = y2;
+
+    TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x2), std::move(y2), true,
+                                     0, true, 2, 1),
                      std::invalid_argument);
 
-    x.resize(3);
+    x3.resize(0);
+    y3.resize(0);
 
-    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, true, 0, true, 2, 1),
-                     std::invalid_argument);
-
-    x.resize(0);
-    y.resize(0);
-
-    TS_ASSERT_THROWS(det->initialize(2, 2, x, y, true, 0, true, 2, 1),
+    TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x3), std::move(y3), true,
+                                     0, true, 2, 1),
                      std::invalid_argument);
 
     delete det;

@@ -21,8 +21,8 @@ namespace API {
  */
 class EXPORT_OPT_MANTIDQT_COMMON FindFilesThreadPoolManager : public QObject {
   Q_OBJECT
-  typedef std::function<FindFilesWorker *(const FindFilesSearchParameters &)>
-      ThreadAllocator;
+  using ThreadAllocator =
+      std::function<FindFilesWorker *(const FindFilesSearchParameters &)>;
 
 public:
   /// Create a new thread pool manager for finding files

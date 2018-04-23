@@ -50,6 +50,10 @@ const std::string PAUSE_PROPERTY("pause");
 const std::string SCAN_PROPERTY("scan_index");
 const std::string PROTON_CHARGE_PROPERTY("proton_charge");
 
+// These are names for some string properties (not time series)
+const std::string RUN_TITLE_PROPERTY("run_title");
+const std::string EXPERIMENT_ID_PROPERTY("experiment_identifier");
+
 // Helper function to get a DateAndTime value from an ADARA packet header
 Mantid::Types::Core::DateAndTime
 timeFromPacket(const ADARA::PacketHeader &hdr) {
@@ -740,9 +744,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     }
 
   } else if (pkt.status() == ADARA::RunStatus::END_RUN) {
-    // Run has ended:  update m_status and set the flag to stop parsing network
-    // packets.  (see comments below for why)
-
+    // Run has ended:  update m_status, set the end time and set the flag
+    // to stop parsing network packets.  (see comments below for why)
     if ((m_status != Running) && (m_status != BeginRun)) {
       // Previous status should have been Running or BeginRun.  Spit out a
       // warning if it's not.  (If it's BeginRun, that's fine.  It just means
@@ -751,6 +754,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
                       << Running << " (Running), but was " << m_status << '\n';
     }
     m_status = EndRun;
+
+    // Add the run_end property
+    m_eventBuffer->mutableRun().addProperty(
+        "run_end", timeFromPacket(pkt).toISO8601String());
 
     // Set the flag to make us stop reading from the network.
     // Stopping network reads solves a number of problems:
@@ -1008,8 +1015,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
 
   // Find the process_variables element
   // Note: for now, I'm ignoring the 'device_name' & 'enumeration' elements
-  // because I don't
-  // think I need them
+  // because I don't think I need them
 
   const Poco::XML::Node *node = deviceNode->firstChild();
   while (node && node->nodeName() != "process_variables") {
@@ -1099,18 +1105,15 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
               prop->setUnits(pvUnits);
             }
             {
-              // Note: it's possible for us receive device descriptor packets in
-              // the middle
-              // of a run (after the call to initWorkspacePart2), so we really
-              // do need to
-              // the lock the mutex here.
+              // Note: it's possible for us receive device descriptor packets
+              // in the middle of a run (after the call to initWorkspacePart2),
+              // so we really do need to the lock the mutex here.
               std::lock_guard<std::mutex> scopedLock(m_mutex);
               m_eventBuffer->mutableRun().addLogData(prop);
             }
 
             // Add the pv id, device id and pv name to the name map so we can
-            // find the
-            // name when we process the variable value packets
+            // find the name when we process the variable value packets
             m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
           }
         }
@@ -1193,6 +1196,97 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   return false;
 }
 
+/// Parse a Run Information packet
+
+/// Overrides the default function defined in ADARA::Parser and processes
+/// data from ADARA::RunInfoPkt packets.  Specifically, it looks for the
+/// proposal id and run title and stores those values in properties in the
+/// workspace.
+/// @param pkt The packet to be parsed
+/// @return Returns false if there were no problems.  Returns true if there
+/// was an error and packet parsing should be interrupted
+bool SNSLiveEventDataListener::rxPacket(const ADARA::RunInfoPkt &pkt) {
+
+  // RunInfoPkts are mostly just blocks of XML.
+  Poco::XML::DOMParser parser;
+  Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString(pkt.info());
+  const Poco::XML::Node *runInfoNode = doc->firstChild();
+
+  // The root of the XML should be "runinfo".
+  while (runInfoNode && runInfoNode->nodeName() != "runinfo") {
+    runInfoNode = runInfoNode->nextSibling();
+  }
+
+  if (!runInfoNode) {
+    g_log.error("Run info packet did not contain a 'runinfo' element!!  "
+                "This should never happen!");
+    return false;
+  }
+
+  // The two elements we're looking for (proposal_id and run_title) should
+  // be children of the runInfoNode.  (Note that run_number is also in there,
+  // but we already get that from the RunStatusPkt.)
+  std::string proposalID;
+  std::string runTitle;
+  const Poco::XML::Node *node = runInfoNode->firstChild();
+  while (node) {
+    // iterate through each individual variable...
+    if (node->nodeName() == "proposal_id") {
+      const Poco::XML::Node *textElement = node->firstChild();
+      if (textElement) {
+        proposalID = textElement->nodeValue();
+      }
+    } else if (node->nodeName() == "run_title") {
+      const Poco::XML::Node *textElement = node->firstChild();
+      if (textElement) {
+        runTitle = textElement->nodeValue();
+      }
+    }
+
+    // If we've got everything we need, we can break out of the while loop
+    if (proposalID.length() && runTitle.length()) {
+      break;
+    }
+
+    node = node->nextSibling();
+  }
+
+  if (proposalID.length()) {
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(EXPERIMENT_ID_PROPERTY);
+
+    // Sanity check: We're likely to get multiple RunInfo packets in a
+    // run, but the values shouldn't change mid-run...
+    std::string prevPropVal = prop->value();
+    if (prevPropVal.length() && prevPropVal != proposalID) {
+      g_log.error("Proposal ID in the current run info packet has changed!  "
+                  "This shouldn't happen!  (Keeping new ID value.)");
+    }
+    prop->setValue(proposalID);
+  } else {
+    g_log.warning("Run info packet did not contain a proposal ID.  "
+                  "Property will be empty.");
+  }
+
+  if (runTitle.length()) {
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(RUN_TITLE_PROPERTY);
+
+    // Sanity check
+    std::string prevPropVal = prop->value();
+    if (prevPropVal.length() && prevPropVal != runTitle) {
+      g_log.error("The run title in the current run info packet has changed!"
+                  "  This shouldn't happen!  (Keeping new title value.)");
+    }
+    prop->setValue(runTitle);
+  } else {
+    g_log.warning("Run info packet did not contain a run title.  "
+                  "Property will be empty.");
+  }
+
+  return false;
+}
+
 /// First part of the workspace initialization
 
 /// Performs various initialization steps that can (and, in some
@@ -1204,16 +1298,20 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   // down in initWorkspacePart2() when we load the instrument definition.
 
   // We also know we'll need 3 time series properties on the workspace.  Create
-  // them
-  // now. (We may end up adding values to the pause and scan properties before
-  // we
-  // can call initWorkspacePart2().)
+  // them now. (We may end up adding values to the pause and scan properties
+  // before we can call initWorkspacePart2().)
   Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
   prop->setUnits("picoCoulomb");
+  m_eventBuffer->mutableRun().addLogData(prop);
+
+  // Same for a couple of other properties (that are not time series)
+  prop = new PropertyWithValue<std::string>(RUN_TITLE_PROPERTY, "");
+  m_eventBuffer->mutableRun().addLogData(prop);
+  prop = new PropertyWithValue<std::string>(EXPERIMENT_ID_PROPERTY, "");
   m_eventBuffer->mutableRun().addLogData(prop);
 }
 
@@ -1236,8 +1334,8 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 
   loadInst->execute();
 
-  m_requiredLogs.clear(); // Clear the list.  If we have to initialize the
-                          // workspace again,
+  m_requiredLogs.clear();
+  // Clear the list.  If we have to initialize the workspace again,
   // (at the start of another run, for example), the list will be
   // repopulated when we receive the next geometry packet.
 
@@ -1258,10 +1356,9 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
       true /* bool throwIfMultipleDets */);
 
   // We always want to have at least one value for the the scan index time
-  // series.  We may have
-  // already gotten a scan start packet by the time we get here and therefor
-  // don't need to do
-  // anything.  If not, we need to put a 0 into the time series.
+  // series.  We may have already gotten a scan start packet by the time we
+  // get here and therefor don't need to do anything.  If not, we need to put
+  // a 0 into the time series.
   if (m_eventBuffer->mutableRun()
           .getTimeSeriesProperty<int>(SCAN_PROPERTY)
           ->size() == 0) {
@@ -1297,8 +1394,7 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
 // NOTE: This function does not lock the mutex!  The calling function must
 // ensure that m_eventBuffer won't change while the function runs (either by
 // locking the mutex, or by the simple fact of never calling it once the
-// workspace
-// has been initialized...)
+// workspace has been initialized...)
 bool SNSLiveEventDataListener::haveRequiredLogs() {
   bool allFound = true;
   Run &run = m_eventBuffer->mutableRun();

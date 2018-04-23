@@ -87,10 +87,10 @@ private:
         {0.75, 0.25, 0.75, 0.25, 0.75},
         {0.25, 0.75, 0.25, 0.75, 0.25},
     };
-    for (std::size_t i = 0; i < 3; ++i) {
+    for (auto &expectedValue : expectedValues) {
       const std::vector<double> randPoint = randGen.nextPoint();
       for (std::size_t j = 0; j < 5; ++j) {
-        TS_ASSERT_DELTA(randPoint[j], expectedValues[i][j], 1e-12);
+        TS_ASSERT_DELTA(randPoint[j], expectedValue[j], 1e-12);
       }
     }
   }

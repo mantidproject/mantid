@@ -317,7 +317,8 @@ end
 #Copy over python libraries not included with OSX.
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
+               "certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
 end

@@ -76,7 +76,7 @@ public:
   static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
   static void destroySuite(ConvertToMDTest *suite) { delete suite; }
 
-  typedef std::vector<std::string> PropertyAllowedValues;
+  using PropertyAllowedValues = std::vector<std::string>;
 
   void testInit() {
 

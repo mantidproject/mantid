@@ -39,8 +39,8 @@ class TreeManager;
 class GenericDataProcessorPresenterThread;
 
 using RowItem = std::pair<int, RowData_sptr>;
-using RowQueue = std::queue<RowItem>;
-using GroupQueue = std::queue<std::pair<int, RowQueue>>;
+using RowQueue = std::vector<RowItem>;
+using GroupQueue = std::vector<std::pair<int, RowQueue>>;
 
 /** @class GenericDataProcessorPresenter
 
@@ -224,6 +224,12 @@ protected:
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
+  virtual void
+  completedRowReductionSuccessfully(GroupData const &groupData,
+                                    std::string const &workspaceName);
+  virtual void
+  completedGroupReductionSuccessfully(GroupData const &groupData,
+                                      std::string const &workspaceName);
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(
@@ -240,11 +246,13 @@ protected:
   void saveNotebook(const TreeData &data);
 protected slots:
   void reductionError(QString ex);
-  void threadFinished(const int exitCode);
+  void groupThreadFinished(const int exitCode);
+  void rowThreadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
 
 private:
+  void threadFinished(const int exitCode);
   void applyDefaultOptions(std::map<QString, QVariant> &options);
   void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
                                        const std::string &hiddenOptions,

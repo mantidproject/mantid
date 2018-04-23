@@ -56,6 +56,9 @@ public:
   /// Clear the plot area to avoid overplotting
   virtual void resetCanvas() = 0;
 
+  /// Enable/disable the widget
+  virtual void setEnabled(const bool enabled) = 0;
+
   /// Connect a message provider to the view.  Used to remove circular
   /// dependency between view and presenter
   virtual void setMessageProvider(

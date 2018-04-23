@@ -268,8 +268,8 @@ void SaveAscii2::exec() {
     }
   } else {
     Progress progress(this, 0.0, 1.0, idx.size());
-    for (auto i = idx.begin(); i != idx.end(); ++i) {
-      writeSpectrum(*i, file);
+    for (int i : idx) {
+      writeSpectrum(i, file);
       progress.report();
     }
   }
@@ -357,7 +357,7 @@ void SaveAscii2::populateQMetaData() {
         boost::shared_ptr<const Geometry::IDetector> detector(
             &spectrumInfo.detector(i), NoDeleting());
         efixed = m_ws->getEFixed(detector);
-      } catch (std::runtime_error) {
+      } catch (std::runtime_error &) {
         throw;
       }
     } else {

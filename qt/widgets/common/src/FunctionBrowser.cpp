@@ -932,26 +932,7 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   if (!isParameter(prop))
     return;
 
-  Mantid::API::Expression expr;
-  expr.parse(tie.toStdString());
-  // Do parameter names include composite function index
-  bool isComposite = false;
-  auto vars = expr.getVariables();
-  for (auto var = vars.begin(); var != vars.end(); ++var) {
-    // nesting level of a particular variable
-    int n = static_cast<int>(std::count(var->begin(), var->end(), '.'));
-    if (n != 0) {
-      isComposite = true;
-    }
-  }
-
-  // Find the property of the function that this tie will be set to:
-  // If the tie has variables that contain function indices (f0.f1. ...)
-  // then it will be set to the topmost composite function.
-  // If the tie is a number or has only simple variable names then it belongs
-  // to the local function (the one that has the tied parameter)
-  QtProperty *funProp =
-      isComposite ? getFunctionProperty().prop : m_properties[prop].parent;
+  QtProperty *funProp = getFunctionProperty().prop;
 
   // Create and add a QtProperty for the tie.
   m_tieManager->blockSignals(true);

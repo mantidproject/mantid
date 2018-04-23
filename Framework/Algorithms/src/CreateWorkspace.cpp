@@ -17,7 +17,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidHistogramData/HistogramBuilder.h"
-#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,7 +46,7 @@ void CreateWorkspace::init() {
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataY", required),
                   "Y-axis data values for workspace (measures).");
   declareProperty(make_unique<ArrayProperty<double>>("DataE"),
-                  "Error values for workspace. Optional.");
+                  "Error values for workspace.");
   declareProperty(make_unique<PropertyWithValue<int>>("NSpec", 1),
                   "Number of spectra to divide data into.");
   declareProperty("UnitX", "", "The unit to assign to the XAxis");
@@ -70,6 +69,8 @@ void CreateWorkspace::init() {
                                                    Direction::Input,
                                                    PropertyMode::Optional),
                   "Name of a parent workspace.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("Dx"),
+                  "X error values for workspace (optional).");
   std::vector<std::string> propOptions{
       Parallel::toString(Parallel::StorageMode::Cloned),
       Parallel::toString(Parallel::StorageMode::Distributed),
@@ -102,6 +103,7 @@ void CreateWorkspace::exec() {
   const Property *const dataXprop = getProperty("DataX");
   const Property *const dataYprop = getProperty("DataY");
   const Property *const dataEprop = getProperty("DataE");
+  const Property *const errorDxprop = getProperty("Dx");
 
   const ArrayProperty<double> *pCheck = nullptr;
 
@@ -119,6 +121,11 @@ void CreateWorkspace::exec() {
   if (!pCheck)
     throw std::invalid_argument("DataE cannot be casted to a double vector");
   const std::vector<double> &dataE = *pCheck;
+
+  pCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
+  if (!pCheck)
+    throw std::invalid_argument("Dx cannot be casted to a double vector");
+  const std::vector<double> &dX = *pCheck;
 
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
@@ -159,6 +166,13 @@ void CreateWorkspace::exec() {
     histogramBuilder.setX(xSize);
   }
   histogramBuilder.setY(ySize);
+
+  if (!dX.empty()) {
+    if (dX.size() != dataY.size())
+      throw std::runtime_error("Dx must have the same size as DataY");
+    histogramBuilder.setDx(ySize);
+  }
+
   histogramBuilder.setDistribution(getProperty("Distribution"));
   auto histogram = histogramBuilder.build();
 
@@ -211,6 +225,10 @@ void CreateWorkspace::exec() {
     if (dataE_provided)
       outputWS->mutableE(local_i)
           .assign(dataE.begin() + yStart, dataE.begin() + yEnd);
+
+    if (!dX.empty())
+      outputWS->mutableDx(local_i)
+          .assign(dX.begin() + yStart, dX.begin() + yEnd);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

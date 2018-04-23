@@ -213,8 +213,8 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     boost::erase_all(bankName, bankPart);
     int bank = 0;
     Strings::convert(bankName, bank);
-    for (size_t j = 0; j < det.size(); j++) {
-      if (bank == det[j]) {
+    for (int j : det) {
+      if (bank == j) {
         bank = 0;
         continue;
       }
@@ -267,8 +267,6 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   double IPK;
   double Inti;
   double SigI;
-
-  seqNum = -1;
 
   std::string s = lastStr;
 
@@ -334,6 +332,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
   peak.setBinCount(IPK);
+  peak.setPeakNumber(seqNum);
   // Return the peak
   return peak;
 }
@@ -488,7 +487,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
     oss << bankString << bankNum;
     std::string bankName = oss.str();
 
-    int seqNum = -1;
+    int seqNum;
 
     try {
       // Read the peak

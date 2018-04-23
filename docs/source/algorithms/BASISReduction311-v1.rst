@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,7 @@ lower boundary the bin with the minimum momentum, the bin width, and the
 upper boundary ofthe bin with the maximum momentum.
 
 Reflection Selector
-===================
+###################
 
 There are typical values for the properties of the 311 reflection:
 
