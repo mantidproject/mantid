@@ -342,6 +342,7 @@ set ( TEST_FILES
 	Algorithms/PawleyFitTest.h
 	Algorithms/PlotPeakByLogValueTest.h
         Algorithms/QENSFitSequentialTest.h
+        Algorithms/QENSFitSimultaneousTest.h
 	Algorithms/RefinePowderInstrumentParameters3Test.h
 	Algorithms/RefinePowderInstrumentParametersTest.h
 	Algorithms/SeqDomainSpectrumCreatorTest.h
