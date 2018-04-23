@@ -1,8 +1,8 @@
-.. _GettingStartedWithMantid:
+.. _GettingStarted:
 
-===========================
-Getting Started with Mantid
-===========================
+===============
+Getting Started
+===============
 
 .. contents::
   :local:

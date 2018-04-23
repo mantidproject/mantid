@@ -4,7 +4,6 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter, ClassTypeParameter)
 from sans.common.enums import (SampleShape, SANSFacility)
-from sans.common.file_information import (SANSFileInformationFactory)
 from sans.state.automatic_setters import (automatic_setters)
 
 
@@ -43,11 +42,7 @@ class StateScale(StateBase):
 # ----------------------------------------------------------------------------------------------------------------------
 #  Builder
 # ----------------------------------------------------------------------------------------------------------------------
-def set_geometry_from_file(state, date_info):
-    sample_scatter = date_info.sample_scatter
-    file_information_factory = SANSFileInformationFactory()
-    file_information = file_information_factory.create_sans_file_information(sample_scatter)
-
+def set_geometry_from_file(state, date_info, file_information):
     # Get the geometry
     state.height_from_file = file_information.get_height()
     state.width_from_file = file_information.get_width()
@@ -57,10 +52,10 @@ def set_geometry_from_file(state, date_info):
 
 class StateScaleBuilder(object):
     @automatic_setters(StateScale, exclusions=[])
-    def __init__(self, data_info):
+    def __init__(self, data_info, file_information):
         super(StateScaleBuilder, self).__init__()
         self.state = StateScale()
-        set_geometry_from_file(self.state, data_info)
+        set_geometry_from_file(self.state, data_info, file_information)
 
     def build(self):
         self.state.validate()
@@ -70,12 +65,12 @@ class StateScaleBuilder(object):
 # ---------------------------------------
 # Factory method for SANStateScaleBuilder
 # ---------------------------------------
-def get_scale_builder(data_info):
+def get_scale_builder(data_info, file_information=None):
     # The data state has most of the information that we require to define the scaling. For the factory method, only
     # the facility/instrument is of relevance.
     facility = data_info.facility
     if facility is SANSFacility.ISIS:
-        return StateScaleBuilder(data_info)
+        return StateScaleBuilder(data_info, file_information)
     else:
         raise NotImplementedError("StateScaleBuilder: Could not find any valid scale builder for the "
                                   "specified StateData object {0}".format(str(data_info)))

@@ -44,8 +44,8 @@ public:
   QtReflSaveTabView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflSaveTabView() override;
-  /// Returns the presenter managing this view
-  IReflSaveTabPresenter *getPresenter() const override;
+
+  void subscribe(IReflSaveTabPresenter *presenter) override;
 
   /// Returns the save path
   std::string getSavePath() const override;
@@ -81,6 +81,19 @@ public:
   /// Sets the 'List of logged parameters' widget
   void setParametersList(const std::vector<std::string> &) const override;
 
+  void disallowAutosave() override;
+
+  void disableAutosaveControls() override;
+  void enableAutosaveControls() override;
+
+  void enableFileFormatAndLocationControls() override;
+  void disableFileFormatAndLocationControls() override;
+
+  void giveUserCritical(const std::string &prompt,
+                        const std::string &title) override;
+  void giveUserInfo(const std::string &prompt,
+                    const std::string &title) override;
+
 public slots:
   /// Populate the 'List of workspaces' widget
   void populateListOfWorkspaces() const;
@@ -92,12 +105,16 @@ public slots:
   void saveWorkspaces() const;
   /// Suggest a save directory
   void suggestSaveDir() const;
+  void browseToSaveDirectory();
+
+  void onSavePathChanged();
+  void onAutosaveChanged(int state);
 
 private:
   /// Initialize the interface
   void initLayout();
   /// The presenter
-  std::unique_ptr<IReflSaveTabPresenter> m_presenter;
+  IReflSaveTabPresenter *m_presenter;
   /// The widget
   Ui::ReflSaveTabWidget m_ui;
 };

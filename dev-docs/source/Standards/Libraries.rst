@@ -1,4 +1,4 @@
-.. _dev-docs-libraries-guidelines:
+.. _Libraries:
 
 =========
 Libraries
@@ -20,13 +20,13 @@ General
 - `Boost <http://www.boost.org>`_ header-only libraries are also
   always available. The following compiled Boost libraries are
   available:
-    
+
   - regex
   - date_time
   - python
   - serialization
   - others required must be discussed with the TSC
-  
+
 - Eigen is used for fast linear algebra calculations
 - Poco is also used for:
 

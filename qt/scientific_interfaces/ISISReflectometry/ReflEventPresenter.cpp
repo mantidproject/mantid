@@ -10,7 +10,10 @@ namespace CustomInterfaces {
 /** Constructor
 * @param view :: The view we are handling
 */
-ReflEventPresenter::ReflEventPresenter(IReflEventView *view) : m_view(view) {}
+ReflEventPresenter::ReflEventPresenter(IReflEventView *view)
+    : m_view(view), m_sliceType(SliceType::UniformEven) {
+  m_view->enableSliceType(m_sliceType);
+}
 
 /** Destructor
 */
@@ -20,20 +23,63 @@ ReflEventPresenter::~ReflEventPresenter() {}
 * @return :: The time-slicing values
 */
 std::string ReflEventPresenter::getTimeSlicingValues() const {
+  switch (m_sliceType) {
+  case SliceType::UniformEven:
+    return m_view->getUniformEvenTimeSlicingValues();
+  case SliceType::Uniform:
+    return m_view->getUniformTimeSlicingValues();
+  case SliceType::Custom:
+    return m_view->getCustomTimeSlicingValues();
+  case SliceType::LogValue: {
+    auto slicingValues = m_view->getLogValueTimeSlicingValues();
+    auto logFilter = m_view->getLogValueTimeSlicingType();
+    return logFilterAndSliceValues(slicingValues, logFilter);
+  }
+  default:
+    throw std::runtime_error("Unrecognized slice type.");
+  }
+}
 
-  return m_view->getTimeSlicingValues();
+std::string ReflEventPresenter::logFilterAndSliceValues(
+    std::string const &slicingValues, std::string const &logFilter) const {
+  if (!slicingValues.empty() && !logFilter.empty())
+    return "Slicing=\"" + slicingValues + "\",LogFilter=" + logFilter;
+  else
+    return "";
 }
 
 /** Returns the time-slicing type
 * @return :: The time-slicing type
 */
 std::string ReflEventPresenter::getTimeSlicingType() const {
-
-  return m_view->getTimeSlicingType();
+  switch (m_sliceType) {
+  case SliceType::UniformEven:
+    return "UniformEven";
+  case SliceType::Uniform:
+    return "Uniform";
+  case SliceType::Custom:
+    return "Custom";
+  case SliceType::LogValue:
+    return "LogValue";
+  default:
+    throw std::runtime_error("Unrecognized slice type.");
+  }
 }
 
-void ReflEventPresenter::onReductionPaused() { m_view->enableAll(); }
+void ReflEventPresenter::onReductionPaused() {
+  m_view->enableSliceType(m_sliceType);
+  m_view->enableSliceTypeSelection();
+}
 
-void ReflEventPresenter::onReductionResumed() { m_view->disableAll(); }
+void ReflEventPresenter::onReductionResumed() {
+  m_view->disableSliceType(m_sliceType);
+  m_view->disableSliceTypeSelection();
+}
+
+void ReflEventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
+  m_view->disableSliceType(m_sliceType);
+  m_view->enableSliceType(newSliceType);
+  m_sliceType = newSliceType;
+}
 }
 }

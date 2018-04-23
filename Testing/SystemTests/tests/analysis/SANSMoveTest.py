@@ -16,6 +16,7 @@ from sans.common.enums import (SANSFacility, DetectorType)
 from sans.test_helper.test_director import TestDirector
 from sans.state.move import get_move_builder
 from sans.state.data import get_data_builder
+from sans.common.file_information import SANSFileInformationFactory
 
 
 def load_workspace(file_name):
@@ -67,7 +68,9 @@ class SANSMoveTest(unittest.TestCase):
     @staticmethod
     def _get_simple_state(sample_scatter, lab_x_translation_correction=None, lab_z_translation_correction=None):
         # Set the data
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(sample_scatter)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter(sample_scatter)
         data_info = data_builder.build()
 

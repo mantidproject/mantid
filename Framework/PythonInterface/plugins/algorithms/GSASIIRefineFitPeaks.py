@@ -45,6 +45,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
+    def seeAlso(self):
+        return [ "LoadGSS","SaveGSS","Fit","EnggFitPeaks" ]
+
     def name(self):
         return "GSASIIRefineFitPeaks"
 

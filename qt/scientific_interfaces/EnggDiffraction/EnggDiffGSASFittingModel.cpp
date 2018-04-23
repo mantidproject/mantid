@@ -27,7 +27,8 @@ std::string refinementMethodToString(
   case MantidQt::CustomInterfaces::GSASRefinementMethod::RIETVELD:
     return "Rietveld refinement";
   default:
-    return "Unknown refinement method: contact development team";
+    throw std::invalid_argument(
+        "Invalid refinement method: please contact the development team");
   }
 }
 

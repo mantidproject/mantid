@@ -9,6 +9,8 @@ namespace CustomInterfaces {
 class IEnggDiffGSASFittingObserver {
 
 public:
+  virtual ~IEnggDiffGSASFittingObserver() = default;
+
   /// Notify the observer that all refinements have terminated successfully
   virtual void notifyRefinementsComplete() = 0;
 

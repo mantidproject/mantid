@@ -241,6 +241,17 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_getAllItems() {
+    WorkspaceGroup_sptr group = makeGroup();
+    auto items = group->getAllItems();
+    TS_ASSERT_EQUALS(group->size(), 3);
+    TS_ASSERT_EQUALS(items.size(), 3);
+    TS_ASSERT_EQUALS(items[0], group->getItem(0));
+    TS_ASSERT_EQUALS(items[1], group->getItem(1));
+    TS_ASSERT_EQUALS(items[2], group->getItem(2));
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_deleting_workspaces() {
     WorkspaceGroup_sptr group = makeGroup();
     TS_ASSERT(AnalysisDataService::Instance().doesExist("group"));
