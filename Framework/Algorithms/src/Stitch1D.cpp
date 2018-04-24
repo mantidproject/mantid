@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
@@ -84,8 +84,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
 }
 
 /** Mask out data in the region between a1 and a2 with zeros. Operation
- * performed
- * on the original workspace
+ * performed on the original workspace
  * @param a1 : start position in X
  * @param a2 : end position in X
  * @param source : Workspace to mask.
@@ -126,10 +125,10 @@ void Stitch1D::init() {
                   "Output stitched workspace.");
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-                  "Start overlap x-value in units of x-axis. Optional.");
+                  "Start overlap x-value in units of x-axis.");
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-                  "End overlap x-value in units of x-axis. Optional.");
+                  "End overlap x-value in units of x-axis.");
   declareProperty(make_unique<ArrayProperty<double>>(
                       "Params", boost::make_shared<RebinParamsValidator>(true)),
                   "Rebinning Parameters. See Rebin for format. If only a "
@@ -149,7 +148,7 @@ void Stitch1D::init() {
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "ManualScaleFactor", 1.0, manualScaleFactorValidator,
                       Direction::Input),
-                  "Provided value for the scale factor. Optional.");
+                  "Provided value for the scale factor.");
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
                   "The actual used value for the scaling factor.");
@@ -310,17 +309,16 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
   PARALLEL_FOR_IF(Kernel::threadSafe(*outWS))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
     std::vector<size_t> &nanEIndexes = m_nanEIndexes[i];
-    std::vector<size_t> &infYIndexes = m_infYIndexes[i];
+    std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
     std::vector<size_t> &infEIndexes = m_infEIndexes[i];
+    std::vector<size_t> &infYIndexes = m_infYIndexes[i];
     // Copy over the data
     auto &sourceY = outWS->mutableY(i);
     auto &sourceE = outWS->mutableE(i);
 
     for (size_t j = 0; j < sourceY.size(); ++j) {
       const double &value = sourceY[j];
-      const double &eValue = sourceE[j];
       if (std::isnan(value)) {
         nanYIndexes.push_back(j);
         sourceY[j] = 0;
@@ -329,6 +327,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
         sourceY[j] = 0;
       }
 
+      const double &eValue = sourceE[j];
       if (std::isnan(eValue)) {
         nanEIndexes.push_back(j);
         sourceE[j] = 0;
@@ -355,6 +354,7 @@ MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input,
                                            const double &start,
                                            const double &stop) {
   auto integration = this->createChildAlgorithm("Integration");
+  integration->initialize();
   integration->setProperty("InputWorkspace", input);
   integration->setProperty("RangeLower", start);
   integration->setProperty("RangeUpper", stop);
@@ -363,8 +363,7 @@ MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input,
   g_log.information("Integration RangeUpper: " +
                     boost::lexical_cast<std::string>(stop));
   integration->execute();
-  MatrixWorkspace_sptr outWS = integration->getProperty("OutputWorkspace");
-  return outWS;
+  return integration->getProperty("OutputWorkspace");
 }
 
 /** Runs the WeightedMean Algorithm as a child
@@ -375,11 +374,11 @@ MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input,
 MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr &inOne,
                                             MatrixWorkspace_sptr &inTwo) {
   auto weightedMean = this->createChildAlgorithm("WeightedMean");
+  weightedMean->initialize();
   weightedMean->setProperty("InputWorkspace1", inOne);
   weightedMean->setProperty("InputWorkspace2", inTwo);
   weightedMean->execute();
-  MatrixWorkspace_sptr outWS = weightedMean->getProperty("OutputWorkspace");
-  return outWS;
+  return weightedMean->getProperty("OutputWorkspace");
 }
 
 /** Runs the ConjoinXRuns Algorithm as a child
@@ -393,12 +392,13 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
   Mantid::API::AnalysisDataService::Instance().addOrReplace(in1, inOne);
   Mantid::API::AnalysisDataService::Instance().addOrReplace(in2, inTwo);
   auto conjoinX = this->createChildAlgorithm("ConjoinXRuns");
-  conjoinX->setProperty("InputWorkspace", std::vector<std::string>{in1, in2});
+  conjoinX->initialize();
+  conjoinX->setProperty("InputWorkspaces", std::vector<std::string>{in1, in2});
   conjoinX->execute();
-  MatrixWorkspace_sptr outWS = conjoinX->getProperty("OutputWorkspace");
   Mantid::API::AnalysisDataService::Instance().remove(in1);
   Mantid::API::AnalysisDataService::Instance().remove(in2);
-  return outWS;
+  API::Workspace_sptr ws = conjoinX->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 }
 
 /** Runs the SortXAxis Algorithm as a child
@@ -407,10 +407,11 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
  */
 MatrixWorkspace_sptr Stitch1D::sortXAxis(MatrixWorkspace_sptr &inWS) {
   auto sortX = this->createChildAlgorithm("SortXAxis");
+  sortX->setChild(true);
+  sortX->initialize();
   sortX->setProperty("InputWorkspace", inWS);
   sortX->execute();
-  MatrixWorkspace_sptr outWS = sortX->getProperty("OutputWorkspace");
-  return outWS;
+  return sortX->getProperty("OutputWorkspace");
 }
 
 /** Runs the CreateSingleValuedWorkspace Algorithm as a child
@@ -420,10 +421,10 @@ MatrixWorkspace_sptr Stitch1D::sortXAxis(MatrixWorkspace_sptr &inWS) {
 MatrixWorkspace_sptr Stitch1D::singleValueWS(double val) {
   auto singleValueWS =
       this->createChildAlgorithm("CreateSingleValuedWorkspace");
+  singleValueWS->initialize();
   singleValueWS->setProperty("DataValue", val);
   singleValueWS->execute();
-  MatrixWorkspace_sptr outWS = singleValueWS->getProperty("OutputWorkspace");
-  return outWS;
+  return singleValueWS->getProperty("OutputWorkspace");
 }
 
 /** Finds the bins containing the ends of the overlapping region
@@ -474,54 +475,46 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
   return hasNonZeroErrors;
 }
 
+/**
+ * @brief scaleWorkspace will set m_scaleFactor and m_errorScaleFactor
+ * @param ws :: Input workspace
+ * @param divident
+ * @param divisor
+ * @param dxWS :: A MatrixWorkspace (size of ws) containing Dx values
+ */
+void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr ws,
+                              MatrixWorkspace_sptr divident,
+                              MatrixWorkspace_sptr divisor,
+                              MatrixWorkspace_sptr dxWS) {
+  const auto ratio = divident / divisor;
+  ws *= ratio;
+  // We lost Dx values (Multiply) and need to get them back for point data
+  if (ws->size() == dxWS->size()) {
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      if (dxWS->hasDx(i) && !ws->hasDx(i)) {
+        ws->setSharedDx(i, dxWS->sharedDx(i));
+      }
+    }
+  }
+  m_scaleFactor = ratio->y(0).front();
+  m_errorScaleFactor = ratio->e(0).front();
+  if (m_scaleFactor < 1e-2 || m_scaleFactor > 1e2 ||
+      std::isnan(m_scaleFactor)) {
+    std::stringstream messageBuffer;
+    messageBuffer << "Stitch1D calculated scale factor is: " << m_scaleFactor
+                  << ". Check that in both input workspaces the integrated "
+                     "overlap region is non-zero.";
+    g_log.warning(messageBuffer.str());
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void Stitch1D::exec() {
-  MatrixWorkspace_sptr rhsWS = this->getProperty("RHSWorkspace");
   MatrixWorkspace_sptr lhsWS = this->getProperty("LHSWorkspace");
+  MatrixWorkspace_sptr rhsWS = this->getProperty("RHSWorkspace");
   const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
-
-  const double intersectionMin = intesectionXRegion.get<0>();
-  const double intersectionMax = intesectionXRegion.get<1>();
-
-  double startOverlap = getStartOverlap(intersectionMin, intersectionMax);
-  double endOverlap = getEndOverlap(intersectionMin, intersectionMax);
-
-  if (startOverlap > endOverlap) {
-    std::string message = boost::str(
-        boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
-                      "StartOverlap: %0.9f, EndOverlap: %0.9f") %
-        startOverlap % endOverlap);
-    throw std::runtime_error(message);
-  }
-
-  const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
-  MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
-
-  const double &xMin = params.front();
-  const double &xMax = params.back();
-
-  if (std::abs(xMin - startOverlap) < 1E-6)
-    startOverlap = xMin;
-
-  if (std::abs(xMax - endOverlap) < 1E-6)
-    endOverlap = xMax;
-
-  if (startOverlap < xMin) {
-    std::string message = boost::str(
-        boost::format("Stitch1D StartOverlap is outside the available X range. "
-                      "after rebinning. StartOverlap: %10.9f, X min: %10.9f") %
-        startOverlap % xMin);
-    throw std::runtime_error(message);
-  }
-  if (endOverlap > xMax) {
-    std::string message = boost::str(
-        boost::format("Stitch1D EndOverlap is outside the available X range "
-                      "after rebinning. EndOverlap: %10.9f, X max: %10.9f") %
-        endOverlap % xMax);
-    throw std::runtime_error(message);
-  }
 
   const size_t histogramCount = rhsWS->getNumberHistograms();
   m_nanYIndexes.resize(histogramCount);
@@ -529,68 +522,104 @@ void Stitch1D::exec() {
   m_nanEIndexes.resize(histogramCount);
   m_infEIndexes.resize(histogramCount);
 
-  const bool useManualScaleFactor = this->getProperty("UseManualScaleFactor");
-  double scaleFactor = 0;
-  double errorScaleFactor = 0;
+  const double intersectionMin = intesectionXRegion.get<0>();
+  const double intersectionMax = intesectionXRegion.get<1>();
 
-  MatrixWorkspace_sptr lhs, rhs;
-
-  // If the input workspaces are histograms ...
+  double startOverlap;
+  double endOverlap;
   if (lhsWS->isHistogramData()) {
+    startOverlap = getStartOverlap(intersectionMin, intersectionMax);
+    endOverlap = getEndOverlap(intersectionMin, intersectionMax);
+    if (startOverlap > endOverlap) {
+      std::string message = boost::str(
+          boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
+                        "StartOverlap: %0.9f, EndOverlap: %0.9f") %
+          startOverlap % endOverlap);
+      throw std::runtime_error(message);
+    }
+  } else {
+    startOverlap = intersectionMin;
+    endOverlap = intersectionMax;
+  }
+
+  const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
+
+  MatrixWorkspace_sptr lhs;
+  MatrixWorkspace_sptr rhs;
+  if (lhsWS->isHistogramData()) {
+    MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
+    const double &xMin = params.front();
+    const double &xMax = params.back();
+
+    if (std::abs(xMin - startOverlap) < 1E-6)
+      startOverlap = xMin;
+
+    if (std::abs(xMax - endOverlap) < 1E-6)
+      endOverlap = xMax;
+
+    if (startOverlap < xMin) {
+      std::string message = boost::str(
+          boost::format(
+              "Stitch1D StartOverlap is outside the available X range. "
+              "StartOverlap: %10.9f, X min: %10.9f") %
+          startOverlap % xMin);
+      throw std::runtime_error(message);
+    }
+    if (endOverlap > xMax) {
+      std::string message = boost::str(
+          boost::format("Stitch1D EndOverlap is outside the available X range. "
+                        "EndOverlap: %10.9f, X max: %10.9f") %
+          endOverlap % xMax);
+      throw std::runtime_error(message);
+    }
     lhs = rebin(lhsWS, params);
     rhs = rebin(rhsWS, params);
+  } else {
+    lhs = lhsWS;
+    rhs = rhsWS;
   }
-  if (useManualScaleFactor) {
-    double manualScaleFactor = this->getProperty("ManualScaleFactor");
-    MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(manualScaleFactor);
 
+  m_scaleFactor = this->getProperty("ManualScaleFactor");
+  m_errorScaleFactor = m_scaleFactor;
+  const bool useManualScaleFactor = this->getProperty("UseManualScaleFactor");
+  if (useManualScaleFactor) {
+    MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(m_scaleFactor);
     if (scaleRHS)
       rhs *= manualScaleFactorWS;
     else
       lhs *= manualScaleFactorWS;
-    scaleFactor = manualScaleFactor;
-    errorScaleFactor = manualScaleFactor;
   } else {
-    auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
-    auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
-
-    MatrixWorkspace_sptr ratio;
-    if (scaleRHS) {
-      ratio = lhsOverlapIntegrated / rhsOverlapIntegrated;
-      rhs = rhs * ratio;
-    } else {
-      ratio = rhsOverlapIntegrated / lhsOverlapIntegrated;
-      lhs *= ratio;
-    }
-    scaleFactor = ratio->y(0).front();
-    errorScaleFactor = ratio->e(0).front();
-    if (scaleFactor < 1e-2 || scaleFactor > 1e2 || std::isnan(scaleFactor)) {
-      std::stringstream messageBuffer;
-      messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor
-                    << ". Check that in both input workspaces the integrated "
-                       "overlap region is non-zero.";
-      g_log.warning(messageBuffer.str());
-    }
+    const auto rhsOverlapIntegrated =
+        integration(rhs, startOverlap, endOverlap);
+    const auto lhsOverlapIntegrated =
+        integration(lhs, startOverlap, endOverlap);
+    if (scaleRHS)
+      scaleWorkspace(rhs, lhsOverlapIntegrated, rhsOverlapIntegrated, rhsWS);
+    else
+      scaleWorkspace(lhs, rhsOverlapIntegrated, lhsOverlapIntegrated, lhsWS);
   }
+  // Provide log information about the scale factors used in the calculations.
+  std::stringstream messageBuffer;
+  messageBuffer << "Scale Factor Y is: " << m_scaleFactor
+                << " Scale Factor E is: " << m_errorScaleFactor;
+  g_log.notice(messageBuffer.str());
 
-  boost::tuple<int, int> startEnd =
-      findStartEndIndexes(startOverlap, endOverlap, lhs);
-  int a1 = boost::tuples::get<0>(startEnd);
-  int a2 = boost::tuples::get<1>(startEnd);
+  MatrixWorkspace_sptr result;
+  if (lhsWS->isHistogramData()) { // If the input workspaces are histograms ...
+    boost::tuple<int, int> startEnd =
+        findStartEndIndexes(startOverlap, endOverlap, lhs);
+    int a1 = boost::tuples::get<0>(startEnd);
+    int a2 = boost::tuples::get<1>(startEnd);
 
-  // Mask out everything BUT the overlap region as a new workspace.
-  MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
-  // Mask out everything BUT the overlap region as a new workspace.
-  MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
-  // Mask out everything AFTER the overlap region as a new workspace.
-  maskInPlace(a1 + 1, static_cast<int>(lhs->blocksize()), lhs);
-  // Mask out everything BEFORE the overlap region as a new workspace.
-  maskInPlace(0, a2, rhs);
-
-  MatrixWorkspace_sptr overlapave;
-
-  // If the input workspaces are histograms ...
-  if (lhsWS->isHistogramData()) {
+    // Mask out everything BUT the overlap region as a new workspace.
+    MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
+    // Mask out everything BUT the overlap region as a new workspace.
+    MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
+    // Mask out everything AFTER the overlap region as a new workspace.
+    maskInPlace(a1 + 1, static_cast<int>(lhs->blocksize()), lhs);
+    // Mask out everything BEFORE the overlap region as a new workspace.
+    maskInPlace(0, a2, rhs);
+    MatrixWorkspace_sptr overlapave;
     if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
       overlapave = weightedMean(overlap1, overlap2);
     } else {
@@ -599,22 +628,16 @@ void Stitch1D::exec() {
       MatrixWorkspace_sptr denominator = singleValueWS(2.0);
       overlapave = sum / denominator;
     }
+    result = lhs + overlapave + rhs;
+    reinsertSpecialValues(result);
   } else { // The input workspaces are point data ... join & sort
-    auto ws = conjoinXAxis(overlap1, overlap2);
-    overlapave = sortXAxis(ws);
+    MatrixWorkspace_sptr ws = conjoinXAxis(lhs, rhs);
+    if (!ws)
+      g_log.error("Could not retrieve joined workspace.");
+    result = sortXAxis(ws);
   }
-
-  MatrixWorkspace_sptr result = lhs + overlapave + rhs;
-  reinsertSpecialValues(result);
-
-  // Provide log information about the scale factors used in the calculations.
-  std::stringstream messageBuffer;
-  messageBuffer << "Scale Factor Y is: " << scaleFactor
-                << " Scale Factor E is: " << errorScaleFactor;
-  g_log.notice(messageBuffer.str());
-
   setProperty("OutputWorkspace", result);
-  setProperty("OutScaleFactor", scaleFactor);
+  setProperty("OutScaleFactor", m_scaleFactor);
 }
 
 /** Put special values back.

@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_STITCH1D_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/tuple/tuple.hpp>
 
@@ -103,14 +104,22 @@ private:
   void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
   /// Range tolerance
   static const double range_tolerance;
-  /// Index per workspace spectra of Nans
-  SpecialTypeIndexes m_nanYIndexes;
-  /// Index per workspace spectra of Infs
-  SpecialTypeIndexes m_infYIndexes;
+  /// Scaling factors
+  double m_scaleFactor;
+  double m_errorScaleFactor;
+  /// Scale workspace (left hand side or right hand side)
+  void scaleWorkspace(Mantid::API::MatrixWorkspace_sptr ws,
+                      API::MatrixWorkspace_sptr divident,
+                      API::MatrixWorkspace_sptr divisor,
+                      Mantid::API::MatrixWorkspace_sptr dxWS);
   /// Index per workspace spectra of Nans
   SpecialTypeIndexes m_nanEIndexes;
+  SpecialTypeIndexes m_nanYIndexes;
+  SpecialTypeIndexes m_nanDxIndexes;
   /// Index per workspace spectra of Infs
   SpecialTypeIndexes m_infEIndexes;
+  SpecialTypeIndexes m_infYIndexes;
+  SpecialTypeIndexes m_infDxIndexes;
 };
 
 } // namespace Algorithms

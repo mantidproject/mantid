@@ -2,7 +2,6 @@
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Multiply.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

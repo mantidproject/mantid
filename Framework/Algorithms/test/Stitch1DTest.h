@@ -240,14 +240,35 @@ public:
   }
 
   void test_point_workspaces_pass() {
-    auto point_ws = make_arbitrary_point_ws();
-    const auto &x = HistogramX(3, LinearGenerator(-.5, 0.2));
-    const auto &y = HistogramY(3, LinearGenerator(1., 1.0));
+    const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
+    const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
     const auto &e = HistogramE(3, 1.);
-    const auto &dx = HistogramDx(3, LinearGenerator(-3., 0.1));
-    auto point_ws_2 = createWorkspace(x, y, e, dx);
-    TSM_ASSERT_THROWS_NOTHING("Point workspaces should pass",
-                              do_stitch1D(point_ws, point_ws_2));
+    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 0.));
+    auto point_ws_1 = createWorkspace(x1, y1, e, dx1);
+
+    const auto &x2 = HistogramX(3, LinearGenerator(1.5, 1.));
+    const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
+    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));//1.
+    auto point_ws_2 = createWorkspace(x2, y2, e, dx2);
+
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", point_ws_1);
+    alg.setProperty("RHSWorkspace", point_ws_2);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    //TS_ASSERT(alg.isExecuted());
+    //MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
+    //const std::vector<double> x_values{1., 2., 2.1, 3., 3.1, 4.1};
+    //TS_ASSERT(stitched->x(0).rawData(), x_values);
+    //const std::vector<double> y_values{1., 2., 5., 3., 6., 7.};
+    //TS_ASSERT(stitched->y(0).rawData(), y_values);
+    //const std::vector<double> dx_values{-3., -3., -9., -3., -9., -9.};
+    //TS_ASSERT(stitched->dx(0).rawData(), dx_values);
+    //double scaleFactor = alg.getProperty("OutScaleFactor");
+    //TS_ASSERT(scaleFactor, 0.);
   }
 
   void test_histogram_workspaces_pass() {
@@ -268,20 +289,18 @@ public:
     alg.initialize();
     alg.setProperty("LHSWorkspace", make_arbitrary_point_ws());
     alg.setProperty("RHSWorkspace", make_arbitrary_histogram_ws());
-    alg.setProperty("StartOverlap", -1);
-    alg.setProperty("EndOverlap", 1);
+    alg.setProperty("StartOverlap", -1.);
+    alg.setProperty("EndOverlap", 1.);
     alg.setProperty("Params", std::vector<double>(1., 0.2));
     alg.setProperty("ScaleRHSWorkspace", true);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
-    alg.execute();
-    TSM_ASSERT("RHSWorkspace must be point data.",
-               !alg.isExecuted());
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
 
     alg.setProperty("LHSWorkspace", make_arbitrary_histogram_ws());
     alg.setProperty("RHSWorkspace", make_arbitrary_point_ws());
-    alg.execute();
-    TSM_ASSERT("RHSWorkspace must be a histogram.",
-               !alg.isExecuted());
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
   }
 
   void test_stitching_uses_supplied_params() {
@@ -549,7 +568,7 @@ public:
     TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
 
     // Run it again with all zeros
-    e = HistogramE(9, 0);
+    e = HistogramE(9, 0.);
     ws = createWorkspace(x, y, e, dx, 1);
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
@@ -564,7 +583,7 @@ public:
 
     // Note: The size for y and e previously contained a factor nspectrum, but
     // it is unclear why, so I removed it.
-    HistogramX x(10, LinearGenerator(-1, 0.2));
+    HistogramX x(10, LinearGenerator(-1., 0.2));
     HistogramY y(9, 1.);
     HistogramE e(9, 1.);
     HistogramDx dx(9, 0.);
