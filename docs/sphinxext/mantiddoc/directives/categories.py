@@ -376,6 +376,7 @@ def create_category_pages(app):
     # Intitalise the lists
     all_top_categories = []
     top_context = {}
+    top_html_path_noext = ""
     # If the category is a top catergory it will not contain "\\"
     for top_name, top_category in iteritems(categories):
         if "\\" not in top_name and top_category not in all_top_categories:
