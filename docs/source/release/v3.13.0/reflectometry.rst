@@ -24,6 +24,8 @@ Bug fixes
 Features Removed
 ################
 
+* Added deprecation notice to ISIS Reflectometry (Old) due to be removed in March 2019.
+
 Algorithms
 ----------
 

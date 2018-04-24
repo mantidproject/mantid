@@ -22,6 +22,7 @@ extern template int NDArrayTypeIndex<unsigned long>::typenum;
 extern template int NDArrayTypeIndex<unsigned long long>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
+extern template int NDArrayTypeIndex<Mantid::Types::Core::DateAndTime>::typenum;
 
 namespace Impl {
 /**

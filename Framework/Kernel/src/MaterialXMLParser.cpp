@@ -51,6 +51,7 @@ const char *ABSORB_ATT = "absorptionxsec";
 
 // Base type to put in a hash
 struct BuilderHandle {
+  virtual ~BuilderHandle() = default;
   virtual void operator()(MaterialBuilder &builder,
                           const std::string &value) const = 0;
 };

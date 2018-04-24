@@ -183,14 +183,14 @@ struct nlls_inform {
 
   ///  the value of the objective function at the best estimate of the solution
   ///   determined by NLLS_solve
-  double obj = HUGE;
+  double obj = std::numeric_limits<float>::max();
 
   ///  the norm of the gradient of the objective function at the best estimate
   ///   of the solution determined by NLLS_solve
-  double norm_g = HUGE;
+  double norm_g = std::numeric_limits<float>::max();
 
   /// the norm of the gradient, scaled by the norm of the residual
-  double scaled_g = HUGE;
+  double scaled_g = std::numeric_limits<float>::max();
 
 }; //  END TYPE nlls_inform
 

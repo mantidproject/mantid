@@ -331,7 +331,7 @@ void FindClusterFaces::exec() {
   for (int it = 0; it < nIterators; ++it) {
     PARALLEL_START_INTERUPT_REGION
     ClusterFaces &localClusterFaces = clusterFaces[it];
-    auto mdIterator = mdIterators[it];
+    auto mdIterator = mdIterators[it].get();
 
     if (usingFiltering) {
       executeFiltered(mdIterator, localClusterFaces, progress, clusterImage,

@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/CreateSimulationWorkspace.h"
 
 #include <boost/make_shared.hpp>
 
@@ -220,6 +221,47 @@ public:
     TS_ASSERT_DELTA(ws_e->readE(0)[78], 0.009076805, delta);
     TS_ASSERT_DELTA(ws_e->readY(0)[119], 0.045373095, delta);
     TS_ASSERT_DELTA(ws_e->readE(0)[119], 0.005462714, delta);
+  }
+
+  void test_sofqw3_zerobinwidth() {
+    // This test sets up a workspace which can yield a bin with zero width
+    // to check the code FractionalRebinning code handles this correctly
+    const double delta(1e-08);
+    Mantid::DataHandling::CreateSimulationWorkspace create_ws;
+    create_ws.initialize();
+    create_ws.setChild(true);
+    create_ws.setPropertyValue("Instrument", "MARI");
+    create_ws.setPropertyValue("BinParams", "-5,0.5,24");
+    create_ws.setPropertyValue("OutputWorkspace", "__unused");
+    create_ws.execute();
+
+    MatrixWorkspace_sptr createdWS = create_ws.getProperty("OutputWorkspace");
+    auto inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(createdWS);
+    // Sets one spectrum to zero so final value is not unity.
+    inWS->setCounts(300, std::vector<double>(58, 0.));
+
+    Mantid::Algorithms::SofQWNormalisedPolygon sqw;
+    sqw.initialize();
+    sqw.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(sqw.setProperty("InputWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING(
+        sqw.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("QAxisBinning", "0,10,10"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EFixed", "25"));
+    TS_ASSERT_THROWS_NOTHING(
+        sqw.setPropertyValue("EAxisBinning", "-1.5,3,1.5"));
+    TS_ASSERT_THROWS_NOTHING(sqw.execute());
+    TS_ASSERT(sqw.isExecuted());
+
+    MatrixWorkspace_sptr ws = sqw.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(ws->getAxis(0)->length(), 2);
+    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), "DeltaE");
+    TS_ASSERT_EQUALS((*(ws->getAxis(0)))(0), -1.5);
+    TS_ASSERT_EQUALS((*(ws->getAxis(0)))(1), 1.5);
+    TS_ASSERT_EQUALS(ws->getAxis(1)->length(), 2);
+    TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+    TS_ASSERT_DELTA(ws->readY(0)[0], 0.998910675, delta);
   }
 };
 

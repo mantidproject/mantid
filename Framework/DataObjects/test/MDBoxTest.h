@@ -585,8 +585,8 @@ public:
     coord_t centroid[2] = {0, 0};
     signal_t signal = 0.0;
     b.centroidSphere(sphere, 400., centroid, signal);
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] /= static_cast<coord_t>(signal);
+    for (float &d : centroid)
+      d /= static_cast<coord_t>(signal);
 
     // This should be the weighted centroid
     TS_ASSERT_DELTA(signal, 6.000, 0.001);
@@ -595,11 +595,11 @@ public:
 
     // --- Reset and reduce the radius ------
     signal = 0;
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] = 0.0;
+    for (float &d : centroid)
+      d = 0.0;
     b.centroidSphere(sphere, 16., centroid, signal);
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] /= static_cast<coord_t>(signal);
+    for (float &d : centroid)
+      d /= static_cast<coord_t>(signal);
     // Only one event was contained
     TS_ASSERT_DELTA(signal, 2.000, 0.001);
     TS_ASSERT_DELTA(centroid[0], 2.000, 0.001);

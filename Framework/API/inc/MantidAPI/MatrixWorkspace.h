@@ -499,7 +499,7 @@ public:
       const Mantid::API::MDNormalization &normalization) const override;
   /// Create iterators. Partitions the iterators according to the number of
   /// cores.
-  std::vector<IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 

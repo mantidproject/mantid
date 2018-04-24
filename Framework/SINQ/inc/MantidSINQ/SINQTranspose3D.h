@@ -52,7 +52,9 @@ public:
   const std::string summary() const override {
     return "SINQ specific MD data reordering";
   }
-
+  const std::vector<std::string> seeAlso() const override {
+    return {"TransposeMD", "Transpose"};
+  }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
