@@ -400,7 +400,12 @@ void LoadDiffCal::exec() {
   try {
     calibrationGroup = file.openGroup("calibration");
   } catch (FileIException &e) {
-    e.printError();
+#if H5_VERSION_GE(1, 8, 13)
+    UNUSED_ARG(e);
+    H5::Exception::printErrorStack();
+#else
+    e.printError(stderr);
+#endif
     throw std::runtime_error("Did not find group \"/calibration\"");
   }
 
