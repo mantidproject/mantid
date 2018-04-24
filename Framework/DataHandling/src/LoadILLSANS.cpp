@@ -181,8 +181,9 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   int numberOfHistograms = data.dim0() * data.dim1() + 2;
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
-  size_t nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, 0);
-  loadDataIntoWorkspaceFromHorizontalTubes(data, m_defaultBinning, nextIndex);
+  size_t nextIndex =
+      loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
+  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
   if (data.dim0() == 128 && m_instrumentName == "D11") {
     m_resMode = "low";
   }
@@ -292,8 +293,13 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       std::vector<double> positionsBinning;
       positionsBinning.reserve(vectorSize);
 
-      const HistogramData::BinEdges histoBinEdges(
-          vectorSize, HistogramData::LinearGenerator(0.0, 1.0));
+      HistogramData::BinEdges histoBinEdges(
+          vectorSize, HistogramData::LinearGenerator(0.0, vectorSize));
+
+      if (firstEntry.getFloat("mode") == 0.0) { // Not TOF
+        histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
+      }
+
       const HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
       m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges),
@@ -604,7 +610,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
 }
 
 /**
- * @param lambda : wavelength in Amstrongs
+ * @param lambda : wavelength in Angstroms
  * @param twoTheta : twoTheta in degreess
  */
 double LoadILLSANS::calculateQ(const double lambda,
