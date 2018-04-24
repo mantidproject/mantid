@@ -139,6 +139,11 @@ This specifies how many times the calibration has to be derived (see Step 4 abov
       Hence, care must be taken when using the iterations.
       It is not recommended to use more than 2 iterations.
 
+MaskCriterion
+-------------
+
+Provide a range, out of which the calibration constants will be set to zero. This effectively masks the pixels after applying the calibration multiplicatively.
+
 Limitations
 -----------
 

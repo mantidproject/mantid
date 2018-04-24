@@ -12,8 +12,10 @@ Diffraction Changes
 New Features
 ------------
 
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is extended to apply vertical and horizontal tube alignment for D2B, based on the IPF.
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to compute the detector efficiencies also for the 2-dimensional scanning diffractometer D2B at the ILL.
-
+- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to provide automatic masking of the pixels with spurious calibration constants.
+- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` is extended to provide initial masking of the top and bottom parts of the tubes, and final masking of the 2D outputs.
 
 Engineering Diffraction
 -----------------------
