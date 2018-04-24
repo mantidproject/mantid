@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_CONVOLUTIONFIT_H_
 
 #include "MantidAPI/Column.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
