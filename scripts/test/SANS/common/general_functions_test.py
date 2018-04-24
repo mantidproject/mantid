@@ -71,8 +71,8 @@ class SANSFunctionsTest(unittest.TestCase):
 
         state.reduction.dimensionality = ReductionDimensionality.OneDim
 
-        state.wavelength.wavelength_low = 12.0
-        state.wavelength.wavelength_high = 34.0
+        state.wavelength.wavelength_low = [12.0]
+        state.wavelength.wavelength_high = [34.0]
 
         state.mask.phi_min = 12.0
         state.mask.phi_max = 56.0

@@ -93,9 +93,9 @@ Nightly Builds
 ##############
 
 The `Jenkins Release Pipeline <http://builds.mantidproject.org/view/Release%20Pipeline/>`__ contains jobs
-that check for changes on the current release branch each night (00:00 GMT). Any detected changes will cause a clean build of the code followed
-by a run of the system tests. These jobs should be checked each morning
-to confirm that everything is green.
+that check for changes on the current release branch each night (00:00 GMT). Any detected changes will cause a clean build of the code followed by a run of the system tests. The Linux clean builds should have the `PACKAGE_SUFFIX` set to `nightly` while testing the patch.
+
+These jobs should be checked each morning to confirm that everything is green.
 
 Release Day
 ###########

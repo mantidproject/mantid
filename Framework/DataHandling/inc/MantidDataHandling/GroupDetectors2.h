@@ -171,10 +171,11 @@ private:
                  std::vector<int64_t> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
-  void processFile(std::string fname, API::MatrixWorkspace_const_sptr workspace,
+  void processFile(const std::string &fname,
+                   API::MatrixWorkspace_const_sptr workspace,
                    std::vector<int64_t> &unUsedSpec);
   /// gets groupings from XML file
-  void processXMLFile(std::string fname,
+  void processXMLFile(const std::string &fname,
                       API::MatrixWorkspace_const_sptr workspace,
                       std::vector<int64_t> &unUsedSpec);
   void
@@ -186,18 +187,19 @@ private:
                               std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if
   /// possible), white space and # comments ignored
-  int readInt(std::string line);
+  int readInt(const std::string &line);
 
-  void readFile(spec2index_map &specs2index, std::istream &File,
+  void readFile(const spec2index_map &specs2index, std::istream &File,
                 size_t &lineNum, std::vector<int64_t> &unUsedSpec,
-                bool ignoreGroupNumber);
+                const bool ignoreGroupNumber);
 
   /// used while reading the file reads reads spectra numbers from the string
   /// and returns spectra indexes
-  void readSpectraIndexes(std::string line, spec2index_map &specs2index,
+  void readSpectraIndexes(const std::string &line,
+                          const spec2index_map &specs2index,
                           std::vector<size_t> &output,
                           std::vector<int64_t> &unUsedSpec,
-                          std::string seperator = "#");
+                          const std::string &seperator = "#");
 
   /// Estimate how much what has been read from the input file constitutes
   /// progress for the algorithm
@@ -232,7 +234,7 @@ private:
     /// spectrum will be included in a group, any other
     /// value and it isn't. Spectra numbers should always
     /// be positive so we shouldn't accidientally set a
-    /// spectrum number to the this
+    /// spectrum number to this
     EMPTY_LINE = 1001 - INT_MAX, ///< when reading from the input file this
     /// value means that we found any empty line
     IGNORE_SPACES = Mantid::Kernel::StringTokenizer::TOK_TRIM ///< equal to

@@ -2,12 +2,13 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
     FloatArrayProperty, StringListValidator
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty, FileProperty, FileAction
 from mantid.simpleapi import *
 
 
 class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
     _progress = None
+    _tolerance = 0.
 
     def category(self):
         return "ILL\\Diffraction;Diffraction\\Reduction"
@@ -43,6 +44,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
                              validator=StringListValidator(['None', 'Monitor']),
                              doc='Normalise to monitor, or skip normalisation.')
 
+        self.declareProperty(FileProperty('CalibrationFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='File containing the detector efficiencies.')
+
         self.declareProperty(name='UseCalibratedData',
                              defaultValue=True,
                              doc='Whether or not to use the calibrated data in the NeXus files.')
@@ -58,6 +62,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         self.declareProperty(name='Output1D',
                              defaultValue=True,
                              doc='Output a 1D workspace with counts against scattering angle.')
+
+        self.declareProperty(name='CropNegativeScatteringAngles', defaultValue=True,
+                             doc='Whether or not to crop the negative scattering angles.')
 
         self.declareProperty(FloatArrayProperty(name='HeightRange', values=[],
                                                 validator=CompositeValidator([FloatArrayOrderedPairsValidator(),
@@ -83,15 +90,31 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         # We might already have a group, but group just in case
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
-        instrument_name = input_group[0].getInstrument().getName()
+        instrument = input_group[0].getInstrument()
         supported_instruments = ['D2B', 'D20']
-        if instrument_name not in supported_instruments:
+        if instrument.getName() not in supported_instruments:
             self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
                              + str(supported_instruments))
+        if instrument.getName() == 'D20':
+            if self.getProperty('Output2DTubes').value:
+                raise RuntimeError('Output2DTubes is not supported for D20 (1D detector)')
+            if self.getProperty('Output2D').value:
+                raise RuntimeError('Output2D is not supported for D20 (1D detector)')
+            self._tolerance = 1000.
 
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
             input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
+
+        calib_file = self.getPropertyValue('CalibrationFile')
+        if calib_file:
+            self._progress.report('Applying detector efficiencies')
+            LoadNexusProcessed(Filename=calib_file, OutputWorkspace='__det_eff')
+            for ws in input_group:
+                name = ws.getName()
+                ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name, MonitorWorkspace='__mon')
+                DeleteWorkspace('__mon')
+                ApplyDetectorScanEffCorr(InputWorkspace=name,DetectorEfficiencyWorkspace='__det_eff',OutputWorkspace=name)
 
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
@@ -101,11 +124,18 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         output_workspaces = []
         output_workspace_name = self.getPropertyValue('OutputWorkspace')
 
+        mirror_angles = False
+        crop_negative = self.getProperty('CropNegativeScatteringAngles').value
+        if instrument.hasParameter("mirror_scattering_angles"):
+            mirror_angles = instrument.getBoolParameter("mirror_scattering_angles")[0]
+
         self._progress.report('Doing Output2DTubes Option')
         if self.getProperty('Output2DTubes').value:
             output2DTubes = SumOverlappingTubes(InputWorkspaces=input_group,
                                                 OutputType='2DTubes',
                                                 HeightAxis=height_range,
+                                                MirrorScatteringAngles=mirror_angles,
+                                                CropNegativeScatteringAngles=crop_negative,
                                                 OutputWorkspace=output_workspace_name + '_2DTubes')
             output_workspaces.append(output2DTubes)
 
@@ -113,8 +143,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if self.getProperty('Output2D').value:
             output2D = SumOverlappingTubes(InputWorkspaces=input_group,
                                            OutputType='2D',
-                                           CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range,
+                                           MirrorScatteringAngles=mirror_angles,
+                                           CropNegativeScatteringAngles=crop_negative,
                                            OutputWorkspace = output_workspace_name + '_2D')
             output_workspaces.append(output2D)
 
@@ -122,9 +153,11 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if self.getProperty('Output1D').value:
             output1D = SumOverlappingTubes(InputWorkspaces=input_group,
                                            OutputType='1D',
-                                           CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range,
-                                           OutputWorkspace=output_workspace_name + '_1D')
+                                           MirrorScatteringAngles=mirror_angles,
+                                           CropNegativeScatteringAngles=crop_negative,
+                                           OutputWorkspace=output_workspace_name + '_1D',
+                                           ScatteringAngleTolerance=self._tolerance)
             output_workspaces.append(output1D)
         DeleteWorkspace('input_group')
 

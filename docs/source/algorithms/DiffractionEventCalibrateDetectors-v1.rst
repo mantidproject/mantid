@@ -37,9 +37,10 @@ Usage
 Output:
 
 .. testoutput:: ExDiffractionEventCalibrateDetectors
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-    Peak in dSpace 2.69077317913
-    Peak from calibration 2.68342207235
+    Peak in dSpace 2.6...
+    Peak from calibration 2.6...
 
 
 .. categories::

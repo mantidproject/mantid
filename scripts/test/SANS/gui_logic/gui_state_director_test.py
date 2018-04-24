@@ -42,8 +42,8 @@ class GuiStateDirectorTest(unittest.TestCase):
         except ValueError:
             has_raised = True
         self.assertFalse(has_raised)
-        self.assertTrue(state.wavelength.wavelength_low == 1.5)
-        self.assertTrue(state.wavelength.wavelength_high == 12.5)
+        self.assertTrue(state.wavelength.wavelength_low == [1.5])
+        self.assertTrue(state.wavelength.wavelength_high == [12.5])
 
     def test_that_will_raise_when_models_are_incomplete(self):
         table_index_model = TableIndexModel(0, "", "", "", "", "", "",
@@ -61,8 +61,8 @@ class GuiStateDirectorTest(unittest.TestCase):
 
         state = director.create_state(0)
         self.assertTrue(isinstance(state, State))
-        self.assertTrue(state.wavelength.wavelength_low == 3.14)
-        self.assertTrue(state.wavelength.wavelength_high == 10.3)
+        self.assertTrue(state.wavelength.wavelength_low == [3.14])
+        self.assertTrue(state.wavelength.wavelength_high == [10.3])
 
 
 if __name__ == '__main__':
