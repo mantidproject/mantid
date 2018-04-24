@@ -697,7 +697,22 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
     return output_workspace_name, output_workspace_base_name
 
 
-def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None, transmission=False):
+def get_transmission_output_name(state, reduction_mode):
+    user_specified_output_name = state.save.user_specified_output_name
+    # Get the standard workspace name
+    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
+                                                                             transmission=True)
+
+    if user_specified_output_name:
+        output_name = user_specified_output_name + "_trans"
+        output_base_name = output_name
+    else:
+        output_name = workspace_name
+        output_base_name = workspace_base_name
+
+    return output_name, output_base_name
+
+def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None):
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
@@ -706,8 +721,7 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
     use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
 
     # Get the standard workspace name
-    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
-                                                                             transmission=transmission)
+    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode)
 
     # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
     if (state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \

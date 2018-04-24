@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from sans.common.general_functions import (create_managed_non_child_algorithm, create_unmanaged_algorithm,
-                                           get_output_name, get_base_name_from_multi_period_name)
+                                           get_output_name, get_base_name_from_multi_period_name, get_transmission_output_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode)
 from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
@@ -631,8 +631,11 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     """
     def _set_output_name(_reduction_alg, _reduction_package, _is_group, _reduction_mode, _property_name,
                          _attr_out_name, _atrr_out_name_base, multi_reduction_type, _suffix=None, transmission=False):
-        _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
-                                                    multi_reduction_type=multi_reduction_type, transmission=transmission)
+        if not transmission:
+            _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
+                                                        multi_reduction_type=multi_reduction_type)
+        else:
+            _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode)
 
         if _suffix is not None:
             _out_name += _suffix
@@ -745,15 +748,13 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     #-------------------------------------------------------------------------------------------------------------------
     # Set the output workspaces for the calculated and unfitted transmission
     #-------------------------------------------------------------------------------------------------------------------
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     if state.adjustment.show_transmission:
         _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
                          "OutputWorkspaceCalculatedTransmission", "calculated_transmission_name",
-                         "calculated_transmission_base_name", transmission=True)
+                         "calculated_transmission_base_name",multi_reduction_type, transmission=True)
         _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
                          "OutputWorkspaceUnfittedTransmission", "unfitted_transmission_name",
-                         "unfitted_transmission_base_name", transmission=True, _suffix='unfitted')
+                         "unfitted_transmission_base_name",multi_reduction_type, transmission=True, _suffix="_unfitted")
 
 
 def get_workspace_from_algorithm(alg, output_property_name):
