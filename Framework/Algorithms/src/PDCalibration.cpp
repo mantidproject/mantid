@@ -109,8 +109,6 @@ public:
         inTofPos.push_back(peaksInD[i]);
         inTofWindows.push_back(peaksInDWindows[2 * i]);
         inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
-      } else if (centre < tofMax) {
-        badPeakOffset = i;
       }
     }
     std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
@@ -119,9 +117,8 @@ public:
   }
 
   // (NEW) Pete: I don't need to get rid of peaks out of TOF range because
-  // FitPeaks checks whether a given
-  // peak is in range or not.  I'd rather to have some peaks out of range than a
-  // ragged workspace
+  // FitPeaks checks whether a given peak is in range or not.  I'd rather
+  // to have some peaks out of range than a ragged workspace
   void calculatePositionWindowInTOF(const std::vector<double> &peaksInD,
                                     const std::vector<double> &peaksInDWindows,
                                     std::function<double(double)> toTof) {
@@ -145,7 +142,6 @@ public:
   std::vector<double> inTofPos;
   std::vector<double> inTofWindows;
   std::vector<double> inDPos;
-  std::size_t badPeakOffset{0}; ///< positions that will not be fit
 };
 
 //----------------------------------------------------------------------------------------------
@@ -274,6 +270,10 @@ void PDCalibration::init() {
   declareProperty("MinimumPeakHeight", EMPTY_DBL(),
                   "Minimum peak height such that all the fitted peaks with "
                   "height under this value will be excluded.");
+
+  declareProperty(
+      "MaxChiSq", 100.,
+      "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
   declareProperty(
       "ConstrainPeakPositions", true,
@@ -525,7 +525,7 @@ void PDCalibration::exec() {
   //  }
 
   double minPeakHeight = getProperty("MinimumPeakHeight");
-  // double maxChiSquared = getProperty("MaxChiSq");
+  double maxChiSquared = getProperty("MaxChiSq");
 
   const std::string calParams = getPropertyValue("CalibrationParameters");
   if (calParams == std::string("DIFC"))
@@ -561,6 +561,8 @@ void PDCalibration::exec() {
 
   MaskWorkspace_sptr maskWS = boost::make_shared<DataObjects::MaskWorkspace>(
       m_uncalibratedWS->getInstrument());
+  for (size_t i = 0; i < maskWS->getNumberHistograms(); ++i) // REMOVE
+    maskWS->setMaskedIndex(i, true); // mask everything to start
   setProperty("MaskWorkspace", maskWS);
 
   const std::string peakFunction = getProperty("PeakFunction");
@@ -571,11 +573,11 @@ void PDCalibration::exec() {
                       "directly compared to delta-d/d";
   }
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
-  API::Progress prog(this, 0.0, 1.0, NUMHIST);
+  API::Progress prog(this, 0.0, 0.7, 1);
 
   // create TOF peak centers workspace
   auto matrix_pair = createTOFPeakCenterFitWindowWorkspaces(
-      m_uncalibratedWS, m_peaksInDspacing, peakWindowMaxInDSpacing);
+      m_uncalibratedWS, peakWindowMaxInDSpacing);
   API::MatrixWorkspace_sptr tof_peak_center_ws = matrix_pair.first;
   API::MatrixWorkspace_sptr tof_peak_window_ws = matrix_pair.second;
   //  API::MatrixWorkspace_sptr peak_window_ws =
@@ -621,6 +623,7 @@ void PDCalibration::exec() {
 
   // run and get the result
   alg->executeAsChildAlg();
+  g_log.information("finished `FitPeaks");
 
   // get result
   API::ITableWorkspace_sptr fittedTable =
@@ -635,6 +638,12 @@ void PDCalibration::exec() {
         "The number of rows in OutputPeakParametersWorkspace is not correct!");
 
   // END-OF (FitPeaks)
+  std::string backgroundType = getProperty("BackgroundType");
+
+  prog.resetNumSteps(NUMHIST, 0.7, 1.0);
+
+  const auto windowsInDSpacing =
+      dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
@@ -645,38 +654,11 @@ void PDCalibration::exec() {
       continue;
     }
 
-    //    PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-    //    auto toTof = getDSpacingToTof(peaks.detid);
-    //    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
-
-    //    if (peaks.inTofPos.empty())
-    //      continue;
-
-    // TODO/FIXME why not do FitPeaks just once?  I don't see the benefit to
-    // call FitPeaks numerous time.
-    //    auto alg = createChildAlgorithm("FindPeaks");
-    //    alg->setLoggingOffset(3);
-    //    alg->setProperty("InputWorkspace", m_uncalibratedWS);
-    //    alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
-    //    alg->setProperty("PeakPositions", peaks.inTofPos);
-    //    alg->setProperty("FitWindows", peaks.inTofWindows);
-    //    alg->setProperty<int>("FWHM", getProperty("FWHM"));
-    //    alg->setProperty<int>("Tolerance", getProperty("Tolerance"));
-    //    alg->setProperty<std::string>("PeakFunction", peakFunction);
-    //    alg->setProperty<std::string>("BackgroundType",
-    //                                  getProperty("BackgroundType"));
-    //    alg->setProperty<bool>("HighBackground",
-    //    getProperty("HighBackground"));
-    //    alg->setProperty<int>("MinGuessedPeakWidth",
-    //                          getProperty("MinGuessedPeakWidth"));
-    //    alg->setProperty<int>("MaxGuessedPeakWidth",
-    //                          getProperty("MaxGuessedPeakWidth"));
-    //    alg->setProperty<double>("MinimumPeakHeight",
-    //                             getProperty("MinimumPeakHeight"));
-    //    alg->setProperty<bool>("StartFromObservedPeakCentre",
-    //                           getProperty("StartFromObservedPeakCentre"));
-    //    alg->executeAsChildAlg();
-    //    API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
+    // object to hold the information about the peak positions, detid, and wksp
+    // index
+    PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
+    auto toTof = getDSpacingToTof(peaks.detid);
+    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
 
     // includes peaks that aren't used in the fit
     const size_t numPeaks = m_peaksInDspacing.size();
@@ -687,44 +669,40 @@ void PDCalibration::exec() {
     std::vector<double> height_vec_full(numPeaks, std::nan(""));
     std::vector<double> height2; // the square of the peak height
 
-    auto in_tof_window = tof_peak_window_ws->histogram(wkspIndex).x();
-
     // for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
-    for (size_t i = 0; i < numPeaks; ++i) {
-      // Get peak value
-      size_t row_number = wkspIndex * numPeaks + i;
-      // check again
-      const int wsindex_i = fittedTable->getRef<int>("wsindex", row_number);
-      if (wsindex_i != wkspIndex)
+    const size_t rowNumInFitTableOffset = wkspIndex * numPeaks;
+    for (size_t peakIndex = 0; peakIndex < numPeaks; ++peakIndex) {
+      size_t rowIndexInFitTable = rowNumInFitTableOffset + peakIndex;
+
+      // check indices in PeaksTable
+      if (fittedTable->getRef<int>("wsindex", rowIndexInFitTable) != wkspIndex)
         throw std::runtime_error("workspace index mismatch!");
-      const int peakindex_i = fittedTable->getRef<int>("peakindex", row_number);
-      if (peakindex_i != static_cast<int>(i))
+      if (fittedTable->getRef<int>("peakindex", rowIndexInFitTable) !=
+          static_cast<int>(peakIndex))
         throw std::runtime_error(
             "peak index mismatch but workspace index matched");
 
       // TODO FIXME Pete: the following only works Gaussian because in FitPeaks,
       // the exact parameter name is used
       const double centre =
-          fittedTable->getRef<double>("PeakCentre", row_number);
-      const double width = fittedTable->getRef<double>("Sigma", row_number);
-      const double height = fittedTable->getRef<double>("Height", row_number);
-      const double chi2 = fittedTable->getRef<double>("chi2", row_number);
+          fittedTable->getRef<double>("PeakCentre", rowIndexInFitTable);
+      const double width =
+          fittedTable->getRef<double>("Sigma", rowIndexInFitTable);
+      const double height =
+          fittedTable->getRef<double>("Height", rowIndexInFitTable);
+      const double chi2 =
+          fittedTable->getRef<double>("chi2", rowIndexInFitTable);
 
       // check chi-square
-      double maxChiSquared = DBL_MAX - 1;
       if (chi2 > maxChiSquared || chi2 < 0.) {
         continue;
       }
 
       // rule out of peak with wrong position
-      if (in_tof_window[2 * i] >= centre ||
-          in_tof_window[2 * i + 1] <= centre) {
+      if (peaks.inTofWindows[2 * peakIndex] >= centre ||
+          peaks.inTofWindows[2 * peakIndex + 1] <= centre) {
         continue;
       }
-      //      if (peaks.inTofWindows[2 * i] >= centre ||
-      //          peaks.inTofWindows[2 * i + 1] <= centre) {
-      //        continue;
-      //      }
 
       // check height: make sure 0 is smaller than 0
       if (height < minPeakHeight + 1.E-15) {
@@ -733,9 +711,16 @@ void PDCalibration::exec() {
 
       // background value
       double back_intercept =
-          fittedTable->getRef<double>("backgroundintercept", i);
-      double back_slope = fittedTable->getRef<double>("backgroundslope", i);
-      double back_quad = fittedTable->getRef<double>("A2", i);
+          fittedTable->getRef<double>("A0", rowIndexInFitTable);
+      double back_slope = 0.;
+      double back_quad = 0.;
+      switch (backgroundType[0]) {
+      case 'Q': // Quadratic
+        back_quad = fittedTable->getRef<double>(
+            "A2", rowIndexInFitTable); // fall through
+      case 'L':                        // Linear
+        back_slope = fittedTable->getRef<double>("A1", rowIndexInFitTable);
+      }
       double background =
           back_intercept + back_slope * centre + back_quad * centre * centre;
 
@@ -743,27 +728,22 @@ void PDCalibration::exec() {
       if (height < 0.5 * std::sqrt(height + background))
         continue;
 
-      d_vec.push_back(m_peaksInDspacing[i]); //   peaks.inDPos[i]);
+      d_vec.push_back(peaks.inDPos[peakIndex]);
       tof_vec.push_back(centre);
       height2.push_back(height * height);
-      //      tof_vec_full[i + peaks.badPeakOffset] = centre;
-      //      width_vec_full[i + peaks.badPeakOffset] = width;
-      //      height_vec_full[i + peaks.badPeakOffset] = height;
-      // no bad peak offset from FitPeaks
-      tof_vec_full[i] = centre;
-      width_vec_full[i] = width;
-      height_vec_full[i] = height;
+      tof_vec_full[peakIndex] = centre;
+      width_vec_full[peakIndex] = width;
+      height_vec_full[peakIndex] = height;
     }
 
+    maskWS->setMasked(peaks.detid, d_vec.size() < 2);
     if (d_vec.size() < 2) { // not enough peaks were found
-      maskWS->setMaskedIndex(wkspIndex, true);
       continue;
     } else {
       double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
 
-      const auto rowNum = m_uncalibratedWS->getDetector(wkspIndex)
-                              ->getID(); //   m_detidToRow[peaks.detid];
+      const auto rowIndexOutputPeaks = m_detidToRow[peaks.detid];
       double chisq = 0.;
       auto converter =
           Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
@@ -773,18 +753,20 @@ void PDCalibration::exec() {
         const double dspacing = converter(tof_vec_full[i]);
         const double temp = m_peaksInDspacing[i] - dspacing;
         chisq += (temp * temp);
-        m_peakPositionTable->cell<double>(rowNum, i + 1) = dspacing;
-        m_peakWidthTable->cell<double>(rowNum, i + 1) =
+        m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+            dspacing;
+        m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
             WIDTH_TO_FWHM * converter(width_vec_full[i]);
-        m_peakHeightTable->cell<double>(rowNum, i + 1) = height_vec_full[i];
+        m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+            height_vec_full[i];
       }
-      m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 1) =
-          chisq;
-      m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 2) =
+      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                        m_peaksInDspacing.size() + 1) = chisq;
+      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                        m_peaksInDspacing.size() + 2) =
           chisq / static_cast<double>(numPeaks - 1);
 
-      setCalibrationValues(m_uncalibratedWS->getDetector(wkspIndex)->getID(),
-                           difc, difa, t0);
+      setCalibrationValues(peaks.detid, difc, difa, t0);
     }
     prog.report();
 
@@ -1381,12 +1363,11 @@ PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
 /// NEW: convert peak positions in dSpacing to peak centers workspace
 std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
 PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
-    API::MatrixWorkspace_sptr dataws, const std::vector<double> &peak_positions,
-    const double peakWindowMaxInDSpacing) {
+    API::MatrixWorkspace_sptr dataws, const double peakWindowMaxInDSpacing) {
 
   // calculate from peaks in dpsacing to peak fit window in dspacing
   const auto windowsInDSpacing =
-      dSpacingWindows(peak_positions, peakWindowMaxInDSpacing);
+      dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
     g_log.information() << "[" << i << "] " << windowsInDSpacing[2 * i] << " < "
@@ -1396,7 +1377,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
 
   // create workspaces
   size_t numspec = dataws->getNumberHistograms();
-  size_t numpeaks = peak_positions.size();
+  size_t numpeaks = m_peaksInDspacing.size();
   MatrixWorkspace_sptr peak_pos_ws = API::WorkspaceFactory::Instance().create(
       "Workspace2D", numspec, numpeaks, numpeaks);
   MatrixWorkspace_sptr peak_window_ws =
@@ -1416,6 +1397,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
     //    peak_pos_ws->histogram(iws).setX(peaks.inTofPos);
     for (size_t i = 0; i < peaks.inTofPos.size(); ++i)
       peak_pos_ws->dataX(iws)[i] = peaks.inTofPos[i];
+
     // peak_window_ws->histogram(iws).setX(peaks.inTofWindows);
     // std::copy(peaks.inTofWindows.begin(), peaks.inTofWindows.end(),
     // peak_pos_ws->histogram(iws).x().begin());

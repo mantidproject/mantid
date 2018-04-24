@@ -75,10 +75,8 @@ private:
 
   /// NEW: convert peak positions in dSpacing to peak centers workspace
   std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
-  createTOFPeakCenterFitWindowWorkspaces(
-      API::MatrixWorkspace_sptr dataws,
-      const std::vector<double> &peak_positions,
-      const double peakWindowMaxInDSpacing);
+  createTOFPeakCenterFitWindowWorkspaces(API::MatrixWorkspace_sptr dataws,
+                                         const double peakWindowMaxInDSpacing);
 
   API::ITableWorkspace_sptr
   sortTableWorkspace(API::ITableWorkspace_sptr &table);
