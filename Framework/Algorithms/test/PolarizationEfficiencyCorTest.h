@@ -35,43 +35,43 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void test_no_input_ws_wildes() {
+  void test_input_ws_no_inputs() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
-    alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
-    // Error: Wildes method expects a list of input workspace names.
+    // Error: Input workspaces are missing. Either a workspace group or a list
+    // of workspace names must be given
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
-  void test_no_input_ws_fredrikze() {
+  void test_input_ws_default_group() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
-    alg.setProperty("CorrectionMethod", "Fredrikze");
-    alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
-    // Error: Fredrikze method expects a WorkspaceGroup as input.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
+    alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
+    alg.execute();
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 4);
   }
-  void test_input_ws_Wildes_expects_list() {
+  void test_input_ws_wildes_group() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
     alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
-    // Error: Wildes method expects a list of input workspace names.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    alg.execute();
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 4);
   }
-  void test_input_ws_fredrikze() {
+  void test_input_ws_fredrikze_group() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -79,14 +79,34 @@ public:
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
-  void test_input_ws_wildes() {
+  void test_input_ws_wildes_wrong_input_size() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
+    alg.setProperty("CorrectionMethod", "Wildes");
+    alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
+    // Error: Some invalid Properties found
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+  void test_input_ws_fredrikze_wrong_input_size() {
+    PolarizationEfficiencyCor alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
+    alg.setProperty("CorrectionMethod", "Fredrikze");
+    alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
+    // Error: For PA analysis, input group must have 4 periods
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+  void test_input_ws_wildes_list() {
+    PolarizationEfficiencyCor alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -94,88 +114,69 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
-  void test_input_ws_fredrikze_needs_group() {
+  void test_input_ws_frederikze_needs_group() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
     alg.setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
-    // Error: Fredrikze method doesn't allow to use a list of names for input.
+    // Error: Input workspaces are required to be in a workspace group
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
-  void test_input_ws_wildes_needs_list() {
+  void test_input_ws_cannot_be_both() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
     alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg.setProperty("InputWorkspaces", createWorkspacesInADS(4));
-    alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
-    // Error: Wildes method doesn't allow to use a WorkspaceGroup for input.
+    // Error: Input workspaces must be given either as a workspace group or a
+    // list of names
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
-  void test_input_ws_fredrikze_cannot_take_both() {
+  void test_input_ws_wildes_wrong_size() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("OutputWorkspace", "out");
-    alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
-    alg.setProperty("InputWorkspaces", createWorkspacesInADS(4));
-    alg.setProperty("CorrectionMethod", "Fredrikze");
-    alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
-    // Error: Fredrikze method doesn't allow to use a list of names for input.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
-  }
-  void test_input_ws_wildes_incompatible_with_efficiencies() {
-    PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
     alg.setProperty("InputWorkspaces", createWorkspacesInADS(2));
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
-    // Error: Some invalid Properties found;
+    // Error: Some invalid Properties found
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
+
   void test_efficiencies_fredrikze_wrong_efficiencies() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
     alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
-    // Error: Efficiencey property not found: CRho;
+    // Error: Efficiencey property not found: Rho;
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
   void test_efficiencies_wildes_wrong_efficiencies() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
     alg.setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
-    // Error: Some invalid Properties found;
+    // Error: Some invalid Properties found
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
   void test_flippers_full() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -184,14 +185,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 01, 10, 11");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_flippers_missing_01() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -200,14 +199,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 10, 11");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_flippers_missing_10() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -216,14 +213,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 01, 11");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
-  void test_flippers_missing_01_10() {
+  void test_flippers_missing_0110() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -232,14 +227,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 11");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
-  void test_flippers_no_analyzer() {
+  void test_flippers_no_analyser() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -248,14 +241,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "0, 1");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 2);
   }
   void test_flippers_direct_beam() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -264,14 +255,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "0");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 1);
   }
-  void test_flippers_inconsistent() {
+  void test_flippers_wrong_flippers() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -279,12 +268,11 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 10, 11");
-    // Error: Some invalid Properties found;
+    // Error: Some invalid Properties found
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
-  void test_flippers_no_pnr() {
+  void test_flippers_wildes_no_pnr() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -293,12 +281,11 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("PolarizationAnalysis", "PNR");
     // Error: Property PolarizationAnalysis canot be used with the Wildes
-    // method.
+    // method
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
-  void test_flippers_no_pa() {
+  void test_flippers_wildes_no_pa() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -307,12 +294,11 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("PolarizationAnalysis", "PA");
     // Error: Property PolarizationAnalysis canot be used with the Wildes
-    // method.
+    // method
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
   void test_polarization_analysis_pnr() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -321,14 +307,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("PolarizationAnalysis", "PNR");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 2);
   }
   void test_polarization_analysis_pa() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -337,14 +321,12 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("PolarizationAnalysis", "PA");
     alg.execute();
-    TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out);
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
-  void test_polarization_analysis_wrong_pnr_input() {
+  void test_polarization_analysis_wrong_group_size() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -352,12 +334,11 @@ public:
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("PolarizationAnalysis", "PNR");
-    // Error: For PNR analysis, input group must have 2 periods.
+    // Error: For PNR analysis, input group must have 2 periods
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
   void test_polarization_analysis_no_flippers() {
     PolarizationEfficiencyCor alg;
-    alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("OutputWorkspace", "out");
@@ -365,7 +346,7 @@ public:
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("Flippers", "00, 01, 10, 11");
-    // Error: Property Flippers canot be used with the Fredrikze method.
+    // Error: Property Flippers canot be used with the Fredrikze method
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
 
@@ -386,6 +367,7 @@ private:
       ws->getAxis(0)->setUnit("Wavelength");
       group->addWorkspace(ws);
     }
+    AnalysisDataService::Instance().addOrReplace("WS_GROUP_1", group);
     return group;
   }
 

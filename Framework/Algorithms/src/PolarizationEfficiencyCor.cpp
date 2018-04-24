@@ -150,7 +150,7 @@ void PolarizationEfficiencyCor::exec() {
 //----------------------------------------------------------------------------------------------
 void PolarizationEfficiencyCor::execWildes() {
   checkWildesProperties();
-  std::vector<std::string> workspaces = getProperty(Prop::INPUT_WORKSPACES);
+  std::vector<std::string> workspaces = getWorkspaceNameList();
   MatrixWorkspace_sptr efficiencies = getProperty(Prop::EFFICIENCIES);
   auto alg = createChildAlgorithm("PolarizationCorrectionWildes");
   alg->initialize();
@@ -159,8 +159,9 @@ void PolarizationEfficiencyCor::execWildes() {
   if (!isDefault(Prop::FLIPPERS)) {
     alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));
   }
-  alg->setPropertyValue("OutputWorkspace",
-                        getPropertyValue(Prop::OUTPUT_WORKSPACES));
+  auto out = getPropertyValue(Prop::OUTPUT_WORKSPACES);
+  alg->setPropertyValue("OutputWorkspace", out
+                        );
   alg->execute();
   API::WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
   setProperty(Prop::OUTPUT_WORKSPACES, outWS);
@@ -169,7 +170,7 @@ void PolarizationEfficiencyCor::execWildes() {
 //----------------------------------------------------------------------------------------------
 void PolarizationEfficiencyCor::execFredrikze() {
   checkFredrikzeProperties();
-  WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
+  WorkspaceGroup_sptr group = getWorkspaceGroup();
   MatrixWorkspace_sptr efficiencies = getProperty(Prop::EFFICIENCIES);
   auto alg = createChildAlgorithm("PolarizationCorrectionFredrikze");
   alg->initialize();
@@ -186,19 +187,29 @@ void PolarizationEfficiencyCor::execFredrikze() {
   setProperty(Prop::OUTPUT_WORKSPACES, outWS);
 }
 
+
+//----------------------------------------------------------------------------------------------
+/** Check that the inputs workspaces are set.
+ */
+void PolarizationEfficiencyCor::checkWorkspaces() const {
+  if (isDefault(Prop::INPUT_WORKSPACES) &&
+      isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
+    throw std::invalid_argument("Input workspaces are missing. Either a "
+                                "workspace group or a list of workspace names "
+                                "must be given.");
+  }
+  if (!isDefault(Prop::INPUT_WORKSPACES) &&
+      !isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
+    throw std::invalid_argument("Input workspaces must be given either as a "
+                                "workspace group or a list of names.");
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Check that the inputs for the Wildes are correct and consistent.
  */
 void PolarizationEfficiencyCor::checkWildesProperties() const {
-  if (isDefault(Prop::INPUT_WORKSPACES)) {
-    throw std::invalid_argument(
-        "Wildes method expects a list of input workspace names.");
-  }
-
-  if (!isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
-    throw std::invalid_argument(
-        "Wildes method doesn't allow to use a WorkspaceGroup for input.");
-  }
+  checkWorkspaces();
 
   if (!isDefault(Prop::POLARIZATION_ANALYSIS)) {
     throw std::invalid_argument(
@@ -210,20 +221,49 @@ void PolarizationEfficiencyCor::checkWildesProperties() const {
 /** Check that the inputs for the Fredrikze method are correct and consistent.
  */
 void PolarizationEfficiencyCor::checkFredrikzeProperties() const {
-  if (!isDefault(Prop::INPUT_WORKSPACES)) {
-    throw std::invalid_argument(
-        "Fredrikze method doesn't allow to use a list of names for input.");
-  }
-
-  if (isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
-    throw std::invalid_argument(
-        "Fredrikze method expects a WorkspaceGroup as input.");
-  }
+  checkWorkspaces();
 
   if (!isDefault(Prop::FLIPPERS)) {
     throw std::invalid_argument(
         "Property Flippers canot be used with the Fredrikze method.");
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get the input workspaces as a list of names.
+ */
+std::vector<std::string>  PolarizationEfficiencyCor::getWorkspaceNameList() const {
+  std::vector<std::string> names;
+  if (!isDefault(Prop::INPUT_WORKSPACES)) {
+    names = getProperty(Prop::INPUT_WORKSPACES);
+  } else {
+    WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
+    auto n = group->size();
+    for(size_t i = 0; i < n; ++i) {
+      auto ws = group->getItem(i);
+      auto const name = ws->getName();
+      if (name.empty()) {
+        throw std::invalid_argument(
+            "Workspace from the input workspace group is not stored in the "
+            "Analysis Data Service which is required by the Wildes method.");
+      }
+      names.push_back(name);
+    }
+  }
+  return names;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get the input workspaces as a workspace group.
+ */
+API::WorkspaceGroup_sptr PolarizationEfficiencyCor::getWorkspaceGroup() const {
+  WorkspaceGroup_sptr group;
+  if (!isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
+    group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
+  } else {
+    throw std::invalid_argument("Input workspaces are required to be in a workspace group.");
+  }
+  return group;
 }
 
 } // namespace Algorithms

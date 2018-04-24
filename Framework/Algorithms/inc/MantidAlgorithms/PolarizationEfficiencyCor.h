@@ -6,10 +6,6 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
-namespace API {
-class ISpectrum;
-}
-
 namespace Algorithms {
 
 /** PolarizationCorrectionWildes : This algorithm corrects for non-ideal
@@ -51,8 +47,12 @@ private:
   void execWildes();
   void execFredrikze();
 
+  void checkWorkspaces() const;
   void checkWildesProperties() const;
   void checkFredrikzeProperties() const;
+
+  std::vector<std::string>  getWorkspaceNameList() const;
+  API::WorkspaceGroup_sptr  getWorkspaceGroup() const;
 
 };
 
