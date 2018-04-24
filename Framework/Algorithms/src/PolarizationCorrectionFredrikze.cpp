@@ -23,13 +23,13 @@ const std::string pNRLabel("PNR");
 
 const std::string pALabel("PA");
 
-const std::string crhoLabel("CRho");
+const std::string crhoLabel("Rho");
 
-const std::string cppLabel("CPp");
+const std::string cppLabel("Pp");
 
-const std::string cAlphaLabel("CAlpha");
+const std::string cAlphaLabel("Alpha");
 
-const std::string cApLabel("CAp");
+const std::string cApLabel("Ap");
 
 const std::string efficienciesLabel("Efficiencies");
 

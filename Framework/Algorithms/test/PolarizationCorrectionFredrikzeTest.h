@@ -83,11 +83,11 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    alg.setPropertyValue("CRho", rho);
-    alg.setPropertyValue("CPp", pp);
+    alg.setPropertyValue("Rho", rho);
+    alg.setPropertyValue("Pp", pp);
     if (!ap.empty()) {
-      alg.setPropertyValue("CAp", ap);
-      alg.setPropertyValue("CAlpha", alpha);
+      alg.setPropertyValue("Ap", ap);
+      alg.setPropertyValue("Alpha", alpha);
     }
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();

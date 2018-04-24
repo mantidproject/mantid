@@ -51,10 +51,10 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setPropertyValue("CPp", "1,0,0,0");
-    alg.setPropertyValue("CAp", "0,1,0,0");
-    alg.setPropertyValue("CRho", "0,0,1,0");
-    alg.setPropertyValue("CAlpha", "0,0,0,1");
+    alg.setPropertyValue("Pp", "1,0,0,0");
+    alg.setPropertyValue("Ap", "0,1,0,0");
+    alg.setPropertyValue("Rho", "0,0,1,0");
+    alg.setPropertyValue("Alpha", "0,0,0,1");
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
@@ -62,10 +62,10 @@ public:
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
 
     auto axis1 = outWS->getAxis(1);
-    TS_ASSERT_EQUALS(axis1->label(0), "CPp");
-    TS_ASSERT_EQUALS(axis1->label(1), "CAp");
-    TS_ASSERT_EQUALS(axis1->label(2), "CRho");
-    TS_ASSERT_EQUALS(axis1->label(3), "CAlpha");
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Ap");
+    TS_ASSERT_EQUALS(axis1->label(2), "Rho");
+    TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
 
     TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
     TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);
@@ -113,10 +113,10 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setPropertyValue("CPp", "1,0,0,0");
-    alg.setPropertyValue("CAp", "0,1,0,0");
-    alg.setPropertyValue("CRho", "0,0,1,0");
-    alg.setPropertyValue("CAlpha", "0,0,0,1");
+    alg.setPropertyValue("Pp", "1,0,0,0");
+    alg.setPropertyValue("Ap", "0,1,0,0");
+    alg.setPropertyValue("Rho", "0,0,1,0");
+    alg.setPropertyValue("Alpha", "0,0,0,1");
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
@@ -124,10 +124,10 @@ public:
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
 
     auto axis1 = outWS->getAxis(1);
-    TS_ASSERT_EQUALS(axis1->label(0), "CPp");
-    TS_ASSERT_EQUALS(axis1->label(1), "CAp");
-    TS_ASSERT_EQUALS(axis1->label(2), "CRho");
-    TS_ASSERT_EQUALS(axis1->label(3), "CAlpha");
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Ap");
+    TS_ASSERT_EQUALS(axis1->label(2), "Rho");
+    TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
 
     TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
     TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);

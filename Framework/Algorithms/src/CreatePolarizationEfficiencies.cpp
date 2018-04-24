@@ -19,10 +19,10 @@ using namespace Mantid::Geometry;
 
 namespace {
 
-const std::string cPpLabel("CPp");
-const std::string cApLabel("CAp");
-const std::string cRhoLabel("CRho");
-const std::string cAlphaLabel("CAlpha");
+const std::string cPpLabel("Pp");
+const std::string cApLabel("Ap");
+const std::string cRhoLabel("Rho");
+const std::string cAlphaLabel("Alpha");
 
 double calculatePolynomial(std::vector<double> const &coefficients, double x) {
   double polynomial = coefficients[0];

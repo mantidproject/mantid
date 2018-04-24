@@ -404,7 +404,7 @@ private:
   MatrixWorkspace_sptr createEfficiencies(std::string const &kind) {
     static std::map<std::string, std::vector<std::string>> const labels = {
         {"Wildes", {"P1", "P2", "F1", "F2"}},
-        {"Fredrikze", {"CPp", "CAp", "CRho", "CAlpha"}}};
+        {"Fredrikze", {"Pp", "Ap", "Rho", "Alpha"}}};
     auto inWS = createWorkspaces(1)[0];
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
     auto axis1 = new TextAxis(4);
