@@ -98,14 +98,11 @@ void SaveLauenorm::exec() {
   int widthBorder = getProperty("WidthBorder");
   bool newFormat = getProperty("LaueScaleFormat");
   std::string cellType = getProperty("CrystalSystem");
-  long int cellNo = 1 + std::distance(m_typeList.begin(),
-                                      std::find(m_typeList.begin(),
-                                      m_typeList.end(), cellType));
-  std::string center = getProperty("Centering");
-  long int centerNo =
-      1 + std::distance(m_centeringList.begin(),
-                        std::find(m_centeringList.begin(),
-                        m_centeringList.end(), center));
+  auto iter = std::find(m_typeList.begin(), m_typeList.end(), cellType);
+  long int cellNo = 1 + std::distance(m_typeList.begin(), iter);
+  std::string cent = getProperty("Centering");
+  auto iter2 = std::find(m_centeringList.begin(), m_centeringList.end(), cent);
+  long int centerNo = 1 + std::distance(m_centeringList.begin(), iter2);
   // sequenceNo and run number
   int sequenceNo = 0;
   int oldSequence = -1;
