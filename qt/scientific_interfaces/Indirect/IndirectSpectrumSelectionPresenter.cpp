@@ -15,7 +15,8 @@ struct SetViewSpectra : boost::static_visitor<> {
   SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
-    m_view->displaySpectra(spectra.first, spectra.second);
+    m_view->displaySpectra(static_cast<int>(spectra.first),
+                           static_cast<int>(spectra.second));
   }
 
   void operator()(const std::string &spectra) const {
@@ -78,7 +79,8 @@ void IndirectSpectrumSelectionPresenter::setActiveModelIndex(
     std::size_t index) {
   const auto workspace = m_model->getWorkspace(index);
   setSpectraRange(0, workspace->getNumberHistograms());
-  boost::apply_visitor(SetViewSpectra(m_view.get()), m_model->getSpectra(index));
+  boost::apply_visitor(SetViewSpectra(m_view.get()),
+                       m_model->getSpectra(index));
   m_activeIndex = index;
   m_view->setEnabled(workspace ? true : false);
 }

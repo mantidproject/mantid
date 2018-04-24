@@ -431,6 +431,10 @@ void IndirectFitPropertyBrowser::moveCustomFunctionsToEnd() {
   }
 }
 
+void IndirectFitPropertyBrowser::updateErrors() {
+  getHandler()->updateErrors();
+}
+
 /**
  * @param settingKey  The key of the boolean setting whose value to retrieve.
  * @return            The value of the boolean setting with the specified key.

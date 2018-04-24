@@ -5,6 +5,7 @@
 #include "MantidKernel/ArrayProperty.h"
 
 #include <boost/variant.hpp>
+#include <boost/variant/static_visitor.hpp>
 #include <boost/weak_ptr.hpp>
 
 namespace MantidQt {
@@ -42,7 +43,7 @@ private:
 
 template <typename F>
 struct ApplyEnumeratedSpectra : boost::static_visitor<std::size_t> {
-  ApplyEnumeratedSpectra(F &&functor, std::size_t start = 0)
+  ApplyEnumeratedSpectra(F const &functor, std::size_t start = 0)
       : m_functor(functor), m_start(start) {}
 
   std::size_t
@@ -90,7 +91,8 @@ public:
   }
 
   template <typename F>
-  std::size_t applyEnumeratedSpectra(F &&functor, std::size_t start = 0) const {
+  std::size_t applyEnumeratedSpectra(F const &functor,
+                                     std::size_t start = 0) const {
     return boost::apply_visitor(ApplyEnumeratedSpectra<F>(functor, start),
                                 m_spectra);
   }

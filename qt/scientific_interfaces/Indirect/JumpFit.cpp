@@ -143,7 +143,8 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   if (m_jumpFittingModel->getWorkspace(0)) {
     m_uiForm->cbWidth->setEnabled(true);
-    const auto width = m_jumpFittingModel->getWidthSpectrum(0);
+    const auto width =
+        static_cast<int>(m_jumpFittingModel->getWidthSpectrum(0));
     setMinimumSpectrum(width);
     setMaximumSpectrum(width);
     setSelectedSpectrum(width);
@@ -232,9 +233,7 @@ void JumpFit::removeGuessPlot() {
 /**
  * Handles mantid plotting
  */
-void JumpFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult("All");
-}
+void JumpFit::plotClicked() { IndirectFitAnalysisTab::plotResult("All"); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

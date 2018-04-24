@@ -23,6 +23,7 @@ struct ParameterValue {
 };
 
 struct ResultLocation {
+  ResultLocation() : result(), index(0) {}
   ResultLocation(boost::weak_ptr<Mantid::API::WorkspaceGroup> group,
                  std::size_t i)
       : result(group), index(i) {}

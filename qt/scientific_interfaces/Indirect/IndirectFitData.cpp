@@ -119,8 +119,7 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
       return rangeToString(spectra1) + "," + rangeToString(spectra2);
   }
 
-  template <typename T, typename U>
-  Spectra operator()(const T &spectra1, const U &spectra2) const {
+  Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
     return boost::apply_visitor(SpectraToString(), spectra1) + "," +
            boost::apply_visitor(SpectraToString(), spectra2);
   }
