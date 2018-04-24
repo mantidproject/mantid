@@ -1,9 +1,8 @@
-
 .. algorithm::
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
