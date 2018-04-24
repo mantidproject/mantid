@@ -16,6 +16,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
@@ -278,7 +279,26 @@ PeaksWorkspace::createPeak(const Kernel::V3D &position,
  */
 Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
   // Create a peak from QSampleFrame
-  const auto goniometer = run().getGoniometer();
+
+  Geometry::Goniometer goniometer;
+
+  LogManager_const_sptr props = getLogs();
+  if (props->hasProperty("wavelength") || props->hasProperty("energy")) {
+    // Assume constant wavelenth
+    // Calculate Q lab from Q sample and wavelength
+    double wavelength;
+    if (props->hasProperty("energy")) {
+      wavelength = Kernel::UnitConversion::run(
+          "Energy", "Wavelength",
+          props->getPropertyValueAsType<double>("energy"), 0, 0, 0,
+          Kernel::DeltaEMode::Elastic, 0);
+    } else {
+      wavelength = props->getPropertyValueAsType<double>("wavelength");
+    }
+    goniometer.calcFromQSampleAndWavelength(position, wavelength);
+  } else {
+    goniometer = run().getGoniometer();
+  }
   // create a peak using the qLab frame
   auto peak = new Peak(getInstrument(), position, goniometer.getR());
   // Take the run number from this

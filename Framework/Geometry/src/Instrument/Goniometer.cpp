@@ -178,6 +178,38 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
   recalculateR();
 }
 
+/**Calculate goniometer for rotation around y-asix for constant wavelength from
+ * Q Sample
+ * @param Q :: Q Sample position in reciprocal space
+ * @param wavelength :: wavelength
+*/
+void Goniometer::calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &Q,
+                                              double wavelength) {
+  double wv = 2.0 * M_PI / wavelength;
+  double norm_q2 = Q.norm2();
+  double theta = acos(1 - norm_q2 / (2 * wv * wv)); // [0, pi]
+  double phi = asin(-Q[1] / wv * sin(theta));       // [-pi/2, pi/2]
+  V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
+            wv * (1 - cos(theta)));
+
+  // Solve to find rotation matrix, assuming only rotation around y-axis
+  // A * X = B
+  Matrix<double> A({Q[0], Q[2], Q[2], -Q[0]}, 2, 2);
+  A.Invert();
+  std::vector<double> B{Q_lab[0], Q_lab[2]};
+  std::vector<double> X = A * B;
+  double rot = atan2(X[1], X[0]);
+  g_log.information() << "Found goniometer rotation to be " << rot * 180 / M_PI
+                      << " degrees for Q sample = " << Q << "\n";
+
+  Matrix<double> goniometer(3, 3, true);
+  goniometer[0][0] = cos(rot);
+  goniometer[0][2] = sin(rot);
+  goniometer[2][0] = -sin(rot);
+  goniometer[2][2] = cos(rot);
+  setR(goniometer);
+}
+
 /// Get GoniometerAxis obfject using motor number
 /// @param axisnumber :: axis number (from 0)
 const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
