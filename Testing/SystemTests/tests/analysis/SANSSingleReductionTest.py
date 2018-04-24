@@ -92,7 +92,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         self.assertTrue(single_reduction_alg.isExecuted())
         return single_reduction_alg
 
-    def _compare_workspace(self, workspace, reference_file_name):
+    def _compare_workspace(self, workspace, reference_file_name, check_spectra_map=True):
         # Load the reference file
         load_name = "LoadNexusProcessed"
         load_options = {"Filename": reference_file_name,
@@ -116,7 +116,7 @@ class SANSSingleReductionTest(unittest.TestCase):
                            "CheckMasking": True,
                            "CheckType": True,
                            "CheckAxes": True,
-                           "CheckSpectraMap": True}
+                           "CheckSpectraMap": check_spectra_map}
         compare_alg = create_unmanaged_algorithm(compare_name, **compare_options)
         compare_alg.setChild(False)
         compare_alg.execute()
@@ -180,7 +180,7 @@ class SANSSingleReductionTest(unittest.TestCase):
 
         calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference_LAB.nxs"
         unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference_LAB.nxs"
-        self._compare_workspace(calculated_transmission, calculated_transmission_reference_file)
+        self._compare_workspace(calculated_transmission, calculated_transmission_reference_file, check_spectra_map=False)
         self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
 
     def test_that_single_reduction_evaluates_HAB(self):

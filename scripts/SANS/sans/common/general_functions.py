@@ -697,10 +697,11 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
     return output_workspace_name, output_workspace_base_name
 
 
-def get_output_name(state, reduction_mode, is_group, suffix=""):
+def get_output_name(state, reduction_mode, is_group, suffix="", transmission=False):
 
     # Get the standard workspace name
-    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode)
+    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
+                                                                             transmission=transmission)
 
     # Get the external settings from the save state
     save_info = state.save

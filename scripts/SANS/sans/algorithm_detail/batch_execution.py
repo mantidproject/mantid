@@ -94,6 +94,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
                                                                                "OutputWorkspaceHABCanCount")
         reduction_package.reduced_hab_can_norm = get_workspace_from_algorithm(reduction_alg,
                                                                               "OutputWorkspaceHABCanNorm")
+        reduction_package.calculated_transmission = get_workspace_from_algorithm(reduction_alg,
+                                                                                 "OutputWorkspaceCalculatedTransmission")
+        reduction_package.unfitted_transmission = get_workspace_from_algorithm(reduction_alg,
+                                                                               "OutputWorkspaceUnfittedTransmission")
         if plot_results and mantidplot:
             plot_workspace(reduction_package, output_graph)
         # -----------------------------------
@@ -562,8 +566,9 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     :param workspace_to_monitor: a workspace to monitor map
     """
     def _set_output_name(_reduction_alg, _reduction_package, _is_group, _reduction_mode, _property_name,
-                         _attr_out_name, _atrr_out_name_base, _suffix=None):
-        _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group)
+                         _attr_out_name, _atrr_out_name_base, _suffix=None, transmission=False):
+        _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
+                                                    transmission=transmission)
 
         if _suffix is not None:
             _out_name += _suffix
@@ -669,6 +674,19 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         _set_hab(reduction_alg, reduction_package, is_group)
     else:
         raise RuntimeError("The reduction mode {0} is not known".format(reduction_mode))
+
+    #-------------------------------------------------------------------------------------------------------------------
+    # Set the output workspaces for the calculated and unfitted transmission
+    #-------------------------------------------------------------------------------------------------------------------
+    import pydevd
+    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+    if state.adjustment.show_transmission:
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceCalculatedTransmission", "calculated_transmission_name",
+                         "calculated_transmission_base_name", transmission=True)
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceUnfittedTransmission", "unfitted_transmission_name",
+                         "unfitted_transmission_base_name", transmission=True, _suffix='unfitted')
 
 
 def get_workspace_from_algorithm(alg, output_property_name):
