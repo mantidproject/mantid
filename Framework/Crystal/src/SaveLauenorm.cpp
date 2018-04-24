@@ -68,31 +68,14 @@ void SaveLauenorm::init() {
                                                        Direction::Input),
       "Comma deliminated string of bank numbers to exclude for example 1,2,5");
   declareProperty("LaueScaleFormat", false, "New format for Lauescale");
-  std::vector<std::string> type_list;
-  type_list.push_back("TRICLINIC");
-  type_list.push_back("MONOCLINIC");
-  type_list.push_back("ORTHORHOMBIC");
-  type_list.push_back("TETRAGONAL");
-  type_list.push_back("HEXAGONAL");
-  type_list.push_back("RHOMBOHEDRAL");
-  type_list.push_back("CUBIC");
 
-  declareProperty("CellType", type_list[0],
-                  boost::make_shared<Kernel::StringListValidator>(type_list),
+  declareProperty("CrystalSystem", m_typeList[0],
+                  boost::make_shared<Kernel::StringListValidator>(m_typeList),
                   "The conventional cell type to use");
 
-  std::vector<std::string> centering_list;
-  centering_list.push_back("P");
-  centering_list.push_back("A");
-  centering_list.push_back("B");
-  centering_list.push_back("C");
-  centering_list.push_back("I");
-  centering_list.push_back("F");
-  centering_list.push_back("R");
-
   declareProperty(
-      "Centering", centering_list[0],
-      boost::make_shared<Kernel::StringListValidator>(centering_list),
+      "Centering", m_centeringList[0],
+      boost::make_shared<Kernel::StringListValidator>(m_centeringList),
       "The centering for the conventional cell");
 }
 
@@ -114,31 +97,15 @@ void SaveLauenorm::exec() {
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
   bool newFormat = getProperty("LaueScaleFormat");
-  std::string cellType = getProperty("CellType");
-  std::vector<std::string> type_list;
-  type_list.push_back("TRICLINIC");
-  type_list.push_back("MONOCLINIC");
-  type_list.push_back("ORTHORHOMBIC");
-  type_list.push_back("TETRAGONAL");
-  type_list.push_back("HEXAGONAL");
-  type_list.push_back("RHOMBOHEDRAL");
-  type_list.push_back("CUBIC");
+  std::string cellType = getProperty("CrystalSystem");
   long int cellNo =
-      std::distance(type_list.begin(),
-                    std::find(type_list.begin(), type_list.end(), cellType)) +
+      std::distance(m_typeList.begin(),
+                    std::find(m_typeList.begin(), m_typeList.end(), cellType)) +
       1;
   std::string center = getProperty("Centering");
-  std::vector<std::string> centering_list;
-  centering_list.push_back("P");
-  centering_list.push_back("A");
-  centering_list.push_back("B");
-  centering_list.push_back("C");
-  centering_list.push_back("I");
-  centering_list.push_back("F");
-  centering_list.push_back("R");
-  long int centerNo = std::distance(centering_list.begin(),
-                                    std::find(centering_list.begin(),
-                                              centering_list.end(), center)) +
+  long int centerNo = std::distance(m_centeringList.begin(),
+                                    std::find(m_centeringList.begin(),
+                                              m_centeringList.end(), center)) +
                       1;
   // sequenceNo and run number
   int sequenceNo = 0;
@@ -177,7 +144,7 @@ void SaveLauenorm::exec() {
   auto inst = ws->getInstrument();
   OrientedLattice lattice;
   if (newFormat) {
-    type = "RunNumber";
+    type = "Both Bank and RunNumber";
     if (!ws->sample().hasOrientedLattice()) {
 
       const std::string fft("FindUBUsingIndexedPeaks");
