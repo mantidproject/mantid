@@ -86,6 +86,9 @@ public:
   // Timer methods
   virtual void startTimer(const int millisecs) = 0;
   virtual void stopTimer() = 0;
+
+  // Start an ICAT search
+  virtual void startIcatSearch() = 0;
 };
 }
 }

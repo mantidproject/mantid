@@ -76,6 +76,7 @@ public:
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
+  MOCK_METHOD0(startIcatSearch, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
@@ -197,7 +198,7 @@ public:
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
-  MOCK_CONST_METHOD0(startNewAutoreduction, bool());
+  MOCK_CONST_METHOD0(requireNewAutoreduction, bool());
   MOCK_METHOD1(settingsChanged, void(int));
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {

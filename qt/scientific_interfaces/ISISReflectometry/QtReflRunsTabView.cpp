@@ -267,6 +267,15 @@ void QtReflRunsTabView::showSearch(ReflSearchModel_sptr model) {
   ui.tableSearchResults->resizeColumnsToContents();
 }
 
+/** Start an icat search
+ */
+void QtReflRunsTabView::startIcatSearch() {
+  m_algoRunner.get()->disconnect(); // disconnect any other connections
+  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
+  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(icatSearchComplete()), Qt::UniqueConnection);
+}
+
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
@@ -277,22 +286,14 @@ void QtReflRunsTabView::icatSearchComplete() {
 /**
 This slot notifies the presenter that the "search" button has been pressed
 */
-void QtReflRunsTabView::on_actionSearch_triggered() {
-  m_algoRunner.get()->disconnect(); // disconnect any other connections
-  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
-  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(icatSearchComplete()), Qt::UniqueConnection);
-}
+void QtReflRunsTabView::on_actionSearch_triggered() { startIcatSearch(); }
 
 /**
 This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
 void QtReflRunsTabView::on_actionAutoreduce_triggered() {
-  m_algoRunner.get()->disconnect(); // disconnect any other connections
-  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
-  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(startAutoreduction()), Qt::UniqueConnection);
+  m_presenter->notify(IReflRunsTabPresenter::StartAutoreductionFlag);
 }
 
 /**
@@ -358,13 +359,6 @@ void QtReflRunsTabView::instrumentChanged(int index) {
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
   m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
-}
-
-/**
-This notifies the presenter that a new autoreduction has been started
-*/
-void QtReflRunsTabView::startAutoreduction() {
-  m_presenter->notify(IReflRunsTabPresenter::StartAutoreductionFlag);
 }
 
 /**

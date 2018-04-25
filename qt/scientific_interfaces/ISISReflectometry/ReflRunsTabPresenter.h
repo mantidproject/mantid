@@ -85,7 +85,7 @@ public:
   void pause() const override;
   void resume() const override;
   /// Determine whether to start a new autoreduction
-  bool startNewAutoreduction() const override;
+  bool requireNewAutoreduction() const override;
   /// Reduction finished/paused/resumed confirmation handler
   void confirmReductionFinished(int group) override;
   void confirmReductionPaused(int group) override;
@@ -127,7 +127,10 @@ private:
 
   /// searching
   void search();
+  void icatSearchComplete();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
+  /// autoreduction
+  void startNewAutoreduction();
   void startAutoreduction();
   void runAutoreduction();
   void transfer(const std::set<int> &rowsToTransfer);

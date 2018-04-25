@@ -106,6 +106,9 @@ public:
   void startTimer(const int millisecs) override;
   void stopTimer() override;
 
+  // Start an ICAT search
+  void startIcatSearch() override;
+
 private:
   /// initialise the interface
   void initLayout();
@@ -138,7 +141,6 @@ private slots:
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
-  void startAutoreduction();
 };
 
 } // namespace Mantid

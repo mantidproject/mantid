@@ -135,15 +135,13 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     search();
     break;
   case IReflRunsTabPresenter::StartAutoreductionFlag:
-    startAutoreduction();
+    startNewAutoreduction();
     break;
   case IReflRunsTabPresenter::TimerEventFlag:
-    runAutoreduction();
+    startAutoreduction();
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
-    auto algRunner = m_view->getAlgorithmRunner();
-    IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
-    populateSearch(searchAlg);
+    icatSearchComplete();
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
@@ -261,9 +259,9 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 /** Searches ICAT for runs with given instrument and investigation id, transfers
 * runs to table and processes them. Clears any existing table data first.
 */
-void ReflRunsTabPresenter::startAutoreduction() {
+void ReflRunsTabPresenter::startNewAutoreduction() {
 
-  if (startNewAutoreduction()) {
+  if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
     auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
@@ -271,29 +269,49 @@ void ReflRunsTabPresenter::startAutoreduction() {
   }
 
   m_autoreductionInProgress = true;
-  runAutoreduction();
+  startAutoreduction();
 }
 
-/** Run a single autoreduction process. Called periodially to add and process
+/** Start a single autoreduction process. Called periodially to add and process
  *  any new runs in the table.
  */
-void ReflRunsTabPresenter::runAutoreduction() {
+void ReflRunsTabPresenter::startAutoreduction() {
 
   // Stop any more notifications during processing
   m_view->stopTimer();
-  
-  // If a new autoreduction is being made, we must remove all existing rows and
-  // transfer the new ones (obtained by ICAT search) in
-  notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
 
-  // Select and transfer all rows to the table
+  // Initially we just need to start an ICat search and the reduction will be
+  // run when the search completes
+  m_view->startIcatSearch();
+}
+
+void ReflRunsTabPresenter::icatSearchComplete() {
+  // Populate the search results
+  auto algRunner = m_view->getAlgorithmRunner();
+  IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
+  populateSearch(searchAlg);
+
+  // If autoreduction is running, perform the next reduction using the new
+  // search
+  // results
+  if (m_autoreductionInProgress)
+    runAutoreduction();
+}
+
+/** Run an autoreduction process based on the latest search results
+ */
+void ReflRunsTabPresenter::runAutoreduction() {
+  // Transfer all of the search results to the table (this excludes any that
+  // already exist so will only add new ones)
   auto rowsToTransfer = m_view->getAllSearchRows();
   if (rowsToTransfer.size() > 0)
     transfer(rowsToTransfer);
 
+  // Cache the current search string
   m_autoSearchString = m_view->getSearchString();
-  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
 
+  // Process all rows in the table
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
   tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
 }
 
@@ -546,7 +564,7 @@ void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
 * either the search number, transfer method or instrument has changed
 * @return : Boolean on whether to start a new autoreduction
 */
-bool ReflRunsTabPresenter::startNewAutoreduction() const {
+bool ReflRunsTabPresenter::requireNewAutoreduction() const {
   bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
   bool transferMethodChanged =
       m_currentTransferMethod != m_view->getTransferMethod();
@@ -568,6 +586,7 @@ void ReflRunsTabPresenter::confirmReductionFinished(int group) {
 * via a user command to pause reduction
 */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
+  // Make sure autoreduction is stopped
   m_autoreductionInProgress = false;
   m_mainPresenter->notifyReductionPaused(group);
 }

@@ -424,7 +424,6 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
       maxProgress++;
 
     for (const auto &rowItem : groupData) {
-      const auto rowIndex = rowItem.first;
       auto rowData = rowItem.second;
 
       // Skip rows that have been processed unless their output has been
