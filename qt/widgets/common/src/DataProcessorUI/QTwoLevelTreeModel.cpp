@@ -593,6 +593,25 @@ bool QTwoLevelTreeModel::removeRows(int position, int count, int parent) {
   return true;
 }
 
+/** Remove all rows and groups
+* @return : Boolean indicating whether or not rows were removed
+*/
+bool QTwoLevelTreeModel::removeAll() {
+  beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+
+  for (int group = 0; group < rowCount(); ++group) {
+    for (int row = 0; row < rowCount(index(group, 0)); ++row) {
+      m_tWS->removeRow(0);
+    }
+  }
+
+  m_groups.clear();
+
+  endRemoveRows();
+
+  return true;
+}
+
 /** Returns the number of rows of a given parent
 * @param parent : The parent item
 * @return : The number of rows

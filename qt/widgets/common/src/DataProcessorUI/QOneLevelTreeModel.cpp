@@ -234,6 +234,22 @@ bool QOneLevelTreeModel::removeRows(int position, int count,
   return true;
 }
 
+/** Remove all rows from the tree
+* @return : Boolean indicating whether or not rows were removed
+ */
+bool QOneLevelTreeModel::removeAll() {
+  beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+
+  for (int pos = 0; pos < rowCount(); ++pos) {
+    m_tWS->removeRow(0);
+    m_rows.erase(m_rows.begin());
+  }
+
+  endRemoveRows();
+
+  return true;
+}
+
 /** Returns the number of rows of a given parent
 * @param parent : The parent item
 * @return : The number of rows

@@ -62,6 +62,8 @@ public:
   void deleteRow() override;
   /// Delete a group
   void deleteGroup() override;
+  /// Delete all rows and groups
+  void deleteAll() override;
   /// Group rows
   void groupRows() override;
   /// Expand selection

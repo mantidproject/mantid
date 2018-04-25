@@ -301,6 +301,8 @@ private:
   void deleteRow();
   // delete group(s) from the model
   void deleteGroup();
+  // delete all rows and groups from the model
+  void deleteAll();
   // clear selected row(s) in the model
   void clearSelected();
   // copy selected rows to clipboard

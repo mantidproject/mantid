@@ -202,6 +202,7 @@ public:
   void appendGroup() override{};
   void deleteRow() override{};
   void deleteGroup() override{};
+  void deleteAll() override{};
   void groupRows() override{};
   std::set<int> expandSelection() override { return std::set<int>(); };
   void clearSelected() override{};

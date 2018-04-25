@@ -1206,6 +1206,38 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
+  void testDeleteAll() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+
+    auto presenter = makeDefaultPresenter();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    // "delete all" is called with no groups selected
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(GroupList()));
+    presenter->notify(DataProcessorPresenter::DeleteAllFlag);
+
+    // The user hits "save"
+    presenter->notify(DataProcessorPresenter::SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 0);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
   void expectNotifiedReductionPaused(MockMainPresenter &mockMainPresenter) {
     EXPECT_CALL(mockMainPresenter,
                 confirmReductionPaused(DEFAULT_GROUP_NUMBER));

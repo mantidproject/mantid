@@ -205,6 +205,11 @@ void TwoLevelTreeManager::deleteGroup() {
 }
 
 /**
+Delete all rows and groups from the model
+*/
+void TwoLevelTreeManager::deleteAll() { m_model->removeAll(); }
+
+/**
 Group rows together
 */
 void TwoLevelTreeManager::groupRows() {

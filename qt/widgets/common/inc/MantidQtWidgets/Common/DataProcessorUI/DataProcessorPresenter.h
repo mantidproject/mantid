@@ -56,6 +56,7 @@ public:
     AppendGroupFlag,
     DeleteRowFlag,
     DeleteGroupFlag,
+    DeleteAllFlag,
     ProcessFlag,
     GroupRowsFlag,
     OpenTableFlag,

@@ -90,6 +90,8 @@ public:
   // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
+  // Remove all rows from the model
+  bool removeAll();
   // Set the 'processed' status of a row
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;

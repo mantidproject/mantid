@@ -1007,6 +1007,11 @@ Delete group(s) from the model
 void GenericDataProcessorPresenter::deleteGroup() { m_manager->deleteGroup(); }
 
 /**
+Delete all groups and rows from the model
+*/
+void GenericDataProcessorPresenter::deleteAll() { m_manager->deleteAll(); }
+
+/**
 Group rows together
 */
 void GenericDataProcessorPresenter::groupRows() { m_manager->groupRows(); }
@@ -1049,6 +1054,9 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::DeleteGroupFlag:
     deleteGroup();
+    break;
+  case DataProcessorPresenter::DeleteAllFlag:
+    deleteAll();
     break;
   case DataProcessorPresenter::ProcessFlag:
     process();

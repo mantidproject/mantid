@@ -147,6 +147,11 @@ void OneLevelTreeManager::deleteGroup() {
 }
 
 /**
+Delete all rows from the model
+*/
+void OneLevelTreeManager::deleteAll() { m_model->removeAll(); }
+
+/**
 Group rows together
 */
 void OneLevelTreeManager::groupRows() {

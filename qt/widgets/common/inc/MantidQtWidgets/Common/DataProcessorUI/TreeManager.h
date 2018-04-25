@@ -63,6 +63,8 @@ public:
   virtual void deleteRow() = 0;
   /// Delete a group
   virtual void deleteGroup() = 0;
+  /// Delete all rows and groups
+  virtual void deleteAll() = 0;
   /// Group rows
   virtual void groupRows() = 0;
   /// Expand selection

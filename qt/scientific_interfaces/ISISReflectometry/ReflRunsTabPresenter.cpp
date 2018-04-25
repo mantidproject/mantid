@@ -264,11 +264,10 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 void ReflRunsTabPresenter::startAutoreduction() {
 
   if (startNewAutoreduction()) {
-    // If starting a brand new autoreduction, select all rows / groups in
-    // existing table and delete them first
+    // If starting a brand new autoreduction, delete all rows / groups in
+    // existing table first
     auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
-    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
+    tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
   }
 
   m_autoreductionInProgress = true;
