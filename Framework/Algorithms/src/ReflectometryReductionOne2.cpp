@@ -801,6 +801,13 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
   bool const shouldCorrectAngle =
       !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
   if (shouldCorrectAngle && moreThanOneDetector) {
+    if (inputWS->getNumberHistograms() > 1) {
+      throw std::invalid_argument(
+          "Expected a single group in "
+          "ProcessingInstructions to be able to "
+          "perform angle correction, found " +
+          std::to_string(inputWS->getNumberHistograms()));
+    }
     MatrixWorkspace_sptr IvsQ = inputWS->clone();
     auto &XOut0 = IvsQ->mutableX(0);
     const auto &XIn0 = inputWS->x(0);

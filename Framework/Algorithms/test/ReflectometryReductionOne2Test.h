@@ -670,6 +670,21 @@ public:
     TS_ASSERT_DELTA(qY[13], 11, 1e-2);
   }
 
+  void test_angle_correction_multi_group() {
+    ReflectometryReductionOne2 alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_multiDetectorWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setPropertyValue("ProcessingInstructions", "1+2, 3");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.setProperty("ThetaIn", 22.0);
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,
