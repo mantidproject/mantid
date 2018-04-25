@@ -625,7 +625,6 @@ public:
     TS_ASSERT_DELTA(qY[0], 84, 1e-2);
     TS_ASSERT_DELTA(qY[6], 54, 1e-2);
     TS_ASSERT_DELTA(qY[13], 19, 1e-2);
-
   }
 
   void test_no_angle_correction() {
@@ -753,14 +752,13 @@ private:
   }
 
   void setYValuesToWorkspace(MatrixWorkspace &ws) {
-    for(size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       auto &y = ws.mutableY(i);
-      for(size_t j = 0; j < y.size(); ++j) {
+      for (size_t j = 0; j < y.size(); ++j) {
         y[j] += double(j + 1) * double(i + 1);
       }
     }
   }
-
 };
 
 #endif /* ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONE2TEST_H_ */
