@@ -942,6 +942,7 @@ set ( TEST_FILES
 	SignalOverErrorTest.h
 	SmoothDataTest.h
 	SmoothNeighboursTest.h
+	SofQCommonTest.h
 	SofQWCentreTest.h
 	SofQWCutTest.h
 	SofQWNormalisedPolygonTest.h
