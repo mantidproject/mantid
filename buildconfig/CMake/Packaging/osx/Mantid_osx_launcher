@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # Get the location that the script was called from
+cd $DIR
+./MantidPlot || sh launch_error_report.sh $?

@@ -1,4 +1,5 @@
-from mantid.kernel import ErrorReporter, UsageService
+from mantid.kernel import UsageService
+#from mantid.kernel import ErrorReporter, UsageService
 from ErrorReporter.errorreport import CrashReportPage
 
 

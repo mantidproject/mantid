@@ -91,7 +91,6 @@ set ( ETC_DIR etc )
 set ( LIB_DIR lib )
 set ( PLUGINS_DIR plugins )
 
-
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
@@ -99,6 +98,17 @@ if ( ENABLE_MANTIDPLOT )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
+
+# Copy the launcher script to the correct location
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher 
+                 ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/Mantid_osx_launcher COPYONLY )
+# Copy the error dialog launcher script to the correct location
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/launch_error_report.sh.in 
+                 ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/launch_error_report.sh COPYONLY )
+# Copy the error dialog script to the correct location
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/error_dialog_app.py.in 
+                 ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/error_dialog_app.py COPYONLY )
+
 
 # We know exactly where this has to be on Darwin, but separate whether we have
 # kit build or a regular build.
@@ -200,6 +210,7 @@ install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
           DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
+
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt )
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
@@ -208,3 +219,4 @@ string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
 
 set ( CPACK_GENERATOR DragNDrop )
 endif ()
+

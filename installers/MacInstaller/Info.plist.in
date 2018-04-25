@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>MantidPlot</string>
+	<string>Mantid_osx_launcher</string>
 	<key>CFBundleGetInfoString</key>
 	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleIconFile</key>
