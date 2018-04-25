@@ -276,7 +276,10 @@ private:
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
-
+  // The current group we are reducing row data for
+  GroupData m_currentGroupData;
+  // The current row item being reduced
+  RowData_sptr m_currentRowData;
   // A boolean indicating whether to prompt the user when getting selected runs
   bool m_promptUser;
   // stores whether or not the table has changed since it was last saved

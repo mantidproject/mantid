@@ -871,6 +871,52 @@ bool QTwoLevelTreeModel::rowIsEmpty(int row, int parent) const {
   return true;
 }
 
+/** Check whether the given row in the model matches the given row values
+ * @param groupIndex : the group to check in the model
+ * @param rowIndex : the row to check in the model
+ * @param rowValues : the cell values to check against
+ * @return : true if the cell matches the given value
+ */
+bool QTwoLevelTreeModel::rowMatches(
+    int groupIndex, int rowIndex,
+    const std::map<QString, QString> &rowValues) const {
+
+  // Just check whether the first cell in the row matches (this is an
+  // assumption that this contains the uniquely-identifying info for the row
+  // i.e. the run number)
+  int columnIndex = 0;
+  auto const &columnName = m_whitelist.name(columnIndex);
+  // Only check non-blank values in the given row values
+  if (rowValues.count(columnName)) {
+    const auto newValue = rowValues.at(columnName);
+    const auto oldValue =
+        data(index(rowIndex, columnIndex, index(groupIndex, columnIndex)));
+
+    if (newValue != oldValue)
+      return false;
+  }
+
+  return true;
+}
+
+/** Check whether a row with given values already exists in the model
+ * @param rowValues : the values to check
+  */
+bool QTwoLevelTreeModel::rowExists(
+    const std::map<QString, QString> &rowValues) const {
+  // Loop through all existing rows
+  for (int groupIndex = 0; groupIndex < rowCount(); ++groupIndex) {
+    for (int rowIndex = 0; rowIndex < rowCount(index(groupIndex, 0));
+         ++rowIndex) {
+      // Return true if we find any match
+      if (rowMatches(groupIndex, rowIndex, rowValues))
+        return true;
+    }
+  }
+
+  return false;
+}
+
 /**
 Inserts a new row with given values to the specified group in the specified
 location
@@ -880,6 +926,10 @@ location
 */
 void QTwoLevelTreeModel::insertRowWithValues(
     int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues) {
+
+  // Don't add duplicates
+  if (rowExists(rowValues))
+    return;
 
   insertRow(rowIndex, index(groupIndex, 0));
 

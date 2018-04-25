@@ -390,6 +390,8 @@ Get the indices of all search result rows
 */
 std::set<int> QtReflRunsTabView::getAllSearchRows() const {
   std::set<int> rows;
+  if (!ui.tableSearchResults || !ui.tableSearchResults->model())
+    return rows;
   auto const rowCount = ui.tableSearchResults->model()->rowCount();
   for (auto row = 0; row < rowCount; ++row)
     rows.insert(row);

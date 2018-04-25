@@ -412,7 +412,10 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
         hasPostprocessing() &&
         !workspaceExists(getPostprocessedWorkspaceName(groupData));
 
-    if (groupOutputNotFound || m_manager->reductionFailed(groupIndex)) {
+    // Reprocess the group if the output has been deleted (note that if the
+    // reduction failed we don'treprocess the group unless force is true)
+    if (m_forceProcessing ||
+        (groupOutputNotFound && !m_manager->reductionFailed(groupIndex))) {
       m_manager->setProcessed(false, groupIndex);
       m_manager->setError("", groupIndex);
     }
@@ -468,21 +471,21 @@ void GenericDataProcessorPresenter::processNextItem() {
   // then return.
   for (auto &groupItem : m_itemsToProcess) {
     const auto groupIndex = groupItem.first;
-    auto groupData = groupItem.second;
+    m_currentGroupData = groupItem.second;
 
     // Skip if the entire group has already been marked as processed
     if (!m_forceProcessing && isGroupProcessed(groupIndex))
       continue;
 
     // Process all rows in the group
-    for (auto &rowItem : groupData) {
+    for (auto &rowItem : m_currentGroupData) {
       const auto rowIndex = rowItem.first;
-      auto rowData = rowItem.second;
+      m_currentRowData = rowItem.second;
 
-      if (m_forceProcessing || !rowData->isProcessed()) {
+      if (m_forceProcessing || !m_currentRowData->isProcessed()) {
         // Start a thread to process this item and then return. The next
         // item will be processed after this thread has finished.
-        startAsyncRowReduceThread(rowData, rowIndex, groupIndex);
+        startAsyncRowReduceThread(m_currentRowData, rowIndex, groupIndex);
         return;
       }
     }
@@ -492,8 +495,8 @@ void GenericDataProcessorPresenter::processNextItem() {
     // after this thread has finished. Note that we skip post-processing of
     // groups that only contain a single row because there is an assumption
     // that post-processing only applies to multi-row groups.
-    if (groupData.size() > 1) {
-      startAsyncGroupReduceThread(groupData, groupIndex);
+    if (m_currentGroupData.size() > 1) {
+      startAsyncGroupReduceThread(m_currentGroupData, groupIndex);
       return;
     }
   }
@@ -516,7 +519,7 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread(
     RowData_sptr rowData, const int rowIndex, const int groupIndex) {
 
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-      this, rowData, rowItem, groupIndex);
+      this, rowData, rowIndex, groupIndex);
 
   connect(worker, SIGNAL(finished(int)), this, SLOT(rowThreadFinished(int)));
   connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
@@ -589,15 +592,16 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 void GenericDataProcessorPresenter::groupThreadFinished(const int exitCode) {
 
   auto postprocessedWorkspace =
-      getPostprocessedWorkspaceName(m_groupData).toStdString();
-  completedGroupReductionSuccessfully(m_groupData, postprocessedWorkspace);
+      getPostprocessedWorkspaceName(m_currentGroupData).toStdString();
+  completedGroupReductionSuccessfully(m_currentGroupData,
+                                      postprocessedWorkspace);
   threadFinished(exitCode);
 }
 
 void GenericDataProcessorPresenter::rowThreadFinished(const int exitCode) {
   completedRowReductionSuccessfully(
-      m_groupData,
-      m_rowItem.second->reducedName(m_processor.defaultOutputPrefix())
+      m_currentGroupData,
+      m_currentRowData->reducedName(m_processor.defaultOutputPrefix())
           .toStdString());
   threadFinished(exitCode);
 }

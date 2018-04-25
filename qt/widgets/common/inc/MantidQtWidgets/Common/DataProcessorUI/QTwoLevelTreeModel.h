@@ -114,6 +114,9 @@ private slots:
 private:
   void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
+  bool rowMatches(int groupIndex, int rowIndex,
+                  const std::map<QString, QString> &rowValues) const;
+  bool rowExists(const std::map<QString, QString> &rowValues) const;
   void insertRowWithValues(int groupIndex, int rowIndex,
                            const std::map<QString, QString> &rowValues);
   bool rowIsEmpty(int row, int parent) const;
