@@ -69,7 +69,7 @@ class TableIndexModel(object):
                  can_scatter, can_scatter_period,
                  can_transmission, can_transmission_period,
                  can_direct, can_direct_period,
-                 output_name="", user_file="", options_column_string=""):
+                 output_name="", user_file="", options_column_string="", sample_thickness='0.0'):
         super(TableIndexModel, self).__init__()
         self.index = index
         self.sample_scatter = sample_scatter
@@ -87,6 +87,7 @@ class TableIndexModel(object):
         self.can_direct_period = can_direct_period
 
         self.user_file = user_file
+        self.sample_thickness = sample_thickness
         self.output_name = output_name
 
         # Options column entries

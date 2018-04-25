@@ -226,6 +226,8 @@ class RunTabPresenter(object):
         """
         Loads a batch file and populates the batch table based on that.
         """
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         try:
             # 1. Get the batch file from the view
             batch_file_path = self._view.get_batch_file_path()
@@ -882,6 +884,7 @@ class RunTabPresenter(object):
             can_direct_period = self.get_cell_value(row, 'CAN_DIRECT_PERIOD_INDEX') if is_multi_period_view else ""
 
             output_name = self.get_cell_value(row, 'OUTPUT_NAME_INDEX')
+            sample_thickness = self.get_cell_value(row, 'SAMPLE_THICKNESS_INDEX')
             user_file = self.get_cell_value(row, 'USER_FILE_INDEX')
 
             # Get the options string
@@ -904,6 +907,7 @@ class RunTabPresenter(object):
                                                 can_direct_period=can_direct_period,
                                                 output_name=output_name,
                                                 user_file = user_file,
+                                                sample_thickness=sample_thickness,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model

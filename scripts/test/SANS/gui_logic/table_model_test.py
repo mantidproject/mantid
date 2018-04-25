@@ -55,6 +55,15 @@ class TableModelTest(unittest.TestCase):
         user_file = table_model.get_row_user_file(2)
         self.assertEqual(user_file,"User_file_name")
 
+    def test_that_can_retrieve_sample_thickness_from_table_index_model(self):
+        sample_thickness = '8.0'
+        table_model = TableModel()
+        table_index_model = TableIndexModel(2, "", "", "", "", "", "",
+                                            "", "", "", "", "", "", sample_thickness=sample_thickness)
+        table_model.add_table_entry(2, table_index_model)
+        row_entry = table_model.get_table_entry(2)
+        self.assertEqual(row_entry.sample_thickness, sample_thickness)
+
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
         table_model = TableModel()
