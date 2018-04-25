@@ -83,6 +83,8 @@ public:
 
   /// Return selected data
   TreeData selectedData(bool prompt) override;
+  /// Return all data
+  TreeData allData(bool prompt) override;
   /// Transfer new data to model
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   /// Update row with new data

@@ -193,6 +193,7 @@ public:
   MockTreeManager(){};
   ~MockTreeManager() override{};
   MOCK_METHOD1(selectedData, TreeData(bool));
+  MOCK_METHOD1(allData, TreeData(bool));
   // Calls we don't care about
   std::vector<std::unique_ptr<Command>> publishCommands() override {
     return std::vector<std::unique_ptr<Command>>();

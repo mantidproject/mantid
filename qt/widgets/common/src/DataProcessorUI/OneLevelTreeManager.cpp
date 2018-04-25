@@ -389,6 +389,20 @@ TreeData OneLevelTreeManager::selectedData(bool prompt) {
   }
 }
 
+/**
+* Returns all data in a format that the presenter can understand and use
+* @param prompt :: True if warning messages should be displayed. False othewise
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
+*/
+TreeData OneLevelTreeManager::allData(bool prompt) {
+  if (isEmptyTable()) {
+    return handleEmptyTable(prompt);
+  } else {
+    return constructTreeData(allRows());
+  }
+}
+
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
 */

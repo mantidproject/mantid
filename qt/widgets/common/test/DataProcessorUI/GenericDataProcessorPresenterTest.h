@@ -122,9 +122,11 @@ private:
   }
 
   // Overriden non-async methods have same implementation as parent class
-  void process() override { GenericDataProcessorPresenter::process(); }
+  void process(TreeData itemsToProcess) override {
+    GenericDataProcessorPresenter::process(itemsToProcess);
+  }
   void plotRow() override { GenericDataProcessorPresenter::plotRow(); }
-  void plotGroup() override { GenericDataProcessorPresenter::process(); }
+  void plotGroup() override { GenericDataProcessorPresenter::plotGroup(); }
 };
 
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
@@ -1275,6 +1277,43 @@ public:
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     expectNotifiedReductionResumed(mockMainPresenter);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
+
+    // Check output and tidy up
+    checkWorkspacesExistInADS(m_defaultWorkspaces);
+    removeWorkspacesFromADS(m_defaultWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testProcessAll() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = makeDefaultPresenterNoThread();
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+    expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    GroupList grouplist;
+    grouplist.insert(0);
+    grouplist.insert(1);
+
+    createTOFWorkspace("TOF_12345", "12345");
+    createTOFWorkspace("TOF_12346", "12346");
+
+    // The user hits the "process" button with the first group selected
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    expectGetSelection(mockDataProcessorView, Exactly(0));
+    expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
+    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
+    expectNotifiedReductionResumed(mockMainPresenter);
+    presenter->notify(DataProcessorPresenter::ProcessAllFlag);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspaces);

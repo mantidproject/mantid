@@ -294,9 +294,7 @@ void ReflRunsTabPresenter::runAutoreduction() {
   m_autoSearchString = m_view->getSearchString();
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
 
-  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-  if (tablePresenter->selectedParents().size() > 0)
-    tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
+  tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
 }
 
 /** Check whether the user started an autoreduction process

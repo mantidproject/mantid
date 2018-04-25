@@ -182,7 +182,7 @@ protected:
   // Loader
   QString m_loader;
   // The list of selected items to reduce
-  TreeData m_selectedData;
+  TreeData m_itemsToProcess;
 
   // Pause reduction
   void pause();
@@ -226,8 +226,8 @@ protected:
 
   // Set up data required for processing a row
   bool initRowForProcessing(RowData_sptr rowData);
-  // Process selected rows
-  virtual void process();
+  // Process rows
+  virtual void process(TreeData itemsToProcess);
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
@@ -293,6 +293,10 @@ private:
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run, const PreprocessingAlgorithm &alg,
                       const OptionsMap &optionsMap);
+  // Process selected items
+  void processSelection();
+  // Process all items
+  void processAll();
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model

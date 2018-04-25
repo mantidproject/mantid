@@ -119,8 +119,8 @@ protected slots:
 private:
   // Get the processing options for this row
   OptionsMap getProcessingOptions(RowData_sptr data) override;
-  // Process selected rows
-  void process() override;
+  // Process given items
+  void process(TreeData itemsToProcess) override;
   // Plotting
   void plotRow() override;
   void plotGroup() override;

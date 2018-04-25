@@ -365,19 +365,32 @@ bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
 }
 
 /**
-Process selected data
+Process selected items
 */
-void GenericDataProcessorPresenter::process() {
+void GenericDataProcessorPresenter::processSelection() {
+  process(m_manager->selectedData(m_promptUser));
+}
+
+/** Process all items
+ */
+void GenericDataProcessorPresenter::processAll() {
+  process(m_manager->allData(m_promptUser));
+}
+
+/** Process a given set of items
+ */
+void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
   // Emit a signal that the process is starting
   m_view->emitProcessClicked();
   if (GenericDataProcessorPresenter::m_skipProcessing) {
     m_skipProcessing = false;
     return;
   }
-  m_selectedData = m_manager->selectedData(m_promptUser);
+  m_itemsToProcess = itemsToProcess;
+  ;
 
   // Don't continue if there are no items selected
-  if (m_selectedData.size() == 0) {
+  if (m_itemsToProcess.size() == 0) {
     m_mainPresenter->confirmReductionPaused(m_group);
     return;
   }
@@ -385,7 +398,7 @@ void GenericDataProcessorPresenter::process() {
   // Progress: each group and each row within count as a progress step.
   int maxProgress = 0;
 
-  for (const auto &groupItem : m_selectedData) {
+  for (const auto &groupItem : m_itemsToProcess) {
     const auto groupIndex = groupItem.first;
     auto groupData = groupItem.second;
 
@@ -448,7 +461,7 @@ void GenericDataProcessorPresenter::processNextItem() {
   // We always loop through all groups in the selection and process the
   // first one that has not yet been processed. We only process one and
   // then return.
-  for (auto &groupItem : m_selectedData) {
+  for (auto &groupItem : m_itemsToProcess) {
     const auto groupIndex = groupItem.first;
     auto groupData = groupItem.second;
 
@@ -533,7 +546,7 @@ void GenericDataProcessorPresenter::endReduction(
 
   // Create an ipython notebook if "Output Notebook" is checked.
   if (reductionSuccessful && m_view->getEnableNotebook())
-    saveNotebook(m_selectedData);
+    saveNotebook(m_itemsToProcess);
 
   // Stop the reduction
   pause();
@@ -1059,7 +1072,10 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     deleteAll();
     break;
   case DataProcessorPresenter::ProcessFlag:
-    process();
+    processSelection();
+    break;
+  case DataProcessorPresenter::ProcessAllFlag:
+    processAll();
     break;
   case DataProcessorPresenter::GroupRowsFlag:
     groupRows();

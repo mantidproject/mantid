@@ -85,6 +85,8 @@ public:
 
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
+  /// Return all data
+  virtual TreeData allData(bool prompt = false) = 0;
   /// Transfer new data to model
   virtual void
   transfer(const std::vector<std::map<QString, QString>> &runs) = 0;

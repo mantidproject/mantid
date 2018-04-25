@@ -269,13 +269,10 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 /**
  Process selected data
 */
-void ReflDataProcessorPresenter::process() {
-
-  // Get selected runs
-  const auto newSelected = m_manager->selectedData(true);
+void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
   // Don't continue if there are no items to process
-  if (newSelected.empty())
+  if (itemsToProcess.empty())
     return;
 
   // If slicing is not specified, process normally, delegating to
@@ -292,22 +289,22 @@ void ReflDataProcessorPresenter::process() {
 
   if (!slicing->hasSlicing()) {
     // Check if any input event workspaces still exist in ADS
-    if (proceedIfWSTypeInADS(newSelected, true)) {
+    if (proceedIfWSTypeInADS(itemsToProcess, true)) {
       setPromptUser(false); // Prevent prompting user twice
-      GenericDataProcessorPresenter::process();
+      GenericDataProcessorPresenter::process(itemsToProcess);
     }
     return;
   }
 
-  m_selectedData = newSelected;
+  m_itemsToProcess = itemsToProcess;
 
   // Check if any input non-event workspaces exist in ADS
-  if (!proceedIfWSTypeInADS(m_selectedData, false))
+  if (!proceedIfWSTypeInADS(m_itemsToProcess, false))
     return;
 
   // Progress report
   int progress = 0;
-  int maxProgress = static_cast<int>(m_selectedData.size());
+  int maxProgress = static_cast<int>(m_itemsToProcess.size());
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
@@ -317,7 +314,7 @@ void ReflDataProcessorPresenter::process() {
   bool errors = false;
 
   // Loop in groups
-  for (const auto &item : m_selectedData) {
+  for (const auto &item : m_itemsToProcess) {
 
     // Group of runs
     GroupData group = item.second;
@@ -336,7 +333,7 @@ void ReflDataProcessorPresenter::process() {
           /// @todo Implement save notebook for event-sliced workspaces.
           // The per-slice input properties are stored in the RowData but
           // at the moment GenerateNotebook just uses the parent row
-          // saveNotebook(m_selectedData);
+          // saveNotebook(m_itemsToProcess);
           GenericDataProcessorPresenter::giveUserWarning(
               "Notebook not implemented for sliced data yet",
               "Notebook will not be generated");
@@ -348,7 +345,7 @@ void ReflDataProcessorPresenter::process() {
           errors = true;
         // Notebook
         if (m_view->getEnableNotebook())
-          saveNotebook(m_selectedData);
+          saveNotebook(m_itemsToProcess);
       }
 
       if (!allEventWS)
@@ -1033,7 +1030,7 @@ void ReflDataProcessorPresenter::endReduction(
 
   // Create an ipython notebook if "Output Notebook" is checked.
   if (reductionSuccessful && m_view->getEnableNotebook())
-    saveNotebook(m_selectedData);
+    saveNotebook(m_itemsToProcess);
 
   if (m_mainPresenter->autoreductionInProgress()) {
     // Signal reduction has finished but leave the GUI in the "processing"

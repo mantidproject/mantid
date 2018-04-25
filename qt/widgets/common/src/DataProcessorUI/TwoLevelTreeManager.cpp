@@ -583,6 +583,37 @@ TreeData TwoLevelTreeManager::selectedData(bool prompt) {
   return constructTreeData(rows);
 }
 
+/**
+* Returns all data in a format that the presenter can understand and use
+* @param prompt :: True if warning messages should be displayed. False othewise
+* @return :: data as a map
+*/
+TreeData TwoLevelTreeManager::allData(bool prompt) {
+
+  TreeData allData;
+
+  auto options = m_presenter->options();
+
+  if (m_model->rowCount() == 0 && prompt) {
+    m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");
+    return allData;
+  }
+
+  // Populate all groups with all rows
+  ParentItems groups;
+  ChildItems rows;
+
+  for (int group = 0; group < m_model->rowCount(); group++) {
+    groups.insert(group);
+
+    const auto nrows = numRowsInGroup(group);
+    for (int row = 0; row < nrows; row++)
+      rows[group].insert(row);
+  }
+
+  return constructTreeData(rows);
+}
+
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
 */
