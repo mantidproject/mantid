@@ -33,6 +33,7 @@ from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.sans_batch import SANSCentreFinder
+from sans.common.file_information import SANSFileInformationFactory
 
 try:
     import mantidplot
@@ -226,8 +227,6 @@ class RunTabPresenter(object):
         """
         Loads a batch file and populates the batch table based on that.
         """
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         try:
             # 1. Get the batch file from the view
             batch_file_path = self._view.get_batch_file_path()
@@ -974,7 +973,6 @@ class RunTabPresenter(object):
 
         def get_string_period(_tag):
             return "" if _tag == ALL_PERIODS else str(_tag)
-
         # 1. Pull out the entries
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
         sample_scatter_period = get_string_entry(BatchReductionEntry.SampleScatterPeriod, row)
@@ -989,6 +987,9 @@ class RunTabPresenter(object):
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
         can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
         output_name = get_string_entry(BatchReductionEntry.Output, row)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(sample_scatter)
+        sample_thickness = file_information._thickness
 
         # If one of the periods is not null, then we should switch the view to multi-period view
         if any ((sample_scatter_period, sample_transmission_period, sample_direct_period, can_scatter_period,
@@ -1000,7 +1001,7 @@ class RunTabPresenter(object):
         if self._view.is_multi_period_view():
             row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
                         "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
-                        "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
+                        "CanDirect:{},cdp:{},OutputName:{},Sample Thickness:{}".format(sample_scatter,
                                                                    get_string_period(sample_scatter_period),
                                                                    sample_transmission,
                                                                    get_string_period(sample_transmission_period),
@@ -1012,17 +1013,17 @@ class RunTabPresenter(object):
                                                                    get_string_period(can_transmission_period),
                                                                    can_direct,
                                                                    get_string_period(can_direct_period),
-                                                                   output_name)
+                                                                   output_name, sample_thickness)
         else:
             row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
                         "CanScatter:{},CanTrans:{}," \
-                        "CanDirect:{},OutputName:{}".format(sample_scatter,
+                        "CanDirect:{},OutputName:{},Sample Thickness:{}".format(sample_scatter,
                                                             sample_transmission,
                                                             sample_direct,
                                                             can_scatter,
                                                             can_transmission,
                                                             can_direct,
-                                                            output_name)
+                                                            output_name, sample_thickness)
 
         self._view.add_row(row_entry)
 
