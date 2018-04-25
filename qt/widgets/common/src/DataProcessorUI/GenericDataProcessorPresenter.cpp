@@ -421,8 +421,11 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
       const auto rowIndex = rowItem.first;
       auto rowData = rowItem.second;
 
-      if (rowData->isProcessed() && rowOutputExists(rowItem) &&
-          !m_forceProcessing)
+      // Skip rows that have been processed unless their output has been
+      // deleted. Note that if the reduction failed then we don't reprocess
+      // unless forcing reprocessing
+      if (!m_forceProcessing && rowData->isProcessed() &&
+          (rowOutputExists(rowItem) || rowData->reductionFailed()))
         continue;
 
       // Reset the row ready for (re)processing
