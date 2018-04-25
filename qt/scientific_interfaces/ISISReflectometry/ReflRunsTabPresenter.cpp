@@ -147,7 +147,7 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
-    transfer();
+    transfer(m_view->getSelectedSearchRows());
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     changeInstrument();
@@ -288,9 +288,9 @@ void ReflRunsTabPresenter::runAutoreduction() {
   notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
 
   // Select and transfer all rows to the table
-  m_view->setAllSearchRowsSelected();
-  if (m_view->getSelectedSearchRows().size() > 0)
-    transfer();
+  auto rowsToTransfer = m_view->getAllSearchRows();
+  if (rowsToTransfer.size() > 0)
+    transfer(rowsToTransfer);
 
   m_autoSearchString = m_view->getSearchString();
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
@@ -309,14 +309,13 @@ bool ReflRunsTabPresenter::autoreductionInProgress() const {
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
-void ReflRunsTabPresenter::transfer() {
+void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer) {
   // Build the input for the transfer strategy
   SearchResultMap runs;
-  auto selectedRows = m_view->getSelectedSearchRows();
 
-  // Do not begin transfer if nothing is selected or if the transfer method does
+  // Do not begin transfer if no rows are given or if the transfer method does
   // not match the one used for populating search
-  if (selectedRows.size() == 0) {
+  if (rowsToTransfer.size() == 0) {
     m_mainPresenter->giveUserCritical(
         "Error: Please select at least one run to transfer.",
         "No runs selected");
@@ -331,7 +330,7 @@ void ReflRunsTabPresenter::transfer() {
     return;
   }
 
-  for (const auto &row : selectedRows) {
+  for (const auto &row : rowsToTransfer) {
     const auto run = m_searchModel->data(m_searchModel->index(row, 0))
                          .toString()
                          .toStdString();
@@ -347,8 +346,8 @@ void ReflRunsTabPresenter::transfer() {
     runs[run] = searchResult;
   }
 
-  ProgressPresenter progress(0, static_cast<double>(selectedRows.size()),
-                             static_cast<int64_t>(selectedRows.size()),
+  ProgressPresenter progress(0, static_cast<double>(rowsToTransfer.size()),
+                             static_cast<int64_t>(rowsToTransfer.size()),
                              this->m_progressView);
 
   TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
@@ -367,11 +366,11 @@ void ReflRunsTabPresenter::transfer() {
            ++errorRowIt) {
         const std::string runNumber = errorRowIt->first; // grab run number
 
-        // iterate over rows that are selected in the search table
-        for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
+        // iterate over given rows
+        for (auto rowIt = rowsToTransfer.begin(); rowIt != rowsToTransfer.end();
              ++rowIt) {
           const int row = *rowIt;
-          // get the run number from that selected row
+          // get the run number from that row
           const auto searchRun =
               m_searchModel->data(m_searchModel->index(row, 0))
                   .toString()

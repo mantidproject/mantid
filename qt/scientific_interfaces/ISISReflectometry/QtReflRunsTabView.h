@@ -79,7 +79,6 @@ public:
                             tableCommands) override;
   void setRowCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                           rowCommands) override;
-  void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
@@ -93,6 +92,7 @@ public:
 
   // Accessor methods
   std::set<int> getSelectedSearchRows() const override;
+  std::set<int> getAllSearchRows() const override;
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
   std::string getTransferMethod() const override;

@@ -57,6 +57,7 @@ public:
 
   // IO
   MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
+  MOCK_CONST_METHOD0(getAllSearchRows, std::set<int>());
   MOCK_CONST_METHOD0(getSearchString, std::string());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
@@ -78,7 +79,6 @@ public:
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
-  void setAllSearchRowsSelected() override{};
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 };
 

@@ -130,7 +130,7 @@ private:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void startAutoreduction();
   void runAutoreduction();
-  void transfer();
+  void transfer(const std::set<int> &rowsToTransfer);
   void pushCommands();
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();

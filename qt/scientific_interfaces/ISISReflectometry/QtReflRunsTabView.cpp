@@ -156,14 +156,6 @@ void QtReflRunsTabView::setRowCommands(
 }
 
 /**
-* Sets all rows in the table view to be selected
-*/
-void QtReflRunsTabView::setAllSearchRowsSelected() {
-
-  ui.tableSearchResults->selectAll();
-}
-
-/**
 * Clears all the actions (commands)
 */
 void QtReflRunsTabView::clearCommands() {
@@ -395,6 +387,18 @@ std::set<int> QtReflRunsTabView::getSelectedSearchRows() const {
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
       rows.insert(it->row());
   }
+  return rows;
+}
+
+/**
+Get the indices of all search result rows
+@returns a set of ints containing the row numbers
+*/
+std::set<int> QtReflRunsTabView::getAllSearchRows() const {
+  std::set<int> rows;
+  auto const rowCount = ui.tableSearchResults->model()->rowCount();
+  for (auto row = 0; row < rowCount; ++row)
+    rows.insert(row);
   return rows;
 }
 
