@@ -808,6 +808,10 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
     double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
     std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
                    [factor](double x) { return factor / x; });
+    auto &Y0 = IvsQ->mutableY(0);
+    auto &E0 = IvsQ->mutableE(0);
+    std::reverse(Y0.begin(), Y0.end());
+    std::reverse(E0.begin(), E0.end());
     IvsQ->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     return IvsQ;

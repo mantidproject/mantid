@@ -586,7 +586,19 @@ public:
   void test_angle_correction() {
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1+2");
+
+    auto inputWS = MatrixWorkspace_sptr(std::move(m_multiDetectorWS->clone()));
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setPropertyValue("ProcessingInstructions", "1+2");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
     double const theta = 22.0;
     alg.setProperty("ThetaIn", theta);
     alg.execute();
@@ -603,12 +615,35 @@ public:
     for (size_t i = 0; i < qX.size(); ++i) {
       TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-14);
     }
+
+    auto const &lamY = outLam->y(0);
+    TS_ASSERT_DELTA(lamY[0], 19, 1e-2);
+    TS_ASSERT_DELTA(lamY[6], 49, 1e-2);
+    TS_ASSERT_DELTA(lamY[13], 84, 1e-2);
+
+    auto const &qY = outQ->y(0);
+    TS_ASSERT_DELTA(qY[0], 84, 1e-2);
+    TS_ASSERT_DELTA(qY[6], 54, 1e-2);
+    TS_ASSERT_DELTA(qY[13], 19, 1e-2);
+
   }
 
   void test_no_angle_correction() {
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2");
+
+    auto inputWS = MatrixWorkspace_sptr(std::move(m_multiDetectorWS->clone()));
+    setYValuesToWorkspace(*inputWS);
+
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
     alg.setProperty("ThetaIn", 22.0);
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
@@ -624,6 +659,16 @@ public:
     for (size_t i = 0; i < qX.size(); ++i) {
       TS_ASSERT_DELTA(qX[i], factor / lamXinv[i], 1e-14);
     }
+
+    auto const &lamY = outLam->y(0);
+    TS_ASSERT_DELTA(lamY[0], 11, 1e-2);
+    TS_ASSERT_DELTA(lamY[6], 29, 1e-2);
+    TS_ASSERT_DELTA(lamY[13], 50, 1e-2);
+
+    auto const &qY = outQ->y(0);
+    TS_ASSERT_DELTA(qY[0], 50, 1e-2);
+    TS_ASSERT_DELTA(qY[6], 32, 1e-2);
+    TS_ASSERT_DELTA(qY[13], 11, 1e-2);
   }
 
 private:
@@ -706,6 +751,16 @@ private:
 
     return outQ;
   }
+
+  void setYValuesToWorkspace(MatrixWorkspace &ws) {
+    for(size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+      auto &y = ws.mutableY(i);
+      for(size_t j = 0; j < y.size(); ++j) {
+        y[j] += double(j + 1) * double(i + 1);
+      }
+    }
+  }
+
 };
 
 #endif /* ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONE2TEST_H_ */
