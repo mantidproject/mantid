@@ -27,6 +27,8 @@ Single Crystal Diffraction
 
 - New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load multiple single crystal diffraction data files from the DNS instrument into MDEventWorkspace.
 
+- HFIR 4Circle Reduction interface is improved to provide a new workflow to integrate weak diffraction peaks.
+
 Improvements
 ############
 
