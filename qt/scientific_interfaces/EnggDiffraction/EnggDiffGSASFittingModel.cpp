@@ -8,6 +8,8 @@
 
 using namespace Mantid;
 
+Q_DECLARE_METATYPE(Mantid::API::IAlgorithm_sptr)
+
 namespace {
 
 std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
@@ -87,7 +89,7 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
 }
 }
 
-GSASIIRefineFitPeaksOutputProperties
+std::pair<API::IAlgorithm_sptr, GSASIIRefineFitPeaksOutputProperties>
 EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const GSASIIRefineFitPeaksParameters &params) {
   auto gsasAlg =
@@ -131,8 +133,9 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
   const auto latticeParams =
       ADS.retrieveWS<API::ITableWorkspace>(latticeParamsName);
-  return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma, fittedPeaks,
-                                              latticeParams, params.runLabel);
+  return std::make_pair(gsasAlg, GSASIIRefineFitPeaksOutputProperties(
+                                     rwp, sigma, gamma, fittedPeaks,
+                                     latticeParams, params.runLabel));
 }
 
 void EnggDiffGSASFittingModel::doRefinements(
@@ -145,12 +148,15 @@ void EnggDiffGSASFittingModel::doRefinements(
   qRegisterMetaType<
       MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
       "GSASIIRefineFitPeaksOutputProperties");
+  qRegisterMetaType<Mantid::API::IAlgorithm_sptr>("IAlgorithm_sptr");
 
   connect(m_workerThread.get(), SIGNAL(started()), worker,
           SLOT(doRefinements()));
   connect(worker,
-          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
+          SIGNAL(refinementSuccessful(Mantid::API::IAlgorithm_sptr,
+                                      GSASIIRefineFitPeaksOutputProperties)),
           this, SLOT(processRefinementSuccessful(
+                    Mantid::API::IAlgorithm_sptr,
                     const GSASIIRefineFitPeaksOutputProperties &)));
   connect(worker, SIGNAL(refinementsComplete()), this,
           SLOT(processRefinementsComplete()));
@@ -161,7 +167,8 @@ void EnggDiffGSASFittingModel::doRefinements(
   connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
           SLOT(deleteLater()));
   connect(worker,
-          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
+          SIGNAL(refinementSuccessful(Mantid::API::IAlgorithm_sptr,
+                                      GSASIIRefineFitPeaksOutputProperties)),
           worker, SLOT(deleteLater()));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), worker,
           SLOT(deleteLater()));
@@ -220,12 +227,13 @@ void EnggDiffGSASFittingModel::processRefinementFailed(
 }
 
 void EnggDiffGSASFittingModel::processRefinementSuccessful(
+    API::IAlgorithm_sptr alg,
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   addFitResultsToMaps(refinementResults.runLabel, refinementResults.rwp,
                       refinementResults.sigma, refinementResults.gamma,
                       refinementResults.latticeParamsWS);
   if (m_observer) {
-    m_observer->notifyRefinementSuccessful(refinementResults);
+    m_observer->notifyRefinementSuccessful(alg, refinementResults);
   }
 }
 
@@ -233,6 +241,49 @@ void EnggDiffGSASFittingModel::processRefinementCancelled() {
   if (m_observer) {
     m_observer->notifyRefinementCancelled();
   }
+}
+
+void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
+    const Mantid::API::IAlgorithm_sptr successfulAlg,
+    const GSASIIRefineFitPeaksOutputProperties &refinementResults,
+    const std::string &filename) const {
+  auto saveAlg = API::AlgorithmManager::Instance().create(
+      "EnggSaveGSASIIFitResultsToHDF5");
+
+  const auto &runLabel = refinementResults.runLabel;
+  const auto latticeParams = *getLatticeParams(runLabel);
+  saveAlg->setProperty("LatticeParams", latticeParams);
+  saveAlg->setPropertyValue("BankID", std::to_string(runLabel.bank));
+
+  const std::string refinementMethod =
+      successfulAlg->getProperty("RefinementMethod");
+  saveAlg->setProperty("RefinementMethod", refinementMethod);
+  saveAlg->setProperty("XMin", successfulAlg->getPropertyValue("XMin"));
+  saveAlg->setProperty("XMax", successfulAlg->getPropertyValue("XMax"));
+
+  if (refinementMethod == "Pawley refinement") {
+    saveAlg->setProperty("PawleyDMin",
+                         successfulAlg->getPropertyValue("PawleyDMin"));
+    saveAlg->setProperty(
+        "PawleyNegativeWeight",
+        successfulAlg->getPropertyValue("PawleyNegativeWeight"));
+  }
+
+  const bool refineSigma = successfulAlg->getProperty("RefineSigma");
+  saveAlg->setProperty("RefineSigma", refineSigma);
+  if (refineSigma) {
+    saveAlg->setProperty("Sigma", successfulAlg->getPropertyValue("Sigma"));
+  }
+
+  const bool refineGamma = successfulAlg->getProperty("RefineGamma");
+  saveAlg->setProperty("RefineGamma", refineGamma);
+  if (refineGamma) {
+    saveAlg->setProperty("Gamma", successfulAlg->getPropertyValue("Gamma"));
+  }
+
+  saveAlg->setProperty("Rwp", successfulAlg->getPropertyValue("Rwp"));
+  saveAlg->setProperty("Filename", filename);
+  saveAlg->execute();
 }
 
 void EnggDiffGSASFittingModel::setObserver(

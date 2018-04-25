@@ -3,6 +3,8 @@
 
 #include "GSASIIRefineFitPeaksOutputProperties.h"
 
+#include "MantidAPI/IAlgorithm_fwd.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -16,6 +18,7 @@ public:
 
   /// Notify the observer that a single refinement has terminated successfully
   virtual void notifyRefinementSuccessful(
+      const Mantid::API::IAlgorithm_sptr alg,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults) = 0;
 
   /// Notify the observer that a refinement has failed

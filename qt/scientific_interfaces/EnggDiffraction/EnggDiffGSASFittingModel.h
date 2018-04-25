@@ -8,6 +8,8 @@
 #include "IEnggDiffGSASFittingObserver.h"
 #include "RunMap.h"
 
+#include "MantidAPI/IAlgorithm_fwd.h"
+
 #include <QObject>
 #include <QThread>
 
@@ -45,6 +47,11 @@ public:
   Mantid::API::MatrixWorkspace_sptr
   loadFocusedRun(const std::string &filename) const override;
 
+  void saveRefinementResultsToHDF5(
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+      const GSASIIRefineFitPeaksOutputProperties &refinementResults,
+      const std::string &filename) const override;
+
 protected:
   /// The following methods are marked as protected so that they can be exposed
   /// by a helper class in the tests
@@ -68,6 +75,7 @@ protected slots:
   void processRefinementFailed(const std::string &failureMessage);
 
   void processRefinementSuccessful(
+      Mantid::API::IAlgorithm_sptr alg,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults);
 
   void processRefinementCancelled();
@@ -96,7 +104,7 @@ private:
   void deleteWorkerThread();
 
   /// Run GSASIIRefineFitPeaks
-  GSASIIRefineFitPeaksOutputProperties
+  std::pair<Mantid::API::IAlgorithm_sptr, GSASIIRefineFitPeaksOutputProperties>
   doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params);
 
   template <typename T>
