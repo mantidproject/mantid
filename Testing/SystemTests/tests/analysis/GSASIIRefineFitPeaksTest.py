@@ -106,7 +106,8 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
-        self.assertAlmostEqual(self.rwp, self._get_expected_rwp(), delta=1e-6)
+        self.tolerance = 1e-4
+        self.assertAlmostEqual(self.rwp, self._get_expected_rwp(), delta=1e-5)
         return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._get_fit_params_reference_filename()),
                 self._FITTED_PEAKS_WS_NAME, mantid.FileFinder.getFullPath(self._get_fitted_peaks_reference_filename()))
 
