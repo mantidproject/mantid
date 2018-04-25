@@ -135,10 +135,12 @@ Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123(
     int64_t nHist, int64_t nBins, bool isHist = false,
-    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
+    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>(),
+    bool hasDx = false);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace154(
     int64_t nHist, int64_t nBins, bool isHist = false,
-    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
+    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>(),
+    bool hasDx = false);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithValuesAndXerror(
     int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,
     double eVal, double dxVal,
@@ -164,11 +166,12 @@ create2DWorkspaceBinned(int nhist, int numVals, double x0 = 0.0,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceBinned(int nhist, const int numBoundaries,
-                        const double xBoundaries[]);
+create2DWorkspaceNonUniformlyBinned(int nhist, const int numBoundaries,
+                                    const double xBoundaries[],
+                                    bool hasDx = false);
 
-struct returnOne {
-  double operator()(const double, size_t) { return 1; }
+struct ReturnOne {
+  double operator()(const double, std::size_t) { return 1.0; };
 };
 
 /**
@@ -183,11 +186,11 @@ struct returnOne {
  * @param eFunc :: A function to use for the y error values
  * @return The new workspace. The errors are set to 1.0
  */
-template <typename fT, typename gT = returnOne>
+template <typename fT, typename gT = ReturnOne>
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
                               double dx, bool isHist = false,
-                              gT eFunc = returnOne()) {
+                              gT eFunc = ReturnOne()) {
   int nX = int((x1 - x0) / dx) + 1;
   int nY = nX - (isHist ? 1 : 0);
   if (nY <= 0)
@@ -228,7 +231,8 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     int nhist, int nbins, bool includeMonitors = false,
     bool startYNegative = false, bool isHistogram = true,
-    const std::string &instrumentName = std::string("testInst"));
+    const std::string &instrumentName = std::string("testInst"),
+    bool hasDx = false);
 
 /**
  * Create a workspace as for create2DWorkspaceWithFullInstrument, but including

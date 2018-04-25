@@ -39,6 +39,8 @@ import traceback
 from qtpy.QtCore import QTimer
 from qtpy.QtWidgets import QApplication
 
+QAPP = None
+
 
 class ModalTester(object):
     """
@@ -51,9 +53,9 @@ class ModalTester(object):
             A modal widget must have exec_() method.
         :param tester: A function taking a widget as its argument that does testing.
         """
-        self.app = QApplication.instance()
-        if self.app is None:
-            self.app = QApplication([''])
+        global QAPP
+        if QAPP is None:
+            QAPP = QApplication([''])
         self.creator = creator
         self.tester = tester
         self.widget = None
@@ -68,7 +70,7 @@ class ModalTester(object):
             self.widget = self.creator()
         except:
             traceback.print_exc()
-            self.app.exit(0)
+            QAPP.exit(0)
         if self.widget is not None:
             self.widget.exec_()
 
@@ -77,7 +79,7 @@ class ModalTester(object):
         This function runs every time in QApplication's event loop.
         Call the testing function.
         """
-        modal_widget = self.app.activeModalWidget()
+        modal_widget = QAPP.activeModalWidget()
         if modal_widget is not None:
             if self.widget is modal_widget:
                 try:
@@ -85,6 +87,7 @@ class ModalTester(object):
                     self.passed = True
                 except:
                     traceback.print_exc()
+                    QAPP.exit(0)
             if modal_widget.isVisible():
                 modal_widget.close()
 
@@ -100,4 +103,4 @@ class ModalTester(object):
         # This calls __call__() method
         QTimer.singleShot(0, self)
         # Start the event loop
-        self.app.exec_()
+        QAPP.exec_()

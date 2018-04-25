@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflMainWindowPresenter.h"
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -47,7 +48,7 @@ public:
                           IReflRunsTabPresenter *runsPresenter,
                           IReflEventTabPresenter *eventPresenter,
                           IReflSettingsTabPresenter *settingsPresenter,
-                          IReflSaveTabPresenter *savePresenter);
+                          std::unique_ptr<IReflSaveTabPresenter> savePresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
 
@@ -87,6 +88,13 @@ public:
   void notifyReductionPaused(int group) override;
   void notifyReductionResumed(int group) override;
 
+  void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
+  void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
+
 private:
   /// Check for Settings Tab null pointer
   void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;
@@ -106,7 +114,7 @@ private:
   /// The presenter of tab 'Settings'
   IReflSettingsTabPresenter *m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'
-  IReflSaveTabPresenter *m_savePresenter;
+  std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
   /// State boolean on whether runs are currently being processed or not
   mutable bool m_isProcessing;
 };

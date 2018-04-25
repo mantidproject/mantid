@@ -57,6 +57,8 @@ public:
 
   MOCK_METHOD0(resetCanvas, void());
 
+  MOCK_METHOD1(setEnabled, void(const bool));
+
   MOCK_CONST_METHOD0(showRefinementResultsSelected, bool());
 
   MOCK_CONST_METHOD1(showStatus, void(const std::string &status));

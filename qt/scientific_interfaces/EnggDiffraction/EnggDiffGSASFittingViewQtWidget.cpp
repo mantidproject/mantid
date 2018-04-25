@@ -35,8 +35,10 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   setupUI();
 
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
-  m_presenter = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
+  auto *model_ptr = model.get();
+  m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
       std::move(model), this, multiRunWidgetPresenter);
+  model_ptr->setObserver(m_presenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
 
@@ -288,6 +290,16 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
 
   m_ui.lineEdit_pawleyDMin->setEnabled(enabled);
   m_ui.lineEdit_pawleyNegativeWeight->setEnabled(enabled);
+
+  m_ui.lineEdit_xMin->setEnabled(enabled);
+  m_ui.lineEdit_xMax->setEnabled(enabled);
+
+  m_ui.checkBox_refineSigma->setEnabled(enabled);
+  m_ui.checkBox_refineGamma->setEnabled(enabled);
+
+  m_ui.pushButton_doRefinement->setEnabled(enabled);
+
+  m_multiRunWidgetView->setEnabled(enabled);
 }
 
 void EnggDiffGSASFittingViewQtWidget::setFocusedRunFileNames(

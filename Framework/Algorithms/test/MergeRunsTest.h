@@ -3,25 +3,21 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <stdarg.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
-#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h>
 #include <MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h>
 #include "MantidTypes/SpectrumDefinition.h"
@@ -305,17 +301,17 @@ public:
 
   MergeRunsTest() {
     AnalysisDataService::Instance().add(
-        "in1", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
+        "in1", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1.));
     AnalysisDataService::Instance().add(
-        "in2", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
+        "in2", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1.));
     AnalysisDataService::Instance().add(
-        "in3", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
+        "in3", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1.));
     AnalysisDataService::Instance().add(
-        "in4", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 20));
+        "in4", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 20.));
     AnalysisDataService::Instance().add(
-        "in5", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 3.5, 2));
+        "in5", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 3.5, 2.));
     AnalysisDataService::Instance().add(
-        "in6", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 3, 2, 2));
+        "in6", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 3, 2., 2.));
   }
 
   void checkOutput(std::string wsname) {

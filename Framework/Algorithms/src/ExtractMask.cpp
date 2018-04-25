@@ -54,9 +54,12 @@ void ExtractMask::exec() {
   std::vector<detid_t> detectorList;
   const auto &detInfo = inputWS->detectorInfo();
   const auto &detIds = detInfo.detectorIDs();
-  for (size_t i = 0; i < detInfo.size(); ++i)
-    if (detInfo.isMasked(i))
+  for (size_t i = 0; i < detInfo.size(); ++i) {
+    if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) ||
+        detInfo.isMasked(i)) {
       detectorList.push_back(detIds[i]);
+    }
+  }
 
   // Create a new workspace for the results, copy from the input to ensure
   // that we copy over the instrument and current masking

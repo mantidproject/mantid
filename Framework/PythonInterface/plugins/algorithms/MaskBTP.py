@@ -24,6 +24,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         """
         return "Transforms\\Masking;Inelastic\\Utility"
 
+    def seeAlso(self):
+        return [ "MaskDetectors","MaskInstrument" ]
+
     def name(self):
         """ Mantid required
         """

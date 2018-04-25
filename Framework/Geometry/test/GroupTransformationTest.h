@@ -51,9 +51,9 @@ public:
      */
     std::unordered_set<std::string> elements;
     std::vector<SymmetryOperation> ops = transformed.getSymmetryOperations();
-    for (auto op = ops.begin(); op != ops.end(); ++op) {
+    for (auto &op : ops) {
       SymmetryElement_sptr el =
-          SymmetryElementFactory::Instance().createSymElement(*op);
+          SymmetryElementFactory::Instance().createSymElement(op);
 
       // Check for identity
       SymmetryElementIdentity_sptr identity =

@@ -1826,9 +1826,8 @@ public:
     }
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;
@@ -1874,9 +1873,8 @@ public:
     }
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;
@@ -2312,9 +2310,8 @@ public:
     TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;
@@ -2385,9 +2382,8 @@ public:
     // TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;

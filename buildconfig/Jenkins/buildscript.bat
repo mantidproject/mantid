@@ -97,6 +97,7 @@ if "!CLEANBUILD!" == "yes" (
 
 if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+  for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-download %BUILD_DIR%\eigen-src
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
@@ -157,10 +158,14 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Remove the user properties file just in case anything polluted it
+:: Remove any user configuration and create a blank user properties file
+:: This prevents race conditions when creating the user config directory
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-
+set CONFIGDIR=%APPDATA%\mantidproject\mantid
+rmdir /S /Q %CONFIGDIR%
+mkdir %CONFIGDIR%
+call cmake.exe -E touch %USERPROPS%
 call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
