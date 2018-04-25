@@ -408,20 +408,18 @@ void GenericDataProcessorPresenter::process() {
       const auto rowIndex = rowItem.first;
       auto rowData = rowItem.second;
 
-      // Set up all data required for processing the row
+      if (rowData->isProcessed() && rowOutputExists(rowItem) &&
+          !m_forceProcessing)
+        continue;
+
+      // Reset the row ready for (re)processing
       if (!initRowForProcessing(rowData))
         return;
 
-      // Set group as unprocessed if settings have changed or the expected
-      // output workspaces cannot be found
-      if (!rowOutputExists(rowItem)) {
-        m_manager->setProcessed(false, rowIndex, groupIndex);
-        m_manager->setError("", rowIndex, groupIndex);
-      }
+      m_manager->setProcessed(false, rowIndex, groupIndex);
+      m_manager->setError("", rowIndex, groupIndex);
 
-      // Rows that are already processed do not count in progress
-      if (!rowData->isProcessed())
-        maxProgress++;
+      maxProgress++;
     }
   }
 

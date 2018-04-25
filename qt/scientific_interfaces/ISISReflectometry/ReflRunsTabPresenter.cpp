@@ -536,7 +536,10 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
 */
-void ReflRunsTabPresenter::pause() const { updateWidgetEnabledState(false); }
+void ReflRunsTabPresenter::pause() const {
+  m_view->stopTimer();
+  updateWidgetEnabledState(false);
+}
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is in progress
