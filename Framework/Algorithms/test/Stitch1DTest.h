@@ -8,11 +8,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/Points.h"
 
 #include <algorithm>
 #include <math.h>
@@ -23,11 +26,13 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::Stitch1D;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
 
 double roundSix(double i) { return floor(i * 1000000. + 0.5) / 1000000.; }
 
@@ -239,16 +244,51 @@ public:
                       std::runtime_error &);
   }
 
-  void test_point_workspaces_pass() {
+  void test_sort_x() {
+    const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
+    const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
+    const auto &e = HistogramE(3, LinearGenerator(7., -1.));
+    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 1.));
+    auto point_ws_1 = createWorkspace(x1, y1, e, dx1);
+
+    const auto &x2 = HistogramX(3, LinearGenerator(2.1, 1.));
+    const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
+    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));
+    auto point_ws_2 = createWorkspace(x2, y2, e, dx2);
+
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", point_ws_1);
+    alg.setProperty("RHSWorkspace", point_ws_2);
+    alg.setProperty("UseManualScaleFactor", true);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
+    const std::vector<double> x_values{1., 2., 2.1, 3., 3.1, 4.1};
+    TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
+    const std::vector<double> y_values{1., 2., 5., 3., 6., 7.};
+    TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
+    const std::vector<double> e_values{7., 6., 7., 5., 6., 5.};
+    TS_ASSERT_EQUALS(stitched->e(0).rawData(), e_values);
+    const std::vector<double> dx_values{-3., -2., -9., -1., -9., -9.};
+    TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
+    double scaleFactor = alg.getProperty("OutScaleFactor");
+    TS_ASSERT_EQUALS(scaleFactor, 1.); // Default scale factor
+  }
+
+  void test_point_data_with_dx() {
     const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
     const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
     const auto &e = HistogramE(3, 1.);
-    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 0.));
+    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 1.));
     auto point_ws_1 = createWorkspace(x1, y1, e, dx1);
 
     const auto &x2 = HistogramX(3, LinearGenerator(1.5, 1.));
     const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
-    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));//1.
+    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));
     auto point_ws_2 = createWorkspace(x2, y2, e, dx2);
 
     Stitch1D alg;
@@ -259,16 +299,33 @@ public:
     alg.setProperty("RHSWorkspace", point_ws_2);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
-    //TS_ASSERT(alg.isExecuted());
-    //MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
-    //const std::vector<double> x_values{1., 2., 2.1, 3., 3.1, 4.1};
-    //TS_ASSERT(stitched->x(0).rawData(), x_values);
-    //const std::vector<double> y_values{1., 2., 5., 3., 6., 7.};
-    //TS_ASSERT(stitched->y(0).rawData(), y_values);
-    //const std::vector<double> dx_values{-3., -3., -9., -3., -9., -9.};
-    //TS_ASSERT(stitched->dx(0).rawData(), dx_values);
-    //double scaleFactor = alg.getProperty("OutScaleFactor");
-    //TS_ASSERT(scaleFactor, 0.);
+    TS_ASSERT(alg.isExecuted());
+    double scaleFactor = alg.getProperty("OutScaleFactor");
+    TS_ASSERT_EQUALS(scaleFactor, 1./3.);
+  }
+
+  void test_point_data_without_dx() {
+    const auto &x1 = Points(3, LinearGenerator(1., 1.));
+    const auto &y1 = Counts(3, LinearGenerator(1., 1.));
+    Workspace2D_sptr ws1 = boost::make_shared<Workspace2D>();
+    Mantid::HistogramData::Histogram histogram1(x1, y1);
+    ws1->initialize(1, histogram1);
+    const auto &x2 = Points(3, LinearGenerator(1.5, 1.));
+    const auto &y2 = Counts(3, LinearGenerator(5., 1.));
+    Mantid::HistogramData::Histogram histogram2(x2, y2);
+    Workspace2D_sptr ws2 = boost::make_shared<Workspace2D>();
+    ws2->initialize(1, histogram2);
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", ws1);
+    alg.setProperty("RHSWorkspace", ws2);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    double scaleFactor = alg.getProperty("OutScaleFactor");
+    TS_ASSERT_EQUALS(scaleFactor, 1./3.);
   }
 
   void test_histogram_workspaces_pass() {
@@ -581,8 +638,6 @@ public:
   void test_has_non_zero_errors_multiple_spectrum() {
     const size_t nspectrum = 10;
 
-    // Note: The size for y and e previously contained a factor nspectrum, but
-    // it is unclear why, so I removed it.
     HistogramX x(10, LinearGenerator(-1., 0.2));
     HistogramY y(9, 1.);
     HistogramE e(9, 1.);
