@@ -433,16 +433,15 @@ MatrixWorkspace_sptr Stitch1D::sortXAxis(MatrixWorkspace_sptr &inWS) {
         vecdx[l] = (++it)->second;
       ++l;
     }
-    for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
-      auto x = make_cow<HistogramX>(std::move(vecx));
-      auto y = make_cow<HistogramY>(std::move(vecy));
-      auto e = make_cow<HistogramE>(std::move(vece));
+    auto x = make_cow<HistogramX>(std::move(vecx));
+    auto y = make_cow<HistogramY>(std::move(vecy));
+    auto e = make_cow<HistogramE>(std::move(vece));
+    inWS->setSharedX(i, x);
+    inWS->setSharedY(i, y);
+    inWS->setSharedE(i, e);
+    if (inWS->hasDx(i)) {
       auto dx = make_cow<HistogramDx>(std::move(vecdx));
-      inWS->setSharedX(i, x);
-      inWS->setSharedY(i, y);
-      inWS->setSharedE(i, e);
-      if (inWS->hasDx(i))
-        inWS->setSharedDx(i, dx);
+      inWS->setSharedDx(i, dx);
     }
   }
   return inWS;
