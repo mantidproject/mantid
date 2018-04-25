@@ -348,8 +348,14 @@ bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
   try {
     processingOptions = getProcessingOptions(rowData);
   } catch (std::runtime_error &e) {
-    // Warn and quit if user entered invalid options
-    m_view->giveUserCritical(e.what(), "Error");
+    // User entered invalid options
+    // Mark the row as processed and failed
+    rowData->setProcessed(true);
+    rowData->setError(e.what());
+    // Warn user
+    if (m_promptUser)
+      m_view->giveUserCritical(e.what(), "Error");
+    // Skip setting the options
     return false;
   }
 
@@ -430,10 +436,7 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
 
       // Reset the row ready for (re)processing
       if (!initRowForProcessing(rowData))
-        return;
-
-      m_manager->setProcessed(false, rowIndex, groupIndex);
-      m_manager->setError("", rowIndex, groupIndex);
+        continue;
 
       maxProgress++;
     }
