@@ -6,6 +6,7 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 
@@ -180,11 +181,15 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
 
 /**Calculate goniometer for rotation around y-asix for constant wavelength from
  * Q Sample
- * @param Q :: Q Sample position in reciprocal space
+ * @param position :: Q Sample position in reciprocal space
  * @param wavelength :: wavelength
 */
-void Goniometer::calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &Q,
-                                              double wavelength) {
+void Goniometer::calcFromQSampleAndWavelength(
+    const Mantid::Kernel::V3D &position, double wavelength) {
+  V3D Q(position);
+  if (Kernel::ConfigService::Instance().getString("Q.convention") ==
+      "Crystallography")
+    Q *= -1;
   double wv = 2.0 * M_PI / wavelength;
   double norm_q2 = Q.norm2();
   double theta = acos(1 - norm_q2 / (2 * wv * wv)); // [0, pi]
