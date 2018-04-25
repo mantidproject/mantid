@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -16,11 +17,15 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/format.hpp>
 #include <boost/math/special_functions.hpp>
+#include <map>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramDx;
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::Points;
 
 namespace {
 
@@ -401,17 +406,46 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
   return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 }
 
-/** Runs the SortXAxis Algorithm as a child
+/** Sort x axis
  @param inWS :: Input workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::sortXAxis(MatrixWorkspace_sptr &inWS) {
-  auto sortX = this->createChildAlgorithm("SortXAxis");
-  sortX->setChild(true);
-  sortX->initialize();
-  sortX->setProperty("InputWorkspace", inWS);
-  sortX->execute();
-  return sortX->getProperty("OutputWorkspace");
+  // using a std::multimap (keys are sorted)
+  std::multimap<double, double> sorter;
+  for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
+    for (size_t k = 0; k < inWS->size(); ++k) {
+      sorter.insert(std::pair<double, double>(inWS->x(i)[k], inWS->y(i)[k]));
+      sorter.insert(std::pair<double, double>(inWS->x(i)[k], inWS->e(i)[k]));
+      if (inWS->hasDx(i))
+        sorter.insert(std::pair<double, double>(inWS->x(i)[k], inWS->dx(i)[k]));
+    }
+    Mantid::MantidVec vecx(inWS->size());
+    Mantid::MantidVec vecy(inWS->size());
+    Mantid::MantidVec vece(inWS->size());
+    Mantid::MantidVec vecdx(inWS->size());
+    int l = 0;
+    for (auto it = sorter.cbegin(); it != sorter.cend(); ++it) {
+      vecx[l] = it->first;
+      vecy[l] = it->second;
+      vece[l] = (++it)->second;
+      if (inWS->hasDx(i))
+        vecdx[l] = (++it)->second;
+      ++l;
+    }
+    for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
+      auto x = make_cow<HistogramX>(std::move(vecx));
+      auto y = make_cow<HistogramY>(std::move(vecy));
+      auto e = make_cow<HistogramE>(std::move(vece));
+      auto dx = make_cow<HistogramDx>(std::move(vecdx));
+      inWS->setSharedX(i, x);
+      inWS->setSharedY(i, y);
+      inWS->setSharedE(i, e);
+      if (inWS->hasDx(i))
+        inWS->setSharedDx(i, dx);
+    }
+  }
+  return inWS;
 }
 
 /** Runs the CreateSingleValuedWorkspace Algorithm as a child
