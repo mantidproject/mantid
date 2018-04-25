@@ -95,8 +95,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
     int group, std::map<QString, QString> postprocessMap, QString loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_loader(std::move(loader)),
-      m_reductionPaused(true), m_postprocessing(postprocessor.name().isEmpty()
+      m_mainPresenter(), m_loader(std::move(loader)), m_reductionPaused(true),
+      m_postprocessing(postprocessor.name().isEmpty()
                            ? boost::optional<PostprocessingStep>()
                            : PostprocessingStep(QString(),
                                                 std::move(postprocessor),
@@ -105,7 +105,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_preprocessing(ColumnOptionsMap(), std::move(preprocessMap)),
       m_group(group), m_whitelist(std::move(whitelist)),
       m_processor(std::move(processor)), m_progressReporter(nullptr),
-      m_promptUser(true), m_tableDirty(false), m_pauseReduction(false) {
+      m_pauseReduction(false), m_promptUser(true), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",

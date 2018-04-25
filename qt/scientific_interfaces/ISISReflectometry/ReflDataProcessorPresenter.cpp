@@ -1032,12 +1032,13 @@ void ReflDataProcessorPresenter::endReduction(
   if (reductionSuccessful && m_view->getEnableNotebook())
     saveNotebook(m_itemsToProcess);
 
-  if (m_mainPresenter->autoreductionInProgress()) {
-    // Signal reduction has finished but leave the GUI in the "processing"
+  if (m_mainPresenter->autoreductionInProgress() && !m_pauseReduction) {
+    // When autoreduction is running, unless the user has requested to pause,
+    // signal reduction has finished but leave the GUI in the "processing"
     // state
     m_mainPresenter->confirmReductionFinished(m_group);
   } else {
-    // Stop the reduction
+    // Paused, or reduction has completely finished. Stop the reduction
     pause();
     m_reductionPaused = true;
     m_mainPresenter->confirmReductionPaused(m_group);

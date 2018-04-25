@@ -257,6 +257,8 @@ protected:
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
   // The progress reporter
   ProgressPresenter *m_progressReporter;
+  // A boolean that can be set to pause reduction of the current item
+  bool m_pauseReduction;
 
 protected slots:
   void reductionError(QString ex);
@@ -281,8 +283,6 @@ private:
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<QString, QVariant> m_options;
-  // A boolean that can be set to pause reduction of the current item
-  bool m_pauseReduction;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr
   getRun(const QString &run, const QString &instrument, const QString &prefix);
