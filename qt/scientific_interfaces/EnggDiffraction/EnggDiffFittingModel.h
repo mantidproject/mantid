@@ -44,7 +44,7 @@ public:
   void enggFitPeaks(const RunLabel &runLabel,
                     const std::string &expectedPeaks) override;
 
-  void saveDiffFittingAscii(const RunLabel &runLabel,
+  void saveFitResultsToHDF5(const RunLabel &runLabel,
                             const std::string &filename) const override;
 
   void createFittedPeaksWS(const RunLabel &runLabel) override;

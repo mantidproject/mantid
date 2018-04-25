@@ -496,12 +496,10 @@ void EnggDiffFittingPresenter::doFitting(const RunLabel &runLabel,
     return;
   }
 
-  const auto outFilename = m_view->getCurrentInstrument() +
-                           std::to_string(runLabel.runNumber) +
-                           "_Single_Peak_Fitting.csv";
-  auto saveDirectory = outFilesUserDir("SinglePeakFitting");
+  const auto outFilename = std::to_string(runLabel.runNumber) + ".hdf5";
+  auto saveDirectory = outFilesUserDir("Runs");
   saveDirectory.append(outFilename);
-  m_model->saveDiffFittingAscii(runLabel, saveDirectory.toString());
+  m_model->saveFitResultsToHDF5(runLabel, saveDirectory.toString());
 
   m_model->createFittedPeaksWS(runLabel);
   m_fittingFinishedOK = true;

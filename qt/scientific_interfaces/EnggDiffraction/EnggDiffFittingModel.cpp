@@ -123,16 +123,14 @@ void EnggDiffFittingModel::enggFitPeaks(const RunLabel &runLabel,
   addFitResults(runLabel, fitResultsTable);
 }
 
-void EnggDiffFittingModel::saveDiffFittingAscii(
+void EnggDiffFittingModel::saveFitResultsToHDF5(
     const RunLabel &runLabel, const std::string &filename) const {
   const auto ws = getFitResults(runLabel);
-  auto saveAlg =
-      Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
+  auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+      "EnggSaveSinglePeakFitResultsToHDF5");
   saveAlg->initialize();
   saveAlg->setProperty("InputWorkspace", ws);
-  saveAlg->setProperty("RunNumber", std::to_string(runLabel.runNumber));
-  saveAlg->setProperty("Bank", std::to_string(runLabel.bank));
-  saveAlg->setProperty("OutMode", "AppendToExistingFile");
+  saveAlg->setProperty("BankID", std::to_string(runLabel.bank));
   saveAlg->setProperty("Filename", filename);
   saveAlg->execute();
 }
