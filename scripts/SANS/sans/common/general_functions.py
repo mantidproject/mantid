@@ -713,12 +713,12 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
             and user_specified_output_name:
         use_reduction_mode_as_suffix = True
 
-    if multi_reduction_type["period"] and user_specified_output_name:
+    if multi_reduction_type and multi_reduction_type["period"] and user_specified_output_name:
         period = state.data.sample_scatter_period
         period_as_string = "p" + str(period)
         user_specified_output_name = user_specified_output_name + period_as_string
 
-    if multi_reduction_type["event_slice"] and user_specified_output_name:
+    if multi_reduction_type and multi_reduction_type["event_slice"] and user_specified_output_name:
         slice_state = state.slice
         start_time = slice_state.start_time
         end_time = slice_state.end_time
@@ -730,7 +730,7 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
             end_time_as_string = ""
         user_specified_output_name = user_specified_output_name + start_time_as_string + end_time_as_string
 
-    if multi_reduction_type["wavelength_range"] and user_specified_output_name:
+    if multi_reduction_type and multi_reduction_type["wavelength_range"] and user_specified_output_name:
         wavelength = state.wavelength
         wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
         user_specified_output_name = user_specified_output_name + wavelength_range_string
