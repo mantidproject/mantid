@@ -286,8 +286,7 @@ double GetDetectorOffsets::fitPeakSecondTime(
   // fit second time!
   double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
   double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
-  g_log.debug() << "ws-index " << wi
-                << " found: center = " << fit_result.center
+  g_log.debug() << "ws-index " << wi << " found: center = " << fit_result.center
                 << ", FHWM = " << fit_result.sigma
                 << "; new fit range: " << xmin << ", " << xmax << "\n";
   offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result, true);
