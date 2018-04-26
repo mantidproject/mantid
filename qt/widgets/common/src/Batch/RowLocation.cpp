@@ -13,10 +13,13 @@ std::size_t RowLocation::depth() const { return m_path.size(); }
 std::ostream &operator<<(std::ostream &os, RowLocation const &location) {
   auto &path = location.path();
   os << "[";
-  auto it = path.cbegin();
-  for (; it < path.cend() - 1; ++it)
-    os << (*it) << ", ";
-  os << (*it) << "]";
+  if (!path.empty()) {
+    auto it = path.cbegin();
+    for (; it < path.cend() - 1; ++it)
+      os << (*it) << ", ";
+    os << (*it);
+  }
+  os << "]";
   return os;
 }
 
