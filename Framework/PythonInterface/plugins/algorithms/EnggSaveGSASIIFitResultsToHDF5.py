@@ -104,8 +104,8 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
         lattice_params_dataset[0] = tuple(lattice_params[param] for param in self.LATTICE_PARAMS)
 
     def _save_profile_coefficients(self, results_group):
-        refine_sigma = self.getProperty(self.PROP_REFINE_SIGMA)
-        refine_gamma = self.getProperty(self.PROP_REFINE_GAMMA)
+        refine_sigma = self.getProperty(self.PROP_REFINE_SIGMA).value
+        refine_gamma = self.getProperty(self.PROP_REFINE_GAMMA).value
 
         if refine_sigma or refine_gamma:
             if refine_sigma and refine_gamma:
