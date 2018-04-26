@@ -84,6 +84,7 @@ set ( SRC_FILES
   src/Batch/JobTreeView.cpp
   src/Batch/JobTreeViewSignalAdapter.cpp
   src/Batch/QtStandardItemTreeAdapter.cpp
+  src/Batch/QtFilterLeafNodes.cpp
   src/Batch/QtTreeCursorNavigation.cpp
   src/Batch/CellDelegate.cpp
   src/Batch/BuildSubtree.cpp
@@ -399,6 +400,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
   inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
+  inc/MantidQtWidgets/Common/Batch/QtFilterLeafNodes.h
   inc/MantidQtWidgets/Common/Batch/RowLocation.h
   inc/MantidQtWidgets/Common/Batch/Row.h
   inc/MantidQtWidgets/Common/Batch/CellDelegate.h
