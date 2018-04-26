@@ -10,7 +10,6 @@ import os
 import re
 
 from sans.gui_logic.sans_data_processor_gui_algorithm import create_option_column_properties
-from sans.gui_logic.gui_common import OPTIONS_SEPARATOR, OPTIONS_EQUAL
 
 
 class TableModel(object):

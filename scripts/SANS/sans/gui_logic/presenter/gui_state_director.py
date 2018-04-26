@@ -47,7 +47,7 @@ class GuiStateDirector(object):
         state_gui_model = copy.deepcopy(self._state_gui_model)
         options_column_model = table_index_model.options_column_model
         self._apply_column_options_to_state(options_column_model, state_gui_model)
-        
+
         # 3. Add other columns
         output_name = table_index_model.output_name
         if output_name:
