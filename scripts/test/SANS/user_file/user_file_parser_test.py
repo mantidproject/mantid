@@ -316,6 +316,10 @@ class MaskParserTest(unittest.TestCase):
                           "MASK/REAR/T 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
                                                 detector_type=DetectorType.LAB)},
                           "MASK/FRONT/TIME 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
+                                                    detector_type=DetectorType.HAB)},
+                          "MASK/TIME/REAR 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
+                                                detector_type=DetectorType.LAB)},
+                          "MASK/T/FRONT 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
                                                     detector_type=DetectorType.HAB)}
                           }
 
