@@ -22,6 +22,13 @@ Engineering Diffraction
 
 :ref:`Release 3.13.0 <v3.13.0>`
 
+Powder Diffraction
+------------------
+
+- :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>` is improved on peak fitting for more precise result on peak center calculation and masking.
+
+
+
 Single Crystal Diffraction
 --------------------------
 
