@@ -316,10 +316,9 @@ private:
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
     constexpr int nHisto{2};
     constexpr int nBins{100};
-    auto ws =
-        create2DWorkspaceWithReflectometryInstrument(
-            startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-            monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+    auto ws = create2DWorkspaceWithReflectometryInstrument(
+        startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
+        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};
@@ -488,43 +487,17 @@ private:
 class ReflectometryMomentumTransferTestPerformance : public CxxTest::TestSuite {
 public:
   void test_performance() {
-    using namespace WorkspaceCreationHelper;
-    constexpr double startX{1000.};
-    const Kernel::V3D sourcePos{0., 0., -L1};
-    const Kernel::V3D &monitorPos = sourcePos;
-    const Kernel::V3D samplePos{
-        0., 0., 0.,
-    };
-    const double braggAngle{0.7};
-    const auto detZ = DET_DIST * std::cos(2 * braggAngle);
-    const auto detY = DET_DIST * std::sin(2 * braggAngle);
-    const Kernel::V3D detectorPos{0., detY, detZ};
-    const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
-    const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nHisto{2};
-    constexpr int nBins{10000};
-    auto ws =
-        create2DWorkspaceWithReflectometryInstrument(
-            startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-            monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
-    // Add slit sizes to sample logs, too.
-    auto &run = ws->mutableRun();
-    constexpr bool overwrite{true};
-    const std::string meters{"m"};
-    run.addProperty("slit1.size", SLIT1_SIZE, meters, overwrite);
-    run.addProperty("slit2.size", SLIT2_SIZE, meters, overwrite);
-    auto convertUnits =
-        API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
-    convertUnits->initialize();
-    convertUnits->setChild(true);
-    convertUnits->setRethrows(true);
-    convertUnits->setProperty("InputWorkspace", ws);
-    convertUnits->setPropertyValue("OutputWorkspace", "_unused_for_child");
-    convertUnits->setProperty("Target", "Wavelength");
-    convertUnits->setProperty("EMode", "Elastic");
-    convertUnits->execute();
-    API::MatrixWorkspace_sptr inputWS = convertUnits->getProperty("OutputWorkspace");
-    API::MatrixWorkspace_sptr directWS = inputWS->clone();
+    API::MatrixWorkspace_sptr reflectedWS = makeWS();
+    API::MatrixWorkspace_sptr directWS = reflectedWS->clone();
+    auto algorithm = makeAlgorithm(reflectedWS, directWS);
+    for (int i = 0; i < 1000; ++i)
+      algorithm->execute();
+  }
+
+private:
+  static API::IAlgorithm_sptr
+  makeAlgorithm(API::MatrixWorkspace_sptr &reflectedWS,
+                API::MatrixWorkspace_sptr &directWS) {
     std::vector<int> foreground(2);
     foreground.front() = 0;
     foreground.back() = 0;
@@ -533,9 +506,9 @@ public:
     alg->setRethrows(true);
     alg->initialize();
     alg->isInitialized();
-    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("InputWorkspace", reflectedWS);
     alg->setPropertyValue("OutputWorkspace", "_unused_for_child");
-    alg->setProperty("ReflectedBeamWorkspace", inputWS);
+    alg->setProperty("ReflectedBeamWorkspace", reflectedWS);
     alg->setProperty("ReflectedForeground", foreground);
     alg->setProperty("DirectBeamWorkspace", directWS);
     alg->setProperty("DirectForeground", foreground);
@@ -552,8 +525,47 @@ public:
     alg->setProperty("Slit2Name", "slit2");
     alg->setProperty("Slit2SizeSampleLog", "slit2.size");
     alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH);
-    for (int i = 0; i < 1000; ++i)
-      alg->execute();
+    return alg;
+  }
+
+  static API::MatrixWorkspace_sptr makeWS() {
+    using namespace WorkspaceCreationHelper;
+    constexpr double startX{1000.};
+    const Kernel::V3D sourcePos{0., 0., -L1};
+    const Kernel::V3D &monitorPos = sourcePos;
+    const Kernel::V3D samplePos{
+        0., 0., 0.,
+    };
+    const double braggAngle{0.7};
+    const auto detZ = DET_DIST * std::cos(2 * braggAngle);
+    const auto detY = DET_DIST * std::sin(2 * braggAngle);
+    const Kernel::V3D detectorPos{0., detY, detZ};
+    const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
+    const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
+    constexpr int nHisto{2};
+    constexpr int nBins{10000};
+    auto ws = create2DWorkspaceWithReflectometryInstrument(
+        startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
+        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+    // Add slit sizes to sample logs, too.
+    auto &run = ws->mutableRun();
+    constexpr bool overwrite{true};
+    const std::string meters{"m"};
+    run.addProperty("slit1.size", SLIT1_SIZE, meters, overwrite);
+    run.addProperty("slit2.size", SLIT2_SIZE, meters, overwrite);
+    auto convertUnits =
+        API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setChild(true);
+    convertUnits->setRethrows(true);
+    convertUnits->setProperty("InputWorkspace", ws);
+    convertUnits->setPropertyValue("OutputWorkspace", "_unused_for_child");
+    convertUnits->setProperty("Target", "Wavelength");
+    convertUnits->setProperty("EMode", "Elastic");
+    convertUnits->execute();
+    API::MatrixWorkspace_sptr outWS =
+        convertUnits->getProperty("OutputWorkspace");
+    return outWS;
   }
 };
 

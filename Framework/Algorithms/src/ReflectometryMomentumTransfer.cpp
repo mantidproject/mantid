@@ -248,7 +248,8 @@ double ReflectometryMomentumTransfer::angularResolutionSquared(
         static_cast<double>(setup.foregroundEnd - setup.foregroundStart + 1) *
         setup.pixelSize;
     const auto foregroundWidthLimited =
-        pow<2>(FWHM_GAUSSIAN_EQUIVALENT) * (pow<2>(foregroundWidth) + pow<2>(setup.slit2Size)) /
+        pow<2>(FWHM_GAUSSIAN_EQUIVALENT) *
+        (pow<2>(foregroundWidth) + pow<2>(setup.slit2Size)) /
         pow<2>(l2 * braggAngle);
     double angularResolution;
     if (setup.polarized) {
@@ -322,10 +323,9 @@ void ReflectometryMomentumTransfer::convertToMomentumTransfer(
  * @param incidentFWHM spread of the incident beam
  * @return the da quantity
  */
-double ReflectometryMomentumTransfer::detectorAngularResolution(const API::MatrixWorkspace &ws,
-                                                 const size_t wsIndex,
-                                                 const Setup &setup,
-                                                 const double incidentFWHM) {
+double ReflectometryMomentumTransfer::detectorAngularResolution(
+    const API::MatrixWorkspace &ws, const size_t wsIndex, const Setup &setup,
+    const double incidentFWHM) {
   // da_det in COSMOS
   using namespace boost::math;
   const auto slitSizeRatio = setup.slit2Size / setup.slit1Size;
@@ -397,7 +397,8 @@ double
 ReflectometryMomentumTransfer::incidentAngularSpread(const Setup &setup) {
   // da in COSMOS
   using namespace boost::math;
-  return FWHM_GAUSSIAN_EQUIVALENT * std::sqrt((pow<2>(setup.slit1Size) + pow<2>(setup.slit2Size))) /
+  return FWHM_GAUSSIAN_EQUIVALENT *
+         std::sqrt((pow<2>(setup.slit1Size) + pow<2>(setup.slit2Size))) /
          setup.slit1Slit2Distance;
 }
 
@@ -439,7 +440,8 @@ double ReflectometryMomentumTransfer::sampleWaviness(
       std::abs(setup.slit2Size - setup.slit2SizeDirectBeam) >=
           slitSizeTolerance) {
     // Differing slit sizes branch from COSMOS.
-    const double daDet = detectorAngularResolution(*ws, wsIndex, setup, incidentFWHM);
+    const double daDet =
+        detectorAngularResolution(*ws, wsIndex, setup, incidentFWHM);
     if (beamFWHM - daDet >= 0) {
       const auto a = std::sqrt(pow<2>(beamFWHM) - pow<2>(daDet));
       if (a >= setup.pixelSize) {
