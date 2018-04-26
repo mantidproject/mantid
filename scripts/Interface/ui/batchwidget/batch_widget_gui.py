@@ -27,10 +27,18 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
 
     def on_row_inserted(self, rowLoc):
         print("Row inserted at {}".format(rowLoc.path()))
-        self.table.removeRowAt(rowLoc)
+        #if rowLoc.depth() > 2 or rowLoc.rowRelativeToParent() >= 5:
+        #    self.table.removeRowAt(rowLoc)
 
     def setup_layout(self):
-        self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Colum1", "Column2"], self)
+        self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Run(s)",
+                                                               "Angle",
+                                                               "Transmission Run(s)",
+                                                               "Q min",
+                                                               "Q max",
+                                                               "dQ/Q",
+                                                               "Scale",
+                                                               "Options"], self)
         self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table)
 
         self.table_signals.removeRowsRequested.connect(self.on_remove_runs_request)
