@@ -712,6 +712,7 @@ def get_transmission_output_name(state, reduction_mode):
 
     return output_name, output_base_name
 
+
 def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None):
     # Get the external settings from the save state
     save_info = state.save
