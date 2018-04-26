@@ -41,8 +41,8 @@ QtStandardItemMutableTreeAdapter::modelItemFromIndex(QModelIndex const &index) {
 
 void QtStandardItemMutableTreeAdapter::removeRowAt(QModelIndex const &index) {
   if (index.isValid()) {
-    auto *parent = modelItemFromIndex(model().parent(index));
-    parent->removeRow(index.row());
+    std::cout << "Index is valid" << std::endl;
+    model().removeRows(index.row(), 1, model().parent(index));
   } else {
     model().removeRows(0, model().rowCount());
   }
@@ -50,12 +50,14 @@ void QtStandardItemMutableTreeAdapter::removeRowAt(QModelIndex const &index) {
 
 QModelIndex QtStandardItemMutableTreeAdapter::appendEmptySiblingRow(
     QModelIndex const &index) {
-  return appendEmptyChildRow(model().parent(index));
+  auto newIndex = appendEmptyChildRow(model().parent(index));
+  return newIndex.sibling(newIndex.row(), index.column());
 }
 
 QModelIndex QtStandardItemMutableTreeAdapter::appendSiblingRow(
     QModelIndex const &index, QList<QStandardItem *> cells) {
-  return appendChildRow(model().parent(index), cells);
+  auto newIndex = appendChildRow(model().parent(index), cells);
+  return newIndex.sibling(newIndex.row(), index.column());
 }
 
 QModelIndex QtStandardItemMutableTreeAdapter::appendEmptyChildRow(
@@ -66,9 +68,10 @@ QModelIndex QtStandardItemMutableTreeAdapter::appendEmptyChildRow(
 QModelIndex
 QtStandardItemMutableTreeAdapter::appendChildRow(QModelIndex const &parent,
                                                  QList<QStandardItem *> cells) {
-  auto *const parentItem = modelItemFromIndex(parent);
+  auto realParent = parent.sibling(parent.row(), 0);
+  auto *const parentItem = modelItemFromIndex(realParent);
   parentItem->appendRow(cells);
-  return model().index(model().rowCount(parent) - 1, 0, parent);
+  return model().index(model().rowCount(realParent) - 1, 0, realParent);
 }
 
 QModelIndex QtStandardItemMutableTreeAdapter::insertChildRow(
