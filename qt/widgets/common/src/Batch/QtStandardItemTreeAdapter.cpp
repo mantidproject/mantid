@@ -42,7 +42,6 @@ QtStandardItemMutableTreeAdapter::modelItemFromIndex(QModelIndex const &index) {
 
 void QtStandardItemMutableTreeAdapter::removeRowAt(QModelIndex const &index) {
   if (index.isValid()) {
-    std::cout << "Index is valid" << std::endl;
     model().removeRows(index.row(), 1, model().parent(index));
   } else {
     model().removeRows(0, model().rowCount());
