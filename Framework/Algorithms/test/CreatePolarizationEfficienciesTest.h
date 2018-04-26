@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -39,7 +40,23 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+
+  void test_mixed_input() {
+    auto inWS = createHistoWS();
+
+    CreatePolarizationEfficiencies alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setPropertyValue("Pp", "1,0,0,0");
+    alg.setPropertyValue("Ap", "0,1,0,0");
+    alg.setPropertyValue("F1", "0,0,1,0");
+    alg.setPropertyValue("F2", "0,0,0,1");
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
 
   void test_histo() {
@@ -56,7 +73,8 @@ public:
     alg.setPropertyValue("Rho", "0,0,1,0");
     alg.setPropertyValue("Alpha", "0,0,0,1");
     alg.execute();
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
@@ -104,6 +122,47 @@ public:
     TS_ASSERT_DELTA(outWS->readY(3)[7], 52.734375, 1e-15);
   }
 
+  void test_histo_partial() {
+    auto inWS = createHistoWS();
+
+    CreatePolarizationEfficiencies alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setPropertyValue("Pp", "1,0,0,0");
+    alg.setPropertyValue("Rho", "0,0,1,0");
+    alg.execute();
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Rho");
+
+    TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[3], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[4], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[5], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[6], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[7], 1.0, 1e-15);
+
+    TS_ASSERT_DELTA(outWS->readY(1)[0], 0.0625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[1], 0.5625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[2], 1.5625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[3], 3.0625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[4], 5.0625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[5], 7.5625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[6], 10.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[7], 14.0625, 1e-15);
+  }
+
   void test_points() {
     auto inWS = createPointWS();
 
@@ -118,7 +177,8 @@ public:
     alg.setPropertyValue("Rho", "0,0,1,0");
     alg.setPropertyValue("Alpha", "0,0,0,1");
     alg.execute();
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
@@ -168,6 +228,152 @@ public:
     TS_ASSERT_DELTA(outWS->readY(3)[6], 27.0  , 1e-15);
     TS_ASSERT_DELTA(outWS->readY(3)[7], 42.875, 1e-15);
     TS_ASSERT_DELTA(outWS->readY(3)[8], 64.0  , 1e-15);
+  }
+
+  void test_histo_wildes() {
+    auto inWS = createHistoWS();
+
+    CreatePolarizationEfficiencies alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setPropertyValue("P1", "1,0,0,0");
+    alg.setPropertyValue("P2", "0,1,0,0");
+    alg.setPropertyValue("F1", "0,0,1,0");
+    alg.setPropertyValue("F2", "0,0,0,1");
+    alg.execute();
+    Workspace_sptr output = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "P2");
+    TS_ASSERT_EQUALS(axis1->label(2), "F1");
+    TS_ASSERT_EQUALS(axis1->label(3), "F2");
+
+    TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[3], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[4], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[5], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[6], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(0)[7], 1.0, 1e-15);
+
+    TS_ASSERT_DELTA(outWS->readY(1)[0], 0.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[1], 0.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[2], 1.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[3], 1.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[4], 2.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[5], 2.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[6], 3.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(1)[7], 3.75, 1e-15);
+
+    TS_ASSERT_DELTA(outWS->readY(2)[0], 0.0625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(2)[1], 0.5625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(2)[2], 1.5625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(2)[3], 3.0625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(2)[4], 5.0625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(2)[5], 7.5625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(2)[6], 10.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(2)[7], 14.0625, 1e-15);
+
+    TS_ASSERT_DELTA(outWS->readY(3)[0], 0.015625 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(3)[1], 0.421875 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(3)[2], 1.953125 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(3)[3], 5.359375 , 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(3)[4], 11.390625, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(3)[5], 20.796875, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(3)[6], 34.328125, 1e-15);
+    TS_ASSERT_DELTA(outWS->readY(3)[7], 52.734375, 1e-15);
+  }
+
+  void test_histo_wildes_group() {
+    auto inWS = createHistoWS();
+
+    CreatePolarizationEfficiencies alg;
+    //alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputAsGroup", true);
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setPropertyValue("P1", "1,0,0,0");
+    alg.setPropertyValue("P2", "0,1,0,0");
+    alg.setPropertyValue("F1", "0,0,1,0");
+    alg.setPropertyValue("F2", "0,0,0,1");
+    alg.execute();
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->size(), 4);
+
+    {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(0));
+      TS_ASSERT_EQUALS(ws->getName(), "out_P1");
+      auto axis1 = ws->getAxis(1);
+      TS_ASSERT_EQUALS(axis1->label(0), "P1");
+      TS_ASSERT_DELTA(ws->readY(0)[0], 1.0, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 1.0, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 1.0, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[3], 1.0, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[4], 1.0, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[5], 1.0, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[6], 1.0, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[7], 1.0, 1e-15);
+    }
+
+    {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(1));
+      TS_ASSERT_EQUALS(ws->getName(), "out_P2");
+      auto axis1 = ws->getAxis(1);
+      TS_ASSERT_EQUALS(axis1->label(0), "P2");
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.25, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.75, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 1.25, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[3], 1.75, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[4], 2.25, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[5], 2.75, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[6], 3.25, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[7], 3.75, 1e-15);
+    }
+
+    {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(2));
+      TS_ASSERT_EQUALS(ws->getName(), "out_F1");
+      auto axis1 = ws->getAxis(1);
+      TS_ASSERT_EQUALS(axis1->label(0), "F1");
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0625 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.5625 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 1.5625 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[3], 3.0625 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[4], 5.0625 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[5], 7.5625 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[6], 10.5625, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[7], 14.0625, 1e-15);
+    }
+
+    {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(3));
+      TS_ASSERT_EQUALS(ws->getName(), "out_F2");
+      auto axis1 = ws->getAxis(1);
+      TS_ASSERT_EQUALS(axis1->label(0), "F2");
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.015625 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.421875 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 1.953125 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[3], 5.359375 , 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[4], 11.390625, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[5], 20.796875, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[6], 34.328125, 1e-15);
+      TS_ASSERT_DELTA(ws->readY(0)[7], 52.734375, 1e-15);
+    }
+
   }
 
 private:

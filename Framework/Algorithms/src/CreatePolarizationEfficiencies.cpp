@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -19,10 +20,15 @@ using namespace Mantid::Geometry;
 
 namespace {
 
-const std::string cPpLabel("Pp");
-const std::string cApLabel("Ap");
-const std::string cRhoLabel("Rho");
-const std::string cAlphaLabel("Alpha");
+const std::string PpLabel("Pp");
+const std::string ApLabel("Ap");
+const std::string RhoLabel("Rho");
+const std::string AlphaLabel("Alpha");
+
+const std::string P1Label("P1");
+const std::string P2Label("P2");
+const std::string F1Label("F1");
+const std::string F2Label("F2");
 
 double calculatePolynomial(std::vector<double> const &coefficients, double x) {
   double polynomial = coefficients[0];
@@ -63,69 +69,149 @@ void CreatePolarizationEfficiencies::init() {
                   "An input workspace to use the x-values from.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(cPpLabel, Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>(PpLabel, Direction::Input),
       "Effective polarizing power of the polarizing system. "
       "Expressed as a ratio 0 < Pp < 1");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(cApLabel, Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>(ApLabel, Direction::Input),
       "Effective polarizing power of the analyzing system. "
       "Expressed as a ratio 0 < Ap < 1");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(cRhoLabel, Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>(RhoLabel, Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
       "spin-up. This is characteristic of the polarizer flipper. "
       "Values are constants for each term in a polynomial "
       "expression.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(cAlphaLabel,
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(AlphaLabel,
                                                              Direction::Input),
                   "Ratio of efficiencies of analyzer spin-down to analyzer "
                   "spin-up. This is characteristic of the analyzer flipper. "
                   "Values are factors for each term in a polynomial "
                   "expression.");
 
-  declareProperty(make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(P1Label, Direction::Input),
+      "Polarizer efficiency.");
+
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(P2Label, Direction::Input),
+      "Analyzer efficiency.");
+
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(F1Label, Direction::Input),
+      "Polarizer flipper efficiency.");
+
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(F2Label, Direction::Input),
+      "Analyzer flipper efficiency.");
+
+  declareProperty("OutputAsGroup", false,
+                  "If true the OutputWorkspace is a WorkspaceGroup of "
+                  "single-spectra MatrixWorkspaces. Otherwise it is a "
+                  "MatrixWorkspace where each spectrum is an efficiency.");
+
+  declareProperty(make_unique<WorkspaceProperty<Mantid::API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
 void CreatePolarizationEfficiencies::exec() {
+  auto const labelsFredrikze = getNonDefaultProperties({PpLabel, ApLabel, RhoLabel, AlphaLabel});
+  auto const labelsWildes = getNonDefaultProperties({P1Label, P2Label, F1Label, F2Label});
 
-  std::vector<std::string> outputLabels;
-  std::vector<std::vector<double>> polynomialCoefficients;
-
-  for(auto const &label : {cPpLabel, cApLabel, cRhoLabel, cAlphaLabel}) {
-    if (!isDefault(label)) {
-      std::vector<double> const coefficients = getProperty(label);
-      outputLabels.push_back(label);
-      polynomialCoefficients.push_back(coefficients);
-    }
+  if (labelsFredrikze.empty() && labelsWildes.empty()) {
+    throw std::invalid_argument("At least one of the polynomials must be set.");
   }
 
-  if (outputLabels.empty()) {
-    throw std::runtime_error("At least one of the polynomials must be set.");
+  if (!labelsFredrikze.empty() && !labelsWildes.empty()) {
+    throw std::invalid_argument("Efficiencies belonging to different methods cannot mix.");
+  }
+
+  MatrixWorkspace_sptr efficiencies;
+  if (!labelsFredrikze.empty()) {
+    efficiencies = createEfficiencies(labelsFredrikze);
+  } else {
+    efficiencies = createEfficiencies(labelsWildes);
+  }
+
+  bool outputAsGroup = getProperty("OutputAsGroup");
+  if (outputAsGroup) {
+    auto group = createGroup(efficiencies);
+    setProperty("OutputWorkspace", group);
+  } else {
+    setProperty("OutputWorkspace", efficiencies);
+  }
+}
+
+/// Get names of non-default properties out of a list of names
+/// @param labels :: Names of properties to check.
+std::vector<std::string>
+CreatePolarizationEfficiencies::getNonDefaultProperties(
+    std::vector<std::string> const &labels) const {
+  std::vector<std::string> outputLabels;
+  for (auto const &label : labels) {
+    if (!isDefault(label)) {
+      outputLabels.push_back(label);
+    }
+  }
+  return outputLabels;
+}
+
+/// Create the efficiencies workspace given names of input properties.
+/// @param labels :: Names of efficiencies which to include in the output workspace.
+MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
+    std::vector<std::string> const &labels) {
+
+  std::vector<std::vector<double>> polynomialCoefficients;
+
+  for (auto const &label : labels) {
+    std::vector<double> const coefficients = getProperty(label);
+    polynomialCoefficients.push_back(coefficients);
   }
 
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   auto sharedInX = inWS->sharedX(0);
 
-  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS, outputLabels.size(), sharedInX->size(), inWS->blocksize());
-  auto axis1 = new TextAxis(outputLabels.size());
+  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS, labels.size(), sharedInX->size(), inWS->blocksize());
+  auto axis1 = new TextAxis(labels.size());
   outWS->replaceAxis(1, axis1);
 
   auto const x = inWS->points(0);
   std::vector<double> y(x.size());
-  for(size_t i = 0; i < outputLabels.size(); ++i) {
+  for(size_t i = 0; i < labels.size(); ++i) {
     outWS->setSharedX(i, sharedInX);
     auto const &coefficients = polynomialCoefficients[i];
     std::transform(x.begin(), x.end(), y.begin(), [&coefficients](double v) {return calculatePolynomial(coefficients, v);});
     outWS->mutableY(i) = y;
-    axis1->setLabel(i, outputLabels[i]);
+    axis1->setLabel(i, labels[i]);
   }
 
-  this->setProperty("OutputWorkspace", outWS);
+  return outWS;
+}
+
+/// Split the efficiencies workspace into single spectra and combine them into a
+/// workspace group.
+API::WorkspaceGroup_sptr CreatePolarizationEfficiencies::createGroup(
+    API::MatrixWorkspace_sptr efficiencies) {
+  auto group = boost::make_shared<WorkspaceGroup>();
+  auto const outputName = getPropertyValue("OutputWorkspace") + "_";
+  for (size_t i = 0; i < efficiencies->getNumberHistograms(); ++i) {
+    auto extractor = createChildAlgorithm("ExtractSingleSpectrum");
+    extractor->initialize();
+    extractor->setProperty("InputWorkspace", efficiencies);
+    extractor->setProperty("WorkspaceIndex", int(i));
+    extractor->execute();
+    MatrixWorkspace_sptr ws = extractor->getProperty("OutputWorkspace");
+    if (!isChild()) {
+      auto axis1 = ws->getAxis(1);
+      AnalysisDataService::Instance().addOrReplace(outputName + axis1->label(0), ws);
+    }
+    group->addWorkspace(ws);
+  }
+  return group;
 }
 
 } // namespace Algorithms
