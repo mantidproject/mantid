@@ -1,8 +1,6 @@
-#pylint: disable=R0902, W0221, W0621
 """
-    Classes for each reduction step. Those are kept separately
-    from the the interface class so that the HFIRReduction class could
-    be used independently of the interface implementation
+    Legacy class that old LR reduction options.
+    This is still in use for backward compatibility.
 """
 from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
@@ -77,62 +75,13 @@ class DataSets(BaseScriptElement):
         super(DataSets, self).__init__()
         self.reset()
 
+#pylint: disable = unused-argument, arguments-differ
     def to_script(self, for_automated_reduction=False):
         """
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-
-#        if for_automated_reduction:
-#            script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
-#        else:
-#            script =  "RefLReduction(RunNumbers=[int(%s)],\n" % str(self.data_files[0])
-        script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
-        script += "              NormalizationRunNumber=%d,\n" % self.norm_file
-        script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
-        script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
-        script += "              SignalBackgroundPixelRange=%s,\n" % str(self.DataBackgroundRoi[:2])
-        script += "              NormFlag=%s,\n" % str(self.NormFlag)
-        script += "              NormPeakPixelRange=%s,\n" % str(self.NormPeakPixels)
-        script += "              NormBackgroundPixelRange=%s,\n" % str(self.NormBackgroundRoi)
-        script += "              SubtractNormBackground=%s,\n" % str(self.NormBackgroundFlag)
-        script += "              LowResDataAxisPixelRangeFlag=%s,\n" % str(self.data_x_range_flag)
-        script += "              LowResDataAxisPixelRange=%s,\n" % str(self.data_x_range)
-        script += "              LowResNormAxisPixelRangeFlag=%s,\n" % str(self.norm_x_range_flag)
-        script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
-        script += "              TOFRange=%s,\n" % str(self.DataTofRange)
-
-        _incident_medium_str = str(self.incident_medium_list[0])
-        _list = _incident_medium_str.split(',')
-
-        script += "              IncidentMediumSelected='%s',\n" % str(_list[self.incident_medium_index_selected])
-        script += "              GeometryCorrectionFlag=%s,\n" % str(self.geometry_correction_switch)
-        script += "              QMin=%s,\n" % str(self.q_min)
-        script += "              QStep=%s,\n" % str(self.q_step)
-
-        # Angle offset
-        if self.angle_offset != 0.0:
-            script += "              AngleOffset=%s,\n" % str(self.angle_offset)
-            script += "              AngleOffsetError=%s,\n" % str(self.angle_offset_error)
-
-        # sf configuration file
-#        if self.scaling_factor_file != '':
-        if self.scaling_factor_file_flag:
-            script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)
-        else:
-            script += "ScalingFactorFile='',\n"
-
-        script += "SlitsWidthFlag=%s,\n" % str(self.slits_width_flag)
-
-        # The output should be slightly different if we are generating
-        # a script for the automated reduction
-        if for_automated_reduction:
-            script += "              OutputWorkspace='reflectivity_'+%s)" % str(self.data_files[0])
-        else:
-            script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
-        script += "\n"
-
-        return script
+        raise RuntimeError("refl_data_script.DataSets.to_script is deprecated")
 
     def update(self):
         """
@@ -144,75 +93,75 @@ class DataSets(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<RefLData>\n"
-        xml += "<peak_selection_type>%s</peak_selection_type>\n" % self.DataPeakSelectionType
-        xml += "<from_peak_pixels>%s</from_peak_pixels>\n" % str(self.DataPeakPixels[0])
-        xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
-        xml += "<peak_discrete_selection>%s</peak_discrete_selection>\n" % self.DataPeakDiscreteSelection
-        xml += "<background_flag>%s</background_flag>\n" % str(self.DataBackgroundFlag)
-        xml += "<back_roi1_from>%s</back_roi1_from>\n" % str(self.DataBackgroundRoi[0])
-        xml += "<back_roi1_to>%s</back_roi1_to>\n" % str(self.DataBackgroundRoi[1])
-        xml += "<back_roi2_from>%s</back_roi2_from>\n" % str(self.DataBackgroundRoi[2])
-        xml += "<back_roi2_to>%s</back_roi2_to>\n" % str(self.DataBackgroundRoi[3])
-        xml += "<tof_range_flag>%s</tof_range_flag>\n" % str(self.TofRangeFlag)
-        xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
-        xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
-        xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
-        xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.data_x_range[0])
-        xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.data_x_range[1])
-        xml += "<x_range_flag>%s</x_range_flag>\n" % str(self.data_x_range_flag)
+        _xml  = "<RefLData>\n"
+        _xml += "<peak_selection_type>%s</peak_selection_type>\n" % self.DataPeakSelectionType
+        _xml += "<from_peak_pixels>%s</from_peak_pixels>\n" % str(self.DataPeakPixels[0])
+        _xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
+        _xml += "<peak_discrete_selection>%s</peak_discrete_selection>\n" % self.DataPeakDiscreteSelection
+        _xml += "<background_flag>%s</background_flag>\n" % str(self.DataBackgroundFlag)
+        _xml += "<back_roi1_from>%s</back_roi1_from>\n" % str(self.DataBackgroundRoi[0])
+        _xml += "<back_roi1_to>%s</back_roi1_to>\n" % str(self.DataBackgroundRoi[1])
+        _xml += "<back_roi2_from>%s</back_roi2_from>\n" % str(self.DataBackgroundRoi[2])
+        _xml += "<back_roi2_to>%s</back_roi2_to>\n" % str(self.DataBackgroundRoi[3])
+        _xml += "<tof_range_flag>%s</tof_range_flag>\n" % str(self.TofRangeFlag)
+        _xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
+        _xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
+        _xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
+        _xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.data_x_range[0])
+        _xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.data_x_range[1])
+        _xml += "<x_range_flag>%s</x_range_flag>\n" % str(self.data_x_range_flag)
 
-        xml += "<tthd_value>%s</tthd_value>\n" % str(self.tthd_value)
-        xml += "<ths_value>%s</ths_value>\n" % str(self.ths_value)
+        _xml += "<tthd_value>%s</tthd_value>\n" % str(self.tthd_value)
+        _xml += "<ths_value>%s</ths_value>\n" % str(self.ths_value)
 
-        xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
-        xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
-        xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[1])
-        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[0])
+        _xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
+        _xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
+        _xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[1])
+        _xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[0])
 
-        xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
-        xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])
-        xml += "<norm_background_flag>%s</norm_background_flag>\n" % str(self.NormBackgroundFlag)
-        xml += "<norm_from_back_pixels>%s</norm_from_back_pixels>\n" % str(self.NormBackgroundRoi[0])
-        xml += "<norm_to_back_pixels>%s</norm_to_back_pixels>\n" % str(self.NormBackgroundRoi[1])
-        xml += "<norm_dataset>%s</norm_dataset>\n" % str(self.norm_file)
+        _xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
+        _xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])
+        _xml += "<norm_background_flag>%s</norm_background_flag>\n" % str(self.NormBackgroundFlag)
+        _xml += "<norm_from_back_pixels>%s</norm_from_back_pixels>\n" % str(self.NormBackgroundRoi[0])
+        _xml += "<norm_to_back_pixels>%s</norm_to_back_pixels>\n" % str(self.NormBackgroundRoi[1])
+        _xml += "<norm_dataset>%s</norm_dataset>\n" % str(self.norm_file)
 
         # Q cut
-        xml += "<q_min>%s</q_min>\n" % str(self.q_min)
-        xml += "<q_step>%s</q_step>\n" % str(self.q_step)
-        xml += "<auto_q_binning>%s</auto_q_binning>\n" % str(self.auto_q_binning)
-        xml += "<overlap_lowest_error>%s</overlap_lowest_error>\n" % str(self.overlap_lowest_error)
-        xml += "<overlap_mean_value>%s</overlap_mean_value>\n" % str(self.overlap_mean_value)
+        _xml += "<q_min>%s</q_min>\n" % str(self.q_min)
+        _xml += "<q_step>%s</q_step>\n" % str(self.q_step)
+        _xml += "<auto_q_binning>%s</auto_q_binning>\n" % str(self.auto_q_binning)
+        _xml += "<overlap_lowest_error>%s</overlap_lowest_error>\n" % str(self.overlap_lowest_error)
+        _xml += "<overlap_mean_value>%s</overlap_mean_value>\n" % str(self.overlap_mean_value)
 
         # Angle offset
-        xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
-        xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
+        _xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
+        _xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
 
         # scaling factor file name
-        xml += "<scaling_factor_flag>%s</scaling_factor_flag>\n" % str(self.scaling_factor_file_flag)
-        xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
-        xml += "<slits_width_flag>%s</slits_width_flag>\n" % str(self.slits_width_flag)
+        _xml += "<scaling_factor_flag>%s</scaling_factor_flag>\n" % str(self.scaling_factor_file_flag)
+        _xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
+        _xml += "<slits_width_flag>%s</slits_width_flag>\n" % str(self.slits_width_flag)
 
         # geometry correction
-        xml += "<geometry_correction_switch>%s</geometry_correction_switch>\n" % str(self.geometry_correction_switch)
+        _xml += "<geometry_correction_switch>%s</geometry_correction_switch>\n" % str(self.geometry_correction_switch)
 
         #incident medium
-        xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
-        xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
+        _xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
+        _xml += "<incident_medium_index_selected>%s</incident_medium_index_selected>\n" % str(self.incident_medium_index_selected)
 
         #fourth column precision
-        xml += "<fourth_column_flag>%s</fourth_column_flag>\n" % str(self.fourth_column_flag)
-        xml += "<fourth_column_dq0>%s</fourth_column_dq0>\n" % str(self.fourth_column_dq0)
-        xml += "<fourth_column_dq_over_q>%s</fourth_column_dq_over_q>\n" % str(self.fourth_column_dq_over_q)
+        _xml += "<fourth_column_flag>%s</fourth_column_flag>\n" % str(self.fourth_column_flag)
+        _xml += "<fourth_column_dq0>%s</fourth_column_dq0>\n" % str(self.fourth_column_dq0)
+        _xml += "<fourth_column_dq_over_q>%s</fourth_column_dq_over_q>\n" % str(self.fourth_column_dq_over_q)
 
         # Primary fraction
         if self.clocking_from is not None and self.clocking_to is not None:
-            xml += "<clocking_from>%s</clocking_from>\n" % str(self.clocking_from)
-            xml += "<clocking_to>%s</clocking_to>\n" % str(self.clocking_to)
+            _xml += "<clocking_from>%s</clocking_from>\n" % str(self.clocking_from)
+            _xml += "<clocking_to>%s</clocking_to>\n" % str(self.clocking_to)
 
-        xml += "</RefLData>\n"
+        _xml += "</RefLData>\n"
 
-        return xml
+        return _xml
 
     def from_xml(self, xml_str):
         self.reset()

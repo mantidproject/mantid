@@ -20,6 +20,9 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         return "Workflow\\Diffraction\\DataHandling"
 
+    def seeAlso(self):
+        return [ "SaveGSS" ]
+
     def name(self):
         """ name of algorithm
         """
@@ -368,7 +371,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
             # property run_start and duration exist
             utctime = numpy.datetime64(run.getProperty('run_start').value)
-            time0 = numpy.datetime64("1990-01-01T0:0:0")
+            time0 = numpy.datetime64("1990-01-01T00:00:00")
             total_nanosecond_start = int((utctime - time0) / numpy.timedelta64(1, 'ns'))
             total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
 

@@ -65,10 +65,10 @@ private:
     TSM_ASSERT_EQUALS("Unexpected number of operations for " + symbol,
                       ops.size(), expectedOperations.size());
 
-    for (auto it = expectedOperations.begin(); it != expectedOperations.end();
-         ++it) {
-      TSM_ASSERT("Operation " + (*it).identifier() + " not found in " + symbol,
-                 symOpExistsInCollection(*it, ops));
+    for (const auto &expectedOperation : expectedOperations) {
+      TSM_ASSERT("Operation " + expectedOperation.identifier() +
+                     " not found in " + symbol,
+                 symOpExistsInCollection(expectedOperation, ops));
     }
 
     CenteringGroup_const_sptr centeringGroup =

@@ -26,14 +26,12 @@
 #include <boost/accumulators/statistics/error_of_mean.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/ranlux.hpp>
-#include <boost/random/uniform_01.hpp>
 
 #include <array>
 #include <deque>
 #include <iostream>
 #include <stack>
+#include <random>
 
 namespace Mantid {
 namespace Geometry {
@@ -1542,7 +1540,7 @@ double CSGObject::monteCarloVolume() const {
   accumulator_set<double, features<tag::mean, tag::error_of<tag::mean>>>
       accumulate;
   // For seeding the single shot runs.
-  boost::random::ranlux48 rnEngine;
+  std::ranlux48 rnEngine;
   // Warm up statistics.
   for (int i = 0; i < 10; ++i) {
     const auto seed = rnEngine();
@@ -1592,15 +1590,14 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
       // the worst case.
       blocksize = shotSize - (threadCount - 1) * blocksize;
     }
-    boost::random::mt19937 rnEngine(
-        static_cast<boost::random::mt19937::result_type>(seed));
+    std::mt19937 rnEngine(static_cast<std::mt19937::result_type>(seed));
     // All threads init their engine with the same seed.
     // We discard the random numbers used by the other threads.
     // This ensures reproducible results independent of the number
     // of threads.
     // We need three random numbers for each iteration.
     rnEngine.discard(currentThreadNum * 3 * blocksize);
-    boost::random::uniform_01<double> rnDistribution;
+    std::uniform_real_distribution<double> rnDistribution(0.0, 1.0);
     int hits = 0;
     for (int i = 0; i < static_cast<int>(blocksize); ++i) {
       double rnd = rnDistribution(rnEngine);
@@ -2092,8 +2089,8 @@ void CSGObject::setVtkGeometryCacheReader(
 }
 
 /**
-* Returns the geometry handler
-*/
+ * Returns the geometry handler
+ */
 boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.

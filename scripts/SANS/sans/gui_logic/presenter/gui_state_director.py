@@ -10,6 +10,7 @@ import copy
 
 from sans.state.data import get_data_builder
 from sans.user_file.state_director import StateDirectorISIS
+from sans.common.file_information import SANSFileInformationFactory
 
 
 class GuiStateDirector(object):
@@ -22,7 +23,10 @@ class GuiStateDirector(object):
     def create_state(self, row):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
-        data_builder = get_data_builder(self._facility)
+        file_name = table_index_model.sample_scatter
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(file_name)
+        data_builder = get_data_builder(self._facility, file_information)
 
         self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
         self._set_data_period_entry(data_builder.set_sample_scatter_period, table_index_model.sample_scatter_period)
@@ -50,7 +54,7 @@ class GuiStateDirector(object):
             state_gui_model.output_name = output_name
 
         # 4. Create the rest of the state based on the builder.
-        user_file_state_director = StateDirectorISIS(data)
+        user_file_state_director = StateDirectorISIS(data, file_information)
         settings = copy.deepcopy(state_gui_model.settings)
         user_file_state_director.add_state_settings(settings)
 

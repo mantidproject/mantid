@@ -84,10 +84,18 @@ if ( NOT TARGET mantidpython )
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY )
 endif ()
 
+
+# directives similar to linux for conda framework-only build
+set ( BIN_DIR bin )
+set ( ETC_DIR etc )
+set ( LIB_DIR lib )
+set ( PLUGINS_DIR plugins )
+
+
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
-
+if ( ENABLE_MANTIDPLOT )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
@@ -199,3 +207,4 @@ set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
 
 set ( CPACK_GENERATOR DragNDrop )
+endif ()

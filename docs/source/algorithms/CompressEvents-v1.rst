@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -16,7 +16,7 @@ resolution. This switch is made by specifying a
 
 
 Without pulsetime resolution
-============================
+############################
 
 This algorithm starts by sorting the event lists by TOF (or whatever
 the independent axis is) and ignoring the pulsetime. Therefore you may
@@ -43,7 +43,7 @@ changes to its X values (unit conversion for example), you have to use
 your best judgement for the Tolerance value.
 
 With pulsetime resolution
-=========================
+#########################
 
 Similar to the version without pulsetime resolution with a few key differences:
 

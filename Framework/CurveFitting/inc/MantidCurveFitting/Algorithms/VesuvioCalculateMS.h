@@ -4,6 +4,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/MSVesuvioHelpers.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 
@@ -18,13 +19,6 @@ class IObject;
 }
 
 namespace CurveFitting {
-
-namespace MSVesuvioHelper {
-class RandomNumberGenerator;
-struct Simulation;
-struct SimulationWithErrors;
-}
-
 namespace Functions {
 struct ResolutionParams;
 }
@@ -79,8 +73,6 @@ private:
 
 public:
   VesuvioCalculateMS();
-  ~VesuvioCalculateMS() override;
-
   /// @copydoc Algorithm::name
   const std::string name() const override { return "VesuvioCalculateMS"; }
   /// @copydoc Algorithm::version
@@ -93,6 +85,11 @@ public:
   const std::string summary() const override {
     return "Calculates the contributions of multiple scattering "
            "on a flat plate sample for VESUVIO";
+  }
+
+  const std::vector<std::string> seeAlso() const override {
+    return {"MayersSampleCorrection", "MonteCarloAbsorption",
+            "MultipleScatteringCylinderAbsorption"};
   }
 
 private:
@@ -131,7 +128,7 @@ private:
                     const double e1res) const;
 
   // Member Variables
-  CurveFitting::MSVesuvioHelper::RandomNumberGenerator *
+  std::unique_ptr<CurveFitting::MSVesuvioHelper::RandomVariateGenerator>
       m_randgen; // random number generator
 
   size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
@@ -139,7 +136,8 @@ private:
   double m_srcR2;                         // beam penumbra radius (m)
   double m_halfSampleHeight, m_halfSampleWidth, m_halfSampleThick; // (m)
   Geometry::IObject const *m_sampleShape; // sample shape
-  SampleComptonProperties *m_sampleProps; // description of sample properties
+  std::unique_ptr<SampleComptonProperties>
+      m_sampleProps; // description of sample properties
   double m_detHeight, m_detWidth, m_detThick; // (m)
   double m_tmin, m_tmax, m_delt;              // min, max & dt TOF value
   double m_foilRes;                           // resolution in energy of foil

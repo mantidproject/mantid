@@ -28,7 +28,7 @@ public:
     int argc = 1;
     char name[] = "DummyTestingApplication";
     char *argv = name;
-    QApplication app(argc, &argv);
+    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("IRS26173");
     auto worker = new FindFilesWorker(parameters);
@@ -52,7 +52,7 @@ public:
     int argc = 1;
     char name[] = "DummyTestingApplication";
     char *argv = name;
-    QApplication app(argc, &argv);
+    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("IRS26173");
     parameters.algorithmName = "";
@@ -79,7 +79,7 @@ public:
     int argc = 1;
     char name[] = "DummyTestingApplication";
     char *argv = name;
-    QApplication app(argc, &argv);
+    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("ThisFileDoesNotExist");
     auto worker = new FindFilesWorker(parameters);
@@ -100,7 +100,7 @@ public:
     int argc = 1;
     char name[] = "DummyTestingApplication";
     char *argv = name;
-    QApplication app(argc, &argv);
+    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("");
     auto worker = new FindFilesWorker(parameters);
@@ -121,7 +121,7 @@ public:
     int argc = 1;
     char name[] = "DummyTestingApplication";
     char *argv = name;
-    QApplication app(argc, &argv);
+    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("");
     parameters.isOptional = true;

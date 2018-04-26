@@ -1,6 +1,7 @@
 #ifndef MANTID_API_IMDWORKSPACE_H_
 #define MANTID_API_IMDWORKSPACE_H_
 
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
@@ -15,20 +16,6 @@ class MDImplicitFunction;
 }
 
 namespace API {
-
-class IMDIterator;
-
-/** Enum describing different ways to normalize the signal
- * in a MDWorkspace.
- */
-enum MDNormalization {
-  /// Don't normalize = return raw counts
-  NoNormalization = 0,
-  /// Divide the signal by the volume of the box/bin
-  VolumeNormalization = 1,
-  /// Divide the signal by the number of events that contributed to it.
-  NumEventsNormalization = 2
-};
 
 static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 
@@ -106,7 +93,7 @@ public:
   virtual uint64_t getNEvents() const = 0;
 
   /// Creates a new iterator pointing to the first cell in the workspace
-  virtual std::vector<IMDIterator *> createIterators(
+  virtual std::vector<std::unique_ptr<IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const = 0;
 
@@ -126,7 +113,7 @@ public:
                                const Mantid::Kernel::VMD &end,
                                Mantid::API::MDNormalization normalize) const;
 
-  IMDIterator *createIterator(
+  std::unique_ptr<IMDIterator> createIterator(
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const;
 
   std::string getConvention() const;
