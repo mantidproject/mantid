@@ -82,6 +82,7 @@ set ( SRC_FILES
   src/Batch/JobTreeViewSignalAdapter.cpp
   src/Batch/QtStandardItemTreeAdapter.cpp
   src/Batch/QtTreeCursorNavigation.cpp
+  src/Batch/CellDelegate.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
@@ -395,6 +396,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
   inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
   inc/MantidQtWidgets/Common/Batch/RowLocation.h
+  inc/MantidQtWidgets/Common/Batch/CellDelegate.h
 )
 
 set ( UI_FILES

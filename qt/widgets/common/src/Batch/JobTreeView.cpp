@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include "MantidQtWidgets/Common/Batch/CellDelegate.h"
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
@@ -15,6 +16,7 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings, QWidget *parent)
   setModel(&m_model);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setItemDelegate(new CellDelegate(this, *this));
 }
 
 void JobTreeView::commitData(QWidget *editor) {
