@@ -51,7 +51,12 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
             for log_property in log_properties:
                 property_dtype = self._dtype_from_property_type(log_property)
 
-                if self._is_time_series(log_property):
+                if isinstance(log_property, FloatArrayProperty):
+                    if len(log_property.value) > 0:
+                        log_value = log_property.value[0]
+                    else:
+                        continue
+                elif self._is_time_series(log_property):
                     log_value = log_property.timeAverageValue()
                 else:
                     log_value = log_property.value
@@ -61,7 +66,7 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
                 log_dataset.attrs["Units"] = log_property.units
 
     def _dtype_from_property_type(self, prop):
-        if isinstance(prop, (FloatPropertyWithValue, FloatTimeSeriesProperty)):
+        if isinstance(prop, (FloatPropertyWithValue, FloatTimeSeriesProperty, FloatArrayProperty)):
             return "f"
         if isinstance(prop, (IntPropertyWithValue, Int32TimeSeriesProperty, Int64TimeSeriesProperty)):
             return "i"
