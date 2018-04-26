@@ -7,18 +7,20 @@ JobTreeViewSignalAdapter::JobTreeViewSignalAdapter(JobTreeView &view,
                                                    QObject *parent)
     : QObject(parent) {
   qRegisterMetaType<RowLocation>("MantidQt::MantidWidgets::Batch::RowLocation");
-  qRegisterMetaType<std::vector<RowLocation>>("std::vector<MantidQt::MantidWidgets::Batch::RowLocation>");
+  qRegisterMetaType<std::vector<RowLocation>>(
+      "std::vector<MantidQt::MantidWidgets::Batch::RowLocation>");
   view.subscribe(*this);
 }
 
-void JobTreeViewSignalAdapter::notifyCellChanged(RowLocation const& itemIndex,
+void JobTreeViewSignalAdapter::notifyCellChanged(RowLocation const &itemIndex,
                                                  int column,
-                                                 std::string const& newValue) {
+                                                 std::string const &newValue) {
   emit cellChanged(itemIndex, column, newValue);
 }
 
-void JobTreeViewSignalAdapter::notifyRowInserted(RowLocation const& itemIndex) {
-  emit rowInserted(itemIndex);
+void JobTreeViewSignalAdapter::notifyRowInserted(
+    RowLocation const &newRowLocation) {
+  emit rowInserted(newRowLocation);
 }
 
 void JobTreeViewSignalAdapter::notifyRemoveRowsRequested(

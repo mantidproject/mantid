@@ -4,6 +4,7 @@
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
+#include <boost/optional.hpp>
 
 #include <QTreeView>
 
@@ -15,9 +16,10 @@ class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSubscriber {
 public:
   virtual void notifyCellChanged(RowLocation const &itemIndex, int column,
                                  std::string const &newValue) = 0;
-  virtual void notifyRowInserted(RowLocation const &itemIndex) = 0;
+  virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
   virtual void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
+
   virtual void notifyCopyRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToCopy) = 0;
   virtual ~JobTreeViewSubscriber() = default;
@@ -55,10 +57,17 @@ public:
                          Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const;
 
+  bool isOnlyChild(QModelIndex const &index) const;
+  bool isOnlyChildOfRoot(QModelIndex const &index) const;
+  QModelIndex siblingIfExistsElseParent(QModelIndex const &index) const;
+  bool rowRemovalWouldBeIneffective(QModelIndex const &indexToRemove) const;
+
   using QTreeView::edit;
+
 protected:
   void keyPressEvent(QKeyEvent *event) override;
-  bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
+  bool edit(const QModelIndex &index, EditTrigger trigger,
+            QEvent *event) override;
   void setHeaderLabels(QStringList const &columnHeadings);
   void removeSelectedRequested();
   void copySelectedRequested();
@@ -70,22 +79,26 @@ private:
   void make(QModelIndex const &){};
   void appendAndEditAtChildRow();
   void appendAndEditAtRowBelow();
+  bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
 
   QModelIndex expanded(QModelIndex const &index);
-  QModelIndex editAt(QModelIndex const &index);
+  void editAt(QModelIndex const &index);
 
   QModelIndex applyNavigationResult(QtTreeCursorNavigationResult const &result);
-  QModelIndex findOrMakeCellBelow(QModelIndex const &index);
+  std::pair<QModelIndex, bool> findOrMakeCellBelow(QModelIndex const &index);
 
   QList<QStandardItem *>
   rowFromRowText(std::vector<std::string> const &rowText) const;
   std::vector<std::string> rowTextFromRow(QModelIndex firstCellIndex) const;
 
   QModelIndex modelIndexAt(RowLocation const &location, int column = 0) const;
+  boost::optional<QModelIndex> modelIndexIfExistsAt(RowLocation const &location, int column = 0) const;
   RowLocation rowLocationAt(QModelIndex const &index) const;
   QStandardItem *modelItemAt(RowLocation const &location, int column = 0) const;
 
   QStandardItem *modelItemFromIndex(QModelIndex const &location) const;
+
+  bool hasEditorOpen() const;
 
   QtTreeCursorNavigation navigation() const;
   QtStandardItemMutableTreeAdapter adaptedModel();
@@ -94,6 +107,7 @@ private:
   JobTreeViewSubscriber *m_notifyee;
   QStandardItemModel m_model;
   QModelIndex m_lastEdited;
+  bool m_hasEditorOpen;
 };
 
 template <typename InputIterator>

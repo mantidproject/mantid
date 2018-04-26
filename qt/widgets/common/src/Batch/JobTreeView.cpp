@@ -28,11 +28,13 @@ void JobTreeView::commitData(QWidget *editor) {
 
   m_notifyee->notifyCellChanged(rowLocationAt(m_lastEdited),
                                 m_lastEdited.column(), cellText);
+  m_hasEditorOpen = false;
 }
 
 bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
                        QEvent *event) {
   m_lastEdited = index;
+  m_hasEditorOpen = true;
   return QTreeView::edit(index, trigger, event);
 }
 
@@ -92,8 +94,9 @@ void JobTreeView::subscribe(JobTreeViewSubscriber &subscriber) {
   m_notifyee = &subscriber;
 }
 
-QModelIndex JobTreeView::modelIndexAt(RowLocation const &location,
-                                      int column) const {
+boost::optional<QModelIndex>
+JobTreeView::modelIndexIfExistsAt(RowLocation const &location,
+                                  int column) const {
   auto parentIndex = adaptedModel().rootModelIndex();
   if (location.isRoot()) {
     return parentIndex;
@@ -101,12 +104,22 @@ QModelIndex JobTreeView::modelIndexAt(RowLocation const &location,
     auto &path = location.path();
     for (auto it = path.cbegin(); it != path.cend() - 1; ++it)
       parentIndex = model()->index(*it, column, parentIndex);
-    assertOrThrow(
-        model()->hasIndex(location.rowRelativeToParent(), 0, parentIndex),
-        "modelIndexAt: Location refers to an index which does not "
-        "exist in the model.");
-    return model()->index(location.rowRelativeToParent(), column, parentIndex);
+    if (model()->hasIndex(location.rowRelativeToParent(), column, parentIndex))
+      return model()->index(location.rowRelativeToParent(), column,
+                            parentIndex);
+    else
+      return boost::none;
   }
+}
+
+QModelIndex JobTreeView::modelIndexAt(RowLocation const &location,
+                                      int column) const {
+  auto maybeIndex = modelIndexIfExistsAt(location, column);
+  if (maybeIndex.is_initialized())
+    return maybeIndex.get();
+  else
+    throw std::runtime_error("modelIndexAt: Attempted to get model index for "
+                             "row location which does not exist.");
 }
 
 RowLocation JobTreeView::rowLocationAt(QModelIndex const &index) const {
@@ -123,8 +136,52 @@ RowLocation JobTreeView::rowLocationAt(QModelIndex const &index) const {
   }
 }
 
+bool JobTreeView::indexesAreOnSameRow(QModelIndex const &a,
+                                      QModelIndex const &b) const {
+  return a.parent() == b.parent() && a.row() == b.row() &&
+         a.model() == b.model();
+}
+
+bool JobTreeView::hasEditorOpen() const { return m_lastEdited.isValid(); }
+
+bool JobTreeView::rowRemovalWouldBeIneffective(
+    QModelIndex const &indexToRemove) const {
+  return indexesAreOnSameRow(currentIndex(), indexToRemove) && hasEditorOpen();
+}
+
+QModelIndex
+JobTreeView::siblingIfExistsElseParent(QModelIndex const &index) const {
+  if (navigation().isNotFirstRowInThisNode(index)) {
+    return index.sibling(index.row() - 1, index.column());
+  } else if (navigation().isNotLastRowInThisNode(index)) {
+    return index.sibling(index.row() + 1, index.column());
+  } else {
+    return index.parent();
+  }
+}
+
+bool JobTreeView::isOnlyChild(QModelIndex const &index) const {
+  auto parentIndex = model()->parent(index);
+  return model()->rowCount(parentIndex) == 1;
+}
+
+bool JobTreeView::isOnlyChildOfRoot(QModelIndex const &index) const {
+  return !model()->parent(index).isValid() && isOnlyChild(index);
+}
+
 void JobTreeView::removeRowAt(RowLocation const &location) {
-  adaptedModel().removeRowAt(modelIndexAt(location));
+  auto indexToRemove = modelIndexAt(location);
+  assertOrThrow(indexToRemove.isValid(),
+                "removeRowAt: Attempted to remove the invisible root item.");
+  assertOrThrow(!isOnlyChildOfRoot(indexToRemove),
+                "Attempted to delete the only child of the invisible root "
+                "item. Try removeAllRows() instead.");
+  if (rowRemovalWouldBeIneffective(indexToRemove)) {
+    auto loc = rowLocationAt(siblingIfExistsElseParent(indexToRemove));
+    std::cout << "Setting current index to " << loc << std::endl;
+    setCurrentIndex(siblingIfExistsElseParent(indexToRemove));
+  }
+  adaptedModel().removeRowAt(indexToRemove);
 }
 
 void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow) {
@@ -147,12 +204,10 @@ void JobTreeView::appendChildRowOf(RowLocation const &parent,
                                 adaptedModel().rowFromRowText(rowText));
 }
 
-QModelIndex JobTreeView::editAt(QModelIndex const &index) {
-  auto parentIndex = index.parent();
+void JobTreeView::editAt(QModelIndex const &index) {
   clearSelection();
   setCurrentIndex(index);
-  QTreeView::edit(index);
-  return index;
+  edit(index);
 }
 
 QModelIndex JobTreeView::expanded(QModelIndex const &index) {
@@ -176,40 +231,47 @@ QtTreeCursorNavigation JobTreeView::navigation() const {
   return QtTreeCursorNavigation(model());
 }
 
-QModelIndex JobTreeView::findOrMakeCellBelow(QModelIndex const &index) {
+std::pair<QModelIndex, bool>
+JobTreeView::findOrMakeCellBelow(QModelIndex const &index) {
   if (navigation().isNotLastRowInThisNode(index)) {
-    return index.sibling(index.row() + 1, index.column());
+    return std::make_pair(index.sibling(index.row() + 1, index.column()),
+                          false);
   } else {
-    return adaptedModel().appendEmptySiblingRow(index);
+    std::cout << "input index for appendEmptySiblingRow is " << index.column()
+              << std::endl;
+    return std::make_pair(adaptedModel().appendEmptySiblingRow(index), true);
   }
 }
 
 void JobTreeView::appendAndEditAtChildRow() {
-  auto const child = adaptedModel().appendEmptyChildRow(currentIndex());
+  auto const parent = currentIndex();
+  auto const child = adaptedModel().appendEmptyChildRow(parent);
   editAt(expanded(child));
   m_notifyee->notifyRowInserted(rowLocationAt(child));
 }
 
 void JobTreeView::appendAndEditAtRowBelow() {
   auto const below = findOrMakeCellBelow(currentIndex());
-  editAt(below);
-  m_notifyee->notifyRowInserted(rowLocationAt(below));
+  auto index = below.first;
+  auto isNew = below.second;
+  editAt(index);
+  if (isNew)
+    m_notifyee->notifyRowInserted(rowLocationAt(index));
 }
-
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Return) {
-    event->accept();
-    if (event->modifiers() & Qt::ControlModifier)
+    if (event->modifiers() & Qt::ControlModifier) {
       appendAndEditAtChildRow();
-    else
+    } else if (event->modifiers() & Qt::ShiftModifier) {
+      // Go to row above
+    } else {
       appendAndEditAtRowBelow();
+    }
   } else if (event->key() == Qt::Key_Delete) {
-    event->accept();
     removeSelectedRequested();
   } else if (event->key() == Qt::Key_C) {
     if (event->modifiers() & Qt::ControlModifier) {
-      event->accept();
       copySelectedRequested();
     }
   } else {
@@ -220,10 +282,20 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
 QModelIndex
 JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult const &result) {
   auto shouldMakeNewRowBelow = result.first;
-  if (shouldMakeNewRowBelow)
-    return expanded(adaptedModel().appendEmptySiblingRow(result.second));
-  else
+  if (shouldMakeNewRowBelow) {
+    auto newIndex = adaptedModel().appendEmptySiblingRow(result.second);
+    auto newRowIndex = newIndex.sibling(newIndex.row(), 0);
+    auto newRowLocation = rowLocationAt(newRowIndex);
+
+    m_notifyee->notifyRowInserted(newRowLocation);
+
+    if (modelIndexIfExistsAt(newRowLocation).is_initialized())
+      return expanded(newRowIndex);
+    else
+      return QModelIndex();
+  } else {
     return result.second;
+  }
 }
 
 QModelIndex JobTreeView::moveCursor(CursorAction cursorAction,
