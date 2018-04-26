@@ -76,8 +76,9 @@ private:
   double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start,
                           const size_t end);
   void convertToMomentumTransfer(API::MatrixWorkspace_sptr &ws);
-  double detectorAngularResolution(const API::MatrixWorkspace &ws, const size_t wsIndex,
-                    const Setup &setup, const double incidentFWHM);
+  double detectorAngularResolution(const API::MatrixWorkspace &ws,
+                                   const size_t wsIndex, const Setup &setup,
+                                   const double incidentFWHM);
   const Setup createSetup(const API::MatrixWorkspace &ws,
                           const API::MatrixWorkspace &directWS);
   double incidentAngularSpread(const Setup &setup);
