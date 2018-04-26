@@ -11,7 +11,6 @@ SANSCreateWavelengthAndPixelAdjustmentTest.py
 SANSNormalizeToMonitorTest.py
 SANSScaleTest.py
 SANSSliceEventTest.py
-SANSReductionCoreUnitTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

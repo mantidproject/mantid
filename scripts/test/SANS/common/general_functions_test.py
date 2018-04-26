@@ -187,6 +187,7 @@ class SANSFunctionsTest(unittest.TestCase):
     def test_that_get_transmission_output_name_returns_correct_name(self):
         # Arrange
         state = SANSFunctionsTest._get_state()
+        state.save.user_specified_output_name = ''
         # Act
         output_workspace, _ = get_transmission_output_name(state, ISISReductionMode.LAB)
         # Assert
