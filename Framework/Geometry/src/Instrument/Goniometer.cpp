@@ -204,8 +204,6 @@ void Goniometer::calcFromQSampleAndWavelength(
   std::vector<double> B{Q_lab[0], Q_lab[2]};
   std::vector<double> X = A * B;
   double rot = atan2(X[1], X[0]);
-  g_log.information() << "Found goniometer rotation to be " << rot * 180 / M_PI
-                      << " degrees for Q sample = " << Q << "\n";
 
   Matrix<double> goniometer(3, 3, true);
   goniometer[0][0] = cos(rot);

@@ -298,6 +298,9 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
       double wavelength = getProperty("Wavelength");
       Geometry::Goniometer goniometer;
       goniometer.calcFromQSampleAndWavelength(Q, wavelength);
+      g_log.information() << "Found goniometer rotation to be "
+                          << goniometer.getEulerAngles()[0]
+                          << " degrees for Q sample = " << Q << "\n";
       p = boost::make_shared<Peak>(inst, Q, goniometer.getR());
 
     } else {

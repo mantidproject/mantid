@@ -40,6 +40,8 @@ namespace DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(PeaksWorkspace)
 
+Mantid::Kernel::Logger g_log("PeaksWorkspace");
+
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
  *
@@ -296,6 +298,9 @@ Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
       wavelength = props->getPropertyValueAsType<double>("wavelength");
     }
     goniometer.calcFromQSampleAndWavelength(position, wavelength);
+    g_log.information() << "Found goniometer rotation to be "
+                        << goniometer.getEulerAngles()[0]
+                        << " degrees for Q sample = " << position << "\n";
   } else {
     goniometer = run().getGoniometer();
   }
