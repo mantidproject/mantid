@@ -1,9 +1,9 @@
 #ifndef MANTIDQTMANTIDWIDGETS_JOBTREEVIEW_H_
 #define MANTIDQTMANTIDWIDGETS_JOBTREEVIEW_H_
+#include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
-#include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <boost/optional.hpp>
 
@@ -20,10 +20,8 @@ public:
   virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
   virtual void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
-  virtual void notifyCopyRowsRequested(
-      std::vector<RowLocation> const &locationsOfRowsToCopy) = 0;
-  virtual void notifyPasteRowsRequested(
-      std::vector<RowLocation> const &locationsOfSelectedRows) = 0;
+  virtual void notifyCopyRowsRequested() = 0;
+  virtual void notifyPasteRowsRequested() = 0;
   virtual ~JobTreeViewSubscriber() = default;
 };
 
@@ -50,20 +48,15 @@ public:
   template <typename InputIterator>
   void removeRows(InputIterator begin, InputIterator end);
 
-  void replaceRows(std::vector<RowLocation> regionToReplace,
-                   std::vector<RowLocation> replacementLocations,
-                   std::vector<std::vector<std::string>> replacementRowText);
+  void replaceRows(std::vector<RowLocation> replacementPoints,
+                   std::vector<Subtree> replacements);
 
-  void replaceSubtree(RowLocation const &rootToRemove,
-                      typename ExtractSubtrees::Subtree const &toInsert);
+  void appendSubtreesAt(RowLocation const& parent, std::vector<Subtree> subtrees);
+  void appendSubtreeAt(RowLocation const &parent, Subtree const &subtree);
 
-  typename ExtractSubtrees::Subtree::const_iterator insertSubtreeRecursive(
-      RowLocation const &parent, int depth,
-      typename ExtractSubtrees::Subtree::const_iterator current,
-      typename ExtractSubtrees::Subtree::const_iterator end);
-
+  void replaceSubtreeAt(RowLocation const &rootToRemove, Subtree const &toInsert);
   void insertSubtreeAt(RowLocation const &parent, int index,
-                       typename ExtractSubtrees::Subtree const &subtree);
+                       Subtree const &subtree);
 
   std::vector<std::string> rowTextAt(RowLocation const &location) const;
   void setRowTextAt(RowLocation const &location,
@@ -75,6 +68,8 @@ public:
   QModelIndex moveCursor(CursorAction cursorAction,
                          Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const;
+  boost::optional<std::vector<Subtree>> selectedSubtrees() const;
+  boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
 
   using QTreeView::edit;
 

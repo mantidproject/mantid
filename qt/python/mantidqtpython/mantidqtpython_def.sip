@@ -20,6 +20,7 @@ qRegisterMetaType<std::string>();
 /***************************************************************************/
 /**************** Exceptions ***********************************************/
 /***************************************************************************/
+
 %Exception std::exception(SIP_Exception) /PyName=StdException/
 {
 %TypeHeaderCode
@@ -1529,10 +1530,8 @@ public:
   virtual void notifyRowInserted(const RowLocation& itemIndex) = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
-  virtual void notifyCopyRowsRequested(
-    const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToCopy) = 0;
-  virtual void notifyPasteRowsRequested(
-    const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfSelectedRows) = 0;
+  virtual void notifyCopyRowsRequested() = 0;
+  virtual void notifyPasteRowsRequested() = 0;
 };
 
 class JobTreeView : public QTreeView
@@ -1553,16 +1552,36 @@ public:
     void removeRowAt(const RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
 
-    void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> regionToReplace,
-                     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementLocations,
-                     std::vector<std::vector<std::string>> replacementRowText);
+    void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
+                     std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>> replacementLocations);
+    void appendSubtreesAt(const RowLocation& parent,
+                          std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>> subtrees);
+    void appendSubtreeAt(const RowLocation& parent,
+                         std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
+    void replaceSubtreeAt(const RowLocation &rootToRemove,
+                          std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
+    void insertSubtreeAt(const RowLocation& parent, int index,
+                         std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
 
     std::vector<std::string> rowTextAt(const RowLocation &location) const;
     void setRowTextAt(const RowLocation &location,
                       const std::vector<std::string> &rowText);
     std::string textAt(RowLocation location, int column);
     void setTextAt(RowLocation location, int column, const std::string &cellText);
+
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
+    boost::optional<std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>>> selectedSubtrees() const;
+    boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> selectedSubtreeRoots() const;
+};
+
+class Row {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/Row.h"
+%End
+public:
+  Row(RowLocation location, std::vector<std::string> cells);
+  const std::vector<std::string>& cells() const;
+  const RowLocation& location() const;
 };
 
 class JobTreeViewSignalAdapter : public QObject, public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
@@ -1576,10 +1595,8 @@ public:
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
-  virtual void notifyCopyRowsRequested(
-      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToCopy);
-  virtual void notifyPasteRowsRequested(
-      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfSelectedRows);
+  virtual void notifyCopyRowsRequested();
+  virtual void notifyPasteRowsRequested();
 signals:
   void cellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
                    std::string newValue);

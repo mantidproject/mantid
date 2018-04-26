@@ -4,6 +4,7 @@
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
+#include "MantidQtWidgets/Common/Batch/BuildSubtree.h"
 #include <QKeyEvent>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
@@ -40,28 +41,55 @@ bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
   return QTreeView::edit(index, trigger, event);
 }
 
+boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
+  auto rows = selectedRowLocations();
+  std::sort(rows.begin(), rows.end());
+
+  auto selectedRowData = std::vector<std::vector<Cell>>();
+  selectedRowData.reserve(rows.size());
+
+  std::transform(rows.cbegin(), rows.cend(),
+                 std::back_inserter(selectedRowData),
+                 [&](RowLocation const &location)
+                     -> std::vector<Cell> { return rowTextAt(location); });
+
+  auto extractSubtrees = ExtractSubtrees();
+  return extractSubtrees(rows, selectedRowData);
+}
+
+boost::optional<std::vector<RowLocation>>
+JobTreeView::selectedSubtreeRoots() const {
+  auto findSubtreeRoots = FindSubtreeRoots();
+  return findSubtreeRoots(selectedRowLocations());
+}
+
 std::vector<RowLocation> JobTreeView::selectedRowLocations() const {
   auto selection = selectionModel()->selectedRows();
   std::vector<RowLocation> rowSelection;
   rowSelection.reserve(selection.size());
   std::transform(selection.begin(), selection.end(),
                  std::back_inserter(rowSelection),
-                 [&](QModelIndex const &index) -> RowLocation {
-                   return rowLocationAt(index);
-                 });
+                 [&](QModelIndex const &index)
+                     -> RowLocation { return rowLocationAt(index); });
   return rowSelection;
 }
+
+/*
+std::vector<RowSubtree> JobTreeView::selectedRows() {
+
+}
+*/
 
 void JobTreeView::removeSelectedRequested() {
   m_notifyee->notifyRemoveRowsRequested(selectedRowLocations());
 }
 
 void JobTreeView::copySelectedRequested() {
-  m_notifyee->notifyCopyRowsRequested(selectedRowLocations());
+  m_notifyee->notifyCopyRowsRequested();
 }
 
 void JobTreeView::pasteSelectedRequested() {
-  m_notifyee->notifyPasteRowsRequested(selectedRowLocations());
+  m_notifyee->notifyPasteRowsRequested();
 }
 
 void JobTreeView::removeRows(std::vector<RowLocation> rowsToRemove) {
@@ -96,97 +124,54 @@ JobTreeView::rowTextAt(RowLocation const &location) const {
   return adaptedModel().rowTextFromRow(modelIndexAt(location));
 }
 
-void JobTreeView::replaceSubtree(
-    RowLocation const &rootToRemove,
-    typename ExtractSubtrees::Subtree const &toInsert) {
+void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
+                                   Subtree const &toInsert) {
   auto const insertionParent = rootToRemove.parent();
   auto insertionIndex = rootToRemove.rowRelativeToParent();
   removeRowAt(rootToRemove);
   insertSubtreeAt(insertionParent, insertionIndex, toInsert);
 }
 
-typename ExtractSubtrees::Subtree::const_iterator
-JobTreeView::insertSubtreeRecursive(
-    RowLocation const &parent, int depth,
-    typename ExtractSubtrees::Subtree::const_iterator current,
-    typename ExtractSubtrees::Subtree::const_iterator end) {
-
-  while (current != end) {
-    auto currentRow = (*current).first;
-    auto currentDepth = currentRow.depth();
-    if (depth < currentDepth) {
-      current =
-          insertSubtreeRecursive(parent.child(currentRow.rowRelativeToParent()),
-                                 depth + 1, current, end); // HACK?
-    } else if (depth > currentDepth) {
-      return current;
-    } else {
-      appendChildRowOf(parent, (*current).second);
-      ++current;
-    }
-  }
-  return end;
+void JobTreeView::insertSubtreeAt(RowLocation const &parent, int index,
+                                  Subtree const &subtree) {
+  auto build = BuildSubtree(adaptedModel());
+  auto parentIndex = modelIndexAt(parent);
+  build(adaptedModel().modelItemFromIndex(parentIndex), parent, index, subtree);
 }
 
-void JobTreeView::insertSubtreeAt(
-    RowLocation const &parent, int index,
-    typename ExtractSubtrees::Subtree const &subtree) {
-  insertChildRowOf(parent, index, subtree[0].second);
-
-  auto insertionParent = parent.child(index);
-  auto lastDepth = subtree[0].first.depth();
-  insertSubtreeRecursive(insertionParent, lastDepth, subtree.cbegin() + 1,
-                         subtree.cend());
+void JobTreeView::appendSubtreesAt(RowLocation const &parent,
+                      std::vector<Subtree> subtrees) {
+  for (auto &&subtree : subtrees)
+    appendSubtreeAt(parent, subtree);
 }
 
-void JobTreeView::replaceRows(
-    std::vector<RowLocation> toRemove, std::vector<RowLocation> toInsert,
-    std::vector<std::vector<std::string>> textToInsert) {
-  try {
+void JobTreeView::appendSubtreeAt(RowLocation const &parent,
+                                  Subtree const &subtree) {
+  auto parentIndex = modelIndexAt(parent);
+  insertSubtreeAt(parent, model()->rowCount(parentIndex), subtree);
+}
 
-    auto findSubtreeRoots = FindSubtreeRoots();
+void JobTreeView::replaceRows(std::vector<RowLocation> replacementPoints,
+                              std::vector<Subtree> replacements) {
+  assertOrThrow(replacementPoints.size() > 0,
+                "replaceRows: Passed an empty list of replacement points."
+                "At least one replacement point is required.");
 
-    std::sort(toRemove.begin(), toRemove.end());
-    auto subtreesToRemove = findSubtreeRoots(toRemove).value();
+  auto replacementPoint = replacementPoints.cbegin();
+  auto replacement = replacements.cbegin();
 
-    auto selectionBase = [&]() -> QModelIndex {
-      if (toRemove.empty()) {
-        return adaptedModel().rootModelIndex();
-      } else {
-        auto firstSelectionRoot = *toRemove.begin();
-        return modelIndexAt(subtreesToRemove[0]).parent();
-      }
-    }();
-
-    // TODO Differentiate between nodes with no children and nodes which have
-    // children?
-
-    auto extractSubtrees = ExtractSubtrees();
-    std::sort(toInsert.begin(), toInsert.end());
-    auto subtreesToInsert = extractSubtrees(toInsert, textToInsert).value();
-
-    auto subtreeToRemove = subtreesToRemove.cbegin();
-    auto subtreeToInsert = subtreesToInsert.cbegin();
-
-    for (; subtreeToRemove != subtreesToRemove.cend() &&
-           subtreeToInsert != subtreesToInsert.cend();
-         ++subtreeToRemove, ++subtreeToInsert) {
-      replaceSubtree(/*toRemove=*/*subtreeToRemove,
-                     /*toInsert=*/*subtreeToInsert);
-    }
-
-    if (subtreesToRemove.size() > subtreesToInsert.size()) {
-      for (; subtreeToRemove != subtreesToRemove.cend(); ++subtreeToRemove)
-        removeRowAt(*subtreeToRemove);
-    } else if (subtreesToRemove.size() < subtreesToInsert.size()) {
-      for (auto &toInsert = *(subtreeToInsert);
-           subtreeToInsert != subtreesToInsert.cend(); ++subtreeToInsert) {
-        // appendSubtreeAt(toRemove.back().parent(), toInsert);
-      }
-    }
-  } catch(std::exception& ex) {
-    std::cout << ex.what() << std::endl;
+  for (; replacementPoint != replacementPoints.cend() &&
+             replacement != replacements.cend();
+       ++replacementPoint, ++replacement) {
+    replaceSubtreeAt(*replacementPoint, *replacement);
   }
+
+  if (replacementPoints.size() > replacements.size())
+    for (; replacementPoint != replacementPoints.cend(); ++replacementPoint)
+      removeRowAt(*replacementPoint);
+  else if (replacementPoints.size() < replacements.size())
+    for (; replacement != replacements.cend(); ++replacement)
+      appendSubtreeAt(replacementPoints.back().parent(), *replacement);
 }
 
 void JobTreeView::setHeaderLabels(QStringList const &columnHeadings) {
@@ -223,9 +208,10 @@ QModelIndex JobTreeView::modelIndexAt(RowLocation const &location,
   auto maybeIndex = modelIndexIfExistsAt(location, column);
   if (maybeIndex.is_initialized())
     return maybeIndex.get();
-  else
+  else {
     throw std::runtime_error("modelIndexAt: Attempted to get model index for "
                              "row location which does not exist.");
+  }
 }
 
 RowLocation JobTreeView::rowLocationAt(QModelIndex const &index) const {

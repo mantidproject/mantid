@@ -28,14 +28,12 @@ void JobTreeViewSignalAdapter::notifyRemoveRowsRequested(
   emit removeRowsRequested(locationsOfRowsToRemove);
 }
 
-void JobTreeViewSignalAdapter::notifyCopyRowsRequested(
-    std::vector<RowLocation> const &locationsOfRowsToCopy) {
-  emit copyRowsRequested(locationsOfRowsToCopy);
+void JobTreeViewSignalAdapter::notifyCopyRowsRequested() {
+  emit copyRowsRequested();
 }
 
-void JobTreeViewSignalAdapter::notifyPasteRowsRequested(
-    std::vector<RowLocation> const &locationsOfSelectedRows) {
-  emit pasteRowsRequested(locationsOfSelectedRows);
+void JobTreeViewSignalAdapter::notifyPasteRowsRequested() {
+  emit pasteRowsRequested();
 }
 }
 }

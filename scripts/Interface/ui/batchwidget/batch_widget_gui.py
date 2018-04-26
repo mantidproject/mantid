@@ -13,30 +13,42 @@ from ui.batchwidget.ui_batch_widget_window import Ui_BatchWidgetWindow
 def row(path):
     return MantidQt.MantidWidgets.Batch.RowLocation(path)
 
+
 class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
     def __init__(self):
         super(QtGui.QMainWindow, self).__init__()
         self.setupUi(self)
-        self.clipboardPaths = []
-        self.clipboardText = []
+        self.clipboard = None
 
     def on_remove_runs_request(self, runs_to_remove):
         self.table.removeRows(runs_to_remove)
 
     def on_cell_updated(self, row, col, cell_content):
         print("Updated row {} col {} with text {}".format(row.path(), col, cell_content))
+        pass
 
     def on_row_inserted(self, rowLoc):
         print("Row inserted at {}".format(rowLoc.path()))
         #if rowLoc.depth() > 2 or rowLoc.rowRelativeToParent() >= 5:
         #    self.table.removeRowAt(rowLoc)
 
-    def on_copy_runs_request(self, runs_to_copy):
-        self.clipboardPaths = runs_to_copy
-        self.clipboardText = list(map(lambda loc: self.table.rowTextAt(loc), runs_to_copy))
+    def on_copy_runs_request(self):
+        self.clipboard = self.table.selectedSubtrees()
+        self.table.clearSelection()
+        if self.clipboard is not None:
+            print(self.clipboard)
+        else:
+            print ("Bad selection for copy.")
 
-    def on_paste_rows_request(self, selected_runs):
-        self.table.replaceRows(selected_runs, self.clipboardPaths, self.clipboardText)
+    def on_paste_rows_request(self):
+        replacement_roots = self.table.selectedSubtreeRoots()
+        if replacement_roots is not None and self.clipboard is not None:
+            if replacement_roots:
+                self.table.replaceRows(replacement_roots, self.clipboard)
+            else:
+                self.table.appendSubtreesAt(row([]), self.clipboard)
+        else:
+            print("Bad selection for paste")
 
     def setup_layout(self):
         self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Run(s)",
