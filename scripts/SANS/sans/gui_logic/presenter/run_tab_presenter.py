@@ -275,7 +275,6 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
-
         try:
             self._view.disable_buttons()
             self.sans_logger.information("Starting processing of batch table.")
@@ -461,7 +460,6 @@ class RunTabPresenter(object):
 
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
-
         # 2. Update the table model
         table_model = self._get_table_model()
 

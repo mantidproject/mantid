@@ -44,12 +44,12 @@ def create_option_column_properties():
                                   prefix='',
                                   property_type=float),
              algorithm_list_entry(column_name="",
-                                  algorithm_property="Thickness",
-                                  description='The sample thickness.',
+                                  algorithm_property="EventSlices",
+                                  description='The event slices to take',
                                   show_value=True,
                                   default='',
                                   prefix='',
-                                  property_type=float),
+                                  property_type=str)
              ]
     return props
 

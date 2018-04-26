@@ -7,6 +7,7 @@ information regarding the custom output name and the information in the options 
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import re
 
 from sans.gui_logic.sans_data_processor_gui_algorithm import create_option_column_properties
 from sans.gui_logic.gui_common import OPTIONS_SEPARATOR, OPTIONS_EQUAL
@@ -118,17 +119,20 @@ class OptionsColumnModel(object):
         :param options_column_string: the string in the options column
         :return: a dict with parsed values
         """
-        parsed = {}
         # Remove all white space
+        parsed = {}
         options_column_string_no_whitespace = "".join(options_column_string.split())
+        options_column_string_no_whitespace = options_column_string_no_whitespace.replace('"', '')
+        options_column_string_no_whitespace = options_column_string_no_whitespace.replace("'", '')
         if not options_column_string_no_whitespace:
             return parsed
+        pat = re.compile(r'''([^,=]+)=*((?:[^,=]+(?:,|$))*)''')
 
-        # Split by the comma
-        elements = options_column_string_no_whitespace.split(OPTIONS_SEPARATOR)
-        for element in elements:
-            key, value = element.split(OPTIONS_EQUAL)
-            parsed.update({key: value})
+        for k, v in pat.findall(options_column_string_no_whitespace):
+            if v.endswith(','):
+                v=v[:-1]
+            parsed.update({k:v})
+
         return parsed
 
     @staticmethod
