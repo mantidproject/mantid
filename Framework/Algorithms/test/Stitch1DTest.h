@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -279,6 +280,38 @@ public:
     TS_ASSERT_EQUALS(scaleFactor, 1.); // Default scale factor
   }
 
+  void test_point_data_input_workspace_not_modified() {
+    const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
+    const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
+    const auto &e = HistogramE(3, LinearGenerator(7., -1.));
+    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 1.));
+    auto ws1 = createWorkspace(x1, y1, e, dx1);
+
+    const auto &x2 = HistogramX(3, LinearGenerator(2.1, 1.));
+    const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
+    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));
+    auto ws2 = createWorkspace(x2, y2, e, dx2);
+
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", ws1);
+    alg.setProperty("RHSWorkspace", ws2);
+    alg.setProperty("UseManualScaleFactor", true);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    Mantid::Algorithms::CompareWorkspaces compare;
+    compare.initialize();
+    compare.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws2));
+    TS_ASSERT(compare.execute());
+    TS_ASSERT(compare.isExecuted());
+    TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), "1");
+  }
+
   void test_point_data_with_dx() {
     const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
     const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
@@ -301,7 +334,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     double scaleFactor = alg.getProperty("OutScaleFactor");
-    TS_ASSERT_EQUALS(scaleFactor, 1./3.);
+    TS_ASSERT_EQUALS(scaleFactor, 1. / 3.);
   }
 
   void test_point_data_without_dx() {
@@ -325,18 +358,26 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     double scaleFactor = alg.getProperty("OutScaleFactor");
-    TS_ASSERT_EQUALS(scaleFactor, 1./3.);
+    TS_ASSERT_EQUALS(scaleFactor, 1. / 3.);
   }
 
   void test_histogram_workspaces_pass() {
-    auto histo_ws = make_arbitrary_histogram_ws();
+    auto ws1 = make_arbitrary_histogram_ws();
     const auto &x = HistogramX(3, LinearGenerator(-1.2, 0.2));
     const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
     const auto &e = HistogramE(2, 1.);
     const auto &dx = HistogramDx(2, LinearGenerator(-3., 0.1));
-    auto histo_ws_2 = createWorkspace(x, y, e, dx);
+    auto ws2 = createWorkspace(x, y, e, dx);
     TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass",
-                              do_stitch1D(histo_ws_2, histo_ws));
+                              do_stitch1D(ws2, ws1));
+    Mantid::Algorithms::CompareWorkspaces compare;
+    compare.initialize();
+    compare.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws2));
+    TS_ASSERT(compare.execute());
+    TS_ASSERT(compare.isExecuted());
+    TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), "1");
   }
 
   void test_input_validation() {
@@ -497,7 +538,8 @@ public:
       TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to eliminate
+    // truncate the input and oputput x values to 6 decimal places to
+    // eliminate
     // insignificant error
     auto xCopy = this->x;
     std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
@@ -526,7 +568,8 @@ public:
       TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to eliminate
+    // truncate the input and oputput x values to 6 decimal places to
+    // eliminate
     // insignificant error
     auto xCopy = this->x;
     std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
@@ -556,7 +599,8 @@ public:
       TS_ASSERT_EQUALS(temp, 0.);
     }
     // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to eliminate
+    // truncate the input and oputput x values to 6 decimal places to
+    // eliminate
     // insignificant error
     auto xCopy = this->x;
     std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
@@ -586,7 +630,8 @@ public:
       TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to eliminate
+    // truncate the input and oputput x values to 6 decimal places to
+    // eliminate
     // insignificant error
     auto xCopy = this->x;
     std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
@@ -732,7 +777,8 @@ public:
 
 class Stitch1DTestPerformance : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
+  // This pair of boilerplate methods prevent the suite being created
+  // statically
   // This means the constructor isn't called when running other tests
   static Stitch1DTestPerformance *createSuite() {
     return new Stitch1DTestPerformance();

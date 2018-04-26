@@ -48,7 +48,7 @@ public:
     return {"Stitch1DMany"};
   }
   /// Does the x-axis have non-zero errors
-  bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
+  bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr &ws);
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
 
@@ -68,9 +68,10 @@ private:
                        const double &intesectionMax) const;
 
   /// Get the rebin parameters
-  std::vector<double> getRebinParams(Mantid::API::MatrixWorkspace_sptr &lhsWS,
-                                     Mantid::API::MatrixWorkspace_sptr &rhsWS,
-                                     const bool scaleRHS) const;
+  std::vector<double>
+  getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
+                 Mantid::API::MatrixWorkspace_const_sptr &rhsWS,
+                 const bool scaleRHS) const;
   /// Perform rebin
   Mantid::API::MatrixWorkspace_sptr
   rebin(Mantid::API::MatrixWorkspace_sptr &input,
@@ -79,7 +80,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   integration(Mantid::API::MatrixWorkspace_sptr &input, const double &start,
               const double &stop);
-  Mantid::API::MatrixWorkspace_sptr singleValueWS(double val);
+  Mantid::API::MatrixWorkspace_sptr singleValueWS(const double &val);
   /// Calculate the weighted mean
   Mantid::API::MatrixWorkspace_sptr
   weightedMean(Mantid::API::MatrixWorkspace_sptr &inOne,
@@ -89,8 +90,7 @@ private:
   conjoinXAxis(Mantid::API::MatrixWorkspace_sptr &inOne,
                Mantid::API::MatrixWorkspace_sptr &inTwo);
   /// Sort x axis
-  Mantid::API::MatrixWorkspace_sptr
-  sortXAxis(Mantid::API::MatrixWorkspace_sptr &inWS);
+  void sortXAxis(Mantid::API::MatrixWorkspace_sptr &ws);
   /// Find the start and end indexes
   boost::tuple<int, int>
   findStartEndIndexes(double startOverlap, double endOverlap,
@@ -99,7 +99,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   maskAllBut(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Mask out everything but the data in the ranges, but do it inplace.
-  void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr source);
+  void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Add back in any special values
   void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
   /// Range tolerance
@@ -108,10 +108,10 @@ private:
   double m_scaleFactor;
   double m_errorScaleFactor;
   /// Scale workspace (left hand side or right hand side)
-  void scaleWorkspace(Mantid::API::MatrixWorkspace_sptr ws,
-                      API::MatrixWorkspace_sptr divident,
-                      API::MatrixWorkspace_sptr divisor,
-                      Mantid::API::MatrixWorkspace_sptr dxWS);
+  void scaleWorkspace(API::MatrixWorkspace_sptr &ws,
+                      API::MatrixWorkspace_sptr &divident,
+                      API::MatrixWorkspace_sptr &divisor,
+                      API::MatrixWorkspace_const_sptr &dxWS);
   /// Index per workspace spectra of Nans
   SpecialTypeIndexes m_nanEIndexes;
   SpecialTypeIndexes m_nanYIndexes;

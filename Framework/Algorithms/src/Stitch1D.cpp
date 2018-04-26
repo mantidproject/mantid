@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidHistogramData/HistogramE.h"
@@ -30,8 +31,8 @@ using Mantid::HistogramData::Points;
 namespace {
 
 using MinMaxTuple = boost::tuple<double, double>;
-MinMaxTuple calculateXIntersection(MatrixWorkspace_sptr lhsWS,
-                                   MatrixWorkspace_sptr rhsWS) {
+MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS,
+                                   MatrixWorkspace_const_sptr &rhsWS) {
   return MinMaxTuple(rhsWS->x(0).front(), lhsWS->x(0).back());
 }
 
@@ -93,8 +94,9 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
  * @param a1 : start position in X
  * @param a2 : end position in X
  * @param source : Workspace to mask.
+ * @return Masked workspace.
  */
-void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr source) {
+void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*source))
   for (int i = 0; i < histogramCount; ++i) {
@@ -164,8 +166,8 @@ void Stitch1D::init() {
  */
 std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   std::map<std::string, std::string> issues;
-  MatrixWorkspace_sptr lhs = getProperty("LHSWorkspace");
-  MatrixWorkspace_sptr rhs = getProperty("RHSWorkspace");
+  MatrixWorkspace_const_sptr lhs = getProperty("LHSWorkspace");
+  MatrixWorkspace_const_sptr rhs = getProperty("RHSWorkspace");
   if (lhs->isHistogramData() && !rhs->isHistogramData())
     issues["RHSWorkspace"] = "Must be a histogram like LHSWorkspace.";
   if (!lhs->isHistogramData() && rhs->isHistogramData())
@@ -241,8 +243,8 @@ double Stitch1D::getEndOverlap(const double &intesectionMin,
  @param scaleRHS :: Scale the right hand side workspace
  @return a vector<double> contianing the rebinning parameters
  */
-std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_sptr &lhsWS,
-                                             MatrixWorkspace_sptr &rhsWS,
+std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
+                                             MatrixWorkspace_const_sptr &rhsWS,
                                              const bool scaleRHS) const {
   std::vector<double> inputParams = this->getProperty("Params");
   Property *prop = this->getProperty("Params");
@@ -392,8 +394,8 @@ MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr &inOne,
  */
 MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
                                             MatrixWorkspace_sptr &inTwo) {
-  std::string in1 = "__Stitch1D_intermediate_workspace_1__";
-  std::string in2 = "__Stitch1D_intermediate_workspace_2__";
+  const std::string in1 = "__Stitch1D_intermediate_workspace_1__";
+  const std::string in2 = "__Stitch1D_intermediate_workspace_2__";
   Mantid::API::AnalysisDataService::Instance().addOrReplace(in1, inOne);
   Mantid::API::AnalysisDataService::Instance().addOrReplace(in2, inTwo);
   auto conjoinX = this->createChildAlgorithm("ConjoinXRuns");
@@ -407,51 +409,57 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
 }
 
 /** Sort x axis
- @param inWS :: Input workspace
+ @param ws :: Input workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::sortXAxis(MatrixWorkspace_sptr &inWS) {
+void Stitch1D::sortXAxis(MatrixWorkspace_sptr &ws) {
   // using a std::multimap (keys are sorted)
   std::multimap<double, double> sorter;
-  for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
-    for (size_t k = 0; k < inWS->size(); ++k) {
-      sorter.insert(std::pair<double, double>(inWS->x(i)[k], inWS->y(i)[k]));
-      sorter.insert(std::pair<double, double>(inWS->x(i)[k], inWS->e(i)[k]));
-      if (inWS->hasDx(i))
-        sorter.insert(std::pair<double, double>(inWS->x(i)[k], inWS->dx(i)[k]));
+  double x_value;
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+  for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    for (size_t k = 0; k < ws->size(); ++k) {
+      x_value = ws->x(i)[k];
+      sorter.insert(std::pair<double, double>(x_value, ws->y(i)[k]));
+      sorter.insert(std::pair<double, double>(x_value, ws->e(i)[k]));
+      if (ws->hasDx(i))
+        sorter.insert(std::pair<double, double>(x_value, ws->dx(i)[k]));
     }
-    Mantid::MantidVec vecx(inWS->size());
-    Mantid::MantidVec vecy(inWS->size());
-    Mantid::MantidVec vece(inWS->size());
-    Mantid::MantidVec vecdx(inWS->size());
+    size_t ws_size = ws->size();
+    Mantid::MantidVec vecx(ws_size);
+    Mantid::MantidVec vecy(ws_size);
+    Mantid::MantidVec vece(ws_size);
+    Mantid::MantidVec vecdx(ws_size);
     int l = 0;
     for (auto it = sorter.cbegin(); it != sorter.cend(); ++it) {
       vecx[l] = it->first;
       vecy[l] = it->second;
       vece[l] = (++it)->second;
-      if (inWS->hasDx(i))
+      if (ws->hasDx(i))
         vecdx[l] = (++it)->second;
       ++l;
     }
     auto x = make_cow<HistogramX>(std::move(vecx));
     auto y = make_cow<HistogramY>(std::move(vecy));
     auto e = make_cow<HistogramE>(std::move(vece));
-    inWS->setSharedX(i, x);
-    inWS->setSharedY(i, y);
-    inWS->setSharedE(i, e);
-    if (inWS->hasDx(i)) {
+    ws->setSharedX(i, x);
+    ws->setSharedY(i, y);
+    ws->setSharedE(i, e);
+    if (ws->hasDx(i)) {
       auto dx = make_cow<HistogramDx>(std::move(vecdx));
-      inWS->setSharedDx(i, dx);
+      ws->setSharedDx(i, dx);
     }
+    PARALLEL_END_INTERUPT_REGION
   }
-  return inWS;
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /** Runs the CreateSingleValuedWorkspace Algorithm as a child
  @param val :: The double to convert to a single value workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::singleValueWS(double val) {
+MatrixWorkspace_sptr Stitch1D::singleValueWS(const double &val) {
   auto singleValueWS =
       this->createChildAlgorithm("CreateSingleValuedWorkspace");
   singleValueWS->initialize();
@@ -484,7 +492,7 @@ Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
  @param ws :: The input workspace
  @return True if there are any non-zero errors in the workspace
  */
-bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
+bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
   int64_t ws_size = static_cast<int64_t>(ws->getNumberHistograms());
   bool hasNonZeroErrors = false;
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
@@ -515,10 +523,10 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
  * @param divisor
  * @param dxWS :: A MatrixWorkspace (size of ws) containing Dx values
  */
-void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr ws,
-                              MatrixWorkspace_sptr divident,
-                              MatrixWorkspace_sptr divisor,
-                              MatrixWorkspace_sptr dxWS) {
+void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
+                              MatrixWorkspace_sptr &divident,
+                              MatrixWorkspace_sptr &divisor,
+                              MatrixWorkspace_const_sptr &dxWS) {
   const auto ratio = divident / divisor;
   ws *= ratio;
   // We lost Dx values (Multiply) and need to get them back for point data
@@ -545,8 +553,8 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr ws,
 /** Execute the algorithm.
  */
 void Stitch1D::exec() {
-  MatrixWorkspace_sptr lhsWS = this->getProperty("LHSWorkspace");
-  MatrixWorkspace_sptr rhsWS = this->getProperty("RHSWorkspace");
+  MatrixWorkspace_const_sptr lhsWS = this->getProperty("LHSWorkspace");
+  MatrixWorkspace_const_sptr rhsWS = this->getProperty("RHSWorkspace");
   const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
 
   const size_t histogramCount = rhsWS->getNumberHistograms();
@@ -577,8 +585,8 @@ void Stitch1D::exec() {
 
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
 
-  MatrixWorkspace_sptr lhs;
-  MatrixWorkspace_sptr rhs;
+  MatrixWorkspace_sptr lhs = boost::const_pointer_cast<MatrixWorkspace>(lhsWS);
+  MatrixWorkspace_sptr rhs = boost::const_pointer_cast<MatrixWorkspace>(rhsWS);
   if (lhsWS->isHistogramData()) {
     MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
     const double &xMin = params.front();
@@ -605,11 +613,8 @@ void Stitch1D::exec() {
           endOverlap % xMax);
       throw std::runtime_error(message);
     }
-    lhs = rebin(lhsWS, params);
-    rhs = rebin(rhsWS, params);
-  } else {
-    lhs = lhsWS;
-    rhs = rhsWS;
+    lhs = rebin(lhs, params);
+    rhs = rebin(rhs, params);
   }
 
   m_scaleFactor = this->getProperty("ManualScaleFactor");
@@ -622,10 +627,8 @@ void Stitch1D::exec() {
     else
       lhs *= manualScaleFactorWS;
   } else {
-    const auto rhsOverlapIntegrated =
-        integration(rhs, startOverlap, endOverlap);
-    const auto lhsOverlapIntegrated =
-        integration(lhs, startOverlap, endOverlap);
+    auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
+    auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
     if (scaleRHS)
       scaleWorkspace(rhs, lhsOverlapIntegrated, rhsOverlapIntegrated, rhsWS);
     else
@@ -664,10 +667,10 @@ void Stitch1D::exec() {
     result = lhs + overlapave + rhs;
     reinsertSpecialValues(result);
   } else { // The input workspaces are point data ... join & sort
-    MatrixWorkspace_sptr ws = conjoinXAxis(lhs, rhs);
-    if (!ws)
+    result = conjoinXAxis(lhs, rhs);
+    if (!result)
       g_log.error("Could not retrieve joined workspace.");
-    result = sortXAxis(ws);
+    sortXAxis(result);
   }
   setProperty("OutputWorkspace", result);
   setProperty("OutScaleFactor", m_scaleFactor);
