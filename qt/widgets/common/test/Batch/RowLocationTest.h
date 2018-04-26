@@ -1,11 +1,11 @@
 #ifndef MANTID_MANTIDWIDGETS_ROWLOCATIONTEST_H
 #define MANTID_MANTIDWIDGETS_ROWLOCATIONTEST_H
 
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <gtest/gtest.h>
 #include <vector>
-#include <algorithm>
-#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
@@ -15,7 +15,7 @@ class RowLocationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RowLocationTest *createSuite() { return new RowLocationTest(); }
+  static RowLocationTest *createSuite() { return new RowLocationTest; }
   static void destroySuite(RowLocationTest *suite) { delete suite; }
 
   void testDefaultIsRoot() { TS_ASSERT(RowLocation().isRoot()); }
@@ -135,100 +135,6 @@ public:
     auto node = RowLocation({0, 1, 2, 3, 4, 10});
     auto ancestor = RowLocation({0, 1});
     TS_ASSERT_EQUALS(RowLocation({2, 3, 4, 10}), node.relativeTo(ancestor));
-  }
-
-  void testFindRootsForSingleLocation() {
-    auto region = std::vector<RowLocation>{{RowLocation({1})}};
-    auto roots = findRootNodes(region).value();
-    TS_ASSERT_EQUALS(1, roots.size());
-    TS_ASSERT_EQUALS(region[0], roots[0]);
-  }
-
-  void testFindRootsForTwoSiblings() {
-    auto region = std::vector<RowLocation>{{
-        RowLocation({1}), RowLocation({2}), }};
-    auto roots = findRootNodes(region).value();
-    sortBoth(region, roots);
-    TS_ASSERT_EQUALS(region, roots);
-  }
-
-  void testFindRootsForParentAndChild() {
-    auto region = std::vector<RowLocation>({
-        RowLocation({1}), RowLocation({1, 2}),
-    });
-
-    auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
-
-    auto roots = findRootNodes(region).value();
-    sortBoth(expectedRoots, roots);
-    TS_ASSERT_EQUALS(expectedRoots, roots);
-  }
-
-  void testFindRootsForParentWithChildAndSibling() {
-    auto region = std::vector<RowLocation>({
-        RowLocation({1}), RowLocation({1, 0}), RowLocation({2}),
-    });
-
-    auto expectedRoots =
-        std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
-
-    auto roots = findRootNodes(region).value();
-    sortBoth(expectedRoots, roots);
-    TS_ASSERT_EQUALS(expectedRoots, roots);
-  }
-
-  void testFindRootsForNonTrivialSibling() {
-    auto region = std::vector<RowLocation>({
-        RowLocation({1}), RowLocation({1, 0}), RowLocation({1, 0, 1}),
-        RowLocation({1, 1}),
-    });
-
-    auto expectedRoots = std::vector<RowLocation>({
-        RowLocation({1}),
-    });
-
-    auto roots = findRootNodes(region).value();
-    sortBoth(expectedRoots, roots);
-    TS_ASSERT_EQUALS(expectedRoots, roots);
-  }
-
-  void testFindRootsFailsForNonChildDescendantGap() {
-    auto region = std::vector<RowLocation>({
-        RowLocation({1}), RowLocation({1, 0}), RowLocation({1, 0, 1, 2}),
-    });
-
-    TS_ASSERT(!findRootNodes(region).is_initialized());
-  }
-
-
-  void testFindRootsForBigTree() {
-    // clang-format off
-    auto region = std::vector<RowLocation>({
-        RowLocation({0}),
-        RowLocation({0, 0}),
-        RowLocation({0, 1}),
-        RowLocation({1}),
-        RowLocation({1, 0}),
-        RowLocation({1, 0, 0}),
-        RowLocation({1, 0, 0, 0}),
-        RowLocation({1, 0, 0, 1}),
-        RowLocation({1, 0, 0, 2}),
-        RowLocation({1, 2}),
-        RowLocation({2}),
-        RowLocation({3})
-    });
-    // clang-format on
-
-    auto expectedRoots = std::vector<RowLocation>({
-        RowLocation({0}),
-        RowLocation({1}),
-        RowLocation({2}),
-        RowLocation({3})
-    });
-
-    auto roots = findRootNodes(region).value();
-    sortBoth(expectedRoots, roots);
-    TS_ASSERT_EQUALS(expectedRoots, roots);
   }
 };
 

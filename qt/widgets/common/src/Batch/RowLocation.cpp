@@ -33,6 +33,12 @@ RowLocation RowLocation::parent() const {
   return RowLocation(RowPath(m_path.begin(), m_path.cend() - 1));
 }
 
+RowLocation RowLocation::child(int n) const {
+  auto childPath = RowPath(m_path);
+  childPath.emplace_back(n);
+  return RowLocation(childPath);
+}
+
 int RowLocation::depth() const { return static_cast<int>(m_path.size()); }
 
 std::ostream &operator<<(std::ostream &os, RowLocation const &location) {
@@ -82,47 +88,8 @@ RowLocation RowLocation::relativeTo(RowLocation const &ancestor) const {
       RowPath(m_path.cbegin() + ancestor.depth(), m_path.cend()));
 }
 
-std::vector<std::vector<RowLocation>>
-splitOnRootNodes(std::vector<RowLocation> region) {
-  assertOrThrow(std::is_sorted(region.cbegin(), region.cend()),
-                "findRootNodes: Requires a lexicograpically sorted list of row "
-                "locations. Got an unsorted list.");
-  auto subtrees = std::vector<std::vector<RowLocation>>();
-  if (!region.empty()) {
-    auto previousNode = *region.begin();
-    auto current = region.begin() + 1;
-    auto lastWasRoot = true;
-    while (current != region.end()) {
-      auto &currentNode = *current;
-      auto subtree = std::vector<RowLocation>();
-      if (currentNode.isChildOf(previousNode) ||
-          (!lastWasRoot && currentNode.isSiblingOf(previousNode))) {
-        previousNode = currentNode;
-        ++current;
-        lastWasRoot = false;
-        subtree.emplace_back(std::move(currentNode));
-      } else if (currentNode.isDescendantOf(subtrees.back())) {
-        if (previousNode.depth() < currentNode.depth()) {
-          return std::vector<std::vector<RowLocation>>();
-        } else {
-          previousNode = currentNode;
-          ++current;
-          lastWasRoot = false;
-        }
-        subtree.emplace_back(std::move(currentNode));
-      } else {
-        previousNode = currentNode;
-        subtree.emplace_back(std::move(currentNode));
-        subtrees.emplace_back(std::move(subtree));
-        ++current;
-        lastWasRoot = true;
-      }
-    }
-    return subtrees;
-  } else {
-    return subtrees;
-  }
-}
+using Row = std::vector<std::string>;
+using Subtree = std::vector<std::pair<RowLocation, Row>>;
 
 bool RowLocation::isSiblingOf(RowLocation const &other) const {
   if (!(isRoot() || other.isRoot())) {

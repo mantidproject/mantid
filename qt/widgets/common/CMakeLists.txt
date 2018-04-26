@@ -78,6 +78,8 @@ set ( SRC_FILES
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/VectorString.cpp
   src/Batch/RowLocation.cpp
+  src/Batch/ExtractSubtrees.cpp
+  src/Batch/FindSubtreeRoots.cpp
   src/Batch/JobTreeView.cpp
   src/Batch/JobTreeViewSignalAdapter.cpp
   src/Batch/QtStandardItemTreeAdapter.cpp
@@ -397,6 +399,8 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
   inc/MantidQtWidgets/Common/Batch/RowLocation.h
   inc/MantidQtWidgets/Common/Batch/CellDelegate.h
+  inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
+  inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
 )
 
 set ( UI_FILES
@@ -545,6 +549,8 @@ set( TEST_FILES
 
   test/Batch/QtAdaptedModelTest.h
   test/Batch/RowLocationTest.h
+  test/Batch/FindSubtreeRootsTest.h
+  test/Batch/ExtractSubtreesTest.h
 
   test/ParseKeyValueStringTest.h
   test/DataProcessorUI/QOneLevelTreeModelTest.h
