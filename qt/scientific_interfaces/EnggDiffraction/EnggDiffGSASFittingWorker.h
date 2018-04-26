@@ -31,7 +31,7 @@ public slots:
 signals:
   void refinementsComplete();
 
-  void refinementSuccessful(Mantid::API::IAlgorithm_sptr alg,
+  void refinementSuccessful(Mantid::API::IAlgorithm_sptr,
                             GSASIIRefineFitPeaksOutputProperties);
 
   void refinementFailed(std::string);

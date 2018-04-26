@@ -34,9 +34,10 @@ public:
 
   void notifyRefinementsComplete() override = 0;
 
-  void notifyRefinementSuccessful(const Mantid::API::IAlgorithm_sptr alg,
-                                  const GSASIIRefineFitPeaksOutputProperties
-                                      &refinementResults) override = 0;
+  void notifyRefinementSuccessful(
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+      const GSASIIRefineFitPeaksOutputProperties &refinementResults) override =
+      0;
 
   void notifyRefinementFailed(const std::string &failureMessage) override = 0;
 
