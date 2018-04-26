@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadSampleShape.h"
 
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -185,11 +186,7 @@ void LoadSampleShape::exec() {
 
   std::string solidName = "";
   boost::shared_ptr<MeshObject> shape = nullptr;
-  try {
-    shape = readSTLSolid(file, solidName);
-  } catch (std::exception &e) {
-    throw Exception::FileError(e.what(), filename);
-  }
+  shape = readSTLSolid(file, solidName);
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();

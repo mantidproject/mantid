@@ -1,7 +1,6 @@
 #ifndef DATAHANDLING_LOAD_SHAPE_H_
 #define DATAHANDLING_LOAD_SHAPE_H_
 
-#include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/V3D.h"
 
