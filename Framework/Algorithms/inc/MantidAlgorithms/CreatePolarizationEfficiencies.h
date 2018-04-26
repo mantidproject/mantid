@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
@@ -46,7 +45,6 @@ private:
   void exec() override;
   API::MatrixWorkspace_sptr createEfficiencies(std::vector<std::string> const &labels);
   std::vector<std::string> getNonDefaultProperties(std::vector<std::string> const &labels) const;
-  API::WorkspaceGroup_sptr createGroup(API::MatrixWorkspace_sptr efficiencies);
 };
 
 } // namespace Algorithms

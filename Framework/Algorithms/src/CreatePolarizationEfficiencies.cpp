@@ -2,7 +2,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -108,12 +107,7 @@ void CreatePolarizationEfficiencies::init() {
       Kernel::make_unique<ArrayProperty<double>>(F2Label, Direction::Input),
       "Analyzer flipper efficiency.");
 
-  declareProperty("OutputAsGroup", false,
-                  "If true the OutputWorkspace is a WorkspaceGroup of "
-                  "single-spectra MatrixWorkspaces. Otherwise it is a "
-                  "MatrixWorkspace where each spectrum is an efficiency.");
-
-  declareProperty(make_unique<WorkspaceProperty<Mantid::API::Workspace>>(
+  declareProperty(make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -137,13 +131,7 @@ void CreatePolarizationEfficiencies::exec() {
     efficiencies = createEfficiencies(labelsWildes);
   }
 
-  bool outputAsGroup = getProperty("OutputAsGroup");
-  if (outputAsGroup) {
-    auto group = createGroup(efficiencies);
-    setProperty("OutputWorkspace", group);
-  } else {
-    setProperty("OutputWorkspace", efficiencies);
-  }
+  setProperty("OutputWorkspace", efficiencies);
 }
 
 /// Get names of non-default properties out of a list of names
@@ -190,28 +178,6 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
   }
 
   return outWS;
-}
-
-/// Split the efficiencies workspace into single spectra and combine them into a
-/// workspace group.
-API::WorkspaceGroup_sptr CreatePolarizationEfficiencies::createGroup(
-    API::MatrixWorkspace_sptr efficiencies) {
-  auto group = boost::make_shared<WorkspaceGroup>();
-  auto const outputName = getPropertyValue("OutputWorkspace") + "_";
-  for (size_t i = 0; i < efficiencies->getNumberHistograms(); ++i) {
-    auto extractor = createChildAlgorithm("ExtractSingleSpectrum");
-    extractor->initialize();
-    extractor->setProperty("InputWorkspace", efficiencies);
-    extractor->setProperty("WorkspaceIndex", int(i));
-    extractor->execute();
-    MatrixWorkspace_sptr ws = extractor->getProperty("OutputWorkspace");
-    if (!isChild()) {
-      auto axis1 = ws->getAxis(1);
-      AnalysisDataService::Instance().addOrReplace(outputName + axis1->label(0), ws);
-    }
-    group->addWorkspace(ws);
-  }
-  return group;
 }
 
 } // namespace Algorithms
