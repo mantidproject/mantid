@@ -43,6 +43,9 @@ static const std::string LAMBDA{"SumInLambda"};
 static const std::string Q{"SumInQ"};
 } // namespace SumTypeChoice
 
+/// A conversion factor from e.g. slit opening to FWHM of Gaussian equivalent.
+constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
+
 /// Convert degrees to radians.
 constexpr double inRad(const double a) noexcept { return a / 180. * M_PI; }
 } // namespace
@@ -163,7 +166,9 @@ void ReflectometryMomentumTransfer::exec() {
   const auto incidentFWHM = incidentAngularSpread(setup);
   const auto slit1FWHM = slit1AngularSpread(setup);
   const auto &spectrumInfo = inWS->spectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *directWS, *outWS))
   for (size_t wsIndex = 0; wsIndex < outWS->getNumberHistograms(); ++wsIndex) {
+    PARALLEL_START_INTERUPT_REGION
     const auto &wavelengths = inWS->points(wsIndex);
     const auto &qs = outWS->points(wsIndex);
     auto dx = Kernel::make_cow<HistogramData::HistogramDx>(qs.size(), 0);
@@ -186,7 +191,9 @@ void ReflectometryMomentumTransfer::exec() {
       resolutions[qIndex] =
           qs[qIndex] * std::sqrt(deltaLambdaSq + deltaThetaSq);
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   setProperty(Prop::OUTPUT_WS, outWS);
 }
 
@@ -241,7 +248,7 @@ double ReflectometryMomentumTransfer::angularResolutionSquared(
         static_cast<double>(setup.foregroundEnd - setup.foregroundStart + 1) *
         setup.pixelSize;
     const auto foregroundWidthLimited =
-        pow<2>(0.68) * (pow<2>(foregroundWidth) + pow<2>(setup.slit2Size)) /
+        pow<2>(FWHM_GAUSSIAN_EQUIVALENT) * (pow<2>(foregroundWidth) + pow<2>(setup.slit2Size)) /
         pow<2>(l2 * braggAngle);
     double angularResolution;
     if (setup.polarized) {
@@ -307,7 +314,7 @@ void ReflectometryMomentumTransfer::convertToMomentumTransfer(
   ws = convert->getProperty("OutputWorkspace");
 }
 
-/** Calculates the da quantity (from COSMOS, actual meaning unclear).
+/** Calculate the detector angular resolution.
  *
  * @param ws a reflectivity workspace
  * @param wsIndex a workspace index to the reflectivity workspace
@@ -315,7 +322,7 @@ void ReflectometryMomentumTransfer::convertToMomentumTransfer(
  * @param incidentFWHM spread of the incident beam
  * @return the da quantity
  */
-double ReflectometryMomentumTransfer::detectorDA(const API::MatrixWorkspace &ws,
+double ReflectometryMomentumTransfer::detectorAngularResolution(const API::MatrixWorkspace &ws,
                                                  const size_t wsIndex,
                                                  const Setup &setup,
                                                  const double incidentFWHM) {
@@ -380,7 +387,8 @@ ReflectometryMomentumTransfer::createSetup(
   return s;
 }
 
-/** Calculate the angular spread of the incident beam.
+/** Calculate the range of angles in the reflection plane determined by
+ *  the collimation.
  *
  * @param setup a setup object
  * @return the incident FWHM
@@ -389,7 +397,7 @@ double
 ReflectometryMomentumTransfer::incidentAngularSpread(const Setup &setup) {
   // da in COSMOS
   using namespace boost::math;
-  return 0.68 * std::sqrt((pow<2>(setup.slit1Size) + pow<2>(setup.slit2Size))) /
+  return FWHM_GAUSSIAN_EQUIVALENT * std::sqrt((pow<2>(setup.slit1Size) + pow<2>(setup.slit2Size))) /
          setup.slit1Slit2Distance;
 }
 
@@ -431,7 +439,7 @@ double ReflectometryMomentumTransfer::sampleWaviness(
       std::abs(setup.slit2Size - setup.slit2SizeDirectBeam) >=
           slitSizeTolerance) {
     // Differing slit sizes branch from COSMOS.
-    const double daDet = detectorDA(*ws, wsIndex, setup, incidentFWHM);
+    const double daDet = detectorAngularResolution(*ws, wsIndex, setup, incidentFWHM);
     if (beamFWHM - daDet >= 0) {
       const auto a = std::sqrt(pow<2>(beamFWHM) - pow<2>(daDet));
       if (a >= setup.pixelSize) {
@@ -456,7 +464,7 @@ double ReflectometryMomentumTransfer::sampleWaviness(
  */
 double ReflectometryMomentumTransfer::slit1AngularSpread(const Setup &setup) {
   // S2_fwhm in COSMOS
-  return 0.68 * setup.slit1Size / setup.slit1Slit2Distance;
+  return FWHM_GAUSSIAN_EQUIVALENT * setup.slit1Size / setup.slit1Slit2Distance;
 }
 
 /** Calculate the angular spread due to the second slit.
@@ -472,7 +480,7 @@ double ReflectometryMomentumTransfer::slit2AngularSpread(
   const auto &spectrumInfo = ws.spectrumInfo();
   const auto slit2Detector =
       setup.slit2SampleDistance + spectrumInfo.l2(wsIndex);
-  return 0.68 * setup.slit2Size / slit2Detector;
+  return FWHM_GAUSSIAN_EQUIVALENT * setup.slit2Size / slit2Detector;
 }
 
 /** Read the slit size from samle logs.
@@ -523,7 +531,6 @@ double ReflectometryMomentumTransfer::wavelengthResolutionSquared(
                                  h * setup.chopperOpening *
                                      setup.chopperPeriod /
                                      (2. * M_PI * NeutronMass * wavelength);
-  // Shouldn't there be a factor of 2 * flightdistance?
   const auto detectorResolution =
       h * setup.tofChannelWidth / (NeutronMass * wavelength);
   const auto partialResolution =
