@@ -183,15 +183,12 @@ void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   if (!m_viewHasClosed) {
     m_view->showStatus("Saving refinement results");
-    auto filename = m_mainSettings->outFilesUserDir("Runs");
-    filename.append(std::to_string(refinementResults.runLabel.runNumber) +
-                    ".hdf5");
+    const auto filename = m_mainSettings->userHDFRunFilename(
+        refinementResults.runLabel.runNumber);
 
-    try{
-      m_model->saveRefinementResultsToHDF5(alg, refinementResults,
-                                           filename.toString());
-    }
-    catch (std::exception &e){
+    try {
+      m_model->saveRefinementResultsToHDF5(alg, refinementResults, filename);
+    } catch (std::exception &e) {
       m_view->userWarning(
           "Could not save refinement results",
           std::string("Refinement was successful but saving results to "

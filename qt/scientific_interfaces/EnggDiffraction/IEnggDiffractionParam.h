@@ -40,7 +40,10 @@ class IEnggDiffractionParam {
 public:
   virtual ~IEnggDiffractionParam() = default;
 
-  virtual Poco::Path outFilesUserDir(const std::string &addToDir) = 0;
+  virtual Poco::Path outFilesUserDir(const std::string &addToDir) const = 0;
+
+  /// Get the name of a HDF file for a given run number to save to
+  virtual std::string userHDFRunFilename(const int runNumber) const = 0;
 };
 
 } // namespace CustomInterfaces

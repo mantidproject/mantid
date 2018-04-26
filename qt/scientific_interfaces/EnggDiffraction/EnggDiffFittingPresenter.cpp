@@ -192,8 +192,13 @@ EnggDiffFittingPresenter::currentCalibration() const {
 }
 
 Poco::Path
-EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
   return m_mainParam->outFilesUserDir(addToDir);
+}
+
+std::string
+EnggDiffFittingPresenter::userHDFRunFilename(const int runNumber) const {
+  return m_mainParam->userHDFRunFilename(runNumber);
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
@@ -496,10 +501,8 @@ void EnggDiffFittingPresenter::doFitting(const RunLabel &runLabel,
     return;
   }
 
-  const auto outFilename = std::to_string(runLabel.runNumber) + ".hdf5";
-  auto saveDirectory = outFilesUserDir("Runs");
-  saveDirectory.append(outFilename);
-  m_model->saveFitResultsToHDF5(runLabel, saveDirectory.toString());
+  const auto outFilename = userHDFRunFilename(runLabel.runNumber);
+  m_model->saveFitResultsToHDF5(runLabel, outFilename);
 
   m_model->createFittedPeaksWS(runLabel);
   m_fittingFinishedOK = true;
