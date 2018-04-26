@@ -101,9 +101,17 @@ void LoadILLSANS::exec() {
     double distance = m_loader.getDoubleFromNexusPath(
         firstEntry, instrumentPath + "/detector/det_calc");
     moveDetectorDistance(distance, "detector");
+    if (m_instrumentName == "D22") {
+      double offset = m_loader.getDoubleFromNexusPath(
+          firstEntry, instrumentPath + "/detector/dtr_actual");
+      moveDetectorHorizontal(offset / 1000, "detector"); // mm to meter
+      double angle = m_loader.getDoubleFromNexusPath(
+          firstEntry, instrumentPath + "/detector/dan_actual");
+      rotateD22(angle, "detector");
+    }
   }
 
-  setFinalProperties();
+  setFinalProperties(filename);
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 }
@@ -184,7 +192,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   size_t nextIndex =
       loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
-  if (data.dim0() == 128 && m_instrumentName == "D11") {
+  if (data.dim1() == 128) {
     m_resMode = "low";
   }
 }
@@ -441,7 +449,7 @@ void LoadILLSANS::runLoadInstrument() {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   if (m_resMode == "nominal") {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-  } else if (m_resMode == "low" && m_instrumentName == "D11") {
+  } else if (m_resMode == "low") {
     loadInst->setPropertyValue("Filename",
                                getInstrumentFilePath(m_instrumentName + "lr"));
   }
@@ -490,6 +498,21 @@ void LoadILLSANS::moveDetectorDistance(double distance,
                   << "' to Z = " << distance << '\n';
     g_log.error() << e.what() << '\n';
   }
+}
+
+void LoadILLSANS::rotateD22(double angle, const ::std::string &componentName) {
+  API::IAlgorithm_sptr rotater =
+      createChildAlgorithm("RotateInstrumentComponent");
+  rotater->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  rotater->setProperty("ComponentName", componentName);
+  rotater->setProperty("X", 0.);
+  rotater->setProperty("Y", 1.);
+  rotater->setProperty("Z", 0.);
+  rotater->setProperty("Angle", angle);
+  rotater->setProperty("RelativeRotation", false);
+  rotater->executeAsChildAlg();
+  g_log.debug() << "Rotating component '" << componentName
+                << "' to angle = " << angle << " degrees.\n";
 }
 
 /**
@@ -560,30 +583,11 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
-  int runNum = entry.getInt("run_number");
-  std::string run_num = std::to_string(runNum);
-  runDetails.addProperty("run_number", run_num);
-
   if (entry.getFloat("mode") == 0.0) { // Not TOF
     runDetails.addProperty<std::string>("tof_mode", "Non TOF");
   } else {
     runDetails.addProperty<std::string>("tof_mode", "TOF");
   }
-
-  std::string desc =
-      m_loader.getStringFromNexusPath(entry, "sample_description");
-  runDetails.addProperty("sample_description", desc);
-
-  std::string start_time = entry.getString("start_time");
-  start_time = m_loader.dateTimeInIsoFormat(start_time);
-  runDetails.addProperty("run_start", start_time);
-
-  std::string end_time = entry.getString("end_time");
-  end_time = m_loader.dateTimeInIsoFormat(end_time);
-  runDetails.addProperty("run_end", end_time);
-
-  double duration = entry.getFloat("duration");
-  runDetails.addProperty("timer", duration);
 
   double wavelength =
       entry.getFloat(instrumentNamePath + "/selector/wavelength");
@@ -660,13 +664,18 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
   return std::pair<double, double>(min, max);
 }
 
-void LoadILLSANS::setFinalProperties() {
+void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   runDetails.addProperty("is_frame_skipping", 0);
-
   std::pair<double, double> minmax = LoadILLSANS::calculateQMaxQMin();
   runDetails.addProperty("qmin", minmax.first);
   runDetails.addProperty("qmax", minmax.second);
+  NXhandle nxHandle;
+  NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
+  if (nxStat != NX_ERROR) {
+    m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
+    nxStat = NXclose(&nxHandle);
+  }
 }
 
 } // namespace DataHandling

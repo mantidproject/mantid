@@ -97,17 +97,18 @@ private:
   Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
+  void rotateD22(double, const std::string &);
 
   LoadHelper m_loader;  
   std::string m_instrumentName; ///< Name of the instrument
   std::vector<std::string> m_supportedInstruments;
   API::MatrixWorkspace_sptr m_localWorkspace;
   std::vector<double> m_defaultBinning;
-  std::string m_resMode; ///< Resolution mode for D11
+  std::string m_resMode; ///< Resolution mode for D11 and D22
 
   double calculateQ(const double lambda, const double twoTheta) const;
   std::pair<double, double> calculateQMaxQMin();
-  void setFinalProperties();
+  void setFinalProperties(const std::string& filename);
 };
 
 } // namespace DataHandling
