@@ -201,19 +201,16 @@ public:
         1, 2, 3, fittedPeaks, latticeParams, runLabel);
     const Mantid::API::IAlgorithm_sptr alg(nullptr);
 
-    const Poco::Path saveDirectory("directory/path");
-    ON_CALL(*m_mockParamPtr, outFilesUserDir(testing::_))
-        .WillByDefault(Return(saveDirectory));
+    const std::string hdfFilename = "directory/path/run.hdf5";
+    ON_CALL(*m_mockParamPtr, userHDFRunFilename(testing::_))
+        .WillByDefault(Return(hdfFilename));
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr,
                 addFittedPeaks(runLabel, fittedPeaks));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Saving refinement results"));
 
-    Poco::Path saveFilename(saveDirectory);
-    saveFilename.append(std::to_string(runLabel.runNumber) + ".hdf5");
-    EXPECT_CALL(*m_mockModelPtr,
-                saveRefinementResultsToHDF5(alg, refinementResults,
-                                            saveFilename.toString()));
+    EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
+                                     alg, refinementResults, hdfFilename));
     EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
 

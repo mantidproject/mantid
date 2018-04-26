@@ -12,7 +12,9 @@ using namespace MantidQt::CustomInterfaces;
 
 class MockEnggDiffractionParam : public IEnggDiffractionParam {
 public:
-  MOCK_METHOD1(outFilesUserDir, Poco::Path(const std::string &addToDir));
+  MOCK_CONST_METHOD1(outFilesUserDir, Poco::Path(const std::string &addToDir));
+
+  MOCK_CONST_METHOD1(userHDFRunFilename, std::string(const int runNumber));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
