@@ -88,9 +88,6 @@ RowLocation RowLocation::relativeTo(RowLocation const &ancestor) const {
       RowPath(m_path.cbegin() + ancestor.depth(), m_path.cend()));
 }
 
-using Row = std::vector<std::string>;
-using Subtree = std::vector<std::pair<RowLocation, Row>>;
-
 bool RowLocation::isSiblingOf(RowLocation const &other) const {
   if (!(isRoot() || other.isRoot())) {
     auto const &otherPath = other.path();

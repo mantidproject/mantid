@@ -23,8 +23,8 @@ bool FindSubtreeRoots::isSiblingOfPrevious(RowLocation const &location) const {
 
 auto FindSubtreeRoots::operator()(std::vector<RowLocation> region)
     -> boost::optional<std::vector<RowLocation>> {
+  std::sort(region.begin(), region.end());
   if (!region.empty()) {
-    std::sort(region.begin(), region.end());
     nodeWasSubtreeRoot(*region.cbegin());
     auto roots = std::vector<RowLocation>({previousNode});
     auto current = region.begin() + 1;
@@ -48,7 +48,7 @@ auto FindSubtreeRoots::operator()(std::vector<RowLocation> region)
     }
     return roots;
   } else {
-    return {};
+    return std::vector<RowLocation>();
   }
 }
 
