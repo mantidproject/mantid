@@ -21,14 +21,17 @@ public:
 
   std::string cell(std::string const &text) const { return text; }
 
-  template <typename... Args> Row cells(Args const &... cellText) const {
-    return Row({cell(cellText)...});
+  using RegionData = std::vector<std::vector<Cell>>;
+
+  template <typename... Args>
+  std::vector<Cell> cells(Args const &... cellText) const {
+    return std::vector<Cell>({cell(cellText)...});
   }
 
   void testForSingleLocation() {
     auto extractSubtrees = ExtractSubtrees();
     auto region = std::vector<RowLocation>({RowLocation({1})});
-    auto regionData = std::vector<Row>({cells("Root")});
+    auto regionData = RegionData({cells("Root")});
 
     auto roots = extractSubtrees(region, regionData).value();
 
@@ -48,7 +51,7 @@ public:
     auto extractSubtrees = ExtractSubtrees();
     auto region =
         std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
-    auto regionData = std::vector<Row>({cells("Root 1"), cells("Root 2")});
+    auto regionData = RegionData({cells("Root 1"), cells("Root 2")});
 
     // clang-format off
     auto expectedSubtrees =
@@ -70,14 +73,14 @@ public:
     auto extractSubtrees = ExtractSubtrees();
     auto region =
         std::vector<RowLocation>({RowLocation({1}), RowLocation({1, 2})});
-    auto regionData = std::vector<Row>({cells("Root"), cells("Child")});
+    auto regionData = RegionData({cells("Root"), cells("Child")});
 
     // clang-format off
     auto expectedSubtrees =
         std::vector<Subtree>({
           Subtree({
             {RowLocation(), cells("Root")},
-            {RowLocation({2}), cells("Child")}
+            {RowLocation({0}), cells("Child")}
           })
         });
     // clang-format on
@@ -96,7 +99,7 @@ public:
     });
     // clang-format on
     auto regionData =
-        std::vector<Row>({cells("Root 1"), cells("Child"), cells("Root 2")});
+        RegionData({cells("Root 1"), cells("Child"), cells("Root 2")});
 
     // clang-format off
     auto expectedSubtrees =
@@ -124,7 +127,7 @@ public:
       RowLocation({1, 0, 1}),
       RowLocation({1, 1})
     });
-    auto regionData = std::vector<Row>({
+    auto regionData = RegionData({
       cells("Root  1"),
       cells("Child 1, 0"),
       cells("Child 1, 0, 1"),
@@ -138,7 +141,7 @@ public:
           Subtree({
             {RowLocation(),       cells("Root  1")},
             {RowLocation({0}),    cells("Child 1, 0")},
-            {RowLocation({0, 1}), cells("Child 1, 0, 1")},
+            {RowLocation({0, 0}), cells("Child 1, 0, 1")},
             {RowLocation({1}),    cells("Child 1, 1")},
           }),
         });
@@ -156,10 +159,35 @@ public:
       RowLocation({1, 0}),
       RowLocation({1, 0, 1, 2})
     });
-    auto regionData = std::vector<Row>({
+    auto regionData = RegionData({
       cells("Root  1"),
       cells("Child 1, 0"),
       cells("Child 1, 0, 1, 2"),
+    });
+    // clang-format on
+
+    TS_ASSERT(!extractSubtrees(region, regionData).is_initialized());
+  }
+
+  void testFailsForLevelGapBetweenSubtrees() {
+    auto extractSubtrees = ExtractSubtrees();
+    // clang-format off
+    auto region = std::vector<RowLocation>({
+      RowLocation({1}),
+      RowLocation({1, 0}),
+      RowLocation({1, 0, 1}),
+
+      RowLocation({2}),
+      RowLocation({2, 1, 0}),
+    });
+
+    auto regionData = RegionData({
+      cells("Root  1"),
+      cells("Child 1, 0"),
+      cells("Child 1, 0, 1"),
+
+      cells("Root  2"),
+      cells("Child 2, 1, 0")
     });
     // clang-format on
 
@@ -184,7 +212,7 @@ public:
       RowLocation({3})
     });
 
-    auto regionData = std::vector<Row>({
+    auto regionData = RegionData({
       cells("Root  0"),
       cells("Child 0, 0"),
       cells("Child 0, 1"),
@@ -215,7 +243,7 @@ public:
             {RowLocation({0, 0, 0}),    cells("Child 1, 0, 0, 0")},
             {RowLocation({0, 0, 1}),    cells("Child 1, 0, 0, 1")},
             {RowLocation({0, 0, 2}),    cells("Child 1, 0, 0, 2")},
-            {RowLocation({2}),          cells("Child 1, 2")}
+            {RowLocation({1}),          cells("Child 1, 2")}
           }),
           Subtree({
             {RowLocation(),             cells("Root  2")}
