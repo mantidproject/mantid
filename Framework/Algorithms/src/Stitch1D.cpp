@@ -55,7 +55,6 @@ DECLARE_ALGORITHM(Stitch1D)
  * @param a1 : Zero based bin index (first one)
  * @param a2 : Zero based bin index (last one inclusive)
  * @param source : Workspace providing the source data.
- * @return Masked workspace.
  */
 MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
                                           MatrixWorkspace_sptr &source) {
@@ -585,8 +584,8 @@ void Stitch1D::exec() {
 
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
 
-  MatrixWorkspace_sptr lhs = boost::const_pointer_cast<MatrixWorkspace>(lhsWS);
-  MatrixWorkspace_sptr rhs = boost::const_pointer_cast<MatrixWorkspace>(rhsWS);
+  MatrixWorkspace_sptr lhs = lhsWS->clone();
+  MatrixWorkspace_sptr rhs = rhsWS->clone();
   if (lhsWS->isHistogramData()) {
     MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
     const double &xMin = params.front();

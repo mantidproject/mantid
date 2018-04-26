@@ -249,12 +249,12 @@ public:
     const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
     const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
     const auto &e = HistogramE(3, LinearGenerator(7., -1.));
-    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 1.));
+    const auto &dx1 = HistogramDx(3, LinearGenerator(3., -1.));
     auto point_ws_1 = createWorkspace(x1, y1, e, dx1);
 
     const auto &x2 = HistogramX(3, LinearGenerator(2.1, 1.));
     const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
-    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));
+    const auto &dx2 = HistogramDx(3, LinearGenerator(9., 0.));
     auto point_ws_2 = createWorkspace(x2, y2, e, dx2);
 
     Stitch1D alg;
@@ -274,7 +274,7 @@ public:
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     const std::vector<double> e_values{7., 6., 7., 5., 6., 5.};
     TS_ASSERT_EQUALS(stitched->e(0).rawData(), e_values);
-    const std::vector<double> dx_values{-3., -2., -9., -1., -9., -9.};
+    const std::vector<double> dx_values{3., 2., 9., 1., 9., 9.};
     TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
     double scaleFactor = alg.getProperty("OutScaleFactor");
     TS_ASSERT_EQUALS(scaleFactor, 1.); // Default scale factor
@@ -284,20 +284,15 @@ public:
     const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
     const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
     const auto &e = HistogramE(3, LinearGenerator(7., -1.));
-    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 1.));
+    const auto &dx1 = HistogramDx(3, LinearGenerator(3., -1.));
     auto ws1 = createWorkspace(x1, y1, e, dx1);
-
-    const auto &x2 = HistogramX(3, LinearGenerator(2.1, 1.));
-    const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
-    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));
-    auto ws2 = createWorkspace(x2, y2, e, dx2);
-
+    auto ws2 = ws1;
     Stitch1D alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("LHSWorkspace", ws1);
-    alg.setProperty("RHSWorkspace", ws2);
+    alg.setProperty("RHSWorkspace", ws1);
     alg.setProperty("UseManualScaleFactor", true);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
@@ -316,12 +311,12 @@ public:
     const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
     const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
     const auto &e = HistogramE(3, 1.);
-    const auto &dx1 = HistogramDx(3, LinearGenerator(-3., 1.));
+    const auto &dx1 = HistogramDx(3, LinearGenerator(3., -1.));
     auto point_ws_1 = createWorkspace(x1, y1, e, dx1);
 
     const auto &x2 = HistogramX(3, LinearGenerator(1.5, 1.));
     const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
-    const auto &dx2 = HistogramDx(3, LinearGenerator(-9., 0.));
+    const auto &dx2 = HistogramDx(3, LinearGenerator(9., 0.));
     auto point_ws_2 = createWorkspace(x2, y2, e, dx2);
 
     Stitch1D alg;
@@ -366,15 +361,22 @@ public:
     const auto &x = HistogramX(3, LinearGenerator(-1.2, 0.2));
     const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
     const auto &e = HistogramE(2, 1.);
-    const auto &dx = HistogramDx(2, LinearGenerator(-3., 0.1));
+    const auto &dx = HistogramDx(2, LinearGenerator(3., 0.1));
     auto ws2 = createWorkspace(x, y, e, dx);
+    auto ws3 = ws1;
+    auto ws4 = ws2;
     TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass",
                               do_stitch1D(ws2, ws1));
     Mantid::Algorithms::CompareWorkspaces compare;
     compare.initialize();
     compare.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws1));
-    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws2));
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws3));
+    TS_ASSERT(compare.execute());
+    TS_ASSERT(compare.isExecuted());
+    TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), "1");
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws2));
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws4));
     TS_ASSERT(compare.execute());
     TS_ASSERT(compare.isExecuted());
     TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), "1");
