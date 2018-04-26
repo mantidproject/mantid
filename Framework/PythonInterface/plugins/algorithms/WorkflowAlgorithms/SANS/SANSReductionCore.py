@@ -192,8 +192,8 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         # settings. On the other hand it is not clear that this would be an advantage with the GIL.
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Creating adjustment workspaces ...")
-        wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace,\
-        calculated_transmission_workspace, unfitted_transmission_workspace =\
+        wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
+            calculated_transmission_workspace, unfitted_transmission_workspace = \
             self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ------------------------------------------------------------
@@ -335,8 +335,8 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
                                            "OutputWorkspaceWavelengthAndPixelAdjustment").value
         calculated_transmission_workspace = adjustment_alg.getProperty("CalculatedTransmissionWorkspace").value
         unfitted_transmission_workspace = adjustment_alg.getProperty("UnfittedTransmissionWorkspace").value
-        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment,\
-               calculated_transmission_workspace, unfitted_transmission_workspace
+        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
+            calculated_transmission_workspace, unfitted_transmission_workspace
 
     def _convert_to_histogram(self, workspace):
         if isinstance(workspace, IEventWorkspace):
