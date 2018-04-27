@@ -1,7 +1,6 @@
 #include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
-#include "MantidAPI/AnalysisDataService.h" // Needed for trim
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -13,6 +12,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <Poco/File.h>
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace DataHandling {
