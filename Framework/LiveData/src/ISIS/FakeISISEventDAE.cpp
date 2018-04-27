@@ -11,8 +11,6 @@
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
 
-#include <boost/random/uniform_int.hpp>
-
 namespace Mantid {
 namespace LiveData {
 // Register the algorithm into the algorithm factory
