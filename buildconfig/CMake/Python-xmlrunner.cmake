@@ -14,7 +14,7 @@ else()
   set ( XMLRUNNER_DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/python-xmlrunner-download )
   configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/Python-xmlrunner.in ${XMLRUNNER_DOWNLOAD_DIR}/CMakeLists.txt)
 
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . WORKING_DIRECTORY ${XMLRUNNER_DOWNLOAD_DIR} )
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} . WORKING_DIRECTORY ${XMLRUNNER_DOWNLOAD_DIR} )
   execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${XMLRUNNER_DOWNLOAD_DIR} )
 
   set(PYTHON_XMLRUNNER_DIR "${CMAKE_BINARY_DIR}/python-xmlrunner-src" CACHE PATH "Location of xmlrunner package")
