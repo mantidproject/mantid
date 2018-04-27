@@ -6,8 +6,8 @@ import sys
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 
-from Muon import dummy_label_widget
-from Muon import dock_widget
+from Muon.GUI.dummy_label.dummy_label_widget import DummyLabelWidget
+from Muon.GUI.dock.dock_widget import DockWidget
 
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):
@@ -15,10 +15,10 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MuonAnalysis2Gui, self).__init__(parent)
 
-        loadWidget = dummy_label_widget.DummyLabelWidget("Load dummy", self)
-        self.dockWidget = dock_widget.DockWidget(self)
+        loadWidget = DummyLabelWidget("Load dummy", self)
+        self.dockWidget = DockWidget(self)
 
-        helpWidget = dummy_label_widget.DummyLabelWidget("Help dummy", self)
+        helpWidget = DummyLabelWidget("Help dummy", self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(loadWidget.widget)

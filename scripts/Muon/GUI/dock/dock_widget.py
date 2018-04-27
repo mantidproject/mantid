@@ -2,9 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
 
-from Muon import dummy_widget
-from Muon import dummy_label_widget
-from Muon import dock_view
+from Muon.GUI.dummy.dummy_widget import DummyWidget
+from Muon.GUI.dummy_label.dummy_label_widget import DummyLabelWidget
+from Muon.GUI.dock.dock_view import DockView
 
 
 class DockWidget(QtGui.QWidget):
@@ -22,16 +22,16 @@ class DockWidget(QtGui.QWidget):
         super(DockWidget, self).__init__(parent)
         self.dockWidget = QtGui.QWidget()
 
-        self.dock_view = dock_view.DockView(self)
+        self.dock_view = DockView(self)
 
-        self.btn = dummy_widget.DummyWidget("moo", self)
+        self.btn = DummyWidget("moo", self)
         self.dock_view.addDock(self.btn.widget, "first")
         self.btn.setButtonConnection(self.handleButton)
 
-        self.label = dummy_label_widget.DummyLabelWidget("boo", self)
+        self.label = DummyLabelWidget("boo", self)
         self.dock_view.addDock(self.label.widget, "second")
 
-        self.btn2 = dummy_widget.DummyWidget("waaa", self)
+        self.btn2 = DummyWidget("waaa", self)
         self.dock_view.addDock(self.btn2.widget, "third")
         self.btn2.setButtonConnection(self.handleButton)
 
