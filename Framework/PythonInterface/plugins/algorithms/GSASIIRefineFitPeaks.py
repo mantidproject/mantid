@@ -125,8 +125,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.declareProperty(name=self.PROP_PAWLEY_DMIN, defaultValue=1.0, direction=Direction.Input,
                              doc="For Pawley refiment: as defined in GSAS-II, the minimum d-spacing to be used in a "
                                  "Pawley refinement. Please refer to the GSAS-II documentation for full details. Note, "
-                                 "if this corresponds to a TOF value less than {} or the lowest TOF value in the data, "
-                                 "the greatest of the 3 values is used".format(self.PROP_XMIN))
+                                 "if this corresponds to a TOF value less than {0} or the lowest TOF value in the data,"
+                                 " the greatest of the 3 values is used as {0}".format(self.PROP_XMIN))
         self.declareProperty(name=self.PROP_PAWLEY_NEGATIVE_WEIGHT, defaultValue=0.0, direction=Direction.Input,
                              doc="For Pawley refinement: as defined in GSAS-II, the weight for a penalty function "
                                  "applied during a Pawley refinement on resulting negative intensities. "
