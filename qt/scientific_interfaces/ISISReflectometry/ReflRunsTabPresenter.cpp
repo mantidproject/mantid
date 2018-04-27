@@ -550,8 +550,9 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
 */
-void ReflRunsTabPresenter::pause() const {
+void ReflRunsTabPresenter::pause() {
   m_view->stopTimer();
+  m_autoreductionInProgress = false;
   updateWidgetEnabledState(false);
 }
 
@@ -586,8 +587,6 @@ void ReflRunsTabPresenter::confirmReductionFinished(int group) {
 * via a user command to pause reduction
 */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
-  // Make sure autoreduction is stopped
-  m_autoreductionInProgress = false;
   m_mainPresenter->notifyReductionPaused(group);
 }
 

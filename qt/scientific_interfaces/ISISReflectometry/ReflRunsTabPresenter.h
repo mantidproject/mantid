@@ -82,7 +82,7 @@ public:
   getOptionsForAngle(const double angle) const override;
   bool hasPerAngleOptions() const override;
   /// Handle data reduction paused/resumed
-  void pause() const override;
+  void pause() override;
   void resume() const override;
   /// Determine whether to start a new autoreduction
   bool requireNewAutoreduction() const override;
