@@ -1,6 +1,5 @@
 #include "MantidDataHandling/LoadSampleShape.h"
 
-#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -15,6 +14,8 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
 
+#include <fstream>
+#include <stdio.h>
 #include <Poco/File.h>
 
 namespace Mantid {
