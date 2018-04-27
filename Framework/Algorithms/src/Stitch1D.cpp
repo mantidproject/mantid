@@ -564,22 +564,14 @@ void Stitch1D::exec() {
 
   const double intersectionMin = intesectionXRegion.get<0>();
   const double intersectionMax = intesectionXRegion.get<1>();
-
-  double startOverlap;
-  double endOverlap;
-  if (lhsWS->isHistogramData()) {
-    startOverlap = getStartOverlap(intersectionMin, intersectionMax);
-    endOverlap = getEndOverlap(intersectionMin, intersectionMax);
-    if (startOverlap > endOverlap) {
-      std::string message = boost::str(
-          boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
-                        "StartOverlap: %0.9f, EndOverlap: %0.9f") %
-          startOverlap % endOverlap);
-      throw std::runtime_error(message);
-    }
-  } else {
-    startOverlap = intersectionMin;
-    endOverlap = intersectionMax;
+  double startOverlap = getStartOverlap(intersectionMin, intersectionMax);
+  double endOverlap = getEndOverlap(intersectionMin, intersectionMax);
+  if (startOverlap > endOverlap) {
+    std::string message = boost::str(
+        boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
+                      "StartOverlap: %0.9f, EndOverlap: %0.9f") %
+        startOverlap % endOverlap);
+    throw std::runtime_error(message);
   }
 
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
