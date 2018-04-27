@@ -25,6 +25,9 @@ Engineering Diffraction
   - A **Refine All** button was added to run refinement on every run
     loaded into the tab
 
+- :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
+
+
 :ref:`Release 3.13.0 <v3.13.0>`
 
 Single Crystal Diffraction
@@ -40,4 +43,3 @@ Improvements
 - PeaksWorkspace has column added for the unique peak number so peaks can be found after sorting or filtering.
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has option to use a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
-
