@@ -1,59 +1,61 @@
 #ifndef MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
 #define MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
+
 #include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-class EXPORT_OPT_MANTIDQT_COMMON QtStandardItemTreeAdapter {
-public:
-  QtStandardItemTreeAdapter(QStandardItemModel const &model);
+QModelIndexForMainModel rootModelIndex(QStandardItemModel const &model);
+QModelIndexForFilteredModel rootModelIndex(QSortFilterProxyModel const &model);
 
-  QModelIndex rootModelIndex() const;
+EXPORT_OPT_MANTIDQT_COMMON QList<QStandardItem *>
+rowFromRowText(std::vector<std::string> const &rowText);
+QList<QStandardItem *> emptyRow(int columnCount);
 
-  QStandardItem const *modelItemFromIndex(QModelIndex const &index) const;
+std::vector<std::string>
+rowTextAtRow(QStandardItemModel const &model,
+             QModelIndexForMainModel const &firstCellIndex);
+std::string textFromCell(QStandardItemModel const &model,
+                         QModelIndexForMainModel const &index);
 
-  QList<QStandardItem *>
-  rowFromRowText(std::vector<std::string> const &rowText) const;
+QModelIndexForMainModel
+appendEmptySiblingRow(QStandardItemModel &model,
+                      QModelIndexForMainModel const &index);
+QModelIndexForMainModel appendSiblingRow(QStandardItemModel &model,
+                                         QModelIndexForMainModel const &index,
+                                         QList<QStandardItem *> cells);
 
-  std::string textFromCell(QModelIndex index) const;
-  std::vector<std::string> rowTextFromRow(QModelIndex firstCellIndex) const;
+QModelIndexForMainModel
+appendEmptyChildRow(QStandardItemModel &model,
+                    QModelIndexForMainModel const &parent);
+QModelIndexForMainModel appendChildRow(QStandardItemModel &model,
+                                       QModelIndexForMainModel const &parent,
+                                       QList<QStandardItem *> cells);
 
-  QList<QStandardItem *> emptyRow() const;
+QModelIndexForMainModel insertChildRow(QStandardItemModel &model,
+                                       QModelIndexForMainModel const &parent,
+                                       int column,
+                                       QList<QStandardItem *> cells);
+QModelIndexForMainModel
+insertEmptyChildRow(QStandardItemModel &model,
+                    QModelIndexForMainModel const &parent, int column);
 
-//  int childRowCount(QModelIndex location);
+QStandardItem *modelItemFromIndex(QStandardItemModel &model,
+                                  QModelIndexForMainModel const &index);
 
-private:
-  QStandardItemModel const &model() const;
-  QStandardItemModel const* m_model;
-};
+QStandardItem const *modelItemFromIndex(QStandardItemModel const &model,
+                                        QModelIndexForMainModel const &index);
 
-class EXPORT_OPT_MANTIDQT_COMMON QtStandardItemMutableTreeAdapter : public QtStandardItemTreeAdapter {
-public:
-  QtStandardItemMutableTreeAdapter(QStandardItemModel &model);
-
-  QModelIndex appendEmptySiblingRow(QModelIndex const &index);
-  QModelIndex appendSiblingRow(QModelIndex const &index,
-                               QList<QStandardItem *> cells);
-
-  QModelIndex appendEmptyChildRow(QModelIndex const &parent);
-  QModelIndex appendChildRow(QModelIndex const &parent,
-                             QList<QStandardItem *> cells);
-
-  QModelIndex insertChildRow(QModelIndex const &parent, int column,
-                             QList<QStandardItem *> cells);
-  QModelIndex insertEmptyChildRow(QModelIndex const &parent, int column);
-  QStandardItem *modelItemFromIndex(QModelIndex const &index);
-
-  void setTextAtCell(QModelIndex index, std::string const& newText);
-  void removeRowAt(QModelIndex const &index);
-
-private:
-  QStandardItemModel &model();
-  QStandardItemModel *m_model;
-};
+void removeRowFrom(QStandardItemModel &model,
+                   QModelIndexForMainModel const &index);
+void setTextAtCell(QStandardItemModel &model,
+                   QModelIndexForMainModel const &index,
+                   std::string const &newText);
 }
 }
 }

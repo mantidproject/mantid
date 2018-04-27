@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/VectorString.cpp
   src/Batch/RowLocation.cpp
+  src/Batch/RowLocationAdapter.cpp
   src/Batch/Row.cpp
   src/Batch/ExtractSubtrees.cpp
   src/Batch/FindSubtreeRoots.cpp
@@ -85,6 +86,7 @@ set ( SRC_FILES
   src/Batch/JobTreeViewSignalAdapter.cpp
   src/Batch/QtStandardItemTreeAdapter.cpp
   src/Batch/QtFilterLeafNodes.cpp
+  src/Batch/QtBasicNavigation.cpp
   src/Batch/QtTreeCursorNavigation.cpp
   src/Batch/CellDelegate.cpp
   src/Batch/BuildSubtree.cpp
@@ -399,9 +401,12 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
+  inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
   inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
+  inc/MantidQtWidgets/Common/Batch/StrictQModelIndices.h
   inc/MantidQtWidgets/Common/Batch/QtFilterLeafNodes.h
   inc/MantidQtWidgets/Common/Batch/RowLocation.h
+  inc/MantidQtWidgets/Common/Batch/RowLocationAdapter.h
   inc/MantidQtWidgets/Common/Batch/Row.h
   inc/MantidQtWidgets/Common/Batch/CellDelegate.h
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h

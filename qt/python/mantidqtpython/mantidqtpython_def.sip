@@ -1520,6 +1520,15 @@ bool isRoot() const;
 unsigned int depth() const;
 };
 
+class RowPredicate {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/QtFilterLeafNodes.h"
+%End
+protected:
+  RowPredicate();
+  virtual bool rowMeetsCriteria(const MantidQt::MantidWidgets::Batch::RowLocation & row) const = 0;
+};
+
 class JobTreeViewSubscriber {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
@@ -1542,6 +1551,7 @@ class JobTreeView : public QTreeView
 %End
 public:
     JobTreeView(const QStringList &columnHeadings, QWidget *parent = nullptr);
+
     void subscribe(JobTreeViewSubscriber& subscriber);
     void insertChildRowOf(const RowLocation &parent, int beforeRow,
                           const std::vector<std::string> &rowText);
@@ -1563,6 +1573,15 @@ public:
     void insertSubtreeAt(const RowLocation& parent, int index,
                          std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
 
+    void enableFiltering();
+    void filterRowsBy(MantidQt::MantidWidgets::Batch::RowPredicate* predicate /Transfer/);
+    void resetFilter();
+    bool hasFilter() const;
+
+    void enableEditing(const RowLocation& row);
+    void disableEditing(const RowLocation& row);
+
+    bool isOnlyChildOfRoot(const RowLocation& location) const;
     std::vector<std::string> rowTextAt(const RowLocation &location) const;
     void setRowTextAt(const RowLocation &location,
                       const std::vector<std::string> &rowText);

@@ -4,8 +4,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
-BuildSubtree::BuildSubtree(QtStandardItemMutableTreeAdapter const &adaptedModel)
-    : m_adaptedModel(adaptedModel) {}
+BuildSubtree::BuildSubtree(QStandardItemModel &model) : m_model(model) {}
 
 void BuildSubtree::operator()(QStandardItem *parentOfSubtreeRootItem,
                               RowLocation const &parentOfSubtreeRoot, int index,
@@ -18,9 +17,9 @@ void BuildSubtree::operator()(QStandardItem *parentOfSubtreeRootItem,
 auto BuildSubtree::buildRecursively(QStandardItem *parentItem, int index,
                                     RowLocation const &parent, int depth,
                                     SubtreeConstIterator current,
-                                    SubtreeConstIterator end) -> SubtreeConstIterator {
-  parentItem->insertRow(index,
-                        m_adaptedModel.rowFromRowText((*current).cells()));
+                                    SubtreeConstIterator end)
+    -> SubtreeConstIterator {
+  parentItem->insertRow(index, rowFromRowText((*current).cells()));
   ++current;
   while (current != end) {
     auto currentRow = (*current).location();
@@ -34,7 +33,7 @@ auto BuildSubtree::buildRecursively(QStandardItem *parentItem, int index,
     } else if (depth > currentDepth) {
       return current;
     } else {
-      parentItem->appendRow(m_adaptedModel.rowFromRowText((*current).cells()));
+      parentItem->appendRow(rowFromRowText((*current).cells()));
       ++current;
     }
   }

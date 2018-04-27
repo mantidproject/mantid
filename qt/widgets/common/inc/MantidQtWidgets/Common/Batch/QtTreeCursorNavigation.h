@@ -4,6 +4,7 @@
 #include <utility>
 namespace MantidQt {
 namespace MantidWidgets {
+namespace Batch {
 
 using QtTreeCursorNavigationResult = std::pair<bool, QModelIndex>;
 class QtTreeCursorNavigation {
@@ -32,16 +33,7 @@ private:
   QtTreeCursorNavigationResult withAppendedRow(QModelIndex const &index) const;
 };
 
-QModelIndex below(QModelIndex const &index);
-QModelIndex above(QModelIndex const &index);
-QModelIndex leftOf(QModelIndex const &index);
-QModelIndex rightOf(QModelIndex const &index);
-QModelIndex firstCellOnRowOf(QModelIndex const &index);
-QModelIndex lastChildRowOf(QModelIndex const &index, QAbstractItemModel const& model);
-bool hasCellOnTheLeft(QModelIndex const &index);
-bool hasCellOnTheRight(QModelIndex const &index);
-bool hasRowAbove(QModelIndex const &index);
-bool hasRowBelow(QModelIndex const &index);
+}
 }
 }
 #endif // MANTIDQTMANTIDWIDGETS_QTTREECURSORNAVIGATION_H_

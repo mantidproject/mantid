@@ -14,7 +14,7 @@ class EXPORT_OPT_MANTIDQT_COMMON BuildSubtree {
 public:
   using SubtreeConstIterator = typename Subtree::const_iterator;
 
-  BuildSubtree(QtStandardItemMutableTreeAdapter const&adaptedModel);
+  BuildSubtree(QStandardItemModel& model);
 
   void operator()(QStandardItem *parentOfSubtreeRootItem,
                   RowLocation const &parentOfSubtreeRoot, int index,
@@ -26,7 +26,7 @@ public:
                                     SubtreeConstIterator end);
 
 private:
-  QtStandardItemMutableTreeAdapter const&m_adaptedModel;
+  QStandardItemModel& m_model;
 };
 
 } // namespace Batch
