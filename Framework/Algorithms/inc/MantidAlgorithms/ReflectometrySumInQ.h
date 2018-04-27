@@ -59,21 +59,22 @@ public:
 private:
   struct Angles {
     double horizon{std::nan("")};
-    double referenceTwoTheta{std::nan("")};
+    double twoTheta{std::nan("")};
+    double delta{std::nan("")};
   };
 
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  Angles angles(const API::SpectrumInfo &spectrumInfo);
   void checkBeamCentreIn(const Indexing::SpectrumIndexSet &indices);
-  API::MatrixWorkspace_sptr constructIvsLamWS(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices);
-  MinMax findWavelengthMinMax(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices);
-  void processValue(const int inputIdx, const double twoTheta, const double bTwoTheta, const HistogramData::HistogramX &inputX, const HistogramData::HistogramY &inputY,
-      const HistogramData::HistogramE &inputE, const API::SpectrumInfo &spectrumInfo, API::MatrixWorkspace &IvsLam,
+  API::MatrixWorkspace_sptr constructIvsLamWS(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices, const Angles &refAngles);
+  MinMax findWavelengthMinMax(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices, const Angles &refAngles);
+  void processValue(const int inputIdx, const double twoTheta, const double bTwoTheta, const Angles &refAngles, const HistogramData::HistogramX &inputX, const HistogramData::HistogramY &inputY,
+      const HistogramData::HistogramE &inputE, API::MatrixWorkspace &IvsLam,
       std::vector<double> &outputE);
   MinMax projectedLambdaRange(const double lambda, const double twoTheta, const double bLambda,
-      const double bTwoTheta, const API::SpectrumInfo &spectrumInfo);
+      const double bTwoTheta, const Angles &refAngles);
+  Angles referenceAngles(const API::SpectrumInfo &spectrumInfo);
   API::MatrixWorkspace_sptr sumInQ(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices);
 };
 

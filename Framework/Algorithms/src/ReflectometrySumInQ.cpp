@@ -197,20 +197,6 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
   return issues;
 }
 
-ReflectometrySumInQ::Angles ReflectometrySumInQ::angles(const API::SpectrumInfo &spectrumInfo) {
-  Angles a;
-  const int beamCentre = getProperty(Prop::BEAM_CENTRE);
-  const double centreTwoTheta = spectrumInfo.signedTwoTheta(static_cast<size_t>(beamCentre));
-  const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
-  if (isFlat) {
-    a.horizon = centreTwoTheta / 2.;
-  } else {
-    a.horizon = 0.;
-  }
-  a.referenceTwoTheta = centreTwoTheta;
-  return a;
-}
-
 void ReflectometrySumInQ::checkBeamCentreIn(const Indexing::SpectrumIndexSet &indices) {
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
   const auto iter = std::find(indices.begin(), indices.end(), static_cast<size_t>(beamCentre));
@@ -227,14 +213,14 @@ void ReflectometrySumInQ::checkBeamCentreIn(const Indexing::SpectrumIndexSet &in
 * @return : a 1D workspace where y values are all zero
 */
 API::MatrixWorkspace_sptr
-ReflectometrySumInQ::constructIvsLamWS(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices) {
+ReflectometrySumInQ::constructIvsLamWS(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices, const Angles &refAngles) {
 
   // Calculate the number of bins based on the min/max wavelength, using
   // the same bin width as the input workspace
   const int twoThetaRIdx = getProperty(Prop::BEAM_CENTRE);
   const auto &x = detectorWS.x(static_cast<size_t>(twoThetaRIdx));
   const double binWidth = (x.back() - x.front()) / static_cast<double>(x.size());
-  const auto wavelengthRange = findWavelengthMinMax(detectorWS, indices);
+  const auto wavelengthRange = findWavelengthMinMax(detectorWS, indices, refAngles);
   if (std::abs(wavelengthRange.max - wavelengthRange.min) < binWidth) {
     throw std::runtime_error("");
   }
@@ -257,7 +243,7 @@ ReflectometrySumInQ::constructIvsLamWS(const API::MatrixWorkspace &detectorWS, c
   return outputWS;
 }
 
-ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices) {
+ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices, const Angles &refAngles) {
   const double lambdaMin = getProperty(Prop::WAVELENGTH_MIN);
   const double lambdaMax = getProperty(Prop::WAVELENGTH_MAX);
   const API::SpectrumInfo &spectrumInfo = detectorWS.spectrumInfo();
@@ -286,15 +272,13 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(const API:
   auto xValues = detectorWS.x(twoThetaMin.first);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
                    static_cast<int>(xValues.size());
-  auto r = projectedLambdaRange(lambdaMax, twoThetaMin.second, bLambda, bTwoThetaMin,
-                          spectrumInfo);
+  auto r = projectedLambdaRange(lambdaMax, twoThetaMin.second, bLambda, bTwoThetaMin, refAngles);
   wavelengthRange.max = r.max;
   const double bTwoThetaMax = twoThetaWidth(twoThetaMax.first, spectrumInfo);
   xValues = detectorWS.x(twoThetaMax.first);
   bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
             static_cast<int>(xValues.size());
-  r = projectedLambdaRange(lambdaMin, twoThetaMax.second, bLambda, bTwoThetaMax,
-                          spectrumInfo);
+  r = projectedLambdaRange(lambdaMin, twoThetaMax.second, bLambda, bTwoThetaMax, refAngles);
   wavelengthRange.min = r.min;
   if (wavelengthRange.min > wavelengthRange.max) {
     throw std::runtime_error(
@@ -320,9 +304,8 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(const API:
 * @param outputE [in,out] :: the projected E values
 */
 void ReflectometrySumInQ::processValue(const int inputIdx, const double twoTheta, const double bTwoTheta,
-    const HistogramData::HistogramX &inputX, const HistogramData::HistogramY &inputY,
-    const HistogramData::HistogramE &inputE,
-    const API::SpectrumInfo &spectrumInfo, API::MatrixWorkspace &IvsLam,
+    const Angles &refAngles, const HistogramData::HistogramX &inputX, const HistogramData::HistogramY &inputY,
+    const HistogramData::HistogramE &inputE, API::MatrixWorkspace &IvsLam,
     std::vector<double> &outputE) {
 
   // Check whether there are any counts (if not, nothing to share)
@@ -335,7 +318,7 @@ void ReflectometrySumInQ::processValue(const int inputIdx, const double twoTheta
   const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
   const double lambda = inputX[inputIdx] + bLambda / 2.0;
   // Project these coordinates onto the virtual-lambda output (at twoThetaR)
-  const auto lambdaRange = projectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, spectrumInfo);
+  const auto lambdaRange = projectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, refAngles);
   // Share the input counts into the output array
   shareCounts(inputCounts, inputE[inputIdx], lambdaRange, IvsLam, outputE);
 }
@@ -360,42 +343,54 @@ void ReflectometrySumInQ::processValue(const int inputIdx, const double twoTheta
 * @param lambdaVMax [out] :: the projected range end
 */
 ReflectometrySumInQ::MinMax ReflectometrySumInQ::projectedLambdaRange(const double lambda, const double twoTheta, const double bLambda,
-    const double bTwoTheta, const API::SpectrumInfo &spectrumInfo) {
+    const double bTwoTheta, const Angles &refAngles) {
 
-  const auto a = angles(spectrumInfo);
   // We cannot project pixels below the horizon angle
-  if (twoTheta <= a.horizon) {
+  if (twoTheta <= refAngles.horizon) {
     throw std::runtime_error("Cannot process twoTheta=" +
                              std::to_string(twoTheta * 180.0 / M_PI) +
                              " as it is below the horizon angle=" +
-                             std::to_string(a.horizon * 180.0 / M_PI));
+                             std::to_string(refAngles.horizon * 180.0 / M_PI));
   }
 
   // Get the distance from the pixel to twoThetaR
-  const double gamma = twoTheta - a.referenceTwoTheta;
-  // Get the angle from the horizon to the reference angle
-  const double horizonThetaR = a.referenceTwoTheta - a.horizon;
+  const double gamma = twoTheta - refAngles.twoTheta;
 
   // Calculate the projected wavelength range
   MinMax range;
   try {
     const double lambdaTop =
         (lambda + bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma - bTwoTheta / 2.0));
+         std::sin(refAngles.delta) /
+         std::sin(refAngles.delta + gamma - bTwoTheta / 2.0);
     const double lambdaBot =
         (lambda - bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma + bTwoTheta / 2.0));
+         std::sin(refAngles.delta) /
+         std::sin(refAngles.delta + gamma + bTwoTheta / 2.0);
     range.testAndSet(lambdaBot);
     range.testAndSet(lambdaTop);
   } catch (std::exception &ex) {
     throw std::runtime_error(
         "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +
         "," + std::to_string(twoTheta * 180.0 / M_PI) + ") onto twoThetaR = " +
-        std::to_string(a.referenceTwoTheta) + ": " + ex.what());
+        std::to_string(refAngles.twoTheta) + ": " + ex.what());
   }
   return range;
+}
+
+ReflectometrySumInQ::Angles ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
+  Angles a;
+  const int beamCentre = getProperty(Prop::BEAM_CENTRE);
+  const double centreTwoTheta = spectrumInfo.signedTwoTheta(static_cast<size_t>(beamCentre));
+  const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
+  if (isFlat) {
+    a.horizon = centreTwoTheta / 2.;
+  } else {
+    a.horizon = 0.;
+  }
+  a.twoTheta = centreTwoTheta;
+  a.delta = a.twoTheta - a.horizon;
+  return a;
 }
 
 /**
@@ -408,9 +403,10 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::projectedLambdaRange(const doub
 API::MatrixWorkspace_sptr
 ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices) {
 
-  // Construct the output array in virtual lambda
-  API::MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS, indices);
   const auto spectrumInfo = detectorWS.spectrumInfo();
+  const auto refAngles = referenceAngles(spectrumInfo);
+  // Construct the output array in virtual lambda
+  API::MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS, indices, refAngles);
   auto &outputE = IvsLam->dataE(0);
   // Loop through each spectrum in the detector group
   for (auto spIdx : indices) {
@@ -437,8 +433,8 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS, const Indexi
     const int ySize = static_cast<int>(inputY.size());
     for (int inputIdx = 0; inputIdx < ySize; ++inputIdx) {
       // Do the summation in Q
-      processValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY,
-                          inputE, spectrumInfo, *IvsLam, projectedE);
+      processValue(inputIdx, twoTheta, bTwoTheta, refAngles, inputX, inputY,
+                          inputE, *IvsLam, projectedE);
     }
     // Sum errors in quadrature
     const int eSize = static_cast<int>(outputE.size());
