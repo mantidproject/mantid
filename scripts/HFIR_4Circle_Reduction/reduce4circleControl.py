@@ -1078,7 +1078,8 @@ class CWSCDReductionControl(object):
         max_index = bisect.bisect_left(two_theta_list, max_2theta)
 
         # debug output
-        # if have_change:
+        if have_change:
+            pass
         #     print('[DB...BAT] Dict size = {0}; Scan set size = {1}'.format(len(self._two_theta_scan_dict),
         #                                                                    len(self._scan_2theta_set)))
         #     print('[DB...BAT] 2theta list: {0}'.format(two_theta_list))
@@ -1087,7 +1088,7 @@ class CWSCDReductionControl(object):
         #        ''.format(two_theta, two_theta_list[min_index:max_index]))
         # print ('[DB...BAT] index range: {0}, {1}'.format(min_index, max_index))
 
-        scans_set = set([self._two_theta_scan_dict[two_theta_i] for two_theta_i in two_theta_list[min_index:max_index]])
+        scans_set = set([self._two_theta_scan_dict[two_theta_j] for two_theta_j in two_theta_list[min_index:max_index]])
         # print ('[DB...BAT] Find scans: {0}  Excluded scans {1}'.format(scans_set, set(excluded_scans)))
         scans_set = scans_set - set(excluded_scans)
         # print ('[DB...BAT] Find scans: {0}'.format(scans_set))
