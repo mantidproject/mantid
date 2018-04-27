@@ -151,100 +151,27 @@ LoadISISPolarizationEfficiencies::getNonDefaultProperties(
 /// @param props :: Names of properties containg names of files to load.
 MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::loadEfficiencies(
     std::vector<std::string> const &props) {
-  std::vector<MatrixWorkspace_sptr> workspaces;
+
+  auto alg = createChildAlgorithm("JoinISISPolarizationEfficiencies");
+  alg->initialize();
   for(auto const &propName : props) {
-    auto alg = createChildAlgorithm("Load");
-    alg->initialize();
-    alg->setPropertyValue("Filename", getPropertyValue(propName));
-    alg->execute();
-    MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+    auto loader = createChildAlgorithm("Load");
+    loader->initialize();
+    loader->setPropertyValue("Filename", getPropertyValue(propName));
+    loader->execute();
+    MatrixWorkspace_sptr ws = loader->getProperty("OutputWorkspace");
     if (ws->getNumberHistograms() != 1) {
       throw std::runtime_error(
           "Loaded workspace must contain a single histogram. Found " +
           std::to_string(ws->getNumberHistograms()));
     }
-    workspaces.push_back(ws);
+    alg->setProperty(propName, ws);
   }
-
-  return createEfficiencies(props, workspaces);
-}
-
-/// Create the efficiency workspace by combining single spectra workspaces into
-/// one.
-/// @param workspaces :: Workspaces to put together.
-MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::createEfficiencies(
-    std::vector<std::string> const &labels,
-    std::vector<MatrixWorkspace_sptr> const &workspaces) {
-  auto rebinnedWorkspaces = rebinWorkspaces(workspaces);
-  
-  auto const &inWS = rebinnedWorkspaces.front();
-  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS, labels.size(), inWS->x(0).size(), inWS->blocksize());
-  auto axis1 = new TextAxis(labels.size());
-  outWS->replaceAxis(1, axis1);
-
-  for (size_t i = 0; i < rebinnedWorkspaces.size(); ++i) {
-    auto &ws = rebinnedWorkspaces[i];
-    outWS->mutableX(i) = ws->x(0);
-    outWS->mutableY(i) = ws->y(0);
-    outWS->mutableE(i) = ws->e(0);
-    axis1->setLabel(i, labels[i]);
-  }
-
+  alg->execute();
+  MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   return outWS;
 }
 
-/// Rebin the workspaces so that all have the same blocksize.
-/// @param workspaces :: The workspaces to rebin.
-/// @return A list of rebinned workspaces.
-std::vector<MatrixWorkspace_sptr>
-LoadISISPolarizationEfficiencies::rebinWorkspaces(
-    std::vector<MatrixWorkspace_sptr> const &workspaces) {
-  size_t minSize(std::numeric_limits<size_t>::max());
-  size_t maxSize(0);
-  bool thereAreHistograms = false;
-  bool allAreHistograms = true;
-
-  // Find out if the workspaces need to be rebinned.
-  for (auto const &ws : workspaces) {
-    auto size = ws->blocksize();
-    if (size < minSize) {
-      minSize = size;
-    }
-    if (size > maxSize) {
-      maxSize = size;
-    }
-    thereAreHistograms = thereAreHistograms || ws->isHistogramData();
-    allAreHistograms = allAreHistograms && ws->isHistogramData();
-  }
-  
-  // All same size, same type - nothing to do
-  if (minSize == maxSize && thereAreHistograms == allAreHistograms) {
-    return workspaces;
-  }
-
-  // Rebin those that need rebinning
-  std::vector<MatrixWorkspace_sptr> rebinnedWorkspaces;
-  size_t xSize = maxSize + (thereAreHistograms ? 1 : 0);
-  for (auto const &ws : workspaces) {
-    auto const &x = ws->x(0);
-    if (x.size() < xSize) {
-      auto const start = x.front();
-      auto const end = x.back();
-      auto const dx = (end - start) / double(xSize - 1);
-      std::string const params = std::to_string(start) + "," + std::to_string(dx) + "," + std::to_string(end);
-      auto rebin = createChildAlgorithm("Rebin");
-      rebin->initialize();
-      rebin->setProperty("InputWorkspace", ws);
-      rebin->setProperty("Params", params);
-      rebin->execute();
-      MatrixWorkspace_sptr rebinnedWS = rebin->getProperty("OutputWorkspace");
-      rebinnedWorkspaces.push_back(rebinnedWS);
-    } else {
-      rebinnedWorkspaces.push_back(ws);
-    }
-  }
-  return rebinnedWorkspaces;
-}
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -47,11 +47,6 @@ private:
   getNonDefaultProperties(std::vector<std::string> const &props) const;
   API::MatrixWorkspace_sptr
   loadEfficiencies(std::vector<std::string> const &props);
-  API::MatrixWorkspace_sptr
-  createEfficiencies(std::vector<std::string> const &labels,
-                     std::vector<API::MatrixWorkspace_sptr> const &workspaces);
-  std::vector<API::MatrixWorkspace_sptr>
-  rebinWorkspaces(std::vector<API::MatrixWorkspace_sptr> const &workspaces);
 };
 
 } // namespace DataHandling
