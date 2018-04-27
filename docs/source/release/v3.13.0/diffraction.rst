@@ -18,7 +18,12 @@ New Features
 Engineering Diffraction
 -----------------------
 
-- GSASIIRefineFitPeaks is now run asynchronously in the GUI, so the GSAS tab no longer locks when a refinement is run
+- Improvements to the GSAS tab:
+
+  - GSASIIRefineFitPeaks is now run asynchronously in the GUI, so the
+    tab no longer locks when a refinement is run
+  - A **Refine All** button was added to run refinement on every run
+    loaded into the tab
 
 :ref:`Release 3.13.0 <v3.13.0>`
 
