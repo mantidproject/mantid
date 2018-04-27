@@ -80,7 +80,7 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
     GSASIIProjectFiles = std::vector<std::string>({GSASIIProjectFile});
   } else {
     for (const auto &runLabel : runLabels) {
-      GSASIIProjectFiles.push_back(
+      GSASIIProjectFiles.emplace_back(
           addRunNumberToGSASIIProjectFile(GSASIIProjectFile, runLabel));
     }
   }
