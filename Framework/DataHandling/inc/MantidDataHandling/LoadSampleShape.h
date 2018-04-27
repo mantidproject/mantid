@@ -1,9 +1,7 @@
 #ifndef DATAHANDLING_LOAD_SHAPE_H_
 #define DATAHANDLING_LOAD_SHAPE_H_
 
-#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace DataHandling {

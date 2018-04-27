@@ -1,17 +1,13 @@
 #include "MantidDataHandling/LoadSampleShape.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataService.h" // Needed for trim
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
 
 #include <fstream>
