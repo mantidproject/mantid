@@ -166,9 +166,11 @@ void ReflectometryMomentumTransfer::exec() {
   const auto incidentFWHM = incidentAngularSpread(setup);
   const auto slit1FWHM = slit1AngularSpread(setup);
   const auto &spectrumInfo = inWS->spectrumInfo();
+  const int64_t nHisto = static_cast<int64_t>(outWS->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *directWS, *outWS))
-  for (size_t wsIndex = 0; wsIndex < outWS->getNumberHistograms(); ++wsIndex) {
+  for (int64_t i = 0; i < nHisto; ++i) {
     PARALLEL_START_INTERUPT_REGION
+    const auto wsIndex = static_cast<size_t>(i);
     const auto &wavelengths = inWS->points(wsIndex);
     const auto &qs = outWS->points(wsIndex);
     auto dx = Kernel::make_cow<HistogramData::HistogramDx>(qs.size(), 0);
