@@ -56,13 +56,22 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                 "using GSAS-II scriptable API")
 
     def validateInputs(self):
+        errors = {}
+
         x_min = self.getProperty(self.PROP_XMIN)
         x_max = self.getProperty(self.PROP_XMAX)
-
         if not x_max.isDefault and x_max.value <= x_min.value:
-            return {self.PROP_XMAX: "{} must be greater than {}".format(self.PROP_XMAX, self.PROP_XMIN)}
+            errors[self.PROP_XMAX] = "{} must be greater than {}".format(self.PROP_XMAX, self.PROP_XMIN)
 
-        return {}
+        input_ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
+        input_ws_d = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing", StoreInADS=False)
+        max_d = max(input_ws_d.readX(0))
+        pawley_dmin = self.getProperty(self.PROP_PAWLEY_DMIN).value
+        if pawley_dmin > max_d:
+            errors[self.PROP_PAWLEY_DMIN] = "{}={} is greater than the max dSpacing value in the input workspace ({})" \
+                                             .format(self.PROP_PAWLEY_DMIN, pawley_dmin, max_d)
+
+        return errors
 
     def PyInit(self):
         self.declareProperty(name=self.PROP_REFINEMENT_METHOD, defaultValue=self.REFINEMENT_METHODS[0],
