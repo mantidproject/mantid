@@ -93,13 +93,13 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   const auto refineGamma = m_view->getRefineGamma();
 
   for (size_t i = 0; i < runLabels.size(); i++) {
-    const auto runLabel = runLabels[i];
+    const auto &runLabel = runLabels[i];
     const auto inputWS = *(m_multiRunWidget->getFocusedRun(runLabel));
 
-    inputParams.push_back(GSASIIRefineFitPeaksParameters(
-        inputWS, runLabels[i], refinementMethod, instParamFile, phaseFiles,
-        pathToGSASII, GSASIIProjectFiles[i], dMin, negativeWeight, xMin, xMax,
-        refineSigma, refineGamma));
+    inputParams.emplace_back(inputWS, runLabel, refinementMethod, instParamFile,
+                             phaseFiles, pathToGSASII, GSASIIProjectFiles[i],
+                             dMin, negativeWeight, xMin, xMax, refineSigma,
+                             refineGamma);
   }
   return inputParams;
 }
