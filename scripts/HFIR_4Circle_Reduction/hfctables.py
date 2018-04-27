@@ -8,7 +8,7 @@ from HFIR_4Circle_Reduction import guiutility
 from PyQt4 import QtCore
 import math
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
-
+import os
 
 
 class KShiftTableWidget(tableBase.NTableWidget):
@@ -1524,12 +1524,15 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
 
     def save_intensities_to_file(self, out_file_name):
         """
-        blabla
+        save integrated peaks intensities to file
         :param out_file_name:
         :return:
         """
         # check inputs ..
-        # blabla
+        assert isinstance(out_file_name, str), 'Output file name {0} must be a string but not a {1}' \
+                                               ''.format(out_file_name, type(out_file_name))
+        if not os.access(out_file_name, os.W_OK):
+            raise RuntimeError('Use specified output file {0} is not writable.'.format(out_file_name))
 
         out_buffer = ''
         for i_row in range(self.rowCount()):
@@ -1557,7 +1560,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
     def set_reference_scan_numbers(self, row_index, ref_numbers):
         """ set reference scan numbers or warning as 'No match'
         :param row_index:
-        :param input:
+        :param ref_numbers:
         :return:
         """
         # process the reference number
@@ -1652,40 +1655,23 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         self.update_cell_value(row_number, self._height_index, peak_height)
         self.update_cell_value(row_number, self._roi_index, roi_name)
 
-
         return
-
-    def set_two_theta(self, scan_number, pt_number, two_theta):
-        """
-        blabla
-        :param pt_number:
-        :param two_theta:
-        :return:
-        """
-        row_number = self._pt_row_dict[scan_number, pt_number]
-
-        self.update_cell_value(row_number, self._2theta_index, two_theta)
-
-        return
-
-
-
-# UB peak information table
-UB_Peak_Table_Setup = [('Scan', 'int'),
-                       ('Pt', 'int'),
-                       ('Spice HKL', 'str'),
-                       ('Calculated HKL', 'str'),
-                       ('Q-Sample', 'str'),
-                       ('Selected', 'checkbox'),
-                       ('m1', 'float'),
-                       ('Wavelength', 'float'),  # wave length
-                       ('Error', 'float')]
 
 
 class UBMatrixPeakTable(tableBase.NTableWidget):
     """
     Extended table for peaks used to calculate UB matrix
     """
+    # UB peak information table
+    UB_Peak_Table_Setup = [('Scan', 'int'),
+                           ('Pt', 'int'),
+                           ('Spice HKL', 'str'),
+                           ('Calculated HKL', 'str'),
+                           ('Q-Sample', 'str'),
+                           ('Selected', 'checkbox'),
+                           ('m1', 'float'),
+                           ('Wavelength', 'float'),  # wave length
+                           ('Error', 'float')]
 
     def __init__(self, parent):
         """
@@ -1829,7 +1815,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         if row_index < 0 or row_index >= self.rowCount():
             raise IndexError('Input row number %d is out of range [0, %d)' % (row_index, self.rowCount()))
 
-        col_index = UB_Peak_Table_Setup.index(('Selected', 'checkbox'))
+        col_index = UBMatrixPeakTable.UB_Peak_Table_Setup.index(('Selected', 'checkbox'))
 
         return self.get_cell_value(row_index, col_index)
 
@@ -1838,7 +1824,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         Init setup
         :return:
         """
-        self.init_setup(UB_Peak_Table_Setup)
+        self.init_setup(UBMatrixPeakTable.UB_Peak_Table_Setup)
         self.set_status_column_name('Selected')
 
         # define all the _colIndex
@@ -1938,7 +1924,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         # set error
         if error is not None:
-            i_col_error = UB_Peak_Table_Setup.index(('Error', 'float'))
+            i_col_error = UBMatrixPeakTable.UB_Peak_Table_Setup.index(('Error', 'float'))
             self.update_cell_value(i_row, i_col_error, error)
 
         return

@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import os
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from . import ui_PeakIntegrationSpreadSheet
 
 
@@ -31,10 +31,9 @@ class PeaksIntegrationReportDialog(QtGui.QDialog):
 
     def do_export_table(self):
         """
-
+        export table to a file
         :return:
         """
-        print ('[DB...BAT] Export peak integration table is called!')
         default_dir = os.getcwd()
         output_file = str(QtGui.QFileDialog.getSaveFileName(self, 'Export table to csv file', default_dir,
                                                             'Data Files (*.dat);;All  Files (*.*)'))

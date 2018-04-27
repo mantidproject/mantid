@@ -160,7 +160,7 @@ def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
         motor_pos_vec[i_pt] = motor_pos_dict[pt]
 
     return motor_pos_vec, pt_intensity_vec
-        
+
 
 def estimate_background(pt_intensity_dict, bg_pt_list):
     """

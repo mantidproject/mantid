@@ -2791,10 +2791,6 @@ class MainWindow(QtGui.QMainWindow):
                 if peak_info_i is None:
                     message += 'Row {0} Scan {1} is not integrated.\n'.format(row_index, scan_i)
                     continue
-            
-            # TODO NOW3 - Debugging no index
-            print ('[DB...BAT] Index row {0} scan {1}.  Peak info = {2} of type {3}'
-                   ''.format(row_index, scan_i, peak_info_i, type(peak_info_i)))
 
             # get or calculate HKL
             if is_single_pt or hkl_src == 'From SPICE':

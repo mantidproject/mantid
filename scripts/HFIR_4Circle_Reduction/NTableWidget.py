@@ -172,15 +172,14 @@ class NTableWidget(QtGui.QTableWidget):
             cell_i_j = self.cellWidget(row_index, col_index)
             # PyQt5 compatible issue!
             assert isinstance(cell_i_j, QCheckBox), 'Cell {0} {1} must be of type QCheckBox but not a {2}' \
-                                                          ''.format(row_index, col_index, type(cell_i_j))
+                                                    ''.format(row_index, col_index, type(cell_i_j))
 
             return_value = cell_i_j.isChecked()
         else:
             # Regular cell for int, float or string
             item_i_j = self.item(row_index, col_index)
-            assert isinstance(item_i_j, QTableWidgetItem), 'Cell {0} {1} must be of type QTableWidgetItem' \
-                                                                 'but not a {2}'.format(row_index, col_index,
-                                                                                        type(item_i_j))
+            assert isinstance(item_i_j, QTableWidgetItem), 'Cell {0} {1} must be of type QTableWidgetItem but not a ' \
+                                                           '{2}'.format(row_index, col_index, type(item_i_j))
 
             # get the string of the cell
             return_value = str(item_i_j.text()).strip()

@@ -335,6 +335,11 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
                 scan_index_increment = -1
             elif event.button == 3:
                 scan_index_increment = 1
+            else:
+                scan_index_increment = 0
+
+            print ('[TODO] Supposed to increase or decrease scan number to {0}'.format(scan_index_increment))
+        # END-IF
 
         return
 

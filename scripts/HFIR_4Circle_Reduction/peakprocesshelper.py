@@ -854,4 +854,3 @@ def str_format(float_items):
     # END-FOR
 
     return format_str
-
