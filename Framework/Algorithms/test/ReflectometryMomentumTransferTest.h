@@ -486,12 +486,15 @@ private:
 
 class ReflectometryMomentumTransferTestPerformance : public CxxTest::TestSuite {
 public:
+  void setUp() override {
+    m_reflectedWS = makeWS();
+    m_directWS = m_reflectedWS->clone();
+    m_algorithm = makeAlgorithm(m_reflectedWS, m_directWS);
+  }
+
   void test_performance() {
-    API::MatrixWorkspace_sptr reflectedWS = makeWS();
-    API::MatrixWorkspace_sptr directWS = reflectedWS->clone();
-    auto algorithm = makeAlgorithm(reflectedWS, directWS);
     for (int i = 0; i < 1000; ++i)
-      algorithm->execute();
+      m_algorithm->execute();
   }
 
 private:
@@ -567,6 +570,11 @@ private:
         convertUnits->getProperty("OutputWorkspace");
     return outWS;
   }
+
+private:
+  API::IAlgorithm_sptr m_algorithm;
+  API::MatrixWorkspace_sptr m_directWS;
+  API::MatrixWorkspace_sptr m_reflectedWS;
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_ */
