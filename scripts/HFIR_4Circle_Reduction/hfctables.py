@@ -1545,13 +1545,13 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         out_file.close()
 
         return
-    
+
     def set_gaussian_sigma(self, row_index, sigma):
         """
         set the (Gaussian) sigma value to a row
         :param row_index:
-        :param sigma: 
-        :return: 
+        :param sigma: sigma value of Gaussian
+        :return: None
         """
         self.update_cell_value(row_index, self._fwhm_index, sigma)
 
