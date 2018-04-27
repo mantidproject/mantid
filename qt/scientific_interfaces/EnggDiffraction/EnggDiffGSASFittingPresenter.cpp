@@ -95,7 +95,7 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
     GSASIIProjectFiles = std::vector<std::string>({GSASIIProjectFile});
   } else {
     for (const auto &runLabel : runLabels) {
-      GSASIIProjectFiles.push_back(
+      GSASIIProjectFiles.emplace_back(
           addRunNumberToGSASIIProjectFile(GSASIIProjectFile, runLabel));
     }
   }
@@ -113,10 +113,10 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   const auto refineGamma = m_view->getRefineGamma();
 
   for (size_t i = 0; i < runLabels.size(); i++) {
-    const auto runLabel = runLabels[i];
+    const auto &runLabel = runLabels[i];
     const auto inputWS = *(m_multiRunWidget->getFocusedRun(runLabel));
 
-    inputParams.emplace_back(inputWS, runLabels[i], refinementMethod,
+    inputParams.emplace_back(inputWS, runLabel, refinementMethod,
                              calibFileNames[0], phaseFiles, pathToGSASII,
                              GSASIIProjectFiles[i], dMin, negativeWeight, xMin,
                              xMax, refineSigma, refineGamma);

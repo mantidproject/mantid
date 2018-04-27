@@ -14,6 +14,7 @@
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/EstimatePolynomial.h"
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -30,9 +31,9 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-
 using namespace std;
 
 const size_t MIN_EVENTS = 100;
@@ -138,7 +139,7 @@ void PeakFitResult::setRecord(size_t ipeak, const double cost,
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
   */
-size_t findXIndex(const HistogramX &vecx, double x) {
+size_t findXIndex(const std::vector<double> &vecx, double x) {
   size_t index;
   if (x <= vecx.front()) {
     index = 0;
@@ -1124,42 +1125,26 @@ void FitPeaks::calculateFittedPeaks() {
 /**  Estimate background: There are two methods that will be tried.
  * First, algorithm FindPeakBackground will be tried;
  * If it fails, then a linear background estimator will be called.
- * @brief FitPeaks::EstimateBackground
- * @param dataws
- * @param wi
- * @param peak_window
- * @param bkgd_function
  */
-void FitPeaks::estimateBackground(MatrixWorkspace_sptr dataws, size_t wi,
+void FitPeaks::estimateBackground(const Histogram &histogram,
                                   const std::pair<double, double> &peak_window,
                                   API::IBackgroundFunction_sptr bkgd_function) {
-  // call algorithm FindPeakBackground
-  // std::vector<size_t> peak_min_max_indexes;
-  std::vector<double> vector_bkgd(3);
-
-  // peak window: if it is not valid, then use an empty peak window
-  std::vector<double> peak_window_v(2);
-  peak_window_v[0] = peak_window.first;
-  peak_window_v[1] = peak_window.second;
-  if (peak_window_v[0] >= peak_window_v[1])
-    peak_window_v.clear();
+  if (peak_window.first >= peak_window.second)
+    throw std::runtime_error("Invalid peak window");
 
   // use the simple way to find linear background
-  double bkgd_a1, bkgd_a0;
-  this->estimateLinearBackground(dataws, wi, peak_window.first,
-                                 peak_window.second, bkgd_a1, bkgd_a0);
-  vector_bkgd[0] = bkgd_a0;
-  vector_bkgd[1] = bkgd_a1;
-  vector_bkgd[2] = 0;
+  double bkgd_a0, bkgd_a1;
+  this->estimateLinearBackground(histogram, peak_window.first,
+                                 peak_window.second, bkgd_a0, bkgd_a1);
 
   // set result
   // FIXME - this is not flexible for background other than
   // flat/linear/quadratic
-  bkgd_function->setParameter(0, vector_bkgd[0]);
+  bkgd_function->setParameter(0, bkgd_a0);
   if (bkgd_function->nParams() > 1)
-    bkgd_function->setParameter(1, vector_bkgd[1]);
+    bkgd_function->setParameter(1, bkgd_a1);
   if (bkgd_function->nParams() > 2)
-    bkgd_function->setParameter(2, vector_bkgd[2]);
+    bkgd_function->setParameter(2, 0.);
 
   return;
 }
@@ -1233,20 +1218,9 @@ int FitPeaks::estimatePeakParameters(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Guess/estimate peak center and thus height by observation
- * @brief FitPeaks::ObservePeakCenter
- * @param vector_x
- * @param vector_y
- * @param bkgd_values
- * @param start_index
- * @param stop_index
- * @param peak_center
- * @param peak_center_index
- * @param peak_height
- * @return
- */
-int FitPeaks::observePeakCenter(const HistogramData::HistogramX &vector_x,
-                                const HistogramData::HistogramY &vector_y,
+/// Guess/estimate peak center and thus height by observation
+int FitPeaks::observePeakCenter(const HistogramX &vector_x,
+                                const HistogramY &vector_y,
                                 FunctionValues &bkgd_values, size_t start_index,
                                 size_t stop_index, double &peak_center,
                                 size_t &peak_center_index,
@@ -1311,8 +1285,8 @@ int FitPeaks::observePeakCenter(const HistogramData::HistogramX &vector_x,
  * @param istop
  * @return peak width as double
  */
-double FitPeaks::observePeakWidth(const HistogramData::HistogramX &vector_x,
-                                  const HistogramData::HistogramY &vector_y,
+double FitPeaks::observePeakWidth(const HistogramX &vector_x,
+                                  const HistogramY &vector_y,
                                   FunctionValues &bkgd_values,
                                   double peak_height, size_t ipeak,
                                   size_t istart, size_t istop) {
@@ -1402,12 +1376,10 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
                              API::IBackgroundFunction_sptr bkgd_func) {
 
   // find out how to fit background
-  size_t start_index =
-      findXIndex(m_inputMatrixWS->histogram(ws_index).x(), fit_window.first);
-  size_t stop_index =
-      findXIndex(m_inputMatrixWS->histogram(ws_index).x(), fit_window.second);
-  size_t expected_peak_index =
-      findXIndex(m_inputMatrixWS->histogram(ws_index).x(), expected_peak_pos);
+  const auto &points = m_inputMatrixWS->histogram(ws_index).points();
+  size_t start_index = findXIndex(points.rawData(), fit_window.first);
+  size_t stop_index = findXIndex(points.rawData(), fit_window.second);
+  size_t expected_peak_index = findXIndex(points.rawData(), expected_peak_pos);
 
   // treat 5 as a magic number - TODO explain why
   bool good_fit(false);
@@ -1419,11 +1391,8 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
     std::vector<double> vec_max(2);
 
     vec_min[0] = fit_window.first;
-    vec_max[0] =
-        m_inputMatrixWS->histogram(ws_index).x()[expected_peak_index - 5];
-
-    vec_min[1] =
-        m_inputMatrixWS->histogram(ws_index).x()[expected_peak_index + 5];
+    vec_max[0] = points[expected_peak_index - 5];
+    vec_min[1] = points[expected_peak_index + 5];
     vec_max[1] = fit_window.second;
 
     // reset background function value
@@ -1519,11 +1488,13 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
   std::pair<double, double> peak_window = std::make_pair(xmin, xmax);
 
   // Estimate background
-  if (estimate_background)
-    estimateBackground(dataws, wsindex, peak_window, bkgd_function);
-  else
+  if (estimate_background) {
+    const auto &histogram = dataws->histogram(wsindex);
+    estimateBackground(histogram, peak_window, bkgd_function);
+  } else {
     for (size_t n = 0; n < bkgd_function->nParams(); ++n)
       bkgd_function->setParameter(n, 0);
+  }
 
   // Estimate peak profile parameter
   int result =
@@ -2042,58 +2013,18 @@ void FitPeaks::reduceBackground(API::IBackgroundFunction_sptr bkgd_func,
   return;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Get index of X value in a given spectrum
- * @brief FitPeaks::getXIndex
- * @param wi
- * @param x
- * @return
- */
-size_t FitPeaks::getXIndex(size_t wi, double x) {
-  // check input
-  if (wi >= m_inputMatrixWS->getNumberHistograms()) {
-    std::stringstream errss;
-    errss << "getXIndex(): given workspace index " << wi
-          << " is out of worspace range [0, "
-          << m_inputMatrixWS->getNumberHistograms() << ")";
-    throw std::runtime_error(errss.str());
-  }
-
-  // get value
-  auto vec_x = m_inputMatrixWS->histogram(wi).x();
-  auto finditer = std::lower_bound(vec_x.begin(), vec_x.end(), x);
-  size_t index = static_cast<size_t>(finditer - vec_x.begin());
-  return index;
-}
-
-void FitPeaks::estimateLinearBackground(API::MatrixWorkspace_sptr dataws,
-                                        size_t wi, double left_window_boundary,
+void FitPeaks::estimateLinearBackground(const Histogram &histogram,
+                                        double left_window_boundary,
                                         double right_window_boundary,
-                                        double &bkgd_a1, double &bkgd_a0) {
+                                        double &bkgd_a0, double &bkgd_a1) {
+  const auto &vecX = histogram.points();
+  size_t istart = findXIndex(vecX.rawData(), left_window_boundary);
+  size_t istop = findXIndex(vecX.rawData(), right_window_boundary);
 
-  bkgd_a0 = 0.;
-  bkgd_a1 = 0.;
-
-  auto &vecX = dataws->x(wi);
-  auto &vecY = dataws->y(wi);
-  size_t istart = findXIndex(vecX, left_window_boundary);
-  size_t istop = findXIndex(vecX, right_window_boundary);
-
-  double left_x = 0.;
-  double left_y = 0.;
-  double right_x = 0.;
-  double right_y = 0.;
-  for (size_t i = 0; i < 3; ++i) {
-    left_x += vecX[istart + i] / 3.;
-    left_y += vecY[istart + i] / 3.;
-    right_x += vecX[istop - i] / 3.;
-    right_y += vecY[istop - 1] / 3.;
-  }
-
-  bkgd_a1 = (left_y - right_y) / (left_x - right_x);
-  bkgd_a0 = (left_y * right_x - right_y * left_x) / (right_x - left_x);
-
-  return;
+  double bg2, chisq;
+  // TODO explain why 3 is the right number
+  HistogramData::estimateBackground(1, histogram, istart, istop, istart + 3,
+                                    istop - 3, bkgd_a0, bkgd_a1, bg2, chisq);
 }
 
 //----------------------------------------------------------------------------------------------

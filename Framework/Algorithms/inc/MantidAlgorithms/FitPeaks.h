@@ -165,14 +165,14 @@ private:
                         const std::vector<double> &vec_e);
 
   /// Esitmate background by 'observation'
-  void estimateBackground(API::MatrixWorkspace_sptr dataws, size_t wi,
+  void estimateBackground(const HistogramData::Histogram &histogram,
                           const std::pair<double, double> &peak_window,
                           API::IBackgroundFunction_sptr bkgd_function);
   /// estimate linear background
-  void estimateLinearBackground(API::MatrixWorkspace_sptr dataws, size_t wi,
+  void estimateLinearBackground(const HistogramData::Histogram &histogram,
                                 double left_window_boundary,
-                                double right_window_boundary, double &bkgd_a1,
-                                double &bkgd_a0);
+                                double right_window_boundary, double &bkgd_a0,
+                                double &bkgd_a1);
 
   /// Estimate peak parameters by 'observation'
   int estimatePeakParameters(API::MatrixWorkspace_sptr dataws, size_t wi,
@@ -206,9 +206,6 @@ private:
 
   /// calculate peak+background for fitted
   void calculateFittedPeaks();
-
-  /// Get index of value X in a spectrum's X histogram
-  size_t getXIndex(size_t wi, double x);
 
   /// Get the parameter name for peak height (I or height or etc)
   std::string

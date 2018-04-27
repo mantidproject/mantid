@@ -519,7 +519,7 @@ To do a refinement, take the following steps:
    **Fit Results** section.
 
    - You can also click **Refine All** to run refinement on all runs
-     loaded into to GSAS tab
+     loaded into GSAS tab
 
 You can toggle the fitted peaks on and off with the **Plot Fitted
 Peaks** checkbox, remove runs from the list with the **Remove Run**
