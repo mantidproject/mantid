@@ -1,8 +1,6 @@
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramDx.h"
@@ -58,7 +56,7 @@ DECLARE_ALGORITHM(Stitch1D)
  */
 MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
                                           MatrixWorkspace_sptr &source) {
-  MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
+  MatrixWorkspace_sptr product = source->clone();
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
   for (int i = 0; i < histogramCount; ++i) {
@@ -637,7 +635,6 @@ void Stitch1D::exec() {
         findStartEndIndexes(startOverlap, endOverlap, lhs);
     int a1 = boost::tuples::get<0>(startEnd);
     int a2 = boost::tuples::get<1>(startEnd);
-
     // Mask out everything BUT the overlap region as a new workspace.
     MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
     // Mask out everything BUT the overlap region as a new workspace.

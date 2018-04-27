@@ -1,6 +1,6 @@
 digraph Stitch1D {
 splines=false
-label = "\nStitch1D workflow - no manual scale factor                                                                                                                  Stitch1D workflow - manual scale factor given\n\n"
+label = "\nStitch1D workflow for histograms - no manual scale factor                                                                                                                  Stitch1D workflow histograms - manual scale factor given\n\n"
  $global_style
 
 subgraph params {
