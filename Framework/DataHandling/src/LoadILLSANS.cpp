@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -45,6 +46,11 @@ const std::string LoadILLSANS::category() const {
   return "DataHandling\\Nexus;ILL\\SANS";
 }
 
+/// Algorithm's summary. @see Algorithm::summery
+const std::string LoadILLSANS::summary() const {
+    return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
+}
+
 //----------------------------------------------------------------------------------------------
 
 /**
@@ -80,39 +86,45 @@ void LoadILLSANS::init() {
 /** Execute the algorithm.
  */
 void LoadILLSANS::exec() {
-  // Init
   const std::string filename = getPropertyValue("Filename");
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
-
   const std::string instrumentPath =
       m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
+  Progress progress(this, 0.0, 1.0, 4);
 
   if (m_instrumentName == "D33") {
+    progress.report("Initializing the workspace for " + m_instrumentName);
     initWorkSpaceD33(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
     const DetectorPosition detPos =
         getDetectorPositionD33(firstEntry, instrumentPath);
+    progress.report("Moving detectors");
     moveDetectorsD33(std::move(detPos));
   } else {
+    progress.report("Initializing the workspace for " + m_instrumentName);
     initWorkSpace(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
     double distance = m_loader.getDoubleFromNexusPath(
         firstEntry, instrumentPath + "/detector/det_calc");
+    progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
     if (m_instrumentName == "D22") {
       double offset = m_loader.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
       moveDetectorHorizontal(offset / 1000, "detector"); // mm to meter
+      /*TODO: DO NOT ROTATE UNTIL CONFIRMED BY INSTRUMENT SCIENTIST
       double angle = m_loader.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dan_actual");
-      rotateD22(angle, "detector");
+      rotateD22(angle, "detector");*/
     }
   }
 
+  progress.report("Setting sample logs");
   setFinalProperties(filename);
-  // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
@@ -121,7 +133,6 @@ void LoadILLSANS::exec() {
  */
 void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
-
   if (instrumentNamePath.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
@@ -147,9 +158,7 @@ LoadILLSANS::DetectorPosition
 LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
   std::string detectorPath(instrumentNamePath + "/detector");
-
   DetectorPosition pos;
-
   pos.distanceSampleRear =
       m_loader.getDoubleFromNexusPath(firstEntry, detectorPath + "/det2_calc");
   pos.distanceSampleBottomTop =
@@ -158,7 +167,6 @@ LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
       pos.distanceSampleBottomTop +
       m_loader.getDoubleFromNexusPath(firstEntry,
                                       detectorPath + "/det1_panel_separation");
-
   pos.shiftLeft = m_loader.getDoubleFromNexusPath(
                       firstEntry, detectorPath + "/OxL_actual") *
                   1e-3;
@@ -171,9 +179,7 @@ LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
   pos.shiftDown = m_loader.getDoubleFromNexusPath(
                       firstEntry, detectorPath + "/OyB_actual") *
                   1e-3;
-
   pos >> g_log.debug();
-
   return pos;
 }
 
@@ -269,16 +275,15 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
   g_log.debug("Loading the data into the workspace...");
 
   size_t nextIndex =
-      loadDataIntoWorkspaceFromHorizontalTubes(dataRear, binningRear, 0);
+      loadDataIntoWorkspaceFromVerticalTubes(dataRear, binningRear, 0);
   nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataRight, binningRight,
                                                      nextIndex);
   nextIndex =
       loadDataIntoWorkspaceFromVerticalTubes(dataLeft, binningLeft, nextIndex);
-  nextIndex = loadDataIntoWorkspaceFromHorizontalTubes(dataDown, binningDown,
+  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataDown, binningDown,
                                                        nextIndex);
   nextIndex =
-      loadDataIntoWorkspaceFromHorizontalTubes(dataUp, binningUp, nextIndex);
-
+      loadDataIntoWorkspaceFromVerticalTubes(dataUp, binningUp, nextIndex);
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
 }
 
@@ -296,23 +301,17 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       data.load();
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0()
                     << "x" << data.dim1() << "x" << data.dim2() << '\n';
-
       const size_t vectorSize = data.dim2() + 1;
       std::vector<double> positionsBinning;
       positionsBinning.reserve(vectorSize);
-
       HistogramData::BinEdges histoBinEdges(
           vectorSize, HistogramData::LinearGenerator(0.0, vectorSize));
-
       if (firstEntry.getFloat("mode") == 0.0) { // Not TOF
         histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
       }
-
       const HistogramData::Counts histoCounts(data(), data() + data.dim2());
-
       m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges),
                                      std::move(histoCounts));
-
       // Add average monitor counts to a property:
       double averageMonitorCounts =
           std::accumulate(data(), data() + data.dim2(), 0) /
@@ -322,52 +321,10 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
         API::Run &runDetails = m_localWorkspace->mutableRun();
         runDetails.addProperty("monitor", averageMonitorCounts, true);
       }
-
       firstIndex++;
     }
   }
   return firstIndex;
-}
-
-size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
-    NeXus::NXInt &data, const std::vector<double> &timeBinning,
-    size_t firstIndex = 0) {
-
-  g_log.debug("Loading the data into the workspace:");
-  g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << '\n';
-  g_log.debug() << "\t"
-                << "Number of Pixels : data.dim0() = " << data.dim0() << '\n';
-  g_log.debug() << "\t"
-                << "Number of Tubes : data.dim1() = " << data.dim1() << '\n';
-  g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << '\n';
-  g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << '\n';
-
-  // Workaround to get the number of tubes / pixels
-  const size_t numberOfTubes = data.dim1();
-  const size_t numberOfPixelsPerTube = data.dim0();
-
-  Progress progress(this, 0.0, 1.0, data.dim0() * data.dim1());
-
-  size_t spec = firstIndex;
-
-  const HistogramData::BinEdges binEdges(timeBinning);
-
-  for (size_t i = 0; i < numberOfTubes; ++i) {
-    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
-      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
-      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
-      ++spec;
-      progress.report();
-    }
-  }
-
-  g_log.debug() << "Data loading into WS done....\n";
-
-  return spec;
 }
 
 size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
@@ -389,9 +346,6 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
   // Workaround to get the number of tubes / pixels
   const size_t numberOfTubes = data.dim0();
   const size_t numberOfPixelsPerTube = data.dim1();
-
-  Progress progress(this, 0.0, 1.0, data.dim0() * data.dim1());
-
   const HistogramData::BinEdges binEdges(timeBinning);
   size_t spec = firstIndex;
 
@@ -399,10 +353,8 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
-
       m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
       ++spec;
-      progress.report();
     }
   }
 
@@ -459,8 +411,11 @@ void LoadILLSANS::runLoadInstrument() {
   loadInst->execute();
 }
 
+/**
+ * Move the detector banks for D33
+ * @param detPos : structure holding the positions
+ */
 void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
-
   // Move in Z
   moveDetectorDistance(detPos.distanceSampleRear, "back_detector");
   moveDetectorDistance(detPos.distanceSampleBottomTop, "front_detector_top");
@@ -477,29 +432,30 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
 
 /**
  * Move detectors in Z axis (X,Y are kept constant)
+ * @param distance : the distance to move along Z axis [meters]
+ * @param componentName : name of the component to move
  */
 void LoadILLSANS::moveDetectorDistance(double distance,
                                        const std::string &componentName) {
 
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
   V3D pos = getComponentPosition(componentName);
-  try {
-    mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    mover->setProperty("ComponentName", componentName);
-    mover->setProperty("X", pos.X());
-    mover->setProperty("Y", pos.Y());
-    mover->setProperty("Z", distance);
-    mover->setProperty("RelativePosition", false);
-    mover->executeAsChildAlg();
-    g_log.debug() << "Moving component '" << componentName
-                  << "' to Z = " << distance << '\n';
-  } catch (std::exception &e) {
-    g_log.error() << "Cannot move the component '" << componentName
-                  << "' to Z = " << distance << '\n';
-    g_log.error() << e.what() << '\n';
-  }
+  mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  mover->setProperty("ComponentName", componentName);
+  mover->setProperty("X", pos.X());
+  mover->setProperty("Y", pos.Y());
+  mover->setProperty("Z", distance);
+  mover->setProperty("RelativePosition", false);
+  mover->executeAsChildAlg();
+  g_log.debug() << "Moving component '" << componentName
+                << "' to Z = " << distance << '\n';
 }
 
+/**
+ * Rotates D22 detector around y-axis
+ * @param componentName : "detector"
+ * @param angle : the angle to rotate [degree]
+ */
 void LoadILLSANS::rotateD22(double angle, const ::std::string &componentName) {
   API::IAlgorithm_sptr rotater =
       createChildAlgorithm("RotateInstrumentComponent");
@@ -517,53 +473,48 @@ void LoadILLSANS::rotateD22(double angle, const ::std::string &componentName) {
 
 /**
  * Move detectors in X
+ * @param shift : the distance to move [metres]
+ * @param componentName : the name of the component
  */
 void LoadILLSANS::moveDetectorHorizontal(double shift,
                                          const std::string &componentName) {
-
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
   V3D pos = getComponentPosition(componentName);
-  try {
-    mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    mover->setProperty("ComponentName", componentName);
-    mover->setProperty("X", shift);
-    mover->setProperty("Y", pos.Y());
-    mover->setProperty("Z", pos.Z());
-    mover->setProperty("RelativePosition", false);
-    mover->executeAsChildAlg();
-    g_log.debug() << "Moving component '" << componentName
-                  << "' to X = " << shift << '\n';
-  } catch (std::exception &e) {
-    g_log.error() << "Cannot move the component '" << componentName
-                  << "' to X = " << shift << '\n';
-    g_log.error() << e.what() << '\n';
-  }
-}
-
-void LoadILLSANS::moveDetectorVertical(double shift,
-                                       const std::string &componentName) {
-
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
-  V3D pos = getComponentPosition(componentName);
-  try {
-    mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    mover->setProperty("ComponentName", componentName);
-    mover->setProperty("X", pos.X());
-    mover->setProperty("Y", shift);
-    mover->setProperty("Z", pos.Z());
-    mover->setProperty("RelativePosition", false);
-    mover->executeAsChildAlg();
-    g_log.debug() << "Moving component '" << componentName
-                  << "' to Y = " << shift << '\n';
-  } catch (std::exception &e) {
-    g_log.error() << "Cannot move the component '" << componentName
-                  << "' to Y = " << shift << '\n';
-    g_log.error() << e.what() << '\n';
-  }
+  mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  mover->setProperty("ComponentName", componentName);
+  mover->setProperty("X", -shift); // positive means right from the sample
+  mover->setProperty("Y", pos.Y());
+  mover->setProperty("Z", pos.Z());
+  mover->setProperty("RelativePosition", false);
+  mover->executeAsChildAlg();
+  g_log.debug() << "Moving component '" << componentName << "' to X = " << shift
+                << '\n';
 }
 
 /**
- * Get position in space of a componentName
+ * Move detectors in Y
+ * @param shift : the distance to move [metres]
+ * @param componentName : the name of the component
+ */
+void LoadILLSANS::moveDetectorVertical(double shift,
+                                       const std::string &componentName) {
+  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  V3D pos = getComponentPosition(componentName);
+  mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  mover->setProperty("ComponentName", componentName);
+  mover->setProperty("X", pos.X());
+  mover->setProperty("Y", shift);
+  mover->setProperty("Z", pos.Z());
+  mover->setProperty("RelativePosition", false);
+  mover->executeAsChildAlg();
+  g_log.debug() << "Moving component '" << componentName << "' to Y = " << shift
+                << '\n';
+}
+
+/**
+ * Get position of a component
+ * @param componentName : the name of the component
+ * @return : V3D of the component position
  */
 V3D LoadILLSANS::getComponentPosition(const std::string &componentName) {
   Geometry::Instrument_const_sptr instrument =
@@ -573,14 +524,15 @@ V3D LoadILLSANS::getComponentPosition(const std::string &componentName) {
   return component->getPos();
 }
 
-/*
- * Loads metadata present in the nexus file
+/**
+ * Loads some metadata present in the nexus file
+ * @param entry : opened nexus entry
+ * @param instrumentPath : the nexus entry of the instrument
  */
 void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
                                const std::string &instrumentNamePath) {
 
   g_log.debug("Loading metadata...");
-
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   if (entry.getFloat("mode") == 0.0) { // Not TOF
@@ -616,12 +568,17 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
 /**
  * @param lambda : wavelength in Angstroms
  * @param twoTheta : twoTheta in degreess
+ * @return Q : momentum transfer [Aˆ-1]
  */
 double LoadILLSANS::calculateQ(const double lambda,
                                const double twoTheta) const {
   return (4 * M_PI * std::sin(twoTheta * (M_PI / 180) / 2)) / (lambda);
 }
 
+/**
+ * Calculates the max and min Q
+ * @return pair<min, max>
+ */
 std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();
@@ -652,18 +609,15 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
       if (v2 > max) {
         max = v2;
       }
-    } else
-      g_log.debug() << "Detector " << i
-                    << " is a Monitor : " << spectrumInfo.detector(i).getID()
-                    << '\n';
+    }
   }
-
-  g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max
-                << "]\n";
-
   return std::pair<double, double>(min, max);
 }
 
+/**
+ * Sets full sample logs
+ * @param filename : name of the file
+ */
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   runDetails.addProperty("is_frame_skipping", 0);

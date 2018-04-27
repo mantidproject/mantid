@@ -37,10 +37,7 @@ class DLLExport LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLSANS();
   const std::string name() const override;
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
-  }
+  const std::string summary() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
     return {"LoadNexus"};
@@ -82,10 +79,6 @@ private:
 
   size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
                                            size_t firstIndex = 0);
-
-  size_t loadDataIntoWorkspaceFromHorizontalTubes(NeXus::NXInt &,
-                                                  const std::vector<double> &,
-                                                  size_t);
   size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &,
                                                 const std::vector<double> &,
                                                 size_t);
