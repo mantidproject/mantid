@@ -11,11 +11,10 @@ Summary
 If your changes break the master builds in any way, on any platform,
 then it is your responsibility to fix the error immediately!
 
-
 The Details
 ^^^^^^^^^^^
 
-You should follow the :ref:`dev-docs-git-workflow`. When you open a
+You should follow the :ref:`GitWorkflow`. When you open a
 pull request (or commit to an already open pull request) the automated
 build process will start. There will be a different build for each
 platform/job. A status will appear for each job in the pull request.
@@ -44,7 +43,28 @@ GitHub hooks fail to activate or the build server was down when the
 pull request was opened.
 
 The pull request builder we are using is called `Leeroy
-<https://github.com/mantidproject/leeroy>`_
+<https://github.com/mantidproject/leeroy>`_.
 
 You can find a list of all the pull request Jenkins jobs at `here
 <http://builds.mantidproject.org/view/Pull%20Requests/>`_.
+
+Master Pipeline
+^^^^^^^^^^^^^^^
+
+The `master pipeline <http://builds.mantidproject.org/view/Master%20Pipeline/>`_
+is a series of jobs that periodically run against code on the ``master`` branch.
+Their purpose is to provide reasonable assurance that the code currently in
+``master`` is usable in its current state.
+
+The main tasks carried out by the pipeline are, for each supported platform:
+
+* Build Mantid and installers (``master_clean-PLATFORM``)
+* Run automated testing (``master_clean-PLATFORM``,
+  ``master_systemtests-PLATFORM``, ``master_doctests``)
+* Deploy installers to nightly download locations (``master_deploy``)
+
+The pipeline view in Jenkins shows the order of dependency between these jobs.
+
+The most upstream jobs (i.e. ``master_clean-PLATFORM``) are triggered to start
+at midnight UTC assuming there were changes pushed to the ``master`` branch
+since the last time they ran.

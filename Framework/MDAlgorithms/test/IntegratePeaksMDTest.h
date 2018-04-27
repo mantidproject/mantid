@@ -18,12 +18,7 @@
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-
+#include <random>
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
@@ -447,17 +442,16 @@ public:
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
-    boost::mt19937 rng;
-    boost::uniform_real<double> u(-9.0, 9.0); // Random from -9 to 9.0
-    boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>> gen(
-        rng, u);
+    std::mt19937 rng;
+    std::uniform_real_distribution<double> flat(-9.0,
+                                                9.0); // Random from -9 to 9.0
 
     peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
     for (size_t i = 0; i < numPeaks; ++i) {
       // Random peak center
-      double x = gen();
-      double y = gen();
-      double z = gen();
+      double x = flat(rng);
+      double y = flat(rng);
+      double z = flat(rng);
 
       // Make the peak
       IntegratePeaksMDTest::addPeak(1000, x, y, z, 0.02);
@@ -470,9 +464,6 @@ public:
 
       // Add to peaks workspace
       peakWS->addPeak(Peak(inst, 1, 1.0, V3D(x, y, z)));
-
-      if (i % 100 == 0)
-        std::cout << "Peak " << i << " added\n";
     }
     AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks", peakWS);
   }

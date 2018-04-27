@@ -79,6 +79,7 @@ New
 
 Improved
 ########
+- DEB and RPM package sizes reduced by 17% and 6% respectively.
 - :class:`mantid.kernel.FloatTimeSeriesProperty` now returns :class:`numpy.datetime64` for the log times.
 - The duration reported by a running algorithm now includes time spent for validation of properties and inputs. This fixes a discrepancy between observed and reported timings if validation is expensive, e.g., when checking if a file exists. More detailed timing information is now available when setting the log level to ``debug``.
 - The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom.

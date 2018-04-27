@@ -1,44 +1,18 @@
 #include "MantidAlgorithms/SofQWCentre.h"
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/CommonBinsValidator.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
-
-#include <numeric>
-#include <stdexcept>
 
 namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQWCentre)
-
-/// Energy to K constant
-double SofQWCentre::energyToK() {
-  static const double energyToK = 8.0 * M_PI * M_PI *
-                                  PhysicalConstants::NeutronMass *
-                                  PhysicalConstants::meV * 1e-20 /
-                                  (PhysicalConstants::h * PhysicalConstants::h);
-  return energyToK;
-}
 
 using namespace Kernel;
 using namespace API;
@@ -50,6 +24,7 @@ void SofQWCentre::init() { SofQW::createCommonInputProperties(*this); }
 
 void SofQWCentre::exec() {
   using namespace Geometry;
+  using PhysicalConstants::E_mev_toNeutronWavenumberSq;
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
 
@@ -61,10 +36,14 @@ void SofQWCentre::exec() {
         "The input workspace must have common binning across all spectra");
   }
 
+  m_EmodeProperties.initCachedValues(*inputWorkspace, this);
+  const int emode = m_EmodeProperties.m_emode;
+
   std::vector<double> verticalAxis;
   MatrixWorkspace_sptr outputWorkspace =
-      SofQW::setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"),
-                                  verticalAxis, getProperty("EAxisBinning"));
+      SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+          *inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
+          getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWorkspace);
   const auto &xAxis = outputWorkspace->binEdges(0).rawData();
 
@@ -72,20 +51,12 @@ void SofQWCentre::exec() {
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
-  m_EmodeProperties.initCachedValues(*inputWorkspace, this);
-  int emode = m_EmodeProperties.m_emode;
-
   const auto &detectorInfo = inputWorkspace->detectorInfo();
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
   V3D beamDir = detectorInfo.samplePosition() - detectorInfo.sourcePosition();
   beamDir.normalize();
   double l1 = detectorInfo.l1();
   g_log.debug() << "Source-sample distance: " << l1 << '\n';
-
-  // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
-                           (PhysicalConstants::h * PhysicalConstants::h);
 
   // Loop over input workspace bins, reassigning data to correct bin in output
   // qw workspace
@@ -158,8 +129,8 @@ void SofQWCentre::exec() {
             throw std::runtime_error(
                 "Negative incident energy. Check binning.");
 
-          const V3D ki = beamDir * sqrt(energyToK * ei);
-          const V3D kf = scatterDir * (sqrt(energyToK * (ef)));
+          const V3D ki = beamDir * sqrt(ei / E_mev_toNeutronWavenumberSq);
+          const V3D kf = scatterDir * sqrt(ef / E_mev_toNeutronWavenumberSq);
           const double q = (ki - kf).norm();
 
           // Test whether it's in range of the Q axis
@@ -198,7 +169,7 @@ void SofQWCentre::exec() {
 
   // If the input workspace was a distribution, need to divide by q bin width
   if (inputWorkspace->isDistribution())
-    this->makeDistribution(outputWorkspace, verticalAxis);
+    this->makeDistribution(*outputWorkspace, verticalAxis);
 
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
@@ -222,15 +193,15 @@ void SofQWCentre::exec() {
  *  @param outputWS :: The output workspace
  *  @param qAxis ::    A vector of the q bin boundaries
  */
-void SofQWCentre::makeDistribution(API::MatrixWorkspace_sptr outputWS,
-                                   const std::vector<double> qAxis) {
+void SofQWCentre::makeDistribution(API::MatrixWorkspace &outputWS,
+                                   const std::vector<double> &qAxis) {
   std::vector<double> widths(qAxis.size());
   std::adjacent_difference(qAxis.begin(), qAxis.end(), widths.begin());
 
-  const size_t numQBins = outputWS->getNumberHistograms();
+  const size_t numQBins = outputWS.getNumberHistograms();
   for (size_t i = 0; i < numQBins; ++i) {
-    auto &Y = outputWS->mutableY(i);
-    auto &E = outputWS->mutableE(i);
+    auto &Y = outputWS.mutableY(i);
+    auto &E = outputWS.mutableE(i);
     std::transform(Y.begin(), Y.end(), Y.begin(),
                    std::bind2nd(std::divides<double>(), widths[i + 1]));
     std::transform(E.begin(), E.end(), E.begin(),

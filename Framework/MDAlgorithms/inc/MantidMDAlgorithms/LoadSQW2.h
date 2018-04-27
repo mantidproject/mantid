@@ -47,6 +47,9 @@ class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNXSPE", "SaveNXSPE"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;

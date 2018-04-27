@@ -10,6 +10,9 @@ class EnggCalibrate(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Engineering"
 
+    def seeAlso(self):
+        return [ "EnggCalibrateFull" ]
+
     def name(self):
         return "EnggCalibrate"
 

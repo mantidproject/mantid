@@ -40,6 +40,9 @@ public:
   const std::string name() const override { return "LoadILLReflectometry"; }
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
   /// Algorithm's category for search and find. @see Algorithm::category
   const std::string category() const override {
     return "DataHandling\\Nexus;ILL\\Reflectometry";
