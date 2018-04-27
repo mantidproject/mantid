@@ -29,6 +29,8 @@ Single Crystal Diffraction
 
 - HFIR 4Circle Reduction interface is improved to provide a new workflow to integrate weak diffraction peaks.
 
+- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
+
 Improvements
 ############
 

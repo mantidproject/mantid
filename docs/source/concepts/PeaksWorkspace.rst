@@ -49,6 +49,27 @@ Each Peak object contains a PeakShape. Only the integration algorithms which act
 Subtypes of PeakShape will then provide additional information. For example PeakShapeSpherical provides the radius as well as background inner, and background outer radius.
 
 
+Calculate Goniometer For Constant Wavelength
+--------------------------------------------
+
+If you set the `wavelength` (in Å) or `energy` (in meV) property on a
+PeaksWorkspace when the createPeak method is used the goniometer
+rotation with be calculated. This allows you to use one instrument
+definition for multiple goniometer rotations, for example adding peaks
+in Slice Viewer from multiple combined MD workspaces. It only works
+for a constant wavelength source and only for Q sample workspaces. It
+also assumes the goniometer rotation is around the y-axis only. For
+details on the calculation see "Calculate Goniometer For Constant
+Wavelength" at :ref:`FindPeaksMD <algm-FindPeaksMD>`.
+
+.. code-block:: python
+
+    pws = mtd['name_of_peaks_workspace']
+    pws.run().addProperty('wavelength', 1.54, True)
+    # or
+    pws.run().addProperty('energy', 34.48, True)
+
+
 Using PeaksWorkspaces in Python
 ---------------------------------
 
