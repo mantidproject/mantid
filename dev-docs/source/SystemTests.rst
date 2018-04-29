@@ -75,7 +75,7 @@ standard workpace, then this step can be skipped. Simply omitting the
 
 .. code-block:: python
 
-   def validate(self):
+   def validate(self):
 
 method from the system test is sufficient.
 
@@ -126,7 +126,7 @@ system test.
 
 .. code-block:: python
 
-   self.tolerance = 0.00000001
+   self.tolerance = 0.00000001
 
 Disable Some Checks
 -------------------
@@ -137,8 +137,8 @@ default, is empty.
 
 .. code-block:: python
 
-   # A list of things not to check when validating
-   self.disableChecking = []
+   # A list of things not to check when validating
+   self.disableChecking = []
 
 Assertions
 ----------
@@ -149,11 +149,11 @@ class.
 
 .. code-block:: python
 
-   def assertTrue(self, value, msg=""):
-   def assertEqual(self, value, expected, msg=""):
-   def assertDelta(self, value, expected, delta, msg=""):
-   def assertLessThan(self, value, expected, msg=""):
-   def assertGreaterThan(self, value, expected, msg=""):
+   def assertTrue(self, value, msg=""):
+   def assertEqual(self, value, expected, msg=""):
+   def assertDelta(self, value, expected, delta, msg=""):
+   def assertLessThan(self, value, expected, msg=""):
+   def assertGreaterThan(self, value, expected, msg=""):
 
 Running Tests Locally
 #####################
