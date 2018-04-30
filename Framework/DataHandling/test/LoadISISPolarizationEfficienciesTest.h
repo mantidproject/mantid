@@ -11,10 +11,17 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <array>
 
 using Mantid::DataHandling::LoadISISPolarizationEfficiencies;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
+using ScopedFileHelper::ScopedFile;
+
 
 class LoadISISPolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
@@ -34,8 +41,110 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_fileIsReadCorrectly() {
+  void test_load() {
+    ScopedFile f1(m_data1, "Efficiency1.dat");
+    ScopedFile f2(m_data1, "Efficiency2.dat");
+
+    LoadISISPolarizationEfficiencies alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("P1", f1.getFileName());
+    alg.setProperty("P2", f2.getFileName());
+    alg.setProperty("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 5);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "P2");
+
+    TS_ASSERT(!outWS->isHistogramData());
+
+    {
+      auto const &x = outWS->x(0);
+      auto const &y = outWS->y(0);
+      TS_ASSERT_EQUALS(x.size(), 5);
+      TS_ASSERT_EQUALS(y.size(), 5);
+      TS_ASSERT_DELTA(x.front(), 1.1, 1e-15);
+      TS_ASSERT_DELTA(x.back(), 5.5, 1e-15);
+      TS_ASSERT_DELTA(y.front(), 1., 1e-15);
+      TS_ASSERT_DELTA(y.back(), 1., 1e-15);
+    }
+
+    {
+      auto const &x = outWS->x(1);
+      auto const &y = outWS->y(1);
+      TS_ASSERT_EQUALS(x.size(), 5);
+      TS_ASSERT_EQUALS(y.size(), 5);
+      TS_ASSERT_DELTA(x.front(), 1.1, 1e-15);
+      TS_ASSERT_DELTA(x.back(), 5.5, 1e-15);
+      TS_ASSERT_DELTA(y.front(), 1., 1e-15);
+      TS_ASSERT_DELTA(y.back(), 1., 1e-15);
+    }
   }
+
+  void test_load_diff_sizes() {
+    ScopedFile f1(m_data1, "Efficiency1.dat");
+    ScopedFile f2(m_data2, "Efficiency2.dat");
+
+    LoadISISPolarizationEfficiencies alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("P1", f1.getFileName());
+    alg.setProperty("P2", f2.getFileName());
+    alg.setProperty("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 5);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "P2");
+
+    TS_ASSERT(!outWS->isHistogramData());
+
+    {
+      auto const &x = outWS->x(0);
+      auto const &y = outWS->y(0);
+      TS_ASSERT_EQUALS(x.size(), 5);
+      TS_ASSERT_EQUALS(y.size(), 5);
+      TS_ASSERT_DELTA(x.front(), 1.1, 1e-15);
+      TS_ASSERT_DELTA(x.back(), 5.5, 1e-15);
+      TS_ASSERT_DELTA(y.front(), 1., 1e-15);
+      TS_ASSERT_DELTA(y.back(), 1., 1e-15);
+    }
+
+    {
+      auto const &x = outWS->x(1);
+      auto const &y = outWS->y(1);
+      TS_ASSERT_EQUALS(x.size(), 5);
+      TS_ASSERT_EQUALS(y.size(), 5);
+      TS_ASSERT_DELTA(x.front(), 1.1, 1e-15);
+      TS_ASSERT_DELTA(x.back(), 4.5, 1e-15);
+      TS_ASSERT_DELTA(y.front(), 1., 1e-15);
+      TS_ASSERT_DELTA(y.back(), 1., 1e-15);
+    }
+  }
+
+private:
+
+  std::string const m_data1{"1.10000,1.000000,0.322961\n"
+                            "2.20000,1.000000,0.0217908\n"
+                            "3.30000,1.000000,0.00993287\n"
+                            "4.50000,1.000000,0.00668106\n"
+                            "5.50000,1.000000,0.0053833\n"};
+
+  std::string const m_data2{"1.10000,1.000000,0.322961\n"
+                            "2.20000,1.000000,0.0217908\n"
+                            "3.30000,1.000000,0.00993287\n"
+                            "4.50000,1.000000,0.00668106\n"};
 };
 
 #endif /* MANTID_DATAHANDLING_LOADISISPOLARIZATIONEFFICIENCIESTEST_H_ */

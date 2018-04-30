@@ -60,42 +60,42 @@ const std::string LoadISISPolarizationEfficiencies::summary() const {
  */
 void LoadISISPolarizationEfficiencies::init() {
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::PP_FILENAME, "", API::FileProperty::Load),
+                      Prop::PP_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the Pp polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::AP_FILENAME, "", API::FileProperty::Load),
+                      Prop::AP_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the Ap polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::RHO_FILENAME, "", API::FileProperty::Load),
+                      Prop::RHO_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the Rho polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::ALPHA_FILENAME, "", API::FileProperty::Load),
+                      Prop::ALPHA_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the Alpha polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::P1_FILENAME, "", API::FileProperty::Load),
+                      Prop::P1_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the P1 polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::P2_FILENAME, "", API::FileProperty::Load),
+                      Prop::P2_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the P2 polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::F1_FILENAME, "", API::FileProperty::Load),
+                      Prop::F1_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the F1 polarization efficiency "
                   "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::F2_FILENAME, "", API::FileProperty::Load),
+                      Prop::F2_FILENAME, "", API::FileProperty::OptionalLoad),
                   "Path to the file containing the F2 polarization efficiency "
                   "in XYE columns.");
 
@@ -159,7 +159,11 @@ MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::loadEfficiencies(
     loader->initialize();
     loader->setPropertyValue("Filename", getPropertyValue(propName));
     loader->execute();
-    MatrixWorkspace_sptr ws = loader->getProperty("OutputWorkspace");
+    Workspace_sptr output = loader->getProperty("OutputWorkspace");
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+    if (!ws) {
+      throw std::invalid_argument("File " + propName + " cannot be loaded into a MatrixWorkspace.");
+    }
     if (ws->getNumberHistograms() != 1) {
       throw std::runtime_error(
           "Loaded workspace must contain a single histogram. Found " +

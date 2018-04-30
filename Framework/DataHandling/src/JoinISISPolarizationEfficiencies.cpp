@@ -7,6 +7,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/make_unique.h"
 #include <limits>
 
@@ -26,11 +27,24 @@ const std::string OUTPUT_WORKSPACE("OutputWorkspace");
 
 }
 
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
+
+namespace {
+
+  Histogram makeHistogram(size_t const size, double const startX, double const endX) {
+    auto const dX = (endX - startX) / double(size - 1);
+      Points xVals(size, LinearGenerator(startX, dX));
+      Counts yVals(size, 0.0);
+      return Histogram(xVals, yVals);
+  }
+
+}
+
 namespace Mantid {
 namespace DataHandling {
-
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(JoinISISPolarizationEfficiencies)
@@ -182,15 +196,15 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
 MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
     std::vector<std::string> const &labels,
     std::vector<MatrixWorkspace_sptr> const &workspaces) {
-  auto rebinnedWorkspaces = rebinWorkspaces(workspaces);
+  auto interpolatedWorkspaces = interpolateWorkspaces(workspaces);
   
-  auto const &inWS = rebinnedWorkspaces.front();
+  auto const &inWS = interpolatedWorkspaces.front();
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS, labels.size(), inWS->x(0).size(), inWS->blocksize());
   auto axis1 = new TextAxis(labels.size());
   outWS->replaceAxis(1, axis1);
 
-  for (size_t i = 0; i < rebinnedWorkspaces.size(); ++i) {
-    auto &ws = rebinnedWorkspaces[i];
+  for (size_t i = 0; i < interpolatedWorkspaces.size(); ++i) {
+    auto &ws = interpolatedWorkspaces[i];
     outWS->mutableX(i) = ws->x(0);
     outWS->mutableY(i) = ws->y(0);
     outWS->mutableE(i) = ws->e(0);
@@ -200,18 +214,18 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
   return outWS;
 }
 
-/// Rebin the workspaces so that all have the same blocksize.
-/// @param workspaces :: The workspaces to rebin.
-/// @return A list of rebinned workspaces.
+/// Interpolate the workspaces so that all have the same blocksize.
+/// @param workspaces :: The workspaces to interpolate.
+/// @return A list of interpolated workspaces.
 std::vector<MatrixWorkspace_sptr>
-JoinISISPolarizationEfficiencies::rebinWorkspaces(
+JoinISISPolarizationEfficiencies::interpolateWorkspaces(
     std::vector<MatrixWorkspace_sptr> const &workspaces) {
   size_t minSize(std::numeric_limits<size_t>::max());
   size_t maxSize(0);
   bool thereAreHistograms = false;
   bool allAreHistograms = true;
 
-  // Find out if the workspaces need to be rebinned.
+  // Find out if the workspaces need to be interpolated.
   for (auto const &ws : workspaces) {
     auto size = ws->blocksize();
     if (size < minSize) {
@@ -233,29 +247,24 @@ JoinISISPolarizationEfficiencies::rebinWorkspaces(
     return workspaces;
   }
 
-  // Rebin those that need rebinning
-  std::vector<MatrixWorkspace_sptr> rebinnedWorkspaces;
-  size_t const xSize = maxSize + (thereAreHistograms ? 1 : 0);
+  // Interpolate those that need interpolating
+  std::vector<MatrixWorkspace_sptr> interpolatedWorkspaces;
   for (auto const &ws : workspaces) {
-    auto const &x = ws->x(0);
-    if (x.size() < xSize) {
-      auto const start = x.front();
-      auto const end = x.back();
-      auto const dx = (end - start) / double(maxSize);
-      std::string const params = std::to_string(start) + "," + std::to_string(dx) + "," + std::to_string(end);
-      auto rebin = createChildAlgorithm("Rebin");
-      rebin->initialize();
-      rebin->setProperty("InputWorkspace", ws);
-      rebin->setProperty("Params", params);
-      rebin->execute();
-      MatrixWorkspace_sptr rebinnedWS = rebin->getProperty("OutputWorkspace");
-      rebinnedWorkspaces.push_back(rebinnedWS);
-      assert(rebinnedWS->x(0).size() == xSize);
+    auto const &x = ws->points(0);
+    if (x.size() < maxSize || thereAreHistograms) {
+      auto const startX = x.front();
+      auto const endX = x.back();
+      auto newHisto = makeHistogram(maxSize, startX, endX);
+      interpolateLinearInplace(ws->histogram(0), newHisto);
+      auto interpolatedWS = boost::make_shared<Workspace2D>();
+      interpolatedWS->initialize(1, newHisto);
+      interpolatedWorkspaces.push_back(interpolatedWS);
+      assert(interpolatedWS->x(0).size() == maxSize);
     } else {
-      rebinnedWorkspaces.push_back(ws);
+      interpolatedWorkspaces.push_back(ws);
     }
   }
-  return rebinnedWorkspaces;
+  return interpolatedWorkspaces;
 }
 
 } // namespace DataHandling
