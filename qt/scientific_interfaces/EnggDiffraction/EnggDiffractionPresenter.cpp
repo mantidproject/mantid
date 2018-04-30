@@ -2426,9 +2426,9 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
 * @param bank the number of the bank as a string
 * @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
-                                              std::string bank,
-                                              std::string runNo) {
+void EnggDiffractionPresenter::saveFocusedXYE(const std::string &inputWorkspace,
+                                              const std::string &bank,
+                                              const std::string &runNo) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
@@ -2474,8 +2474,9 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
 * @param bank the number of the bank as a string
 * @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
-                                       std::string bank, std::string runNo) {
+void EnggDiffractionPresenter::saveGSS(const std::string &inputWorkspace,
+                                       const std::string &bank,
+                                       const std::string &runNo) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
@@ -2551,9 +2552,9 @@ void EnggDiffractionPresenter::saveNexus(const std::string &inputWorkspace,
 * @param bank the number of the bank as a string
 * @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
-                                             std::string bank,
-                                             std::string runNo) {
+void EnggDiffractionPresenter::saveOpenGenie(const std::string &inputWorkspace,
+                                             const std::string &bank,
+                                             const std::string &runNo) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
@@ -2608,8 +2609,8 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
 * @param format the format of the file to be saved as
 */
 std::string EnggDiffractionPresenter::outFileNameFactory(
-    std::string inputWorkspace, std::string runNo, std::string bank,
-    std::string format) {
+    const std::string &inputWorkspace, const std::string &runNo,
+    const std::string &bank, const std::string &format) {
   std::string fullFilename;
 
   // calibration output files

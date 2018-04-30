@@ -259,17 +259,20 @@ private:
                           std::string specNos);
 
   // algorithms to save the generated workspace
-  void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
-  void saveFocusedXYE(std::string inputWorkspace, std::string bank,
-                      std::string runNo);
+  void saveGSS(const std::string &inputWorkspace, const std::string &bank,
+               const std::string &runNo);
+  void saveFocusedXYE(const std::string &inputWorkspace,
+                      const std::string &bank, const std::string &runNo);
   void saveNexus(const std::string &inputWorkspace, const std::string &bank,
                  const std::string &runNumber);
-  void saveOpenGenie(std::string inputWorkspace, std::string bank,
-                     std::string runNo);
+  void saveOpenGenie(const std::string &inputWorkspace, const std::string &bank,
+                     const std::string &runNo);
 
   // generates the required file name of the output files
-  std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
-                                 std::string bank, std::string format);
+  std::string outFileNameFactory(const std::string &inputWorkspace,
+                                 const std::string &runNo,
+                                 const std::string &bank,
+                                 const std::string &format);
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
