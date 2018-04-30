@@ -468,8 +468,6 @@ The user must input the following files:
 
 - **Focused run file(s)** - these must have been generated either by
   the **Fitting** tab or :ref:`EnggFocus <algm-EnggFocus>`.
-- **Instrument Parameter File** - contains DIFA and DIFC GSAS
-  constants, will probably be of ``.prm`` format
 - **Phase file(s)** - contain crystallographic information about the
   sample in question. Currently only ``.cif`` files are supported
 
