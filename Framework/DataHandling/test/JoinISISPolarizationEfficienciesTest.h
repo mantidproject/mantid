@@ -11,10 +11,15 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 #include <array>
+#include <numeric>
 
 using Mantid::DataHandling::JoinISISPolarizationEfficiencies;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 class JoinISISPolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
@@ -34,7 +39,558 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_fileIsReadCorrectly() {
+  void test_no_input() {
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    // Error: At least one of the efficiency file names must be set.
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+
+  void test_mixed_input() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createHistoWS(10, 0, 10);
+    auto ws3 = createHistoWS(10, 0, 10);
+    auto ws4 = createHistoWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("Pp", ws1);
+    alg.setProperty("Ap", ws2);
+    alg.setProperty("P1", ws3);
+    alg.setProperty("P2", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    // Error: Efficiencies belonging to different methods cannot mix.
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+
+  void test_fredrikze() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createHistoWS(10, 0, 10);
+    auto ws3 = createHistoWS(10, 0, 10);
+    auto ws4 = createHistoWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("Pp", ws1);
+    alg.setProperty("Ap", ws2);
+    alg.setProperty("Rho", ws3);
+    alg.setProperty("Alpha", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Ap");
+    TS_ASSERT_EQUALS(axis1->label(2), "Rho");
+    TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
+
+    TS_ASSERT(outWS->isHistogramData());
+
+    {
+      auto const &x = outWS->x(0);
+      auto const &y = outWS->y(0);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(1);
+      auto const &y = outWS->y(1);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(2);
+      auto const &y = outWS->y(2);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(3);
+      auto const &y = outWS->y(3);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+  }
+
+  void test_wildes() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createHistoWS(10, 0, 10);
+    auto ws3 = createHistoWS(10, 0, 10);
+    auto ws4 = createHistoWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("P1", ws1);
+    alg.setProperty("P2", ws2);
+    alg.setProperty("F1", ws3);
+    alg.setProperty("F2", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "P2");
+    TS_ASSERT_EQUALS(axis1->label(2), "F1");
+    TS_ASSERT_EQUALS(axis1->label(3), "F2");
+
+    TS_ASSERT(outWS->isHistogramData());
+  }
+
+  void test_wildes_points() {
+    auto ws1 = createPointWS(10, 0, 10);
+    auto ws2 = createPointWS(10, 0, 10);
+    auto ws3 = createPointWS(10, 0, 10);
+    auto ws4 = createPointWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("P1", ws1);
+    alg.setProperty("P2", ws2);
+    alg.setProperty("F1", ws3);
+    alg.setProperty("F2", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "P2");
+    TS_ASSERT_EQUALS(axis1->label(2), "F1");
+    TS_ASSERT_EQUALS(axis1->label(3), "F2");
+
+    TS_ASSERT(!outWS->isHistogramData());
+
+    {
+      auto const &x = outWS->x(0);
+      auto const &y = outWS->y(0);
+      TS_ASSERT_EQUALS(x.size(), 10);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 10.0, 1e-14);
+    }
+
+    {
+      auto const &x = outWS->x(1);
+      auto const &y = outWS->y(1);
+      TS_ASSERT_EQUALS(x.size(), 10);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 10.0, 1e-14);
+    }
+
+    {
+      auto const &x = outWS->x(2);
+      auto const &y = outWS->y(2);
+      TS_ASSERT_EQUALS(x.size(), 10);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 10.0, 1e-14);
+    }
+
+    {
+      auto const &x = outWS->x(3);
+      auto const &y = outWS->y(3);
+      TS_ASSERT_EQUALS(x.size(), 10);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 10.0, 1e-14);
+    }
+  }
+
+  void test_histo_3_out_of_4() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createHistoWS(10, 0, 10);
+    auto ws3 = createHistoWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("P1", ws1);
+    alg.setProperty("P2", ws2);
+    alg.setProperty("F1", ws3);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 3);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "P2");
+    TS_ASSERT_EQUALS(axis1->label(2), "F1");
+  }
+
+  void test_histo_2_out_of_4() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createHistoWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("P1", ws1);
+    alg.setProperty("F1", ws2);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "F1");
+  }
+
+  void test_histo_1_out_of_4() {
+    auto ws1 = createHistoWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("F2", ws1);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "F2");
+  }
+
+  void test_mixed_histo_points() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createPointWS(10, 0, 10);
+    auto ws3 = createHistoWS(10, 0, 10);
+    auto ws4 = createHistoWS(10, 0, 10);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("P1", ws1);
+    alg.setProperty("P2", ws2);
+    alg.setProperty("F1", ws3);
+    alg.setProperty("F2", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    // Error: Cannot mix histograms and point data.
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+
+  void test_ragged() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createHistoWS(10, 1, 10);
+    auto ws3 = createHistoWS(10, 2, 3);
+    auto ws4 = createHistoWS(10, 11, 20);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("Pp", ws1);
+    alg.setProperty("Ap", ws2);
+    alg.setProperty("Rho", ws3);
+    alg.setProperty("Alpha", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Ap");
+    TS_ASSERT_EQUALS(axis1->label(2), "Rho");
+    TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
+
+    TS_ASSERT(outWS->isHistogramData());
+
+    {
+      auto const &x = outWS->x(0);
+      auto const &y = outWS->y(0);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(1);
+      auto const &y = outWS->y(1);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 1);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(2);
+      auto const &y = outWS->y(2);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 2);
+      TS_ASSERT_EQUALS(x.back(), 3);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(3);
+      auto const &y = outWS->y(3);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 10);
+      TS_ASSERT_EQUALS(x.front(), 11);
+      TS_ASSERT_EQUALS(x.back(), 20);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+  }
+
+  void test_histo_ragged_diff_sizes() {
+    auto ws1 = createHistoWS(10, 0, 10);
+    auto ws2 = createHistoWS(9, 1, 10);
+    auto ws3 = createHistoWS(11, 2, 3);
+    auto ws4 = createHistoWS(10, 11, 20);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("Pp", ws1);
+    alg.setProperty("Ap", ws2);
+    alg.setProperty("Rho", ws3);
+    alg.setProperty("Alpha", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 11);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Ap");
+    TS_ASSERT_EQUALS(axis1->label(2), "Rho");
+    TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
+
+    TS_ASSERT(outWS->isHistogramData());
+
+    {
+      auto const &x = outWS->x(0);
+      auto const &y = outWS->y(0);
+      TS_ASSERT_EQUALS(x.size(), 12);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_EQUALS(x.front(), 0);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_DELTA(y.front(), 10./11., 1e-5);
+      TS_ASSERT_DELTA(y.back(), 10./11., 1e-5);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 10.0, 1e-14);
+    }
+
+    {
+      auto const &x = outWS->x(1);
+      auto const &y = outWS->y(1);
+      TS_ASSERT_EQUALS(x.size(), 12);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_EQUALS(x.front(), 1);
+      TS_ASSERT_EQUALS(x.back(), 10);
+      TS_ASSERT_DELTA(y.front(), 9./11., 1e-5);
+      TS_ASSERT_DELTA(y.back(), 9./11., 1e-5);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 9.0, 1e-14);
+    }
+
+    {
+      auto const &x = outWS->x(2);
+      auto const &y = outWS->y(2);
+      TS_ASSERT_EQUALS(x.size(), 12);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_EQUALS(x.front(), 2);
+      TS_ASSERT_EQUALS(x.back(), 3);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(3);
+      auto const &y = outWS->y(3);
+      TS_ASSERT_EQUALS(x.size(), 12);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_EQUALS(x.front(), 11);
+      TS_ASSERT_EQUALS(x.back(), 20);
+      TS_ASSERT_DELTA(y.front(), 10./11., 1e-5);
+      TS_ASSERT_DELTA(y.back(), 10./11., 1e-5);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 10.0, 1e-14);
+    }
+  }
+
+  void test_points_ragged_diff_sizes() {
+    auto ws1 = createPointWS(10, 0, 10);
+    auto ws2 = createPointWS(9, 1, 10);
+    auto ws3 = createPointWS(11, 2, 3);
+    auto ws4 = createPointWS(10, 11, 20);
+
+    JoinISISPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("Pp", ws1);
+    alg.setProperty("Ap", ws2);
+    alg.setProperty("Rho", ws3);
+    alg.setProperty("Alpha", ws4);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 11);
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Ap");
+    TS_ASSERT_EQUALS(axis1->label(2), "Rho");
+    TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
+
+    TS_ASSERT(!outWS->isHistogramData());
+
+    {
+      auto const &x = outWS->x(0);
+      auto const &y = outWS->y(0);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_DELTA(x.front(), 0.4545455004, 1e-5);
+      TS_ASSERT_DELTA(x.back(), 9.5454550088, 1e-5);
+      TS_ASSERT_DELTA(y.front(), 9./11., 1e-5);
+      TS_ASSERT_DELTA(y.back(), 9./11., 1e-5);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 9.0, 1e-14);
+    }
+
+    {
+      auto const &x = outWS->x(1);
+      auto const &y = outWS->y(1);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_DELTA(x.front(), 1.4090910002, 1e-5);
+      TS_ASSERT_DELTA(x.back(), 9.5909100088, 1e-5);
+      TS_ASSERT_DELTA(y.front(), 8./11., 1e-5);
+      TS_ASSERT_DELTA(y.back(), 8./11., 1e-5);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 8.0, 1e-14);
+    }
+
+    {
+      auto const &x = outWS->x(2);
+      auto const &y = outWS->y(2);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_EQUALS(x.front(), 2);
+      TS_ASSERT_EQUALS(x.back(), 3);
+      TS_ASSERT_EQUALS(y.front(), 1);
+      TS_ASSERT_EQUALS(y.back(), 1);
+    }
+
+    {
+      auto const &x = outWS->x(3);
+      auto const &y = outWS->y(3);
+      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(y.size(), 11);
+      TS_ASSERT_DELTA(x.front(), 11.4090910084, 1e-5);
+      TS_ASSERT_DELTA(x.back(), 19.5909100060, 1e-5);
+      TS_ASSERT_DELTA(y.front(), 9./11., 1e-5);
+      TS_ASSERT_DELTA(y.back(), 9./11., 1e-5);
+      auto sum = std::accumulate(y.begin(), y.end(), 0.0);
+      TS_ASSERT_DELTA(sum, 9.0, 1e-14);
+    }
+  }
+
+private:
+
+  MatrixWorkspace_sptr createHistoWS(size_t size, double startX, double endX) const {
+    double const dX = (endX - startX) / size;
+    BinEdges xVals(size + 1, LinearGenerator(startX, dX));
+    Counts yVals(size, 1.0);
+    auto retVal = boost::make_shared<Workspace2D>();
+    retVal->initialize(1, Histogram(xVals, yVals));
+    return retVal;
+  }
+
+  MatrixWorkspace_sptr createPointWS(size_t size, double startX, double endX) const {
+    double const dX = (endX - startX) / (size - 1);
+    Points xVals(size, LinearGenerator(startX, dX));
+    Counts yVals(size, 1.0);
+    auto retVal = boost::make_shared<Workspace2D>();
+    retVal->initialize(1, Histogram(xVals, yVals));
+    return retVal;
   }
 };
 

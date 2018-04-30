@@ -223,21 +223,25 @@ JoinISISPolarizationEfficiencies::rebinWorkspaces(
     thereAreHistograms = thereAreHistograms || ws->isHistogramData();
     allAreHistograms = allAreHistograms && ws->isHistogramData();
   }
-  
+
+  if (thereAreHistograms != allAreHistograms) {
+    throw std::invalid_argument("Cannot mix histograms and point data.");
+  }
+
   // All same size, same type - nothing to do
-  if (minSize == maxSize && thereAreHistograms == allAreHistograms) {
+  if (minSize == maxSize) {
     return workspaces;
   }
 
   // Rebin those that need rebinning
   std::vector<MatrixWorkspace_sptr> rebinnedWorkspaces;
-  size_t xSize = maxSize + (thereAreHistograms ? 1 : 0);
+  size_t const xSize = maxSize + (thereAreHistograms ? 1 : 0);
   for (auto const &ws : workspaces) {
     auto const &x = ws->x(0);
     if (x.size() < xSize) {
       auto const start = x.front();
       auto const end = x.back();
-      auto const dx = (end - start) / double(xSize - 1);
+      auto const dx = (end - start) / double(maxSize);
       std::string const params = std::to_string(start) + "," + std::to_string(dx) + "," + std::to_string(end);
       auto rebin = createChildAlgorithm("Rebin");
       rebin->initialize();
@@ -246,6 +250,7 @@ JoinISISPolarizationEfficiencies::rebinWorkspaces(
       rebin->execute();
       MatrixWorkspace_sptr rebinnedWS = rebin->getProperty("OutputWorkspace");
       rebinnedWorkspaces.push_back(rebinnedWS);
+      assert(rebinnedWS->x(0).size() == xSize);
     } else {
       rebinnedWorkspaces.push_back(ws);
     }
