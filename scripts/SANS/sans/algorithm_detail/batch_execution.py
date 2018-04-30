@@ -63,7 +63,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     single_reduction_options = {"UseOptimizations": use_optimizations}
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
     reduction_alg.setChild(False)
-
     # Perform the data reduction
     for reduction_package in reduction_packages:
         # -----------------------------------
@@ -483,19 +482,19 @@ def split_reduction_packages_for_wavelength_range(reduction_packages):
 
             states.append(state_copy)
 
-            workspaces = reduction_package.workspaces
-            monitors = reduction_package.monitors
-            is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-            is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-            for state in states:
-                new_state = deepcopy(state)
-                new_reduction_package = ReductionPackage(state=new_state,
-                                                         workspaces=workspaces,
-                                                         monitors=monitors,
-                                                         is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
-                                                         is_part_of_event_slice_reduction=is_part_of_event_slice_reduction,
-                                                         is_part_of_wavelength_range_reduction=True)
-                reduction_packages_split.append(new_reduction_package)
+        workspaces = reduction_package.workspaces
+        monitors = reduction_package.monitors
+        is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
+        is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
+        for state in states:
+            new_state = deepcopy(state)
+            new_reduction_package = ReductionPackage(state=new_state,
+                                                     workspaces=workspaces,
+                                                     monitors=monitors,
+                                                     is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
+                                                     is_part_of_event_slice_reduction=is_part_of_event_slice_reduction,
+                                                     is_part_of_wavelength_range_reduction=True)
+            reduction_packages_split.append(new_reduction_package)
     return reduction_packages_split
 
 
@@ -773,7 +772,9 @@ def group_workspaces_if_required(reduction_package):
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
+    is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
+    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction\
+                        or is_part_of_wavelength_range_reduction
 
     reduced_lab = reduction_package.reduced_lab
     reduced_hab = reduction_package.reduced_hab

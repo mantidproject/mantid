@@ -686,14 +686,14 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
                                  dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
                                  start_time_as_string + end_time_as_string)
-        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string +
-                                      wavelength_range_string + phi_limits_as_string)
+        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
+                                      + phi_limits_as_string)
     else:
         output_workspace_name = (short_run_number_as_string + period_as_string + transmission_name +
                                  wavelength_range_string + phi_limits_as_string + start_time_as_string
                                  + end_time_as_string)
         output_workspace_base_name = (short_run_number_as_string + transmission_name +
-                                      wavelength_range_string + phi_limits_as_string)
+                                      phi_limits_as_string)
     return output_workspace_name, output_workspace_base_name
 
 
