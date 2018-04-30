@@ -13,7 +13,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
         self.assertTrue(len(options) == 3)
         self.assertTrue(options[0].algorithm_property == "WavelengthMin")
         self.assertTrue(options[1].algorithm_property == "WavelengthMax")
-        self.assertTrue(options[2].algorithm_property == "Thickness")
+        self.assertTrue(options[2].algorithm_property == "EventSlices")
 
     def test_that_the_properties_with_periods_can_be_provided(self):
         props = create_properties()
