@@ -23,7 +23,7 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
     PROP_FILENAME = "Filename"
 
     BANK_GROUP_NAME = "Bank {}".format
-    LATTICE_PARAMS_DATASET_NAME = "Lattice parameters"
+    LATTICE_PARAMS_DATASET_NAME = "Lattice Parameters"
     REFINEMENT_PARAMS_DATASET_NAME = "Refinement Parameters"
     FIT_RESULTS_GROUP_NAME = "GSAS-II Fitting"
     LATTICE_PARAMS = ["a", "b", "c", "alpha", "beta", "gamma", "volume"]
