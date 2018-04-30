@@ -8,7 +8,9 @@ Matrix Workspace
 .. contents::
   :local:
 
-A MatrixWorkspace is a generic name for any workspace that can be access like a table of X, Y and E values.  This is the prime interface for accessing workspace data in Mantid.  This covers several workspace types including:
+A Matrix Workspace is a generic name for a family which contains measured (or derived) data (Y) with associated errors (E) and an axis (X) giving information about where the the measurement was made. A set of Y, E, X forms a single row in the matrix. A stack of readings forms rows, for example the output of each detector measuring time-of-flight might form a single row. 
+
+This is the prime interface for accessing workspace data in Mantid.  This covers several workspace types including:
 
 -  :ref:`Workspace2D <Workspace2D>` - A workspace for holding two       dimensional data in memory, this is the most commonly used workspace.
 -  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the       individual neutron event data.            
