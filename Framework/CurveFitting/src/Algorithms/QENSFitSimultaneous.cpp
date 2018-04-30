@@ -322,7 +322,6 @@ QENSFitSimultaneous::performFit(
     const std::vector<MatrixWorkspace_sptr> &workspaces,
     const std::string &output) {
   IFunction_sptr function = getProperty("Function");
-  bool extractMembers = getProperty("ExtractMembers");
   bool convolveMembers = getProperty("ConvolveMembers");
   bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   bool calcErrors = getProperty("CalcErrors");
@@ -339,7 +338,7 @@ QENSFitSimultaneous::performFit(
   fit->setPropertyValue("MaxIterations", getPropertyValue("MaxIterations"));
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
-  fit->setPropertyValue("CalcErrors", getPropertyValue("CalcErrors"));
+  fit->setPropertyValue("CalcErrors", calcErrors);
   fit->setProperty("OutputCompositeMembers", true);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
