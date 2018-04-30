@@ -152,7 +152,7 @@ Usage
    axs[0].plot(mtd['ws1'], wkspIndex=0, label='ws1')
    axs[0].plot(mtd['ws2'], wkspIndex=0, label='ws2')
    axs[0].legend()
-   axs[1].plot(mtd['stitchedP'], wkspIndex=0, color='k', marker='.', ls='', label='stitched')
+   axs[1].plot(mtd['stitched'], wkspIndex=0, color='k', marker='.', ls='', label='stitched')
    axs[1].legend()
 
    # uncomment the following line to show the plot window
