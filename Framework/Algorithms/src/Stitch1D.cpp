@@ -429,13 +429,15 @@ void Stitch1D::sortXAxis(MatrixWorkspace_sptr &ws) {
     Mantid::MantidVec vece(ws_size);
     Mantid::MantidVec vecdx(ws_size);
     int l = 0;
-    for (auto it = sorter.cbegin(); it != sorter.cend(); ++it) {
+    auto it = sorter.cbegin();
+    while (it != sorter.cend()) {
       vecx[l] = it->first;
       vecy[l] = it->second;
       vece[l] = (++it)->second;
       if (ws->hasDx(i))
         vecdx[l] = (++it)->second;
       ++l;
+      ++it;
     }
     auto x = make_cow<HistogramX>(std::move(vecx));
     auto y = make_cow<HistogramY>(std::move(vecy));
