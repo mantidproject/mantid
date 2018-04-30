@@ -33,7 +33,8 @@ Usage
 
    input_ws = Load(Filename="ENGINX00213855.nxs")
 
-   output_filename = os.path.join(config["defaultsave.directory"], "Test.hdf5")
+   output_filename = os.path.join(config["defaultsave.directory"],
+ 	                          "ExportSampleLogsToHDF5DocTest.hdf5")
 
    ExportSampleLogsToHDF5(InputWorkspace=input_ws,
                           Filename=output_filename,
