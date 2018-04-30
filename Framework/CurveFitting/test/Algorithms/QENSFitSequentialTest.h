@@ -182,7 +182,7 @@ private:
 
     ws->getAxis(0)->setUnit("DeltaE");
 
-    for (int i = 0; i < xlen; i++)
+    for (int i = 0; i < xlen; ++i)
       ws->setEFixed((i + 1), 0.50);
 
     auto &run = ws->mutableRun();
