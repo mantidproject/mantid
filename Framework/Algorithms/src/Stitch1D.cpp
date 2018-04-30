@@ -386,7 +386,8 @@ MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr &inOne,
 }
 
 /** Runs the ConjoinXRuns Algorithm as a child
- @param inWS :: Input workspace
+ @param inOne :: First input workspace
+ @param inTwo :: Second input workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
@@ -413,8 +414,9 @@ void Stitch1D::sortXAxis(MatrixWorkspace_sptr &ws) {
   // using a std::multimap (keys are sorted)
   std::multimap<double, double> sorter;
   double x_value;
+  const int nHists = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+  for (int i = 0; i < nHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
     for (size_t k = 0; k < ws->size(); ++k) {
       x_value = ws->x(i)[k];
