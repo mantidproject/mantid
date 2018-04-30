@@ -1,4 +1,6 @@
 #include "EnggDiffractionPresenter.h"
+#include "EnggDiffractionPresWorker.h"
+#include "IEnggDiffractionView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,8 +9,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "EnggDiffractionPresWorker.h"
-#include "IEnggDiffractionView.h"
 
 #include <algorithm>
 #include <cctype>
@@ -253,7 +253,8 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
             g_log.warning()
                 << "Error when trying to extract parameters from this line:  "
                 << line << ". This calibration file may not load correctly. "
-                           "Error details: " << rexc.what() << '\n';
+                           "Error details: "
+                << rexc.what() << '\n';
           }
         } else {
           g_log.warning() << "Could not parse correctly a parameters "
@@ -970,7 +971,8 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
         << "The calibration calculations failed. One of the "
            "algorithms did not execute correctly. See log messages for "
            "further details. Error: " +
-               std::string(rexc.what()) << '\n';
+               std::string(rexc.what())
+        << '\n';
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -1513,7 +1515,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
   g_lastValidRun = runNo;
 
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: " << dir << '\n';
+                    "this directory: "
+                 << dir << '\n';
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1558,7 +1561,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         loadDetectorGroupingCSV(dgFile, bankIDs, specs);
       } catch (std::runtime_error &re) {
         g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what() << '\n';
+                             ". Detailed error: " + re.what()
+                      << '\n';
         bankIDs.clear();
         specs.clear();
       }
@@ -1574,8 +1578,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo +
-                          " into: " << effectiveFilenames[idx] << '\n';
+                          ") for run " + runNo + " into: "
+                   << effectiveFilenames[idx] << '\n';
     try {
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
@@ -1584,12 +1588,13 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       g_log.error() << "The focusing calculations failed. One of the algorithms"
                        "did not execute correctly. See log messages for "
                        "further details. Error: " +
-                           std::string(rexc.what()) << '\n';
+                           std::string(rexc.what())
+                    << '\n';
     } catch (std::invalid_argument &ia) {
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
-                       "See log messages for details. Error: " << ia.what()
-                    << '\n';
+                       "See log messages for details. Error: "
+                    << ia.what() << '\n';
     }
   }
 
@@ -1686,7 +1691,8 @@ void EnggDiffractionPresenter::focusingFinished() {
     if (lastRun != lastValid) {
       g_log.warning()
           << "Focussing process has been stopped, last successful "
-             "run number: " << g_lastValidRun
+             "run number: "
+          << g_lastValidRun
           << " , total number of focus run that could not be processed: "
           << (lastRun - lastValid) << '\n';
       m_view->showStatus("Focusing stopped. Ready");
@@ -1929,7 +1935,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what()) << '\n';
+                           std::string(ia.what())
+                    << '\n';
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -1938,14 +1945,15 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what()) << '\n';
+                           std::string(re.what())
+                    << '\n';
       throw;
     }
   } else {
     g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run " << vanNo
-                   << ". Re-using these files: " << preIntegFilename << ", and "
-                   << preCurvesFilename << '\n';
+                      "Vanadium run "
+                   << vanNo << ". Re-using these files: " << preIntegFilename
+                   << ", and " << preCurvesFilename << '\n';
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS, vanNo, specNos);
@@ -2823,7 +2831,7 @@ std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
 * "Focus"
 */
 Poco::Path
-EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) const {
   std::string rbn = m_view->getRBNumber();
   Poco::Path dir = outFilesRootDir();
 
@@ -2838,13 +2846,20 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
     }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to user "
-                     "directory: " << dir.toString()
-                  << ". Error details: " << e.what() << '\n';
+                     "directory: "
+                  << dir.toString() << ". Error details: " << e.what() << '\n';
   } catch (std::runtime_error &re) {
     g_log.error() << "Error while finding/creating a user path: "
                   << dir.toString() << ". Error details: " << re.what() << '\n';
   }
   return dir;
+}
+
+std::string
+EnggDiffractionPresenter::userHDFRunFilename(const int runNumber) const {
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(runNumber) + ".hdf5");
+  return userOutputDir.toString();
 }
 
 /**
@@ -2870,8 +2885,8 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
     }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to "
-                     "general directory: " << dir.toString()
-                  << ". Error details: " << e.what() << '\n';
+                     "general directory: "
+                  << dir.toString() << ". Error details: " << e.what() << '\n';
   } catch (std::runtime_error &re) {
     g_log.error() << "Error while finding/creating a general path: "
                   << dir.toString() << ". Error details: " << re.what() << '\n';
@@ -2882,7 +2897,7 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
 /**
  * Produces the root path where output files are going to be written.
  */
-Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
+Poco::Path EnggDiffractionPresenter::outFilesRootDir() const {
   // TODO decide whether to move into settings or use mantid's default directory
   // after discussion with users
   const std::string rootDir = "EnginX_Mantid";

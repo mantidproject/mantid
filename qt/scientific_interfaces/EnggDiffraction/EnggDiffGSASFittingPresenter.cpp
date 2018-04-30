@@ -22,9 +22,10 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
     IEnggDiffGSASFittingView *view,
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget)
-    : m_model(std::move(model)), m_multiRunWidget(multiRunWidget), m_view(view),
-      m_viewHasClosed(false) {}
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+    boost::shared_ptr<IEnggDiffractionParam> mainSettings)
+    : m_model(std::move(model)), m_multiRunWidget(multiRunWidget),
+      m_mainSettings(mainSettings), m_view(view), m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}
 
@@ -178,8 +179,25 @@ void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
 }
 
 void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
+    const Mantid::API::IAlgorithm_sptr alg,
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   if (!m_viewHasClosed) {
+    m_view->showStatus("Saving refinement results");
+    const auto filename = m_mainSettings->userHDFRunFilename(
+        refinementResults.runLabel.runNumber);
+
+    try {
+      m_model->saveRefinementResultsToHDF5(alg, refinementResults, filename);
+    } catch (std::exception &e) {
+      m_view->userWarning(
+          "Could not save refinement results",
+          std::string("Refinement was successful but saving results to "
+                      "HDF5 failed for the following reason:\n") +
+              e.what());
+    }
+    m_view->setEnabled(true);
+    m_view->showStatus("Ready");
+
     m_multiRunWidget->addFittedPeaks(refinementResults.runLabel,
                                      refinementResults.fittedPeaksWS);
     displayFitResults(refinementResults.runLabel);

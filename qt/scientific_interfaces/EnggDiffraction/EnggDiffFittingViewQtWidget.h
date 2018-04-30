@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEWQTWIDGET_H_
 
-#include "MantidAPI/IPeakFunction.h"
 #include "DllConfig.h"
 #include "IEnggDiffFittingPresenter.h"
 #include "IEnggDiffFittingView.h"
+#include "MantidAPI/IPeakFunction.h"
 
 #include "ui_EnggDiffractionQtTabFitting.h"
 

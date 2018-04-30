@@ -5,6 +5,7 @@
 #include "EnggDiffGSASFittingModelMock.h"
 #include "EnggDiffGSASFittingViewMock.h"
 #include "EnggDiffMultiRunFittingWidgetPresenterMock.h"
+#include "EnggDiffractionParamMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
@@ -54,7 +55,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -197,9 +199,20 @@ public:
     const RunLabel runLabel(123, 1);
     const GSASIIRefineFitPeaksOutputProperties refinementResults(
         1, 2, 3, fittedPeaks, latticeParams, runLabel);
+    const Mantid::API::IAlgorithm_sptr alg(nullptr);
+
+    const std::string hdfFilename = "directory/path/run.hdf5";
+    ON_CALL(*m_mockParamPtr, userHDFRunFilename(testing::_))
+        .WillByDefault(Return(hdfFilename));
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr,
                 addFittedPeaks(runLabel, fittedPeaks));
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Saving refinement results"));
+
+    EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
+                                     alg, refinementResults, hdfFilename));
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
 
     // make sure displayFitResults(runLabel) is getting called
     EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
@@ -209,7 +222,7 @@ public:
     ON_CALL(*m_mockModelPtr, getSigma(runLabel)).WillByDefault(Return(1));
     ON_CALL(*m_mockModelPtr, getGamma(runLabel)).WillByDefault(Return(1));
 
-    presenter->notifyRefinementSuccessful(refinementResults);
+    presenter->notifyRefinementSuccessful(alg, refinementResults);
     assertMocksUsedCorrectly();
   }
 
@@ -304,6 +317,7 @@ private:
   MockEnggDiffGSASFittingModel *m_mockModelPtr;
   MockEnggDiffGSASFittingView *m_mockViewPtr;
   MockEnggDiffMultiRunFittingWidgetPresenter *m_mockMultiRunWidgetPtr;
+  MockEnggDiffractionParam *m_mockParamPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
     auto mockModel = Mantid::Kernel::make_unique<
@@ -316,8 +330,13 @@ private:
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetPresenter>>();
     m_mockMultiRunWidgetPtr = mockMultiRunWidgetPresenter_sptr.get();
 
+    auto mockParam_sptr =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    m_mockParamPtr = mockParam_sptr.get();
+
     auto pres_uptr = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
-        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr);
+        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr,
+        mockParam_sptr);
     return pres_uptr;
   }
 

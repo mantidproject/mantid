@@ -3,6 +3,8 @@
 
 #include "MantidAPI/Algorithm.h"
 
+Q_DECLARE_METATYPE(Mantid::API::IAlgorithm_sptr)
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -16,9 +18,10 @@ void EnggDiffGSASFittingWorker::doRefinements() {
     qRegisterMetaType<
         MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
         "GSASIIRefineFitPeaksOutputProperties");
+    qRegisterMetaType<Mantid::API::IAlgorithm_sptr>("IAlgorithm_sptr");
     for (const auto params : m_refinementParams) {
       const auto fitResults = m_model->doGSASRefinementAlgorithm(params);
-      emit refinementSuccessful(fitResults);
+      emit refinementSuccessful(fitResults.first, fitResults.second);
     }
     emit refinementsComplete();
   } catch (const Mantid::API::Algorithm::CancelException &) {
