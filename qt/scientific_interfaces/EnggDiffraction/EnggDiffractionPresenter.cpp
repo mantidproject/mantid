@@ -1578,7 +1578,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                           " into: " << effectiveFilenames[idx] << '\n';
     try {
       m_focusFinishedOK = false;
-      doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
+      doFocusing(cs, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &rexc) {
       g_log.error() << "The focusing calculations failed. One of the algorithms"
@@ -1701,8 +1701,6 @@ void EnggDiffractionPresenter::focusingFinished() {
 * @param cs user settings for calibration (this does not calibrate but
 * uses calibration input files such as vanadium runs
 *
-* @param fullFilename full path for the output (focused) filename
-*
 * @param runNo input run to focus
 *
 * @param bank instrument bank number to focus
@@ -1713,8 +1711,7 @@ void EnggDiffractionPresenter::focusingFinished() {
 * @param dgFile detector grouping file name. If not empty implies
 * texture focusing
 */
-void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
-                                          const std::string &fullFilename,
+  void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                                           const std::string &runNo, size_t bank,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
@@ -1843,33 +1840,15 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
   g_log.notice() << "Produced focused workspace: " << outWSName << '\n';
 
-  try {
-    g_log.debug() << "Going to save focused output into nexus file: "
-                  << fullFilename << '\n';
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNexus");
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", outWSName);
-    alg->setPropertyValue("Filename", fullFilename);
-    alg->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate successfully for bank " +
-            boost::lexical_cast<std::string>(bank) + ". Error description: " +
-            re.what() + " Please check also the log messages for details.";
-    throw;
-  }
-  g_log.notice() << "Saved focused workspace as file: " << fullFilename << '\n';
-
-  copyFocusedToUserAndAll(fullFilename);
-
   bool saveOutputFiles = m_view->saveFocusedOutputFiles();
+  const auto bankString = boost::lexical_cast<std::string>(bank);
 
   if (saveOutputFiles) {
     try {
-      saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank), runNo);
-      saveGSS(outWSName, boost::lexical_cast<std::string>(bank), runNo);
-      saveOpenGenie(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+      saveFocusedXYE(outWSName, bankString, runNo);
+      saveGSS(outWSName, bankString, runNo);
+      saveOpenGenie(outWSName, bankString, runNo);
+      saveNexus(outWSName, bankString, runNo);
     } catch (std::runtime_error &re) {
       g_log.error() << "Error saving focused data. ",
           "There was an error while saving focused data. "
@@ -2486,7 +2465,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
                  << '\n';
   copyToGeneral(saveDir, focusingComp);
 }
-
+  
 /**
 * Convert the generated output files and saves them in
 * GSS format
@@ -2532,6 +2511,36 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
   g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
                  << '\n';
   copyToGeneral(saveDir, focusingComp);
+}
+
+void EnggDiffractionPresenter::saveNexus(const std::string &inputWorkspace,
+                                         const std::string &bank,
+                                         const std::string &runNumber) {
+  const auto filename =
+      outFileNameFactory(inputWorkspace, runNumber, bank, ".nxs");
+  auto saveDirectory = outFilesUserDir("Focus");
+  saveDirectory.append(filename);
+  const auto fullOutFileName = saveDirectory.toString();
+
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullOutFileName << "\n";
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNexus");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("Filename", fullOutFileName);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in save NXS format file. Could not run the "
+                     "algorithm SaveNexus successfully for workspace "
+                  << inputWorkspace << ". Error description: " << re.what()
+                  << ". Please also check the log message for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << fullOutFileName
+                 << "\n";
+  copyToGeneral(saveDirectory, "Focus");
 }
 
 /**

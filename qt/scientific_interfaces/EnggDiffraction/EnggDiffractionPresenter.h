@@ -205,8 +205,7 @@ private:
                                std::vector<size_t> &bankIDs,
                                std::vector<std::string> &specs);
 
-  void doFocusing(const EnggDiffCalibSettings &cs,
-                  const std::string &fullFilename, const std::string &runNo,
+  void doFocusing(const EnggDiffCalibSettings &cs, const std::string &runNo,
                   size_t bank, const std::string &specNos,
                   const std::string &dgFile);
 
@@ -263,6 +262,8 @@ private:
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
   void saveFocusedXYE(std::string inputWorkspace, std::string bank,
                       std::string runNo);
+  void saveNexus(const std::string &inputWorkspace, const std::string &bank,
+                 const std::string &runNumber);
   void saveOpenGenie(std::string inputWorkspace, std::string bank,
                      std::string runNo);
 
