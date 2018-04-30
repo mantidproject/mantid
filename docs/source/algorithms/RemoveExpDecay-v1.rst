@@ -11,7 +11,8 @@ Description
 
 This algorithm removes the exponential time decay from the specified muon
 spectra, leaving the rest unchanged. By default, all the spectra
-in a workspace will be corrected.
+in a workspace will be corrected. If the detector records a total of 
+zero counts (i.e. the detector is dead) then the output will be all zeros for that detector.
 
 The formula for removing the exponential decay is given by:
 

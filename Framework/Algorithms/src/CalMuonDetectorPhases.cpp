@@ -15,6 +15,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+namespace {
+	bool isZero(double value) {
+		bool result = value == 0;
+		return result;
+	}
+}
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -161,30 +168,46 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   const static std::string success = "success";
   for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
     reportProgress(wsIndex, nhist);
-    auto fit = createChildAlgorithm("Fit");
-    fit->initialize();
-    fit->setPropertyValue("Function", funcStr);
-    fit->setProperty("InputWorkspace", ws);
-    fit->setProperty("WorkspaceIndex", wsIndex);
-    fit->setProperty("CreateOutput", true);
-    fit->setPropertyValue("Output", groupName);
-    fit->execute();
+	auto yValues = ws->readY(wsIndex);
+	auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(), isZero);
+	if (emptySpectrum) {
+		g_log.warning("Spectrum " + std::to_string(wsIndex) + " is empty");
+		auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+		tab->addColumn("str", "Name");
+		tab->addColumn("double", "Value");
+		tab->addColumn("double", "Error");
+		for (int j = 0; j < 4; j++) {
+			API::TableRow row = tab->appendRow();
+			row << "dummy" << 999. << 0.0;
+		}
+		extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
 
-    std::string status = fit->getProperty("OutputStatus");
-    if (!fit->isExecuted() || status != success) {
-      std::ostringstream error;
-      error << "Fit failed for spectrum at workspace index " << wsIndex;
-      error << ": " << status;
-      throw std::runtime_error(error.str());
-    }
+	}else{
+		auto fit = createChildAlgorithm("Fit");
+		fit->initialize();
+		fit->setPropertyValue("Function", funcStr);
+		fit->setProperty("InputWorkspace", ws);
+		fit->setProperty("WorkspaceIndex", wsIndex);
+		fit->setProperty("CreateOutput", true);
+		fit->setPropertyValue("Output", groupName);
+		fit->execute();
 
-    API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
-    resGroup->addWorkspace(fitOut);
-    API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
-    // Now we have our fitting results stored in tab
-    // but we need to extract the relevant information, i.e.
-    // the detector phases (parameter 'p') and asymmetries ('A')
-    extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
+		std::string status = fit->getProperty("OutputStatus");
+		if (!fit->isExecuted() || status != success) {
+			std::ostringstream error;
+			error << "Fit failed for spectrum at workspace index " << wsIndex;
+			error << ": " << status;
+			throw std::runtime_error(error.str());
+		}
+
+		API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
+		resGroup->addWorkspace(fitOut);
+		API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
+		// Now we have our fitting results stored in tab
+		// but we need to extract the relevant information, i.e.
+		// the detector phases (parameter 'p') and asymmetries ('A')
+		extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
+	}
   }
 }
 

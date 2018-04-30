@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidAPI/FunctionFactory.h"
-
+#include "MantidKernel/MultiThreaded.h"
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -25,15 +25,20 @@ void LinearBackground::function1D(double *out, const double *xValues,
                                   const size_t nData) const {
   const double a0 = getParameter("A0");
   const double a1 = getParameter("A1");
-
-  for (size_t i = 0; i < nData; i++) {
+  int64_t nData64 = nData;
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < nData64; i++) {
     out[i] = a0 + a1 * xValues[i];
   }
 }
 
 void LinearBackground::functionDeriv1D(Jacobian *out, const double *xValues,
                                        const size_t nData) {
-  for (size_t i = 0; i < nData; i++) {
+	int64_t nData64 = nData;
+
+	PARALLEL_FOR_NO_WSP_CHECK()
+
+  for (int64_t i = 0; i < nData64; i++) {
     out->set(i, 0, 1);
     out->set(i, 1, xValues[i]);
   }

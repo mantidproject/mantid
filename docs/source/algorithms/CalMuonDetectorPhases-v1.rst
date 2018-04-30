@@ -25,7 +25,7 @@ is then treated as a fixed constant when fitting the spectra to the function abo
 The algorithm outputs a table workspace containing the spectrum number, the asymmetry and the phase.
 This table is intended to be used as the input
 *PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`. 
-Usually for muon instruments, each spectrum will correspond to one detector (spectrum number = detector ID).
+Usually for muon instruments, each spectrum will correspond to one detector (spectrum number = detector ID).If a spectrum is empty (i.e. the detector is dead) then the phase and asymmetry are recorded as zero and :math:`999`respectively. 
 
 In addition, the fitting results are returned
 in a workspace group, where each of the items stores the original data (after removing the
