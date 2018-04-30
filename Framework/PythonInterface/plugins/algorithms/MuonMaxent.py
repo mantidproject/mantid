@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division,print_function)
 import numpy as np
 import math
 from Muon.MaxentTools.multimaxalpha import MULTIMAX
+from Muon.MaxentTools.dead_detector_handler import removeDeadDetectors
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -220,32 +221,48 @@ class MuonMaxent(PythonAlgorithm):
             names = pt.getColumnNames()
             phaseLabel = None
             IDLabel = None
+            asymmLabel = None
             for name in names:
                 if name.lower() == "phi" or name.lower() == "phase":
                     phaseLabel = name
                 if name.lower() == "detid" or name.lower() == "spectrum number":
                     IDLabel = name
+                if name.lower() == "asymmetry" or  name.lower() == "asymm" or  name.lower() == "asasym":
+                    asymmLabel = name
             if phaseLabel is None:
                 raise ValueError(
                     "Phase/phi are not labelled in the phase table")
             if IDLabel is None:
                 raise ValueError(
                     "Spectrum number/DetID are not labelled in the phase table")
+            if asymmLabel is None:
+                raise ValueError(
+                    "Asymmetry is not labelled in the phase table")
 
             if(len(pt) == POINTS_ngroups):  # phase table for grouped data, or when not grouping
-                for r in pt:
-                    filePHASE[r[IDLabel] - 1] = r[phaseLabel]
+                for row in pt:
+                    filePHASE[row[IDLabel] - 1] = row[phaseLabel]
                         # sign of phase now OK for Mantid 3.12 onwards
             elif (len(pt) == POINTS_nhists):  # phase table for ungrouped data. Pick a representative detector for each group (the last one)
-                for r in pt:
-                    filePHASE[GROUPING_group[r[IDLabel] - 1]] = r[phaseLabel]
+                for row in pt:
+                    filePHASE[GROUPING_group[row[IDLabel] - 1]] = row[phaseLabel]
+            else: # muat be some dead Detectors
+                offset=0
+                print(POINTS_ngroups,"nnn" )
+                for row in pt:
+                    if row[asymmLabel]==999:
+                        offset+=1
+                    else:
+                        filePHASE[row[IDLabel] - 1 - offset ] = row[phaseLabel]
         return filePHASE
 
     def PyExec(self):
         # logging
         mylog = self.log()
         #
-        ws = self.getProperty("InputWorkspace").value
+        originalWS=self.getProperty("InputWorkspace").value
+        ws,deadDetectors = removeDeadDetectors(originalWS)
+            
         # crop off odd sized bins at start and end (if present)
         xv = ws.readX(0)
         rg0 = 0
@@ -359,12 +376,18 @@ class MuonMaxent(PythonAlgorithm):
         if not self.getProperty("PhaseConvergenceTable").isDefault:
             phaseconvWS = WorkspaceFactory.create(
                 "Workspace2D",
-                NVectors=POINTS_ngroups,
+                NVectors=POINTS_ngroups+len(deadDetectors),
                 XLength=OuterIter + 1,
                 YLength=OuterIter + 1)
-            for i in range(POINTS_ngroups):
-                phaseconvWS.dataX(i)[0] = 0.0
-                phaseconvWS.dataY(i)[0] = filePHASE[i]
+            offset=0
+            for i in range(POINTS_ngroups+len(deadDetectors)):
+                if i+1 in deadDetectors:
+                    offset+=1
+                    phaseconvWS.dataX(i)[0] = 0.0
+                    phaseconvWS.dataY(i)[0] = 0.0
+                else:
+                    phaseconvWS.dataX(i)[0] = 0.0
+                    phaseconvWS.dataY(i)[0] = filePHASE[i-offset]
         else:
             phaseconvWS = None
         # do the work! Lots to pass in and out
@@ -375,7 +398,7 @@ class MuonMaxent(PythonAlgorithm):
                                         CHANNELS_itotal, RUNDATA_res, RUNDATA_frames, GROUPING_group, DATALL_rdata,
                                         FAC_factor, SENSE_taud, MAXPAGE_n, filePHASE, PULSES_def, PULSES_npulse,
                                         FLAGS_fitdead, FLAGS_fixphase, SAVETIME_i2,
-                                        OuterIter, InnerIter, mylog, prog, phaseconvWS, TZERO_fine)
+                                        OuterIter, InnerIter, mylog, prog, phaseconvWS, TZERO_fine,deadDetectors)
         #
         fperchan = 1. / (RUNDATA_res * float(POINTS_npts) * 2.)
         fchan = np.linspace(
@@ -399,8 +422,13 @@ class MuonMaxent(PythonAlgorithm):
             outTaud = WorkspaceFactory.createTable()
             outTaud.addColumn("int", "spectrum", 1)
             outTaud.addColumn("double", "dead-time", 2)
-            for i in range(POINTS_ngroups):
-                outTaud.addRow([i + 1, SENSE_taud[i]])
+            offset=0
+            for i in range(POINTS_ngroups+len(deadDetectors)):
+                if i+1 in deadDetectors:
+                    outTaud.addRow([i + 1, 0.0])
+                    offset +=1
+                else:
+                    outTaud.addRow([i + 1, SENSE_taud[i-offset]])
             self.setProperty("OutputDeadTimeTable", outTaud)
         # revised phases (and amplitudes since they're in the table too)
         if(not self.getProperty("OutputPhaseTable").isDefault):
@@ -408,8 +436,13 @@ class MuonMaxent(PythonAlgorithm):
             outPhase.addColumn("int", "Spectrum number", 1)
             outPhase.addColumn("double", "Asymmetry", 2)
             outPhase.addColumn("double", "Phase", 2)
-            for i in range(POINTS_ngroups):
-                outPhase.addRow([i + 1, AMPS_amp[i], SENSE_phi[i]])
+            offset=0
+            for i in range(POINTS_ngroups+len(deadDetectors)):
+                if i+1 in deadDetectors:
+                    outPhase.addRow([i + 1, 999, 0.0])
+                    offset+=1
+                else:
+                    outPhase.addRow([i + 1, AMPS_amp[i-offset], SENSE_phi[i-offset]])
                                 # sign of phase now OK for Mantid 3.12 onwards
             self.setProperty("OutputPhaseTable", outPhase)
         # reconstructed spectra passed back from OUTSPEC
@@ -429,12 +462,18 @@ class MuonMaxent(PythonAlgorithm):
                                                                             OUTSPEC_guess.shape[0]))
             recSpec = WorkspaceFactory.create(
                 ws,
-                NVectors=POINTS_ngroups,
+                NVectors=POINTS_ngroups+len(deadDetectors),
                 XLength=i2 - i1 + 1,
                 YLength=i2 - i1)
-            for j in range(POINTS_ngroups):
-                recSpec.dataX(j)[:] = ws.dataX(j)[k1:k2 + 1]
-                recSpec.dataY(j)[:] = OUTSPEC_guess[i1:i2, j]
+            offset = 0
+            for j in range(POINTS_ngroups+len(deadDetectors)):
+                if j+1 in deadDetectors:
+                    offset+=1
+                    recSpec.dataX(j)[:] = originalWS.dataX(j)[k1:k2 + 1]
+                    recSpec.dataY(j)[:] = np.zeros(k2-k1)
+                else:
+                    recSpec.dataX(j)[:] = originalWS.dataX(j)[k1:k2 + 1]
+                    recSpec.dataY(j)[:] = OUTSPEC_guess[i1:i2, j-offset]
             self.setProperty("ReconstructedSpectra", recSpec)
         if phaseconvWS:
             self.setProperty("PhaseConvergenceTable", phaseconvWS)
