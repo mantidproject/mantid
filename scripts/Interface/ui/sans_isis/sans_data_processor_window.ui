@@ -1637,7 +1637,7 @@ QGroupBox::title {
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 1D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                      <property name="text">
-                      <string>RCUT [mm]</string>
+                      <string>RCut [mm]</string>
                      </property>
                     </widget>
                    </item>
@@ -1647,7 +1647,7 @@ QGroupBox::title {
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 1D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                      <property name="text">
-                      <string>WCUT [Å]</string>
+                      <string>WCut [Å]</string>
                      </property>
                     </widget>
                    </item>
