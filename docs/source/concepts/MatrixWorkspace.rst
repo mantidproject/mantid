@@ -8,38 +8,31 @@ Matrix Workspace
 .. contents::
   :local:
 
-A Matrix Workspace is a generic name for a family which contains measured (or derived) data (Y) with associated errors (E) and an axis (X) giving information about where the the measurement was made. A set of Y, E, X forms a single row in the matrix. A stack of readings forms rows, for example the output of each detector measuring time-of-flight might form a single row. 
+A Matrix Workspace is a generic name for a family which contains measured (or derived) data (Y) with associated errors (E) and an axis (X) giving information about where the the measurement was made. The Matrix Workspace forms a 2D structure, more details on this will be provided below. This is the most common structure for storing data in  Mantid. This covers several more detailed workspace types including:
 
-This is the prime interface for accessing workspace data in Mantid.  This covers several workspace types including:
-
--  :ref:`Workspace2D <Workspace2D>` - A workspace for holding two       dimensional data in memory, this is the most commonly used workspace.
--  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the       individual neutron event data.            
+-  :ref:`Workspace2D <Workspace2D>` - A workspace for holding 2D, acuumulated data in memory, this is the most commonly used to store histograms.
+-  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.            
 
 What information is in a MatrixWorkspace
 ----------------------------------------
 
-All Matrix Workspaces contain:
-
--  Measured or derived data with associated errors, this is referenced as a 2D array of counts and error data.  The axes are commonly "SpectraNumber" and another unit of measure, but are very flexible.
+All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :ref:`Units <Unit Factory>`.  
 
 Also they may contain:
 
--  Axes with
-   :ref:`Units <Unit Factory>`
 -  :ref:`Sample` and sample environment data
 -  :ref:`Run` logs
--  A full :ref:`instrument <instrument>` geometric definition, along with
-   an instrument parameter map
--  A spectra - detector mapping
--  A distribution flag
+-  Usable geometry may be present, for example to determine the position of each detector, see :ref:`here <InstrumentAccessLayers>` for more information
+-  Spectra - detector mapping, and other spectra level information see :ref:`here <InstrumentAccessLayers>`.
+-  :ref:`Histogram <HistogramData>` information
 -  A list of 'masked' bins
 
 Working with Matrix Workspaces in Python
 ----------------------------------------
 
-MatrixWorkspace is an abstract description of an specific workspace implementation. It provides access to a common way of accessing the data for a 2D workspace without needing to know the details of how that data is actually stored.
+As alluded to above, Matrix Workspace is an abstraction. Matrix Workspace provides access to the majority of the common information for all 2D workspaces in its family, without needing to know all the details of how that data is actually stored.
 
-Matrix Workspaces have all the data and operations of the base :ref:`Workspace <Workspace>` class, but add operations to access the data in a useful way.
+Matrix Workspaces have all the data and operations of the base :ref:`Workspace <Workspace>` class, but add operations to access the 2D data itself a useful way.
 
 You can look at the :ref:`Matrix Workspace API reference <mantid.api.MatrixWorkspace>` for a full list of properties and operations, but here are some of the key ones.
 
@@ -52,6 +45,7 @@ If you want to check if a variable points to something that is a Matrix Workspac
 
 .. testcode:: CheckMatrixWorkspace
 
+    from mantid.simpleapi import *
     from mantid.api import MatrixWorkspace
 
     histoWS = CreateSampleWorkspace(WorkspaceType="Histogram")
@@ -96,6 +90,7 @@ Matrix Workspace Properties
 
 .. testsetup:: MatrixWorkspaceProperties
 
+  from mantid.simpleapi import Load
   ws = Load("MAR11015")
 
 .. testcode:: MatrixWorkspaceProperties
@@ -132,6 +127,7 @@ You can get access to the :ref:`Instrument` for a workspace with
 
 .. testsetup:: MatrixWorkspaceInstrument
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceInstrument
@@ -147,6 +143,7 @@ You can get access to the :ref:`Run` for a workspace with
 
 .. testsetup:: MatrixWorkspaceRun
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceRun
@@ -163,6 +160,7 @@ You can list out the axes of a workspace using the following code.
 
 .. testcode:: MatrixWorkspaceAxes
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
   for i in range(ws.axes()):
       axis = ws.getAxis(i)
@@ -194,6 +192,7 @@ Output:
 
 .. testcode:: MatrixWorkspaceAxesLabel
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
   axis = ws.getAxis(1)
   # Create a new axis
@@ -217,6 +216,7 @@ Output:
 
 .. testsetup:: MatrixWorkspaceAxesReplace
 
+  from mantid.simpleapi import Load
   ws = Load("MAR11015")
 
 .. testcode:: MatrixWorkspaceAxesReplace
@@ -267,6 +267,7 @@ Output:
 
 .. testsetup:: MatrixWorkspaceYUnit
 
+  from mantid.simpleapi import CreateSampleWorkspace
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceYUnit
@@ -288,6 +289,7 @@ Matrix Workspace Operations
 
 .. testsetup:: MatrixWorkspaceOperations
 
+  from mantid.simpleapi import *
   ws = CreateSampleWorkspace()
 
 .. testcode:: MatrixWorkspaceOperations
@@ -342,6 +344,7 @@ The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands
 
 .. testsetup:: MatrixWorkspaceData
 
+  from mantid.simpleapi import Load
   ws = Load("MAR11015")
 
 .. testcode:: MatrixWorkspaceData
@@ -378,6 +381,7 @@ The expected operations of +,-,*,/ are supported with either a single number or 
 
 .. testsetup:: MatrixWorkspaceAlgebra
 
+  from mantid.simpleapi import *
   workspace1 = Load("MAR11015")
   workspace2 = CloneWorkspace(workspace1)
 
@@ -396,6 +400,7 @@ It is also possible to replace one of the input workspaces using one of +=,-=,*=
 
 .. testsetup:: MatrixWorkspaceAlgebra2
 
+  from mantid.simpleapi import *
   w1= Load("MAR11015")
   w2= CloneWorkspace(w1)
 
