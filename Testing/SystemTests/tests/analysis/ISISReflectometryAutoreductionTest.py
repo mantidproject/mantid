@@ -25,6 +25,7 @@ class ISISReflectometryAutoreductionTest(stresstesting.MantidStressTest):
     result_workspace = 'Result'
 
     def __init__(self):
+        super(ISISReflectometryAutoreductionTest, self).__init__()
         self.tolerance = 0.00000001
 
     def requiredFiles(self):
