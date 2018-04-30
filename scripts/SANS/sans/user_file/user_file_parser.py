@@ -894,9 +894,6 @@ class MaskParser(UserFileComponentParser):
     def _is_time_mask(self, line):
         return does_pattern_match(self._time_pattern, line)
 
-    def _is_time_mask_2(self, line):
-        return does_pattern_match(self._time_pattern_2, line)
-
     def _is_clear_mask(self, line):
         return does_pattern_match(self._clear_pattern, line)
 
