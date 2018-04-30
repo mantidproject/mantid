@@ -24,7 +24,7 @@ void Stitch1DMany::init() {
   declareProperty(
       Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces", boost::make_shared<ADSValidator>()),
-      "Input Workspaces. List of histogram workspaces to stitch together. At "
+      "Input Workspaces: List of histogram workspaces to stitch together, at "
       "least 2 workspaces must be supplied for stitching and all must be "
       "either Matrix Workspaces or Workspace Groups containing Matrix "
       "Workspaces only.");
@@ -36,18 +36,18 @@ void Stitch1DMany::init() {
   declareProperty(make_unique<ArrayProperty<double>>(
                       "Params", boost::make_shared<RebinParamsValidator>(false),
                       Direction::Input),
-                  "Rebinning Parameters. See Rebin for format.");
+                  "Rebinning Parameters, see Rebin for format.");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("StartOverlaps", Direction::Input),
-      "Start overlaps for stitched workspaces. If specified, the number of "
+      "Start overlaps for stitched workspaces; if specified, the number of "
       "StartOverlaps must be 1 less than the number of input workspaces. "
       "Optional.");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("EndOverlaps", Direction::Input),
-      "End overlaps for stitched workspaces. If specified, the number of "
-      "EndOverlaps must be the same as the number of StartOverlaps. Optional.");
+      "End overlaps for stitched workspaces; if specified, the number of "
+      "EndOverlaps must be the same as the number of StartOverlaps.");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
                                                        true, Direction::Input),
@@ -59,7 +59,7 @@ void Stitch1DMany::init() {
 
   declareProperty(make_unique<ArrayProperty<double>>("ManualScaleFactors",
                                                      Direction::Input),
-                  "Provided values for the scale factors. If specified, the "
+                  "Provided values for the scale factors; if specified, the "
                   "number of ManualScaleFactors must either be one (in which "
                   "case the provided value is applied to all input workspaces) "
                   "or 1 less than the number of input workspaces");
@@ -77,8 +77,8 @@ void Stitch1DMany::init() {
   declareProperty(make_unique<PropertyWithValue<int>>(
                       "ScaleFactorFromPeriod", 1,
                       scaleFactorFromPeriodValidator, Direction::Input),
-                  "Provided index of period to obtain scale factor from. "
-                  "Periods are indexed from 1. Used only if stitching group "
+                  "Provided index of period to obtain scale factor from; "
+                  "periods are indexed from 1 and used only if stitching group "
                   "workspaces, UseManualScaleFactors is true and "
                   "ManualScaleFactors is set to default.");
 
