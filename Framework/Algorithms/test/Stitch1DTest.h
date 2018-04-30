@@ -238,11 +238,11 @@ public:
   }
 
   void test_startoverlap_greater_than_end_overlap_throws() {
-    TSM_ASSERT_THROWS("Should have thrown with StartOverlap < x max",
-                      do_stitch1D(this->a, this->b, this->x.back(),
-                                  this->x.front(),
-                                  std::vector<double>(1., 0.2)),
-                      std::runtime_error &);
+    std::vector<double> params = {0., 0.2, .5};
+    TSM_ASSERT_THROWS(
+        "Should have thrown with StartOverlap < x max",
+        do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), params),
+        std::runtime_error &);
   }
 
   void test_sort_x() {
@@ -389,10 +389,6 @@ public:
     alg.initialize();
     alg.setProperty("LHSWorkspace", make_arbitrary_point_ws());
     alg.setProperty("RHSWorkspace", make_arbitrary_histogram_ws());
-    alg.setProperty("StartOverlap", -1.);
-    alg.setProperty("EndOverlap", 1.);
-    alg.setProperty("Params", std::vector<double>(1., 0.2));
-    alg.setProperty("ScaleRHSWorkspace", true);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     TS_ASSERT(!alg.isExecuted());
