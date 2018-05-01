@@ -96,7 +96,7 @@ EnggVanadiumCorrectionsModel::fetchCachedIntegratedWorkspace(
     const std::string &vanadiumRunNumber) const {
 
   if (m_integratedFilenameCache.find(vanadiumRunNumber) !=
-      m_curvesFilenameCache.end()) {
+      m_integratedFilenameCache.end()) {
     return loadTableWorkspace(m_integratedFilenameCache[vanadiumRunNumber],
                               INTEGRATED_WORKSPACE_NAME);
   }
