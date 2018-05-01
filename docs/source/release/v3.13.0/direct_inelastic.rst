@@ -20,6 +20,8 @@ New features
 Improvements
 ############
 
+- :ref:`DirectILLReduction <algm-DirectILLReduction>` now converts all its output workspaces to distributions, i.e. divides the histograms by the bin width.
+
 Bug fixes
 #########
 
