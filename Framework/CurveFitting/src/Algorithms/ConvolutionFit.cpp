@@ -268,7 +268,7 @@ const std::vector<std::string> ConvolutionFit<Base>::seeAlso() const {
 template <typename Base>
 std::map<std::string, std::string> ConvolutionFit<Base>::validateInputs() {
   auto errors = Base::validateInputs();
-  IFunction_sptr function = getProperty("Function");
+  IFunction_sptr function = Base::getProperty("Function");
   if (!containsFunction(function, "Convolution") ||
       !containsFunction(function, "Resolution"))
     errors["Function"] = "Function provided does not contain convolution with "
@@ -301,7 +301,7 @@ ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
 template <typename Base>
 std::map<std::string, std::string>
 ConvolutionFit<Base>::getAdditionalLogStrings() const {
-  IFunction_sptr function = getProperty("Function");
+  IFunction_sptr function = Base::getProperty("Function");
   auto logs = Base::getAdditionalLogStrings();
   logs["delta_function"] = m_deltaUsed ? "true" : "false";
   logs["background"] = extractBackgroundType(function);

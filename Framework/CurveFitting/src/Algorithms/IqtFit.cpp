@@ -94,7 +94,7 @@ const std::vector<std::string> IqtFit<Base>::seeAlso() const {
 template <typename Base>
 std::map<std::string, std::string> IqtFit<Base>::validateInputs() {
   auto errors = Base::validateInputs();
-  double startX = getProperty("StartX");
+  double startX = Base::getProperty("StartX");
   if (startX < 0)
     errors["StartX"] = "StartX must be greater than or equal to 0.";
   return errors;
@@ -115,8 +115,8 @@ bool IqtFit<Base>::throwIfElasticQConversionFails() const {
 template <typename Base>
 std::vector<API::MatrixWorkspace_sptr> IqtFit<Base>::getWorkspaces() const {
   auto workspaces = Base::getWorkspaces();
-  double startX = getProperty("StartX");
-  double endX = getProperty("EndX");
+  double startX = Base::getProperty("StartX");
+  double endX = Base::getProperty("EndX");
 
   for (auto i = 0u; i < workspaces.size(); ++i)
     workspaces[i] =

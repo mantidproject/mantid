@@ -338,7 +338,7 @@ QENSFitSimultaneous::performFit(
   fit->setPropertyValue("MaxIterations", getPropertyValue("MaxIterations"));
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
-  fit->setPropertyValue("CalcErrors", calcErrors);
+  fit->setProperty("CalcErrors", calcErrors);
   fit->setProperty("OutputCompositeMembers", true);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
