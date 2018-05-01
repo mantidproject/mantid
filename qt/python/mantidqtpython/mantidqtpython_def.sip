@@ -1554,11 +1554,11 @@ public:
 
     void subscribe(JobTreeViewSubscriber& subscriber);
     void insertChildRowOf(const RowLocation &parent, int beforeRow,
-                          const std::vector<std::string> &rowText);
+                          const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
     void insertChildRowOf(const RowLocation &parent, int beforeRow);
     void appendChildRowOf(const RowLocation &parent);
     void appendChildRowOf(const RowLocation &parentLocation,
-                          const std::vector<std::string> &rowText);
+                          const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
     void removeRowAt(const RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
 
@@ -1578,19 +1578,36 @@ public:
     void resetFilter();
     bool hasFilter() const;
 
-    void enableEditing(const RowLocation& row);
-    void disableEditing(const RowLocation& row);
-
     bool isOnlyChildOfRoot(const RowLocation& location) const;
-    std::vector<std::string> rowTextAt(const RowLocation &location) const;
-    void setRowTextAt(const RowLocation &location,
-                      const std::vector<std::string> &rowText);
-    std::string textAt(RowLocation location, int column);
-    void setTextAt(RowLocation location, int column, const std::string &cellText);
+    std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsAt(const RowLocation &location) const;
+    void setCellsAt(const RowLocation &location,
+                    const std::vector<MantidQt::MantidWidgets::Batch::Cell> &cells);
+    Cell cellAt(RowLocation location, int column);
+    void setCellAt(RowLocation location, int column, const Cell &cellText);
 
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
     boost::optional<std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>>> selectedSubtrees() const;
     boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> selectedSubtreeRoots() const;
+};
+
+class Cell {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Batch/Cell.h"
+%End
+public:
+  Cell(const std::string &contentText);
+
+  const std::string &contentText() const;
+  int borderThickness() const;
+  const std::string & borderColor() const;
+  bool isEditable() const;
+
+  void setContentText(const std::string& contentText);
+  void setBorderThickness(int borderThickness);
+  void setBorderColor(const std::string& borderColor);
+  void setEditable(bool isEditable);
+  void disableEditing();
+  void enableEditing();
 };
 
 class Row {
@@ -1598,8 +1615,8 @@ class Row {
 #include "MantidQtWidgets/Common/Batch/Row.h"
 %End
 public:
-  Row(RowLocation location, std::vector<std::string> cells);
-  const std::vector<std::string>& cells() const;
+  Row(RowLocation location, std::vector<MantidQt::MantidWidgets::Batch::Cell> cells);
+  const std::vector<MantidQt::MantidWidgets::Batch::Cell>& cells() const;
   const RowLocation& location() const;
 };
 

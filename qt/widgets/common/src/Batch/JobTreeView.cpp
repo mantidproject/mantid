@@ -16,14 +16,15 @@ namespace MantidWidgets {
 namespace Batch {
 
 JobTreeView::JobTreeView(QStringList const &columnHeadings, QWidget *parent)
-    : QTreeView(parent), m_mainModel(this),
-      m_columnCount(columnHeadings.size()), m_filteredModel(),
+    : QTreeView(parent),
+      m_mainModel(this),
+      m_filteredModel(RowLocationAdapter(m_mainModel), this),
       m_lastEdited(QModelIndex()) {
 
   setModel(&m_mainModel);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
-  setItemDelegate(new CellDelegate(this, *this));
+  setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
 }
 
 void JobTreeView::commitData(QWidget *editor) {
@@ -38,21 +39,21 @@ void JobTreeView::commitData(QWidget *editor) {
 }
 
 void JobTreeView::filterRowsBy(std::unique_ptr<RowPredicate> predicate) {
-  m_filteredModel->setPredicate(std::move(predicate));
+  m_filteredModel.setPredicate(std::move(predicate));
   expandAll();
 }
 
 void JobTreeView::filterRowsBy(RowPredicate *predicate) {
-  m_filteredModel->setPredicate(std::unique_ptr<RowPredicate>(predicate));
+  m_filteredModel.setPredicate(std::unique_ptr<RowPredicate>(predicate));
   expandAll();
 }
 
 void JobTreeView::resetFilter() {
   // TODO: m_notifyee->notifyFilterReset()
-  m_filteredModel->resetPredicate();
+  m_filteredModel.resetPredicate();
 }
 
-bool JobTreeView::hasFilter() const { return m_filteredModel->isReset(); }
+bool JobTreeView::hasFilter() const { return m_filteredModel.isReset(); }
 
 bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
                        QEvent *event) {
@@ -252,40 +253,6 @@ void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
                  rowFromCells(cells));
 }
 
-void JobTreeView::enableEditing(RowLocation const &row) {
-  if (!row.isRoot()) {
-    auto cellIndex = rowLocation().indexAt(row).untyped();
-    do {
-      cellIndex = rightOf(cellIndex);
-      auto *item = modelItemFromIndex(m_mainModel, fromMainModel(cellIndex));
-      item->setEditable(true);
-    } while (hasCellOnTheRight(cellIndex));
-  } else {
-    // auto cellIndex = rowLocation().indexAt(row);
-    // auto *item = modelItemFromIndex(firstCellIndex);
-    // item->setEditable(true);
-  }
-}
-
-void JobTreeView::enableEditing(RowLocation const &row, int cell) {}
-
-void JobTreeView::disableEditing(RowLocation const &row) {
-  if (!row.isRoot()) {
-    for (auto cellIndex = rowLocation().indexAt(row).untyped();
-         hasCellOnTheRight(cellIndex); cellIndex = rightOf(cellIndex)) {
-      auto *item = modelItemFromIndex(m_mainModel, fromMainModel(cellIndex));
-      item->setEditable(false);
-    }
-  } else {
-    auto *item = modelItemFromIndex(m_mainModel, rootModelIndex(m_mainModel));
-    item->setEditable(false);
-  }
-}
-
-void JobTreeView::disableEditing(RowLocation const &row, int cell) {
-  auto cellIndex = rowLocation().indexAt(row, cell).untyped();
-}
-
 void JobTreeView::appendChildRowOf(RowLocation const &parent) {
   appendEmptyChildRow(m_mainModel, rowLocation().indexAt(parent));
 }
@@ -307,13 +274,13 @@ JobTreeView::expanded(QModelIndexForFilteredModel const &index) {
   auto expandAt = index.untyped();
   while (expandAt.isValid()) {
     setExpanded(expandAt, true);
-    expandAt = m_filteredModel->parent(expandAt);
+    expandAt = m_filteredModel.parent(expandAt);
   }
   return index;
 }
 
 QtTreeCursorNavigation JobTreeView::navigation() const {
-  return QtTreeCursorNavigation(m_filteredModel);
+  return QtTreeCursorNavigation(&m_filteredModel);
 }
 
 RowLocationAdapter JobTreeView::rowLocation() const {
@@ -335,13 +302,13 @@ JobTreeView::findOrMakeCellBelow(QModelIndexForFilteredModel const &index) {
 QModelIndexForMainModel JobTreeView::mapToMainModel(
     QModelIndexForFilteredModel const &filteredModelIndex) const {
   return QModelIndexForMainModel(
-      m_filteredModel->mapToSource(filteredModelIndex.untyped()));
+      m_filteredModel.mapToSource(filteredModelIndex.untyped()));
 }
 
 QModelIndexForFilteredModel JobTreeView::mapToFilteredModel(
     QModelIndexForMainModel const &mainModelIndex) const {
   return QModelIndexForFilteredModel(
-      m_filteredModel->mapFromSource(mainModelIndex.untyped()));
+      m_filteredModel.mapFromSource(mainModelIndex.untyped()));
 }
 
 void JobTreeView::appendAndEditAtChildRow() {
@@ -362,10 +329,9 @@ void JobTreeView::appendAndEditAtRowBelow() {
 }
 
 void JobTreeView::enableFiltering() {
-  m_filteredModel = new QtFilterLeafNodes(rowLocation(), this);
-  m_filteredModel->setDynamicSortFilter(false);
-  m_filteredModel->setSourceModel(&m_mainModel);
-  setModel(m_filteredModel);
+  m_filteredModel.setDynamicSortFilter(false);
+  m_filteredModel.setSourceModel(&m_mainModel);
+  setModel(&m_filteredModel);
 }
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
@@ -383,7 +349,6 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
   } else if (event->key() == Qt::Key_C) {
     if (event->modifiers() & Qt::ControlModifier) {
       copySelectedRequested();
-    } else {
     }
   } else if (event->key() == Qt::Key_V) {
     if (event->modifiers() & Qt::ControlModifier) {
@@ -403,7 +368,7 @@ JobTreeView::fromMainModel(QModelIndex const &mainModelIndex) const {
 QModelIndexForFilteredModel
 JobTreeView::fromFilteredModel(QModelIndex const &filteredModelIndex) const {
   return ::MantidQt::MantidWidgets::Batch::fromFilteredModel(filteredModelIndex,
-                                                             *m_filteredModel);
+                                                             m_filteredModel);
 }
 
 QModelIndex JobTreeView::moveCursor(CursorAction cursorAction,

@@ -15,6 +15,29 @@ def row(path):
     return MantidQt.MantidWidgets.Batch.RowLocation(path)
 
 
+def cell(cell_text):
+    return MantidQt.MantidWidgets.Batch.Cell(cell_text)
+
+
+def row_from_text(*cell_texts):
+    return [cell(cell_text) for cell_text in cell_texts]
+
+
+def group_row(group_title, n_columns):
+    def dead_cell():
+        cell = uneditable_cell("")
+        cell.setBorderColor("transparent")
+        return cell
+
+    return [cell(group_title)] + [dead_cell() for n in range(n_columns -1)]
+
+
+def uneditable_cell(cell_text):
+    new_cell = cell(cell_text)
+    new_cell.disableEditing()
+    return new_cell
+    
+
 class RegexPredicate(MantidQt.MantidWidgets.Batch.RowPredicate):
     def __init__(self, view, text):
         super(MantidQt.MantidWidgets.Batch.RowPredicate, self).__init__()
@@ -27,7 +50,7 @@ class RegexPredicate(MantidQt.MantidWidgets.Batch.RowPredicate):
             self.re = re.compile('')
 
     def rowMeetsCriteria(self, location):
-        return bool(self.re.match(self.view.textAt(location, 0)))
+        return bool(self.re.match(self.view.cellAt(location, 0).contentText()))
 
 
 class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
@@ -86,18 +109,18 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         self.table_signals.cellChanged.connect(self.on_cell_updated)
         self.table_signals.rowInserted.connect(self.on_row_inserted)
 
-        self.table.appendChildRowOf(row([]), ["A"])
+        self.table.appendChildRowOf(row([]), group_row("A", 8))
 
-        self.table.appendChildRowOf(row([]), ["B"])
+        self.table.appendChildRowOf(row([]), group_row("B", 8))
 
-        self.table.appendChildRowOf(row([0]), ["C",
-                                               "C",
-                                               "C",
-                                               "C",
-                                               "C",
-                                               "C",
-                                               "C",
-                                               "C"])
+        self.table.appendChildRowOf(row([0]), row_from_text("C",
+                                                            "C",
+                                                            "C",
+                                                            "C",
+                                                            "C",
+                                                            "C",
+                                                            "C",
+                                                            "C"))
         self.table.enableFiltering()
 
         self.filterBox = QtGui.QLineEdit(self)

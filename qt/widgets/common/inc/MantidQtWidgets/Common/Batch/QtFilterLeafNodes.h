@@ -5,6 +5,7 @@
 #include <memory>
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -17,7 +18,7 @@ protected:
   virtual bool rowMeetsCriteria(RowLocation const& row) const = 0;
 };
 
-class QtFilterLeafNodes : public QSortFilterProxyModel {
+class EXPORT_OPT_MANTIDQT_COMMON QtFilterLeafNodes : public QSortFilterProxyModel {
 public:
   QtFilterLeafNodes(RowLocationAdapter rowLocation, QObject *parent = nullptr);
   void setPredicate(std::unique_ptr<RowPredicate> predicate);

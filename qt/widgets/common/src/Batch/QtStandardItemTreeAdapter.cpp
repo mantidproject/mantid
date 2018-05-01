@@ -2,6 +2,7 @@
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -89,12 +90,6 @@ insertEmptyChildRow(QStandardItemModel &model,
   return insertChildRow(model, parent, row, emptyRow(model.columnCount()));
 }
 
-void setTextAtCell(QStandardItemModel &model,
-                   QModelIndexForMainModel const &index,
-                   std::string const &newText) {
-  modelItemFromIndex(model, index)->setText(QString::fromStdString(newText));
-}
-
 QList<QStandardItem *> emptyRow(int columnCount) {
   auto cells = QList<QStandardItem *>();
   for (auto i = 0; i < columnCount; ++i)
@@ -109,43 +104,48 @@ QList<QStandardItem *> rowFromRowText(std::vector<std::string> const &rowText) {
   return rowCells;
 }
 
-std::vector<Cell>
-cellsAtRow(QStandardItemModel const &model,
-             QModelIndexForMainModel const &firstCellIndex) {
+void setCellAtCellIndex(QStandardItemModel &model,
+                        QModelIndexForMainModel const &cellIndex,
+                        Cell const &cell) {
+  auto *item = modelItemFromIndex(model, cellIndex);
+  applyCellPropertiesToItem(cell, *item);
+}
+
+void setCellsAtRow(QStandardItemModel &model,
+                   QModelIndexForMainModel const &firstCellIndex,
+                   std::vector<Cell> const &cells) {
+  enumerateCellsInRow(firstCellIndex, model.columnCount(),
+                      [&model, &cells](QModelIndexForMainModel const &cellIndex, int i) -> void {
+                        auto *item = modelItemFromIndex(model, cellIndex);
+                        applyCellPropertiesToItem(cells[i], *item);
+                      });
+}
+
+QList<QStandardItem *> rowFromCells(std::vector<Cell> const &cells) {
+  auto rowCells = QList<QStandardItem *>();
+  for (auto &&cell : cells) {
+    auto *item = new QStandardItem(QString::fromStdString(cell.contentText()));
+    applyCellPropertiesToItem(cell, *item);
+    rowCells.append(item);
+  }
+  return rowCells;
+}
+
+std::vector<Cell> cellsAtRow(QStandardItemModel const &model,
+                             QModelIndexForMainModel const &firstCellIndex) {
   auto cells = std::vector<Cell>();
   cells.reserve(model.columnCount());
-
-  for (auto i = 0; i < model.columnCount(); i++) {
-    auto cellIndex = firstCellIndex.sibling(firstCellIndex.row(), i);
-    cells.emplace_back(cellFromCellIndex(model, cellIndex));
-  }
+  enumerateCellsInRow(firstCellIndex, model.columnCount(),
+                      [&model, &cells](QModelIndexForMainModel const &cellIndex, int) -> void {
+                        cells.emplace_back(cellFromCellIndex(model, cellIndex));
+                      });
   return cells;
 }
 
-void setBorderThickness(QStandardItem& item, int borderThickness) {
-  item.setData(borderThickness, Qt::UserRole + 2);
-}
-
-int getBorderThickness(QStandardItem const& item) {
-  return item.data(Qt::UserRole + 2).toInt();
-}
-
-void setBorderColor(QStandardItem& item, int borderThickness) {
-  item.setData(borderThickness, Qt::UserRole + 1);
-}
-
-QColor getBorderColor(QStandardItem const& item) {
-  return item.data(Qt::UserRole + 1).value<QColor>();
-}
-
 Cell cellFromCellIndex(QStandardItemModel const &model,
-                         QModelIndexForMainModel const &index) {
-  auto* cellItem = modelItemFromIndex(model, index);
-  auto cell = Cell(cellItem->text().toStdString());
-  cell.setBorderThickness(getBorderThickness(*cellItem));
-  cell.setBorderColor(getBorderColor(*cellItem).name().toStdString());
-  cell.setEditable(cell.isEditable());
-  return cell;
+                       QModelIndexForMainModel const &index) {
+  auto *cellItem = modelItemFromIndex(model, index);
+  return extractCellPropertiesFromItem(*cellItem);
 }
 }
 }

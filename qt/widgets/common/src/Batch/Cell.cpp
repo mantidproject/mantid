@@ -6,7 +6,7 @@ namespace Batch {
 
 Cell::Cell(std::string const &contentText)
     : m_contentText(contentText), m_borderThickness(1), m_borderColor("grey"),
-      m_isEditable(false) {}
+      m_isEditable(true) {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
 

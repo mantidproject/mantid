@@ -25,6 +25,7 @@ public:
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
   virtual void notifyPasteRowsRequested() = 0;
+// TODO:  virtual void notifyFilterReset() = 0;
   virtual ~JobTreeViewSubscriber() = default;
 };
 
@@ -81,12 +82,6 @@ public:
   std::vector<RowLocation> selectedRowLocations() const;
   boost::optional<std::vector<Subtree>> selectedSubtrees() const;
   boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
-
-  void enableEditing(RowLocation const &row);
-  void enableEditing(RowLocation const &row, int cell);
-  void disableEditing(RowLocation const &row);
-  void disableEditing(RowLocation const &row, int cell);
-
   using QTreeView::edit;
 
 protected:
@@ -129,17 +124,6 @@ private:
   std::pair<QModelIndexForFilteredModel, bool>
   findOrMakeCellBelow(QModelIndexForFilteredModel const &index);
 
-  // QList<QStandardItem *>
-  // rowFromRowText(std::vector<std::string> const &rowText) const;
-  std::vector<std::string> rowTextFromRow(QModelIndex firstCellIndex) const;
-
-  QModelIndexForMainModel modelIndexAt(RowLocation const &location,
-                                       int column = 0) const;
-  boost::optional<QModelIndexForMainModel>
-  modelIndexIfExistsAt(RowLocation const &location, int column = 0) const;
-  RowLocation rowLocationAt(QModelIndexForMainModel const &index) const;
-  QStandardItem *modelItemAt(RowLocation const &location, int column = 0) const;
-
   bool hasEditorOpen() const;
 
   QtTreeCursorNavigation navigation() const;
@@ -147,9 +131,8 @@ private:
 
   JobTreeViewSubscriber *m_notifyee;
   QStandardItemModel m_mainModel;
-  int m_columnCount;
 
-  QtFilterLeafNodes *m_filteredModel;
+  QtFilterLeafNodes m_filteredModel;
   QModelIndexForMainModel m_lastEdited;
   bool m_hasEditorOpen;
 };

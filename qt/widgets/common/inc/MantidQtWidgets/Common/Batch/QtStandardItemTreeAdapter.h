@@ -11,6 +11,14 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
+template <typename Action>
+void enumerateCellsInRow(QModelIndexForMainModel const& startIndex, int columns, Action const& action) {
+  for (auto i = 0; i < columns; i++) {
+    auto cellIndex = startIndex.sibling(startIndex.row(), i);
+    action(cellIndex, i);
+  }
+}
+
 QModelIndexForMainModel rootModelIndex(QStandardItemModel const &model);
 QModelIndexForFilteredModel rootModelIndex(QSortFilterProxyModel const &model);
 
@@ -24,7 +32,7 @@ cellsAtRow(QStandardItemModel const &model,
            QModelIndexForMainModel const &firstCellIndex);
 
 EXPORT_OPT_MANTIDQT_COMMON void
-setCellsAtRow(QStandardItemModel const &model,
+setCellsAtRow(QStandardItemModel &model,
               QModelIndexForMainModel const &firstCellIndex,
               std::vector<Cell> const &cells);
 
