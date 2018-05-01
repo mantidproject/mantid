@@ -1711,7 +1711,7 @@ void EnggDiffractionPresenter::focusingFinished() {
 * @param dgFile detector grouping file name. If not empty implies
 * texture focusing
 */
-  void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
+void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                                           const std::string &runNo, size_t bank,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
@@ -2465,7 +2465,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string &inputWorkspace,
                  << '\n';
   copyToGeneral(saveDir, focusingComp);
 }
-  
+
 /**
 * Convert the generated output files and saves them in
 * GSS format
