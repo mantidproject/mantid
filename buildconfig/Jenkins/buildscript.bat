@@ -28,6 +28,7 @@ set VS_VERSION=14
 :: externally and cannot be supplied in the cmake configuration
 set SDK_VERSION=8.1
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %SDK_VERSION%
+set UseEnv=true
 set CM_GENERATOR=Visual Studio 14 2015 Win64
 set PARAVIEW_DIR=%PARAVIEW_DIR%
 
@@ -99,7 +100,7 @@ if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
-    rmdir /S /Q %BUILD_DIR%\eigen-download %BUILD_DIR%\eigen-src
+    rmdir /S /Q %BUILD_DIR%\eigen-prefix
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
     rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
   )
