@@ -80,6 +80,7 @@ set ( SRC_FILES
   src/Batch/RowLocation.cpp
   src/Batch/RowLocationAdapter.cpp
   src/Batch/Row.cpp
+  src/Batch/Cell.cpp
   src/Batch/ExtractSubtrees.cpp
   src/Batch/FindSubtreeRoots.cpp
   src/Batch/JobTreeView.cpp
@@ -408,6 +409,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/RowLocation.h
   inc/MantidQtWidgets/Common/Batch/RowLocationAdapter.h
   inc/MantidQtWidgets/Common/Batch/Row.h
+  inc/MantidQtWidgets/Common/Batch/Cell.h
   inc/MantidQtWidgets/Common/Batch/CellDelegate.h
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
