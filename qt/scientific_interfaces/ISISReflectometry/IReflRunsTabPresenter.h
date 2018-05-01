@@ -55,6 +55,8 @@ public:
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
   // Determine whether to start a new autoreduction
   virtual bool requireNewAutoreduction() const = 0;
+  // Determine whether autoreduction is still running
+  virtual bool autoreductionInProgress() const = 0;
 };
 }
 }

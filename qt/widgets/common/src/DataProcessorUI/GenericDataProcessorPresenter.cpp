@@ -1570,7 +1570,7 @@ void GenericDataProcessorPresenter::pause() {
 
   updateWidgetEnabledState(false);
 
-  m_mainPresenter->pause();
+  m_mainPresenter->pause(m_group);
 
   m_pauseReduction = true;
 }
@@ -1633,7 +1633,7 @@ void GenericDataProcessorPresenter::accept(
 
   m_mainPresenter->notifyADSChanged(m_workspaceList);
   // Presenter should initially be in the paused state
-  m_mainPresenter->pause();
+  m_mainPresenter->pause(m_group);
 }
 
 /** Returs the list of valid workspaces currently in the ADS

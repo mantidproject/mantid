@@ -550,10 +550,18 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
 */
-void ReflRunsTabPresenter::pause() {
+void ReflRunsTabPresenter::pause(int group) {
   m_view->stopTimer();
   m_autoreductionInProgress = false;
   updateWidgetEnabledState(false);
+
+  // We get here in two scenarios: processing is still running, in which case
+  // do not confirm reduction has paused yet (confirmReductionPaused will be
+  // called when reduction is finished); and when processing is finished but
+  // autoreduction is in progress, in which case we need to confirm reduction
+  // has paused now because confirmReductionPaused will not be called.
+  if (!m_mainPresenter->checkIfProcessing())
+    m_mainPresenter->notifyReductionPaused(group);
 }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
@@ -577,8 +585,8 @@ bool ReflRunsTabPresenter::requireNewAutoreduction() const {
 * i.e. after all rows have been reduced
 */
 void ReflRunsTabPresenter::confirmReductionFinished(int group) {
-  UNUSED_ARG(group);
-  
+  m_mainPresenter->notifyReductionFinished(group);
+
   // Start a timer to re-run autoreduction periodically
   m_view->startTimer(1000);
 }

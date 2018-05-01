@@ -128,7 +128,7 @@ public:
   MOCK_CONST_METHOD0(getTimeSlicingType, QString());
 
   // Data reduction paused/resumed handling
-  MOCK_METHOD0(pause, void());
+  MOCK_METHOD1(pause, void(int));
   MOCK_CONST_METHOD0(resume, void());
 
   // Calls we don't care about

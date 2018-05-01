@@ -199,6 +199,7 @@ public:
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
   MOCK_CONST_METHOD0(requireNewAutoreduction, bool());
+  MOCK_CONST_METHOD0(autoreductionInProgress, bool());
   MOCK_METHOD1(settingsChanged, void(int));
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
@@ -304,6 +305,7 @@ public:
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
                     std::string const &));
   MOCK_METHOD1(notify, void(IReflMainWindowPresenter::Flag));
+  MOCK_METHOD1(notifyReductionFinished, void(int));
   MOCK_METHOD1(notifyReductionPaused, void(int));
   MOCK_METHOD1(notifyReductionResumed, void(int));
   MOCK_METHOD3(askUserString,

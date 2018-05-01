@@ -279,6 +279,7 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
+    constexpr int GROUP_NUMBER = 0;
     // Expect that the view updates the menu with isProcessing=false
     // and enables the 'autoreduce', 'transfer' and 'instrument' buttons
     EXPECT_CALL(mockRunsTabView, updateMenuEnabledState(false))
@@ -289,8 +290,9 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setInstrumentComboEnabled(true))
         .Times(Exactly(1));
+
     // Pause presenter
-    presenter.pause();
+    presenter.pause(GROUP_NUMBER);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -320,6 +322,29 @@ public:
         .Times(Exactly(1));
     // Resume presenter
     presenter.resume();
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
+  void test_confirmReductionFinished() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    constexpr int GROUP_NUMBER = 0;
+    // Expect that the main presenter is notified that data reduction is
+    // finished
+    EXPECT_CALL(mockMainPresenter, notifyReductionFinished(GROUP_NUMBER))
+        .Times(Exactly(1));
+
+    presenter.confirmReductionFinished(GROUP_NUMBER);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));

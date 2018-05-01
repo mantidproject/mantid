@@ -51,6 +51,11 @@ void ReflMainWindowPresenter::completedRowReductionSuccessfully(
   m_savePresenter->completedRowReductionSuccessfully(group, workspaceName);
 }
 
+void ReflMainWindowPresenter::notifyReductionFinished(int group) {
+  UNUSED_ARG(group);
+  m_isProcessing = false;
+}
+
 void ReflMainWindowPresenter::notifyReductionPaused(int group) {
   m_isProcessing = false;
   m_savePresenter->onAnyReductionPaused();
@@ -237,7 +242,7 @@ Checks whether or not data is currently being processed in the Runs Tab
 */
 bool ReflMainWindowPresenter::checkIfProcessing() const {
 
-  return m_isProcessing;
+  return m_isProcessing || m_runsPresenter->autoreductionInProgress();
 }
 
 /** Checks for Settings Tab null pointer

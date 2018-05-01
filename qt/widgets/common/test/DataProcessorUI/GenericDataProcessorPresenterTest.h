@@ -3293,6 +3293,8 @@ public:
     NiceMock<MockMainPresenter> mockMainPresenter;
 
     auto presenter = makeDefaultPresenter();
+    constexpr int GROUP_NUMBER = 0;
+
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -3301,7 +3303,7 @@ public:
     // User hits the 'pause' button
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectUpdateViewToPausedState(mockDataProcessorView, Exactly(1));
-    EXPECT_CALL(mockMainPresenter, pause()).Times(1);
+    EXPECT_CALL(mockMainPresenter, pause(GROUP_NUMBER)).Times(1);
     presenter->notify(DataProcessorPresenter::PauseFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));

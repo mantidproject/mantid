@@ -79,7 +79,7 @@ public:
   virtual bool autoreductionInProgress() const { return false; }
   
   /// Handle data reduction paused/resumed
-  virtual void pause() {}
+  virtual void pause(int group) { UNUSED_ARG(group) }
   virtual void resume() const {}
 
   /// Handle data reduction paused/resumed confirmation

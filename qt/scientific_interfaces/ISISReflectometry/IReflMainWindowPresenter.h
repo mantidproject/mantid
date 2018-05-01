@@ -47,6 +47,7 @@ public:
   };
 
   virtual void notify(Flag flag) = 0;
+  virtual void notifyReductionFinished(int group) = 0;
   virtual void notifyReductionPaused(int group) = 0;
   virtual void notifyReductionResumed(int group) = 0;
 

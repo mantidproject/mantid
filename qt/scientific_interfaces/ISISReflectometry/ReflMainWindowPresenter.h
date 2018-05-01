@@ -85,6 +85,7 @@ public:
   bool checkIfProcessing() const override;
   void settingsChanged(int group) override;
   void notify(IReflMainWindowPresenter::Flag flag) override;
+  void notifyReductionFinished(int group) override;
   void notifyReductionPaused(int group) override;
   void notifyReductionResumed(int group) override;
 
