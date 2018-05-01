@@ -100,6 +100,13 @@ std::map<std::string, std::string> IqtFit<Base>::validateInputs() {
   return errors;
 }
 
+bool IqtFitSequential::isFitParameter(const std::string &name) const {
+  return name.rfind("A0") != std::string::npos ||
+         name.rfind("Height") != std::string::npos ||
+         name.rfind("Stretching") != std::string::npos ||
+         name.rfind("Lifetime") != std::string::npos;
+}
+
 template <typename Base>
 bool IqtFit<Base>::throwIfElasticQConversionFails() const {
   return true;

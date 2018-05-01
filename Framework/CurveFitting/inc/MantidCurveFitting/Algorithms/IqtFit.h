@@ -37,6 +37,7 @@ protected:
 
 private:
   std::map<std::string, std::string> validateInputs() override;
+  bool isFitParameter(const std::string &name) const override;
   bool throwIfElasticQConversionFails() const override;
 };
 
