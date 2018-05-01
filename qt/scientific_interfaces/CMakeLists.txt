@@ -37,6 +37,7 @@ set ( TEST_FILES
   test/EnggDiffFittingModelTest.h
   test/EnggDiffFittingPresenterTest.h
   test/EnggDiffractionPresenterTest.h
+  test/EnggVanadiumCorrectionsModelTest.h
   test/IO_MuonGroupingTest.h
   test/MDFLogValueFinderTest.h
   test/MeasurementItemTest.h
