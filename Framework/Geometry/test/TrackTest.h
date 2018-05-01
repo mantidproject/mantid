@@ -5,6 +5,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
 
@@ -38,7 +39,7 @@ public:
 
   void testAddLink() {
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
-    Object shape;
+    CSGObject shape;
     A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape, nullptr);
     const auto &linkFront = A.front();
     const auto &linkBack = A.back();
@@ -72,7 +73,7 @@ public:
 
   void testBuildLink() {
     Track A(V3D(-5, -5, 0), V3D(1.0, 0.0, 0.0));
-    Object shape;
+    CSGObject shape;
 
     TS_ASSERT_EQUALS(A.startPoint(), V3D(-5.0, -5.0, 0.0));
     TS_ASSERT_EQUALS(A.direction(), V3D(1.0, 0.0, 0.0));
@@ -94,7 +95,7 @@ public:
 
   void testRemoveCojoins() {
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
-    Object shape;
+    CSGObject shape;
     A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape);
     A.addLink(V3D(2.0001, 2.0001, 2.0001), V3D(3, 3, 3), 2.001, shape);
     // Check track length
@@ -115,7 +116,7 @@ public:
 
   void testNonComplete() {
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
-    Object shape;
+    CSGObject shape;
     A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape);
     A.addLink(V3D(2.0001, 2.0001, 2.0001), V3D(3, 3, 3), 2.001, shape);
     TS_ASSERT(A.nonComplete() > 0);

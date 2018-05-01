@@ -3351,6 +3351,8 @@ class UserFile(ReductionStep):
                 if det_specif == 'MERGE':
                     det_specif = 'MERGED'
                 reducer.instrument.setDetector(det_specif)
+            elif det_specif.startswith('OVERLAP'):
+                self.readFrontMergeRange(det_specif, reducer)
             else:
                 _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)
 
@@ -3719,6 +3721,24 @@ class UserFile(ReductionStep):
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
 
+    def readFrontMergeRange(self, details, reducer):
+        """
+            Handle user commands of the type DET/OVERLAP [Q1 Q2] which are used to specify the range to merge
+
+            @param details: the contents of the line after DET/
+            @param reducer: the object that contains all the settings
+        """
+        values = details.split()
+        rAnds = reducer.instrument.getDetector('FRONT').mergeRange
+        rAnds.q_merge_range = False
+        if len(values) == 3:
+            rAnds.q_merge_range = True
+            rAnds.q_min = float(values[1])
+            rAnds.q_max = float(values[2])
+        else:
+            _issueWarning(
+                "Command: \"DET/" + details + "\" not valid. Expected format is /DET/OVERLAP q1 q2")
+
     def _read_back_line(self, arguments, reducer):
         """
             Parses a line from the settings file
@@ -3888,7 +3908,6 @@ class UserFile(ReductionStep):
         @param arguments: the arguments of a QResolution line
         @param reducer: a reducer object
         '''
-        arguments = arguments.upper()
         if arguments.find('=') == -1:
             return self._read_q_resolution_line_on_off(arguments, reducer)
 
@@ -3897,7 +3916,7 @@ class UserFile(ReductionStep):
         arguments = [element.strip() for element in arguments]
 
         # Check if it is the moderator file name, if so add it and return
-        if arguments[0].startswith('MODERATOR'):
+        if arguments[0].upper().startswith('MODERATOR'):
             # pylint: disable=bare-except
             try:
                 reducer.to_Q.set_q_resolution_moderator(file_name=arguments[1])

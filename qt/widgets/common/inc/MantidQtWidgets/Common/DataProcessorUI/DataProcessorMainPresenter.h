@@ -2,13 +2,17 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <QSet>
 #include <QString>
+#include <map>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
+
 /** @class DataProcessorMainPresenter
 
 DataProcessorMainPresenter is an interface that defines the functions that
@@ -51,26 +55,37 @@ public:
     UNUSED_ARG(workspaceList);
   }
 
-  /// Return global options for pre-processing as a string
-  virtual QString getPreprocessingOptionsAsString() const { return QString(); }
-  /// Return property names associated with pre-processing values
-  virtual QString getPreprocessingProperties() const { return QString(); }
+  /// Return global options for pre-processing
+  virtual ColumnOptionsQMap getPreprocessingOptions() const {
+    return ColumnOptionsQMap();
+  }
   /// Return global options for reduction
-  virtual QString getProcessingOptions() const { return QString(); }
-  /// Return global options for post-processing
-  virtual QString getPostprocessingOptions() const { return QString(); }
+  virtual OptionsQMap getProcessingOptions() const { return OptionsQMap(); }
+  /// Return global options for post-processing as a string
+  virtual QString getPostprocessingOptionsAsString() const { return QString(); }
   /// Return time-slicing values
   virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type
   virtual QString getTimeSlicingType() const { return QString(); }
+  /// Return transmission runs for a particular angle
+  virtual OptionsQMap getOptionsForAngle(const double angle) const {
+    UNUSED_ARG(angle);
+    return OptionsQMap();
+  }
+  /// Return true if there are per-angle transmission runs set
+  virtual bool hasPerAngleOptions() const { return false; }
 
   /// Handle data reduction paused/resumed
   virtual void pause() const {}
   virtual void resume() const {}
 
   /// Handle data reduction paused/resumed confirmation
-  virtual void confirmReductionPaused() const {}
-  virtual void confirmReductionResumed() const {}
+  virtual void confirmReductionPaused(int group) { UNUSED_ARG(group); }
+  virtual void confirmReductionResumed(int group) { UNUSED_ARG(group); }
+  virtual void completedGroupReductionSuccessfully(GroupData const &,
+                                                   std::string const &){};
+  virtual void completedRowReductionSuccessfully(GroupData const &,
+                                                 std::string const &){};
 };
 }
 }

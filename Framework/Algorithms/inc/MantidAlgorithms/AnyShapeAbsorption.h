@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AbsorptionCorrection.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -87,6 +88,14 @@ public:
   AnyShapeAbsorption();
   /// Algorithm's name
   const std::string name() const override { return "AbsorptionCorrection"; }
+
+  const std::vector<std::string> seeAlso() const override {
+    return {"SetSampleMaterial",          "CreateSampleShape",
+            "DefineGaugeVolume",          "CylinderAbsorption",
+            "FlatPlateAbsorption",        "AnnularRingAbsorption",
+            "CuboidGaugeVolumeAbsorption"};
+  }
+
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates an approximation of the attenuation due to absorption "
@@ -106,7 +115,7 @@ private:
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
   /// Create the gague volume for the correction
-  Geometry::Object constructGaugeVolume();
+  boost::shared_ptr<const Geometry::IObject> constructGaugeVolume();
 
   double m_cubeSide; ///< The length of the side of an element cube in m
 };

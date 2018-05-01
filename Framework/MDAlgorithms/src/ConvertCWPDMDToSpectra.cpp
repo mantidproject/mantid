@@ -107,7 +107,7 @@ void ConvertCWPDMDToSpectra::exec() {
 
   // output unit: make a map for wavelength
   std::map<int, double> map_runWavelength;
-  if (outputunit.compare("2theta")) {
+  if (outputunit != "2theta") {
     // set up runid and wavelength  map
     std::string wavelengthpropertyname =
         getProperty("NeutornWaveLengthPropertyName");
@@ -449,7 +449,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                 << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
 
   // Go through all events to find out their positions
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
   bool scancell = true;
   size_t nextindex = 1;
   int currRunIndex = -1;

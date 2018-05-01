@@ -19,7 +19,7 @@ class V3D;
 }
 
 namespace Geometry {
-class Object;
+class IObject;
 }
 
 namespace Algorithms {
@@ -96,13 +96,16 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AbsorptionCorrection"};
+  }
 
 protected:
-  API::MatrixWorkspace_sptr m_inputWS;    ///< A pointer to the input workspace
-  const Geometry::Object *m_sampleObject; ///< Local cache of sample object.
-  Kernel::V3D m_beamDirection;            ///< The direction of the beam.
-  std::vector<double> m_L1s,              ///< Cached L1 distances
-      m_elementVolumes;                   ///< Cached element volumes
+  API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
+  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
+  Kernel::V3D m_beamDirection;             ///< The direction of the beam.
+  std::vector<double> m_L1s,               ///< Cached L1 distances
+      m_elementVolumes;                    ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements; ///< The number of volume elements
   double m_sampleVolume;      ///< The total volume of the sample

@@ -26,6 +26,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"NormaliseToMonitor"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
@@ -47,7 +50,7 @@ private:
   /// stores the incident energy of the neutrons
   double m_Ei = 0.0;
   /// stores the total count of neutrons from the monitor
-  int m_monitorCounts = 0;
+  double m_monitorCounts = 0;
 };
 
 } // namespace Algorithms

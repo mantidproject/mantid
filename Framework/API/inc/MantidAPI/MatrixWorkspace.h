@@ -32,11 +32,11 @@ class Axis;
 class SpectrumDetectorMapping;
 
 /// typedef for the image type
-typedef std::vector<std::vector<double>> MantidImage;
+using MantidImage = std::vector<std::vector<double>>;
 /// shared pointer to MantidImage
-typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
+using MantidImage_sptr = boost::shared_ptr<MantidImage>;
 /// shared pointer to const MantidImage
-typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
+using MantidImage_const_sptr = boost::shared_ptr<const MantidImage>;
 
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
@@ -449,8 +449,9 @@ public:
   bool hasMaskedBins(const size_t &workspaceIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
-  typedef std::map<size_t, double> MaskList;
+  using MaskList = std::map<size_t, double>;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -498,7 +499,7 @@ public:
       const Mantid::API::MDNormalization &normalization) const override;
   /// Create iterators. Partitions the iterators according to the number of
   /// cores.
-  std::vector<IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
@@ -511,6 +512,9 @@ public:
   /// @return the special coordinate system used if any.
   Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const override;
+
+  // Check if this class has an oriented lattice on a sample object
+  virtual bool hasOrientedLattice() const override;
 
   //=====================================================================================
   // End IMDWorkspace methods
@@ -618,9 +622,9 @@ protected:
 };
 
 /// shared pointer to the matrix workspace base class
-typedef boost::shared_ptr<MatrixWorkspace> MatrixWorkspace_sptr;
+using MatrixWorkspace_sptr = boost::shared_ptr<MatrixWorkspace>;
 /// shared pointer to the matrix workspace base class (const version)
-typedef boost::shared_ptr<const MatrixWorkspace> MatrixWorkspace_const_sptr;
+using MatrixWorkspace_const_sptr = boost::shared_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid

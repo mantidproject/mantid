@@ -10,6 +10,7 @@ class IDetector;
 class IComponent;
 class IObjComponent;
 class RectangularDetector;
+class ObjCompAssembly;
 
 /** ComponentVisitor : Visitor for IComponents. Enables parsing of a full doubly
   linked InstrumentTree without need for dynamic casts. Public methods are
@@ -42,11 +43,17 @@ public:
   virtual size_t registerComponentAssembly(const ICompAssembly &assembly) = 0;
   virtual size_t registerGenericComponent(const IComponent &component) = 0;
   virtual size_t
+  registerInfiniteComponent(const Mantid::Geometry::IComponent &component) = 0;
+  virtual size_t
   registerGenericObjComponent(const IObjComponent &objComponent) = 0;
+  virtual size_t
+  registerInfiniteObjComponent(const IObjComponent &component) = 0;
   virtual size_t registerDetector(const IDetector &detector) = 0;
+  virtual size_t registerRectangularBank(const ICompAssembly &bank) = 0;
   virtual size_t registerStructuredBank(const ICompAssembly &bank) = 0;
+  virtual size_t registerObjComponentAssembly(const ObjCompAssembly &obj) = 0;
   virtual ~ComponentVisitor() {}
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 #endif

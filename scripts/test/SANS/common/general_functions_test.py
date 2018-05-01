@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
-
 from mantid.kernel import (V3D, Quat)
 from mantid.api import AnalysisDataService
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log,
@@ -9,7 +7,7 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
-                                           get_facility)
+                                           get_facility, parse_diagnostic_settings)
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
 from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility)
@@ -169,6 +167,14 @@ class SANSFunctionsTest(unittest.TestCase):
         # Assert
         self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
 
+    def test_that_creates_correct_transmission_workspace_name(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        # Act
+        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB, data_type = 'Sample', transmission = True)
+        # Assert
+        self.assertTrue("12345_trans_Sample_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+
     def test_that_sanitises_instrument_names(self):
         name1 = sanitise_instrument_name("LOQ_trans")
         self.assertTrue(LOQ == name1)
@@ -263,6 +269,14 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertTrue(get_facility(SANSInstrument.LARMOR) is SANSFacility.ISIS)
         self.assertTrue(get_facility(SANSInstrument.ZOOM) is SANSFacility.ISIS)
         self.assertTrue(get_facility(SANSInstrument.NoInstrument) is SANSFacility.NoFacility)
+
+    def test_that_diagnostic_parser_produces_correct_list(self):
+        string_to_parse = '8-11, 12:15, 5, 7:9'
+        expected_result = [[8, 11], [12, 12], [13, 13], [14, 14], [15, 15], [5, 5], [7,7], [8,8], [9,9]]
+
+        result = parse_diagnostic_settings(string_to_parse)
+
+        self.assertEqual(result, expected_result)
 
 if __name__ == '__main__':
     unittest.main()

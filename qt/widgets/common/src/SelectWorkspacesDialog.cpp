@@ -56,7 +56,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
 
   Mantid::API::AnalysisDataServiceImpl &ADS =
       Mantid::API::AnalysisDataService::Instance();
-  typedef std::vector<Mantid::API::Workspace_sptr> VecWorkspaces;
+  using VecWorkspaces = std::vector<Mantid::API::Workspace_sptr>;
   VecWorkspaces workspaces = ADS.getObjects();
   WorkspaceIsNotOfType comparitor(typeFilter);
   workspaces.erase(

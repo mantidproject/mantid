@@ -77,7 +77,7 @@ Description          : Preferences dialog
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
-#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
+#include "MdPlottingCmapsProvider.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 
@@ -796,7 +796,7 @@ void ConfigDialog::initMdPlottingGeneralTab() {
   generalTabLayout->addWidget(label);
 
   // Set the color maps
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   QStringList colorMapNames;
   QStringList colorMapFiles;
   mdPlottingCmapsProvider.getColorMapsForMdPlotting(colorMapNames,
@@ -879,7 +879,7 @@ void ConfigDialog::initMdPlottingVsiTab() {
 
   // Set the color map selection for the VSI
   QStringList maps;
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   mdPlottingCmapsProvider.getColorMapsForVSI(maps);
 
   MantidQt::API::MdConstants mdConstants;
@@ -1277,8 +1277,8 @@ void ConfigDialog::updateSendToTab() {
   }
 }
 
-typedef std::map<std::string, bool> categoriesType;
-typedef QMap<QString, QTreeWidgetItem *> widgetMap;
+using categoriesType = std::map<std::string, bool>;
+using widgetMap = QMap<QString, QTreeWidgetItem *>;
 
 void ConfigDialog::refreshTreeCategories() {
   treeCategories->clear();
@@ -3105,7 +3105,7 @@ void ConfigDialog::chooseTranslationsFolder() {
   QFileInfo tfi(app->d_translations_folder);
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Choose the location of the MantidPlot translations folder!"),
-      tfi.dir().absolutePath(), 0 /**QFileDialog::ShowDirsOnly*/);
+      tfi.dir().absolutePath(), nullptr /**QFileDialog::ShowDirsOnly*/);
 
   if (!dir.isEmpty()) {
     app->d_translations_folder = dir;
@@ -3130,7 +3130,7 @@ void ConfigDialog::chooseHelpFolder() {
 void ConfigDialog::addPythonScriptsDirs() {
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Add a python scripts directory"), "",
-      0 /**QFileDialog::ShowDirsOnly*/);
+      nullptr /**QFileDialog::ShowDirsOnly*/);
   if (!dir.isEmpty()) {
     QString dirs = lePythonScriptsDirs->text();
     if (!dirs.isEmpty()) {
@@ -3144,7 +3144,7 @@ void ConfigDialog::addPythonScriptsDirs() {
 void ConfigDialog::addPythonPluginDirs() {
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Add a python extension directory"), "",
-      0 /**QFileDialog::ShowDirsOnly*/);
+      nullptr /**QFileDialog::ShowDirsOnly*/);
   if (!dir.isEmpty()) {
     QString dirs = lePythonPluginsDirs->text();
     if (!dirs.isEmpty()) {
@@ -3157,7 +3157,7 @@ void ConfigDialog::addPythonPluginDirs() {
 
 void ConfigDialog::addInstrumentDir() {
   QString dir = QFileDialog::getExistingDirectory(
-      this, tr("Select new instrument definition directory"), "", 0);
+      this, tr("Select new instrument definition directory"), "", nullptr);
   if (!dir.isEmpty()) {
     leInstrumentDir->setText(dir);
   }

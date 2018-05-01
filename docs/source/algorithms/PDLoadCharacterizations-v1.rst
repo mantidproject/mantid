@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,19 +39,24 @@ characterization file::
   60 3.731  6 18280 0 0 1.70 12.50 50000.00  66666.67
   10 3.198  1 17538 0 0 0.05 15.40 00000.00 100000.00
 
-The first line ``Instrument parameter file:`` must be present to mark the
-beginning of the first section. Whatever string appears after the semicolon
-is copied into the ``IParmFilename`` output property. The following lines
-are of the form "bank l2 polar" with the last line being the keyword ``L1``
-followed by the effective primary flight path. This information is saved
-in the ``IParmFilename``, ``SpectrumIDs``, ``L2``, ``Polar``, and
-``PrimaryFlightPath`` properties. The ``Azimuthal`` properties is filled with zeros
-and is the same length as ``SpectrumIDs``, ``L2``, ``Polar``, and ``PrimaryFlightPath``.
+The first line ``Instrument parameter file:`` must be present to mark
+the beginning of the first section. Whatever string appears after the
+semicolon is copied into the ``IParmFilename`` output property. The
+following lines are of the form "bank l2 polar" with the last line
+being the keyword ``L1`` followed by the effective primary flight
+path. This information is saved in the ``IParmFilename``,
+``SpectrumIDs``, ``L2``, ``Polar``, ``Azimuthal`` and
+``PrimaryFlightPath`` properties. The ``Azimuthal`` values are
+optional and will be set to zero if not specified. No example for
+specifying azimuthal angles for the focus positions is being supplied
+as it uncommon except for preferred orientation studies.
 
 The second section of the characterizations file is read into the output
 `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ as described below.
 
-A second example from NOMAD demonstrates how to specify different ranges for each focused spectrum as well as the optional wavelength ranges::
+A second example from NOMAD demonstrates how to specify different
+ranges for each focused spectrum as well as the optional wavelength
+ranges::
 
   Instrument parameter file: NOMAD_11_22_11.prm
   1 2 15

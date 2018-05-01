@@ -72,6 +72,11 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ReadGroupsFromFile",   "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "LoadCalFile",          "SaveCalFile",
+            "MergeCalFiles"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Diffraction\\DataHandling\\CalFiles";
@@ -79,7 +84,7 @@ public:
 
 private:
   /// Calibration entries map
-  typedef std::map<int, std::pair<int, int>> instrcalmap;
+  using instrcalmap = std::map<int, std::pair<int, int>>;
   /// Initialisation code
   void init() override;
   /// Execution code

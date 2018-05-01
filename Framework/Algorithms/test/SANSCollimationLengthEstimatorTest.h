@@ -8,6 +8,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -50,7 +51,7 @@ createTestInstrument(const Mantid::detid_t id,
   Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
-    det0 = new Detector("det0", id, shape, NULL);
+    det0 = new Detector("det0", id, shape, nullptr);
   } else {
     det0 = new Detector("det0", id, nullptr);
   }

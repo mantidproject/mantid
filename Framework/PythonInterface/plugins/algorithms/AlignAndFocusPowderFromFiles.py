@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, \
+from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import ConfigService, Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, \
@@ -52,9 +52,12 @@ def determineChunking(filename, chunkSize):
     return strategy
 
 
-class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
+class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
+
+    def seeAlso(self):
+        return [ "AlignAndFocusPowder" ]
 
     def name(self):
         return "AlignAndFocusPowderFromFiles"

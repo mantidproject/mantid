@@ -26,10 +26,10 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/Common/SignalRange.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h"
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidQtWidgets/SliceViewer/CustomTools.h"
 #include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
@@ -45,6 +45,15 @@
 #include "MantidQtWidgets/SliceViewer/SliceViewerFunctions.h"
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
+#include <QClipboard>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QSettings>
+#include <QToolTip>
+#include <QUrl>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_rescaler.h>
 #include <Poco/AutoPtr.h>
@@ -252,7 +261,7 @@ void SliceViewer::loadSettings() {
   // used.
   // If the user selected a unified color map for the SliceViewer and the VSI,
   // then this is loaded.
-  if (m_mdSettings != NULL && m_mdSettings->getUsageGeneralMdColorMap()) {
+  if (m_mdSettings != nullptr && m_mdSettings->getUsageGeneralMdColorMap()) {
     m_currentColorMapFile = m_mdSettings->getGeneralMdColorMapFile();
   } else {
     m_currentColorMapFile = settings.value("ColormapFile", "").toString();

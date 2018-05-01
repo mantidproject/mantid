@@ -101,7 +101,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
 
 
 def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_data_group_dirs=None,
-                         minimizers=None, use_errors=True):
+                         muon_data_group_dir=None, minimizers=None, use_errors=True):
     """
     Run a fit minimizer benchmark against groups of fitting problems.
 
@@ -116,6 +116,7 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
     @param nist_group_dir :: whether to try to load NIST problems
     @param cutest_group_dir :: whether to try to load CUTEst problems
     @param neutron_data_group_dirs :: base directory where fitting problems are located including NIST+CUTEst
+    @param muon_data_group_dir :: base directory where muon fitting problems are located
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
     """
@@ -134,6 +135,8 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
 
     if neutron_data_group_dirs:
         problem_blocks.extend(get_data_groups(neutron_data_group_dirs))
+    if muon_data_group_dir:
+        problem_blocks.extend(get_data_groups(muon_data_group_dir))
 
     prob_results = [do_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
                     block in problem_blocks]
@@ -295,11 +298,11 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         #fig.labels['y']="something "
         fig.labels['title']=prob.name[:-4]+" "+str(count)
         fig.title_size=10
-        status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(user_func, wks, Output='ws_fitting_test',
-                                                                Minimizer='Levenberg-Marquardt',
-                                                                CostFunction='Least squares',IgnoreInvalidData=True,
-                                                                StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
-        tmp=msapi.ConvertToPointData(fit_wks)
+        fit_result= msapi.Fit(user_func, wks, Output='ws_fitting_test',
+                              Minimizer='Levenberg-Marquardt',
+                              CostFunction='Least squares',IgnoreInvalidData=True,
+                              StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
+        tmp=msapi.ConvertToPointData(fit_result.OutputWorkspace)
         xData = tmp.readX(1)
         yData = tmp.readY(1)
         startData=data("Start Guess",xData,yData)
@@ -314,10 +317,17 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         start_fig.labels['y']="Arbitrary units"
         title=user_func[27:-1]
         title=splitByString(title,30)
-        start_fig.labels['title']=prob.name[:-4]+" "+str(count)+"\n"+title
+        # remove the extension (e.g. .nxs) if there is one
+        run_ID = prob.name
+        k=-1
+        k=run_ID.rfind(".")
+        if k != -1:
+            run_ID=run_ID[:k]
+
+        start_fig.labels['title']=run_ID+" "+str(count)+"\n"+title
         start_fig.title_size=10
-        fig.make_scatter_plot("Fit for "+prob.name[:-4]+" "+str(count)+".pdf")
-        start_fig.make_scatter_plot("start for "+prob.name[:-4]+" "+str(count)+".pdf")
+        fig.make_scatter_plot("Fit for "+run_ID+" "+str(count)+".pdf")
+        start_fig.make_scatter_plot("start for "+run_ID+" "+str(count)+".pdf")
     return results_fit_problem
 
 
@@ -335,23 +345,21 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
 
     @returns the fitted parameter values and error estimates for these
     """
-    status = None
-    chi2 = None
+    fit_result = None
     param_tbl = None
-    fit_wks = None
     try:
         # When using 'Least squares' (weighted by errors), ignore nans and zero errors, but don't
         # ignore them when using 'Unweighted least squares' as that would ignore all values!
         ignore_invalid = cost_function == 'Least squares'
-
         # Note the ugly adhoc exception. We need to reconsider these WISH problems:
         if 'WISH17701' in prob.name:
             ignore_invalid = False
-        status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws_fitting_test',
-                                                                Minimizer=minimizer,
-                                                                CostFunction=cost_function,
-                                                                IgnoreInvalidData=ignore_invalid,
-                                                                StartX=prob.start_x, EndX=prob.end_x)
+
+        fit_result = msapi.Fit(function, wks, Output='ws_fitting_test',
+                               Minimizer=minimizer,
+                               CostFunction=cost_function,
+                               IgnoreInvalidData=ignore_invalid,
+                               StartX=prob.start_x, EndX=prob.end_x)
 
         calc_chi2 = msapi.CalculateChiSquared(Function=function,
                                               InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)
@@ -359,7 +367,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
 
     except RuntimeError as rerr:
         print("Warning, Fit probably failed. Going on. Error: {0}".format(str(rerr)))
-
+    param_tbl = fit_result.OutputParameters
     if param_tbl:
         params = param_tbl.column(1)[:-1]
         errors = param_tbl.column(2)[:-1]
@@ -367,7 +375,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         params = None
         errors = None
 
-    return status, chi2, fit_wks, params, errors
+    return fit_result.OutputStatus, fit_result.OutputChi2overDoF, fit_result.OutputWorkspace, params, errors
 
 
 def prepare_wks_cost_function(prob, use_errors):
@@ -422,7 +430,6 @@ def get_function_definitions(prob):
     else:
         # Equation from a neutron data spec file. Ready to be used
         function_defs.append(prob.equation)
-
     return function_defs
 
 

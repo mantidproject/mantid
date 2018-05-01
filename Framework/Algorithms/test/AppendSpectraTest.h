@@ -164,6 +164,19 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
+  void testExecNonConstantBins() {
+    AppendSpectra alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace1", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 15)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "outExecNonConstantBins"));
+    alg.execute();
+    TS_ASSERT(!alg.isExecuted());
+  }
+
   //----------------------------------------------------------------------------------------------
   void doTest(bool event, bool combineLogs = false) {
     MatrixWorkspace_sptr ws1, ws2, out;

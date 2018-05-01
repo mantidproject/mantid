@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qlineedit.h>
+#include <QLineEdit>
 #include <QLabel>
 
 namespace MantidQt {

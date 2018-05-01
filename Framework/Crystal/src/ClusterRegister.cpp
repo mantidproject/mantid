@@ -26,13 +26,13 @@ public:
   ClusterRegister::MapCluster m_unique;
 
   /// Type for identifying label groups
-  typedef std::list<std::unordered_set<size_t>> GroupType;
+  using GroupType = std::list<std::unordered_set<size_t>>;
 
   /// Groups of labels to maintain
   GroupType m_groups;
 
   /// Type for identifying labels already seen
-  typedef std::unordered_set<size_t> LabelHash;
+  using LabelHash = std::unordered_set<size_t>;
 
   /// Hash of labels merged
   LabelHash m_labelHash;

@@ -18,6 +18,7 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 
 namespace {
+
 /**
  * Converts QStringList -> std::vector<std::string>
  * @param qsl :: [input] QStringList to convert
@@ -40,6 +41,7 @@ std::vector<std::string> qStringListToVector(const QStringList &qsl) {
  */
 void addColumnToTable(ITableWorkspace_sptr &table, const std::string &dataType,
                       const std::string &name, const int plotType) {
+
   auto column = table->addColumn(dataType, name);
   column->setPlotType(plotType);
   column->setReadOnly(false);
@@ -107,11 +109,8 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   // Add columns for log values
   if (m_multiple) {
     addColumnToTable(table, "str", "Label", PLOT_TYPE_LABEL);
-  }
-  for (const auto &log : m_logs) {
-    // Despite type "str", this will still work for plotting if it contains a
-    // number (like "100")
-    addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+  } else {
+    addColumnToTable(table, "str", "workspace_Name", PLOT_TYPE_LABEL);
   }
 
   // Cache the start time of the first run
@@ -119,6 +118,20 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
 
   // Get param information and add columns to table
   const auto &wsParamsByLabel = getParametersByLabel(workspacesByLabel);
+
+  const auto valMap = m_logValues->value(m_logValues->keys()[0]);
+  for (const auto &log : m_logs) {
+
+    auto val = valMap[log];
+    // multiple files use strings due to x-y format
+    if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+
+      addColumnToResultsTable(table, wsParamsByLabel, log); //
+
+    } else {
+      addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    }
+  }
   const auto &paramsToDisplay = addParameterColumns(table, wsParamsByLabel);
 
   // Write log and parameter data to the table
@@ -462,6 +475,7 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
 
   for (const auto &wsName : m_items) {
     Mantid::API::TableRow row = table->appendRow();
+    row << wsName.toStdString();
 
     // Get log values for this row
     const auto &logValues = m_logValues->value(wsName);
@@ -477,10 +491,17 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
+      } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+        valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
       }
-      row << valueToWrite.toStdString();
+
+      if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+        row << valueToWrite.toDouble();
+      } else {
+        row << valueToWrite.toStdString();
+      }
     }
 
     // Add param values (params same for all workspaces)
@@ -489,6 +510,52 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
       row << paramsList[paramName];
     }
   }
+}
+/**
+* Add column for a log to the table for the case of multiple fits.
+* Have to check multiple values are not returned
+* @param table :: [input, output] Table to write to
+* @param paramsByLabel :: [input] Map of <label name, <workspace name,
+* <parameter, value>>>
+* @param log :: [input] the log we are going to add to the table
+*/
+void MuonAnalysisResultTableCreator::addColumnToResultsTable(
+    ITableWorkspace_sptr &table,
+    const QMap<QString, WSParameterList> &paramsByLabel,
+    const QString &log) const {
+  // if its a single fit we know its a double
+  if (!m_multiple) {
+    addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
+    return;
+  }
+  const auto &labelName = m_items[0];
+
+  QStringList valuesPerWorkspace;
+  for (const auto &wsName : paramsByLabel[labelName].keys()) {
+    const auto &logValues = m_logValues->value(wsName);
+    const auto &val = logValues[log];
+
+    // Special case: if log is time in sec, subtract the first start time
+    if (log.endsWith(" (s)")) {
+      auto seconds =
+          val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
+      valuesPerWorkspace.append(QString::number(seconds));
+    } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+
+      valuesPerWorkspace.append(QString::number(val.toDouble()));
+
+    } else {
+      valuesPerWorkspace.append(logValues[log].toString());
+    }
+  }
+  valuesPerWorkspace.sort();
+  const auto &min = valuesPerWorkspace.front().toDouble();
+  const auto &max = valuesPerWorkspace.back().toDouble();
+  if (min == max) {
+    addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
+    return;
+  }
+  addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
 }
 
 /**
@@ -525,6 +592,10 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
           auto seconds =
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
+        } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+
+          valuesPerWorkspace.append(QString::number(val.toDouble()));
+
         } else {
           valuesPerWorkspace.append(logValues[log].toString());
         }
@@ -534,13 +605,14 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       // Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
       // (https://bugreports.qt.io/browse/QTBUG-41092)
       valuesPerWorkspace.sort();
-      const auto &min = valuesPerWorkspace.front().toStdString();
-      const auto &max = valuesPerWorkspace.back().toStdString();
+      const auto &min = valuesPerWorkspace.front().toDouble();
+      const auto &max = valuesPerWorkspace.back().toDouble();
       if (min == max) {
         row << min;
       } else {
         std::ostringstream oss;
-        oss << min << '-' << max;
+        oss << valuesPerWorkspace.front().toStdString() << "-"
+            << valuesPerWorkspace.back().toStdString();
         row << oss.str();
       }
       columnIndex++;

@@ -43,8 +43,8 @@ template <typename ContainerType>
 void SequenceTypeHandler<ContainerType>::set(
     Kernel::IPropertyManager *alg, const std::string &name,
     const boost::python::object &value) const {
-  using boost::python::len;
-  typedef typename ContainerType::value_type DestElementType;
+  using namespace boost::python;
+  using DestElementType = typename ContainerType::value_type;
 
   // Current workaround for things that still pass back wrapped vectors...
   if (boost::starts_with(value.ptr()->ob_type->tp_name, "std_vector")) {
@@ -52,9 +52,9 @@ void SequenceTypeHandler<ContainerType>::set(
   }
   // numpy arrays requires special handling to extract their types. Hand-off to
   // a more appropriate handler
-  else if (PyArray_Check(value.ptr())) {
-    alg->setProperty(name,
-                     Converters::NDArrayToVector<DestElementType>(value)());
+  else if (NumPy::NdArray::check(value)) {
+    alg->setProperty(name, Converters::NDArrayToVector<DestElementType>(
+                               NumPy::NdArray(value))());
   } else if (PySequence_Check(value.ptr())) {
     alg->setProperty(name,
                      Converters::PySequenceToVector<DestElementType>(value)());
@@ -82,7 +82,7 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
     const std::string &name, const boost::python::object &defaultValue,
     const boost::python::object &validator,
     const unsigned int direction) const {
-  typedef typename ContainerType::value_type DestElementType;
+  using DestElementType = typename ContainerType::value_type;
   using Kernel::IValidator;
   using Kernel::PropertyWithValue;
   using boost::python::extract;

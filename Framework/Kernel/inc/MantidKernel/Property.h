@@ -148,6 +148,8 @@ public:
   /// Returns the value of the property as a pretty printed string
   virtual std::string valueAsPrettyStr(const size_t maxLength = 0,
                                        const bool collapseLists = true) const;
+  /// Whether the string returned by value() can be used for serialization.
+  virtual bool isValueSerializable() const { return true; }
   /// Set the value of the property via a string.  If the value is unacceptable
   /// the value is not changed but a string is returned
   virtual std::string setValue(const std::string &) = 0;

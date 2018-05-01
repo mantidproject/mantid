@@ -3,6 +3,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidIndexing/IndexInfo.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -34,36 +35,53 @@ template <> std::unique_ptr<API::HistoWorkspace> createConcreteHelper() {
   return {nullptr};
 }
 
+template <class UseIndexInfo>
+void doInitializeFromParent(const API::MatrixWorkspace &parent,
+                            API::MatrixWorkspace &workspace,
+                            const bool differentSize) {
+  API::WorkspaceFactory::Instance().initializeFromParent(parent, workspace,
+                                                         differentSize);
+}
+
+/** Same as WorkspaceFactory::initializeFromParent, with modifications for
+ * changed IndexInfo.
+ *
+ * IndexInfo used for initialization this implies that the following data from
+ * the parent is not applicable (since no automatic mapping possible):
+ * - Bin masking
+ * - Spectrum numbers and detector ID grouping
+ * - Y axis
+ */
+template <>
+void doInitializeFromParent<std::true_type>(const API::MatrixWorkspace &parent,
+                                            API::MatrixWorkspace &child,
+                                            const bool differentSize) {
+  // Ignore flag since with IndexInfo the size is the same but we nevertheless
+  // do not want to copy some data since spectrum order or definitions may have
+  // changed. This should take care of not copying bin masks and Y axis.
+  static_cast<void>(differentSize);
+
+  const auto indexInfo = child.indexInfo();
+  API::WorkspaceFactory::Instance().initializeFromParent(parent, child, true);
+  // Restore previously set IndexInfo of child, undo changes to spectrum numbers
+  // and detector ID grouping initializeFromParent does by default. This hack is
+  // not optimal performance wise but copying data between workspaces is too
+  // complicated and dangerous currently without using initializeFromParent.
+  child.setIndexInfo(indexInfo);
+}
+
 /** Initialize a MatrixWorkspace from its parent including instrument, unit,
  * number of spectra and Run
  * @brief initializeFromParent
  * @param parent
  * @param ws
  */
+template <class UseIndexInfo>
 void initializeFromParent(const API::MatrixWorkspace &parent,
                           API::MatrixWorkspace &ws) {
   bool differentSize = (parent.x(0).size() != ws.x(0).size()) ||
                        (parent.y(0).size() != ws.y(0).size());
-  API::WorkspaceFactory::Instance().initializeFromParent(parent, ws,
-                                                         differentSize);
-  // For EventWorkspace, `ws.y(0)` put entry 0 in the MRU. However, clients
-  // would typically expect an empty MRU and fail to clear it. This dummy call
-  // removes the entry from the MRU.
-  static_cast<void>(ws.mutableX(0));
-}
-
-/** Initialize a MatrixWorkspace from its parent including instrument, unit,
- * number of spectra but without Run (i.e., logs)
- * @brief initializeFromParentWithoutLogs
- * @param parent
- * @param ws
- */
-void initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
-                                     API::MatrixWorkspace &ws) {
-  bool differentSize = (parent.x(0).size() != ws.x(0).size()) ||
-                       (parent.y(0).size() != ws.y(0).size());
-  API::WorkspaceFactory::Instance().initializeFromParentWithoutLogs(
-      parent, ws, differentSize);
+  doInitializeFromParent<UseIndexInfo>(parent, ws, differentSize);
   // For EventWorkspace, `ws.y(0)` put entry 0 in the MRU. However, clients
   // would typically expect an empty MRU and fail to clear it. This dummy call
   // removes the entry from the MRU.
@@ -76,6 +94,13 @@ void fixDistributionFlag(API::MatrixWorkspace &workspace,
   workspace.setDistribution(histArg.yMode() ==
                             HistogramData::Histogram::YMode::Frequencies);
 }
+
+template void MANTID_DATAOBJECTS_DLL
+initializeFromParent<std::true_type>(const API::MatrixWorkspace &,
+                                     API::MatrixWorkspace &);
+template void MANTID_DATAOBJECTS_DLL
+initializeFromParent<std::false_type>(const API::MatrixWorkspace &,
+                                      API::MatrixWorkspace &);
 }
 } // namespace DataObjects
 } // namespace Mantid

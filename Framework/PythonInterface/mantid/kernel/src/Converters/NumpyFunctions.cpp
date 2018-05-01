@@ -16,6 +16,29 @@ PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
       dims, // Length in each dimension
       nullptr, nullptr, 0, nullptr));
 }
+
+PyArrayObject *func_PyArray_NewFromDescr(const std::string &datadescr,
+                                         const int ndims, Py_intptr_t *dims) {
+  // convert the string description to an actual description
+  PyArray_Descr *descr = func_PyArray_Descr(datadescr);
+
+  // create the array
+  PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(
+      PyArray_NewFromDescr(&PyArray_Type, descr, ndims, // rank
+                           dims, // Length in each dimension
+                           nullptr, nullptr, 0, nullptr));
+
+  return nparray;
+}
+
+PyArray_Descr *func_PyArray_Descr(const std::string &datadescr) {
+  PyObject *data_type = Py_BuildValue("s", datadescr.c_str());
+  PyArray_Descr *descr;
+  PyArray_DescrConverter(data_type, &descr);
+  Py_XDECREF(data_type); // function above incremented reference count
+
+  return descr;
+}
 }
 }
 }

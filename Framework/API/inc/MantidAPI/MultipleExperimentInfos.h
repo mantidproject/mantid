@@ -51,6 +51,9 @@ public:
 
   void copyExperimentInfos(const MultipleExperimentInfos &other);
 
+  // Check if this class has an oriented lattice on any sample object
+  bool hasOrientedLattice() const;
+
 protected:
   /// Returns a string description of the object
   const std::string toString() const;
@@ -60,9 +63,9 @@ private:
   std::vector<ExperimentInfo_sptr> m_expInfos;
 };
 
-typedef boost::shared_ptr<MultipleExperimentInfos> MultipleExperimentInfos_sptr;
-typedef boost::shared_ptr<const MultipleExperimentInfos>
-    MultipleExperimentInfos_const_sptr;
+using MultipleExperimentInfos_sptr = boost::shared_ptr<MultipleExperimentInfos>;
+using MultipleExperimentInfos_const_sptr =
+    boost::shared_ptr<const MultipleExperimentInfos>;
 
 } // namespace API
 } // namespace Mantid

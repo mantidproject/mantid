@@ -41,13 +41,10 @@ public:
   /// If type is Y or E it is the number of data values.
   int columnCount(const QModelIndex &parent = QModelIndex()) const override {
     (void)parent; // To avoid compiler warning
-    int columnCount = 0;
-    if (m_type == X || m_type == DX) {
-      columnCount = m_cols + m_colNumCorr;
-    } else {
-      columnCount = m_cols;
-    }
-    return columnCount;
+    if (m_type == X)
+      return m_cols + m_colNumCorr;
+    else
+      return m_cols;
   }
 
   double data(int row, int col) const;

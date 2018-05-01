@@ -29,8 +29,8 @@ public:
                                   const bool ascending) = 0;
 };
 
-typedef boost::shared_ptr<PeaksPresenterVsi> PeaksPresenterVsi_sptr;
-typedef boost::shared_ptr<const PeaksPresenterVsi> PeaksPresenterVsi_const_sptr;
+using PeaksPresenterVsi_sptr = boost::shared_ptr<PeaksPresenterVsi>;
+using PeaksPresenterVsi_const_sptr = boost::shared_ptr<const PeaksPresenterVsi>;
 }
 }
 #endif

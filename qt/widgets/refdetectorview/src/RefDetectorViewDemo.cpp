@@ -1,8 +1,7 @@
 
 
-#include <qapplication.h>
+#include <QApplication>
 #include <QMainWindow>
-#include <QtGui>
 
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidQtWidgets/RefDetectorView/RefImageView.h"

@@ -556,7 +556,7 @@ QVariant PythonScript::evaluateImpl() {
     if (pystring) {
       PyObject *asUTF8 =
           PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring),
-                               (int)PyUnicode_GET_DATA_SIZE(pystring), NULL);
+                               (int)PyUnicode_GET_DATA_SIZE(pystring), nullptr);
       Py_DECREF(pystring);
       if (asUTF8) {
         qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
@@ -647,7 +647,6 @@ bool PythonScript::executeString() {
   }
   // If an error has occurred we need to construct the error message
   // before any other python code is run
-  QString msg;
   if (!result) {
     emit_error();
     // If a script was aborted we both raise a KeyboardInterrupt and
@@ -658,9 +657,9 @@ bool PythonScript::executeString() {
   } else {
     emit finished(MSG_FINISHED);
     success = true;
-  }
-  if (isInteractive()) {
-    generateAutoCompleteList();
+    if (isInteractive()) {
+      generateAutoCompleteList();
+    }
   }
 
   Py_XDECREF(compiledCode);

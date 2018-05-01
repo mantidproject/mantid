@@ -117,33 +117,6 @@ void DoubleSpinBox::interpretText(bool notify) {
       lineEdit()->setText(textFromValue(d_value));
     }
   }
-
-  //  bool ok = false;
-  //  QString s = text();
-  //  double value = locale().toDouble(s, &ok);
-  //  if (ok && value == d_value)
-  //    return;
-  //
-  //  if (!ok)
-  //  {
-  //    MyParser parser;
-  //    parser.setLocale(QLocale());
-  //    parser.addGSLConstants();
-  //    try
-  //    {
-  //      parser.SetExpr(s.toAscii().constData());
-  //      value = parser.Eval();
-  //    } catch (mu::ParserError &e)
-  //    {
-  //      lineEdit()->setText(textFromValue(d_value));
-  //      return;
-  //    }
-  //  }
-  //
-  //  if (setValue(value))
-  //    emit valueChanged( d_value);
-  //  else
-  //    lineEdit()->setText(textFromValue(d_value));
 }
 
 /**

@@ -1,4 +1,3 @@
-#pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 import math
 
@@ -12,6 +11,9 @@ class EnggCalibrateFull(PythonAlgorithm):
 
     def category(self):
         return "Diffraction\\Engineering"
+
+    def seeAlso(self):
+        return [ "EnggCalibrate" ]
 
     def name(self):
         return "EnggCalibrateFull"
@@ -29,14 +31,14 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '',
                                                      Direction.Input, PropertyMode.Optional),
-                             doc = 'Results of integrating the spectra of a Vanadium run, with one column '
+                             doc='Results of integrating the spectra of a Vanadium run, with one column '
                              '(integration result) and one row per spectrum. This can be used in '
                              'combination with OutVanadiumCurveFits from a previous execution and '
                              'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
 
         self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
                                                      PropertyMode.Optional),
-                             doc = 'A workspace2D with the fitting workspaces corresponding to '
+                             doc='A workspace2D with the fitting workspaces corresponding to '
                              'the instrument banks. This workspace has three spectra per bank, as produced '
                              'by the algorithm Fit. This is meant to be used as an alternative input '
                              'VanadiumWorkspace for testing and performance reasons. If not given, no '
@@ -55,7 +57,7 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "DIFC and TZERO calibration parameters.")
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
-                             doc = "Information on fitted peaks. The table has one row per calibrated "
+                             doc="Information on fitted peaks. The table has one row per calibrated "
                              "detector contains. In each row, the parameters of all the peaks fitted "
                              "are specified together with the the expected peak value (in d-spacing). "
                              "The expected values are given in the field labelled 'dSpacing'. When "
@@ -64,12 +66,12 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
-                             doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
+                             doc="Which bank to calibrate: It can be specified as 1 or 2, or "
                              "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
                              "for a more flexible alternative to select specific detectors")
 
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
-                             doc = 'Sets the spectrum numbers for the detectors '
+                             doc='Sets the spectrum numbers for the detectors '
                              'that should be considered in the calibration (all others will be '
                              'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
@@ -109,27 +111,26 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
 
     def PyExec(self):
-
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
-        expectedPeaksD = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                          self.getProperty('ExpectedPeaks').value)
+        expected_peaks_d = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                            self.getProperty('ExpectedPeaks').value)
 
-        if len(expectedPeaksD) < 1:
+        if len(expected_peaks_d) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         in_wks = self.getProperty('Workspace').value
-        wks_indices = EnggUtils.getWsIndicesFromInProperties(in_wks, self.getProperty('Bank').value,
-                                                             self.getProperty(self.INDICES_PROP_NAME).value)
+        wks_indices = EnggUtils.get_ws_indices_from_input_properties(in_wks, self.getProperty('Bank').value,
+                                                                     self.getProperty(self.INDICES_PROP_NAME).value)
 
         van_wks = self.getProperty("VanadiumWorkspace").value
         van_integ_wks = self.getProperty('VanIntegrationWorkspace').value
         van_curves_wks = self.getProperty('VanCurvesWorkspace').value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
-        EnggUtils.applyVanadiumCorrections(self, in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
+        EnggUtils.apply_vanadium_corrections(self, in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
 
         rebinned_ws = self._prepare_ws_for_fitting(in_wks, self.getProperty('RebinBinWidth').value)
-        pos_tbl, peaks_tbl = self._calculate_calib_positions_tbl(rebinned_ws, wks_indices, expectedPeaksD)
+        pos_tbl, peaks_tbl = self._calculate_calib_positions_tbl(rebinned_ws, wks_indices, expected_peaks_d)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
         self.setProperty("OutDetPosTable", pos_tbl)
@@ -154,7 +155,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         return result
 
-    def _calculate_calib_positions_tbl(self, ws, indices, expectedPeaksD):
+    def _calculate_calib_positions_tbl(self, ws, indices, expected_peaks_d):
         """
         Makes a table of calibrated positions (and additional parameters). It goes through
         the detectors of the workspace and calculates the DIFC and TZERO parameters by fitting
@@ -163,7 +164,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         @param ws :: input workspace with an instrument definition
         @param indices :: workspace indices to consider for calibration (for example all the
         indices of a bank)
-        @param expectedPeaksD :: expected peaks in d-spacing
+        @param expected_peaks_d :: expected peaks in d-spacing
 
         @return Two tables. A positions table, with the detector positions, one row per detector.
         A peaks details table with the fitted parameters for every of the peaks of every detector.
@@ -177,13 +178,13 @@ class EnggCalibrateFull(PythonAlgorithm):
         for i in indices:
 
             try:
-                fitted_peaks_table = self._fit_peaks(ws, i, expectedPeaksD)
+                fitted_peaks_table = self._fit_peaks(ws, i, expected_peaks_d)
                 difa, difc, tzero = self._fit_difc_linear(fitted_peaks_table)
             except RuntimeError as re:
                 raise RuntimeError("Severe issue found when trying to fit peaks for the detector with ID %d. "
                                    "This calibration algorithm cannot continue. Please check the expected "
                                    "peaks provided. Details from "
-                                   "FindPeaks: %s"%(i, str(re)))
+                                   "FindPeaks: %s" % (i, str(re)))
 
             det = ws.getDetector(i)
             new_pos, new_L2 = self._get_calibrated_det_pos(difc, det, ws)
@@ -204,20 +205,20 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         return pos_tbl, peaks_tbl
 
-    def _fit_peaks(self, ws, wsIndex, expectedPeaksD):
+    def _fit_peaks(self, ws, ws_index, expected_peaks_d):
         """
         Fits expected peaks to the spectrum, and returns calibrated zero and difc values.
 
-        @param wsIndex workspace index of the spectrum to fit
-        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
+        @param ws_index workspace index of the spectrum to fit
+        @param expected_peaks_d :: expected peaks for the fitting, in d-spacing units
 
         @returns the peaks parameters in a table as produced by the algorithm
         EnggFitPeaks
         """
         alg = self.createChildAlgorithm('EnggFitPeaks')
         alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
-        alg.setProperty('ExpectedPeaks', expectedPeaksD)
+        alg.setProperty('WorkspaceIndex', ws_index) # There should be only one index anyway
+        alg.setProperty('ExpectedPeaks', expected_peaks_d)
         alg.execute()
 
         fitted_peaks_table = alg.getProperty('FittedPeaks').value
@@ -241,7 +242,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         difc = alg.getProperty('DIFC').value
         tzero = alg.getProperty('TZERO').value
 
-        return (difa, difc, tzero)
+        return difa, difc, tzero
 
     def _create_positions_table(self):
         """
@@ -329,7 +330,7 @@ class EnggCalibrateFull(PythonAlgorithm):
                     'calibrated position (x), calibrated position (y), calibrated position (z), '
                     'calib. L2, calib. 2\\theta, calib. \\phi, delta L2 (calibrated - old), difc, zero\n')
             for r in range(0, tbl.rowCount()):
-                f.write('{0:d},'.format(tbl.cell(r,0)))
+                f.write('{0:d},'.format(tbl.cell(r, 0)))
                 f.write('{0:.7f},{1:.7f},{2:.7f},{3:.7f},{4:.7f},{5:.7f},'.
                         format(tbl.cell(r, 1).getX(), tbl.cell(r, 1).getY(), tbl.cell(r, 1).getZ(),
                                tbl.cell(r, 2).getX(), tbl.cell(r, 2).getY(), tbl.cell(r, 2).getZ()))
@@ -337,7 +338,7 @@ class EnggCalibrateFull(PythonAlgorithm):
                         format(tbl.cell(r, 3), tbl.cell(r, 4), tbl.cell(r, 5),
                                tbl.cell(r, 6), tbl.cell(r, 7), tbl.cell(r, 8)))
 
-    def _get_calibrated_det_pos(self, newDifc, det, ws):
+    def _get_calibrated_det_pos(self, new_difc, det, ws):
         """
         Returns a detector position which corresponds to the newDifc value.
 
@@ -348,11 +349,11 @@ class EnggCalibrateFull(PythonAlgorithm):
         det_two_theta = ws.detectorTwoTheta(det)
         det_phi = det.getPhi()
 
-        new_L2 = (newDifc / (252.816 * 2 * math.sin(det_two_theta / 2.0))) - 50
+        new_L2 = (new_difc / (252.816 * 2 * math.sin(det_two_theta / 2.0))) - 50
 
         new_pos = self._V3D_from_spherical(new_L2, det_two_theta, det_phi)
 
-        return (new_pos, new_L2)
+        return new_pos, new_L2
 
     def _apply_calibration_table(self, ws, detPos):
         """
@@ -383,7 +384,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         x = ct * math.cos(azimuth)
         y = ct * math.sin(azimuth)
 
-        return V3D(x,y,z)
+        return V3D(x, y, z)
 
 
 AlgorithmFactory.subscribe(EnggCalibrateFull)

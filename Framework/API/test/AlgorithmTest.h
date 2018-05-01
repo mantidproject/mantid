@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "FakeAlgorithms.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -171,10 +172,16 @@ public:
   static const std::string FAIL_MSG;
 
   void init() override {
-    declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace");
+    declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", "");
     declareProperty(
         Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
             "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
+    declareWorkspaceInputProperties<
+        MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+        "InputWorkspace3", "");
+    declareWorkspaceInputProperties<
+        MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+        "InputWorkspace4", "", boost::make_shared<HistogramValidator>());
   }
 
   void exec() override {}
@@ -234,6 +241,13 @@ public:
     TS_ASSERT_EQUALS(algv3.categories(), result);
   }
 
+  void testSeeAlso() {
+    std::vector<std::string> result{"rabbit"};
+    result.emplace_back("goldfish");
+    result.emplace_back("Spotted Hyena");
+    TS_ASSERT_EQUALS(alg.seeAlso(), result);
+  }
+
   void testAlias() { TS_ASSERT_EQUALS(alg.alias(), "Dog"); }
 
   void testIsChild() {
@@ -242,6 +256,14 @@ public:
     TS_ASSERT_EQUALS(true, alg.isChild());
     alg.setChild(false);
     TS_ASSERT_EQUALS(false, alg.isChild());
+  }
+
+  void testAlwaysStoreInADSGetterSetter() {
+    TS_ASSERT(alg.getAlwaysStoreInADS())
+    alg.setAlwaysStoreInADS(false);
+    TS_ASSERT(!alg.getAlwaysStoreInADS())
+    alg.setAlwaysStoreInADS(true);
+    TS_ASSERT(alg.getAlwaysStoreInADS())
   }
 
   void testAlgStartupLogging() {
@@ -346,7 +368,7 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_No_Properties() {
-    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\"}");
+    IAlgorithm_sptr testAlg = runFromString(R"({"name":"ToyAlgorithm"})");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
   }
@@ -793,10 +815,10 @@ public:
     IAlgorithm_sptr algNonConst;
     TS_ASSERT_THROWS_NOTHING(
         algConst = manager.getValue<IAlgorithm_const_sptr>(algName));
-    TS_ASSERT(algConst != NULL);
+    TS_ASSERT(algConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(algNonConst =
                                  manager.getValue<IAlgorithm_sptr>(algName));
-    TS_ASSERT(algNonConst != NULL);
+    TS_ASSERT(algNonConst != nullptr);
     TS_ASSERT_EQUALS(algConst, algNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -804,9 +826,9 @@ public:
     IAlgorithm_const_sptr algCastConst;
     IAlgorithm_sptr algCastNonConst;
     TS_ASSERT_THROWS_NOTHING(algCastConst = (IAlgorithm_const_sptr)val);
-    TS_ASSERT(algCastConst != NULL);
+    TS_ASSERT(algCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(algCastNonConst = (IAlgorithm_sptr)val);
-    TS_ASSERT(algCastNonConst != NULL);
+    TS_ASSERT(algCastNonConst != nullptr);
     TS_ASSERT_EQUALS(algCastConst, algCastNonConst);
   }
 
@@ -821,10 +843,9 @@ public:
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
-    TS_ASSERT_THROWS_NOTHING((
-        indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-            "InputWorkspace", wksp, IndexType::WorkspaceIndex,
-            std::vector<int>{1, 2, 3, 4, 5})));
+    TS_ASSERT_THROWS_NOTHING((indexAlg.setWorkspaceInputProperties(
+        "InputWorkspace", wksp, IndexType::WorkspaceIndex,
+        std::vector<int64_t>{1, 2, 3, 4, 5})));
   }
 
   void
@@ -846,10 +867,10 @@ public:
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     // Requires workspace in ADS due to validity checks
-    TS_ASSERT_THROWS_NOTHING((
-        indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
+    TS_ASSERT_THROWS_NOTHING(
+        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace>(
             "InputWorkspace", "wksp", IndexType::WorkspaceIndex,
-            std::vector<int>{1, 2, 3, 4, 5})));
+            std::vector<int64_t>{1, 2, 3, 4, 5})));
     AnalysisDataService::Instance().remove("wksp");
   }
 

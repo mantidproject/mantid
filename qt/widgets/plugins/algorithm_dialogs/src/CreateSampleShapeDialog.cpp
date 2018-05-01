@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
 
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include <QMenu>
 #include <QLabel>
@@ -200,11 +200,10 @@ void CreateSampleShapeDialog::update3DView() {
   //     (infcyl_1:(infcyl_2:infcyl_3))))\" />\n";
 
   Mantid::Geometry::ShapeFactory sFactory;
-  boost::shared_ptr<Mantid::Geometry::Object> shape_sptr =
-      sFactory.createShape(shapexml);
+  auto shape_sptr = sFactory.createShape(shapexml);
   // std::cerr << "\n--------- XML String -----------\n" << shapexml <<
   // "\n---------------------\n";
-  if (shape_sptr == boost::shared_ptr<Mantid::Geometry::Object>())
+  if (shape_sptr == boost::shared_ptr<Mantid::Geometry::CSGObject>())
     return;
   try {
     shape_sptr->initDraw();
@@ -623,8 +622,13 @@ void BinaryTreeWidget::traverseInPostOrder(
   expression.append(node);
 }
 
+#if QT_VERSION < 0x050000
 void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
                                    const QModelIndex &) {
+#else
+void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
+                                   const QModelIndex &, const QVector<int> &) {
+#endif
   emit treeDataChange(
       dynamic_cast<BinaryTreeWidgetItem *>(itemFromIndex(topLeft)),
       topLeft.data(Qt::UserRole).toInt());

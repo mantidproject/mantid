@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include <vector>
 
 #include <Poco/DOM/DOMParser.h>
@@ -23,17 +23,17 @@ class ShapeFactoryTest : public CxxTest::TestSuite {
 public:
   void testCuboid() {
     std::string xmlShape = "<cuboid id=\"shape\"> ";
-    xmlShape += "<left-front-bottom-point x=\"0.005\" y=\"-0.1\" z=\"0.0\" /> ";
+    xmlShape += R"(<left-front-bottom-point x="0.005" y="-0.1" z="0.0" /> )";
     xmlShape +=
-        "<left-front-top-point x=\"0.005\" y=\"-0.1\" z=\"0.0001\" />  ";
+        R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
     xmlShape +=
-        "<left-back-bottom-point x=\"-0.005\" y=\"-0.1\" z=\"0.0\" />  ";
+        R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
     xmlShape +=
-        "<right-front-bottom-point x=\"0.005\" y=\"0.1\" z=\"0.0\" />  ";
+        R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 0.00001)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 0.001)));
@@ -48,8 +48,8 @@ public:
     xmlShape += "<height val=\"0.2\" />";
     xmlShape += "<width val=\"0.1\" />";
     xmlShape += "<depth val=\"0.4\" />";
-    xmlShape += "<centre x=\"1.0\" y=\"1.0\" z=\"1.0\" />";
-    xmlShape += "<axis x=\"1\" y=\"0\" z=\"0\" />"; // Note non-default axis.
+    xmlShape += R"(<centre x="1.0" y="1.0" z="1.0" />)";
+    xmlShape += R"(<axis x="1" y="0" z="0" />)"; // Note non-default axis.
     xmlShape += "</cuboid>";
     xmlShape += "<algebra val=\"some-shape\" />";
 
@@ -80,7 +80,7 @@ public:
     xmlShape += "<height val=\"0.2\" />";
     xmlShape += "<width val=\"0.1\" />";
     xmlShape += "<depth val=\"0.4\" />";
-    xmlShape += "<centre x=\"1.0\" y=\"1.0\" z=\"1.0\" />";
+    xmlShape += R"(<centre x="1.0" y="1.0" z="1.0" />)";
     xmlShape += "</cuboid>";
     xmlShape += "<algebra val=\"some-shape\" />";
 
@@ -111,7 +111,7 @@ public:
     xmlShape += "<height val=\"0.2\" />";
     xmlShape += "<width val=\"0.1\" />";
     xmlShape += "<depth val=\"0.4\" />";
-    xmlShape += "<axis x=\"0\" y=\"0\" z=\"1\" />";
+    xmlShape += R"(<axis x="0" y="0" z="1" />)";
     xmlShape += "</cuboid>";
     xmlShape += "<algebra val=\"some-shape\" />";
 
@@ -139,17 +139,17 @@ public:
   void testRelayShapeXML() {
     // Create a cuboid.
     std::string xmlShape = "<cuboid id=\"shape\"> ";
-    xmlShape += "<left-front-bottom-point x=\"0.005\" y=\"-0.1\" z=\"0.0\"/> ";
-    xmlShape += "<left-front-top-point x=\"0.005\" y=\"-0.1\" z=\"0.0001\"/>  ";
-    xmlShape += "<left-back-bottom-point x=\"-0.005\" y=\"-0.1\" z=\"0.0\"/>  ";
-    xmlShape += "<right-front-bottom-point x=\"0.005\" y=\"0.1\" z=\"0.0\"/>  ";
+    xmlShape += R"(<left-front-bottom-point x="0.005" y="-0.1" z="0.0"/> )";
+    xmlShape += R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001"/>  )";
+    xmlShape += R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0"/>  )";
+    xmlShape += R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0"/>  )";
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\"/> ";
 
     std::string expectedXML =
         "<type name=\"userShape\"> " + xmlShape + " </type>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TSM_ASSERT("Empty shape xml given.", !shape_sptr->getShapeXML().empty());
     TSM_ASSERT_EQUALS("Shape xml not relayed through to shape object.",
                       expectedXML, shape_sptr->getShapeXML());
@@ -157,18 +157,18 @@ public:
 
   void testHexahedron() {
     std::string xmlShape = "<hexahedron id=\"shape\"> ";
-    xmlShape += "<left-back-bottom-point  x=\"0.0\" y=\"0.0\" z=\"0.0\"  /> ";
-    xmlShape += "<left-front-bottom-point x=\"1.0\" y=\"0.0\" z=\"0.0\"  /> ";
-    xmlShape += "<right-front-bottom-point x=\"1.0\" y=\"1.0\" z=\"0.0\"  /> ";
-    xmlShape += "<right-back-bottom-point  x=\"0.0\" y=\"1.0\" z=\"0.0\"  /> ";
-    xmlShape += "<left-back-top-point  x=\"0.0\" y=\"0.0\" z=\"2.0\"  /> ";
-    xmlShape += "<left-front-top-point  x=\"0.5\" y=\"0.0\" z=\"2.0\"  /> ";
-    xmlShape += "<right-front-top-point  x=\"0.5\" y=\"0.5\" z=\"2.0\"  /> ";
-    xmlShape += "<right-back-top-point  x=\"0.0\" y=\"0.5\" z=\"2.0\"  /> ";
+    xmlShape += R"(<left-back-bottom-point  x="0.0" y="0.0" z="0.0"  /> )";
+    xmlShape += R"(<left-front-bottom-point x="1.0" y="0.0" z="0.0"  /> )";
+    xmlShape += R"(<right-front-bottom-point x="1.0" y="1.0" z="0.0"  /> )";
+    xmlShape += R"(<right-back-bottom-point  x="0.0" y="1.0" z="0.0"  /> )";
+    xmlShape += R"(<left-back-top-point  x="0.0" y="0.0" z="2.0"  /> )";
+    xmlShape += R"(<left-front-top-point  x="0.5" y="0.0" z="2.0"  /> )";
+    xmlShape += R"(<right-front-top-point  x="0.5" y="0.5" z="2.0"  /> )";
+    xmlShape += R"(<right-back-top-point  x="0.0" y="0.5" z="2.0"  /> )";
     xmlShape += "</hexahedron> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 0.0)));
     TS_ASSERT(!shape_sptr->isValid(V3D(1.1, 0.0, 0.0)));
@@ -180,25 +180,25 @@ public:
   void testHexahedron2() {
     std::string xmlShape = "<hexahedron id=\"shape\"> ";
     xmlShape +=
-        "<left-front-bottom-point x=\"0.0\" y=\"-0.0031\" z=\"-0.037\"  /> ";
+        R"(<left-front-bottom-point x="0.0" y="-0.0031" z="-0.037"  /> )";
     xmlShape +=
-        "<right-front-bottom-point x=\"0.0\" y=\"0.0031\" z=\"-0.037\"  /> ";
+        R"(<right-front-bottom-point x="0.0" y="0.0031" z="-0.037"  /> )";
     xmlShape +=
-        "<left-front-top-point x=\"0.0\" y=\"-0.0104\" z=\"0.037\"  /> ";
+        R"(<left-front-top-point x="0.0" y="-0.0104" z="0.037"  /> )";
     xmlShape +=
-        "<right-front-top-point x=\"0.0\" y=\"0.0104\" z=\"0.037\"  /> ";
+        R"(<right-front-top-point x="0.0" y="0.0104" z="0.037"  /> )";
     xmlShape +=
-        "<left-back-bottom-point x=\"0.005\" y=\"-0.0031\" z=\"-0.037\"  /> ";
+        R"(<left-back-bottom-point x="0.005" y="-0.0031" z="-0.037"  /> )";
     xmlShape +=
-        "<right-back-bottom-point x=\"0.005\" y=\"0.0031\" z=\"-0.037\"  /> ";
+        R"(<right-back-bottom-point x="0.005" y="0.0031" z="-0.037"  /> )";
     xmlShape +=
-        "<left-back-top-point x=\"0.005\" y=\"-0.0104\" z=\"0.037\"  /> ";
+        R"(<left-back-top-point x="0.005" y="-0.0104" z="0.037"  /> )";
     xmlShape +=
-        "<right-back-top-point x=\"0.005\" y=\"0.0104\" z=\"0.037\"  /> ";
+        R"(<right-back-top-point x="0.005" y="0.0104" z="0.037"  /> )";
     xmlShape += "</hexahedron> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0001, 0.0, 0.0)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0055, 0.0, 0.0)));
@@ -209,13 +209,13 @@ public:
 
   void testTaperedGuideDefaults() {
     std::string xmlShape = "<tapered-guide id=\"shape\">";
-    xmlShape += "<aperture-start height=\"2.0\" width=\"2.0\" />";
+    xmlShape += R"(<aperture-start height="2.0" width="2.0" />)";
     xmlShape += "<length val=\"2.0\" />";
-    xmlShape += "<aperture-end height=\"4.0\" width=\"4.0\" />";
+    xmlShape += R"(<aperture-end height="4.0" width="4.0" />)";
     xmlShape += "</tapered-guide>";
     xmlShape += "<algebra val=\"shape\"/>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     // Vertices.
     TS_ASSERT(shape_sptr->isValid(V3D(2.0, -2.0, 2.0)));
@@ -242,15 +242,15 @@ public:
 
   void testTaperedGuideDifferentAxisAndCentre() {
     std::string xmlShape = "<tapered-guide id=\"shape\">";
-    xmlShape += "<aperture-start height=\"2.0\" width=\"2.0\" />";
+    xmlShape += R"(<aperture-start height="2.0" width="2.0" />)";
     xmlShape += "<length val=\"2.0\" />";
-    xmlShape += "<aperture-end height=\"4.0\" width=\"4.0\" />";
-    xmlShape += "<centre x=\"0.0\" y=\"0.0\" z=\"1.0\" />";
-    xmlShape += "<axis x=\"1.0\" y=\"0.0\" z=\"0\" />";
+    xmlShape += R"(<aperture-end height="4.0" width="4.0" />)";
+    xmlShape += R"(<centre x="0.0" y="0.0" z="1.0" />)";
+    xmlShape += R"(<axis x="1.0" y="0.0" z="0" />)";
     xmlShape += "</tapered-guide>";
     xmlShape += "<algebra val=\"shape\"/>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     // Vertices.
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, -1.0, 0.0)));
@@ -278,12 +278,12 @@ public:
   void testSphere() {
     // algebra line is essential
     std::string xmlShape = "<sphere id=\"shape\"> ";
-    xmlShape += "<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" /> ";
+    xmlShape += R"(<centre x="4.1"  y="2.1" z="8.1" /> )";
     xmlShape += "<radius val=\"3.2\" /> ";
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(4.1, 2.1, 8.1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(47.1, 2.1, 8.1)));
@@ -295,16 +295,16 @@ public:
   void testTwoSpheres() {
     // algebra line is essential
     std::string xmlShape = "<sphere id=\"shape1\"> ";
-    xmlShape += "<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" /> ";
+    xmlShape += R"(<centre x="4.1"  y="2.1" z="8.1" /> )";
     xmlShape += "<radius val=\"3.2\" /> ";
     xmlShape += "</sphere>";
     xmlShape += "<sphere id=\"shape2\"> ";
-    xmlShape += "<centre x=\"2.1\"  y=\"2.1\" z=\"8.1\" /> ";
+    xmlShape += R"(<centre x="2.1"  y="2.1" z="8.1" /> )";
     xmlShape += "<radius val=\"3.2\" /> ";
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape1 : shape2\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(4.1, 2.1, 8.1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(47.1, 2.1, 8.1)));
@@ -318,15 +318,15 @@ public:
   void testTwoSpheresNoAlgebraString() {
     // algebra line is essential
     std::string xmlShape = "<sphere id=\"shape1\"> ";
-    xmlShape += "<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" /> ";
+    xmlShape += R"(<centre x="4.1"  y="2.1" z="8.1" /> )";
     xmlShape += "<radius val=\"3.2\" /> ";
     xmlShape += "</sphere>";
     xmlShape += "<sphere id=\"shape2\"> ";
-    xmlShape += "<centre x=\"2.1\"  y=\"2.1\" z=\"8.1\" /> ";
+    xmlShape += R"(<centre x="2.1"  y="2.1" z="8.1" /> )";
     xmlShape += "<radius val=\"3.2\" /> ";
     xmlShape += "</sphere>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(4.1, 2.1, 8.1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(47.1, 2.1, 8.1)));
@@ -343,7 +343,7 @@ public:
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(1.0, 0.0, 0.0)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 1.0, 0.0)));
@@ -363,14 +363,14 @@ public:
   void testCylinder() {
     // algebra line is essential
     std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<centre-of-bottom-base x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<radius val=\"0.1\" /> ";
     xmlShape += "<height val=\"3\" /> ";
     xmlShape += "</cylinder>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -382,13 +382,13 @@ public:
   void testCylinderNoAlgebraString() {
     // algebra line is essential
     std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<centre-of-bottom-base x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<radius val=\"0.1\" /> ";
     xmlShape += "<height val=\"3\" /> ";
     xmlShape += "</cylinder>";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -400,15 +400,15 @@ public:
   void testCylinderTwoAlgebraStrings() {
     // algebra line is essential
     std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<centre-of-bottom-base x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<radius val=\"0.1\" /> ";
     xmlShape += "<height val=\"3\" /> ";
     xmlShape += "</cylinder>";
     xmlShape += "<algebra val=\"shape\" /> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -427,7 +427,7 @@ public:
         " <height val=\"0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(shape_sptr->hasValidShape());
     // centre is not valid
@@ -453,7 +453,7 @@ public:
         " <height val=\"0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -468,7 +468,7 @@ public:
         " <height val=\"-0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -483,7 +483,7 @@ public:
         " <height val=\"-0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -498,7 +498,7 @@ public:
         " <height val=\"-0.05\" />"
         "</hollow-cylinder> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
     TS_ASSERT(shape_sptr);
     TS_ASSERT(!shape_sptr->hasValidShape());
   }
@@ -506,13 +506,13 @@ public:
   void testInfiniteCylinder() {
     // algebra line is essential
     std::string xmlShape = "<infinite-cylinder id=\"shape\"> ";
-    xmlShape += "<centre x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<centre x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<radius val=\"0.1\" /> ";
     xmlShape += "</infinite-cylinder>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, 10)));
@@ -524,14 +524,14 @@ public:
   void testCone() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<height val=\"4\" /> ";
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, -1)));
@@ -543,15 +543,15 @@ public:
   void testConeUseDirectStringArgument() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<height val=\"4\" /> ";
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
     ShapeFactory sFactory;
-    boost::shared_ptr<Object> shape_sptr = sFactory.createShape(xmlShape);
+    auto shape_sptr = sFactory.createShape(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
     TS_ASSERT(shape_sptr->isValid(V3D(0.0, 0.0, -1)));
@@ -562,18 +562,18 @@ public:
 
   void testComplement() {
     std::string xmlShape = "<cylinder id=\"stick\"> ";
-    xmlShape += "<centre-of-bottom-base x=\"-0.5\" y=\"0.0\" z=\"0.0\" />";
-    xmlShape += "<axis x=\"1.0\" y=\"0.0\" z=\"0.0\" />";
+    xmlShape += R"(<centre-of-bottom-base x="-0.5" y="0.0" z="0.0" />)";
+    xmlShape += R"(<axis x="1.0" y="0.0" z="0.0" />)";
     xmlShape += "<radius val=\"0.05\" />";
     xmlShape += "<height val=\"1.0\" />";
     xmlShape += "</cylinder>";
     xmlShape += "<sphere id=\"some-sphere\">";
-    xmlShape += "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" />";
+    xmlShape += R"(<centre x="0.0"  y="0.0" z="0.0" />)";
     xmlShape += "<radius val=\"0.5\" />";
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"some-sphere # stick\" />";
 
-    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    auto shape_sptr = getObject(xmlShape);
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 0.0)));
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, -0.04)));
@@ -589,15 +589,14 @@ public:
   void testNoneExistingShape() {
     // algebra line is essential
     std::string xmlShape = "<c5one id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<height val=\"4\" /> ";
     xmlShape += "</c5one>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
@@ -605,15 +604,14 @@ public:
   void testTypingErrorInSubElement() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<heeight val=\"4\" /> ";
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
@@ -621,20 +619,19 @@ public:
   void testTypingErrorInAttribute() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<height vaal=\"4\" /> ";
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    boost::shared_ptr<Object> shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
 
-  boost::shared_ptr<Object> getObject(std::string xmlShape) {
+  boost::shared_ptr<CSGObject> getObject(std::string xmlShape) {
     std::string shapeXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
 
     // Set up the DOM parser and parse xml string
@@ -646,7 +643,7 @@ public:
 
     // convert into a Geometry object
     ShapeFactory sFactory;
-    boost::shared_ptr<Object> shape_sptr = sFactory.createShape(pRootElem);
+    auto shape_sptr = sFactory.createShape(pRootElem);
     return shape_sptr;
   }
 

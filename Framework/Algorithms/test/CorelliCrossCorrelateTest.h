@@ -62,7 +62,7 @@ public:
 
     ws->getAxis(0)->setUnit("TOF");
 
-    ws->sortAll(PULSETIME_SORT, NULL);
+    ws->sortAll(PULSETIME_SORT, nullptr);
 
     // Add some chopper TDCs to the workspace.
     double period = 1 / 293.383;

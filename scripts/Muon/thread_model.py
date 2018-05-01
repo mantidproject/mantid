@@ -17,9 +17,14 @@ class ThreadModel(QThread):
         self.wait()
 
     def run(self):
-        self.model.execute()
-        self.model.output()
-        return
+        try:
+            self.model.execute()
+            self.model.output()
+        except KeyboardInterrupt:
+            pass
+
+    def cancel(self):
+        self.model.cancel()
 
     # if there is one set of inputs (1 alg)
     def setInputs(self,inputs,runName):

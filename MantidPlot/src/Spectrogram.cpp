@@ -26,7 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "Spectrogram.h"
-#include "MantidQtWidgets/Common/qwt_compat.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include <QColor>
 #include <QPainter>
 #include <QPen>
@@ -43,8 +43,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
-#include "MantidQtWidgets/Common/SignalRange.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 

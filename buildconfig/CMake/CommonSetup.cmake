@@ -20,6 +20,11 @@ set ( BUILD_SHARED_LIBS On )
 # Send libraries to common place
 set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+if ( CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode" )
+  set ( PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/plugins/paraview )
+else ()
+  set ( PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins/paraview )
+endif()
 
 # This allows us to group targets logically in Visual Studio
 set_property ( GLOBAL PROPERTY USE_FOLDERS ON )
@@ -37,25 +42,20 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 
 ###########################################################################
 # Look for dependencies
+# Do NOT add include_directories commands here. They will affect every
+# target.
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
 find_package ( Boost 1.53.0 REQUIRED date_time regex serialization filesystem system)
-include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 
 find_package ( Poco 1.4.6 REQUIRED )
-include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
-
 find_package ( Nexus 4.3.1 REQUIRED )
-include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
-
 find_package ( MuParser REQUIRED )
-
 find_package ( JsonCPP 0.7.0 REQUIRED )
-include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
 set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation" )
 if (ENABLE_OPENCASCADE)
@@ -254,7 +254,7 @@ endif ()
 # Configure clang-tidy if the tool is found
 ###########################################################################
 
-if ( CMAKE_VERSION GREATER "3.5" )
+if ( CMAKE_VERSION VERSION_GREATER "3.5" )
   set(ENABLE_CLANG_TIDY OFF CACHE BOOL "Add clang-tidy automatically to builds")
   if (ENABLE_CLANG_TIDY)
     find_program (CLANG_TIDY_EXE NAMES "clang-tidy" PATHS /usr/local/opt/llvm/bin )
@@ -267,6 +267,8 @@ if ( CMAKE_VERSION GREATER "3.5" )
       message(AUTHOR_WARNING "clang-tidy not found!")
       set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
     endif()
+  else()
+    set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
   endif()
 endif()
 

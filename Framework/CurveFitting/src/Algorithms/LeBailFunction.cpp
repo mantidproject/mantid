@@ -174,7 +174,7 @@ bool LeBailFunction::hasProfileParameter(std::string paramname) {
   } else {
     // Middle of vector
     string matchparname = *fiter;
-    if (matchparname.compare(paramname))
+    if (matchparname != paramname)
       found = false;
   }
 
@@ -1080,7 +1080,7 @@ LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
   } else {
     // Middle of vector. But no match
     string matchparname = *vsiter;
-    if (parname.compare(matchparname))
+    if (parname != matchparname)
       found = false;
   }
 

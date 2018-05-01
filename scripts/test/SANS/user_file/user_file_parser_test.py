@@ -132,6 +132,20 @@ class DetParserTest(unittest.TestCase):
                             " DET/CoRR/FRONT/ SidE -i3": RuntimeError}
 
         det_parser = DetParser()
+
+        do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+    def test_that_DET_OVERLAP_option_is_parsed_correctly(self):
+        valid_settings = {"DET/OVERLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)},
+                          "DeT/OverLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)}
+                          }
+
+        invalid_settings = {"DET/OVERLAP 0.13 0.15 0.17": RuntimeError,
+                            "DET/OVERLAP 0.13": RuntimeError,
+                            "DET/OVERLAP": RuntimeError,
+                            "DET/OVERLAP 0.13 five": RuntimeError}
+
+        det_parser = DetParser()
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
 
@@ -888,9 +902,13 @@ class PrintParserTest(unittest.TestCase):
         self.assertTrue(PrintParser.get_type(), "PRINT")
 
     def test_that_print_is_parsed_correctly(self):
-        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"}}
+        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
+                          "PRiNt OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
+                          "  PRINT Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells":
+                          {PrintId.print_line: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells"}
+                          }
 
-        invalid_settings = {}
+        invalid_settings = {"j PRINT OdlfP slsk 23lksdl2 34l ": RuntimeError,}
 
         print_parser = PrintParser()
         do_test(print_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)

@@ -98,7 +98,73 @@ public:
       const auto &bkgEs = outWS->e(histI);
       const auto &bkgXs = outWS->x(histI);
       for (size_t binI = 0; binI < nBin; ++binI) {
-        TS_ASSERT_DELTA(bkgYs[binI], ys[binI], 1e-12)
+        TS_ASSERT_DELTA(bkgYs[binI], ys[binI], 1e-10)
+        TS_ASSERT_EQUALS(bkgEs[binI], 0)
+        TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
+      }
+    }
+  }
+
+  void test_costFuctionLeastSquares() {
+    using namespace WorkspaceCreationHelper;
+    const size_t nHist{2};
+    const HistogramData::Counts counts{0, 4, 0, 0};
+    const HistogramData::CountStandardDeviations stdDevs{0, 0.001, 0, 0};
+    const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
+    API::MatrixWorkspace_sptr ws(
+        DataObjects::create<DataObjects::Workspace2D>(
+            nHist, HistogramData::Histogram(edges, counts, stdDevs)).release());
+    auto alg = makeAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Degree", 0))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("CostFunction", "Least squares"))
+    TS_ASSERT_THROWS_NOTHING(alg->execute())
+    TS_ASSERT(alg->isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    for (size_t histI = 0; histI < nHist; ++histI) {
+      const auto &xs = ws->x(histI);
+      const auto &bkgYs = outWS->y(histI);
+      const auto &bkgEs = outWS->e(histI);
+      const auto &bkgXs = outWS->x(histI);
+      for (size_t binI = 0; binI < counts.size(); ++binI) {
+        // Number 4 in counts is heavily weighted by the small error.
+        TS_ASSERT_DELTA(bkgYs[binI], 4, 1e-5)
+        TS_ASSERT_EQUALS(bkgEs[binI], 0)
+        TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
+      }
+    }
+  }
+
+  void test_costFuctionUnweightedLeastSquares() {
+    using namespace WorkspaceCreationHelper;
+    const size_t nHist{2};
+    const HistogramData::Counts counts{0, 4, 0, 0};
+    const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
+    API::MatrixWorkspace_sptr ws(
+        DataObjects::create<DataObjects::Workspace2D>(
+            nHist, HistogramData::Histogram(edges, counts)).release());
+    auto alg = makeAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Degree", 0))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(alg->execute())
+    TS_ASSERT(alg->isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    // Unweighted fitting of zeroth order polynomial is equivalent to the mean.
+    const double result = std::accumulate(counts.cbegin(), counts.cend(), 0.0) /
+                          static_cast<double>(counts.size());
+    for (size_t histI = 0; histI < nHist; ++histI) {
+      const auto &xs = ws->x(histI);
+      const auto &bkgYs = outWS->y(histI);
+      const auto &bkgEs = outWS->e(histI);
+      const auto &bkgXs = outWS->x(histI);
+      for (size_t binI = 0; binI < counts.size(); ++binI) {
+        TS_ASSERT_DELTA(bkgYs[binI], result, 1e-5)
         TS_ASSERT_EQUALS(bkgEs[binI], 0)
         TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
       }
@@ -176,7 +242,7 @@ public:
     const auto &bkgXs = outWS->x(0);
     const std::vector<double> expected{1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
     for (size_t binI = 0; binI < nBin; ++binI) {
-      TS_ASSERT_DELTA(bkgYs[binI], expected[binI], 1e-12)
+      TS_ASSERT_DELTA(bkgYs[binI], expected[binI], 1e-10)
       TS_ASSERT_EQUALS(bkgEs[binI], 0)
       TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
     }

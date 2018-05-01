@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -20,6 +20,10 @@ a consistent indexing of the peaks from multiple runs will be obtained,
 which indexes the largest number of peaks, although one
 :ref:`UB matrix <Lattice>` may not produce exactly that indexing for all
 peaks, within the specified tolerance.
+
+To not optimize the UB for each run, use the option, CommonUBForAll.  In
+this case, the same UB stored in the workspace will be used to index
+all the peaks with no optimization.
 
 Any peak with any Miller index more than the specified tolerance away
 from an integer will have its (h,k,l) set to (0,0,0). The calculated

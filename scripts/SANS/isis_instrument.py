@@ -135,6 +135,23 @@ class DetectorBank(object):
         def n_pixels(self):
             return self._n_pixels
 
+    class _MergeRange(object):
+        """
+            Stores property about the detector which is used to specify the merge ranges after the data has been reduced.
+        """
+        def __init__(self, q_min=None, q_max=None):
+            """
+                @param q_max: Default to None. Merge region maximum
+                @param q_min: Default to 0.0. Merge region minimum
+            """
+            self.q_min = q_min
+            self.q_max = q_max
+
+            if self.q_min is None and self.q_max is None:
+                self.q_merge_range = False
+            else:
+                self.q_merge_range = True
+
     class _RescaleAndShift(object):
         """
             Stores property about the detector which is used to rescale and shift
@@ -234,6 +251,7 @@ class DetectorBank(object):
 
         # hold rescale and shift object _RescaleAndShift
         self.rescaleAndShift = self._RescaleAndShift()
+        self.mergeRange = self._MergeRange()
 
         # The orientation is set by default to Horizontal (Note this used to be HorizontalFlipped,
         # probably as part of some hack for specific run numbers of SANS2D)

@@ -6,19 +6,23 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <random>
+
 // Define helper functions to create test workspaces with appropriate
 // instruments set up
 namespace ComptonProfileTestHelpers {
+enum class NoiseType { None = 0, Full = 1 };
+
 // Forward declare all functions
 static Mantid::API::MatrixWorkspace_sptr
 createTestWorkspace(const size_t nhist, const double x0, const double x1,
-                    const double dx, const bool singleMassSpectrum = false,
+                    const double dx, const NoiseType noise,
+                    const bool singleMassSpectrum = false,
                     const bool addFoilChanger = false);
 static Mantid::Geometry::Instrument_sptr
 createTestInstrumentWithFoilChanger(const Mantid::detid_t id,
@@ -33,44 +37,47 @@ static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
 static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
                               const std::string &name);
 
-struct ones {
-  double operator()(const double, size_t) {
-    return 1.0;
-  } // don't care about Y values, just use 1.0 everywhere
-};
-
 static Mantid::API::MatrixWorkspace_sptr
 createTestWorkspace(const size_t nhist, const double x0, const double x1,
-                    const double dx, const bool singleMassSpectrum,
-                    const bool addFoilChanger) {
+                    const double dx, const NoiseType noise,
+                    const bool singleMassSpectrum, const bool addFoilChanger) {
   bool isHist(false);
   auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-      ones(), static_cast<int>(nhist), x0, x1, dx, isHist);
+      [](const double, std::size_t) { return 1.0; }, static_cast<int>(nhist),
+      x0, x1, dx, isHist);
   ws2d->getAxis(0)->setUnit("TOF");
   if (singleMassSpectrum) {
-    const size_t nvalues = ws2d->blocksize();
     // Generate a test mass profile with some noise so any calculated spectrum
     // won't exactly match
     const double peakCentre(164.0), sigmaSq(16 * 16), peakHeight(0.2);
-    const double noise(0.02);
-    Mantid::Kernel::MersenneTwister mt1998(123456);
     for (size_t i = 0; i < nhist; ++i) {
-      for (size_t j = 0; j < nvalues; ++j) {
-        double x = ws2d->dataX(i)[j];
-        double y = peakHeight * exp(-0.5 * pow(x - peakCentre, 2.) / sigmaSq);
-        double r = mt1998.nextValue();
-        if (r > 0.5)
-          y += noise * r;
-        else
-          y -= noise * r;
-        ws2d->dataY(i)[j] = y;
+      auto &dataXi = ws2d->mutableX(i);
+      auto &dataYi = ws2d->mutableY(i);
+      for (auto xit = std::begin(dataXi), yit = std::begin(dataYi);
+           xit != std::end(dataXi); ++xit, ++yit) {
+        *yit = peakHeight *exp(-0.5 * pow(*xit - peakCentre, 2.) / sigmaSq);
+      }
+    }
+    if (noise == NoiseType::Full) {
+      const double meanNoise(0.02);
+      std::mt19937 rng(1);
+      std::uniform_real_distribution<double> flat(0.0, 1.0);
+      for (size_t i = 0; i < nhist; ++i) {
+        auto &dataYi = ws2d->mutableY(i);
+        for (auto &y : dataYi) {
+          const double r(flat(rng));
+          if (r > 0.5)
+            y += r * meanNoise;
+          else
+            y -= r * meanNoise;
+        }
       }
     }
   }
 
   Mantid::detid_t id(1);
   if (addFoilChanger) {
-    double r(0.553), theta(66.5993), phi(138.6);
+    const double r(0.553), theta(66.5993), phi(138.6);
     Mantid::Kernel::V3D detPos;
     detPos.spherical_rad(r, theta * M_PI / 180.0, phi * M_PI / 180.0);
     ws2d->setInstrument(createTestInstrumentWithFoilChanger(id, detPos));
@@ -154,7 +161,7 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
-    det0 = new Detector("det0", id, shape, NULL);
+    det0 = new Detector("det0", id, shape, nullptr);
   } else {
     det0 = new Detector("det0", id, nullptr);
   }

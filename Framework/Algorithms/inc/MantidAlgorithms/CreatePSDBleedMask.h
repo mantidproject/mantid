@@ -57,7 +57,9 @@ public:
     return "Runs a diagnostic test for saturation of PSD tubes and creates a "
            "MaskWorkspace marking the failed tube spectra.";
   }
-
+  const std::vector<std::string> seeAlso() const override {
+    return {"IdentifyNoisyDetectors"};
+  }
   const std::string category() const override;
 
 private:

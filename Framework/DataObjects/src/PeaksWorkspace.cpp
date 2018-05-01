@@ -16,6 +16,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
@@ -38,6 +39,8 @@ namespace Mantid {
 namespace DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(PeaksWorkspace)
+
+Mantid::Kernel::Logger g_log("PeaksWorkspace");
 
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
@@ -162,8 +165,8 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
       std::remove_if(peaks.begin(), peaks.end(), [&ip, badPeaks](Peak &pk) {
         (void)pk;
         ip++;
-        for (auto ibp = badPeaks.begin(); ibp != badPeaks.end(); ++ibp) {
-          if (*ibp == ip)
+        for (int badPeak : badPeaks) {
+          if (badPeak == ip)
             return true;
         }
         return false;
@@ -181,6 +184,17 @@ void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   } else {
     peaks.push_back(Peak(ipeak));
   }
+}
+
+//---------------------------------------------------------------------------------------------
+/** Add a peak to the list
+ * @param position :: position on the peak in the specified coordinate frame
+ * @param frame :: the coordinate frame that the position is specified in
+ */
+void PeaksWorkspace::addPeak(const V3D &position,
+                             const SpecialCoordinateSystem &frame) {
+  auto peak = createPeak(position, frame);
+  addPeak(*peak);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -236,6 +250,64 @@ PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
   // Take the run number from this
   peak->setRunNumber(this->getRunNumber());
 
+  return peak;
+}
+
+//---------------------------------------------------------------------------------------------
+/** Creates an instance of a Peak BUT DOES NOT ADD IT TO THE WORKSPACE
+ * @param position :: position of the center of the peak, in reciprocal space
+ * @param frame :: the coordinate system that the position is specified in
+ * detector. You do NOT need to explicitly provide this distance.
+ * @return a pointer to a new Peak object.
+ */
+std::unique_ptr<Geometry::IPeak>
+PeaksWorkspace::createPeak(const Kernel::V3D &position,
+                           const Kernel::SpecialCoordinateSystem &frame) const {
+  if (frame == Mantid::Kernel::HKL) {
+    return std::unique_ptr<Geometry::IPeak>(createPeakHKL(position));
+  } else if (frame == Mantid::Kernel::QLab) {
+    return std::unique_ptr<Geometry::IPeak>(createPeak(position));
+  } else {
+    return std::unique_ptr<Geometry::IPeak>(createPeakQSample(position));
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+/** Creates an instance of a Peak BUT DOES NOT ADD IT TO THE WORKSPACE
+ * @param position :: QSample position of the center of the peak, in reciprocal
+ * space
+ * detector. You do NOT need to explicitly provide this distance.
+ * @return a pointer to a new Peak object.
+ */
+Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
+  // Create a peak from QSampleFrame
+
+  Geometry::Goniometer goniometer;
+
+  LogManager_const_sptr props = getLogs();
+  if (props->hasProperty("wavelength") || props->hasProperty("energy")) {
+    // Assume constant wavelenth
+    // Calculate Q lab from Q sample and wavelength
+    double wavelength;
+    if (props->hasProperty("energy")) {
+      wavelength = Kernel::UnitConversion::run(
+          "Energy", "Wavelength",
+          props->getPropertyValueAsType<double>("energy"), 0, 0, 0,
+          Kernel::DeltaEMode::Elastic, 0);
+    } else {
+      wavelength = props->getPropertyValueAsType<double>("wavelength");
+    }
+    goniometer.calcFromQSampleAndWavelength(position, wavelength);
+    g_log.information() << "Found goniometer rotation to be "
+                        << goniometer.getEulerAngles()[0]
+                        << " degrees for Q sample = " << position << "\n";
+  } else {
+    goniometer = run().getGoniometer();
+  }
+  // create a peak using the qLab frame
+  auto peak = new Peak(getInstrument(), position, goniometer.getR());
+  // Take the run number from this
+  peak->setRunNumber(getRunNumber());
   return peak;
 }
 
@@ -583,6 +655,7 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("Col");
   addPeakColumn("QLab");
   addPeakColumn("QSample");
+  addPeakColumn("PeakNumber");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -647,6 +720,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> dSpacing(np);
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
+  std::vector<int> peakNumber(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 
@@ -668,6 +742,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
     dSpacing[i] = p.getDSpacing();
     TOF[i] = p.getTOF();
     runNumber[i] = p.getRunNumber();
+    peakNumber[i] = p.getPeakNumber();
     {
       Matrix<double> gm = p.getGoniometerMatrix();
       goniometerMatrix[9 * i] = gm[0][0];
@@ -814,6 +889,14 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
+  // Peak Number column
+  file->writeData("column_17", peakNumber);
+  file->openData("column_17");
+  file->putAttr("name", "Peak Number");
+  file->putAttr("interpret_as", specifyInteger);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
   // Goniometer Matrix Column
   std::vector<int> array_dims;
   array_dims.push_back(static_cast<int>(peaks.size()));
@@ -877,15 +960,9 @@ PeaksWorkspace::getSpecialCoordinateSystem() const {
 struct NullDeleter {
   template <typename T> void operator()(T *) {}
 };
-/**Get access to shared pointer containing workspace porperties, cashes the
- shared pointer
- into internal class variable to not allow shared pointer being deleted */
+/**Get access to shared pointer containing workspace porperties */
 API::LogManager_sptr PeaksWorkspace::logs() {
-  if (m_logCash)
-    return m_logCash;
-
-  m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
-  return m_logCash;
+  return API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
 }
 
 /** Get constant access to shared pointer containing workspace porperties;

@@ -48,6 +48,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Rebin", "SofQW"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Rebin"; }
 
@@ -61,9 +64,11 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Setup the output workspace
-  API::MatrixWorkspace_sptr createOutputWorkspace(
-      API::MatrixWorkspace_const_sptr parent, HistogramData::BinEdges &newXBins,
-      HistogramData::BinEdges &newYBins, const bool useFractionalArea) const;
+  API::MatrixWorkspace_sptr
+  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &parent,
+                        HistogramData::BinEdges &newXBins,
+                        HistogramData::BinEdges &newYBins,
+                        const bool useFractionalArea) const;
 };
 
 } // namespace Algorithms

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -11,10 +11,10 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
+   This algorithm is being developed for a specific instrument. It might get changed or even
    removed without a notification, should instrument scientists decide to do so.
 
-This algorithm computes detector efficiency correction coefficients using a given Vanadium and background workspaces. As a result, output workspace or group of workspaces with coefficients will be created. 
+This algorithm computes detector efficiency correction coefficients using a given Vanadium and background workspaces. As a result, output workspace or group of workspaces with coefficients will be created.
 
 Detector efficiency correction is performed using the measurements of vanadium standard sample (hereafter Vanadium). Background for Vanadium must be also measured and provided to the algorithm as an input **BkgWorkspace**. Vanadium and its background can be measured at several detector bank positions.  This algorithm does the detector efficiency for a particular run in following steps:
 
@@ -37,12 +37,12 @@ Detector efficiency correction is performed using the measurements of vanadium s
    :math:`<V> = \frac{1}{N}\sum <V_i^{SF} + V_i^{NSF}>`
 
    where :math:`<V_i^{SF} + V_i^{NSF}>` is the mean value of the total signal for :math:`i`-th detector calculated using the :ref:`algm-Mean` algorithm, :math:`N` is the number of not masked detectors. Sum is calculated using the :ref:`algm-SumSpectra` algorithm.
-  
+
    The :ref:`algm-Divide` algorithm is used for this step.
 
 .. note::
-    
-        To apply detector efficiency corrrection to the data, one should divide neutron counts by the coefficients: 
+
+        To apply detector efficiency corrrection to the data, one should divide neutron counts by the coefficients:
 
                 :math:`(I_i)_{corr} = \frac{I_i}{k_i}`
 
@@ -87,7 +87,7 @@ Usage
 
    print("Is first detector masked? {}".format(coefs.getInstrument().getDetector(1).isMasked()))
 
-   # load sample data 
+   # load sample data
    rawdata = LoadDNSLegacy('oi196012pbi.d_dat', Normalization='duration', CoilCurrentsTable=curtable)
 
    # apply correction
@@ -98,7 +98,7 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
    First 3 correction coefficients:
 
@@ -109,13 +109,13 @@ Output:
    1.26
 
    Is first detector masked? True
-   
+
    First 3 corrected data points
-   
+
    0.0
-   
+
    287.89
-   
+
    277.55
 
 .. categories::

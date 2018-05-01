@@ -186,8 +186,8 @@ private:
 
     // at centre
     ShapeFactory factory;
-    auto can = factory.createShape<Container>(
-        ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1"));
+    auto can = boost::make_shared<Container>(factory.createShape(
+        ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
     can->setID("8mm");
     auto kit = boost::make_shared<SampleEnvironment>("TestKit", can);
     // before sample

@@ -1,11 +1,11 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init, invalid-name, bare-except
 """
     Magnetism reflectometry reduction
 """
 from __future__ import (absolute_import, division, print_function)
 import math
-import functools
 import numpy as np
+import functools
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -40,7 +40,13 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
     def PyInit(self):
         """ Initialization """
         self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a scattering workspace directly")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
+        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a normalization workspace directly")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the data peak")
@@ -90,36 +96,22 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
         self.declareProperty("ConstQTrim", 0.5,
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
+        self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
         self.declareProperty("ConstantQBinning", False, doc="If true, we convert to Q before summing")
 
     #pylint: disable=too-many-locals
     def PyExec(self):
         """ Main execution """
         # DATA
-        dataRunNumbers = self.getProperty("RunNumbers").value
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
         dataBackRange = self.getProperty("SignalBackgroundPixelRange").value
 
         # NORMALIZATION
-        normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
         normBackRange = self.getProperty("NormBackgroundPixelRange").value
         normPeakRange = self.getProperty("NormPeakPixelRange").value
 
-        # If we have multiple files, add them
-        file_list = []
-        for item in dataRunNumbers:
-            # The standard mode of operation is to give a run number as input
-            try:
-                data_file = FileFinder.findRuns("%s%s" % (INSTRUMENT_NAME, item))[0]
-            except RuntimeError:
-                # Allow for a file name or file path as input
-                data_file = FileFinder.findRuns(item)[0]
-            file_list.append(data_file)
-        runs = functools.reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
-
-        entry_name = self.getProperty("EntryName").value
-        ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
-                                       OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
+        # Load the data
+        ws_event_data = self.load_data()
 
         # Number of pixels in each direction
         self.number_of_pixels_x = int(ws_event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
@@ -137,7 +129,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         perform_normalization = self.getProperty("ApplyNormalization").value
         if perform_normalization:
             # Load normalization
-            ws_event_norm = self.load_direct_beam(normalizationRunNumber)
+            ws_event_norm = self.load_direct_beam()
+            run_number = str(ws_event_norm.getRunNumber())
             crop_request = self.getProperty("CutLowResNormAxis").value
             low_res_range = self.getProperty("LowResNormAxisPixelRange").value
             bck_request = self.getProperty("SubtractNormBackground").value
@@ -156,7 +149,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             # Normalize the data
             normalized_data = data_cropped / norm_summed
 
-            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(normalizationRunNumber))
+            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=run_number)
             AddSampleLog(Workspace=normalized_data, LogName='normalization_file_path',
                          LogText=norm_summed.getRun().getProperty("Filename").value)
             norm_dirpix = norm_summed.getRun().getProperty('DIRPIX').getStatistics().mean
@@ -186,14 +179,56 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Avoid leaving trash behind
         AnalysisDataService.remove(str(normalized_data))
 
+        # Add dQ to each Q point
+        q_rebin = self.compute_resolution(q_rebin)
+
         self.setProperty('OutputWorkspace', q_rebin)
 
-    def load_direct_beam(self, normalizationRunNumber):
+    def load_data(self):
         """
-            Load a direct beam file. This method will disappear once we move to the new DAS.
-            It is necessary at the moment only because the direct beam data is occasionally
-            stored in another entry than entry_Off-Off.
+            Load the data. We can either load it from the specified
+            run numbers, or use the input workspace.
+
+            Supplying a workspace takes precedence over supplying a list of runs
         """
+        dataRunNumbers = self.getProperty("RunNumbers").value
+        ws_event_data = self.getProperty("InputWorkspace").value
+
+        if ws_event_data is not None:
+            return ws_event_data
+
+        if len(dataRunNumbers) > 0:
+            # If we have multiple files, add them
+            file_list = []
+            for item in dataRunNumbers:
+                # The standard mode of operation is to give a run number as input
+                try:
+                    data_file = FileFinder.findRuns("%s%s" % (INSTRUMENT_NAME, item))[0]
+                except RuntimeError:
+                    # Allow for a file name or file path as input
+                    data_file = FileFinder.findRuns(item)[0]
+                file_list.append(data_file)
+            runs = functools.reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
+            entry_name = self.getProperty("EntryName").value
+            ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
+                                           OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
+        else:
+            raise RuntimeError("No input data was specified")
+        return ws_event_data
+
+    def load_direct_beam(self):
+        """
+            Load a direct beam file. We can either load it from the specified
+            run number, or use the input workspace.
+
+            Supplying a workspace takes precedence over supplying a run number.
+        """
+        normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
+        ws_event_norm = self.getProperty("NormalizationWorkspace").value
+
+        if ws_event_norm is not None:
+            return ws_event_norm
+
         for entry in ['entry', 'entry-Off_Off', 'entry-On_Off', 'entry-Off_On', 'entry-On_On']:
             try:
                 ws_event_norm = LoadEventNexus("%s_%s" % (INSTRUMENT_NAME, normalizationRunNumber),
@@ -434,6 +469,52 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         self.write_meta_data(q_rebin)
         return q_rebin
+
+    def compute_resolution(self, ws):
+        """
+            Calculate dQ/Q using the slit information.
+            :param workspace ws: reflectivity workspace
+        """
+        sample_length = self.getProperty("SampleLength").value
+
+        # In newer data files, the slit distances are part of the logs
+        if ws.getRun().hasProperty("S1Distance"):
+            s1_dist = ws.getRun().getProperty("S1Distance").value
+            s2_dist = ws.getRun().getProperty("S2Distance").value
+            s3_dist = ws.getRun().getProperty("S3Distance").value
+        else:
+            s1_dist = -2600.
+            s2_dist = -2019.
+            s3_dist = -714.
+        slits =[[ws.getRun().getProperty("S1HWidth").getStatistics().mean, s1_dist],
+                [ws.getRun().getProperty("S2HWidth").getStatistics().mean, s2_dist],
+                [ws.getRun().getProperty("S3HWidth").getStatistics().mean, s3_dist]]
+        theta = ws.getRun().getProperty("two_theta").value/2.0 * np.pi / 180.0
+        res=[]
+        s_width=sample_length*np.sin(theta)
+        for width, dist in slits:
+            # Calculate the maximum opening angle dTheta
+            if s_width > 0.:
+                d_theta = np.arctan((s_width/2.*(1.+width/s_width))/dist)*2.
+            else:
+                d_theta = np.arctan(width/2./dist)*2.
+            # The standard deviation for a uniform angle distribution is delta/sqrt(12)
+            res.append(d_theta*0.28867513)
+
+        # Wavelength uncertainty
+        lambda_min = ws.getRun().getProperty("lambda_min").value
+        lambda_max = ws.getRun().getProperty("lambda_max").value
+        dq_over_q = min(res) / np.tan(theta)
+
+        data_x = ws.dataX(0)
+        data_dx = ws.dataDx(0)
+        dwl = (lambda_max - lambda_min) / len(data_x) / np.sqrt(12.0)
+        for i in range(len(data_x)):
+            dq_theta = data_x[i] * dq_over_q
+            dq_wl = data_x[i]**2 * dwl / (4.0*np.pi*np.sin(theta))
+            data_dx[i] = np.sqrt(dq_theta**2 + dq_wl**2)
+
+        return ws
 
     def calculate_scattering_angle(self, ws_event_data):
         """

@@ -1,7 +1,7 @@
 #ifndef DIMENSIONSLICEWIDGET_H
 #define DIMENSIONSLICEWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "ui_DimensionSliceWidget.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "DllOption.h"

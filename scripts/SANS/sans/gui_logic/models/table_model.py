@@ -35,6 +35,12 @@ class TableModel(object):
         self._validate_file_name(value)
         self._user_file = value
 
+    def get_row_user_file(self, row_index):
+        if row_index in self._table_entries:
+            return self._table_entries[row_index].user_file
+        else:
+            raise IndexError("The row {} does not exist.".format(row_index))
+
     @property
     def batch_file(self):
         return self._batch_file
@@ -63,7 +69,7 @@ class TableIndexModel(object):
                  can_scatter, can_scatter_period,
                  can_transmission, can_transmission_period,
                  can_direct, can_direct_period,
-                 output_name="", options_column_string=""):
+                 output_name="", user_file="", options_column_string=""):
         super(TableIndexModel, self).__init__()
         self.index = index
         self.sample_scatter = sample_scatter
@@ -80,7 +86,7 @@ class TableIndexModel(object):
         self.can_direct = can_direct
         self.can_direct_period = can_direct_period
 
-        self.user_file = ""
+        self.user_file = user_file
         self.output_name = output_name
 
         # Options column entries

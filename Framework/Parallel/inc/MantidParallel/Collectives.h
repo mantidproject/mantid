@@ -3,6 +3,7 @@
 
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
+#include "MantidParallel/Nonblocking.h"
 
 #ifdef MPI_EXPERIMENTAL
 #include <boost/mpi/collectives.hpp>
@@ -68,6 +69,25 @@ void gather(const Communicator &comm, const T &in_value, int root) {
         "Parallel::gather on root rank without output argument.");
   }
 }
+
+template <typename... T>
+void all_gather(const Communicator &comm, T &&... args) {
+  for (int root = 0; root < comm.size(); ++root)
+    gather(comm, std::forward<T>(args)..., root);
+}
+
+template <typename T>
+void all_to_all(const Communicator &comm, const std::vector<T> &in_values,
+                std::vector<T> &out_values) {
+  int tag{0};
+  out_values.resize(comm.size());
+  std::vector<Request> requests;
+  for (int rank = 0; rank < comm.size(); ++rank)
+    requests.emplace_back(comm.irecv(rank, tag, out_values[rank]));
+  for (int rank = 0; rank < comm.size(); ++rank)
+    comm.send(rank, tag, in_values[rank]);
+  wait_all(requests.begin(), requests.end());
+}
 }
 
 template <typename... T> void gather(const Communicator &comm, T &&... args) {
@@ -76,6 +96,24 @@ template <typename... T> void gather(const Communicator &comm, T &&... args) {
     return boost::mpi::gather(comm, std::forward<T>(args)...);
 #endif
   detail::gather(comm, std::forward<T>(args)...);
+}
+
+template <typename... T>
+void all_gather(const Communicator &comm, T &&... args) {
+#ifdef MPI_EXPERIMENTAL
+  if (!comm.hasBackend())
+    return boost::mpi::all_gather(comm, std::forward<T>(args)...);
+#endif
+  detail::all_gather(comm, std::forward<T>(args)...);
+}
+
+template <typename... T>
+void all_to_all(const Communicator &comm, T &&... args) {
+#ifdef MPI_EXPERIMENTAL
+  if (!comm.hasBackend())
+    return boost::mpi::all_to_all(comm, std::forward<T>(args)...);
+#endif
+  detail::all_to_all(comm, std::forward<T>(args)...);
 }
 
 } // namespace Parallel

@@ -84,7 +84,7 @@ bool UserStringParser::Contains(const std::string &input, char ch) {
   */
 std::vector<std::string>
 UserStringParser::separateComma(const std::string &input) {
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer tokens(input, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   return tokens.asVector();
 }
@@ -142,7 +142,7 @@ void UserStringParser::Tokenize(const std::string &input,
                                 const std::string &delimiter,
                                 unsigned int &start, unsigned int &end,
                                 unsigned int &step) {
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer tokens(input, delimiter);
   // validate the separated tokens
   if (!isValidStepSeparator(input, tokens.asVector())) {
@@ -170,7 +170,7 @@ bool UserStringParser::isValidStepSeparator(
       step_separator = input.substr(index - 1, 1);
     }
     // step values must be preceded by colon ':'
-    return (!step_separator.compare(":"));
+    return (step_separator == ":");
   }
   return true;
 }

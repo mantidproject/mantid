@@ -3,11 +3,11 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/TextPropertyWidget.h"
-#include <QtCore/qstringlist.h>
-#include <QtCore/qstring.h>
+#include <QStringList>
+#include <QString>
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include <qpushbutton.h>
+#include <QPushButton>
 
 namespace MantidQt {
 namespace API {

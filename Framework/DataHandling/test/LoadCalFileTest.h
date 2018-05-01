@@ -125,8 +125,8 @@ public:
   }
 
   void tearDown() override {
-    for (size_t i = 0; i < loadAlgPtrArray.size(); i++) {
-      delete loadAlgPtrArray[i];
+    for (auto &i : loadAlgPtrArray) {
+      delete i;
     }
     loadAlgPtrArray.clear();
 

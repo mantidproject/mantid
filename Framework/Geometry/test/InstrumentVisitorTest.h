@@ -3,21 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include <set>
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
 #include <boost/make_shared.hpp>
+#include <set>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -31,7 +30,7 @@ makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
   return boost::make_shared<const Instrument>(
       baseInstrument, boost::make_shared<ParameterMap>());
 }
-}
+} // namespace
 
 class InstrumentVisitorTest : public CxxTest::TestSuite {
 public:
@@ -245,8 +244,7 @@ public:
   void test_visitor_component_ranges_check() {
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                           V3D(10, 0, 0) /*sample pos*/
-                                           ,
+                                           V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
 
     InstrumentVisitor visitor(makeParameterized(visitee));
@@ -292,7 +290,7 @@ public:
   }
 
   void test_visitation_of_rectangular_detector() {
-
+    using Mantid::Beamline::ComponentType;
     // Need confidence that this works properly for RectangularDetectors
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
@@ -308,16 +306,22 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
 
-    const size_t bankIndex = compInfo->indexOf(
-        instrument->getComponentByName("bank1")->getComponentID());
-    TS_ASSERT(compInfo->isStructuredBank(bankIndex)); // Bank is rectangular
-    TS_ASSERT(!compInfo->isStructuredBank(
-        compInfo->source())); // Source is not a rectangular bank
-    TS_ASSERT(!compInfo->isStructuredBank(
-        0)); //  A detector is never a bank, let alone a detector
+    using Mantid::Beamline::ComponentType;
+
+    const size_t bankIndex = compInfo->indexOfAny("bank1");
+    TS_ASSERT_EQUALS(compInfo->componentType(bankIndex),
+                     ComponentType::Rectangular); // Bank is rectangular
+    TS_ASSERT_DIFFERS(
+        compInfo->componentType(compInfo->source()),
+        ComponentType::Rectangular); // Source is not a rectangular bank
+    TS_ASSERT_DIFFERS(compInfo->componentType(0),
+                      ComponentType::Rectangular); //  A detector is never a
+                                                   //  bank, let alone a
+                                                   //  detector
   }
 
   void test_visitation_of_non_rectangular_detectors() {
+    using Mantid::Beamline::ComponentType;
 
     auto instrument =
         ComponentCreationHelper::createTestInstrumentCylindrical(1 /*n banks*/);
@@ -328,7 +332,7 @@ public:
 
     // Nothing should be marked as a rectangular bank
     for (size_t index = 0; index < compInfo->size(); ++index) {
-      TS_ASSERT(!compInfo->isStructuredBank(index));
+      TS_ASSERT(compInfo->componentType(index) != ComponentType::Rectangular);
     }
   }
 
@@ -384,6 +388,30 @@ public:
                       &componentInfo->shape(1 /*another detector*/));
   }
 
+  void test_names() {
+
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+
+    // Visit everything
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto componentInfo = std::move(std::get<0>(wrappers));
+
+    // Check root name
+    TS_ASSERT_EQUALS("basic_rect", componentInfo->name(componentInfo->root()));
+    // Backward check that we get the right index
+    TS_ASSERT_EQUALS(componentInfo->indexOfAny("basic_rect"),
+                     componentInfo->root());
+
+    // Check all names are the same in old instrument and component info
+    for (size_t index = 0; index < componentInfo->size(); ++index) {
+      TS_ASSERT_EQUALS(componentInfo->componentID(index)->getName(),
+                       componentInfo->name(index));
+    }
+  }
+
   void test_purge_scale_factors() {
 
     // Create a very basic instrument to visit
@@ -411,6 +439,57 @@ public:
     auto compInfo = std::move(std::get<0>(wrappers));
     TS_ASSERT_EQUALS(detScaling, compInfo->scaleFactor(0));
     TS_ASSERT_EQUALS(instrScaling, compInfo->scaleFactor(compInfo->root()));
+  }
+
+  void test_instrumentTreeWithMinimalInstrument() {
+    /** This should produce the following instrument tree
+     *   3
+     * / | \
+     *0  1  2
+     */
+    auto instrument =
+        createMinimalInstrument(V3D(0, 0, 0), V3D(0, 0, 1), V3D(0, 0, 10));
+    auto visitor = InstrumentVisitor(instrument);
+
+    visitor.walkInstrument();
+
+    auto componentInfo = visitor.componentInfo();
+    auto root = componentInfo->root();
+    TS_ASSERT_EQUALS(componentInfo->children(0).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(1).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(2).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(root).size(), 3);
+  }
+
+  void test_instrumentTreeWithComplexInstrument() {
+    /** This should produce the following instrument tree
+     *               16
+     *   /      /      \                \
+     * 14      15       10              13
+     *                /    \          /   \
+     *               8      9      11       12
+     *             /  \   /  \    /  \    /   \
+     *            0    1  2   3  4    5   6    7
+     */
+    auto instrument = createTestInstrumentRectangular2(2, 2);
+    auto visitor = InstrumentVisitor(instrument);
+
+    visitor.walkInstrument();
+
+    auto componentInfo = visitor.componentInfo();
+    auto root = componentInfo->root();
+    for (int i = 0; i < 8; i++)
+      TS_ASSERT_EQUALS(componentInfo->children(i).size(), 0);
+
+    TS_ASSERT_EQUALS(componentInfo->children(root).size(), 4);
+    TS_ASSERT_EQUALS(componentInfo->children(8).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(9).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(11).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(12).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(10).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(13).size(), 2);
+    TS_ASSERT_EQUALS(componentInfo->children(14).size(), 0);
+    TS_ASSERT_EQUALS(componentInfo->children(15).size(), 0);
   }
 };
 

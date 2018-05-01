@@ -79,6 +79,7 @@ class ReductionStateTransferer(object):
 
         # Set front detector scale, shift and q range
         reducer.instrument.getDetector('FRONT').rescaleAndShift = copy.deepcopy(self.rc.instrument.getDetector('FRONT').rescaleAndShift)
+        reducer.instrument.getDetector('FRONT').mergeRange = copy.deepcopy(self.rc.instrument.getDetector('FRONT').mergeRange)
 
         # Set Gravity and extra length
         reducer.to_Q._use_gravity = self.rc.to_Q._use_gravity

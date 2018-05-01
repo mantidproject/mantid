@@ -1,12 +1,12 @@
 ####################################################################################
-# PythonInterface sub modules 
+# PythonInterface sub modules
 ####################################################################################
 
 # Set the root directory for the package
 set ( PYTHON_PKG_ROOT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantid )
 
 ####################################################################################
-# Root module 
+# Root module
 ####################################################################################
 # The destination directory, used by sub modules
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
@@ -18,7 +18,7 @@ set ( PY_FILES
   fitfunctions.py
 )
 
-copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
                      PYTHON_PKGROOT_INSTALL_FILES )
 # Generate the version module
 set ( VERSION_PY pyversion )
@@ -35,7 +35,7 @@ add_custom_target ( PythonModule DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} ${PYTHO
 set_property ( TARGET PythonModule PROPERTY FOLDER "MantidFramework/Python" )
 
 ####################################################################################
-# Sub modules 
+# Sub modules
 ####################################################################################
 add_subdirectory ( kernel )
 add_dependencies ( PythonKernelModule PythonModule ) # Ensure the module files are in place
@@ -43,17 +43,19 @@ add_subdirectory ( geometry )
 add_subdirectory ( api )
 add_subdirectory ( dataobjects )
 add_subdirectory ( _plugins )
+add_subdirectory ( plots )
 
 # Create an overall target
-add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule 
-                    PythonAPIModule PythonDataObjectsModule PythonCurveFittingModule )
+add_custom_target ( PythonInterface DEPENDS PythonKernelModule
+  PythonGeometryModule PythonAPIModule PythonDataObjectsModule
+  PythonCurveFittingModule PythonPlotsModule )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 ###########################################################################
 # Bundle Python DLL (where appropriate)
 ###########################################################################
 # Defines the target the will cause the Python bundle to be copied
-set ( PYBUNDLE_POST_TARGET PythonModule ) 
+set ( PYBUNDLE_POST_TARGET PythonModule )
 include ( ${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake )
 
 
@@ -61,9 +63,8 @@ include ( ${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake )
 # Installation settings
 ###########################################################################
 
-# Pure Python files 
+# Pure Python files
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid )
 # version.py that will overwrite the ones from the built target
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py DESTINATION
           ${BIN_DIR}/mantid RENAME ${VERSION_PY}.py )
-

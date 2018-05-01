@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Objects/IObject.h"
 
 namespace Mantid {
 
@@ -12,7 +13,7 @@ class Material;
 
 namespace Geometry {
 class Track;
-class Object;
+class IObject;
 class GeometryHandler;
 
 /** Object Component class, this class brings together the physical attributes
@@ -58,6 +59,10 @@ public:
 
   IObjComponent(GeometryHandler *the_handler);
 
+  IObjComponent(const IObjComponent &);
+
+  IObjComponent &operator=(const IObjComponent &rhs);
+
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
   ~IObjComponent() override;
@@ -95,7 +100,7 @@ public:
   virtual void initDraw() const = 0;
 
   /// Returns the shape of the Object
-  virtual const boost::shared_ptr<const Object> shape() const = 0;
+  virtual const boost::shared_ptr<const IObject> shape() const = 0;
   /// Returns the material of the Object
   virtual const Kernel::Material material() const = 0;
 
@@ -103,11 +108,6 @@ public:
   GeometryHandler *Handle() const { return handle; }
 
 protected:
-  /// Protected copy constructor
-  IObjComponent(const IObjComponent &);
-  /// Assignment operator
-  IObjComponent &operator=(const IObjComponent &);
-
   /// Reset the current geometry handler
   void setGeometryHandler(GeometryHandler *h);
 
@@ -119,9 +119,9 @@ private:
 };
 
 /// Shared pointer to IObjComponent
-typedef boost::shared_ptr<IObjComponent> IObjComponent_sptr;
+using IObjComponent_sptr = boost::shared_ptr<IObjComponent>;
 /// Shared pointer to IObjComponent (const version)
-typedef boost::shared_ptr<const IObjComponent> IObjComponent_const_sptr;
+using IObjComponent_const_sptr = boost::shared_ptr<const IObjComponent>;
 
 } // namespace Geometry
 } // namespace Mantid

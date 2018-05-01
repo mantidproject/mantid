@@ -41,7 +41,9 @@ public:
    * @return Standard string name  */
   const std::string id() const override { return "WorkspaceSingleValue"; }
 
-  WorkspaceSingleValue(double value = 0.0, double error = 0.0);
+  WorkspaceSingleValue(
+      double value = 0.0, double error = 0.0,
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceSingleValue> clone() const {
@@ -94,9 +96,9 @@ private:
 };
 
 /// shared pointer to the WorkspaceSingleValue class
-typedef boost::shared_ptr<WorkspaceSingleValue> WorkspaceSingleValue_sptr;
-typedef boost::shared_ptr<const WorkspaceSingleValue>
-    WorkspaceSingleValue_const_sptr;
+using WorkspaceSingleValue_sptr = boost::shared_ptr<WorkspaceSingleValue>;
+using WorkspaceSingleValue_const_sptr =
+    boost::shared_ptr<const WorkspaceSingleValue>;
 
 } // namespace DataObjects
 } // namespace Mantid

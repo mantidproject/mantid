@@ -65,12 +65,12 @@ void IndirectDiffractionReduction::initLayout() {
                                         const QString &)));
 
   // Update run button based on state of raw files field
-  connect(m_uiForm.rfSampleFiles, SIGNAL(fileTextChanged(const QString &)),
-          this, SLOT(runFilesChanged()));
-  connect(m_uiForm.rfSampleFiles, SIGNAL(findingFiles()), this,
-          SLOT(runFilesFinding()));
-  connect(m_uiForm.rfSampleFiles, SIGNAL(fileFindingFinished()), this,
-          SLOT(runFilesFound()));
+  connectRunButtonValidation(m_uiForm.rfSampleFiles);
+  connectRunButtonValidation(m_uiForm.rfCanFiles);
+  connectRunButtonValidation(m_uiForm.rfCalFile);
+  connectRunButtonValidation(m_uiForm.rfCalFile_only);
+  connectRunButtonValidation(m_uiForm.rfVanadiumFile);
+  connectRunButtonValidation(m_uiForm.rfVanFile_only);
 
   m_valDbl = new QDoubleValidator(this);
 
@@ -100,6 +100,18 @@ void IndirectDiffractionReduction::initLayout() {
 
   // Update instrument dependant widgets
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
+}
+
+/**
+* Make file finding status display on the run button and enable/disable it
+*/
+void IndirectDiffractionReduction::connectRunButtonValidation(
+    const MantidQt::API::MWRunFiles *file_field) {
+  connect(file_field, SIGNAL(fileTextChanged(const QString &)), this,
+          SLOT(runFilesChanged()));
+  connect(file_field, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
+  connect(file_field, SIGNAL(fileFindingFinished()), this,
+          SLOT(runFilesFound()));
 }
 
 /**
@@ -151,7 +163,7 @@ void IndirectDiffractionReduction::run() {
  */
 void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
-  disconnect(m_batchAlgoRunner, 0, this, SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
 
   // Delete grouping workspace, if created.
   if (AnalysisDataService::Instance().doesExist(m_groupingWsName)) {
@@ -485,8 +497,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
     return;
   }
 
-  bool manualDRange(m_uiForm.ckManualDRange->isChecked());
-
   IAlgorithm_sptr osirisDiffReduction =
       AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
   osirisDiffReduction->initialize();
@@ -507,11 +517,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
       boost::lexical_cast<std::string, int>(m_uiForm.spSpecMax->value());
   osirisDiffReduction->setProperty("SpectraMin", specMin);
   osirisDiffReduction->setProperty("SpectraMax", specMax);
-
-  osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
-  if (manualDRange)
-    osirisDiffReduction->setProperty("DRange",
-                                     m_uiForm.spDRange->text().toStdString());
 
   if (m_uiForm.ckUseCan->isChecked()) {
     osirisDiffReduction->setProperty(
@@ -631,7 +636,7 @@ void IndirectDiffractionReduction::instrumentSelected(
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
-  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanadiumFile->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());
@@ -685,22 +690,12 @@ void IndirectDiffractionReduction::instrumentSelected(
 
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
-    m_uiForm.ckManualDRange->setToolTip(
-        "D-Ranges corresponding to numeric values can be found in the"
-        " OSIRIS user guide: "
-        "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
-    m_uiForm.spDRange->setToolTip(
-        "D-Ranges corresponding to numeric values can be found in the"
-        " OSIRIS user guide: "
-        "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
     m_uiForm.ckSumFiles->setEnabled(false);
     m_uiForm.ckSumFiles->setChecked(false);
 
   } else {
     // Re-enable sum files
     m_uiForm.ckSumFiles->setToolTip("");
-    m_uiForm.ckManualDRange->setToolTip("");
-    m_uiForm.spDRange->setToolTip("");
     m_uiForm.ckSumFiles->setEnabled(true);
     m_uiForm.ckSumFiles->setChecked(true);
 

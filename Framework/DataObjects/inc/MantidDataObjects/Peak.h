@@ -2,17 +2,22 @@
 #define MANTID_DATAOBJECTS_PEAK_H_
 
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
+
+namespace Geometry {
+class InstrumentRayTracer;
+}
+
 namespace DataObjects {
 
 /** Structure describing a single-crystal peak
@@ -81,6 +86,7 @@ public:
   Geometry::Instrument_const_sptr getInstrument() const override;
 
   bool findDetector() override;
+  bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
 
   int getRunNumber() const override;
   void setRunNumber(int m_runNumber) override;
@@ -115,16 +121,19 @@ public:
   void setWavelength(double wavelength) override;
   double getWavelength() const override;
   double getScattering() const override;
+  double getAzimuthal() const override;
   double getDSpacing() const override;
   double getTOF() const override;
 
   double getInitialEnergy() const override;
   double getFinalEnergy() const override;
+  double getEnergyTransfer() const override;
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
   double getIntensity() const override;
   double getSigmaIntensity() const override;
+  double getIntensityOverSigma() const override;
 
   void setIntensity(double m_intensity) override;
   void setSigmaIntensity(double m_sigmaIntensity) override;
@@ -141,6 +150,8 @@ public:
   int getCol() const override;
   void setRow(int m_row);
   void setCol(int m_col);
+  void setPeakNumber(int m_peakNumber) override;
+  int getPeakNumber() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
@@ -164,7 +175,8 @@ public:
   Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
 private:
-  bool findDetector(const Mantid::Kernel::V3D &beam);
+  bool findDetector(const Mantid::Kernel::V3D &beam,
+                    const Geometry::InstrumentRayTracer &tracer);
 
   /// Shared pointer to the instrument (for calculating some values )
   Geometry::Instrument_const_sptr m_inst;
@@ -233,6 +245,9 @@ private:
   double m_orig_K;
   double m_orig_L;
 
+  // keep peak number
+  int m_peakNumber;
+
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;
 
@@ -246,7 +261,7 @@ private:
   std::string convention;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_PEAK_H_ */

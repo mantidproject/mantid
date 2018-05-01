@@ -31,7 +31,7 @@
 #include <nexus/NeXusException.hpp>
 #include <vector>
 
-typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
+using file_holder_type = std::unique_ptr<Mantid::API::IBoxControllerIO>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -428,6 +428,7 @@ void LoadMD::loadDimensions2() {
         axis.size() - 1));
   }
   m_file->closeGroup();
+  m_numDims = m_dims.size();
 }
 
 void LoadMD::loadVisualNormalization(

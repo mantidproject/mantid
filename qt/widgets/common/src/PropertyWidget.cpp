@@ -308,7 +308,7 @@ void PropertyWidget::updateIconVisibility(const QString &error) {
     try {
       userError = QString::fromStdString(m_prop->setValue(value.toStdString()));
     } catch (std::exception &err_details) {
-      userError = QString::fromAscii(err_details.what());
+      userError = QString::fromLatin1(err_details.what());
     }
   }
   this->setError(userError.trimmed());

@@ -3,7 +3,9 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/Logger.h"
 
+#include <list>
 #include <vector>
 
 namespace Mantid {
@@ -49,6 +51,9 @@ public:
   void setReferenceProperties(API::MatrixWorkspace_sptr);
   static std::vector<std::string>
   unWrapGroups(const std::vector<std::string> &);
+  std::list<API::MatrixWorkspace_sptr>
+  validateInputWorkspaces(const std::vector<std::string> &inputWorkspaces,
+                          Kernel::Logger &g_log);
 
 private:
   size_t m_numberSpectra;
@@ -59,6 +64,7 @@ private:
   std::string m_instrumentName;
   bool m_isHistogramData;
   bool m_isScanning;
+  std::vector<bool> m_hasDx;
 };
 
 } // namespace Algorithms

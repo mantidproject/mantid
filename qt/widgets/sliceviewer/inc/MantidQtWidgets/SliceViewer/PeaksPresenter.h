@@ -35,8 +35,8 @@ class PeakOverlayView;
 class UpdateableOnDemand;
 
 // Alias
-typedef std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>
-    SetPeaksWorkspaces;
+using SetPeaksWorkspaces =
+    std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
 
 /*---------------------------------------------------------
 Abstract PeaksPresenter.
@@ -60,8 +60,6 @@ public:
   virtual void showBackgroundRadius(const bool shown) = 0;
   virtual void setShown(const bool shown) = 0;
   virtual PeakBoundingBox getBoundingBox(const int peakIndex) const = 0;
-  virtual void sortPeaksWorkspace(const std::string &byColumnName,
-                                  const bool ascending) = 0;
   virtual void setPeakSizeOnProjection(const double fraction) = 0;
   virtual void setPeakSizeIntoProjection(const double fraction) = 0;
   virtual double getPeakSizeOnProjection() const = 0;
@@ -78,12 +76,11 @@ public:
   virtual void peakEditMode(EditMode mode) = 0;
   virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox) = 0;
   virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) = 0;
-  virtual bool hasPeakAddMode() const = 0;
   ~PeaksPresenter() override{};
 };
 
-typedef boost::shared_ptr<PeaksPresenter> PeaksPresenter_sptr;
-typedef boost::shared_ptr<const PeaksPresenter> PeaksPresenter_const_sptr;
+using PeaksPresenter_sptr = boost::shared_ptr<PeaksPresenter>;
+using PeaksPresenter_const_sptr = boost::shared_ptr<const PeaksPresenter>;
 }
 }
 

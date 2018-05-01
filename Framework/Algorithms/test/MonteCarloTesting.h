@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
@@ -11,6 +11,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+#include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
 
 /*
@@ -68,7 +69,7 @@ inline std::string annulusXML(double innerRadius, double outerRadius,
   return os.str();
 }
 
-inline Mantid::Geometry::Object_sptr
+inline Mantid::Geometry::IObject_sptr
 createAnnulus(double innerRadius, double outerRadius, double height,
               const Mantid::Kernel::V3D &upAxis) {
   using Mantid::Geometry::ShapeFactory;
@@ -89,19 +90,28 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   const double height(0.05), innerRadius(0.0046), outerRadius(0.005);
   const V3D centre(0, 0, -0.5 * height), upAxis(0, 0, 1);
   // Container
-  auto can = ShapeFactory().createShape<Container>(
+  auto canShape = ShapeFactory().createShape(
       annulusXML(innerRadius, outerRadius, height, upAxis));
-  can->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+  // CSG Object assumed
+  if (auto csgObj =
+          boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(canShape)) {
+    csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+  }
+  auto can = boost::make_shared<Container>(canShape);
   auto environment =
       Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");
-  sampleCell->setMaterial(Material("Si", getNeutronAtom(14), 0.15));
+  // CSG Object assumed
+  if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(
+          sampleCell)) {
+    csgObj->setMaterial(Material("Si", getNeutronAtom(14), 0.15));
+  }
 
   // Sample object
   Sample testSample;
-  testSample.setShape(*sampleCell);
+  testSample.setShape(sampleCell);
   testSample.setEnvironment(environment.release());
   return testSample;
 }
@@ -110,7 +120,7 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   using Mantid::API::Sample;
   using Mantid::Kernel::Material;
   using Mantid::Kernel::V3D;
-  using Mantid::Geometry::Object_sptr;
+  using Mantid::Geometry::IObject_sptr;
   using Mantid::PhysicalConstants::getNeutronAtom;
 
   using namespace Mantid::Geometry;
@@ -119,7 +129,7 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   if (sampleType == TestSampleType::SamplePlusContainer) {
     testSample = createSamplePlusContainer();
   } else {
-    Object_sptr shape;
+    IObject_sptr shape;
     if (sampleType == TestSampleType::SolidSphere) {
       shape = ComponentCreationHelper::createSphere(0.1);
     } else if (sampleType == TestSampleType::Annulus) {
@@ -129,8 +139,12 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
     } else {
       throw std::invalid_argument("Unknown testing shape type requested");
     }
-    shape->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
-    testSample.setShape(*shape);
+    // CSG Object assumed
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
+      csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+    }
+    testSample.setShape(shape);
   }
   return testSample;
 }

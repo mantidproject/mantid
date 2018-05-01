@@ -5,10 +5,12 @@ set ( SRC_FILES
 	src/LegacyConversion.cpp
 	src/Partitioner.cpp
 	src/RoundRobinPartitioner.cpp
+	src/Scatter.cpp
 	src/SpectrumNumberTranslator.cpp
 )
 
 set ( INC_FILES
+	inc/MantidIndexing/Conversion.h
 	inc/MantidIndexing/DetectorID.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/Extract.h
@@ -21,12 +23,14 @@ set ( INC_FILES
 	inc/MantidIndexing/PartitionIndex.h
 	inc/MantidIndexing/Partitioner.h
 	inc/MantidIndexing/RoundRobinPartitioner.h
+	inc/MantidIndexing/Scatter.h
 	inc/MantidIndexing/SpectrumIndexSet.h
 	inc/MantidIndexing/SpectrumNumber.h
 	inc/MantidIndexing/SpectrumNumberTranslator.h
 )
 
 set ( TEST_FILES
+	ConversionTest.h
 	DetectorIDTest.h
 	ExtractTest.h
 	GlobalSpectrumIndexTest.h
@@ -38,6 +42,7 @@ set ( TEST_FILES
 	PartitionIndexTest.h
 	PartitionerTest.h
 	RoundRobinPartitionerTest.h
+	ScatterTest.h
 	SpectrumIndexSetTest.h
 	SpectrumNumberTest.h
 	SpectrumNumberTranslatorTest.h
@@ -61,12 +66,15 @@ set_target_properties ( Indexing PROPERTIES OUTPUT_NAME MantidIndexing
   COMPILE_DEFINITIONS IN_MANTID_INDEXING )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Indexing PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Indexing PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Indexing PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Indexing PROPERTY FOLDER "MantidFramework" )
 
+target_include_directories ( Indexing PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries ( Indexing LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
   Parallel
   )

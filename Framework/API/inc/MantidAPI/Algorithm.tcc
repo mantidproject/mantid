@@ -1,3 +1,6 @@
+#ifndef MANTID_API_ALGORITHM_TCC_
+#define MANTID_API_ALGORITHM_TCC_
+
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -25,34 +28,40 @@ namespace API {
 @param propertyName Name of property which will be reserved
 @param allowedIndexTypes combination of allowed index types. Default
 IndexType::WorkspaceIndex
-@param optional Determines if workspace property is optional. Default
-PropertyMode::Type::Mandatory
-@param lock Determines whether or not the workspace is locked. Default
-LockMode::Type::Lock
+@param wsPropArgs a parameter pack of arguments forwarded to WorkspaceProperty.
+Can contain PropertyMode, LockMode, and validators.
 @param doc Property documentation string.
 */
-template <typename T, typename>
+template <typename T, const int AllowedIndexTypes, typename... WSPropArgs,
+          typename>
 void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
-                                                const int allowedIndexTypes,
-                                                PropertyMode::Type optional,
-                                                LockMode::Type lock,
-                                                const std::string &doc) {
+                                                const std::string &doc,
+                                                WSPropArgs &&... wsPropArgs) {
   auto wsProp = Kernel::make_unique<WorkspaceProperty<T>>(
-      propertyName, "", Kernel::Direction::Input, optional, lock);
+      propertyName, "", Kernel::Direction::Input,
+      std::forward<WSPropArgs>(wsPropArgs)...);
   const auto &wsPropRef = *wsProp;
   declareProperty(std::move(wsProp), doc);
 
   auto indexTypePropName =
       IndexTypeProperty::generatePropertyName(propertyName);
   auto indexTypeProp = Kernel::make_unique<IndexTypeProperty>(
-      indexTypePropName, allowedIndexTypes);
+      indexTypePropName, AllowedIndexTypes);
   const auto &indexTypePropRef = *indexTypeProp;
 
-  declareProperty(std::move(indexTypeProp));
+  declareProperty(std::move(indexTypeProp),
+                  "The type of indices in the optional index set; For optimal "
+                  "performance WorkspaceIndex should be preferred;");
 
   auto indexPropName = IndexProperty::generatePropertyName(propertyName);
   declareProperty(Kernel::make_unique<IndexProperty>(indexPropName, wsPropRef,
-                                                     indexTypePropRef));
+                                                     indexTypePropRef),
+                  "An optional set of spectra that will be processed by the "
+                  "algorithm; If not set, all spectra will be processed; The "
+                  "indices in this list can be workspace indices or possibly "
+                  "spectrum numbers, depending on the selection made for the "
+                  "index type; Indices are entered as a comma-separated list "
+                  "of values, and/or ranges; For example, '4,6,10-20,1000';");
 
   m_reservedList.push_back(propertyName);
   m_reservedList.push_back(indexTypePropName);
@@ -101,7 +110,7 @@ void Algorithm::setWorkspaceInputProperties(const std::string &name,
 
 /** Mechanism for setting the index property with a workspace shared pointer.
 * This method can only be used if T1 is convertible to a MatrixWorkspace and
-* T2 is either std::string or std::vector<int>
+* T2 is either std::string or std::vector<int64_t>
 
 @param name Property name
 @param wsName Workspace name as string
@@ -147,3 +156,5 @@ Algorithm::getWorkspaceAndIndices(const std::string &name) const {
 }
 } // namespace API
 } // namespace Mantid
+
+#endif /*MANTID_API_ALGORITHM_TCC_*/

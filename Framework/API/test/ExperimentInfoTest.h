@@ -129,7 +129,7 @@ public:
   void test_Setting_A_New_Chopper_With_NULL_Ptr_Throws() {
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
-    TS_ASSERT_THROWS(ws->setChopperModel(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(ws->setChopperModel(nullptr), std::invalid_argument);
   }
 
   void test_Setting_A_New_Chopper_To_Point_Lower_Point_Succeeds() {
@@ -192,9 +192,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    Property *log(nullptr);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(instPar));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void test_GetLog_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name() {
@@ -204,9 +205,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, actualLogName, "some  value");
 
-    Property *log(nullptr);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(actualLogName));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void
@@ -524,9 +526,8 @@ public:
     std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
               std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
 
-    for (auto setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
-         setIt++) {
-      ret = idfFiles.equal_range(*setIt);
+    for (const auto &idfIdentifier : idfIdentifiers) {
+      ret = idfFiles.equal_range(idfIdentifier);
       for (it1 = ret.first; it1 != ret.second; ++it1) {
         for (it2 = ret.first; it2 != ret.second; ++it2) {
           if (it1 != it2) {
@@ -727,10 +728,10 @@ public:
     ExperimentInfo_sptr eiNonConst;
     TS_ASSERT_THROWS_NOTHING(
         eiConst = manager.getValue<ExperimentInfo_const_sptr>(eiName));
-    TS_ASSERT(eiConst != NULL);
+    TS_ASSERT(eiConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiNonConst =
                                  manager.getValue<ExperimentInfo_sptr>(eiName));
-    TS_ASSERT(eiNonConst != NULL);
+    TS_ASSERT(eiNonConst != nullptr);
     TS_ASSERT_EQUALS(eiConst, eiNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -738,9 +739,9 @@ public:
     ExperimentInfo_const_sptr eiCastConst;
     ExperimentInfo_sptr eiCastNonConst;
     TS_ASSERT_THROWS_NOTHING(eiCastConst = (ExperimentInfo_const_sptr)val);
-    TS_ASSERT(eiCastConst != NULL);
+    TS_ASSERT(eiCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
-    TS_ASSERT(eiCastNonConst != NULL);
+    TS_ASSERT(eiCastNonConst != nullptr);
     TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
   }
 

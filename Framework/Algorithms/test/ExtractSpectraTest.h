@@ -7,15 +7,69 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidIndexing/IndexInfo.h"
+
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ExtractSpectra;
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
 using namespace Mantid;
+using namespace API;
+using namespace Kernel;
+using namespace DataObjects;
+using namespace HistogramData;
+
+namespace {
+void run_parallel_DetectorList_fails(const Parallel::Communicator &comm) {
+  Indexing::IndexInfo indexInfo(1000, Parallel::StorageMode::Distributed, comm);
+  auto alg = ParallelTestHelpers::create<ExtractSpectra>(comm);
+  alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
+  alg->setProperty("DetectorList", "1");
+  if (comm.size() == 1) {
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+  } else {
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::runtime_error &e, std::string(e.what()),
+        "MatrixWorkspace: Using getIndicesFromDetectorIDs in "
+        "a parallel run is most likely incorrect. Aborting.");
+  }
+}
+
+void run_parallel_WorkspaceIndexList(const Parallel::Communicator &comm) {
+  Indexing::IndexInfo indexInfo(1000, Parallel::StorageMode::Distributed, comm);
+  auto alg = ParallelTestHelpers::create<ExtractSpectra>(comm);
+  alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
+  alg->setProperty("WorkspaceIndexList", "0-" + std::to_string(comm.size()));
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
+  if (comm.rank() == 0) {
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
+  } else {
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
+  }
+}
+
+void run_parallel_WorkspaceIndexRange(const Parallel::Communicator &comm) {
+  Indexing::IndexInfo indexInfo(3 * comm.size(),
+                                Parallel::StorageMode::Distributed, comm);
+  auto alg = ParallelTestHelpers::create<ExtractSpectra>(comm);
+  alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
+  alg->setProperty("StartWorkspaceIndex", std::to_string(comm.size() + 1));
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
+  if (comm.rank() == 0) {
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
+  } else {
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
+  }
+}
+}
 
 class ExtractSpectraTest : public CxxTest::TestSuite {
 public:
@@ -262,12 +316,7 @@ public:
   void test_invalid_x_range_event() {
     Parameters params("event");
     params.setInvalidXRange();
-    auto ws = runAlgorithm(params, true);
-    // this is a bit unexpected but at least no crash
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
-    TS_ASSERT_EQUALS(ws->blocksize(), 1);
-    TS_ASSERT_EQUALS(ws->x(0)[0], 2);
-    TS_ASSERT_EQUALS(ws->x(0)[1], 1);
+    auto ws = runAlgorithm(params, false);
   }
 
   void test_invalid_index_range_event() {
@@ -383,6 +432,16 @@ public:
     params.setInvalidXRange();
 
     auto ws = runAlgorithm(params, false);
+  }
+
+  void test_parallel_DetectorList_fails() {
+    ParallelTestHelpers::runParallel(run_parallel_DetectorList_fails);
+  }
+  void test_parallel_WorkspaceIndexList() {
+    ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexList);
+  }
+  void test_parallel_WorkspaceIndexRange() {
+    ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexRange);
   }
 
 private:

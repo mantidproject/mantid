@@ -35,12 +35,13 @@ namespace Kernel {
 class MANTID_KERNEL_DLL RebinParamsValidator
     : public TypedValidator<std::vector<double>> {
 public:
-  RebinParamsValidator(bool allowEmpty = false);
+  RebinParamsValidator(bool allowEmpty = false, bool allowRange = false);
   IValidator_sptr clone() const override;
 
 private:
   std::string checkValidity(const std::vector<double> &value) const override;
   bool m_allowEmpty;
+  bool m_allowRange;
 };
 
 } // namespace Kernel

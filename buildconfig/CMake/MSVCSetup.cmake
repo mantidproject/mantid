@@ -13,19 +13,13 @@ add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
-# Workaround Qt compiler detection
-#https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
-#https://bugreports.qt.io/browse/QTBUG-39142
-add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
 
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
 # /MP     - Compile .cpp files in parallel
 # /W3     - Warning Level 3 (This is also the default)
-# /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
-#           work with wstring
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3 /Zc:wchar_t-" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3" )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
@@ -39,6 +33,11 @@ else()
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
 endif()
+
+###########################################################################
+# Qt5 is always in the same place
+###########################################################################
+set ( Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5 )
 
 ###########################################################################
 # On Windows we want to bundle Python.
@@ -88,8 +87,20 @@ set ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 ###########################################################################
 set ( WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows )
 configure_file ( ${WINDOWS_BUILDCONFIG}/buildenv.bat.in ${PROJECT_BINARY_DIR}/buildenv.bat @ONLY )
+
+if ( MSVC_VERSION LESS 1911 )
+    get_filename_component ( MSVC_VAR_LOCATION "$ENV{VS140COMNTOOLS}/../../VC/" ABSOLUTE)
+    get_filename_component ( MSVC_IDE_LOCATION "$ENV{VS140COMNTOOLS}/../IDE" ABSOLUTE)
+else ()
+    get_filename_component ( MSVC_IDE_LOCATION "${CMAKE_CXX_COMPILER}" DIRECTORY )
+    get_filename_component ( MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/../../../../../../.." ABSOLUTE )
+    set ( MSVC_VAR_LOCATION "${MSVC_IDE_LOCATION}/VC/Auxiliary/Build")
+    set ( MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/Common7/IDE")
+endif()
+
 configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
 configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY )
 
 ###########################################################################
 # Configure Mantid startup scripts
@@ -131,6 +142,9 @@ configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
 ###########################################################################
 set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
+# This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
-set ( PVPLUGINS_DIR PVPlugins )
-set ( PVPLUGINS_SUBDIR PVPlugins ) # Need to tidy these things up!
+# Separate directory of plugins to be discovered by the ParaView framework
+# These cannot be mixed with our other plugins. Further sub-directories
+# based on the Qt version will also be created by the installation targets
+set ( PVPLUGINS_SUBDIR paraview ) # Need to tidy these things up!
