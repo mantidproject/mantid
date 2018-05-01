@@ -1230,7 +1230,7 @@ void InstrumentWidget::handleWorkspaceReplacement(
       // the same name)
       auto matrixWS =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
-      if (!matrixWS) {
+      if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
         emit preDeletingHandle();
         close();
         return;
