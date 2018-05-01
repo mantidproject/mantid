@@ -59,9 +59,8 @@ class IqtFitSequentialTest(unittest.TestCase):
         text_axis = matrixWS.getAxis(1)
         self.assertTrue(text_axis.isText())
         self.assertEquals('f0.A0',text_axis.label(0))
-        self.assertEquals('f0.A1', text_axis.label(1))
-        self.assertEquals('f1.Height',text_axis.label(2))
-        self.assertEquals('f1.Lifetime',text_axis.label(3))
+        self.assertEquals('f1.Height',text_axis.label(1))
+        self.assertEquals('f1.Lifetime',text_axis.label(2))
 
         # Check bin units
         self.assertEquals('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
@@ -101,21 +100,20 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertEquals(round(row['f1.Lifetime'], 7), 0.0287491)
 
     def _validate_matrix_values(self, matrixWS):
-        # Check f0.A0
+        # Check f1.A0
         a0 = matrixWS.readY(0)
         self.assertEquals(round(a0[0], 7), 0.0336564)
         self.assertEquals(round(a0[-1],7), 0.0182411)
 
         # Check f1.Height
-        height = matrixWS.readY(2)
+        height = matrixWS.readY(1)
         self.assertEquals(round(height[0], 6), 0.966344)
         self.assertEquals(round(height[-1],6), 0.981759)
 
         # Check f1.Lifetime
-        lifetime = matrixWS.readY(3)
+        lifetime = matrixWS.readY(2)
         self.assertEquals(round(lifetime[0], 7), 0.0287491)
         self.assertEquals(round(lifetime[-1],7), 0.0034427)
-
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)
