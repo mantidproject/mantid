@@ -156,13 +156,13 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
 
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 
@@ -190,10 +190,10 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("3"));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("UniformEven"));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -233,13 +233,13 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 
@@ -267,10 +267,10 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("500"));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("Uniform"));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -316,13 +316,13 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 
@@ -350,10 +350,10 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -393,13 +393,13 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
@@ -426,10 +426,10 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("Slicing=\"0,10,20,30\",LogFilter=proton_charge"));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("LogValue"));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -469,13 +469,13 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(QString()));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -509,10 +509,10 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("0,10"));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -531,13 +531,13 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 
@@ -565,10 +565,10 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("Custom"));
 
@@ -628,7 +628,7 @@ public:
     EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
@@ -705,7 +705,7 @@ public:
     EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
@@ -775,7 +775,7 @@ public:
     EXPECT_CALL(*mockTreeManager_ptr, selectedData(false))
         .Times(1)
         .WillOnce(Return(tree));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
     TS_ASSERT_THROWS_NOTHING(
@@ -820,7 +820,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
     TS_ASSERT_THROWS_NOTHING(

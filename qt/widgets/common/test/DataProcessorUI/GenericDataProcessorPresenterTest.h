@@ -477,20 +477,21 @@ private:
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
                         Cardinality numTimes,
                         std::string postprocessingOptions = "") {
+    constexpr int GROUP = 0;
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP)).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP)).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
           .Times(numTimes);
     } else {
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
           .Times(numTimes)
           .WillRepeatedly(Return(ColumnOptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
           .Times(numTimes)
           .WillRepeatedly(Return(OptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
           .Times(numTimes)
           .WillRepeatedly(
               Return(QString::fromStdString(postprocessingOptions)));

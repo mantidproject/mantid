@@ -241,8 +241,16 @@ Checks whether or not data is currently being processed in the Runs Tab
 * @return : Bool on whether data is being processed
 */
 bool ReflMainWindowPresenter::checkIfProcessing() const {
+  return m_isProcessing || m_runsPresenter->autoreductionRunning();
+}
 
-  return m_isProcessing || m_runsPresenter->autoreductionInProgress();
+/**
+Checks whether or not data is currently being processed in the Runs Tab
+for a specific group
+* @return : Bool on whether data is being processed
+*/
+bool ReflMainWindowPresenter::checkIfProcessing(int group) const {
+  return m_isProcessing || m_runsPresenter->autoreductionRunning(group);
 }
 
 /** Checks for Settings Tab null pointer

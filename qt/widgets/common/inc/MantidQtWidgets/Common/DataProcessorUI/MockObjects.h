@@ -107,7 +107,7 @@ public:
   ~MockMainPresenter() override {}
 
   // Notify
-  MOCK_METHOD1(notifyADSChanged, void(const QSet<QString> &));
+  MOCK_METHOD2(notifyADSChanged, void(const QSet<QString> &, int));
 
   // Prompt methods
   MOCK_METHOD3(askUserString,
@@ -118,18 +118,18 @@ public:
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptions, ColumnOptionsQMap());
-  MOCK_CONST_METHOD0(getProcessingOptions, OptionsQMap());
-  MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
-  MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
+  MOCK_CONST_METHOD1(getPreprocessingOptions, ColumnOptionsQMap(int));
+  MOCK_CONST_METHOD1(getProcessingOptions, OptionsQMap(int));
+  MOCK_CONST_METHOD1(getPostprocessingOptionsAsString, QString(int));
+  MOCK_CONST_METHOD1(getTimeSlicingOptions, QString(int));
 
   // Event handling
-  MOCK_CONST_METHOD0(getTimeSlicingValues, QString());
-  MOCK_CONST_METHOD0(getTimeSlicingType, QString());
+  MOCK_CONST_METHOD1(getTimeSlicingValues, QString(int));
+  MOCK_CONST_METHOD1(getTimeSlicingType, QString(int));
 
   // Data reduction paused/resumed handling
   MOCK_METHOD1(pause, void(int));
-  MOCK_CONST_METHOD0(resume, void());
+  MOCK_CONST_METHOD1(resume, void(int));
 
   // Calls we don't care about
   MOCK_METHOD1(confirmReductionFinished, void(int));

@@ -280,8 +280,8 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
   std::unique_ptr<TimeSlicingInfo> slicing;
   try {
     slicing = Mantid::Kernel::make_unique<TimeSlicingInfo>(
-        m_mainPresenter->getTimeSlicingType(),
-        m_mainPresenter->getTimeSlicingValues());
+        m_mainPresenter->getTimeSlicingType(m_group),
+        m_mainPresenter->getTimeSlicingValues(m_group));
   } catch (const std::runtime_error &ex) {
     m_view->giveUserWarning(ex.what(), "Error");
     return;
@@ -823,7 +823,7 @@ void ReflDataProcessorPresenter::plotRow() {
 
   // If slicing values are empty plot normally
   auto timeSlicingValues =
-      m_mainPresenter->getTimeSlicingValues().toStdString();
+      m_mainPresenter->getTimeSlicingValues(m_group).toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
@@ -871,7 +871,7 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues(m_group);
   if (timeSlicingValues.isEmpty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
@@ -990,7 +990,7 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
 
   // Get the angle for the current row. The angle is the second data item
   if (!hasAngle(data)) {
-    if (m_mainPresenter->hasPerAngleOptions()) {
+    if (m_mainPresenter->hasPerAngleOptions(m_group)) {
       // The user has specified per-angle transmission runs on the settings
       // tab. In theory this is fine, but it could cause confusion when the
       // angle is not available in the data processor table because the
@@ -1011,8 +1011,8 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
   }
 
   // Get the options for this angle
-  auto optionsForAngle =
-      convertOptionsFromQMap(m_mainPresenter->getOptionsForAngle(angle(data)));
+  auto optionsForAngle = convertOptionsFromQMap(
+      m_mainPresenter->getOptionsForAngle(angle(data), m_group));
   // Add the default options (only added if per-angle options don't exist)
   optionsForAngle.insert(options.begin(), options.end());
 
@@ -1032,7 +1032,7 @@ void ReflDataProcessorPresenter::endReduction(
   if (reductionSuccessful && m_view->getEnableNotebook())
     saveNotebook(m_itemsToProcess);
 
-  if (m_mainPresenter->autoreductionInProgress() && !m_pauseReduction) {
+  if (m_mainPresenter->autoreductionRunning(m_group) && !m_pauseReduction) {
     // When autoreduction is running, unless the user has requested to pause,
     // signal reduction has finished but leave the GUI in the "processing"
     // state
@@ -1053,7 +1053,7 @@ void ReflDataProcessorPresenter::threadFinished(const int exitCode) {
   m_workerThread.release();
 
   // We continue regardless of errors if autoreducing
-  if (m_mainPresenter->autoreductionInProgress() || exitCode == 0) {
+  if (m_mainPresenter->autoreductionRunning(m_group) || exitCode == 0) {
     m_progressReporter->report();
     processNextItem();
   } else { // Error and not autoreducing

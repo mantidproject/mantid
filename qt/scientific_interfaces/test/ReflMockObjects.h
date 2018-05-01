@@ -198,8 +198,8 @@ public:
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
-  MOCK_CONST_METHOD0(requireNewAutoreduction, bool());
-  MOCK_CONST_METHOD0(autoreductionInProgress, bool());
+  MOCK_CONST_METHOD0(autoreductionRunning, bool());
+  MOCK_CONST_METHOD1(autoreductionRunning, bool(int));
   MOCK_METHOD1(settingsChanged, void(int));
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
@@ -220,15 +220,8 @@ public:
 
 class MockEventTabPresenter : public IReflEventTabPresenter {
 public:
-  std::string getTimeSlicingValues(int group) const override {
-    UNUSED_ARG(group)
-    return std::string();
-  }
-  std::string getTimeSlicingType(int group) const override {
-    UNUSED_ARG(group)
-    return std::string();
-  }
-
+  std::string getTimeSlicingValues(int) const override { return std::string(); }
+  std::string getTimeSlicingType(int) const override { return std::string(); }
   MOCK_METHOD1(onReductionPaused, void(int));
   MOCK_METHOD1(onReductionResumed, void(int));
 
@@ -328,6 +321,7 @@ public:
     return std::string();
   }
   bool checkIfProcessing() const override { return false; }
+  bool checkIfProcessing(int) const override { return false; }
 
   ~MockMainWindowPresenter() override{};
 };

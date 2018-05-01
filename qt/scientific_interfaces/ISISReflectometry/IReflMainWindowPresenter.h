@@ -85,8 +85,10 @@ public:
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
-  /// Data processing check
+  /// Data processing check for all groups
   virtual bool checkIfProcessing() const = 0;
+  /// Data processing check for a specific group
+  virtual bool checkIfProcessing(int group) const = 0;
 
   virtual void settingsChanged(int group) = 0;
 };

@@ -303,13 +303,13 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
 void GenericDataProcessorPresenter::settingsChanged() {
   try {
     m_preprocessing.m_options = convertColumnOptionsFromQMap(
-        m_mainPresenter->getPreprocessingOptions());
+        m_mainPresenter->getPreprocessingOptions(m_group));
     m_processingOptions =
-        convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
+        convertOptionsFromQMap(m_mainPresenter->getProcessingOptions(m_group));
 
     if (hasPostprocessing())
       m_postprocessing->m_options =
-          m_mainPresenter->getPostprocessingOptionsAsString();
+          m_mainPresenter->getPostprocessingOptionsAsString(m_group);
 
     m_manager->invalidateAllProcessed();
   } catch (std::runtime_error &e) {
@@ -1279,7 +1279,7 @@ void GenericDataProcessorPresenter::addHandle(
     return;
 
   m_workspaceList.insert(QString::fromStdString(name));
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
 /**
@@ -1287,7 +1287,7 @@ Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.remove(QString::fromStdString(name));
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
 /**
@@ -1295,7 +1295,7 @@ Handle ADS clear events
 */
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
 /**
@@ -1311,7 +1311,7 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   if (m_workspaceList.contains(qOldName)) {
     m_workspaceList.remove(qOldName);
     m_workspaceList.insert(qNewName);
-    m_mainPresenter->notifyADSChanged(m_workspaceList);
+    m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
   }
 }
 
@@ -1580,7 +1580,7 @@ void GenericDataProcessorPresenter::pause() {
 void GenericDataProcessorPresenter::resume() {
 
   updateWidgetEnabledState(true);
-  m_mainPresenter->resume();
+  m_mainPresenter->resume(m_group);
 
   m_pauseReduction = false;
   m_reductionPaused = false;
@@ -1631,7 +1631,7 @@ void GenericDataProcessorPresenter::accept(
   // is registered
   settingsChanged();
 
-  m_mainPresenter->notifyADSChanged(m_workspaceList);
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
   // Presenter should initially be in the paused state
   m_mainPresenter->pause(m_group);
 }

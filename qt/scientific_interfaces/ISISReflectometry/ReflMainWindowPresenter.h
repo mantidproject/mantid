@@ -83,6 +83,7 @@ public:
 
   /// Returns whether the Runs Tab is currently processing any runs
   bool checkIfProcessing() const override;
+  bool checkIfProcessing(int group) const override;
   void settingsChanged(int group) override;
   void notify(IReflMainWindowPresenter::Flag flag) override;
   void notifyReductionFinished(int group) override;

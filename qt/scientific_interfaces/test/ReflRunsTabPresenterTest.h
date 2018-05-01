@@ -101,7 +101,8 @@ public:
     // Expect that the view is populated with the list of row commands
     EXPECT_CALL(mockRunsTabView, setRowCommandsProxy()).Times(Exactly(1));
     // The presenter is notified that something changed in the ADS
-    presenter.notifyADSChanged(QSet<QString>());
+    int group = 199;
+    presenter.notifyADSChanged(QSet<QString>(), group);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -125,7 +126,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    presenter.getPreprocessingOptions();
+    presenter.getPreprocessingOptions(group);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -149,7 +150,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getReductionOptions(group))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    presenter.getProcessingOptions();
+    presenter.getProcessingOptions(group);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -171,7 +172,7 @@ public:
         .Times(Exactly(1))
         .WillOnce(Return(group));
     EXPECT_CALL(mockMainPresenter, getStitchOptions(group)).Times(1);
-    presenter.getPostprocessingOptionsAsString();
+    presenter.getPostprocessingOptionsAsString(group);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -321,7 +322,8 @@ public:
     EXPECT_CALL(mockRunsTabView, setInstrumentComboEnabled(false))
         .Times(Exactly(1));
     // Resume presenter
-    presenter.resume();
+    constexpr int GROUP_NUMBER = 0;
+    presenter.resume(GROUP_NUMBER);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
