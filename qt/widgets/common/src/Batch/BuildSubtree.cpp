@@ -19,7 +19,7 @@ auto BuildSubtree::buildRecursively(QStandardItem *parentItem, int index,
                                     SubtreeConstIterator current,
                                     SubtreeConstIterator end)
     -> SubtreeConstIterator {
-  parentItem->insertRow(index, rowFromRowText((*current).cells()));
+  parentItem->insertRow(index, rowFromCells((*current).cells()));
   ++current;
   while (current != end) {
     auto currentRow = (*current).location();
@@ -33,7 +33,7 @@ auto BuildSubtree::buildRecursively(QStandardItem *parentItem, int index,
     } else if (depth > currentDepth) {
       return current;
     } else {
-      parentItem->appendRow(rowFromRowText((*current).cells()));
+      parentItem->appendRow(rowFromCells((*current).cells()));
       ++current;
     }
   }

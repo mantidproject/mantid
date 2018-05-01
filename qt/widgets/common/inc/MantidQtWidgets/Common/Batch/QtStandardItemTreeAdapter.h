@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
+#include "MantidQtWidgets/Common/Batch/Row.h"
 
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
@@ -14,14 +15,26 @@ QModelIndexForMainModel rootModelIndex(QStandardItemModel const &model);
 QModelIndexForFilteredModel rootModelIndex(QSortFilterProxyModel const &model);
 
 EXPORT_OPT_MANTIDQT_COMMON QList<QStandardItem *>
-rowFromRowText(std::vector<std::string> const &rowText);
+rowFromCells(std::vector<Cell> const &cells);
+
 QList<QStandardItem *> emptyRow(int columnCount);
 
-std::vector<std::string>
-rowTextAtRow(QStandardItemModel const &model,
-             QModelIndexForMainModel const &firstCellIndex);
-std::string textFromCell(QStandardItemModel const &model,
-                         QModelIndexForMainModel const &index);
+EXPORT_OPT_MANTIDQT_COMMON std::vector<Cell>
+cellsAtRow(QStandardItemModel const &model,
+           QModelIndexForMainModel const &firstCellIndex);
+
+EXPORT_OPT_MANTIDQT_COMMON void
+setCellsAtRow(QStandardItemModel const &model,
+              QModelIndexForMainModel const &firstCellIndex,
+              std::vector<Cell> const &cells);
+
+EXPORT_OPT_MANTIDQT_COMMON Cell
+cellFromCellIndex(QStandardItemModel const &model,
+                  QModelIndexForMainModel const &index);
+
+void setCellAtCellIndex(QStandardItemModel &model,
+                        QModelIndexForMainModel const &index,
+                        Cell const &newCellProperties);
 
 QModelIndexForMainModel
 appendEmptySiblingRow(QStandardItemModel &model,
@@ -53,9 +66,6 @@ QStandardItem const *modelItemFromIndex(QStandardItemModel const &model,
 
 void removeRowFrom(QStandardItemModel &model,
                    QModelIndexForMainModel const &index);
-void setTextAtCell(QStandardItemModel &model,
-                   QModelIndexForMainModel const &index,
-                   std::string const &newText);
 }
 }
 }

@@ -27,7 +27,6 @@ public:
   virtual ~JobTreeViewSubscriber() = default;
 };
 
-
 class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView {
   Q_OBJECT
 public:
@@ -37,18 +36,18 @@ public:
   void enableFiltering();
 
   void filterRowsBy(std::unique_ptr<RowPredicate> predicate);
-  void filterRowsBy(RowPredicate* predicate);
+  void filterRowsBy(RowPredicate *predicate);
   void resetFilter();
   bool hasFilter() const;
 
   void subscribe(JobTreeViewSubscriber &subscriber);
 
   void insertChildRowOf(RowLocation const &parent, int beforeRow,
-                        std::vector<std::string> const &rowText);
+                        std::vector<Cell> const &rowText);
   void insertChildRowOf(RowLocation const &parent, int beforeRow);
   void appendChildRowOf(RowLocation const &parent);
   void appendChildRowOf(RowLocation const &parentLocation,
-                        std::vector<std::string> const &rowText);
+                        std::vector<Cell> const &rowText);
 
   void removeRowAt(RowLocation const &location);
   void removeRows(std::vector<RowLocation> rowsToRemove);
@@ -69,12 +68,12 @@ public:
   void insertSubtreeAt(RowLocation const &parent, int index,
                        Subtree const &subtree);
 
-  std::vector<std::string> rowTextAt(RowLocation const &location) const;
-  void setRowTextAt(RowLocation const &location,
-                    std::vector<std::string> const &rowText);
+  std::vector<Cell> cellsAt(RowLocation const &location) const;
+  void setCellsAt(RowLocation const &location,
+                  std::vector<Cell> const &rowText);
 
-  std::string textAt(RowLocation location, int column) const;
-  void setTextAt(RowLocation location, int column, std::string const &cellText);
+  Cell cellAt(RowLocation location, int column) const;
+  void setCellAt(RowLocation location, int column, Cell const &cellText);
 
   QModelIndex moveCursor(CursorAction cursorAction,
                          Qt::KeyboardModifiers modifiers) override;
@@ -82,10 +81,10 @@ public:
   boost::optional<std::vector<Subtree>> selectedSubtrees() const;
   boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
 
-  void enableEditing(RowLocation const& row);
-  void enableEditing(RowLocation const& row, int cell);
-  void disableEditing(RowLocation const& row);
-  void disableEditing(RowLocation const& row, int cell);
+  void enableEditing(RowLocation const &row);
+  void enableEditing(RowLocation const &row, int cell);
+  void disableEditing(RowLocation const &row);
+  void disableEditing(RowLocation const &row, int cell);
 
   using QTreeView::edit;
 
@@ -106,25 +105,31 @@ private:
   void appendAndEditAtRowBelow();
   bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
 
-  QModelIndexForMainModel mapToMainModel(QModelIndexForFilteredModel const& filteredModelIndex) const;
-  QModelIndexForFilteredModel mapToFilteredModel(QModelIndexForMainModel const& mainModelIndex) const;
+  QModelIndexForMainModel
+  mapToMainModel(QModelIndexForFilteredModel const &filteredModelIndex) const;
+  QModelIndexForFilteredModel
+  mapToFilteredModel(QModelIndexForMainModel const &mainModelIndex) const;
 
-  QModelIndexForMainModel fromMainModel(QModelIndex const& mainModelIndex) const;
-  QModelIndexForFilteredModel fromFilteredModel(QModelIndex const& filteredModelIndex) const;
+  QModelIndexForMainModel
+  fromMainModel(QModelIndex const &mainModelIndex) const;
+  QModelIndexForFilteredModel
+  fromFilteredModel(QModelIndex const &filteredModelIndex) const;
 
   bool isOnlyChild(QModelIndexForMainModel const &index) const;
   bool isOnlyChildOfRoot(QModelIndexForMainModel const &index) const;
   QModelIndex siblingIfExistsElseParent(QModelIndex const &index) const;
   bool rowRemovalWouldBeIneffective(QModelIndex const &indexToRemove) const;
 
-  QModelIndexForFilteredModel expanded(QModelIndexForFilteredModel const &index);
+  QModelIndexForFilteredModel
+  expanded(QModelIndexForFilteredModel const &index);
   void editAt(QModelIndexForFilteredModel const &index);
 
   QModelIndex applyNavigationResult(QtTreeCursorNavigationResult const &result);
-  std::pair<QModelIndexForFilteredModel, bool> findOrMakeCellBelow(QModelIndexForFilteredModel const &index);
+  std::pair<QModelIndexForFilteredModel, bool>
+  findOrMakeCellBelow(QModelIndexForFilteredModel const &index);
 
-  //QList<QStandardItem *>
-  //rowFromRowText(std::vector<std::string> const &rowText) const;
+  // QList<QStandardItem *>
+  // rowFromRowText(std::vector<std::string> const &rowText) const;
   std::vector<std::string> rowTextFromRow(QModelIndex firstCellIndex) const;
 
   QModelIndexForMainModel modelIndexAt(RowLocation const &location,
@@ -143,7 +148,7 @@ private:
   QStandardItemModel m_mainModel;
   int m_columnCount;
 
-  QtFilterLeafNodes* m_filteredModel;
+  QtFilterLeafNodes *m_filteredModel;
   QModelIndexForMainModel m_lastEdited;
   bool m_hasEditorOpen;
 };

@@ -109,22 +109,43 @@ QList<QStandardItem *> rowFromRowText(std::vector<std::string> const &rowText) {
   return rowCells;
 }
 
-std::vector<std::string>
-rowTextAtRow(QStandardItemModel const &model,
+std::vector<Cell>
+cellsAtRow(QStandardItemModel const &model,
              QModelIndexForMainModel const &firstCellIndex) {
-  auto rowText = std::vector<std::string>();
-  rowText.reserve(model.columnCount());
+  auto cells = std::vector<Cell>();
+  cells.reserve(model.columnCount());
 
   for (auto i = 0; i < model.columnCount(); i++) {
     auto cellIndex = firstCellIndex.sibling(firstCellIndex.row(), i);
-    rowText.emplace_back(textFromCell(model, cellIndex));
+    cells.emplace_back(cellFromCellIndex(model, cellIndex));
   }
-  return rowText;
+  return cells;
 }
 
-std::string textFromCell(QStandardItemModel const &model,
+void setBorderThickness(QStandardItem& item, int borderThickness) {
+  item.setData(borderThickness, Qt::UserRole + 2);
+}
+
+int getBorderThickness(QStandardItem const& item) {
+  return item.data(Qt::UserRole + 2).toInt();
+}
+
+void setBorderColor(QStandardItem& item, int borderThickness) {
+  item.setData(borderThickness, Qt::UserRole + 1);
+}
+
+QColor getBorderColor(QStandardItem const& item) {
+  return item.data(Qt::UserRole + 1).value<QColor>();
+}
+
+Cell cellFromCellIndex(QStandardItemModel const &model,
                          QModelIndexForMainModel const &index) {
-  return modelItemFromIndex(model, index)->text().toStdString();
+  auto* cellItem = modelItemFromIndex(model, index);
+  auto cell = Cell(cellItem->text().toStdString());
+  cell.setBorderThickness(getBorderThickness(*cellItem));
+  cell.setBorderColor(getBorderColor(*cellItem).name().toStdString());
+  cell.setEditable(cell.isEditable());
+  return cell;
 }
 }
 }

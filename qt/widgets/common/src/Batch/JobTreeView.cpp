@@ -71,7 +71,7 @@ boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
   std::transform(rows.cbegin(), rows.cend(),
                  std::back_inserter(selectedRowData),
                  [&](RowLocation const &location)
-                     -> std::vector<Cell> { return rowTextAt(location); });
+                     -> std::vector<Cell> { return cellsAt(location); });
 
   auto extractSubtrees = ExtractSubtrees();
   return extractSubtrees(rows, selectedRowData);
@@ -115,24 +115,23 @@ void JobTreeView::removeRows(std::vector<RowLocation> rowsToRemove) {
     removeRowAt(*rowIt);
 }
 
-std::string JobTreeView::textAt(RowLocation location, int column) const {
-  QModelIndexForMainModel const cellIndex =
-      rowLocation().indexAt(location, column);
-  return textFromCell(m_mainModel, cellIndex);
-}
-
-void JobTreeView::setTextAt(RowLocation location, int column,
-                            std::string const &cellText) {
+Cell JobTreeView::cellAt(RowLocation location, int column) const {
   auto const cellIndex = rowLocation().indexAt(location, column);
-  setTextAtCell(m_mainModel, cellIndex, cellText);
+  return cellFromCellIndex(m_mainModel, cellIndex);
 }
 
-void JobTreeView::setRowTextAt(RowLocation const &,
-                               std::vector<std::string> const &) {}
+void JobTreeView::setCellAt(RowLocation location, int column,
+                            Cell const &cell) {
+  auto const cellIndex = rowLocation().indexAt(location, column);
+  setCellAtCellIndex(m_mainModel, cellIndex, cell);
+}
 
-std::vector<std::string>
-JobTreeView::rowTextAt(RowLocation const &location) const {
-  return rowTextAtRow(m_mainModel, rowLocation().indexAt(location));
+std::vector<Cell> JobTreeView::cellsAt(RowLocation const &location) const {
+  return cellsAtRow(m_mainModel, rowLocation().indexAt(location));
+}
+
+void JobTreeView::setCellsAt(RowLocation const &location, std::vector<Cell> const &cells) {
+  return setCellsAtRow(m_mainModel, rowLocation().indexAt(location), cells);
 }
 
 void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
@@ -248,9 +247,9 @@ void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow) {
 }
 
 void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
-                                   std::vector<std::string> const &rowText) {
+                                   std::vector<Cell> const &cells) {
   insertChildRow(m_mainModel, rowLocation().indexAt(parent), beforeRow,
-                 rowFromRowText(rowText));
+                 rowFromCells(cells));
 }
 
 void JobTreeView::enableEditing(RowLocation const &row) {
@@ -262,38 +261,39 @@ void JobTreeView::enableEditing(RowLocation const &row) {
       item->setEditable(true);
     } while (hasCellOnTheRight(cellIndex));
   } else {
-    //auto cellIndex = rowLocation().indexAt(row);
-    //auto *item = modelItemFromIndex(firstCellIndex);
-    //item->setEditable(true);
+    // auto cellIndex = rowLocation().indexAt(row);
+    // auto *item = modelItemFromIndex(firstCellIndex);
+    // item->setEditable(true);
   }
 }
 
 void JobTreeView::enableEditing(RowLocation const &row, int cell) {}
 
 void JobTreeView::disableEditing(RowLocation const &row) {
-  auto cellIndex = rowLocation().indexAt(row).untyped();
   if (!row.isRoot()) {
-    do {
-      cellIndex = rightOf(cellIndex);
+    for (auto cellIndex = rowLocation().indexAt(row).untyped();
+         hasCellOnTheRight(cellIndex); cellIndex = rightOf(cellIndex)) {
       auto *item = modelItemFromIndex(m_mainModel, fromMainModel(cellIndex));
       item->setEditable(false);
-    } while (hasCellOnTheRight(cellIndex));
+    }
   } else {
-  //  auto *item = modelItemFromIndex(firstCellIndex);
-   // item->setEditable(false);
+    auto *item = modelItemFromIndex(m_mainModel, rootModelIndex(m_mainModel));
+    item->setEditable(false);
   }
 }
 
-void JobTreeView::disableEditing(RowLocation const &row, int cell) {}
+void JobTreeView::disableEditing(RowLocation const &row, int cell) {
+  auto cellIndex = rowLocation().indexAt(row, cell).untyped();
+}
 
 void JobTreeView::appendChildRowOf(RowLocation const &parent) {
   appendEmptyChildRow(m_mainModel, rowLocation().indexAt(parent));
 }
 
 void JobTreeView::appendChildRowOf(RowLocation const &parent,
-                                   std::vector<std::string> const &rowText) {
+                                   std::vector<Cell> const &cells) {
   auto parentIndex = rowLocation().indexAt(parent);
-  appendChildRow(m_mainModel, parentIndex, rowFromRowText(rowText));
+  appendChildRow(m_mainModel, parentIndex, rowFromCells(cells));
 }
 
 void JobTreeView::editAt(QModelIndexForFilteredModel const &index) {
