@@ -100,7 +100,7 @@ std::map<std::string, std::string> IqtFit<Base>::validateInputs() {
   return errors;
 }
 
-bool IqtFit<Base>::::isFitParameter(const std::string &name) const {
+bool IqtFit<Base>::isFitParameter(const std::string &name) const {
   return name.rfind("A0") != std::string::npos ||
          name.rfind("Height") != std::string::npos ||
          name.rfind("Stretching") != std::string::npos ||
