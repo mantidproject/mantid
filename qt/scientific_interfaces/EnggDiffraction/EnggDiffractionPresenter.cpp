@@ -1568,10 +1568,6 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
 
   // focus all requested banks
   for (size_t idx = 0; idx < bankIDs.size(); idx++) {
-
-    Poco::Path fpath(dir);
-    const std::string fullFilename =
-        fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
                           ") for run " + runNo +
