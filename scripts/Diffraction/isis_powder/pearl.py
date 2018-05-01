@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+from contextlib import contextmanager
+
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import common, instrument_settings
@@ -25,54 +27,52 @@ class Pearl(AbstractInst):
         self._cached_run_details = {}
 
     def focus(self, **kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
-        focused_run = self._focus(run_number_string=self._inst_settings.run_number,
-                                  do_absorb_corrections=self._inst_settings.absorb_corrections,
-                                  do_van_normalisation=self._inst_settings.van_norm)
-        self._inst_settings = copy.deepcopy(self._default_inst_settings)
-        return focused_run
+        with self._apply_temporary_inst_settings(kwargs):
+            return self._focus(run_number_string=self._inst_settings.run_number,
+                               do_absorb_corrections=self._inst_settings.absorb_corrections,
+                               do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
-        self._inst_settings.update_attributes(kwargs=kwargs)
 
-        if str(self._inst_settings.tt_mode).lower() == "all":
-            for new_tt_mode in ["tt35", "tt70", "tt88"]:
-                self._inst_settings.tt_mode = new_tt_mode
+        with self._apply_temporary_inst_settings(kwargs):
+            if str(self._inst_settings.tt_mode).lower() == "all":
+                for new_tt_mode in ["tt35", "tt70", "tt88"]:
+                    self._inst_settings.tt_mode = new_tt_mode
+                    self._run_create_vanadium()
+            else:
                 self._run_create_vanadium()
-        else:
-            self._run_create_vanadium()
-
-        self._inst_settings = copy.deepcopy(self._default_inst_settings)
 
     def create_cal(self, **kwargs):
+        with self._apply_temporary_inst_settings(kwargs):
+            run_details = self._get_run_details(self._inst_settings.run_number)
+
+            cross_correlate_params = {"ReferenceSpectra": self._inst_settings.reference_spectra,
+                                      "WorkspaceIndexMin": self._inst_settings.cross_corr_ws_min,
+                                      "WorkspaceIndexMax": self._inst_settings.cross_corr_ws_max,
+                                      "XMin": self._inst_settings.cross_corr_x_min,
+                                      "XMax": self._inst_settings.cross_corr_x_max}
+            get_detector_offsets_params = {"DReference": self._inst_settings.d_reference,
+                                           "Step": self._inst_settings.get_det_offsets_step,
+                                           "XMin": self._inst_settings.get_det_offsets_x_min,
+                                           "XMax": self._inst_settings.get_det_offsets_x_max}
+
+            return pearl_calibration_algs.create_calibration(calibration_runs=self._inst_settings.run_number,
+                                                             instrument=self,
+                                                             offset_file_name=run_details.offset_file_path,
+                                                             grouping_file_name=run_details.grouping_file_path,
+                                                             calibration_dir=self._inst_settings.calibration_dir,
+                                                             rebin_1_params=self._inst_settings.cal_rebin_1,
+                                                             rebin_2_params=self._inst_settings.cal_rebin_2,
+                                                             cross_correlate_params=cross_correlate_params,
+                                                             get_det_offset_params=get_detector_offsets_params)
+
+    @contextmanager
+    def _apply_temporary_inst_settings(self, kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        run_details = self._get_run_details(self._inst_settings.run_number)
-
-        cross_correlate_params = {"ReferenceSpectra": self._inst_settings.reference_spectra,
-                                  "WorkspaceIndexMin": self._inst_settings.cross_corr_ws_min,
-                                  "WorkspaceIndexMax": self._inst_settings.cross_corr_ws_max,
-                                  "XMin": self._inst_settings.cross_corr_x_min,
-                                  "XMax": self._inst_settings.cross_corr_x_max}
-        get_detector_offsets_params = {"DReference": self._inst_settings.d_reference,
-                                       "Step": self._inst_settings.get_det_offsets_step,
-                                       "XMin": self._inst_settings.get_det_offsets_x_min,
-                                       "XMax": self._inst_settings.get_det_offsets_x_max}
-
-        calibration = pearl_calibration_algs.create_calibration(calibration_runs=self._inst_settings.run_number,
-                                                                instrument=self,
-                                                                offset_file_name=run_details.offset_file_path,
-                                                                grouping_file_name=run_details.grouping_file_path,
-                                                                calibration_dir=self._inst_settings.calibration_dir,
-                                                                rebin_1_params=self._inst_settings.cal_rebin_1,
-                                                                rebin_2_params=self._inst_settings.cal_rebin_2,
-                                                                cross_correlate_params=cross_correlate_params,
-                                                                get_det_offset_params=get_detector_offsets_params)
+        yield
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
-        return calibration
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
