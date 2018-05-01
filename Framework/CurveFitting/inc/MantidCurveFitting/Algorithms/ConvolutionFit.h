@@ -41,8 +41,8 @@ public:
   const std::vector<std::string> seeAlso() const override;
 
 protected:
-  virtual API::ITableWorkspace_sptr
-  processParameterTable(API::ITableWorkspace_sptr parameterTable) const override;
+  virtual API::ITableWorkspace_sptr processParameterTable(
+      API::ITableWorkspace_sptr parameterTable) const override;
   std::map<std::string, std::string> getAdditionalLogStrings() const override;
   std::map<std::string, std::string> getAdditionalLogNumbers() const override;
 
