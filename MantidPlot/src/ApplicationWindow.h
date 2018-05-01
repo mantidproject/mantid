@@ -1610,6 +1610,7 @@ private:
 
   friend class MantidUI;
   friend class ConfigDialog;
+  friend class Graph;
   QString m_nexusInputWSName;
 
   // Store initialized script environments

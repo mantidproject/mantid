@@ -3963,6 +3963,7 @@ void Graph::showAxisTitleMenu() {
 }
 
 void Graph::showAxisContextMenu(int axis) {
+  this->multiLayer()->applicationWindow()->setActiveWindow(this->multiLayer());
   QMenu menu(this);
 
   menu.addAction(getQPixmap("unzoom_xpm"), tr("&Rescale to show all"), this,
