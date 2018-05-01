@@ -50,13 +50,14 @@ public:
 
   void addElement(const QString &colName, const QString &algProperty,
                   const QString &description, bool showValue = false,
-                  const QString &prefix = "");
+                  const QString &prefix = "", bool isKey = false);
   int indexFromName(const QString &colName) const;
   QString name(int index) const;
   QString algorithmProperty(int index) const;
   QString description(int index) const;
   QString prefix(int index) const;
   bool isShown(int index) const;
+  bool isKey(int index) const;
   std::size_t size() const;
   const_iterator cbegin() const;
   const_iterator begin() const;
@@ -70,6 +71,7 @@ private:
   std::vector<bool> m_isShown;
   std::vector<QString> m_prefixes;
   std::vector<QString> m_descriptions;
+  std::vector<bool> m_isKey;
 };
 }
 }

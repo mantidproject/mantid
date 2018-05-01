@@ -877,44 +877,53 @@ bool QTwoLevelTreeModel::rowIsEmpty(int row, int parent) const {
  * @param rowValues : the cell values to check against
  * @return : true if the cell matches the given value
  */
-bool QTwoLevelTreeModel::rowMatches(
-    int groupIndex, int rowIndex,
-    const std::map<QString, QString> &rowValues) const {
+bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
+                                    const std::map<QString, QString> &rowValues,
+                                    const bool exactMatch) const {
 
-  // Just check whether the first cell in the row matches (this is an
-  // assumption that this contains the uniquely-identifying info for the row
-  // i.e. the run number)
   int columnIndex = 0;
-  auto const &columnName = m_whitelist.name(columnIndex);
-  // Only check non-blank values in the given row values
-  if (rowValues.count(columnName)) {
-    const auto newValue = rowValues.at(columnName);
-    const auto oldValue =
-        data(index(rowIndex, columnIndex, index(groupIndex, columnIndex)));
+  for (auto &column : m_whitelist) {
+    auto const &columnName = column.name();
 
-    if (newValue != oldValue)
-      return false;
+    // Only check non-blank values in the given row values
+    if (rowValues.count(columnName)) {
+      const auto newValue = rowValues.at(columnName);
+      const auto oldValue =
+          data(index(rowIndex, columnIndex, index(groupIndex, columnIndex)));
+
+      // If looking for an exact match check all columns; otherwise only check
+      // key
+      // columns
+      if ((exactMatch || column.isKey()) && newValue != oldValue) {
+        return false;
+      }
+    }
+
+    ++columnIndex;
   }
 
   return true;
 }
 
-/** Check whether a row with given values already exists in the model
- * @param rowValues : the values to check
+/** Find the index of a row in a group based on row data values.
+ * @param rowValues : the row values to look for
+ * @return : an optional value that is set with the row's index if
+ * it was found or is unset if it is not
   */
-bool QTwoLevelTreeModel::rowExists(
-    const std::map<QString, QString> &rowValues) const {
+boost::optional<int> QTwoLevelTreeModel::findRowIndex(
+    int groupIndex, const std::map<QString, QString> &rowValues) const {
+  boost::optional<int> result;
   // Loop through all existing rows
-  for (int groupIndex = 0; groupIndex < rowCount(); ++groupIndex) {
-    for (int rowIndex = 0; rowIndex < rowCount(index(groupIndex, 0));
-         ++rowIndex) {
-      // Return true if we find any match
-      if (rowMatches(groupIndex, rowIndex, rowValues))
-        return true;
+  for (int rowIndex = 0; rowIndex < rowCount(index(groupIndex, 0));
+       ++rowIndex) {
+    // Return true if we find any match
+    if (rowMatches(groupIndex, rowIndex, rowValues, false)) {
+      result = rowIndex;
+      return result;
     }
   }
 
-  return false;
+  return result;
 }
 
 /**
@@ -927,9 +936,19 @@ location
 void QTwoLevelTreeModel::insertRowWithValues(
     int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues) {
 
-  // Don't add duplicates
-  if (rowExists(rowValues))
-    return;
+  // Handle existing rows
+  auto existingRowIndex = findRowIndex(groupIndex, rowValues);
+  if (existingRowIndex) {
+    rowIndex = existingRowIndex.get();
+
+    // If it is identical to the new values then there is nothing to do
+    if (rowMatches(groupIndex, rowIndex, rowValues, true))
+      return;
+
+    // Otherwise, we want to reset the row to the new values. Just delete the
+    // existing row and then continue below to add the new row.
+    removeRows(rowIndex, 1, groupIndex);
+  }
 
   insertRow(rowIndex, index(groupIndex, 0));
 

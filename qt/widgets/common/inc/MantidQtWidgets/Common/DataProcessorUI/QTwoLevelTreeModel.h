@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -115,8 +116,10 @@ private:
   void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
   bool rowMatches(int groupIndex, int rowIndex,
-                  const std::map<QString, QString> &rowValues) const;
-  bool rowExists(const std::map<QString, QString> &rowValues) const;
+                  const std::map<QString, QString> &rowValues,
+                  const bool exactMatch) const;
+  boost::optional<int>
+  findRowIndex(int group, const std::map<QString, QString> &rowValues) const;
   void insertRowWithValues(int groupIndex, int rowIndex,
                            const std::map<QString, QString> &rowValues);
   bool rowIsEmpty(int row, int parent) const;
