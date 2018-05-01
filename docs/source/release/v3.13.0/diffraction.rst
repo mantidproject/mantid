@@ -26,6 +26,7 @@ Engineering Diffraction
     loaded into the tab
 
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
+- The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
 
 
 :ref:`Release 3.13.0 <v3.13.0>`
