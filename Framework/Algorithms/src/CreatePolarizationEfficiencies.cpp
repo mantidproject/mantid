@@ -166,6 +166,7 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS, labels.size(), sharedInX->size(), inWS->blocksize());
   auto axis1 = new TextAxis(labels.size());
   outWS->replaceAxis(1, axis1);
+  outWS->getAxis(0)->setUnit(inWS->getAxis(0)->unit()->unitID());
 
   auto const x = inWS->points(0);
   std::vector<double> y(x.size());

@@ -12,6 +12,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <array>
@@ -57,6 +58,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(outWS->blocksize(), 5);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "P1");
@@ -103,6 +105,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(outWS->blocksize(), 5);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "P1");
@@ -131,6 +134,20 @@ public:
       TS_ASSERT_DELTA(y.front(), 1., 1e-15);
       TS_ASSERT_DELTA(y.back(), 1., 1e-15);
     }
+  }
+
+  void test_diff_methods() {
+    ScopedFile f1(m_data1, "Efficiency1.dat");
+    ScopedFile f2(m_data1, "Efficiency2.dat");
+
+    LoadISISPolarizationEfficiencies alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("P1", f1.getFileName());
+    alg.setProperty("Pp", f2.getFileName());
+    alg.setProperty("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
 
 private:

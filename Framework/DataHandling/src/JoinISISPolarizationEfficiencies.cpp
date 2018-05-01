@@ -202,6 +202,7 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS, labels.size(), inWS->x(0).size(), inWS->blocksize());
   auto axis1 = new TextAxis(labels.size());
   outWS->replaceAxis(1, axis1);
+  outWS->getAxis(0)->setUnit("Wavelength");
 
   for (size_t i = 0; i < interpolatedWorkspaces.size(); ++i) {
     auto &ws = interpolatedWorkspaces[i];

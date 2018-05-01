@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -77,6 +78,8 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
 
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
+
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "Pp");
     TS_ASSERT_EQUALS(axis1->label(1), "Ap");
@@ -136,6 +139,7 @@ public:
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "Pp");
@@ -175,6 +179,7 @@ public:
     alg.setPropertyValue("Alpha", "0,0,0,1");
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
@@ -244,6 +249,7 @@ public:
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "P1");
@@ -296,6 +302,7 @@ private:
     Counts yVals(size, 0);
     auto retVal = boost::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
+    retVal->getAxis(0)->setUnit("Wavelength");
     return retVal;
   }
 
@@ -305,6 +312,7 @@ private:
     Counts yVals(size, 0);
     auto retVal = boost::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
+    retVal->getAxis(0)->setUnit("Wavelength");
     return retVal;
   }
 };

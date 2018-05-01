@@ -12,6 +12,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Unit.h"
 
 #include <array>
 #include <numeric>
@@ -88,6 +89,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "Pp");
@@ -162,6 +164,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "P1");
@@ -192,6 +195,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "P1");
@@ -272,6 +276,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 3);
     TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "P1");
@@ -295,6 +300,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "P1");
@@ -315,6 +321,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "F2");
@@ -359,6 +366,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outWS->blocksize(), 10);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "Pp");
@@ -433,6 +441,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outWS->blocksize(), 11);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "Pp");
@@ -507,6 +516,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outWS->blocksize(), 11);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
 
     auto axis1 = outWS->getAxis(1);
     TS_ASSERT_EQUALS(axis1->label(0), "Pp");
