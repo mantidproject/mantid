@@ -178,9 +178,15 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 		tab->addColumn("double", "Error");
 		for (int j = 0; j < 4; j++) {
 			API::TableRow row = tab->appendRow();
-			row << "dummy" << 999. << 0.0;
+			if (j == 2) {
+			    row << "dummy" << 0.0 << 0.0;
+			}
+			else {
+				row << "dummy" << 999. << 0.0;
+			}
 		}
-		extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
+
+			extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
 
 	}else{
 		auto fit = createChildAlgorithm("Fit");
