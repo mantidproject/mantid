@@ -164,8 +164,8 @@ private:
   /// Precision of doubles in m_doubleManager
   int m_decimals;
 
-  typedef void (FitOptionsBrowser::*SetterType)(QtProperty *, const QString &);
-  typedef QString (FitOptionsBrowser::*GetterType)(QtProperty *) const;
+  using SetterType = void (FitOptionsBrowser::*)(QtProperty *, const QString &);
+  using GetterType = QString (FitOptionsBrowser::*)(QtProperty *) const;
   /// Maps algorithm property name to the QtProperty
   QMap<QString, QtProperty *> m_propertyNameMap;
   /// Store for the properties setter methods

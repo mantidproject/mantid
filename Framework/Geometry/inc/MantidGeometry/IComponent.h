@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_ICOMPONENT_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/V3D.h"
 
 #include <map>
@@ -21,11 +22,10 @@ class Quat;
 
 namespace Geometry {
 class IComponent;
-class BoundingBox;
 class ParameterMap;
 
 /// Define a type for a unique component identifier.
-typedef IComponent *ComponentID;
+using ComponentID = IComponent *;
 
 /** @class IComponent
 @brief base class for Geometric IComponent
@@ -186,14 +186,9 @@ public:
 };
 
 /// Typedef of a shared pointer to a IComponent
-typedef boost::shared_ptr<IComponent> IComponent_sptr;
+using IComponent_sptr = boost::shared_ptr<IComponent>;
 /// Typdef of a shared pointer to a const IComponent
-typedef boost::shared_ptr<const IComponent> IComponent_const_sptr;
-
-/** Prints a text representation
-*/
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const IComponent &);
+using IComponent_const_sptr = boost::shared_ptr<const IComponent>;
 
 } // Namespace Geometry
 

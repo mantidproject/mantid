@@ -25,12 +25,14 @@ add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 # Add the target for this directory
 add_library ( Nexus ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Nexus PROPERTIES OUTPUT_NAME MantidNexus 
+set_target_properties ( Nexus PROPERTIES OUTPUT_NAME MantidNexus
                                          COMPILE_DEFINITIONS IN_MANTID_NEXUS )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Nexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS" )
-endif () 
+  set_target_properties(Nexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS" )
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Nexus PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Nexus PROPERTY FOLDER "MantidFramework" )

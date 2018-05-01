@@ -4,16 +4,18 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
 #include <boost/regex.hpp>
+#include <boost/make_shared.hpp>
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace {
@@ -45,7 +47,7 @@ RectangularDetector::RectangularDetector()
       m_minDetId(0), m_maxDetId(0) {
 
   init();
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Constructor for a parametrized RectangularDetector
@@ -57,7 +59,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
     : CompAssembly(base, map), IObjComponent(nullptr), m_rectBase(base),
       m_minDetId(0), m_maxDetId(0) {
   init();
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Valued constructor
@@ -75,7 +77,7 @@ RectangularDetector::RectangularDetector(const std::string &n,
       m_minDetId(0), m_maxDetId(0) {
   init();
   this->setName(n);
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 bool RectangularDetector::compareName(const std::string &proposedMatch) {
@@ -367,7 +369,7 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const {
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
-void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
+void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
                                      int xpixels, double xstart, double xstep,
                                      int ypixels, double ystart, double ystep,
                                      int idstart, bool idfillbyfirst_y,
@@ -673,7 +675,7 @@ void RectangularDetector::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
@@ -696,12 +698,12 @@ void RectangularDetector::initDraw() const {
     return;
   // Render the ObjComponent and then render the object
   // if(shape!=NULL)    shape->initDraw();
-  Handle()->Initialize();
+  Handle()->initialize();
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> RectangularDetector::shape() const {
+const boost::shared_ptr<const IObject> RectangularDetector::shape() const {
   // --- Create a cuboid shape for your pixels ----
   double szX = m_xpixels;
   double szY = m_ypixels;
@@ -720,7 +722,7 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const {
 
   std::string xmlCuboidShape(xmlShapeStream.str());
   Geometry::ShapeFactory shapeCreator;
-  boost::shared_ptr<Geometry::Object> cuboidShape =
+  boost::shared_ptr<Geometry::IObject> cuboidShape =
       shapeCreator.createShape(xmlCuboidShape);
 
   return cuboidShape;
@@ -732,7 +734,7 @@ const Kernel::Material RectangularDetector::material() const {
 
 size_t RectangularDetector::registerContents(
     ComponentVisitor &componentVisitor) const {
-  return componentVisitor.registerStructuredBank(*this);
+  return componentVisitor.registerRectangularBank(*this);
 }
 
 //-------------------------------------------------------------------------------------------------

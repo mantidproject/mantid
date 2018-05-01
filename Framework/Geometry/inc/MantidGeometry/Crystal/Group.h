@@ -195,8 +195,8 @@ protected:
   CoordinateSystem m_axisSystem;
 };
 
-typedef boost::shared_ptr<Group> Group_sptr;
-typedef boost::shared_ptr<const Group> Group_const_sptr;
+using Group_sptr = boost::shared_ptr<Group>;
+using Group_const_sptr = boost::shared_ptr<const Group>;
 
 namespace GroupFactory {
 /// Creates a Group sub-class of type T if T has a constructor that takes a

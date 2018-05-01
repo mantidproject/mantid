@@ -138,8 +138,10 @@ std::shared_ptr<PeakPrimitives> PeakRepresentationSphere::getDrawingInformation(
   drawingInformation->peakInnerRadiusX = scaleX * m_peakRadiusAtDistance.get();
   drawingInformation->peakInnerRadiusY = scaleY * m_peakRadiusAtDistance.get();
 
-  // If the outer radius is selected, then add the outer radius
-  if (this->m_showBackgroundRadius) {
+  // If the outer radius is selected, and we actually have an integrated
+  // background radius, then add the outer radius
+  if (this->m_showBackgroundRadius && m_backgroundInnerRadiusAtDistance &&
+      m_backgroundOuterRadiusAtDistance) {
     drawingInformation->backgroundOuterRadiusX =
         scaleX * m_backgroundOuterRadiusAtDistance.get();
     drawingInformation->backgroundOuterRadiusY =

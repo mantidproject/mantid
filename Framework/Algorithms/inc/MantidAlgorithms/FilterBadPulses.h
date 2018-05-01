@@ -1,11 +1,8 @@
 #ifndef MANTID_ALGORITHMS_FILTERBADPULSES_H_
 #define MANTID_ALGORITHMS_FILTERBADPULSES_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -49,7 +46,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FilterBadPulses : public API::Algorithm {
+class DLLExport FilterBadPulses : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -59,6 +56,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"FilterByTime", "FilterByLogValue"};
+  }
 
   const std::string category() const override;
 

@@ -23,6 +23,10 @@ class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
         self.setCentralWidget(view)
         self.setWindowTitle("Frequency Domain Analysis")
 
+    # cancel algs if window is closed
+    def closeEvent(self,event):
+        self.presenter.close()
+
 
 def qapp():
     if QtGui.QApplication.instance():
@@ -33,7 +37,11 @@ def qapp():
 
 
 app = qapp()
-ex= FrequencyDomainAnalysisGui()
-ex.resize(700,700)
-ex.show()
-app.exec_()
+try:
+    ex= FrequencyDomainAnalysisGui()
+    ex.resize(700,700)
+    ex.show()
+    app.exec_()
+except RuntimeError as error:
+    ex = QtGui.QWidget()
+    QtGui.QMessageBox.warning(ex,"Frequency Domain Analysis",str(error))

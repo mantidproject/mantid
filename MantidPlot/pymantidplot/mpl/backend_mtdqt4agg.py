@@ -19,6 +19,7 @@ except ImportError:
     from matplotlib.backends.qt4_compat import QtGui as QtWidgets
 # Import everything from the *real* matplotlib backend
 from matplotlib.backends.backend_qt4agg import *
+from matplotlib.figure import Figure
 import six
 
 # Remove the implementations of new_figure_manager_*. We replace them below
@@ -95,12 +96,15 @@ class ThreadAwareFigureManagerQT(FigureManagerQT):
         FigureManagerQT.__init__(self, canvas, num)
         self._destroy_orig = self.destroy
         self.destroy = QAppThreadCall(self._destroy_orig)
+        self._show_orig = self.show
+        self.show = QAppThreadCall(self._show_orig)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Wrap the required functions
+# Patch known functions
+# ----------------------------------------------------------------------------------------------------------------------
 show = QAppThreadCall(show)
-# Use our figure manager
+
 FigureManager = ThreadAwareFigureManagerQT
 
 if MPL_HAVE_GIVEN_FIG_METHOD:

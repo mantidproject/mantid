@@ -4,7 +4,9 @@
 #include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include <boost/weak_ptr.hpp>
 
@@ -58,7 +60,7 @@ protected:
   void runPythonScript(const QString &pyInput);
 
   /// Retrieve input workspace
-  Mantid::API::MatrixWorkspace_sptr inputWorkspace();
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace() const;
 
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
@@ -71,10 +73,43 @@ protected:
       Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
-  int selectedSpectrum();
+  int selectedSpectrum() const;
 
-  /// Sets the selected spectrum
-  void setSelectedSpectrum(int spectrum);
+  /// Retrieve the selected minimum spectrum
+  int minimumSpectrum() const;
+
+  /// Retrieve the selected maximum spectrum
+  int maximumSpectrum() const;
+
+  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
+
+  void clearAndPlotInput(MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(const std::string &outputWSName, size_t index,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(Mantid::API::WorkspaceGroup_sptr outputWS,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(const std::string &workspaceName,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+
+  void updatePlotRange(const QString &rangeName,
+                       MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                       const QString &startRangePropName = "",
+                       const QString &endRangePropName = "");
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
@@ -87,6 +122,15 @@ protected slots:
 
   /// Plots the current preview data
   void plotCurrentPreview();
+
+  /// Sets the selected spectrum
+  virtual void setSelectedSpectrum(int spectrum);
+
+  /// Sets the maximum spectrum
+  void setMaximumSpectrum(int spectrum);
+
+  /// Sets the minimum spectrum
+  void setMinimumSpectrum(int spectrum);
 
 private:
   /// Overidden by child class.
@@ -104,7 +148,10 @@ private:
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
+  int m_minSpectrum;
+  int m_maxSpectrum;
 };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

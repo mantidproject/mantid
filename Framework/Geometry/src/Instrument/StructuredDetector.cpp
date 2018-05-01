@@ -3,10 +3,9 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
@@ -71,7 +70,7 @@ void StructuredDetector::init() {
   m_idStepByRow = 0;
   m_idStep = 0;
 
-  setGeometryHandler(new StructuredGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Clone method
@@ -290,8 +289,8 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 *
 */
 void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
-                                    const std::vector<double> &x,
-                                    const std::vector<double> &y, bool isZBeam,
+                                    std::vector<double> &&x,
+                                    std::vector<double> &&y, bool isZBeam,
                                     detid_t idStart, bool idFillByFirstY,
                                     int idStepByRow, int idStep) {
   if (m_map)
@@ -329,8 +328,8 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                 "z-axis aligned beams.");
 
   // Store vertices
-  m_xvalues = x;
-  m_yvalues = y;
+  m_xvalues = std::move(x);
+  m_yvalues = std::move(y);
 
   createDetectors();
 }
@@ -420,7 +419,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   ylb -= ypos;
 
   ShapeFactory factory;
-  boost::shared_ptr<Mantid::Geometry::Object> shape =
+  boost::shared_ptr<Mantid::Geometry::IObject> shape =
       factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
@@ -552,7 +551,7 @@ void StructuredDetector::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
@@ -568,11 +567,11 @@ void StructuredDetector::initDraw() const {
   if (Handle() == nullptr)
     return;
 
-  Handle()->Initialize();
+  Handle()->initialize();
 }
 
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> StructuredDetector::shape() const {
+const boost::shared_ptr<const IObject> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
   auto w = this->xPixels() + 1;
   auto xlb = m_xvalues[0];

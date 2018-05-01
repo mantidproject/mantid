@@ -102,7 +102,43 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     double tmp = static_cast<double>(*it);
-    Zscore.push_back(fabs((tmp - stats.mean) / stats.standard_deviation));
+    Zscore.push_back(fabs((stats.mean - tmp) / stats.standard_deviation));
+  }
+  return Zscore;
+}
+/**
+ * There are enough special cases in determining the Z score where it useful to
+ * put it in a single function.
+ */
+template <typename TYPE>
+std::vector<double> getWeightedZscore(const vector<TYPE> &data,
+                                      const vector<TYPE> &weights) {
+  if (data.size() < 3) {
+    std::vector<double> Zscore(data.size(), 0.);
+    return Zscore;
+  }
+  std::vector<double> Zscore;
+  Statistics stats = getStatistics(data);
+  if (stats.standard_deviation == 0.) {
+    std::vector<double> Zscore(data.size(), 0.);
+    return Zscore;
+  }
+  double sumWeights = 0.0;
+  double sumWeightedData = 0.0;
+  double weightedVariance = 0.0;
+  for (size_t it = 0; it != data.size(); ++it) {
+    sumWeights += static_cast<double>(weights[it]);
+    sumWeightedData += static_cast<double>(weights[it] * data[it]);
+  }
+  double weightedMean = sumWeightedData / sumWeights;
+  for (size_t it = 0; it != data.size(); ++it) {
+    weightedVariance +=
+        std::pow(static_cast<double>(data[it]) - weightedMean, 2) *
+        std::pow(static_cast<double>(weights[it]) / sumWeights, 2);
+  }
+  for (auto it = data.cbegin(); it != data.cend(); ++it) {
+    Zscore.push_back(fabs((static_cast<double>(*it) - weightedMean) /
+                          std::sqrt(weightedVariance)));
   }
   return Zscore;
 }
@@ -406,6 +442,8 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
   getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);               \
   template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(              \
       const vector<TYPE> &);                                                   \
+  template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(      \
+      const vector<TYPE> &, const vector<TYPE> &);                             \
   template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(      \
       const vector<TYPE> &, const bool);                                       \
   template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(  \

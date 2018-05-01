@@ -123,6 +123,11 @@ void LoadNexus::runLoadMuonNexus() {
   // Set the workspace property
   std::string outputWorkspace = "OutputWorkspace";
   loadMuonNexus->setPropertyValue(outputWorkspace, m_workspace);
+  loadMuonNexus->setPropertyValue("DeadTimeTable",
+                                  m_workspace + "_DeadTimeTable");
+  loadMuonNexus->setPropertyValue("DetectorGroupingTable",
+                                  m_workspace + "DetectorGroupingTable");
+
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
   std::vector<int> specList = getProperty("SpectrumList");

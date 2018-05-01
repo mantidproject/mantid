@@ -165,6 +165,9 @@ class ExportSpectraMask(PythonAlgorithm):
         """
         return "DataHandling\\Masking"
 
+    def seeAlso(self):
+        return [ "SaveMask","ExportSpectraMask" ]
+
     def name(self):
         """ Return name
         """

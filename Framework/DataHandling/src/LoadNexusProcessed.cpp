@@ -55,7 +55,7 @@ using Mantid::Types::Event::TofEvent;
 namespace {
 
 // Helper typedef
-typedef boost::shared_array<int> IntArray_shared;
+using IntArray_shared = boost::shared_array<int>;
 
 // Struct to contain spectrum information.
 struct SpectraInfo {
@@ -83,7 +83,7 @@ struct SpectraInfo {
 };
 
 // Helper typdef.
-typedef boost::optional<SpectraInfo> SpectraInfo_optional;
+using SpectraInfo_optional = boost::optional<SpectraInfo>;
 
 /**
 * Extract ALL the detector, spectrum number and workspace index mapping
@@ -1081,7 +1081,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   }
 
   for (const auto &str : columnNames) {
-    if (!str.compare("column_1")) {
+    if (str == "column_1") {
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
@@ -1090,9 +1090,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         if (ival != -1)
           peakWS->getPeak(r).setDetectorID(ival);
       }
-    }
-
-    if (!str.compare("column_2")) {
+    } else if (str == "column_2") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
@@ -1100,9 +1098,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setH(val);
       }
-    }
-
-    if (!str.compare("column_3")) {
+    } else if (str == "column_3") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
@@ -1110,9 +1106,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setK(val);
       }
-    }
-
-    if (!str.compare("column_4")) {
+    } else if (str == "column_4") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
@@ -1120,9 +1114,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         double val = qSign * nxDouble[r];
         peakWS->getPeak(r).setL(val);
       }
-    }
-
-    if (!str.compare("column_5")) {
+    } else if (str == "column_5") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
@@ -1130,9 +1122,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setIntensity(val);
       }
-    }
-
-    if (!str.compare("column_6")) {
+    } else if (str == "column_6") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
@@ -1140,9 +1130,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setSigmaIntensity(val);
       }
-    }
-
-    if (!str.compare("column_7")) {
+    } else if (str == "column_7") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
@@ -1150,9 +1138,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setBinCount(val);
       }
-    }
-
-    if (!str.compare("column_10")) {
+    } else if (str == "column_10") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
@@ -1160,9 +1146,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setWavelength(val);
       }
-    }
-
-    if (!str.compare("column_14")) {
+    } else if (str == "column_14") {
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
@@ -1171,9 +1155,15 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         if (ival != -1)
           peakWS->getPeak(r).setRunNumber(ival);
       }
-    }
+    } else if (str == "column_17") {
+      NXInt nxInt = nx_tw.openNXInt(str);
+      nxInt.load();
 
-    if (!str.compare("column_15")) {
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        peakWS->getPeak(r).setPeakNumber(ival);
+      }
+    } else if (str == "column_15") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       Kernel::Matrix<double> gm(3, 3, false);
@@ -1186,9 +1176,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         }
         peakWS->getPeak(r).setGoniometerMatrix(gm);
       }
-    }
-
-    if (!str.compare("column_16")) {
+    } else if (str == "column_16") {
       // Read shape information
       using namespace Mantid::DataObjects;
 

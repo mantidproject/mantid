@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -14,8 +14,15 @@ The bin parameters are used to form an output grid. A positive
 create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`. The overlap of the polygons
 formed from the old and new grids is tested to compute the required
-signal weight for the each of the new bins on the workspace. The errors
-are summed in quadrature.
+signal weight for the each of the new bins on the workspace, like in
+:ref:`algm-Rebin`, and the errors are summed in quadrature, as:
+
+.. math:: Y^{\mathrm{new}} = \sum_i Y^{\mathrm{old}}_i F_i
+.. math:: E^{\mathrm{new}} = \sqrt{\sum_i (E^{\mathrm{old}}_i)^2 F_i}
+
+where :math:`F_i = A^{\mathrm{overlap}}_i / A^{\mathrm{old}}_i` is the
+ratio of the overlap area of the new and old bin over the area of the
+old bin.
 
 Requirements
 ------------

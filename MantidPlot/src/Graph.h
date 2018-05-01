@@ -49,7 +49,7 @@
 #endif
 #include "AxesDialog.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "PlotToolInterface.h"
@@ -448,7 +448,7 @@ public slots:
   //! \name Zoom
   //@{
   void zoomed(const QwtDoubleRect &);
-  void zoom(bool on);
+  void zoomMode(bool on);
   void zoomOut();
   bool zoomOn();
   //@}

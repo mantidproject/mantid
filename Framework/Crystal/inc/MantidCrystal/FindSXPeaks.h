@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Crystal {
 
-typedef std::vector<FindSXPeaksHelper::SXPeak> peakvector;
+using peakvector = std::vector<FindSXPeaksHelper::SXPeak>;
 
 /** Search detector space for single crystal peaks.
 
@@ -64,6 +64,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"IndexSXPeaks"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Crystal\\Peaks;Optimization\\PeakFinding";

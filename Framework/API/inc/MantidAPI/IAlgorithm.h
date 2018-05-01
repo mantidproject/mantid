@@ -21,7 +21,7 @@ namespace API {
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */
-typedef void *AlgorithmID;
+using AlgorithmID = void *;
 
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
@@ -76,6 +76,9 @@ public:
 
   /// Function to return the separator token for the category string
   virtual const std::string categorySeparator() const = 0;
+
+  /// Function to return all of the seeAlso algorithms related to this algorithm
+  virtual const std::vector<std::string> seeAlso() const = 0;
 
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
@@ -137,6 +140,9 @@ public:
 
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;
+
+  /// To query whether the output is stored in the analysis data service.
+  virtual bool getAlwaysStoreInADS() const = 0;
 
   /** To set whether algorithm is a child.
    *  @param isChild :: True - the algorithm is a child algorithm.  False - this

@@ -65,6 +65,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"MaskDetectorsInShape", "MaskDetectorsIf", "MaskInstrument",
+            "MaskSpectra", "MaskBTP", "MaskAngle", "InvertMask"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Masking"; }
 
@@ -99,10 +103,11 @@ private:
                                    const RangeInfo &rangeInfo);
 
   void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
-  void fillIndexListFromSpectra(
-      std::vector<size_t> &indexList,
-      const std::vector<Indexing::SpectrumNumber> &spectraList,
-      const API::MatrixWorkspace_sptr WS, const RangeInfo &range_info);
+  void
+  fillIndexListFromSpectra(std::vector<size_t> &indexList,
+                           std::vector<Indexing::SpectrumNumber> spectraList,
+                           const API::MatrixWorkspace_sptr WS,
+                           const RangeInfo &range_info);
   void appendToDetectorListFromComponentList(
       std::vector<detid_t> &detectorList,
       const std::vector<std::string> &componentList,

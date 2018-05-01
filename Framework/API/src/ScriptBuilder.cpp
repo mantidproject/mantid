@@ -159,8 +159,7 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     // remove properties that are not present on a fresh algorithm
     // i.e. remove dynamically added properties
     for (auto prop_iter = props.begin(); prop_iter != props.end();) {
-      if (std::find(freshPropNames.begin(), freshPropNames.end(),
-                    (*prop_iter)->name()) == freshPropNames.end()) {
+      if (freshPropNames.find((*prop_iter)->name()) == freshPropNames.end()) {
         prop_iter = props.erase(prop_iter);
       } else {
         ++prop_iter;
@@ -186,7 +185,7 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     //...or only specify algorithm versions when they're not the newest version
     bool oldVersion = false;
 
-    std::vector<Algorithm_descriptor> descriptors =
+    std::vector<AlgorithmDescriptor> descriptors =
         AlgorithmFactory::Instance().getDescriptors();
     for (auto &descriptor : descriptors) {
       // If a newer version of this algorithm exists, then this must be an old

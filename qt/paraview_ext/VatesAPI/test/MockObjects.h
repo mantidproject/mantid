@@ -93,6 +93,7 @@ public:
   MOCK_METHOD0(clearMDMasking, void());
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
+  MOCK_CONST_METHOD0(hasOrientedLattice, bool());
 
   Mantid::API::IMDWorkspace::LinePlot
   getLinePlot(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &,
@@ -101,7 +102,7 @@ public:
     return line;
   }
 
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t = 1,
       Mantid::Geometry::MDImplicitFunction * = NULL) const override {
     throw std::runtime_error("Not Implemented");

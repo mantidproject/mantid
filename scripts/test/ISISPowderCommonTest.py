@@ -5,7 +5,7 @@ import unittest
 
 from six_shim import assertRaisesRegex
 
-from isis_powder.routines import common, common_enums
+from isis_powder.routines import common, common_enums, SampleDetails
 
 
 class ISISPowderCommonTest(unittest.TestCase):
@@ -487,6 +487,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         sample_empty_number = "100"
         ws_file_name = "POL" + sample_empty_number
         original_ws = mantid.Load(ws_file_name)
+        mantid.AddSampleLog(Workspace=original_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
         no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws, OutputWorkspace="test_subtract_sample_empty_ws")
 
         # Subtracting from self should equal 0
@@ -510,6 +511,7 @@ class ISISPowderCommonTest(unittest.TestCase):
     def test_subtract_summed_runs_throw_on_tof_mismatch(self):
         # Create a sample workspace which will have mismatched TOF range
         sample_ws = mantid.CreateSampleWorkspace()
+        mantid.AddSampleLog(Workspace=sample_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
         ws_file_name = "100"  # Load POL100
 
         # This should throw as the TOF ranges do not match
@@ -519,10 +521,40 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         mantid.DeleteWorkspace(sample_ws)
 
+    def test_generate_sample_geometry(self):
+        # Create mock SampleDetails
+        sample_details = SampleDetails(height=4.0, radius=3.0,
+                                       center=[0.5, 1.0, -3.2], shape='cylinder')
+        # Run test
+        result = common.generate_sample_geometry(sample_details)
+        # Validate result
+        expected = {'Shape': 'Cylinder',
+                    'Height': 4.0,
+                    'Radius': 3.0,
+                    'Center': [0.5, 1.0, -3.2]}
+        self.assertEquals(result, expected)
+
+    def test_generate_sample_material(self):
+        # Create mock SampleDetails
+        sample_details = SampleDetails(height=1.0, radius=1.0,
+                                       center=[0.0, 0.0, 0.0])
+        sample_details.set_material(chemical_formula='Si', number_density=1.5)
+        sample_details.set_material_properties(absorption_cross_section=123,
+                                               scattering_cross_section=456)
+        # Run test
+        result = common.generate_sample_material(sample_details)
+        # Validate
+        expected = {'ChemicalFormula': 'Si',
+                    'SampleNumberDensity': 1.5,
+                    'AttenuationXSection': 123.0,
+                    'ScatteringXSection': 456.0}
+        self.assertEquals(result, expected)
+
 
 class ISISPowderMockInst(object):
     def __init__(self, file_ext=None):
         self._file_ext = file_ext
+        self._inst_prefix = "MOCK"
 
     @staticmethod
     def _get_input_batching_mode(**_):

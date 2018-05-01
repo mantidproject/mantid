@@ -6,8 +6,8 @@
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "qboxlayout.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <QtCore/qvariant.h>
-#include <QtCore/qstringlist.h>
+#include <QVariant>
+#include <QStringList>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/DateAndTime.h"
@@ -15,7 +15,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LiveListenerInfo.h"
-#include <QtGui>
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 using namespace MantidQt::CustomDialogs;
@@ -41,8 +40,8 @@ private:
 template class Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>
-    LiveDataAlgInputHistory;
+using LiveDataAlgInputHistory =
+    Mantid::Kernel::SingletonHolder<LiveDataAlgInputHistoryImpl>;
 
 class LiveDataPostProcessingAlgInputHistoryImpl
     : public AbstractAlgorithmInputHistory {
@@ -62,9 +61,8 @@ template class Mantid::Kernel::SingletonHolder<
     LiveDataPostProcessingAlgInputHistoryImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<
-    LiveDataPostProcessingAlgInputHistoryImpl>
-    LiveDataPostProcessingAlgInputHistory;
+using LiveDataPostProcessingAlgInputHistory =
+    Mantid::Kernel::SingletonHolder<LiveDataPostProcessingAlgInputHistoryImpl>;
 }
 
 // Add this class to the list of specialised dialogs in this namespace

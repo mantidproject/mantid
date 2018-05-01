@@ -38,6 +38,9 @@ public:
   const std::string name() const override { return "Stitch1DMany"; }
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Stitch1D"};
+  }
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Reflectometry"; }
   /// Summary of algorithm's purpose

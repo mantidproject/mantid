@@ -4,9 +4,10 @@
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDAEDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
+#include <QFileDialog>
+#include <QLabel>
+#include <QLineEdit>
 #include <QValidator>
-#include <QtGui>
-#include <qfiledialog.h>
 
 namespace MantidQt {
 namespace CustomDialogs {

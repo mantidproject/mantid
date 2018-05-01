@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::Histogram;
@@ -150,6 +151,47 @@ public:
     TS_ASSERT(!src.points());
     TS_ASSERT(dest.points());
     TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::Points);
+  }
+
+  void test_size() {
+    TS_ASSERT_EQUALS(Histogram(BinEdges(0)).size(), 0);
+    TS_ASSERT_EQUALS(Histogram(BinEdges(2)).size(), 1);
+    TS_ASSERT_EQUALS(Histogram(BinEdges(3)).size(), 2);
+    TS_ASSERT_EQUALS(Histogram(Points(0)).size(), 0);
+    TS_ASSERT_EQUALS(Histogram(Points(1)).size(), 1);
+    TS_ASSERT_EQUALS(Histogram(Points(2)).size(), 2);
+  }
+
+  void test_resize_point_data() {
+    Histogram histogram(Points(3), Counts(3));
+    histogram.resize(2);
+    TS_ASSERT_EQUALS(histogram.size(), 2);
+    TS_ASSERT_EQUALS(histogram.x().size(), 2);
+    TS_ASSERT_EQUALS(histogram.y().size(), 2);
+    histogram.resize(1);
+    TS_ASSERT_EQUALS(histogram.size(), 1);
+    TS_ASSERT_EQUALS(histogram.x().size(), 1);
+    TS_ASSERT_EQUALS(histogram.y().size(), 1);
+    histogram.resize(0);
+    TS_ASSERT_EQUALS(histogram.size(), 0);
+    TS_ASSERT_EQUALS(histogram.x().size(), 0);
+    TS_ASSERT_EQUALS(histogram.y().size(), 0);
+  }
+
+  void test_resize_histogram() {
+    Histogram histogram(BinEdges(4), Counts(3));
+    histogram.resize(2);
+    TS_ASSERT_EQUALS(histogram.size(), 2);
+    TS_ASSERT_EQUALS(histogram.x().size(), 3);
+    TS_ASSERT_EQUALS(histogram.y().size(), 2);
+    histogram.resize(1);
+    TS_ASSERT_EQUALS(histogram.size(), 1);
+    TS_ASSERT_EQUALS(histogram.x().size(), 2);
+    TS_ASSERT_EQUALS(histogram.y().size(), 1);
+    histogram.resize(0);
+    TS_ASSERT_EQUALS(histogram.size(), 0);
+    TS_ASSERT_EQUALS(histogram.x().size(), 0);
+    TS_ASSERT_EQUALS(histogram.y().size(), 0);
   }
 
   void test_xMode() {
@@ -1107,6 +1149,15 @@ public:
     TS_ASSERT(!h.sharedY());
     TS_ASSERT(!h.sharedE());
     TS_ASSERT(!h.sharedDx());
+  }
+
+  void test_that_can_iterate_histogram() {
+    Histogram hist(Points{0.1, 0.2, 0.4}, Counts{1, 2, 4});
+    double total = 0;
+    for (const auto &item : hist) {
+      total += item.counts();
+    }
+    TS_ASSERT_EQUALS(total, 7)
   }
 };
 

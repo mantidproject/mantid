@@ -155,9 +155,6 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
     m_progress->report();
   }
 
-  // Set the same bins for all output pixels
-  output->setAllX(event_ws1->binEdges(0));
-
   fixSpectrumNumbers(*event_ws1, *event_ws2, *output);
 
   return std::move(output);
@@ -210,13 +207,6 @@ void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
   if (ws1.isDistribution() != ws2.isDistribution()) {
     const std::string message(
         "The input workspaces have inconsistent distribution flags");
-    g_log.error(message);
-    throw std::invalid_argument(message);
-  }
-
-  if (!WorkspaceHelpers::matchingBins(ws1, ws2, true)) {
-    const std::string message("The input workspaces are not compatible because "
-                              "they have different binning");
     g_log.error(message);
     throw std::invalid_argument(message);
   }

@@ -8,6 +8,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+using namespace MantidQt::MantidWidgets::DataProcessor;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -17,11 +19,26 @@ namespace CustomInterfaces {
 */
 ReflSettingsTabPresenter::ReflSettingsTabPresenter(
     std::vector<IReflSettingsPresenter *> presenters)
-    : m_settingsPresenters(presenters) {}
+    : m_settingsPresenters(presenters) {
+  passSelfToChildren(presenters);
+}
 
-/** Destructor
-*
-*/
+void ReflSettingsTabPresenter::passSelfToChildren(
+    std::vector<IReflSettingsPresenter *> const &children) {
+  for (auto *presenter : children)
+    presenter->acceptTabPresenter(this);
+}
+
+void ReflSettingsTabPresenter::acceptMainPresenter(
+    IReflMainWindowPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
+void ReflSettingsTabPresenter::settingsChanged(int group) {
+  m_mainPresenter->settingsChanged(group);
+}
+
+/// Destructor
 ReflSettingsTabPresenter::~ReflSettingsTabPresenter() {}
 
 /** Sets the current instrument name and changes accessibility status of
@@ -34,16 +51,32 @@ void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
     presenter->setInstrumentName(instName);
 }
 
+void ReflSettingsTabPresenter::onReductionResumed(int group) {
+  m_settingsPresenters[group]->onReductionResumed();
+}
+
+void ReflSettingsTabPresenter::onReductionPaused(int group) {
+  m_settingsPresenters[group]->onReductionPaused();
+}
+
 /** Returns values passed for 'Transmission run(s)'
 *
 * @param group :: The group from which to get the values
-* @param loadRuns :: If true, will try to load transmission runs as well
+* @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-std::string ReflSettingsTabPresenter::getTransmissionRuns(int group,
-                                                          bool loadRuns) const {
+OptionsQMap
+ReflSettingsTabPresenter::getOptionsForAngle(int group,
+                                             const double angle) const {
 
-  return m_settingsPresenters.at(group)->getTransmissionRuns(loadRuns);
+  return m_settingsPresenters.at(group)->getOptionsForAngle(angle);
+}
+
+/** Check whether per-angle transmission runs are specified
+ * @return :: true if per-angle transmission runs are specified
+ */
+bool ReflSettingsTabPresenter::hasPerAngleOptions(int group) const {
+  return m_settingsPresenters.at(group)->hasPerAngleOptions();
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -51,7 +84,7 @@ std::string ReflSettingsTabPresenter::getTransmissionRuns(int group,
 * @param group :: The group from which to get the options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
+OptionsQMap ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 
   return m_settingsPresenters.at(group)->getTransmissionOptions();
 }
@@ -61,7 +94,7 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 * @param group :: The group from which to get the options
 * @return :: Global options for 'ReflectometryReductionOneAuto'
 */
-std::string ReflSettingsTabPresenter::getReductionOptions(int group) const {
+OptionsQMap ReflSettingsTabPresenter::getReductionOptions(int group) const {
 
   return m_settingsPresenters.at(group)->getReductionOptions();
 }

@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/Common/MantidColorMap.h"
-#include "MantidQtWidgets/Common/PowerScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 

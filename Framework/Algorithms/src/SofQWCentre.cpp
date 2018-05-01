@@ -1,28 +1,12 @@
 #include "MantidAlgorithms/SofQWCentre.h"
-#include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/CommonBinsValidator.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
-
-#include <numeric>
-#include <stdexcept>
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,66 +14,17 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQWCentre)
 
-/// Energy to K constant
-double SofQWCentre::energyToK() {
-  static const double energyToK = 8.0 * M_PI * M_PI *
-                                  PhysicalConstants::NeutronMass *
-                                  PhysicalConstants::meV * 1e-20 /
-                                  (PhysicalConstants::h * PhysicalConstants::h);
-  return energyToK;
-}
-
 using namespace Kernel;
 using namespace API;
 
 /**
  * Create the input properties
  */
-void SofQWCentre::init() { createInputProperties(*this); }
-
-/**
- * Create the given algorithm's input properties
- * @param alg An algorithm object
- */
-void SofQWCentre::createInputProperties(API::Algorithm &alg) {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("DeltaE");
-  wsValidator->add<SpectraAxisValidator>();
-  wsValidator->add<CommonBinsValidator>();
-  wsValidator->add<HistogramValidator>();
-  wsValidator->add<InstrumentValidator>();
-  alg.declareProperty(make_unique<WorkspaceProperty<>>(
-                          "InputWorkspace", "", Direction::Input, wsValidator),
-                      "Reduced data in units of energy transfer DeltaE.\nThe "
-                      "workspace must contain histogram data and have common "
-                      "bins across all spectra.");
-  alg.declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                       Direction::Output),
-                      "The name to use for the q-omega workspace.");
-  alg.declareProperty(
-      make_unique<ArrayProperty<double>>(
-          "QAxisBinning", boost::make_shared<RebinParamsValidator>()),
-      "The bin parameters to use for the q axis (in the format used by the "
-      ":ref:`algm-Rebin` algorithm).");
-
-  std::vector<std::string> propOptions{"Direct", "Indirect"};
-  alg.declareProperty("EMode", "",
-                      boost::make_shared<StringListValidator>(propOptions),
-                      "The energy transfer analysis mode (Direct/Indirect)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-  alg.declareProperty("EFixed", 0.0, mustBePositive,
-                      "The value of fixed energy: :math:`E_i` (EMode=Direct) "
-                      "or :math:`E_f` (EMode=Indirect) (meV).\nMust be set "
-                      "here if not available in the instrument definition.");
-  alg.declareProperty("ReplaceNaNs", false,
-                      "If true, replaces all NaNs in output workspace with "
-                      "zeroes.",
-                      Direction::Input);
-}
+void SofQWCentre::init() { SofQW::createCommonInputProperties(*this); }
 
 void SofQWCentre::exec() {
   using namespace Geometry;
+  using PhysicalConstants::E_mev_toNeutronWavenumberSq;
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
 
@@ -101,17 +36,20 @@ void SofQWCentre::exec() {
         "The input workspace must have common binning across all spectra");
   }
 
+  m_EmodeProperties.initCachedValues(*inputWorkspace, this);
+  const int emode = m_EmodeProperties.m_emode;
+
   std::vector<double> verticalAxis;
-  MatrixWorkspace_sptr outputWorkspace = setUpOutputWorkspace(
-      inputWorkspace, getProperty("QAxisBinning"), verticalAxis);
+  MatrixWorkspace_sptr outputWorkspace =
+      SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+          *inputWorkspace, getProperty("QAxisBinning"), verticalAxis,
+          getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWorkspace);
+  const auto &xAxis = outputWorkspace->binEdges(0).rawData();
 
   // Holds the spectrum-detector mapping
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
-
-  m_EmodeProperties.initCachedValues(*inputWorkspace, this);
-  int emode = m_EmodeProperties.m_emode;
 
   const auto &detectorInfo = inputWorkspace->detectorInfo();
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
@@ -119,11 +57,6 @@ void SofQWCentre::exec() {
   beamDir.normalize();
   double l1 = detectorInfo.l1();
   g_log.debug() << "Source-sample distance: " << l1 << '\n';
-
-  // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
-                           (PhysicalConstants::h * PhysicalConstants::h);
 
   // Loop over input workspace bins, reassigning data to correct bin in output
   // qw workspace
@@ -158,6 +91,9 @@ void SofQWCentre::exec() {
             (detectorInfo.position(idet) - detectorInfo.samplePosition());
         scatterDir.normalize();
         for (size_t j = 0; j < numBins; ++j) {
+          if (X[j] < xAxis.front() || X[j + 1] > xAxis.back())
+            continue;
+
           const double deltaE = 0.5 * (X[j] + X[j + 1]);
           // Compute ki and kf wave vectors and therefore q = ki - kf
           double ei(0.0), ef(0.0);
@@ -193,8 +129,8 @@ void SofQWCentre::exec() {
             throw std::runtime_error(
                 "Negative incident energy. Check binning.");
 
-          const V3D ki = beamDir * sqrt(energyToK * ei);
-          const V3D kf = scatterDir * (sqrt(energyToK * (ef)));
+          const V3D ki = beamDir * sqrt(ei / E_mev_toNeutronWavenumberSq);
+          const V3D kf = scatterDir * sqrt(ef / E_mev_toNeutronWavenumberSq);
           const double q = (ki - kf).norm();
 
           // Test whether it's in range of the Q axis
@@ -204,6 +140,10 @@ void SofQWCentre::exec() {
           const MantidVec::difference_type qIndex =
               std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) -
               verticalAxis.begin() - 1;
+          // Find which e bin this point lies in
+          const MantidVec::difference_type eIndex =
+              std::upper_bound(xAxis.begin(), xAxis.end(), deltaE) -
+              xAxis.begin() - 1;
 
           // Add this spectra-detector pair to the mapping
           specNumberMapping.push_back(
@@ -212,10 +152,10 @@ void SofQWCentre::exec() {
 
           // And add the data and it's error to that bin, taking into account
           // the number of detectors contributing to this bin
-          outputWorkspace->mutableY(qIndex)[j] += Y[j] / numDets_d;
+          outputWorkspace->mutableY(qIndex)[eIndex] += Y[j] / numDets_d;
           // Standard error on the average
-          outputWorkspace->mutableE(qIndex)[j] =
-              sqrt((pow(outputWorkspace->e(qIndex)[j], 2) + pow(E[j], 2)) /
+          outputWorkspace->mutableE(qIndex)[eIndex] =
+              sqrt((pow(outputWorkspace->e(qIndex)[eIndex], 2) + pow(E[j], 2)) /
                    numDets_d);
         }
       } catch (std::out_of_range &) {
@@ -229,7 +169,7 @@ void SofQWCentre::exec() {
 
   // If the input workspace was a distribution, need to divide by q bin width
   if (inputWorkspace->isDistribution())
-    this->makeDistribution(outputWorkspace, verticalAxis);
+    this->makeDistribution(*outputWorkspace, verticalAxis);
 
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
@@ -249,63 +189,19 @@ void SofQWCentre::exec() {
   }
 }
 
-/** Creates the output workspace, setting the axes according to the input
- * binning parameters
- *  @param[in]  inputWorkspace The input workspace
- *  @param[in]  binParams The bin parameters from the user
- *  @param[out] newAxis        The 'vertical' axis defined by the given
- * parameters
- *  @return A pointer to the newly-created workspace
- */
-API::MatrixWorkspace_sptr SofQWCentre::setUpOutputWorkspace(
-    API::MatrixWorkspace_const_sptr inputWorkspace,
-    const std::vector<double> &binParams, std::vector<double> &newAxis) {
-  // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->sharedX(0));
-  const int xLength = static_cast<int>(xAxis.size());
-  // Create a vector to temporarily hold the vertical ('y') axis and populate
-  // that
-  const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(binParams, newAxis));
-
-  // Create the output workspace
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWorkspace, yLength - 1, xLength, xLength - 1);
-  // Create a numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new BinEdgeAxis(newAxis);
-  outputWorkspace->replaceAxis(1, verticalAxis);
-
-  // Now set the axis values
-  for (int i = 0; i < yLength - 1; ++i) {
-    outputWorkspace->setBinEdges(i, xAxis);
-  }
-
-  // Set the axis units
-  verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxis->title() = "|Q|";
-
-  // Set the X axis title (for conversion to MD)
-  outputWorkspace->getAxis(0)->title() = "Energy transfer";
-
-  outputWorkspace->setYUnit("");
-  outputWorkspace->setYUnitLabel("Intensity");
-
-  return outputWorkspace;
-}
-
 /** Divide each bin by the width of its q bin.
  *  @param outputWS :: The output workspace
  *  @param qAxis ::    A vector of the q bin boundaries
  */
-void SofQWCentre::makeDistribution(API::MatrixWorkspace_sptr outputWS,
-                                   const std::vector<double> qAxis) {
+void SofQWCentre::makeDistribution(API::MatrixWorkspace &outputWS,
+                                   const std::vector<double> &qAxis) {
   std::vector<double> widths(qAxis.size());
   std::adjacent_difference(qAxis.begin(), qAxis.end(), widths.begin());
 
-  const size_t numQBins = outputWS->getNumberHistograms();
+  const size_t numQBins = outputWS.getNumberHistograms();
   for (size_t i = 0; i < numQBins; ++i) {
-    auto &Y = outputWS->mutableY(i);
-    auto &E = outputWS->mutableE(i);
+    auto &Y = outputWS.mutableY(i);
+    auto &E = outputWS.mutableE(i);
     std::transform(Y.begin(), Y.end(), Y.begin(),
                    std::bind2nd(std::divides<double>(), widths[i + 1]));
     std::transform(E.begin(), E.end(), E.begin(),

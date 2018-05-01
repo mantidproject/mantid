@@ -63,7 +63,8 @@ public:
     IFunction_sptr func =
         createFunctionNoBackground(); // No equality matrix set
     double x0(165.0), x1(166.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
 
     TS_ASSERT_THROWS_NOTHING(func->setMatrixWorkspace(testWS, 0, x0, x1));
   }
@@ -73,7 +74,8 @@ public:
     using namespace Mantid::API;
     IFunction_sptr func = createFunctionNoBackground();
     double x0(165.0), x1(166.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->mutableX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
@@ -95,7 +97,8 @@ public:
     using namespace Mantid::API;
     IFunction_sptr func = createFunctionWithBackground();
     double x0(165.0), x1(166.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->mutableX(0) *= 1e-06; // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
 
@@ -116,7 +119,8 @@ public:
     using namespace Mantid::API;
     IFunction_sptr func = createFunctionNoBackground();
     double x0(165.0), x1(166.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->mutableX(0) *= 1e-06; // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
 
@@ -137,7 +141,8 @@ public:
                             "Matrix(1|2)1|-2"); // I_1 = 2I_2
 
     double x0(165.0), x1(166.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->mutableX(0) *= 1e-06; // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
 
@@ -158,7 +163,8 @@ public:
         createFunctionNoBackground(useTwoIntensityFuncAsFirst);
 
     double x0(165.0), x1(166.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->mutableX(0) *= 1e-06; // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
 
@@ -176,26 +182,26 @@ public:
   }
 
   void
-  xtest_Iteration_Starting_Resets_Intensity_Parameters_And_Background_Parameters_With_Background_Included() {
+  test_IterStartingResetsIntensityAndBackgroundParsWithBackgroundIncluded() {
     using namespace Mantid::API;
     IFunction_sptr func = createFunctionWithBackground();
     func->setAttributeValue("IntensityConstraints",
                             "Matrix(1|2)1|-2"); // I_1 = 2I_2
 
     double x0(165.0), x1(166.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->mutableX(0) *= 1e-06; // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
 
     func->iterationStarting();
-    //    TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10); // width_1
-    //    TS_ASSERT_DELTA(func->getParameter(1),-0.0506748344, 1e-10); // I_1
-    //    TS_ASSERT_DELTA(func->getParameter(2),10.0, 1e-10); //width_2
-    //    TS_ASSERT_DELTA(func->getParameter(3),-0.0253374172, 1e-10); // I_2
-    //    TS_ASSERT_DELTA(func->getParameter(4),-0.0422290287, 1e-10); //
-    //    background A_0
-    //    TS_ASSERT_DELTA(func->getParameter(5),0.00675680781, 1e-10); //
-    //    background A_1
+    TS_ASSERT_DELTA(func->getParameter("f0.Width"), 5.0, 1e-10);
+    const double intensity0(0.42850051);
+    TS_ASSERT_DELTA(func->getParameter("f0.Intensity"), intensity0, 1e-8);
+    TS_ASSERT_DELTA(func->getParameter("f1.Width"), 10.0, 1e-8);
+    TS_ASSERT_DELTA(func->getParameter("f1.Intensity"), 0.5 * intensity0, 1e-8);
+    TS_ASSERT_DELTA(func->getParameter("f2.A0"), 0.35708376, 1e-8);
+    TS_ASSERT_DELTA(func->getParameter("f2.A1"), 0.99989358, 1e-8);
   }
 
 private:

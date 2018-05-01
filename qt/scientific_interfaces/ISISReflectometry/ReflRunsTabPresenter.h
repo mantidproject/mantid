@@ -5,6 +5,7 @@
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -68,22 +69,33 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
-  QString getPreprocessingProperties() const override;
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
-  QString getPreprocessingOptionsAsString() const override;
-  QString getProcessingOptions() const override;
-  QString getPostprocessingOptions() const override;
+  MantidWidgets::DataProcessor::ColumnOptionsQMap
+  getPreprocessingOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getProcessingOptions() const override;
+  QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angle) const override;
+  bool hasPerAngleOptions() const override;
   /// Handle data reduction paused/resumed
   void pause() const override;
   void resume() const override;
   /// Determine whether to start a new autoreduction
   bool startNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
-  void confirmReductionPaused() const override;
-  void confirmReductionResumed() const override;
+  void confirmReductionPaused(int group) override;
+  void confirmReductionResumed(int group) override;
+  void settingsChanged(int group) override;
+  void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &) override;
+  void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceNames) override;
 
 private:
   /// The search model
@@ -119,6 +131,8 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
+  /// enable/disable widgets on the view
+  void updateWidgetEnabledState(const bool isProcessing) const;
 };
 }
 }

@@ -51,6 +51,9 @@ public:
   /// Return time-slicing type
   std::string getTimeSlicingType(int group) const override;
 
+  void onReductionResumed(int group) override;
+  void onReductionPaused(int group) override;
+
 private:
   /// The presenters for each group as a vector
   std::vector<IReflEventPresenter *> m_eventPresenters;

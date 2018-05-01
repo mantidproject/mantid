@@ -103,7 +103,7 @@ template <typename T> struct ElementTraits {};
 /** ElementTraits for boolean element types.
 */
 template <> struct ElementTraits<size_t> {
-  typedef size_t ValueType;
+  using ValueType = size_t;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%u,") % value);
   }
@@ -115,7 +115,7 @@ template <> struct ElementTraits<size_t> {
 /** ElementTraits for boolean element types.
 */
 template <> struct ElementTraits<bool> {
-  typedef bool ValueType;
+  using ValueType = bool;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%u,") % value);
   }
@@ -127,7 +127,7 @@ template <> struct ElementTraits<bool> {
 /** ElementTraits for double element types.
 */
 template <> struct ElementTraits<double> {
-  typedef double ValueType;
+  using ValueType = double;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%.4f,") % value);
   }
@@ -139,7 +139,7 @@ template <> struct ElementTraits<double> {
 /** ElementTraits for float element types.
 */
 template <> struct ElementTraits<float> {
-  typedef double ValueType;
+  using ValueType = double;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%.4f,") % value);
   }

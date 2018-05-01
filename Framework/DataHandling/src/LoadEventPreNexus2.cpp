@@ -54,7 +54,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using Types::Event::TofEvent;
 using Types::Core::DateAndTime;
-using std::cout;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -745,7 +744,7 @@ void LoadEventPreNexus2::procEvents(
   std::vector<DasEvent *> buffers;
 
   /// Pointer to the vector of events
-  typedef std::vector<TofEvent> *EventVector_pt;
+  using EventVector_pt = std::vector<TofEvent> *;
   /// Bare array of arrays of pointers to the EventVectors
   EventVector_pt **eventVectors;
 

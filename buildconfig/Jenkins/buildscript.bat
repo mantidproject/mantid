@@ -12,7 +12,6 @@ setlocal enableextensions enabledelayedexpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
 echo %sha1%
-set VS_VERSION=14
 
 :: Find the grep tool for later
 for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
@@ -24,9 +23,28 @@ set GREP_EXE=%GIT_ROOT_DIR%\usr\bin\grep.exe
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Source the VS setup script
 set VS_VERSION=14
-call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
+:: 8.1 is backwards compatible with Windows 7. It allows us to target Windows 7
+:: when building on newer versions of Windows. This value must be supplied
+:: externally and cannot be supplied in the cmake configuration
+set SDK_VERSION=8.1
+call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %SDK_VERSION%
+set UseEnv=true
 set CM_GENERATOR=Visual Studio 14 2015 Win64
-set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
+set PARAVIEW_DIR=%PARAVIEW_DIR%
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Pre-processing steps on the workspace itself
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: If the third party repo exists ensure it is in a clean state
+:: as updating errors on previous builds can leave it in a state that
+:: cmake is unable to cope with
+if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
+  cd %WORKSPACE%\external\src\ThirdParty
+  git reset --hard HEAD
+  git clean -fdx
+  cd %WORKSPACE%
+)
+
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
@@ -80,8 +98,9 @@ if "!CLEANBUILD!" == "yes" (
 
 if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+  for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
-    rmdir /S /Q %BUILD_DIR%\eigen-download %BUILD_DIR%\eigen-src
+    rmdir /S /Q %BUILD_DIR%\eigen-prefix
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
     rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
   )
@@ -92,9 +111,9 @@ if EXIST %BUILD_DIR% (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Packaging options
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set PACKAGE_DOCS=
+set PACKAGE_OPTS=
 if "%BUILDPKG%" == "yes" (
-  set PACKAGE_DOCS=-DPACKAGE_DOCS=ON
+  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=
 )
 
 cd %BUILD_DIR%
@@ -127,7 +146,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
 ) else (
   set VATES_OPT_VAL=ON
 )
-call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON -DENABLE_FILE_LOGGING=OFF %PACKAGE_DOCS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DUSE_PRECOMPILED_HEADERS=ON -DENABLE_FILE_LOGGING=OFF %PACKAGE_OPTS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -140,10 +159,14 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Remove the user properties file just in case anything polluted it
+:: Remove any user configuration and create a blank user properties file
+:: This prevents race conditions when creating the user config directory
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-
+set CONFIGDIR=%APPDATA%\mantidproject\mantid
+rmdir /S /Q %CONFIGDIR%
+mkdir %CONFIGDIR%
+call cmake.exe -E touch %USERPROPS%
 call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 

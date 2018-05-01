@@ -199,5 +199,19 @@ void ISpectrum::invalidateSpectrumDefinition() const {
     m_matrixWorkspace->invalidateSpectrumDefinition(m_index);
 }
 
+/// Override in child classes for polymorphic copying of data.
+void ISpectrum::copyDataInto(DataObjects::EventList &) const {
+  throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
+}
+/// Override in child classes for polymorphic copying of data.
+void ISpectrum::copyDataInto(DataObjects::Histogram1D &) const {
+  throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
+}
+
+/// Override in child classes for polymorphic copying of data.
+void ISpectrum::copyDataInto(SpectrumTester &) const {
+  throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
+}
+
 } // namespace Mantid
 } // namespace API

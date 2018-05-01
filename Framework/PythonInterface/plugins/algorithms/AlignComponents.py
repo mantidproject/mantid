@@ -30,6 +30,9 @@ class AlignComponents(PythonAlgorithm):
         """
         return "Diffraction"
 
+    def seeAlso(self):
+        return [ "GetDetOffsetsMultiPeaks","CalibrateRectangularDetectors" ]
+
     def name(self):
         """
         Mantid required

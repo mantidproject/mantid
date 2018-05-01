@@ -29,7 +29,8 @@ class PyChop2Tests(unittest.TestCase):
             flux.append(ff)
         # Checks that the flux should be highest for MERLIN, MARI and MAPS in that order
         self.assertTrue(flux[2] > flux[1])
-        self.assertTrue(flux[1] > flux[0])
+        # Note that MAPS has been upgraded so now should have higher flux than MARI.
+        self.assertTrue(flux[0] > flux[1])
         # Checks that the resolution should be best for MARI, MAPS and MERLIN in that order
         self.assertTrue(res[1][0] < res[0][0])
         self.assertTrue(res[0][0] < res[2][0]) 

@@ -4,7 +4,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include <iosfwd>
 #include <fstream>
+#include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
+#include <QSettings>
 
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;

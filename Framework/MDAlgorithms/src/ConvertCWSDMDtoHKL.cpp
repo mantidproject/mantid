@@ -175,7 +175,7 @@ void ConvertCWSDMDtoHKL::exportEvents(
   vec_event_det.resize(numevents);
 
   // Go through to get value
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
   size_t nextindex = 1;
   bool scancell = true;
   size_t currindex = 0;

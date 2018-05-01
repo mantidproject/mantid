@@ -57,6 +57,9 @@ public:
   }
 
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadSNSspec"};
+  }
   const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
@@ -74,8 +77,8 @@ private:
   /// Allowed values for the cache property
   std::vector<std::string> m_seperator_options;
   std::map<std::string, const char *> m_separatormap; ///<a map of seperators
-  typedef std::pair<std::string, const char *>
-      separator_pair; ///<serparator pair type def
+  using separator_pair =
+      std::pair<std::string, const char *>; ///<serparator pair type def
 };
 
 } // namespace DataHandling

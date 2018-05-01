@@ -3,14 +3,14 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-This algorithm joins the input workspaces into a single one by concatenating their spectra. The concatenation is done in the same order as in the input workspaces list. Consider using :ref:`SortXAxis <algm-SortXAxis>` afterwards, if necessary. The instrument and the units are copied from the first workspace. The sample logs are also copied from the first input, but the behaviour can be controlled by the instrument parameter file (IPF), as described in :ref:`MergeRuns <algm-MergeRuns>`. Furthermore, that behaviour can be overriden by providing input to the relevant optional properties of the algorithm.
+This algorithm joins the input workspaces into a single one by concatenating their spectra. The concatenation is done in the same order as in the input workspaces list. Consider using :ref:`SortXAxis <algm-SortXAxis>` afterwards, if necessary. The instrument and the units are copied from the first workspace. The sample logs are also copied from the first input, but the behaviour can be controlled by the instrument parameter file (IPF), as described in :ref:`MergeRuns <algm-MergeRuns>`. Furthermore, that behaviour can be overriden by providing input to the relevant optional properties of the algorithm. This algorithm joins Dx values, if present.
 
 InputWorkspaces
 ---------------
@@ -19,6 +19,7 @@ This can be a mixed list of workspaces and workspace groups on AnalysisDataServi
 - the same instrument
 - the same number of histograms
 - the same units
+- each workspace must have the same amount of points per spectrum, however the x-axes may differ
 
 SampleLogAsXAxis
 ----------------
@@ -48,7 +49,7 @@ Usage
 **Example - ConjoinXRuns**
 
 .. testcode:: ConjoinXRunsExample
-   
+
     # Create input workspaces
     list = []
     for i in range(3):
@@ -168,4 +169,3 @@ Related Algorithms
 .. categories::
 
 .. sourcelink::
-

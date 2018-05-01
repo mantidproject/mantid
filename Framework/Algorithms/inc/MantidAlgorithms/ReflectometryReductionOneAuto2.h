@@ -36,6 +36,9 @@ class DLLExport ReflectometryReductionOneAuto2
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ReflectometryReductionOne"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -69,8 +72,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS, double theta,
                 std::vector<double> &params);
-  /// Populate direct beam properties
-  void populateDirectBeamProperties(Mantid::API::IAlgorithm_sptr alg);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,

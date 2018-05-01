@@ -6,11 +6,12 @@ import mantid
 
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.enums import (SANSFacility, ISISReductionMode, RangeStepType, RebinType, DataType, FitType,
-                               DetectorType, SampleShape)
+                               DetectorType, SampleShape, SANSInstrument)
 from sans.common.configurations import Configurations
 from sans.state.data import get_data_builder
 
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 # -----------------------------------------------------------------
@@ -62,6 +63,9 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
     def _assert_reduction(self, state):
         reduction = state.reduction
         self.assertTrue(reduction.reduction_mode is ISISReductionMode.LAB)
+        self.assertFalse(reduction.merge_mask)
+        self.assertTrue(reduction.merge_min == None)
+        self.assertTrue(reduction.merge_max == None)
 
     def _assert_scale(self, state):
         scale = state.scale
@@ -147,6 +151,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low == 1.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high == 12.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order == 0)
+        self.assertTrue(adjustment.show_transmission == False)
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment
@@ -166,12 +171,13 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def test_state_can_be_created_from_valid_user_file_with_data_information(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_builder.set_sample_scatter_period(3)
         data_state = data_builder.build()
 
-        director = StateDirectorISIS(data_state)
+        director = StateDirectorISIS(data_state, file_information)
         user_file_path = create_user_file(sample_user_file)
 
         director.set_user_file(user_file_path)
@@ -193,12 +199,13 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def test_stat_can_be_crated_from_valid_user_file_and_later_on_reset(self):
         # Arrange
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_builder.set_sample_scatter_period(3)
         data_state = data_builder.build()
 
-        director = StateDirectorISIS(data_state)
+        director = StateDirectorISIS(data_state, file_information)
         user_file_path = create_user_file(sample_user_file)
         director.set_user_file(user_file_path)
 

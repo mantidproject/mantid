@@ -103,7 +103,9 @@ private:
     // YLength = nTubes * nPixelsPerTube
     const int nSpectra(nTubes * nPixelsPerTube);
     auto testWS = create<Workspace2D>(
-        createTestInstrument(nTubes, nPixelsPerTube), IndexInfo(nSpectra),
+        ComponentCreationHelper::createInstrumentWithPSDTubes(nTubes,
+                                                              nPixelsPerTube),
+        IndexInfo(nSpectra),
         Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
                   Counts(nBins, 2.0)));
     // Set a spectra to have high count such that the fail the test
@@ -111,48 +113,6 @@ private:
     // Set a high value to tip that tube over the max count rate
     testWS->mutableY(failedTube * nPixelsPerTube + 1)[0] = 100.0;
     return std::move(testWS);
-  }
-
-  Mantid::Geometry::Instrument_sptr
-  createTestInstrument(const int nTubes = 3, const int nPixelsPerTube = 50) {
-    using Mantid::Geometry::Instrument_sptr;
-    using Mantid::Geometry::Instrument;
-    using Mantid::Geometry::CompAssembly;
-    using Mantid::Geometry::Detector;
-    using Mantid::Geometry::Object_sptr;
-    using Mantid::Kernel::V3D;
-
-    // Need a tube based instrument.
-    // pixels
-    // Pixels will be numbered simply from 1->nTubes*nPixelsPerTube with a 1:1
-    // mapping
-    Instrument_sptr testInst(new Instrument("Merlin-like"));
-
-    // Pixel shape
-    const double pixelRadius(0.01);
-    const double pixelHeight(0.003);
-    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
-        pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
-        V3D(0.0, 1.0, 0.0), "pixelShape");
-    for (int i = 0; i < nTubes; ++i) {
-      std::ostringstream lexer;
-      lexer << "tube-" << i;
-      CompAssembly *tube = new CompAssembly(lexer.str());
-      tube->setPos(V3D(i * 2.0 * pixelRadius, 0.0, 0.0));
-      for (int j = 0; j < nPixelsPerTube; ++j) {
-        lexer.str("");
-        lexer << "pixel-" << i *nPixelsPerTube + j;
-        Detector *pixel = new Detector(lexer.str(), i * nPixelsPerTube + j + 1,
-                                       pixelShape, tube);
-        const double xpos = 0.0;
-        const double ypos = j * pixelHeight;
-        pixel->setPos(xpos, ypos, 0.0);
-        tube->add(pixel);
-        testInst->markAsDetector(pixel);
-      }
-      testInst->add(tube);
-    }
-    return testInst;
   }
 
   Mantid::Algorithms::CreatePSDBleedMask diagnostic;

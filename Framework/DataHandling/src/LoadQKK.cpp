@@ -168,7 +168,7 @@ void LoadQKK::exec() {
       pixel_width_str + "\" y= \"" + pixel_height_str + "\" z=\"0\"  />"
                                                         "</cuboid>";
   // Create a shape object which will be shared by all pixels.
-  Geometry::Object_sptr shape = Geometry::ShapeFactory().createShape(detXML);
+  auto shape = Geometry::ShapeFactory().createShape(detXML);
   // Initialise the detector specifying the sizes.
   bank->initialize(shape, int(nx), 0, pixel_width, int(ny), 0, pixel_height, 1,
                    true, int(nx));

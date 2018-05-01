@@ -95,14 +95,15 @@ public:
 
   WorkspaceProperty &operator=(const WorkspaceProperty &right);
 
-  boost::shared_ptr<TYPE> &
-  operator=(const boost::shared_ptr<TYPE> &value) override;
+  WorkspaceProperty &operator=(const boost::shared_ptr<TYPE> &value) override;
 
   WorkspaceProperty &operator+=(Kernel::Property const *) override;
 
   WorkspaceProperty<TYPE> *clone() const override;
 
   std::string value() const override;
+
+  bool isValueSerializable() const override;
 
   std::string getDefault() const override;
 

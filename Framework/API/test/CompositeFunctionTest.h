@@ -781,6 +781,19 @@ public:
     delete mfun;
   }
 
+  void test_removeFunction_removes_tie() {
+    CompositeFunction mfun;
+    IFunction_sptr g1 = IFunction_sptr(new Gauss());
+    IFunction_sptr g2 = IFunction_sptr(new Gauss());
+
+    mfun.addFunction(g1);
+    mfun.addFunction(g2);
+
+    mfun.tie("f0.h", "1-f1.h");
+    mfun.removeFunction(0);
+    TS_ASSERT_EQUALS(mfun.writeTies(), "");
+  }
+
   // replacing function has fewer parameters
   void testReplaceFunction() {
     IFunction_sptr g1 = IFunction_sptr(new Gauss());

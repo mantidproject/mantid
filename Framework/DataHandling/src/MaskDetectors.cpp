@@ -11,6 +11,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include <algorithm>
 #include <numeric>
 #include <set>
 
@@ -170,7 +171,8 @@ void MaskDetectors::exec() {
   // appropriate spectra number and adding the indices they are linked to the
   // list to be processed
   if (!spectraList.empty()) {
-    fillIndexListFromSpectra(indexList, spectraList, WS, ranges_info);
+    fillIndexListFromSpectra(indexList, std::move(spectraList), WS,
+                             ranges_info);
   } // End dealing with spectraList
   if (!detectorList.empty()) {
     // Convert from detectors to workspace indexes
@@ -451,7 +453,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  */
 void MaskDetectors::fillIndexListFromSpectra(
     std::vector<size_t> &indexList,
-    const std::vector<Indexing::SpectrumNumber> &spectraList,
+    std::vector<Indexing::SpectrumNumber> spectraList,
     const API::MatrixWorkspace_sptr WS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
@@ -466,6 +468,12 @@ void MaskDetectors::fillIndexListFromSpectra(
     tmp_index.swap(indexList);
   }
 
+  // Ignore duplicate entries.
+  std::sort(spectraList.begin(), spectraList.end());
+  auto last = std::unique(spectraList.begin(), spectraList.end());
+  if (last != spectraList.end())
+    g_log.warning("Duplicate entries in spectrum list.");
+  spectraList.erase(last, spectraList.end());
   for (auto ws_index : WS->indexInfo().makeIndexSet(spectraList)) {
     if (range_constrained && (ws_index < startIndex || ws_index > endIndex)) {
       continue;

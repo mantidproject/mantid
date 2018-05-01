@@ -67,9 +67,10 @@ struct IntegrationParameters {
                  <http://doxygen.mantidproject.org>
  */
 
-typedef std::unordered_map<
-    int64_t, std::vector<std::pair<double, Mantid::Kernel::V3D>>> EventListMap;
-typedef std::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
+using EventListMap =
+    std::unordered_map<int64_t,
+                       std::vector<std::pair<double, Mantid::Kernel::V3D>>>;
+using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
 class DLLExport Integrate3DEvents {
 public:
@@ -109,7 +110,7 @@ public:
 
 private:
   /// Get a list of events for a given Q
-  boost::optional<const std::vector<std::pair<double, Mantid::Kernel::V3D>> &>
+  const std::vector<std::pair<double, Mantid::Kernel::V3D>> *
   getEvents(const Mantid::Kernel::V3D &peak_q);
 
   bool correctForDetectorEdges(std::tuple<double, double, double> &radii,

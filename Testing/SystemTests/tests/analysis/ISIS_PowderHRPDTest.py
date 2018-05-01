@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import platform
 import shutil
 import stresstesting
 
@@ -53,7 +54,8 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return calibration_validator(self.calibration_results)
+        self.tolerance = 0.05  # Required for difference in spline data between operating systems
+        return self.calibration_results.getName(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
 
     def cleanup(self):
         try:
@@ -78,7 +80,11 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return focus_validation(self.focus_results)
+        if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
+            self.tolerance = 0.4
+        else:
+            self.tolerance = 0.05
+        return self.focus_results.getName(), "HRPD66063_focused.nxs"
 
     def cleanup(self):
         try:
@@ -87,18 +93,6 @@ class FocusTest(stresstesting.MantidStressTest):
         finally:
             config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()
-
-
-def _compare_ws(reference_file_name, results):
-    ref_ws = mantid.Load(Filename=reference_file_name)
-    is_valid = len(results) > 0
-
-    for (ws, ref) in zip(results, ref_ws):
-        if not mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref):
-            is_valid = False
-            print("{} was not equal to {}".format(ws.getName(), ref.getName()))
-
-    return is_valid
 
 
 def _gen_required_files():
@@ -112,16 +106,6 @@ def gen_required_run_numbers():
     return ["66028",  # Sample empty
             "66031",  # Vanadium
             "66063"]  # Run to focus
-
-
-def calibration_validator(results):
-    reference_file_name = "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def focus_validation(results):
-    reference_file_name = "HRPD66063_focused.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
 
 
 def run_vanadium_calibration():

@@ -1,4 +1,6 @@
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
+
 #include <sstream>
 
 namespace Mantid {
@@ -267,7 +269,7 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   std::vector::resize which either truncates the current values
   or applies zero padding. */
 void Histogram::resize(size_t n) {
-  auto newXSize = xMode() == XMode::Points ? n : n + 1;
+  auto newXSize = (xMode() == XMode::Points || n == 0) ? n : n + 1;
 
   m_x.access().mutableRawData().resize(newXSize);
   if (m_y) {
@@ -281,6 +283,14 @@ void Histogram::resize(size_t n) {
   if (m_dx) {
     m_dx.access().mutableRawData().resize(n);
   }
+}
+
+HistogramIterator Histogram::begin() const {
+  return HistogramIterator(*this, 0);
+}
+
+HistogramIterator Histogram::end() const {
+  return HistogramIterator(*this, size());
 }
 
 } // namespace HistogramData

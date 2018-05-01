@@ -91,7 +91,7 @@ public:
 
   /// Execuate transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr executeNormPoly(
-      Mantid::API::MatrixWorkspace_const_sptr inputWS,
+      const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
       boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
       bool dumpVertexes, std::string outputDimensions) const;
 
@@ -123,7 +123,7 @@ MANTID_DATAOBJECTS_DLL DetectorAngularCache
 initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
 
 // Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;
+using ReflectometryTransform_sptr = boost::shared_ptr<ReflectometryTransform>;
 }
 }
 #endif

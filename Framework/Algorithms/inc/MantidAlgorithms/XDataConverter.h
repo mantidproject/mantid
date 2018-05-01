@@ -1,14 +1,12 @@
 #ifndef MANTID_ALGORITHMS_XDATACONVERTER_H_
 #define MANTID_ALGORITHMS_XDATACONVERTER_H_
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace HistogramData {
+class HistogramDx;
 class HistogramX;
 }
 namespace Algorithms {
@@ -43,7 +41,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport XDataConverter : public API::Algorithm {
+class DLLExport XDataConverter : public API::DistributedAlgorithm {
 public:
   /// Default constructor
   XDataConverter();

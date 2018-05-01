@@ -31,9 +31,15 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"ReadGroupsFromFile",   "CreateDummyCalFile",
+            "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "SaveCalFile",
+            "MergeCalFiles"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles";
+    return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)";
   }
 
   static void getInstrument3WaysInit(Mantid::API::Algorithm *alg);
@@ -46,6 +52,11 @@ public:
                           Mantid::DataObjects::GroupingWorkspace_sptr groupWS,
                           Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
                           Mantid::DataObjects::MaskWorkspace_sptr maskWS);
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// Initialise the properties

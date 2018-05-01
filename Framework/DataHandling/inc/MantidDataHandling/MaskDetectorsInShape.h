@@ -1,10 +1,7 @@
 #ifndef MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
 #define MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -55,12 +52,15 @@ namespace DataHandling {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MaskDetectorsInShape : public API::Algorithm {
+class DLLExport MaskDetectorsInShape : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskDetectorsInShape"; };
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"MaskDetectors", "FindDetectorsInShape"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Masking"; }
   /// Summary of algorithms purpose
@@ -79,7 +79,7 @@ private:
                                            const bool includeMonitors);
   /// Calls MaskDetectors as a Child Algorithm
   void runMaskDetectors(API::MatrixWorkspace_sptr workspace,
-                        const std::vector<int> detectorIds);
+                        const std::vector<int> &detectorIds);
 };
 
 } // namespace DataHandling

@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_COMMENT_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -29,10 +29,13 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Comment : public API::Algorithm {
+class DLLExport Comment : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"RemoveWorkspaceHistory"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

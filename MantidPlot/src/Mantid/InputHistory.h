@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace API {
 class IAlgorithm;
-typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
+using IAlgorithm_sptr = boost::shared_ptr<IAlgorithm>;
 }
 }
 
@@ -88,6 +88,6 @@ private:
   QMap<QString, QList<PropertyData>> m_history;
 };
 
-typedef Mantid::Kernel::SingletonHolder<InputHistoryImpl> InputHistory;
+using InputHistory = Mantid::Kernel::SingletonHolder<InputHistoryImpl>;
 
 #endif /* INPUTHISTORY_H */

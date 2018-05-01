@@ -7,16 +7,22 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::Geometry::Instrument;
 
 // Anonymous namespace for shared methods between unit and performance test
@@ -423,8 +429,6 @@ public:
   }
 
   void testMonitorWorkspaceNotInADSWorks() {
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
     BinEdges xs{-1.0, 1.0};
     Counts ys{1.0};
     Histogram h(xs, ys);
@@ -440,6 +444,172 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorWorkspace", monitors))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
+  }
+
+  void test_with_scanning_workspace_bin_by_bin() {
+    auto testWS = makeTestDetectorScanWorkspace();
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", testWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    const auto &specOutInfo = outWS->spectrumInfo();
+    for (size_t i = 0; i < specOutInfo.size(); ++i) {
+      const auto &yValues = outWS->histogram(i).y();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specOutInfo.isMonitor(i))
+          TS_ASSERT_DELTA(yValues[j], 3.0, 1e-12)
+        else
+          TS_ASSERT_DELTA(yValues[j], 6.0 / double(j + 1), 1e-12)
+      }
+    }
+  }
+
+  void test_with_scanning_workspace_integration_range() {
+    auto testWS = makeTestDetectorScanWorkspace();
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", testWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrationRangeMin", "-1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrationRangeMax", "99"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    const auto &specOutInfo = outWS->spectrumInfo();
+    for (size_t i = 0; i < specOutInfo.size(); ++i) {
+      const auto &yValues = outWS->histogram(i).y();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specOutInfo.isMonitor(i))
+          TS_ASSERT_DELTA(yValues[j], double(j + 1) / 15.0, 1e-12)
+        else
+          TS_ASSERT_DELTA(yValues[j], 2.0 / 15.0, 1e-12)
+      }
+    }
+  }
+
+  void test_with_async_scan_workspace_throws() {
+    const size_t N_DET = 10;
+    const size_t N_BINS = 5;
+
+    // Set up 2 workspaces to be merged
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+    auto &detInfo1 = ws1->mutableDetectorInfo();
+    auto &detInfo2 = ws2->mutableDetectorInfo();
+    for (size_t i = 0; i < N_DET; ++i) {
+      detInfo1.setScanInterval(i, {10, 20});
+      detInfo2.setScanInterval(i, {20, 30});
+    }
+    // Merge
+    auto merged = WorkspaceFactory::Instance().create(ws1, 2 * N_DET);
+    auto &detInfo = merged->mutableDetectorInfo();
+    detInfo.merge(detInfo2);
+    merged->setIndexInfo(Indexing::IndexInfo(merged->getNumberHistograms()));
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", merged))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error & e, std::string(e.what()),
+        "More then one spectrum corresponds to the requested monitor ID. This "
+        "is unexpected in a non-scanning workspace.")
+  }
+
+  void test_with_single_count_point_data_workspace() {
+    const size_t N_DET = 10;
+    const size_t N_BINS = 1;
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+
+    Points points({0.0});
+
+    const auto &specInfo = testWS->spectrumInfo();
+    for (size_t i = 0; i < specInfo.size(); ++i) {
+      auto hist = testWS->histogram(i);
+      auto &yValues = hist.mutableY();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specInfo.isMonitor(i))
+          yValues[j] = 3.0;
+        else
+          TS_ASSERT_EQUALS(yValues[j], 2.0)
+      }
+      testWS->setHistogram(i, hist);
+      testWS->setPoints(i, points);
+    }
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", testWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    const auto &specOutInfo = outWS->spectrumInfo();
+    for (size_t i = 0; i < specOutInfo.size(); ++i) {
+      const auto &yValues = outWS->histogram(i).y();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specOutInfo.isMonitor(i))
+          TS_ASSERT_DELTA(yValues[j], 1.0, 1e-12)
+        else
+          TS_ASSERT_DELTA(yValues[j], 2.0 / 3.0, 1e-12)
+      }
+    }
+  }
+
+private:
+  MatrixWorkspace_sptr makeTestDetectorScanWorkspace() {
+    const size_t N_DET = 10;
+    const size_t N_BINS = 5;
+    const size_t N_TIMEINDEXES = 5;
+
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(
+            N_DET, N_BINS, N_TIMEINDEXES, 0, 1, true);
+
+    double x0 = 0.0;
+    double deltax = 1.0;
+
+    BinEdges x(N_BINS + 1, LinearGenerator(x0, deltax));
+    Counts y(N_BINS, 2.0);
+    Counts yMonitor(N_BINS, 2.0);
+    for (size_t j = 0; j < y.size(); ++j) {
+      y.mutableRawData()[j] = 2.0;
+      yMonitor.mutableRawData()[j] = double(j + 1);
+    }
+    CountStandardDeviations e(N_BINS, M_SQRT2);
+    const auto &specInfo = testWS->spectrumInfo();
+    for (size_t i = 0; i < N_DET * N_TIMEINDEXES; i++) {
+      testWS->setBinEdges(i, x);
+      if (specInfo.isMonitor(i))
+        testWS->setCounts(i, yMonitor);
+      else
+        testWS->setCounts(i, y);
+      testWS->setCountStandardDeviations(i, e);
+    }
+    return testWS;
   }
 };
 

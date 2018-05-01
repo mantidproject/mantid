@@ -93,22 +93,32 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
   const int derivOrder = getProperty("DerivOrder");
 
   MatrixWorkspace_const_sptr iwsValid = getProperty("WorkspaceToInterpolate");
-  const size_t binsNo = iwsValid->blocksize();
+  if (iwsValid) {
+    try {
+      const size_t binsNo = iwsValid->blocksize();
 
-  // The minimum number of points for cubic splines is 3
-  if (binsNo < 2) {
-    result["WorkspaceToInterpolate"] = "Workspace must have minimum 2 points.";
-  } else if (binsNo == 2) {
-    if (!linear) {
-      result["WorkspaceToInterpolate"] =
-          "Workspace has only 2 points, "
-          "you can enable linear interpolation by "
-          "setting the property Linear2Points. Otherwise "
-          "provide a minimum of 3 points.";
-    } else if (derivOrder == 2) {
-      result["DerivOrder"] = "Linear interpolation is requested, hence "
-                             "derivative order can be maximum 1.";
+      // The minimum number of points for cubic splines is 3
+      if (binsNo < 2) {
+        result["WorkspaceToInterpolate"] =
+            "Workspace must have minimum 2 points.";
+      } else if (binsNo == 2) {
+        if (!linear) {
+          result["WorkspaceToInterpolate"] =
+              "Workspace has only 2 points, "
+              "you can enable linear interpolation by "
+              "setting the property Linear2Points. Otherwise "
+              "provide a minimum of 3 points.";
+        } else if (derivOrder == 2) {
+          result["DerivOrder"] = "Linear interpolation is requested, hence "
+                                 "derivative order can be maximum 1.";
+        }
+      }
+    } catch (std::length_error &) {
+      result["WorkspaceToInterpolate"] = "The input workspace does not have "
+                                         "the same number of bins per spectrum";
     }
+  } else {
+    result["WorkspaceToInterpolate"] = "The input is not a MatrixWorkspace";
   }
 
   return result;
@@ -222,8 +232,7 @@ void SplineInterpolation::exec() {
     }
   }
   // Store the output workspaces
-  std::string derivWsName = getPropertyValue("OutputWorkspaceDeriv");
-  if (order > 0 && !derivWsName.empty()) {
+  if (order > 0 && !isDefault("OutputWorkspaceDeriv")) {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (size_t i = 0; i < histNo; ++i) {

@@ -1,12 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-
-import mantid
-
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
                                FitType)
+from sans.user_file.settings_tags import (det_fit_range)
 
 
 class StateGuiModelTest(unittest.TestCase):
@@ -130,6 +128,37 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.HAB)
         state_gui_model.reduction_mode = ISISReductionMode.All
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.All)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Merge range
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_merge_mask_is_false_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertFalse(state_gui_model.merge_mask)
+
+    def test_that_merge_mask_can_be_set_to_something_else(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.merge_mask = True
+        self.assertTrue(state_gui_model.merge_mask)
+
+    def test_that_merge_min_is_None_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.merge_min == None)
+
+    def test_that_merge_max_is_None_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.merge_max == None)
+
+    def test_that_merge_min_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.merge_min = 78.9
+        self.assertTrue(state_gui_model.merge_min == 78.9)
+
+    def test_that_merge_range_set_correctly(self):
+        state_gui_model = StateGuiModel({DetectorId.merge_range: [det_fit_range(use_fit=True, start=0.13, stop=0.15)]})
+        self.assertEqual(state_gui_model.merge_min, 0.13)
+        self.assertEqual(state_gui_model.merge_max, 0.15)
+        self.assertTrue(state_gui_model.merge_mask)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reduction dimensionality
@@ -278,7 +307,7 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.transmission_incident_monitor = 3
         self.assertTrue(state_gui_model.transmission_incident_monitor == 3)
 
-    def test_that_can_set_only_interpolation(self):
+    def test_that_can_set_only_transmission_interpolation(self):
         state_gui_model = StateGuiModel({"test": [1]})
         state_gui_model.transmission_interpolate = True
         self.assertTrue(state_gui_model.transmission_incident_monitor is None)
@@ -374,6 +403,15 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.transmission_sample_wavelength_max == 10.3)
         self.assertTrue(state_gui_model.transmission_can_wavelength_min == 1.3)
         self.assertTrue(state_gui_model.transmission_can_wavelength_max == 10.3)
+
+    def test_that_default_show_transmission_is_false(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertFalse(state_gui_model.show_transmission)
+
+    def test_that_can_set_show_transmission(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.show_transmission = True
+        self.assertTrue(state_gui_model.show_transmission)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -510,7 +548,6 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.mask_files = ["file.txt", "file2.txt"]
         self.assertTrue(state_gui_model.mask_files == ["file.txt", "file2.txt"])
 
+
 if __name__ == '__main__':
     unittest.main()
-
-

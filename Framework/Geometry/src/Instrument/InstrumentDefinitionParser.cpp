@@ -496,7 +496,11 @@ void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
     isTypeAssembly[typeName] = false;
 
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+    // Only CSGObjects can be combined into one shape.
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+            mapTypeNameToShape[typeName])) {
+      csgObj->setName(static_cast<int>(iType));
+    }
   }
 }
 
@@ -520,7 +524,11 @@ void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
     // for now try to create a geometry shape associated with every type
     // that does not contain any component elements
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+    // Name can be set only for a CSGObject.
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+            mapTypeNameToShape[typeName])) {
+      csgObj->setName(static_cast<int>(iType));
+    }
   } else {
     isTypeAssembly[typeName] = true;
     if (pTypeElem->hasAttribute("outline")) {
@@ -853,8 +861,8 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
 */
 Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
     const Poco::XML::Element *pLocElem) {
-  if ((pLocElem->tagName()).compare("location") &&
-      (pLocElem->tagName()).compare("locations")) {
+  if (((pLocElem->tagName()) != "location") &&
+      ((pLocElem->tagName()) != "locations")) {
     const std::string &tagname = pLocElem->tagName();
     g_log.error("Argument to function getParentComponent must be a pointer to "
                 "an XML element with tag name location or locations.");
@@ -872,7 +880,7 @@ Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
   Element *pCompElem;
   if (pCompNode->nodeType() == 1) {
     pCompElem = static_cast<Element *>(pCompNode);
-    if ((pCompElem->tagName()).compare("component")) {
+    if ((pCompElem->tagName()) != "component") {
       g_log.error("Argument to function getParentComponent must be a XML "
                   "element sitting inside a component element.");
       throw std::logic_error("Argument to function getParentComponent must be "
@@ -1128,7 +1136,7 @@ void InstrumentDefinitionParser::appendAssembly(
   if (pCompElem->hasAttribute("idlist")) {
     std::string idlist = pCompElem->getAttribute("idlist");
 
-    if (idlist.compare(idList.idname)) {
+    if (idlist != idList.idname) {
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
@@ -1253,7 +1261,7 @@ void InstrumentDefinitionParser::appendAssembly(
     }
     if (pType->getAttribute("object_created") == "no") {
       pType->setAttribute("object_created", "yes");
-      boost::shared_ptr<Geometry::Object> obj = objAss->createOutline();
+      boost::shared_ptr<Geometry::IObject> obj = objAss->createOutline();
       if (obj) {
         mapTypeNameToShape[pType->getAttribute("name")] = obj;
       } else { // object failed to be created
@@ -1402,7 +1410,7 @@ void InstrumentDefinitionParser::createRectangularDetector(
   // Given that this leaf component is actually an assembly, its constituent
   // component detector shapes comes from its type attribute.
   const std::string shapeType = pType->getAttribute("type");
-  boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
+  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
 
   // These parameters are in the TYPE defining RectangularDetector
   if (pType->hasAttribute("xpixels"))
@@ -1502,7 +1510,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   // Given that this leaf component is actually an assembly, its constituent
   // component detector shapes comes from its type attribute.
   const std::string shapeType = pType->getAttribute("type");
-  boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
+  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
 
   std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
@@ -1579,8 +1587,8 @@ void InstrumentDefinitionParser::createStructuredDetector(
   bool isZBeam =
       m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
   // Now, initialize all the pixels in the bank
-  bank->initialize(xpixels, ypixels, xValues, yValues, isZBeam, idstart,
-                   idfillbyfirst_y, idstepbyrow, idstep);
+  bank->initialize(xpixels, ypixels, std::move(xValues), std::move(yValues),
+                   isZBeam, idstart, idfillbyfirst_y, idstepbyrow, idstep);
 
   // Loop through all detectors in the newly created bank and mark those in
   // the instrument.
@@ -1642,7 +1650,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   if (pCompElem->hasAttribute("idlist")) {
     std::string idlist = pCompElem->getAttribute("idlist");
 
-    if (idlist.compare(idList.idname)) {
+    if (idlist != idList.idname) {
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
@@ -1730,7 +1738,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
                                                 IdList &idList) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
-  if ((pE->tagName()).compare("idlist")) {
+  if ((pE->tagName()) != "idlist") {
     g_log.error("Argument to function createIdList must be a pointer to an XML "
                 "element with tag name idlist.");
     throw std::logic_error("Argument to function createIdList must be a "
@@ -1995,7 +2003,7 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
                                            const Poco::XML::Element *pElem) {
   // Require that pElem points to an element with tag name 'location'
 
-  if ((pElem->tagName()).compare("location")) {
+  if ((pElem->tagName()) != "location") {
     g_log.error("Second argument to function setLocation must be a pointer to "
                 "an XML element with tag name location.");
     throw std::logic_error("Second argument to function setLocation must be a "
@@ -2460,12 +2468,16 @@ void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
   const std::string cacheFullPath = cacheToApply->getFileFullPathStr();
   g_log.information("Loading geometry cache from " + cacheFullPath);
   // create a vtk reader
-  std::map<std::string, boost::shared_ptr<Geometry::Object>>::iterator objItr;
+  std::map<std::string, boost::shared_ptr<Geometry::IObject>>::iterator objItr;
   boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(
       new Mantid::Geometry::vtkGeometryCacheReader(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
-    ((*objItr).second)->setVtkGeometryCacheReader(reader);
+    // caching only applies to CSGObject
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+      csgObj->setVtkGeometryCacheReader(reader);
+    }
   }
 }
 
@@ -2499,12 +2511,16 @@ InstrumentDefinitionParser::writeAndApplyCache(
   const std::string cacheFullPath = usedCache->getFileFullPathStr();
   g_log.information() << "Creating cache in " << cacheFullPath << "\n";
   // create a vtk writer
-  std::map<std::string, boost::shared_ptr<Geometry::Object>>::iterator objItr;
+  std::map<std::string, boost::shared_ptr<Geometry::IObject>>::iterator objItr;
   boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(
       new Mantid::Geometry::vtkGeometryCacheWriter(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
-    ((*objItr).second)->setVtkGeometryCacheWriter(writer);
+    // caching only applies to CSGObject
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+      csgObj->setVtkGeometryCacheWriter(writer);
+    }
   }
   writer->write();
   return cachingOption;
@@ -2609,7 +2625,7 @@ void InstrumentDefinitionParser::adjust(
     std::map<std::string, Poco::XML::Element *> &getTypeElement) {
   UNUSED_ARG(isTypeAssembly)
   // check if pElem is an element with tag name 'type'
-  if ((pElem->tagName()).compare("type"))
+  if (pElem->tagName() != "type")
     throw Exception::InstrumentDefinitionError("Argument to function adjust() "
                                                "must be a pointer to an XML "
                                                "element with tag name type.");

@@ -4,7 +4,7 @@
 #include "MantidKernel/V3D.h"
 
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 namespace Mantid {
 using Kernel::PseudoRandomNumberGenerator;

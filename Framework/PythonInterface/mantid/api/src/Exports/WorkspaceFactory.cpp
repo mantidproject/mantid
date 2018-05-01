@@ -73,9 +73,9 @@ void export_WorkspaceFactory() {
 
   const char *createFromScratchDoc =
       "Create a clean new worksapce of the given size.";
-  typedef MatrixWorkspace_sptr (WorkspaceFactoryImpl::*createFromScratchPtr)(
-      const std::string &, const size_t &, const size_t &, const size_t &)
-      const;
+  using createFromScratchPtr = MatrixWorkspace_sptr (
+      WorkspaceFactoryImpl::*)(const std::string &, const size_t &,
+                               const size_t &, const size_t &) const;
 
   class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl",
                                                    no_init)

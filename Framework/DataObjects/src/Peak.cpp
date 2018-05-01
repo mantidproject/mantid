@@ -29,7 +29,7 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -49,7 +49,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -76,7 +76,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -99,7 +99,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -121,7 +121,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -145,7 +145,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -169,7 +169,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
@@ -197,8 +197,9 @@ Peak::Peak(const Peak &other)
       m_row(other.m_row), m_col(other.m_col), sourcePos(other.sourcePos),
       samplePos(other.samplePos), detPos(other.detPos),
       m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
-      m_orig_L(other.m_orig_L), m_detIDs(other.m_detIDs),
-      m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
+      m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
+      m_detIDs(other.m_detIDs), m_peakShape(other.m_peakShape->clone()),
+      convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -218,6 +219,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
+      m_peakNumber(ipeak.getPeakNumber()),
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -423,6 +425,15 @@ double Peak::getScattering() const {
 }
 
 // -------------------------------------------------------------------------------------
+/** Calculate the azimuthal angle of the peak  */
+double Peak::getAzimuthal() const {
+  // The detector is at 2 theta scattering angle
+  V3D detDir = detPos - samplePos;
+
+  return atan2(detDir.Y(), detDir.X());
+}
+
+// -------------------------------------------------------------------------------------
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
 double Peak::getDSpacing() const {
   // The detector is at 2 theta scattering angle
@@ -587,7 +598,8 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
     // client seems to know better.
   } else {
     // Find the detector
-    const bool found = findDetector(detectorDir);
+    InstrumentRayTracer tracer(m_inst);
+    const bool found = findDetector(detectorDir, tracer);
     if (!found) {
       // This is important, so we ought to log when this fails to happen.
       g_log.debug("Could not find detector after setting qLab via setQLab with "
@@ -623,26 +635,39 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
  * @return true if the detector ID was found.
  */
 bool Peak::findDetector() {
+  InstrumentRayTracer tracer(m_inst);
+  return findDetector(tracer);
+}
 
+/**
+ * Performs the same algorithm as findDetector() but uses a pre-existing
+ * InstrumentRayTracer object to be able to take adavtange of its caches.
+ * This method should be preferred if findDetector is to be called many times
+ * over the same instrument.
+ * @param tracer A reference to an existing InstrumentRayTracer object.
+ * @return true if the detector ID was found.
+ */
+bool Peak::findDetector(const InstrumentRayTracer &tracer) {
   // Scattered beam direction
   V3D beam = detPos - samplePos;
   beam.normalize();
 
-  return findDetector(beam);
+  return findDetector(beam, tracer);
 }
 
 /**
  * @brief Peak::findDetector : Find the detector along the beam location. sets
  * the detector, and detector position if found
- * @param beam : detector direction from the sample as V3D
+ * @param beam : Detector direction from the sample as V3D
+ * @param tracer : Ray tracer to use for detector finding
  * @return True if a detector has been found
  */
-bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
+bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
+                        const InstrumentRayTracer &tracer) {
   bool found = false;
   // Create a ray tracer
-  InstrumentRayTracer tracker(m_inst);
-  tracker.traceFromSample(beam);
-  IDetector_const_sptr det = tracker.getDetectorResult();
+  tracer.traceFromSample(beam);
+  IDetector_const_sptr det = tracer.getDetectorResult();
   if (det) {
     // Set the detector ID, the row, col, etc.
     this->setDetectorID(det->getID());
@@ -663,11 +688,11 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
         V3D gapDir = V3D(0., 0., 0.);
         gapDir[i] = gap;
         V3D beam1 = beam + gapDir;
-        tracker.traceFromSample(beam1);
-        IDetector_const_sptr det1 = tracker.getDetectorResult();
+        tracer.traceFromSample(beam1);
+        IDetector_const_sptr det1 = tracer.getDetectorResult();
         V3D beam2 = beam - gapDir;
-        tracker.traceFromSample(beam2);
-        IDetector_const_sptr det2 = tracker.getDetectorResult();
+        tracer.traceFromSample(beam2);
+        IDetector_const_sptr det2 = tracer.getDetectorResult();
         if (det1 && det2) {
           // Set the detector ID to one of the neighboring pixels
           this->setDetectorID(static_cast<int>(det1->getID()));
@@ -701,11 +726,16 @@ void Peak::setMonitorCount(double m_monitorCount) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get the final neutron energy */
+/** Get the final neutron energy in meV */
 double Peak::getFinalEnergy() const { return m_finalEnergy; }
 
-/** Get the initial (incident) neutron energy */
+/** Get the initial (incident) neutron energy in meV */
 double Peak::getInitialEnergy() const { return m_initialEnergy; }
+
+/** Get the difference between the initial and final neutron energy in meV */
+double Peak::getEnergyTransfer() const {
+  return getInitialEnergy() - getFinalEnergy();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Get the H index of the peak */
@@ -785,6 +815,12 @@ double Peak::getIntensity() const { return m_intensity; }
 /** Return the error on the integrated peak intensity */
 double Peak::getSigmaIntensity() const { return m_sigmaIntensity; }
 
+/** Return the peak intensity divided by the error in the intensity */
+double Peak::getIntensityOverSigma() const {
+  const auto result = m_intensity / m_sigmaIntensity;
+  return (std::isinf(result)) ? 0.0 : result;
+}
+
 /** Set the integrated peak intensity
  * @param m_intensity :: intensity value   */
 void Peak::setIntensity(double m_intensity) { this->m_intensity = m_intensity; }
@@ -831,7 +867,7 @@ void Peak::setGoniometerMatrix(
   m_InverseGoniometerMatrix = m_GoniometerMatrix;
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
-        "Peak::setGoniometerMatrix(): Goniometer matrix must non-singular.");
+        "Peak::setGoniometerMatrix(): Goniometer matrix must be non-singular.");
 }
 
 // -------------------------------------------------------------------------------------
@@ -843,8 +879,8 @@ std::string Peak::getBankName() const { return m_bankName; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, returns the row (y) of the pixel of the
-* detector.
-* Returns -1 if it could not find it. */
+ * detector.
+ * Returns -1 if it could not find it. */
 int Peak::getRow() const { return m_row; }
 
 // -------------------------------------------------------------------------------------
@@ -852,6 +888,11 @@ int Peak::getRow() const { return m_row; }
  * detector.
  * Returns -1 if it could not find it. */
 int Peak::getCol() const { return m_col; }
+
+// -------------------------------------------------------------------------------------
+/**Returns the unique peak number
+ * Returns -1 if it could not find it. */
+int Peak::getPeakNumber() const { return m_peakNumber; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, sets the row (y) of the pixel of the
@@ -864,6 +905,13 @@ void Peak::setRow(int m_row) { this->m_row = m_row; }
  * detector.
  * @param m_col :: col value   */
 void Peak::setCol(int m_col) { this->m_col = m_col; }
+
+// -------------------------------------------------------------------------------------
+/** Sets the unique peak number
+ * @param m_peakNumber :: unique peak number value   */
+void Peak::setPeakNumber(int m_peakNumber) {
+  this->m_peakNumber = m_peakNumber;
+}
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
@@ -916,6 +964,8 @@ double Peak::getValueByColName(const std::string &name_in) const {
     return this->getRow();
   else if (name == "col")
     return this->getCol();
+  else if (name == "peaknumber")
+    return double(this->getPeakNumber());
   else
     throw std::runtime_error(
         "Peak::getValueByColName() unknown column or column is not a number: " +
@@ -1003,5 +1053,5 @@ Mantid::Kernel::V3D Peak::getDetectorPosition() const {
 
 Mantid::Kernel::Logger Peak::g_log("PeakLogger");
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

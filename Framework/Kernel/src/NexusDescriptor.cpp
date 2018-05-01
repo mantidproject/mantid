@@ -125,9 +125,10 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
   }
   try {
     initialize(filename);
-  } catch (::NeXus::Exception &) {
-    throw std::invalid_argument("NexusDescriptor::initialize - File '" +
-                                filename + "' does not look like a HDF file.");
+  } catch (::NeXus::Exception &e) {
+    throw std::invalid_argument(
+        "NexusDescriptor::initialize - File '" + filename +
+        "' does not look like a HDF file.\n Error was: " + e.what());
   }
 }
 

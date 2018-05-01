@@ -7,10 +7,10 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/Common/IndirectInstrumentConfig.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 #include "IndirectTab.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include <QDoubleValidator>
 #include <QMap>
@@ -95,12 +95,12 @@ protected:
                            std::string analyser = "",
                            std::string reflection = "");
   /// Function to get details about the instrumet from a given workspace
-  QMap<QString, QString> getInstrumentDetails();
+  QMap<QString, QString> getInstrumentDetails() const;
   std::map<std::string, double>
   getRangesFromInstrument(QString instName = "", QString analyser = "",
                           QString reflection = "");
   /// Get the instrument config widget
-  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration();
+  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
 
 private slots:
   void tabExecutionComplete(bool error);
