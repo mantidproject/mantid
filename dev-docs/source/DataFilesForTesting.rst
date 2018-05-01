@@ -107,6 +107,8 @@ There are two places files may be found:
    for test `IDF <IDF>`__ files
 
 
+.. _DataFilesForTesting_AddingANewFile:
+
 Adding A New File(s)
 ####################
 
