@@ -59,9 +59,8 @@ class IqtFitSequentialTest(unittest.TestCase):
         text_axis = matrixWS.getAxis(1)
         self.assertTrue(text_axis.isText())
         self.assertEquals('f0.A0',text_axis.label(0))
-        self.assertEquals('f0.A1', text_axis.label(1))
-        self.assertEquals('f1.Height',text_axis.label(2))
-        self.assertEquals('f1.Lifetime',text_axis.label(3))
+        self.assertEquals('f1.Height',text_axis.label(1))
+        self.assertEquals('f1.Lifetime',text_axis.label(2))
 
         # Check bin units
         self.assertEquals('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
