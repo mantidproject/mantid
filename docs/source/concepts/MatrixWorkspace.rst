@@ -54,7 +54,7 @@ If you want to check if a variable points to something that is a Matrix Workspac
         print(histoWS.name() + " is a " + histoWS.id() + \
                  " and can be treated as a MatrixWorkspace")
 
-    print("\nFor more workspace types")
+    print("\nFor more Matrix Workspace types")
     eventWS = CreateSampleWorkspace(WorkspaceType="Event")
     svWS = CreateSingleValuedWorkspace()
     tableWS = CreateEmptyTableWorkspace()
@@ -64,9 +64,9 @@ If you want to check if a variable points to something that is a Matrix Workspac
                                NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
     myWorkspaceList = [histoWS,eventWS,svWS,tableWS,mdWS,mdHistoWS]
-    print("MatrixWorkspace? Type")
+    print("Is MatrixWorkspace?\tType")
     for ws in myWorkspaceList:
-        print("   {0}\t      {1}".format(isinstance(ws, MatrixWorkspace), ws.id()))
+        print("{0}\t{1}".format(isinstance(ws, MatrixWorkspace), ws.id()))
 
 
 Output:
@@ -76,14 +76,14 @@ Output:
 
     histoWS is a Workspace2D and can be treated as a MatrixWorkspace
 
-    For more workspace types
-    MatrixWorkspace? Type
-       True           Workspace2D
-       True           EventWorkspace
-       True           WorkspaceSingleValue
-       False          TableWorkspace
-       False          MDEventWorkspace<MDLeanEvent,3>
-       False          MDHistoWorkspace
+    For more Matrix Workspace types
+    Is MatrixWorkspace? Type
+    True        Workspace2D
+    True        EventWorkspace
+    True        WorkspaceSingleValue
+    False       TableWorkspace
+    False       MDEventWorkspace<MDLeanEvent,3>
+    False       MDHistoWorkspace
 
 Matrix Workspace Properties
 ###########################
@@ -98,7 +98,7 @@ Matrix Workspace Properties
   # find out the number of histograms on a workspace use getNumberHistograms()
   print("number of histograms = {0}".format(ws.getNumberHistograms()))
 
-  # To find out the number of bins use blocksize()
+  # To find out the number of bins along the x-axis use blocksize()
   print("number of bins = {0}".format(ws.blocksize()))
   # To find out the bin containing a value use binIndexOf()
   print("bin index containing 502.2 for a histogram (0 by default) = {0}".format(ws.binIndexOf(502.2)))
