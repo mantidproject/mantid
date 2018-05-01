@@ -53,7 +53,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         nbins = matrixWS.blocksize()
         nhists = matrixWS.getNumberHistograms()
         self.assertEquals(nbins, 17)
-        self.assertEquals(nhists, 4)
+        self.assertEquals(nhists, 3)
 
         # Check histogram names
         text_axis = matrixWS.getAxis(1)
