@@ -66,6 +66,13 @@ std::map<std::string, std::string> IqtFitSequential::validateInputs() {
   return errors;
 }
 
+bool IqtFitSequential::isFitParameter(const std::string &name) const {
+  return name.rfind("A0") != std::string::npos ||
+         name.rfind("Height") != std::string::npos ||
+         name.rfind("Stretching") != std::string::npos ||
+         name.rfind("Lifetime") != std::string::npos;
+}
+
 bool IqtFitSequential::throwIfElasticQConversionFails() const { return true; }
 
 std::vector<API::MatrixWorkspace_sptr> IqtFitSequential::getWorkspaces() const {
