@@ -60,8 +60,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false),
-      m_autoreductionInProgress(false) {
+      m_searcher(searcher), m_instrumentChanged(false), m_autoreduction() {
   assert(m_view != nullptr);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -145,7 +144,7 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
-    transfer(m_view->getSelectedSearchRows());
+    transfer(m_view->getSelectedSearchRows(), m_view->getSelectedGroup());
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     changeInstrument();
@@ -268,7 +267,7 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
   }
 
-  m_autoreductionInProgress = true;
+  m_autoreduction.start(m_view->getSelectedGroup(), m_view->getSearchString());
   startAutoreduction();
 }
 
@@ -294,7 +293,7 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   // If autoreduction is running, perform the next reduction using the new
   // search
   // results
-  if (m_autoreductionInProgress)
+  if (m_autoreduction.running())
     runAutoreduction();
 }
 
@@ -305,26 +304,23 @@ void ReflRunsTabPresenter::runAutoreduction() {
   // already exist so will only add new ones)
   auto rowsToTransfer = m_view->getAllSearchRows();
   if (rowsToTransfer.size() > 0)
-    transfer(rowsToTransfer);
-
-  // Cache the current search string
-  m_autoSearchString = m_view->getSearchString();
+    transfer(rowsToTransfer, m_autoreduction.group());
 
   // Process all rows in the table
-  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+  auto tablePresenter = m_tablePresenters.at(m_autoreduction.group());
   tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
 }
 
 /** Check whether the user started an autoreduction process
  */
 bool ReflRunsTabPresenter::autoreductionInProgress() const {
-  return m_autoreductionInProgress;
+  return m_autoreduction.running();
 }
 
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
-void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer) {
+void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer, int group) {
   // Build the input for the transfer strategy
   SearchResultMap runs;
 
@@ -401,7 +397,7 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer) {
     }
   }
 
-  m_tablePresenters.at(m_view->getSelectedGroup())
+  m_tablePresenters.at(group)
       ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
           results.getTransferRuns()));
 }
@@ -552,7 +548,7 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
 */
 void ReflRunsTabPresenter::pause(int group) {
   m_view->stopTimer();
-  m_autoreductionInProgress = false;
+  m_autoreduction.stop();
   updateWidgetEnabledState(false);
 
   // We get here in two scenarios: processing is still running, in which case
@@ -574,7 +570,8 @@ void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
 * @return : Boolean on whether to start a new autoreduction
 */
 bool ReflRunsTabPresenter::requireNewAutoreduction() const {
-  bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
+  bool searchNumChanged =
+      m_autoreduction.searchStringChanged(m_view->getSearchString());
   bool transferMethodChanged =
       m_currentTransferMethod != m_view->getTransferMethod();
 

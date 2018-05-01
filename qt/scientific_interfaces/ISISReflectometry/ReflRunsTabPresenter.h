@@ -30,6 +30,37 @@ class ReflTransferStrategy;
 using MantidWidgets::ProgressableView;
 using MantidWidgets::DataProcessor::DataProcessorPresenter;
 
+/** @class Autoreduction
+
+Class to hold information about an autoreduction process
+*/
+class Autoreduction {
+public:
+  Autoreduction() : m_running(false), m_group(0){};
+
+  bool running() const { return m_running; }
+  int group() const { return m_group; }
+  bool searchStringChanged(const std::string &newSearchString) const {
+    return m_searchString != newSearchString;
+  }
+
+  void start(const int group, const std::string &searchString) {
+    m_group = group;
+    m_searchString = searchString;
+    run();
+  }
+  void run() { m_running = true; }
+  void stop() { m_running = false; }
+
+private:
+  /// Flag indicating whether autoreduction is currently running
+  bool m_running;
+  /// The group autoreduction is running on
+  int m_group;
+  /// The string that was used to start the autoreduction
+  std::string m_searchString;
+};
+
 /** @class ReflRunsTabPresenter
 
 ReflRunsTabPresenter is a presenter class for the Reflectometry Interface. It
@@ -118,12 +149,10 @@ private:
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
-  /// The current search string used for autoreduction
-  std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
-  /// Whether autoreduction is in progress
-  bool m_autoreductionInProgress;
+  /// Information about the autoreduction process
+  Autoreduction m_autoreduction;
 
   /// searching
   void search();
@@ -133,7 +162,7 @@ private:
   void startNewAutoreduction();
   void startAutoreduction();
   void runAutoreduction();
-  void transfer(const std::set<int> &rowsToTransfer);
+  void transfer(const std::set<int> &rowsToTransfer, int group);
   void pushCommands();
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
