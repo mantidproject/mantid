@@ -20,11 +20,10 @@ constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 constexpr double MUON_LIFETIME_MICROSECONDS{
     Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
 
-	bool isZero(double value) {
-		bool result= value == 0;
-		return result;
-	}
-
+bool isZero(double value) {
+  bool result = value == 0;
+  return result;
+}
 }
 
 namespace Mantid {
@@ -106,22 +105,23 @@ void MuonRemoveExpDecay::exec() {
       throw std::invalid_argument(
           "Spectra size greater than the number of spectra!");
     }
-	auto fsdaf = (inputWS->y(specNum));
-	auto emptySpectrum = std::all_of(inputWS->y(specNum).begin(), inputWS->y(specNum).end(), isZero);
-	if (emptySpectrum) {
-			// if the y values are all zero do not change them
-			m_log.warning("waaa " + std::to_string(specNum));
-		outputWS->setHistogram(specNum, inputWS->histogram(specNum));
-	}else{
-		// Remove decay from Y and E
-		outputWS->setHistogram(specNum, removeDecay(inputWS->histogram(specNum)));
+    auto fsdaf = (inputWS->y(specNum));
+    auto emptySpectrum = std::all_of(inputWS->y(specNum).begin(),
+                                     inputWS->y(specNum).end(), isZero);
+    if (emptySpectrum) {
+      // if the y values are all zero do not change them
+      m_log.warning("waaa " + std::to_string(specNum));
+      outputWS->setHistogram(specNum, inputWS->histogram(specNum));
+    } else {
+      // Remove decay from Y and E
+      outputWS->setHistogram(specNum, removeDecay(inputWS->histogram(specNum)));
 
-		// do scaling and subtract 1
-		const double normConst = calNormalisationConst(outputWS, spectra[i]);
-		outputWS->mutableY(specNum) /= normConst;
-		outputWS->mutableY(specNum) -= 1.0;
-		outputWS->mutableE(specNum) /= normConst;
-	}
+      // do scaling and subtract 1
+      const double normConst = calNormalisationConst(outputWS, spectra[i]);
+      outputWS->mutableY(specNum) /= normConst;
+      outputWS->mutableY(specNum) -= 1.0;
+      outputWS->mutableE(specNum) /= normConst;
+    }
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION

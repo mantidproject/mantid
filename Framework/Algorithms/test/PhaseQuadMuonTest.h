@@ -17,19 +17,22 @@ using namespace Mantid::API;
 
 namespace {
 
-void populatePhaseTable2(ITableWorkspace_sptr phaseTable,const MatrixWorkspace_sptr ws){
-  phaseTable->addColumn("int","DetectprID");
+void populatePhaseTable2(ITableWorkspace_sptr phaseTable,
+                         const MatrixWorkspace_sptr ws) {
+  phaseTable->addColumn("int", "DetectprID");
   phaseTable->addColumn("double", "Asymmetry");
   phaseTable->addColumn("double", "phase");
   double asym(1.);
   for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
-    phaseRow1 << int(i) << asym << 2.*M_PI*double(i+1)/(1.+double(ws->getNumberHistograms())); 
+    phaseRow1 << int(i) << asym
+              << 2. * M_PI * double(i + 1) /
+                     (1. + double(ws->getNumberHistograms()));
   }
 }
 bool isZero(double value) {
-	bool result = value == 0;
-	return result;
+  bool result = value == 0;
+  return result;
 }
 void populatePhaseTable(ITableWorkspace_sptr phaseTable,
                         std::vector<std::string> names, bool swap = false) {
@@ -83,26 +86,27 @@ IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
 }
 
 MatrixWorkspace_sptr setupWS(MatrixWorkspace_sptr m_loadedData) {
-	boost::shared_ptr<ITableWorkspace> phaseTable(
-		new Mantid::DataObjects::TableWorkspace);
-        MatrixWorkspace_sptr ws = m_loadedData->clone();
-	// create toy data set
-	populatePhaseTable2(phaseTable,ws);
-	auto xData = ws->points(0);
-	for (size_t spec=0; spec < ws->getNumberHistograms(); spec++) {
-		for (size_t j=0; j < xData.size(); j++) {
-			if (spec == 12 || spec == 4) {
-				ws->mutableY(spec)[j] = 0.0;
-				ws->mutableE(spec)[j] = 0.0;
-			}
-			else {
-				ws->mutableY(spec)[j] = sin(2.3*xData[j]+phaseTable->Double(spec,2))*exp(-xData[j]/2.19703);
-				ws->mutableE(spec)[j] = cos(0.2*xData[j]);
-			}
-		}
-	}
-	return ws;
-	}
+  boost::shared_ptr<ITableWorkspace> phaseTable(
+      new Mantid::DataObjects::TableWorkspace);
+  MatrixWorkspace_sptr ws = m_loadedData->clone();
+  // create toy data set
+  populatePhaseTable2(phaseTable, ws);
+  auto xData = ws->points(0);
+  for (size_t spec = 0; spec < ws->getNumberHistograms(); spec++) {
+    for (size_t j = 0; j < xData.size(); j++) {
+      if (spec == 12 || spec == 4) {
+        ws->mutableY(spec)[j] = 0.0;
+        ws->mutableE(spec)[j] = 0.0;
+      } else {
+        ws->mutableY(spec)[j] =
+            sin(2.3 * xData[j] + phaseTable->Double(spec, 2)) *
+            exp(-xData[j] / 2.19703);
+        ws->mutableE(spec)[j] = cos(0.2 * xData[j]);
+      }
+    }
+  }
+  return ws;
+}
 
 MatrixWorkspace_sptr loadMuonDataset() {
   IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
@@ -141,21 +145,22 @@ public:
     TS_ASSERT(phaseQuad->isInitialized());
   }
   void testDead() {
-	  MatrixWorkspace_sptr ws = setupWS(m_loadedData);
-	  size_t nspec = ws->getNumberHistograms();
-          // check got some dead detectors
-	  std::vector<bool> emptySpectrum;
-	  for (size_t h = 0; h < nspec; h++) {
-		  emptySpectrum.push_back(std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
-	  }
-	  TS_ASSERT_EQUALS(emptySpectrum[2],false);
-	  TS_ASSERT_EQUALS(emptySpectrum[4], true);
-	  TS_ASSERT_EQUALS(emptySpectrum[12], true);
-	  TS_ASSERT_EQUALS(emptySpectrum[9], false);
-	  TS_ASSERT_EQUALS(emptySpectrum[22], false);
+    MatrixWorkspace_sptr ws = setupWS(m_loadedData);
+    size_t nspec = ws->getNumberHistograms();
+    // check got some dead detectors
+    std::vector<bool> emptySpectrum;
+    for (size_t h = 0; h < nspec; h++) {
+      emptySpectrum.push_back(
+          std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
+    }
+    TS_ASSERT_EQUALS(emptySpectrum[2], false);
+    TS_ASSERT_EQUALS(emptySpectrum[4], true);
+    TS_ASSERT_EQUALS(emptySpectrum[12], true);
+    TS_ASSERT_EQUALS(emptySpectrum[9], false);
+    TS_ASSERT_EQUALS(emptySpectrum[22], false);
 
-          // do phase Quad
-     IAlgorithm_sptr phaseQuad = setupAlg(ws, true);
+    // do phase Quad
+    IAlgorithm_sptr phaseQuad = setupAlg(ws, true);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -176,22 +181,21 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0],  1.1472, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], 1.1472, 0.0001);
     TS_ASSERT_DELTA(specReY[20], 1.2517, 0.0001);
     TS_ASSERT_DELTA(specReY[50], 1.3087, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0],  0.2638, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.2638, 0.0001);
     TS_ASSERT_DELTA(specReE[20], 0.2837, 0.0001);
     TS_ASSERT_DELTA(specReE[50], 0.3165, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0],  -0.2109, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], -0.2109, 0.0001);
     TS_ASSERT_DELTA(specImY[20], -0.1741, 0.0001);
     TS_ASSERT_DELTA(specImY[50], -0.1460, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0],  0.0553, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.0553, 0.0001);
     TS_ASSERT_DELTA(specImE[20], 0.0595, 0.0001);
     TS_ASSERT_DELTA(specImE[50], 0.0664, 0.0001);
-          
   }
   void testExecPhaseTable() {
     IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true);
