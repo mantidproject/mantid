@@ -25,15 +25,17 @@ public:
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
   virtual void notifyPasteRowsRequested() = 0;
-// TODO:  virtual void notifyFilterReset() = 0;
+  // TODO:  virtual void notifyFilterReset() = 0;
   virtual ~JobTreeViewSubscriber() = default;
 };
+
 
 class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView {
   Q_OBJECT
 public:
   // JobTreeView(QWidget *parent = nullptr);
-  JobTreeView(QStringList const &columnHeadings, QWidget *parent = nullptr);
+  JobTreeView(QStringList const &columnHeadings, Cell const &defaultCellStyle,
+              QWidget *parent = nullptr);
 
   void enableFiltering();
 
@@ -97,6 +99,8 @@ protected slots:
   void commitData(QWidget *) override;
 
 private:
+  static Cell const deadCell;
+
   void appendAndEditAtChildRow();
   void appendAndEditAtRowBelow();
   bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
@@ -114,7 +118,7 @@ private:
   bool isOnlyChild(QModelIndexForMainModel const &index) const;
   bool isOnlyChildOfRoot(QModelIndexForMainModel const &index) const;
   QModelIndex siblingIfExistsElseParent(QModelIndex const &index) const;
-  bool rowRemovalWouldBeIneffective(QModelIndex const &indexToRemove) const;
+  bool rowRemovalWouldBeIneffective(QModelIndexForMainModel const &indexToRemove) const;
 
   QModelIndexForFilteredModel
   expanded(QModelIndexForFilteredModel const &index);
@@ -131,6 +135,7 @@ private:
 
   JobTreeViewSubscriber *m_notifyee;
   QStandardItemModel m_mainModel;
+  QtStandardItemTreeModelAdapter m_adaptedMainModel;
 
   QtFilterLeafNodes m_filteredModel;
   QModelIndexForMainModel m_lastEdited;

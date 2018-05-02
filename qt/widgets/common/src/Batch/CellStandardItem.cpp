@@ -22,14 +22,20 @@ QColor getBorderColor(QStandardItem const &item) {
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   item.setText(QString::fromStdString(cell.contentText()));
   item.setEditable(cell.isEditable());
-  item.setData(QColor(cell.borderColor().c_str()), CellUserRoles::BorderColor);
+  auto borderColor = QColor(cell.borderColor().c_str());
+  borderColor.setAlpha(cell.borderTransparency());
+  item.setData(borderColor, CellUserRoles::BorderColor);
   item.setData(cell.borderThickness(), CellUserRoles::BorderThickness);
 }
 
 Cell extractCellPropertiesFromItem(QStandardItem const& item) {
   auto cell = Cell(item.text().toStdString());
   cell.setBorderThickness(getBorderThickness(item));
-  cell.setBorderColor(getBorderColor(item).name().toStdString());
+
+  auto borderColor = getBorderColor(item);
+  cell.setBorderColor(borderColor.name().toStdString());
+  cell.setBorderTransparency(borderColor.alpha());
+
   cell.setEditable(cell.isEditable());
   return cell;
 }

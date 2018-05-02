@@ -12,68 +12,75 @@ namespace MantidWidgets {
 namespace Batch {
 
 template <typename Action>
-void enumerateCellsInRow(QModelIndexForMainModel const& startIndex, int columns, Action const& action) {
+void enumerateCellsInRow(QModelIndexForMainModel const &startIndex, int columns,
+                         Action const &action) {
   for (auto i = 0; i < columns; i++) {
     auto cellIndex = startIndex.sibling(startIndex.row(), i);
     action(cellIndex, i);
   }
 }
 
-QModelIndexForMainModel rootModelIndex(QStandardItemModel const &model);
-QModelIndexForFilteredModel rootModelIndex(QSortFilterProxyModel const &model);
+EXPORT_OPT_MANTIDQT_COMMON QModelIndexForMainModel
+rootModelIndex(QStandardItemModel const &model);
+EXPORT_OPT_MANTIDQT_COMMON QModelIndexForFilteredModel
+rootModelIndex(QSortFilterProxyModel const &model);
+
+EXPORT_OPT_MANTIDQT_COMMON QStandardItem *
+modelItemFromIndex(QStandardItemModel &model,
+                   QModelIndexForMainModel const &index);
+
+EXPORT_OPT_MANTIDQT_COMMON QStandardItem const *
+modelItemFromIndex(QStandardItemModel const &model,
+                   QModelIndexForMainModel const &index);
 
 EXPORT_OPT_MANTIDQT_COMMON QList<QStandardItem *>
 rowFromCells(std::vector<Cell> const &cells);
 
-QList<QStandardItem *> emptyRow(int columnCount);
+EXPORT_OPT_MANTIDQT_COMMON QList<QStandardItem *>
+paddedRowFromCells(std::vector<Cell> const &cells, Cell const &paddingCell,
+                   int paddedWidth);
 
-EXPORT_OPT_MANTIDQT_COMMON std::vector<Cell>
-cellsAtRow(QStandardItemModel const &model,
-           QModelIndexForMainModel const &firstCellIndex);
+EXPORT_OPT_MANTIDQT_COMMON QList<QStandardItem *> emptyRow(int columnCount);
 
-EXPORT_OPT_MANTIDQT_COMMON void
-setCellsAtRow(QStandardItemModel &model,
-              QModelIndexForMainModel const &firstCellIndex,
-              std::vector<Cell> const &cells);
+class EXPORT_OPT_MANTIDQT_COMMON QtStandardItemTreeModelAdapter {
+public:
+  QtStandardItemTreeModelAdapter(QStandardItemModel &model,
+                                 Cell const &emptyCellStyle);
 
-EXPORT_OPT_MANTIDQT_COMMON Cell
-cellFromCellIndex(QStandardItemModel const &model,
-                  QModelIndexForMainModel const &index);
+  QModelIndexForMainModel rootIndex() const;
+  QList<QStandardItem *> emptyRow(int columnCount) const;
 
-void setCellAtCellIndex(QStandardItemModel &model,
-                        QModelIndexForMainModel const &index,
-                        Cell const &newCellProperties);
+  std::vector<Cell>
+  cellsAtRow(QModelIndexForMainModel const &firstCellIndex) const;
+  void setCellsAtRow(QModelIndexForMainModel const &rowIndex,
+                     std::vector<Cell> const &cells);
 
-QModelIndexForMainModel
-appendEmptySiblingRow(QStandardItemModel &model,
-                      QModelIndexForMainModel const &index);
-QModelIndexForMainModel appendSiblingRow(QStandardItemModel &model,
-                                         QModelIndexForMainModel const &index,
+  Cell cellFromCellIndex(QModelIndexForMainModel const &index) const;
+  void setCellAtCellIndex(QModelIndexForMainModel const &index,
+                          Cell const &newCellProperties);
+
+  QModelIndexForMainModel appendSiblingRow(QModelIndexForMainModel const &index,
+                                           QList<QStandardItem *> cells);
+  QModelIndexForMainModel
+  appendEmptySiblingRow(QModelIndexForMainModel const &index);
+
+  QModelIndexForMainModel appendChildRow(QModelIndexForMainModel const &parent,
                                          QList<QStandardItem *> cells);
+  QModelIndexForMainModel
+  appendEmptyChildRow(QModelIndexForMainModel const &parent);
 
-QModelIndexForMainModel
-appendEmptyChildRow(QStandardItemModel &model,
-                    QModelIndexForMainModel const &parent);
-QModelIndexForMainModel appendChildRow(QStandardItemModel &model,
-                                       QModelIndexForMainModel const &parent,
-                                       QList<QStandardItem *> cells);
+  QModelIndexForMainModel insertChildRow(QModelIndexForMainModel const &parent,
+                                         int column,
+                                         QList<QStandardItem *> cells);
+  QModelIndexForMainModel
+  insertEmptyChildRow(QModelIndexForMainModel const &parent, int column);
 
-QModelIndexForMainModel insertChildRow(QStandardItemModel &model,
-                                       QModelIndexForMainModel const &parent,
-                                       int column,
-                                       QList<QStandardItem *> cells);
-QModelIndexForMainModel
-insertEmptyChildRow(QStandardItemModel &model,
-                    QModelIndexForMainModel const &parent, int column);
+  void removeRowFrom(QModelIndexForMainModel const &index);
 
-QStandardItem *modelItemFromIndex(QStandardItemModel &model,
-                                  QModelIndexForMainModel const &index);
-
-QStandardItem const *modelItemFromIndex(QStandardItemModel const &model,
-                                        QModelIndexForMainModel const &index);
-
-void removeRowFrom(QStandardItemModel &model,
-                   QModelIndexForMainModel const &index);
+private:
+  QStandardItemModel &m_model;
+  Cell m_emptyCellStyle;
+};
 }
 }
 }

@@ -1550,7 +1550,7 @@ class JobTreeView : public QTreeView
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 %End
 public:
-    JobTreeView(const QStringList &columnHeadings, QWidget *parent = nullptr);
+    JobTreeView(const QStringList &columnHeadings, const Cell& defaultCellStyle, QWidget *parent = nullptr);
 
     void subscribe(JobTreeViewSubscriber& subscriber);
     void insertChildRowOf(const RowLocation &parent, int beforeRow,

@@ -24,19 +24,8 @@ def row_from_text(*cell_texts):
 
 
 def group_row(group_title, n_columns):
-    def dead_cell():
-        cell = uneditable_cell("")
-        cell.setBorderColor("transparent")
-        return cell
+    return [cell(group_title)]
 
-    return [cell(group_title)] + [dead_cell() for n in range(n_columns -1)]
-
-
-def uneditable_cell(cell_text):
-    new_cell = cell(cell_text)
-    new_cell.disableEditing()
-    return new_cell
-    
 
 class RegexPredicate(MantidQt.MantidWidgets.Batch.RowPredicate):
     def __init__(self, view, text):
@@ -68,17 +57,33 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
 
     def on_row_inserted(self, rowLoc):
         print("Row inserted at {}".format(rowLoc.path()))
+
+        def killed_cell(cell):
+            cell.disableEditing()
+            cell.setBorderThickness(0)
+            cell.setBorderColor("transparent")
+            return cell
+
+        if rowLoc.depth() > 2:
+            print( "Deleting" )
+            self.table.removeRowAt(rowLoc)
+
         if rowLoc.depth() == 1:
             print ("Disabled Editing At {}".format(rowLoc.path()))
-            self.table.disableEditing(rowLoc)
-        #if rowLoc.depth() > 2 or rowLoc.rowRelativeToParent() >= 5:
-        #    self.table.removeRowAt(rowLoc)
+            cells = self.table.cellsAt(rowLoc)
+
+            for i, cell in enumerate(cells):
+                if i > 0:
+                    cells[i] = killed_cell(cell)
+
+            self.table.setCellsAt(rowLoc, cells)
+
 
     def on_copy_runs_request(self):
         self.clipboard = self.table.selectedSubtrees()
         self.table.clearSelection()
         if self.clipboard is not None:
-            print(self.clipboard)
+            print(self.clipboard[0][0].cells()[0].borderColor())
         else:
             print ("Bad selection for copy.")
 
@@ -100,7 +105,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
                                                                "Q max",
                                                                "dQ/Q",
                                                                "Scale",
-                                                               "Options"], self)
+                                                               "Options"], cell(""), self)
         self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table)
 
         self.table_signals.removeRowsRequested.connect(self.on_remove_runs_request)

@@ -15,9 +15,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-JobTreeView::JobTreeView(QStringList const &columnHeadings, QWidget *parent)
-    : QTreeView(parent),
-      m_mainModel(this),
+JobTreeView::JobTreeView(QStringList const &columnHeadings,
+                         Cell const &emptyCellStyle, QWidget *parent)
+    : QTreeView(parent), m_mainModel(0, columnHeadings.size(), this),
+      m_adaptedMainModel(m_mainModel, emptyCellStyle),
       m_filteredModel(RowLocationAdapter(m_mainModel), this),
       m_lastEdited(QModelIndex()) {
 
@@ -118,21 +119,23 @@ void JobTreeView::removeRows(std::vector<RowLocation> rowsToRemove) {
 
 Cell JobTreeView::cellAt(RowLocation location, int column) const {
   auto const cellIndex = rowLocation().indexAt(location, column);
-  return cellFromCellIndex(m_mainModel, cellIndex);
+  return m_adaptedMainModel.cellFromCellIndex(cellIndex);
 }
 
 void JobTreeView::setCellAt(RowLocation location, int column,
                             Cell const &cell) {
   auto const cellIndex = rowLocation().indexAt(location, column);
-  setCellAtCellIndex(m_mainModel, cellIndex, cell);
+  m_adaptedMainModel.setCellAtCellIndex(cellIndex, cell);
 }
 
 std::vector<Cell> JobTreeView::cellsAt(RowLocation const &location) const {
-  return cellsAtRow(m_mainModel, rowLocation().indexAt(location));
+  return m_adaptedMainModel.cellsAtRow(rowLocation().indexAt(location));
 }
 
-void JobTreeView::setCellsAt(RowLocation const &location, std::vector<Cell> const &cells) {
-  return setCellsAtRow(m_mainModel, rowLocation().indexAt(location), cells);
+void JobTreeView::setCellsAt(RowLocation const &location,
+                             std::vector<Cell> const &cells) {
+  return m_adaptedMainModel.setCellsAtRow(rowLocation().indexAt(location),
+                                          cells);
 }
 
 void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
@@ -199,8 +202,11 @@ void JobTreeView::subscribe(JobTreeViewSubscriber &subscriber) {
 bool JobTreeView::hasEditorOpen() const { return m_lastEdited.isValid(); }
 
 bool JobTreeView::rowRemovalWouldBeIneffective(
-    QModelIndex const &indexToRemove) const {
-  return areOnSameRow(currentIndex(), indexToRemove) && hasEditorOpen();
+    QModelIndexForMainModel const &indexToRemove) const {
+  return areOnSameRow(
+             mapToMainModel(fromFilteredModel(currentIndex())).untyped(),
+             indexToRemove.untyped()) &&
+         hasEditorOpen();
 }
 
 QModelIndex
@@ -235,32 +241,45 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
   assertOrThrow(!isOnlyChildOfRoot(indexToRemove),
                 "Attempted to delete the only child of the invisible root"
                 " for the main model. Try removeAllRows() instead.");
-  if (rowRemovalWouldBeIneffective(indexToRemove.untyped())) {
-    auto rowIndexToSwitchTo =
-        siblingIfExistsElseParent(indexToRemove.untyped());
-    setCurrentIndex(rowIndexToSwitchTo);
+  assertOrThrow(m_filteredModel.isReset(),
+                "Attempted to remove a node while a filter was applied. Call "
+                "resetFilter before "
+                "removing.");
+  if (rowRemovalWouldBeIneffective(indexToRemove)) {
+    auto rowIndexToSwitchTo = mapToFilteredModel(
+        fromMainModel(siblingIfExistsElseParent(indexToRemove.untyped())));
+    setCurrentIndex(rowIndexToSwitchTo.untyped());
   }
-  removeRowFrom(m_mainModel, indexToRemove);
+  m_adaptedMainModel.removeRowFrom(indexToRemove);
 }
 
 void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow) {
-  insertEmptyChildRow(m_mainModel, rowLocation().indexAt(parent), beforeRow);
+  m_adaptedMainModel.insertEmptyChildRow(rowLocation().indexAt(parent),
+                                         beforeRow);
 }
 
 void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
                                    std::vector<Cell> const &cells) {
-  insertChildRow(m_mainModel, rowLocation().indexAt(parent), beforeRow,
-                 rowFromCells(cells));
+  assertOrThrow(cells.size() <= m_mainModel.columnCount(),
+                "Attempted to add row with more cells than columns. Increase "
+                "the number of columns by increasing the number of headings.");
+  m_adaptedMainModel.insertChildRow(
+      rowLocation().indexAt(parent), beforeRow,
+      paddedRowFromCells(cells, deadCell, m_mainModel.columnCount()));
 }
 
+Cell const JobTreeView::deadCell = Cell("", 0, "transparent", 0, false);
+
 void JobTreeView::appendChildRowOf(RowLocation const &parent) {
-  appendEmptyChildRow(m_mainModel, rowLocation().indexAt(parent));
+  m_adaptedMainModel.appendEmptyChildRow(rowLocation().indexAt(parent));
 }
 
 void JobTreeView::appendChildRowOf(RowLocation const &parent,
                                    std::vector<Cell> const &cells) {
   auto parentIndex = rowLocation().indexAt(parent);
-  appendChildRow(m_mainModel, parentIndex, rowFromCells(cells));
+  m_adaptedMainModel.appendChildRow(
+      parentIndex,
+      paddedRowFromCells(cells, deadCell, m_mainModel.columnCount()));
 }
 
 void JobTreeView::editAt(QModelIndexForFilteredModel const &index) {
@@ -294,7 +313,7 @@ JobTreeView::findOrMakeCellBelow(QModelIndexForFilteredModel const &index) {
   else {
     auto indexForModel = mapToMainModel(index);
     resetFilter();
-    auto newIndex = appendEmptySiblingRow(m_mainModel, indexForModel);
+    auto newIndex = m_adaptedMainModel.appendEmptySiblingRow(indexForModel);
     return std::make_pair(mapToFilteredModel(newIndex), true);
   }
 }
@@ -314,7 +333,7 @@ QModelIndexForFilteredModel JobTreeView::mapToFilteredModel(
 void JobTreeView::appendAndEditAtChildRow() {
   resetFilter();
   auto const parent = mapToMainModel(fromFilteredModel(currentIndex()));
-  auto const child = appendEmptyChildRow(m_mainModel, parent);
+  auto const child = m_adaptedMainModel.appendEmptyChildRow(parent);
   editAt(expanded(mapToFilteredModel(child)));
   m_notifyee->notifyRowInserted(rowLocation().atIndex(child));
 }
@@ -386,8 +405,8 @@ QModelIndex
 JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult const &result) {
   auto shouldMakeNewRowBelow = result.first;
   if (shouldMakeNewRowBelow) {
-    auto newCellIndex = appendEmptySiblingRow(
-        m_mainModel, mapToMainModel(fromFilteredModel(result.second)));
+    auto newCellIndex = m_adaptedMainModel.appendEmptySiblingRow(
+        mapToMainModel(fromFilteredModel(result.second)));
     auto newRowIndex = fromMainModel(firstCellOnRowOf(newCellIndex.untyped()));
     resetFilter();
     auto newRowLocation = rowLocation().atIndex(newRowIndex);

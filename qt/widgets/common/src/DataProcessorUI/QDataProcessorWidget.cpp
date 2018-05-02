@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 
+
 #include <QClipboard>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -152,7 +153,7 @@ void QDataProcessorWidget::createTable() {
   connect(ui.buttonProcess, SIGNAL(clicked()), this, SLOT(processClicked()));
 
   ui.layoutButtonsTable->itemAt(1)->widget()->hide();
-  m_treeView = new Batch::JobTreeView({"Heading 1", "Heading 2"}, this);
+  m_treeView = new Batch::JobTreeView({"Heading 1", "Heading 2"}, Batch::Cell(""), this);
   m_treeViewSignals = new Batch::JobTreeViewSignalAdapter(*m_treeView, this);
 
   connect(m_treeViewSignals, SIGNAL(removeRowsRequested(std::vector<Batch::RowLocation> const &)),

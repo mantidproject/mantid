@@ -38,113 +38,123 @@ QStandardItem *modelItemFromIndex(QStandardItemModel &model,
     return model.invisibleRootItem();
 }
 
-void removeRowFrom(QStandardItemModel &model,
-                   QModelIndexForMainModel const &index) {
+QtStandardItemTreeModelAdapter::QtStandardItemTreeModelAdapter(
+    QStandardItemModel &model, Cell const &emptyCellStyle)
+    : m_model(model), m_emptyCellStyle(emptyCellStyle) {}
+
+void QtStandardItemTreeModelAdapter::removeRowFrom(
+    QModelIndexForMainModel const &index) {
   if (index.isValid()) {
-    model.removeRows(index.row(), 1, index.parent().untyped());
+    m_model.removeRows(index.row(), 1, m_model.parent(index.untyped()));
   } else {
-    model.removeRows(0, model.rowCount());
+    m_model.removeRows(0, m_model.rowCount());
   }
 }
 
-QModelIndexForMainModel
-appendEmptySiblingRow(QStandardItemModel &model,
-                      QModelIndexForMainModel const &index) {
-  auto newIndex = appendEmptyChildRow(model, index.parent());
+QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendEmptySiblingRow(
+    QModelIndexForMainModel const &index) {
+  auto newIndex = appendEmptyChildRow(index.parent());
   return newIndex.sibling(newIndex.row(), index.column());
 }
 
-QModelIndexForMainModel appendSiblingRow(QStandardItemModel &model,
-                                         QModelIndexForMainModel const &index,
-                                         QList<QStandardItem *> cells) {
-  auto newIndex = appendChildRow(model, index.parent(), cells);
+QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendSiblingRow(
+    QModelIndexForMainModel const &index, QList<QStandardItem *> cells) {
+  auto newIndex = appendChildRow(index.parent(), cells);
   return newIndex.sibling(newIndex.row(), index.column());
 }
 
-QModelIndexForMainModel
-appendEmptyChildRow(QStandardItemModel &model,
-                    QModelIndexForMainModel const &parent) {
-  return appendChildRow(model, parent, emptyRow(model.columnCount()));
+QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendEmptyChildRow(
+    QModelIndexForMainModel const &parent) {
+  return appendChildRow(parent, emptyRow(m_model.columnCount()));
 }
 
-QModelIndexForMainModel appendChildRow(QStandardItemModel &model,
-                                       QModelIndexForMainModel const &parent,
-                                       QList<QStandardItem *> cells) {
+QModelIndexForMainModel QtStandardItemTreeModelAdapter::appendChildRow(
+    QModelIndexForMainModel const &parent, QList<QStandardItem *> cells) {
   auto parentRow = QModelIndexForMainModel(firstCellOnRowOf(parent.untyped()));
-  auto *const parentItem = modelItemFromIndex(model, parentRow);
+  auto *const parentItem = modelItemFromIndex(m_model, parentRow);
   parentItem->appendRow(cells);
-  return QModelIndexForMainModel(lastChildRowOf(parentRow.untyped(), model));
+  return QModelIndexForMainModel(lastChildRowOf(parentRow.untyped(), m_model));
 }
 
-QModelIndexForMainModel insertChildRow(QStandardItemModel &model,
-                                       QModelIndexForMainModel const &parent,
-                                       int row, QList<QStandardItem *> cells) {
-  auto *const parentItem = modelItemFromIndex(model, parent);
+QModelIndexForMainModel QtStandardItemTreeModelAdapter::insertChildRow(
+    QModelIndexForMainModel const &parent, int row,
+    QList<QStandardItem *> cells) {
+  auto *const parentItem = modelItemFromIndex(m_model, parent);
   parentItem->insertRow(row, cells);
-  return QModelIndexForMainModel(model.index(row, 0, parent.untyped()));
+  return QModelIndexForMainModel(m_model.index(row, 0, parent.untyped()));
 }
 
-QModelIndexForMainModel
-insertEmptyChildRow(QStandardItemModel &model,
-                    QModelIndexForMainModel const &parent, int row) {
-  return insertChildRow(model, parent, row, emptyRow(model.columnCount()));
+QModelIndexForMainModel QtStandardItemTreeModelAdapter::insertEmptyChildRow(
+    QModelIndexForMainModel const &parent, int row) {
+  return insertChildRow(parent, row, emptyRow(m_model.columnCount()));
 }
 
-QList<QStandardItem *> emptyRow(int columnCount) {
+QList<QStandardItem *>
+QtStandardItemTreeModelAdapter::emptyRow(int columnCount) const {
   auto cells = QList<QStandardItem *>();
-  for (auto i = 0; i < columnCount; ++i)
-    cells.append(new QStandardItem(""));
+  for (auto i = 0; i < columnCount; ++i) {
+    auto *cellItem = new QStandardItem();
+    applyCellPropertiesToItem(m_emptyCellStyle, *cellItem);
+    cells.append(cellItem);
+  }
   return cells;
 }
 
-QList<QStandardItem *> rowFromRowText(std::vector<std::string> const &rowText) {
-  auto rowCells = QList<QStandardItem *>();
-  for (auto &cellText : rowText)
-    rowCells.append(new QStandardItem(QString::fromStdString(cellText)));
-  return rowCells;
-}
-
-void setCellAtCellIndex(QStandardItemModel &model,
-                        QModelIndexForMainModel const &cellIndex,
-                        Cell const &cell) {
-  auto *item = modelItemFromIndex(model, cellIndex);
+void QtStandardItemTreeModelAdapter::setCellAtCellIndex(
+    QModelIndexForMainModel const &cellIndex, Cell const &cell) {
+  auto *item = modelItemFromIndex(m_model, cellIndex);
   applyCellPropertiesToItem(cell, *item);
 }
 
-void setCellsAtRow(QStandardItemModel &model,
-                   QModelIndexForMainModel const &firstCellIndex,
-                   std::vector<Cell> const &cells) {
-  enumerateCellsInRow(firstCellIndex, model.columnCount(),
-                      [&model, &cells](QModelIndexForMainModel const &cellIndex, int i) -> void {
-                        auto *item = modelItemFromIndex(model, cellIndex);
-                        applyCellPropertiesToItem(cells[i], *item);
-                      });
+void QtStandardItemTreeModelAdapter::setCellsAtRow(
+    QModelIndexForMainModel const &firstCellIndex,
+    std::vector<Cell> const &cells) {
+  enumerateCellsInRow(
+      firstCellIndex, m_model.columnCount(),
+      [this, &cells](QModelIndexForMainModel const &cellIndex, int i) -> void {
+        auto *item = modelItemFromIndex(m_model, cellIndex);
+        applyCellPropertiesToItem(cells[i], *item);
+      });
 }
 
 QList<QStandardItem *> rowFromCells(std::vector<Cell> const &cells) {
   auto rowCells = QList<QStandardItem *>();
   for (auto &&cell : cells) {
-    auto *item = new QStandardItem(QString::fromStdString(cell.contentText()));
+    auto *item = new QStandardItem();
     applyCellPropertiesToItem(cell, *item);
     rowCells.append(item);
   }
   return rowCells;
 }
 
-std::vector<Cell> cellsAtRow(QStandardItemModel const &model,
-                             QModelIndexForMainModel const &firstCellIndex) {
+QList<QStandardItem *> paddedRowFromCells(std::vector<Cell> const &cells,
+                                          Cell const &paddingCell,
+                                          int paddedWidth) {
+  auto rowCells = rowFromCells(cells);
+
+  for (auto i = static_cast<int>(cells.size()); i < paddedWidth; i++) {
+    auto *item = new QStandardItem();
+    applyCellPropertiesToItem(paddingCell, *item);
+    rowCells.append(item);
+  }
+
+  return rowCells;
+}
+
+std::vector<Cell> QtStandardItemTreeModelAdapter::cellsAtRow(
+    QModelIndexForMainModel const &firstCellIndex) const {
   auto cells = std::vector<Cell>();
-  cells.reserve(model.columnCount());
-  enumerateCellsInRow(firstCellIndex, model.columnCount(),
-                      [&model, &cells](QModelIndexForMainModel const &cellIndex, int) -> void {
-                        cells.emplace_back(cellFromCellIndex(model, cellIndex));
-                      });
+  cells.reserve(m_model.columnCount());
+  enumerateCellsInRow(
+      firstCellIndex, m_model.columnCount(),
+      [this, &cells](QModelIndexForMainModel const &cellIndex, int)
+          -> void { cells.emplace_back(cellFromCellIndex(cellIndex)); });
   return cells;
 }
 
-Cell cellFromCellIndex(QStandardItemModel const &model,
-                       QModelIndexForMainModel const &index) {
-  auto *cellItem = modelItemFromIndex(model, index);
+Cell QtStandardItemTreeModelAdapter::cellFromCellIndex(
+    QModelIndexForMainModel const &index) const {
+  auto *cellItem = modelItemFromIndex(m_model, index);
   return extractCellPropertiesFromItem(*cellItem);
 }
 }
