@@ -102,15 +102,7 @@ MatrixWorkspace_sptr setupWS(MatrixWorkspace_sptr m_loadedData) {
 		}
 	}
 	return ws;
-	/*// Set up PhaseQuad
-	IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
-	phaseQuad->setChild(true);
-	phaseQuad->initialize();
-	phaseQuad->setProperty("InputWorkspace", m_loadedData);
-	phaseQuad->setProperty("PhaseTable", phaseTable);
-	phaseQuad->setPropertyValue("OutputWorkspace", "outputWs");
-	return phaseQuad;*/
-}
+	}
 
 MatrixWorkspace_sptr loadMuonDataset() {
   IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
