@@ -154,7 +154,7 @@ public:
           std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
     }
     TS_ASSERT(!emptySpectrum[2]);
-    TS_ASSERT(emptySpectrum[4] );
+    TS_ASSERT(emptySpectrum[4]);
     TS_ASSERT(emptySpectrum[12]);
     TS_ASSERT(!emptySpectrum[9]);
     TS_ASSERT(emptySpectrum[22]);
