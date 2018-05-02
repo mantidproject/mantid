@@ -602,7 +602,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             indexShift = -min(begin, end + 1)
             while comp(i, begin):
                 index = i + indexShift
-                if not maskWS.readY(i) > 0:
+                if maskWS.readY(i) == 0:
                     Ys[index] = numpy.sum(ws.readY(i))
                 else:
                     Ys[index] = 0.
