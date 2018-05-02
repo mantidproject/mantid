@@ -91,6 +91,9 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   // description
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Load", "LoadQKK"};
+  }
   const std::string name() const override { return "LoadBBY"; }
   const std::string category() const override { return "DataHandling\\ANSTO"; }
   const std::string summary() const override {

@@ -31,7 +31,7 @@ private:
   */
   class ConcreteMDHWLoadingPresenter : public MDHWLoadingPresenter {
   private:
-    typedef MDHWLoadingPresenter BaseClass;
+    using BaseClass = MDHWLoadingPresenter;
 
   public:
     ConcreteMDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)

@@ -598,10 +598,10 @@ void IntegratePeakTimeSlices::exec() {
                                        "Mrow is negative.");
             }
 
-            lastRow = static_cast<int>(params[i] + .5);
+            lastRow = boost::math::iround(params[i]);
             i = findNameInVector("Mcol", names);
             if (i >= 0)
-              lastCol = static_cast<int>(params[i] + .5);
+              lastCol = boost::math::iround(params[i]);
             prog.report();
 
           } else if (dir > 0)

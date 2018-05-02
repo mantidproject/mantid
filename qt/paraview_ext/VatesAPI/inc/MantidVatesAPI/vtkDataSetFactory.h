@@ -247,8 +247,8 @@ private:
   bool m_bCheckDimensionality;
 };
 
-typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
-typedef std::unique_ptr<vtkDataSetFactory> vtkDataSetFactory_uptr;
+using vtkDataSetFactory_sptr = boost::shared_ptr<vtkDataSetFactory>;
+using vtkDataSetFactory_uptr = std::unique_ptr<vtkDataSetFactory>;
 }
 }
 

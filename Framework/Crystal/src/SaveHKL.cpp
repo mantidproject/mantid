@@ -185,8 +185,8 @@ void SaveHKL::exec() {
   std::string bankPart = "?";
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  typedef std::map<int, std::vector<size_t>> bankMap_t;
-  typedef std::map<int, bankMap_t> runMap_t;
+  using bankMap_t = std::map<int, std::vector<size_t>>;
+  using runMap_t = std::map<int, bankMap_t>;
   std::set<int> uniqueBanks;
   std::set<int> uniqueRuns;
   runMap_t runMap;
@@ -258,9 +258,9 @@ void SaveHKL::exec() {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                         static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
                         m_amu);
-    auto shape =
-        boost::shared_ptr<IObject>(peaksW->sample().getShape().clone());
-    shape->setMaterial(Material("SetInSaveHKL", neutron, 1.0));
+    auto shape = boost::shared_ptr<IObject>(
+        peaksW->sample().getShape().cloneWithMaterial(
+            Material("SetInSaveHKL", neutron, 1.0)));
     peaksW->mutableSample().setShape(shape);
   }
   if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
@@ -345,6 +345,7 @@ void SaveHKL::exec() {
           continue;
         }
         int run = p.getRunNumber();
+        int seqNum = p.getPeakNumber();
         int bank = 0;
         std::string bankName = p.getBankName();
         int nCols, nRows;
@@ -546,7 +547,7 @@ void SaveHKL::exec() {
 
           out << std::setw(6) << run;
 
-          out << std::setw(6) << wi + 1;
+          out << std::setw(6) << seqNum;
 
           out << std::setw(7) << std::fixed << std::setprecision(4)
               << transmission;

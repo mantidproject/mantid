@@ -63,6 +63,10 @@ bool workspaceExists(QString const &workspaceName) {
 void removeWorkspace(QString const &workspaceName) {
   AnalysisDataService::Instance().remove(workspaceName.toStdString());
 }
+
+template <typename T> void pop_front(std::vector<T> &queue) {
+  queue.erase(queue.begin());
+}
 }
 
 namespace MantidQt {
@@ -291,7 +295,7 @@ Returns the name of the reduced workspace for a given row
 QString GenericDataProcessorPresenter::getReducedWorkspaceName(
     const RowData_sptr data) const {
   return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
-      data, m_whitelist);
+      data, m_whitelist, m_preprocessing.m_map);
 }
 
 void GenericDataProcessorPresenter::settingsChanged() {
@@ -397,7 +401,7 @@ void GenericDataProcessorPresenter::process() {
         return;
 
       // Add all row items to queue
-      rowQueue.push(row);
+      rowQueue.emplace_back(row);
 
       // Set group as unprocessed if settings have changed or the expected
       // output workspaces cannot be found
@@ -408,7 +412,7 @@ void GenericDataProcessorPresenter::process() {
       if (!isProcessed(row.first, group.first))
         maxProgress++;
     }
-    m_group_queue.emplace(group.first, rowQueue);
+    m_group_queue.emplace_back(group.first, rowQueue);
   }
 
   // Create progress reporter bar
@@ -465,28 +469,35 @@ void GenericDataProcessorPresenter::nextRow() {
     m_nextActionFlag = ReductionFlag::ReduceRowFlag;
     // Reduce next row
     m_rowItem = rqueue.front();
-    rqueue.pop();
+    pop_front(rqueue);
     // Skip reducing rows that are already processed
     if (!isProcessed(m_rowItem.first, groupIndex)) {
       startAsyncRowReduceThread(&m_rowItem, groupIndex);
       return;
     }
   } else {
-    m_group_queue.pop();
+    pop_front(m_group_queue);
     // Set next action flag
     m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
 
     // Skip post-processing groups that are already processed or only contain a
     // single row
-    if (!isProcessed(groupIndex) && m_groupData.size() > 1) {
-      startAsyncGroupReduceThread(m_groupData, groupIndex);
-      return;
+    if (!isProcessed(groupIndex)) {
+      if (m_groupData.size() > 1) {
+        startAsyncGroupReduceThread(m_groupData, groupIndex);
+        return;
+      }
     }
   }
-
   // Row / group skipped, perform next action
   doNextAction();
 }
+
+void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
+    GroupData const &, std::string const &) {}
+
+void GenericDataProcessorPresenter::completedRowReductionSuccessfully(
+    GroupData const &, std::string const &) {}
 
 /**
 Process a new group
@@ -500,23 +511,27 @@ void GenericDataProcessorPresenter::nextGroup() {
     return;
   }
 
-  // Clear group data from any previously processed groups
-  m_groupData.clear();
-
   if (!m_group_queue.empty()) {
     // Set next action flag
     m_nextActionFlag = ReductionFlag::ReduceRowFlag;
     // Reduce first row
     auto &rqueue = m_group_queue.front().second;
     m_rowItem = rqueue.front();
-    rqueue.pop();
+    // Clear group data from any previously processed groups
+    m_groupData.clear();
+    for (auto &&row : rqueue)
+      m_groupData[row.first] = row.second;
+    pop_front(rqueue);
+
     // Skip reducing rows that are already processed
-    if (!isProcessed(m_rowItem.first, m_group_queue.front().first))
+    if (!isProcessed(m_rowItem.first, m_group_queue.front().first)) {
       startAsyncRowReduceThread(&m_rowItem, m_group_queue.front().first);
-    else
+    } else {
       doNextAction();
+    }
   } else {
-    // If "Output Notebook" checkbox is checked then create an ipython notebook
+    // If "Output Notebook" checkbox is checked then create an ipython
+    // notebook
     if (m_view->getEnableNotebook())
       saveNotebook(m_selectedData);
     endReduction();
@@ -531,6 +546,10 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
 
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
       this, rowItem, groupIndex);
+
+  connect(worker, SIGNAL(finished(int)), this, SLOT(rowThreadFinished(int)));
+  connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
+          SLOT(reductionError(QString)), Qt::QueuedConnection);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -543,6 +562,9 @@ void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
 
   auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
       this, groupData, groupIndex);
+  connect(worker, SIGNAL(finished(int)), this, SLOT(groupThreadFinished(int)));
+  connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
+          SLOT(reductionError(QString)), Qt::QueuedConnection);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -581,6 +603,22 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
     m_progressReporter->clear();
     endReduction();
   }
+}
+
+void GenericDataProcessorPresenter::groupThreadFinished(const int exitCode) {
+
+  auto postprocessedWorkspace =
+      getPostprocessedWorkspaceName(m_groupData).toStdString();
+  completedGroupReductionSuccessfully(m_groupData, postprocessedWorkspace);
+  threadFinished(exitCode);
+}
+
+void GenericDataProcessorPresenter::rowThreadFinished(const int exitCode) {
+  completedRowReductionSuccessfully(
+      m_groupData,
+      m_rowItem.second->reducedName(m_processor.defaultOutputPrefix())
+          .toStdString());
+  threadFinished(exitCode);
 }
 
 /**
@@ -622,9 +660,9 @@ void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
   if (hasPostprocessing()) {
     const auto outputWSName = getPostprocessedWorkspaceName(groupData);
-    m_postprocessing->postProcessGroup(outputWSName,
-                                       m_processor.defaultOutputPropertyName(),
-                                       m_whitelist, groupData);
+    m_postprocessing->postProcessGroup(
+        outputWSName, m_processor.postprocessedOutputPropertyName(),
+        m_whitelist, groupData);
   }
 }
 
@@ -651,11 +689,13 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  auto const outputName =
-      preprocessingListToString(runs, preprocessor.prefix());
+  auto const outputName = preprocessingListToString(runs, preprocessor.prefix(),
+                                                    preprocessor.separator());
 
-  /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
-  * but that doesn't preserve history nicely, so we'll just take care of tidying
+  /* Ideally, this should be executed as a child algorithm to keep the ADS
+  * tidy,
+  * but that doesn't preserve history nicely, so we'll just take care of
+  * tidying
   * up in the event of failure.
   */
   IAlgorithm_sptr alg =
@@ -693,12 +733,14 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
       alg->execute();
 
       if (runIt != --runs.end()) {
-        // After the first execution we replace the LHS with the previous output
+        // After the first execution we replace the LHS with the previous
+        // output
         setAlgorithmProperty(alg.get(), preprocessor.lhsProperty(), outputName);
       }
     }
   } catch (...) {
-    // If we're unable to create the full workspace, discard the partial version
+    // If we're unable to create the full workspace, discard the partial
+    // version
     removeWorkspace(outputName);
     // We've tidied up, now re-throw.
     throw;
@@ -882,12 +924,15 @@ void GenericDataProcessorPresenter::preprocessOptionValues(RowData_sptr data) {
   data->setPreprocessedOptions(std::move(options));
 }
 
-/** Some columns in the model should be updated with outputs
- * from the algorithm if they were not set by the user. This is
- * so that the view can be updated show the user what values were used.
+/** If cells in the row are empty, update them with values used from the
+ * options or the results of the algorithm so that the user can see what was
+ * used and tweak values if required.
+ *
+ * @param alg : the executed algorithm
+ * @param data : the row data
  */
-void GenericDataProcessorPresenter::updateModelFromAlgorithm(
-    IAlgorithm_sptr alg, RowData_sptr data) {
+void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
+                                                           RowData_sptr data) {
 
   auto newData = data;
 
@@ -906,6 +951,14 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
       if (data->value(i).isEmpty() &&
           !m_preprocessing.hasPreprocessing(column.name())) {
 
+        // First check if there was a default value and if so use that
+        const auto optionValue = data->optionValue(column.algorithmProperty());
+        if (!optionValue.isEmpty()) {
+          data->setValue(i, optionValue);
+          continue;
+        }
+
+        // If not, check if there's an output available from the algorithm
         QString propValue = QString::fromStdString(
             alg->getPropertyValue(column.algorithmProperty().toStdString()));
 
@@ -957,7 +1010,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData_sptr data) {
   // Run the algorithm
   const auto alg = createAndRunAlgorithm(data->preprocessedOptions());
   // Populate any missing values in the model with output from the algorithm
-  updateModelFromAlgorithm(alg, data);
+  updateModelFromResults(alg, data);
 }
 
 /**
@@ -1082,7 +1135,8 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     pause();
     break;
   }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // Not having a 'default' case is deliberate. gcc issues a warning if
+  // there's
   // a flag we aren't handling.
 }
 
@@ -1431,7 +1485,8 @@ void GenericDataProcessorPresenter::plotWorkspaces(
 void GenericDataProcessorPresenter::showOptionsDialog() {
   auto options =
       new QtDataProcessorOptionsDialog(m_view, m_view->getPresenter());
-  // By default the dialog is only destroyed when ReflMainView is and so they'll
+  // By default the dialog is only destroyed when ReflMainView is and so
+  // they'll
   // stack up.
   // This way, they'll be deallocated as soon as they've been closed.
   options->setAttribute(Qt::WA_DeleteOnClose, true);

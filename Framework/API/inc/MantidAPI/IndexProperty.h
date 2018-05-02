@@ -57,7 +57,7 @@ public:
 
   bool isDefault() const override;
   std::string isValid() const override;
-  std::string operator=(const std::string &rhs);
+  IndexProperty &operator=(const std::string &rhs);
   operator Indexing::SpectrumIndexSet() const;
   Indexing::SpectrumIndexSet getIndices() const;
   Indexing::IndexInfo getFilteredIndexInfo() const;

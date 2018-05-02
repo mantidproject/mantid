@@ -911,7 +911,7 @@ void TiledWindow::selectRange(int row1, int col1, int row2, int col2) {
 void TiledWindow::removeSelectionTo(TiledWindow::RemoveDestination to) {
   foreach (Tile *tile, m_selection) {
     MdiSubWindow *widget = removeTile(tile);
-    if (widget == NULL) {
+    if (widget == nullptr) {
       throw std::logic_error("TiledWindow: Empty tile is found in slection.");
     }
     sendWidgetTo(widget, to);

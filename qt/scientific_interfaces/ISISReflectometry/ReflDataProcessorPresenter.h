@@ -18,13 +18,14 @@ public:
   TimeSlicingInfo() = delete;
   TimeSlicingInfo(QString type, QString values);
 
-  size_t numberOfSlices() { return m_startTimes.size(); }
+  size_t numberOfSlices() const;
+  double sliceDuration() const;
   double startTime(const size_t i) { return m_startTimes[i]; }
   double stopTime(const size_t i) { return m_stopTimes[i]; }
   QString values() { return m_values; }
   QString logFilter() { return m_logFilter; }
 
-  bool hasSlicing() const { return !m_values.isEmpty(); }
+  bool hasSlicing() const { return m_enableSlicing && !m_values.isEmpty(); }
   bool isCustom() const { return m_type == "Custom"; }
   bool isLogValue() const { return m_type == "LogValue"; }
   bool isUniform() const { return m_type == "Uniform"; }
@@ -32,6 +33,8 @@ public:
 
   void addSlice(const double startTime, const double stopTime);
   void clearSlices();
+  void parseUniform();
+  void parseUniformEven();
   void parseCustom();
   void parseLogValue();
 
@@ -40,6 +43,12 @@ private:
   QString m_type;
   // the slicing values specified by the user
   QString m_values;
+  // whether time slicing is enabled or not
+  bool m_enableSlicing;
+  // the number of slices (where this is constant for all slices)
+  size_t m_constNumberOfSlices;
+  // the duration of the slices (where this is constant for all slices)
+  double m_constSliceDuration;
   // The start and stop times for all slices for all rows in all groups. If
   // using non-even slicing then different runs may have different numbers of
   // slices. These vectors will contain ALL slices. It is assumed the first n
@@ -95,6 +104,12 @@ public:
   // The following methods are public for testing purposes only
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
+
+  void
+  completedRowReductionSuccessfully(GroupData const &groupData,
+                                    std::string const &workspaceName) override;
+  void completedGroupReductionSuccessfully(
+      GroupData const &groupData, std::string const &workspaceName) override;
 
 private:
   // Get the processing options for this row

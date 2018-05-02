@@ -62,7 +62,7 @@ public:
   Material build() const;
 
 private:
-  typedef std::tuple<PhysicalConstants::NeutronAtom, double> Composition;
+  using Composition = std::tuple<PhysicalConstants::NeutronAtom, double>;
 
   bool hasOverrideNeutronProperties() const;
   void overrideNeutronProperties(PhysicalConstants::NeutronAtom &neutron) const;

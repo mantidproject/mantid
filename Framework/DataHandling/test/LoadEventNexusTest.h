@@ -295,9 +295,9 @@ public:
 
     double max = events.begin()->tof();
     double min = events.begin()->tof();
-    for (size_t j = 0; j < events.size(); ++j) {
-      max = events[j].tof() > max ? events[j].tof() : max;
-      min = events[j].tof() < min ? events[j].tof() : min;
+    for (auto &event : events) {
+      max = event.tof() > max ? event.tof() : max;
+      min = event.tof() < min ? event.tof() : min;
     }
     TSM_ASSERT("The max TOF in the workspace should be equal to or less than "
                "the filtered cut-off",

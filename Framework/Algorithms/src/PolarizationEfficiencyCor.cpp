@@ -557,13 +557,13 @@ void PolarizationEfficiencyCor::checkConsistentX(
   const auto &P2x = efficiencies.P2->x();
   checkX(P2x, "P2");
   // A local helper function to check an input workspace against F1.
-  auto checkWS = [&F1x, &checkX](const API::MatrixWorkspace_sptr &ws,
-                                 const std::string &tag) {
-    const auto nHist = ws->getNumberHistograms();
-    for (size_t i = 0; i != nHist; ++i) {
-      checkX(ws->x(i), tag);
-    }
-  };
+  auto checkWS =
+      [&checkX](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
+        const auto nHist = ws->getNumberHistograms();
+        for (size_t i = 0; i != nHist; ++i) {
+          checkX(ws->x(i), tag);
+        }
+      };
   if (inputs.mmWS) {
     checkWS(inputs.mmWS, Flippers::OffOff);
   }

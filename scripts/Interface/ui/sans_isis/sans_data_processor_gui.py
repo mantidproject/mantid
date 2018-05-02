@@ -322,8 +322,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                       entry.show_value, entry.prefix)
 
         # Processing algorithm (mandatory)
+        unused_postprocessing_index = 0
         alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
-                                                                       'unused_', self._black_list)
+                                                                       'unused_', unused_postprocessing_index, self._black_list)
 
         self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
         self.data_processor_table.setForcedReProcessing(True)

@@ -102,7 +102,7 @@ public:
     return line;
   }
 
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t = 1,
       Mantid::Geometry::MDImplicitFunction * = NULL) const override {
     throw std::runtime_error("Not Implemented");

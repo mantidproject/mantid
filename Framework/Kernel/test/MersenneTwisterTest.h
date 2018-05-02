@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/MersenneTwister.h"
 
+#include <iomanip>
+
 using Mantid::Kernel::MersenneTwister;
 
 class MersenneTwisterTest : public CxxTest::TestSuite {
@@ -139,14 +141,15 @@ public:
 
 private:
   void assertSequenceCorrectForSeed_39857239(MersenneTwister &randGen) {
-    double expectedValues[10] = {
-        0.203374452656, 0.597970068222, 0.120683325687,  0.92372657801,
-        0.734524340136, 0.467380537419, 0.0712658402044, 0.204503614921,
-        0.487210249063, 0.885743656661};
+    double expectedValues[10] = {0.597970068269, 0.923726578038, 0.46738053759,
+                                 0.204503614938, 0.885743656775, 0.532315163407,
+                                 0.849185494256, 0.294648804097, 0.435378050559,
+                                 0.222489577528};
     // Check 10 numbers
     for (std::size_t i = 0; i < 10; ++i) {
       TS_ASSERT_DELTA(randGen.nextValue(), expectedValues[i], 1e-12);
     }
+    std::cerr << "\n";
   }
 
   std::vector<double> doNextValueCalls(const unsigned int ncalls,

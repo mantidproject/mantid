@@ -67,7 +67,7 @@ private:
   std::vector<int> m_vruns;
 };
 
-typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
+using ChopperConfiguration_sptr = boost::shared_ptr<ChopperConfiguration>;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

@@ -75,8 +75,8 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     }
 
     // Ensure destruction in any event.
-    boost::scoped_ptr<IMDIterator> it(
-        createIteratorWithNormalization(m_normalizationOption, imdws.get()));
+    auto it =
+        createIteratorWithNormalization(m_normalizationOption, imdws.get());
 
     // Create 2 points per box.
     vtkNew<vtkPoints> points;
@@ -116,8 +116,8 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-        auto coords = std::unique_ptr<coord_t[]>(
-            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
+        auto coords =
+            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
 
         // Iterate through all coordinates. Candidate for speed improvement.
         for (size_t v = 0; v < nVertexes; ++v) {

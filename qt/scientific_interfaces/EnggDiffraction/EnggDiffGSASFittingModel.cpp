@@ -19,20 +19,38 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
   return filenameSegments[0];
 }
 
+std::string refinementMethodToString(
+    const MantidQt::CustomInterfaces::GSASRefinementMethod &method) {
+  switch (method) {
+  case MantidQt::CustomInterfaces::GSASRefinementMethod::PAWLEY:
+    return "Pawley refinement";
+  case MantidQt::CustomInterfaces::GSASRefinementMethod::RIETVELD:
+    return "Rietveld refinement";
+  default:
+    throw std::invalid_argument(
+        "Invalid refinement method: please contact the development team");
+  }
+}
+
 } // anonymous namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+EnggDiffGSASFittingModel::~EnggDiffGSASFittingModel() {
+  if (m_workerThread) {
+    if (m_workerThread->isRunning()) {
+      m_workerThread->wait(10);
+    }
+  }
+}
+
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
     const RunLabel &runLabel, const double rwp, const double sigma,
-    const double gamma, const std::string &latticeParamsTableName) {
+    const double gamma, const API::ITableWorkspace_sptr latticeParams) {
   addRwp(runLabel, rwp);
   addSigma(runLabel, sigma);
   addGamma(runLabel, gamma);
-
-  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  const auto latticeParams =
-      ADS.retrieveWS<API::ITableWorkspace>(latticeParamsTableName);
   addLatticeParams(runLabel, latticeParams);
 }
 
@@ -69,34 +87,14 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
 }
 }
 
-API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doPawleyRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
-  const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
-  const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
-
-  const auto outputProperties = doGSASRefinementAlgorithm(
-      outputWSName, latticeParamsName, params, "Pawley refinement");
-
-  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
-                      outputProperties.sigma, outputProperties.gamma,
-                      latticeParamsName);
-
-  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
-
-  return fittedPeaks;
-}
-
 GSASIIRefineFitPeaksOutputProperties
 EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
-    const std::string &outputWorkspaceName,
-    const std::string &latticeParamsName,
-    const GSASIIRefineFitPeaksParameters &params,
-    const std::string &refinementMethod) {
+    const GSASIIRefineFitPeaksParameters &params) {
   auto gsasAlg =
       API::AlgorithmManager::Instance().create("GSASIIRefineFitPeaks");
 
-  gsasAlg->setProperty("RefinementMethod", refinementMethod);
+  gsasAlg->setProperty("RefinementMethod",
+                       refinementMethodToString(params.refinementMethod));
   gsasAlg->setProperty("InputWorkspace", params.inputWorkspace);
   gsasAlg->setProperty("InstrumentFile", params.instParamsFile);
   gsasAlg->setProperty("PhaseInfoFiles",
@@ -118,7 +116,9 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   gsasAlg->setProperty("RefineSigma", params.refineSigma);
   gsasAlg->setProperty("RefineGamma", params.refineGamma);
 
-  gsasAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+  const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
+  const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
+  gsasAlg->setProperty("OutputWorkspace", outputWSName);
   gsasAlg->setProperty("LatticeParameters", latticeParamsName);
   gsasAlg->setProperty("SaveGSASIIProjectFile", params.gsasProjectFile);
   gsasAlg->execute();
@@ -126,25 +126,46 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   const double rwp = gsasAlg->getProperty("Rwp");
   const double sigma = gsasAlg->getProperty("Sigma");
   const double gamma = gsasAlg->getProperty("Gamma");
-  return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma);
-}
-
-API::MatrixWorkspace_sptr EnggDiffGSASFittingModel::doRietveldRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
-  const auto outputWSName = generateFittedPeaksWSName(params.runLabel);
-  const auto latticeParamsName = generateLatticeParamsName(params.runLabel);
-
-  const auto outputProperties = doGSASRefinementAlgorithm(
-      outputWSName, latticeParamsName, params, "Rietveld refinement");
-
-  addFitResultsToMaps(params.runLabel, outputProperties.rwp,
-                      outputProperties.sigma, outputProperties.gamma,
-                      latticeParamsName);
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
+  const auto latticeParams =
+      ADS.retrieveWS<API::ITableWorkspace>(latticeParamsName);
+  return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma, fittedPeaks,
+                                              latticeParams, params.runLabel);
+}
 
-  return fittedPeaks;
+void EnggDiffGSASFittingModel::doRefinements(
+    const std::vector<GSASIIRefineFitPeaksParameters> &params) {
+  m_workerThread = Mantid::Kernel::make_unique<QThread>(this);
+  EnggDiffGSASFittingWorker *worker =
+      new EnggDiffGSASFittingWorker(this, params);
+  worker->moveToThread(m_workerThread.get());
+
+  qRegisterMetaType<
+      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
+      "GSASIIRefineFitPeaksOutputProperties");
+
+  connect(m_workerThread.get(), SIGNAL(started()), worker,
+          SLOT(doRefinements()));
+  connect(worker,
+          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
+          this, SLOT(processRefinementSuccessful(
+                    const GSASIIRefineFitPeaksOutputProperties &)));
+  connect(worker, SIGNAL(refinementsComplete()), this,
+          SLOT(processRefinementsComplete()));
+  connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
+          SLOT(processRefinementFailed(const std::string &)));
+  connect(worker, SIGNAL(refinementCancelled()), this,
+          SLOT(processRefinementCancelled()));
+  connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
+          SLOT(deleteLater()));
+  connect(worker,
+          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
+          worker, SLOT(deleteLater()));
+  connect(worker, SIGNAL(refinementFailed(const std::string &)), worker,
+          SLOT(deleteLater()));
+  m_workerThread->start();
 }
 
 boost::optional<API::ITableWorkspace_sptr>
@@ -185,6 +206,38 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(wsName);
   return ws;
+}
+
+void EnggDiffGSASFittingModel::processRefinementsComplete() {
+  m_observer->notifyRefinementsComplete();
+}
+
+void EnggDiffGSASFittingModel::processRefinementFailed(
+    const std::string &failureMessage) {
+  if (m_observer) {
+    m_observer->notifyRefinementFailed(failureMessage);
+  }
+}
+
+void EnggDiffGSASFittingModel::processRefinementSuccessful(
+    const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
+  addFitResultsToMaps(refinementResults.runLabel, refinementResults.rwp,
+                      refinementResults.sigma, refinementResults.gamma,
+                      refinementResults.latticeParamsWS);
+  if (m_observer) {
+    m_observer->notifyRefinementSuccessful(refinementResults);
+  }
+}
+
+void EnggDiffGSASFittingModel::processRefinementCancelled() {
+  if (m_observer) {
+    m_observer->notifyRefinementCancelled();
+  }
+}
+
+void EnggDiffGSASFittingModel::setObserver(
+    boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) {
+  m_observer = observer;
 }
 
 } // CustomInterfaces

@@ -40,8 +40,13 @@ private:
 
   DataObjects::PeaksWorkspace_sptr ws;
   void sizeBanks(std::string bankName, int &nCols, int &nRows);
-  std::vector<int> crystalSystem(Geometry::OrientedLattice lattice,
-                                 std::vector<DataObjects::Peak> peaks);
+
+  const std::vector<std::string> m_typeList{
+      "TRICLINIC", "MONOCLINIC",   "ORTHORHOMBIC", "TETRAGONAL",
+      "HEXAGONAL", "RHOMBOHEDRAL", "CUBIC"};
+
+  const std::vector<std::string> m_centeringList{"P", "A", "B", "C",
+                                                 "I", "F", "R"};
 };
 
 } // namespace Mantid

@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
 	src/DataProcessorUI/AbstractTreeModel.cpp
+	src/DataProcessorUI/TreeData.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
         src/DataProcessorUI/OptionsMap.cpp

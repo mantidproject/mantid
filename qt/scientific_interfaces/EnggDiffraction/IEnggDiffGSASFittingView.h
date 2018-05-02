@@ -103,6 +103,9 @@ public:
   /// Get XMin parameter, if it is set
   virtual boost::optional<double> getXMin() const = 0;
 
+  /// Enable or disable the GUI
+  virtual void setEnabled(const bool enabled) = 0;
+
   /// Update the view with current status
   virtual void showStatus(const std::string &status) const = 0;
 

@@ -239,7 +239,7 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
  * @param suggestedNumCores :: split iterator over this many cores.
  * @param function :: Optional MDImplicitFunction limiting the iterator
  */
-TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
+TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>> MDEventWorkspace)::createIterators(
     size_t suggestedNumCores,
     Mantid::Geometry::MDImplicitFunction *function) const {
   // Get all the boxes in this workspaces
@@ -261,13 +261,13 @@ TMDE(std::vector<Mantid::API::IMDIterator *> MDEventWorkspace)::createIterators(
     numCores = 1;
 
   // Create one iterator per core, splitting evenly amongst spectra
-  std::vector<API::IMDIterator *> out;
+  std::vector<std::unique_ptr<API::IMDIterator>> out;
   for (size_t i = 0; i < numCores; i++) {
     size_t begin = (i * numElements) / numCores;
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(new MDBoxIterator<MDE, nd>(boxes, begin, end));
+    out.push_back(Kernel::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
   }
   return out;
 }
@@ -493,7 +493,7 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
   }
 
   // Now sort by ID
-  typedef MDBoxBase<MDE, nd> *ibox_t;
+  using ibox_t = MDBoxBase<MDE, nd> *;
   std::sort(boxes_filtered.begin(), boxes_filtered.end(),
             SortBoxesByID<ibox_t>);
 

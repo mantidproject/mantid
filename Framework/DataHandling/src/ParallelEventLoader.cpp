@@ -59,11 +59,11 @@ std::vector<int32_t> bankOffsetsSpectrumNumbers(
   const auto &specNums = ws.indexInfo().spectrumNumbers();
   int32_t spectrumIndex{0}; // *global* index
   std::vector<int32_t> bankOffsets(bankNames.size(), 0);
-  for (size_t i = 0; i < specNums.size(); ++i) {
+  for (auto i : specNums) {
     // In contrast to the case of event ID = detector ID we know that any
     // spectrum number has a corresponding event ID, i.e., we do not need
     // special handling for monitors.
-    specnum_t specNum = static_cast<specnum_t>(specNums[i]);
+    specnum_t specNum = static_cast<specnum_t>(i);
     // See comment in bankOffsets regarding this offset computation.
     if (idToBank.count(specNum) == 1) {
       size_t bank = idToBank.at(specNum);
