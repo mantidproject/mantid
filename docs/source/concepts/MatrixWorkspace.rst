@@ -13,7 +13,7 @@ A Matrix Workspace is a generic name for a family which contains measured (or de
 -  :ref:`Workspace2D <Workspace2D>` - A workspace for holding 2D, acuumulated data in memory, this is the most commonly used to store histograms.
 -  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.            
 
-What information is in a MatrixWorkspace
+What information is in a Matrix Workspace
 ----------------------------------------
 
 All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :ref:`Units <Unit Factory>`.  
@@ -39,7 +39,7 @@ You can look at the :ref:`Matrix Workspace API reference <mantid.api.MatrixWorks
 Accessing Workspaces
 ####################
 
-The methods for getting a variable to a MatrixWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
+The methods for getting a variable to a Matrix Workspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
 
 If you want to check if a variable points to something that is a Matrix Workspace you can use this:
 
@@ -52,7 +52,7 @@ If you want to check if a variable points to something that is a Matrix Workspac
 
     if isinstance(histoWS, MatrixWorkspace):
         print(histoWS.name() + " is a " + histoWS.id() + \
-                 " and can be treated as a MatrixWorkspace")
+                 " and can be treated as a Matrix Workspace")
 
     print("\nFor more Matrix Workspace types")
     eventWS = CreateSampleWorkspace(WorkspaceType="Event")
@@ -64,7 +64,7 @@ If you want to check if a variable points to something that is a Matrix Workspac
                                NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
     myWorkspaceList = [histoWS,eventWS,svWS,tableWS,mdWS,mdHistoWS]
-    print("Is MatrixWorkspace?\tType")
+    print("Is Matrix Workspace?\tType")
     for ws in myWorkspaceList:
         print("{0}\t{1}".format(isinstance(ws, MatrixWorkspace), ws.id()))
 
@@ -74,10 +74,10 @@ Output:
 .. testoutput:: CheckMatrixWorkspace
     :options: +NORMALIZE_WHITESPACE
 
-    histoWS is a Workspace2D and can be treated as a MatrixWorkspace
+    histoWS is a Workspace2D and can be treated as a Matrix Workspace
 
     For more Matrix Workspace types
-    Is MatrixWorkspace? Type
+    Is Matrix Workspace? Type
     True        Workspace2D
     True        EventWorkspace
     True        WorkspaceSingleValue
@@ -337,7 +337,7 @@ Matrix Workspace Operations
 Accessing Data
 ##############
 
-A MatrixWorkspace is essentially a 2D list of binned data where a workspace index, starting at 0, gives access to the data fields in each spectra.
+A Matrix Workspace is essentially a 2D list of binned data where a workspace index, starting at 0, gives access to the data fields in each spectra.
 
 
 The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands. Each of these commands takes a number that refers to the index on the workspace and returns a list of the data for that workspace index, i.e
@@ -374,7 +374,7 @@ There are more examples how to `Extract and manipulate workspace data here <http
 Workspace algebra
 #################
 
-MatrixWorkspaces can have algebraic operations applied to them directly without the need to call a specific algorithm, e.g. :ref:`Plus <algm-Plus>`
+Matrix Workspaces can have algebraic operations applied to them directly without the need to call a specific algorithm, e.g. :ref:`Plus <algm-Plus>`
 
 
 The expected operations of +,-,*,/ are supported with either a single number or another workspace as the second argument, e.g.
