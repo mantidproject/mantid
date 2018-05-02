@@ -9,10 +9,19 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Powder Diffraction
+------------------
+
+- Changing settings while running methods on the PEARL object no
+  longer updates the default settings. Instead, initial settings are
+  taken as the default, and any changes are reverted back to the
+  default once the line they were made on has finished executing
+
 New Features
 ------------
 
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to compute the detector efficiencies also for the 2-dimensional scanning diffractometer D2B at the ILL.
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` performs powder diffraction data reduction for WAND² with calibration, monitor normalisation and background subtraction.
 
 
 Engineering Diffraction
@@ -32,6 +41,7 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
+
 
 - New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load multiple single crystal diffraction data files from the DNS instrument into MDEventWorkspace.
 
