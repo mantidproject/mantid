@@ -87,7 +87,7 @@ QVariant QOneLevelTreeModel::headerData(int section,
 * @param index : The index
 * @return : The data associated with the given index as a RowData class
 */
-RowData_sptr QOneLevelTreeModel::rowData(const QModelIndex &index) {
+RowData_sptr QOneLevelTreeModel::rowData(const QModelIndex &index) const {
   RowData_sptr result;
 
   // Return a null ptr if the index is invalid

@@ -60,7 +60,7 @@ public:
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
   // Get row metadata
-  RowData_sptr rowData(const QModelIndex &index) override;
+  RowData_sptr rowData(const QModelIndex &index) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent

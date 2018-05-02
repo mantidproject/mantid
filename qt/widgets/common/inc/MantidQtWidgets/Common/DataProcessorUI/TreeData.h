@@ -68,7 +68,8 @@ public:
   /// Return the data value at the given index
   QString value(const int i);
   /// Set the data value at the given index
-  void setValue(const int i, const QString &value);
+  void setValue(const int i, const QString &value,
+                const bool isGenerated = false);
 
   /// Get the algorithm input properties
   OptionsMap options() const;
@@ -82,6 +83,8 @@ public:
   // Get the number of fields in the data
   int size() const;
 
+  // Check if a cell value was auto-generated
+  bool isGenerated(const int i) const;
   /// Check if a property exists
   bool hasOption(const QString &name) const;
   /// Return a property value
@@ -108,6 +111,8 @@ public:
   /// Add a child slice
   RowData_sptr addSlice(const QString &sliceSuffix,
                         const std::vector<QString> &workspaceProperties);
+  /// Reset the row to its unprocessed state
+  void reset();
   /// Clear all slices from the row
   void clearSlices();
 
@@ -146,6 +151,9 @@ private:
   /// The canonical reduced workspace name for this row i.e. prior to any
   /// prefixes being added for specific output workspace properties
   QString m_reducedName;
+  /// A record of column indices whose cells have been populated with generated
+  /// values (i.e. they are not user entered inputs)
+  std::set<int> m_generatedColumns;
 };
 
 using GroupData = std::map<int, RowData_sptr>;

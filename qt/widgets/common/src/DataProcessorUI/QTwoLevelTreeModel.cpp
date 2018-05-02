@@ -246,7 +246,7 @@ QVariant QTwoLevelTreeModel::headerData(int section,
 * @param index : The index
 * @return : The data associated with the given index as a RowData class
 */
-RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) {
+RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) const {
 
   RowData_sptr result;
 
@@ -882,24 +882,34 @@ bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
                                     const bool exactMatch) const {
 
   int columnIndex = 0;
-  for (auto &column : m_whitelist) {
-    auto const &columnName = column.name();
+  for (auto columnIt = m_whitelist.begin(); columnIt != m_whitelist.end();
+       ++columnIt, ++columnIndex) {
+    const auto column = *columnIt;
+    const auto &columnName = column.name();
 
     // Only check non-blank values in the given row values
     if (rowValues.count(columnName)) {
+      const auto rowQIndex =
+          index(rowIndex, columnIndex, index(groupIndex, columnIndex));
+      auto oldValue = data(rowQIndex).toString();
       const auto newValue = rowValues.at(columnName);
-      const auto oldValue =
-          data(index(rowIndex, columnIndex, index(groupIndex, columnIndex)));
+
+      // Ignore generated values - if a value was auto generated then the user
+      // input was empty, so treat these as empty cells
+      auto currentRowData = rowData(rowQIndex);
+      if (currentRowData->isGenerated(columnIndex))
+        oldValue = "";
 
       // If looking for an exact match check all columns; otherwise only check
-      // key
-      // columns
-      if ((exactMatch || column.isKey()) && newValue != oldValue) {
+      // key columns
+      if (!exactMatch && !column.isKey())
+        continue;
+
+      // Ok, compare the values
+      if (newValue != oldValue) {
         return false;
       }
     }
-
-    ++columnIndex;
   }
 
   return true;

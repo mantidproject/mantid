@@ -334,12 +334,9 @@ bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
  * @return : true if ok, false if there was a problem
  */
 bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
-  // Clear state
-  rowData->setProcessed(false);
-  rowData->setError("");
-  rowData->setOptions(OptionsMap());
-  rowData->setPreprocessedOptions(OptionsMap());
-  
+  // Reset the row to its unprocessed state
+  rowData->reset();
+
   // Work out and cache the reduced workspace name
   rowData->setReducedName(getReducedWorkspaceName(rowData));
 
@@ -942,7 +939,7 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
         // First check if there was a default value and if so use that
         const auto optionValue = data->optionValue(column.algorithmProperty());
         if (!optionValue.isEmpty()) {
-          data->setValue(i, optionValue);
+          data->setValue(i, optionValue, true);
           continue;
         }
 
@@ -960,7 +957,7 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
               exp;
         }
 
-        data->setValue(i, propValue);
+        data->setValue(i, propValue, true);
       }
     }
   }

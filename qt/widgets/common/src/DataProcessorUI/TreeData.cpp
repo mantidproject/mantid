@@ -59,11 +59,15 @@ QString RowData::value(const int i) {
  * @param i [in] : the index of the value to set
  * @param value [in] : the new value
  */
-void RowData::setValue(const int i, const QString &value) {
+void RowData::setValue(const int i, const QString &value,
+                       const bool isGenerated) {
   // Set the row value
   if (m_data.size() > i) {
     m_data[i] = value;
   }
+
+  if (isGenerated)
+    m_generatedColumns.insert(i);
 
   // Also update the value in any child slices
   if (m_slices.size() > 0) {
@@ -105,6 +109,14 @@ void RowData::setPreprocessedOptions(OptionsMap options) {
  * @return : the number of fields
  */
 int RowData::size() const { return m_data.size(); }
+
+/** Check whether a cell value was auto-generated (i.e. has been populated with
+ * a result of the algorithm rather than being entered by the user)
+ * @param i : the column index of the cell to check
+ */
+bool RowData::isGenerated(const int i) const {
+  return (m_generatedColumns.count(i) > 0);
+}
 
 /** Check whether the given property exists in the options
  * @return : true if the property exists
@@ -247,6 +259,27 @@ RowData::addSlice(const QString &sliceSuffix,
   m_slices.push_back(sliceData);
 
   return sliceData;
+}
+
+/** Reset the row to how it was before it was processed. This clears the
+ * processed state, errors, generated values etc. It doesn't change the row
+ * data other than clearing generated values i.e. it leaves user-entered inputs
+ * unchanged
+ */
+void RowData::reset() {
+  // Clear processed state and error
+  setProcessed(false);
+  setError("");
+
+  // Clear the cache of algorithm properties used
+  setOptions(OptionsMap());
+  setPreprocessedOptions(OptionsMap());
+
+  // Clear generated values
+  for (auto columnIndex : m_generatedColumns) {
+    setValue(columnIndex, "");
+  }
+  m_generatedColumns.clear();
 }
 
 /** Clear all child slices for this row
