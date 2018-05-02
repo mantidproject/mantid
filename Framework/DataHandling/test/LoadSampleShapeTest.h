@@ -46,7 +46,7 @@ public:
     loadMeshObject(alg, true, "cube.stl");
   }
 
-  void test_cube() {
+  void test_stl_cube() {
     LoadSampleShape alg;
     auto cube = loadMeshObject(alg, true, "cube.stl");
     TS_ASSERT(cube->hasValidShape());
@@ -55,7 +55,7 @@ public:
     TS_ASSERT_DELTA(cube->volume(), 3000, 0.001);
   }
 
-  void test_cylinder() {
+  void test_stl_cylinder() {
     LoadSampleShape alg;
     auto cylinder = loadMeshObject(alg, true, "cylinder.stl");
     TS_ASSERT(cylinder->hasValidShape());
@@ -64,7 +64,7 @@ public:
     TS_ASSERT_DELTA(cylinder->volume(), 589, 1);
   }
 
-  void test_tube() {
+  void test_stl_tube() {
     LoadSampleShape alg;
     auto tube = loadMeshObject(alg, true, "tube.stl");
     TS_ASSERT(tube->hasValidShape());
@@ -73,24 +73,38 @@ public:
     TS_ASSERT_DELTA(tube->volume(), 7068, 1);
   }
 
-  void test_fail_invalid_solid() {
+  void test_fail_invalid_stl_solid() {
     LoadSampleShape alg;
     loadFailureTest(alg, "invalid_solid.stl");
   }
 
-  void test_fail_invalid_keyword() {
+  void test_fail_invalid_stl_keyword() {
     LoadSampleShape alg;
     loadFailureTest(alg, "invalid_keyword.stl");
   }
 
-  void test_fail_invalid_vertex() {
+  void test_fail_invalid_stl_vertex() {
     LoadSampleShape alg;
     loadFailureTest(alg, "invalid_vertex.stl");
   }
 
-  void test_fail_invalid_triangle() {
+  void test_fail_invalid_stl_triangle() {
     LoadSampleShape alg;
     loadFailureTest(alg, "invalid_triangle.stl");
+  }
+
+  void test_off_cube() {
+    LoadSampleShape alg;
+    auto cube = loadMeshObject(alg, true, "cube.off");
+    TS_ASSERT(cube->hasValidShape());
+    TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
+    TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
+    TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
+  }
+
+  void test_fail_invalid_off_triangle() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "cube4.off");
   }
 
 private:
