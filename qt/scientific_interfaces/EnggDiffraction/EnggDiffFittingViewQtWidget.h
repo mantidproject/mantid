@@ -8,8 +8,6 @@
 
 #include "ui_EnggDiffractionQtTabFitting.h"
 
-#include <boost/scoped_ptr.hpp>
-
 // Qt classes forward declarations
 class QMessageBox;
 class QMutex;
@@ -244,7 +242,7 @@ private:
   boost::shared_ptr<IEnggDiffractionPythonRunner> m_mainPythonRunner;
 
   /// presenter as in the model-view-presenter
-  boost::scoped_ptr<IEnggDiffFittingPresenter> m_presenter;
+  boost::shared_ptr<IEnggDiffFittingPresenter> m_presenter;
 
   /// current selected instrument
   /// updated from the EnggDiffractionPresenter processInstChange
