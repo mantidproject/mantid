@@ -83,8 +83,8 @@ private:
     QENSFitSimultaneous alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("Function", convolutionFunction(resolution->getName()));
+    alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", 0);
@@ -107,9 +107,9 @@ private:
     QENSFitSimultaneous alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    setMultipleInput(alg, workspaces);
     alg.setProperty("Function",
                     createMultiDomainFunction(function, workspaces.size()));
+    setMultipleInput(alg, workspaces);
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 10.0);
     alg.setProperty("ConvolveMembers", true);
@@ -214,14 +214,19 @@ private:
   }
 
   void setMultipleInput(IAlgorithm &fitAlgorithm,
-                        const std::vector<MatrixWorkspace_sptr> &workspaces) {
+                        const std::vector<MatrixWorkspace_sptr> &workspaces,
+                        double startX, double endX) {
     fitAlgorithm.setProperty("InputWorkspace", workspaces[0]);
     fitAlgorithm.setProperty("WorkspaceIndex", 0);
+    fitAlgorithm.setProperty("StartX", startX);
+    fitAlgorithm.setProperty("EndX", endX);
 
     for (auto i = 1u; i < workspaces.size(); ++i) {
       const auto suffix = "_" + std::to_string(i);
       fitAlgorithm.setProperty("InputWorkspace" + suffix, workspaces[i]);
       fitAlgorithm.setProperty("WorkspaceIndex" + suffix, 0);
+      fitAlgorithm.setProperty("StartX" + suffix, startX);
+      fitAlgorithm.setProperty("EndX" + suffix, endX);
     }
   }
 
