@@ -140,6 +140,45 @@ std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file,
   return nullptr;
 }
 
+std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
+  std::vector<uint16_t> triangleIndices;
+  std::vector<V3D> vertices;
+  size_t nVertices;
+  size_t nTriangles;
+
+  std::string line;
+  // Get number of vetrtices and faces
+  if (getline(file, line)) {
+    boost::trim(line);
+    std::vector<std::string> tokens;
+    boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
+    if (tokens.size() == 3) {
+      nVertices = boost::lexical_cast<size_t>(tokens[0]);
+      nTriangles = boost::lexical_cast<size_t>(tokens[1]);
+    }
+    else {
+      throw std::runtime_error("Error on reading OFF number of vertices, faces & edges");
+    }
+    throw std::runtime_error("Unexpected end of file");
+  }
+
+  return nullptr;
+}
+
+std::unique_ptr<Geometry::MeshObject> readOFFshape(std::ifstream &file) {
+  // We expect line after trimming to be "solid "+name.
+  std::string line;
+  if (getline(file, line)) {
+    boost::trim(line);
+    if (line.size() < 5 || line.substr(0, 5) != "OFF") {
+      throw std::runtime_error("Expected first line be 'OFF' keyword");
+    }
+    // Read OFF shape
+    return readOFFMeshObject(file);
+  }
+  return nullptr;
+}
+
 } // end anonymous namespace
 
 void LoadSampleShape::init() {
@@ -153,7 +192,7 @@ void LoadSampleShape::init() {
       "The name of the workspace containing the instrument to add the shape");
 
   // shape file
-  const std::vector<std::string> extensions{".stl"};
+  const std::vector<std::string> extensions{".stl",".off"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
       "The path name of the file containing the shape");
@@ -181,9 +220,16 @@ void LoadSampleShape::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  std::string solidName = "";
+  std::string filetype = filename.substr(filename.size()-3);
+
   boost::shared_ptr<MeshObject> shape = nullptr;
-  shape = readSTLSolid(file, solidName);
+  if (filetype == "off") {
+    shape = readOFFshape(file);
+  }
+  else /* stl */ {
+    std::string solidName = "";
+    shape = readSTLSolid(file, solidName);
+  }
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();
