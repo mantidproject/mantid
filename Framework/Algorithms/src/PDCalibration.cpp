@@ -603,6 +603,7 @@ void PDCalibration::exec() {
   // peak range setup
   alg->setProperty("FitPeakWindowWorkspace", tof_peak_window_ws);
   alg->setProperty("PeakWidthPercent", peak_width_percent);
+  alg->setProperty("MinimumPeakHeight", minPeakHeight);
   // some fitting strategy
   alg->setProperty("FitFromRight", true);
   alg->setProperty("HighBackground", false);
@@ -616,8 +617,10 @@ void PDCalibration::exec() {
   // Analysis output
   std::string fit_param_table_name =
       getPropertyValue("OutputPeakParametersWorkspace");
-  alg->setPropertyValue("OutputPeakParametersWorkspace", fit_param_table_name);
-  std::string fit_peak_matrix = getPropertyValue("FittedPeaksWorkspace");
+  alg->setPropertyValue("OutputPeakParametersWorkspace",
+                        fit_param_table_name); // TODO put in diagnostics
+  std::string fit_peak_matrix =
+      getPropertyValue("FittedPeaksWorkspace"); // TODO put in diagnostics
   if (fit_peak_matrix.size() > 0)
     alg->setPropertyValue("FittedPeaksWorkspace", fit_peak_matrix);
 
@@ -628,7 +631,11 @@ void PDCalibration::exec() {
   // get result
   API::ITableWorkspace_sptr fittedTable =
       alg->getProperty("OutputPeakParametersWorkspace");
-  setProperty("OUTPUTPEAKPARAMETERSWORKSPACE", fittedTable);
+  setProperty("OutputPeakParametersWorkspace", fittedTable);
+  if (fit_peak_matrix.size() > 0) {
+    MatrixWorkspace_sptr fittedWksp = alg->getProperty("FittedPeaksWorkspace");
+    setProperty("FittedPeaksWorkspace", fittedWksp);
+  }
   // check : for Pete
   if (!fittedTable)
     throw std::runtime_error(
@@ -822,8 +829,6 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   const size_t numPeaks = static_cast<size_t>(peakVec->at(0));
   // number of parameters
   const size_t numParams = static_cast<size_t>(peakVec->at(1));
-  // std::cout << "numPeaks=" << numPeaks << " numParams=" << numParams <<
-  // std::endl;
 
   // isn't strictly necessary, but makes reading the code much easier
   const std::vector<double> tofObs(peakVec->begin() + 2,
