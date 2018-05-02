@@ -69,11 +69,11 @@ private:
   void checkBeamCentreIn(const Indexing::SpectrumIndexSet &indices);
   API::MatrixWorkspace_sptr constructIvsLamWS(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices, const Angles &refAngles);
   MinMax findWavelengthMinMax(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices, const Angles &refAngles);
-  void processValue(const int inputIdx, const double twoTheta, const double bTwoTheta, const Angles &refAngles, const HistogramData::HistogramX &inputX, const HistogramData::HistogramY &inputY,
+  void processValue(const int inputIdx, const MinMax &twoThetaRange, const Angles &refAngles, const HistogramData::HistogramX &inputX, const HistogramData::HistogramY &inputY,
       const HistogramData::HistogramE &inputE, API::MatrixWorkspace &IvsLam,
       std::vector<double> &outputE);
-  MinMax projectedLambdaRange(const double lambda, const double twoTheta, const double bLambda,
-      const double bTwoTheta, const Angles &refAngles);
+  MinMax projectedLambdaRange(const MinMax &wavelengthRange,
+      const MinMax &twoThetaRange, const Angles &refAngles);
   Angles referenceAngles(const API::SpectrumInfo &spectrumInfo);
   API::MatrixWorkspace_sptr sumInQ(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices);
 };
