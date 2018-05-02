@@ -17,6 +17,9 @@ using namespace Mantid::API;
 
 namespace {
 
+const int dead1 = 4;
+const int dead2 = 12;
+
 void populatePhaseTable2(ITableWorkspace_sptr phaseTable,
                          const MatrixWorkspace_sptr ws) {
   phaseTable->addColumn("int", "DetectprID");
@@ -94,7 +97,7 @@ MatrixWorkspace_sptr setupWS(MatrixWorkspace_sptr m_loadedData) {
   auto xData = ws->points(0);
   for (size_t spec = 0; spec < ws->getNumberHistograms(); spec++) {
     for (size_t j = 0; j < xData.size(); j++) {
-      if (spec == 12 || spec == 4) {
+      if (spec == dead1 || spec == dead2) {
         ws->mutableY(spec)[j] = 0.0;
         ws->mutableE(spec)[j] = 0.0;
       } else {
@@ -153,12 +156,13 @@ public:
       emptySpectrum.push_back(
           std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
     }
-    TS_ASSERT(!emptySpectrum[2]);
-    TS_ASSERT(emptySpectrum[4]);
-    TS_ASSERT(emptySpectrum[12]);
-    TS_ASSERT(!emptySpectrum[9]);
-    TS_ASSERT(emptySpectrum[22]);
-
+    for(int j=0;j< emptySpectrum.size();j++){
+        if(j == dead1 || j == dead2){
+          TS_ASSERT(emptySpectrum[j]);
+        }else{
+          TS_ASSERT(!emptySpectrum[j]);
+        }
+    }
     // do phase Quad
     IAlgorithm_sptr phaseQuad = setupAlg(ws, true);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
