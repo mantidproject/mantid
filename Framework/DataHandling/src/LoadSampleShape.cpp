@@ -140,11 +140,70 @@ std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file,
   return nullptr;
 }
 
+void readOFFVertices(std::ifstream &file, uint16_t nV, std::vector<V3D> &vertices)
+{
+  std::string line;
+  V3D vertex;
+  for (uint16_t i = 0; i < nV; i++) {
+    if (getline(file, line)) {
+      boost::trim(line);
+      std::vector<std::string> tokens;
+      boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
+      if (tokens.size() == 3) {
+        vertex.setX(boost::lexical_cast<double>(tokens[0]));
+        vertex.setY(boost::lexical_cast<double>(tokens[1]));
+        vertex.setZ(boost::lexical_cast<double>(tokens[2]));
+      }
+      else {
+        throw std::runtime_error("Error on reading OFF vertex");
+      }
+      vertices.push_back(vertex);
+    }
+    else {
+      throw std::runtime_error("Unexpected end of file, while reading OFF vertices");
+    }
+  }
+}
+
+void readOFFTriangles(std::ifstream &file, uint16_t nT, std::vector<uint16_t> &triangleIndices)
+{
+  std::string line;
+  uint16_t t1, t2, t3;
+  size_t nFaceVertices;
+  if (getline(file, line)) {
+    for (uint16_t i = 0; i < nT; i++) {
+      boost::trim(line);
+      std::vector<std::string> tokens;
+      boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
+      if (tokens.size() >= 4) {
+        nFaceVertices = boost::lexical_cast<size_t>(tokens[0]);
+        if (nFaceVertices == 3) {
+          t1 = boost::lexical_cast<uint16_t>(tokens[1]);
+          t2 = boost::lexical_cast<uint16_t>(tokens[2]);
+          t3 = boost::lexical_cast<uint16_t>(tokens[3]);
+        }
+        else {
+          throw std::runtime_error("OFF face is not a triangle.");
+        }
+        triangleIndices.push_back(t1);
+        triangleIndices.push_back(t2);
+        triangleIndices.push_back(t3);
+      }
+      else {
+        throw std::runtime_error("Error on reading OFF triangle");
+      }
+    }
+  }
+  else {
+    throw std::runtime_error("Unexpected end of file, while reading OFF triangles");
+  }
+}
+
 std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
   std::vector<uint16_t> triangleIndices;
   std::vector<V3D> vertices;
-  size_t nVertices;
-  size_t nTriangles;
+  uint16_t nVertices;
+  uint16_t nTriangles;
 
   std::string line;
   // Get number of vetrtices and faces
@@ -153,25 +212,34 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
     std::vector<std::string> tokens;
     boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
     if (tokens.size() == 3) {
-      nVertices = boost::lexical_cast<size_t>(tokens[0]);
-      nTriangles = boost::lexical_cast<size_t>(tokens[1]);
+      nVertices = boost::lexical_cast<uint16_t>(tokens[0]);
+      nTriangles = boost::lexical_cast<uint16_t>(tokens[1]);
+      vertices.reserve(nVertices);
+      triangleIndices.reserve(3 * nTriangles);
     }
     else {
       throw std::runtime_error("Error on reading OFF number of vertices, faces & edges");
     }
-    throw std::runtime_error("Unexpected end of file");
   }
+  else {
+    throw std::runtime_error("Unexpected end of OFF file");
+  }
+  readOFFVertices(file, nVertices, vertices);
+  readOFFTriangles(file, nTriangles, triangleIndices);
 
-  return nullptr;
+  // Use efficient constructor of MeshObject
+  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
+    new MeshObject(std::move(triangleIndices), std::move(vertices),
+      Mantid::Kernel::Material()));
+  return retVal;
 }
 
 std::unique_ptr<Geometry::MeshObject> readOFFshape(std::ifstream &file) {
-  // We expect line after trimming to be "solid "+name.
   std::string line;
   if (getline(file, line)) {
     boost::trim(line);
-    if (line.size() < 5 || line.substr(0, 5) != "OFF") {
-      throw std::runtime_error("Expected first line be 'OFF' keyword");
+    if (line != "OFF") {
+      throw std::runtime_error("Expected first line to be 'OFF' keyword");
     }
     // Read OFF shape
     return readOFFMeshObject(file);
