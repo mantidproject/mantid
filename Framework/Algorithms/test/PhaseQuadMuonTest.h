@@ -153,11 +153,11 @@ public:
       emptySpectrum.push_back(
           std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
     }
-    TS_ASSERT_EQUALS(emptySpectrum[2], false);
-    TS_ASSERT_EQUALS(emptySpectrum[4], true);
-    TS_ASSERT_EQUALS(emptySpectrum[12], true);
-    TS_ASSERT_EQUALS(emptySpectrum[9], false);
-    TS_ASSERT_EQUALS(emptySpectrum[22], false);
+    TS_ASSERT(!emptySpectrum[2]);
+    TS_ASSERT(emptySpectrum[4] );
+    TS_ASSERT(emptySpectrum[12]);
+    TS_ASSERT(!emptySpectrum[9]);
+    TS_ASSERT(emptySpectrum[22]);
 
     // do phase Quad
     IAlgorithm_sptr phaseQuad = setupAlg(ws, true);
