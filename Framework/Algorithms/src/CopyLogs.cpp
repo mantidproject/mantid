@@ -72,8 +72,8 @@ void CopyLogs::exec() {
   } else {
     throw std::runtime_error("Cannot copy logs using unknown merge strategy");
   }
-  
-  if(!outputWS->getName().empty())
+
+  if (!outputWS->getName().empty())
     setProperty("OutputWorkspace", outputWs->getName());
 }
 
