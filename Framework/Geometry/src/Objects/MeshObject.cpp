@@ -58,8 +58,8 @@ const Kernel::Material MeshObject::material() const { return m_material; }
 */
 bool MeshObject::hasValidShape() const {
   // May enclose volume if there are at
-  // at least 4 triangles and 4 vertices
-  return (numberOfTriangles() >= 4 && numberOfVertices() >= 4);
+  // at least 2 triangles and 4 vertices
+  return (numberOfTriangles() >= 2 && numberOfVertices() >= 4);
 }
 
 /**
@@ -446,6 +446,9 @@ const BoundingBox &MeshObject::getBoundingBox() const {
         minZ = std::min(minZ, vz);
         maxZ = std::max(maxZ, vz);
       }
+      if (minZ == maxZ)
+        maxZ += 0.001;
+
       // Cache bounding box, so we do not need to repeat calculation
       m_boundingBox = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
     }

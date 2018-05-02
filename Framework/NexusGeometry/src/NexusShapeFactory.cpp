@@ -1,13 +1,14 @@
-#include "MantidGeometry/Objects/IObject.h"
+#include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidNexusGeometry/NexusShapeFactory.h"
+#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
@@ -29,7 +30,7 @@ createShape(const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
   // Boundingbox x,y,z:max; x,y,z:min
   shape->defineBoundingBox(boundingBox[0], boundingBox[2], boundingBox[4],
                            boundingBox[1], boundingBox[3], boundingBox[5]);
-  return shape;
+  return Mantid::Kernel::make_unique<const Geometry::CSGObject>(*shape);
 }
 
 void createTrianglesFromPolygon(const std::vector<uint16_t> &windingOrder,
@@ -73,7 +74,7 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 
   return triangularFaces;
 }
-}
+} // namespace
 
 std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
@@ -133,29 +134,47 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
                   const std::vector<uint16_t> &windingOrder,
                   const std::vector<float> &nexusVertices) {
 
-  std::vector<uint16_t> triangularFaces =
-      createTriangularFaces(faceIndices, windingOrder);
+  std::vector<Mantid::Kernel::V3D> vertices(nexusVertices.size() / 3);
 
-  auto numberOfVertices = nexusVertices.size() / 3;
-  std::vector<Mantid::Kernel::V3D> vertices(numberOfVertices);
   for (size_t vertexNumber = 0; vertexNumber < nexusVertices.size();
        vertexNumber += 3) {
-    vertices[vertexNumber / 3] = Mantid::Kernel::V3D(
-        nexusVertices[vertexNumber], nexusVertices[vertexNumber + 1],
-        nexusVertices[vertexNumber + 2]);
+    auto &vertex = vertices[vertexNumber / 3];
+    vertex = Mantid::Kernel::V3D(nexusVertices[vertexNumber],
+                                 nexusVertices[vertexNumber + 1],
+                                 nexusVertices[vertexNumber + 2]);
   }
+
+  std::vector<uint16_t> triangularFaces =
+      createTriangularFaces(faceIndices, windingOrder);
 
   return NexusShapeFactory::createMesh(std::move(triangularFaces),
                                        std::move(vertices));
 }
 
 std::unique_ptr<const Geometry::IObject>
+createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
+  const std::vector<uint16_t> &windingOrder,
+  const std::vector<Eigen::Vector3d> &nexusVertices) {
+
+  std::vector<Mantid::Kernel::V3D> vertices(nexusVertices.size());
+
+  std::transform(
+      nexusVertices.cbegin(), nexusVertices.cend(), vertices.begin(),
+      [](const Eigen::Vector3d &vert) { return Kernel::toV3D(vert); });
+
+  std::vector<uint16_t> triangularFaces =
+    createTriangularFaces(faceIndices, windingOrder);
+
+  return NexusShapeFactory::createMesh(std::move(triangularFaces),
+    std::move(vertices));
+}
+
+std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices) {
-
   return Mantid::Kernel::make_unique<Geometry::MeshObject>(
       std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
-}
-}
-}
+} // namespace NexusShapeFactory
+} // namespace NexusGeometry
+} // namespace Mantid

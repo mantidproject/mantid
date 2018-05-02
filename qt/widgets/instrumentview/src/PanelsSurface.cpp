@@ -232,8 +232,9 @@ void PanelsSurface::setupAxes() {
 * @param normal :: Normal vector to the bank's plane.
 * @param detectors :: List of detectorIndices.
 */
-void PanelsSurface::addFlatBankOfDetectors(
-    const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
+void PanelsSurface::addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal,
+                                           const std::vector<size_t> &detectors,
+                                           size_t bankIndex) {
   int index = m_flatBanks.size();
   // save bank info
   FlatBankInfo *info = new FlatBankInfo(this);
@@ -255,15 +256,10 @@ void PanelsSurface::addFlatBankOfDetectors(
   QVector<QPointF> vert;
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
-
   for (auto detector : detectors) {
     addDetector(detector, pos0, index, info->rotation);
-    // update the outline polygon
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
-    auto p2 = QPointF(udet.u, udet.v);
-    vert.clear();
-    vert << p0 << p1 << p2;
-    info->polygon = info->polygon.united(QPolygonF(vert));
+    info->polygon << QPointF(udet.u, udet.v);
   }
 }
 
@@ -362,8 +358,15 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
                                    std::vector<bool> &visited) {
   Mantid::Kernel::V3D normal;
   const auto &detectorInfo = m_instrActor->detectorInfo();
-  Mantid::Kernel::V3D pos0;
-  Mantid::Kernel::V3D x, y;
+  Mantid::Kernel::V3D pos0 = detectorInfo.position(children[0]);
+  Mantid::Kernel::V3D y = detectorInfo.position(children[1]) - pos0;
+  Mantid::Kernel::V3D x;
+
+  y.normalize();
+  // at first set the normal to an argbitrary vector orthogonal to
+  // the line between the first two detectors
+  setupBasisAxes(y, normal, x);
+ 
   bool normalFound = false;
   const auto &componentInfo = m_instrActor->componentInfo();
   std::vector<size_t> detectors;
@@ -372,19 +375,12 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
     if (visited[child])
       continue;
     visited[child] = true;
-
     if (detectorInfo.isMonitor(child))
       continue;
+    
     auto pos = detectorInfo.position(child);
-    if (child == children[0])
-      pos0 = pos;
-    else if (child == children[1]) {
-      // at first set the normal to an argbitrary vector orthogonal to
-      // the line between the first two detectors
-      y = pos - pos0;
-      y.normalize();
-      setupBasisAxes(y, normal, x);
-    } else if (fabs(normal.scalar_prod(pos - pos0)) >
+
+    if (fabs(normal.scalar_prod(pos - pos0)) >
                Mantid::Kernel::Tolerance) {
       if (!normalFound) {
         // when first non-colinear detector is found set the normal
@@ -451,7 +447,7 @@ void PanelsSurface::constructFromComponentInfo() {
         Mantid::Kernel::V3D normal;
         std::tie(detectors, normal) = res.get();
         if (!detectors.empty())
-          addFlatBankOfDetectors(normal, detectors);
+          addFlatBankOfDetectors(normal, detectors, i);
       }
     } else if (children.size() > 0 &&
                componentInfo.parent(children[0]) == componentInfo.root()) {
