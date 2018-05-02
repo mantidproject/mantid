@@ -156,12 +156,12 @@ public:
       emptySpectrum.push_back(
           std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
     }
-    for(int j=0;j< emptySpectrum.size();j++){
-        if(j == dead1 || j == dead2){
-          TS_ASSERT(emptySpectrum[j]);
-        }else{
-          TS_ASSERT(!emptySpectrum[j]);
-        }
+    for (int j = 0; j < emptySpectrum.size(); j++) {
+      if (j == dead1 || j == dead2) {
+        TS_ASSERT(emptySpectrum[j]);
+      } else {
+        TS_ASSERT(!emptySpectrum[j]);
+      }
     }
     // do phase Quad
     IAlgorithm_sptr phaseQuad = setupAlg(ws, true);
