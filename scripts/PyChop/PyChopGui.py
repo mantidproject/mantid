@@ -50,9 +50,18 @@ class PyChopGui(QtGui.QMainWindow):
         if 'LET' in str(instname):
             self.widgets['PulseRemoverCombo']['Combo'].show()
             self.widgets['PulseRemoverCombo']['Label'].show()
+            self.widgets['PulseRemoverCombo']['Label'].setText('Pulse remover chopper freq')
             for fq in range(10, 301, 10):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
             for fq in range(10, 151, 10):
+                self.widgets['PulseRemoverCombo']['Combo'].addItem(str(fq))
+        elif 'MAPS' in str(instname):
+            self.widgets['PulseRemoverCombo']['Combo'].show()
+            self.widgets['PulseRemoverCombo']['Label'].show()
+            self.widgets['PulseRemoverCombo']['Label'].setText('Disk Chopper frequency')
+            for fq in range(50, 601, 50):
+                self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
+            for fq in [50, 100]:
                 self.widgets['PulseRemoverCombo']['Combo'].addItem(str(fq))
         else:
             self.widgets['PulseRemoverCombo']['Combo'].hide()
@@ -61,20 +70,28 @@ class PyChopGui(QtGui.QMainWindow):
             self.widgets['Chopper2Phase']['Label'].hide()
             for fq in range(50, 601, 50):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
-        if 'LET' in str(instname) or 'MERLIN' in str(instname):
+        if 'LET' in str(instname):
             self.widgets['MultiRepCheck'].setEnabled(True)
             self.tabs.setTabEnabled(self.tdtabID, True)
-            if 'LET' in str(instname):
+            self.widgets['Chopper2Phase']['Edit'].show()
+            self.widgets['Chopper2Phase']['Label'].show()
+            self.widgets['Chopper2Phase']['Edit'].setText('5')
+            self.widgets['Chopper2Phase']['Label'].setText('Chopper 2 phase delay time')
+        elif 'MERLIN' in str(instname):
+            self.widgets['MultiRepCheck'].setEnabled(True)
+            self.tabs.setTabEnabled(self.tdtabID, True)
+            self.widgets['Chopper2Phase']['Edit'].setText('1500')
+            self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
+            if self.instSciAct.isChecked():
                 self.widgets['Chopper2Phase']['Edit'].show()
                 self.widgets['Chopper2Phase']['Label'].show()
-                self.widgets['Chopper2Phase']['Edit'].setText('5')
-                self.widgets['Chopper2Phase']['Label'].setText('Chopper 2 phase delay time')
-            else:
-                self.widgets['Chopper2Phase']['Edit'].setText('1500')
-                self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
-                if self.instSciAct.isChecked():
-                    self.widgets['Chopper2Phase']['Edit'].show()
-                    self.widgets['Chopper2Phase']['Label'].show()
+        elif 'MARI' in str(instname) or 'MAPS' in str(instname):
+            self.widgets['MultiRepCheck'].setEnabled(True)
+            self.tabs.setTabEnabled(self.tdtabID, True)
+            self.widgets['Chopper2Phase']['Edit'].show()
+            self.widgets['Chopper2Phase']['Label'].show()
+            self.widgets['Chopper2Phase']['Edit'].setText('0')
+            self.widgets['Chopper2Phase']['Label'].setText('Multirep mode')
         else:
             self.widgets['MultiRepCheck'].setEnabled(False)
             self.widgets['MultiRepCheck'].setChecked(False)
@@ -120,6 +137,13 @@ class PyChopGui(QtGui.QMainWindow):
             self.engine.setFrequency([freq_in, freqpr], Chopper2Phase=chop2phase)
         elif 'MERLIN' in str(self.engine.instname) and 'G' in self.engine.getChopper():
             chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 2e4
+            self.engine.setFrequency(freq_in, Chopper2Phase=chop2phase)
+        elif 'MAPS' in str(self.engine.instname): 
+            freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
+            chop2phase = int(self.widgets['Chopper2Phase']['Edit'].text())
+            self.engine.setFrequency([freq_in, freqpr], Chopper2Phase=chop2phase)
+        elif 'MARI' in str(self.engine.instname):
+            chop2phase = int(self.widgets['Chopper2Phase']['Edit'].text())
             self.engine.setFrequency(freq_in, Chopper2Phase=chop2phase)
         else:
             self.engine.setFrequency(freq_in)
@@ -193,15 +217,14 @@ class PyChopGui(QtGui.QMainWindow):
                 freq = freq[0]
             self.resaxes.hold(True)
             for ie, Ei in enumerate(Eis):
-                # For LET ignore reps above 40 meV in energy as there is no flux there.
-                # Similarly for MERLIN below 7 meV
-                #if ('LET' in inst and Ei > 30) or ('MERLIN' in inst and Ei < 7):
-                #    continue
                 en = np.linspace(0, 0.95*Ei, 200)
-                line, = self.resaxes.plot(en, self.res[ie])
-                line.set_label('%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, Ei, freq, self.flux[ie]))
-                if Ei > self.xlim:
-                    self.xlim = Ei
+                if any(self.res[ie]):
+                    if not self.flux[ie]:
+                        continue
+                    line, = self.resaxes.plot(en, self.res[ie])
+                    line.set_label('%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, Ei, freq, self.flux[ie]))
+                    if Ei > self.xlim:
+                        self.xlim = Ei
             self.resaxes.hold(False)
         else:
             en = np.linspace(0, 0.95*self.engine.getEi(), 200)
@@ -211,7 +234,7 @@ class PyChopGui(QtGui.QMainWindow):
             ei = self.engine.getEi()
             freq = self.engine.getFrequency()
             if hasattr(freq, '__len__'):
-                freq = freq[-1]
+                freq = freq[-1] if 'LET' in inst else freq[0]
             line.set_label('%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux))
             if ei > self.xlim:
                 self.xlim = ei
@@ -344,7 +367,7 @@ class PyChopGui(QtGui.QMainWindow):
         else:
             self.frqaxes1.clear()
             self.frqaxes2.clear()
-        self.setFreq(manual_freq=(freq0[-1] if 'LET' in inst else freq0))
+        self.setFreq(manual_freq=(freq0[-1] if hasattr(freq0, '__len__') else freq0))
         self.frqaxes1.set_xlabel('Chopper Frequency (Hz)')
         self.frqaxes1.set_ylabel('Flux (n/cm$^2$/s)')
         line, = self.frqaxes1.plot(freqs, flux, 'o-')
@@ -362,7 +385,7 @@ class PyChopGui(QtGui.QMainWindow):
         """
         Callback function for the "Instrument Scientist Mode" menu option
         """
-        if 'LET' in self.engine.instname:
+        if any([instname in self.engine.instname for instname in ['LET', 'MAPS', 'MARI']]):
             self.widgets['Chopper2Phase']['Edit'].show()   # Widget should show all the time for LET.
             self.widgets['Chopper2Phase']['Label'].show()
         elif self.instSciAct.isChecked() and 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
@@ -385,9 +408,8 @@ class PyChopGui(QtGui.QMainWindow):
         Plots the distance-time diagram in the right tab
         """
         self.repaxes.clear()
-        if 'LET' in str(self.engine.instname) or 'MERLIN' in str(self.engine.instname):
-            self.engine.plotMultiRepFrame(self.repaxes)
-            self.repcanvas.draw()
+        self.engine.plotMultiRepFrame(self.repaxes)
+        self.repcanvas.draw()
 
     def genText(self):
         """

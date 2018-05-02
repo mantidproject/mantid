@@ -30,7 +30,9 @@ class PyChop2:
         'LETHIFLUX': ISISDisk,   # LET, high flux configuration
         'LETINTERMED': ISISDisk, # LET, medium flux configuration
         'LETHIRES': ISISDisk,    # LET, low flux configuration
-        'MERLIN': ISISDisk}
+        'MERLIN': ISISDisk,
+        'MAPS': ISISDisk,
+        'MARI': ISISDisk}
 
     def __init__(self, instname, *args):
         instname = instname.upper()
