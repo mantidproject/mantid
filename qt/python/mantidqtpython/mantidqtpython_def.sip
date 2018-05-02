@@ -1597,17 +1597,32 @@ class Cell {
 public:
   Cell(const std::string &contentText);
 
-  const std::string &contentText() const;
-  int borderThickness() const;
-  const std::string & borderColor() const;
-  bool isEditable() const;
+  Cell(const std::string &contentText, const std::string& backgroundColor, int borderThickness,
+       const std::string &color, int borderTransparency, bool isEditable);
 
+  const std::string &contentText() const;
   void setContentText(const std::string& contentText);
-  void setBorderThickness(int borderThickness);
+
+  const std::string & borderColor() const;
   void setBorderColor(const std::string& borderColor);
-  void setEditable(bool isEditable);
+
+  const std::string & backgroundColor() const;
+  void setBackgroundColor(const std::string& backgroundColor);
+
+  int borderTransparency() const;
+  void setBorderTransparency(int alpha);
+
+  int borderThickness() const;
+  void setBorderThickness(int borderThickness);
+
+  bool isEditable() const;
   void disableEditing();
   void enableEditing();
+  void setEditable(bool isEditable);
+
+  const std::string &iconFilePath() const;
+  void setIconFilePath(const std::string& iconFilePath);
+
 };
 
 class Row {

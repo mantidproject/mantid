@@ -4,15 +4,18 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-Cell::Cell(std::string const &contentText, int borderThickness,
-           std::string const &borderColor, int borderTransparency, bool isEditable)
-    : m_contentText(contentText), m_borderThickness(borderThickness),
+Cell::Cell(std::string const &contentText, std::string const &backgroundColor,
+           int borderThickness, std::string const &borderColor,
+           int borderTransparency, bool isEditable)
+    : m_contentText(contentText), m_backgroundColor(backgroundColor),
+      m_borderThickness(borderThickness),
       m_borderTransparency(borderTransparency), m_borderColor(borderColor),
-      m_isEditable(isEditable) {}
+      m_iconFilePath(), m_isEditable(isEditable) {}
 
 Cell::Cell(std::string const &contentText)
-    : m_contentText(contentText), m_borderThickness(1), m_borderTransparency(255),
-      m_borderColor("darkGrey"), m_isEditable(true) {}
+    : m_contentText(contentText), m_backgroundColor("white"),
+      m_borderThickness(1), m_borderTransparency(255),
+      m_borderColor("darkGrey"), m_iconFilePath(), m_isEditable(true) {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
 
@@ -36,9 +39,21 @@ void Cell::setBorderColor(std::string const &borderColor) {
   m_borderColor = borderColor;
 }
 
+void Cell::setBackgroundColor(std::string const &backgroundColor) {
+  m_backgroundColor = backgroundColor;
+}
+
+std::string const &Cell::backgroundColor() const { return m_backgroundColor; }
+
 void Cell::setBorderTransparency(int borderTransparency) {
   m_borderTransparency = borderTransparency;
 }
+
+void Cell::setIconFilePath(std::string const &iconFilePath) {
+  m_iconFilePath = iconFilePath;
+}
+
+std::string const &Cell::iconFilePath() const { return m_iconFilePath; }
 
 void Cell::setEditable(bool isEditable) { m_isEditable = isEditable; }
 

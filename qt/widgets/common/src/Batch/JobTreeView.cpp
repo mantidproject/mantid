@@ -268,7 +268,7 @@ void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
       paddedRowFromCells(cells, deadCell, m_mainModel.columnCount()));
 }
 
-Cell const JobTreeView::deadCell = Cell("", 0, "transparent", 0, false);
+Cell const JobTreeView::deadCell = Cell("", "white", 0, "transparent", 0, false);
 
 void JobTreeView::appendChildRowOf(RowLocation const &parent) {
   m_adaptedMainModel.appendEmptyChildRow(rowLocation().indexAt(parent));

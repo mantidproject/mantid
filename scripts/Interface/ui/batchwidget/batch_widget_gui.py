@@ -52,6 +52,18 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         self.table.removeRows(runs_to_remove)
 
     def on_cell_updated(self, row, col, cell_content):
+        cell = self.table.cellAt(row, col)
+        if cell_content == 'Invalid':
+            cell.setIconFilePath(':/invalid.png')
+            cell.setBackgroundColor('white')
+            cell.setBorderColor('darkRed')
+            self.table.setCellAt(row, col, cell)
+        else:
+            cell.setIconFilePath('')
+            cell.setBorderColor('darkGrey')
+            cell.setBackgroundColor('#b3ffb3')
+            self.table.setCellAt(row, col, cell)
+
         print("Updated row {} col {} with text {}".format(row.path(), col, cell_content))
         pass
 

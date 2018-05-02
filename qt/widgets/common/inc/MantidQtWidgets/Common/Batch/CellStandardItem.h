@@ -10,7 +10,8 @@ namespace Batch {
 
 enum CellUserRoles {
   BorderColor = Qt::UserRole + 1,
-  BorderThickness
+  BorderThickness,
+  IconFilePath
 };
 
 void setBorderThickness(QStandardItem &item, int borderThickness);

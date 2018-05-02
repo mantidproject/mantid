@@ -31,7 +31,7 @@ RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
   } else {
     auto &path = location.path();
     for (auto it = path.cbegin(); it != path.cend() - 1; ++it)
-      parentIndex = m_model.index(*it, column, parentIndex);
+      parentIndex = m_model.index(*it, 0, parentIndex);
 
     if (m_model.hasIndex(location.rowRelativeToParent(), column, parentIndex))
       return fromMainModel(

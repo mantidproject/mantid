@@ -11,8 +11,38 @@ int getBorderThickness(QStandardItem const &item) {
   return item.data(CellUserRoles::BorderThickness).toInt();
 }
 
-void setBorderColor(QStandardItem &item, QColor const& borderColor) {
-  item.setData(borderColor, CellUserRoles::BorderColor);
+std::string getIconFilePath(QStandardItem const &item) {
+  return item.data(CellUserRoles::IconFilePath).toString().toStdString();
+}
+
+void setIconFilePath(QStandardItem &item, QString const &iconFilePath) {
+  item.setData(iconFilePath, CellUserRoles::IconFilePath);
+}
+
+void setIcon(QStandardItem &item, std::string const &iconFilePath) {
+  auto qiconFilePath = QString::fromStdString(iconFilePath);
+  setIconFilePath(item, qiconFilePath);
+  if (!qiconFilePath.isEmpty())
+    item.setIcon(QIcon(qiconFilePath));
+  else
+    item.setIcon(QIcon());
+}
+
+void setBorderColor(QStandardItem &item, std::string const &borderColor,
+                    int alpha) {
+  auto borderQColor = QColor(borderColor.c_str());
+  borderQColor.setAlpha(alpha);
+  item.setData(borderQColor, CellUserRoles::BorderColor);
+}
+
+void setBackgroundColor(QStandardItem &item,
+                        std::string const &backgroundColor) {
+  auto borderColor = QColor(backgroundColor.c_str());
+  item.setData(QBrush(borderColor), Qt::BackgroundRole);
+}
+
+std::string getBackgroundColor(QStandardItem const &item) {
+  return item.data(Qt::BackgroundRole).value<QBrush>().color().name().toStdString();
 }
 
 QColor getBorderColor(QStandardItem const &item) {
@@ -22,24 +52,25 @@ QColor getBorderColor(QStandardItem const &item) {
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   item.setText(QString::fromStdString(cell.contentText()));
   item.setEditable(cell.isEditable());
-  auto borderColor = QColor(cell.borderColor().c_str());
-  borderColor.setAlpha(cell.borderTransparency());
-  item.setData(borderColor, CellUserRoles::BorderColor);
-  item.setData(cell.borderThickness(), CellUserRoles::BorderThickness);
+  setBorderThickness(item, cell.borderThickness());
+  setBackgroundColor(item, cell.backgroundColor());
+  setBorderColor(item, cell.borderColor(), cell.borderTransparency());
+  setIcon(item, cell.iconFilePath());
 }
 
-Cell extractCellPropertiesFromItem(QStandardItem const& item) {
+Cell extractCellPropertiesFromItem(QStandardItem const &item) {
   auto cell = Cell(item.text().toStdString());
   cell.setBorderThickness(getBorderThickness(item));
+  cell.setIconFilePath(getIconFilePath(item));
+  cell.setBackgroundColor(getBackgroundColor(item));
 
   auto borderColor = getBorderColor(item);
   cell.setBorderColor(borderColor.name().toStdString());
   cell.setBorderTransparency(borderColor.alpha());
 
-  cell.setEditable(cell.isEditable());
+  cell.setEditable(item.isEditable());
   return cell;
 }
-
 }
 }
 }

@@ -10,31 +10,39 @@ namespace Batch {
 class EXPORT_OPT_MANTIDQT_COMMON Cell {
 public:
   Cell(std::string const &contentText);
-  Cell(std::string const &contentText, int borderThickness,
+  Cell(std::string const &contentText, std::string const& backgroundColor, int borderThickness,
        std::string const &color, int borderTransparency, bool isEditable);
 
-  std::string const &contentText() const;
-  int borderThickness() const;
-  std::string const &borderColor() const;
-  int borderTransparency() const;
-  bool isEditable() const;
-
   void setContentText(std::string const &contentText);
-  void setBorderThickness(int borderThickness);
-  void setBorderColor(std::string const &borderColor);
-  void setBorderTransparency(int transparency);
+  std::string const &contentText() const;
 
+  void setIconFilePath(std::string const& iconPath);
+  std::string const& iconFilePath() const;
+
+  void setBorderColor(std::string const &borderColor);
+  std::string const &borderColor() const;
+
+  void setBackgroundColor(std::string const &backgroundColor);
+  std::string const &backgroundColor() const;
+
+  void setBorderTransparency(int transparency);
+  int borderTransparency() const;
+
+  int borderThickness() const;
+  void setBorderThickness(int borderThickness);
+
+  bool isEditable() const;
   void setEditable(bool isEditable);
   void disableEditing();
   void enableEditing();
 
 private:
   std::string m_contentText;
+  std::string m_backgroundColor;
   int m_borderThickness;
-
   int m_borderTransparency;
   std::string m_borderColor;
-
+  std::string m_iconFilePath;
   bool m_isEditable;
 };
 
