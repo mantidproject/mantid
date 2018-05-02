@@ -109,6 +109,7 @@ public:
   virtual void clearTable() = 0;
 
   virtual void skipProcessing() = 0;
+  virtual void setPromptUser(bool allowPrompt) = 0;
 };
 }
 }

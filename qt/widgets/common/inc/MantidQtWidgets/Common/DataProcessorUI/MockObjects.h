@@ -155,6 +155,7 @@ public:
                      void(const QString &prompt, const QString &title));
   MOCK_METHOD0(publishCommandsMocked, void());
   MOCK_METHOD0(skipProcessing, void());
+  MOCK_METHOD1(setPromptUser, void(const bool));
   MOCK_METHOD1(setForcedReProcessing, void(bool));
   MOCK_METHOD0(settingsChanged, void());
 

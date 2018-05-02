@@ -271,9 +271,14 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 */
 void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
+  m_itemsToProcess = itemsToProcess;
+
   // Don't continue if there are no items to process
-  if (itemsToProcess.empty())
+  if (m_itemsToProcess.empty()) {
+    resume();
+    endReduction(false);
     return;
+  }
 
   // If slicing is not specified, process normally, delegating to
   // GenericDataProcessorPresenter
@@ -289,14 +294,12 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
   if (!slicing->hasSlicing()) {
     // Check if any input event workspaces still exist in ADS
-    if (proceedIfWSTypeInADS(itemsToProcess, true)) {
+    if (proceedIfWSTypeInADS(m_itemsToProcess, true)) {
       setPromptUser(false); // Prevent prompting user twice
-      GenericDataProcessorPresenter::process(itemsToProcess);
+      GenericDataProcessorPresenter::process(m_itemsToProcess);
     }
     return;
   }
-
-  m_itemsToProcess = itemsToProcess;
 
   // Check if any input non-event workspaces exist in ADS
   if (!proceedIfWSTypeInADS(m_itemsToProcess, false))

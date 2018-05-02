@@ -169,6 +169,9 @@ public:
 
   void skipProcessing() override;
 
+  // Sets whether to prompt user when getting selected runs
+  void setPromptUser(bool allowPrompt) override;
+
 protected:
   template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
   // The table view we're managing
@@ -221,8 +224,6 @@ protected:
   // Finds a run in the AnalysisDataService
   QString findRunInADS(const QString &run, const QString &prefix,
                        bool &runFound);
-  // Sets whether to prompt user when getting selected runs
-  void setPromptUser(bool allowPrompt);
 
   // Set up data required for processing a row
   bool initRowForProcessing(RowData_sptr rowData);
@@ -259,6 +260,8 @@ protected:
   ProgressPresenter *m_progressReporter;
   // A boolean that can be set to pause reduction of the current item
   bool m_pauseReduction;
+  // resume reduction
+  void resume();
 
 protected slots:
   void reductionError(QString ex);
@@ -353,8 +356,6 @@ private:
   // end reduction
   virtual void endReduction(const bool success);
 
-  // resume reduction
-  void resume();
   void updateWidgetEnabledState(const bool isProcessing) const;
 
   // Check if a group has been processed

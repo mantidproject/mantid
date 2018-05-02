@@ -386,18 +386,19 @@ void GenericDataProcessorPresenter::processAll() {
 /** Process a given set of items
  */
 void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
+  m_itemsToProcess = itemsToProcess;
+
   // Emit a signal that the process is starting
   m_view->emitProcessClicked();
   if (GenericDataProcessorPresenter::m_skipProcessing) {
     m_skipProcessing = false;
     return;
   }
-  m_itemsToProcess = itemsToProcess;
-  ;
 
   // Don't continue if there are no items selected
   if (m_itemsToProcess.size() == 0) {
-    m_mainPresenter->confirmReductionPaused(m_group);
+    resume();
+    endReduction(false);
     return;
   }
 
@@ -1081,6 +1082,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     deleteAll();
     break;
   case DataProcessorPresenter::ProcessFlag:
+    setPromptUser(true);
     processSelection();
     break;
   case DataProcessorPresenter::ProcessAllFlag:

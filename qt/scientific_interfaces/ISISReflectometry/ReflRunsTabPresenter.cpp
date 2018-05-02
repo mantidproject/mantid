@@ -303,11 +303,17 @@ void ReflRunsTabPresenter::runAutoreduction() {
   // Transfer all of the search results to the table (this excludes any that
   // already exist so will only add new ones)
   auto rowsToTransfer = m_view->getAllSearchRows();
-  if (rowsToTransfer.size() > 0)
+  const auto group = m_autoreduction.group();
+  auto tablePresenter = m_tablePresenters.at(group);
+
+  if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, m_autoreduction.group());
+  }
+
+  // Don't prompt the user on errors such as an empty table
+  tablePresenter->setPromptUser(false);
 
   // Process all rows in the table
-  auto tablePresenter = m_tablePresenters.at(m_autoreduction.group());
   tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
 }
 
