@@ -109,9 +109,7 @@ private:
 
     alg.setProperty("Function",
                     createMultiDomainFunction(function, workspaces.size()));
-    setMultipleInput(alg, workspaces);
-    alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 10.0);
+    setMultipleInput(alg, workspaces, 0.0, 10.0);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
