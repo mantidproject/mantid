@@ -145,7 +145,7 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
         // try to cast property to WorkspaceProperty
         Mantid::API::WorkspaceProperty<> *wsProp =
             dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
-        if (wsProp != NULL) {
+        if (wsProp != nullptr) {
           m_algPropName = QString::fromStdString((*it)->name());
           break;
         }

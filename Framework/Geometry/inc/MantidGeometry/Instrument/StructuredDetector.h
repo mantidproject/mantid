@@ -64,8 +64,8 @@ public:
   StructuredDetector(const StructuredDetector *base, const ParameterMap *map);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(size_t xPixels, size_t yPixels, const std::vector<double> &x,
-                  const std::vector<double> &y, bool isZBeam, detid_t idStart,
+  void initialize(size_t xPixels, size_t yPixels, std::vector<double> &&x,
+                  std::vector<double> &&y, bool isZBeam, detid_t idStart,
                   bool idFillByFirstY, int idStepByRow, int idStep = 1);
 
   //! Make a clone of the present component

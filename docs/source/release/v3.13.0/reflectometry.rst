@@ -24,6 +24,8 @@ Bug fixes
 Features Removed
 ################
 
+* Added deprecation notice to ISIS Reflectometry (Old) due to be removed in March 2019.
+
 Algorithms
 ----------
 
@@ -44,5 +46,7 @@ Improvements
 
 Bug fixes
 #########
+
+* Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 
 :ref:`Release 3.13.0 <v3.13.0>`

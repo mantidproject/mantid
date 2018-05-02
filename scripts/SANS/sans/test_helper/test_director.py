@@ -16,7 +16,8 @@ from sans.state.adjustment import get_adjustment_builder
 from sans.state.convert_to_q import get_convert_to_q_builder
 
 from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality,
-                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape)
+                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape, SANSInstrument)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class TestDirector(object):
@@ -51,10 +52,11 @@ class TestDirector(object):
 
     def construct(self):
         facility = SANSFacility.ISIS
+        file_information = SANSFileInformationMock(run_number=22024, instrument=SANSInstrument.SANS2D)
 
         # Build the SANSStateData
         if self.data_state is None:
-            data_builder = get_data_builder(facility)
+            data_builder = get_data_builder(facility, file_information)
             data_builder.set_sample_scatter("SANS2D00022024")
             data_builder.set_can_scatter("SANS2D00022024")
             self.data_state = data_builder.build()
@@ -110,7 +112,7 @@ class TestDirector(object):
 
         # Build the SANSStateScale
         if self.scale_state is None:
-            scale_builder = get_scale_builder(self.data_state)
+            scale_builder = get_scale_builder(self.data_state, file_information)
             scale_builder.set_shape(SampleShape.Cuboid)
             scale_builder.set_width(1.0)
             scale_builder.set_height(2.0)

@@ -2,6 +2,8 @@
 #include "ReflSaveTabPresenter.h"
 
 #include <boost/algorithm/string.hpp>
+#include <QMessageBox>
+#include <QFileDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -9,10 +11,15 @@ namespace CustomInterfaces {
 /** Constructor
 * @param parent :: The parent of this view
 */
-QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter() {
-
+QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter(nullptr) {
   UNUSED_ARG(parent);
   initLayout();
+}
+
+void QtReflSaveTabView::subscribe(IReflSaveTabPresenter *presenter) {
+  m_presenter = presenter;
+  populateListOfWorkspaces();
+  suggestSaveDir();
 }
 
 /** Destructor
@@ -32,18 +39,50 @@ void QtReflSaveTabView::initLayout() {
           SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)),
           this, SLOT(requestWorkspaceParams()));
-
-  m_presenter.reset(new ReflSaveTabPresenter(this));
-  populateListOfWorkspaces();
-  suggestSaveDir();
+  connect(m_ui.saveReductionResultsCheckBox, SIGNAL(stateChanged(int)), this,
+          SLOT(onAutosaveChanged(int)));
+  connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this,
+          SLOT(onSavePathChanged()));
+  connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this,
+          SLOT(browseToSaveDirectory()));
 }
 
-/** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
-IReflSaveTabPresenter *QtReflSaveTabView::getPresenter() const {
+void QtReflSaveTabView::browseToSaveDirectory() {
+  auto savePath = QFileDialog::getExistingDirectory(
+      this, "Select the directory to save to.");
+  if (!savePath.isEmpty()) {
+    m_ui.savePathEdit->setText(savePath);
+    onSavePathChanged();
+  }
+}
 
-  return m_presenter.get();
+void QtReflSaveTabView::onSavePathChanged() {
+  m_presenter->notify(IReflSaveTabPresenter::Flag::savePathChanged);
+}
+
+void QtReflSaveTabView::onAutosaveChanged(int state) {
+  if (state == Qt::CheckState::Checked)
+    m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
+  else
+    m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveDisabled);
+}
+
+void QtReflSaveTabView::disableAutosaveControls() {
+  m_ui.autosaveGroup->setEnabled(false);
+}
+
+void QtReflSaveTabView::enableAutosaveControls() {
+  m_ui.autosaveGroup->setEnabled(true);
+}
+
+void QtReflSaveTabView::enableFileFormatAndLocationControls() {
+  m_ui.fileFormatGroup->setEnabled(true);
+  m_ui.fileLocationGroup->setEnabled(true);
+}
+
+void QtReflSaveTabView::disableFileFormatAndLocationControls() {
+  m_ui.fileFormatGroup->setEnabled(false);
+  m_ui.fileLocationGroup->setEnabled(false);
 }
 
 /** Returns the save path
@@ -133,6 +172,10 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
   return m_ui.qResolutionCheckBox->isChecked();
 }
 
+void QtReflSaveTabView::disallowAutosave() {
+  m_ui.saveReductionResultsCheckBox->setCheckState(Qt::CheckState::Unchecked);
+}
+
 /** Returns the separator type
 * @return :: The separator
 */
@@ -204,5 +247,28 @@ void QtReflSaveTabView::suggestSaveDir() const {
   m_presenter->notify(IReflSaveTabPresenter::suggestSaveDirFlag);
 }
 
+/**
+Show an critical error dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void QtReflSaveTabView::giveUserCritical(const std::string &prompt,
+                                         const std::string &title) {
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+/**
+Show an information dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void QtReflSaveTabView::giveUserInfo(const std::string &prompt,
+                                     const std::string &title) {
+  QMessageBox::information(this, QString::fromStdString(title),
+                           QString::fromStdString(prompt), QMessageBox::Ok,
+                           QMessageBox::Ok);
+}
 } // namespace CustomInterfaces
 } // namespace Mantid

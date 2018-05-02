@@ -59,6 +59,10 @@ public:
 
   IObjComponent(GeometryHandler *the_handler);
 
+  IObjComponent(const IObjComponent &);
+
+  IObjComponent &operator=(const IObjComponent &rhs);
+
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
   ~IObjComponent() override;
@@ -104,11 +108,6 @@ public:
   GeometryHandler *Handle() const { return handle; }
 
 protected:
-  /// Protected copy constructor
-  IObjComponent(const IObjComponent &);
-  /// Assignment operator
-  IObjComponent &operator=(const IObjComponent &);
-
   /// Reset the current geometry handler
   void setGeometryHandler(GeometryHandler *h);
 

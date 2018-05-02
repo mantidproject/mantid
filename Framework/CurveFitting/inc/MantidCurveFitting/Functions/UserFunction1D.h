@@ -88,6 +88,7 @@ public:
   const std::string summary() const override {
     return "Fits a histogram from a workspace to a user defined function.";
   }
+  const std::vector<std::string> seeAlso() const override { return {"Fit"}; }
 
 protected:
   /// overwrite base class methods

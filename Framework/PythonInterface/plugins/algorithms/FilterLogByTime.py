@@ -12,6 +12,9 @@ class FilterLogByTime(PythonAlgorithm):
     def category(self):
         return "Events\\EventFiltering"
 
+    def seeAlso(self):
+        return [ "FilterByTime","FilterByLogValue" ]
+
     def name(self):
         return "FilterLogByTime"
 
