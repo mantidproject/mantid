@@ -97,7 +97,7 @@ Output:
   detectorTable, fittingResults =   CalMuonDetectorPhases(InputWorkspace='ws', LastGoodData=20,ForwardSpectra="1,2", BackwardSpectra="3,4",Frequency=5.0)
   # Print the result
   for i in range(0,4):
-    print "Detector %i has phase %f and amplitude %f" % (detectorTable.cell(i,0), detectorTable.cell(i,2), detectorTable.cell(i,1))
+     print("Detector {} has phase {:.6f} and amplitude {:.6f}".format(detectorTable.cell(i,0), detectorTable.cell(i,2), detectorTable.cell(i,1)))
    
 Output:
 
