@@ -478,6 +478,9 @@ The following parameters are also required:
 - **New GSAS-II Project** - GSASIIRefineFitPeaks creates a new
   ``.gpx`` project here, which can be opened and inspected from the
   GSAS-II GUI
+
+  - Note, if running **Refine All** on more than one run, the run
+    number and bank ID will be appended to the filename
 - **GSAS-II Installation Directory**
 
   - This is the directory containing the GSAS-II executables and
@@ -514,6 +517,9 @@ To do a refinement, take the following steps:
    (goodness of fit index), Sigma and Gamma (peak broadening
    coefficients) and lattice parameters should be displayed in the
    **Fit Results** section.
+
+   - You can also click **Refine All** to run refinement on all runs
+     loaded into GSAS tab
 
 You can toggle the fitted peaks on and off with the **Plot Fitted
 Peaks** checkbox, remove runs from the list with the **Remove Run**

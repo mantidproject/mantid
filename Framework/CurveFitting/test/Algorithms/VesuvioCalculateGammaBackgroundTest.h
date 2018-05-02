@@ -62,15 +62,15 @@ public:
     TS_ASSERT_DELTA(corrE.back(), inE.back(), 1e-08);
 
     const auto &corrY(correctedWS->y(0));
-    TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
-    TS_ASSERT_DELTA(corrY[npts / 2], 0.15060372, 1e-08);
-    TS_ASSERT_DELTA(corrY.back(), -0.01696477, 1e-08);
+    TS_ASSERT_DELTA(corrY.front(), 0.0000012042, 1e-08);
+    TS_ASSERT_DELTA(corrY[npts / 2], 0.1580361070, 1e-08);
+    TS_ASSERT_DELTA(corrY.back(), -0.0144493467, 1e-08);
 
     // Background Y values = 0.0
     const auto &backY(backgroundWS->y(0));
-    TS_ASSERT_DELTA(backY.front(), -0.00000138, 1e-08);
-    TS_ASSERT_DELTA(backY[npts / 2], -0.00015056, 1e-08);
-    TS_ASSERT_DELTA(backY.back(), 0.01650629, 1e-08);
+    TS_ASSERT_DELTA(backY.front(), -0.0000012042, 1e-08);
+    TS_ASSERT_DELTA(backY[npts / 2], -0.0001317931, 1e-08);
+    TS_ASSERT_DELTA(backY.back(), 0.0144493467, 1e-08);
   }
 
   void
@@ -159,15 +159,15 @@ public:
 
     // Corrected values
     const auto &corrY(correctedWS->y(0));
-    TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
-    TS_ASSERT_DELTA(corrY[npts / 2], 0.15060372, 1e-08);
-    TS_ASSERT_DELTA(corrY.back(), -0.01696477, 1e-08);
+    TS_ASSERT_DELTA(corrY.front(), 0.0000012042, 1e-08);
+    TS_ASSERT_DELTA(corrY[npts / 2], 0.1580361070, 1e-08);
+    TS_ASSERT_DELTA(corrY.back(), -0.0144493467, 1e-08);
 
     // Background Y values = 0.0
     const auto &backY(backgroundWS->y(0));
-    TS_ASSERT_DELTA(backY.front(), -0.00000138, 1e-08);
-    TS_ASSERT_DELTA(backY[npts / 2], -0.00015056, 1e-08);
-    TS_ASSERT_DELTA(backY.back(), 0.01650629, 1e-08);
+    TS_ASSERT_DELTA(backY.front(), -0.0000012042, 1e-08);
+    TS_ASSERT_DELTA(backY[npts / 2], -0.0001317931, 1e-08);
+    TS_ASSERT_DELTA(backY.back(), 0.0144493467, 1e-08);
   }
 
   //------------------------------------ Error cases
@@ -233,20 +233,21 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithFoilChanger() {
     double x0(50.0), x1(300.0), dx(0.5);
-    return ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, true,
-                                                          true);
+    return ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
   }
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithNoFoilChanger() {
     double x0(165.0), x1(166.0), dx(0.5);
-    return ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, false);
+    return ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, false);
   }
 
   Mantid::API::MatrixWorkspace_sptr
   createTwoSpectrumWorkspaceWithFoilChanger() {
     double x0(50.0), x1(300.0), dx(0.5);
     auto singleSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
-        1, x0, x1, dx, true, true);
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
     const size_t nhist = 2;
     auto twoSpectrum =
         Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
@@ -268,7 +269,7 @@ public:
     constexpr int nhist = 1;
 
     auto singleSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
-        1, x0, x1, dx, true, true);
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
     auto inWs =
         Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
 

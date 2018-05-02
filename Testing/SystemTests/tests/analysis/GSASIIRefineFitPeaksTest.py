@@ -20,6 +20,7 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
     sigma = None
     lattice_params_table = None
 
+    _FITTED_PEAKS_WS_NAME = "FittedPeaks"
     _LATTICE_PARAM_TBL_NAME = "LatticeParameters"
     _INPUT_WORKSPACE_FILENAME = "focused_bank1_ENGINX00256663.nxs"
     _PHASE_FILENAME_1 = "Fe-gamma.cif"
@@ -34,6 +35,10 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
 
     @abstractmethod
     def _get_fit_params_reference_filename(self):
+        pass
+
+    @abstractmethod
+    def _get_fitted_peaks_reference_filename(self):
         pass
 
     @abstractmethod
@@ -85,6 +90,7 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
 
         self.fitted_peaks_ws, self.lattice_params_table, self.rwp, self.sigma, self.gamma = \
             GSASIIRefineFitPeaks(RefinementMethod=self._get_refinement_method(),
+                                 OutputWorkspace=self._FITTED_PEAKS_WS_NAME,
                                  InputWorkspace=self.input_ws,
                                  PhaseInfoFiles=self.phase_file_paths(),
                                  InstrumentFile=self.inst_param_file_path(),
@@ -100,10 +106,10 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
-        # TODO: Check fitted_peaks_ws has correct values once we have some data we're sure of
-        self.assertEqual(self.input_ws.getNumberBins(), self.fitted_peaks_ws.getNumberBins())
-        self.assertAlmostEqual(self.rwp, self._get_expected_rwp(), delta=1e-6)
-        return self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._get_fit_params_reference_filename())
+        self.tolerance = 1e-4
+        self.assertAlmostEqual(self.rwp, self._get_expected_rwp(), delta=1e-5)
+        return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._get_fit_params_reference_filename()),
+                self._FITTED_PEAKS_WS_NAME, mantid.FileFinder.getFullPath(self._get_fitted_peaks_reference_filename()))
 
 
 class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
@@ -116,6 +122,9 @@ class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksRietveldFitParams.nxs"
+
+    def _get_fitted_peaks_reference_filename(self):
+        return "GSASIIRefineFitPeaksRietveldFittedPeaks.nxs"
 
     def _get_gsas_proj_filename(self):
         return "GSASIIRefineFitPeaksRietveldTest.gpx"
@@ -130,10 +139,13 @@ class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
         return not self.path_to_gsas()
 
     def _get_expected_rwp(self):
-        return 74.025863
+        return 24.051622
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksPawleyFitParams.nxs"
+
+    def _get_fitted_peaks_reference_filename(self):
+        return "GSASIIRefineFitPeaksPawleyFittedPeaks.nxs"
 
     def _get_gsas_proj_filename(self):
         return "GSASIIRefineFitPeaksPawleyTest.gpx"

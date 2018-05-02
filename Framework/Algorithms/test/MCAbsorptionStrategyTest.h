@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 
@@ -76,8 +75,8 @@ public:
     const size_t nevents(10), maxTries(1);
     MCAbsorptionStrategy mcabs(testBeamProfile, testThinAnnulus, nevents,
                                maxTries);
-    MersenneTwister rng;
-    rng.setSeed(1);
+    MockRNG rng;
+    EXPECT_CALL(rng, nextValue()).WillRepeatedly(Return(0.5));
     const double lambdaBefore(2.5), lambdaAfter(3.5);
     const V3D endPos(0.7, 0.7, 1.4);
     TS_ASSERT_THROWS(mcabs.calculate(rng, endPos, lambdaBefore, lambdaAfter),
