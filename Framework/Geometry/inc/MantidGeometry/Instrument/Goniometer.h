@@ -91,6 +91,10 @@ public:
   // Set rotation angle for an axis in the units the angle is set (default --
   // degrees)
   void setRotationAngle(size_t axisnumber, double value);
+  // Calculate goniometer for rotation around y-axis for constant wavelength
+  // from Q Sample
+  void calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &Q,
+                                    double wavelength);
   // Get axis object
   const GoniometerAxis &getAxis(size_t axisnumber) const;
   // Get axis object

@@ -247,6 +247,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         """Return the algorithm's category."""
         return common.CATEGORIES
 
+    def seeAlso(self):
+        return [ "DirectILLReduction" ]
+
     def name(self):
         """Return the algorithm's name."""
         return 'DirectILLCollectData'

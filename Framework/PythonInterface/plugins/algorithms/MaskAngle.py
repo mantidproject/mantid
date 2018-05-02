@@ -15,6 +15,9 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         """
         return "Transforms\\Masking"
 
+    def seeAlso(self):
+        return [ "MaskDetectors" ]
+
     def name(self):
         """ Mantid require
         """
@@ -32,9 +35,12 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         angleValidator=mantid.kernel.FloatBoundedValidator()
         angleValidator.setBounds(0.,180.)
         self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator,
-                             direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
-        self.declareProperty(name="MaxAngle", defaultValue=0.0, validator=angleValidator,
-                             direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
+                             direction=mantid.kernel.Direction.Input, doc="Angles above MinAngle are going to be masked")
+        self.declareProperty(name="MaxAngle", defaultValue=180.0, validator=angleValidator,
+                             direction=mantid.kernel.Direction.Input, doc="Angles below MaxAngle are going to be masked")
+        self.declareProperty('Angle', 'TwoTheta',
+                             mantid.kernel.StringListValidator(['TwoTheta', 'Phi']),
+                             'Which angle to use')
         self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
                              doc="List of detector masked, with scatterin angles between MinAngle and MaxAngle")
 
@@ -56,23 +62,35 @@ class MaskAngle(mantid.api.PythonAlgorithm):
 
     def PyExec(self):
         ws = self.getProperty("Workspace").value
-        ttmin = self.getProperty("MinAngle").value
-        ttmax = self.getProperty("MaxAngle").value
+        ttmin = numpy.radians(self.getProperty("MinAngle").value)
+        ttmax = numpy.radians(self.getProperty("MaxAngle").value)
         if ttmin > ttmax :
             raise ValueError("MinAngle > MaxAngle, please check angle range for masking")
+
+        angle = self.getProperty('Angle').value
 
         detlist=[]
 
         numspec = ws.getNumberHistograms()
-        source=ws.getInstrument().getSource().getPos()
-        sample=ws.getInstrument().getSample().getPos()
         spectrumInfo = ws.spectrumInfo()
-        for i in range(numspec):
-            if not spectrumInfo.isMonitor(i):
-                det = ws.getDetector(i)
-                tt=numpy.degrees(det.getTwoTheta(sample,sample-source))
-                if tt>= ttmin and tt<= ttmax:
-                    detlist.append(det.getID())
+
+        if angle == 'Phi':
+            for i in range(numspec):
+                if not spectrumInfo.isMonitor(i):
+                    det = ws.getDetector(i)
+                    phi=abs(det.getPhi())
+                    if phi>= ttmin and phi<= ttmax:
+                        detlist.append(det.getID())
+        else:
+            source=ws.getInstrument().getSource().getPos()
+            sample=ws.getInstrument().getSample().getPos()
+            beam = sample-source
+            for i in range(numspec):
+                if not spectrumInfo.isMonitor(i):
+                    det = ws.getDetector(i)
+                    tt=det.getTwoTheta(sample,beam)
+                    if tt>= ttmin and tt<= ttmax:
+                        detlist.append(det.getID())
 
         if len(detlist)> 0:
             mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist)

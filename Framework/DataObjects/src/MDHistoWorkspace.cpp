@@ -1,21 +1,22 @@
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include <map>
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
-#include <boost/scoped_array.hpp>
+#include "MantidKernel/make_unique.h"
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
+#include <boost/scoped_array.hpp>
 #include <cmath>
+#include <map>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -303,8 +304,9 @@ void MDHistoWorkspace::applyImplicitFunction(
  * @param[out] numVertices :: returns the number of vertices in the array.
  * @return the bare array. This should be deleted by the caller!
  * */
-coord_t *MDHistoWorkspace::getVertexesArray(size_t linearIndex,
-                                            size_t &numVertices) const {
+std::unique_ptr<coord_t[]>
+MDHistoWorkspace::getVertexesArray(size_t linearIndex,
+                                   size_t &numVertices) const {
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
   numVertices = static_cast<size_t>(1)
@@ -319,7 +321,7 @@ coord_t *MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  auto out = new coord_t[numDimensions * numVertices];
+  auto out = Kernel::make_unique<coord_t[]>(numDimensions * numVertices);
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each
@@ -421,7 +423,8 @@ size_t MDHistoWorkspace::getLinearIndexAtCoord(const coord_t *coords) const {
  *call.
  * @return MDHistoWorkspaceIterator vector
  */
-std::vector<Mantid::API::IMDIterator *> MDHistoWorkspace::createIterators(
+std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
+MDHistoWorkspace::createIterators(
     size_t suggestedNumCores,
     Mantid::Geometry::MDImplicitFunction *function) const {
   size_t numCores = suggestedNumCores;
@@ -434,7 +437,7 @@ std::vector<Mantid::API::IMDIterator *> MDHistoWorkspace::createIterators(
     numCores = 1;
 
   // Create one iterator per core, splitting evenly amongst spectra
-  std::vector<IMDIterator *> out;
+  std::vector<std::unique_ptr<IMDIterator>> out;
   for (size_t i = 0; i < numCores; i++) {
     size_t begin = (i * numElements) / numCores;
     size_t end = ((i + 1) * numElements) / numCores;
@@ -446,8 +449,8 @@ std::vector<Mantid::API::IMDIterator *> MDHistoWorkspace::createIterators(
     if (function)
       clonedFunction = new Mantid::Geometry::MDImplicitFunction(*function);
 
-    out.push_back(
-        new MDHistoWorkspaceIterator(this, clonedFunction, begin, end));
+    out.push_back(Kernel::make_unique<MDHistoWorkspaceIterator>(
+        this, clonedFunction, begin, end));
   }
   return out;
 }

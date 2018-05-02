@@ -68,7 +68,8 @@ public:
 
     auto func = createFunctionWithParamsSet();
     double x0(200.0), x1(220.0), dx(10.0);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),

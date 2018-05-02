@@ -261,7 +261,7 @@ void SliceViewer::loadSettings() {
   // used.
   // If the user selected a unified color map for the SliceViewer and the VSI,
   // then this is loaded.
-  if (m_mdSettings != NULL && m_mdSettings->getUsageGeneralMdColorMap()) {
+  if (m_mdSettings != nullptr && m_mdSettings->getUsageGeneralMdColorMap()) {
     m_currentColorMapFile = m_mdSettings->getGeneralMdColorMapFile();
   } else {
     m_currentColorMapFile = settings.value("ColormapFile", "").toString();

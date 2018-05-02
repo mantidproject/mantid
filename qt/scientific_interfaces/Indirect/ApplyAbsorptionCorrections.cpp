@@ -255,7 +255,7 @@ void ApplyAbsorptionCorrections::run() {
                            "Would you like to interpolate this workspace to "
                            "match the sample?";
 
-        result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
+        result = QMessageBox::question(nullptr, tr("Interpolate corrections?"),
                                        tr(text.c_str()), QMessageBox::YesToAll,
                                        QMessageBox::Yes, QMessageBox::No);
       }

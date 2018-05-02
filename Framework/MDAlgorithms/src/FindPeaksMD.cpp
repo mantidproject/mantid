@@ -4,6 +4,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -295,30 +296,12 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
     if (calcGoniometer) {
       // Calculate Q lab from Q sample and wavelength
       double wavelength = getProperty("Wavelength");
-      double wv = 2.0 * M_PI / wavelength;
-      double norm_q2 = Q.norm2();
-      double theta = acos(1 - norm_q2 / (2 * wv * wv));
-      double phi = asin(-Q[1] / wv * sin(theta));
-      V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
-                wv * (1 - cos(theta)));
-
-      // Solve to find rotation matrix, assuming only rotation around y-axis
-      // A * X = B
-      Matrix<double> A({Q[0], Q[2], Q[2], -Q[0]}, 2, 2);
-      A.Invert();
-      std::vector<double> B{Q_lab[0], Q_lab[2]};
-      std::vector<double> X = A * B;
-      double rot = atan2(X[1], X[0]);
+      Geometry::Goniometer goniometer;
+      goniometer.calcFromQSampleAndWavelength(Q, wavelength);
       g_log.information() << "Found goniometer rotation to be "
-                          << rot * 180 / M_PI
-                          << " degrees for peak at Q sample = " << Q << "\n";
-
-      Matrix<double> goniometer(3, 3, true);
-      goniometer[0][0] = cos(rot);
-      goniometer[0][2] = sin(rot);
-      goniometer[2][0] = -sin(rot);
-      goniometer[2][2] = cos(rot);
-      p = boost::make_shared<Peak>(inst, Q, goniometer);
+                          << goniometer.getEulerAngles()[0]
+                          << " degrees for Q sample = " << Q << "\n";
+      p = boost::make_shared<Peak>(inst, Q, goniometer.getR());
 
     } else {
       p = boost::make_shared<Peak>(inst, Q, m_goniometer);
@@ -394,7 +377,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
     g_log.information() << "Threshold signal density: " << threshold << '\n';
 
-    typedef API::IMDNode *boxPtr;
+    using boxPtr = API::IMDNode *;
     // We will fill this vector with pointers to all the boxes (up to a given
     // depth)
     typename std::vector<API::IMDNode *> boxes;
@@ -404,7 +387,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     ws->getBox()->getBoxes(boxes, 1000, true);
 
     // This pair is the <density, ptr to the box>
-    typedef std::pair<double, API::IMDNode *> dens_box;
+    using dens_box = std::pair<double, API::IMDNode *>;
 
     // Map that will sort the boxes by increasing density. The key = density;
     // value = box *.
@@ -586,7 +569,7 @@ void FindPeaksMD::findPeaksHisto(
     peakWS->copyExperimentInfoFrom(ei.get());
 
     // This pair is the <density, box index>
-    typedef std::pair<double, size_t> dens_box;
+    using dens_box = std::pair<double, size_t>;
 
     // Map that will sort the boxes by increasing density. The key = density;
     // value = box index.
@@ -746,6 +729,10 @@ void FindPeaksMD::exec() {
   criteria.push_back(std::pair<std::string, bool>("bincount", false));
   peakWS->sort(criteria);
 
+  for (auto i = 0; i != peakWS->getNumberPeaks(); ++i) {
+    Peak &p = peakWS->getPeak(i);
+    p.setPeakNumber(i + 1);
+  }
   // Save the output
   setProperty("OutputWorkspace", peakWS);
 }

@@ -64,6 +64,9 @@ public:
   const std::string name() const override { return "ConjoinWorkspaces"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConjoinSpectra", "ConjoinXRuns", "MergeRuns"};
+  }
 
 private:
   // Overridden Algorithm methods

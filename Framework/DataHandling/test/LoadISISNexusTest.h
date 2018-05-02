@@ -483,8 +483,8 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
     MatrixWorkspace_sptr ws2 =
         boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(1));
-    TS_ASSERT(ws1 != NULL);
-    TS_ASSERT(ws2 != NULL);
+    TS_ASSERT(ws1 != nullptr);
+    TS_ASSERT(ws2 != nullptr);
     // Check that workspace 1 has the correct period data, and no other period
     // log data
     checkPeriodLogData(ws1, 1);

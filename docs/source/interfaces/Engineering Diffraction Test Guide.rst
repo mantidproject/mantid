@@ -156,6 +156,43 @@ Negative Testing Ideas
 - Change any unlocked dialog boxes whilst `Fit` runs
 
 
+.. _gsas-fitting-Engineering-Diffraction_test-ref:
+
+GSAS Fitting
+^^^^^^^^^^^^
+
+GSAS-style fitting allows the user to plot peaks from their focused
+NeXuS file (obtained from
+:ref:`focus-Engineering_Diffraction_test-ref`).
+
+After a fit has run, the plot should look something like below:
+
+.. image:: ../images/EnggDiffExampleGSASOutput.png
+
+If that fit output (the red line) is flat, or just follows the
+background of the data, the fit was not unsuccessful. Make sure you're
+using the right ``.cif`` and ``.prm`` files for your run. You can find
+an example of files which work nicely together on most PRs related to
+the GSAS tab or GSASIIRefineFitPeaks, or have a look `here
+<https://github.com/mantidproject/mantid/files/1739753/GSASIIRefineFitPeaks.zip>`_.
+
+.. warning:: At the moment, you will also just get background if you
+	     try to do a Pawley refinement, as this is still under
+	     development, possibly requiring input from ENGINX
+	     scientists or GSAS-II developers (probably both)
+
+You can navigate around the plot in the same way as the Fitting tab.
+
+Negative Testing Ideas
+----------------------
+
+- Using an unfocused .nxs file \- Mantid shouldn't crash
+- Enter bad input into the text entries - this should be handled
+  elegantly
+- Change any unlocked dialogs and click any unlocked buttons while
+  refinement is running
+- Cancel the algorithm before exiting the GUI, and vice verse
+
 .. _settings-Engineering_Diffraction_test-ref:
 
 Settings

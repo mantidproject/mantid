@@ -5,7 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DataProcessorAlgorithm.h"
+
 #include "MantidAlgorithms/SofQCommon.h"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,6 +54,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+struct SofQCommon;
+
 class DLLExport SofQW : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name
@@ -57,27 +66,95 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SofQWCentre", "SofQWPolygon", "SofQWNormalisedPolygon", "Rebin2D"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
-  static API::MatrixWorkspace_sptr
-  setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace,
-                       const std::vector<double> &qbinParams,
-                       std::vector<double> &qAxis,
-                       const std::vector<double> &ebinParams);
+  template <typename Workspace>
+  static std::unique_ptr<Workspace> setUpOutputWorkspace(
+      const API::MatrixWorkspace &inputWorkspace,
+      const std::vector<double> &qbinParams, std::vector<double> &qAxis,
+      const std::vector<double> &ebinParams, const SofQCommon &emodeProperties);
   /// Create the input properties on the given algorithm object
   static void createCommonInputProperties(API::Algorithm &alg);
-  /// Energy to K constant
-  static double energyToK();
 
 private:
   /// Initialization code
   void init() override;
   /// Execution code
   void exec() override;
-
-  SofQCommon m_EmodeProperties;
 };
+
+/** Creates the output workspace, setting the axes according to the input
+ * binning parameters
+ *  @tparam     Workspace The type of the workspace to create
+ *  @param[in]  inputWorkspace The input workspace
+ *  @param[in]  qbinParams The q-bin parameters from the user
+ *  @param[out] qAxis The 'vertical' (q) axis defined by the given parameters
+ *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
+ *  @param[in]  emodeProperties The initialized SofQCommon object corresponding
+ *              to the input workspace and calling algorithm
+ *  @return A pointer to the newly-created workspace
+ */
+template <typename Workspace>
+std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
+    const API::MatrixWorkspace &inputWorkspace,
+    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
+    const std::vector<double> &ebinParams, const SofQCommon &emodeProperties) {
+  using Kernel::VectorHelper::createAxisFromRebinParams;
+  // Create vector to hold the new X axis values
+  HistogramData::BinEdges xAxis(0);
+  double eMin{std::nan("")};
+  double eMax{std::nan("")};
+  if (ebinParams.empty()) {
+    xAxis = inputWorkspace.binEdges(0);
+  } else if (ebinParams.size() == 1) {
+    inputWorkspace.getXMinMax(eMin, eMax);
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true,
+                              eMin, eMax);
+  } else {
+    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
+  }
+  // Create a vector to temporarily hold the vertical ('y') axis and populate
+  // that
+  int yLength;
+  if (qbinParams.size() == 1) {
+    if (std::isnan(eMin)) {
+      inputWorkspace.getXMinMax(eMin, eMax);
+    }
+    double qMin;
+    double qMax;
+    std::tie(qMin, qMax) =
+        emodeProperties.qBinHints(inputWorkspace, eMin, eMax);
+    yLength =
+        createAxisFromRebinParams(qbinParams, qAxis, true, true, qMin, qMax);
+  } else {
+    yLength = createAxisFromRebinParams(qbinParams, qAxis);
+  }
+
+  // Create output workspace, bin edges are same as in inputWorkspace index 0
+  auto outputWorkspace =
+      DataObjects::create<Workspace>(inputWorkspace, yLength - 1, xAxis);
+
+  // Create a binned numeric axis to replace the default vertical one
+  API::Axis *const verticalAxis = new API::BinEdgeAxis(qAxis);
+  outputWorkspace->replaceAxis(1, verticalAxis);
+
+  // Set the axis units
+  verticalAxis->unit() =
+      Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  verticalAxis->title() = "|Q|";
+
+  // Set the X axis title (for conversion to MD)
+  outputWorkspace->getAxis(0)->title() = "Energy transfer";
+
+  outputWorkspace->setYUnit("");
+  outputWorkspace->setYUnitLabel("Intensity");
+
+  return outputWorkspace;
+}
 
 } // namespace Algorithms
 } // namespace Mantid

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -118,7 +118,7 @@ Usage
    # You would normally generate the focused file using the Engg GUI or,
    # alternatively, with commands like these:
    #
-   # wks = Load('ENGINX00256663-256675')
+   # ws_to_focus = Load('ENGINX00256663-256675')
    # wks_ceria = Load('ENGINX00255924')
    # wks_vana = Load('ENGINX00254854')
    # # Using default expected peaks for Ceria
@@ -127,50 +127,53 @@ Usage
    # SaveNexus(InputWorkspace=wks_focused, Filename='focused_bank1_ENGINX00256663.nxs')
    #
    wks = Load('focused_bank1_ENGINX00256663.nxs')
-   peaks, residuals, lattice_params = \
+   peaks, lattice_params, rwp, sigma, gamma = \
        GSASIIRefineFitPeaks(InputWorkspace=wks,
-                            RefinementMethod="PawleyRefinement",
+                            RefinementMethod="Pawley refinement",
                             InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
-                            PhaseInfoFile='FE_ALPHA.cif',
-                            PathToGSASII='/home/user/gsas',
-                            SaveGSASIIProjectFile='example_gsas2_project.gpx')
-   print "Goodness of fit coefficient: {0:.5f}".format(residuals.row(0)["GoF"])
-   print "Weighted profile R-factor (Rwp): {0:.5f}".format(residuals.row(0)["Rwp"])
-   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
-          "Volume: {volume:.3f}".format(**lattice_params.row(0)))
+                            PhaseInfoFiles='Fe-alpha.cif,Fe-gamma.cif',
+                            PathToGSASII='/home/user/g2conda/GSASII',
+                            RefineSigma=True,
+                            RefineGamma=True,
+                            SaveGSASIIProjectFile='example_gsas2_project.gpx',
+                            OutputWorkspace="FittedPeaks")
+   print("Weighted profile R-factor (Rwp): {0:.5f}".format(rwp))
+   print("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
+         "Volume: {volume:.3f}".format(**lattice_params.row(0)))
+   print("Sigma={}, Gamma={}".format(sigma, gamma))
 
 Output:
 
 .. code-block:: none
 
-    Goodness of fit coefficient: 3.57847
     Weighted profile R-factor (Rwp): 77.75515
     Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
+    Sigma=81.0939, Gamma=0.1855
 
 **Example - Rietveld refinement of lattice parameters from a diffraction spectrum**
 
 .. code-block:: python
 
    wks=Load('focused_bank1_ENGINX00256663.nxs')
-   peaks, residuals, lattice_params = \
+   peaks, lattice_params, rwp, sigma, gamma = \
        GSASIIRefineFitPeaks(InputWorkspace=wks,
                             RefinementMethod='Rietveld refinement',
                             InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
-                            PhaseInfoFile='FE_ALPHA.cif',
-                            PathToGSASII='/home/user/gsas',
+                            PhaseInfoFiles='Fe-alpha.cif,Fe-gamma.cif',
+                            PathToGSASII='/home/user/g2conda/GSASII',
                             SaveGSASIIProjectFile='example_gsas2_project.gpx',
-   print "Goodness of fit coefficient: {0:.5f}".format(residuals.row(0)["GoF"]))
-   print "Weighted profile R-factor (Rwp): {0:.5f}".format(residuals.row(0)["Rwp"])
-   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
-          "Volume: {volume:.3f}".format(**lattice_params.row(0)))
+   print("Weighted profile R-factor (Rwp): {0:.5f}".format(rwp))
+   print("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
+         "Volume: {volume:.3f}".format(**lattice_params.row(0)))
+   print("Sigma={}, Gamma={}".format(sigma, gamma))
 
 Output:
 
 .. code-block:: none
 
-    Goodness of fit coefficient: 3.57776
     Weighted profile R-factor (Rwp): 77.75499
     Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
+    Sigma=81.0939, Gamma=0.1855
 
 .. categories::
 

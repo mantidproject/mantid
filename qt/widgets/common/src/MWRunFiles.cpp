@@ -550,9 +550,6 @@ void MWRunFiles::findFiles(bool isModified) {
 * @return search text to create search params with
 */
 const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
-
-  emit findingFiles();
-
   // If we have an override instrument then add it in appropriate places to
   // the search text
   if (!m_defaultInstrumentName.isEmpty()) {
@@ -590,6 +587,8 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
 */
 void MWRunFiles::runFindFiles(const QString &searchText) {
   if (!searchText.isEmpty()) {
+    emit findingFiles();
+
     const auto parameters =
         createFindFilesSearchParameters(searchText.toStdString());
     m_pool.createWorker(this, parameters);

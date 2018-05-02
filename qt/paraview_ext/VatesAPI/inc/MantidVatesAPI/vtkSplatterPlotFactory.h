@@ -18,8 +18,7 @@
 namespace Mantid {
 namespace VATES {
 
-// Helper typedef
-typedef Mantid::signal_t (Mantid::API::IMDNode::*SigFuncIMDNodePtr)() const;
+using SigFuncIMDNodePtr = Mantid::signal_t (Mantid::API::IMDNode::*)() const;
 
 /**
  * Factory that creates a simple "splatter plot" data set composed of points

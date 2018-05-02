@@ -10,6 +10,7 @@ from sans.state.data import get_data_builder
 from sans.common.enums import (SANSFacility, ISISReductionMode, OutputMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------
@@ -60,7 +61,10 @@ class SANSBatchReductionTest(unittest.TestCase):
     def test_that_batch_reduction_evaluates_LAB(self):
         # Arrange
         # Build the data information
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00034484")
+
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_sample_transmission("SANS2D00034505")
         data_builder.set_sample_direct("SANS2D00034461")
@@ -73,7 +77,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info)
+        user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
@@ -104,13 +108,16 @@ class SANSBatchReductionTest(unittest.TestCase):
     def test_batch_reduction_on_multiperiod_file(self):
         # Arrange
         # Build the data information
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D0005512")
+
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D0005512")
 
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info)
+        user_file_director = StateDirectorISIS(data_info, file_information)
         user_file_director.set_user_file("MASKSANS2Doptions.091A")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)

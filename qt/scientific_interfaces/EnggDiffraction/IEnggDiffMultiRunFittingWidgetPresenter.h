@@ -58,6 +58,9 @@ public:
   virtual boost::optional<Mantid::API::MatrixWorkspace_sptr>
   getFocusedRun(const RunLabel &runLabel) const = 0;
 
+  /// Get RunLabels for all runs loaded into the tab
+  virtual std::vector<RunLabel> getAllRunLabels() const = 0;
+
   /// Get run number and bank ID of the run currently selected in the list
   virtual boost::optional<RunLabel> getSelectedRunLabel() const = 0;
 

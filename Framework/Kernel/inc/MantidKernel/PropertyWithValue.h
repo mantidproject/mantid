@@ -76,7 +76,7 @@ public:
   std::string setDataItem(const boost::shared_ptr<DataItem> data) override;
   PropertyWithValue &operator=(const PropertyWithValue &right);
   PropertyWithValue &operator+=(Property const *right) override;
-  virtual TYPE &operator=(const TYPE &value);
+  virtual PropertyWithValue &operator=(const TYPE &value);
   virtual const TYPE &operator()() const;
   virtual operator const TYPE &() const;
   std::string isValid() const override;

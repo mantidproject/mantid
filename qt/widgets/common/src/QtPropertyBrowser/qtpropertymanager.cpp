@@ -361,7 +361,7 @@ public:
     }
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 };
 
@@ -638,7 +638,7 @@ public:
     }
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 };
 
@@ -969,7 +969,7 @@ public:
     QRegExp regExp;
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   QMap<const QtProperty *, Data> m_values;
 };
 
@@ -1320,7 +1320,7 @@ public:
 
   QString m_format;
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   QMap<const QtProperty *, Data> m_values;
 };
 
@@ -1537,7 +1537,7 @@ class QtTimePropertyManagerPrivate {
 public:
   QString m_format;
 
-  typedef QMap<const QtProperty *, QTime> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QTime>;
   PropertyValueMap m_values;
 };
 
@@ -1646,7 +1646,7 @@ class QtDateTimePropertyManagerPrivate {
 public:
   QString m_format;
 
-  typedef QMap<const QtProperty *, QDateTime> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QDateTime>;
   PropertyValueMap m_values;
 };
 
@@ -1755,7 +1755,7 @@ class QtKeySequencePropertyManagerPrivate {
 public:
   QString m_format;
 
-  typedef QMap<const QtProperty *, QKeySequence> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QKeySequence>;
   PropertyValueMap m_values;
 };
 
@@ -1861,7 +1861,7 @@ class QtCharPropertyManagerPrivate {
   QtCharPropertyManager *q_ptr;
   Q_DECLARE_PUBLIC(QtCharPropertyManager)
 public:
-  typedef QMap<const QtProperty *, QChar> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QChar>;
   PropertyValueMap m_values;
 };
 
@@ -4170,7 +4170,7 @@ public:
     QMap<int, QIcon> enumIcons;
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 };
 
@@ -5125,7 +5125,7 @@ void QtFontPropertyManagerPrivate::slotFontDatabaseChanged() {
 }
 
 void QtFontPropertyManagerPrivate::slotFontDatabaseDelayedChange() {
-  typedef QMap<const QtProperty *, QtProperty *> PropertyPropertyMap;
+  using PropertyPropertyMap = QMap<const QtProperty *, QtProperty *>;
   // rescan available font names
   const QStringList oldFamilies = m_familyNames;
   m_familyNames = fontDatabase()->families();
@@ -5732,7 +5732,7 @@ class QtCursorPropertyManagerPrivate {
   QtCursorPropertyManager *q_ptr;
   Q_DECLARE_PUBLIC(QtCursorPropertyManager)
 public:
-  typedef QMap<const QtProperty *, QCursor> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QCursor>;
   PropertyValueMap m_values;
 };
 

@@ -95,8 +95,8 @@ bool does_contain_key(const Container &container,
   return container.find(value) != container.end();
 }
 
-typedef boost::tuple<size_t, size_t> EdgeIndexPair;
-typedef std::vector<EdgeIndexPair> VecEdgeIndexPair;
+using EdgeIndexPair = boost::tuple<size_t, size_t>;
+using VecEdgeIndexPair = std::vector<EdgeIndexPair>;
 
 /**
  * Free function performing the CCL implementation over a range defined by the
@@ -288,9 +288,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
   const int nThreadsToUse = getNThreads();
 
   if (nThreadsToUse > 1) {
-    std::vector<API::IMDIterator *> iterators =
-        ws->createIterators(nThreadsToUse);
-
+    auto iterators = ws->createIterators(nThreadsToUse);
     const size_t maxClustersPossible =
         calculateMaxClusters(ws.get(), nThreadsToUse);
 
@@ -303,7 +301,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     g_log.debug("Parallel solve local CCL");
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < nThreadsToUse; ++i) {
-      API::IMDIterator *iterator = iterators[i];
+      API::IMDIterator *iterator = iterators[i].get();
       boost::scoped_ptr<BackgroundStrategy> strategy(
           baseStrategy->clone());                     // local strategy
       VecEdgeIndexPair &edgeVec = parallelEdgeVec[i]; // local edge indexes
@@ -364,12 +362,12 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     clusterMap = clusterRegister.clusters(neighbourElements);
 
   } else {
-    API::IMDIterator *iterator = ws->createIterator(nullptr);
+    auto iterator = ws->createIterator(nullptr);
     VecEdgeIndexPair edgeIndexPair; // This should never get filled in a single
                                     // threaded situation.
     size_t endLabelId = doConnectedComponentLabeling(
-        iterator, baseStrategy, neighbourElements, progress, maxNeighbours,
-        m_startId, edgeIndexPair);
+        iterator.get(), baseStrategy, neighbourElements, progress,
+        maxNeighbours, m_startId, edgeIndexPair);
 
     // Create clusters from labels.
     for (size_t labelId = m_startId; labelId != endLabelId; ++labelId) {
@@ -383,7 +381,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     iterator->jumpTo(0); // Reset
     do {
       const size_t currentIndex = iterator->getLinearIndex();
-      if (!baseStrategy->isBackground(iterator)) {
+      if (!baseStrategy->isBackground(iterator.get())) {
         const int labelAtIndex = neighbourElements[currentIndex].getRoot();
         clusterMap[labelAtIndex]->addIndex(currentIndex);
       }

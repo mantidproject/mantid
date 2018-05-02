@@ -4,7 +4,8 @@ import mantid
 
 from sans.state.save import (get_save_builder)
 from sans.state.data import (get_data_builder)
-from sans.common.enums import (SANSFacility, SaveType)
+from sans.common.enums import (SANSFacility, SaveType, SANSInstrument)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -20,7 +21,8 @@ class StateReductionBuilderTest(unittest.TestCase):
     def test_that_reduction_state_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LOQ74044")
         data_info = data_builder.build()
 

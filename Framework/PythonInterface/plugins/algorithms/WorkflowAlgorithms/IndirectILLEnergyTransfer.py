@@ -53,6 +53,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     def summary(self):
         return 'Performs initial energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
 
+    def seeAlso(self):
+        return [ "IndirectILLReductionQENS","IndirectILLReductionFWS" ]
+
     def name(self):
         return "IndirectILLEnergyTransfer"
 

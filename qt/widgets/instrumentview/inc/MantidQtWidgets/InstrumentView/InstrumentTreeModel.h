@@ -33,10 +33,12 @@ public:
   QModelIndex parent(const QModelIndex &index) const override;
   int rowCount(const QModelIndex &paren = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  static size_t extractIndex(const QModelIndex &index);
 
 private:
   /// instrument widget to which the model corresponds
   const InstrumentWidget *m_instrWidget;
+  mutable std::vector<size_t> m_componentIndices;
 };
 } // MantidWidgets
 } // MantidQt

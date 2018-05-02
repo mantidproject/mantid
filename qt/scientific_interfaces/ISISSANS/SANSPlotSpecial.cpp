@@ -423,16 +423,16 @@ void SANSPlotSpecial::setupTable() {
 
   m_derivatives["Rg"] = new QTableWidgetItem();
   m_derivatives["Rg"]->setToolTip("Radius of gyration");
-  m_units["Rg"] = QString::fromUtf8("\xc3\x85");
+  m_units["Rg"] = QString::fromUtf8(R"(Å)");
   m_derivatives["Rg,xs"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["Rg,xs"]->setToolTip("Cross-sectional radius of gyration");
-  m_units["Rg,xs"] = QString::fromUtf8("\xc3\x85");
+  m_units["Rg,xs"] = QString::fromUtf8(R"(Å)");
   m_derivatives["R"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["R"]->setToolTip("Equivalent spherical radius");
-  m_units["R"] = QString::fromUtf8("\xc3\x85");
+  m_units["R"] = QString::fromUtf8(R"(Å)");
   m_derivatives["T"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["T"]->setToolTip("Thickness");
-  m_units["T"] = QString::fromUtf8("\xc3\x85");
+  m_units["T"] = QString::fromUtf8(R"(Å)");
   m_derivatives["C"] = new QTableWidgetItem();
   m_derivatives["C"]->setToolTip("Concentration");
   m_units["C"] = "g/cm^3";
@@ -460,7 +460,7 @@ void SANSPlotSpecial::setupTable() {
   m_units["V"] = "(unitless)";
   m_derivatives["Zeta"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["Zeta"]->setToolTip("Characteristic length");
-  m_units["Zeta"] = QString::fromUtf8("\xc3\x85");
+  m_units["Zeta"] = QString::fromUtf8(R"(Å)");
   m_derivatives["(S/V)"] = new QTableWidgetItem();
   m_derivatives["(S/V)"]->setToolTip("Surface area-to-volume ratio");
   m_units["(S/V)"] = "cm^-1";
