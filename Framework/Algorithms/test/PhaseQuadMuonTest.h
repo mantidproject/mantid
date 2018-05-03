@@ -28,10 +28,13 @@ void populatePhaseTable2(ITableWorkspace_sptr phaseTable,
   double asym(1.);
   for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
-    phaseRow1 << int(i) << asym
+    if (i == dead1 || i ==dead2){
+    phaseRow1 << int(i) << 999.
+              << 0.0;
+    }else{phaseRow1 << int(i) << asym
               << 2. * M_PI * double(i + 1) /
                      (1. + double(ws->getNumberHistograms()));
-  }
+  }}
 }
 bool isZero(double value) {
   bool result = value == 0;
@@ -86,6 +89,15 @@ IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
   populatePhaseTable(phaseTable, names, swap);
 
   return setupAlg(m_loadedData, isChildAlg, phaseTable);
+}
+
+IAlgorithm_sptr setupAlgDead(MatrixWorkspace_sptr m_loadedData) {
+  // Create and populate a detector table
+  boost::shared_ptr<ITableWorkspace> phaseTable(
+      new Mantid::DataObjects::TableWorkspace);
+  populatePhaseTable2(phaseTable,m_loadedData);
+
+  return setupAlg(m_loadedData, true, phaseTable);
 }
 
 MatrixWorkspace_sptr setupWS(MatrixWorkspace_sptr m_loadedData) {
@@ -164,7 +176,7 @@ public:
       }
     }
     // do phase Quad
-    IAlgorithm_sptr phaseQuad = setupAlg(ws, true);
+    IAlgorithm_sptr phaseQuad = setupAlgDead(ws);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -185,21 +197,21 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], 1.1472, 0.0001);
-    TS_ASSERT_DELTA(specReY[20], 1.2517, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], 1.3087, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], -0.6149, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], 0.2987, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], 1.2487, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0], 0.2638, 0.0001);
-    TS_ASSERT_DELTA(specReE[20], 0.2837, 0.0001);
-    TS_ASSERT_DELTA(specReE[50], 0.3165, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.2927, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.31489, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.3512, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], -0.2109, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], -0.1741, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], -0.1460, 0.0001);
+    TS_ASSERT_DELTA(specImY[0],  1.0823, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], 1.3149, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], 0.4965, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0], 0.0553, 0.0001);
-    TS_ASSERT_DELTA(specImE[20], 0.0595, 0.0001);
-    TS_ASSERT_DELTA(specImE[50], 0.0664, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.2801, 0.0001);
+    TS_ASSERT_DELTA(specImE[20], 0.3013, 0.0001);
+    TS_ASSERT_DELTA(specImE[50], 0.3360, 0.0001);
   }
   void testExecPhaseTable() {
     IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true);
