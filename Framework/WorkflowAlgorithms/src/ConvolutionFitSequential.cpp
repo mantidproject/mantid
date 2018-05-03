@@ -238,8 +238,6 @@ std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
       !containsFunction(function, "Resolution"))
     errors["Function"] = "Function provided does not contain convolution with "
                          "a resolution function.";
-  m_deltaUsed = containsFunction(function, "DeltaFunction");
-  m_lorentzianCount = numberOfFunctions(function, "Lorentzian");
   return errors;
 }
 
@@ -257,6 +255,7 @@ ITableWorkspace_sptr
 ConvolutionFitSequential::performFit(const std::string &input,
                                      const std::string &output) {
   auto parameterWorkspace = QENSFitSequential::performFit(input, output);
+  m_deltaUsed = containsFunction(getProperty("Function"), "DeltaFunction");
   if (m_deltaUsed)
     calculateEISF(parameterWorkspace);
   return parameterWorkspace;
@@ -274,7 +273,7 @@ ConvolutionFitSequential::getAdditionalLogStrings() const {
 std::map<std::string, std::string>
 ConvolutionFitSequential::getAdditionalLogNumbers() const {
   auto logs = QENSFitSequential::getAdditionalLogNumbers();
-  logs["lorentzians"] = boost::lexical_cast<std::string>(m_lorentzianCount);
+  logs["lorentzians"] = boost::lexical_cast<std::string>(numberOfFunctions(function, "Lorentzian"));
   return logs;
 }
 
