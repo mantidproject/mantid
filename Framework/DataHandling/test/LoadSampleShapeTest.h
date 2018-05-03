@@ -127,6 +127,11 @@ public:
     loadFailureTest(alg, "cube4.off");
   }
 
+  void test_fail_wrong_number_of_vertices() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "wrong_number_of_vertices.off");
+  }
+
 private:
   // Create workspaces and add them to algorithm properties
   void prepareWorkspaces(LoadSampleShape &alg, bool outputWsSameAsInputWs) {

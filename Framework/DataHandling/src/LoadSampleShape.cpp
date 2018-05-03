@@ -185,8 +185,8 @@ void readOFFTriangles(std::ifstream &file, uint16_t nT, std::vector<uint16_t> &t
   std::string line;
   uint16_t t1, t2, t3;
   size_t nFaceVertices;
-  if (getOFFline(file, line)) {
-    for (uint16_t i = 0; i < nT; i++) {
+  for (uint16_t i = 0; i < nT; i++) {
+    if (getOFFline(file, line)) {
       std::vector<std::string> tokens;
       boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
       if (tokens.size() >= 4) {
@@ -206,10 +206,9 @@ void readOFFTriangles(std::ifstream &file, uint16_t nT, std::vector<uint16_t> &t
       else {
         throw std::runtime_error("Error on reading OFF triangle");
       }
+    } else {
+      throw std::runtime_error("Unexpected end of file, while reading OFF triangles");
     }
-  }
-  else {
-    throw std::runtime_error("Unexpected end of file, while reading OFF triangles");
   }
 }
 
