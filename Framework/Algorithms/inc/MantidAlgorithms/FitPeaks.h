@@ -70,6 +70,8 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "Optimization"; }
 
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /// Init
   void init() override;

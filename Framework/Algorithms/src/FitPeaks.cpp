@@ -327,6 +327,73 @@ void FitPeaks::init() {
   return;
 }
 
+std::map<std::string, std::string> FitPeaks::validateInputs() {
+  map<std::string, std::string> issues;
+
+  // check that the peak parameters are in parallel properties
+  bool haveCommonPeakParameters(false);
+  std::vector<string> suppliedParameterNames =
+      getProperty("PeakParameterNames");
+  std::vector<double> peakParamValues = getProperty("PeakParameterValues");
+  if ((!suppliedParameterNames.empty()) || (!peakParamValues.empty())) {
+    haveCommonPeakParameters = true;
+    if (suppliedParameterNames.size() != peakParamValues.size()) {
+      issues["PeakParameterNames"] =
+          "must have same number of values as PeakParameterValues";
+      issues["PeakParameterValues"] =
+          "must have same number of values as PeakParameterNames";
+    }
+  }
+
+  // get the information out of the table
+  std::string partablename = getPropertyValue("PeakParameterValueTable");
+  if (!partablename.empty()) {
+    if (haveCommonPeakParameters) {
+      const std::string msg = "Parameter value table and initial parameter "
+                              "name/value vectors cannot be given "
+                              "simultanenously.";
+      issues["PeakParameterValueTable"] = msg;
+      issues["PeakParameterNames"] = msg;
+      issues["PeakParameterValues"] = msg;
+    } else {
+      m_profileStartingValueTable = getProperty("PeakParameterValueTable");
+      suppliedParameterNames = m_profileStartingValueTable->getColumnNames();
+    }
+  }
+
+  // check that the suggested peak parameter names exist in the peak function
+  if (!suppliedParameterNames.empty()) {
+    std::string peakfunctiontype = getPropertyValue("PeakFunction");
+    m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+        API::FunctionFactory::Instance().createFunction(peakfunctiontype));
+
+    // put the names in a vector
+    std::vector<string> functionParameterNames;
+    for (size_t i = 0; i < m_peakFunction->nParams(); ++i)
+      functionParameterNames.push_back(m_peakFunction->parameterName(i));
+    // check that the supplied names are in the function
+    // it is acceptable to be missing parameters
+    bool failed = false;
+    for (const auto &name : suppliedParameterNames) {
+      if (std::find(functionParameterNames.begin(),
+                    functionParameterNames.end(),
+                    name) == functionParameterNames.end()) {
+        failed = true;
+        break;
+      }
+    }
+    if (failed) {
+      std::string msg = "Specified invalid parameter for peak function";
+      if (haveCommonPeakParameters)
+        issues["PeakParameterNames"] = msg;
+      else
+        issues["PeakParameterValueTable"] = msg;
+    }
+  }
+
+  return issues;
+}
+
 //----------------------------------------------------------------------------------------------
 void FitPeaks::exec() {
   // process inputs
@@ -451,26 +518,17 @@ void FitPeaks::processInputFunctions() {
   // input peak parameters
   std::string partablename = getPropertyValue("PeakParameterValueTable");
   m_peakParamNames = getProperty("PeakParameterNames");
+
   if (partablename.empty() && (!m_peakParamNames.empty())) {
     // use uniform starting value of peak parameters
     m_initParamValues = getProperty("PeakParameterValues");
-    // check whether given parameter names and initial values match
-    if (m_peakParamNames.size() != m_initParamValues.size())
-      throw std::invalid_argument("PeakParameterNames and PeakParameterValues "
-                                  "have different number of items.");
     // convert the parameter name in string to parameter name in integer index
     convertParametersNameToIndex();
-    // set the flag
     m_uniformProfileStartingValue = true;
   } else if ((!partablename.empty()) && m_peakParamNames.empty()) {
     // use non-uniform starting value of peak parameters
     m_uniformProfileStartingValue = false;
     m_profileStartingValueTable = getProperty(partablename);
-  } else if ((!partablename.empty()) && m_peakParamNames.size() > 0) {
-    // user specifies both of them causing confusion
-    throw std::invalid_argument("Parameter value table and initial parameter "
-                                "name/value vectors cannot be given "
-                                "simultanenously.");
   } else {
     // user specifies nothing
     g_log.warning("Neither parameter value table nor initial "
