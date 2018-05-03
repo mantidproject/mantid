@@ -255,7 +255,8 @@ ITableWorkspace_sptr
 ConvolutionFitSequential::performFit(const std::string &input,
                                      const std::string &output) {
   auto parameterWorkspace = QENSFitSequential::performFit(input, output);
-  m_deltaUsed = containsFunction(getProperty("Function"), "DeltaFunction");
+  IFunction_sptr function = getProperty("Function");
+  m_deltaUsed = containsFunction(function, "DeltaFunction");
   if (m_deltaUsed)
     calculateEISF(parameterWorkspace);
   return parameterWorkspace;
