@@ -85,6 +85,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Return a summary of the algorithm."""
         return "Loads, merges, normalizes and subtracts background from ILL reflectometry data."
 
+    def seeAlso(self):
+        """Return a list of related algorithm names."""
+        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor', 'ReflectometryILLSumForeground']
+
     def version(self):
         """Return the version of the algorithm."""
         return 1

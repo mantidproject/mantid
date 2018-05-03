@@ -46,6 +46,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Return a summary of the algorithm."""
         return 'Sums foreground pixels in selected summation mode, optionally converting to reflectivity.'
 
+    def seeAlso(self):
+        """Return a list of related algorithm names."""
+        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor', 'ReflectometryILLPreprocess']
+
     def version(self):
         """Return the version of the algorithm."""
         return 1

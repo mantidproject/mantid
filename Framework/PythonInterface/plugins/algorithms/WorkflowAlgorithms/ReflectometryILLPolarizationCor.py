@@ -36,6 +36,10 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         """Return a summary of the algorithm."""
         return 'Performs polarization efficiency corrections for reflectometry instruments at ILL.'
 
+    def seeAlso(self):
+        """Return a list of related algorithm names."""
+        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPreprocess', 'ReflectometryILLSumForeground']
+
     def version(self):
         """Return the version of the algorithm."""
         return 1
