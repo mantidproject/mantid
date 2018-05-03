@@ -1513,11 +1513,26 @@ class RowLocation
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 %End
 public:
-RowLocation(std::vector<int>);
-const std::vector<int>& path() const;
-int rowRelativeToParent() const;
-bool isRoot() const;
-unsigned int depth() const;
+  RowLocation();
+  RowLocation(std::vector<int> path);
+  const std::vector<int> &path();
+  int rowRelativeToParent();
+  bool isRoot();
+  int depth();
+  bool isChildOf(const RowLocation &other);
+  bool isSiblingOf(const RowLocation &other);
+  bool isChildOrSiblingOf(const RowLocation &other);
+  bool isDescendantOf(const RowLocation &other);
+  RowLocation parent();
+  RowLocation relativeTo(const RowLocation &ancestor);
+  RowLocation child(int n);
+
+  bool operator==(const RowLocation& other);
+  bool operator!=(const RowLocation& other);
+  bool operator<(const RowLocation& other);
+  bool operator<=(const RowLocation& other);
+  bool operator>(const RowLocation& other);
+  bool operator>=(const RowLocation& other);
 };
 
 class RowPredicate {

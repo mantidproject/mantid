@@ -25,6 +25,7 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
+  enableFiltering();
 }
 
 void JobTreeView::commitData(QWidget *editor) {

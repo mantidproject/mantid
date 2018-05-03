@@ -25,25 +25,19 @@ public:
   RowLocation parent() const;
   RowLocation relativeTo(RowLocation const &ancestor) const;
   RowLocation child(int n) const;
+  bool operator==(RowLocation const &other) const;
+  bool operator!=(RowLocation const &other) const;
+  bool operator<(RowLocation const &other) const;
+  bool operator<=(RowLocation const &other) const;
+  bool operator>(RowLocation const &other) const;
+  bool operator>=(RowLocation const &other) const;
 
 private:
   RowPath m_path;
 };
 
-EXPORT_OPT_MANTIDQT_COMMON std::ostream &
-operator<<(std::ostream &os, RowLocation const &location);
-EXPORT_OPT_MANTIDQT_COMMON bool operator==(RowLocation const &lhs,
-                                           RowLocation const &rhs);
-EXPORT_OPT_MANTIDQT_COMMON bool operator!=(RowLocation const &lhs,
-                                           RowLocation const &rhs);
-EXPORT_OPT_MANTIDQT_COMMON bool operator<(RowLocation const &lhs,
-                                          RowLocation const &rhs);
-EXPORT_OPT_MANTIDQT_COMMON bool operator<=(RowLocation const &lhs,
-                                           RowLocation const &rhs);
-EXPORT_OPT_MANTIDQT_COMMON bool operator>(RowLocation const &lhs,
-                                          RowLocation const &rhs);
-EXPORT_OPT_MANTIDQT_COMMON bool operator>=(RowLocation const &lhs,
-                                           RowLocation const &rhs);
+std::ostream& operator<<(std::ostream &os, RowLocation const &location);
+
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

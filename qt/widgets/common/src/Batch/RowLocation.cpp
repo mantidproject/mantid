@@ -54,30 +54,30 @@ std::ostream &operator<<(std::ostream &os, RowLocation const &location) {
   return os;
 }
 
-bool operator==(RowLocation const &lhs, RowLocation const &rhs) {
-  return lhs.path() == rhs.path();
+bool RowLocation::operator==(RowLocation const &other) const {
+  return this->path() == other.path();
 }
 
-bool operator!=(RowLocation const &lhs, RowLocation const &rhs) {
-  return !(lhs == rhs);
+bool RowLocation::operator!=(RowLocation const &other) const {
+  return !((*this) == other);
 }
 
-bool operator<(RowLocation const &lhs, RowLocation const &rhs) {
-  auto &lhsPath = lhs.path();
-  auto &rhsPath = rhs.path();
+bool RowLocation::operator<(RowLocation const &other) const {
+  auto &lhsPath = this->path();
+  auto &rhsPath = other.path();
   return boost::algorithm::lexicographical_compare(lhsPath, rhsPath);
 }
 
-bool operator<=(RowLocation const &lhs, RowLocation const &rhs) {
-  return lhs < rhs || lhs == rhs;
+bool RowLocation::operator<=(RowLocation const &other) const {
+  return (*this) < other || (*this) == other;
 }
 
-bool operator>=(RowLocation const &lhs, RowLocation const &rhs) {
-  return !(lhs < rhs);
+bool RowLocation::operator>=(RowLocation const &other) const {
+  return !((*this) < other);
 }
 
-bool operator>(RowLocation const &lhs, RowLocation const &rhs) {
-  return !(lhs <= rhs);
+bool RowLocation::operator>(RowLocation const &other) const {
+  return !((*this) <= other);
 }
 
 RowLocation RowLocation::relativeTo(RowLocation const &ancestor) const {

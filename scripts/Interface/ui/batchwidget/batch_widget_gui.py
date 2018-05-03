@@ -123,8 +123,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
                                                                "dQ/Q",
                                                                "Scale",
                                                                "Options"], cell(""), self)
-        self.table.enableFiltering()
-
+                                                               
         self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table)
 
         self.table_signals.removeRowsRequested.connect(self.on_remove_runs_request)

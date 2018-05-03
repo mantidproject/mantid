@@ -44,17 +44,21 @@ public:
     // clang-format off
     auto items = std::vector<RowLocation>({
       RowLocation(),
+      RowLocation({0}),
       RowLocation({1, 0}),
       RowLocation({1, 0, 2}),
       RowLocation({2, 0}),
       RowLocation({1, 2, 1}),
       RowLocation({2, 2}),
+      RowLocation({1}),
       RowLocation({1, 2}),
       RowLocation({1, 2, 0})
     });
 
     auto expected = std::vector<RowLocation>({
       RowLocation(),
+      RowLocation({0}),
+      RowLocation({1}),
       RowLocation({1, 0}),
       RowLocation({1, 0, 2}),
       RowLocation({1, 2}),
