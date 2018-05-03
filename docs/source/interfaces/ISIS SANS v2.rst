@@ -94,10 +94,12 @@ Columns
 | **User File**            |   User file to use for this row. If specified it will override any options set in the GUI,      |
 |                          |   otherwise the default file will be used.                                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
-| **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
-|                          |   and WavelengthMax can be set here.                                                            |
+| **Sample Thickness**     |   Sets the sample thickness to be used in the reduction.                                        |
+|                          |                                                                                                 |
 +--------------------------+-------------------------------------------------------------------------------------------------+
-
+| **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
+|                          |   , **WavelengthMax** and **EventSlices** can be set here.                                      |
++--------------------------+-------------------------------------------------------------------------------------------------+
 Save Options
 ^^^^^^^^^^^^
 
