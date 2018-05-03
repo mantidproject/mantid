@@ -8,6 +8,7 @@ from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, Samp
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
                                           simple_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
+from sans.common.file_information import SANSFileInformationFactory
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Commands
@@ -140,9 +141,14 @@ class CommandInterfaceStateDirector(object):
     def _get_data_state(self):
         # Get the data commands
         data_commands = self._get_data_commands()
+        data_elements = self._get_elements_with_key(DataCommandId.sample_scatter, data_commands)
+        data_element = data_elements[-1]
+        file_name = data_element.file_name
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(file_name)
 
         # Build the state data
-        data_builder = get_data_builder(self._facility)
+        data_builder = get_data_builder(self._facility, file_information)
         self._set_data_element(data_builder.set_sample_scatter, data_builder.set_sample_scatter_period,
                                DataCommandId.sample_scatter, data_commands)
         self._set_data_element(data_builder.set_sample_transmission, data_builder.set_sample_transmission_period,
@@ -215,7 +221,11 @@ class CommandInterfaceStateDirector(object):
         @param data_state: the data state.
         @return: a SANSState object.
         """
-        self._state_director = StateDirectorISIS(data_state)
+        file_name = data_state.sample_scatter
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(file_name)
+
+        self._state_director = StateDirectorISIS(data_state, file_information)
 
         # If we have a clean instruction in there, then we should apply it to all commands
         self._apply_clean_if_required()

@@ -5,6 +5,7 @@ import mantid
 from sans.state.data import (StateData, get_data_builder)
 from state_test_helper import (assert_validate_error, assert_raises_nothing)
 from sans.common.enums import (SANSFacility, SANSInstrument)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -71,9 +72,9 @@ class StateDataBuilderTest(unittest.TestCase):
     def test_that_data_state_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-
+        file_information = SANSFileInformationMock(run_number=74044)
         # Act
-        data_builder = get_data_builder(facility)
+        data_builder = get_data_builder(facility, file_information)
 
         data_builder.set_sample_scatter("LOQ74044")
         data_builder.set_sample_scatter_period(3)

@@ -8,11 +8,6 @@ MuSR Changes
 Interface
 ---------
 
-
-Interface
----------
-
-
 Improvements
 ############
 

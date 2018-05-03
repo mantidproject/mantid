@@ -20,10 +20,21 @@ Install the following:
 
 * `Visual Studio 2015 Community Edition <https://go.microsoft.com/fwlink/?LinkId=532606&clcid=0x409>`_. If you are at RAL then
   ask for the location of the locally-cached offline version.
+
+  * Select a custom install and include at minimum:
+
+    * Programming Languages -> Visual C++
+    * Universal Windows App Development Kits -> Tools and Windows 10 SDK
+    * Windows 8.1 and Windows Phone 8.0/8.1 Tools -> Tools and Windows SDKs
+
 * `Git <https://git-scm.com/>`_. After installation open Git Bash and run ``git lfs install``.
 * `CMake <https://cmake.org/download/>`_
-* `MiKTeX <https://miktex.org/download>`_. Instructions are
-  `available here <https://miktex.org/howto/install-miktex>`_.
+* `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
+
+  * open the MikTeX console from the start menu
+  * switch to administrator mode
+  * settings -> select "Always install missing packages on-the-fly"
+
 * `NSIS <http://nsis.sourceforge.net/Download>`_ (optional). Used for building packages
 
 `Graphviz <http://graphviz.org/download/>`__ is required to generate the workflow diagrams in the documentation.

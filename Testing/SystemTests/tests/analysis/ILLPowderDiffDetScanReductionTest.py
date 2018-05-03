@@ -5,10 +5,10 @@ from mantid.simpleapi import PowderDiffILLDetScanReduction, \
 from mantid import config
 
 
-class PowderDiffILLDetScanReductionTest(stresstesting.MantidStressTest):
+class ILLPowderDiffDetScanReductionTest(stresstesting.MantidStressTest):
 
     def __init__(self):
-        super(PowderDiffILLDetScanReductionTest, self).__init__()
+        super(ILLPowderDiffDetScanReductionTest, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -17,7 +17,7 @@ class PowderDiffILLDetScanReductionTest(stresstesting.MantidStressTest):
         config.appendDataSearchSubDir('ILL/D2B/')
 
     def requiredFiles(self):
-        return ["508093.nxs, 508094.nxs, 508095.nxs, D2B_scan_test.nxs"]
+        return ["508093.nxs, 508094.nxs, 508095.nxs"]
 
     def d2b_2d_tubes_test(self):
         ws_2d_tubes = PowderDiffILLDetScanReduction(
@@ -88,4 +88,5 @@ class PowderDiffILLDetScanReductionTest(stresstesting.MantidStressTest):
         GroupWorkspaces([ws_2d_tubes[0], ws_2d[0], ws_1d[0]], OutputWorkspace='grouped_output')
 
     def validate(self):
+        self.tolerance = 0.0001
         return 'grouped_output', 'D2B_scan_test.nxs'

@@ -752,6 +752,8 @@ void LoadILLDiffraction::setSampleLogs() {
   double lambda = run.getLogAsSingleValue("wavelength");
   double eFixed = WAVE_TO_E / (lambda * lambda);
   run.addLogData(new PropertyWithValue<double>("Ei", eFixed));
+  run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors",
+                                               m_numberDetectorsActual));
 }
 
 /**
