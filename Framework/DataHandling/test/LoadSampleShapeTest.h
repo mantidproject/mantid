@@ -132,6 +132,11 @@ public:
     loadFailureTest(alg, "wrong_number_of_vertices.off");
   }
 
+  void test_fail_wrong_number_of_triangles() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "wrong_number_of_triangles.off");
+  }
+
 private:
   // Create workspaces and add them to algorithm properties
   void prepareWorkspaces(LoadSampleShape &alg, bool outputWsSameAsInputWs) {
