@@ -163,8 +163,7 @@ class EnggFocus(PythonAlgorithm):
         # converting units), so I guess that's what users will expect
         self._convert_to_distribution(input_ws)
 
-        if bank:
-            self._add_bank_number(input_ws, bank)
+        self._add_bank_number(input_ws, bank)
 
         self.setProperty("OutputWorkspace", input_ws)
 
@@ -175,7 +174,8 @@ class EnggFocus(PythonAlgorithm):
             return "2"
         if bank in ("1", "2"):
             return bank
-        raise RuntimeError("Invalid value for bank: \"{}\" of type {}".format(bank, type(bank)))
+        # The convention is to set bank ID to 0 for cropped / texture runs
+        return "0"
 
     def _add_bank_number(self, ws, bank):
         alg = self.createChildAlgorithm("AddSampleLog")

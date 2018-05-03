@@ -57,16 +57,16 @@ public:
   void test_getRunLabels() {
     RunMap<3, std::string> runMap;
 
-    const RunLabel polly(111, 1);
+    const RunLabel polly(111, 0);
     runMap.add(polly, "Polly");
 
-    const RunLabel morphism(222, 2);
+    const RunLabel morphism(222, 1);
     runMap.add(morphism, "Morphism");
 
-    const RunLabel al(333, 3);
+    const RunLabel al(333, 2);
     runMap.add(al, "Al");
 
-    const RunLabel gorithm(444, 1);
+    const RunLabel gorithm(444, 0);
     runMap.add(gorithm, "Gorithm");
 
     const std::vector<RunLabel> runLabels({polly, morphism, al, gorithm});
@@ -84,12 +84,12 @@ public:
     RunMap<3, std::string> runMap;
     TS_ASSERT_EQUALS(runMap.size(), 0);
 
-    runMap.add(RunLabel(111, 1), "Polly");
-    runMap.add(RunLabel(222, 2), "Morphism");
+    runMap.add(RunLabel(111, 0), "Polly");
+    runMap.add(RunLabel(222, 1), "Morphism");
     TS_ASSERT_EQUALS(runMap.size(), 2);
 
-    runMap.add(RunLabel(333, 3), "Al");
-    runMap.add(RunLabel(444, 1), "Gorithm");
+    runMap.add(RunLabel(333, 2), "Al");
+    runMap.add(RunLabel(444, 0), "Gorithm");
     TS_ASSERT_EQUALS(runMap.size(), 4);
   }
 };

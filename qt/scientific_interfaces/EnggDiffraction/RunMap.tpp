@@ -6,14 +6,14 @@ namespace CustomInterfaces {
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::add(const RunLabel &runLabel, const T &itemToAdd) {
   validateBankID(runLabel.bank);
-  m_map[runLabel.bank - 1][runLabel.runNumber] = itemToAdd;
+  m_map[runLabel.bank][runLabel.runNumber] = itemToAdd;
 }
 
 template <size_t NumBanks, typename T>
 bool RunMap<NumBanks, T>::contains(const RunLabel &runLabel) const {
-  return runLabel.bank > 0 && runLabel.bank <= NumBanks &&
-         m_map[runLabel.bank - 1].find(runLabel.runNumber) !=
-             m_map[runLabel.bank - 1].end();
+  return runLabel.bank >= 0 && runLabel.bank < NumBanks &&
+         m_map[runLabel.bank].find(runLabel.runNumber) !=
+             m_map[runLabel.bank].end();
 }
 
 template <size_t NumBanks, typename T>
@@ -24,13 +24,13 @@ const T &RunMap<NumBanks, T>::get(const RunLabel &runLabel) const {
                                 std::to_string(runLabel.runNumber) +
                                 " for bank " + std::to_string(runLabel.bank));
   }
-  return m_map[runLabel.bank - 1].at(runLabel.runNumber);
+  return m_map[runLabel.bank].at(runLabel.runNumber);
 }
 
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::remove(const RunLabel &runLabel) {
   validateBankID(runLabel.bank);
-  m_map[runLabel.bank - 1].erase(runLabel.runNumber);
+  m_map[runLabel.bank].erase(runLabel.runNumber);
 }
 
 template <size_t NumBanks, typename T>
@@ -41,7 +41,7 @@ std::vector<RunLabel> RunMap<NumBanks, T>::getRunLabels() const {
   for (const auto runNumber : runNumbers) {
     for (size_t i = 0; i < NumBanks; ++i) {
       if (m_map[i].find(runNumber) != m_map[i].end()) {
-        pairs.push_back(RunLabel(runNumber, i + 1));
+        pairs.emplace_back(runNumber, i);
       }
     }
   }
@@ -73,7 +73,7 @@ size_t RunMap<NumBanks, T>::size() const {
 
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::validateBankID(const size_t bank) const {
-  if (bank < 1 || bank > NumBanks) {
+  if (bank < 0 || bank >= NumBanks) {
     throw std::invalid_argument("Tried to access invalid bank: " +
                                 std::to_string(bank));
   }
