@@ -66,7 +66,8 @@ struct ElasticQAppender {
 
   void operator()(MatrixWorkspace_sptr workspace, const std::string &outputBase,
                   bool doThrow) {
-    if (m_converted.find(workspace.get()) != m_converted.end())
+    auto it = m_converted.find(workspace.get());
+    if (it != m_converted.end())
       m_elasticInput.emplace_back(it->second);
     else {
       auto elasticQ = convertToElasticQ(
