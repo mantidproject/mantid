@@ -61,6 +61,10 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
                 else:
                     log_value = log_property.value
 
+                    if isinstance(log_value, str):
+                        # For h5py and Python 3 - h5py doesn't get on well with Unicode strings
+                        log_value = log_value.encode()
+
                 log_dataset = sample_logs_group.create_dataset(name=log_property.name, shape=(1,), dtype=property_dtype,
                                                                data=[log_value])
                 log_dataset.attrs["Units"] = log_property.units
