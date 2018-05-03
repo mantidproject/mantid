@@ -8,6 +8,7 @@ namespace Mantid {
 namespace PythonInterface {
 using API::IFunction;
 using PythonInterface::Environment::callMethod;
+using PythonInterface::Environment::callMethodNoCheck;
 using PythonInterface::Environment::UndefinedAttributeError;
 using namespace boost::python;
 
@@ -84,7 +85,7 @@ const std::string IFunctionAdapter::category() const {
 
 /**
  */
-void IFunctionAdapter::init() { callMethod<void>(getSelf(), "init"); }
+void IFunctionAdapter::init() { callMethodNoCheck<void>(getSelf(), "init"); }
 
 /**
  * Declare an attribute on the given function from a python object
@@ -99,6 +100,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name,
                                           defaultValue);
   } catch (UndefinedAttributeError &) {
+    // nothing to do
   }
 }
 
