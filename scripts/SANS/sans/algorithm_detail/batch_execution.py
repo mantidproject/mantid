@@ -774,7 +774,7 @@ def group_workspaces_if_required(reduction_package):
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
     requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction\
-                        or is_part_of_wavelength_range_reduction
+        or is_part_of_wavelength_range_reduction
 
     reduced_lab = reduction_package.reduced_lab
     reduced_hab = reduction_package.reduced_hab
