@@ -77,8 +77,8 @@ bool IqtFitSequential::throwIfElasticQConversionFails() const { return true; }
 
 std::vector<API::MatrixWorkspace_sptr> IqtFitSequential::getWorkspaces() const {
   auto workspaces = QENSFitSequential::getWorkspaces();
-  double startX = getProperty("StartX");
-  double endX = getProperty("EndX");
+  const double startX = getProperty("StartX");
+  const double endX = getProperty("EndX");
 
   for (auto i = 0u; i < workspaces.size(); ++i)
     workspaces[i] =
