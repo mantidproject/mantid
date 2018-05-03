@@ -274,6 +274,7 @@ ConvolutionFitSequential::getAdditionalLogStrings() const {
 std::map<std::string, std::string>
 ConvolutionFitSequential::getAdditionalLogNumbers() const {
   auto logs = QENSFitSequential::getAdditionalLogNumbers();
+  IFunction_sptr function = getProperty("Function");
   logs["lorentzians"] = boost::lexical_cast<std::string>(
       numberOfFunctions(function, "Lorentzian"));
   return logs;
