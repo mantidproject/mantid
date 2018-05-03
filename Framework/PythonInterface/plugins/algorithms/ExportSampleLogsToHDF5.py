@@ -78,7 +78,9 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
                            format(prop.type))
 
     def _ignore_property(self, prop):
-        return isinstance(prop, StringTimeSeriesProperty) or prop.value == ""
+        # Skip StringTimeSeriesProperty, and time-averaging them means nothing, and also skip empty strings
+        return isinstance(prop, StringTimeSeriesProperty) or \
+               (isinstance(prop, StringPropertyWithValue) and prop.value == "")
 
     def _is_time_series(self, prop):
         return isinstance(prop, (FloatTimeSeriesProperty, Int32TimeSeriesProperty, Int64TimeSeriesProperty,
