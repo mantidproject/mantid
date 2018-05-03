@@ -27,19 +27,21 @@ def group_row(group_title, n_columns):
     return [cell(group_title)]
 
 
-class RegexPredicate(MantidQt.MantidWidgets.Batch.RowPredicate):
-    def __init__(self, view, text):
+class Predicate(MantidQt.MantidWidgets.Batch.RowPredicate):
+    def __init__(self, meetsCriteria):
         super(MantidQt.MantidWidgets.Batch.RowPredicate, self).__init__()
-        self.view = view
-        self.text = text
-
-        try:
-            self.re = re.compile(text)
-        except re.error:
-            self.re = re.compile('')
+        self.meetsCriteria = meetsCriteria
 
     def rowMeetsCriteria(self, location):
-        return bool(self.re.match(self.view.cellAt(location, 0).contentText()))
+        return bool(self.meetsCriteria(location))
+
+
+def make_regex_filter(table, text, col = 0):
+    try:
+        regex = re.compile(text)
+        return Predicate(lambda location: regex.match(table.cellAt(location, col).contentText()))
+    except re.error:
+        return Predicate(lambda location: True)
 
 
 class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
@@ -55,17 +57,14 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         cell = self.table.cellAt(row, col)
         if cell_content == 'Invalid':
             cell.setIconFilePath(':/invalid.png')
-            cell.setBackgroundColor('white')
             cell.setBorderColor('darkRed')
             self.table.setCellAt(row, col, cell)
         else:
             cell.setIconFilePath('')
             cell.setBorderColor('darkGrey')
-            cell.setBackgroundColor('#b3ffb3')
             self.table.setCellAt(row, col, cell)
 
         print("Updated row {} col {} with text {}".format(row.path(), col, cell_content))
-        pass
 
     def on_row_inserted(self, rowLoc):
         print("Row inserted at {}".format(rowLoc.path()))
@@ -74,6 +73,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
             cell.disableEditing()
             cell.setBorderThickness(0)
             cell.setBorderColor("transparent")
+            cell.setBorderOpacity(0)
             return cell
 
         if rowLoc.depth() > 2:
@@ -88,8 +88,10 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
                 if i > 0:
                     cells[i] = killed_cell(cell)
 
-            self.table.setCellsAt(rowLoc, cells)
+            for cell in cells:
+                print(cell.borderColor())
 
+            self.table.setCellsAt(rowLoc, cells)
 
     def on_copy_runs_request(self):
         self.clipboard = self.table.selectedSubtrees()
@@ -109,6 +111,9 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         else:
             print("Bad selection for paste")
 
+    def on_filter_reset(self):
+        self.filterBox.setText('')
+
     def setup_layout(self):
         self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Run(s)",
                                                                "Angle",
@@ -118,6 +123,8 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
                                                                "dQ/Q",
                                                                "Scale",
                                                                "Options"], cell(""), self)
+        self.table.enableFiltering()
+
         self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table)
 
         self.table_signals.removeRowsRequested.connect(self.on_remove_runs_request)
@@ -125,11 +132,10 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         self.table_signals.pasteRowsRequested.connect(self.on_paste_rows_request)
         self.table_signals.cellChanged.connect(self.on_cell_updated)
         self.table_signals.rowInserted.connect(self.on_row_inserted)
+        self.table_signals.filterReset.connect(self.on_filter_reset)
 
-        self.table.appendChildRowOf(row([]), group_row("A", 8))
-
-        self.table.appendChildRowOf(row([]), group_row("B", 8))
-
+        self.table.appendChildRowOf(row([]), [cell("A")])
+        self.table.appendChildRowOf(row([]), [cell("B")])
         self.table.appendChildRowOf(row([0]), row_from_text("C",
                                                             "C",
                                                             "C",
@@ -138,11 +144,9 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
                                                             "C",
                                                             "C",
                                                             "C"))
-        self.table.enableFiltering()
 
         self.filterBox = QtGui.QLineEdit(self)
-        self.filterBox.textChanged.connect(lambda value: self.table.filterRowsBy(RegexPredicate(self.table, value)))
-
+        self.filterBox.textEdited.connect(lambda value: self.table.filterRowsBy(make_regex_filter(self.table, value)))
         self.layoutBase.addWidget(self.filterBox)
 
         # Add the widget to this interface

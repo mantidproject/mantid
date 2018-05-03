@@ -11,7 +11,7 @@ class EXPORT_OPT_MANTIDQT_COMMON Cell {
 public:
   Cell(std::string const &contentText);
   Cell(std::string const &contentText, std::string const& backgroundColor, int borderThickness,
-       std::string const &color, int borderTransparency, bool isEditable);
+       std::string const &color, int borderOpacity, bool isEditable);
 
   void setContentText(std::string const &contentText);
   std::string const &contentText() const;
@@ -25,8 +25,8 @@ public:
   void setBackgroundColor(std::string const &backgroundColor);
   std::string const &backgroundColor() const;
 
-  void setBorderTransparency(int transparency);
-  int borderTransparency() const;
+  void setBorderOpacity(int transparency);
+  int borderOpacity() const;
 
   int borderThickness() const;
   void setBorderThickness(int borderThickness);
@@ -40,7 +40,7 @@ private:
   std::string m_contentText;
   std::string m_backgroundColor;
   int m_borderThickness;
-  int m_borderTransparency;
+  int m_borderOpacity;
   std::string m_borderColor;
   std::string m_iconFilePath;
   bool m_isEditable;

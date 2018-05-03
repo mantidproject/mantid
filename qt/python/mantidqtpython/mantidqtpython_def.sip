@@ -1541,6 +1541,7 @@ public:
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
   virtual void notifyPasteRowsRequested() = 0;
+  virtual void notifyFilterReset() = 0;
 };
 
 class JobTreeView : public QTreeView
@@ -1598,7 +1599,7 @@ public:
   Cell(const std::string &contentText);
 
   Cell(const std::string &contentText, const std::string& backgroundColor, int borderThickness,
-       const std::string &color, int borderTransparency, bool isEditable);
+       const std::string &color, int borderOpacity, bool isEditable);
 
   const std::string &contentText() const;
   void setContentText(const std::string& contentText);
@@ -1609,8 +1610,8 @@ public:
   const std::string & backgroundColor() const;
   void setBackgroundColor(const std::string& backgroundColor);
 
-  int borderTransparency() const;
-  void setBorderTransparency(int alpha);
+  int borderOpacity() const;
+  void setBorderOpacity(int alpha);
 
   int borderThickness() const;
   void setBorderThickness(int borderThickness);
@@ -1648,10 +1649,12 @@ public:
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
   virtual void notifyPasteRowsRequested();
+  virtual void notifyFilterReset();
 signals:
   void cellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
                    std::string newValue);
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  void filterReset();
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested(

@@ -7,7 +7,6 @@
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/Batch/BuildSubtree.h"
 #include <QKeyEvent>
-#include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <algorithm>
 #include <iostream>
@@ -50,7 +49,7 @@ void JobTreeView::filterRowsBy(RowPredicate *predicate) {
 }
 
 void JobTreeView::resetFilter() {
-  // TODO: m_notifyee->notifyFilterReset()
+  m_notifyee->notifyFilterReset();
   m_filteredModel.resetPredicate();
 }
 
@@ -241,14 +240,18 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
   assertOrThrow(!isOnlyChildOfRoot(indexToRemove),
                 "Attempted to delete the only child of the invisible root"
                 " for the main model. Try removeAllRows() instead.");
-  assertOrThrow(m_filteredModel.isReset(),
-                "Attempted to remove a node while a filter was applied. Call "
-                "resetFilter before "
-                "removing.");
   if (rowRemovalWouldBeIneffective(indexToRemove)) {
-    auto rowIndexToSwitchTo = mapToFilteredModel(
-        fromMainModel(siblingIfExistsElseParent(indexToRemove.untyped())));
-    setCurrentIndex(rowIndexToSwitchTo.untyped());
+    // implies that indexToRemove corresponds to an index in filtered model.
+    auto rowIndexToSwitchTo =
+        siblingIfExistsElseParent(mapToFilteredModel(indexToRemove).untyped());
+    if (rowIndexToSwitchTo.isValid()) {
+      setCurrentIndex(rowIndexToSwitchTo);
+    } else {
+      resetFilter();
+      rowIndexToSwitchTo = siblingIfExistsElseParent(
+          mapToFilteredModel(indexToRemove).untyped());
+      setCurrentIndex(rowIndexToSwitchTo);
+    }
   }
   m_adaptedMainModel.removeRowFrom(indexToRemove);
 }
@@ -268,7 +271,8 @@ void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
       paddedRowFromCells(cells, deadCell, m_mainModel.columnCount()));
 }
 
-Cell const JobTreeView::deadCell = Cell("", "white", 0, "transparent", 0, false);
+Cell const JobTreeView::deadCell =
+    Cell("", "white", 0, "transparent", 0, false);
 
 void JobTreeView::appendChildRowOf(RowLocation const &parent) {
   m_adaptedMainModel.appendEmptyChildRow(rowLocation().indexAt(parent));

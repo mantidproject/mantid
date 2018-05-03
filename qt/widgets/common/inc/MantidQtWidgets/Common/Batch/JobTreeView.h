@@ -25,7 +25,7 @@ public:
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
   virtual void notifyPasteRowsRequested() = 0;
-  // TODO:  virtual void notifyFilterReset() = 0;
+  virtual void notifyFilterReset() = 0;
   virtual ~JobTreeViewSubscriber() = default;
 };
 

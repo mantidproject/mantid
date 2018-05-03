@@ -28,6 +28,7 @@ void setIcon(QStandardItem &item, std::string const &iconFilePath) {
     item.setIcon(QIcon());
 }
 
+
 void setBorderColor(QStandardItem &item, std::string const &borderColor,
                     int alpha) {
   auto borderQColor = QColor(borderColor.c_str());
@@ -54,7 +55,7 @@ void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   item.setEditable(cell.isEditable());
   setBorderThickness(item, cell.borderThickness());
   setBackgroundColor(item, cell.backgroundColor());
-  setBorderColor(item, cell.borderColor(), cell.borderTransparency());
+  setBorderColor(item, cell.borderColor(), cell.borderOpacity());
   setIcon(item, cell.iconFilePath());
 }
 
@@ -66,7 +67,7 @@ Cell extractCellPropertiesFromItem(QStandardItem const &item) {
 
   auto borderColor = getBorderColor(item);
   cell.setBorderColor(borderColor.name().toStdString());
-  cell.setBorderTransparency(borderColor.alpha());
+  cell.setBorderOpacity(borderColor.alpha());
 
   cell.setEditable(item.isEditable());
   return cell;

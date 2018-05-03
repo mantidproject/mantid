@@ -6,15 +6,15 @@ namespace Batch {
 
 Cell::Cell(std::string const &contentText, std::string const &backgroundColor,
            int borderThickness, std::string const &borderColor,
-           int borderTransparency, bool isEditable)
+           int borderOpacity, bool isEditable)
     : m_contentText(contentText), m_backgroundColor(backgroundColor),
       m_borderThickness(borderThickness),
-      m_borderTransparency(borderTransparency), m_borderColor(borderColor),
+      m_borderOpacity(borderOpacity), m_borderColor(borderColor),
       m_iconFilePath(), m_isEditable(isEditable) {}
 
 Cell::Cell(std::string const &contentText)
     : m_contentText(contentText), m_backgroundColor("white"),
-      m_borderThickness(1), m_borderTransparency(255),
+      m_borderThickness(1), m_borderOpacity(255),
       m_borderColor("darkGrey"), m_iconFilePath(), m_isEditable(true) {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
@@ -25,7 +25,7 @@ int Cell::borderThickness() const { return m_borderThickness; }
 
 std::string const &Cell::borderColor() const { return m_borderColor; }
 
-int Cell::borderTransparency() const { return m_borderTransparency; }
+int Cell::borderOpacity() const { return m_borderOpacity; }
 
 void Cell::setContentText(std::string const &contentText) {
   m_contentText = contentText;
@@ -45,8 +45,8 @@ void Cell::setBackgroundColor(std::string const &backgroundColor) {
 
 std::string const &Cell::backgroundColor() const { return m_backgroundColor; }
 
-void Cell::setBorderTransparency(int borderTransparency) {
-  m_borderTransparency = borderTransparency;
+void Cell::setBorderOpacity(int borderOpacity) {
+  m_borderOpacity = borderOpacity;
 }
 
 void Cell::setIconFilePath(std::string const &iconFilePath) {

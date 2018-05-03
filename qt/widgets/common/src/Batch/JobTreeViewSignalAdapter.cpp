@@ -35,6 +35,10 @@ void JobTreeViewSignalAdapter::notifyCopyRowsRequested() {
 void JobTreeViewSignalAdapter::notifyPasteRowsRequested() {
   emit pasteRowsRequested();
 }
+
+void JobTreeViewSignalAdapter::notifyFilterReset() {
+  emit filterReset();
+}
 }
 }
 }
