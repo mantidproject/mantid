@@ -233,12 +233,12 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // Get the maximum asymmetry
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
-    if (phase->Double(h, asymmetryIndex) > maxAsym &&phase->Double(h, asymmetryIndex) !=999.0 ) {
+    if (phase->Double(h, asymmetryIndex) > maxAsym &&
+        phase->Double(h, asymmetryIndex) != 999.0) {
       maxAsym = phase->Double(h, asymmetryIndex);
     }
   }
-  
-  
+
   if (maxAsym == 0.0) {
     throw std::invalid_argument("Invalid detector asymmetries");
   }
@@ -269,16 +269,17 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     const double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
     const double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
-      if(emptySpectrum[h]){
-          aj.push_back(0.0);
-          bj.push_back(0.0);
-      }else{
-      const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
-      const double phi = phase->Double(h, phaseIndex);
-      const double X = n0[h] * asym * cos(phi);
-      const double Y = n0[h] * asym * sin(phi);
-      aj.push_back((lam1 * X + mu1 * Y) * 0.5);
-      bj.push_back((lam2 * X + mu2 * Y) * 0.5);}
+      if (emptySpectrum[h]) {
+        aj.push_back(0.0);
+        bj.push_back(0.0);
+      } else {
+        const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+        const double phi = phase->Double(h, phaseIndex);
+        const double X = n0[h] * asym * cos(phi);
+        const double Y = n0[h] * asym * sin(phi);
+        aj.push_back((lam1 * X + mu1 * Y) * 0.5);
+        bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+      }
     }
   }
 

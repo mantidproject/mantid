@@ -28,13 +28,14 @@ void populatePhaseTable2(ITableWorkspace_sptr phaseTable,
   double asym(1.);
   for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
-    if (i == dead1 || i ==dead2){
-    phaseRow1 << int(i) << 999.
-              << 0.0;
-    }else{phaseRow1 << int(i) << asym
-              << 2. * M_PI * double(i + 1) /
-                     (1. + double(ws->getNumberHistograms()));
-  }}
+    if (i == dead1 || i == dead2) {
+      phaseRow1 << int(i) << 999. << 0.0;
+    } else {
+      phaseRow1 << int(i) << asym
+                << 2. * M_PI * double(i + 1) /
+                       (1. + double(ws->getNumberHistograms()));
+    }
+  }
 }
 bool isZero(double value) {
   bool result = value == 0;
@@ -95,7 +96,7 @@ IAlgorithm_sptr setupAlgDead(MatrixWorkspace_sptr m_loadedData) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
-  populatePhaseTable2(phaseTable,m_loadedData);
+  populatePhaseTable2(phaseTable, m_loadedData);
 
   return setupAlg(m_loadedData, true, phaseTable);
 }
@@ -205,7 +206,7 @@ public:
     TS_ASSERT_DELTA(specReE[20], 0.31489, 0.0001);
     TS_ASSERT_DELTA(specReE[50], 0.3512, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0],  1.0823, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], 1.0823, 0.0001);
     TS_ASSERT_DELTA(specImY[20], 1.3149, 0.0001);
     TS_ASSERT_DELTA(specImY[50], 0.4965, 0.0001);
     // Check imaginary E values
