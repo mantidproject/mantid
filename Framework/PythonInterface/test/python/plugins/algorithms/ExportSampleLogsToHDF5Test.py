@@ -42,7 +42,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
             self.assertTrue("Sample Logs" in output_file)
             logs_group = output_file["Sample Logs"]
             self.assertEquals(logs_group["Test1"].value, 1.0)
-            self.assertEquals(logs_group["Test2"].value, "Test2")
+            self.assertEquals(logs_group["Test2"].value[0], b"Test2")
 
     def test_blacklistExcludesLogs(self):
         input_ws = self._create_sample_workspace()
