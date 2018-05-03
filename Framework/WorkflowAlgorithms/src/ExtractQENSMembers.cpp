@@ -69,12 +69,23 @@ void ExtractQENSMembers::init() {
                   "The output workspace group, containing the fit members.");
 }
 
+std::map<std::string, std::string> ExtractQENSMembers::validateInputs() {
+  std::map<std::string, std::string> errors;
+  std::vector<std::string> workspaceNames = getProperty("InputWorkspaces");
+  MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+
+  if(workspaceNames.empty() && !inputWorkspace)
+    errors["InputWorkspace"] = "Neither the InputWorkspace or InputWorkspaces "
+                               "property have been defined.";
+  return errors;
+}
+
 void ExtractQENSMembers::exec() {
   auto inputWorkspaces = getInputWorkspaces();
   WorkspaceGroup_sptr resultWS = getProperty("ResultWorkspace");
   MatrixWorkspace_sptr initialWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(0));
-  auto qValues = getQValues(inputWorkspaces);
+  const auto qValues = getQValues(inputWorkspaces);
   auto members = getAxisLabels(initialWS, 1);
 
   bool renameConvolved = getProperty("RenameConvolvedMembers");
@@ -109,12 +120,8 @@ ExtractQENSMembers::getInputWorkspaces() const {
     for (const auto &name : workspaceNames)
       workspaces.emplace_back(
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
-  } else if (MatrixWorkspace_sptr workspace = getProperty("InputWorkspace"))
-    workspaces.emplace_back(workspace);
-
-  if (workspaces.empty())
-    throw std::runtime_error("Neither the InputWorkspace or InputWorkspaces "
-                             "property have been defined.");
+  } else
+    workspaces.push_back(getProperty("InputWorkspace"));
   return workspaces;
 }
 
@@ -132,7 +139,7 @@ std::vector<double> ExtractQENSMembers::getQValues(
     auto getQs = createChildAlgorithm("GetQsInQENSData", -1.0, -1.0, false);
     getQs->setProperty("InputWorkspace", workspace);
     getQs->executeAsChildAlg();
-    std::vector<double> values = getQs->getProperty("Qvalues");
+    const std::vector<double> values = getQs->getProperty("Qvalues");
     qValues.insert(std::end(qValues), std::begin(values), std::end(values));
   }
   return qValues;
