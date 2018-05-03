@@ -17,7 +17,8 @@ New features
 
 Improvements
 ############
-
+* Added thickness column to table in new GUI.
+* Added EventSlice option to options column in new GUI.
 Bug fixes
 #########
 * Fixed a bug where the beam stop arm was not being masked on LOQ.
