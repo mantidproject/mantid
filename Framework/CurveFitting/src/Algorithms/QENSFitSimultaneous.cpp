@@ -16,6 +16,8 @@
 
 #include <boost/algorithm/string/join.hpp>
 
+#include <unordered_set>
+
 namespace {
 Mantid::Kernel::Logger g_log("QENSFit");
 
@@ -89,19 +91,18 @@ struct ElasticQAppender {
       : m_elasticInput(elasticInput), m_converted() {}
 
   void operator()(MatrixWorkspace_sptr workspace, bool doThrow) {
-    auto it = m_converted.find(workspace.get());
-    if (it != m_converted.end())
+    if (m_converted.find(workspace.get()) != m_converted.end())
       m_elasticInput.emplace_back(it->second);
     else {
       auto elasticQ = convertToElasticQ(workspace, doThrow);
       m_elasticInput.emplace_back(elasticQ);
-      m_converted[workspace.get()] = elasticQ;
+      m_converted.insert(elasticQ.get);
     }
   }
 
 private:
   std::vector<MatrixWorkspace_sptr> &m_elasticInput;
-  std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
+  std::unordered_set<MatrixWorkspace *> m_converted;
 };
 
 std::vector<MatrixWorkspace_sptr>
@@ -294,15 +295,15 @@ void QENSFitSimultaneous::execConcrete() {
       setProperty("OutputWorkspaceGroup", outputBaseName + "_Workspaces");
   }
 
-  auto inputWorkspaces = getWorkspaces();
-  auto workspaces = convertInputToElasticQ(inputWorkspaces);
-  auto workspaceIndices = getWorkspaceIndices(workspaces.size());
-  auto singleDomainFunction = convertToSingleDomain(getProperty("Function"));
+  const auto inputWorkspaces = getWorkspaces();
+  const auto workspaces = convertInputToElasticQ(inputWorkspaces);
+  const auto workspaceIndices = getWorkspaceIndices(workspaces.size());
+  const auto singleDomainFunction = convertToSingleDomain(getProperty("Function"));
 
-  auto fitResult = performFit(inputWorkspaces, outputBaseName);
-  auto parameterWs = transposeFitTable(fitResult.first, singleDomainFunction);
-  auto groupWs = fitResult.second;
-  auto resultWs = processIndirectFitParameters(parameterWs);
+  const auto fitResult = performFit(inputWorkspaces, outputBaseName);
+  const auto parameterWs = processParameterTable(transposeFitTable(fitResult.first, singleDomainFunction));
+  const auto groupWs = fitResult.second;
+  const auto resultWs = processIndirectFitParameters(parameterWs);
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -322,9 +323,9 @@ QENSFitSimultaneous::performFit(
     const std::vector<MatrixWorkspace_sptr> &workspaces,
     const std::string &output) {
   IFunction_sptr function = getProperty("Function");
-  bool convolveMembers = getProperty("ConvolveMembers");
-  bool ignoreInvalidData = getProperty("IgnoreInvalidData");
-  bool calcErrors = getProperty("CalcErrors");
+  const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+  const bool calcErrors = getProperty("CalcErrors");
 
   auto fit = createChildAlgorithm("Fit", 0.05, 0.90, true);
   fit->setProperty("Function", function);
@@ -430,7 +431,7 @@ void QENSFitSimultaneous::addAdditionalLogs(
 
 IAlgorithm_sptr QENSFitSimultaneous::extractMembersAlgorithm(
     WorkspaceGroup_sptr resultGroupWs, const std::string &outputWsName) const {
-  bool convolved = getProperty("ConvolveMembers");
+  const bool convolved = getProperty("ConvolveMembers");
   std::vector<std::string> convolvedMembers;
   IFunction_sptr function = getProperty("Function");
 
@@ -498,7 +499,7 @@ std::vector<std::string> QENSFitSimultaneous::getFitParameterNames() const {
 
 std::map<std::string, std::string>
 QENSFitSimultaneous::getAdditionalLogStrings() const {
-  bool convolve = getProperty("ConvolveMembers");
+  const bool convolve = getProperty("ConvolveMembers");
   auto fitProgram = name();
   fitProgram = fitProgram.substr(0, fitProgram.rfind("Simultaneous"));
 
@@ -527,10 +528,6 @@ QENSFitSimultaneous::getWorkspaceIndices(std::size_t numberOfIndices) const {
   for (auto i = 1u; i < numberOfIndices; ++i)
     indices.push_back(getPropertyValue("WorkspaceIndex_" + std::to_string(i)));
   return indices;
-}
-
-std::string QENSFitSimultaneous::getTemporaryName() const {
-  return "__" + name() + "_ws";
 }
 
 } // namespace Algorithms

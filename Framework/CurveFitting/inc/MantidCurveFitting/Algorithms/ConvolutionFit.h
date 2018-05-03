@@ -54,7 +54,6 @@ private:
   void calculateEISF(API::ITableWorkspace_sptr &) const;
 
   bool m_deltaUsed;
-  std::size_t m_lorentzianCount;
 };
 
 } // namespace Algorithms

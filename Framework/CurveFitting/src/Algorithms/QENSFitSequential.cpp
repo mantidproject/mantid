@@ -16,10 +16,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace {
-Mantid::Kernel::Logger g_log("QENSFitSequential");
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -67,21 +66,20 @@ struct ElasticQAppender {
 
   void operator()(MatrixWorkspace_sptr workspace, const std::string &outputBase,
                   bool doThrow) {
-    auto it = m_converted.find(workspace.get());
-    if (it != m_converted.end())
+    if (m_converted.find(workspace.get()) != m_converted.end())
       m_elasticInput.emplace_back(it->second);
     else {
       auto elasticQ = convertToElasticQ(
           workspace, outputBase + std::to_string(m_converted.size() + 1),
           doThrow);
       m_elasticInput.emplace_back(elasticQ);
-      m_converted[workspace.get()] = elasticQ;
+      m_converted.insert(elasticQ.get());
     }
   }
 
 private:
   std::vector<MatrixWorkspace_sptr> &m_elasticInput;
-  std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
+  std::unordered_set<MatrixWorkspace *> m_converted;
 };
 
 std::vector<MatrixWorkspace_sptr>
@@ -356,7 +354,7 @@ void QENSFitSequential::init() {
                   "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate "
                   "gradient (Polak-Ribiere imp.)' and 'BFGS'");
 
-  std::vector<std::string> costFuncOptions =
+  const std::vector<std::string> costFuncOptions =
       CostFunctionFactory::Instance().getKeys();
   declareProperty("CostFunction", "Least squares",
                   boost::make_shared<StringListValidator>(costFuncOptions),
@@ -389,7 +387,8 @@ void QENSFitSequential::init() {
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
-  std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
+  const std::array<std::string, 2> evaluationTypes = {
+      {"CentrePoint", "Histogram"}};
   declareProperty(
       "EvaluationType", "CentrePoint",
       Kernel::IValidator_sptr(
@@ -407,14 +406,14 @@ std::map<std::string, std::string> QENSFitSequential::validateInputs() {
       errors["InputWorkspace"] =
           "No input string or input workspace was provided.";
 
-    int specMin = getProperty("SpecMin");
-    int specMax = getProperty("SpecMax");
+    const int specMin = getProperty("SpecMin");
+    const int specMax = getProperty("SpecMax");
     if (specMin > specMax)
       errors["SpecMin"] = "SpecMin must be less than or equal to SpecMax.";
   }
 
-  double startX = getProperty("StartX");
-  double endX = getProperty("EndX");
+  const double startX = getProperty("StartX");
+  const double endX = getProperty("EndX");
   if (startX >= endX)
     errors["StartX"] = "StartX must be less than EndX";
 
@@ -430,19 +429,20 @@ void QENSFitSequential::exec() {
   if (getPropertyValue("OutputWorkspaceGroup").empty())
     setProperty("OutputWorkspaceGroup", outputBaseName + "_Workspaces");
 
-  auto inputWorkspaces = getWorkspaces();
-  auto workspaces = convertInputToElasticQ(inputWorkspaces);
-  auto inputString = getInputString(workspaces);
-  auto spectra = getSpectra(inputString);
+  const auto inputWorkspaces = getWorkspaces();
+  const auto workspaces = convertInputToElasticQ(inputWorkspaces);
+  const auto inputString = getInputString(workspaces);
+  const auto spectra = getSpectra(inputString);
 
   if (workspaces.empty() || spectra.empty() ||
       (workspaces.size() > 1 && workspaces.size() != spectra.size()))
     throw std::invalid_argument("A malformed input string was provided.");
 
-  auto parameterWs = performFit(inputString, outputBaseName);
-  auto resultWs = processIndirectFitParameters(parameterWs);
-  auto groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      outputBaseName + "_Workspaces");
+  const auto outputWs = performFit(inputString, outputBaseName);
+  const auto resultWs = processIndirectFitParameters(outputWs);
+  const auto groupWs =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          outputBaseName + "_Workspaces");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
@@ -468,7 +468,7 @@ void QENSFitSequential::exec() {
 
 std::map<std::string, std::string>
 QENSFitSequential::getAdditionalLogStrings() const {
-  bool convolve = getProperty("ConvolveMembers");
+  const bool convolve = getProperty("ConvolveMembers");
   auto fitProgram = name();
   fitProgram = fitProgram.substr(0, fitProgram.rfind("Sequential"));
 
@@ -495,7 +495,7 @@ void QENSFitSequential::addAdditionalLogs(
 
   Progress logAdderProg(this, 0.99, 1.00, 6);
   logAdder->setProperty("LogType", "String");
-  for (const auto log : getAdditionalLogStrings()) {
+  for (const auto &log : getAdditionalLogStrings()) {
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
     logAdder->executeAsChildAlg();
@@ -503,7 +503,7 @@ void QENSFitSequential::addAdditionalLogs(
   }
 
   logAdder->setProperty("LogType", "Number");
-  for (const auto log : getAdditionalLogNumbers()) {
+  for (const auto &log : getAdditionalLogNumbers()) {
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
     logAdder->executeAsChildAlg();
@@ -513,7 +513,7 @@ void QENSFitSequential::addAdditionalLogs(
 
 std::string QENSFitSequential::getOutputBaseName() const {
   const auto base = getPropertyValue("OutputWorkspace");
-  auto position = base.rfind("_Result");
+  const auto position = base.rfind("_Result");
   if (position != std::string::npos)
     return base.substr(0, position);
   return base;
@@ -578,7 +578,7 @@ void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
     const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  auto getNameSuffix = [&](std::size_t i) {
+  const auto getNameSuffix = [&](std::size_t i) {
     return inputWorkspaces[i]->getName() + "_" + spectra[i] + "_Workspace";
   };
   return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
@@ -593,8 +593,8 @@ void QENSFitSequential::renameWorkspaces(
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
-  bool convolveMembers = getProperty("ConvolveMembers");
-  bool passWsIndex = getProperty("PassWSIndexToFunction");
+  const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool passWsIndex = getProperty("PassWSIndexToFunction");
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
@@ -620,7 +620,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
 
 std::string QENSFitSequential::getInputString(
     const std::vector<MatrixWorkspace_sptr> &workspaces) const {
-  auto inputString = getPropertyValue("Input");
+  const auto inputString = getPropertyValue("Input");
   if (!inputString.empty())
     return replaceWorkspaces(inputString, workspaces);
   return constructInputString(workspaces[0], getProperty("SpecMin"),
@@ -676,7 +676,7 @@ void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
 
 IAlgorithm_sptr QENSFitSequential::extractMembersAlgorithm(
     WorkspaceGroup_sptr resultGroupWs, const std::string &outputWsName) const {
-  bool convolved = getProperty("ConvolveMembers");
+  const bool convolved = getProperty("ConvolveMembers");
   std::vector<std::string> convolvedMembers;
   IFunction_sptr function = getProperty("Function");
 

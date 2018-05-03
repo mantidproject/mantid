@@ -74,7 +74,6 @@ private:
   std::vector<std::string>
   getWorkspaceIndices(std::size_t numberOfIndices) const;
   std::string getOutputBaseName() const;
-  std::string getTemporaryName() const;
 };
 
 } // namespace Algorithms

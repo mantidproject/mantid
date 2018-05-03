@@ -116,8 +116,8 @@ bool IqtFit<Base>::throwIfElasticQConversionFails() const {
 template <typename Base>
 std::vector<API::MatrixWorkspace_sptr> IqtFit<Base>::getWorkspaces() const {
   auto workspaces = Base::getWorkspaces();
-  double startX = Base::getProperty("StartX");
-  double endX = Base::getProperty("EndX");
+  const double startX = Base::getProperty("StartX");
+  const double endX = Base::getProperty("EndX");
 
   for (auto i = 0u; i < workspaces.size(); ++i)
     workspaces[i] =
