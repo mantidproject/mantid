@@ -115,6 +115,8 @@ private slots:
 private:
   void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
+  bool runListsMatch(const QString &newValue, const QString &oldValue,
+                     const bool exactMatch) const;
   bool rowMatches(int groupIndex, int rowIndex,
                   const std::map<QString, QString> &rowValues,
                   const bool exactMatch) const;
@@ -122,6 +124,7 @@ private:
   findRowIndex(int group, const std::map<QString, QString> &rowValues) const;
   void insertRowWithValues(int groupIndex, int rowIndex,
                            const std::map<QString, QString> &rowValues);
+  void insertRowAndGroupWithValues(const std::map<QString, QString> &rowValues);
   bool rowIsEmpty(int row, int parent) const;
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
   bool insertGroups(int position, int count);

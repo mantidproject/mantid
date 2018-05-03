@@ -2,6 +2,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include <MantidKernel/StringTokenizer.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -871,6 +872,49 @@ bool QTwoLevelTreeModel::rowIsEmpty(int row, int parent) const {
   return true;
 }
 
+/** This function checks whether two lists of runs match or partially match. If
+ * the original list only contains one of the runs, say '12345', and a
+ * subsequent list contained two, e.g. '12345+22345' then we need to identify
+ * that this is the same row and that it needs updating with the new run
+ * numbers (so it is considered a match but not an exact match).  If the
+ * original list contains both run numbers and the new list contains a run that
+ * already exists in that row then the rows are considered to be an exact match
+ * because no new runs need to be added.
+ */
+bool QTwoLevelTreeModel::runListsMatch(const QString &newValue,
+                                       const QString &oldValue,
+                                       const bool exactMatch) const {
+  // Parse the individual runs from each list and check that they all
+  // match, allowing for additional runs in one of the lists.
+  auto newRuns =
+      Mantid::Kernel::StringTokenizer(newValue.toStdString(), ",+",
+                                      Mantid::Kernel::StringTokenizer::TOK_TRIM)
+          .asVector();
+  auto oldRuns =
+      Mantid::Kernel::StringTokenizer(oldValue.toStdString(), ",+",
+                                      Mantid::Kernel::StringTokenizer::TOK_TRIM)
+          .asVector();
+
+  // Loop through all values in the shortest list and check they exist
+  // in the longer list (or they all match if they're the same length).
+  auto longList = newRuns.size() > oldRuns.size() ? newRuns : oldRuns;
+  auto shortList = newRuns.size() > oldRuns.size() ? oldRuns : newRuns;
+  for (auto &run : shortList) {
+    if (!std::count(longList.cbegin(), longList.cend(), run))
+      return false;
+  }
+
+  // Ok, the short list only contains items in the long list. If the new
+  // list contains additional items that are not in the old list then the
+  // row will require updating and this is not an exact match.  However,
+  // if the new list contains fewer items then the row does not updating
+  // because they already all exist in the old list
+  if (exactMatch && newRuns.size() > oldRuns.size())
+    return false;
+
+  return true;
+}
+
 /** Check whether the given row in the model matches the given row values
  * @param groupIndex : the group to check in the model
  * @param rowIndex : the row to check in the model
@@ -899,6 +943,14 @@ bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
       auto currentRowData = rowData(rowQIndex);
       if (currentRowData->isGenerated(columnIndex))
         oldValue = "";
+
+      // Special case for runs column to allows for new runs to be added into
+      // rows that already contain a partial list of runs for the same angle
+      if (column.name() == "Run(s)") {
+        if (!runListsMatch(newValue, oldValue, exactMatch))
+          return false;
+        continue;
+      }
 
       // If looking for an exact match check all columns; otherwise only check
       // key columns
@@ -946,20 +998,7 @@ location
 void QTwoLevelTreeModel::insertRowWithValues(
     int groupIndex, int rowIndex, const std::map<QString, QString> &rowValues) {
 
-  // Handle existing rows
-  auto existingRowIndex = findRowIndex(groupIndex, rowValues);
-  if (existingRowIndex) {
-    rowIndex = existingRowIndex.get();
-
-    // If it is identical to the new values then there is nothing to do
-    if (rowMatches(groupIndex, rowIndex, rowValues, true))
-      return;
-
-    // Otherwise, we want to reset the row to the new values. Just delete the
-    // existing row and then continue below to add the new row.
-    removeRows(rowIndex, 1, groupIndex);
-  }
-
+  // Add the row into the table
   insertRow(rowIndex, index(groupIndex, 0));
 
   // Loop through all the cells and update the values
@@ -974,7 +1013,41 @@ void QTwoLevelTreeModel::insertRowWithValues(
     ++colIndex;
   }
 
+  // Update cached data from the table
   updateAllGroupData();
+}
+
+void QTwoLevelTreeModel::insertRowAndGroupWithValues(
+    const std::map<QString, QString> &rowValues) {
+
+  // Get the group index. Create the groups if it doesn't exist
+  const auto groupName = rowValues.at("Group").toStdString();
+  auto groupIndex = findOrAddGroup(groupName);
+
+  // Find the row index to update. First, check if the row already exists in
+  // the group
+  auto existingRowIndex = findRowIndex(groupIndex, rowValues);
+  int rowIndex = 0;
+  if (existingRowIndex) {
+    // We'll update the existing row
+    rowIndex = existingRowIndex.get();
+
+    // If it is identical to the new values then there is nothing to do
+    if (rowMatches(groupIndex, rowIndex, rowValues, true))
+      return;
+
+    // Otherwise, we want to reset the row to the new values. Just delete the
+    // existing row and then continue below to add the new row.
+    removeRows(rowIndex, 1, groupIndex);
+
+    // The group may have been removed it if was left empty; if so, re-add it
+    groupIndex = findOrAddGroup(groupName);
+  } else {
+    // We'll add a new row to the end of the group
+    rowIndex = rowCount(index(groupIndex, 0));
+  }
+
+  insertRowWithValues(groupIndex, rowIndex, rowValues);
 }
 
 /** Transfer data to the model
@@ -988,21 +1061,17 @@ void QTwoLevelTreeModel::transfer(
   if (rowCount() == 1 && rowCount(index(0, 0)) == 1 && rowIsEmpty(0, 0))
     removeRows(0, 1);
 
-  for (const auto &row : runs) {
+  for (const auto &rowValues : runs) {
     // The first cell in the row contains the group name. It must be set.
     // (Potentially we could allow it to be empty but it's probably safer to
     // enforce this.)
-    if (!row.count("Group") || row.at("Group").isEmpty()) {
+    if (!rowValues.count("Group") || rowValues.at("Group").isEmpty()) {
       throw std::invalid_argument("Data cannot be transferred to the "
                                   "processing table. Group information is "
                                   "missing.");
     }
-    const auto groupName = row.at("Group").toStdString();
-    // Get the group index. Create the groups if it doesn't exist
-    const auto groupIndex = findOrAddGroup(groupName);
-    // Add a new row with the given values to the end of the group
-    const int rowIndex = rowCount(index(groupIndex, 0));
-    insertRowWithValues(groupIndex, rowIndex, row);
+
+    insertRowAndGroupWithValues(rowValues);
   }
 }
 } // namespace DataProcessor
