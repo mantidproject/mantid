@@ -273,7 +273,8 @@ ConvolutionFitSequential::getAdditionalLogStrings() const {
 std::map<std::string, std::string>
 ConvolutionFitSequential::getAdditionalLogNumbers() const {
   auto logs = QENSFitSequential::getAdditionalLogNumbers();
-  logs["lorentzians"] = boost::lexical_cast<std::string>(numberOfFunctions(function, "Lorentzian"));
+  logs["lorentzians"] = boost::lexical_cast<std::string>(
+      numberOfFunctions(function, "Lorentzian"));
   return logs;
 }
 

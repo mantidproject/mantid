@@ -386,7 +386,8 @@ void QENSFitSequential::init() {
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
-  const std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
+  const std::array<std::string, 2> evaluationTypes = {
+      {"CentrePoint", "Histogram"}};
   declareProperty(
       "EvaluationType", "CentrePoint",
       Kernel::IValidator_sptr(
@@ -438,8 +439,9 @@ void QENSFitSequential::exec() {
 
   const auto outputWs = performFit(inputString, outputBaseName);
   const auto resultWs = processIndirectFitParameters(outputWs);
-  const auto groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      outputBaseName + "_Workspaces");
+  const auto groupWs =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          outputBaseName + "_Workspaces");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 

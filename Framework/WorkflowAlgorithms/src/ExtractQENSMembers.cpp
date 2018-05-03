@@ -74,7 +74,7 @@ std::map<std::string, std::string> ExtractQENSMembers::validateInputs() {
   std::vector<std::string> workspaceNames = getProperty("InputWorkspaces");
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  if(workspaceNames.empty() && !inputWorkspace)
+  if (workspaceNames.empty() && !inputWorkspace)
     errors["InputWorkspace"] = "Neither the InputWorkspace or InputWorkspaces "
                                "property have been defined.";
   return errors;
