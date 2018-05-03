@@ -152,7 +152,8 @@ void PolarizationEfficiencyCor::exec() {
 void PolarizationEfficiencyCor::execWildes() {
   checkWildesProperties();
   std::vector<std::string> workspaces = getWorkspaceNameList();
-  MatrixWorkspace_sptr efficiencies = getProperty(Prop::EFFICIENCIES);
+
+  MatrixWorkspace_sptr efficiencies = getEfficiencies();
   auto alg = createChildAlgorithm("PolarizationCorrectionWildes");
   alg->initialize();
   alg->setProperty("InputWorkspaces", workspaces);
@@ -171,7 +172,7 @@ void PolarizationEfficiencyCor::execWildes() {
 void PolarizationEfficiencyCor::execFredrikze() {
   checkFredrikzeProperties();
   WorkspaceGroup_sptr group = getWorkspaceGroup();
-  MatrixWorkspace_sptr efficiencies = getProperty(Prop::EFFICIENCIES);
+  MatrixWorkspace_sptr efficiencies = getEfficiencies();
   auto alg = createChildAlgorithm("PolarizationCorrectionFredrikze");
   alg->initialize();
   alg->setProperty("InputWorkspace", group);
@@ -265,6 +266,81 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::getWorkspaceGroup() const {
         "Input workspaces are required to be in a workspace group.");
   }
   return group;
+}
+
+//----------------------------------------------------------------------------------------------
+/// Check if efficiencies workspace needs interpolation. Use inWS as for comparison.
+bool PolarizationEfficiencyCor::needInterpolation(
+    MatrixWorkspace const &efficiencies, MatrixWorkspace const &inWS) const {
+
+  if (!efficiencies.isHistogramData()) return true;
+  if (efficiencies.blocksize() != inWS.blocksize()) return true;
+
+  auto const &x = inWS.x(0);
+  size_t const xSize = x.size();
+  for (size_t i = 0; i < efficiencies.getNumberHistograms(); ++i) {
+    auto const &effX = efficiencies.x(i);
+    for(size_t j = 0; j < xSize; ++j) {
+      if (effX[j] != x[j]) return true;
+    }
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------------
+/// Convert the efficiencies to histogram
+MatrixWorkspace_sptr PolarizationEfficiencyCor::convertToHistogram(
+    API::MatrixWorkspace_sptr efficiencies) {
+  if (efficiencies->isHistogramData()) {
+    return efficiencies;
+  }
+  auto alg = createChildAlgorithm("ConvertToHistogram");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", efficiencies);
+  alg->setProperty("OutputWorkspace", "dummy");
+  alg->execute();
+  MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
+  return result;
+}
+
+//----------------------------------------------------------------------------------------------
+/// Convert the efficiencies to histogram
+MatrixWorkspace_sptr PolarizationEfficiencyCor::interpolate(
+    MatrixWorkspace_sptr efficiencies, MatrixWorkspace_sptr inWS) {
+
+  efficiencies->setDistribution(true);
+  auto alg = createChildAlgorithm("RebinToWorkspace");
+  alg->initialize();
+  alg->setProperty("WorkspaceToRebin", efficiencies);
+  alg->setProperty("WorkspaceToMatch", inWS);
+  alg->setProperty("OutputWorkspace", "dummy");
+  alg->execute();
+  MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
+  return result;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Prepare and return the efficiencies.
+ */
+API::MatrixWorkspace_sptr  PolarizationEfficiencyCor::getEfficiencies() {
+  MatrixWorkspace_sptr inWS;
+  if (!isDefault(Prop::INPUT_WORKSPACES)) {
+    std::vector<std::string> names = getProperty(Prop::INPUT_WORKSPACES);
+    inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(names.front());
+  } else {
+    WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
+    inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+  }
+  MatrixWorkspace_sptr efficiencies = getProperty(Prop::EFFICIENCIES);
+
+  if (!needInterpolation(*efficiencies, *inWS)) {
+    return efficiencies;
+  }
+
+  efficiencies = convertToHistogram(efficiencies);
+  efficiencies = interpolate(efficiencies, inWS);
+
+  return efficiencies;
 }
 
 } // namespace Algorithms

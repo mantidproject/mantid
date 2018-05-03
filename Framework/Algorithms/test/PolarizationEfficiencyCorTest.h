@@ -13,6 +13,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -20,6 +23,8 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace WorkspaceCreationHelper;
 
 class PolarizationEfficiencyCorTest : public CxxTest::TestSuite {
@@ -350,11 +355,82 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
 
+  void test_histo() {
+    PolarizationEfficiencyCor alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaces", createWorkspacesInADS(4));
+    alg.setProperty("CorrectionMethod", "Wildes");
+    alg.setProperty("Efficiencies", createEfficiencies("histo"));
+    alg.execute();
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 4);
+  }
+
+  void test_points() {
+    PolarizationEfficiencyCor alg;
+    auto const inputs = createWorkspacesInADS(4);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaces", inputs);
+    alg.setProperty("CorrectionMethod", "Wildes");
+    alg.setProperty("Efficiencies", createEfficiencies("points"));
+    alg.execute();
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 4);
+
+    for (size_t i = 0; i < out->size(); ++i) {
+      auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
+      auto checkAlg =
+          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+      checkAlg->initialize();
+      checkAlg->setChild(true);
+      checkAlg->setProperty("Workspace1", ws);
+      checkAlg->setProperty("Workspace2", out->getItem(i));
+      checkAlg->setProperty("Tolerance", 3e-16);
+      checkAlg->execute();
+      TS_ASSERT(checkAlg->getProperty("Result"));
+    }
+  }
+
+  void test_points_short() {
+    PolarizationEfficiencyCor alg;
+    auto const inputs = createWorkspacesInADS(4);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaces", inputs);
+    alg.setProperty("CorrectionMethod", "Wildes");
+    alg.setProperty("Efficiencies", createEfficiencies("points-short"));
+    alg.execute();
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 4);
+
+    for (size_t i = 0; i < out->size(); ++i) {
+      auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
+      auto checkAlg =
+          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+      checkAlg->initialize();
+      checkAlg->setChild(true);
+      checkAlg->setProperty("Workspace1", ws);
+      checkAlg->setProperty("Workspace2", out->getItem(i));
+      checkAlg->setProperty("Tolerance", 3e-16);
+      checkAlg->execute();
+      TS_ASSERT(checkAlg->getProperty("Result"));
+    }
+  }
+
+
 private:
   std::vector<MatrixWorkspace_sptr> createWorkspaces(int n) {
     std::vector<MatrixWorkspace_sptr> workspaces;
     for (int i = 0; i < n; ++i) {
-      auto ws = create1DWorkspaceConstant(1, 2.0, 1.0, true);
+      auto ws = create1DWorkspaceConstant(5, 2.0, 1.0, true);
       workspaces.push_back(ws);
     }
     return workspaces;
@@ -387,16 +463,96 @@ private:
     static std::map<std::string, std::vector<std::string>> const labels = {
         {"Wildes", {"P1", "P2", "F1", "F2"}},
         {"Fredrikze", {"Pp", "Ap", "Rho", "Alpha"}}};
-    auto inWS = createWorkspaces(1)[0];
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
-    auto axis1 = new TextAxis(4);
-    ws->replaceAxis(1, axis1);
-    auto const &current_labels = labels.at(kind);
-    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      axis1->setLabel(i, current_labels[i]);
+    if (kind == "Wildes" || kind == "Fredrikze") {
+      auto inWS = createWorkspaces(1)[0];
+      MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
+      ws->getAxis(0)->setUnit("Wavelength");
+      auto axis1 = new TextAxis(4);
+      ws->replaceAxis(1, axis1);
+      auto const &current_labels = labels.at(kind);
+      for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+        axis1->setLabel(i, current_labels[i]);
+      }
+      return ws;
+    } else if (kind == "histo") {
+      auto ws1 = createHistoWS(10, 0, 10);
+      auto ws2 = createHistoWS(10, 0, 10);
+      auto ws3 = createHistoWS(10, 0, 10);
+      auto ws4 = createHistoWS(10, 0, 10);
+
+      auto alg = AlgorithmFactory::Instance().create(
+          "JoinISISPolarizationEfficiencies", -1);
+      alg->initialize();
+      alg->setChild(true);
+      alg->setRethrows(true);
+      alg->setProperty("P1", ws1);
+      alg->setProperty("P2", ws2);
+      alg->setProperty("F1", ws3);
+      alg->setProperty("F2", ws4);
+      alg->setPropertyValue("OutputWorkspace", "dummy");
+      alg->execute();
+      MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+      return outWS;
+    } else if (kind == "points") {
+      auto ws1 = createPointWS(10, 0, 10);
+      auto ws2 = createPointWS(10, 0, 10);
+      auto ws3 = createPointWS(10, 0, 10);
+      auto ws4 = createPointWS(10, 0, 10);
+
+      auto alg = AlgorithmFactory::Instance().create(
+          "JoinISISPolarizationEfficiencies", -1);
+      alg->initialize();
+      alg->setChild(true);
+      alg->setRethrows(true);
+      alg->setProperty("P1", ws1);
+      alg->setProperty("P2", ws2);
+      alg->setProperty("F1", ws3);
+      alg->setProperty("F2", ws4);
+      alg->setPropertyValue("OutputWorkspace", "dummy");
+      alg->execute();
+      MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+      return outWS;
+    } else if (kind == "points-short") {
+      auto ws1 = createPointWS(4, 0, 10);
+      auto ws2 = createPointWS(4, 0, 10);
+      auto ws3 = createPointWS(4, 0, 10);
+      auto ws4 = createPointWS(4, 0, 10);
+
+      auto alg = AlgorithmFactory::Instance().create(
+          "JoinISISPolarizationEfficiencies", -1);
+      alg->initialize();
+      alg->setChild(true);
+      alg->setRethrows(true);
+      alg->setProperty("P1", ws1);
+      alg->setProperty("P2", ws2);
+      alg->setProperty("F1", ws3);
+      alg->setProperty("F2", ws4);
+      alg->setPropertyValue("OutputWorkspace", "dummy");
+      alg->execute();
+      MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+      return outWS;
     }
-    return ws;
+    throw std::logic_error("Unknown efficeincy test kind");
   }
+
+  MatrixWorkspace_sptr createHistoWS(size_t size, double startX, double endX) const {
+    double const dX = (endX - startX) / size;
+    BinEdges xVals(size + 1, LinearGenerator(startX, dX));
+    Counts yVals(size, 1.0);
+    auto retVal = boost::make_shared<Workspace2D>();
+    retVal->initialize(1, Histogram(xVals, yVals));
+    return retVal;
+  }
+
+  MatrixWorkspace_sptr createPointWS(size_t size, double startX, double endX) const {
+    double const dX = (endX - startX) / (size - 1);
+    Points xVals(size, LinearGenerator(startX, dX));
+    Counts yVals(size, 1.0);
+    auto retVal = boost::make_shared<Workspace2D>();
+    retVal->initialize(1, Histogram(xVals, yVals));
+    return retVal;
+  }
+
 };
 
 #endif /* MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCORTEST_H_ */
