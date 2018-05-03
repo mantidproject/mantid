@@ -102,6 +102,15 @@ public:
     TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
   }
 
+  void test_off_cube_with_comments() {
+    LoadSampleShape alg;
+    auto cube = loadMeshObject(alg, true, "cube_with_comments.off");
+    TS_ASSERT(cube->hasValidShape());
+    TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
+    TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
+    TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
+  }
+
   void test_fail_invalid_off_triangle() {
     LoadSampleShape alg;
     loadFailureTest(alg, "cube4.off");

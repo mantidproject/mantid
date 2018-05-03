@@ -140,13 +140,28 @@ std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file,
   return nullptr;
 }
 
+bool getOFFline(std::ifstream &file, std::string &line) {
+  // Get line from OFF file ignoring blank lines and comments
+  // The line output is ready trimmed
+  if(!getline(file, line)) {
+    return false;
+  }
+  boost::trim(line);
+  while (line.empty() || line.substr(0,1) == "#") {
+    if (!getline(file, line)) {
+      return false;
+    }
+    boost::trim(line);
+  }
+  return true;
+}
+
 void readOFFVertices(std::ifstream &file, uint16_t nV, std::vector<V3D> &vertices)
 {
   std::string line;
   V3D vertex;
   for (uint16_t i = 0; i < nV; i++) {
-    if (getline(file, line)) {
-      boost::trim(line);
+    if (getOFFline(file, line)) {
       std::vector<std::string> tokens;
       boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
       if (tokens.size() == 3) {
@@ -170,9 +185,8 @@ void readOFFTriangles(std::ifstream &file, uint16_t nT, std::vector<uint16_t> &t
   std::string line;
   uint16_t t1, t2, t3;
   size_t nFaceVertices;
-  if (getline(file, line)) {
+  if (getOFFline(file, line)) {
     for (uint16_t i = 0; i < nT; i++) {
-      boost::trim(line);
       std::vector<std::string> tokens;
       boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
       if (tokens.size() >= 4) {
@@ -207,8 +221,7 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
 
   std::string line;
   // Get number of vetrtices and faces
-  if (getline(file, line)) {
-    boost::trim(line);
+  if (getOFFline(file, line)) {
     std::vector<std::string> tokens;
     boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
     if (tokens.size() == 3) {
@@ -236,8 +249,7 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
 
 std::unique_ptr<Geometry::MeshObject> readOFFshape(std::ifstream &file) {
   std::string line;
-  if (getline(file, line)) {
-    boost::trim(line);
+  if (getOFFline(file, line)) {
     if (line != "OFF") {
       throw std::runtime_error("Expected first line to be 'OFF' keyword");
     }
