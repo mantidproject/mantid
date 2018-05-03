@@ -111,6 +111,17 @@ public:
     TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
   }
 
+  void test_off_colored_cube() {
+    // Cube with colored faces should be read normally,
+    // except that the colors are ignored.
+    LoadSampleShape alg;
+    auto cube = loadMeshObject(alg, true, "colored_cube.off");
+    TS_ASSERT(cube->hasValidShape());
+    TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
+    TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
+    TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
+  }
+
   void test_fail_invalid_off_triangle() {
     LoadSampleShape alg;
     loadFailureTest(alg, "cube4.off");
