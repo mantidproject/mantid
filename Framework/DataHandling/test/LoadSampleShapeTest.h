@@ -122,19 +122,29 @@ public:
     TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
   }
 
-  void test_fail_invalid_off_triangle() {
+  void test_fail_off_non_tiangular_face() {
     LoadSampleShape alg;
     loadFailureTest(alg, "cube4.off");
   }
 
-  void test_fail_wrong_number_of_vertices() {
+  void test_fail_off_wrong_number_of_vertices() {
     LoadSampleShape alg;
     loadFailureTest(alg, "wrong_number_of_vertices.off");
   }
 
-  void test_fail_wrong_number_of_triangles() {
+  void test_fail_off_wrong_number_of_triangles() {
     LoadSampleShape alg;
     loadFailureTest(alg, "wrong_number_of_triangles.off");
+  }
+
+  void test_fail_off_invalid_vertex() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "invalid_vertex.off");
+  }
+
+  void test_fail_off_invalid_triangle() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "invalid_triangle.off");
   }
 
 private:
