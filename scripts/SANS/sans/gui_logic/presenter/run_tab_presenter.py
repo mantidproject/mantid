@@ -855,7 +855,7 @@ class RunTabPresenter(object):
 
     def _set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
-        if attribute or isinstance(attribute, bool) or attribute==0:
+        if attribute is not None and attribute != '':
             setattr(state_model, attribute_name, attribute)
 
     def _get_table_model(self):

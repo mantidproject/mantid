@@ -920,7 +920,7 @@ bool SANSRunWindow::loadUserFile() {
   dbl_param = runReduceScriptFunction(
                   "print(i.ReductionSingleton().to_Q.w_cut)").toDouble();
   m_uiForm.w_cut_line_edit->setText(QString::number(dbl_param));
-  
+
   // Q
   QString text =
       runReduceScriptFunction("print(i.ReductionSingleton().to_Q.binning)");
@@ -2259,10 +2259,12 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
       m_uiForm.rad_min->text() + " '+'" + m_uiForm.rad_max->text() +
       " '+'1', i.ReductionSingleton())\n";
 
-  exec_reduce += "i.ReductionSingleton().user_settings.readLimitValues('L/Q/RCut '+'" +
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/RCut '+'" +
       m_uiForm.r_cut_line_edit->text() + "', i.ReductionSingleton())\n";
 
-  exec_reduce += "i.ReductionSingleton().user_settings.readLimitValues('L/Q/WCut '+'" +
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/WCut '+'" +
       m_uiForm.w_cut_line_edit->text() + "', i.ReductionSingleton())\n";
 
   setStringSetting("events.binning", m_uiForm.l_events_binning->text());
@@ -4064,8 +4066,8 @@ void SANSRunWindow::setValidators() {
   m_uiForm.wav_max->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.wav_dw->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.r_cut_line_edit->setValidator(m_mustBeDouble);
-  m_uiForm.w_cut_line_edit->setValidator(m_mustBeDouble);
+  m_uiForm.r_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.w_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
 
   m_uiForm.q_min->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.q_max->setValidator(m_doubleValidatorZeroToMax);

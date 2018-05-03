@@ -1630,6 +1630,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
         self.q_xy_step_line_edit.setValidator(positive_double_validator)
 
+        self.r_cut_line_edit.setValidator(positive_double_validator)
+        self.w_cut_line_edit.setValidator(positive_double_validator)
+
         self.gravity_extra_length_line_edit.setValidator(double_validator)
 
         self.q_resolution_source_a_line_edit.setValidator(positive_double_validator)
