@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
+from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel)
 
 
 class TableModelTest(unittest.TestCase):
@@ -54,6 +54,23 @@ class TableModelTest(unittest.TestCase):
         table_model.add_table_entry(2, table_index_model)
         user_file = table_model.get_row_user_file(2)
         self.assertEqual(user_file,"User_file_name")
+
+    def test_that_can_retrieve_sample_thickness_from_table_index_model(self):
+        sample_thickness = '8.0'
+        table_model = TableModel()
+        table_index_model = TableIndexModel(2, "", "", "", "", "", "",
+                                            "", "", "", "", "", "", sample_thickness=sample_thickness)
+        table_model.add_table_entry(2, table_index_model)
+        row_entry = table_model.get_table_entry(2)
+        self.assertEqual(row_entry.sample_thickness, sample_thickness)
+
+    def test_that_parse_string_returns_correctly(self):
+        string_to_parse = 'EventSlices=1-6,5-9,4:5:89 , WavelengthMax=78 , WavelengthMin=9'
+        expected_dict = {'EventSlices':'1-6,5-9,4:5:89', 'WavelengthMax':'78', 'WavelengthMin':'9'}
+
+        parsed_dict = OptionsColumnModel._parse_string(string_to_parse)
+
+        self.assertEqual(parsed_dict, expected_dict)
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
