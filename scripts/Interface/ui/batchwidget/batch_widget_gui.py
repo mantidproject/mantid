@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 try:
-    from mantidplot import *
     canMantidPlot = True
 except ImportError:
     canMantidPlot = False
@@ -123,7 +122,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
                                                                "dQ/Q",
                                                                "Scale",
                                                                "Options"], cell(""), self)
-                                                               
+
         self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table)
 
         self.table_signals.removeRowsRequested.connect(self.on_remove_runs_request)
