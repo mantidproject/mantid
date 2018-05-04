@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ArrayProperty.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
