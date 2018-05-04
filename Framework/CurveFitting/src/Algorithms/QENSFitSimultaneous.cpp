@@ -518,7 +518,7 @@ QENSFitSimultaneous::getAdditionalLogNumbers() const {
 }
 
 ITableWorkspace_sptr QENSFitSimultaneous::processParameterTable(
-    ITableWorkspace_sptr parameterTable) const {
+    ITableWorkspace_sptr parameterTable) {
   return parameterTable;
 }
 
