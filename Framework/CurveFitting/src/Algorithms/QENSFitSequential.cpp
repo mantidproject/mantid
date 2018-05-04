@@ -438,7 +438,8 @@ void QENSFitSequential::exec() {
       (workspaces.size() > 1 && workspaces.size() != spectra.size()))
     throw std::invalid_argument("A malformed input string was provided.");
 
-  const auto outputWs = performFit(inputString, outputBaseName);
+  const auto parameterWs =
+      processParameterTable(performFit(inputString, outputBaseName));
   const auto resultWs = processIndirectFitParameters(outputWs);
   const auto groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
@@ -539,7 +540,7 @@ std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
 std::set<std::string> QENSFitSequential::getUniqueParameterNames() const {
   IFunction_sptr function = getProperty("Function");
   std::set<std::string> nameSet;
-  for (auto i = 0u; i < functions->nParams(); ++i)
+  for (auto i = 0u; i < function->nParams(); ++i)
     nameSet.insert(shortParameterName(function->parameterName(i)));
   return nameSet;
 }
