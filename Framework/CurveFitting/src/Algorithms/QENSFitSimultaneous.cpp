@@ -16,8 +16,6 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-#include <set>
-
 namespace {
 Mantid::Kernel::Logger g_log("QENSFit");
 
@@ -103,7 +101,7 @@ struct ElasticQAppender {
 
 private:
   std::vector<MatrixWorkspace_sptr> &m_elasticInput;
-  std::unordered_set<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
+  std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
 };
 
 std::vector<MatrixWorkspace_sptr>
