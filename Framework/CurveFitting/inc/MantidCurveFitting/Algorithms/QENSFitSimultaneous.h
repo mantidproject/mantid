@@ -54,7 +54,7 @@ private:
   void execConcrete() override;
   std::vector<API::MatrixWorkspace_sptr> convertInputToElasticQ(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
-  std::pair<API::ITableWorkspace_sptr, API::WorkspaceGroup_sptr>
+  std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
   performFit(const std::vector<API::MatrixWorkspace_sptr> &workspaces,
              const std::string &output);
   API::MatrixWorkspace_sptr
@@ -72,8 +72,6 @@ private:
   extractMembersAlgorithm(API::WorkspaceGroup_sptr resultGroupWs,
                           const std::string &outputWsName) const;
 
-  std::vector<std::string>
-  getWorkspaceIndices(std::size_t numberOfIndices) const;
   std::string getOutputBaseName() const;
 };
 

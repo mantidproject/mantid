@@ -298,12 +298,11 @@ void QENSFitSimultaneous::execConcrete() {
 
   const auto inputWorkspaces = getWorkspaces();
   const auto workspaces = convertInputToElasticQ(inputWorkspaces);
-  const auto workspaceIndices = getWorkspaceIndices(workspaces.size());
   const auto singleDomainFunction = convertToSingleDomain(getProperty("Function"));
 
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
   const auto parameterWs = processParameterTable(transposeFitTable(fitResult.first, singleDomainFunction));
-  const auto groupWs = fitResult.second;
+  const auto groupWs = boost::dynamic_pointer_cast<WorkspaceGroup>(fitResult.second);
   const auto resultWs = processIndirectFitParameters(parameterWs);
   copyLogs(resultWs, workspaces);
 
@@ -319,7 +318,7 @@ void QENSFitSimultaneous::execConcrete() {
   setProperty("OutputWorkspaceGroup", groupWs);
 }
 
-std::pair<API::ITableWorkspace_sptr, API::WorkspaceGroup_sptr>
+std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
 QENSFitSimultaneous::performFit(
     const std::vector<MatrixWorkspace_sptr> &workspaces,
     const std::string &output) {
@@ -519,16 +518,6 @@ QENSFitSimultaneous::getAdditionalLogNumbers() const {
 ITableWorkspace_sptr QENSFitSimultaneous::processParameterTable(
     ITableWorkspace_sptr parameterTable) const {
   return parameterTable;
-}
-
-std::vector<std::string>
-QENSFitSimultaneous::getWorkspaceIndices(std::size_t numberOfIndices) const {
-  std::vector<std::string> indices;
-  indices.reserve(numberOfIndices);
-  indices.push_back(getPropertyValue("WorkspaceIndex"));
-  for (auto i = 1u; i < numberOfIndices; ++i)
-    indices.push_back(getPropertyValue("WorkspaceIndex_" + std::to_string(i)));
-  return indices;
 }
 
 } // namespace Algorithms
