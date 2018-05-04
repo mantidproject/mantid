@@ -143,11 +143,11 @@ std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file,
 bool getOFFline(std::ifstream &file, std::string &line) {
   // Get line from OFF file ignoring blank lines and comments
   // The line output is ready trimmed
-  if(!getline(file, line)) {
+  if (!getline(file, line)) {
     return false;
   }
   boost::trim(line);
-  while (line.empty() || line.substr(0,1) == "#") {
+  while (line.empty() || line.substr(0, 1) == "#") {
     if (!getline(file, line)) {
       return false;
     }
@@ -156,58 +156,58 @@ bool getOFFline(std::ifstream &file, std::string &line) {
   return true;
 }
 
-void readOFFVertices(std::ifstream &file, uint16_t nV, std::vector<V3D> &vertices)
-{
+void readOFFVertices(std::ifstream &file, uint16_t nV,
+                     std::vector<V3D> &vertices) {
   std::string line;
   V3D vertex;
   for (uint16_t i = 0; i < nV; i++) {
     if (getOFFline(file, line)) {
       std::vector<std::string> tokens;
-      boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
+      boost::split(tokens, line, boost::is_any_of(" "),
+                   boost::token_compress_on);
       if (tokens.size() == 3) {
         vertex.setX(boost::lexical_cast<double>(tokens[0]));
         vertex.setY(boost::lexical_cast<double>(tokens[1]));
         vertex.setZ(boost::lexical_cast<double>(tokens[2]));
-      }
-      else {
+      } else {
         throw std::runtime_error("Error on reading OFF vertex");
       }
       vertices.push_back(vertex);
-    }
-    else {
-      throw std::runtime_error("Unexpected end of file, while reading OFF vertices");
+    } else {
+      throw std::runtime_error(
+          "Unexpected end of file, while reading OFF vertices");
     }
   }
 }
 
-void readOFFTriangles(std::ifstream &file, uint16_t nT, std::vector<uint16_t> &triangleIndices)
-{
+void readOFFTriangles(std::ifstream &file, uint16_t nT,
+                      std::vector<uint16_t> &triangleIndices) {
   std::string line;
   uint16_t t1, t2, t3;
   size_t nFaceVertices;
   for (uint16_t i = 0; i < nT; i++) {
     if (getOFFline(file, line)) {
       std::vector<std::string> tokens;
-      boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
+      boost::split(tokens, line, boost::is_any_of(" "),
+                   boost::token_compress_on);
       if (tokens.size() >= 4) {
         nFaceVertices = boost::lexical_cast<size_t>(tokens[0]);
         if (nFaceVertices == 3) {
           t1 = boost::lexical_cast<uint16_t>(tokens[1]);
           t2 = boost::lexical_cast<uint16_t>(tokens[2]);
           t3 = boost::lexical_cast<uint16_t>(tokens[3]);
-        }
-        else {
+        } else {
           throw std::runtime_error("OFF face is not a triangle.");
         }
         triangleIndices.push_back(t1);
         triangleIndices.push_back(t2);
         triangleIndices.push_back(t3);
-      }
-      else {
+      } else {
         throw std::runtime_error("Error on reading OFF triangle");
       }
     } else {
-      throw std::runtime_error("Unexpected end of file, while reading OFF triangles");
+      throw std::runtime_error(
+          "Unexpected end of file, while reading OFF triangles");
     }
   }
 }
@@ -228,12 +228,11 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
       nTriangles = boost::lexical_cast<uint16_t>(tokens[1]);
       vertices.reserve(nVertices);
       triangleIndices.reserve(3 * nTriangles);
+    } else {
+      throw std::runtime_error(
+          "Error on reading OFF number of vertices, faces & edges");
     }
-    else {
-      throw std::runtime_error("Error on reading OFF number of vertices, faces & edges");
-    }
-  }
-  else {
+  } else {
     throw std::runtime_error("Unexpected end of OFF file");
   }
   readOFFVertices(file, nVertices, vertices);
@@ -241,8 +240,8 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
 
   // Use efficient constructor of MeshObject
   std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-    new MeshObject(std::move(triangleIndices), std::move(vertices),
-      Mantid::Kernel::Material()));
+      new MeshObject(std::move(triangleIndices), std::move(vertices),
+                     Mantid::Kernel::Material()));
   return retVal;
 }
 
@@ -271,7 +270,7 @@ void LoadSampleShape::init() {
       "The name of the workspace containing the instrument to add the shape");
 
   // shape file
-  const std::vector<std::string> extensions{".stl",".off"};
+  const std::vector<std::string> extensions{".stl", ".off"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
       "The path name of the file containing the shape");
@@ -299,13 +298,12 @@ void LoadSampleShape::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  std::string filetype = filename.substr(filename.size()-3);
+  std::string filetype = filename.substr(filename.size() - 3);
 
   boost::shared_ptr<MeshObject> shape = nullptr;
   if (filetype == "off") {
     shape = readOFFshape(file);
-  }
-  else /* stl */ {
+  } else /* stl */ {
     std::string solidName = "";
     shape = readSTLSolid(file, solidName);
   }
