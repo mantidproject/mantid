@@ -131,6 +131,11 @@ public:
     TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
   }
 
+  void test_fail_off_invalid_first_line() {
+    LoadSampleShape alg;
+    loadFailureTest(alg, "invalid_first_line.off");
+  }
+
   void test_fail_off_non_triangular_face() {
     LoadSampleShape alg;
     loadFailureTest(alg, "cube4.off");
