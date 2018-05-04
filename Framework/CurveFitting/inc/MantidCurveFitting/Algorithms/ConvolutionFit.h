@@ -1,17 +1,15 @@
-#ifndef MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
-#define MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
+#ifndef MANTID_ALGORITHMS_CONVOLUTIONFIT_H_
+#define MANTID_ALGORITHMS_CONVOLUTIONFIT_H_
 
 #include "MantidAPI/Column.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
-/** ConvolutionFitSequential : Performs a sequential fit for a convolution
-  workspace
+/** ConvolutionFit : Performs a QENS convolution fit
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,34 +32,32 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvolutionFitSequential : public API::DataProcessorAlgorithm {
+template <typename Base> class DLLExport ConvolutionFit : public Base {
 public:
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override;
+
+protected:
+  virtual API::ITableWorkspace_sptr processParameterTable(
+      API::ITableWorkspace_sptr parameterTable) const override;
+  std::map<std::string, std::string> getAdditionalLogStrings() const override;
+  std::map<std::string, std::string> getAdditionalLogNumbers() const override;
 
 private:
-  void init() override;
-  void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
-  bool checkForTwoLorentz(const std::string &);
-  std::vector<std::string> findValuesFromFunction(const std::string &);
-  std::vector<std::string> searchForFitParams(const std::string &,
-                                              const std::vector<std::string> &);
-  std::vector<double> squareVector(std::vector<double>);
-  std::vector<double> cloneVector(const std::vector<double> &);
-  void convertInputToElasticQ(API::MatrixWorkspace_sptr &, const std::string &);
-  void calculateEISF(API::ITableWorkspace_sptr &);
-  std::string convertBackToShort(const std::string &);
-  std::string convertFuncToShort(const std::string &);
-  void extractMembers(Mantid::API::MatrixWorkspace_sptr inputWs,
-                      Mantid::API::WorkspaceGroup_sptr resultGroupWs,
-                      const std::vector<std::string> &convolvedMembers,
-                      const std::string &outputWsName);
+  bool throwIfElasticQConversionFails() const override;
+  bool isFitParameter(const std::string &name) const override;
+  void calculateEISF(API::ITableWorkspace_sptr &) const;
+
+  bool m_deltaUsed;
 };
 
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_ */
