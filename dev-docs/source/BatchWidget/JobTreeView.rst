@@ -73,16 +73,17 @@ user's selection while preserving the tree structure. This is however necessary 
 to support presenters which wish to have sensible behaviour for actions such as copy and
 paste.
 
-A subtree in this context refers to a set of nodes within the tree where each node is directly
-connected to at least one other node in the set. An example of a set of nodes which meets this
-constraint and a set of nodes which does not are illustrated in blue in the diagram below.
+A subtree in this context refers to a set of one or more nodes within the tree where if the set has
+a size greater than one, each node is directly connected to at least one other node in the set.
+An example of a set of nodes which meets this constraint and a set of nodes which does not are
+illustrated in blue in the diagram below.
 
 .. image::  ../images/subtree.svg
    :align: center
    :width: 800px
 
 The :code:`Subtree` type used to represent this concept in the API is defined in the header
-:code:`Row.h`. Refer to the documentation for the component :code:`ExtractSubtrees` for more detail
+:code:`Row.h`. Refer to the documentation for the component :doc:`ExtractSubtrees` for more detail
 on the internal representation of a subtree in this API.
 
 

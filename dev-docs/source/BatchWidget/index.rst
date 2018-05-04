@@ -16,3 +16,4 @@ reduction jobs.
 
    JobTreeView
    ExtractSubtrees
+   FindRootNodes
