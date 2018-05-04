@@ -50,8 +50,14 @@ private:
   API::MatrixWorkspace_sptr
   createEfficiencies(std::vector<std::string> const &labels,
                      std::vector<API::MatrixWorkspace_sptr> const &workspaces);
-  std::vector<API::MatrixWorkspace_sptr>
-  interpolateWorkspaces(std::vector<API::MatrixWorkspace_sptr> const &workspaces);
+  std::vector<API::MatrixWorkspace_sptr> interpolateWorkspaces(
+      std::vector<API::MatrixWorkspace_sptr> const &workspaces);
+  API::MatrixWorkspace_sptr
+  interpolatePointDataWorkspace(API::MatrixWorkspace_sptr ws,
+                                size_t const maxSize);
+  API::MatrixWorkspace_sptr
+  interpolateHistogramWorkspace(API::MatrixWorkspace_sptr ws,
+                                size_t const maxSize);
 };
 
 } // namespace DataHandling

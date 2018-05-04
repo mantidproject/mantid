@@ -47,7 +47,7 @@ int LoadISISPolarizationEfficiencies::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadISISPolarizationEfficiencies::category() const {
-  return "DataHandling\\Text;ILL\\Reflectometry";
+  return "DataHandling;ISIS\\Reflectometry";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

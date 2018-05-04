@@ -449,15 +449,15 @@ public:
     TS_ASSERT_EQUALS(axis1->label(2), "Rho");
     TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
 
-    TS_ASSERT(!outWS->isHistogramData());
+    TS_ASSERT(outWS->isHistogramData());
 
     {
       auto const &x = outWS->x(0);
       auto const &y = outWS->y(0);
-      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(x.size(), 12);
       TS_ASSERT_EQUALS(y.size(), 11);
-      TS_ASSERT_DELTA(x.front(), 0.5, 1e-15);
-      TS_ASSERT_DELTA(x.back(), 9.5, 1e-15);
+      TS_ASSERT_DELTA(x.front(), 0., 1e-15);
+      TS_ASSERT_DELTA(x.back(), 10, 1e-15);
       TS_ASSERT_DELTA(y.front(), 1., 1e-15);
       TS_ASSERT_DELTA(y.back(), 1., 1e-15);
     }
@@ -465,10 +465,10 @@ public:
     {
       auto const &x = outWS->x(1);
       auto const &y = outWS->y(1);
-      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(x.size(), 12);
       TS_ASSERT_EQUALS(y.size(), 11);
-      TS_ASSERT_DELTA(x.front(), 1.5, 1e-15);
-      TS_ASSERT_DELTA(x.back(), 9.5, 1e-15);
+      TS_ASSERT_DELTA(x.front(), 1., 1e-15);
+      TS_ASSERT_DELTA(x.back(), 10, 1e-15);
       TS_ASSERT_DELTA(y.front(),1., 1e-15);
       TS_ASSERT_DELTA(y.back(), 1., 1e-15);
     }
@@ -476,10 +476,10 @@ public:
     {
       auto const &x = outWS->x(2);
       auto const &y = outWS->y(2);
-      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(x.size(), 12);
       TS_ASSERT_EQUALS(y.size(), 11);
-      TS_ASSERT_DELTA(x.front(), 2.0454545450, 1e-9);
-      TS_ASSERT_DELTA(x.back(), 2.9545454549, 1e-9);
+      TS_ASSERT_DELTA(x.front(), 2.0, 1e-9);
+      TS_ASSERT_DELTA(x.back(), 3.0, 1e-9);
       TS_ASSERT_EQUALS(y.front(), 1);
       TS_ASSERT_EQUALS(y.back(), 1);
     }
@@ -487,10 +487,10 @@ public:
     {
       auto const &x = outWS->x(3);
       auto const &y = outWS->y(3);
-      TS_ASSERT_EQUALS(x.size(), 11);
+      TS_ASSERT_EQUALS(x.size(), 12);
       TS_ASSERT_EQUALS(y.size(), 11);
-      TS_ASSERT_DELTA(x.front(), 11.45, 1e-15);
-      TS_ASSERT_DELTA(x.back(), 19.55, 1e-15);
+      TS_ASSERT_DELTA(x.front(), 11.0, 1e-15);
+      TS_ASSERT_DELTA(x.back(), 20.0, 1e-15);
       TS_ASSERT_DELTA(y.front(), 1., 1e-15);
       TS_ASSERT_DELTA(y.back(), 1., 1e-15);
     }
