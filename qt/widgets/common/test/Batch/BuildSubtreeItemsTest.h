@@ -20,15 +20,11 @@ public:
   static BuildSubtreeItemsTest *createSuite() { return new BuildSubtreeItemsTest; }
   static void destroySuite(BuildSubtreeItemsTest *suite) { delete suite; }
 
-  QtStandardItemMutableTreeAdapter adapt(QStandardItemModel *model) {
-    return QtStandardItemMutableTreeAdapter(*model);
-  }
-
   std::unique_ptr<QStandardItemModel> emptyModel() const {
     return Mantid::Kernel::make_unique<QStandardItemModel>();
   }
 
-  std::string cell(std::string const &text) const { return text; }
+  Cell cell(std::string const &text) const { return Cell(text); }
 
   template <typename... Args>
   std::vector<Cell> cells(Args const &... cellText) const {
@@ -36,9 +32,7 @@ public:
   }
 
   void testBuildEmptySubtree() {
-    auto model = emptyModel();
-    auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtreeItems(adaptedModel);
+    auto build = BuildSubtreeItems();
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree();
@@ -50,9 +44,7 @@ public:
   }
 
   void testBuildSubtreeItemsWithRootOnly() {
-    auto model = emptyModel();
-    auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtreeItems(adaptedModel);
+    auto build = BuildSubtreeItems();
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({{RowLocation(), cells("Root")}});
@@ -65,9 +57,7 @@ public:
   }
 
   void testBuildSubtreeItemsWithRootAndSingleChild() {
-    auto model = emptyModel();
-    auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtreeItems(adaptedModel);
+    auto build = BuildSubtreeItems();
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({Row(RowLocation(), cells("Root")),
@@ -86,9 +76,7 @@ public:
   }
 
   void testBuildSubtreeItemsWithRootAndTwoChildren() {
-    auto model = emptyModel();
-    auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtreeItems(adaptedModel);
+    auto build = BuildSubtreeItems();
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({Row(RowLocation(), cells("Root")),

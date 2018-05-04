@@ -4,9 +4,6 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
-BuildSubtreeItems::BuildSubtreeItems(QStandardItemModel &model)
-    : m_model(model) {}
-
 void BuildSubtreeItems::operator()(QStandardItem *parentOfSubtreeRootItem,
                                    RowLocation const &parentOfSubtreeRoot,
                                    int index, Subtree const &subtree) {

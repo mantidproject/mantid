@@ -11,6 +11,7 @@ namespace Batch {
 template <typename Derived> class EXPORT_OPT_MANTIDQT_COMMON StrictQModelIndex {
 public:
   explicit StrictQModelIndex(QModelIndex const &index);
+  StrictQModelIndex() = default;
 
   QModelIndex untyped() const;
   int row() const;

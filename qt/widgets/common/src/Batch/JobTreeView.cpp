@@ -148,7 +148,7 @@ void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
 
 void JobTreeView::insertSubtreeAt(RowLocation const &parent, int index,
                                   Subtree const &subtree) {
-  auto build = BuildSubtreeItems(m_mainModel);
+  auto build = BuildSubtreeItems();
   auto parentIndex = rowLocation().indexAt(parent);
   build(modelItemFromIndex(m_mainModel, parentIndex), parent, index, subtree);
 }

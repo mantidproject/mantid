@@ -14,8 +14,6 @@ class EXPORT_OPT_MANTIDQT_COMMON BuildSubtreeItems {
 public:
   using SubtreeConstIterator = typename Subtree::const_iterator;
 
-  BuildSubtreeItems(QStandardItemModel &model);
-
   void operator()(QStandardItem *parentOfSubtreeRootItem,
                   RowLocation const &parentOfSubtreeRoot, int index,
                   Subtree const &subtree);
@@ -24,9 +22,6 @@ public:
                                         RowLocation const &parent, int depth,
                                         SubtreeConstIterator current,
                                         SubtreeConstIterator end);
-
-private:
-  QStandardItemModel &m_model;
 };
 
 } // namespace Batch
