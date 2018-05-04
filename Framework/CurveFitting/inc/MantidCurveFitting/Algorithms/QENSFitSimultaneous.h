@@ -42,6 +42,7 @@ protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &name) const;
+  std::set<std::string> getUniqueParameterNames() const;
   std::vector<std::string> getFitParameterNames() const;
   virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;

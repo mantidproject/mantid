@@ -16,7 +16,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-#include <unordered_set>
+#include <set>
 
 namespace {
 Mantid::Kernel::Logger g_log("QENSFit");
@@ -91,7 +91,8 @@ struct ElasticQAppender {
       : m_elasticInput(elasticInput), m_converted() {}
 
   void operator()(MatrixWorkspace_sptr workspace, bool doThrow) {
-    if (m_converted.find(workspace.get()) != m_converted.end())
+    auto it = m_converted.find(workspace.get());
+    if (it != m_converted.end())
       m_elasticInput.emplace_back(it->second);
     else {
       auto elasticQ = convertToElasticQ(workspace, doThrow);
@@ -102,7 +103,7 @@ struct ElasticQAppender {
 
 private:
   std::vector<MatrixWorkspace_sptr> &m_elasticInput;
-  std::unordered_set<MatrixWorkspace *> m_converted;
+  std::unordered_set<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
 };
 
 std::vector<MatrixWorkspace_sptr>
@@ -479,22 +480,22 @@ bool QENSFitSimultaneous::isFitParameter(const std::string &) const {
   return true;
 }
 
-std::vector<std::string> QENSFitSimultaneous::getFitParameterNames() const {
-  IFunction_sptr function = convertToSingleDomain(getProperty("Function"));
+std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
+  const auto uniqueParameters = getUniqueParameterNames();
+  std::vector<std::string> parameters;
+  parameters.reserve(uniqueParameters.size());
+  std::copy_if(uniqueParameters.begin(), uniqueParameters.end(), 
+               std::back_inserter(parameters), 
+               [](const std::string &parameter) { return isFitParameter(parameter); });
+  return parameters;
+}
 
-  std::unordered_set<std::string> nameSet;
-  std::vector<std::string> names;
-  names.reserve(function->nParams());
-
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    auto name = shortParameterName(function->parameterName(i));
-
-    if (isFitParameter(name) && nameSet.find(name) == nameSet.end()) {
-      names.emplace_back(name);
-      nameSet.insert(name);
-    }
-  }
-  return names;
+std::set<std::string> QENSFitSequential::getUniqueParameterNames() const {
+  IFunction_sptr function = getProperty("Function");
+  std::set<std::string> nameSet;
+  for (auto i = 0u; i < functions->nParams(); ++i)
+    nameSet.insert(shortParameterName(function->parameterName(i)));
+  return nameSet;
 }
 
 std::map<std::string, std::string>
