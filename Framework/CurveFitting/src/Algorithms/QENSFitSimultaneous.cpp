@@ -120,7 +120,8 @@ std::string shortParameterName(const std::string &longName) {
   return longName.substr(longName.rfind('.') + 1, longName.size());
 }
 
-void renameWorkspace(MatrixWorkspace_sptr workspace, const std::string &newName) {
+void renameWorkspace(MatrixWorkspace_sptr workspace,
+                     const std::string &newName) {
   auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
   renamer->setProperty("InputWorkspace", workspace);
   renamer->setProperty("OutputWorkspace", newName);
