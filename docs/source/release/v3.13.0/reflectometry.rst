@@ -30,11 +30,17 @@ Algorithms
 ----------
 
 * Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``.
+* Renamed algorithms ``PolarizationCorrection`` to ``PolarizationCorrectionFredrikze`` and ``PolarizationEfficiencyCor`` to ``PolarizationCorrectionWildes``.
 
 New features
 ############
 
-* Added algorithm CreatePolarizationEfficiencies to calculate polarixation efficiencies as histograms from polynomial coefficients.
+* Added algorithm ``PolarizationEfficiencyCor`` which calls ``PolarizationCorrectionFredrikze`` or ``PolarizationCorrectionWildes`` depending on chosen ``Mathod`` property.
+* Added algorithms that help create a matrix workspace with polarization efficiencies ready to be used with ``PolarizationEfficiencyCor``
+
+  - ``CreatePolarizationEfficiencies`` creates efficiencies from polynomial coefficients
+  - ``JoinISISPolarizationEfficiencies`` joins individual efficiencies into one matrix workspace
+  - ``LoadISISPolarizationEfficiencies`` loads efficiencies form files
 
 
 Improvements
