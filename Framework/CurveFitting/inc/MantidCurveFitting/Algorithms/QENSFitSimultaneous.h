@@ -47,7 +47,7 @@ protected:
   virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
   virtual API::ITableWorkspace_sptr
-  processParameterTable(API::ITableWorkspace_sptr parameterTable) const;
+  processParameterTable(API::ITableWorkspace_sptr parameterTable);
 
 private:
   void initConcrete() override;

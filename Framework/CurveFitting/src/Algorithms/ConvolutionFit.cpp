@@ -290,7 +290,7 @@ bool ConvolutionFit<Base>::isFitParameter(const std::string &name) const {
 
 template <typename Base>
 ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
-    ITableWorkspace_sptr parameterTable) const {
+    ITableWorkspace_sptr parameterTable) {
   IFunction_sptr function = Base::getProperty("Function");
   m_deltaUsed = containsFunction(function, "DeltaFunction");
   if (m_deltaUsed)
