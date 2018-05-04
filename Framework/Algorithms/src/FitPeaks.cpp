@@ -802,7 +802,8 @@ void FitPeaks::convertParametersNameToIndex() {
 /** main method to fit peaks among all
  */
 void FitPeaks::fitPeaks() {
-  API::Progress prog(this, 0., 1., m_stopWorkspaceIndex-m_startWorkspaceIndex);
+  API::Progress prog(this, 0., 1.,
+                     m_stopWorkspaceIndex - m_startWorkspaceIndex);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
@@ -1162,7 +1163,7 @@ void FitPeaks::calculateFittedPeaks() {
             values.getCalculated(yindex - istart);
     } // END-FOR (ipeak)
     PARALLEL_END_INTERUPT_REGION
-  }   // END-FOR (iws)
+  } // END-FOR (iws)
   PARALLEL_CHECK_INTERUPT_REGION
 
   return;
