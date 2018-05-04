@@ -425,7 +425,6 @@ public:
     }
   }
 
-
 private:
   std::vector<MatrixWorkspace_sptr> createWorkspaces(int n) {
     std::vector<MatrixWorkspace_sptr> workspaces;
@@ -535,7 +534,8 @@ private:
     throw std::logic_error("Unknown efficeincy test kind");
   }
 
-  MatrixWorkspace_sptr createHistoWS(size_t size, double startX, double endX) const {
+  MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
+                                     double endX) const {
     double const dX = (endX - startX) / size;
     BinEdges xVals(size + 1, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
@@ -544,7 +544,8 @@ private:
     return retVal;
   }
 
-  MatrixWorkspace_sptr createPointWS(size_t size, double startX, double endX) const {
+  MatrixWorkspace_sptr createPointWS(size_t size, double startX,
+                                     double endX) const {
     double const dX = (endX - startX) / (size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
@@ -552,7 +553,6 @@ private:
     retVal->initialize(1, Histogram(xVals, yVals));
     return retVal;
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCORTEST_H_ */

@@ -23,7 +23,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using ScopedFileHelper::ScopedFile;
 
-
 class LoadISISPolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -151,7 +150,6 @@ public:
   }
 
 private:
-
   std::string const m_data1{"1.10000,1.000000,0.322961\n"
                             "2.20000,1.000000,0.0217908\n"
                             "3.30000,1.000000,0.00993287\n"

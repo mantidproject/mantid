@@ -456,7 +456,8 @@ void PolarizationCorrectionWildes::exec() {
  * Validate the algorithm's input properties.
  * @return a map from property names to discovered issues
  */
-std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs() {
+std::map<std::string, std::string>
+PolarizationCorrectionWildes::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
   const auto &factorAxis = factorWS->getAxis(1);
@@ -803,8 +804,8 @@ PolarizationCorrectionWildes::threeInputCorrections(
  * @return a set of corrected workspaces
  */
 PolarizationCorrectionWildes::WorkspaceMap
-PolarizationCorrectionWildes::fullCorrections(const WorkspaceMap &inputs,
-                                           const EfficiencyMap &efficiencies) {
+PolarizationCorrectionWildes::fullCorrections(
+    const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.mpWS, Flippers::OnOff);

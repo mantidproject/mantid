@@ -101,7 +101,8 @@ public:
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1",
+                                         "1,1,1,1", "1,1,1,1", "1,1,1,1");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -122,7 +123,8 @@ public:
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1",
+                                         "1,1,1,1", "1,1,1,1", "1,1,1,1");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -146,7 +148,8 @@ public:
 
     // Name of the output workspace.
     std::string outWSName("PolarizationCorrectionFredrikzeTest_OutputWS");
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1",
+                                         "1,1,1,1", "1,1,1,1", "1,1,1,1");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -174,7 +177,8 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0",
+                                         "1,0,0,0", "1,0,0,0", "1,0,0,0");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -221,7 +225,8 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     setInstrument(groupWS, "POLREF");
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+    auto efficiencies =
+        makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -257,7 +262,8 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+    auto efficiencies =
+        makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);
@@ -267,16 +273,17 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.setProperty("PolarizationAnalysis", "PA");
     alg.setProperty("Efficiencies", efficiencies);
-    TSM_ASSERT_THROWS("Instrument doesn't have default efficiencies, should throw",
-                  alg.execute(), std::invalid_argument &);
-
+    TSM_ASSERT_THROWS(
+        "Instrument doesn't have default efficiencies, should throw",
+        alg.execute(), std::invalid_argument &);
   }
 
   void test_run_PNR_unity() {
     auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
+    auto efficiencies =
+        makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
 
     PolarizationCorrectionFredrikze alg;
     alg.setChild(true);

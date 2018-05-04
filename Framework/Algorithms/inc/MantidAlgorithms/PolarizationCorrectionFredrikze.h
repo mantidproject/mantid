@@ -13,9 +13,11 @@ class MatrixWorkspace;
 }
 namespace Algorithms {
 
-/** PolarizationCorrectionFredrikze : Algorithm to perform polarisation corrections on
+/** PolarizationCorrectionFredrikze : Algorithm to perform polarisation
+ corrections on
  multi-period group workspaces that implements the Fredrikze (Dutch) method.
- Fredrikze, H, et al. “Calibration of a polarized neutron reflectometer” Physica B 297 (2001)
+ Fredrikze, H, et al. “Calibration of a polarized neutron reflectometer” Physica
+ B 297 (2001)
 
  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source

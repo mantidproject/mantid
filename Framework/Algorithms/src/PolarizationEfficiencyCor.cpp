@@ -269,19 +269,23 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::getWorkspaceGroup() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Check if efficiencies workspace needs interpolation. Use inWS as for comparison.
+/// Check if efficiencies workspace needs interpolation. Use inWS as for
+/// comparison.
 bool PolarizationEfficiencyCor::needInterpolation(
     MatrixWorkspace const &efficiencies, MatrixWorkspace const &inWS) const {
 
-  if (!efficiencies.isHistogramData()) return true;
-  if (efficiencies.blocksize() != inWS.blocksize()) return true;
+  if (!efficiencies.isHistogramData())
+    return true;
+  if (efficiencies.blocksize() != inWS.blocksize())
+    return true;
 
   auto const &x = inWS.x(0);
   size_t const xSize = x.size();
   for (size_t i = 0; i < efficiencies.getNumberHistograms(); ++i) {
     auto const &effX = efficiencies.x(i);
-    for(size_t j = 0; j < xSize; ++j) {
-      if (effX[j] != x[j]) return true;
+    for (size_t j = 0; j < xSize; ++j) {
+      if (effX[j] != x[j])
+        return true;
     }
   }
   return false;
@@ -305,8 +309,9 @@ MatrixWorkspace_sptr PolarizationEfficiencyCor::convertToHistogram(
 
 //----------------------------------------------------------------------------------------------
 /// Convert the efficiencies to histogram
-MatrixWorkspace_sptr PolarizationEfficiencyCor::interpolate(
-    MatrixWorkspace_sptr efficiencies, MatrixWorkspace_sptr inWS) {
+MatrixWorkspace_sptr
+PolarizationEfficiencyCor::interpolate(MatrixWorkspace_sptr efficiencies,
+                                       MatrixWorkspace_sptr inWS) {
 
   efficiencies->setDistribution(true);
   auto alg = createChildAlgorithm("RebinToWorkspace");
@@ -322,11 +327,12 @@ MatrixWorkspace_sptr PolarizationEfficiencyCor::interpolate(
 //----------------------------------------------------------------------------------------------
 /** Prepare and return the efficiencies.
  */
-API::MatrixWorkspace_sptr  PolarizationEfficiencyCor::getEfficiencies() {
+API::MatrixWorkspace_sptr PolarizationEfficiencyCor::getEfficiencies() {
   MatrixWorkspace_sptr inWS;
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
     std::vector<std::string> names = getProperty(Prop::INPUT_WORKSPACES);
-    inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(names.front());
+    inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        names.front());
   } else {
     WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
     inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));

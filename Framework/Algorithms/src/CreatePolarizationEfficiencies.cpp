@@ -84,12 +84,12 @@ void CreatePolarizationEfficiencies::init() {
       "Values are constants for each term in a polynomial "
       "expression.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(AlphaLabel,
-                                                             Direction::Input),
-                  "Ratio of efficiencies of analyzer spin-down to analyzer "
-                  "spin-up. This is characteristic of the analyzer flipper. "
-                  "Values are factors for each term in a polynomial "
-                  "expression.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(AlphaLabel, Direction::Input),
+      "Ratio of efficiencies of analyzer spin-down to analyzer "
+      "spin-up. This is characteristic of the analyzer flipper. "
+      "Values are factors for each term in a polynomial "
+      "expression.");
 
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>(P1Label, Direction::Input),
@@ -113,15 +113,18 @@ void CreatePolarizationEfficiencies::init() {
 }
 
 void CreatePolarizationEfficiencies::exec() {
-  auto const labelsFredrikze = getNonDefaultProperties({PpLabel, ApLabel, RhoLabel, AlphaLabel});
-  auto const labelsWildes = getNonDefaultProperties({P1Label, P2Label, F1Label, F2Label});
+  auto const labelsFredrikze =
+      getNonDefaultProperties({PpLabel, ApLabel, RhoLabel, AlphaLabel});
+  auto const labelsWildes =
+      getNonDefaultProperties({P1Label, P2Label, F1Label, F2Label});
 
   if (labelsFredrikze.empty() && labelsWildes.empty()) {
     throw std::invalid_argument("At least one of the polynomials must be set.");
   }
 
   if (!labelsFredrikze.empty() && !labelsWildes.empty()) {
-    throw std::invalid_argument("Efficiencies belonging to different methods cannot mix.");
+    throw std::invalid_argument(
+        "Efficiencies belonging to different methods cannot mix.");
   }
 
   MatrixWorkspace_sptr efficiencies;
@@ -149,7 +152,8 @@ CreatePolarizationEfficiencies::getNonDefaultProperties(
 }
 
 /// Create the efficiencies workspace given names of input properties.
-/// @param labels :: Names of efficiencies which to include in the output workspace.
+/// @param labels :: Names of efficiencies which to include in the output
+/// workspace.
 MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
     std::vector<std::string> const &labels) {
 
@@ -163,17 +167,20 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   auto sharedInX = inWS->sharedX(0);
 
-  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS, labels.size(), sharedInX->size(), inWS->blocksize());
+  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
+      inWS, labels.size(), sharedInX->size(), inWS->blocksize());
   auto axis1 = new TextAxis(labels.size());
   outWS->replaceAxis(1, axis1);
   outWS->getAxis(0)->setUnit(inWS->getAxis(0)->unit()->unitID());
 
   auto const x = inWS->points(0);
   std::vector<double> y(x.size());
-  for(size_t i = 0; i < labels.size(); ++i) {
+  for (size_t i = 0; i < labels.size(); ++i) {
     outWS->setSharedX(i, sharedInX);
     auto const &coefficients = polynomialCoefficients[i];
-    std::transform(x.begin(), x.end(), y.begin(), [&coefficients](double v) {return calculatePolynomial(coefficients, v);});
+    std::transform(x.begin(), x.end(), y.begin(), [&coefficients](double v) {
+      return calculatePolynomial(coefficients, v);
+    });
     outWS->mutableY(i) = y;
     axis1->setLabel(i, labels[i]);
   }

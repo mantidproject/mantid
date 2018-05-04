@@ -469,7 +469,7 @@ public:
       TS_ASSERT_EQUALS(y.size(), 11);
       TS_ASSERT_DELTA(x.front(), 1., 1e-15);
       TS_ASSERT_DELTA(x.back(), 10, 1e-15);
-      TS_ASSERT_DELTA(y.front(),1., 1e-15);
+      TS_ASSERT_DELTA(y.front(), 1., 1e-15);
       TS_ASSERT_DELTA(y.back(), 1., 1e-15);
     }
 
@@ -572,8 +572,8 @@ public:
   }
 
 private:
-
-  MatrixWorkspace_sptr createHistoWS(size_t size, double startX, double endX) const {
+  MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
+                                     double endX) const {
     double const dX = (endX - startX) / size;
     BinEdges xVals(size + 1, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
@@ -582,7 +582,8 @@ private:
     return retVal;
   }
 
-  MatrixWorkspace_sptr createPointWS(size_t size, double startX, double endX) const {
+  MatrixWorkspace_sptr createPointWS(size_t size, double startX,
+                                     double endX) const {
     double const dX = (endX - startX) / (size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);

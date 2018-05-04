@@ -54,13 +54,15 @@ private:
   void checkWildesProperties() const;
   void checkFredrikzeProperties() const;
 
-  std::vector<std::string>  getWorkspaceNameList() const;
-  API::WorkspaceGroup_sptr  getWorkspaceGroup() const;
-  API::MatrixWorkspace_sptr  getEfficiencies();
-  bool needInterpolation(API::MatrixWorkspace const &efficiencies, API::MatrixWorkspace const &inWS) const;
-  API::MatrixWorkspace_sptr convertToHistogram(API::MatrixWorkspace_sptr efficiencies);
-  API::MatrixWorkspace_sptr interpolate(API::MatrixWorkspace_sptr efficiencies, API::MatrixWorkspace_sptr  inWS);
-
+  std::vector<std::string> getWorkspaceNameList() const;
+  API::WorkspaceGroup_sptr getWorkspaceGroup() const;
+  API::MatrixWorkspace_sptr getEfficiencies();
+  bool needInterpolation(API::MatrixWorkspace const &efficiencies,
+                         API::MatrixWorkspace const &inWS) const;
+  API::MatrixWorkspace_sptr
+  convertToHistogram(API::MatrixWorkspace_sptr efficiencies);
+  API::MatrixWorkspace_sptr interpolate(API::MatrixWorkspace_sptr efficiencies,
+                                        API::MatrixWorkspace_sptr inWS);
 };
 
 } // namespace Algorithms

@@ -43,8 +43,10 @@ public:
 private:
   void init() override;
   void exec() override;
-  API::MatrixWorkspace_sptr createEfficiencies(std::vector<std::string> const &labels);
-  std::vector<std::string> getNonDefaultProperties(std::vector<std::string> const &labels) const;
+  API::MatrixWorkspace_sptr
+  createEfficiencies(std::vector<std::string> const &labels);
+  std::vector<std::string>
+  getNonDefaultProperties(std::vector<std::string> const &labels) const;
 };
 
 } // namespace Algorithms

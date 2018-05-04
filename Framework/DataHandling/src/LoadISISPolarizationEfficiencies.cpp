@@ -23,7 +23,6 @@ const std::string F1_FILENAME("F1");
 const std::string F2_FILENAME("F2");
 
 const std::string OUTPUT_WORKSPACE("OutputWorkspace");
-
 }
 
 namespace Mantid {
@@ -52,7 +51,8 @@ const std::string LoadISISPolarizationEfficiencies::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadISISPolarizationEfficiencies::summary() const {
-  return "Loads ISIS reflectometry polarization efficiency factors from files: one factor per file.";
+  return "Loads ISIS reflectometry polarization efficiency factors from files: "
+         "one factor per file.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -74,10 +74,11 @@ void LoadISISPolarizationEfficiencies::init() {
                   "Path to the file containing the Rho polarization efficiency "
                   "in XYE columns.");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
-                      Prop::ALPHA_FILENAME, "", API::FileProperty::OptionalLoad),
-                  "Path to the file containing the Alpha polarization efficiency "
-                  "in XYE columns.");
+  declareProperty(
+      Kernel::make_unique<API::FileProperty>(Prop::ALPHA_FILENAME, "",
+                                             API::FileProperty::OptionalLoad),
+      "Path to the file containing the Alpha polarization efficiency "
+      "in XYE columns.");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       Prop::P1_FILENAME, "", API::FileProperty::OptionalLoad),
@@ -116,11 +117,13 @@ void LoadISISPolarizationEfficiencies::exec() {
                                Prop::F1_FILENAME, Prop::F2_FILENAME});
 
   if (propsFredrikze.empty() && propsWildes.empty()) {
-    throw std::invalid_argument("At least one of the efficiency file names must be set.");
+    throw std::invalid_argument(
+        "At least one of the efficiency file names must be set.");
   }
 
   if (!propsFredrikze.empty() && !propsWildes.empty()) {
-    throw std::invalid_argument("Efficiencies belonging to different methods cannot mix.");
+    throw std::invalid_argument(
+        "Efficiencies belonging to different methods cannot mix.");
   }
 
   MatrixWorkspace_sptr efficiencies;
@@ -154,7 +157,7 @@ MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::loadEfficiencies(
 
   auto alg = createChildAlgorithm("JoinISISPolarizationEfficiencies");
   alg->initialize();
-  for(auto const &propName : props) {
+  for (auto const &propName : props) {
     auto loader = createChildAlgorithm("Load");
     loader->initialize();
     loader->setPropertyValue("Filename", getPropertyValue(propName));
@@ -162,7 +165,8 @@ MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::loadEfficiencies(
     Workspace_sptr output = loader->getProperty("OutputWorkspace");
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (!ws) {
-      throw std::invalid_argument("File " + propName + " cannot be loaded into a MatrixWorkspace.");
+      throw std::invalid_argument("File " + propName +
+                                  " cannot be loaded into a MatrixWorkspace.");
     }
     if (ws->getNumberHistograms() != 1) {
       throw std::runtime_error(
@@ -175,7 +179,6 @@ MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::loadEfficiencies(
   MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   return outWS;
 }
-
 
 } // namespace DataHandling
 } // namespace Mantid

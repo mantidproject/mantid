@@ -282,10 +282,10 @@ JoinISISPolarizationEfficiencies::interpolateHistogramWorkspace(
   ws->setDistribution(true);
   auto const &x = ws->x(0);
   auto const dX = (x.back() - x.front()) / double(maxSize);
-  std::vector<double> params(2*maxSize + 1);
-  for(size_t i = 0; i < maxSize; ++i) {
-    params[2*i] = x.front() + dX * double(i);
-    params[2*i + 1] = dX;
+  std::vector<double> params(2 * maxSize + 1);
+  for (size_t i = 0; i < maxSize; ++i) {
+    params[2 * i] = x.front() + dX * double(i);
+    params[2 * i + 1] = dX;
   }
   params.back() = x.back();
   auto alg = createChildAlgorithm("InterpolatingRebin");
