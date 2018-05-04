@@ -42,6 +42,9 @@ class InstrumentSettings(object):
     # __getattr__ is only called if the attribute was not set so we already know
     #  were going to throw at this point unless the attribute was optional.
     def __getattr__(self, item):
+        if item == "__setstate__":
+            raise AttributeError(item)
+
         # Check if it is in our parameter mapping
         known_param = next((param_entry for param_entry in self._param_map if item == param_entry.int_name), None)
 
