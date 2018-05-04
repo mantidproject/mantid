@@ -1100,7 +1100,8 @@ void FitPeaks::calculateFittedPeaks() {
   size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
-  for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
+  for (int64_t iws = static_cast<int64_t>(m_startWorkspaceIndex);
+       iws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iws) {
     PARALLEL_START_INTERUPT_REGION
 
     // get a copy of peak function and background function
@@ -1113,7 +1114,8 @@ void FitPeaks::calculateFittedPeaks() {
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
       // get and set the peak function parameters
       size_t row_index =
-          (iws - m_startWorkspaceIndex) * m_numPeaksToFit + ipeak;
+          (static_cast<size_t>(iws) - m_startWorkspaceIndex) * m_numPeaksToFit +
+          ipeak;
       double chi2 = m_fittedParamTable->cell<double>(
           row_index, num_peakfunc_params + num_bkgdfunc_params + 2);
       if (chi2 > 10.e10)
@@ -1137,8 +1139,9 @@ void FitPeaks::calculateFittedPeaks() {
 
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
-      auto vec_x = m_fittedPeakWS->x(iws);
-      std::pair<double, double> peakwindow = getPeakFitWindow(iws, ipeak);
+      auto vec_x = m_fittedPeakWS->x(static_cast<size_t>(iws));
+      std::pair<double, double> peakwindow =
+          getPeakFitWindow(static_cast<size_t>(iws), ipeak);
       std::vector<double>::const_iterator start_x_iter =
           std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
       std::vector<double>::const_iterator stop_x_iter =
@@ -1159,7 +1162,7 @@ void FitPeaks::calculateFittedPeaks() {
       size_t istart = static_cast<size_t>(start_x_iter - vec_x.begin());
       size_t istop = static_cast<size_t>(stop_x_iter - vec_x.begin());
       for (size_t yindex = istart; yindex < istop; ++yindex)
-        m_fittedPeakWS->dataY(iws)[yindex] =
+        m_fittedPeakWS->dataY(static_cast<size_t>(iws))[yindex] =
             values.getCalculated(yindex - istart);
     } // END-FOR (ipeak)
     PARALLEL_END_INTERUPT_REGION

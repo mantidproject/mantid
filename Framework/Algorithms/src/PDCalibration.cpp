@@ -1218,23 +1218,16 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
   API::Progress prog(this, 0., .2, dataws->getNumberHistograms());
 
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (size_t iws = 0; iws < dataws->getNumberHistograms(); ++iws) {
+  for (int64_t iws = 0;
+       iws < static_cast<int64_t>(dataws->getNumberHistograms()); ++iws) {
     PARALLEL_START_INTERUPT_REGION
     // calculatePositionWindowInTOF
-    PDCalibration::FittedPeaks peaks(dataws, iws);
+    PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     auto toTof = getDSpacingToTof(peaks.detid);
     peaks.calculatePositionWindowInTOF(m_peaksInDspacing, windowsInDSpacing,
                                        toTof);
-    // set peaks.inTofPos and  peaks.inTofWindows to workspaces
-    // FIXME: Pete I fail to figure out a clean way to copy all the elements to
-    // histogram here
-    //    peak_pos_ws->histogram(iws).setX(peaks.inTofPos);
     for (size_t i = 0; i < peaks.inTofPos.size(); ++i)
       peak_pos_ws->dataX(iws)[i] = peaks.inTofPos[i];
-
-    // peak_window_ws->histogram(iws).setX(peaks.inTofWindows);
-    // std::copy(peaks.inTofWindows.begin(), peaks.inTofWindows.end(),
-    // peak_pos_ws->histogram(iws).x().begin());
     for (size_t i = 0; i < peaks.inTofWindows.size(); ++i)
       peak_window_ws->dataX(iws)[i] = peaks.inTofWindows[i];
     prog.report();
