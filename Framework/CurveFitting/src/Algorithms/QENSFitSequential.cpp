@@ -67,13 +67,13 @@ struct ElasticQAppender {
                   bool doThrow) {
     auto it = m_converted.find(workspace.get());
     if (it != m_converted.end())
-      m_elasticInput.emplace_back(it->second());
+      m_elasticInput.emplace_back(it->second);
     else {
       auto elasticQ = convertToElasticQ(
           workspace, outputBase + std::to_string(m_converted.size() + 1),
           doThrow);
       m_elasticInput.emplace_back(elasticQ);
-      m_converted[workspace] = elasticQ.get();
+      m_converted[workspace.get()] = elasticQ;
     }
   }
 
