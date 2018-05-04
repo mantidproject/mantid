@@ -33,8 +33,14 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
       std::vector<std::string> group = wsgroup->getNames();
       outputs.insert(outputs.end(), group.begin(), group.end());
     } else {
-      // single workspace
-      outputs.push_back(input);
+      // MatrixWorkspace
+      MatrixWorkspace_sptr matrixws =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
+      if (matrixws)
+        outputs.push_back(matrixws->getName());
+      else
+        throw(std::runtime_error(
+            "The input is neither a WorkspaceGroup nor a MatrixWorkspace"));
     }
   }
   return outputs;
