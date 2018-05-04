@@ -8,7 +8,6 @@
 #include <boost/algorithm/string/replace.hpp>
 
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
-#include "MantidAPI/ArrayProperty.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -26,6 +25,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
