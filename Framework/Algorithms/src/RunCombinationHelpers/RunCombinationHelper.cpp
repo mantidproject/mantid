@@ -40,7 +40,8 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
         outputs.push_back(matrixws->getName());
       else
         throw(std::runtime_error(
-            "The input is neither a WorkspaceGroup nor a MatrixWorkspace"));
+            "The input " + input +
+            " is neither a WorkspaceGroup nor a MatrixWorkspace"));
     }
   }
   return outputs;

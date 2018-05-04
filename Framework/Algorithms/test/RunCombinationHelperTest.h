@@ -40,6 +40,20 @@ public:
     m_testee.setReferenceProperties(m_reference);
   }
 
+  void testUnwraping_throws() {
+
+    MatrixWorkspace_sptr ws1 = create2DWorkspace(2, 3);
+    storeWS("ws1", ws1);
+
+    TS_ASSERT_THROWS_EQUALS(
+        m_testee.unWrapGroups(std::vector<std::string>{"ws1", "ws?"}),
+        const std::exception &e, std::string(e.what()),
+        "Unable to find workspace type with name 'ws?': data service  search "
+        "object ws?");
+
+    removeWS("ws1");
+  }
+
   void testUnwraping() {
 
     MatrixWorkspace_sptr ws1 = create2DWorkspace(2, 3);
