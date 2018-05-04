@@ -528,9 +528,10 @@ std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
   const auto uniqueParameters = getUniqueParameterNames();
   std::vector<std::string> parameters;
   parameters.reserve(uniqueParameters.size());
-  std::copy_if(uniqueParameters.begin(), uniqueParameters.end(), 
-               std::back_inserter(parameters), 
-               [](const std::string &parameter) { return isFitParameter(parameter); });
+  std::copy_if(
+      uniqueParameters.begin(), uniqueParameters.end(),
+      std::back_inserter(parameters),
+      [](const std::string &parameter) { return isFitParameter(parameter); });
   return parameters;
 }
 
