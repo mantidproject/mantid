@@ -81,15 +81,12 @@ public:
     delete suite;
   }
 
-  EnggVanadiumCorrectionsModelTest() {
+  EnggVanadiumCorrectionsModelTest()
+      : m_inputDir(boost::filesystem::temp_directory_path() / INPUT_DIR_NAME) {
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void setUp() override {
-    const auto tempDir = boost::filesystem::temp_directory_path();
-    m_inputDir = tempDir / INPUT_DIR_NAME;
-    boost::filesystem::create_directory(m_inputDir);
-  }
+  void setUp() override { boost::filesystem::create_directory(m_inputDir); }
 
   void tearDown() override { boost::filesystem::remove_all(m_inputDir); }
 
@@ -163,7 +160,7 @@ private:
   const static std::string CURRENT_INSTRUMENT;
   const static boost::filesystem::path INPUT_DIR_NAME;
 
-  boost::filesystem::path m_inputDir;
+  const boost::filesystem::path m_inputDir;
 
   void saveNexus(const std::string &filename,
                  const Mantid::API::Workspace_sptr workspace) const {
