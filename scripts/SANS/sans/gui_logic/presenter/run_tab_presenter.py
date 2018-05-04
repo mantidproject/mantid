@@ -1000,29 +1000,30 @@ class RunTabPresenter(object):
         if self._view.is_multi_period_view():
             row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
                         "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
-                        "CanDirect:{},cdp:{},OutputName:{},User File:{},Sample Thickness:{}".format(sample_scatter,
-                                                                                       get_string_period(sample_scatter_period),
-                                                                                       sample_transmission,
-                                                                                       get_string_period(sample_transmission_period),
-                                                                                       sample_direct,
-                                                                                       get_string_period(sample_direct_period),
-                                                                                       can_scatter,
-                                                                                       get_string_period(can_scatter_period),
-                                                                                       can_transmission,
-                                                                                       get_string_period(can_transmission_period),
-                                                                                       can_direct,
-                                                                                       get_string_period(can_direct_period),
-                                                                                       output_name, user_file, sample_thickness)
+                        "CanDirect:{},cdp:{},OutputName:{},User File:{}," \
+                        "Sample Thickness:{}".format(sample_scatter,
+                                                     get_string_period(sample_scatter_period),
+                                                     sample_transmission,
+                                                     get_string_period(sample_transmission_period),
+                                                     sample_direct,
+                                                     get_string_period(sample_direct_period),
+                                                     can_scatter,
+                                                     get_string_period(can_scatter_period),
+                                                     can_transmission,
+                                                     get_string_period(can_transmission_period),
+                                                     can_direct,
+                                                     get_string_period(can_direct_period),
+                                                     output_name, user_file, sample_thickness)
         else:
             row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
                         "CanScatter:{},CanTrans:{}," \
                         "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{}".format(sample_scatter,
-                                                                                sample_transmission,
-                                                                                sample_direct,
-                                                                                can_scatter,
-                                                                                can_transmission,
-                                                                                can_direct,
-                                                                                output_name, user_file,sample_thickness)
+                                                                                             sample_transmission,
+                                                                                             sample_direct,
+                                                                                             can_scatter,
+                                                                                             can_transmission,
+                                                                                             can_direct,
+                                                                                             output_name, user_file,sample_thickness)
 
         self._view.add_row(row_entry)
 
