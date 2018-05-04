@@ -97,7 +97,7 @@ struct ElasticQAppender {
     else {
       auto elasticQ = convertToElasticQ(workspace, doThrow);
       m_elasticInput.emplace_back(elasticQ);
-      m_converted.insert(elasticQ.get);
+      m_converted[workspace.get()] = elasticQ;
     }
   }
 
