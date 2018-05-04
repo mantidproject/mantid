@@ -802,6 +802,8 @@ void FitPeaks::convertParametersNameToIndex() {
 /** main method to fit peaks among all
  */
 void FitPeaks::fitPeaks() {
+  API::Progress prog(this, 0., 1., m_stopWorkspaceIndex-m_startWorkspaceIndex);
+
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int wi = static_cast<int>(m_startWorkspaceIndex);
@@ -827,6 +829,7 @@ void FitPeaks::fitPeaks() {
       writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
                      fit_result);
     }
+    prog.report();
 
     PARALLEL_END_INTERUPT_REGION
   }

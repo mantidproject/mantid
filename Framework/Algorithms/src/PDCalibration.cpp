@@ -389,18 +389,8 @@ void PDCalibration::exec() {
   std::sort(m_peaksInDspacing.begin(), m_peaksInDspacing.end());
 
   const double peakWindowMaxInDSpacing = getProperty("PeakWindow");
-  //  const auto windowsInDSpacing =
-  //      dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
-
-  //  for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
-  //    g_log.information() << "[" << i << "] " << windowsInDSpacing[2 * i] << "
-  //    < "
-  //                        << m_peaksInDspacing[i] << " < "
-  //                        << windowsInDSpacing[2 * i + 1] << std::endl;
-  //  }
-
-  double minPeakHeight = getProperty("MinimumPeakHeight");
-  double maxChiSquared = getProperty("MaxChiSq");
+  const double minPeakHeight = getProperty("MinimumPeakHeight");
+  const double maxChiSquared = getProperty("MaxChiSq");
 
   const std::string calParams = getPropertyValue("CalibrationParameters");
   if (calParams == std::string("DIFC"))
@@ -451,7 +441,6 @@ void PDCalibration::exec() {
                       "directly compared to delta-d/d";
   }
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
-  API::Progress prog(this, 0.0, 0.7, 1);
 
   // create TOF peak centers workspace
   auto matrix_pair = createTOFPeakCenterFitWindowWorkspaces(
@@ -466,7 +455,7 @@ void PDCalibration::exec() {
   const std::string diagnostic_prefix =
       getPropertyValue("DiagnosticWorkspaces");
 
-  auto algFitPeaks = createChildAlgorithm("FitPeaks");
+  auto algFitPeaks = createChildAlgorithm("FitPeaks", .2, .7);
   algFitPeaks->setLoggingOffset(3);
 
   algFitPeaks->setProperty("InputWorkspace", m_uncalibratedWS);
@@ -517,7 +506,7 @@ void PDCalibration::exec() {
   // END-OF (FitPeaks)
   std::string backgroundType = getProperty("BackgroundType");
 
-  prog.resetNumSteps(NUMHIST, 0.7, 1.0);
+  API::Progress prog(this, 0.7, 1.0, NUMHIST);
 
   const auto windowsInDSpacing =
       dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
@@ -1226,8 +1215,11 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
       API::WorkspaceFactory::Instance().create("Workspace2D", numspec,
                                                numpeaks * 2, numpeaks * 2);
 
-  // TODO - Parallization can be introduced here
+  API::Progress prog(this, 0., .2, dataws->getNumberHistograms());
+
+  PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (size_t iws = 0; iws < dataws->getNumberHistograms(); ++iws) {
+    PARALLEL_START_INTERUPT_REGION
     // calculatePositionWindowInTOF
     PDCalibration::FittedPeaks peaks(dataws, iws);
     auto toTof = getDSpacingToTof(peaks.detid);
@@ -1245,7 +1237,11 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
     // peak_pos_ws->histogram(iws).x().begin());
     for (size_t i = 0; i < peaks.inTofWindows.size(); ++i)
       peak_window_ws->dataX(iws)[i] = peaks.inTofWindows[i];
+    prog.report();
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   return std::make_pair(peak_pos_ws, peak_window_ws);
 }
