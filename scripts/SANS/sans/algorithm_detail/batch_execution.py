@@ -888,16 +888,21 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors):
     def _delete_workspaces(_delete_alg, _workspaces):
         _workspace_names_to_delete = set([_workspace.name() for _workspace in _workspaces if _workspace is not None])
         for _workspace_name_to_delete in _workspace_names_to_delete:
-            if _workspace_name_to_delete:
+            if _workspace_name_to_delete and AnalysisDataService.doesExist(_workspace_name_to_delete):
                 _delete_alg.setProperty("Workspace", _workspace_name_to_delete)
                 _delete_alg.execute()
 
     def _delete_workspaces_from_dict(_delete_alg, workspaces):
+        _workspace_names_to_delete = []
         for key, workspace_list in workspaces.items():
             for workspace in workspace_list:
-                if workspace and workspace.name()and AnalysisDataService.doesExist(workspace.name()):
-                        _delete_alg.setProperty("Workspace", workspace.name())
-                        _delete_alg.execute()
+                if workspace and workspace.name():
+                    _workspace_names_to_delete += [workspace.name()]
+
+        for _workspace_name_to_delete in _workspace_names_to_delete:
+            if _workspace_name_to_delete and AnalysisDataService.doesExist(_workspace_name_to_delete):
+                _delete_alg.setProperty("Workspace", _workspace_name_to_delete)
+                _delete_alg.execute()
 
     delete_name = "DeleteWorkspace"
     delete_options = {}

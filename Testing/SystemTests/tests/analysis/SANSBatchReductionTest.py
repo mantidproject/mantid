@@ -20,13 +20,7 @@ class SANSBatchReductionTest(unittest.TestCase):
 
     def _run_batch_reduction(self, states, use_optimizations=False):
         batch_reduction_alg = SANSBatchReduction()
-        # try:
         batch_reduction_alg(states, use_optimizations, OutputMode.PublishToADS)
-        #     did_raise = False
-        # except Exception as e:  # noqa
-        #
-        #     did_raise = True
-        # self.assertFalse(did_raise)
 
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
