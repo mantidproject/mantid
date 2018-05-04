@@ -17,7 +17,9 @@ class BuildSubtreeItemsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BuildSubtreeItemsTest *createSuite() { return new BuildSubtreeItemsTest; }
+  static BuildSubtreeItemsTest *createSuite() {
+    return new BuildSubtreeItemsTest;
+  }
   static void destroySuite(BuildSubtreeItemsTest *suite) { delete suite; }
 
   std::unique_ptr<QStandardItemModel> emptyModel() const {

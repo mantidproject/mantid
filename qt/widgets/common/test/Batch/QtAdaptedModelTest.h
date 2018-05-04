@@ -124,8 +124,10 @@ public:
     auto const cellItems = rowFromCells(cells);
 
     TS_ASSERT_EQUALS(cellItems.size(), 2u);
-    TS_ASSERT_EQUALS(cells[0].contentText(), cellItems[0]->text().toStdString());
-    TS_ASSERT_EQUALS(cells[1].contentText(), cellItems[1]->text().toStdString());
+    TS_ASSERT_EQUALS(cells[0].contentText(),
+                     cellItems[0]->text().toStdString());
+    TS_ASSERT_EQUALS(cells[1].contentText(),
+                     cellItems[1]->text().toStdString());
   }
 };
 
