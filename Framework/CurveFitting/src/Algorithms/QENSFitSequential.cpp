@@ -1,12 +1,12 @@
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ArrayProperty.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
