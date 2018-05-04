@@ -480,7 +480,7 @@ bool QENSFitSimultaneous::isFitParameter(const std::string &) const {
   return true;
 }
 
-std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
+std::vector<std::string> QENSFitSimultaneous::getFitParameterNames() const {
   const auto uniqueParameters = getUniqueParameterNames();
   std::vector<std::string> parameters;
   parameters.reserve(uniqueParameters.size());
@@ -491,10 +491,10 @@ std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
   return parameters;
 }
 
-std::set<std::string> QENSFitSequential::getUniqueParameterNames() const {
+std::set<std::string> QENSFitSimultaneous::getUniqueParameterNames() const {
   IFunction_sptr function = getProperty("Function");
   std::set<std::string> nameSet;
-  for (auto i = 0u; i < functions->nParams(); ++i)
+  for (auto i = 0u; i < function->nParams(); ++i)
     nameSet.insert(shortParameterName(function->parameterName(i)));
   return nameSet;
 }
