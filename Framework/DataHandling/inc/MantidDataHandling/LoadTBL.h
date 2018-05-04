@@ -48,6 +48,9 @@ public:
 
   /// The version number
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveTBL"};
+  }
   /// The category
   const std::string category() const override { return "DataHandling\\Text"; }
   /// Returns a confidence value that this algorithm can load a file

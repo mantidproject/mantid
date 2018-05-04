@@ -35,6 +35,7 @@ Algorithms
 New features
 ############
 
+* A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for relfectivity workspaces.
 * Added algorithm ``PolarizationEfficiencyCor`` which calls ``PolarizationCorrectionFredrikze`` or ``PolarizationCorrectionWildes`` depending on chosen ``Mathod`` property.
 * Added algorithms that help create a matrix workspace with polarization efficiencies ready to be used with ``PolarizationEfficiencyCor``
 
@@ -42,11 +43,12 @@ New features
   - ``JoinISISPolarizationEfficiencies`` joins individual efficiencies into one matrix workspace
   - ``LoadISISPolarizationEfficiencies`` loads efficiencies form files
 
-
 Improvements
 ############
 
 Bug fixes
 #########
+
+* Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 
 :ref:`Release 3.13.0 <v3.13.0>`

@@ -3,11 +3,10 @@
 
 #include "DllConfig.h"
 #include <string>
+#include "IReflEventPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class IReflEventPresenter;
 
 /** @class IReflEventView
 
@@ -39,21 +38,20 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class DLLExport IReflEventView {
 public:
-  /// Constructor
   IReflEventView(){};
-  /// Destructor
   virtual ~IReflEventView(){};
-  /// Returns the presenter managing this view
   virtual IReflEventPresenter *getPresenter() const = 0;
 
-  /// Slice type enums
-  enum class SliceType { UniformEven, Uniform, Custom, LogValue };
+  virtual std::string getLogValueTimeSlicingValues() const = 0;
+  virtual std::string getCustomTimeSlicingValues() const = 0;
+  virtual std::string getUniformTimeSlicingValues() const = 0;
+  virtual std::string getUniformEvenTimeSlicingValues() const = 0;
+  virtual std::string getLogValueTimeSlicingType() const = 0;
 
-  virtual std::string getTimeSlicingValues() const = 0;
-  virtual std::string getTimeSlicingType() const = 0;
-
-  virtual void enableAll() = 0;
-  virtual void disableAll() = 0;
+  virtual void enableSliceType(SliceType sliceType) = 0;
+  virtual void disableSliceType(SliceType sliceType) = 0;
+  virtual void enableSliceTypeSelection() = 0;
+  virtual void disableSliceTypeSelection() = 0;
 };
 }
 }

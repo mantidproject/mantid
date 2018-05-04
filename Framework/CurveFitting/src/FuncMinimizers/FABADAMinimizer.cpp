@@ -9,7 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidCurveFitting//Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 
@@ -17,17 +17,14 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/normal_distribution.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/version.hpp>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <random>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -355,13 +352,9 @@ void FABADAMinimizer::finalize() {
 * @return :: the step
 */
 double FABADAMinimizer::gaussianStep(const double &jump) {
-  boost::mt19937 mt;
-  mt.seed(123 * (int(m_counter) + 45 * int(jump)) +
-          14 * int(time_t())); // Numbers for the seed
-  boost::normal_distribution<double> distr(0.0, std::abs(jump));
-  boost::variate_generator<boost::mt19937, boost::normal_distribution<double>>
-      step(mt, distr);
-  return step();
+  std::mt19937 rng(123 * (int(m_counter) + 45 * int(jump)) +
+                   14 * int(time_t()));
+  return Kernel::normal_distribution<double>(0.0, std::abs(jump))(rng);
 }
 
 /** If the new point is out of its bounds, it is changed to fit in the bound
@@ -484,10 +477,9 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
     double prob = exp((m_chi2 - chi2New) / (2.0 * m_temperature));
 
     // Decide if changing or not
-    boost::mt19937 mt;
-    mt.seed(int(time_t()) + 48 * (int(m_counter) + 76 * int(parameterIndex)));
-    boost::uniform_real<> distr(0.0, 1.0);
-    double p = distr(mt);
+    std::mt19937 rng(int(time_t()) +
+                     48 * (int(m_counter) + 76 * int(parameterIndex)));
+    double p = std::uniform_real_distribution<double>(0.0, 1.0)(rng);
     if (p <= prob) {
       for (size_t j = 0; j < m_nParams; j++) {
         m_chain[j].push_back(newParameters.get(j));

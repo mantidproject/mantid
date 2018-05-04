@@ -38,6 +38,9 @@ public:
 
   const std::string name() const override { return "EvaluateMDFunction"; }
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateMDWorkspace", "FakeMDEventData"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

@@ -40,7 +40,7 @@ Machine Setup
 
 Set up a local ``builder`` account that will be used by the slave.
 
-Install the :ref:`required prerequisites <GettingStartedWithMantid>` for the relevant OS.
+Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
 
 .. note::
    For Windows the `Command line Visual C++ build tools <http://landinghub.visualstudio.com/visual-cpp-build-tools>`__
@@ -422,7 +422,7 @@ Run a Process
     Process p = "cmd /c dir".execute()
     println "${p.text}"
 
-    # kill process on windows
+    // kill process on windows slave
     Process p = "cmd /c Taskkill /F /IM MantidPlot.exe".execute()
     println "${p.text}"
 
