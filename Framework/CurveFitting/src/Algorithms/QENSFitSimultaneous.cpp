@@ -298,11 +298,14 @@ void QENSFitSimultaneous::execConcrete() {
 
   const auto inputWorkspaces = getWorkspaces();
   const auto workspaces = convertInputToElasticQ(inputWorkspaces);
-  const auto singleDomainFunction = convertToSingleDomain(getProperty("Function"));
+  const auto singleDomainFunction =
+      convertToSingleDomain(getProperty("Function"));
 
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
-  const auto parameterWs = processParameterTable(transposeFitTable(fitResult.first, singleDomainFunction));
-  const auto groupWs = boost::dynamic_pointer_cast<WorkspaceGroup>(fitResult.second);
+  const auto parameterWs = processParameterTable(
+      transposeFitTable(fitResult.first, singleDomainFunction));
+  const auto groupWs =
+      boost::dynamic_pointer_cast<WorkspaceGroup>(fitResult.second);
   const auto resultWs = processIndirectFitParameters(parameterWs);
   copyLogs(resultWs, workspaces);
 
@@ -483,9 +486,10 @@ std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
   const auto uniqueParameters = getUniqueParameterNames();
   std::vector<std::string> parameters;
   parameters.reserve(uniqueParameters.size());
-  std::copy_if(uniqueParameters.begin(), uniqueParameters.end(), 
-               std::back_inserter(parameters), 
-               [](const std::string &parameter) { return isFitParameter(parameter); });
+  std::copy_if(
+      uniqueParameters.begin(), uniqueParameters.end(),
+      std::back_inserter(parameters),
+      [&](const std::string &parameter) { return isFitParameter(parameter); });
   return parameters;
 }
 
