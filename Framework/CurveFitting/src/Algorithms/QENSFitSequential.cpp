@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ArrayProperty.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
@@ -444,7 +445,7 @@ void QENSFitSequential::exec() {
 
   const auto parameterWs =
       processParameterTable(performFit(inputString, outputBaseName));
-  const auto resultWs = processIndirectFitParameters(outputWs);
+  const auto resultWs = processIndirectFitParameters(parameterWs);
   const auto groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outputBaseName + "_Workspaces");
@@ -537,7 +538,7 @@ std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
   std::copy_if(
       uniqueParameters.begin(), uniqueParameters.end(),
       std::back_inserter(parameters),
-      [](const std::string &parameter) { return isFitParameter(parameter); });
+      [&](const std::string &parameter) { return isFitParameter(parameter); });
   return parameters;
 }
 
@@ -575,8 +576,8 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
   return pifp->getProperty("OutputWorkspace");
 }
 
-ITableWorkspace_sptr QENSFitSequential::processParameterTable(
-    ITableWorkspace_sptr parameterTable) const {
+ITableWorkspace_sptr
+QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
   return parameterTable;
 }
 

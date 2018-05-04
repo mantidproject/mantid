@@ -290,8 +290,8 @@ bool ConvolutionFit<Base>::isFitParameter(const std::string &name) const {
 
 template <typename Base>
 ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
-    ITableWorkspace_sptr parameterTable) const {
-  IFunction_sptr function = getProperty("Function");
+    ITableWorkspace_sptr parameterTable) {
+  IFunction_sptr function = Base::getProperty("Function");
   m_deltaUsed = containsFunction(function, "DeltaFunction");
   if (m_deltaUsed)
     calculateEISF(parameterTable);
@@ -311,8 +311,8 @@ ConvolutionFit<Base>::getAdditionalLogStrings() const {
 template <typename Base>
 std::map<std::string, std::string>
 ConvolutionFit<Base>::getAdditionalLogNumbers() const {
-  auto logs = QENSFitSequential::getAdditionalLogNumbers();
-  IFunction_sptr function = getProperty("Function");
+  auto logs = Base::getAdditionalLogNumbers();
+  IFunction_sptr function = Base::getProperty("Function");
   logs["lorentzians"] = boost::lexical_cast<std::string>(
       numberOfFunctions(function, "Lorentzian"));
   return logs;
