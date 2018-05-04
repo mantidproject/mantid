@@ -123,15 +123,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SignalWorkspace", "PDCalibrationTest_WS"));
+        alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputCalibrationTable", "cal"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("DiagnosticWorkspaces", "diag"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -174,7 +172,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SignalWorkspace", "PDCalibrationTest_WS"));
+        alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputCalibrationTable", "cal"));
@@ -183,8 +181,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -229,7 +225,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SignalWorkspace", "PDCalibrationTest_WS"));
+        alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputCalibrationTable", "cal"));
@@ -238,8 +234,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO+DIFA"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputPeakParametersWorkspace", "peakparams"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -295,7 +289,7 @@ public:
         Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
     createSampleWS();
     pdc.initialize();
-    pdc.setProperty("SignalWorkspace", "PDCalibrationTest_WS");
+    pdc.setProperty("InputWorkspace", "PDCalibrationTest_WS");
     pdc.setProperty("TofBinning", TOF_BINNING);
     pdc.setPropertyValue("OutputCalibrationTable", "outputWS");
     pdc.setPropertyValue("DiagnosticWorkspaces", "diag");

@@ -177,29 +177,9 @@ const std::string PDCalibration::summary() const {
  */
 void PDCalibration::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "SignalWorkspace", "", Direction::InOut),
+                      "InputWorkspace", "", Direction::InOut),
                   "Input signal workspace.\nIf the workspace does not exist it "
                   "will read it from the SignalFile into this workspace.");
-
-  const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
-  declareProperty(
-      Kernel::make_unique<FileProperty>(
-          "SignalFile", "", FileProperty::FileAction::OptionalLoad, exts),
-      "Calibration measurement");
-  declareProperty(Kernel::make_unique<FileProperty>(
-                      "BackgroundFile", "", FileProperty::OptionalLoad, exts),
-                  "Calibration background");
-
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-  declareProperty("MaxChunkSize", EMPTY_DBL(), mustBePositive,
-                  "Get chunking strategy for chunks with this number of "
-                  "Gbytes. File will not be loaded if this option is set.");
-
-  auto range = boost::make_shared<BoundedValidator<double>>();
-  range->setBounds(0., 100.);
-  declareProperty("FilterBadPulses", 95., range,
-                  "The percentage of the average to use as the lower bound");
 
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(
                       "TofBinning", boost::make_shared<RebinParamsValidator>()),
@@ -207,11 +187,25 @@ void PDCalibration::init() {
                   "Logarithmic binning is used if Step is negative.");
 
   const std::vector<std::string> exts2{".h5", ".cal"};
+  declareProperty(
+      Kernel::make_unique<FileProperty>("PreviousCalibrationFile", "",
+                                        FileProperty::OptionalLoad, exts2),
+      "Previous calibration file");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+          "PreviousCalibrationTable", "", Direction::Input,
+          API::PropertyMode::Optional),
+      "Previous calibration table. This overrides results from previous file.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("PreviousCalibration", "",
-                                                    FileProperty::OptionalLoad,
-                                                    exts2),
-                  "Calibration measurement");
+  // properties about peak positions to fit
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
+                                     "Lorentzian", "PseudoVoigt"};
+  declareProperty("PeakFunction", "Gaussian",
+                  boost::make_shared<StringListValidator>(peaktypes));
+  vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
+  declareProperty("BackgroundType", "Linear",
+                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  "Type of Background.");
 
   auto peaksValidator = boost::make_shared<CompositeValidator>();
   auto mustBePosArr =
@@ -224,26 +218,12 @@ void PDCalibration::init() {
                                                              peaksValidator),
                   "Comma delimited d-space positions of reference peaks.");
 
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
   declareProperty(
       "PeakWindow", 0.1, mustBePositive,
       "The maximum window (in d space) around peak to look for peak.");
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
-
-  // Copy FitPeaks properties
-  // --------------------------------------------------------->
-  // properties about peak positions to fit
-  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
-                                     "Lorentzian", "PseudoVoigt"};
-  declareProperty("PeakFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peaktypes));
-  vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
-  declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
-                  "Type of Background.");
-
-  std::string funcgroup("Function Types");
-  setPropertyGroup("PeakFunction", funcgroup);
-  setPropertyGroup("BackgroundType", funcgroup);
 
   auto min = boost::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
@@ -253,21 +233,11 @@ void PDCalibration::init() {
                   "of the center of the peak.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "EventNumberWorkspace", "", Direction::Input,
-          API::PropertyMode::Optional),
-      "Name of an optional workspace, whose each spectrum corresponds to each "
-      "spectrum "
-      "in input workspace. "
-      "It has 1 value of each spectrum, standing for the number of events of "
-      "the corresponding spectrum.");
-
-  declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
       "List of tolerance on fitted peak positions against given peak positions."
       "If there is only one value given, then ");
 
-  declareProperty("MinimumPeakHeight", EMPTY_DBL(),
+  declareProperty("MinimumPeakHeight", 2.,
                   "Minimum peak height such that all the fitted peaks with "
                   "height under this value will be excluded.");
 
@@ -280,65 +250,6 @@ void PDCalibration::init() {
       "If true peak position will be constrained by estimated positions "
       "(highest Y value position) and "
       "the peak width either estimted by observation or calculate.");
-
-  // additional output for reviewing
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputPeakParametersWorkspace", "", Direction::Output),
-                  "Name of workspace containing all fitted peak parameters.  "
-                  "X-values are spectra/workspace index.");
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "FittedPeaksWorkspace", "", Direction::Output,
-          API::PropertyMode::Optional),
-      "Name of the output matrix workspace with fitted peak. "
-      "This output workspace have the same dimesion as the input workspace."
-      "The Y values belonged to peaks to fit are replaced by fitted value. "
-      "Values of estimated background are used if peak fails to be fit.");
-
-  std::string addoutgrp("Analysis");
-  setPropertyGroup("OutputPeakParametersWorkspace", addoutgrp);
-  setPropertyGroup("FittedPeaksWorkspace", addoutgrp);
-
-  // copy FindPeaks properties
-  //  auto min = boost::make_shared<BoundedValidator<int>>();
-  //  min->setLower(1);
-  //  declareProperty(
-  //      "FWHM", 7, min,
-  //      "Estimated number of points covered by the fwhm of a peak (default
-  //      7)");
-  //  declareProperty("Tolerance", 4, min, "A measure of the strictness desired
-  //  in "
-  //                                       "meeting the condition on peak "
-  //                                       "candidates,\n Mariscotti recommends
-  //                                       2 "
-  //                                       "(default 4)");
-  //  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
-  //                                     "Lorentzian"};
-  //  declareProperty("PeakFunction", "Gaussian",
-  //                  boost::make_shared<StringListValidator>(peaktypes));
-  //  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
-  //  declareProperty("BackgroundType", "Linear",
-  //                  boost::make_shared<StringListValidator>(bkgdtypes),
-  //                  "Type of Background.");
-  //  declareProperty("HighBackground", true,
-  //                  "Relatively weak peak in high background");
-  //  declareProperty(
-  //      "MinGuessedPeakWidth", 2, min,
-  //      "Minimum guessed peak width for fit. It is in unit of number of
-  //      pixels.");
-  //  declareProperty(
-  //      "MaxGuessedPeakWidth", 10, min,
-  //      "Maximum guessed peak width for fit. It is in unit of number of
-  //      pixels.");
-  //  declareProperty("MinimumPeakHeight", 2., "Minimum allowed peak height. ");
-  //  declareProperty(
-  //      "MaxChiSq", 100.,
-  //      "Maximum chisq value for individual peak fit allowed. (Default:
-  //      100)");
-  //  declareProperty("StartFromObservedPeakCentre", true,
-  //                  "Use observed value as the starting value of peak centre.
-  //                  ");
-  // end of copy FitPeaks properties
 
   declareProperty("CalibrationParameters", "DIFC",
                   boost::make_shared<StringListValidator>(modes),
@@ -360,66 +271,30 @@ void PDCalibration::init() {
 
   // make group for Input properties
   std::string inputGroup("Input Options");
-  setPropertyGroup("SignalWorkspace", inputGroup);
-  setPropertyGroup("SignalFile", inputGroup);
-  setPropertyGroup("BackgroundFile", inputGroup);
-  setPropertyGroup("MaxChunkSize", inputGroup);
-  setPropertyGroup("FilterBadPulses", inputGroup);
+  setPropertyGroup("InputWorkspace", inputGroup);
   setPropertyGroup("TofBinning", inputGroup);
-  setPropertyGroup("PreviousCalibration", inputGroup);
+  setPropertyGroup("PreviousCalibrationFile", inputGroup);
+  setPropertyGroup("PreviousCalibrationTable", inputGroup);
+
+  std::string funcgroup("Function Types");
+  setPropertyGroup("PeakFunction", funcgroup);
+  setPropertyGroup("BackgroundType", funcgroup);
 
   // make group for FitPeaks properties
-  std::string fitPeaksGroup("Peak fitting properties");
-
+  std::string fitPeaksGroup("Peak Fitting");
+  setPropertyGroup("PeakPositions", fitPeaksGroup);
   setPropertyGroup("PeakWindow", fitPeaksGroup);
+  setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
+  setPropertyGroup("PositionTolerance", fitPeaksGroup);
+  setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
+  setPropertyGroup("MaxChiSq", fitPeaksGroup);
+  setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
 
-  //  setPropertyGroup("PeakCenters", fitPeaksGroup);
-  //  setPropertyGroup("PeakCentersWorkspace", fitPeaksGroup);
-  //  setPropertyGroup("PeakFunction", fitPeaksGroup);
-  //  setPropertyGroup("BackgroundType", fitPeaksGroup);
-  //  setPropertyGroup("FitWindowBoundaryList", fitPeaksGroup);
-  //  setPropertyGroup("FitPeakWindowWorkspace", fitPeaksGroup);
-  //  setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
-  //  setPropertyGroup("FitWindowBoundaryList", fitPeaksGroup);
-  //  setPropertyGroup("FitPeakWindowWorkspace", fitPeaksGroup);
-  //  setPropertyGroup("PeakParameterNames", fitPeaksGroup);
-  //  setPropertyGroup("PeakParameterValues", fitPeaksGroup);
-  //  setPropertyGroup("PeakParameterValueTable", fitPeaksGroup);
-  //  setPropertyGroup("FitFromRight", fitPeaksGroup);
-  //  setPropertyGroup("", fitPeaksGroup);
-  //  setPropertyGroup("", fitPeaksGroup);
-  //  setPropertyGroup("", fitPeaksGroup);
-
-  // Note: changes of properties from FindPeaks to FitPeaks
-  // PeakPositions (keep) --> PeakCenters, PeakCentersWorkspace
-  // PeakWindow    (keep) --> FitWindowBoundaryList, FitPeakWindowWorkspace
-  // FWHM          --> PeakWidthPercent
-  // MinGuessedPeakWidth --> PeakParameterNames, PeakParameterValues,
-  //                         PeakParameterValueTable
-  // MaxGuessedPeakWidth --> (as above)
-  // Tolerance     -->
-  // PeakFunction  --> PeakFunction
-  // BackgroundType --> BackgroundType
-  // HighBackground --> shall be false for PDCalibration?
-  // MaxChiSq -->
-  // StartFromObservedPeakCentre -->
-  // (new) --> FitFromRight
-  //
-
-  //  // make group for FindPeak properties
-  //  std::string findPeaksGroup("Peak finding properties");
-  //  setPropertyGroup("PeakPositions", findPeaksGroup);
-  //  setPropertyGroup("PeakWindow", findPeaksGroup);
-  //  setPropertyGroup("FWHM", findPeaksGroup);
-  //  setPropertyGroup("Tolerance", findPeaksGroup);
-  //  setPropertyGroup("PeakFunction", findPeaksGroup);
-  //  setPropertyGroup("BackgroundType", findPeaksGroup);
-  //  setPropertyGroup("HighBackground", findPeaksGroup);
-  //  setPropertyGroup("MinGuessedPeakWidth", findPeaksGroup);
-  //  setPropertyGroup("MaxGuessedPeakWidth", findPeaksGroup);
-  //  setPropertyGroup("MinimumPeakHeight", findPeaksGroup);
-  //  setPropertyGroup("MaxChiSq", findPeaksGroup);
-  //  setPropertyGroup("StartFromObservedPeakCentre", findPeaksGroup);
+  // make group for type of calibration
+  std::string calGroup("Calibration Type");
+  setPropertyGroup("CalibrationParameters", calGroup);
+  setPropertyGroup("TZEROrange", calGroup);
+  setPropertyGroup("DIFArange", calGroup);
 }
 
 std::map<std::string, std::string> PDCalibration::validateInputs() {
@@ -539,17 +414,20 @@ void PDCalibration::exec() {
         "Encountered impossible CalibrationParameters value");
 
   m_uncalibratedWS = loadAndBin();
-  setProperty("SignalWorkspace", m_uncalibratedWS);
+  setProperty("InputWorkspace", m_uncalibratedWS);
 
   auto uncalibratedEWS =
       boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
   bool isEvent = bool(uncalibratedEWS);
 
   // Load Previous Calibration or create calibration table from signal file
-  if (!static_cast<std::string>(getProperty("PreviousCalibration")).empty()) {
-    loadOldCalibration();
+  if ((!static_cast<std::string>(getProperty("PreviousCalibrationFile"))
+            .empty()) ||
+      (!getPropertyValue("PreviousCalibrationTable")
+            .empty())) { //"PreviousCalibrationTable"
+    createCalTableFromExisting();
   } else {
-    createNewCalTable();
+    createCalTableNew();
   }
   createInformationWorkspaces();
 
@@ -583,59 +461,51 @@ void PDCalibration::exec() {
   //  API::MatrixWorkspace_sptr peak_window_ws =
   //      createTOFPeakFitWindowWorkspace(m_uncalibratedWS, windowsInDSpacing);
 
-  // TODO - consider to wrap FitPeaks to a method
-  // NEW ---------->>>>>>>>>>>----------------->>>>>
   double peak_width_percent = getProperty("PeakWidthPercent");
 
-  // TODO/FIXME why not do FitPeaks just once?  I don't see the benefit to
-  // call FitPeaks numerous time.
-  auto alg = createChildAlgorithm("FitPeaks");
-  alg->setLoggingOffset(3);
+  const std::string diagnostic_prefix =
+      getPropertyValue("DiagnosticWorkspaces");
 
-  alg->setProperty("InputWorkspace", m_uncalibratedWS);
+  auto algFitPeaks = createChildAlgorithm("FitPeaks");
+  algFitPeaks->setLoggingOffset(3);
+
+  algFitPeaks->setProperty("InputWorkspace", m_uncalibratedWS);
   // theoretical peak center
-  alg->setProperty("PeakCentersWorkspace", tof_peak_center_ws);
+  algFitPeaks->setProperty("PeakCentersWorkspace", tof_peak_center_ws);
 
   // peak and background functions
-  alg->setProperty<std::string>("PeakFunction", peakFunction);
-  alg->setProperty<std::string>("BackgroundType",
-                                getProperty("BackgroundType"));
+  algFitPeaks->setProperty<std::string>("PeakFunction", peakFunction);
+  algFitPeaks->setProperty<std::string>("BackgroundType",
+                                        getProperty("BackgroundType"));
   // peak range setup
-  alg->setProperty("FitPeakWindowWorkspace", tof_peak_window_ws);
-  alg->setProperty("PeakWidthPercent", peak_width_percent);
-  alg->setProperty("MinimumPeakHeight", minPeakHeight);
+  algFitPeaks->setProperty("FitPeakWindowWorkspace", tof_peak_window_ws);
+  algFitPeaks->setProperty("PeakWidthPercent", peak_width_percent);
+  algFitPeaks->setProperty("MinimumPeakHeight", minPeakHeight);
   // some fitting strategy
-  alg->setProperty("FitFromRight", true);
-  alg->setProperty("HighBackground", false);
-  alg->setProperty("ConstrainPeakPositions",
-                   false); // TODO Pete: need to test this option
+  algFitPeaks->setProperty("FitFromRight", true);
+  algFitPeaks->setProperty("HighBackground", false);
+  algFitPeaks->setProperty("ConstrainPeakPositions",
+                           false); // TODO Pete: need to test this option
   //  optimization setup // TODO : need to test LM or LM-MD
-  alg->setProperty("Minimizer", "Levenberg-Marquardt");
-  alg->setProperty("CostFunction", "Least squares");
-  // additional information if input is EventWorkspace
-  // alg->setProperty("EventNumberWorkspace", spec_event_ws);
+  algFitPeaks->setProperty("Minimizer", "Levenberg-Marquardt");
+  algFitPeaks->setProperty("CostFunction", "Least squares");
+
   // Analysis output
-  std::string fit_param_table_name =
-      getPropertyValue("OutputPeakParametersWorkspace");
-  alg->setPropertyValue("OutputPeakParametersWorkspace",
-                        fit_param_table_name); // TODO put in diagnostics
-  std::string fit_peak_matrix =
-      getPropertyValue("FittedPeaksWorkspace"); // TODO put in diagnostics
-  if (fit_peak_matrix.size() > 0)
-    alg->setPropertyValue("FittedPeaksWorkspace", fit_peak_matrix);
+  algFitPeaks->setPropertyValue("OutputPeakParametersWorkspace",
+                                diagnostic_prefix + "_fitparam");
+  algFitPeaks->setPropertyValue("FittedPeaksWorkspace",
+                                diagnostic_prefix + "_fitted");
 
   // run and get the result
-  alg->executeAsChildAlg();
+  algFitPeaks->executeAsChildAlg();
   g_log.information("finished `FitPeaks");
 
-  // get result
+  // get the fit result
   API::ITableWorkspace_sptr fittedTable =
-      alg->getProperty("OutputPeakParametersWorkspace");
-  setProperty("OutputPeakParametersWorkspace", fittedTable);
-  if (fit_peak_matrix.size() > 0) {
-    MatrixWorkspace_sptr fittedWksp = alg->getProperty("FittedPeaksWorkspace");
-    setProperty("FittedPeaksWorkspace", fittedWksp);
-  }
+      algFitPeaks->getProperty("OutputPeakParametersWorkspace");
+  API::ITableWorkspace_sptr calculatedWS =
+      algFitPeaks->getProperty("OutputPeakParametersWorkspace");
+
   // check : for Pete
   if (!fittedTable)
     throw std::runtime_error(
@@ -675,7 +545,6 @@ void PDCalibration::exec() {
     std::vector<double> width_vec_full(numPeaks, std::nan(""));
     std::vector<double> height_vec_full(numPeaks, std::nan(""));
     std::vector<double> height2; // the square of the peak height
-
     // for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
     const size_t rowNumInFitTableOffset = wkspIndex * numPeaks;
     for (size_t peakIndex = 0; peakIndex < numPeaks; ++peakIndex) {
@@ -732,9 +601,9 @@ void PDCalibration::exec() {
           back_intercept + back_slope * centre + back_quad * centre * centre;
 
       // ban peaks that are not outside of error bars for the background
-      if (height < 0.5 * std::sqrt(height + background))
+      if (height < 0.5 * std::sqrt(height + background)) {
         continue;
-
+      }
       d_vec.push_back(peaks.inDPos[peakIndex]);
       tof_vec.push_back(centre);
       height2.push_back(height * height);
@@ -794,19 +663,23 @@ void PDCalibration::exec() {
   auto resolutionWksp = calculateResolutionTable();
 
   // set the diagnostic workspaces out
-  const std::string partials_prefix = getPropertyValue("DiagnosticWorkspaces");
   auto diagnosticGroup = boost::make_shared<API::WorkspaceGroup>();
+  // add workspaces calculated by FitPeaks
+  diagnosticGroup->addWorkspace(fittedTable);
+  diagnosticGroup->addWorkspace(calculatedWS);
+
+  // add workspaces calculated by PDCalibration
   API::AnalysisDataService::Instance().addOrReplace(
-      partials_prefix + "_dspacing", m_peakPositionTable);
+      diagnostic_prefix + "_dspacing", m_peakPositionTable);
   diagnosticGroup->addWorkspace(m_peakPositionTable);
-  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_width",
-                                                    m_peakWidthTable);
+  API::AnalysisDataService::Instance().addOrReplace(
+      diagnostic_prefix + "_width", m_peakWidthTable);
   diagnosticGroup->addWorkspace(m_peakWidthTable);
-  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_height",
-                                                    m_peakHeightTable);
+  API::AnalysisDataService::Instance().addOrReplace(
+      diagnostic_prefix + "_height", m_peakHeightTable);
   diagnosticGroup->addWorkspace(m_peakHeightTable);
   API::AnalysisDataService::Instance().addOrReplace(
-      partials_prefix + "_resolution", resolutionWksp);
+      diagnostic_prefix + "_resolution", resolutionWksp);
   diagnosticGroup->addWorkspace(resolutionWksp);
   setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
@@ -1105,47 +978,8 @@ MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
 }
 
 MatrixWorkspace_sptr PDCalibration::loadAndBin() {
-  m_uncalibratedWS = getProperty("SignalWorkspace");
-
-  if (bool(m_uncalibratedWS)) {
-    return rebin(m_uncalibratedWS);
-  }
-
-  const std::string signalFile = getProperty("Signalfile");
-  g_log.information() << "Loading signal file \"" << signalFile << "\"\n";
-  auto signalWS = load(getProperty("SignalFile"));
-
-  const std::string backFile = getProperty("Backgroundfile");
-  if (!backFile.empty()) {
-    g_log.information() << "Loading background file \"" << backFile << "\"\n";
-    auto backWS = load(backFile);
-
-    double signalPcharge = signalWS->run().getProtonCharge();
-    double backPcharge = backWS->run().getProtonCharge();
-    backWS *= (signalPcharge / backPcharge); // scale background by charge
-
-    g_log.information("Subtracting background");
-    auto algMinus = createChildAlgorithm("Minus");
-    algMinus->setLoggingOffset(1);
-    algMinus->setProperty("LHSWorkspace", signalWS);
-    algMinus->setProperty("RHSWorkspace", backWS);
-    algMinus->setProperty("OutputWorkspace", signalWS);
-    algMinus->setProperty("ClearRHSWorkspace", true); // only works for events
-    algMinus->executeAsChildAlg();
-    signalWS = algMinus->getProperty("OutputWorkspace");
-
-    g_log.information("Compressing data");
-    auto algCompress = createChildAlgorithm("CompressEvents");
-    algCompress->setLoggingOffset(1);
-    algCompress->setProperty("InputWorkspace", signalWS);
-    algCompress->setProperty("OutputWorkspace", signalWS);
-    algCompress->executeAsChildAlg();
-    DataObjects::EventWorkspace_sptr compressResult =
-        algCompress->getProperty("OutputWorkspace");
-    signalWS = boost::dynamic_pointer_cast<MatrixWorkspace>(compressResult);
-  }
-
-  return rebin(signalWS);
+  m_uncalibratedWS = getProperty("InputWorkspace");
+  return rebin(m_uncalibratedWS);
 }
 
 API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
@@ -1162,20 +996,23 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
   return wksp;
 }
 
-void PDCalibration::loadOldCalibration() {
-  // load the old one
-  std::string filename = getProperty("PreviousCalibration");
-  auto alg = createChildAlgorithm("LoadDiffCal");
-  alg->setLoggingOffset(1);
-  alg->setProperty("Filename", filename);
-  alg->setProperty("WorkspaceName", "NOMold"); // TODO
-  alg->setProperty("MakeGroupingWorkspace", false);
-  alg->setProperty("MakeMaskWorkspace", false);
-  alg->setProperty("TofMin", m_tofMin);
-  alg->setProperty("TofMax", m_tofMax);
-  alg->executeAsChildAlg();
+void PDCalibration::createCalTableFromExisting() {
   API::ITableWorkspace_sptr calibrationTableOld =
-      alg->getProperty("OutputCalWorkspace");
+      getProperty("PreviousCalibrationTable");
+  if (calibrationTableOld == nullptr) {
+    // load from file
+    std::string filename = getProperty("PreviousCalibrationFile");
+    auto alg = createChildAlgorithm("LoadDiffCal");
+    alg->setLoggingOffset(1);
+    alg->setProperty("Filename", filename);
+    alg->setProperty("WorkspaceName", "NOMold"); // TODO
+    alg->setProperty("MakeGroupingWorkspace", false);
+    alg->setProperty("MakeMaskWorkspace", false);
+    alg->setProperty("TofMin", m_tofMin);
+    alg->setProperty("TofMax", m_tofMax);
+    alg->executeAsChildAlg();
+    calibrationTableOld = alg->getProperty("OutputCalWorkspace");
+  }
 
   m_hasDasIds = hasDasIDs(calibrationTableOld);
 
@@ -1219,7 +1056,7 @@ void PDCalibration::loadOldCalibration() {
   }
 }
 
-void PDCalibration::createNewCalTable() {
+void PDCalibration::createCalTableNew() {
   // create new calibraion table for when an old one isn't loaded
   // using the signal workspace and CalculateDIFC
   auto alg = createChildAlgorithm("CalculateDIFC");

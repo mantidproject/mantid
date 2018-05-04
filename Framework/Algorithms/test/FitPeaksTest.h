@@ -287,10 +287,6 @@ public:
     loader->execute();
     TS_ASSERT(loader->isExecuted());
 
-    // create an EventNumberWorkspace
-    std::string event_number_ws_name("PG3_733_EventNumbers");
-    createEventNumberWorkspace(event_number_ws_name, 4, 3);
-
     // Initialize FitPeak
     FitPeaks fit_peaks_alg;
 
@@ -312,8 +308,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
         "PeakWidthPercent", 0.016)); // typical powgen's
-    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("EventNumberWorkspace",
-                                                       event_number_ws_name));
 
     std::string peak_pos_ws_name("PG3_733_peak_positions");
     std::string peak_param_ws_name("PG3_733_peak_params");
@@ -581,28 +575,6 @@ public:
     parvalues.push_back(0.000355);
 
     return;
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
-  /** create a multiple spectra workspace containing counts
-   * @brief createEventNumberWorkspace
-   * @param event_number_ws_name
-   * @param num_spec
-   * @param empty_ws_index
-   */
-  void createEventNumberWorkspace(const std::string &event_number_ws_name,
-                                  size_t num_spec, size_t empty_ws_index) {
-    // create a MatrixWorkspace
-    MatrixWorkspace_sptr matrix_ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            static_cast<int>(num_spec), 1);
-
-    // set spectrum without counts
-    matrix_ws->mutableY(empty_ws_index) = 0.;
-
-    // add to ADS
-    AnalysisDataService::Instance().addOrReplace(event_number_ws_name,
-                                                 matrix_ws);
   }
 
   //--------------------------------------------------------------------------------------------------------------

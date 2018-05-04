@@ -8,6 +8,7 @@
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -21,8 +22,6 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
-
-#include "MantidAPI/MultiDomainFunction.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -68,6 +67,10 @@ size_t PeakFitResult::getNumberParameters() const {
   return m_function_parameters_number;
 }
 
+size_t PeakFitResult::getNumberPeaks() const {
+  return m_function_parameters_vector.size();
+}
+
 double PeakFitResult::getParameterValue(size_t ipeak, size_t iparam) const {
   return m_function_parameters_vector[ipeak][iparam];
 }
@@ -107,8 +110,26 @@ void PeakFitResult::setRecord(size_t ipeak, const double cost,
     m_function_parameters_vector[ipeak][ipar + peak_num_params] =
         fit_functions.bkgdfunction->getParameter(ipar);
   }
+}
 
-  return;
+/// The peak postition should be negative and indicates what went wrong
+void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
+  // check input
+  if (ipeak >= m_costs.size())
+    throw std::runtime_error("Peak index is out of range");
+  if (peak_position >= 0.)
+    throw std::runtime_error("Can only set negative postion for bad record");
+
+  // set the values
+  m_costs[ipeak] = DBL_MAX;
+
+  // set peak position
+  m_fitted_peak_positions[ipeak] = peak_position;
+
+  // transfer from peak function to vector
+  for (size_t ipar = 0; ipar < m_function_parameters_number; ++ipar) {
+    m_function_parameters_vector[ipeak][ipar] = 0.;
+  }
 }
 }
 
@@ -279,20 +300,11 @@ void FitPeaks::init() {
                   "For example, vanadium peaks usually have high background.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "EventNumberWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Name of an optional workspace, whose each spectrum corresponds to each "
-      "spectrum "
-      "in input workspace. "
-      "It has 1 value of each spectrum, standing for the number of events of "
-      "the corresponding spectrum.");
-
-  declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
       "List of tolerance on fitted peak positions against given peak positions."
       "If there is only one value given, then ");
 
-  declareProperty("MinimumPeakHeight", EMPTY_DBL(),
+  declareProperty("MinimumPeakHeight", 0.,
                   "Minimum peak height such that all the fitted peaks with "
                   "height under this value will be excluded.");
 
@@ -303,8 +315,6 @@ void FitPeaks::init() {
       "the peak width either estimted by observation or calculate.");
 
   std::string helpgrp("Additional Information");
-
-  setPropertyGroup("EventNumberWorkspace", helpgrp);
 
   // additional output for reviewing
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
@@ -415,11 +425,6 @@ void FitPeaks::exec() {
 void FitPeaks::processInputs() {
   // input workspaces
   m_inputMatrixWS = getProperty("InputWorkspace");
-  std::string event_ws_name = getPropertyValue("EventNumberWorkspace");
-  if (event_ws_name.empty())
-    m_eventNumberWS = nullptr;
-  else
-    m_eventNumberWS = getProperty("EventNumberWorkspace");
 
   if (m_inputMatrixWS->getAxis(0)->unit()->unitID() == "dSpacing")
     m_inputIsDSpace = true;
@@ -815,26 +820,12 @@ void FitPeaks::fitPeaks() {
         boost::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
                                                              numfuncparams);
 
-    // check number of events
-    bool noevents(false);
-    if (m_eventNumberWS &&
-        m_eventNumberWS->histogram(static_cast<size_t>(wi)).x()[0] < 1.0) {
-      // no event with additional event number workspace
-      noevents = true;
-    } else if (m_inputEventWS &&
-               m_inputEventWS->getNumberEvents() < MIN_EVENTS) {
-      // too few events for peak fitting
-      noevents = true;
-    } else {
-      // fit
-      fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
-                       fit_result);
-      //    fitted_peak_centers, fitted_parameters, &peak_chi2_vec);
-    }
+    fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
+                     fit_result);
 
     PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-      writeFitResult(static_cast<size_t>(wi), expected_peak_centers, fit_result,
-                     noevents);
+      writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
+                     fit_result);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -884,8 +875,11 @@ double numberCounts(const Histogram &histogram, const double xmin,
 void FitPeaks::fitSpectrumPeaks(
     size_t wi, const std::vector<double> &expected_peak_centers,
     boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result) {
-  if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight)
+  if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight) {
+    for (size_t i = 0; i < fit_result->getNumberPeaks(); ++i)
+      fit_result->setBadRecord(i, -1.);
     return; // don't do anything
+  }
 
   // Set up sub algorithm Fit for peak and background
   IAlgorithm_sptr peak_fitter; // both peak and background (combo)
@@ -1101,9 +1095,9 @@ void FitPeaks::calculateFittedPeaks() {
   size_t num_peakfunc_params = m_peakFunction->nParams();
   size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
-  // TODO/LATER - Implement OpenMP parallelization
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
   for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
-    // TODO/LATER - Parallelization macro shall be put here
+    PARALLEL_START_INTERUPT_REGION
 
     // get a copy of peak function and background function
     IPeakFunction_sptr peak_function =
@@ -1164,7 +1158,9 @@ void FitPeaks::calculateFittedPeaks() {
         m_fittedPeakWS->dataY(iws)[yindex] =
             values.getCalculated(yindex - istart);
     } // END-FOR (ipeak)
+    PARALLEL_END_INTERUPT_REGION
   }   // END-FOR (iws)
+  PARALLEL_CHECK_INTERUPT_REGION
 
   return;
 }
@@ -1435,8 +1431,6 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
 
 //----------------------------------------------------------------------------------------------
 /** Fit an individual peak
- * @param observe_peak_width:: flag to estimate peak width (by observation) or
- * not
  */
 double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                                    const double expected_peak_center,
@@ -1992,8 +1986,7 @@ void FitPeaks::estimateLinearBackground(const Histogram &histogram,
 ///  Write result of peak fit per spectrum to output analysis workspaces
 void FitPeaks::writeFitResult(
     size_t wi, const std::vector<double> &expected_positions,
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
-    bool noevents) {
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result) {
   // convert to
   size_t out_wi = wi - m_startWorkspaceIndex;
   if (out_wi >= m_outputPeakPositionWorkspace->getNumberHistograms()) {
@@ -2010,13 +2003,8 @@ void FitPeaks::writeFitResult(
   // Fill the output peak position workspace
   for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
     double exp_peak_pos(expected_positions[ipeak]);
-    double fitted_peak_pos(-1); // default for no event or no signal
-    double peak_chi2(-1E20);    // use negative number for NO fit
-    if (!noevents) {
-      fitted_peak_pos =
-          fit_result->getPeakPosition(ipeak); // fitted_positions[ipeak];
-      peak_chi2 = fit_result->getCost(ipeak); // peak_chi2_vec[ipeak];
-    }
+    double fitted_peak_pos = fit_result->getPeakPosition(ipeak);
+    double peak_chi2 = fit_result->getCost(ipeak);
 
     m_outputPeakPositionWorkspace->mutableX(out_wi)[ipeak] = exp_peak_pos;
     m_outputPeakPositionWorkspace->mutableY(out_wi)[ipeak] = fitted_peak_pos;
@@ -2048,35 +2036,27 @@ void FitPeaks::writeFitResult(
           "table workspace");
     }
 
-    if (noevents) {
-      // no signals: just pass
-      ;
-    } else {
-      // case for fit peak with signals
-      for (size_t iparam = 0;
-           iparam <
-               fit_result
-                   ->getNumberParameters(); // peak_parameters[ipeak].size();
-           ++iparam) {
-        size_t col_index = iparam + 2;
-        if (col_index >= m_fittedParamTable->columnCount()) {
-          stringstream err_ss;
-          err_ss << "Try to access FittedParamTable's " << col_index
-                 << "-th column, which is out of range [0, "
-                 << m_fittedParamTable->columnCount() << ")";
-          const std::vector<std::string> &col_names =
-              m_fittedParamTable->getColumnNames();
-          for (const auto &name : col_names)
-            err_ss << name << "  ";
-          throw std::runtime_error(err_ss.str());
-        }
-        m_fittedParamTable->cell<double>(row_index, col_index) =
-            fit_result->getParameterValue(ipeak, iparam);
-      } // end for (iparam)
-      // set chi2
-      m_fittedParamTable->cell<double>(row_index, chi2_index) =
-          fit_result->getCost(ipeak);
-    }
+    // case for fit peak with signals
+    for (size_t iparam = 0; iparam < fit_result->getNumberParameters();
+         ++iparam) {
+      size_t col_index = iparam + 2;
+      if (col_index >= m_fittedParamTable->columnCount()) {
+        stringstream err_ss;
+        err_ss << "Try to access FittedParamTable's " << col_index
+               << "-th column, which is out of range [0, "
+               << m_fittedParamTable->columnCount() << ")";
+        const std::vector<std::string> &col_names =
+            m_fittedParamTable->getColumnNames();
+        for (const auto &name : col_names)
+          err_ss << name << "  ";
+        throw std::runtime_error(err_ss.str());
+      }
+      m_fittedParamTable->cell<double>(row_index, col_index) =
+          fit_result->getParameterValue(ipeak, iparam);
+    } // end for (iparam)
+    // set chi2
+    m_fittedParamTable->cell<double>(row_index, chi2_index) =
+        fit_result->getCost(ipeak);
   }
 
   return;

@@ -34,10 +34,11 @@ public:
   double getPeakPosition(size_t ipeak) const;
   double getCost(size_t ipeak) const;
   size_t getNumberParameters() const;
+  size_t getNumberPeaks() const;
   double getParameterValue(size_t ipeak, size_t iparam) const;
   void setRecord(size_t ipeak, const double cost, const double peak_position,
                  const FitFunction fit_functions);
-  void setPosition(size_t ipeak, double position);
+  void setBadRecord(size_t ipeak, const double peak_position);
   void setFunctionParameters(size_t ipeak, std::vector<double> &param_values);
 
 private:
@@ -216,10 +217,9 @@ private:
   void processOutputs();
 
   /// Write result of peak fit per spectrum to output analysis workspaces
-  void
-  writeFitResult(size_t wi, const std::vector<double> &expected_positions,
-                 boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result,
-                 bool noevents);
+  void writeFitResult(
+      size_t wi, const std::vector<double> &expected_positions,
+      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
 
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
@@ -230,8 +230,6 @@ private:
   /// output workspace for peak positions
   API::MatrixWorkspace_sptr
       m_outputPeakPositionWorkspace; // output workspace for peak positions
-  /// matrix workspace contains number of events of each spectrum
-  API::MatrixWorkspace_const_sptr m_eventNumberWS;
   /// optional output analysis workspaces
   /// table workspace for fitted parameters
   API::ITableWorkspace_sptr m_fittedParamTable;
