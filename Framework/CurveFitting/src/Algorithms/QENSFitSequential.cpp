@@ -571,8 +571,8 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
   return pifp->getProperty("OutputWorkspace");
 }
 
-ITableWorkspace_sptr QENSFitSequential::processParameterTable(
-    ITableWorkspace_sptr parameterTable) {
+ITableWorkspace_sptr
+QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
   return parameterTable;
 }
 
