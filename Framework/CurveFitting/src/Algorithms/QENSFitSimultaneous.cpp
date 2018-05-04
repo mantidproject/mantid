@@ -323,7 +323,8 @@ void QENSFitSimultaneous::execConcrete() {
   addAdditionalLogs(resultWs);
   copyLogs(resultWs, groupWs);
 
-  setProperty("OutputWorkspace", boost::static_pointer_cast<Workspace>(resultWs));
+  setProperty("OutputWorkspace",
+              boost::static_pointer_cast<Workspace>(resultWs));
   setProperty("OutputParameterWorkspace", parameterWs);
   setProperty("OutputWorkspaceGroup", groupWs);
 }
