@@ -120,6 +120,14 @@ std::string shortParameterName(const std::string &longName) {
   return longName.substr(longName.rfind('.') + 1, longName.size());
 }
 
+void renameWorkspace(MatrixWorkspace_sptr workspace,
+                     const std::string &newName) {
+  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+  renamer->setProperty("InputWorkspace", workspace);
+  renamer->setProperty("OutputWorkspace", newName);
+  renamer->execute();
+}
+
 void setMultiDataProperties(const IAlgorithm &qensFit, IAlgorithm &fit,
                             MatrixWorkspace_sptr workspace,
                             const std::string &suffix) {
@@ -247,7 +255,7 @@ void QENSFitSimultaneous::initConcrete() {
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output result workspace");
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -305,6 +313,7 @@ void QENSFitSimultaneous::execConcrete() {
   const auto groupWs =
       boost::dynamic_pointer_cast<WorkspaceGroup>(fitResult.second);
   const auto resultWs = processIndirectFitParameters(parameterWs);
+  renameWorkspace(resultWs, getPropertyValue("OutputWorkspace"));
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -314,7 +323,7 @@ void QENSFitSimultaneous::execConcrete() {
   addAdditionalLogs(resultWs);
   copyLogs(resultWs, groupWs);
 
-  setProperty("OutputWorkspace", resultWs);
+  setProperty("OutputWorkspace", boost::static_pointer_cast<Workspace>(resultWs));
   setProperty("OutputParameterWorkspace", parameterWs);
   setProperty("OutputWorkspaceGroup", groupWs);
 }
