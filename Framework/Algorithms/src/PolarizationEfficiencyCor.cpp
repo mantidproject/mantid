@@ -93,8 +93,8 @@ void PolarizationEfficiencyCor::init() {
                       PropertyMode::Optional),
                   "A group of workspaces to be corrected.");
 
-  const std::vector<std::string> methods{
-      {CorrectionMethod::WILDES, CorrectionMethod::FREDRIKZE}};
+  const std::vector<std::string> methods{CorrectionMethod::WILDES,
+                                         CorrectionMethod::FREDRIKZE};
   declareProperty(
       Prop::CORRECTION_METHOD, CorrectionMethod::WILDES,
       boost::make_shared<Kernel::ListValidator<std::string>>(methods),

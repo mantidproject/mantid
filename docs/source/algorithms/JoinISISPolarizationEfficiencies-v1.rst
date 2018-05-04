@@ -25,10 +25,10 @@ Usage
 
     # Combine them in a single workspace
     efficiencies = JoinISISPolarizationEfficiencies(Pp=ws1, Ap=ws2)
-    print 'Number of spectra =', efficiencies.getNumberHistograms()
-    print 'Number of bins    =', efficiencies.blocksize()
-    print 'Label of first  spectrum:', efficiencies.getAxis(1).label(0)
-    print 'Label of second spectrum:', efficiencies.getAxis(1).label(1)
+    print('Number of spectra =', efficiencies.getNumberHistograms())
+    print('Number of bins    =', efficiencies.blocksize())
+    print('Label of first  spectrum:', efficiencies.getAxis(1).label(0))
+    print('Label of second spectrum:', efficiencies.getAxis(1).label(1))
 
 Output:
 

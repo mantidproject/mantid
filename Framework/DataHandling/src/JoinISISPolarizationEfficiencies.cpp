@@ -183,6 +183,7 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
 
 /// Create the efficiency workspace by combining single spectra workspaces into
 /// one.
+/// @param labels :: Axis labels for each workspace.
 /// @param workspaces :: Workspaces to put together.
 MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
     std::vector<std::string> const &labels,
