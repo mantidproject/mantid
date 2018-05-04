@@ -531,14 +531,14 @@ std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
   std::copy_if(
       uniqueParameters.begin(), uniqueParameters.end(),
       std::back_inserter(parameters),
-      [](const std::string &parameter) { return isFitParameter(parameter); });
+      [&](const std::string &parameter) { return isFitParameter(parameter); });
   return parameters;
 }
 
 std::set<std::string> QENSFitSequential::getUniqueParameterNames() const {
   IFunction_sptr function = getProperty("Function");
   std::set<std::string> nameSet;
-  for (auto i = 0u; i < functions->nParams(); ++i)
+  for (auto i = 0u; i < function->nParams(); ++i)
     nameSet.insert(shortParameterName(function->parameterName(i)));
   return nameSet;
 }
