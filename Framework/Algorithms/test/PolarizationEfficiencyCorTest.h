@@ -536,7 +536,7 @@ private:
 
   MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
                                      double endX) const {
-    double const dX = (endX - startX) / size;
+    double const dX = (endX - startX) / double(size);
     BinEdges xVals(size + 1, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
     auto retVal = boost::make_shared<Workspace2D>();
@@ -546,7 +546,7 @@ private:
 
   MatrixWorkspace_sptr createPointWS(size_t size, double startX,
                                      double endX) const {
-    double const dX = (endX - startX) / (size - 1);
+    double const dX = (endX - startX) / double(size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
     auto retVal = boost::make_shared<Workspace2D>();
