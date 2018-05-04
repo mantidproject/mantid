@@ -1,23 +1,24 @@
-#include "MantidQtWidgets/Common/Batch/BuildSubtree.h"
+#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include <tuple>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
-BuildSubtree::BuildSubtree(QStandardItemModel &model) : m_model(model) {}
+BuildSubtreeItems::BuildSubtreeItems(QStandardItemModel &model)
+    : m_model(model) {}
 
-void BuildSubtree::operator()(QStandardItem *parentOfSubtreeRootItem,
-                              RowLocation const &parentOfSubtreeRoot, int index,
-                              Subtree const &subtree) {
+void BuildSubtreeItems::operator()(QStandardItem *parentOfSubtreeRootItem,
+                                   RowLocation const &parentOfSubtreeRoot,
+                                   int index, Subtree const &subtree) {
   if (!subtree.empty())
     buildRecursively(parentOfSubtreeRootItem, index, parentOfSubtreeRoot, 0,
                      subtree.cbegin(), subtree.cend());
 }
 
-auto BuildSubtree::buildRecursively(QStandardItem *parentItem, int index,
-                                    RowLocation const &parent, int depth,
-                                    SubtreeConstIterator current,
-                                    SubtreeConstIterator end)
+auto BuildSubtreeItems::buildRecursively(QStandardItem *parentItem, int index,
+                                         RowLocation const &parent, int depth,
+                                         SubtreeConstIterator current,
+                                         SubtreeConstIterator end)
     -> SubtreeConstIterator {
   parentItem->insertRow(index, rowFromCells((*current).cells()));
   ++current;

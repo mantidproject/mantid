@@ -5,7 +5,7 @@
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
-#include "MantidQtWidgets/Common/Batch/BuildSubtree.h"
+#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <algorithm>
@@ -148,7 +148,7 @@ void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
 
 void JobTreeView::insertSubtreeAt(RowLocation const &parent, int index,
                                   Subtree const &subtree) {
-  auto build = BuildSubtree(m_mainModel);
+  auto build = BuildSubtreeItems(m_mainModel);
   auto parentIndex = rowLocation().indexAt(parent);
   build(modelItemFromIndex(m_mainModel, parentIndex), parent, index, subtree);
 }

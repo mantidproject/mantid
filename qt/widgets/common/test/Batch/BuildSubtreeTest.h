@@ -2,7 +2,7 @@
 #define MANTID_MANTIDWIDGETS_BUILDSUBTREETEST_H
 
 #include "MantidKernel/make_unique.h"
-#include "MantidQtWidgets/Common/Batch/BuildSubtree.h"
+#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <gtest/gtest.h>
@@ -13,12 +13,12 @@ using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
 using namespace testing;
 
-class BuildSubtreeTest : public CxxTest::TestSuite {
+class BuildSubtreeItemsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BuildSubtreeTest *createSuite() { return new BuildSubtreeTest; }
-  static void destroySuite(BuildSubtreeTest *suite) { delete suite; }
+  static BuildSubtreeItemsTest *createSuite() { return new BuildSubtreeItemsTest; }
+  static void destroySuite(BuildSubtreeItemsTest *suite) { delete suite; }
 
   QtStandardItemMutableTreeAdapter adapt(QStandardItemModel *model) {
     return QtStandardItemMutableTreeAdapter(*model);
@@ -38,7 +38,7 @@ public:
   void testBuildEmptySubtree() {
     auto model = emptyModel();
     auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtree(adaptedModel);
+    auto build = BuildSubtreeItems(adaptedModel);
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree();
@@ -49,10 +49,10 @@ public:
     TS_ASSERT(rootItem->rowCount() == 0);
   }
 
-  void testBuildSubtreeWithRootOnly() {
+  void testBuildSubtreeItemsWithRootOnly() {
     auto model = emptyModel();
     auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtree(adaptedModel);
+    auto build = BuildSubtreeItems(adaptedModel);
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({{RowLocation(), cells("Root")}});
@@ -64,10 +64,10 @@ public:
     TS_ASSERT_EQUALS(rootItem->child(0)->text(), "Root");
   }
 
-  void testBuildSubtreeWithRootAndSingleChild() {
+  void testBuildSubtreeItemsWithRootAndSingleChild() {
     auto model = emptyModel();
     auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtree(adaptedModel);
+    auto build = BuildSubtreeItems(adaptedModel);
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({Row(RowLocation(), cells("Root")),
@@ -85,10 +85,10 @@ public:
     TS_ASSERT_EQUALS(childItem->text(), "Child");
   }
 
-  void testBuildSubtreeWithRootAndTwoChildren() {
+  void testBuildSubtreeItemsWithRootAndTwoChildren() {
     auto model = emptyModel();
     auto adaptedModel = adapt(model.get());
-    auto build = BuildSubtree(adaptedModel);
+    auto build = BuildSubtreeItems(adaptedModel);
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({Row(RowLocation(), cells("Root")),

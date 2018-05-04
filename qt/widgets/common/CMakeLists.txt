@@ -92,7 +92,7 @@ set ( SRC_FILES
   src/Batch/QtBasicNavigation.cpp
   src/Batch/QtTreeCursorNavigation.cpp
   src/Batch/CellDelegate.cpp
-  src/Batch/BuildSubtree.cpp
+  src/Batch/BuildSubtreeItems.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
@@ -416,7 +416,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/CellDelegate.h
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
-  inc/MantidQtWidgets/Common/Batch/BuildSubtree.h
+  inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
 )
 
 set ( UI_FILES
@@ -567,7 +567,7 @@ set( TEST_FILES
   test/Batch/RowLocationTest.h
   test/Batch/FindSubtreeRootsTest.h
   test/Batch/ExtractSubtreesTest.h
-  test/Batch/BuildSubtreeTest.h
+  test/Batch/BuildSubtreeItemsTest.h
 
   test/ParseKeyValueStringTest.h
   test/DataProcessorUI/QOneLevelTreeModelTest.h

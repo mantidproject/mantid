@@ -10,11 +10,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-class EXPORT_OPT_MANTIDQT_COMMON BuildSubtree {
+class EXPORT_OPT_MANTIDQT_COMMON BuildSubtreeItems {
 public:
   using SubtreeConstIterator = typename Subtree::const_iterator;
 
-  BuildSubtree(QStandardItemModel &model);
+  BuildSubtreeItems(QStandardItemModel &model);
 
   void operator()(QStandardItem *parentOfSubtreeRootItem,
                   RowLocation const &parentOfSubtreeRoot, int index,
