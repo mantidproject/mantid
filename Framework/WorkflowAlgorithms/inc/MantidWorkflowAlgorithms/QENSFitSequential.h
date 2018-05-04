@@ -7,6 +7,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/IValidator.h"
 
+#include <set>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -54,6 +56,7 @@ private:
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &parameterName) const;
   std::vector<std::string> getFitParameterNames() const;
+  std::set<std::string> getUniqueParameterNames() const;
   std::string getOutputBaseName() const;
   std::string getInputString(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
