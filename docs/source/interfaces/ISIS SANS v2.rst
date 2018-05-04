@@ -100,6 +100,7 @@ Columns
 | **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
 |                          |   , **WavelengthMax** and **EventSlices** can be set here.                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
+
 Save Options
 ^^^^^^^^^^^^
 
