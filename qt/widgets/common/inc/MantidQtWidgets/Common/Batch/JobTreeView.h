@@ -29,7 +29,6 @@ public:
   virtual ~JobTreeViewSubscriber() = default;
 };
 
-
 class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView {
   Q_OBJECT
 public:
@@ -118,7 +117,8 @@ private:
   bool isOnlyChild(QModelIndexForMainModel const &index) const;
   bool isOnlyChildOfRoot(QModelIndexForMainModel const &index) const;
   QModelIndex siblingIfExistsElseParent(QModelIndex const &index) const;
-  bool rowRemovalWouldBeIneffective(QModelIndexForMainModel const &indexToRemove) const;
+  bool rowRemovalWouldBeIneffective(
+      QModelIndexForMainModel const &indexToRemove) const;
 
   QModelIndexForFilteredModel
   expanded(QModelIndexForFilteredModel const &index);

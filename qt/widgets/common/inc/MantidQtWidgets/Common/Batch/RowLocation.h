@@ -36,7 +36,7 @@ private:
   RowPath m_path;
 };
 
-std::ostream& operator<<(std::ostream &os, RowLocation const &location);
+std::ostream &operator<<(std::ostream &os, RowLocation const &location);
 
 } // namespace Batch
 } // namespace MantidWidgets

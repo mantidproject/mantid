@@ -13,7 +13,6 @@
 #include "MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 
-
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {

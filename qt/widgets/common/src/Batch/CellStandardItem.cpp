@@ -28,7 +28,6 @@ void setIcon(QStandardItem &item, std::string const &iconFilePath) {
     item.setIcon(QIcon());
 }
 
-
 void setBorderColor(QStandardItem &item, std::string const &borderColor,
                     int alpha) {
   auto borderQColor = QColor(borderColor.c_str());
@@ -43,7 +42,11 @@ void setBackgroundColor(QStandardItem &item,
 }
 
 std::string getBackgroundColor(QStandardItem const &item) {
-  return item.data(Qt::BackgroundRole).value<QBrush>().color().name().toStdString();
+  return item.data(Qt::BackgroundRole)
+      .value<QBrush>()
+      .color()
+      .name()
+      .toStdString();
 }
 
 QColor getBorderColor(QStandardItem const &item) {

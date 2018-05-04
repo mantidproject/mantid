@@ -10,7 +10,6 @@ inline void assertOrThrow(bool condition, std::string const &message) {
   if (!condition)
     throw std::runtime_error(message);
 }
-
 }
 }
 }

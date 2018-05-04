@@ -36,9 +36,7 @@ void JobTreeViewSignalAdapter::notifyPasteRowsRequested() {
   emit pasteRowsRequested();
 }
 
-void JobTreeViewSignalAdapter::notifyFilterReset() {
-  emit filterReset();
-}
+void JobTreeViewSignalAdapter::notifyFilterReset() { emit filterReset(); }
 }
 }
 }

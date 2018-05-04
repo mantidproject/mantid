@@ -11,7 +11,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-
 class EXPORT_OPT_MANTIDQT_COMMON Row {
 public:
   Row(RowLocation location, std::vector<Cell> cells);

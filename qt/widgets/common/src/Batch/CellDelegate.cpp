@@ -18,7 +18,9 @@ void CellDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
   QStyledItemDelegate::paint(painter, option, index);
   painter->save();
 
-  auto* item = modelItemFromIndex(m_mainModel, fromMainModel(m_filteredModel.mapToSource(index), m_mainModel));
+  auto *item = modelItemFromIndex(
+      m_mainModel,
+      fromMainModel(m_filteredModel.mapToSource(index), m_mainModel));
   auto borderColor = getBorderColor(*item);
   auto borderThickness = getBorderThickness(*item);
 

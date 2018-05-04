@@ -61,7 +61,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QModelIndexForFilteredModel
 
 inline QModelIndexForFilteredModel
 fromFilteredModel(QModelIndex const &filteredModelIndex,
-                        QAbstractItemModel const &model) {
+                  QAbstractItemModel const &model) {
   assertOrThrow(filteredModelIndex.model() == nullptr ||
                     filteredModelIndex.model() == &model,
                 "assertFromFilteredModel: Index model assertion was not true.");
@@ -73,9 +73,8 @@ class EXPORT_OPT_MANTIDQT_COMMON QModelIndexForMainModel
   using StrictQModelIndex<QModelIndexForMainModel>::StrictQModelIndex;
 };
 
-inline QModelIndexForMainModel
-fromMainModel(QModelIndex const &mainModelIndex,
-                    QAbstractItemModel const &model) {
+inline QModelIndexForMainModel fromMainModel(QModelIndex const &mainModelIndex,
+                                             QAbstractItemModel const &model) {
   assertOrThrow(mainModelIndex.model() == nullptr ||
                     mainModelIndex.model() == &model,
                 "assertFromMainModel: Index model assertion was not true.");

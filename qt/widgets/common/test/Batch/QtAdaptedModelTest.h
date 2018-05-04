@@ -115,7 +115,8 @@ public:
     auto model = emptyModel();
     auto adaptedModel = adapt(model.get());
 
-    auto const rowText = std::vector<std::string>({"First Cell", "Second Cell"});
+    auto const rowText =
+        std::vector<std::string>({"First Cell", "Second Cell"});
     auto const row = adaptedModel.rowFromRowText(rowText);
 
     TS_ASSERT_EQUALS(row.size(), 2u);

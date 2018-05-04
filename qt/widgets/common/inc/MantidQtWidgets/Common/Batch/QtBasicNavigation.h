@@ -18,7 +18,6 @@ bool hasCellOnTheRight(QModelIndex const &index);
 bool hasRowAbove(QModelIndex const &index);
 bool hasRowBelow(QModelIndex const &index);
 bool areOnSameRow(QModelIndex const &a, QModelIndex const &b);
-
 }
 }
 }

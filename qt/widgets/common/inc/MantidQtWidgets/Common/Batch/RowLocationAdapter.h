@@ -10,7 +10,7 @@ namespace Batch {
 
 class RowLocationAdapter {
 public:
-  RowLocationAdapter(QStandardItemModel const& model);
+  RowLocationAdapter(QStandardItemModel const &model);
 
   RowLocation atIndex(QModelIndexForMainModel const &index) const;
   boost::optional<QModelIndexForMainModel>
@@ -19,7 +19,7 @@ public:
                                   int column = 0) const;
 
 private:
-  QStandardItemModel const& m_model;
+  QStandardItemModel const &m_model;
 };
 }
 }

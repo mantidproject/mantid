@@ -10,14 +10,15 @@ namespace Batch {
 class EXPORT_OPT_MANTIDQT_COMMON Cell {
 public:
   Cell(std::string const &contentText);
-  Cell(std::string const &contentText, std::string const& backgroundColor, int borderThickness,
-       std::string const &color, int borderOpacity, bool isEditable);
+  Cell(std::string const &contentText, std::string const &backgroundColor,
+       int borderThickness, std::string const &color, int borderOpacity,
+       bool isEditable);
 
   void setContentText(std::string const &contentText);
   std::string const &contentText() const;
 
-  void setIconFilePath(std::string const& iconPath);
-  std::string const& iconFilePath() const;
+  void setIconFilePath(std::string const &iconPath);
+  std::string const &iconFilePath() const;
 
   void setBorderColor(std::string const &borderColor);
   std::string const &borderColor() const;

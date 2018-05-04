@@ -32,7 +32,6 @@ private:
   withoutAppendedRow(QModelIndex const &index) const;
   QtTreeCursorNavigationResult withAppendedRow(QModelIndex const &index) const;
 };
-
 }
 }
 }

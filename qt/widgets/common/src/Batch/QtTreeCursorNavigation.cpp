@@ -64,7 +64,8 @@ QtTreeCursorNavigation::lastCellInPreviousRow(QModelIndex const &index) const {
   return index.sibling(index.row() - 1, model->columnCount() - 1);
 }
 
-QModelIndex lastChildRowOf(QModelIndex const &parent, QAbstractItemModel const& model) {
+QModelIndex lastChildRowOf(QModelIndex const &parent,
+                           QAbstractItemModel const &model) {
   return model.index(model.rowCount(parent) - 1, 0, parent);
 }
 

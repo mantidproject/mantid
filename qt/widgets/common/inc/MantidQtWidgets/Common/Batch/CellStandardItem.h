@@ -17,12 +17,11 @@ enum CellUserRoles {
 void setBorderThickness(QStandardItem &item, int borderThickness);
 int getBorderThickness(QStandardItem const &item);
 
-void setBorderColor(QStandardItem &item, QColor const& borderColor);
+void setBorderColor(QStandardItem &item, QColor const &borderColor);
 QColor getBorderColor(QStandardItem const &item);
 
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item);
-Cell extractCellPropertiesFromItem(QStandardItem const& item);
-
+Cell extractCellPropertiesFromItem(QStandardItem const &item);
 }
 }
 }
