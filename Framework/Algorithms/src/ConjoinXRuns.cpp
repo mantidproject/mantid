@@ -113,8 +113,15 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
+  std::vector<std::string> workspaces;
+  try {
+    workspaces = RunCombinationHelper::unWrapGroups(inputs_given);
+  } catch (const std::exception &e) {
+    issues[INPUT_WORKSPACE_PROPERTY] = std::string(e.what());
+  }
+
   // find if there are workspaces that are not Matrix or not a point-data
-  for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
+  for (const auto &input : workspaces) {
     MatrixWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
     if (ws->isHistogramData()) {
