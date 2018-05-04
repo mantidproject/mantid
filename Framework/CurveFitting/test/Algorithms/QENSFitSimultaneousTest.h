@@ -83,13 +83,11 @@ private:
     QENSFitSimultaneous alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("Function", convolutionFunction(resolution->getName()));
+    alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
-    alg.setProperty("SpecMin", 0);
-    alg.setProperty(
-        "SpecMax", static_cast<int>(inputWorkspace->getNumberHistograms() - 1));
+    alg.setProperty("WorkspaceIndex", 0);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
@@ -107,11 +105,9 @@ private:
     QENSFitSimultaneous alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    setMultipleInput(alg, workspaces);
     alg.setProperty("Function",
                     createMultiDomainFunction(function, workspaces.size()));
-    alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 10.0);
+    setMultipleInput(alg, workspaces, 0.0, 10.0);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
@@ -214,14 +210,19 @@ private:
   }
 
   void setMultipleInput(IAlgorithm &fitAlgorithm,
-                        const std::vector<MatrixWorkspace_sptr> &workspaces) {
+                        const std::vector<MatrixWorkspace_sptr> &workspaces,
+                        double startX, double endX) {
     fitAlgorithm.setProperty("InputWorkspace", workspaces[0]);
     fitAlgorithm.setProperty("WorkspaceIndex", 0);
+    fitAlgorithm.setProperty("StartX", startX);
+    fitAlgorithm.setProperty("EndX", endX);
 
     for (auto i = 1u; i < workspaces.size(); ++i) {
       const auto suffix = "_" + std::to_string(i);
       fitAlgorithm.setProperty("InputWorkspace" + suffix, workspaces[i]);
       fitAlgorithm.setProperty("WorkspaceIndex" + suffix, 0);
+      fitAlgorithm.setProperty("StartX" + suffix, startX);
+      fitAlgorithm.setProperty("EndX" + suffix, endX);
     }
   }
 

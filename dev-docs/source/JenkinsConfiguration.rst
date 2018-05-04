@@ -422,7 +422,7 @@ Run a Process
     Process p = "cmd /c dir".execute()
     println "${p.text}"
 
-    # kill process on windows
+    // kill process on windows slave
     Process p = "cmd /c Taskkill /F /IM MantidPlot.exe".execute()
     println "${p.text}"
 

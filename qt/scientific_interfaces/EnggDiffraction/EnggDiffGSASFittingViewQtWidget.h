@@ -83,6 +83,7 @@ private slots:
   void disableLoadIfInputEmpty();
   void doRefinement();
   void loadFocusedRun();
+  void refineAll();
   void selectRun();
 
 private:

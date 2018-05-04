@@ -268,13 +268,11 @@ const std::vector<std::string> ConvolutionFit<Base>::seeAlso() const {
 template <typename Base>
 std::map<std::string, std::string> ConvolutionFit<Base>::validateInputs() {
   auto errors = Base::validateInputs();
-  IFunction_sptr function = getProperty("Function");
+  IFunction_sptr function = Base::getProperty("Function");
   if (!containsFunction(function, "Convolution") ||
       !containsFunction(function, "Resolution"))
     errors["Function"] = "Function provided does not contain convolution with "
                          "a resolution function.";
-  m_deltaUsed = containsFunction(function, "DeltaFunction");
-  m_lorentzianCount = numberOfFunctions(function, "Lorentzian");
   return errors;
 }
 
@@ -293,6 +291,8 @@ bool ConvolutionFit<Base>::isFitParameter(const std::string &name) const {
 template <typename Base>
 ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
     ITableWorkspace_sptr parameterTable) const {
+  IFunction_sptr function = getProperty("Function");
+  m_deltaUsed = containsFunction(function, "DeltaFunction");
   if (m_deltaUsed)
     calculateEISF(parameterTable);
   return parameterTable;
@@ -301,7 +301,7 @@ ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
 template <typename Base>
 std::map<std::string, std::string>
 ConvolutionFit<Base>::getAdditionalLogStrings() const {
-  IFunction_sptr function = getProperty("Function");
+  IFunction_sptr function = Base::getProperty("Function");
   auto logs = Base::getAdditionalLogStrings();
   logs["delta_function"] = m_deltaUsed ? "true" : "false";
   logs["background"] = extractBackgroundType(function);
@@ -311,8 +311,10 @@ ConvolutionFit<Base>::getAdditionalLogStrings() const {
 template <typename Base>
 std::map<std::string, std::string>
 ConvolutionFit<Base>::getAdditionalLogNumbers() const {
-  auto logs = Base::getAdditionalLogNumbers();
-  logs["lorentzians"] = boost::lexical_cast<std::string>(m_lorentzianCount);
+  auto logs = QENSFitSequential::getAdditionalLogNumbers();
+  IFunction_sptr function = getProperty("Function");
+  logs["lorentzians"] = boost::lexical_cast<std::string>(
+      numberOfFunctions(function, "Lorentzian"));
   return logs;
 }
 

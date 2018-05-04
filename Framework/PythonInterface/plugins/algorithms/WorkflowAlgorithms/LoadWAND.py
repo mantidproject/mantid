@@ -26,26 +26,30 @@ class LoadWAND(DataProcessorAlgorithm):
         wavelength = self.getProperty("wavelength").value
         outWS = self.getPropertyValue("OutputWorkspace")
 
-        LoadEventNexus(Filename=filename, OutputWorkspace=outWS, LoadMonitors=True)
-        Integration(InputWorkspace=outWS, OutputWorkspace=outWS)
+        LoadEventNexus(Filename=filename, OutputWorkspace=outWS, LoadMonitors=True, EnableLogging=False)
+        Integration(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
 
         if self.getProperty("ApplyMask").value:
-            MaskBTP(outWS, Bank='8', Tube='475-480')
-            MaskBTP(outWS, Pixel='1,2,511,512')
+            MaskBTP(outWS, Pixel='1,2,511,512', EnableLogging=False)
+            if mtd[outWS].getRunNumber() > 26600: # They changed pixel mapping and bank name order here
+                MaskBTP(outWS, Bank='1', Tube='479-480', EnableLogging=False)
+                MaskBTP(outWS, Bank='8', Tube='1-2', EnableLogging=False)
+            else:
+                MaskBTP(outWS, Bank='8', Tube='475-480', EnableLogging=False)
 
         mtd[outWS].getAxis(0).setUnit("Wavelength")
         w = [wavelength-0.001, wavelength+0.001]
         for idx in range(mtd[outWS].getNumberHistograms()):
             mtd[outWS].setX(idx, w)
 
-        SetGoniometer(outWS, Axis0="HB2C:Mot:s1,0,1,0,1")
+        SetGoniometer(outWS, Axis0="HB2C:Mot:s1,0,1,0,1", EnableLogging=False)
         AddSampleLog(outWS, LogName="gd_prtn_chrg", LogType='Number', NumberType='Double',
-                     LogText=str(mtd[outWS+'_monitors'].getNumberEvents()))
-        DeleteWorkspace(outWS+'_monitors')
+                     LogText=str(mtd[outWS+'_monitors'].getNumberEvents()), EnableLogging=False)
+        DeleteWorkspace(outWS+'_monitors', EnableLogging=False)
 
-        AddSampleLog(outWS, LogName="Wavelength", LogType='Number', NumberType='Double', LogText=str(wavelength))
+        AddSampleLog(outWS, LogName="Wavelength", LogType='Number', NumberType='Double', LogText=str(wavelength), EnableLogging=False)
         AddSampleLog(outWS, LogName="Ei", LogType='Number', NumberType='Double',
-                     LogText=str(UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)))
+                     LogText=str(UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)), EnableLogging=False)
 
         self.setProperty('OutputWorkspace', outWS)
 

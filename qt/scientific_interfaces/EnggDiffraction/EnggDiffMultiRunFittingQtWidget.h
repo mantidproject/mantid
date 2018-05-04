@@ -26,6 +26,8 @@ public:
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
+  std::vector<RunLabel> getAllRunLabels() const override;
+
   boost::optional<RunLabel> getSelectedRunLabel() const override;
 
   void plotFittedPeaks(

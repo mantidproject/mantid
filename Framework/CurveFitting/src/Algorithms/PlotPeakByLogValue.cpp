@@ -144,6 +144,10 @@ void PlotPeakByLogValue::init() {
           new Kernel::ListValidator<std::string>(evaluationTypes)),
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
+
+  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+                  "A list of pairs of real numbers, defining the regions to "
+                  "exclude from the fit.");
 }
 
 /**
@@ -154,6 +158,7 @@ void PlotPeakByLogValue::exec() {
   // Create a list of the input workspace
   const std::vector<InputData> wsNames = makeNames();
 
+  const std::vector<double> exclude = getProperty("Exclude");
   std::string fun = getPropertyValue("Function");
   // int wi = getProperty("WorkspaceIndex");
   std::string logName = getProperty("LogValue");
@@ -295,6 +300,7 @@ void PlotPeakByLogValue::exec() {
         fit->setProperty("WorkspaceIndex", j);
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
+        fit->setProperty("Exclude", exclude);
         fit->setPropertyValue(
             "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));

@@ -18,8 +18,6 @@
 #include <unordered_map>
 
 namespace {
-Mantid::Kernel::Logger g_log("QENSFitSequential");
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -240,9 +238,8 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 
-  auto getName = [&](std::size_t i) {
-    return outputBase + "_" + getNameSuffix(i);
-  };
+  auto getName =
+      [&](std::size_t i) { return outputBase + "_" + getNameSuffix(i); };
 
   auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
     renameWorkspace(renameAlgorithm, workspace, name);
@@ -335,19 +332,16 @@ void QENSFitSequential::init() {
   declareProperty(
       make_unique<FunctionProperty>("Function"),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "",
-                  "Name of the log value to plot the "
-                  "parameters against. Default: use spectra "
-                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(),
-                  "A value of x in, or on the low x "
-                  "boundary of, the first bin to "
-                  "include in\n"
-                  "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(),
-                  "A value in, or on the high x boundary "
-                  "of, the last bin the fitting range\n"
-                  "(default the highest value of x)");
+  declareProperty("LogValue", "", "Name of the log value to plot the "
+                                  "parameters against. Default: use spectra "
+                                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
+                                         "boundary of, the first bin to "
+                                         "include in\n"
+                                         "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
+                                       "of, the last bin the fitting range\n"
+                                       "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
@@ -360,7 +354,7 @@ void QENSFitSequential::init() {
                   "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate "
                   "gradient (Polak-Ribiere imp.)' and 'BFGS'");
 
-  std::vector<std::string> costFuncOptions =
+  const std::vector<std::string> costFuncOptions =
       CostFunctionFactory::Instance().getKeys();
   declareProperty("CostFunction", "Least squares",
                   boost::make_shared<StringListValidator>(costFuncOptions),
@@ -393,13 +387,18 @@ void QENSFitSequential::init() {
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
-  std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
+  const std::array<std::string, 2> evaluationTypes = {
+      {"CentrePoint", "Histogram"}};
   declareProperty(
       "EvaluationType", "CentrePoint",
       Kernel::IValidator_sptr(
           new Kernel::ListValidator<std::string>(evaluationTypes)),
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
+
+  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+                  "A list of pairs of real numbers, defining the regions to "
+                  "exclude from the fit.");
 }
 
 std::map<std::string, std::string> QENSFitSequential::validateInputs() {
@@ -411,14 +410,14 @@ std::map<std::string, std::string> QENSFitSequential::validateInputs() {
       errors["InputWorkspace"] =
           "No input string or input workspace was provided.";
 
-    int specMin = getProperty("SpecMin");
-    int specMax = getProperty("SpecMax");
+    const int specMin = getProperty("SpecMin");
+    const int specMax = getProperty("SpecMax");
     if (specMin > specMax)
       errors["SpecMin"] = "SpecMin must be less than or equal to SpecMax.";
   }
 
-  double startX = getProperty("StartX");
-  double endX = getProperty("EndX");
+  const double startX = getProperty("StartX");
+  const double endX = getProperty("EndX");
   if (startX >= endX)
     errors["StartX"] = "StartX must be less than EndX";
 
@@ -434,19 +433,21 @@ void QENSFitSequential::exec() {
   if (getPropertyValue("OutputWorkspaceGroup").empty())
     setProperty("OutputWorkspaceGroup", outputBaseName + "_Workspaces");
 
-  auto inputWorkspaces = getWorkspaces();
-  auto workspaces = convertInputToElasticQ(inputWorkspaces);
-  auto inputString = getInputString(workspaces);
-  auto spectra = getSpectra(inputString);
+  const auto inputWorkspaces = getWorkspaces();
+  const auto workspaces = convertInputToElasticQ(inputWorkspaces);
+  const auto inputString = getInputString(workspaces);
+  const auto spectra = getSpectra(inputString);
 
   if (workspaces.empty() || spectra.empty() ||
       (workspaces.size() > 1 && workspaces.size() != spectra.size()))
     throw std::invalid_argument("A malformed input string was provided.");
 
-  auto parameterWs = performFit(inputString, outputBaseName);
-  auto resultWs = processIndirectFitParameters(parameterWs);
-  auto groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      outputBaseName + "_Workspaces");
+  const auto parameterWs =
+      processParameterTable(performFit(inputString, outputBaseName));
+  const auto resultWs = processIndirectFitParameters(outputWs);
+  const auto groupWs =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          outputBaseName + "_Workspaces");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
@@ -472,7 +473,7 @@ void QENSFitSequential::exec() {
 
 std::map<std::string, std::string>
 QENSFitSequential::getAdditionalLogStrings() const {
-  bool convolve = getProperty("ConvolveMembers");
+  const bool convolve = getProperty("ConvolveMembers");
   auto fitProgram = name();
   fitProgram = fitProgram.substr(0, fitProgram.rfind("Sequential"));
 
@@ -499,7 +500,7 @@ void QENSFitSequential::addAdditionalLogs(
 
   Progress logAdderProg(this, 0.99, 1.00, 6);
   logAdder->setProperty("LogType", "String");
-  for (const auto log : getAdditionalLogStrings()) {
+  for (const auto &log : getAdditionalLogStrings()) {
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
     logAdder->executeAsChildAlg();
@@ -507,7 +508,7 @@ void QENSFitSequential::addAdditionalLogs(
   }
 
   logAdder->setProperty("LogType", "Number");
-  for (const auto log : getAdditionalLogNumbers()) {
+  for (const auto &log : getAdditionalLogNumbers()) {
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
     logAdder->executeAsChildAlg();
@@ -517,7 +518,7 @@ void QENSFitSequential::addAdditionalLogs(
 
 std::string QENSFitSequential::getOutputBaseName() const {
   const auto base = getPropertyValue("OutputWorkspace");
-  auto position = base.rfind("_Result");
+  const auto position = base.rfind("_Result");
   if (position != std::string::npos)
     return base.substr(0, position);
   return base;
@@ -530,21 +531,22 @@ bool QENSFitSequential::isFitParameter(const std::string &) const {
 }
 
 std::vector<std::string> QENSFitSequential::getFitParameterNames() const {
+  const auto uniqueParameters = getUniqueParameterNames();
+  std::vector<std::string> parameters;
+  parameters.reserve(uniqueParameters.size());
+  std::copy_if(
+      uniqueParameters.begin(), uniqueParameters.end(),
+      std::back_inserter(parameters),
+      [](const std::string &parameter) { return isFitParameter(parameter); });
+  return parameters;
+}
+
+std::set<std::string> QENSFitSequential::getUniqueParameterNames() const {
   IFunction_sptr function = getProperty("Function");
-
-  std::unordered_set<std::string> nameSet;
-  std::vector<std::string> names;
-  names.reserve(function->nParams());
-
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    auto name = shortParameterName(function->parameterName(i));
-
-    if (isFitParameter(name) && nameSet.find(name) == nameSet.end()) {
-      names.emplace_back(name);
-      nameSet.insert(name);
-    }
-  }
-  return names;
+  std::set<std::string> nameSet;
+  for (auto i = 0u; i < function->nParams(); ++i)
+    nameSet.insert(shortParameterName(function->parameterName(i)));
+  return nameSet;
 }
 
 void QENSFitSequential::deleteTemporaryWorkspaces(
@@ -582,7 +584,7 @@ void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
     const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  auto getNameSuffix = [&](std::size_t i) {
+  const auto getNameSuffix = [&](std::size_t i) {
     return inputWorkspaces[i]->getName() + "_" + spectra[i] + "_Workspace";
   };
   return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
@@ -597,8 +599,9 @@ void QENSFitSequential::renameWorkspaces(
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
-  bool convolveMembers = getProperty("ConvolveMembers");
-  bool passWsIndex = getProperty("PassWSIndexToFunction");
+  const std::vector<double> exclude = getProperty("Exclude");
+  const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool passWsIndex = getProperty("PassWSIndexToFunction");
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
@@ -607,6 +610,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setPropertyValue("Function", getPropertyValue("Function"));
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
+  plotPeaks->setProperty("Exclude", exclude)
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
   plotPeaks->setProperty("OutputCompositeMembers", true);
@@ -624,7 +628,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
 
 std::string QENSFitSequential::getInputString(
     const std::vector<MatrixWorkspace_sptr> &workspaces) const {
-  auto inputString = getPropertyValue("Input");
+  const auto inputString = getPropertyValue("Input");
   if (!inputString.empty())
     return replaceWorkspaces(inputString, workspaces);
   return constructInputString(workspaces[0], getProperty("SpecMin"),
@@ -680,7 +684,7 @@ void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
 
 IAlgorithm_sptr QENSFitSequential::extractMembersAlgorithm(
     WorkspaceGroup_sptr resultGroupWs, const std::string &outputWsName) const {
-  bool convolved = getProperty("ConvolveMembers");
+  const bool convolved = getProperty("ConvolveMembers");
   std::vector<std::string> convolvedMembers;
   IFunction_sptr function = getProperty("Function");
 

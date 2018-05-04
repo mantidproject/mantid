@@ -750,7 +750,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
         # Load files into Mantid
         for sample in self.samples:
             LoadNexus(sample, OutputWorkspace=sample)
-        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
+        LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
         _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
                                    ResolutionWorkspace=self.resolution,
@@ -868,7 +868,7 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirec
         #load files into mantid
         for sample in self.samples:
             LoadNexus(sample, OutputWorkspace=sample)
-        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
+        LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
         _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
                                    ResolutionWorkspace=self.resolution,
@@ -992,7 +992,7 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
         '''Defines the workflow for the test'''
         self.tolerance = 1e-4
         LoadNexus(self.sample, OutputWorkspace=self.sample)
-        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
+        LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
         ConvolutionFitSequential(
             InputWorkspace=self.sample,
@@ -1003,7 +1003,7 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
             SpecMin=self.spectra_min,
             SpecMax=self.spectra_max,
             PeakRadius=5,
-            OutputWorkspace='result')
+            OutputWorkspace=self.result_names[0])
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -1033,7 +1033,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
     def __init__(self):
         ISISIndirectInelasticConvFit.__init__(self)
         self.sample = 'osi97935_graphite002_red.nxs'
-        self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
+        self.resolution = 'osi97935_graphite002_res.nxs'
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
                     'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
@@ -1059,7 +1059,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
     def __init__(self):
         ISISIndirectInelasticConvFit.__init__(self)
         self.sample = 'irs53664_graphite002_red.nxs'
-        self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
+        self.resolution = 'irs53664_graphite002_res.nxs'
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;' \
                     '(composite=Convolution,FixResolution=true,NumDeriv=true;' \

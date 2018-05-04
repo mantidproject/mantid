@@ -1,2 +1,2 @@
 @echo off
-install_gsas_common.bat %*
+%~dp0install_gsas_common.bat %*

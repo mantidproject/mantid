@@ -214,9 +214,9 @@ const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
 
 void QENSFitSimultaneous::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")->setDocumentation(
-      "Math expressions defining ties between parameters of "
-      "the fitting function.");
+  getPointerToProperty("Ties")
+      ->setDocumentation("Math expressions defining ties between parameters of "
+                         "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
@@ -294,15 +294,17 @@ void QENSFitSimultaneous::execConcrete() {
       setProperty("OutputWorkspaceGroup", outputBaseName + "_Workspaces");
   }
 
-  auto inputWorkspaces = getWorkspaces();
-  auto workspaces = convertInputToElasticQ(inputWorkspaces);
-  auto workspaceIndices = getWorkspaceIndices(workspaces.size());
-  auto singleDomainFunction = convertToSingleDomain(getProperty("Function"));
+  const auto inputWorkspaces = getWorkspaces();
+  const auto workspaces = convertInputToElasticQ(inputWorkspaces);
+  const auto singleDomainFunction =
+      convertToSingleDomain(getProperty("Function"));
 
-  auto fitResult = performFit(inputWorkspaces, outputBaseName);
-  auto parameterWs = transposeFitTable(fitResult.first, singleDomainFunction);
-  auto groupWs = fitResult.second;
-  auto resultWs = processIndirectFitParameters(parameterWs);
+  const auto fitResult = performFit(inputWorkspaces, outputBaseName);
+  const auto parameterWs = processParameterTable(
+      transposeFitTable(fitResult.first, singleDomainFunction));
+  const auto groupWs =
+      boost::dynamic_pointer_cast<WorkspaceGroup>(fitResult.second);
+  const auto resultWs = processIndirectFitParameters(parameterWs);
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -317,15 +319,14 @@ void QENSFitSimultaneous::execConcrete() {
   setProperty("OutputWorkspaceGroup", groupWs);
 }
 
-std::pair<API::ITableWorkspace_sptr, API::WorkspaceGroup_sptr>
+std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
 QENSFitSimultaneous::performFit(
     const std::vector<MatrixWorkspace_sptr> &workspaces,
     const std::string &output) {
   IFunction_sptr function = getProperty("Function");
-  bool extractMembers = getProperty("ExtractMembers");
-  bool convolveMembers = getProperty("ConvolveMembers");
-  bool ignoreInvalidData = getProperty("IgnoreInvalidData");
-  bool calcErrors = getProperty("CalcErrors");
+  const bool convolveMembers = getProperty("ConvolveMembers");
+  const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+  const bool calcErrors = getProperty("CalcErrors");
 
   auto fit = createChildAlgorithm("Fit", 0.05, 0.90, true);
   fit->setProperty("Function", function);
@@ -339,7 +340,7 @@ QENSFitSimultaneous::performFit(
   fit->setPropertyValue("MaxIterations", getPropertyValue("MaxIterations"));
   fit->setProperty("Minimizer", getPropertyValue("Minimizer"));
   fit->setProperty("CostFunction", getPropertyValue("CostFunction"));
-  fit->setPropertyValue("CalcErrors", getPropertyValue("CalcErrors"));
+  fit->setProperty("CalcErrors", calcErrors);
   fit->setProperty("OutputCompositeMembers", true);
   fit->setProperty("ConvolveMembers", convolveMembers);
   fit->setProperty("CreateOutput", true);
@@ -431,7 +432,7 @@ void QENSFitSimultaneous::addAdditionalLogs(
 
 IAlgorithm_sptr QENSFitSimultaneous::extractMembersAlgorithm(
     WorkspaceGroup_sptr resultGroupWs, const std::string &outputWsName) const {
-  bool convolved = getProperty("ConvolveMembers");
+  const bool convolved = getProperty("ConvolveMembers");
   std::vector<std::string> convolvedMembers;
   IFunction_sptr function = getProperty("Function");
 
@@ -480,26 +481,27 @@ bool QENSFitSimultaneous::isFitParameter(const std::string &) const {
 }
 
 std::vector<std::string> QENSFitSimultaneous::getFitParameterNames() const {
-  IFunction_sptr function = convertToSingleDomain(getProperty("Function"));
+  const auto uniqueParameters = getUniqueParameterNames();
+  std::vector<std::string> parameters;
+  parameters.reserve(uniqueParameters.size());
+  std::copy_if(
+      uniqueParameters.begin(), uniqueParameters.end(),
+      std::back_inserter(parameters),
+      [&](const std::string &parameter) { return isFitParameter(parameter); });
+  return parameters;
+}
 
-  std::unordered_set<std::string> nameSet;
-  std::vector<std::string> names;
-  names.reserve(function->nParams());
-
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    auto name = shortParameterName(function->parameterName(i));
-
-    if (isFitParameter(name) && nameSet.find(name) == nameSet.end()) {
-      names.emplace_back(name);
-      nameSet.insert(name);
-    }
-  }
-  return names;
+std::set<std::string> QENSFitSimultaneous::getUniqueParameterNames() const {
+  IFunction_sptr function = getProperty("Function");
+  std::set<std::string> nameSet;
+  for (auto i = 0u; i < function->nParams(); ++i)
+    nameSet.insert(shortParameterName(function->parameterName(i)));
+  return nameSet;
 }
 
 std::map<std::string, std::string>
 QENSFitSimultaneous::getAdditionalLogStrings() const {
-  bool convolve = getProperty("ConvolveMembers");
+  const bool convolve = getProperty("ConvolveMembers");
   auto fitProgram = name();
   fitProgram = fitProgram.substr(0, fitProgram.rfind("Simultaneous"));
 
@@ -518,20 +520,6 @@ QENSFitSimultaneous::getAdditionalLogNumbers() const {
 ITableWorkspace_sptr QENSFitSimultaneous::processParameterTable(
     ITableWorkspace_sptr parameterTable) const {
   return parameterTable;
-}
-
-std::vector<std::string>
-QENSFitSimultaneous::getWorkspaceIndices(std::size_t numberOfIndices) const {
-  std::vector<std::string> indices;
-  indices.reserve(numberOfIndices);
-  indices.push_back(getPropertyValue("WorkspaceIndex"));
-  for (auto i = 1u; i < numberOfIndices; ++i)
-    indices.push_back(getPropertyValue("WorkspaceIndex_" + std::to_string(i)));
-  return indices;
-}
-
-std::string QENSFitSimultaneous::getTemporaryName() const {
-  return "__" + name() + "_ws";
 }
 
 } // namespace Algorithms

@@ -497,13 +497,12 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   ws->replaceAxis(0, ax0);
 
   // re-assign detector IDs to the rectangular detector
-  int detID = numPixels * numPixels;
-  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
+  const auto detIds = inst->getDetectorIDs();
+  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); ++wi) {
     ws->getSpectrum(wi).clearDetectorIDs();
     if (clearEvents)
       ws->getSpectrum(wi).clear(true);
-    ws->getSpectrum(wi).setDetectorID(detID);
-    detID++;
+    ws->getSpectrum(wi).setDetectorID(detIds[wi]);
   }
   return ws;
 }

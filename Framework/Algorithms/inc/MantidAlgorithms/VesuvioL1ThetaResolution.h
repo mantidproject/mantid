@@ -6,8 +6,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IComponent.h"
 
-#include <boost/random/mersenne_twister.hpp>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -49,20 +47,18 @@ private:
   void loadInstrument();
 
   void calculateDetector(const Mantid::Geometry::IDetector &detector,
+                         std::function<double()> &flatRandomVariateGen,
                          std::vector<double> &l1Values,
                          std::vector<double> &thetaValues);
   Mantid::API::MatrixWorkspace_sptr
   processDistribution(Mantid::API::MatrixWorkspace_sptr ws,
                       const double binWidth);
-  double random();
 
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
   Mantid::Geometry::IComponent_const_sptr m_sample;
   Mantid::API::MatrixWorkspace_sptr m_outputWorkspace;
   Mantid::API::MatrixWorkspace_sptr m_l1DistributionWs;
   Mantid::API::MatrixWorkspace_sptr m_thetaDistributionWs;
-
-  boost::mt19937 m_generator;
 };
 
 } // namespace Algorithms

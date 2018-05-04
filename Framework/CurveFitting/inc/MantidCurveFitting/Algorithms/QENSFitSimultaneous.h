@@ -42,6 +42,7 @@ protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &name) const;
+  std::set<std::string> getUniqueParameterNames() const;
   std::vector<std::string> getFitParameterNames() const;
   virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
@@ -53,7 +54,7 @@ private:
   void execConcrete() override;
   std::vector<API::MatrixWorkspace_sptr> convertInputToElasticQ(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
-  std::pair<API::ITableWorkspace_sptr, API::WorkspaceGroup_sptr>
+  std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
   performFit(const std::vector<API::MatrixWorkspace_sptr> &workspaces,
              const std::string &output);
   API::MatrixWorkspace_sptr
@@ -71,10 +72,7 @@ private:
   extractMembersAlgorithm(API::WorkspaceGroup_sptr resultGroupWs,
                           const std::string &outputWsName) const;
 
-  std::vector<std::string>
-  getWorkspaceIndices(std::size_t numberOfIndices) const;
   std::string getOutputBaseName() const;
-  std::string getTemporaryName() const;
 };
 
 } // namespace Algorithms
