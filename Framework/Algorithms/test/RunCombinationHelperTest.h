@@ -47,7 +47,7 @@ public:
 
     TS_ASSERT_THROWS_EQUALS(
         m_testee.unWrapGroups(std::vector<std::string>{"ws1", "ws?"}),
-        const std::exception &e, std::string(e.what()),
+        const std::runtime_error &e, std::string(e.what()),
         "Unable to find workspace type with name 'ws?': data service  search "
         "object ws?");
 
