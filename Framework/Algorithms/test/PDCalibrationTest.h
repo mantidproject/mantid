@@ -158,6 +158,14 @@ public:
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
+
+    ITableWorkspace_sptr peaksTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "diag_fitparam");
+    for (size_t i = 0; i < peaksTable->rowCount(); ++i) {
+      std::cout << "row[" << i << "] ";
+      TS_ASSERT_LESS_THAN(peaksTable->cell<double>(i, 7), 100.); // chisq
+    }
   }
 
   void test_exec_difc_tzero() {
