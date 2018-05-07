@@ -161,11 +161,25 @@ public:
 
     ITableWorkspace_sptr peaksTable =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "diag_fitparam");
-    for (size_t i = 0; i < peaksTable->rowCount(); ++i) {
-      std::cout << "row[" << i << "] ";
-      TS_ASSERT_LESS_THAN(peaksTable->cell<double>(i, 7), 100.); // chisq
+            "diag_dspacing");
+    // check for workspace index 55 which is spectrum 56
+    for (size_t i = 0; i < dValues.size(); ++i) {
+      TS_ASSERT_DELTA(peaksTable->cell<double>(55, 1 + i), dValues[i], 0.0002);
     }
+    // checks for chisq, first one is strange because of test framework missing
+    // > operator
+    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(55, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(55, 1 + dValues.size()), 10.);
+
+    // check for workspace index 95 which is spectrum 96 - last peak is out of
+    // range???
+    for (size_t i = 0; i < dValues.size() - 1; ++i) {
+      TS_ASSERT_DELTA(peaksTable->cell<double>(95, 1 + i), dValues[i], 0.0002);
+    }
+    // checks for chisq, first one is strange because of test framework missing
+    // > operator
+    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(95, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(95, 1 + dValues.size()), 10.);
   }
 
   void test_exec_difc_tzero() {
