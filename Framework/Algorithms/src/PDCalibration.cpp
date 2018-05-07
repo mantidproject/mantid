@@ -492,8 +492,8 @@ void PDCalibration::exec() {
   // get the fit result
   API::ITableWorkspace_sptr fittedTable =
       algFitPeaks->getProperty("OutputPeakParametersWorkspace");
-  API::ITableWorkspace_sptr calculatedWS =
-      algFitPeaks->getProperty("OutputPeakParametersWorkspace");
+  API::MatrixWorkspace_sptr calculatedWS =
+      algFitPeaks->getProperty("FittedPeaksWorkspace");
 
   // check : for Pete
   if (!fittedTable)
@@ -654,7 +654,11 @@ void PDCalibration::exec() {
   // set the diagnostic workspaces out
   auto diagnosticGroup = boost::make_shared<API::WorkspaceGroup>();
   // add workspaces calculated by FitPeaks
+  API::AnalysisDataService::Instance().addOrReplace(
+      diagnostic_prefix + "_fitparam", fittedTable);
   diagnosticGroup->addWorkspace(fittedTable);
+  API::AnalysisDataService::Instance().addOrReplace(
+      diagnostic_prefix + "_fitted", calculatedWS);
   diagnosticGroup->addWorkspace(calculatedWS);
 
   // add workspaces calculated by PDCalibration
