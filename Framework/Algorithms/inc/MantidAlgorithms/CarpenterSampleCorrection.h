@@ -69,7 +69,7 @@ public:
   }
 
   // Algorithm's alias for identification overriding a virtual method
-  const std::string alias() const {
+  const std::string alias() const override {
     return "MultipleScatteringCylinderAbsorption";
   }
 

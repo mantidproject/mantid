@@ -42,7 +42,7 @@ This algorithm calculates and outputs the absorption and/or multiple scattering 
  
 2. The multiple scattering correction workspace will be OutputWorkspaceBaseName + `_ms` and will be in `.getItem(1)`.
 
-This is the child algorithm that :ref:`algm-CarpenterSampleCorrection` (also known as :ref:`algm-MultipleScatteringCylinderAbsorption`) uses to calculate and apply the correction to a sample workspace.
+This is the child algorithm that :ref:`algm-CarpenterSampleCorrection` (previously known as *MultipleScatteringCylinderAbsorption*) uses to calculate and apply the correction to a sample workspace.
 
 Usage
 -----
