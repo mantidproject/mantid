@@ -34,8 +34,6 @@ using namespace Mantid::Kernel;
 using Mantid::HistogramData::Histogram;
 using namespace std;
 
-const size_t MIN_EVENTS = 100;
-
 namespace Mantid {
 namespace Algorithms {
 
