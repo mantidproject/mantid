@@ -9,6 +9,10 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Instrument Definition Updates
+-----------------------------
+
+- The ALF IDF has been updated following a detector array alteration.
 
 Algorithms
 ----------

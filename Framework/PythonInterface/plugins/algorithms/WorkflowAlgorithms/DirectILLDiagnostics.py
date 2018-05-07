@@ -367,7 +367,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         beamStopMaskedSpectra = list()
         if self._beamStopDiagnosticsEnabled(mainWS, report):
             progress.report('Diagnosing beam stop')
-            beamStopMaskWS = self._beamStopDiagnostics(mainWS, wsNames, wsCleanup, report, subalgLogging)
+            beamStopMaskWS = self._beamStopDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
             beamStopMaskedSpectra = _reportBeamStopMask(reportWS, beamStopMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
                           RHSWorkspace=beamStopMaskWS,
@@ -592,11 +592,11 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                 issues[common.PROP_EPP_WS] = 'An EPP table is needed for background diagnostics.'
         return issues
 
-    def _beamStopDiagnostics(self, mainWS, wsNames, wsCleanup, report, algorithmLogging):
+    def _beamStopDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, algorithmLogging):
         """Diagnose beam stop and return a mask workspace."""
         import operator
 
-        def thresholdIndex(ws, begin, end, threshold):
+        def thresholdIndex(ws, maskWS, begin, end, threshold):
             """Return an index where the threshold is crossed."""
             step = -1 if begin < end else 1
             comp = operator.ge if begin < end else operator.le
@@ -605,7 +605,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             indexShift = -min(begin, end + 1)
             while comp(i, begin):
                 index = i + indexShift
-                Ys[index] = numpy.sum(ws.dataY(i))
+                if maskWS.readY(i) == 0:
+                    Ys[index] = numpy.sum(ws.readY(i))
+                else:
+                    Ys[index] = 0.
                 i += step
             maxIndex = int(numpy.argmax(Ys))
             thresholdVal = threshold * Ys[maxIndex]
@@ -624,8 +627,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             begin = beginIndices[i]
             end = endIndices[i]
             mid = int((end + begin) / 2)
-            lowerIdx = thresholdIndex(mainWS, mid, begin, threshold)
-            upperIdx = thresholdIndex(mainWS, mid, end, threshold)
+            lowerIdx = thresholdIndex(mainWS, maskWS, mid, begin, threshold)
+            upperIdx = thresholdIndex(mainWS, maskWS, mid, end, threshold)
             if lowerIdx != upperIdx:
                 for j in range(upperIdx - lowerIdx + 1):
                     ys = beamStopDiagnosticsWS.dataY(lowerIdx + j)
