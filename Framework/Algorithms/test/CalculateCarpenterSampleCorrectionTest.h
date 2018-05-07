@@ -128,10 +128,9 @@ public:
     // Check absorption correction
     const size_t size = 16;
     std::array<double, size> abs_corr_expected = {
-      { 0.786608, 0.764593, 0.743221, 0.722473, 0.702329, 0.682772,
-        0.663783, 0.645345, 0.627442, 0.610057, 0.593173, 0.576775,
-        0.560848, 0.545376, 0.530345, 0.515739 }
-    };
+        {0.786608, 0.764593, 0.743221, 0.722473, 0.702329, 0.682772, 0.663783,
+         0.645345, 0.627442, 0.610057, 0.593173, 0.576775, 0.560848, 0.545376,
+         0.530345, 0.515739}};
 
     auto &abs_corr_actual = absWksp->y(0);
     for (size_t i = 0; i < size; i++)
@@ -149,19 +148,18 @@ public:
         AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             "TestAbsWS");
     std::array<double, size> abs_ws_expected = {
-      { 2.54256, 2.61577, 2.69099, 2.76827, 2.84767, 2.92924, 3.01303, 3.09912,
-        3.18754, 3.27838, 3.37170, 3.46756, 3.56603, 3.66720, 3.77113, 3.87793 }
-    };
+        {2.54256, 2.61577, 2.69099, 2.76827, 2.84767, 2.92924, 3.01303, 3.09912,
+         3.18754, 3.27838, 3.37170, 3.46756, 3.56603, 3.66720, 3.77113,
+         3.87793}};
     auto &abs_ws_actual = absCorrectedWksp->y(0);
     for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(abs_ws_actual[i], abs_ws_expected[i], 0.00001);
 
     // Check multiple scattering correction
     std::array<double, size> ms_corr_expected = {
-      { 0.159334, 0.161684, 0.164032, 0.166376, 0.168712, 0.171039,
-        0.173355, 0.175658, 0.177944, 0.180211, 0.182457, 0.184678,
-        0.186873, 0.189038, 0.191171, 0.193268 }
-    };
+        {0.159334, 0.161684, 0.164032, 0.166376, 0.168712, 0.171039, 0.173355,
+         0.175658, 0.177944, 0.180211, 0.182457, 0.184678, 0.186873, 0.189038,
+         0.191171, 0.193268}};
     auto &ms_corr_actual = msWksp->y(0);
     for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(ms_corr_actual[i], ms_corr_expected[i], 0.00001);
@@ -178,10 +176,9 @@ public:
         AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             "TestMultScatWS");
     std::array<double, size> ms_ws_expected = {
-      { 0.318668, 0.323369, 0.328065, 0.332751, 0.337424, 0.342079,
-        0.346711, 0.351315, 0.355887, 0.360422, 0.364913, 0.369356,
-        0.373746, 0.378076, 0.382341, 0.386535 }
-    };
+        {0.318668, 0.323369, 0.328065, 0.332751, 0.337424, 0.342079, 0.346711,
+         0.351315, 0.355887, 0.360422, 0.364913, 0.369356, 0.373746, 0.378076,
+         0.382341, 0.386535}};
 
     auto &ms_ws_actual = msCorrectedWksp->y(0);
     for (size_t i = 0; i < size; i++)
@@ -199,9 +196,9 @@ public:
         AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             "TestOutputWS");
     std::array<double, size> test_ws_expected = {
-      { 2.22389, 2.2924,  2.36292, 2.43552, 2.51024, 2.58716, 2.66632, 2.7478,
-        2.83166, 2.91796, 3.00678, 3.09820, 3.19228, 3.28912, 3.38879, 3.49139 }
-    };
+        {2.22389, 2.2924, 2.36292, 2.43552, 2.51024, 2.58716, 2.66632, 2.7478,
+         2.83166, 2.91796, 3.00678, 3.09820, 3.19228, 3.28912, 3.38879,
+         3.49139}};
 
     auto &test_ws_actual = outputWksp->y(0);
     for (size_t i = 0; i < size; i++)
@@ -258,10 +255,9 @@ public:
     // Check absorption correction
     const size_t size = 16;
     std::array<double, size> abs_corr_expected = {
-      { 0.733553, 0.726500, 0.719519, 0.712607, 0.705765, 0.698992,
-        0.692286, 0.685648, 0.679076, 0.672570, 0.666129, 0.659753,
-        0.65344,  0.647191, 0.641004, 0.634878 }
-    };
+        {0.733553, 0.726500, 0.719519, 0.712607, 0.705765, 0.698992, 0.692286,
+         0.685648, 0.679076, 0.672570, 0.666129, 0.659753, 0.65344, 0.647191,
+         0.641004, 0.634878}};
     const auto &abs_corr_actual = absWksp->histogram(0).y();
     for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(abs_corr_actual[i], abs_corr_expected[i], 0.00001);
@@ -272,10 +268,9 @@ public:
 
     // Check multiple scattering correction
     std::array<double, size> ms_corr_expected = {
-      { 0.165116, 0.165916, 0.166714, 0.167512, 0.168309, 0.169105,
-        0.169900, 0.170693, 0.171486, 0.172277, 0.173066, 0.173854,
-        0.17464,  0.175425, 0.176207, 0.176988 }
-    };
+        {0.165116, 0.165916, 0.166714, 0.167512, 0.168309, 0.169105, 0.169900,
+         0.170693, 0.171486, 0.172277, 0.173066, 0.173854, 0.17464, 0.175425,
+         0.176207, 0.176988}};
     auto &ms_corr_actual = msWksp->y(0);
     for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(ms_corr_actual[i], ms_corr_expected[i], 0.00001);
