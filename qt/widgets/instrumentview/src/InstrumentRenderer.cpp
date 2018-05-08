@@ -144,6 +144,7 @@ void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {
 
   auto bank = compInfo.quadrilateralComponent(bankIndex);
   auto pos = compInfo.position(bank.bottomLeft);
+
   auto scale = compInfo.scaleFactor(bankIndex);
   glTranslated(pos.X(), pos.Y(), pos.Z());
   glScaled(scale[0], scale[1], scale[2]);
