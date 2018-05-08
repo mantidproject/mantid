@@ -28,5 +28,10 @@ Bug fixes
 
 - Fixed a crash in :ref:`SofQW <algm-SofQW>`, :ref:`SofQWCentre <algm-SofQWCentre>`, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and :ref:`SofQWPolygon <algm-SofQWPolygon>` algorithms when they were supplied with energy or :math:`Q` binning params containing the bin width only.
 
+Python
+------
+
+- The plotting methods in the :ref:`directtools <Directtools Python module>` python module now support logarithmic scales.
+
 :ref:`Release 3.13.0 <v3.13.0>`
 
