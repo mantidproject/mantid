@@ -120,14 +120,6 @@ std::string shortParameterName(const std::string &longName) {
   return longName.substr(longName.rfind('.') + 1, longName.size());
 }
 
-void renameWorkspace(MatrixWorkspace_sptr workspace,
-                     const std::string &newName) {
-  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
-  renamer->setProperty("InputWorkspace", workspace);
-  renamer->setProperty("OutputWorkspace", newName);
-  renamer->execute();
-}
-
 void setMultiDataProperties(const IAlgorithm &qensFit, IAlgorithm &fit,
                             MatrixWorkspace_sptr workspace,
                             const std::string &suffix) {
@@ -160,6 +152,15 @@ IFunction_sptr convertToSingleDomain(IFunction_sptr function) {
   if (composite && composite->getNumberDomains() > 1)
     return composite->getFunction(0);
   return function;
+}
+
+WorkspaceGroup_sptr makeGroup(Workspace_sptr workspace) {
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  if (group)
+    return group;
+  group = WorkspaceGroup_sptr(new WorkspaceGroup);
+  group->addWorkspace(workspace);
+  return group;
 }
 
 ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
@@ -222,9 +223,9 @@ const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
 
 void QENSFitSimultaneous::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")
-      ->setDocumentation("Math expressions defining ties between parameters of "
-                         "the fitting function.");
+  getPointerToProperty("Ties")->setDocumentation(
+      "Math expressions defining ties between parameters of "
+      "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
@@ -310,10 +311,8 @@ void QENSFitSimultaneous::execConcrete() {
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
   const auto parameterWs = processParameterTable(
       transposeFitTable(fitResult.first, singleDomainFunction));
-  const auto groupWs =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(fitResult.second);
+  const auto groupWs = makeGroup(fitResult.second);
   const auto resultWs = processIndirectFitParameters(parameterWs);
-  renameWorkspace(resultWs, getPropertyValue("OutputWorkspace"));
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -355,8 +354,14 @@ QENSFitSimultaneous::performFit(
   fit->setProperty("CreateOutput", true);
   fit->setProperty("Output", output);
   fit->executeAsChildAlg();
-  return {fit->getProperty("OutputParameters"),
-          fit->getProperty("OutputWorkspace")};
+
+  if (workspaces.size() == 1) {
+    MatrixWorkspace_sptr outputWS = fit->getProperty("OutputWorkspace");
+    return {fit->getProperty("OutputParameters"), outputWS};
+  }
+
+  WorkspaceGroup_sptr outputWS = fit->getProperty("OutputWorkspace");
+  return {fit->getProperty("OutputParameters"), outputWS};
 }
 
 MatrixWorkspace_sptr QENSFitSimultaneous::processIndirectFitParameters(
