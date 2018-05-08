@@ -18,7 +18,7 @@ def change_colour_to_red(self, location, column_index):
     cell.setBackgroundColor("#FF0000")
     self.table.setCellAt(location, column_index, cell)
 
-    
+
 def cell(text):
     return MantidQt.MantidWidgets.Batch.Cell(text)
 
