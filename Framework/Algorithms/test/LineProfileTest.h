@@ -390,6 +390,52 @@ public:
     TS_ASSERT_EQUALS(vertAxis->getValue(1), 5)
   }
 
+  void test_input_sample_logs_preserved() {
+    const size_t nHist = 13;
+    const size_t nBins = 23;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
+    inputWS->mutableRun().addProperty("test_property", true);
+    const int start = 2;
+    const int end = nBins - 2;
+    MatrixWorkspace_sptr outputWS =
+        profileOverTwoSpectra(inputWS, start, end, "Sum");
+    TS_ASSERT(outputWS);
+    const auto &logs = outputWS->run();
+    TS_ASSERT(logs.hasProperty("test_property"));
+ }
+
+  void test_distribution_input_gives_distribution_output() {
+    const size_t nHist = 13;
+    const size_t nBins = 23;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins, true);
+    inputWS->setDistribution(true);
+    TS_ASSERT(inputWS->isHistogramData());
+    TS_ASSERT(inputWS->isDistribution());
+    const int start = 2;
+    const int end = nBins - 2;
+    MatrixWorkspace_sptr outputWS =
+        profileOverTwoSpectra(inputWS, start, end, "Sum");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(outputWS->isHistogramData());
+    TS_ASSERT(outputWS->isDistribution());
+  }
+
+  void test_nondistribution_input_gives_nondistribution_output() {
+    const size_t nHist = 13;
+    const size_t nBins = 23;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins, true);
+    inputWS->setDistribution(false);
+    TS_ASSERT(inputWS->isHistogramData());
+    TS_ASSERT(!inputWS->isDistribution());
+    const int start = 2;
+    const int end = nBins - 2;
+    MatrixWorkspace_sptr outputWS =
+        profileOverTwoSpectra(inputWS, start, end, "Sum");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(outputWS->isHistogramData());
+    TS_ASSERT(!outputWS->isDistribution());
+  }
+
 private:
   MatrixWorkspace_sptr profileOverTwoSpectra(MatrixWorkspace_sptr inputWS,
                                              const int start, const int end,

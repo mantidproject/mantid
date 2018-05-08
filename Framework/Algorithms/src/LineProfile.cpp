@@ -32,6 +32,8 @@ using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Frequencies;
+using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::Points;
 using Mantid::Kernel::BoundedValidator;
@@ -86,6 +88,35 @@ struct IndexLimits {
   size_t widthStart;
   size_t widthEnd;
 };
+
+/**
+ * Create the profile workspace.
+ * @param ws The parent workspace.
+ * @param Xs Profile's X values.
+ * @param Ys Profile's Y values.
+ * @param Es Profile's E values.
+ * @return A single histogram profile workspace.
+ */
+Workspace2D_sptr makeOutput(const MatrixWorkspace &ws, std::vector<double> &&Xs,
+                            std::vector<double> &&Ys,
+                            std::vector<double> &&Es) {
+  Workspace2D_sptr outWS;
+  if (ws.isHistogramData()) {
+    if (ws.isDistribution()) {
+      outWS = create<Workspace2D>(ws, 1,
+                                  Histogram(BinEdges(Xs), Frequencies(Ys),
+                                            FrequencyStandardDeviations(Es)));
+    } else {
+      outWS =
+          create<Workspace2D>(ws, 1, Histogram(BinEdges(Xs), Counts(Ys),
+                                               CountStandardDeviations(Es)));
+    }
+  } else {
+    outWS = create<Workspace2D>(
+        ws, 1, Histogram(Points(Xs), Counts(Ys), CountStandardDeviations(Es)));
+  }
+  return outWS;
+}
 
 /**
  * Set correct units and vertical axis binning.
@@ -399,16 +430,8 @@ void LineProfile::exec() {
             verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
   }
   // Prepare and set output.
-  Workspace2D_sptr outWS;
-  if (Xs.size() > profileYs.size()) {
-    outWS =
-        create<Workspace2D>(1, Histogram(BinEdges(Xs), Counts(profileYs),
-                                         CountStandardDeviations(profileEs)));
-  } else {
-    outWS =
-        create<Workspace2D>(1, Histogram(Points(Xs), Counts(profileYs),
-                                         CountStandardDeviations(profileEs)));
-  }
+  auto outWS = makeOutput(*ws, std::move(Xs), std::move(profileYs),
+                          std::move(profileEs));
   // The actual profile might be of different size than what user
   // specified.
   Box actualBounds;
