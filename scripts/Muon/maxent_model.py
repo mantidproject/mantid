@@ -21,14 +21,8 @@ class MaxEntWrapper(object):
         """
         store the data in the wrapper for later
         """
-        if "phaseTable" in inputs:
-            self.phaseTable = inputs["phaseTable"]
-        else:
-            self.phaseTable = None
-        if "maxent" in inputs:
-            self.maxent = inputs["maxent"]
-        else:
-            self.maxent = None
+        self.phaseTable = inputs.get("phaseTable",None)
+        self.maxent = inputs.get("maxent",None)
         self.model.setRun(inputs["Run"])
 
     def execute(self):
