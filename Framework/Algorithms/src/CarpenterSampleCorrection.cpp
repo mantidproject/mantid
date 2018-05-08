@@ -52,7 +52,8 @@ void CarpenterSampleCorrection::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  auto algCalcCarpenter = AlgorithmManager::Instance().createUnmanaged("CalculateCarpenterSampleCorrection");
+  auto algCalcCarpenter = AlgorithmManager::Instance().createUnmanaged(
+      "CalculateCarpenterSampleCorrection");
   algCalcCarpenter->initialize();
 
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace> >(
@@ -114,9 +115,8 @@ void CarpenterSampleCorrection::exec() {
 WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
     MatrixWorkspace_sptr &inputWksp, double radius, double coeff1,
     double coeff2, double coeff3, bool doAbs, bool doMS) {
-  auto calculate =
-      this->createChildAlgorithm("CalculateCarpenterSampleCorrection",
-                                  0.0, 0.25);
+  auto calculate = this->createChildAlgorithm(
+      "CalculateCarpenterSampleCorrection", 0.0, 0.25);
   calculate->setProperty("InputWorkspace", inputWksp);
   calculate->setProperty("CylinderSampleRadius", radius);
   calculate->setProperty("AttenuationXSection", coeff1);

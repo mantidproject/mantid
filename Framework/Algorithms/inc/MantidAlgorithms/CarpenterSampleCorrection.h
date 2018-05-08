@@ -42,7 +42,8 @@ namespace Algorithms {
                   <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CarpenterSampleCorrection : public API::DistributedDataProcessorAlgorithm {
+class DLLExport CarpenterSampleCorrection
+    : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
@@ -50,9 +51,9 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CalculateCarpenterSampleCorrection", "CylinderAbsorption",
-            "MonteCarloAbsorption", "MayersSampleCorrection",
-            "PearlMCAbsorption", "VesuvioCalculateMS"};
+    return { "CalculateCarpenterSampleCorrection", "CylinderAbsorption",
+             "MonteCarloAbsorption",               "MayersSampleCorrection",
+             "PearlMCAbsorption",                  "VesuvioCalculateMS" };
   }
 
   /// Algorithm's category for identification overriding a virtual method
