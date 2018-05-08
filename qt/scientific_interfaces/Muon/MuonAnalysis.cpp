@@ -1975,28 +1975,30 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
  */
 void MuonAnalysis::selectMultiPeak(const QString &wsName,
                                    const boost::optional<QString> &filePath) {
+
   disableAllTools();
   if (!plotExists(wsName)) {
     plotSpectrum(wsName);
     setCurrentDataName(wsName);
   }
+  // go from MUSR data (after a fit) to HIFI 84447 to see errors...
+  // move the below code to be after load??? 
+  	if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
+	// Set the available groups/pairs and periods
+	const Grouping groups = m_groupingHelper.parseGroupingTable();
+	QStringList groupsAndPairs;
+	groupsAndPairs.reserve(
+	static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
+	std::transform(groups.groupNames.begin(), groups.groupNames.end(),
+	std::back_inserter(groupsAndPairs), &QString::fromStdString);
+	std::transform(groups.pairNames.begin(), groups.pairNames.end(),
+	std::back_inserter(groupsAndPairs), &QString::fromStdString);
+	setGroupsAndPairs();
 
-  if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
-    // Set the available groups/pairs and periods
-    const Grouping groups = m_groupingHelper.parseGroupingTable();
-    QStringList groupsAndPairs;
-    groupsAndPairs.reserve(
-        static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
-    std::transform(groups.groupNames.begin(), groups.groupNames.end(),
-                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
-    std::transform(groups.pairNames.begin(), groups.pairNames.end(),
-                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
-    setGroupsAndPairs();
-
-    // Set the selected run, group/pair and period
-    m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
-    setChosenGroupAndPeriods(wsName);
-  }
+	// Set the selected run, group/pair and period
+	m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+	setChosenGroupAndPeriods(wsName);
+	}
 
   QString code;
 
