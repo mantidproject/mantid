@@ -1,6 +1,7 @@
 #include <memory>
 #include <vector>
 #include <boost/optional.hpp>
+#include "MantidQtWidgets/Common/PythonSystemHeader.h"
 
 bool isIterable(PyObject *iterable) {
   PyObject *iterator = PyObject_GetIter(iterable);
@@ -110,11 +111,11 @@ inline boost::optional<std::string>
 pythonStringToStdString(PyObject *pyString) {
   if (PyUnicode_Check(pyString)) {
     PyObject *s = PyUnicode_AsEncodedString(pyString, "UTF-8", "");
-    auto val = std::string(PyString_AS_STRING(s));
+    auto val = std::string(TO_CSTRING(s));
     Py_DECREF(s);
     return val;
-  } else if (PyString_Check(pyString)) {
-    return std::string(PyString_AS_STRING(pyString));
+  } else if (STR_CHECK(pyString)) {
+    return std::string(TO_CSTRING(pyString));
   } else {
     return boost::none;
   }
@@ -126,6 +127,6 @@ PyObject *stdStringToPythonString(std::string const &cppString) {
     return utf8String;
   } else {
     PyErr_Clear();
-    return PyString_FromString(cppString.c_str());
+    return FROM_CSTRING(cppString.c_str());
   }
 }
