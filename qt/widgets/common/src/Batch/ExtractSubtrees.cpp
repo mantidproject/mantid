@@ -4,89 +4,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-bool ExtractSubtrees::isChildOfPrevious(RowLocation const &location) const {
-  return location.isChildOf(m_previousNode);
-}
-
-bool ExtractSubtrees::isSiblingOfPrevious(RowLocation const &location) const {
-  return location.isSiblingOf(m_previousNode);
-}
-
-bool ExtractSubtrees::isCorrectDepthForChild(int parentDepth,
-                                             int maybeChildDepth) {
-  return maybeChildDepth == parentDepth + 1;
-}
-
-bool ExtractSubtrees::currentIsInDifferentSubtree(
-    int depthOfCurrentRow, RowLocation const &rootRelativeToTree) {
-  return depthOfCurrentRow < rootRelativeToTree.depth();
-}
-
-RecursiveSubtreeExtractionResult const
-ExtractSubtrees::finishedSubtree(RowLocationConstIterator currentRow,
-                                 RowDataConstIterator currentRowData) {
-  return RecursiveSubtreeExtractionResult(true, {currentRow, currentRowData});
-}
-
-RecursiveSubtreeExtractionResult const
-ExtractSubtrees::continueOnLevelAbove(RowLocationConstIterator currentRow,
-                                      RowDataConstIterator currentRowData) {
-  return RecursiveSubtreeExtractionResult(false, {currentRow, currentRowData});
-}
-
-RecursiveSubtreeExtractionResult const ExtractSubtrees::reportUnsuitableTree() {
-  return RecursiveSubtreeExtractionResult();
-}
-
-RecursiveSubtreeExtractionResult::RecursiveSubtreeExtractionResult(
-    bool shouldNotContinue,
-    std::pair<RowLocationConstIterator, RowDataConstIterator> const &
-        currentPosition)
-    : shouldNotContinue(shouldNotContinue), regionHasGaps(false),
-      currentPosition(currentPosition) {}
-
-RecursiveSubtreeExtractionResult::RecursiveSubtreeExtractionResult()
-    : shouldNotContinue(false), regionHasGaps(true), currentPosition() {}
-
-auto ExtractSubtrees::extractSubtreeRecursive(
-    Subtree &subtree, RowLocation const &rootRelativeToTree, RowLocation parent,
-    int currentDepth, RowLocationConstIterator currentRow,
-    RowLocationConstIterator endRow, RowDataConstIterator currentRowData)
-    -> RecursiveSubtreeExtractionResult {
-  auto childCount = 0;
-  while (currentRow != endRow) {
-    auto depthOfCurrentRow = (*currentRow).depth();
-    if (depthOfCurrentRow > currentDepth) {
-      if (isCorrectDepthForChild(currentDepth, depthOfCurrentRow)) {
-        auto extractionResult = extractSubtreeRecursive(
-            subtree, rootRelativeToTree, subtree.back().location(),
-            currentDepth + 1, currentRow, endRow, currentRowData);
-        if (!extractionResult.regionHasGaps) {
-          if (!extractionResult.shouldNotContinue)
-            std::tie(currentRow, currentRowData) =
-                extractionResult.currentPosition;
-          else
-            return extractionResult;
-        } else {
-          return reportUnsuitableTree();
-        }
-      } else
-        return reportUnsuitableTree();
-    } else if (depthOfCurrentRow < currentDepth) {
-      if (currentIsInDifferentSubtree(depthOfCurrentRow, rootRelativeToTree))
-        return finishedSubtree(currentRow, currentRowData);
-      else
-        return continueOnLevelAbove(currentRow, currentRowData);
-    } else {
-      subtree.emplace_back(parent.child(childCount), *currentRowData);
-      ++childCount;
-      ++currentRow;
-      ++currentRowData;
-    }
-  }
-  return finishedSubtree(currentRow, currentRowData);
-}
-
 auto ExtractSubtrees::operator()(std::vector<RowLocation> region,
                                  std::vector<std::vector<Cell>> regionData)
     -> boost::optional<std::vector<Subtree>> {
@@ -107,9 +24,9 @@ auto ExtractSubtrees::operator()(std::vector<RowLocation> region,
       auto extractionResult = extractSubtreeRecursive(
           subtree, *rowIt, subtree[0].location(), rowDepth + 1, nextRowIt,
           region.end(), rowDataIt + 1);
-      if (!extractionResult.regionHasGaps) {
-        done = extractionResult.shouldNotContinue;
-        std::tie(rowIt, rowDataIt) = extractionResult.currentPosition;
+      if (!extractionResult.isUnsuitableTree()) {
+        done = extractionResult.shouldNotContinue();
+        std::tie(rowIt, rowDataIt) = extractionResult.currentPosition();
         subtrees.emplace_back(std::move(subtree));
       } else {
         return boost::none;
@@ -119,6 +36,129 @@ auto ExtractSubtrees::operator()(std::vector<RowLocation> region,
     }
   }
   return subtrees;
+}
+
+auto ExtractSubtrees::extractSubtreeRecursive(
+    Subtree &subtree, RowLocation const &rootRelativeToTree, RowLocation parent,
+    int currentDepth, RowLocationConstIterator currentRow,
+    RowLocationConstIterator endRow, RowDataConstIterator currentRowData)
+    -> RecursiveSubtreeExtractionResult {
+  auto childIndex = 0;
+  while (currentRow != endRow) {
+    auto depthOfCurrentRow = (*currentRow).depth();
+    if (depthOfCurrentRow > currentDepth) {
+      if (isCorrectDepthForChild(currentDepth, depthOfCurrentRow)) {
+        auto extractionResult = extractSubtreeRecursive(
+            subtree, rootRelativeToTree, subtree.back().location(),
+            currentDepth + 1, currentRow, endRow, currentRowData);
+        if (!extractionResult.isUnsuitableTree()) {
+          if (extractionResult.shouldContinue())
+            std::tie(currentRow, currentRowData) =
+                extractionResult.currentPosition();
+          else
+            return extractionResult;
+        } else {
+          return unsuitableTree();
+        }
+      } else
+        return unsuitableTree();
+    } else if (depthOfCurrentRow < currentDepth) {
+      if (currentIsInDifferentSubtree(depthOfCurrentRow, rootRelativeToTree))
+        return finishedSubtree(currentRow, currentRowData);
+      else
+        return continueOnLevelAbove(currentRow, currentRowData);
+    } else {
+      subtree.emplace_back(parent.child(childIndex), *currentRowData);
+      ++childIndex;
+      ++currentRow;
+      ++currentRowData;
+    }
+  }
+  return finishedSubtree(currentRow, currentRowData);
+}
+
+bool ExtractSubtrees::isChildOfPrevious(RowLocation const &location) const {
+  return location.isChildOf(m_previousNode);
+}
+
+bool ExtractSubtrees::isSiblingOfPrevious(RowLocation const &location) const {
+  return location.isSiblingOf(m_previousNode);
+}
+
+bool ExtractSubtrees::isCorrectDepthForChild(int parentDepth,
+                                             int maybeChildDepth) {
+  return maybeChildDepth == parentDepth + 1;
+}
+
+bool ExtractSubtrees::currentIsInDifferentSubtree(
+    int depthOfCurrentRow, RowLocation const &rootRelativeToTree) {
+  return depthOfCurrentRow < rootRelativeToTree.depth();
+}
+
+RecursiveSubtreeExtractionResult
+ExtractSubtrees::continueOnLevelAbove(RowLocationConstIterator currentRow,
+                                      RowDataConstIterator currentRowData) {
+  return RecursiveSubtreeExtractionResult::continueOnLevelAbove(currentRow,
+                                                                currentRowData);
+}
+
+RecursiveSubtreeExtractionResult
+ExtractSubtrees::finishedSubtree(RowLocationConstIterator currentRow,
+                                 RowDataConstIterator currentRowData) {
+  return RecursiveSubtreeExtractionResult::finishedSubtree(currentRow,
+                                                           currentRowData);
+}
+
+RecursiveSubtreeExtractionResult ExtractSubtrees::unsuitableTree() {
+  return RecursiveSubtreeExtractionResult::unsuitableTree();
+}
+
+RecursiveSubtreeExtractionResult::RecursiveSubtreeExtractionResult(
+    bool shouldContinue, bool isUnsuitableTree,
+    std::pair<RowLocationConstIterator, RowDataConstIterator> const &
+        currentPosition)
+    : m_shouldContinue(shouldContinue), m_isUnsuitableTree(isUnsuitableTree),
+      m_currentPosition(currentPosition) {}
+
+bool RecursiveSubtreeExtractionResult::shouldContinue() const {
+  return m_shouldContinue;
+}
+
+bool RecursiveSubtreeExtractionResult::shouldNotContinue() const {
+  return !m_shouldContinue;
+}
+
+bool RecursiveSubtreeExtractionResult::isUnsuitableTree() const {
+  return m_isUnsuitableTree;
+}
+
+auto RecursiveSubtreeExtractionResult::currentPosition() const
+    -> std::pair<RowLocationConstIterator, RowDataConstIterator> const & {
+  return m_currentPosition;
+}
+
+RecursiveSubtreeExtractionResult
+RecursiveSubtreeExtractionResult::finishedSubtree(
+    RowLocationConstIterator currentRow, RowDataConstIterator currentRowData) {
+  return RecursiveSubtreeExtractionResult(/*shouldContinue=*/false,
+                                          /*regionHasGaps=*/false,
+                                          {currentRow, currentRowData});
+}
+
+RecursiveSubtreeExtractionResult
+RecursiveSubtreeExtractionResult::continueOnLevelAbove(
+    RowLocationConstIterator currentRow, RowDataConstIterator currentRowData) {
+  return RecursiveSubtreeExtractionResult(/*shouldContinue=*/true,
+                                          /*regionHasGaps=*/false,
+                                          {currentRow, currentRowData});
+}
+
+RecursiveSubtreeExtractionResult
+RecursiveSubtreeExtractionResult::unsuitableTree() {
+  return RecursiveSubtreeExtractionResult(
+      /*shouldContinue=*/false,
+      /*regionHasGaps=*/true,
+      std::pair<RowLocationConstIterator, RowDataConstIterator>());
 }
 } // namespace Batch
 } // namespace MantidWidgets

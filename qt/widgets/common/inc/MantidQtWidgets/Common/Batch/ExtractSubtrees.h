@@ -11,20 +11,35 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-struct RecursiveSubtreeExtractionResult {
+class RecursiveSubtreeExtractionResult {
+public:
   using RowLocationConstIterator =
       typename std::vector<RowLocation>::const_iterator;
   using RowDataConstIterator =
       typename std::vector<std::vector<Cell>>::const_iterator;
-  RecursiveSubtreeExtractionResult();
+
   RecursiveSubtreeExtractionResult(
       bool shouldContinue,
+      bool regionHasGaps,
       std::pair<RowLocationConstIterator, RowDataConstIterator> const &
           currentPosition);
 
-  bool shouldNotContinue;
-  bool regionHasGaps;
-  std::pair<RowLocationConstIterator, RowDataConstIterator> currentPosition;
+  bool shouldContinue() const;
+  bool shouldNotContinue() const;
+  bool isUnsuitableTree() const;
+  std::pair<RowLocationConstIterator, RowDataConstIterator> const& currentPosition() const;
+
+  static RecursiveSubtreeExtractionResult
+  finishedSubtree(RowLocationConstIterator currentRow,
+                  RowDataConstIterator currentRowData);
+  static RecursiveSubtreeExtractionResult
+  continueOnLevelAbove(RowLocationConstIterator currentRow,
+                       RowDataConstIterator currentRowData);
+  static RecursiveSubtreeExtractionResult unsuitableTree();
+private:
+  bool m_shouldContinue;
+  bool m_isUnsuitableTree;
+  std::pair<RowLocationConstIterator, RowDataConstIterator> m_currentPosition;
 };
 
 class EXPORT_OPT_MANTIDQT_COMMON ExtractSubtrees {
@@ -40,14 +55,15 @@ public:
   bool isChildOfPrevious(RowLocation const &location) const;
   bool isSiblingOfPrevious(RowLocation const &location) const;
   bool isCorrectDepthForChild(int parentDepth, int maybeChildDepth);
-  RecursiveSubtreeExtractionResult const
+
+  RecursiveSubtreeExtractionResult
   finishedSubtree(RowLocationConstIterator currentRow,
                   RowDataConstIterator currentRowData);
-  RecursiveSubtreeExtractionResult const
+  RecursiveSubtreeExtractionResult
   continueOnLevelAbove(RowLocationConstIterator currentRow,
                        RowDataConstIterator currentRowData);
+  RecursiveSubtreeExtractionResult unsuitableTree();
 
-  RecursiveSubtreeExtractionResult const reportUnsuitableTree();
   bool currentIsInDifferentSubtree(int depthOfCurrentRow,
                                    RowLocation const &rootRelativeToTree);
 
