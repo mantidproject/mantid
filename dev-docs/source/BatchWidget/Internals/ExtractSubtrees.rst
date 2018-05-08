@@ -24,5 +24,5 @@ is unsuitable and the algorithm will return an empty optional.
    :width: 800px
 
 
-This algorithm is used by :code:`JobTreeView` in the :code:`selectedSubtrees` method which is
+This algorithm is used by :doc:`../API/JobTreeView` in the :code:`selectedSubtrees` method which is
 required to implement non-trivial copy and paste.

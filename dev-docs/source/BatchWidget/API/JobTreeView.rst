@@ -15,7 +15,7 @@ Row Location
 ^^^^^^^^^^^^
 
 A row location is the notion of an individual row's position within the table. Since the
-table is unlike a traditional spreadsheet in that it is hierarchical the table is more like a
+table is unlike a traditional spreadsheet in that it is hierarchical, the table is more like a
 tree of rows where all non-leaf nodes can have any number of children.
 
 In practice some interfaces, such as Reflectometry are likely to want to constrain the

@@ -4,16 +4,16 @@
 Model Indices in Job Tree View
 ==============================
 
-The JobTreeView uses :code:`RowLocation` objects in it's API as an abstraction over
+The :doc:`../API/JobTreeView` uses :code:`RowLocation` objects in it's API as an abstraction over
 :code:`QModelIndex`\ s which are used internally to access :code:`QStandardItem`\ s from the 'models'
-provided by Qt. As such code which simply uses the :code:`JobTreeView` does not need to know anything
+provided by Qt. As such, code which simply uses the :code:`JobTreeView` does not need to know anything
 about :code:`QModelIndex`\ s.
 
 MVC Models
 ^^^^^^^^^^
 
 Sections of Qt such as :code:`QTreeView` are designed as an MVC framework rather than an MVP
-framework, as such working with some sections of it's API become difficult when using MVP. Models in
+framework, as such working with some sections of it's API becomes difficult when using MVP. Models in
 MVC are directly accessible from the view which is free to read the data directly from it. In MVP
 however, data access is marshalled through the presenter, models and presenters are not supposed to
 be coupled to any particular view implementation.
@@ -29,7 +29,7 @@ Filtered Model
 --------------
 
 To take advantage of the filtering functionality offered by the :code:`QTreeView`, the
-:code:`JobTreeView` also manages an instance of :code:`QtFilterLeafNodes` a class derived from
+:code:`JobTreeView` also manages an instance of :code:`QtFilterLeafNodes`, a class derived from
 :code:`QSortFilterProxyModel` which is a filtered version of the 'main model'.
 
 Strongly Typed Indexes
@@ -40,7 +40,7 @@ main model. Likewise, the :code:`QModelIndex`\ s cannot be used to directly acce
 filtered model. Indexes must be explicitly converted between the two spaces.
 
 To make this less bugprone, the header file :code:`StrictQModelIndices.h` defines two types,
-:code:`QModelIndexForMainModel` and :code:`QModelIndexForFilteredModel`, functions which wish to
+:code:`QModelIndexForMainModel` and :code:`QModelIndexForFilteredModel`. Functions which wish to
 constrain the indices they accept and/or return can now make that explicit and use the type system
 to catch errors.
 
@@ -53,3 +53,22 @@ The filtered model holds a subset of the items in the main model, therefore:
   always be successful.
 * Conversion from a valid index into the main model to a valid index into the main model could be
   unsuccessful.
+
+Given a :code:`QModelIndex`, in order to convert to a strongly typed variant you must know whether
+it originated from the filtered model or the main model. Conversion to the appropriate
+strongly typed variant is done via assertion using the functions :code:`fromMainModel` and
+:code:`fromFilteredModel` provided by :code:`StrictQModelIndices.h`. These functions attempt to
+check the assertion by requiring a reference to the model you are claiming the index is from and
+comparing it with the pointer returned by calling :code:`.model()` on the model index. However this
+is only a heuristic since the index could refer to a cell which has since been removed from the
+filtered model due to a change of filter.
+
+After the construction of the :code:`JobTreeView`, indices provided through :code:`QTreeView` APIs
+are indices into the filtered model and must be mapped into the main model before being used to
+modify it. :code:`RowLocation`\ s on the other hand always correspond with indices into the main
+model.
+
+Asserting that an index is from one space or the other as described above is not the same as mapping
+from one space into the other. This is performed using the functions :code:`mapToMainModel` and
+:code:`mapToFilteredModel` defined in :code:`JobTreeView` which internally call methods of the
+filtered model.
