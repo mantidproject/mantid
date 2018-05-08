@@ -1,0 +1,55 @@
+.. _StrictModelIndexing:
+
+==============================
+Model Indices in Job Tree View
+==============================
+
+The JobTreeView uses :code:`RowLocation` objects in it's API as an abstraction over
+:code:`QModelIndex`\ s which are used internally to access :code:`QStandardItem`\ s from the 'models'
+provided by Qt. As such code which simply uses the :code:`JobTreeView` does not need to know anything
+about :code:`QModelIndex`\ s.
+
+MVC Models
+^^^^^^^^^^
+
+Sections of Qt such as :code:`QTreeView` are designed as an MVC framework rather than an MVP
+framework, as such working with some sections of it's API become difficult when using MVP. Models in
+MVC are directly accessible from the view which is free to read the data directly from it. In MVP
+however, data access is marshalled through the presenter, models and presenters are not supposed to
+be coupled to any particular view implementation.
+
+The Main Model
+--------------
+
+The :code:`JobTreeView` solves this problem by keeping an internal instance of
+:code:`QStandardItemModel` a Qt 'model' which fulfils Qt's requirements for a 'model' and which acts
+as the view state. We refer to this instance as the 'main model'.
+
+Filtered Model
+--------------
+
+To take advantage of the filtering functionality offered by the :code:`QTreeView`, the
+:code:`JobTreeView` also manages an instance of :code:`QtFilterLeafNodes` a class derived from
+:code:`QSortFilterProxyModel` which is a filtered version of the 'main model'.
+
+Strongly Typed Indexes
+^^^^^^^^^^^^^^^^^^^^^^
+
+The :code:`QModelIndex`\ s into the filtered model cannot be used to directly access items in the
+main model. Likewise, the :code:`QModelIndex`\ s cannot be used to directly access items in the
+filtered model. Indexes must be explicitly converted between the two spaces.
+
+To make this less bugprone, the header file :code:`StrictQModelIndices.h` defines two types,
+:code:`QModelIndexForMainModel` and :code:`QModelIndexForFilteredModel`, functions which wish to
+constrain the indices they accept and/or return can now make that explicit and use the type system
+to catch errors.
+
+Converting Between Index Spaces
+-------------------------------
+
+The filtered model holds a subset of the items in the main model, therefore:
+
+* Conversion from a valid index into the filtered model to a valid index into the main model should
+  always be successful.
+* Conversion from a valid index into the main model to a valid index into the main model could be
+  unsuccessful.

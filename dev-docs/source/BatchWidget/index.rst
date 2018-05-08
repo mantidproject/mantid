@@ -8,12 +8,21 @@ The Batch Widget is a hierarchical grid-based widget designed for interfaces whi
 spreadsheet-like interface for configuring, running and indicating the status of multiple (batch)
 reduction jobs.
 
-.. contents:: Contents
-   :local:
+API Documentation
+^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
 
-   JobTreeView
-   ExtractSubtrees
-   FindRootNodes
+   API/JobTreeView
+
+
+Internals Documentation
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+
+   Internals/ExtractSubtrees
+   Internals/FindRootNodes
+   Internals/StrictModelIndexing

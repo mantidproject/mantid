@@ -1,13 +1,15 @@
-.. _ExtractSubtrees:
+.. _FindRootNodes:
 
-================
-Extract Subtrees
-================
+===============
+Find Root Nodes
+===============
 
-The :code:`ExtractSubtrees` component converts a set of row cell contents and a set of row
-locations into a structured set of subtrees, this is better described by the illustration below.
+The :code:`FindRootNodes` component filters an unordered set of row locations down to a
+lexicographically ordered set of row locations where each location corresponds to the root
+of a subtree.
 
-.. image::  ../images/extract_subtree.svg
+
+.. image::  ../../images/find_subtree_roots.svg
    :align: center
    :width: 800px
 
@@ -19,10 +21,10 @@ The algorithm used to perform this conversion makes a simplifying assumption tha
 subtrees in the result all share a common parent. If this assumption is untrue then the input set
 is unsuitable and the algorithm will return an empty optional.
 
-.. image::  ../images/subtree_fail.svg
+.. image::  ../../images/subtree_fail.svg
    :align: center
    :width: 800px
 
 
-This algorithm is used by :code:`JobTreeView` in the :code:`selectedSubtrees` method which is
+This algorithm is used by :code:`JobTreeView` in the :code:`selectedSubtreeRoots` method which is
 required to implement non-trivial copy and paste.

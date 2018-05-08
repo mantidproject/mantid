@@ -6,7 +6,7 @@ Job Tree View
 
 The :code:`JobTreeView` component provides an MVP style view interface for a hierarchical table
 with a spreadsheet-like appearance for configuring and indicating the status of multiple (batch)
-reduction jobs. It is currently used to implement the tree component of the BatchWidget.
+reduction jobs. It is currently used to implement the tree component of the Batch Widget.
 
 API Concepts
 ############
@@ -27,7 +27,7 @@ each element represents the index of the next node in the path relative to it's 
 path. Some example nodes, their corresponding paths, and their representations are illustrated in
 the diagram below.
 
-.. image::  ../images/row_location_path.svg
+.. image::  ../../images/row_location_path.svg
    :align: center
    :width: 800px
 
@@ -63,6 +63,21 @@ Each row in the table can have 0..N cells. When interacting with the :code:`JobT
 sometimes need to be able to address and change the properties of an individual cell. To do this
 we use both a :code:`RowLocation` and a column index, usually actualized as an :code:`int`.
 
+Cells
+^^^^^
+
+In order to retrieve the view properties for one or more specific cells, the methods :code:`cellAt`
+and :code:`cellsAt` can be used to retrieve :code:`Cell` objects for the cell at a row and column
+index or all the cells for a particular row respectively.
+
+The :code:`Cell` class contains the per-cell view properties (such as the text it contains) in a
+view-implementation independent format.
+
+These cell objects intentionally have no link back to the view they originated from and so mutating
+them does not directly update the view. In order to update the cell or cells corresponding to a row,
+the methods :code:`setCellAt` or :code:`setCellsAt` should be used.
+
+This is illustrated in the `Change Cell Color Example`_ below.
 
 Subtrees
 ^^^^^^^^
@@ -76,14 +91,14 @@ paste.
 A subtree in this context refers to a set of one or more nodes within the tree where if the set has
 a size greater than one, each node is directly connected to at least one other node in the set.
 An example of a set of nodes which meets this constraint and a set of nodes which does not are
-illustrated in blue in the diagram below.
+outlined in blue in the diagram below.
 
-.. image::  ../images/subtree.svg
+.. image::  ../../images/subtree.svg
    :align: center
    :width: 800px
 
 The :code:`Subtree` type used to represent this concept in the API is defined in the header
-:code:`Row.h`. Refer to the documentation for the component :doc:`ExtractSubtrees` for more detail
+:code:`Row.h`. Refer to the documentation for the component :doc:`../Internals/ExtractSubtrees` for more detail
 on the internal representation of a subtree in this API.
 
 
@@ -99,7 +114,7 @@ Due to the interactive nature of some events (such as row insertion, cell modifi
 notification does not happen until after said event has taken place and the view has
 already been updated. Therefore, if a presenter determines that said action is on-reflection invalid
 it will be required to call a method which updates the view and rolls back the action.
-This is illustrated in the depth limit example below.
+This is illustrated in the `Depth Limit Example`_ below.
 
 Other events (those who's notification method name ends with :code:`Requested`) require the presenter
 to update the view and/or model and so the notification happens before the view has been updated.
@@ -114,102 +129,29 @@ Usage Examples
 Initializing a JobTreeView
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: py
+.. literalinclude:: CodeExamples/init.py
 
-   from mantidqtpython import MantidQt
+.. literalinclude:: CodeExamples/init.cpp
+   :language: c++
 
-   def empty_cell():
-     return MantidQt.MantidWidgets.Batch.Cell("")
-
-   # Inside the parent view
-   def setup(self):
-     self.table = MantidQt.MantidWidgets.Batch.JobTreeView(
-       ["Column 1", "Column 2"], # The table column headings
-       empty_cell(), # The default style and content for new 'empty' cells.
-       self # The parent QObject.
-       )
-     self.table_signals = # The signal adapter subscribes to events from the table and
-                          # emits signals whenever it is notified.
-       MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table, self)
-
-     self.table.appendChildRowOf(row([]), [cell("Value for Column A"), cell("Value for Column B")])
-
-
-.. code-block:: c++
-
-  #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
-
-  using namespace MantidWidgets::Common::Batch;
-
-  // Inside the parent view constructor
-  m_treeView = new JobTreeView(
-    {"Heading 1", "Heading 2"}, // The table column headings.
-    Cell(""), // The default style and content for the new 'empty' cells.
-    this // The parent QObject
-    );
-  m_treeViewSignals = // JobTreeViewSignalAdapter is also available from C++
-                      // Constructing a signal adapter with the view implicitly calls subscribe.
-    new JobTreeViewSignalAdapter(*m_treeView, this);
-  m_treeView->appendChildRowOf(RowLocation(), {Cell("Value for Column A"), Cell("Value for Column B")})
 
 Initializing a JobTreeView with your own subscriber
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: c++
+.. literalinclude:: CodeExamples/init_with_custom_subscriber.cpp
+   :language: c++
 
-  #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 
-  using namespace MantidWidgets::Common::Batch;
-
-  class SimplePresenter : public JobTreeViewSubscriber {
-  public:
-    SimplePresenter(JobTreeView* view) : m_view(view) {
-      m_view->subscribe(this); // Since we aren't using signal adapter
-                               // we must remember the call to subscribe.
-    }
-
-    void notifyCellChanged(RowLocation const &itemIndex, int column,
-                           std::string const &newValue) override { /* ... */ }
-    void notifyRowInserted(RowLocation const &newRowLocation) override { /* ... */ }
-    void notifyRemoveRowsRequested(std::vector<RowLocation> const &locationsOfRowsToRemove) override { /* ... */ }
-    void notifyCopyRowsRequested() overrride { /* ... */ }
-    void notifyPasteRowsRequested() override { /* ... */}
-    void notifyFilterReset() override { /* ... */ }
-
-  private:
-    JobTreeView* m_view;
-  };
-
-  // Elsewhere - Inside initialization
-  m_treeView = new JobTreeView(
-    {"Heading 1", "Heading 2"}, // The table column headings.
-    Cell(""), // The default style and content for the new 'empty' cells.
-    this // The parent QObject
-    );
-  m_childPresenter = SimplePresenter(m_treeView);
+.. _Depth Limit Example:
 
 Limiting the depth of the tree
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: py
+.. literalinclude:: CodeExamples/depth_limit_example.py
 
-   from mantidqtpython import MantidQt
+.. _Change Cell Color Example:
 
-   def empty_cell():
-     return MantidQt.MantidWidgets.Batch.Cell("")
+Changing the color of a cell
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   # Inside the parent view
-   def setup(self):
-     self.table = MantidQt.MantidWidgets.Batch.JobTreeView(
-       ["Column 1", "Column 2"], empty_cell(), self)
-     self.table_signals =
-       MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table, self)
-
-     self.table_signals.rowInserted.connect(self.on_row_inserted)
-     # The rowInserted signal is fired every time a user inserts a row.
-     # It is NOT fired if we manually insert a row.
-
-   def on_row_inserted(self, rowLocation):
-     if rowLocation.depth() > 2: # If the depth is more than two then
-                                 # we can safely 'rollback' the insertion.
-       self.table.removeRowAt(rowLocation)
+.. literalinclude:: CodeExamples/change_color.py
