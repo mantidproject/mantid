@@ -30,6 +30,14 @@ Usage
 
    import h5py
    import os
+   import sys
+
+   # The following is needed as strings read from h5py are formatted differently between Python 2 and 3
+   run_number_output = "Run number (read from file): {}"
+   if sys.version_info[0] < 3:
+       format_run_number = run_number_output.format
+   else:
+       format_run_number = lambda run_number: run_number_output.format(run_number.tostring().decode())
 
    input_ws = Load(Filename="ENGINX00213855.nxs")
 
@@ -44,7 +52,7 @@ Usage
        sample_logs_group = f["Sample Logs"]
        
        print("Proton charge saved to file: {}".format("tot_prtn_chrg" in sample_logs_group))
-       print("Run number (read from file): {}".format(sample_logs_group["run_number"][0].encode()))
+       print(format_run_number(sample_logs_group["run_number"][0]))
        print("nspectra (blacklisted) saved to file: {}".format("nspectra" in sample_logs_group))
 
 .. testcleanup:: ExportSampleLogsToHDF5
