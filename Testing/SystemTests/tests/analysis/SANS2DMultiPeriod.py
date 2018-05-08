@@ -7,6 +7,7 @@ from mantid.api import AnalysisDataService
 from ISISCommandInterface import *
 from SANSBatchMode import *
 
+
 class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
 
     reduced=''
