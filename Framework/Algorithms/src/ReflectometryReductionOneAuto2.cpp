@@ -753,7 +753,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     return true;
   }
 
-  Algorithm_sptr polAlg = createChildAlgorithm("PolarizationCorrectionFredrikze");
+  Algorithm_sptr polAlg =
+      createChildAlgorithm("PolarizationCorrectionFredrikze");
   polAlg->setChild(false);
   polAlg->setRethrows(true);
   polAlg->setProperty("InputWorkspace", outputIvsLam);
