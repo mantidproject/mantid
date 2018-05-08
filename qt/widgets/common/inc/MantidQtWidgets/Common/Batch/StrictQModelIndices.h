@@ -8,7 +8,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-template <typename Derived> class EXPORT_OPT_MANTIDQT_COMMON StrictQModelIndex {
+template <typename Derived> class StrictQModelIndex {
 public:
   explicit StrictQModelIndex(QModelIndex const &index);
   StrictQModelIndex() = default;

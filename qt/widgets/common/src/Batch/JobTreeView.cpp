@@ -264,7 +264,7 @@ void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow) {
 
 void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
                                    std::vector<Cell> const &cells) {
-  assertOrThrow(cells.size() <= m_mainModel.columnCount(),
+  assertOrThrow(static_cast<int>(cells.size()) <= m_mainModel.columnCount(),
                 "Attempted to add row with more cells than columns. Increase "
                 "the number of columns by increasing the number of headings.");
   m_adaptedMainModel.insertChildRow(
@@ -420,7 +420,7 @@ JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult const &result) {
 
     auto maybeIndexOfNewRow = rowLocation().indexIfExistsAt(newRowLocation);
     if (maybeIndexOfNewRow.is_initialized()) {
-      return expanded(mapToFilteredModel(maybeIndexOfNewRow.value())).untyped();
+      return expanded(mapToFilteredModel(maybeIndexOfNewRow.get())).untyped();
     } else {
       return QModelIndex();
     }

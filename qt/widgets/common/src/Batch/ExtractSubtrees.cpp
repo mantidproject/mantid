@@ -5,11 +5,11 @@ namespace MantidWidgets {
 namespace Batch {
 
 bool ExtractSubtrees::isChildOfPrevious(RowLocation const &location) const {
-  return location.isChildOf(previousNode);
+  return location.isChildOf(m_previousNode);
 }
 
 bool ExtractSubtrees::isSiblingOfPrevious(RowLocation const &location) const {
-  return location.isSiblingOf(previousNode);
+  return location.isSiblingOf(m_previousNode);
 }
 
 bool ExtractSubtrees::isCorrectDepthForChild(int parentDepth,

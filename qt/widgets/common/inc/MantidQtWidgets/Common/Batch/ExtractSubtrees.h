@@ -57,8 +57,7 @@ public:
       RowLocationConstIterator endRow, RowDataConstIterator currentRowData);
 
 private:
-  bool previousWasRoot;
-  RowLocation previousNode;
+  RowLocation m_previousNode;
 };
 
 } // namespace Batch

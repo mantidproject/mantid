@@ -1,5 +1,6 @@
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include <boost/algorithm/cxx14/equal.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 namespace MantidQt {
 namespace MantidWidgets {
@@ -16,8 +17,8 @@ bool RowLocation::isChildOf(RowLocation const &other) const {
     } else {
       auto const &otherPath = other.path();
       if (depth() - other.depth() == 1)
-        return std::equal(m_path.cbegin(), m_path.cend() - 1,
-                          otherPath.cbegin(), otherPath.cend());
+        return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1,
+                                       otherPath.cbegin(), otherPath.cend());
       else
         return false;
     }
