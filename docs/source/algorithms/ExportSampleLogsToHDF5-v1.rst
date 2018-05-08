@@ -44,7 +44,7 @@ Usage
        sample_logs_group = f["Sample Logs"]
        
        print("Proton charge saved to file: {}".format("tot_prtn_chrg" in sample_logs_group))
-       print("Run number (read from file): {}".format(sample_logs_group["run_number"][0]))
+       print("Run number (read from file): {}".format(sample_logs_group["run_number"][0].encode()))
        print("nspectra (blacklisted) saved to file: {}".format("nspectra" in sample_logs_group))
 
 .. testcleanup:: ExportSampleLogsToHDF5
