@@ -102,6 +102,7 @@ private:
 
   void appendAndEditAtChildRow();
   void appendAndEditAtRowBelow();
+  void editAtRowAbove();
   bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
 
   QModelIndexForMainModel

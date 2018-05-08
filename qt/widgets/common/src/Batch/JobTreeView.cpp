@@ -352,6 +352,11 @@ void JobTreeView::appendAndEditAtRowBelow() {
     m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));
 }
 
+void JobTreeView::editAtRowAbove() {
+  if (hasRowAbove(currentIndex()))
+    editAt(fromFilteredModel(above(currentIndex())));
+}
+
 void JobTreeView::enableFiltering() {
   m_filteredModel.setDynamicSortFilter(false);
   m_filteredModel.setSourceModel(&m_mainModel);
@@ -363,8 +368,7 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
     if (event->modifiers() & Qt::ControlModifier) {
       appendAndEditAtChildRow();
     } else if (event->modifiers() & Qt::ShiftModifier) {
-      // TODO Go to row above
-      // prependAndEditAtRowAbove();
+      editAtRowAbove();
     } else {
       appendAndEditAtRowBelow();
     }
