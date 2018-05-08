@@ -204,10 +204,10 @@ public:
 
     auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["PolarizationAnalysis"]), "PNR");
-    TS_ASSERT_EQUALS(variantToString(options["CRho"]), "2.5,0.4,1.1");
-    TS_ASSERT_EQUALS(variantToString(options["CAlpha"]), "0.6,0.9,1.2");
-    TS_ASSERT_EQUALS(variantToString(options["CAp"]), "100.0,17.0,44.0");
-    TS_ASSERT_EQUALS(variantToString(options["CPp"]), "0.54,0.33,1.81");
+    TS_ASSERT_EQUALS(variantToString(options["Rho"]), "2.5,0.4,1.1");
+    TS_ASSERT_EQUALS(variantToString(options["Alpha"]), "0.6,0.9,1.2");
+    TS_ASSERT_EQUALS(variantToString(options["Ap"]), "100.0,17.0,44.0");
+    TS_ASSERT_EQUALS(variantToString(options["Pp"]), "0.54,0.33,1.81");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

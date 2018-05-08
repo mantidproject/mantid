@@ -6,8 +6,8 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,9 +42,9 @@ const std::string ReflectometryReductionOneAuto2::summary() const {
 }
 
 /** Validate transmission runs
-*
-* @return :: result of the validation as a map
-*/
+ *
+ * @return :: result of the validation as a map
+ */
 std::map<std::string, std::string>
 ReflectometryReductionOneAuto2::validateInputs() {
 
@@ -104,7 +104,7 @@ ReflectometryReductionOneAuto2::validateInputs() {
 }
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void ReflectometryReductionOneAuto2::init() {
 
   // Input ws
@@ -235,7 +235,7 @@ void ReflectometryReductionOneAuto2::init() {
 }
 
 /** Execute the algorithm.
-*/
+ */
 void ReflectometryReductionOneAuto2::exec() {
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -325,14 +325,14 @@ void ReflectometryReductionOneAuto2::exec() {
 }
 
 /** Returns the detectors of interest, specified via processing instructions.
-* Note that this returns the names of the parent detectors of the first and
-* last spectrum indices in the processing instructions. It is assumed that all
-* the interim detectors have the same parent.
-*
-* @param instructions :: processing instructions defining detectors of interest
-* @param inputWS :: the input workspace
-* @return :: the names of the detectors of interest
-*/
+ * Note that this returns the names of the parent detectors of the first and
+ * last spectrum indices in the processing instructions. It is assumed that all
+ * the interim detectors have the same parent.
+ *
+ * @param instructions :: processing instructions defining detectors of interest
+ * @param inputWS :: the input workspace
+ * @return :: the names of the detectors of interest
+ */
 std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
     const std::string &instructions, MatrixWorkspace_sptr inputWS) {
 
@@ -365,14 +365,14 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
 }
 
 /** Correct an instrument component by shifting it vertically or
-* rotating it around the sample.
-*
-* @param instructions :: processing instructions defining the detectors of
-* interest
-* @param inputWS :: the input workspace
-* @param twoTheta :: the angle to move detectors to
-* @return :: the corrected workspace
-*/
+ * rotating it around the sample.
+ *
+ * @param instructions :: processing instructions defining the detectors of
+ * interest
+ * @param inputWS :: the input workspace
+ * @param twoTheta :: the angle to move detectors to
+ * @return :: the corrected workspace
+ */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
     const std::string &instructions, MatrixWorkspace_sptr inputWS,
     const double twoTheta) {
@@ -407,13 +407,13 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
 }
 
 /** Calculate the theta value of the detector of interest specified via
-* processing instructions
-*
-* @param instructions :: processing instructions defining the detectors of
-* interest
-* @param inputWS :: the input workspace
-* @return :: the angle of the detector (only the first detector is considered)
-*/
+ * processing instructions
+ *
+ * @param instructions :: processing instructions defining the detectors of
+ * interest
+ * @param inputWS :: the input workspace
+ * @return :: the angle of the detector (only the first detector is considered)
+ */
 double
 ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
                                                MatrixWorkspace_sptr inputWS) {
@@ -438,10 +438,10 @@ ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
 }
 
 /** Set algorithmic correction properties
-*
-* @param alg :: ReflectometryReductionOne algorithm
-* @param instrument :: The instrument attached to the workspace
-*/
+ *
+ * @param alg :: ReflectometryReductionOne algorithm
+ * @param instrument :: The instrument attached to the workspace
+ */
 void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
@@ -507,12 +507,12 @@ void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
 }
 
 /** Rebin and scale a workspace in Q.
-*
-* @param inputWS :: the workspace in Q
-* @param theta :: the angle of this run
-* @param params :: [output] rebin parameters
-* @return :: the output workspace
-*/
+ *
+ * @param inputWS :: the workspace in Q
+ * @param theta :: the angle of this run
+ * @param params :: [output] rebin parameters
+ * @return :: the output workspace
+ */
 MatrixWorkspace_sptr
 ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
                                               const double theta,
@@ -585,7 +585,7 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
 }
 
 /** Check if input workspace is a group
-*/
+ */
 bool ReflectometryReductionOneAuto2::checkGroups() {
 
   const std::string wsName = getPropertyValue("InputWorkspace");
@@ -611,7 +611,7 @@ bool ReflectometryReductionOneAuto2::checkGroups() {
  * items in the transmission group will be summed to produce a matrix workspace
  * that will be applied to each of the items in the input workspace group. See
  * documentation of this algorithm for more details.
-*/
+ */
 bool ReflectometryReductionOneAuto2::processGroups() {
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
   m_usingBaseProcessGroups = true;
@@ -744,14 +744,24 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     return true;
   }
 
-  if (!group->isMultiperiod()) {
-    g_log.warning("Polarization corrections can only be performed on "
-                  "multiperiod workspaces.");
-    setPropertyValue("OutputWorkspace", outputIvsQ);
-    setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
-    setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
-    return true;
+  auto groupIvsLam =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputIvsLam);
+  auto effAlg = createChildAlgorithm("CreatePolarizationEfficiencies");
+  effAlg->setProperty("InputWorkspace", groupIvsLam->getItem(0));
+  if (!isDefault("Pp")) {
+    effAlg->setProperty("Pp", getPropertyValue("Pp"));
   }
+  if (!isDefault("Rho")) {
+    effAlg->setProperty("Rho", getPropertyValue("Rho"));
+  }
+  if (!isDefault("Ap")) {
+    effAlg->setProperty("Ap", getPropertyValue("Ap"));
+  }
+  if (!isDefault("Alpha")) {
+    effAlg->setProperty("Alpha", getPropertyValue("Alpha"));
+  }
+  effAlg->execute();
+  MatrixWorkspace_sptr efficiencies = effAlg->getProperty("OutputWorkspace");
 
   Algorithm_sptr polAlg =
       createChildAlgorithm("PolarizationCorrectionFredrikze");
@@ -761,18 +771,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   polAlg->setProperty("OutputWorkspace", outputIvsLam);
   polAlg->setProperty("PolarizationAnalysis",
                       getPropertyValue("PolarizationAnalysis"));
-  if (!isDefault("Pp")) {
-    polAlg->setProperty("Pp", getPropertyValue("Pp"));
-  }
-  if (!isDefault("Rho")) {
-    polAlg->setProperty("Rho", getPropertyValue("Rho"));
-  }
-  if (!isDefault("Ap")) {
-    polAlg->setProperty("Ap", getPropertyValue("Ap"));
-  }
-  if (!isDefault("Alpha")) {
-    polAlg->setProperty("Alpha", getPropertyValue("Alpha"));
-  }
+  polAlg->setProperty("Efficiencies", efficiencies);
   polAlg->execute();
 
   // Now we've overwritten the IvsLam workspaces, we'll need to recalculate
@@ -802,10 +801,10 @@ bool ReflectometryReductionOneAuto2::processGroups() {
 }
 
 /**
-* Sum transmission workspaces that belong to a workspace group
-* @param transGroup : The transmission group containing the transmission runs
-* @return :: A workspace pointer containing the sum of transmission workspaces
-*/
+ * Sum transmission workspaces that belong to a workspace group
+ * @param transGroup : The transmission group containing the transmission runs
+ * @return :: A workspace pointer containing the sum of transmission workspaces
+ */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
     WorkspaceGroup_sptr &transGroup) {
 
