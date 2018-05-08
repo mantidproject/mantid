@@ -54,6 +54,7 @@ public:
   }
 
   void test_single_dataset_fit() {
+
     const int totalBins = 6;
     const int totalHist = 5;
     auto inputWorkspace = createReducedWorkspace(totalBins, totalHist);
@@ -61,7 +62,7 @@ public:
         createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
 
     auto outputBaseName = runConvolutionFit(inputWorkspace, resolution);
-    testFitOutput(outputBaseName, inputWorkspace->getNumberHistograms());
+    testFitOutput(outputBaseName, 1);
     AnalysisDataService::Instance().clear();
   }
 
@@ -70,10 +71,11 @@ public:
     const int totalHist = 10;
 
     std::vector<std::string> names = {"first_red", "second_red"};
-    auto function = FunctionFactory::Instance().createFunction(peakFunction());
+    auto function =
+        FunctionFactory::Instance().createInitialized(peakFunction());
     auto outputBaseName = runMultiDatasetFit(
         createReducedWorkspaces(names, totalBins, totalHist), function);
-    testFitOutput(outputBaseName, names.size() * 3);
+    testFitOutput(outputBaseName, names.size());
     AnalysisDataService::Instance().clear();
   }
 
