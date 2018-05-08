@@ -25,8 +25,8 @@ std::ostream &operator<<(std::ostream &os,
                          ExperimentOptionDefaults const &defaults) {
   os << "ExperimentOptionDefaults: { AnalysisMode: '" << defaults.AnalysisMode
      << ", \nPolarizationAnalysis: '" << defaults.PolarizationAnalysis
-     << "',\nCRho: '" << defaults.CRho << "',\nCAlpha: '" << defaults.CAlpha
-     << "',\nCAp: '" << defaults.CAp << "', \nCPp: '" << defaults.CPp
+     << "',\nRho: '" << defaults.CRho << "',\nAlpha: '" << defaults.CAlpha
+     << "',\nAp: '" << defaults.CAp << "', \nPp: '" << defaults.CPp
      << "',\nSummationType: '" << defaults.SummationType
      << "', \nReductionType: '" << defaults.ReductionType;
   if (defaults.TransRunStartOverlap)
