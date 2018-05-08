@@ -3,8 +3,6 @@
 
 .. summary::
 
-.. alias::
-
 .. properties::
 
 Description

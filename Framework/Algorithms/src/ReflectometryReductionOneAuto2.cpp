@@ -190,30 +190,30 @@ void ReflectometryReductionOneAuto2::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "Polarization analysis mode.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("Pp", Direction::Input),
       "Effective polarizing power of the polarizing system. "
       "Expressed as a ratio 0 < Pp < 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("Ap", Direction::Input),
       "Effective polarizing power of the analyzing system. "
       "Expressed as a ratio 0 < Ap < 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("Rho", Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
       "spin-up. This is characteristic of the polarizer flipper. "
       "Values are constants for each term in a polynomial "
       "expression.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("CAlpha", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("Alpha", Direction::Input),
       "Ratio of efficiencies of analyzer spin-down to analyzer "
       "spin-up. This is characteristic of the analyzer flipper. "
       "Values are factors for each term in a polynomial "
       "expression.");
   setPropertyGroup("PolarizationAnalysis", "Polarization Corrections");
-  setPropertyGroup("CPp", "Polarization Corrections");
-  setPropertyGroup("CAp", "Polarization Corrections");
-  setPropertyGroup("CRho", "Polarization Corrections");
-  setPropertyGroup("CAlpha", "Polarization Corrections");
+  setPropertyGroup("Pp", "Polarization Corrections");
+  setPropertyGroup("Ap", "Polarization Corrections");
+  setPropertyGroup("Rho", "Polarization Corrections");
+  setPropertyGroup("Alpha", "Polarization Corrections");
 
   // Init properties for diagnostics
   initDebugProperties();
@@ -753,17 +753,25 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     return true;
   }
 
-  Algorithm_sptr polAlg = createChildAlgorithm("PolarizationCorrection");
+  Algorithm_sptr polAlg = createChildAlgorithm("PolarizationCorrectionFredrikze");
   polAlg->setChild(false);
   polAlg->setRethrows(true);
   polAlg->setProperty("InputWorkspace", outputIvsLam);
   polAlg->setProperty("OutputWorkspace", outputIvsLam);
   polAlg->setProperty("PolarizationAnalysis",
                       getPropertyValue("PolarizationAnalysis"));
-  polAlg->setProperty("CPp", getPropertyValue("CPp"));
-  polAlg->setProperty("CRho", getPropertyValue("CRho"));
-  polAlg->setProperty("CAp", getPropertyValue("CAp"));
-  polAlg->setProperty("CAlpha", getPropertyValue("CAlpha"));
+  if (!isDefault("Pp")) {
+    polAlg->setProperty("Pp", getPropertyValue("Pp"));
+  }
+  if (!isDefault("Rho")) {
+    polAlg->setProperty("Rho", getPropertyValue("Rho"));
+  }
+  if (!isDefault("Ap")) {
+    polAlg->setProperty("Ap", getPropertyValue("Ap"));
+  }
+  if (!isDefault("Alpha")) {
+    polAlg->setProperty("Alpha", getPropertyValue("Alpha"));
+  }
   polAlg->execute();
 
   // Now we've overwritten the IvsLam workspaces, we'll need to recalculate

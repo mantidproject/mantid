@@ -106,7 +106,7 @@ Polarization Analysis On
 If :literal:`PolarizationAnalysis` is set to :literal:`PA` or :literal:`PNR`
 the reduction continues and polarization corrections will be applied to
 the output workspace in wavelength. The algorithm will use the properties :literal:`PolarizationAnalysis`,
-:literal:`CPp`, :literal:`CAp`, :literal:`CRho` and :literal:`CAlpha` to run :ref:`algm-PolarizationCorrection`.
+:literal:`Pp`, :literal:`Ap`, :literal:`Rho` and :literal:`Alpha` to run :ref:`algm-PolarizationCorrectionFredrikze`.
 The result will be a new workspace in wavelength, which will override the previous one, that will
 be used as input to :ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in Q, which
 in turn will override the existing workspaces in Q. Note that if transmission runs are provided in the form of workspace
