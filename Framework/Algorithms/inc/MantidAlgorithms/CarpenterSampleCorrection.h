@@ -1,9 +1,8 @@
 #ifndef MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
 #define MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include <vector>
 
@@ -21,11 +20,8 @@ namespace Algorithms {
     out by Jack Carpenter and Asfia Huq and implmented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
 
-    @author Dennis Mikkelson
-    @date 17/08/2010
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory &
-    NScD Oak Ridge National Laboratory
+    Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -46,7 +42,7 @@ namespace Algorithms {
                   <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CarpenterSampleCorrection : public API::DistributedAlgorithm {
+class DLLExport CarpenterSampleCorrection : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;

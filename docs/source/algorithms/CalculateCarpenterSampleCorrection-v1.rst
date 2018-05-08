@@ -36,6 +36,8 @@ expansion coefficients:
 where the Chebyshev coefficients :math:`c_{s}(m,n)` up to  m + n 
 :math:`\leqslant` 5 have been tabulated and are stored as an array by the algorithm.
 
+This version of the correction follows the implemenation in [1] in that it only calculates for the correction in-plane, unlike [2] that generalizes the correction to out-of-plane.
+
 This algorithm calculates and outputs the absorption and/or multiple scattering correction workspaces to be applied to the InputWorkspace. Thus, there are, at most, two workspaces in the OutputWorkspaceBaseName group workspace. This allows for flexibility of applying either correction to a workspace without having to apply both (as is the case with :ref:`algm-CarpenterSampleCorrection`). For the case where both corrections are calculated, the output will be the following:
 
 1. The absorption correction workspace will be OutputWorkspaceBaseName + `_abs` and will be in `.getItem(0)`.
@@ -166,8 +168,6 @@ References
 .. [2] D.F.R. Mildner, J.M. Carpenter, and C.A. Pelizzari *Generalized Attenuation Correction Factor for Scattering from Cylindrical Targets* Review of Scientific Instruments **45.4** (1974): 572. doi: `10.1063/1.1686687 <http://dx.doi.org/10.1063/1.1686687>`_
 
 .. [3] D.F.R. Mildner and J.M.Carpenter *Improvements to the Chebyshev Expansion of Attenuation Correction Factors for Cylindrical Samples.* J Appl Crystallogr **23.5** (1990): 378–386 doi: `10.1107/S0021889890005258 <http://dx.doi.org/10.1107/S0021889890005258>`_
-
-.. seealso :: Algorithm :ref:`algm-MayersSampleCorrection`
 
 .. categories::
 

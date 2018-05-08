@@ -33,9 +33,6 @@ using std::vector;
 using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
 
-// Constants required internally only, so make them static. These are
-// Chebyshev expansion coefficients copied directly from Carpenter 1969 Table 1
-// clang-format off
 const std::string CarpenterSampleCorrection::name() const {
   return "CarpenterSampleCorrection";
 }
@@ -55,6 +52,9 @@ void CarpenterSampleCorrection::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
+  auto algCalcCarpenter = AlgorithmManager::Instance().createUnmanaged("CalculateCarpenterSampleCorrection");
+  algCalcCarpenter->initialize();
+
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace> >(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
@@ -62,15 +62,10 @@ void CarpenterSampleCorrection::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
-  declareProperty("AttenuationXSection", 2.8, "Coefficient 1, absorption cross "
-                                              "section / 1.81 if not set with "
-                                              "SetSampleMaterial");
-  declareProperty("ScatteringXSection", 5.1, "Coefficient 3, total scattering "
-                                             "cross section if not set with "
-                                             "SetSampleMaterial");
-  declareProperty("SampleNumberDensity", 0.0721,
-                  "Coefficient 2, density if not set with SetSampleMaterial");
-  declareProperty("CylinderSampleRadius", 0.3175, "Sample radius, in cm");
+  copyProperty(algCalcCarpenter, "AttenuationXSection");
+  copyProperty(algCalcCarpenter, "ScatteringXSection");
+  copyProperty(algCalcCarpenter, "SampleNumberDensity");
+  copyProperty(algCalcCarpenter, "CylinderSampleRadius");
 }
 
 /**
@@ -120,8 +115,8 @@ WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
     MatrixWorkspace_sptr &inputWksp, double radius, double coeff1,
     double coeff2, double coeff3, bool doAbs, bool doMS) {
   auto calculate =
-      this->createChildAlgorithm("CalculateCarpenterSampleCorrection");
-  calculate->initialize();
+      this->createChildAlgorithm("CalculateCarpenterSampleCorrection",
+                                  0.0, 0.25);
   calculate->setProperty("InputWorkspace", inputWksp);
   calculate->setProperty("CylinderSampleRadius", radius);
   calculate->setProperty("AttenuationXSection", coeff1);
@@ -138,8 +133,7 @@ WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
 MatrixWorkspace_sptr
 CarpenterSampleCorrection::divide(const MatrixWorkspace_sptr lhsWS,
                                   const MatrixWorkspace_sptr rhsWS) {
-  IAlgorithm_sptr divide = this->createChildAlgorithm("Divide");
-  divide->initialize();
+  IAlgorithm_sptr divide = this->createChildAlgorithm("Divide", 0.25, 0.5);
   divide->setProperty("LHSWorkspace", lhsWS);
   divide->setProperty("RHSWorkspace", rhsWS);
   divide->execute();
@@ -150,8 +144,7 @@ CarpenterSampleCorrection::divide(const MatrixWorkspace_sptr lhsWS,
 MatrixWorkspace_sptr
 CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
                                     const MatrixWorkspace_sptr rhsWS) {
-  auto multiply = this->createChildAlgorithm("Multiply");
-  multiply->initialize();
+  auto multiply = this->createChildAlgorithm("Multiply", 0.5, 0.75);
   multiply->setProperty("LHSWorkspace", lhsWS);
   multiply->setProperty("RHSWorkspace", rhsWS);
   multiply->execute();
@@ -162,8 +155,7 @@ CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
 MatrixWorkspace_sptr
 CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr lhsWS,
                                  const MatrixWorkspace_sptr rhsWS) {
-  auto minus = this->createChildAlgorithm("Minus");
-  minus->initialize();
+  auto minus = this->createChildAlgorithm("Minus", 0.75, 1.0);
   minus->setProperty("LHSWorkspace", lhsWS);
   minus->setProperty("RHSWorkspace", rhsWS);
   minus->execute();
