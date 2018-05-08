@@ -14,7 +14,7 @@ boost::optional<T>
 typeErrorIfNoneElseValue(boost::optional<T> const &maybeValue,
                          std::string const &errorMessage) {
   if (!maybeValue.is_initialized())
-    PyErr_Format(PyExc_TypeError, errorMessage.c_str());
+    PyErr_SetString(PyExc_TypeError, errorMessage.c_str());
   return maybeValue;
 }
 

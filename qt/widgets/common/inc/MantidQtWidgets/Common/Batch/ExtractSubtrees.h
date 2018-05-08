@@ -19,15 +19,15 @@ public:
       typename std::vector<std::vector<Cell>>::const_iterator;
 
   RecursiveSubtreeExtractionResult(
-      bool shouldContinue,
-      bool regionHasGaps,
+      bool shouldContinue, bool regionHasGaps,
       std::pair<RowLocationConstIterator, RowDataConstIterator> const &
           currentPosition);
 
   bool shouldContinue() const;
   bool shouldNotContinue() const;
   bool isUnsuitableTree() const;
-  std::pair<RowLocationConstIterator, RowDataConstIterator> const& currentPosition() const;
+  std::pair<RowLocationConstIterator, RowDataConstIterator> const &
+  currentPosition() const;
 
   static RecursiveSubtreeExtractionResult
   finishedSubtree(RowLocationConstIterator currentRow,
@@ -36,6 +36,7 @@ public:
   continueOnLevelAbove(RowLocationConstIterator currentRow,
                        RowDataConstIterator currentRowData);
   static RecursiveSubtreeExtractionResult unsuitableTree();
+
 private:
   bool m_shouldContinue;
   bool m_isUnsuitableTree;
