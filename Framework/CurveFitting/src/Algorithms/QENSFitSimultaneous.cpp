@@ -255,8 +255,8 @@ void QENSFitSimultaneous::initConcrete() {
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
                   "The output result workspace");
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputParameterWorkspace", "", Direction::Output,
