@@ -144,7 +144,7 @@ template<TYPE>
 
 %ConvertFromTypeCode
   return vectorToPythonList(*sipCpp, [](int item) -> PyObject* {
-    return PyInt_FromLong(item);
+    return FROM_LONG(item);
   });
 %End
 
@@ -153,8 +153,8 @@ template<TYPE>
     // Check if type is compatible
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
-    auto cppValue =  pythonListToVector<int>(sipPy, [&](PyObject* pyItem) -> boost::optional<int> {
-      if (!PyInt_Check(pyItem)) {
+    auto cppValue = pythonListToVector<int>(sipPy, [&](PyObject* pyItem) -> boost::optional<int> {
+      if (!INT_CHECK(pyItem)) {
         PyErr_Format(PyExc_TypeError, "object in iterable is not an int");
         return boost::none;
       } else {
@@ -179,7 +179,7 @@ template<TYPE>
 
 %ConvertFromTypeCode
   return vectorToPythonList(*sipCpp, [](unsigned int item) -> PyObject* {
-    return PyInt_FromLong(item);
+    return FROM_LONG(item);
   });
 %End
 

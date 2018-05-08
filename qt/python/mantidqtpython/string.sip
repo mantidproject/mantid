@@ -36,7 +36,7 @@
          Py_DECREF(s);
          return 1;
 	}
-	if (PyString_Check(sipPy)) {
+	if (STR_CHECK(sipPy)) {
          *sipCppPtr = new std::string(TO_CSTRING(sipPy));
      	return 1;
 	}

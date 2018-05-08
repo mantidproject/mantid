@@ -99,8 +99,8 @@ bool RowLocation::isSiblingOf(RowLocation const &other) const {
   if (!(isRoot() || other.isRoot())) {
     auto const &otherPath = other.path();
     if (depth() == other.depth())
-      return std::equal(m_path.cbegin(), m_path.cend() - 1, otherPath.cbegin(),
-                        otherPath.cend() - 1);
+      return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1,
+                                     otherPath.cbegin(), otherPath.cend() - 1);
   }
   return false;
 }
@@ -116,8 +116,9 @@ bool RowLocation::isDescendantOf(RowLocation const &ancestor) const {
     } else {
       auto const &ancestorPath = ancestor.path();
       if (depth() > ancestor.depth())
-        return std::equal(m_path.cbegin(), m_path.cbegin() + ancestor.depth(),
-                          ancestorPath.cbegin(), ancestorPath.cend());
+        return boost::algorithm::equal(
+            m_path.cbegin(), m_path.cbegin() + ancestor.depth(),
+            ancestorPath.cbegin(), ancestorPath.cend());
     }
   }
   return false;
