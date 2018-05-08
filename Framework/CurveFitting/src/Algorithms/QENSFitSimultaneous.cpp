@@ -255,7 +255,7 @@ void QENSFitSimultaneous::initConcrete() {
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output result workspace");
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -323,8 +323,7 @@ void QENSFitSimultaneous::execConcrete() {
   addAdditionalLogs(resultWs);
   copyLogs(resultWs, groupWs);
 
-  setProperty("OutputWorkspace",
-              boost::static_pointer_cast<Workspace>(resultWs));
+  setProperty("OutputWorkspace", resultWs);
   setProperty("OutputParameterWorkspace", parameterWs);
   setProperty("OutputWorkspaceGroup", groupWs);
 }
