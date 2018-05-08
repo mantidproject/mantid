@@ -17,6 +17,7 @@ New features
 
 Improvements
 ############
+* Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
 
 Bug fixes
 #########
