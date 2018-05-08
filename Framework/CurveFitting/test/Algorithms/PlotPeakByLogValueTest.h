@@ -626,8 +626,8 @@ public:
     alg.setProperty("CreateOutput", true);
     alg.setPropertyValue("WorkspaceIndex", "1");
     alg.setPropertyValue("Function", "name=LinearBackground,A0=1,A1=0.3;name="
-      "Gaussian,PeakCentre=5,Height=2,Sigma=0."
-      "1");
+                                     "Gaussian,PeakCentre=5,Height=2,Sigma=0."
+                                     "1");
     alg.setPropertyValue("MaxIterations", "50");
     alg.execute();
 
@@ -636,7 +636,7 @@ public:
     API::IFunction_sptr function = alg.getProperty("Function");
     TS_ASSERT_DELTA(function->getParameter(0), 0.5, 1e-12)
 
-      deleteData();
+    deleteData();
   }
 
 private:
