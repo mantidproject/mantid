@@ -1,7 +1,13 @@
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
-#include <boost/algorithm/cxx14/equal.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+#include "MantidQtWidgets/Common/Batch/equal.hpp"
+// equivalent to
+//         #include <boost/algorithm/cxx14/equal.hpp>
+// or just #include <algorithm> in c++14
+// available in boost 1.54+ - required for RHEL7.
+
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
