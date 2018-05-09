@@ -82,12 +82,25 @@ void CarpenterSampleCorrection::exec() {
 
   outputWksp = inputWksp->clone();
 
-  // Apply the absorption correction to the sample workspace
-  outputWksp = divide(outputWksp, absWksp);
+  // Inverse the absorption correction ( 1/A)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*absWksp))
+  for (size_t i = 0; i < absWksp->getNumberHistograms(); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    auto &y = absWksp->mutableY(i);
+    for (size_t j = 0; j < y.size(); j++) {
+      y[j] = 1.0 / y[j];
+    }
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 
-  // Apply the multiple scattering correction to the sample workspace
-  auto factorWksp = multiply(inputWksp, msWksp);
-  outputWksp = minus(outputWksp, factorWksp);
+  // Compute the overall correction (= 1/A - MS ) to multiply by
+  auto correctionWksp = minus(absWksp, msWksp);
+
+  // Apply the correction to the sample workspace
+  //   = (1/A - MS) * wksp
+  //   = wksp/A - MS * wksp
+  outputWksp= multiply(inputWksp, correctionWksp);
 
   // Output workspace
   if (inputWkspEvent) {
@@ -117,35 +130,24 @@ WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
 }
 
 MatrixWorkspace_sptr
-CarpenterSampleCorrection::divide(const MatrixWorkspace_sptr lhsWS,
-                                  const MatrixWorkspace_sptr rhsWS) {
-  IAlgorithm_sptr divide = this->createChildAlgorithm("Divide", 0.25, 0.5);
-  divide->setProperty("LHSWorkspace", lhsWS);
-  divide->setProperty("RHSWorkspace", rhsWS);
-  divide->execute();
-  MatrixWorkspace_sptr outWS = divide->getProperty("OutputWorkspace");
+CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr lhsWS,
+                                 const MatrixWorkspace_sptr rhsWS) {
+  auto minus = this->createChildAlgorithm("Minus", 0.5, 0.75);
+  minus->setProperty("LHSWorkspace", lhsWS);
+  minus->setProperty("RHSWorkspace", rhsWS);
+  minus->execute();
+  MatrixWorkspace_sptr outWS = minus->getProperty("OutputWorkspace");
   return outWS;
 }
 
 MatrixWorkspace_sptr
 CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
                                     const MatrixWorkspace_sptr rhsWS) {
-  auto multiply = this->createChildAlgorithm("Multiply", 0.5, 0.75);
+  auto multiply = this->createChildAlgorithm("Multiply", 0.75, 1.0);
   multiply->setProperty("LHSWorkspace", lhsWS);
   multiply->setProperty("RHSWorkspace", rhsWS);
   multiply->execute();
   MatrixWorkspace_sptr outWS = multiply->getProperty("OutputWorkspace");
-  return outWS;
-}
-
-MatrixWorkspace_sptr
-CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr lhsWS,
-                                 const MatrixWorkspace_sptr rhsWS) {
-  auto minus = this->createChildAlgorithm("Minus", 0.75, 1.0);
-  minus->setProperty("LHSWorkspace", lhsWS);
-  minus->setProperty("RHSWorkspace", rhsWS);
-  minus->execute();
-  MatrixWorkspace_sptr outWS = minus->getProperty("OutputWorkspace");
   return outWS;
 }
 

@@ -161,10 +161,7 @@ public:
             outName));
     wksp = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
     TS_ASSERT(wksp);
-    // double the events due to the minus of the mult. scat. correction
-    // concatenates the event list
-    // (positive input events and negative correction events)
-    TS_ASSERT_EQUALS(wksp->getNumberEvents(), 2 * NUM_EVENTS);
+    TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);
 
     // do the final comparison - this is done by bounding
     const auto &y_actual = wksp->histogram(0).y();
