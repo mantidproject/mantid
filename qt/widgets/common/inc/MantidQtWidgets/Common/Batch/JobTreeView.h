@@ -3,7 +3,7 @@
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
-#include "MantidQtWidgets/Common/Batch/QtFilterLeafNodes.h"
+#include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 #include "MantidQtWidgets/Common/Batch/Cell.h"
@@ -138,7 +138,7 @@ private:
   QStandardItemModel m_mainModel;
   QtStandardItemTreeModelAdapter m_adaptedMainModel;
 
-  QtFilterLeafNodes m_filteredModel;
+  FilteredTreeModel m_filteredModel;
   QModelIndexForMainModel m_lastEdited;
   bool m_hasEditorOpen;
 };

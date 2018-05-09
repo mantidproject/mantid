@@ -80,6 +80,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/VectorString.cpp
   src/Batch/RowLocation.cpp
   src/Batch/RowLocationAdapter.cpp
+  src/Batch/RowPredicate.cpp
   src/Batch/Row.cpp
   src/Batch/Cell.cpp
   src/Batch/CellStandardItem.cpp
@@ -88,7 +89,7 @@ set ( SRC_FILES
   src/Batch/JobTreeView.cpp
   src/Batch/JobTreeViewSignalAdapter.cpp
   src/Batch/QtStandardItemTreeAdapter.cpp
-  src/Batch/QtFilterLeafNodes.cpp
+  src/Batch/FilteredTreeModel.cpp
   src/Batch/QtBasicNavigation.cpp
   src/Batch/QtTreeCursorNavigation.cpp
   src/Batch/CellDelegate.cpp
@@ -407,8 +408,9 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
   inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
   inc/MantidQtWidgets/Common/Batch/StrictQModelIndices.h
-  inc/MantidQtWidgets/Common/Batch/QtFilterLeafNodes.h
+  inc/MantidQtWidgets/Common/Batch/FilteredTreeModel.h
   inc/MantidQtWidgets/Common/Batch/RowLocation.h
+  inc/MantidQtWidgets/Common/Batch/RowPredicate.h
   inc/MantidQtWidgets/Common/Batch/RowLocationAdapter.h
   inc/MantidQtWidgets/Common/Batch/Row.h
   inc/MantidQtWidgets/Common/Batch/Cell.h

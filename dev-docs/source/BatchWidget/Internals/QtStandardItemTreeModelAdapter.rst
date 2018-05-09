@@ -1,9 +1,10 @@
-.. _StrictModelIndexing:
+.. _QtStandardItemTreeModelAdapter:
 
 ==============================
-Model Indices in Job Tree View
+QtStandardItemTreeModelAdapter
 ==============================
 
+The :code:`QtStandardItemTreeModelAdapter` is a class used to perform
 The :doc:`../API/JobTreeView` uses :code:`RowLocation` objects in it's API as an abstraction over
 :code:`QModelIndex`\ s which are used internally to access :code:`QStandardItem`\ s from the 'models'
 provided by Qt. As such, code which simply uses the :code:`JobTreeView` does not need to know anything
@@ -29,7 +30,7 @@ Filtered Model
 --------------
 
 To take advantage of the filtering functionality offered by the :code:`QTreeView`, the
-:code:`JobTreeView` also manages an instance of :code:`FilteredTreeModel`, a class derived from
+:code:`JobTreeView` also manages an instance of :code:`TreeFilterOnSelfOrDescendant`, a class derived from
 :code:`QSortFilterProxyModel` which is a filtered version of the 'main model'.
 
 Strongly Typed Indexes

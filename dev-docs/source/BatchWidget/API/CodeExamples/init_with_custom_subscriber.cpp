@@ -14,7 +14,7 @@ public:
   void notifyRowInserted(RowLocation const &newRowLocation) override {}
   void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) override {}
-  void notifyCopyRowsRequested() overrride {}
+  void notifyCopyRowsRequested() override {}
   void notifyPasteRowsRequested() override {}
   void notifyFilterReset() override {}
 

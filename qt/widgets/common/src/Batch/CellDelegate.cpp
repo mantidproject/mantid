@@ -8,7 +8,7 @@ namespace MantidWidgets {
 namespace Batch {
 
 CellDelegate::CellDelegate(QObject *parent, QTreeView const &view,
-                           QtFilterLeafNodes const &filteredModel,
+                           FilteredTreeModel const &filteredModel,
                            QStandardItemModel const &mainModel)
     : QStyledItemDelegate(parent), m_view(view), m_filteredModel(filteredModel),
       m_mainModel(mainModel) {}

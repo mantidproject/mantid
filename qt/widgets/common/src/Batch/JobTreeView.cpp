@@ -50,8 +50,8 @@ void JobTreeView::filterRowsBy(RowPredicate *predicate) {
 }
 
 void JobTreeView::resetFilter() {
-  m_notifyee->notifyFilterReset();
   m_filteredModel.resetPredicate();
+  m_notifyee->notifyFilterReset();
 }
 
 bool JobTreeView::hasFilter() const { return m_filteredModel.isReset(); }

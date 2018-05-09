@@ -1537,7 +1537,7 @@ public:
 
 class RowPredicate {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/Batch/QtFilterLeafNodes.h"
+#include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
 %End
 protected:
   RowPredicate();
