@@ -906,6 +906,10 @@ void FitPeaks::fitSpectrumPeaks(
   peak_fitter->setProperty("CostFunction", m_costFunction);
   peak_fitter->setProperty("CalcErrors", true);
 
+  // store the peak fit parameters once one works
+  bool foundAnyPeak = false;
+  std::vector<double> lastGoodPeakParameters(peakfunction->nParams(), 0.);
+
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
@@ -914,27 +918,40 @@ void FitPeaks::fitSpectrumPeaks(
     if (m_fitPeaksFromRight)
       peak_index = m_numPeaksToFit - fit_index - 1;
 
-    // get expected peak position
+    // reset the background function
+    for (size_t i = 0; i < bkgdfunction->nParams(); ++i)
+      bkgdfunction->setParameter(0, 0.);
+
+    // set the peak parameters from last good fit - override peak center
+    for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
+      peakfunction->setParameter(i, lastGoodPeakParameters[i]);
     double expected_peak_pos = expected_peak_centers[peak_index];
+    peakfunction->setCentre(expected_peak_pos);
+
     double cost(DBL_MAX);
     if (expected_peak_pos <= x0 || expected_peak_pos >= xf) {
       // out of range and there won't be any fit
       peakfunction->setIntensity(0);
-      peakfunction->setCentre(expected_peak_pos);
     } else {
       // find out the peak position to fit
       std::pair<double, double> peak_window_i =
           getPeakFitWindow(wi, peak_index);
 
       bool observe_peak_width =
-          decideToEstimatePeakWidth(fit_index == 0, peakfunction);
+          decideToEstimatePeakWidth(!foundAnyPeak, peakfunction);
 
       // do fitting with peak and background function (no analysis at this
       // point)
       cost =
           fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
                             observe_peak_width, peakfunction, bkgdfunction);
+      if (cost < 1e7) { // assume it worked and save out the result
+        foundAnyPeak = true;
+        for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
+          lastGoodPeakParameters[i] = peakfunction->getParameter(i);
+      }
     }
+    foundAnyPeak = true;
 
     // process fitting result
     FitPeaksAlgorithm::FitFunction fit_function;
@@ -1754,14 +1771,16 @@ void FitPeaks::generateFittedParametersValueWorkspace() {
                                   m_bkgdFunction->parameterName(iparam));
   m_fittedParamTable->addColumn("double", "chi2");
 
+  const size_t numParam = m_peakFunction->nParams() + m_bkgdFunction->nParams();
   // add rows
   for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      size_t row_index = m_fittedParamTable->rowCount();
-      m_fittedParamTable->appendRow();
-      m_fittedParamTable->cell<int>(row_index, static_cast<size_t>(0)) =
-          static_cast<int>(iws);
-      m_fittedParamTable->cell<int>(row_index, 1) = static_cast<int>(ipeak);
+      API::TableRow newRow = m_fittedParamTable->appendRow();
+      newRow << static_cast<int>(iws);   // workspace index
+      newRow << static_cast<int>(ipeak); // peak number
+      for (size_t iparam = 0; iparam < numParam; ++iparam)
+        newRow << 0.;    // parameters for each peak
+      newRow << DBL_MAX; // chisq
     }
   }
 
