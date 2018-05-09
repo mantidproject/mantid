@@ -28,9 +28,7 @@ int findName(const T1 &patterns, const T2 &names) {
   }
   return -1;
 }
-bool isZero(double value) {
-  return value == 0;
-}
+bool isZero(double value) { return value == 0; }
 }
 
 namespace Mantid {

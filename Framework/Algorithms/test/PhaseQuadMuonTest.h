@@ -21,7 +21,7 @@ const int dead1 = 4;
 const int dead2 = 12;
 
 void populatePhaseTableWithDeadDetectors(ITableWorkspace_sptr phaseTable,
-                         const MatrixWorkspace_sptr ws) {
+                                         const MatrixWorkspace_sptr ws) {
   phaseTable->addColumn("int", "DetectprID");
   phaseTable->addColumn("double", "Asymmetry");
   phaseTable->addColumn("double", "phase");

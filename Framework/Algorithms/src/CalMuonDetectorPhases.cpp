@@ -16,9 +16,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 namespace {
-bool isZero(double value) {
-  return value == 0;
-}
+bool isZero(double value) { return value == 0; }
 int phaseRow = 2;
 double asymError = 999.0;
 }
