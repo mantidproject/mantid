@@ -83,7 +83,7 @@ const std::vector<std::string> IqtFit<QENSFitSequential>::seeAlso() const {
 
 template <>
 const std::vector<std::string> IqtFit<QENSFitSimultaneous>::seeAlso() const {
-  return {"QENSSimultaneousFit"};
+  return {"QENSFitSimultaneous"};
 }
 
 template <typename Base>

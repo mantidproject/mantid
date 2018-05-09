@@ -24,8 +24,6 @@
 #include <cmath>
 
 namespace {
-Mantid::Kernel::Logger g_log("ConvolutionFit");
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;

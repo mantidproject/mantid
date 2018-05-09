@@ -29,7 +29,8 @@ Usage
     function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.972332,Tau=0.0247558,Beta=1;ties=(f1.Intensity=1-f0.A0)'
 
     #run IqtFitSimultaneous
-    result, params, fit_group = IqtFitSimultaneous(InputWorkspace=input_ws, Function=function, StartX=0, EndX=0.2, SpecMin=0, SpecMax=16)
+    result, params, fit_group = IqtFitSimultaneous(Function=function, InputWorkspace=input_ws, 
+                                                   StartX=0, EndX=0.2, SpecMin=0, SpecMax=16)
 
 
 .. categories::
