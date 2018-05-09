@@ -100,7 +100,7 @@ void CarpenterSampleCorrection::exec() {
   // Apply the correction to the sample workspace
   //   = (1/A - MS) * wksp
   //   = wksp/A - MS * wksp
-  outputWksp= multiply(inputWksp, correctionWksp);
+  outputWksp = multiply(inputWksp, correctionWksp);
 
   // Output workspace
   if (inputWkspEvent) {
