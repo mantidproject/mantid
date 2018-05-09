@@ -1,28 +1,33 @@
-digraph ConvolutionFitSequential {
-  label="ConvolutionFitSequential Flowchart"
+digraph QENSFitSequential {
+  label="QENSFitSequential Flowchart"
   $global_style
 
   subgraph params  {
     $param_style
     InputWorkspace
-    FitType
+    Input
     FitParameters
-    BackgroundType
     Function
-    XStart
-    XEnd
+    StartX
+    EndX
     SpecMin
     SpecMax
-    Convolve
+    ConvolveMembers
     ExtractMembers
+    PassWSIndexToFunction
     Minimizer
+    CostFunction
     MaxIterations
+    PeakRadius
+    EvaluationType
+    LogValue
     ParameterTable
     FitWorkspaces
     NormalisedCovarianceWorkspace
     ParameterNames
-    ResultWorkspace
 	OutputWorkspace
+	OutputParameterWorkspace
+	OutputWorkspaceGroup
     SampleLog
   }
 
@@ -48,20 +53,25 @@ digraph ConvolutionFitSequential {
   }
 
   InputWorkspace                 -> FitFunction
-  BackgroundType                 -> FitFunction
-  FitType                        -> FitFunction
+  Input                          -> FitFunction
   Function                       -> FitFunction
   FitParameters                  -> FitFunction
   SpecMin                        -> FitFunction
   SpecMax                        -> FitFunction
-  InputWorkspace                 -> ConvertSpectrumAxis            [label="Convert to Elastic Q"]
+  InputWorkspace                 -> ConvertSpectrumAxis            [label="Attempt conversion to Elastic Q"]
   ConvertSpectrumAxis            -> PlotPeakByLogValue             [label="InputWorkspace"]
+  Input                          -> PlotPeakByLogValue
   FitFunction                    -> PlotPeakByLogValue
-  XStart                         -> PlotPeakByLogValue
-  XEnd                           -> PlotPeakByLogValue
-  Convolve                       -> PlotPeakByLogValue
+  StartX                         -> PlotPeakByLogValue
+  EndX                           -> PlotPeakByLogValue
+  ConvolveMembers                -> PlotPeakByLogValue
   MaxIterations                  -> PlotPeakByLogValue
   Minimizer                      -> PlotPeakByLogValue
+  CostFunction                   -> PlotPeakByLogValue
+  PeakRadius                     -> PlotPeakByLogValue
+  LogValue                       -> PlotPeakByLogValue
+  PassWSIndexToFunction          -> PlotPeakByLogValue
+  EvaluationType                 -> PlotPeakByLogValue
   PlotPeakByLogValue             -> NormalisedCovarianceWorkspace
   PlotPeakByLogValue             -> ParameterTable
   PlotPeakByLogValue             -> FitWorkspaces
