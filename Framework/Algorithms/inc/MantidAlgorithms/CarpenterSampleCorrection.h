@@ -66,10 +66,10 @@ private:
   void init() override;
   void exec() override;
 
-  API::WorkspaceGroup_sptr calculateCorrection(API::MatrixWorkspace_sptr &inputWksp,
-                                          double radius, double coeff1,
-                                          double coeff2, double coeff3,
-                                          bool doAbs, bool doMS);
+  API::WorkspaceGroup_sptr
+  calculateCorrection(API::MatrixWorkspace_sptr &inputWksp, double radius,
+                      double coeff1, double coeff2, double coeff3, bool doAbs,
+                      bool doMS);
 
   API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr lhsWS,
                                   const API::MatrixWorkspace_sptr rhsWS);
