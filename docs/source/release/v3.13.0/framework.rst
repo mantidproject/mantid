@@ -53,5 +53,6 @@ Bug fixes
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
 - :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS. 
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
+- The output workspace of :ref:`LineProfile <algm-LineProfile>` now has correct sample logs, instrument and history.
 
 :ref:`Release 3.13.0 <v3.13.0>`
