@@ -94,6 +94,7 @@ std::pair<size_t, size_t> getCorrectedTextureSize(const size_t width,
 
 void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
                            size_t index) {
+
   auto c = findCorners(compInfo, index);
   auto bank = compInfo.quadrilateralComponent(index);
   auto xstep =
