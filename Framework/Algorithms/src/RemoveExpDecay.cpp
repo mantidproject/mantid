@@ -21,8 +21,7 @@ constexpr double MUON_LIFETIME_MICROSECONDS{
     Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
 
 bool isZero(double value) {
-  bool result = value == 0;
-  return result;
+  return value == 0;
 }
 }
 
@@ -110,7 +109,7 @@ void MuonRemoveExpDecay::exec() {
                                      inputWS->y(specNum).end(), isZero);
     if (emptySpectrum) {
       // if the y values are all zero do not change them
-      m_log.warning("waaa " + std::to_string(specNum));
+      m_log.warning("Dead detector found at spectrum number " + std::to_string(specNum));
       outputWS->setHistogram(specNum, inputWS->histogram(specNum));
     } else {
       // Remove decay from Y and E

@@ -229,11 +229,12 @@ class MuonMaxent(PythonAlgorithm):
             IDLabel = None
             asymmLabel = None
             for name in names:
-                if name.lower() == "phi" or name.lower() == "phase":
+                name_lower = name.lower()
+                if name_lower in {"phi", "phase"}:
                     phaseLabel = name
-                if name.lower() == "detid" or name.lower() == "spectrum number":
+                if name_lower in {"detid", "spectrum number"}:
                     IDLabel = name
-                if name.lower() == "asymmetry" or name.lower() == "asymm" or name.lower() == "asasym":
+                if name_lower in{"asymmetry", "asymm",  "asym"}:
                     asymmLabel = name
             if phaseLabel is None:
                 raise ValueError(
@@ -255,7 +256,6 @@ class MuonMaxent(PythonAlgorithm):
                         phaseLabel]
             else:  # muat be some dead Detectors
                 offset = 0
-                print(POINTS_ngroups, "nnn")
                 for row in pt:
                     if row[asymmLabel] == 999:
                         offset += 1

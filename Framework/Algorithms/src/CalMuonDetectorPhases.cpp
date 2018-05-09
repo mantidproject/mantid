@@ -17,9 +17,10 @@
 
 namespace {
 bool isZero(double value) {
-  bool result = value == 0;
-  return result;
+  return value == 0;
 }
+int phaseRow = 2;
+double asymError = 999.0;
 }
 
 namespace Mantid {
@@ -179,10 +180,10 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
       tab->addColumn("double", "Error");
       for (int j = 0; j < 4; j++) {
         API::TableRow row = tab->appendRow();
-        if (j == 2) {
+        if (j == phaseRow) {
           row << "dummy" << 0.0 << 0.0;
         } else {
-          row << "dummy" << 999. << 0.0;
+          row << "dummy" << asymError << 0.0;
         }
       }
 

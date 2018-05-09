@@ -29,8 +29,7 @@ int findName(const T1 &patterns, const T2 &names) {
   return -1;
 }
 bool isZero(double value) {
-  bool result = value == 0;
-  return result;
+  return value == 0;
 }
 }
 
@@ -243,6 +242,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     throw std::invalid_argument("Invalid detector asymmetries");
   }
   std::vector<bool> emptySpectrum;
+  emptySpectrum.reserve(nspec);
   std::vector<double> aj, bj;
   {
     // Calculate coefficients aj, bj

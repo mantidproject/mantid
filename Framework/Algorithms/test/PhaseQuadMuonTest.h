@@ -20,7 +20,7 @@ namespace {
 const int dead1 = 4;
 const int dead2 = 12;
 
-void populatePhaseTable2(ITableWorkspace_sptr phaseTable,
+void populatePhaseTableWithDeadDetectors(ITableWorkspace_sptr phaseTable,
                          const MatrixWorkspace_sptr ws) {
   phaseTable->addColumn("int", "DetectprID");
   phaseTable->addColumn("double", "Asymmetry");
@@ -96,7 +96,7 @@ IAlgorithm_sptr setupAlgDead(MatrixWorkspace_sptr m_loadedData) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
-  populatePhaseTable2(phaseTable, m_loadedData);
+  populatePhaseTableWithDeadDetectors(phaseTable, m_loadedData);
 
   return setupAlg(m_loadedData, true, phaseTable);
 }
@@ -106,7 +106,7 @@ MatrixWorkspace_sptr setupWS(MatrixWorkspace_sptr m_loadedData) {
       new Mantid::DataObjects::TableWorkspace);
   MatrixWorkspace_sptr ws = m_loadedData->clone();
   // create toy data set
-  populatePhaseTable2(phaseTable, ws);
+  populatePhaseTableWithDeadDetectors(phaseTable, ws);
   auto xData = ws->points(0);
   for (size_t spec = 0; spec < ws->getNumberHistograms(); spec++) {
     for (size_t j = 0; j < xData.size(); j++) {

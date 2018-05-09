@@ -39,7 +39,7 @@ class MuonMaxEntTest(unittest.TestCase):
             UnitX='Time')
         return inputData
 
-    def genData3(self):
+    def genDataWithDeadDetectors(self):
         inputData = CreateSimulationWorkspace("MUSR", "0,1,32")
         xData = (inputData.dataX(0)[1:] + inputData.dataX(0)[:-1]) / 2.
         for j in range(inputData.getNumberHistograms()):
@@ -80,7 +80,7 @@ class MuonMaxEntTest(unittest.TestCase):
         self.cleanUp()
 
     def test_deadDetectors(self):
-        inputData = self.genData3()
+        inputData = self.genDataWithDeadDetectors()
         # check input data has 2 dead detectors
         for k in range(inputData.getNumberHistograms()):
             if k == 24 or k == 42:
