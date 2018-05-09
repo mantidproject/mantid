@@ -1,4 +1,6 @@
-**Description of work**
+Description of work.
+
+**Report to:** [user name/email]/[nobody]. <!--If the original issue was raised by a user they should be named here.-->
 
 **To test:**
 
