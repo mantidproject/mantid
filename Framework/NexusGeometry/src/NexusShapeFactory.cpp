@@ -133,6 +133,8 @@ std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
                   const std::vector<uint16_t> &windingOrder,
                   const std::vector<float> &nexusVertices) {
+  std::vector<uint16_t> triangularFaces =
+      createTriangularFaces(faceIndices, windingOrder);
 
   std::vector<Mantid::Kernel::V3D> vertices(nexusVertices.size() / 3);
 
@@ -144,17 +146,16 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
                                  nexusVertices[vertexNumber + 2]);
   }
 
-  std::vector<uint16_t> triangularFaces =
-      createTriangularFaces(faceIndices, windingOrder);
-
   return NexusShapeFactory::createMesh(std::move(triangularFaces),
                                        std::move(vertices));
 }
 
 std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
-  const std::vector<uint16_t> &windingOrder,
-  const std::vector<Eigen::Vector3d> &nexusVertices) {
+                  const std::vector<uint16_t> &windingOrder,
+                  const std::vector<Eigen::Vector3d> &nexusVertices) {
+  std::vector<uint16_t> triangularFaces =
+      createTriangularFaces(faceIndices, windingOrder);
 
   std::vector<Mantid::Kernel::V3D> vertices(nexusVertices.size());
 
@@ -162,11 +163,8 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
       nexusVertices.cbegin(), nexusVertices.cend(), vertices.begin(),
       [](const Eigen::Vector3d &vert) { return Kernel::toV3D(vert); });
 
-  std::vector<uint16_t> triangularFaces =
-    createTriangularFaces(faceIndices, windingOrder);
-
   return NexusShapeFactory::createMesh(std::move(triangularFaces),
-    std::move(vertices));
+                                       std::move(vertices));
 }
 
 std::unique_ptr<const Geometry::IObject>

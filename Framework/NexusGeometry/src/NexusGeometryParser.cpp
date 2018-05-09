@@ -10,6 +10,8 @@
 #include <H5Cpp.h>
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
+#include <numeric>
+#include <tuple>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -420,101 +422,15 @@ parseNexusMesh(const Group &detectorGroup, const Group &shapeGroup) {
                                               vertices);
 }
 
-//std::pair<boost::shared_ptr<const Geometry::IObject>, Eigen::Vector3d>
-//parseHex(const FaceV &face) {
-//  auto xlb = face[0].x();
-//  auto xlf = face[1].x();
-//  auto xrf = face[2].x();
-//  auto xrb = face[3].x();
-//  auto ylb = face[0].y();
-//  auto ylf = face[1].y();
-//  auto yrf = face[2].y();
-//  auto yrb = face[3].y();
-//
-//  // calculate midpoint of trapeziod
-//  auto a = std::fabs(xrf - xlf);
-//  auto b = std::fabs(xrb - xlb);
-//  auto h = std::fabs(ylb - ylf);
-//  auto cx = ((a + b) / 4);
-//  auto cy = h / 2;
-//
-//  // store detector position before translating to origin
-//  auto xpos = xlb + cx;
-//  auto ypos = ylb + cy;
-//
-//  // Translate detector shape to origin
-//  xlf -= xpos;
-//  xrf -= xpos;
-//  xrb -= xpos;
-//  xlb -= xpos;
-//  ylf -= ypos;
-//  yrf -= ypos;
-//  yrb -= ypos;
-//  ylb -= ypos;
-//
-//  return {Mantid::Geometry::ShapeFactory::createHexahedralShape(
-//              xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb),
-//          Eigen::Vector3d(xpos, ypos, 0)};
-//}
-
-//std::vector<
-//    std::pair<boost::shared_ptr<const Geometry::IObject>, Eigen::Vector3d>>
-//parseNexusMeshForBank(const Group &shapeGroup, const size_t numDets,
-//                      int32_t minDetId) {
-//  const std::vector<uint16_t> detFaces = convertVector<int32_t, uint16_t>(
-//      get1DDataset<int32_t>("detector_faces", shapeGroup));
-//  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
-//      get1DDataset<int32_t>("faces", shapeGroup));
-//  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
-//      get1DDataset<int32_t>("winding_order", shapeGroup));
-//  const auto vertices = get1DDataset<float>("vertices", shapeGroup);
-//
-//  auto vertsPerFace = windingOrder.size() / faceIndices.size();
-//  std::vector<std::vector<FaceV>> detFaceMap;
-//  size_t vertStride = 3;
-//  size_t detFaceIndex = 1;
-//  detFaceMap.resize(numDets);
-//  for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
-//    FaceV fv(vertsPerFace);
-//    for (size_t v = 0; v < vertsPerFace; ++v) {
-//      auto vi = windingOrder[i + v] * vertStride;
-//      fv[v] = Eigen::Vector3d(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
-//    }
-//    detFaceMap[detFaces[detFaceIndex] - minDetId].emplace_back(fv);
-//    detFaceIndex += 2;
-//  }
-//
-//  std::vector<
-//      std::pair<boost::shared_ptr<const Geometry::IObject>, Eigen::Vector3d>>
-//      shapes;
-//  shapes.reserve(numDets);
-//  for (auto &faces : detFaceMap) {
-//    if (faces.size() == 1 && vertsPerFace == 4) { // create hexahedron
-//      auto &f = faces[0];
-//      shapes.emplace_back(parseHex(f));
-//    }
-//  }
-//
-//  return shapes;
-//}
-
-std::vector<boost::shared_ptr<const Geometry::IObject>>
-parseNexusMeshForBank(const Group &shapeGroup, const size_t numDets,
-                      int32_t minDetId, const Pixels &pixelOffsets,
-                      const Eigen::Vector3d &bankPosition,
-                      Eigen::Quaterniond &rotation) {
-  const std::vector<uint16_t> detFaces = convertVector<int32_t, uint16_t>(
-      get1DDataset<int32_t>("detector_faces", shapeGroup));
-  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
-      get1DDataset<int32_t>("faces", shapeGroup));
-  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
-      get1DDataset<int32_t>("winding_order", shapeGroup));
-  const auto vertices = get1DDataset<float>("vertices", shapeGroup);
-
-  auto vertsPerFace = windingOrder.size() / faceIndices.size();
-  std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
-  std::vector<std::vector<uint16_t>> detFaceIndices(numDets);
-  std::vector<std::vector<uint16_t>> detWindingOrder(numDets);
+void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
+                        const std::vector<uint16_t> &faceIndices,
+                        const std::vector<uint16_t> &windingOrder,
+                        const std::vector<float> vertices,
+                        const int32_t minDetId, const const size_t vertsPerFace,
+                        std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
+                        std::vector<std::vector<uint16_t>> &detFaceIndices,
+                        std::vector<std::vector<uint16_t>> &detWindingOrder,
+                        std::vector<int> &detIds) {
   size_t vertStride = 3;
   size_t detFaceIndex = 1;
   std::fill(detFaceIndices.begin(), detFaceIndices.end(),
@@ -525,61 +441,71 @@ parseNexusMeshForBank(const Group &shapeGroup, const size_t numDets,
     auto &detWinding = detWindingOrder[detFaces[detFaceIndex] - minDetId];
     for (size_t v = 0; v < vertsPerFace; ++v) {
       auto vi = windingOrder[i + v] * vertStride;
-      detVerts.emplace_back(vertices[vi], vertices[vi + 1] ,vertices[vi + 2]);
+      detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
       detWinding.push_back(static_cast<uint16_t>(detWinding.size()));
     }
+    detIds[detFaces[detFaceIndex] - minDetId] = detFaces[detFaceIndex];
     detIndices.push_back(static_cast<uint16_t>(detVerts.size()));
     detFaceIndex += 2;
   }
+}
 
-  std::vector<boost::shared_ptr<const Geometry::IObject>> shapes;
-  shapes.reserve(numDets);
+void parseNexusMeshAndAddDetectors(const std::vector<uint16_t> &detFaces,
+                                   const std::vector<uint16_t> &faceIndices,
+                                   const std::vector<uint16_t> &windingOrder,
+                                   const std::vector<float> vertices,
+                                   const size_t numDets, const int32_t minDetId,
+                                   const std::string &name,
+                                   InstrumentBuilder &builder) {
+  auto vertsPerFace = windingOrder.size() / faceIndices.size();
+  std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
+  std::vector<std::vector<uint16_t>> detFaceIndices(numDets);
+  std::vector<std::vector<uint16_t>> detWindingOrder(numDets);
+  std::vector<int> detIds(numDets);
+
+  extractFacesAndIDs(detFaces, faceIndices, windingOrder, vertices, minDetId,
+                     vertsPerFace, detFaceVerts, detFaceIndices,
+                     detWindingOrder, detIds);
+
   for (size_t i = 0; i < numDets; ++i) {
     auto &detVerts = detFaceVerts[i];
     const auto &detIndices = detFaceIndices[i];
     const auto &detWinding = detWindingOrder[i];
+    // Calculate polygon centre
+    auto centre = std::accumulate(detVerts.begin() + 1, detVerts.end(),
+                                  detVerts.front()) /
+                  detVerts.size();
 
+    // translate shape to origin for shape coordinates.
     std::for_each(detVerts.begin(), detVerts.end(),
-                  [&pixelOffsets, i](Eigen::Vector3d &val) {
-                    val -= pixelOffsets.col(i);
-                  });
+                  [&centre](Eigen::Vector3d &val) { val -= centre; });
 
-    auto shape = NexusShapeFactory::createFromOFFMesh(
-        detIndices, detWinding, detVerts);
-    shapes.emplace_back(std::move(shape));
+    auto shape =
+        NexusShapeFactory::createFromOFFMesh(detIndices, detWinding, detVerts);
+    builder.addDetectorToLastBank(
+        name + "_" + std::to_string(i), detIds[i], centre,
+        boost::shared_ptr<const Geometry::IObject>(std::move(shape)));
   }
-
-  return shapes;
 }
 
-void parseAndAddBank(const H5File &file, const Group &detectorGroup,
-  InstrumentBuilder &builder, Eigen::Vector3d sourcePosition) {
-  // Get the pixel offsets
-  Pixels pixelOffsets = getPixelOffsets(detectorGroup);
-  // Transform in homogenous coordinates. Offsets will be rotated then bank
-  // translation applied.
-  Eigen::Transform<double, 3, 2> transforms =
-    getTransformations(file, detectorGroup);
-  // Absolute bank position
-  Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{ 0, 0, 0 };
-  // Absolute bank rotation
-  Eigen::Quaterniond bankRotation = Eigen::Quaterniond(transforms.rotation());
-  builder.addBank(get1DStringDataset(BANK_NAME, detectorGroup), bankPos,
-    bankRotation);
-  // Get the pixel detIds
-  auto detectorIds = getDetectorIds(detectorGroup);
+void parseAndAddBank(const H5File &file, const Group &shapeGroup,
+                     InstrumentBuilder &builder,
+                     const std::vector<int> &detectorIds,
+                     const std::string &bankName) {
+  // Load mapping between detector IDs and faces, winding order of vertices for
+  // faces, and face corner vertices.
+  const std::vector<uint16_t> detFaces = convertVector<int32_t, uint16_t>(
+      get1DDataset<int32_t>("detector_faces", shapeGroup));
+  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
+      get1DDataset<int32_t>("faces", shapeGroup));
+  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
+      get1DDataset<int32_t>("winding_order", shapeGroup));
+  const auto vertices = get1DDataset<float>("vertices", shapeGroup);
+
   auto minId = std::min(detectorIds.cbegin(), detectorIds.cend());
-  // Extract shape
-  auto res = parseNexusMeshForBank(detectorGroup.openGroup(DETECTOR_SHAPE),
-                                   detectorIds.size(), *minId, pixelOffsets,
-                                   bankPos + sourcePosition, bankRotation);
-  for (size_t i = 0; i < detectorIds.size(); ++i) {
-    auto index = static_cast<int>(i);
-    std::string name = std::to_string(index);
-    auto &shape = res[i];
-    builder.addDetectorToLastBank(name, detectorIds[index], pixelOffsets.col(i),
-                                  shape);
-  }
+
+  parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder, vertices,
+                                detectorIds.size(), *minId, bankName, builder);
 }
 
 /// Choose what shape type to parse
@@ -674,15 +600,6 @@ extractInstrument(const H5File &file, const Group &root) {
   // Get path to all detector groups
   const std::vector<Group> detectorGroups = openDetectorGroups(root);
   for (auto &detectorGroup : detectorGroups) {
-    try {
-      detectorGroup.openGroup(DETECTOR_SHAPE);
-      parseAndAddBank(file, detectorGroup, builder,
-                      getSourcePosition(file, root));
-      continue;
-    } catch (...) { // No detector_shape group
-    }
-    // Get the pixel offsets
-    Pixels pixelOffsets = getPixelOffsets(detectorGroup);
     // Transform in homogenous coordinates. Offsets will be rotated then bank
     // translation applied.
     Eigen::Transform<double, 3, 2> transforms =
@@ -691,18 +608,28 @@ extractInstrument(const H5File &file, const Group &root) {
     Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{0, 0, 0};
     // Absolute bank rotation
     Eigen::Quaterniond bankRotation = Eigen::Quaterniond(transforms.rotation());
-    builder.addBank(get1DStringDataset(BANK_NAME, detectorGroup), bankPos,
-                    bankRotation);
-    // Calculate pixel relative positions
-    Pixels detectorPixels = Eigen::Affine3d::Identity() * pixelOffsets;
+    auto bankName = get1DStringDataset(BANK_NAME, detectorGroup);
+    builder.addBank(bankName, bankPos, bankRotation);
     // Get the pixel detIds
     auto detectorIds = getDetectorIds(detectorGroup);
+
+    try {
+      auto shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
+      parseAndAddBank(file, shapeGroup, builder, detectorIds, bankName);
+      continue;
+    } catch (...) { // No detector_shape group
+    }
+
+    // Get the pixel offsets
+    Pixels pixelOffsets = getPixelOffsets(detectorGroup);
+    // Calculate pixel relative positions
+    Pixels detectorPixels = Eigen::Affine3d::Identity() * pixelOffsets;
     // Extract shape
     auto shape = parseNexusShape(detectorGroup);
 
     for (size_t i = 0; i < detectorIds.size(); ++i) {
       auto index = static_cast<int>(i);
-      std::string name = std::to_string(index);
+      std::string name = bankName + "_" + std::to_string(index);
 
       Eigen::Vector3d relativePos = detectorPixels.col(index);
       builder.addDetectorToLastBank(name, detectorIds[index], relativePos,

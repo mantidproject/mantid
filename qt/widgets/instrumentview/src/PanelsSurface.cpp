@@ -362,6 +362,9 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
   Mantid::Kernel::V3D y = detectorInfo.position(children[1]) - pos0;
   Mantid::Kernel::V3D x;
 
+  visited[children[0]] = true;
+  visited[children[1]] = true;
+
   y.normalize();
   // at first set the normal to an argbitrary vector orthogonal to
   // the line between the first two detectors
@@ -371,6 +374,9 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
   const auto &componentInfo = m_instrActor->componentInfo();
   std::vector<size_t> detectors;
   detectors.reserve(children.size());
+  detectors.push_back(children[0]);
+  detectors.push_back(children[1]);
+
   for (auto child : children) {
     if (visited[child])
       continue;
@@ -446,7 +452,7 @@ void PanelsSurface::constructFromComponentInfo() {
         std::vector<size_t> detectors;
         Mantid::Kernel::V3D normal;
         std::tie(detectors, normal) = res.get();
-        if (!detectors.empty())
+        if (detectors.size() > 1)
           addFlatBankOfDetectors(normal, detectors, i);
       }
     } else if (children.size() > 0 &&
@@ -488,7 +494,7 @@ void PanelsSurface::addDetector(size_t detIndex,
                                 Mantid::Kernel::Quat &rotation) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
 
-  Mantid::Kernel::V3D pos = detectorInfo.position(detIndex);
+  auto pos = detectorInfo.position(detIndex);
   m_detector2bankMap[detIndex] = index;
   // get the colour
   UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
