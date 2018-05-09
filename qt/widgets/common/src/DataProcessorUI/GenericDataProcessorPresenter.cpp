@@ -70,6 +70,23 @@ void removeWorkspace(QString const &workspaceName) {
 template <typename T> void pop_front(std::vector<T> &queue) {
   queue.erase(queue.begin());
 }
+
+/** Validate the algorithm inputs
+ * @return : an error message, or empty string if ok
+ */
+std::string validateAlgorithmInputs(IAlgorithm_sptr alg) {
+  std::string error;
+  // Get input property errors as a map
+  auto errorMap = alg->validateInputs();
+  // Combine into a single string
+  for (auto const &kvp : errorMap) {
+    if (!error.empty()) {
+      error.append("\n");
+    }
+    error.append(kvp.first + ": " + kvp.second);
+  }
+  return error;
+}
 }
 
 namespace MantidQt {
@@ -349,7 +366,6 @@ bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
     // Mark the row as processed and failed
     rowData->setProcessed(true);
     rowData->setError(e.what());
-    // Warn user
     if (m_promptUser)
       m_view->giveUserCritical(e.what(), "Error");
     // Skip setting the options
@@ -854,7 +870,14 @@ IAlgorithm_sptr
 GenericDataProcessorPresenter::createProcessingAlgorithm() const {
   auto alg =
       AlgorithmManager::Instance().create(m_processor.name().toStdString());
+
   alg->initialize();
+
+  if (!alg->isInitialized()) {
+    throw std::runtime_error("Failed to initialize algorithm " +
+                             m_processor.name().toStdString());
+  }
+
   return alg;
 }
 
@@ -969,17 +992,25 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
  * @throws std::runtime_error if reduction fails
  * @returns : the algorithm
  */
-IAlgorithm_sptr
-GenericDataProcessorPresenter::createAndRunAlgorithm(const OptionsMap &options,
-                                                     bool &success) {
-  auto alg = createProcessingAlgorithm();
+IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
+    const OptionsMap &options) {
 
+  // Create and initialize the algorithm
+  auto alg = createProcessingAlgorithm();
+  // Set the properties
   for (auto &kvp : options) {
     setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
   }
-
-  success = alg->execute();
-
+  // Check for input errors
+  auto error = validateAlgorithmInputs(alg);
+  if (!error.empty()) {
+    throw std::runtime_error(error);
+  }
+  // Run the algorithm
+  if (!alg->execute()) {
+    throw std::runtime_error("Error executing algorithm " +
+                             m_processor.name().toStdString());
+  }
   return alg;
 }
 
@@ -991,18 +1022,27 @@ GenericDataProcessorPresenter::createAndRunAlgorithm(const OptionsMap &options,
  */
 void GenericDataProcessorPresenter::reduceRow(RowData_sptr data) {
 
-  // Perform any preprocessing on the input properties and cache the results
-  // in the row data
-  preprocessOptionValues(data);
-  // Run the algorithm
-  bool success = false;
-  const auto alg = createAndRunAlgorithm(data->preprocessedOptions(), success);
-  if (success) {
+  try {
+    // Perform any preprocessing on the input properties and cache the results
+    // in the row data
+    preprocessOptionValues(data);
+    // Run the algorithm
+    const auto alg = createAndRunAlgorithm(data->preprocessedOptions());
     // Populate any missing values in the model with output from the algorithm
     updateModelFromResults(alg, data);
-  } else {
+  } catch (std::runtime_error &e) {
     // Set an error on the row if the algorithm failed
-    data->setError("Reduction failed");
+    auto error = std::string("Row reduction failed: ") + e.what();
+    data->setError(error);
+    if (m_promptUser)
+      m_view->giveUserCritical(QString::fromStdString(error), "Error");
+  } catch (...) {
+    // Set an error on the row if the algorithm failed
+    auto error =
+        "Row reduction failed: Unexpected exception while reducing row";
+    data->setError(error);
+    if (m_promptUser)
+      m_view->giveUserCritical(QString::fromStdString(error), "Error");
   }
 }
 

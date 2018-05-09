@@ -56,7 +56,8 @@ private slots:
         m_presenter->m_manager->setProcessed(true, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
-      m_presenter->m_manager->setError(ex.what(), m_groupIndex);
+      m_presenter->m_manager->setError(
+          std::string("Group processing failed: ") + ex.what(), m_groupIndex);
       if (m_presenter->m_manager->rowCount(m_groupIndex) ==
           static_cast<int>(m_groupData.size()))
         m_presenter->m_manager->setProcessed(true, m_groupIndex);

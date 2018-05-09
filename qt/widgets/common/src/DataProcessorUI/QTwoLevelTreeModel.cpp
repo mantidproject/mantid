@@ -28,6 +28,9 @@ public:
   bool isProcessed() const { return m_rowData->isProcessed(); }
   void setProcessed(const bool isProcessed) const {
     m_rowData->setProcessed(isProcessed);
+    // Also clear the error if resetting processed state
+    if (!isProcessed)
+      m_rowData->setError("");
   }
   bool reductionFailed() const { return m_rowData->reductionFailed(); }
   std::string error() const { return m_rowData->error(); }
@@ -62,7 +65,19 @@ public:
     return true;
   }
   // Get/set error
-  std::string error() const { return m_error; }
+  std::string error() const {
+    // Return the group's error, if set
+    if (!m_error.empty())
+      return m_error;
+    // If the group's error is not set but some row errors are, then
+    // report that some rows failed
+    for (auto const &row : m_rows) {
+      if (!row.error().empty())
+        return "Reduction failed for some rows in the group";
+    }
+    // Return an empty string if there is no error
+    return std::string();
+  }
   void setError(const std::string &error) { m_error = error; }
   // Return true if reduction failed for the group or any rows within it
   bool reductionFailed() const {

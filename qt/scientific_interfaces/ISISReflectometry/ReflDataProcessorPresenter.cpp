@@ -460,25 +460,24 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
   rowData->clearSlices();
 
   for (size_t i = 0; i < slicing.numberOfSlices(); i++) {
+    RowData_sptr slice;
     try {
       // Create the slice
       QString sliceSuffix = takeSlice(runName, slicing, i);
-      auto slice = rowData->addSlice(sliceSuffix, slicedWorkspaceProperties);
+      slice = rowData->addSlice(sliceSuffix, slicedWorkspaceProperties);
       // Run the algorithm
-      bool success = false;
-      const auto alg =
-          createAndRunAlgorithm(slice->preprocessedOptions(), success);
-      if (success) {
-        // Populate any empty values in the row with output from the algorithm.
-        // Note that this overwrites the data each time with the results
-        // from the latest slice. It would be good to do some validation
-        // that the results are the same for each slice e.g. the resolution
-        // should always be the same.
-        updateModelFromResults(alg, rowData);
-      } else {
-        slice->setError("Reduction failed");
-      }
+      const auto alg = createAndRunAlgorithm(slice->preprocessedOptions());
+      // Populate any empty values in the row with output from the algorithm.
+      // Note that this overwrites the data each time with the results
+      // from the latest slice. It would be good to do some validation
+      // that the results are the same for each slice e.g. the resolution
+      // should always be the same.
+      updateModelFromResults(alg, rowData);
+    } catch (std::runtime_error &e) {
+      slice->setError(e.what());
+      return false;
     } catch (...) {
+      slice->setError("Unexpected exception while reducing slice");
       return false;
     }
   }

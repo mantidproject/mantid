@@ -217,8 +217,7 @@ protected:
   void updateModelFromResults(Mantid::API::IAlgorithm_sptr alg,
                               RowData_sptr data);
   // Create and execute the algorithm with the given properties
-  Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options,
-                                                     bool &success);
+  Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
   void reduceRow(RowData_sptr data);
   // Finds a run in the AnalysisDataService

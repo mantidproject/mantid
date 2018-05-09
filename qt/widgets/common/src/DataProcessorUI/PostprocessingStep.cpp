@@ -90,6 +90,7 @@ void PostprocessingStep::postProcessGroup(
 
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       m_algorithm.name().toStdString());
+
   alg->initialize();
   alg->setProperty(m_algorithm.inputProperty().toStdString(),
                    inputWSNames.toStdString());
@@ -123,8 +124,10 @@ void PostprocessingStep::postProcessGroup(
 
   alg->execute();
 
-  if (!alg->isExecuted())
-    throw std::runtime_error("Failed to post-process workspaces.");
+  if (!alg->isExecuted()) {
+    throw std::runtime_error("Failed to execute algorithm " +
+                             m_algorithm.name().toStdString());
+  }
 }
 }
 }
