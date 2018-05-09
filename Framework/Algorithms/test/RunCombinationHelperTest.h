@@ -27,7 +27,6 @@ using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
 
-
 class RunCombinationHelperTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
