@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/CalculateCarpenterSampleCorrection.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -7,13 +6,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include <stdexcept>
 
@@ -25,14 +20,9 @@ DECLARE_ALGORITHM(CalculateCarpenterSampleCorrection) // Register the class
 
 using namespace Kernel;
 using namespace API;
-using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
-using Mantid::DataObjects::WeightedEventNoTime;
-using Mantid::DataObjects::Workspace2D;
-using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::Points;
 using std::vector;
 using namespace Mantid::PhysicalConstants;
@@ -433,7 +423,7 @@ void CalculateCarpenterSampleCorrection::calculate_ms_correction(
 }
 
 MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::createOutputWorkspace(
-    const MatrixWorkspace_sptr inputWksp, const std::string ylabel) const {
+    const MatrixWorkspace_sptr &inputWksp, const std::string ylabel) const {
   MatrixWorkspace_sptr outputWS =
       WorkspaceFactory::Instance().create(inputWksp);
   // The algorithm computes the signal values at bin centres so they should

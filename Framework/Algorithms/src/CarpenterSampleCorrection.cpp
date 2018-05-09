@@ -1,16 +1,8 @@
 #include "MantidAlgorithms/CarpenterSampleCorrection.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include <stdexcept>
 
@@ -22,15 +14,10 @@ DECLARE_ALGORITHM(CarpenterSampleCorrection) // Register the class
 
 using namespace Kernel;
 using namespace API;
-using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
-using Mantid::DataObjects::WeightedEventNoTime;
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 using std::vector;
-using namespace Mantid::PhysicalConstants;
+//using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
 
 const std::string CarpenterSampleCorrection::name() const {

@@ -1,7 +1,5 @@
 #ifndef MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
 #define MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include <vector>
@@ -9,11 +7,6 @@
 using namespace Mantid::API;
 
 namespace Mantid {
-namespace HistogramData {
-class HistogramX;
-class HistogramY;
-class HistogramE;
-}
 namespace Algorithms {
 /** Multiple scattering absorption correction, originally used to
     correct vanadium spectrum at IPNS.  Algorithm originally worked
