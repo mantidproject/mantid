@@ -1116,7 +1116,6 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
-  //m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
   allowLoading(true);
 }
 
@@ -1396,7 +1395,6 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 		  m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
 	  }
     updatePeriodWidgets(numPeriods);
-
   }
 
   // Populate bin width info in Plot options
@@ -1882,8 +1880,6 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   // Insert real values
   QString safeWSName(wsName);
   safeWSName.replace("'", "\'");
-  auto fsf = safeWSName.toStdString();
-  auto sadf = m_currentDataName.toStdString();
   pyS.replace("%WSNAME%", safeWSName);
   pyS.replace("%PREV%", m_currentDataName);
   pyS.replace("%USEPREV%", policy == MuonAnalysisOptionTab::PreviousWindow

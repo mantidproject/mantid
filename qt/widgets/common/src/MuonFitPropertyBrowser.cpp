@@ -447,9 +447,6 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 		// turn on only the relevant box
 		for (auto iter = m_groupBoxes.constBegin();
 			iter != m_groupBoxes.constEnd(); ++iter) {
-			auto a = selectedGroup.toStdString();
-			auto b = iter.key().toStdString();
-			auto c = selectedGroup == iter.key();
 			m_boolManager->setValue(iter.value(), selectedGroup == iter.key());
 		}
 	}
