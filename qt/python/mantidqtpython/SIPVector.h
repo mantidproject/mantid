@@ -1,6 +1,7 @@
 #include <memory>
 #include <vector>
 #include <boost/optional.hpp>
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/PythonSystemHeader.h"
 
 bool isIterable(PyObject *iterable) {
@@ -32,7 +33,7 @@ template <typename T, typename ConversionFunction>
 PyObject *optionalToPyObject(boost::optional<T> const &item,
                              ConversionFunction valueAsPyObject) {
   if (item.is_initialized()) {
-    return valueAsPyObject(item.value());
+    return valueAsPyObject(item.get());
   } else {
     return Py_None;
   }
@@ -71,7 +72,7 @@ pythonListToVector(PyObject *pythonList, ConversionFunction pyObjectToItem) {
     while ((pythonItem = PyIter_Next(iterator))) {
       auto item = pyObjectToItem(pythonItem);
       if (item.is_initialized())
-        cppVector.emplace_back(std::move(item.value()));
+        cppVector.emplace_back(std::move(item.get()));
       else {
         Py_DECREF(pythonItem);
         Py_DECREF(iterator);
@@ -90,7 +91,8 @@ template <typename T>
 int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr,
                   int *sipIsErr, int sipState) {
   if (cppValue.is_initialized()) {
-    auto heapValue = std::make_unique<T>(std::move(cppValue.value()));
+    auto heapValue =
+        ::Mantid::Kernel::make_unique<T>(std::move(cppValue.get()));
     *sipCppPtr = heapValue.release();
     return sipState;
   } else {

@@ -25,7 +25,7 @@ public:
     auto findSubtreeRoots = FindSubtreeRoots();
     auto region = std::vector<RowLocation>{{RowLocation({1})}};
 
-    auto roots = findSubtreeRoots(region).value();
+    auto roots = findSubtreeRoots(region).get();
 
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
     TS_ASSERT_EQUALS(expectedRoots, roots);
@@ -43,7 +43,7 @@ public:
     });
     // clang-format on
 
-    auto roots = findSubtreeRoots(region).value();
+    auto roots = findSubtreeRoots(region).get();
     TS_ASSERT_EQUALS(expectedRoots, roots);
   }
 
@@ -54,7 +54,7 @@ public:
 
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
 
-    auto roots = findSubtreeRoots(region).value();
+    auto roots = findSubtreeRoots(region).get();
     TS_ASSERT_EQUALS(expectedRoots, roots);
   }
 
@@ -71,7 +71,7 @@ public:
     auto expectedRoots =
         std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
 
-    auto roots = findSubtreeRoots(region).value();
+    auto roots = findSubtreeRoots(region).get();
     TS_ASSERT_EQUALS(expectedRoots, roots);
   }
 
@@ -88,7 +88,7 @@ public:
 
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
 
-    auto roots = findSubtreeRoots(region).value();
+    auto roots = findSubtreeRoots(region).get();
     TS_ASSERT_EQUALS(expectedRoots, roots);
   }
 
@@ -133,7 +133,7 @@ public:
     });
     // clang-format on
 
-    auto roots = findSubtreeRoots(region).value();
+    auto roots = findSubtreeRoots(region).get();
     TS_ASSERT_EQUALS(expectedRoots, roots);
   }
 };

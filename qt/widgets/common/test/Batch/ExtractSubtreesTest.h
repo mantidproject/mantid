@@ -33,7 +33,7 @@ public:
     auto region = std::vector<RowLocation>({RowLocation({1})});
     auto regionData = RegionData({cells("Root")});
 
-    auto roots = extractSubtrees(region, regionData).value();
+    auto roots = extractSubtrees(region, regionData).get();
 
     // clang-format off
     auto expectedSubtrees =
@@ -65,7 +65,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region, regionData).value();
+    auto roots = extractSubtrees(region, regionData).get();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -85,7 +85,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region, regionData).value();
+    auto roots = extractSubtrees(region, regionData).get();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -114,7 +114,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region, regionData).value();
+    auto roots = extractSubtrees(region, regionData).get();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -147,7 +147,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region, regionData).value();
+    auto roots = extractSubtrees(region, regionData).get();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
@@ -254,7 +254,7 @@ public:
         });
     // clang-format on
 
-    auto roots = extractSubtrees(region, regionData).value();
+    auto roots = extractSubtrees(region, regionData).get();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 };
