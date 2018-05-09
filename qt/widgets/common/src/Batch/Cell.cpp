@@ -73,6 +73,14 @@ bool operator==(Cell const &lhs, Cell const &rhs) {
 }
 
 bool operator!=(Cell const &lhs, Cell const &rhs) { return !(lhs == rhs); }
+
+std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells,
+                                     Cell const &paddingCell, int paddedWidth) {
+  auto paddedCells = cells;
+  for (auto i = static_cast<int>(cells.size()); i < paddedWidth; i++)
+    paddedCells.emplace_back(paddingCell);
+  return paddedCells;
+}
 }
 }
 }

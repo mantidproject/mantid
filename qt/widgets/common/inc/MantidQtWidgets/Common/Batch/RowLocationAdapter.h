@@ -1,5 +1,6 @@
 #ifndef MANTIDQTMANTIDWIDGETS_ROWLOCATIONADAPTER_H_
 #define MANTIDQTMANTIDWIDGETS_ROWLOCATIONADAPTER_H_
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QStandardItemModel>
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
@@ -8,9 +9,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-class RowLocationAdapter {
+class EXPORT_OPT_MANTIDQT_COMMON RowLocationAdapter {
 public:
-  RowLocationAdapter(QStandardItemModel const &model);
+  RowLocationAdapter(QStandardItemModel const& model);
 
   RowLocation atIndex(QModelIndexForMainModel const &index) const;
   boost::optional<QModelIndexForMainModel>

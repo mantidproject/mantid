@@ -1,37 +1,43 @@
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
-#include <tuple>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
-void BuildSubtreeItems::operator()(QStandardItem *parentOfSubtreeRootItem,
-                                   RowLocation const &parentOfSubtreeRoot,
+
+BuildSubtreeItems::BuildSubtreeItems(
+    QtStandardItemTreeModelAdapter &adaptedModel,
+    RowLocationAdapter const &rowLocationAdapter)
+    : m_adaptedMainModel(adaptedModel), m_rowLocations(rowLocationAdapter) {}
+
+void BuildSubtreeItems::operator()(RowLocation const &parentOfSubtreeRoot,
                                    int index, Subtree const &subtree) {
-  if (!subtree.empty())
-    buildRecursively(parentOfSubtreeRootItem, index, parentOfSubtreeRoot, 0,
-                     subtree.cbegin(), subtree.cend());
+  if (!subtree.empty()) {
+    buildRecursively(index, parentOfSubtreeRoot, 0, subtree.cbegin(),
+                     subtree.cend());
+  }
 }
 
-auto BuildSubtreeItems::buildRecursively(QStandardItem *parentItem, int index,
-                                         RowLocation const &parent, int depth,
+auto BuildSubtreeItems::buildRecursively(int index, RowLocation const &parent,
+                                         int depth,
                                          SubtreeConstIterator current,
                                          SubtreeConstIterator end)
     -> SubtreeConstIterator {
-  parentItem->insertRow(index, rowFromCells((*current).cells()));
+  m_adaptedMainModel.insertChildRow(m_rowLocations.indexAt(parent), index,
+                                    (*current).cells());
   ++current;
   while (current != end) {
     auto currentRow = (*current).location();
     auto currentDepth = currentRow.depth();
 
     if (depth < currentDepth) {
-      current = buildRecursively(parentItem->child(index),
-                                 currentRow.rowRelativeToParent(),
+      current = buildRecursively(currentRow.rowRelativeToParent(),
                                  parent.child(currentRow.rowRelativeToParent()),
                                  depth + 1, current, end);
     } else if (depth > currentDepth) {
       return current;
     } else {
-      parentItem->appendRow(rowFromCells((*current).cells()));
+      m_adaptedMainModel.appendChildRow(m_rowLocations.indexAt(parent),
+                                        (*current).cells());
       ++current;
     }
   }

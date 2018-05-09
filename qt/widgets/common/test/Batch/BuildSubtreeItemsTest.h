@@ -3,6 +3,8 @@
 
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
+#include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
+#include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <gtest/gtest.h>
@@ -26,6 +28,10 @@ public:
     return Mantid::Kernel::make_unique<QStandardItemModel>();
   }
 
+  QtStandardItemTreeModelAdapter adapt(QStandardItemModel *model) {
+    return QtStandardItemTreeModelAdapter(*model, Cell(""));
+  }
+
   Cell cell(std::string const &text) const { return Cell(text); }
 
   template <typename... Args>
@@ -34,40 +40,45 @@ public:
   }
 
   void testBuildEmptySubtree() {
-    auto build = BuildSubtreeItems();
+    auto model = emptyModel();
+    auto adaptedModel = adapt(model.get());
+    auto build = BuildSubtreeItems(adaptedModel, RowLocationAdapter(*model));
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree();
     auto rootItem = Mantid::Kernel::make_unique<QStandardItem>();
 
-    build(rootItem.get(), positionRelativeToMainTree, 0, subtree);
+    build(positionRelativeToMainTree, 0, subtree);
 
     TS_ASSERT(rootItem->rowCount() == 0);
   }
 
   void testBuildSubtreeItemsWithRootOnly() {
-    auto build = BuildSubtreeItems();
+    auto model = emptyModel();
+    auto adaptedModel = adapt(model.get());
+    auto build = BuildSubtreeItems(adaptedModel, RowLocationAdapter(*model));
+
     auto positionRelativeToMainTree = RowLocation();
-
     auto subtree = Subtree({{RowLocation(), cells("Root")}});
-    auto rootItem = Mantid::Kernel::make_unique<QStandardItem>();
+    build(positionRelativeToMainTree, 0, subtree);
 
-    build(rootItem.get(), positionRelativeToMainTree, 0, subtree);
-
+    auto* rootItem = model->invisibleRootItem();
     TS_ASSERT(rootItem->rowCount() == 1);
     TS_ASSERT_EQUALS(rootItem->child(0)->text(), "Root");
   }
 
   void testBuildSubtreeItemsWithRootAndSingleChild() {
-    auto build = BuildSubtreeItems();
+    auto model = emptyModel();
+    auto adaptedModel = adapt(model.get());
+    auto build = BuildSubtreeItems(adaptedModel, RowLocationAdapter(*model));
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({Row(RowLocation(), cells("Root")),
                             Row(RowLocation({0}), cells("Child"))});
 
-    auto invisibleRootItem = Mantid::Kernel::make_unique<QStandardItem>();
-    build(invisibleRootItem.get(), positionRelativeToMainTree, 0, subtree);
+    build(positionRelativeToMainTree, 0, subtree);
 
+    auto* invisibleRootItem = model->invisibleRootItem();
     TS_ASSERT_EQUALS(invisibleRootItem->rowCount(), 1);
     auto *subtreeRootItem = invisibleRootItem->child(0);
     TS_ASSERT_EQUALS(subtreeRootItem->text(), "Root");
@@ -78,16 +89,18 @@ public:
   }
 
   void testBuildSubtreeItemsWithRootAndTwoChildren() {
-    auto build = BuildSubtreeItems();
+    auto model = emptyModel();
+    auto adaptedModel = adapt(model.get());
+    auto build = BuildSubtreeItems(adaptedModel, RowLocationAdapter(*model));
     auto positionRelativeToMainTree = RowLocation();
 
     auto subtree = Subtree({Row(RowLocation(), cells("Root")),
                             Row(RowLocation({0}), cells("Child 1")),
                             Row(RowLocation({1}), cells("Child 2"))});
 
-    auto invisibleRootItem = Mantid::Kernel::make_unique<QStandardItem>();
-    build(invisibleRootItem.get(), positionRelativeToMainTree, 0, subtree);
+    build(positionRelativeToMainTree, 0, subtree);
 
+    auto* invisibleRootItem = model->invisibleRootItem();
     TS_ASSERT_EQUALS(invisibleRootItem->rowCount(), 1);
     auto *subtreeRootItem = invisibleRootItem->child(0);
     TS_ASSERT_EQUALS(subtreeRootItem->text(), "Root");

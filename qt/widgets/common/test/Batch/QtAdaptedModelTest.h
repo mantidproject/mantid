@@ -31,26 +31,18 @@ public:
     auto model = emptyModel();
     auto adaptedModel = adapt(model.get());
 
-    TS_ASSERT_EQUALS(rootModelIndex(*model).untyped(), QModelIndex());
-  }
-
-  void testCanGetRootItemFromRootIndex() {
-    auto model = emptyModel();
-    auto adaptedModel = adapt(model.get());
-
-    auto rootIndex = QModelIndexForMainModel();
-    TS_ASSERT_EQUALS(modelItemFromIndex(*model, rootIndex),
-                     model->invisibleRootItem());
+    TS_ASSERT_EQUALS(adaptedModel.rootIndex().untyped(), QModelIndex());
   }
 
   void testAppendChildNode() {
     auto model = emptyModel();
     auto adaptedModel = adapt(model.get());
 
-    auto *expectedChildItem = new QStandardItem("Some Dummy Text");
-    adaptedModel.appendChildRow(QModelIndexForMainModel(), {expectedChildItem});
+    auto expectedChildCell = Cell("Some Dummy Text");
+    adaptedModel.appendChildRow(QModelIndexForMainModel(), {expectedChildCell});
 
-    TS_ASSERT_EQUALS(expectedChildItem, model->invisibleRootItem()->child(0));
+    TS_ASSERT_EQUALS(QString::fromStdString(expectedChildCell.contentText()),
+                     model->invisibleRootItem()->child(0)->text());
   }
 
   void testInsertChildNodeBetweenTwoSiblings() {
@@ -64,10 +56,11 @@ public:
     rootItem->appendRow({sibling0});
     rootItem->appendRow({sibling1});
 
-    auto *newSibling = new QStandardItem("Some Dummy Text");
+    auto newSiblingCell = Cell("Some Dummy Text");
 
-    adaptedModel.insertChildRow(QModelIndexForMainModel(), 1, {newSibling});
-    TS_ASSERT_EQUALS(newSibling, model->invisibleRootItem()->child(1));
+    adaptedModel.insertChildRow(QModelIndexForMainModel(), 1, {newSiblingCell});
+    TS_ASSERT_EQUALS(QString::fromStdString(newSiblingCell.contentText()),
+                     model->invisibleRootItem()->child(1)->text());
   }
 
   void testAppendSiblingNodeAfterSiblings() {
@@ -84,10 +77,11 @@ public:
     auto rootIndex = QModelIndexForMainModel();
     auto sibling0Index = fromMainModel(
         model->index(/*row=*/0, /*column=*/0, rootIndex.untyped()), *model);
-    auto *newSibling = new QStandardItem("Some Dummy Text");
+    auto newSiblingCell = Cell("Some Text");
 
-    adaptedModel.appendSiblingRow(sibling0Index, {newSibling});
-    TS_ASSERT_EQUALS(newSibling, model->invisibleRootItem()->child(2));
+    adaptedModel.appendSiblingRow(sibling0Index, {newSiblingCell});
+    TS_ASSERT_EQUALS(QString::fromStdString(newSiblingCell.contentText()),
+                     model->invisibleRootItem()->child(2)->text());
   }
 
   void testCellTextCorrectForAppendedRow() {
@@ -113,21 +107,6 @@ public:
                      QString::fromStdString(cells[0].contentText()));
     TS_ASSERT_EQUALS(secondCellText,
                      QString::fromStdString(cells[1].contentText()));
-  }
-
-  void testCanCreateRowFromStringVector() {
-    auto model = emptyModel();
-    auto adaptedModel = adapt(model.get());
-
-    auto const cells =
-        std::vector<Cell>({Cell("First Cell"), Cell("Second Cell")});
-    auto const cellItems = rowFromCells(cells);
-
-    TS_ASSERT_EQUALS(cellItems.size(), 2u);
-    TS_ASSERT_EQUALS(cells[0].contentText(),
-                     cellItems[0]->text().toStdString());
-    TS_ASSERT_EQUALS(cells[1].contentText(),
-                     cellItems[1]->text().toStdString());
   }
 };
 

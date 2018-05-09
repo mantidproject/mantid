@@ -35,6 +35,7 @@ EXPORT_OPT_MANTIDQT_COMMON bool operator<(Row const &lhs, Row const &rhs);
 EXPORT_OPT_MANTIDQT_COMMON bool operator<=(Row const &lhs, Row const &rhs);
 EXPORT_OPT_MANTIDQT_COMMON bool operator>(Row const &lhs, Row const &rhs);
 EXPORT_OPT_MANTIDQT_COMMON bool operator>=(Row const &lhs, Row const &rhs);
+
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

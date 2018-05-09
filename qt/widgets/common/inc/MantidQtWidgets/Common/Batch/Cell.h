@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_CELL_H_
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -51,6 +52,10 @@ EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,
                                                     Cell const &cell);
 EXPORT_OPT_MANTIDQT_COMMON bool operator==(Cell const &lhs, Cell const &rhs);
 EXPORT_OPT_MANTIDQT_COMMON bool operator!=(Cell const &lhs, Cell const &rhs);
+EXPORT_OPT_MANTIDQT_COMMON std::vector<Cell>
+paddedCellsToWidth(std::vector<Cell> const &cells, Cell const &paddingCell,
+                   int paddedWidth);
+
 }
 }
 }

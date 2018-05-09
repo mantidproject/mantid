@@ -4,72 +4,18 @@
 QtStandardItemTreeModelAdapter
 ==============================
 
-The :code:`QtStandardItemTreeModelAdapter` is a class used to perform
-The :doc:`../API/JobTreeView` uses :code:`RowLocation` objects in it's API as an abstraction over
-:code:`QModelIndex`\ s which are used internally to access :code:`QStandardItem`\ s from the 'models'
-provided by Qt. As such, code which simply uses the :code:`JobTreeView` does not need to know anything
-about :code:`QModelIndex`\ s.
+The :code:`QtStandardItemTreeModelAdapter` is a wrapper around :code:`QStandardItemModel`
+it helps to enforce the strong typing on :code:`QModelIndex`\ s eliminates some of the boilerplate
+required when working with the model in the :doc:`../API/JobTreeView`, aiming to prevent
+:code:`JobTreeView` and higher level classes from working directly with :code:`QStandardItem`\ s.
 
-MVC Models
-^^^^^^^^^^
+It's header also contains definitions for :code:`modelItemFromIndex` who's usage in it's raw
+form is discouraged outside of the implementation of :code:`QtStandardItemTreeModelAdapter`
+but currently necessary in :code:`CellDelegate`.
 
-Sections of Qt such as :code:`QTreeView` are designed as an MVC framework rather than an MVP
-framework, as such working with some sections of it's API becomes difficult when using MVP. Models in
-MVC are directly accessible from the view which is free to read the data directly from it. In MVP
-however, data access is marshalled through the presenter, models and presenters are not supposed to
-be coupled to any particular view implementation.
 
-The Main Model
---------------
+Usage
+#############################
 
-The :code:`JobTreeView` solves this problem by keeping an internal instance of
-:code:`QStandardItemModel` a Qt 'model' which fulfils Qt's requirements for a 'model' and which acts
-as the view state. We refer to this instance as the 'main model'.
-
-Filtered Model
---------------
-
-To take advantage of the filtering functionality offered by the :code:`QTreeView`, the
-:code:`JobTreeView` also manages an instance of :code:`TreeFilterOnSelfOrDescendant`, a class derived from
-:code:`QSortFilterProxyModel` which is a filtered version of the 'main model'.
-
-Strongly Typed Indexes
-^^^^^^^^^^^^^^^^^^^^^^
-
-The :code:`QModelIndex`\ s into the filtered model cannot be used to directly access items in the
-main model. Likewise, the :code:`QModelIndex`\ s cannot be used to directly access items in the
-filtered model. Indexes must be explicitly converted between the two spaces.
-
-To make this less bugprone, the header file :code:`StrictQModelIndices.h` defines two types,
-:code:`QModelIndexForMainModel` and :code:`QModelIndexForFilteredModel`. Functions which wish to
-constrain the indices they accept and/or return can now make that explicit and use the type system
-to catch errors.
-
-Converting Between Index Spaces
--------------------------------
-
-The filtered model holds a subset of the items in the main model, therefore:
-
-* Conversion from a valid index into the filtered model to a valid index into the main model should
-  always be successful.
-* Conversion from a valid index into the main model to a valid index into the main model could be
-  unsuccessful.
-
-Given a :code:`QModelIndex`, in order to convert to a strongly typed variant you must know whether
-it originated from the filtered model or the main model. Conversion to the appropriate
-strongly typed variant is done via assertion using the functions :code:`fromMainModel` and
-:code:`fromFilteredModel` provided by :code:`StrictQModelIndices.h`. These functions attempt to
-check the assertion by requiring a reference to the model you are claiming the index is from and
-comparing it with the pointer returned by calling :code:`.model()` on the model index. However this
-is only a heuristic since the index could refer to a cell which has since been removed from the
-filtered model due to a change of filter.
-
-After the construction of the :code:`JobTreeView`, indices provided through :code:`QTreeView` APIs
-are indices into the filtered model and must be mapped into the main model before being used to
-modify it. :code:`RowLocation`\ s on the other hand always correspond with indices into the main
-model.
-
-Asserting that an index is from one space or the other as described above is not the same as mapping
-from one space into the other. This is performed using the functions :code:`mapToMainModel` and
-:code:`mapToFilteredModel` defined in :code:`JobTreeView` which internally call methods of the
-filtered model.
+The :code:`QtStandardItemTreeModelAdapter` is currently used when performing model manipulations
+in the :code:`JobTreeView`.

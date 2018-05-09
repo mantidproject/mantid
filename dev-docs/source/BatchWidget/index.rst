@@ -26,3 +26,4 @@ Internals Documentation
    Internals/ExtractSubtrees
    Internals/FindRootNodes
    Internals/StrictModelIndexing
+   Internals/QtStandardItemTreeModelAdapter

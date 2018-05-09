@@ -1,10 +1,10 @@
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
-#include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-RowLocationAdapter::RowLocationAdapter(QStandardItemModel const &model)
+RowLocationAdapter::RowLocationAdapter(
+    QStandardItemModel const &model)
     : m_model(model) {}
 
 RowLocation
@@ -25,7 +25,7 @@ RowLocationAdapter::atIndex(QModelIndexForMainModel const &index) const {
 boost::optional<QModelIndexForMainModel>
 RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
                                     int column) const {
-  auto parentIndex = rootModelIndex(m_model).untyped();
+  auto parentIndex = QModelIndex();
   if (location.isRoot()) {
     return fromMainModel(parentIndex, m_model);
   } else {

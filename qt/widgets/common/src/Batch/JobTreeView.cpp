@@ -30,12 +30,10 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
 
 void JobTreeView::commitData(QWidget *editor) {
   QTreeView::commitData(editor);
-
-  auto location = rowLocation().atIndex(m_lastEdited);
-  auto *const cell = modelItemFromIndex(m_mainModel, m_lastEdited);
-  auto cellText = cell->text().toStdString();
-
-  m_notifyee->notifyCellChanged(location, m_lastEdited.column(), cellText);
+  auto cellProperties = m_adaptedMainModel.cellFromCellIndex(m_lastEdited);
+  auto cellText = cellProperties.contentText();
+  m_notifyee->notifyCellChanged(rowLocation().atIndex(m_lastEdited),
+                                m_lastEdited.column(), cellText);
   m_hasEditorOpen = false;
 }
 
@@ -148,9 +146,8 @@ void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
 
 void JobTreeView::insertSubtreeAt(RowLocation const &parent, int index,
                                   Subtree const &subtree) {
-  auto build = BuildSubtreeItems();
-  auto parentIndex = rowLocation().indexAt(parent);
-  build(modelItemFromIndex(m_mainModel, parentIndex), parent, index, subtree);
+  auto build = BuildSubtreeItems(m_adaptedMainModel, rowLocation());
+  build(parent, index, subtree);
 }
 
 void JobTreeView::appendSubtreesAt(RowLocation const &parent,
@@ -269,7 +266,7 @@ void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
                 "the number of columns by increasing the number of headings.");
   m_adaptedMainModel.insertChildRow(
       rowLocation().indexAt(parent), beforeRow,
-      paddedRowFromCells(cells, deadCell, m_mainModel.columnCount()));
+      paddedCellsToWidth(cells, deadCell, m_mainModel.columnCount()));
 }
 
 Cell const JobTreeView::deadCell =
@@ -284,7 +281,7 @@ void JobTreeView::appendChildRowOf(RowLocation const &parent,
   auto parentIndex = rowLocation().indexAt(parent);
   m_adaptedMainModel.appendChildRow(
       parentIndex,
-      paddedRowFromCells(cells, deadCell, m_mainModel.columnCount()));
+      paddedCellsToWidth(cells, deadCell, m_mainModel.columnCount()));
 }
 
 void JobTreeView::editAt(QModelIndexForFilteredModel const &index) {
