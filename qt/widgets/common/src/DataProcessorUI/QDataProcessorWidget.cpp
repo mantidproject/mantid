@@ -5,7 +5,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GridDelegate.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
-#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 
 #include <QClipboard>
 #include <QFileDialog>
@@ -150,24 +149,6 @@ void QDataProcessorWidget::createTable() {
           this, SLOT(showContextMenu(const QPoint &)));
   // Process button
   connect(ui.buttonProcess, SIGNAL(clicked()), this, SLOT(processClicked()));
-
-  ui.layoutButtonsTable->itemAt(1)->widget()->hide();
-  m_treeView =
-      new Batch::JobTreeView({"Heading 1", "Heading 2"}, Batch::Cell(""), this);
-  m_treeViewSignals = new Batch::JobTreeViewSignalAdapter(*m_treeView, this);
-
-  connect(m_treeViewSignals,
-          SIGNAL(removeRowsRequested(std::vector<Batch::RowLocation> const &)),
-          this,
-          SLOT(onRemoveRowsRequested(std::vector<Batch::RowLocation> const &)));
-
-  m_treeView->appendChildRowOf(Batch::RowLocation());
-  ui.layoutButtonsTable->insertWidget(1, m_treeView);
-}
-
-void QDataProcessorWidget::onRemoveRowsRequested(
-    std::vector<Batch::RowLocation> const &locationsOfRowsToRemove) {
-  m_treeView->removeRows(locationsOfRowsToRemove);
 }
 
 /** Add actions to the toolbar
