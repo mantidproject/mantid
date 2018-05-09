@@ -1219,21 +1219,19 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
       API::WorkspaceFactory::Instance().create("Workspace2D", numspec,
                                                numpeaks * 2, numpeaks * 2);
 
-  API::Progress prog(this, 0., .2, dataws->getNumberHistograms());
+  const int64_t NUM_HIST = static_cast<int64_t>(dataws->getNumberHistograms());
+  API::Progress prog(this, 0., .2, NUM_HIST);
 
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (int64_t iws = 0;
-       iws < static_cast<int64_t>(dataws->getNumberHistograms()); ++iws) {
+  for (int64_t iws = 0; iws < static_cast<int64_t>(NUM_HIST); ++iws) {
     PARALLEL_START_INTERUPT_REGION
     // calculatePositionWindowInTOF
     PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     auto toTof = getDSpacingToTof(peaks.detid);
     peaks.calculatePositionWindowInTOF(m_peaksInDspacing, windowsInDSpacing,
                                        toTof);
-    for (size_t i = 0; i < peaks.inTofPos.size(); ++i)
-      peak_pos_ws->dataX(iws)[i] = peaks.inTofPos[i];
-    for (size_t i = 0; i < peaks.inTofWindows.size(); ++i)
-      peak_window_ws->dataX(iws)[i] = peaks.inTofWindows[i];
+    peak_pos_ws->setPoints(iws, peaks.inTofPos);
+    peak_window_ws->setPoints(iws, peaks.inTofWindows);
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
