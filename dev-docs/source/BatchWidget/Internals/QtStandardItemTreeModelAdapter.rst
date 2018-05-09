@@ -5,8 +5,8 @@ QtStandardItemTreeModelAdapter
 ==============================
 
 The :code:`QtStandardItemTreeModelAdapter` is a wrapper around :code:`QStandardItemModel`
-it helps to enforce the strong typing on :code:`QModelIndex`\ s eliminates some of the boilerplate
-required when working with the model in the :doc:`../API/JobTreeView`, aiming to prevent
+which helps to enforce the strong typing on :code:`QModelIndex`\ s and eliminates some of the
+boilerplate required when working with the model in the :doc:`../API/JobTreeView`, aiming to prevent
 :code:`JobTreeView` and higher level classes from working directly with :code:`QStandardItem`\ s.
 
 It's header also contains definitions for :code:`modelItemFromIndex` who's usage in it's raw

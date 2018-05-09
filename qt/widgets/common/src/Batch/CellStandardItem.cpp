@@ -3,6 +3,29 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
+void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
+  item.setText(QString::fromStdString(cell.contentText()));
+  item.setEditable(cell.isEditable());
+  setBorderThickness(item, cell.borderThickness());
+  setBackgroundColor(item, cell.backgroundColor());
+  setBorderColor(item, cell.borderColor(), cell.borderOpacity());
+  setIcon(item, cell.iconFilePath());
+}
+
+Cell extractCellPropertiesFromItem(QStandardItem const &item) {
+  auto cell = Cell(item.text().toStdString());
+  cell.setBorderThickness(getBorderThickness(item));
+  cell.setIconFilePath(getIconFilePath(item));
+  cell.setBackgroundColor(getBackgroundColor(item));
+
+  auto borderColor = getBorderColor(item);
+  cell.setBorderColor(borderColor.name().toStdString());
+  cell.setBorderOpacity(borderColor.alpha());
+
+  cell.setEditable(item.isEditable());
+  return cell;
+}
+
 void setBorderThickness(QStandardItem &item, int borderThickness) {
   item.setData(borderThickness, CellUserRoles::BorderThickness);
 }
@@ -53,28 +76,6 @@ QColor getBorderColor(QStandardItem const &item) {
   return item.data(CellUserRoles::BorderColor).value<QColor>();
 }
 
-void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
-  item.setText(QString::fromStdString(cell.contentText()));
-  item.setEditable(cell.isEditable());
-  setBorderThickness(item, cell.borderThickness());
-  setBackgroundColor(item, cell.backgroundColor());
-  setBorderColor(item, cell.borderColor(), cell.borderOpacity());
-  setIcon(item, cell.iconFilePath());
-}
-
-Cell extractCellPropertiesFromItem(QStandardItem const &item) {
-  auto cell = Cell(item.text().toStdString());
-  cell.setBorderThickness(getBorderThickness(item));
-  cell.setIconFilePath(getIconFilePath(item));
-  cell.setBackgroundColor(getBackgroundColor(item));
-
-  auto borderColor = getBorderColor(item);
-  cell.setBorderColor(borderColor.name().toStdString());
-  cell.setBorderOpacity(borderColor.alpha());
-
-  cell.setEditable(item.isEditable());
-  return cell;
-}
 }
 }
 }

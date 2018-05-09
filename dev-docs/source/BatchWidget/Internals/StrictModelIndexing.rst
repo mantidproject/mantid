@@ -72,3 +72,11 @@ Asserting that an index is from one space or the other as described above is not
 from one space into the other. This is performed using the functions :code:`mapToMainModel` and
 :code:`mapToFilteredModel` defined in :code:`JobTreeView` which internally call methods of the
 filtered model.
+
+Type Erasure
+------------
+
+Some functions are ambivalent to which model an index belongs to, a good example might be those in
+:code:`QtBasicNavigation.h`, in order to still be able to use these functions without requiring them
+all to be templates, the strict versions have a member function :code:`.untyped()` which returns the
+internal plain old :code:`QModelIndex`.

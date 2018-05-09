@@ -27,3 +27,4 @@ Internals Documentation
    Internals/FindRootNodes
    Internals/StrictModelIndexing
    Internals/QtStandardItemTreeModelAdapter
+   Internals/CellBasedViewProperties
