@@ -70,6 +70,9 @@ public:
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setTransferButtonEnabled(bool enabled) = 0;
   virtual void setInstrumentComboEnabled(bool enabled) = 0;
+  virtual void setTransferMethodComboEnabled(bool enabled) = 0;
+  virtual void setSearchTextEntryEnabled(bool enabled) = 0;
+  virtual void setSearchButtonEnabled(bool enabled) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;

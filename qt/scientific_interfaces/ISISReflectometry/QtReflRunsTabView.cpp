@@ -204,6 +204,33 @@ void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
 }
 
 /**
+* Sets the transfer method combo box enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setTransferMethodComboEnabled(bool enabled) {
+
+  ui.comboTransferMethod->setEnabled(enabled);
+}
+
+/**
+* Sets the search text box enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
+
+  ui.textSearch->setEnabled(enabled);
+}
+
+/**
+* Sets the search button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
+
+  ui.buttonSearch->setEnabled(enabled);
+}
+
+/**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
 */

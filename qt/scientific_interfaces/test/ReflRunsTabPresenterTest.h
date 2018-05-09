@@ -291,6 +291,12 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setInstrumentComboEnabled(true))
         .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setTransferMethodComboEnabled(true))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setSearchTextEntryEnabled(true))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setSearchButtonEnabled(true))
+        .Times(Exactly(1));
 
     // Pause presenter
     presenter.pause(GROUP_NUMBER);
@@ -320,6 +326,12 @@ public:
     EXPECT_CALL(mockRunsTabView, setTransferButtonEnabled(false))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setInstrumentComboEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setTransferMethodComboEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setSearchTextEntryEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setSearchButtonEnabled(false))
         .Times(Exactly(1));
     // Resume presenter
     constexpr int GROUP_NUMBER = 0;

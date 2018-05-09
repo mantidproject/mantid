@@ -84,6 +84,9 @@ public:
   void setAutoreduceButtonEnabled(bool enabled) override;
   void setTransferButtonEnabled(bool enabled) override;
   void setInstrumentComboEnabled(bool enabled) override;
+  void setTransferMethodComboEnabled(bool enabled) override;
+  void setSearchTextEntryEnabled(bool enabled) override;
+  void setSearchButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;

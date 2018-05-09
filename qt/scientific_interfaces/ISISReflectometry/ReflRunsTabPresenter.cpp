@@ -553,6 +553,11 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
   m_view->setAutoreduceButtonEnabled(!isProcessing);
   m_view->setTransferButtonEnabled(!isProcessing);
   m_view->setInstrumentComboEnabled(!isProcessing);
+
+  // These components are always enabled unless autoreduction is running
+  m_view->setTransferMethodComboEnabled(!m_autoreduction.running());
+  m_view->setSearchTextEntryEnabled(!m_autoreduction.running());
+  m_view->setSearchButtonEnabled(!m_autoreduction.running());
 }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets

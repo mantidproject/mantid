@@ -74,6 +74,9 @@ public:
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
   MOCK_METHOD1(setTransferButtonEnabled, void(bool));
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
+  MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));
+  MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
+  MOCK_METHOD1(setSearchButtonEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD0(startIcatSearch, void());
