@@ -41,7 +41,7 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
-* :ref:`Algorithms List`
+* `Algorithms <algorithm%20index/Algorithms/Algorithms.html>`_
 * :ref:`training`
     - `Mantid Basic Course <http://www.mantidproject.org/Mantid_Basic_Course>`_
     - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
