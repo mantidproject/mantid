@@ -113,7 +113,7 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
            "Error: " << e.what() << "\n";
     file.seekg(0);
     while (getline(file, line)) {
-      std::cerr << ":::" << line << std::endl;
+      msg << ":::" << line << std::endl;
     }
     throw std::runtime_error(msg.str());
   }
