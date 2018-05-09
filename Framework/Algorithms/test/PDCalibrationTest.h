@@ -112,10 +112,10 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void checkDSpacing(const std::vector<double> &dValues) {
+  void checkDSpacing(const std::string &wsname,
+                     const std::vector<double> &dValues) {
     ITableWorkspace_sptr peaksTable =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "diag_dspacing");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsname);
     // check for workspace index 55 which is spectrum 56
     for (size_t i = 0; i < dValues.size(); ++i) {
       TS_ASSERT_DELTA(peaksTable->cell<double>(55, 1 + i), dValues[i], 0.0002);
@@ -143,6 +143,8 @@ public:
         PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
         Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
 
+    const std::string prefix{"PDCalibration_difc"};
+
     PDCalibration alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -150,15 +152,16 @@ public:
         alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputCalibrationTable", "cal"));
+        alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DiagnosticWorkspaces", "diag"));
+        alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr calTable =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix +
+                                                                    "cal");
 
     TS_ASSERT(calTable);
 
@@ -178,12 +181,16 @@ public:
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
 
     MatrixWorkspace_const_sptr mask =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix +
+                                                                    "cal_mask");
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
 
-    checkDSpacing(dValues);
+    checkDSpacing(prefix + "diag_dspacing", dValues);
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal_mask");
   }
 
   void test_exec_difc_tzero() {
@@ -194,6 +201,8 @@ public:
                    Mantid::Kernel::Diffraction::getTofToDConversionFunc(
                        DIFC_155, 0., TZERO));
 
+    const std::string prefix{"PDCalibration_difc_tzero"};
+
     PDCalibration alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -201,9 +210,9 @@ public:
         alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputCalibrationTable", "cal"));
+        alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DiagnosticWorkspaces", "diag"));
+        alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO"));
@@ -211,7 +220,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr calTable =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix +
+                                                                    "cal");
 
     TS_ASSERT(calTable);
 
@@ -231,13 +241,17 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
     MatrixWorkspace_const_sptr mask =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix +
+                                                                    "cal_mask");
 
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
 
-    checkDSpacing(dValues);
+    checkDSpacing(prefix + "diag_dspacing", dValues);
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal_mask");
   }
 
   void test_exec_difc_tzero_difa() {
@@ -249,6 +263,8 @@ public:
                    Mantid::Kernel::Diffraction::getTofToDConversionFunc(
                        DIFC_155, 0., TZERO));
 
+    const std::string prefix{"PDCalibration_difc_tzero_difa"};
+
     PDCalibration alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -256,9 +272,9 @@ public:
         alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputCalibrationTable", "cal"));
+        alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DiagnosticWorkspaces", "diag"));
+        alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO+DIFA"));
@@ -266,7 +282,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr calTable =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix +
+                                                                    "cal");
 
     TS_ASSERT(calTable);
 
@@ -286,13 +303,17 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
     MatrixWorkspace_const_sptr mask =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix +
+                                                                    "cal_mask");
 
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
 
-    checkDSpacing(dValues);
+    checkDSpacing(prefix + "diag_dspacing", dValues);
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal_mask");
   }
 };
 
