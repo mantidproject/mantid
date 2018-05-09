@@ -5,8 +5,6 @@
 #include "MantidHistogramData/Points.h"
 #include <vector>
 
-using namespace Mantid::API;
-
 namespace Mantid {
 namespace Algorithms {
 /** Multiple scattering absorption correction, originally used to
@@ -77,11 +75,11 @@ private:
                                const HistogramData::Points &wavelength,
                                HistogramData::HistogramY &y_val);
 
-  MatrixWorkspace_sptr
-  createOutputWorkspace(const MatrixWorkspace_sptr &inputWS,
+  API::MatrixWorkspace_sptr
+  createOutputWorkspace(const API::MatrixWorkspace_sptr &inputWS,
                         const std::string) const;
-  void deleteWorkspace(MatrixWorkspace_sptr workspace);
-  MatrixWorkspace_sptr setUncertainties(MatrixWorkspace_sptr workspace);
+  void deleteWorkspace(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr setUncertainties(API::MatrixWorkspace_sptr workspace);
 };
 
 } // namespace Algorithm
