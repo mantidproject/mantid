@@ -1116,7 +1116,7 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
-  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
+  //m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
   allowLoading(true);
 }
 
@@ -1388,7 +1388,15 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   size_t numPeriods =
       MuonAnalysisHelper::numPeriods(loadResult->loadedWorkspace);
   if (instrumentChanged || numPeriods != m_numPeriods) {
+	  // if some data has been loaded, update the run number
+	  // before updating the periods (stops errors)
+	  if (m_currentDataName != NOT_AVAILABLE) {
+		  const boost::optional<QString> filePath =
+			  m_uiForm.mwRunFiles->getUserInput().toString();
+		  m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
+	  }
     updatePeriodWidgets(numPeriods);
+
   }
 
   // Populate bin width info in Plot options
@@ -1639,6 +1647,8 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
 
   // cache number of periods
   m_numPeriods = numPeriods;
+  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
+
 }
 
 /**
@@ -1872,6 +1882,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   // Insert real values
   QString safeWSName(wsName);
   safeWSName.replace("'", "\'");
+  auto fsf = safeWSName.toStdString();
+  auto sadf = m_currentDataName.toStdString();
   pyS.replace("%WSNAME%", safeWSName);
   pyS.replace("%PREV%", m_currentDataName);
   pyS.replace("%USEPREV%", policy == MuonAnalysisOptionTab::PreviousWindow
@@ -1975,30 +1987,28 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
  */
 void MuonAnalysis::selectMultiPeak(const QString &wsName,
                                    const boost::optional<QString> &filePath) {
-
   disableAllTools();
   if (!plotExists(wsName)) {
     plotSpectrum(wsName);
     setCurrentDataName(wsName);
   }
-  // go from MUSR data (after a fit) to HIFI 84447 to see errors...
-  // move the below code to be after load??? 
-  	if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
-	// Set the available groups/pairs and periods
-	const Grouping groups = m_groupingHelper.parseGroupingTable();
-	QStringList groupsAndPairs;
-	groupsAndPairs.reserve(
-	static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
-	std::transform(groups.groupNames.begin(), groups.groupNames.end(),
-	std::back_inserter(groupsAndPairs), &QString::fromStdString);
-	std::transform(groups.pairNames.begin(), groups.pairNames.end(),
-	std::back_inserter(groupsAndPairs), &QString::fromStdString);
-	setGroupsAndPairs();
 
-	// Set the selected run, group/pair and period
-	m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
-	setChosenGroupAndPeriods(wsName);
-	}
+  if (wsName != m_fitDataPresenter->getAssignedFirstRun()) {
+    // Set the available groups/pairs and periods
+    const Grouping groups = m_groupingHelper.parseGroupingTable();
+    QStringList groupsAndPairs;
+    groupsAndPairs.reserve(
+        static_cast<int>(groups.groupNames.size() + groups.pairNames.size()));
+    std::transform(groups.groupNames.begin(), groups.groupNames.end(),
+                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
+    std::transform(groups.pairNames.begin(), groups.pairNames.end(),
+                   std::back_inserter(groupsAndPairs), &QString::fromStdString);
+    setGroupsAndPairs();
+
+    // Set the selected run, group/pair and period
+    m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+    setChosenGroupAndPeriods(wsName);
+  }
 
   QString code;
 

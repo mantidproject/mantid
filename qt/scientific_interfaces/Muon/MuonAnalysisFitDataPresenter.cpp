@@ -276,6 +276,7 @@ void MuonAnalysisFitDataPresenter::updateWorkspaceNames(
  */
 std::vector<std::string>
 MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
+	//these have not updated
   const auto instrument = m_dataSelector->getInstrumentName().toStdString();
   const auto runs = m_dataSelector->getRuns().toStdString();
   return generateWorkspaceNames(instrument, runs, overwrite);
@@ -848,7 +849,7 @@ bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
 void MuonAnalysisFitDataPresenter::setSelectedWorkspace(
     const QString &wsName, const boost::optional<QString> &filePath) {
   updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
-  setUpDataSelector(wsName, filePath);
+   setUpDataSelector(wsName, filePath);
 }
 
 /**
