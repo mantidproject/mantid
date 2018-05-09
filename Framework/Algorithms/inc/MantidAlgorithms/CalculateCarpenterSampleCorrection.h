@@ -81,8 +81,7 @@ private:
   createOutputWorkspace(const MatrixWorkspace_sptr &inputWS,
                         const std::string) const;
   void deleteWorkspace(MatrixWorkspace_sptr workspace);
-  MatrixWorkspace_sptr
-  setUncertainties(MatrixWorkspace_sptr workspace);
+  MatrixWorkspace_sptr setUncertainties(MatrixWorkspace_sptr workspace);
 };
 
 } // namespace Algorithm

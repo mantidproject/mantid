@@ -17,7 +17,6 @@ using namespace API;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using std::vector;
-//using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
 
 const std::string CarpenterSampleCorrection::name() const {
