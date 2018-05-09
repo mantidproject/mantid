@@ -7,7 +7,9 @@
 #include "MantidAPI/FrameworkManager.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
@@ -20,9 +22,11 @@ using Mantid::Algorithms::RunCombinationHelper;
 using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
+
 
 class RunCombinationHelperTest : public CxxTest::TestSuite {
 public:
@@ -42,14 +46,15 @@ public:
 
   void testUnwraping_throws() {
 
-    MatrixWorkspace_sptr ws1 = create2DWorkspace(2, 3);
+    auto ws1 = create2DWorkspace(2, 3);
     storeWS("ws1", ws1);
+    auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    storeWS("table", table);
 
     TS_ASSERT_THROWS_EQUALS(
-        m_testee.unWrapGroups(std::vector<std::string>{"ws1", "ws?"}),
+        m_testee.unWrapGroups(std::vector<std::string>{"ws1", "table"}),
         const std::runtime_error &e, std::string(e.what()),
-        "Unable to find workspace type with name 'ws?': data service  search "
-        "object ws?");
+        "The input table is neither a WorkspaceGroup nor a MatrixWorkspace");
 
     removeWS("ws1");
   }

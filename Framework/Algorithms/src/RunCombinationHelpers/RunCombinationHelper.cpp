@@ -21,6 +21,7 @@ using namespace Kernel;
 * @param inputs : input workspaces vector [including] group workspaces (all must
 * be on ADS)
 * @return : the flat vector of the input workspaces
+* @throw : std::runtime_error if the input workspaces are neither groups nor MatrixWorkspaces
 */
 std::vector<std::string>
 RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
