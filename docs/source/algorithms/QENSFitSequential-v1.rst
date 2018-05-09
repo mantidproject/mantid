@@ -46,3 +46,17 @@ Usage
   convolve = True  # Convolve the fitted model components with the resolution
   minimizer = "Levenberg-Marquardt"
   maxIt = 500
+
+  # Run algorithm
+  result, params, fit_group = QENSFitSequential(InputWorkspace=sample,
+                                                Function=function,
+                                                PassWSIndexToFunction=True,
+                                                StartX=startX, EndX=endX,
+                                                SpecMin=specMin, SpecMax=specMax,
+                                                ConvolveMembers=convolve,
+                                                Minimizer=minimizer, MaxIterations=maxIt)
+
+.. categories::
+
+.. sourcelink::
+        :filename: QENSFitSequential
