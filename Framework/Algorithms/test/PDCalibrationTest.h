@@ -112,6 +112,30 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
+  void checkDSpacing(const std::vector<double> &dValues) {
+    ITableWorkspace_sptr peaksTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "diag_dspacing");
+    // check for workspace index 55 which is spectrum 56
+    for (size_t i = 0; i < dValues.size(); ++i) {
+      TS_ASSERT_DELTA(peaksTable->cell<double>(55, 1 + i), dValues[i], 0.0002);
+    }
+    // checks for chisq, first one is strange because of test framework missing
+    // > operator
+    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(55, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(55, 1 + dValues.size()), 10.);
+
+    // check for workspace index 95 which is spectrum 96 - last peak is out of
+    // range???
+    for (size_t i = 0; i < dValues.size() - 1; ++i) {
+      TS_ASSERT_DELTA(peaksTable->cell<double>(95, 1 + i), dValues[i], 0.0002);
+    }
+    // checks for chisq, first one is strange because of test framework missing
+    // > operator
+    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(95, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(95, 1 + dValues.size()), 10.);
+  }
+
   void test_exec_difc() {
     // setup the peak postions based on transformation from detID=155
     std::vector<double> dValues(PEAK_TOFS.size());
@@ -159,27 +183,7 @@ public:
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
 
-    ITableWorkspace_sptr peaksTable =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "diag_dspacing");
-    // check for workspace index 55 which is spectrum 56
-    for (size_t i = 0; i < dValues.size(); ++i) {
-      TS_ASSERT_DELTA(peaksTable->cell<double>(55, 1 + i), dValues[i], 0.0002);
-    }
-    // checks for chisq, first one is strange because of test framework missing
-    // > operator
-    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(55, 1 + dValues.size()));
-    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(55, 1 + dValues.size()), 10.);
-
-    // check for workspace index 95 which is spectrum 96 - last peak is out of
-    // range???
-    for (size_t i = 0; i < dValues.size() - 1; ++i) {
-      TS_ASSERT_DELTA(peaksTable->cell<double>(95, 1 + i), dValues[i], 0.0002);
-    }
-    // checks for chisq, first one is strange because of test framework missing
-    // > operator
-    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(95, 1 + dValues.size()));
-    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(95, 1 + dValues.size()), 10.);
+    checkDSpacing(dValues);
   }
 
   void test_exec_difc_tzero() {
@@ -232,6 +236,8 @@ public:
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
+
+    checkDSpacing(dValues);
   }
 
   void test_exec_difc_tzero_difa() {
@@ -285,6 +291,8 @@ public:
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
+
+    checkDSpacing(dValues);
   }
 };
 
