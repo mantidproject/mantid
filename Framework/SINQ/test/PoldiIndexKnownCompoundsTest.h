@@ -670,8 +670,8 @@ private:
 
   void storeRandomWorkspaces(const std::vector<std::string> &wsNames) {
     for (const auto &wsName : wsNames) {
-      auto ws = WorkspaceCreationHelper::create1DWorkspaceRand(10, true)
-          WorkspaceCreationHelper::storeWS(wsName, ws);
+      auto ws = WorkspaceCreationHelper::create1DWorkspaceRand(10, true);
+      WorkspaceCreationHelper::storeWS(wsName, ws);
     }
   }
 
