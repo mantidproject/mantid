@@ -330,7 +330,7 @@ set ( TEST_FILES
 	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
-        Algorithms/ConvolutionFitSequentialTest.h
+	Algorithms/ConvolutionFitSequentialTest.h
 	Algorithms/EstimateFitParametersTest.h
 	Algorithms/EstimatePeakErrorsTest.h
 	Algorithms/EvaluateFunctionTest.h
