@@ -120,6 +120,8 @@ public:
   bool isProcessed() const { return m_isProcessed; }
   /// Set whether the row has been processed
   void setProcessed(const bool isProcessed) { m_isProcessed = isProcessed; }
+  /// Get the error associated with the row
+  std::string error() const { return m_error; }
   /// Set an error message for this row
   void setError(const std::string &error) { m_error = error; }
   /// Whether reduction failed for this row

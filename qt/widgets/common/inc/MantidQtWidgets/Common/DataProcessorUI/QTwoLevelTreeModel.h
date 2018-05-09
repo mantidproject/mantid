@@ -136,6 +136,7 @@ private:
   QVariant getEditRole(const QModelIndex &index) const;
   QVariant getDisplayRole(const QModelIndex &index) const;
   QVariant getBackgroundRole(const QModelIndex &index) const;
+  QVariant getToolTipRole(const QModelIndex &index) const;
 
   /// List of all groups ordered by the group's position in the tree
   std::vector<GroupInfo> m_groups;

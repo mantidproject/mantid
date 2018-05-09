@@ -30,7 +30,8 @@ public:
     m_rowData->setProcessed(isProcessed);
   }
   bool reductionFailed() const { return m_rowData->reductionFailed(); }
-  void setError(const std::string &error) const { m_rowData->setError(error); }
+  std::string error() const { return m_rowData->error(); }
+  void setError(const std::string &error) { m_rowData->setError(error); }
   void setAbsoluteIndex(const size_t absoluteIndex) {
     m_absoluteIndex = absoluteIndex;
   }
@@ -60,6 +61,8 @@ public:
     }
     return true;
   }
+  // Get/set error
+  std::string error() const { return m_error; }
   void setError(const std::string &error) { m_error = error; }
   // Return true if reduction failed for the group or any rows within it
   bool reductionFailed() const {
@@ -91,8 +94,12 @@ public:
     checkRowIndex(rowIndex);
     m_rows[rowIndex].setProcessed(isProcessed);
   }
-  // Set an error on a row for the given row index
-  void setRowError(const size_t rowIndex, const std::string &error) const {
+  // Get/set an error on a row for the given row index
+  std::string rowError(const size_t rowIndex) const {
+    checkRowIndex(rowIndex);
+    return m_rows[rowIndex].error();
+  }
+  void setRowError(const size_t rowIndex, const std::string &error) {
     checkRowIndex(rowIndex);
     m_rows[rowIndex].setError(error);
   }
@@ -230,6 +237,21 @@ QVariant QTwoLevelTreeModel::getBackgroundRole(const QModelIndex &index) const {
   return QVariant();
 }
 
+/** Return the ToolTip role data
+ */
+QVariant QTwoLevelTreeModel::getToolTipRole(const QModelIndex &index) const {
+  if (indexIsGroup(index)) {
+    const auto &group = m_groups.at(index.row());
+    return QString::fromStdString(group.error());
+  } else {
+    auto pIndex = parent(index);
+    const auto &group = m_groups[pIndex.row()];
+    return QString::fromStdString(group.rowError(index.row()));
+  }
+
+  return QVariant();
+}
+
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
@@ -247,6 +269,8 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
     return getEditRole(index);
   case Qt::BackgroundRole:
     return getBackgroundRole(index);
+  case Qt::ToolTipRole:
+    return getToolTipRole(index);
   default:
     return QVariant();
   }
