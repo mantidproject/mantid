@@ -3,8 +3,11 @@
 =====
  API
 =====
+.. raw :: html
 
-The following subsections document the defined APIs for the Mantid libraries.
+    <blockquote>
+    The following subsections document the defined APIs for the Mantid libraries.
+    </blockquote>
 
 Bindings
 --------
