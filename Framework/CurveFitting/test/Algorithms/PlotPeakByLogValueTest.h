@@ -616,7 +616,7 @@ public:
   }
 
   void test_exclude_range() {
-    createData(true);
+    createData(false);
 
     PlotPeakByLogValue alg;
     alg.initialize();
