@@ -132,7 +132,7 @@ public:
   bool wholeRange() const;
 
   /// Get the number of detectors in the instrument.
-  size_t ndetectors() const; // { return m_detIDs.size(); }
+  size_t ndetectors() const;
   /// Get a detector index by a detector ID.
   size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.

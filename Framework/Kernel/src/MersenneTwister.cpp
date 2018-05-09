@@ -2,9 +2,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/MersenneTwister.h"
-
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/uniform_int_distribution.h"
 
 #include <Poco/Timestamp.h>
 
@@ -44,25 +43,18 @@ MersenneTwister::MersenneTwister(const double start, const double end)
  */
 MersenneTwister::MersenneTwister(const size_t seedValue, const double start,
                                  const double end)
-    : m_generator(), m_start(start), m_end(end), m_currentSeed(),
-      m_savedStateGenerator(nullptr) {
+    : m_engine(), m_start(start), m_end(end), m_seed(), m_savedEngine() {
   setSeed(seedValue);
 }
 
-/// Destructor
-MersenneTwister::~MersenneTwister() { delete m_savedStateGenerator; }
-
 /**
- * (Re-)seed the generator. This clears the current saved state
+ * (Re-)seed the generator. This resets the current saved state
  * @param seedValue :: A seed for the generator
  */
 void MersenneTwister::setSeed(const size_t seedValue) {
-  // Bug in earlier versions of this implementation meant
-  // that a unsigned int could not be past to the seed function
-  m_currentSeed = static_cast<boost::mt19937::result_type>(seedValue);
-  m_generator.seed(m_currentSeed);
-  delete m_savedStateGenerator;
-  m_savedStateGenerator = nullptr;
+  m_seed = static_cast<std::mt19937::result_type>(seedValue);
+  m_engine.seed(m_seed);
+  m_savedEngine = Kernel::make_unique<std::mt19937>(m_engine);
 }
 
 /**
@@ -83,8 +75,7 @@ void MersenneTwister::setRange(const double start, const double end) {
  * @returns The next number in the pseudo-random sequence
  */
 double MersenneTwister::nextValue(double start, double end) {
-  boost::random::uniform_real_distribution<double> dist(start, end);
-  return dist(m_generator);
+  return std::uniform_real_distribution<double>(start, end)(m_engine);
 }
 
 /**
@@ -95,18 +86,17 @@ double MersenneTwister::nextValue(double start, double end) {
  * @return An integer in the defined range
  */
 int MersenneTwister::nextInt(int start, int end) {
-  boost::random::uniform_int_distribution<> dist(start, end);
-  return dist(m_generator);
+  return Mantid::Kernel::uniform_int_distribution<int>(start, end)(m_engine);
 }
 
 /**
  * Resets the generator using the value given at the last call to setSeed
  */
-void MersenneTwister::restart() { setSeed(m_currentSeed); }
+void MersenneTwister::restart() { setSeed(m_seed); }
 
 /// Saves the current state of the generator
 void MersenneTwister::save() {
-  m_savedStateGenerator = new boost::mt19937(m_generator); // Copy the state
+  m_savedEngine = Kernel::make_unique<std::mt19937>(m_engine);
 }
 
 /// Restores the generator to the last saved point, or the beginning if nothing
@@ -115,8 +105,8 @@ void MersenneTwister::restore() {
   // Copy saved to current, still distinct objects so that another restore still
   // brings us
   // back to the originally saved point
-  if (m_savedStateGenerator) {
-    m_generator = boost::mt19937(*m_savedStateGenerator);
+  if (m_savedEngine) {
+    m_engine = std::mt19937(*m_savedEngine);
   } else {
     restart();
   }

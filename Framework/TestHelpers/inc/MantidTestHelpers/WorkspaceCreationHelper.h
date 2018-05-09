@@ -106,8 +106,14 @@ struct EPPTableRow {
   FitStatus fitStatus = FitStatus::SUCCESS;
 };
 
-/// Adds a workspace to the ADS
-void storeWS(const std::string &name, Mantid::API::Workspace_sptr ws);
+/**
+ * Adds a workspace to the ADS
+ * @param name :: The name of the workspace
+ * @param ws :: The workspace object
+ */
+template <typename WSType> void storeWS(const std::string &name, WSType &ws) {
+  Mantid::API::AnalysisDataService::Instance().add(name, ws);
+}
 /// Deletes a workspace
 void removeWS(const std::string &name);
 /// Returns a workspace of a given type
@@ -170,8 +176,8 @@ create2DWorkspaceNonUniformlyBinned(int nhist, const int numBoundaries,
                                     const double xBoundaries[],
                                     bool hasDx = false);
 
-struct returnOne {
-  double operator()(const double, size_t) { return 1; }
+struct ReturnOne {
+  double operator()(const double, std::size_t) { return 1.0; };
 };
 
 /**
@@ -186,11 +192,11 @@ struct returnOne {
  * @param eFunc :: A function to use for the y error values
  * @return The new workspace. The errors are set to 1.0
  */
-template <typename fT, typename gT = returnOne>
+template <typename fT, typename gT = ReturnOne>
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
                               double dx, bool isHist = false,
-                              gT eFunc = returnOne()) {
+                              gT eFunc = ReturnOne()) {
   int nX = int((x1 - x0) / dx) + 1;
   int nY = nX - (isHist ? 1 : 0);
   if (nY <= 0)
