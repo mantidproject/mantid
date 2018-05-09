@@ -227,7 +227,6 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
                                         const size_t &specMax) const {
   const auto outputName = outputWorkspaceName(specMin);
   const bool constrainBeta = boolSettingValue("ConstrainBeta");
-  const bool constrainIntens = boolSettingValue("ConstrainIntensities");
   const bool extractMembers = boolSettingValue("ExtractMembers");
 
   IAlgorithm_sptr iqtFitAlg;
@@ -238,15 +237,10 @@ IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
     iqtFitAlg = AlgorithmManager::Instance().create("IqtFitSequential");
 
   iqtFitAlg->initialize();
-  iqtFitAlg->setProperty("FitType", fitTypeString() + "_s");
-  iqtFitAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
-  iqtFitAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
-  iqtFitAlg->setProperty("ConstrainIntensities", constrainIntens);
+  iqtFitAlg->setProperty("SpecMin", static_cast<int>(specMin));
+  iqtFitAlg->setProperty("SpecMax", static_cast<int>(specMax));
   iqtFitAlg->setProperty("ExtractMembers", extractMembers);
-  iqtFitAlg->setProperty("OutputResultWorkspace", outputName + "_Result");
-  iqtFitAlg->setProperty("OutputParameterWorkspace",
-                         outputName + "_Parameters");
-  iqtFitAlg->setProperty("OutputWorkspaceGroup", outputName + "_Workspaces");
+  iqtFitAlg->setProperty("OutputWorkspace", outputName + "_Result");
   return iqtFitAlg;
 }
 
@@ -275,11 +269,6 @@ IqtFit::getParameters(IFunction_sptr function,
       parameters.push_back(longName);
   }
   return parameters;
-}
-
-void IqtFit::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
-                              int maxIterations) const {
-  fitAlgorithm->setProperty("MaxIterations", static_cast<long>(maxIterations));
 }
 
 void IqtFit::updatePlotOptions() {

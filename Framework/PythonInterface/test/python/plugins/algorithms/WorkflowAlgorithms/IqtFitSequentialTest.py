@@ -73,7 +73,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         nbins = sub_ws.blocksize()
         nhists = sub_ws.getNumberHistograms()
         self.assertEquals(nbins, 58)
-        self.assertEquals(nhists, 3)
+        self.assertEquals(nhists, 5)
 
         # Check histogram names
         text_axis = sub_ws.getAxis(1)
@@ -100,7 +100,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertEquals(round(row['f1.Lifetime'], 7), 0.0287491)
 
     def _validate_matrix_values(self, matrixWS):
-        # Check f0.A0
+        # Check f1.A0
         a0 = matrixWS.readY(0)
         self.assertEquals(round(a0[0], 7), 0.0336564)
         self.assertEquals(round(a0[-1],7), 0.0182411)
@@ -114,7 +114,6 @@ class IqtFitSequentialTest(unittest.TestCase):
         lifetime = matrixWS.readY(2)
         self.assertEquals(round(lifetime[0], 7), 0.0287491)
         self.assertEquals(round(lifetime[-1],7), 0.0034427)
-
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)
@@ -134,9 +133,6 @@ class IqtFitSequentialTest(unittest.TestCase):
     def _validate_sample_log_values(self, matrixWS):
         run = matrixWS.getRun()
         # Check additionally added logs
-        self.assertEqual(run.getProperty('fit_type').value, '1E')
-        self.assertEqual(run.getProperty('intensities_constrained').value, 'True')
-        self.assertEqual(run.getProperty('beta_constrained').value, 'False')
         self.assertEqual(run.getProperty('end_x').value, 0.24)
         self.assertEqual(run.getProperty('start_x').value, 0.0)
 
@@ -155,12 +151,10 @@ class IqtFitSequentialTest(unittest.TestCase):
         """
         result, params, fit_group = IqtFitSequential(InputWorkspace=self._iqt_ws,
                                                      Function=self._function,
-                                                     FitType='1E_s',
                                                      StartX=0,
                                                      EndX=0.24,
                                                      SpecMin=0,
-                                                     SpecMax=16,
-                                                     ConstrainIntensities=True)
+                                                     SpecMax=16)
         self._validate_output(params, result, fit_group)
 
 #----------------------------------------Failure cases-------------------------------------
@@ -169,72 +163,54 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertRaises(ValueError, IqtFitSequential,
                           InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          FitType='1S_s',
                           EndX=0.2,
                           SpecMin=-1,
                           SpecMax=16,
-                          OutputResultWorkspace='result',
+                          OutputWorkspace='result',
                           OutputParameterWorkspace='table',
                           OutputWorkspaceGroup='fit_group')
 
     def test_maximum_spectra_more_than_workspace_spectra(self):
         self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          FitType='1S_s',
                           EndX=0.2,
                           SpecMin=0,
                           SpecMax=20,
-                          OutputResultWorkspace='result',
+                          OutputWorkspace='result',
                           OutputParameterWorkspace='table',
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_spectra_more_than_maximum_spectra(self):
         self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          FitType='1S_s',
                           EndX=0.2,
                           SpecMin=10,
                           SpecMax=5,
-                          OutputResultWorkspace='result',
+                          OutputWorkspace='result',
                           OutputParameterWorkspace='table',
                           OutputWorkspaceGroup='fit_group')
 
     def test_minimum_x_less_than_0(self):
-        self.assertRaises(ValueError, IqtFitSequential, InputWorkspace=self._iqt_ws,
+        self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          FitType='1S_s',
                           StartX=-0.2,
                           EndX=0.2,
                           SpecMin=0,
                           SpecMax=16,
-                          OutputResultWorkspace='result',
+                          OutputWorkspace='result',
                           OutputParameterWorkspace='table',
                           OutputWorkspaceGroup='fit_group')
 
     def test_maximum_x_more_than_workspace_max_x(self):
         self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          FitType='1S_s',
                           StartX=0,
                           EndX=0.4,
                           SpecMin=0,
                           SpecMax=16,
-                          OutputResultWorkspace='result',
+                          OutputWorkspace='result',
                           OutputParameterWorkspace='table',
                           OutputWorkspaceGroup='fit_group')
-
-    def test_minimum_spectra_more_than_maximum_spectra(self):
-        self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
-                          Function=self._function,
-                          FitType='1S_s',
-                          StartX=0.2,
-                          EndX=0.1,
-                          SpecMin=16,
-                          SpecMax=0,
-                          OutputResultWorkspace='result',
-                          OutputParameterWorkspace='table',
-                          OutputWorkspaceGroup='fit_group')
-
 
 if __name__=="__main__":
     unittest.main()
