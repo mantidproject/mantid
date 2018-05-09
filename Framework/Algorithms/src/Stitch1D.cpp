@@ -165,10 +165,14 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   std::map<std::string, std::string> issues;
   MatrixWorkspace_const_sptr lhs = getProperty("LHSWorkspace");
   MatrixWorkspace_const_sptr rhs = getProperty("RHSWorkspace");
+  if (!lhs)
+    issues["LHSWorkspace"] = "Cannot retrieve workspace";
+  if (!rhs)
+    issues["RHSWorkspace"] = "Cannot retrieve workspace";
   if (lhs->isHistogramData() && !rhs->isHistogramData())
-    issues["RHSWorkspace"] = "Must be a histogram like LHSWorkspace.";
+    issues["RHSWorkspace"] = rhs->getName() + " must be a histogram.";
   if (!lhs->isHistogramData() && rhs->isHistogramData())
-    issues["RHSWorkspace"] = "Must be point data like LHSWorkspace.";
+    issues["RHSWorkspace"] = lhs->getName() + " must be point data.";
   return issues;
 }
 
