@@ -110,7 +110,11 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   } catch (std::exception &e) {
     std::ostringstream msg;
     msg << "Failed to create a Workspace2D from the data found in this file. "
-           "Error: " << e.what();
+           "Error: " << e.what() << "\n";
+    file.seekg(0);
+    while (getline(file, line)) {
+      std::cerr << ":::" << line << std::endl;
+    }
     throw std::runtime_error(msg.str());
   }
 
