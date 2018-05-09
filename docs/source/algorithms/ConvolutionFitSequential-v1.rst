@@ -1,7 +1,4 @@
 
-.. sourcelink::
-        :filename: ConvolutionFit
-
 .. algorithm::
 
 .. summary::
@@ -94,4 +91,5 @@ Output:
 .. categories::
 
 .. sourcelink::
+        :filename: ConvolutionFit
 
