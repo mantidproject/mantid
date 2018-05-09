@@ -130,6 +130,12 @@ private:
   bool insertGroups(int position, int count);
   bool removeGroups(int position, int count);
   bool removeRows(int position, int count, int parent);
+  // Check whether an index corresponds to a group or a row
+  bool indexIsGroup(const QModelIndex &index) const;
+  // Get data for a cell for particular roles
+  QVariant getEditRole(const QModelIndex &index) const;
+  QVariant getDisplayRole(const QModelIndex &index) const;
+  QVariant getBackgroundRole(const QModelIndex &index) const;
 
   /// List of all groups ordered by the group's position in the tree
   std::vector<GroupInfo> m_groups;

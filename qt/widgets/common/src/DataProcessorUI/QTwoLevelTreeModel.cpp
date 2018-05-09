@@ -174,6 +174,62 @@ QTwoLevelTreeModel::QTwoLevelTreeModel(ITableWorkspace_sptr tableWorkspace,
 
 QTwoLevelTreeModel::~QTwoLevelTreeModel() {}
 
+/** Return the Edit role data
+ */
+QVariant QTwoLevelTreeModel::getEditRole(const QModelIndex &index) const {
+  return getDisplayRole(index);
+}
+
+/** Returns true if the given index corresponds to a group; false if it
+    corresponds to a row
+ */
+bool QTwoLevelTreeModel::indexIsGroup(const QModelIndex &index) const {
+  return (!parent(index).isValid());
+}
+
+/** Return the Display role data
+ */
+QVariant QTwoLevelTreeModel::getDisplayRole(const QModelIndex &index) const {
+  if (indexIsGroup(index)) {
+    const auto &group = m_groups.at(index.row());
+    // Return the group name only in the first column
+    if (index.column() == 0)
+      return QString::fromStdString(group.name());
+  } else {
+    auto pIndex = parent(index);
+    const auto &group = m_groups[pIndex.row()];
+    return QString::fromStdString(
+        m_tWS->String(group.rowAbsoluteIndex(index.row()), index.column() + 1));
+  }
+
+  return QVariant();
+}
+
+/** Return the Background role data
+ */
+QVariant QTwoLevelTreeModel::getBackgroundRole(const QModelIndex &index) const {
+  if (indexIsGroup(index)) {
+    const auto &group = m_groups.at(index.row());
+    // Highlight if this group is processed
+    if (group.reductionFailed())
+      return QColor(Colour::FAILED);
+    else if (group.isProcessed())
+      return QColor(Colour::SUCCESS);
+    else if (group.allRowsProcessed())
+      return QColor(Colour::COMPLETE);
+  } else {
+    auto pIndex = parent(index);
+    const auto &group = m_groups[pIndex.row()];
+    // Highlight if this row is processed (red if failed, green if success)
+    if (group.rowReductionFailed(index.row()))
+      return QColor(Colour::FAILED);
+    else if (group.isRowProcessed(index.row()))
+      return QColor(Colour::SUCCESS);
+  }
+
+  return QVariant();
+}
+
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
@@ -184,43 +240,16 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
-  if (!parent(index).isValid()) {
-    // Index corresponds to a group
-    const auto &group = m_groups.at(index.row());
-
-    if ((role == Qt::DisplayRole || role == Qt::EditRole) &&
-        index.column() == 0) {
-      // Return the group name only in the first column
-      return QString::fromStdString(group.name());
-    }
-    if (role == Qt::BackgroundRole) {
-      // Highlight if this group is processed
-      if (group.reductionFailed())
-        return QColor(Colour::FAILED);
-      else if (group.isProcessed())
-        return QColor(Colour::SUCCESS);
-      else if (group.allRowsProcessed())
-        return QColor(Colour::COMPLETE);
-    }
-  } else {
-    // Index corresponds to a row
-    auto pIndex = parent(index);
-    const auto &group = m_groups[pIndex.row()];
-
-    if (role == Qt::DisplayRole || role == Qt::EditRole) {
-      return QString::fromStdString(m_tWS->String(
-          group.rowAbsoluteIndex(index.row()), index.column() + 1));
-    }
-    if (role == Qt::BackgroundRole && group.isRowProcessed(index.row())) {
-      // Highlight if this row is processed (red if failed, green if success)
-      if (group.rowReductionFailed(index.row()))
-        return QColor(Colour::FAILED);
-      else
-        return QColor(Colour::SUCCESS);
-    }
+  switch (role) {
+  case Qt::DisplayRole:
+    return getDisplayRole(index);
+  case Qt::EditRole:
+    return getEditRole(index);
+  case Qt::BackgroundRole:
+    return getBackgroundRole(index);
+  default:
+    return QVariant();
   }
-
-  return QVariant();
 }
 
 /** Returns the column name (header data for given section)
@@ -254,7 +283,7 @@ RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) const {
   if (!index.isValid())
     return result;
 
-  if (!parent(index).isValid()) {
+  if (indexIsGroup(index)) {
     return result;
   } else {
     // Index corresponds to a row
@@ -648,7 +677,7 @@ bool QTwoLevelTreeModel::setData(const QModelIndex &index,
 
   const std::string newName = value.toString().toStdString();
 
-  if (!parent(index).isValid()) {
+  if (indexIsGroup(index)) {
     // Index corresponds to a group
 
     if (index.column() != 0)
