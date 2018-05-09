@@ -142,10 +142,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
         position_1_step = get_named_elements_from_ipf_file(
-            instrument_file[1], "centre-finder-step-size", float)['centre-finder-step-size']
+            instrument_file[1], ["centre-finder-step-size"], float)['centre-finder-step-size']
         try:
             position_2_step = get_named_elements_from_ipf_file(
-                instrument_file[1], "centre-finder-step-size2", float)['centre-finder-step-size2']
+                instrument_file[1], ["centre-finder-step-size2"], float)['centre-finder-step-size2']
         except:
             position_2_step = position_1_step
 
