@@ -93,7 +93,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="labelInstrument">
            <property name="text">
-            <string>Instrument:</string>
+            <string>&amp;Instrument:</string>
            </property>
            <property name="buddy">
             <cstring>comboSearchInstrument</cstring>
@@ -131,7 +131,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Investigation Id:</string>
+            <string>I&amp;nvestigation Id:</string>
            </property>
            <property name="buddy">
             <cstring>textSearch</cstring>
@@ -204,16 +204,16 @@
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>Transfer the selected run(s) into the processing table and reduce them</string>
+            <string>Process all runs in this investigation and poll for new runs</string>
            </property>
            <property name="whatsThis">
-            <string>Automatically searches ICAT for runs with given instrument and investigation id, transfers runs to table and processes them.</string>
+            <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
            </property>
            <property name="text">
-            <string>Autoreduce</string>
+            <string>Autoprocess</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="../../../MantidPlot/icons/icons.qrc">
              <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
            </property>
           </widget>
@@ -315,7 +315,7 @@
   </layout>
   <action name="actionSearch">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../../MantidPlot/icons/icons.qrc">
      <normaloff>:/folder.png</normaloff>:/folder.png</iconset>
    </property>
    <property name="text">
@@ -329,17 +329,17 @@
   </action>
   <action name="actionTransfer">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../../MantidPlot/icons/icons.qrc">
      <normaloff>:/append_drag_curves.png</normaloff>:/append_drag_curves.png</iconset>
    </property>
    <property name="text">
     <string>Transfer</string>
    </property>
    <property name="toolTip">
-    <string>Transfer the selected run(s) to the processing table.</string>
+    <string>Process all runs in this investigation and poll for new runs</string>
    </property>
    <property name="whatsThis">
-    <string>Transfers the selected runs into the processing table.</string>
+    <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
    </property>
   </action>
  </widget>
@@ -348,7 +348,7 @@
   <tabstop>tableSearchResults</tabstop>
  </tabstops>
  <resources>
-  <include location="../../../../MantidPlot/icons/icons.qrc"/>
+  <include location="../../../MantidPlot/icons/icons.qrc"/>
  </resources>
  <connections>
   <connection>
