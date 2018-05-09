@@ -1,4 +1,8 @@
 
+.. sourcelink::
+         :h:   Framework/CurveFitting/inc/MantidCurveFitting/ConvolutionFit.h
+         :cpp: Framework/CurveFitting/src/ConvolutionFit.cpp
+
 .. algorithm::
 
 .. summary::

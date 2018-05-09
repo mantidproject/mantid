@@ -1,3 +1,8 @@
+
+.. sourcelink::
+         :h:   Framework/CurveFitting/inc/MantidCurveFitting/IqtFit.h
+         :cpp: Framework/CurveFitting/src/IqtFit.cpp
+
 .. algorithm::
 
 .. summary::
