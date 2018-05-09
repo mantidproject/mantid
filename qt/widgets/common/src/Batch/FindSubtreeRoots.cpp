@@ -49,7 +49,6 @@ bool FindSubtreeRoots::isSiblingOfPrevious(RowLocation const &location) const {
   return location.isSiblingOf(previousNode);
 }
 
-
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

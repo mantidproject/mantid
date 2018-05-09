@@ -44,6 +44,7 @@ public:
   insertEmptyChildRow(QModelIndexForMainModel const &parent, int column);
 
   void removeRowFrom(QModelIndexForMainModel const &index);
+
 private:
   QList<QStandardItem *> rowItemsFromCells(std::vector<Cell> const &cells);
 

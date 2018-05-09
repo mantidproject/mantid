@@ -3,8 +3,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-RowLocationAdapter::RowLocationAdapter(
-    QStandardItemModel const &model)
+RowLocationAdapter::RowLocationAdapter(QStandardItemModel const &model)
     : m_model(model) {}
 
 RowLocation

@@ -55,7 +55,6 @@ EXPORT_OPT_MANTIDQT_COMMON bool operator!=(Cell const &lhs, Cell const &rhs);
 EXPORT_OPT_MANTIDQT_COMMON std::vector<Cell>
 paddedCellsToWidth(std::vector<Cell> const &cells, Cell const &paddingCell,
                    int paddedWidth);
-
 }
 }
 }

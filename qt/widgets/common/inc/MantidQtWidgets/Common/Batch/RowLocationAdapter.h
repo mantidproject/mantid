@@ -11,7 +11,7 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON RowLocationAdapter {
 public:
-  RowLocationAdapter(QStandardItemModel const& model);
+  RowLocationAdapter(QStandardItemModel const &model);
 
   RowLocation atIndex(QModelIndexForMainModel const &index) const;
   boost::optional<QModelIndexForMainModel>

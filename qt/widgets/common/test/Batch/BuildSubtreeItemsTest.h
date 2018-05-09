@@ -62,7 +62,7 @@ public:
     auto subtree = Subtree({{RowLocation(), cells("Root")}});
     build(positionRelativeToMainTree, 0, subtree);
 
-    auto* rootItem = model->invisibleRootItem();
+    auto *rootItem = model->invisibleRootItem();
     TS_ASSERT(rootItem->rowCount() == 1);
     TS_ASSERT_EQUALS(rootItem->child(0)->text(), "Root");
   }
@@ -78,7 +78,7 @@ public:
 
     build(positionRelativeToMainTree, 0, subtree);
 
-    auto* invisibleRootItem = model->invisibleRootItem();
+    auto *invisibleRootItem = model->invisibleRootItem();
     TS_ASSERT_EQUALS(invisibleRootItem->rowCount(), 1);
     auto *subtreeRootItem = invisibleRootItem->child(0);
     TS_ASSERT_EQUALS(subtreeRootItem->text(), "Root");
@@ -100,7 +100,7 @@ public:
 
     build(positionRelativeToMainTree, 0, subtree);
 
-    auto* invisibleRootItem = model->invisibleRootItem();
+    auto *invisibleRootItem = model->invisibleRootItem();
     TS_ASSERT_EQUALS(invisibleRootItem->rowCount(), 1);
     auto *subtreeRootItem = invisibleRootItem->child(0);
     TS_ASSERT_EQUALS(subtreeRootItem->text(), "Root");
