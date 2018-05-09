@@ -83,8 +83,10 @@ void CarpenterSampleCorrection::exec() {
   outputWksp = inputWksp->clone();
 
   // Inverse the absorption correction ( 1/A)
+  const int64_t NUM_HIST =
+      static_cast<int64_t>(inputWksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*absWksp))
-  for (size_t i = 0; i < absWksp->getNumberHistograms(); ++i) {
+  for (int64_t i = 0; i < NUM_HIST; ++i) {
     PARALLEL_START_INTERUPT_REGION
     auto &y = absWksp->mutableY(i);
     for (size_t j = 0; j < y.size(); j++) {
