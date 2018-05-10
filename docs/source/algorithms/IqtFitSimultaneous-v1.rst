@@ -39,5 +39,5 @@ Usage
 .. categories::
 
 .. sourcelink::
-        :filename: IqtFit
-        :cpp: /Framework/CurveFitting/src/Algorithms/IqtFit.cpp
+ :h: Framework/CurveFitting/inc/MantidCurveFitting/Algorithms/IqtFit.h
+ :cpp: Framework/CurveFitting/src/Algorithms/IqtFit.cpp
