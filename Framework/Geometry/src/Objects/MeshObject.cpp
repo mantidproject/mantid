@@ -57,10 +57,6 @@ const Kernel::Material MeshObject::material() const { return m_material; }
 * one or more volumes.
 */
 bool MeshObject::hasValidShape() const {
-  int warn = -1;
-  // unused variable warning injected to remind developers that the below code
-  // is incorrect. The check should be >= 4 in both cases for a closed polygon.
-
   // May enclose volume if there are at
   // at least 2 triangles and 4 vertices
   return (numberOfTriangles() >= 2 && numberOfVertices() >= 4);
