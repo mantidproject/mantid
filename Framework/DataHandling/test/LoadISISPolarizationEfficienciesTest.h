@@ -16,6 +16,7 @@
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <array>
+#include <fstream>
 
 using Mantid::DataHandling::LoadISISPolarizationEfficiencies;
 using namespace Mantid::API;
@@ -44,6 +45,13 @@ public:
   void test_load() {
     ScopedFile f1(m_data1, "Efficiency1.dat");
     ScopedFile f2(m_data1, "Efficiency2.dat");
+
+    std::ifstream fil(f1.getFileName());
+    std::string test_str;
+    fil >> test_str;
+    fil.close();
+    std::cerr << '\n' << test_str << std::endl;
+    TS_ASSERT_EQUALS(test_str, "1.10000,1.000000,0.322961");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
