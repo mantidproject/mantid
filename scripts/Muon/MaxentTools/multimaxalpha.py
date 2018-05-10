@@ -62,11 +62,13 @@ def MULTIMAX(
                 phaseConvY_k = phaseconvWS.dataY(k)
                 if k+1 in deadDetectors:
                     offset+=1
-                    phaseconvX_k[j + 1] = (j + 1) * 1.0
-                    phaseconvY_k(k)[j + 1] = 0.0
+                    phaseConvX_k[j + 1] = (j + 1) * 1.0
+                    phaseConvY_k[j + 1] = 0.0
                 else:
-                    phaseconvX_k[j + 1] = (j + 1) * 1.0
-                    phaseconvY_k[j + 1] = SENSE_phi[k-offset]
+                    phaseConvX_k[j + 1] = (j + 1) * 1.0
+                    phaseConvY_k[j + 1] = SENSE_phi[k-offset]
+
+
         prog.report((j + 1) * InnerIter, "")
                     # finished outer loop, jump progress bar
 
