@@ -100,8 +100,9 @@ void MuonRemoveExpDecay::exec() {
       throw std::invalid_argument(
           "Spectra size greater than the number of spectra!");
     }
-    auto emptySpectrum = std::all_of(inputWS->y(specNum).begin(),
-		inputWS->y(specNum).end(), [](double value) { return value == 0.; });
+    auto emptySpectrum =
+        std::all_of(inputWS->y(specNum).begin(), inputWS->y(specNum).end(),
+                    [](double value) { return value == 0.; });
     if (emptySpectrum) {
       // if the y values are all zero do not change them
       m_log.warning("Dead detector found at spectrum number " +

@@ -163,7 +163,8 @@ public:
     std::vector<bool> emptySpectrum;
     for (size_t h = 0; h < nspec; h++) {
       emptySpectrum.push_back(
-          std::all_of(ws->y(h).begin(), ws->y(h).end(), [](double value) { return value == 0.; }));
+          std::all_of(ws->y(h).begin(), ws->y(h).end(),
+                      [](double value) { return value == 0.; }));
     }
     for (size_t j = 0; j < emptySpectrum.size(); j++) {
       if (j == dead1 || j == dead2) {

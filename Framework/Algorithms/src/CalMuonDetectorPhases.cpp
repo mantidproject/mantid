@@ -167,7 +167,8 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
     reportProgress(wsIndex, nhist);
     auto yValues = ws->y(wsIndex);
-    auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(), [](double value) { return value == 0.; });
+    auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(),
+                                     [](double value) { return value == 0.; });
     if (emptySpectrum) {
       g_log.warning("Spectrum " + std::to_string(wsIndex) + " is empty");
       auto tab =
