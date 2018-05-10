@@ -4,7 +4,7 @@
 Cell Based View Properties
 ==========================
 
-As described in :doc:`../API/JobTreeView` per-cell view properties can be retrieved as an
+As described in :doc:`../API/JobTreeView`, per-cell view properties can be retrieved as an
 instance of the :code:`Cell` class. The mechanics behind this are implemented in
 :code:`CellStandardItem.h`.
 
@@ -12,8 +12,8 @@ Implementation
 ##############
 
 This header contains an enumeration of the per-cell attributes which are not members of
-:code:`QStandardItem`, this enumeration starts at :code:`Qt::UserRole + 1`. Qt has a built in
-mechanism for extending the per-cell view attributes which is what we use here.
+:code:`QStandardItem`. This enumeration starts at :code:`Qt::UserRole + 1`. Qt has a built in
+mechanism for extending the per-item view attributes which we use here.
 
 Two significant functions defined in this file are :code:`applyCellPropertiesToItem` and
 :code:`extractCellPropertiesFromItem`. These functions are used to save the property values from the

@@ -8,7 +8,7 @@ The :code:`JobTreeView` component provides an MVP style view interface for a hie
 with a spreadsheet-like appearance for configuring and indicating the status of multiple (batch)
 reduction jobs. It is currently used to implement the tree component of the Batch Widget.
 
-It is written in C++ and exposed to python through SIP leading to similar API's as shown by the
+It is written in C++ and exposed to python through SIP leading to similar APIs as shown by the
 examples below.
 
 .. literalinclude:: CodeExamples/init.py
@@ -23,17 +23,17 @@ Row Location
 ^^^^^^^^^^^^
 
 A row location is the notion of an individual row's position within the table. Since the
-table is unlike a traditional spreadsheet in that it is hierarchical, the table is more like a
+table is hierarchical, unlike a traditional spreadsheet, the table is more like a
 tree of rows where all non-leaf nodes can have any number of children.
 
-In practice some interfaces, such as Reflectometry are likely to want to constrain the
+In practice some interfaces such as Reflectometry are likely to want to constrain the
 number of children or depth of the tree, the batch widget has mechanisms for performing this.
 
 Currently a row location is represented as a path from the root node to the row node in question,
 this is actualised in the :code:`RowLocation` class which contains an ordered list of integers where
 each element represents the index of the next node in the path relative to it's predecessor in the
-path. An example table and corresponding tree structure, complete with their paths are illustrated in
-the diagram below.
+path. An example table and corresponding tree structure are illustrated in the diagram below
+(complete with their paths).
 
 .. image::  ../../images/row_location_path.svg
    :align: center
@@ -41,8 +41,8 @@ the diagram below.
 
 Equality over :code:`RowLocation` objects is based on the equality of their paths. The other relational
 operators have a definition based on a lexicographical comparison such that sorting a range of
-:code:`RowLocation`\ s puts them in the same order as they would appear in the table. As demonstrated by
-the code below.
+:code:`RowLocation`\ s puts them in the same order as they would appear in the table. This is
+demonstrated by the code below.
 
 .. code-block:: c++
 
@@ -81,7 +81,7 @@ index or all the cells for a particular row respectively.
 The :code:`Cell` class contains the per-cell view properties (such as the text it contains) in a
 view-implementation independent format.
 
-These cell objects intentionally have no link back to the view they originated from and so mutating
+These cell objects intentionally have no link back to the view they originated from, so mutating
 them does not directly update the view. In order to update the cell or cells corresponding to a row,
 the methods :code:`setCellAt` or :code:`setCellsAt` should be used. This process is illustrated in
 the example code below.
@@ -92,15 +92,15 @@ the example code below.
 Subtrees
 ^^^^^^^^
 
-As previously illustrated the conceptual model for the API is a tree of tables. However
-initially this model presents some challenges when you think about how to represent a
-user's selection while preserving the tree structure. This is however necessary in order
-to support presenters which wish to have sensible behaviour for actions such as copy and
+As previously illustrated the conceptual model for the API is a tree of tables. Initially, this
+model presents some challenges when you think about how to represent a user's selection while
+preserving the tree structure. This is however necessary in order to support presenters which wish
+to have sensible behaviour for actions such as copy and
 paste.
 
 A subtree in this context refers to a set of one or more nodes within the tree where if the set has
 a size greater than one, each node is directly connected to at least one other node in the set.
-An example of a set of nodes which meets this constraint and a set of nodes which does not are
+An example of a set of nodes which meets this constraint and a set of nodes which do not are
 outlined in blue in the diagram below.
 
 .. image::  ../../images/subtree.svg
@@ -143,7 +143,7 @@ Filtering
 ^^^^^^^^^
 
 Is is possible to make the JobTreeView only show a subset of the nodes in the tree based on an
-arbitrary predicate over row locations which can of course be translated to their corresponding
+arbitrary predicate over row locations. These can be translated to their corresponding
 node in the MVP model or their corresponding cells from the view.
 
 The header :code:`RowPredicate.h` defines the interface which must be implemented by implementations
@@ -152,9 +152,8 @@ the currently active filter as demonstrated by the code below.
 
 .. literalinclude:: CodeExamples/filtering.py
 
-The method :code:`resetFilter` is used to unset the filter such that
-all items are shown again and the :code:`hasFilter` method is used to determine if the filter is
-currently set.
+The method :code:`resetFilter` is used to unset the filter so that all items are shown again and
+the :code:`hasFilter` method is used to determine if the filter is currently set.
 
 Some actions performed on the :code:`JobTreeView` can trigger the filter to be reset automatically.
 This necessitates the :code:`notifyFilterReset` method in :code:`JobTreeViewSubscriber` which is
