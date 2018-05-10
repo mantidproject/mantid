@@ -6,7 +6,7 @@ namespace MantidWidgets {
 namespace Batch {
 
 QtTreeCursorNavigation::QtTreeCursorNavigation(QAbstractItemModel const *model)
-    : model(model) {}
+    : m_model(model) {}
 
 QtTreeCursorNavigationResult
 QtTreeCursorNavigation::withoutAppendedRow(QModelIndex const &index) const {
@@ -61,7 +61,7 @@ QtTreeCursorNavigation::previousCellInThisRow(QModelIndex const &index) const {
 
 QModelIndex
 QtTreeCursorNavigation::lastCellInPreviousRow(QModelIndex const &index) const {
-  return index.sibling(index.row() - 1, model->columnCount() - 1);
+  return index.sibling(index.row() - 1, m_model->columnCount() - 1);
 }
 
 QModelIndex lastChildRowOf(QModelIndex const &parent,
@@ -71,14 +71,14 @@ QModelIndex lastChildRowOf(QModelIndex const &parent,
 
 QModelIndex
 QtTreeCursorNavigation::lastRowInThisNode(QModelIndex const &parent) const {
-  return lastChildRowOf(parent, *model);
+  return lastChildRowOf(parent, *m_model);
 }
 
 QModelIndex QtTreeCursorNavigation::lastCellInParentRowElseNone(
     QModelIndex const &index) const {
-  auto parent = model->parent(index);
+  auto parent = m_model->parent(index);
   if (parent.isValid())
-    return parent.sibling(parent.row(), model->columnCount() - 1);
+    return parent.sibling(parent.row(), m_model->columnCount() - 1);
   else
     return QModelIndex();
 }

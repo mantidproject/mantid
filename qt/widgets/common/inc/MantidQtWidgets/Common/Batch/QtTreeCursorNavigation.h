@@ -27,7 +27,7 @@ public:
   bool isNotFirstRowInThisNode(QModelIndex const &index) const;
 
 private:
-  QAbstractItemModel const *model;
+  QAbstractItemModel const *m_model;
   QtTreeCursorNavigationResult
   withoutAppendedRow(QModelIndex const &index) const;
   QtTreeCursorNavigationResult withAppendedRow(QModelIndex const &index) const;
