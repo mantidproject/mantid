@@ -68,36 +68,18 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
     def on_row_inserted(self, rowLoc):
         print("Row inserted at {}".format(rowLoc.path()))
 
-        def killed_cell(cell):
-            cell.disableEditing()
-            cell.setBorderThickness(0)
-            cell.setBorderColor("transparent")
-            cell.setBorderOpacity(0)
-            return cell
-
-        if rowLoc.depth() > 2:
-            print( "Deleting" )
-            self.table.removeRowAt(rowLoc)
-
         if rowLoc.depth() == 1:
-            print ("Disabled Editing At {}".format(rowLoc.path()))
             cells = self.table.cellsAt(rowLoc)
-
             for i, cell in enumerate(cells):
                 if i > 0:
-                    cells[i] = killed_cell(cell)
-
-            for cell in cells:
-                print(cell.borderColor())
+                    cells[i] = self.table.deadCell()
 
             self.table.setCellsAt(rowLoc, cells)
 
     def on_copy_runs_request(self):
         self.clipboard = self.table.selectedSubtrees()
         self.table.clearSelection()
-        if self.clipboard is not None:
-            print(self.clipboard[0][0].cells()[0].borderColor())
-        else:
+        if self.clipboard is None:
             print ("Bad selection for copy.")
 
     def on_paste_rows_request(self):
