@@ -369,7 +369,7 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
   // at first set the normal to an argbitrary vector orthogonal to
   // the line between the first two detectors
   setupBasisAxes(y, normal, x);
- 
+
   bool normalFound = false;
   const auto &componentInfo = m_instrActor->componentInfo();
   std::vector<size_t> detectors;
@@ -383,11 +383,10 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
     visited[child] = true;
     if (detectorInfo.isMonitor(child))
       continue;
-    
+
     auto pos = detectorInfo.position(child);
 
-    if (fabs(normal.scalar_prod(pos - pos0)) >
-               Mantid::Kernel::Tolerance) {
+    if (fabs(normal.scalar_prod(pos - pos0)) > Mantid::Kernel::Tolerance) {
       if (!normalFound) {
         // when first non-colinear detector is found set the normal
         x = pos - pos0;
