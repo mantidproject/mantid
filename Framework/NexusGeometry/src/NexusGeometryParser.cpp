@@ -410,8 +410,6 @@ parseNexusCylinder(const Group &shapeGroup) {
 // Parse OFF (mesh) nexus geometry
 boost::shared_ptr<const Geometry::IObject>
 parseNexusMesh(const Group &detectorGroup, const Group &shapeGroup) {
-  const std::vector<uint16_t> detFaces = convertVector<int32_t, uint16_t>(
-      get1DDataset<int32_t>("detector_faces", shapeGroup));
   const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
       get1DDataset<int32_t>("faces", shapeGroup));
   const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
@@ -425,7 +423,7 @@ parseNexusMesh(const Group &detectorGroup, const Group &shapeGroup) {
 void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
                         const std::vector<uint16_t> &faceIndices,
                         const std::vector<uint16_t> &windingOrder,
-                        const std::vector<float> vertices,
+                        const std::vector<float> &vertices,
                         const int32_t minDetId, const const size_t vertsPerFace,
                         std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
                         std::vector<std::vector<uint16_t>> &detFaceIndices,
