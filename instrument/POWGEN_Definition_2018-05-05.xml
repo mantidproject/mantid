@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2018-05-10 16:16:42.588652" name="PG3" valid-from="2017-05-01 00:00:01" valid-to="2017-05-04 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2018-05-10 16:16:42.588652" name="PG3" valid-from="2018-05-05 00:00:01" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Peter Peterson, Stuart Campbell, Vickie Lynch, Janik Zikovsky-->
   <!--DEFAULTS-->
   <defaults>
@@ -30,6 +30,9 @@
       <location name="monitor1" z="-1.5077"/>
     </component>
   </type>
+  <component type="A">
+    <location/>
+  </component>
   <component type="SA">
     <location/>
   </component>
@@ -67,15 +70,6 @@
     <location/>
   </component>
   <type name="SA">
-    <component idfillbyfirst="y" idstart="0" idstepbyrow="7" type="panel_v2">
-      <location name="bank1" x="-0.73925475" y="-0.82071225" z="-1.996748">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-95.7836082769">
-          <rot val="-0.214446930188">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-260.481108323"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
     <component idfillbyfirst="y" idstart="15000" idstepbyrow="7" type="panel_v2">
       <location name="bank2" x="-0.7395815" y="-0.4102375" z="-1.997611">
         <rot axis-x="0" axis-y="1" axis-z="0" val="-248.092344247">
@@ -103,26 +97,8 @@
         </rot>
       </location>
     </component>
-    <component idfillbyfirst="y" idstart="60000" idstepbyrow="7" type="panel_v2">
-      <location name="bank5" x="-0.74006325" y="0.81578475" z="-1.99702175">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="0.0">
-          <rot val="-0.0102009129589">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-355.999468485"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
   </type>
   <type name="SB">
-    <component idfillbyfirst="y" idstart="75000" idstepbyrow="7" type="panel_v2">
-      <location name="bank6" x="-1.4947395" y="-0.821244" z="-1.81559025">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-14.227431466">
-          <rot val="-0.115682526238">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-322.353813357"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
     <component idfillbyfirst="y" idstart="90000" idstepbyrow="7" type="panel_v2">
       <location name="bank7" x="-1.4981475" y="-0.41126725" z="-1.813485">
         <rot axis-x="0" axis-y="1" axis-z="0" val="-8.47357850501">
@@ -146,15 +122,6 @@
         <rot axis-x="0" axis-y="1" axis-z="0" val="-239.560642886">
           <rot val="-0.200624965876">
             <rot axis-x="0" axis-y="1" axis-z="0" val="-97.2292744758"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
-    <component idfillbyfirst="y" idstart="135000" idstepbyrow="7" type="panel_v2">
-      <location name="bank10" x="-1.497145" y="0.81472025" z="-1.81433725">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-33.3719292385">
-          <rot val="-0.0758077553307">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-303.627647711"/>
           </rot>
         </rot>
       </location>
@@ -324,15 +291,6 @@
         </rot>
       </location>
     </component>
-    <component idfillbyfirst="y" idstart="405000" idstepbyrow="7" type="panel_v2">
-      <location name="bank28" x="-2.92493925" y="0.4054455" z="2.22520275">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-342.221194876">
-          <rot val="-0.0878132050408">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-266.749077233"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
   </type>
   <type name="SI">
     <component idfillbyfirst="y" idstart="420000" idstepbyrow="7" type="panel_v2">
@@ -353,26 +311,8 @@
         </rot>
       </location>
     </component>
-    <component idfillbyfirst="y" idstart="450000" idstepbyrow="7" type="panel_v2">
-      <location name="bank31" x="-2.56714575" y="0.40589375" z="2.92551425">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-319.018079143">
-          <rot val="-0.315217152334">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-278.264953374"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
   </type>
   <type name="SJ">
-    <component idfillbyfirst="y" idstart="465000" idstepbyrow="7" type="panel_v2">
-      <location name="bank32" x="-2.08030575" y="-0.41216925" z="3.5484435">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-299.755580123">
-          <rot val="-0.144124370034">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-286.443905065"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
     <component idfillbyfirst="y" idstart="480000" idstepbyrow="7" type="panel_v2">
       <location name="bank33" x="-2.0809715" y="-0.0024505" z="3.5501205">
         <rot axis-x="0" axis-y="1" axis-z="0" val="-275.57520057">
@@ -382,26 +322,8 @@
         </rot>
       </location>
     </component>
-    <component idfillbyfirst="y" idstart="495000" idstepbyrow="7" type="panel_v2">
-      <location name="bank34" x="-2.07957875" y="0.406084" z="3.549173">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-337.740895143">
-          <rot val="-0.120942525992">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-248.445057948"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
   </type>
   <type name="SK">
-    <component idfillbyfirst="y" idstart="510000" idstepbyrow="7" type="panel_v2">
-      <location name="bank35" x="-1.48729325" y="-0.4119115" z="4.0699365">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-285.609034597">
-          <rot val="-0.12013017802">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-290.494131053"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
     <component idfillbyfirst="y" idstart="525000" idstepbyrow="7" type="panel_v2">
       <location name="bank36" x="-1.4875845" y="-0.003188" z="4.07093">
         <rot axis-x="0" axis-y="1" axis-z="0" val="-197.709724524">
@@ -411,26 +333,8 @@
         </rot>
       </location>
     </component>
-    <component idfillbyfirst="y" idstart="540000" idstepbyrow="7" type="panel_v2">
-      <location name="bank37" x="-1.4869935" y="0.40566575" z="4.069813">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-322.393046384">
-          <rot val="-0.0922239694629">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-253.924817426"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
   </type>
   <type name="SL">
-    <component idfillbyfirst="y" idstart="555000" idstepbyrow="7" type="panel_v2">
-      <location name="bank38" x="-0.81221125" y="-0.41096475" z="4.47902375">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-319.242574796">
-          <rot val="-0.210570577141">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-247.092689865"/>
-          </rot>
-        </rot>
-      </location>
-    </component>
     <component idfillbyfirst="y" idstart="570000" idstepbyrow="7" type="panel_v2">
       <location name="bank39" x="-0.8139335" y="-0.00202475" z="4.4808475">
         <rot axis-x="0" axis-y="1" axis-z="0" val="-253.084239916">
@@ -440,11 +344,112 @@
         </rot>
       </location>
     </component>
-    <component idfillbyfirst="y" idstart="585000" idstepbyrow="7" type="panel_v2">
-      <location name="bank40" x="-0.809226" y="0.40591675" z="4.47886225">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="-278.169933832">
-          <rot val="-0.161734568834">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="-288.322832013"/>
+  </type>
+  <type name="A">
+    <component idfillbyfirst="y" idstart="630000" idstepbyrow="7" type="panel_v2">
+      <location name="bank43" x="0.73829375" y="-0.0023845" z="-1.99970725">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-212.032916017">
+          <rot val="-0.0159340363344">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-152.225654756"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="705000" idstepbyrow="7" type="panel_v2">
+      <location name="bank48" x="1.499995" y="-0.00324925" z="-1.81232825">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-92.4337749097">
+          <rot val="-0.183994169594">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-290.681885867"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="765000" idstepbyrow="7" type="panel_v2">
+      <location name="bank52" x="2.160184" y="-0.00318325" z="-1.398954">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-163.385575511">
+          <rot val="-0.0374090162194">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-237.650567097"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="810000" idstepbyrow="7" type="panel_v2">
+      <location name="bank55" x="2.67649875" y="-0.0029795" z="-0.8035895">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-134.710820334">
+          <rot val="-0.234178795373">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-282.31662431"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="855000" idstepbyrow="7" type="panel_v2">
+      <location name="bank58" x="3.012846" y="-0.0002255" z="-0.094475">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-354.557065626">
+          <rot val="-0.150971483389">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-77.6075190542"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="900000" idstepbyrow="7" type="panel_v2">
+      <location name="bank61" x="3.163332" y="-0.001557" z="0.677613">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-57.7611151625">
+          <rot val="-0.120373668035">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-28.1407923079"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="945000" idstepbyrow="7" type="panel_v2">
+      <location name="bank64" x="3.12909225" y="-0.0025335" z="1.46325375">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-227.862405226">
+          <rot val="-0.0348258479558">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-231.363668527"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="990000" idstepbyrow="7" type="panel_v2">
+      <location name="bank67" x="2.925454" y="-0.00121325" z="2.22259675">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-335.435290642">
+          <rot val="-0.218489078386">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-135.798379642"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="1035000" idstepbyrow="7" type="panel_v2">
+      <location name="bank70" x="2.5679975" y="-0.002491" z="2.928798">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-102.657624083">
+          <rot val="-0.195821578452">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-20.1307048965"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="1080000" idstepbyrow="7" type="panel_v2">
+      <location name="bank73" x="2.08063175" y="-0.00079625" z="3.55287475">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-106.309588537">
+          <rot val="-0.204650897536">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-27.1621985902"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="1125000" idstepbyrow="7" type="panel_v2">
+      <location name="bank76" x="1.48752725" y="-0.00307125" z="4.0684955">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-224.134064394">
+          <rot val="-0.104823130903">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-280.181064026"/>
+          </rot>
+        </rot>
+      </location>
+    </component>
+    <component idfillbyfirst="y" idstart="1170000" idstepbyrow="7" type="panel_v2">
+      <location name="bank79" x="0.812355" y="-0.00264075" z="4.4807255">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-270.0">
+          <rot val="-0.0088598837769">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="-243.871932599"/>
           </rot>
         </rot>
       </location>

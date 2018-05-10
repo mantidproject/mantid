@@ -17,6 +17,8 @@ Powder Diffraction
   taken as the default, and any changes are reverted back to the
   default once the line they were made on has finished executing
 
+- New POWGEN instrument geometry for 2018 run cycle
+
 New Features
 ------------
 
