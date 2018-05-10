@@ -144,7 +144,8 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
-    transfer(m_view->getSelectedSearchRows(), m_view->getSelectedGroup());
+    transfer(m_view->getSelectedSearchRows(), m_view->getSelectedGroup(),
+             TransferMatch::Any);
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     changeInstrument();
@@ -307,7 +308,7 @@ void ReflRunsTabPresenter::runAutoreduction() {
   auto tablePresenter = m_tablePresenters.at(group);
 
   if (rowsToTransfer.size() > 0) {
-    transfer(rowsToTransfer, m_autoreduction.group());
+    transfer(rowsToTransfer, m_autoreduction.group(), TransferMatch::Strict);
   }
 
   // Don't prompt the user on errors such as an empty table
@@ -330,10 +331,14 @@ bool ReflRunsTabPresenter::autoreductionRunning(int group) const {
 }
 
 /** Transfers the selected runs in the search results to the processing table
-* @return : The runs to transfer as a vector of maps
+ * @param rowsToTransfer : a set of row indices in the search results to
+ * transfer
+ * @param group : the group number of the table to transfer to
+ * @param strict :
+ * @return : The runs to transfer as a vector of maps
 */
 void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
-                                    int group) {
+                                    int group, const TransferMatch matchType) {
   // Build the input for the transfer strategy
   SearchResultMap runs;
 
@@ -374,7 +379,8 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
                              static_cast<int64_t>(rowsToTransfer.size()),
                              this->m_progressView);
 
-  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+  TransferResults results =
+      getTransferStrategy()->transferRuns(runs, progress, matchType);
 
   auto invalidRuns =
       results.getErrorRuns(); // grab our invalid runs from the transfer

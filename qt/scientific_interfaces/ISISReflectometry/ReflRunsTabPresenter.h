@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "ReflAutoreduction.h"
+#include "ReflTransferStrategy.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -131,7 +132,8 @@ private:
   void startNewAutoreduction();
   void startAutoreduction();
   void runAutoreduction();
-  void transfer(const std::set<int> &rowsToTransfer, int group);
+  void transfer(const std::set<int> &rowsToTransfer, int group,
+                const TransferMatch matchType = TransferMatch::Any);
   void pushCommands(int group);
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
