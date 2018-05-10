@@ -1600,6 +1600,7 @@ public:
                     const std::vector<MantidQt::MantidWidgets::Batch::Cell> &cells);
     MantidQt::MantidWidgets::Batch::Cell cellAt(MantidQt::MantidWidgets::Batch::RowLocation location, int column);
     void setCellAt(MantidQt::MantidWidgets::Batch::RowLocation location, int column, const MantidQt::MantidWidgets::Batch::Cell &cellText);
+    Cell deadCell() const;
 
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
     boost::optional<std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>>> selectedSubtrees() const;

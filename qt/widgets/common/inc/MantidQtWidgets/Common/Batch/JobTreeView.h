@@ -83,6 +83,8 @@ public:
   std::vector<RowLocation> selectedRowLocations() const;
   boost::optional<std::vector<Subtree>> selectedSubtrees() const;
   boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
+
+  Cell deadCell() const;
   using QTreeView::edit;
 
 protected:
@@ -98,7 +100,7 @@ protected slots:
   void commitData(QWidget *) override;
 
 private:
-  static Cell const deadCell;
+  static Cell const g_deadCell;
 
   void appendAndEditAtChildRow();
   void appendAndEditAtRowBelow();

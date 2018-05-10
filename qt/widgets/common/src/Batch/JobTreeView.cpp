@@ -61,6 +61,10 @@ bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
   return QTreeView::edit(index, trigger, event);
 }
 
+Cell JobTreeView::deadCell() const {
+  return g_deadCell;
+}
+
 boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
   auto rows = selectedRowLocations();
   std::sort(rows.begin(), rows.end());
@@ -266,10 +270,10 @@ void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
                 "the number of columns by increasing the number of headings.");
   m_adaptedMainModel.insertChildRow(
       rowLocation().indexAt(parent), beforeRow,
-      paddedCellsToWidth(cells, deadCell, m_mainModel.columnCount()));
+      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount()));
 }
 
-Cell const JobTreeView::deadCell =
+Cell const JobTreeView::g_deadCell =
     Cell("", "white", 0, "transparent", 0, false);
 
 void JobTreeView::appendChildRowOf(RowLocation const &parent) {
@@ -281,7 +285,7 @@ void JobTreeView::appendChildRowOf(RowLocation const &parent,
   auto parentIndex = rowLocation().indexAt(parent);
   m_adaptedMainModel.appendChildRow(
       parentIndex,
-      paddedCellsToWidth(cells, deadCell, m_mainModel.columnCount()));
+      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount()));
 }
 
 void JobTreeView::editAt(QModelIndexForFilteredModel const &index) {
