@@ -18,7 +18,10 @@ auto FindSubtreeRoots::operator()(std::vector<RowLocation> region)
           (!previousWasRoot && isSiblingOfPrevious(currentNode))) {
         nodeWasNotSubtreeRoot(currentNode);
       } else if (currentNode.isDescendantOf(previousRoot)) {
-        return boost::none;
+        if (previousNode.depth() < currentNode.depth())
+          return boost::none;
+        else
+          nodeWasNotSubtreeRoot(currentNode);
       } else {
         nodeWasSubtreeRoot(currentNode);
         roots.emplace_back(currentNode);
