@@ -1,16 +1,16 @@
 #ifndef MANTID_KERNEL_NEXUSDESCRIPTORTEST_H_
 #define MANTID_KERNEL_NEXUSDESCRIPTORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <nexus/NeXusFile.hpp>
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
+#include <nexus/NeXusFile.hpp>
 
 #include <cstdio>
 

@@ -7,17 +7,17 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include <numeric>
 
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::LogFilterGenerator;
-using Mantid::Types::Core::DateAndTime;
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Kernel::LogFilter;
 using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Types::Core::DateAndTime;
 
 class LogFilterGeneratorTest : public CxxTest::TestSuite {
 public:

@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
 #define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
 
@@ -12,8 +12,8 @@ namespace XML {
 class Document;
 class Element;
 class Node;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {

@@ -29,9 +29,9 @@
 //----------------------------------------------------------------------
 
 #include "kd_tree.h"                  // kd-tree declarations
+#include "MantidKernel/ANN/ANNperf.h" // performance evaluation
 #include "kd_split.h"                 // kd-tree splitting rules
 #include "kd_util.h"                  // kd-tree utilities
-#include "MantidKernel/ANN/ANNperf.h" // performance evaluation
 
 //----------------------------------------------------------------------
 //	Global data
@@ -121,12 +121,12 @@ void ANNkd_tree::Print( // print entire tree
   }
 }
 
-//----------------------------------------------------------------------
-//	kd_tree statistics (for performance evaluation)
-//		This routine compute various statistics information for
-//		a kd-tree.  It is used by the implementors for performance
-//		evaluation of the data structure.
-//----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  //	kd_tree statistics (for performance evaluation)
+  //		This routine compute various statistics information for
+  //		a kd-tree.  It is used by the implementors for performance
+  //		evaluation of the data structure.
+  //----------------------------------------------------------------------
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 

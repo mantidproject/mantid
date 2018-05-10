@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_PEAKTRANSFORMSELECTOR_H_
 #define MANTID_GEOMETRY_PEAKTRANSFORMSELECTOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidKernel/System.h"
 #include <set>
 
 namespace Mantid {
@@ -37,7 +37,7 @@ private:
   using Factories = std::set<PeakTransformFactory_sptr>;
   Factories m_candidateFactories;
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

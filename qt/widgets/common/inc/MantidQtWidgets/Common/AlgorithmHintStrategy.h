@@ -56,7 +56,7 @@ private:
   Mantid::API::IAlgorithm_sptr m_algorithm;
   std::set<std::string> m_blacklist;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGY_H */

@@ -51,16 +51,16 @@ public:
   /// Copy constructor
   Peak(const Peak &other);
 
-// MSVC 2015/17 can build with noexcept = default however
-// intellisense still incorrectly reports this as an error despite compiling.
-// https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
-// For that reason we still use the supplied default which should be noexcept
-// once the above is fixed we can remove this workaround
+  // MSVC 2015/17 can build with noexcept = default however
+  // intellisense still incorrectly reports this as an error despite compiling.
+  // https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
+  // For that reason we still use the supplied default which should be noexcept
+  // once the above is fixed we can remove this workaround
 
 #if defined(_MSC_VER) && _MSC_VER <= 1910
   Peak(Peak &&) = default;
   Peak &operator=(Peak &&) = default;
-#elif((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
+#elif ((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
   // The noexcept default declaration was fixed in GCC 4.9.0
   // so for versions 4.8.x and below use default only
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903

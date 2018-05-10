@@ -67,7 +67,7 @@ public slots:
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQT_API_HELPWINDOWINTERFACE_H_

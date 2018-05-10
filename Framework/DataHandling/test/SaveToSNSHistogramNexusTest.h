@@ -1,10 +1,10 @@
 #ifndef SAVESNSNEXUSTEST_H_
 #define SAVESNSNEXUSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveToSNSHistogramNexus.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidDataHandling/SaveToSNSHistogramNexus.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

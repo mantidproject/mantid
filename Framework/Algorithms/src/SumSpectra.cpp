@@ -66,12 +66,12 @@ bool validateSingleMatrixWorkspace(
 }
 
 /**
-* @param validationOutput Output map to be populated with any errors
-* @param name A string identifier for an input workspace to verify
-* @param minIndex Minimum index of range to sum
-* @param maxIndex Mmaximum index of range to sum
-* @param indices A list of indices to sum
-*/
+ * @param validationOutput Output map to be populated with any errors
+ * @param name A string identifier for an input workspace to verify
+ * @param minIndex Minimum index of range to sum
+ * @param maxIndex Mmaximum index of range to sum
+ * @param indices A list of indices to sum
+ */
 void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
                            const std::string &name, const int minIndex,
                            const int maxIndex,
@@ -98,7 +98,7 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
     ++index;
   }
 }
-}
+} // namespace
 
 /** Initialisation method.
  *
@@ -152,10 +152,10 @@ void SumSpectra::init() {
 }
 
 /*
-* Validate the input parameters
-* @returns map with keys corresponding to properties with errors and values
-* containing the error messages.
-*/
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
 std::map<std::string, std::string> SumSpectra::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
@@ -324,10 +324,10 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
 }
 
 /**
-  * Calls an algorithm to replace special values within the workspace
-  * such as NaN or Inf to 0.
-  * @return The workspace with special floating point values set to 0
-  */
+ * Calls an algorithm to replace special values within the workspace
+ * such as NaN or Inf to 0.
+ * @return The workspace with special floating point values set to 0
+ */
 API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
   // Get a copy of the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");

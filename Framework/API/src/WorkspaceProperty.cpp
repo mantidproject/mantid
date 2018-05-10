@@ -5,8 +5,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 // WorkspaceProperty implementation
 #include "MantidAPI/WorkspaceProperty.tcc"

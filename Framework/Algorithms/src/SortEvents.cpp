@@ -15,12 +15,12 @@ DECLARE_ALGORITHM(SortEvents)
 using namespace Kernel;
 using namespace API;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void SortEvents::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
@@ -38,10 +38,10 @@ void SortEvents::init() {
 }
 
 /** Executes the rebin algorithm
-*
-*  @throw runtime_error Thrown if the bin range does not intersect the range of
-*the input workspace
-*/
+ *
+ *  @throw runtime_error Thrown if the bin range does not intersect the range of
+ *the input workspace
+ */
 void SortEvents::exec() {
   // Get the input workspace
   EventWorkspace_sptr eventW = getProperty("InputWorkspace");
@@ -64,5 +64,5 @@ void SortEvents::exec() {
   eventW->sortAll(sortType, &prog);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

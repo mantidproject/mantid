@@ -2,8 +2,8 @@
 #define MANTID_GEOMETRY_BASICHKLFILTERSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
@@ -16,9 +16,9 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-using ::testing::_;
-using ::testing::Return;
 using ::testing::Mock;
+using ::testing::Return;
+using ::testing::_;
 
 class BasicHKLFiltersTest : public CxxTest::TestSuite {
 public:

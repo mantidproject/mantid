@@ -139,6 +139,6 @@ private:
 };
 
 } // namespace CustomInterfaces
-} // namespace MantidQT
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGMODEL_H_

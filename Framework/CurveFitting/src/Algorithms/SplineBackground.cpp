@@ -4,8 +4,8 @@
 #include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
@@ -82,7 +82,7 @@ void SplineBackground::exec() {
  * Calculates the number of unmasked bins to process within spline background
  *
  * @param ws:: The input workspace to calculate the number of unmasked bins of
-*/
+ */
 size_t
 SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
   const int spec = getProperty("WorkspaceIndex");
@@ -143,12 +143,12 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
 }
 
 /**
-  * Allocates the various vectors and workspaces within the GSL
-  *
-  * @param numBins:: The number of unmasked bins in the input workspaces to
-  *process
-  * @param ncoeffs:: The user specified number of coefficients to process
-  */
+ * Allocates the various vectors and workspaces within the GSL
+ *
+ * @param numBins:: The number of unmasked bins in the input workspaces to
+ *process
+ * @param ncoeffs:: The user specified number of coefficients to process
+ */
 void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
   const int k = 4; // order of the spline + 1 (cubic)
   const int nbreak = ncoeffs - (k - 2);
@@ -172,14 +172,14 @@ void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
 }
 
 /**
-  * Calculates the bin weight from the error value passed
-  * logs a warning if the value is less than or equal to 0
-  * or a special floating point value
-  *
-  * @param errValue:: The error value to use within the calculation
-  *
-  * @return:: The bin weight to use within the GSL allocation
-  */
+ * Calculates the bin weight from the error value passed
+ * logs a warning if the value is less than or equal to 0
+ * or a special floating point value
+ *
+ * @param errValue:: The error value to use within the calculation
+ *
+ * @return:: The bin weight to use within the GSL allocation
+ */
 double SplineBackground::calculateBinWeight(double errValue) {
   double outBinWeight = -1;
   if (errValue <= 0 || !std::isfinite(errValue)) {

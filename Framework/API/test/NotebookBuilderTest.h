@@ -1,8 +1,8 @@
 #ifndef MANTID_NOTEBOOKBUILDERTEST_H_
 #define MANTID_NOTEBOOKBUILDERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <algorithm>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"

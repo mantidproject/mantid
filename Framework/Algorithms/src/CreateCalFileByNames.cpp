@@ -24,8 +24,8 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateCalFileByNames)
 
 using namespace Kernel;
-using API::Progress;
 using API::FileProperty;
+using API::Progress;
 using Geometry::Instrument_const_sptr;
 
 /** Initialisation method. Declares properties to be used in algorithm.
@@ -260,5 +260,5 @@ void CreateCalFileByNames::writeHeaders(std::ostream &os,
      << "\n";
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

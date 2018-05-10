@@ -3,21 +3,21 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/ApplyCalibration.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "WorkspaceCreationHelperTest.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/V3D.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAlgorithms/ApplyCalibration.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidKernel/V3D.h"
+#include "WorkspaceCreationHelperTest.h"
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -90,7 +90,7 @@ public:
      * and so here we
      * load the IDF of a MAPS instrument where the number of detectors has been
      * reduced.
-    */
+     */
 
     int ndets = 3;
 

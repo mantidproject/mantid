@@ -11,7 +11,7 @@ namespace API {
 class IFunctionGeneral;
 class Column;
 class ITableWorkspace;
-}
+} // namespace API
 
 namespace CurveFitting {
 

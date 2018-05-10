@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <QLineEdit>
 #include <QLabel>
+#include <QLineEdit>
 
 namespace MantidQt {
 namespace API {
@@ -57,6 +57,6 @@ protected:
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_TEXTPROPERTYWIDGET_H_ */

@@ -173,7 +173,7 @@ private:
   int64_t m_firstStart_ns;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_PLOTASYMMETRYBULOGVALUE_H_*/

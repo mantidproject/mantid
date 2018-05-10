@@ -1,9 +1,9 @@
 #ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIHELPER_H
 #define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIHELPER_H
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "MantidKernel/DllConfig.h"
 
@@ -19,8 +19,8 @@ class HTTPCookie;
 class NameValueCollection;
 class HTTPClientSession;
 class HTTPRequest;
-}
-}
+} // namespace Net
+} // namespace Poco
 
 namespace Mantid {
 namespace RemoteJobManagers {
@@ -126,10 +126,10 @@ private:
   static std::vector<Poco::Net::HTTPCookie> g_cookies;
   Poco::Net::NameValueCollection getCookies() const;
 
-  mutable Poco::Net::HTTPClientSession *
-      m_session; // Pointer to session object for all our HTTP requests
-                 // (Has to be a pointer because we allocate and delete
-                 // it multiple times)
+  mutable Poco::Net::HTTPClientSession
+      *m_session; // Pointer to session object for all our HTTP requests
+                  // (Has to be a pointer because we allocate and delete
+                  // it multiple times)
   Poco::Net::HTTPResponse
       m_response; // Response object for all of our HTTP requests
 

@@ -1,29 +1,29 @@
 #include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-#include <QVBoxLayout>
+#include <QApplication>
+#include <QComboBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QComboBox>
+#include <QLabel>
 #include <QLineEdit>
 #include <QMouseEvent>
-#include <QApplication>
-#include <qwt_scale_widget.h>
+#include <QVBoxLayout>
 #include <qwt_scale_engine.h>
-#include <QLabel>
+#include <qwt_scale_widget.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-* Constructor.
-* @param type The scale type, e.g. "Linear" or "Log10"
-* @param parent A parent widget
-* @param minPositiveValue A minimum positive value for the Log10 scale
-*/
+ * Constructor.
+ * @param type The scale type, e.g. "Linear" or "Log10"
+ * @param parent A parent widget
+ * @param minPositiveValue A minimum positive value for the Log10 scale
+ */
 ColorMapWidget::ColorMapWidget(int type, QWidget *parent,
                                const double &minPositiveValue)
     : QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false),
@@ -101,9 +101,9 @@ void ColorMapWidget::nPowerChanged(double nth_power) {
 }
 
 /**
-* Set up a new colour map.
-* @param colorMap :: Reference to the new colour map.
-*/
+ * Set up a new colour map.
+ * @param colorMap :: Reference to the new colour map.
+ */
 void ColorMapWidget::setupColorBarScaling(const MantidColorMap &colorMap) {
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
@@ -161,9 +161,9 @@ void ColorMapWidget::maxValueChanged() {
 }
 
 /**
-* Set a new min value and update the widget.
-* @param value :: The new value
-*/
+ * Set a new min value and update the widget.
+ * @param value :: The new value
+ */
 void ColorMapWidget::setMinValue(double value) {
   setMinValueText(value);
   updateScale();
@@ -173,9 +173,9 @@ void ColorMapWidget::setMinValue(double value) {
 }
 
 /**
-* Set a new max value and update the widget.
-* @param value :: The new value
-*/
+ * Set a new max value and update the widget.
+ * @param value :: The new value
+ */
 void ColorMapWidget::setMaxValue(double value) {
   setMaxValueText(value);
   updateScale();
@@ -185,55 +185,54 @@ void ColorMapWidget::setMaxValue(double value) {
 }
 
 /**
-* returns the min value as QString
-*/
+ * returns the min value as QString
+ */
 QString ColorMapWidget::getMinValue() const { return m_minValueBox->text(); }
 
 /**
-* returns the min value as QString
-*/
+ * returns the min value as QString
+ */
 QString ColorMapWidget::getMaxValue() const { return m_maxValueBox->text(); }
 
 /**
-* returns the mnth powder as QString
-*/
+ * returns the mnth powder as QString
+ */
 QString ColorMapWidget::getNth_power() const { return m_dspnN->text(); }
 
 /**
-* Update the min value text box.
-* @param value :: Value to be displayed in the text box.
-*/
+ * Update the min value text box.
+ * @param value :: Value to be displayed in the text box.
+ */
 void ColorMapWidget::setMinValueText(double value) {
   m_minValueBox->setText(QString::number(value));
 }
 
 /**
-* Update the max value text box.
-* @param value :: Value to be displayed in the text box.
-*/
+ * Update the max value text box.
+ * @param value :: Value to be displayed in the text box.
+ */
 void ColorMapWidget::setMaxValueText(double value) {
   m_maxValueBox->setText(QString::number(value));
 }
 
 /**
-* Set the minimum positive value for use with the Log10 scale. Values below this
-* will
-* not be displayed on a Log10 scale.
-*/
+ * Set the minimum positive value for use with the Log10 scale. Values below
+ * this will not be displayed on a Log10 scale.
+ */
 void ColorMapWidget::setMinPositiveValue(double value) {
   m_minPositiveValue = value;
 }
 
 /**
-* Return the scale type: Log10 or Linear.
-*/
+ * Return the scale type: Log10 or Linear.
+ */
 int ColorMapWidget::getScaleType() const {
   return m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
 }
 
 /**
-* Set the scale type: Log10 or Linear.
-*/
+ * Set the scale type: Log10 or Linear.
+ */
 void ColorMapWidget::setScaleType(int type) {
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
 }
@@ -243,14 +242,14 @@ void ColorMapWidget::setNthPower(double nth_power) {
 }
 
 /**
-* Update the colour scale after the range changes.
-*/
+ * Update the colour scale after the range changes.
+ */
 void ColorMapWidget::updateScale() {
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
-  GraphOptions::ScaleType type =
-      (GraphOptions::ScaleType)
-          m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
+  GraphOptions::ScaleType type = (GraphOptions::ScaleType)m_scaleOptions
+                                     ->itemData(m_scaleOptions->currentIndex())
+                                     .toUInt();
   if (type == GraphOptions::Linear) {
     QwtLinearScaleEngine linScaler;
     m_scaleWidget->setScaleDiv(
@@ -273,9 +272,9 @@ void ColorMapWidget::updateScale() {
 }
 
 /**
-* Respond to a mouse press event. Start dragging to modify the range (min or max
-* value).
-*/
+ * Respond to a mouse press event. Start dragging to modify the range (min or
+ * max value).
+ */
 void ColorMapWidget::mousePressEvent(QMouseEvent *e) {
   QRect rect = m_scaleWidget->rect();
   if (e->x() > rect.left() && e->x() < rect.right()) {
@@ -287,8 +286,9 @@ void ColorMapWidget::mousePressEvent(QMouseEvent *e) {
 }
 
 /**
-* Respond to mouse move event. If the left button is down change the min or max.
-*/
+ * Respond to mouse move event. If the left button is down change the min or
+ * max.
+ */
 void ColorMapWidget::mouseMoveEvent(QMouseEvent *e) {
   if (!m_dragging)
     return;
@@ -308,8 +308,8 @@ void ColorMapWidget::mouseMoveEvent(QMouseEvent *e) {
 }
 
 /**
-* Respond to a mouse release event. Finish all dragging.
-*/
+ * Respond to a mouse release event. Finish all dragging.
+ */
 void ColorMapWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
   if (!m_dragging)
     return;
@@ -359,5 +359,5 @@ void ColorMapWidget::loadFromProject(const std::string &lines) {
   setMinValue(min);
   setMaxValue(max);
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

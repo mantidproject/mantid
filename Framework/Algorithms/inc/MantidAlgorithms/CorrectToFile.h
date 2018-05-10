@@ -73,6 +73,6 @@ private:
                      API::MatrixWorkspace_sptr rhs, const std::string &algName,
                      API::MatrixWorkspace_sptr &result);
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 #endif /*ALGORITHMSCORRECTTOFILE_H_*/

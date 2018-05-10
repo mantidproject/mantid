@@ -1,27 +1,27 @@
 #include "MantidQtWidgets/Common/ScriptRepositoryView.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#include "MantidQtWidgets/Common/RepoModel.h"
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/RepoModel.h"
 
-#include <QDebug>
-#include <QMessageBox>
-#include <QTime>
 #include <QCoreApplication>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QPushButton>
+#include <QDebug>
 #include <QFileDialog>
+#include <QLabel>
+#include <QMessageBox>
 #include <QPainter>
+#include <QPushButton>
+#include <QTime>
+#include <QVBoxLayout>
 
 namespace MantidQt {
 namespace API {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ScriptRepositoryView");
-}
+} // namespace
 
 const QString install_mantid_label =
     "<html><head/><body><p>The <span style=\" font-weight:600;\">"
@@ -89,8 +89,8 @@ const QString dir_not_empty_label =
 ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
     : QDialog(parent), ui(new Ui::ScriptRepositoryView) {
   using Mantid::API::ScriptRepositoryFactory;
-  using Mantid::Kernel::ConfigServiceImpl;
   using Mantid::Kernel::ConfigService;
+  using Mantid::Kernel::ConfigServiceImpl;
   enum EXC_OPTIONS { NOTWANTED, NODIRECTORY };
 
   try {
@@ -128,10 +128,9 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
         }
 
         // warn if dir is not empty
-        if (0 ==
-            QDir(dir)
-                .entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot)
-                .count()) {
+        if (0 == QDir(dir)
+                     .entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot)
+                     .count()) {
           // empty dir, just go ahead
           sureAboutDir = true;
         } else {
@@ -389,7 +388,7 @@ void ScriptRepositoryView::RepoDelegate::paint(
  * @param index: identifies the entry (file/folder)
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
-*/
+ */
 bool ScriptRepositoryView::RepoDelegate::editorEvent(
     QEvent *event, QAbstractItemModel *model,
     const QStyleOptionViewItem & /*option*/, const QModelIndex &index) {
@@ -424,26 +423,26 @@ QSize ScriptRepositoryView::RepoDelegate::sizeHint(
 ScriptRepositoryView::CheckBoxDelegate::CheckBoxDelegate(QObject *parent)
     : QStyledItemDelegate(parent) {}
 /** Draws the column 2 (AutoUpdate) of ScriptRepositoryView.
-  *
-  *  This function is called every time the ScriptRepository needs to
-  *draw the widget for the AutoUpdate of the file/folder inside the
-  *ScriptRepository.  Instead of displaying the strings 'true' and
-  *'false' it will draw a checkbox that 'hoppefully' will better
-  *indicate to the user the condition of the entry as well as
-  *encourage him to act. The action will be dealt with at the
-  *editorEvent.
-  *
-  *  When this method is called, it will get the index in order to
-  *retrieve the information about the state of the entry
-  *(folder/file).
-  *
-  *
-  * @param painter: Required to draw the widget
-  * @param option: Provided by the framework and has information
-  *displaying the widget.
-  * @param index: Identifies the entry inside the RepoModel
-  * (indirectly the file / folder).
-  */
+ *
+ *  This function is called every time the ScriptRepository needs to
+ *draw the widget for the AutoUpdate of the file/folder inside the
+ *ScriptRepository.  Instead of displaying the strings 'true' and
+ *'false' it will draw a checkbox that 'hoppefully' will better
+ *indicate to the user the condition of the entry as well as
+ *encourage him to act. The action will be dealt with at the
+ *editorEvent.
+ *
+ *  When this method is called, it will get the index in order to
+ *retrieve the information about the state of the entry
+ *(folder/file).
+ *
+ *
+ * @param painter: Required to draw the widget
+ * @param option: Provided by the framework and has information
+ *displaying the widget.
+ * @param index: Identifies the entry inside the RepoModel
+ * (indirectly the file / folder).
+ */
 void ScriptRepositoryView::CheckBoxDelegate::paint(
     QPainter *painter, const QStyleOptionViewItem &option,
     const QModelIndex &index) const {
@@ -500,7 +499,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(
  * @param index: identifies the entry (file/folder)
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
-*/
+ */
 bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(
     QEvent *event, QAbstractItemModel *model,
     const QStyleOptionViewItem & /*option*/, const QModelIndex &index) {
@@ -589,7 +588,7 @@ void ScriptRepositoryView::RemoveEntryDelegate::paint(
  * @param index: identifies the entry (file/folder)
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
-*/
+ */
 bool ScriptRepositoryView::RemoveEntryDelegate::editorEvent(
     QEvent *event, QAbstractItemModel *model,
     const QStyleOptionViewItem & /*option*/, const QModelIndex &index) {
@@ -630,4 +629,4 @@ void ScriptRepositoryView::openFolderLink(QString link) {
 }
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt

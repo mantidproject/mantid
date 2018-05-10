@@ -8,8 +8,8 @@ namespace Poco {
 namespace XML {
 class Document;
 class Element;
-}
-}
+} // namespace XML
+} // namespace Poco
 namespace Mantid {
 
 namespace Geometry {

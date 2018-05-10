@@ -1,7 +1,7 @@
 #include "ReflSearchModel.h"
-#include "ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "ReflTransferStrategy.h"
 #include <QColor>
 
 namespace MantidQt {
@@ -52,7 +52,7 @@ ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 ReflSearchModel::~ReflSearchModel() {}
 
 /**
@@ -177,4 +177,4 @@ void ReflSearchModel::clear() {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

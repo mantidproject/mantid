@@ -7,10 +7,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidVatesAPI/MDHWLoadingPresenter.h"
-#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/MDHWLoadingPresenter.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 #include "MockObjects.h"
 

@@ -60,7 +60,7 @@ protected: // for testing
                               std::vector<double> &maxVal) = 0;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif // MANTID_MDALGORITHMS_BASECONVERTTODIFFRACTIONMDWORKSPACE_H

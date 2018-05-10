@@ -8,8 +8,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <mutex>
 

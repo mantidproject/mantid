@@ -43,5 +43,5 @@ ITableWorkspace_sptr ReflCatalogSearcher::search(const std::string &text) {
 
   return results;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

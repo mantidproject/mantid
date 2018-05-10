@@ -11,8 +11,8 @@
 #ifndef MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
 #define MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
 
-#include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
 #include <mutex>
 
@@ -109,5 +109,5 @@ private:
   /// identified of the file state, if it is open or not.
   bool m_isOpened;
 };
-}
+} // namespace MantidTestHelpers
 #endif

@@ -4,10 +4,10 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectTools.h"
+#include "IndirectToolsTab.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "IndirectToolsTab.h"
+#include "ui_IndirectTools.h"
 
 #include <Poco/NObserver.h>
 
@@ -88,7 +88,7 @@ private:
   /// Main interface window
   Ui::IndirectTools m_uiForm;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

@@ -31,8 +31,8 @@
 // desired.)
 //----------------------------------------------------------------------
 
-#include "kd_tree.h" // kd-tree declarations
 #include "bd_tree.h" // bd-tree declarations
+#include "kd_tree.h" // kd-tree declarations
 
 #include <limits>
 
@@ -335,9 +335,8 @@ annReadDump(istream &in,              // input stream
       in >> the_bnd_box_hi[j];
     }
 
-    if (0 > the_n_pts ||
-        static_cast<size_t>(std::numeric_limits<int>::max()) <=
-            static_cast<size_t>(the_n_pts / sizeof(ANNidx))) {
+    if (0 > the_n_pts || static_cast<size_t>(std::numeric_limits<int>::max()) <=
+                             static_cast<size_t>(the_n_pts / sizeof(ANNidx))) {
       annError("Too big number of elements for the point index array. This "
                "would cause an overflow when allocating memory",
                ANNabort);

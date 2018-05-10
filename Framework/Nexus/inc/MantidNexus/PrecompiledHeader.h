@@ -6,8 +6,8 @@
 
 // STL
 #include <climits>
-#include <vector>
 #include <map>
 #include <string>
+#include <vector>
 
 #endif // MANTID_NEXUS_PRECOMPILEDHEADER_H_

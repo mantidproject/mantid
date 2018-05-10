@@ -1,13 +1,13 @@
 #ifndef MANTID_VATES_CONCRETE_PEAKS_PRESENTER_VSI_H
 #define MANTID_VATES_CONCRETE_PEAKS_PRESENTER_VSI_H
 
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
-#include "MantidGeometry/Crystal/PeakTransform.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/ViewFrustum.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <vector>
 
 namespace Mantid {
@@ -42,6 +42,6 @@ private:
   /// The frame
   std::string m_frame;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

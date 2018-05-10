@@ -23,7 +23,7 @@ bool isMonitorDeprecated(const Detector &self) {
   const auto &detInfo = self.parameterMap().detectorInfo();
   return detInfo.isMonitor(self.index());
 }
-}
+} // namespace
 
 /**
  * Enables boost.python to automatically "cast" an object up to the

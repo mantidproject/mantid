@@ -141,10 +141,10 @@ public:
   }
 
   /**
- * Test that the algorithm can handle a WorkspaceGroup as input without
- * crashing
- * We have to use the ADS to test WorkspaceGroups
- */
+   * Test that the algorithm can handle a WorkspaceGroup as input without
+   * crashing
+   * We have to use the ADS to test WorkspaceGroups
+   */
   void testValidateInputsWithWSGroup() {
     auto ws1 = boost::static_pointer_cast<Workspace>(
         WorkspaceCreationHelper::create2DWorkspace(2, 1));

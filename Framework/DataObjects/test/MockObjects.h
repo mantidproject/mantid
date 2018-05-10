@@ -34,8 +34,8 @@ public:
       radius, boost::optional<double>(Mantid::Geometry::PeakShape::RadiusType));
   ~MockPeakShape() override {}
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 

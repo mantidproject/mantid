@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_
 #define MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PolarizationCorrection.h"
-#include "MantidAPI/Axis.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include <boost/make_shared.hpp>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/PolarizationCorrection.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

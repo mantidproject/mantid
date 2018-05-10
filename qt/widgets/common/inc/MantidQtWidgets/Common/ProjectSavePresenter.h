@@ -2,8 +2,8 @@
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTER_H
 
 #include "MantidAPI/Workspace.h"
-#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/IProjectSaveView.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/ProjectSaveModel.h"
 
 #include "DllOption.h"
@@ -67,7 +67,7 @@ private:
   ProjectSaveModel m_model;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // PROJECTSAVEPRESENTER_H

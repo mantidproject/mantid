@@ -7,9 +7,9 @@
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "MantidAPI/AlgorithmManager.h"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid {
@@ -172,5 +172,5 @@ void MDHWNexusLoadingPresenter::loadWorkspace(
   m_histoWs = AnalysisDataService::Instance()
                   .retrieveWS<Mantid::API::IMDHistoWorkspace>("MD_HISTO_WS_ID");
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

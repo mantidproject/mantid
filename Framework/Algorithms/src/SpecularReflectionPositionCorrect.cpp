@@ -51,7 +51,7 @@ bool hasCommonParent(const std::vector<IDetector_const_sptr> &detectors) {
   }
   return true;
 }
-}
+} // namespace
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SpecularReflectionPositionCorrect)
 

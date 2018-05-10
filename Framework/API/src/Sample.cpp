@@ -2,12 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
 
@@ -416,5 +416,5 @@ void Sample::clearOrientedLattice() {
     m_lattice = nullptr;
   }
 }
-}
-}
+} // namespace API
+} // namespace Mantid

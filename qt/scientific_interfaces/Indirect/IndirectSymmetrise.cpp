@@ -1,7 +1,7 @@
 #include "IndirectSymmetrise.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 
 namespace {
@@ -533,4 +533,4 @@ void IndirectSymmetrise::saveClicked() {
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

@@ -6,8 +6,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 
-#include <QWidget>
 #include <QMap>
+#include <QWidget>
 
 #include <boost/optional.hpp>
 
@@ -38,8 +38,8 @@ namespace API {
 class CompositeFunction;
 class Workspace;
 class ParameterTie;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -441,8 +441,8 @@ protected:
   friend class SetAttributeFromProperty;
 };
 
-} // MantidWidgets
+} // namespace MantidWidgets
 
-} // MantidQt
+} // namespace MantidQt
 
 #endif /*MANTIDWIDGETS_FUNCTIONBROWSER_H_*/

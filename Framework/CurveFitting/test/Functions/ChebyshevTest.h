@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/Chebyshev.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Functions/Chebyshev.h"
 
 #include <array>
 

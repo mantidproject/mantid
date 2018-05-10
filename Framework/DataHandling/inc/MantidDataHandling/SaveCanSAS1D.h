@@ -12,8 +12,8 @@ namespace XML {
 class Document;
 class Element;
 class Text;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -165,7 +165,7 @@ protected:
   /// the stylesheet part in Poco or libXML
   std::fstream m_outFile;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif

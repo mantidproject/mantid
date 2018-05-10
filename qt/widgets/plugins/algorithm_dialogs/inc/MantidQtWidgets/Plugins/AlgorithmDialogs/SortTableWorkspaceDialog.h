@@ -74,7 +74,7 @@ private:
   QStringList m_sortColumns;
 };
 
-} // CustomDialogs
-} // MantidQt
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOM_DIALOGS_SORTTABLEWORKSPACEDIALOG_H

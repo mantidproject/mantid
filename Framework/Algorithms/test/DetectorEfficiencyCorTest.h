@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"

@@ -78,7 +78,7 @@ struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesEllipse
   double backgroundInnerRadiusMinorAxis;
   double angle;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

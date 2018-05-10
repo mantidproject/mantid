@@ -1,9 +1,9 @@
 #ifndef INTERPOLATIONTEST_H_
 #define INTERPOLATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <ctime>
 #include "MantidKernel/Interpolation.h"
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 

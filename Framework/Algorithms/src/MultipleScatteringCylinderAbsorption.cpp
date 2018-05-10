@@ -5,8 +5,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -25,9 +25,9 @@ using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::WeightedEventNoTime;
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 using std::vector;
 using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
@@ -75,7 +75,7 @@ static const double LAMBDA_REF =
 // scattering correction factor.
 static const double COEFF4 = 1.1967;
 static const double COEFF5 = -0.8667;
-} // end of anonymous
+} // namespace
 
 const std::string MultipleScatteringCylinderAbsorption::name() const {
   return "MultipleScatteringCylinderAbsorption";
@@ -103,12 +103,14 @@ void MultipleScatteringCylinderAbsorption::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
-  declareProperty("AttenuationXSection", 2.8, "Coefficient 1, absorption cross "
-                                              "section / 1.81 if not set with "
-                                              "SetSampleMaterial");
-  declareProperty("ScatteringXSection", 5.1, "Coefficient 3, total scattering "
-                                             "cross section if not set with "
-                                             "SetSampleMaterial");
+  declareProperty("AttenuationXSection", 2.8,
+                  "Coefficient 1, absorption cross "
+                  "section / 1.81 if not set with "
+                  "SetSampleMaterial");
+  declareProperty("ScatteringXSection", 5.1,
+                  "Coefficient 3, total scattering "
+                  "cross section if not set with "
+                  "SetSampleMaterial");
   declareProperty("SampleNumberDensity", 0.0721,
                   "Coefficient 2, density if not set with SetSampleMaterial");
   declareProperty("CylinderSampleRadius", 0.3175, "Sample radius, in cm");
@@ -299,10 +301,10 @@ double calculate_msa_factor(const double radius, const double Q2,
   const double sigabs = Q2 * wavelength;
   const double sigir = (sigabs + sigsct) * radius;
   /**
-  * By setting the incident and scattered cross sections to be equal
-  * we implicitly assume elastic scattering because in general these will
-  * vary with neutron energy.
-  **/
+   * By setting the incident and scattered cross sections to be equal
+   * we implicitly assume elastic scattering because in general these will
+   * vary with neutron energy.
+   **/
   const double sigsr = sigir;
 
   const double delta = COEFF4 * sigir + COEFF5 * sigir * sigir;
@@ -324,7 +326,7 @@ double calculate_msa_factor(const double radius, const double Q2,
  *  @param coeff2 ::      The density
  *  @param coeff3 ::      The total scattering cross section
  *  @param wavelength ::          Array of wavelengths at bin boundaries
-    *                     (or bin centers) for the spectrum, in Angstroms
+ *                     (or bin centers) for the spectrum, in Angstroms
  *  @param y_val ::       The spectrum values
  *  @param errors ::      The spectrum errors
  */
@@ -360,5 +362,5 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -1,11 +1,11 @@
 #ifndef MANTID_TESTMATIX__
 #define MANTID_TESTMATIX__
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
@@ -13,10 +13,10 @@
 
 #include <boost/lexical_cast.hpp>
 
-using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::IntMatrix;
+using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class MatrixTest : public CxxTest::TestSuite {
 

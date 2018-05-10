@@ -1,21 +1,21 @@
 #include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/CoordTransform.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <vtkUnstructuredGrid.h>
+#include <boost/shared_ptr.hpp>
+#include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkLine.h>
-#include <vtkCellData.h>
 #include <vtkNew.h>
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
+#include <vtkUnstructuredGrid.h>
 
 #include <cmath>
 
@@ -185,5 +185,5 @@ void vtkMDLineFactory::validate() const {
         "vtkMDLineFactory has no workspace to run against");
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

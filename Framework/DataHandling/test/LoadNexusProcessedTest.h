@@ -2,23 +2,23 @@
 #define LOADNEXUSPROCESSEDTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataHandling/Load.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
-#include "MantidDataHandling/SaveNexusProcessed.h"
-#include "MantidDataHandling/Load.h"
-#include "MantidDataHandling/LoadInstrument.h"
 
 #include "SaveNexusProcessedTest.h"
 
@@ -30,8 +30,8 @@
 
 #include <string>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -1188,14 +1188,14 @@ private:
   }
 
   /**
-    * Does a few common checks for using spectra lists with/without
-        * spectrum min and/or max being set. Expects the algorithm
-        * passed in to be configured for this test.
-        *
-        * @param alg The configured algorithm to executed
-        * @param expectedSpectra The IDs of the spectrum loaded which should
-        * be present
-        */
+   * Does a few common checks for using spectra lists with/without
+   * spectrum min and/or max being set. Expects the algorithm
+   * passed in to be configured for this test.
+   *
+   * @param alg The configured algorithm to executed
+   * @param expectedSpectra The IDs of the spectrum loaded which should
+   * be present
+   */
   void doSpectrumListTests(LoadNexusProcessed &alg,
                            const std::vector<int> expectedSpectra) {
     TS_ASSERT_THROWS_NOTHING(alg.execute());

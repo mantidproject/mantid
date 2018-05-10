@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/TOFSANSResolution.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"

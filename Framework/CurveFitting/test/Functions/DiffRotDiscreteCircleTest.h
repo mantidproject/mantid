@@ -1,12 +1,12 @@
 #ifndef DIFFROTDISCRETECIRCLETEST_H_
 #define DIFFROTDISCRETECIRCLETEST_H_
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -433,9 +433,8 @@ private:
       temp_ws->dataX(0)[i] = xView[i];
       temp_ws->dataY(0)[i] = dataYvalues.getCalculated(i);
       temp_ws->dataE(0)[i] =
-          0.1 *
-          dataYvalues.getCalculated(
-              i); // assume the error is 10% of the actual value
+          0.1 * dataYvalues.getCalculated(
+                    i); // assume the error is 10% of the actual value
     }
     const double dw = xView[1] - xView[0]; // bin width
     temp_ws->dataX(0)[M] = temp_ws->dataX(0)[M - 1] + dw;
@@ -487,9 +486,10 @@ private:
       double bin_boundary =
           dataX[i] -
           dw / 2.0; // bin boundaries are shifted by half the bind width
-      double y = I * (2.0 / M_PI) * A1 *
-                 (3.0 * rate / (9.0 * rate * rate +
-                                dataX[i] * dataX[i])); // verbose for clarity
+      double y =
+          I * (2.0 / M_PI) * A1 *
+          (3.0 * rate /
+           (9.0 * rate * rate + dataX[i] * dataX[i])); // verbose for clarity
       ws->dataX(0)[i] = bin_boundary;
       ws->dataY(0)[i] = y;
       ws->dataE(0)[i] =

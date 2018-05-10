@@ -28,7 +28,7 @@ bool isAngleEitherValueOr180DegreesRoated(double expectedAngle,
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle + M_PI) ||
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle - M_PI);
 }
-}
+} // namespace
 
 class EllipsoidPlaneSliceCalculatorTest : public CxxTest::TestSuite {
 public:
@@ -50,8 +50,8 @@ public:
 
     // Assert
 
-    std::vector<std::pair<int, int>> indices = {
-        {0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
+    std::vector<std::pair<int, int>> indices = {{0, 1}, {0, 2}, {1, 0},
+                                                {1, 2}, {2, 0}, {2, 1}};
 
     for (const auto &index : indices) {
       TSM_ASSERT("Non-diagonal element should be zero",

@@ -1,25 +1,25 @@
 #ifndef MULTIDOMAINCREATORTEST_H_
 #define MULTIDOMAINCREATORTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/JointDomain.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/JointDomain.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidCurveFitting/MultiDomainCreator.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
 
-#include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

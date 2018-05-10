@@ -5,11 +5,11 @@
 // Includes
 //---------------------------------------------------
 
-#include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidNexus/NexusClasses.h"
 #include "LoadANSTOHelper.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -131,7 +131,7 @@ private:
                          EventProcessor &eventProcessor);
 };
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // DATAHANDING_LOADBBY_H_

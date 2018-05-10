@@ -41,7 +41,7 @@ SpaceGroup_sptr createSpaceGroup(SpaceGroupFactoryImpl &self,
   SpaceGroup_const_sptr spaceGroup = self.createSpaceGroup(symbol);
   return boost::const_pointer_cast<SpaceGroup>(spaceGroup);
 }
-}
+} // namespace
 
 void export_SpaceGroupFactory() {
 

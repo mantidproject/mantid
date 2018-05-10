@@ -1,11 +1,11 @@
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidCrystal/CentroidPeaks.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Crystal/EdgePixel.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include <boost/algorithm/clamp.hpp>
 
 using Mantid::DataObjects::PeaksWorkspace;
@@ -388,5 +388,5 @@ void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

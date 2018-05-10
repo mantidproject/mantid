@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_PERFORMINDEXOPERATIONS_H_
 #define MANTID_ALGORITHMS_PERFORMINDEXOPERATIONS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

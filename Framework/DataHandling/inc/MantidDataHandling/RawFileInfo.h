@@ -83,7 +83,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /*MANTIDDATAHANDLING_RAWFILEINFO_H_*/

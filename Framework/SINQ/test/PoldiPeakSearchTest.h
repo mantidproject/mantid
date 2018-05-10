@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/UnitFactory.h"
 #include "MantidSINQ/PoldiPeakSearch.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include "MantidKernel/UnitFactory.h"
 
 using Mantid::Poldi::PoldiPeakSearch;
 using namespace Mantid::Poldi;

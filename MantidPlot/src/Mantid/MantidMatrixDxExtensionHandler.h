@@ -2,8 +2,8 @@
 #define MANTIDPLOT_MANTIDMATRIXDXEXTENSIONHANDLER_H
 
 #include "IMantidMatrixExtensionHandler.h"
-#include "MantidMatrixTabExtension.h"
 #include "MantidMatrixModel.h"
+#include "MantidMatrixTabExtension.h"
 
 class MantidMatrixDxExtensionHandler : public IMantidMatrixExtensionHandler {
 public:

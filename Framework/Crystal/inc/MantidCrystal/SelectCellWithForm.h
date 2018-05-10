@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_SELECT_CELL_WITH_FORM_H_
 #define MANTID_CRYSTAL_SELECT_CELL_WITH_FORM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

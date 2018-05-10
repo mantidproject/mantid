@@ -88,7 +88,8 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
     msg << "Error setting value from string.\n"
            "String is expected to contain either the name of a global "
            "PropertyManager or a json-formatted object.\n"
-           "Parser error: " << exc.what();
+           "Parser error: "
+        << exc.what();
   } catch (std::exception &exc) {
     msg << "Error setting value from string.\n" << exc.what();
   }

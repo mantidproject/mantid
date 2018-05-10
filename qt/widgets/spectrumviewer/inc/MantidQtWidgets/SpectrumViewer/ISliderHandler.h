@@ -2,8 +2,8 @@
 #define ISLIDER_HANDLER_H
 
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
-#include <QRect>
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include <QRect>
 
 namespace MantidQt {
 namespace SpectrumView {

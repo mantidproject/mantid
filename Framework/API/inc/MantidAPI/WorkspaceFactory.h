@@ -15,11 +15,11 @@
   }
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -112,6 +112,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /*MANTID_KERNEL_WORKSPACEFACTORY_H_*/

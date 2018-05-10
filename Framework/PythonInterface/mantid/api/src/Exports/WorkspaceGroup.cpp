@@ -5,8 +5,8 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/iterator.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
@@ -56,8 +56,9 @@ void export_WorkspaceGroup() {
            "Returns the number of workspaces contained in the group")
       .def("remove", &WorkspaceGroup::remove,
            (arg("self"), arg("workspace_name")), "Remove a name from the group")
-      .def("getItem", (Workspace_sptr (WorkspaceGroup::*)(const size_t) const) &
-                          WorkspaceGroup::getItem,
+      .def("getItem",
+           (Workspace_sptr(WorkspaceGroup::*)(const size_t) const) &
+               WorkspaceGroup::getItem,
            (arg("self"), arg("workspace_name")),
            return_value_policy<Policies::ToWeakPtr>(),
            "Returns the item at the given index")
@@ -72,7 +73,7 @@ void export_WorkspaceGroup() {
            (arg("self"), arg("workspace name")),
            "Does this group contain the named workspace?")
       .def("__getitem__",
-           (Workspace_sptr (WorkspaceGroup::*)(const size_t) const) &
+           (Workspace_sptr(WorkspaceGroup::*)(const size_t) const) &
                WorkspaceGroup::getItem,
            (arg("self"), arg("index")),
            return_value_policy<Policies::ToWeakPtr>())

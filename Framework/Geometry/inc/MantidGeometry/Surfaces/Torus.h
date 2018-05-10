@@ -98,7 +98,7 @@ public:
 #endif
 };
 
-} // NAMESPACE
+} // namespace Geometry
 
 } // NAMESPACE Mantid
 

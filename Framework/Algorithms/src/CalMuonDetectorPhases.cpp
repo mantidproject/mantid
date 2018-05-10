@@ -3,17 +3,17 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/GroupingLoader.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -133,12 +133,12 @@ void CalMuonDetectorPhases::exec() {
 }
 
 /** Fits each spectrum in the workspace to f(x) = A * sin( w * x + p)
-* @param ws :: [input] The workspace to fit
-* @param freq :: [input] Hint for the frequency (w)
-* @param groupName :: [input] The name of the output workspace group
-* @param resTab :: [output] Table workspace storing the asymmetries and phases
-* @param resGroup :: [output] Workspace group storing the fitting results
-*/
+ * @param ws :: [input] The workspace to fit
+ * @param freq :: [input] Hint for the frequency (w)
+ * @param groupName :: [input] The name of the output workspace group
+ * @param resTab :: [output] Table workspace storing the asymmetries and phases
+ * @param resGroup :: [output] Workspace group storing the fitting results
+ */
 void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
                                          double freq, std::string groupName,
                                          API::ITableWorkspace_sptr &resTab,
@@ -189,11 +189,11 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 }
 
 /** Extracts detector asymmetries and phases from fitting results
-* and adds a new row to the results table with them
-* @param paramTab :: [input] Output parameter table resulting from the fit
-* @param resultsTab :: [input] Results table to update with a new row
-* @param spectrumNumber :: [input] Spectrum number
-*/
+ * and adds a new row to the results table with them
+ * @param paramTab :: [input] Output parameter table resulting from the fit
+ * @param resultsTab :: [input] Results table to update with a new row
+ * @param spectrumNumber :: [input] Spectrum number
+ */
 void CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &paramTab,
     const API::ITableWorkspace_sptr &resultsTab,
@@ -218,14 +218,14 @@ void CalMuonDetectorPhases::extractDetectorInfo(
 }
 
 /** Creates the fitting function f(x) = A * cos( w*x - p) + B as string
-* Two modes:
-* 1) Fixed frequency, no background - for main sequential fit
-* 2) Varying frequency, flat background - for finding frequency from asymmetry
-* @param freq :: [input] Value for the frequency (w)
-* @param fixFreq :: [input] True: fixed frequency, no background. False: varying
-* frequency with flat background.
-* @returns :: The fitting function as a string
-*/
+ * Two modes:
+ * 1) Fixed frequency, no background - for main sequential fit
+ * 2) Varying frequency, flat background - for finding frequency from asymmetry
+ * @param freq :: [input] Value for the frequency (w)
+ * @param fixFreq :: [input] True: fixed frequency, no background. False:
+ * varying frequency with flat background.
+ * @returns :: The fitting function as a string
+ */
 std::string CalMuonDetectorPhases::createFittingFunction(double freq,
                                                          bool fixFreq) {
   // The fitting function is:
@@ -252,10 +252,10 @@ std::string CalMuonDetectorPhases::createFittingFunction(double freq,
 }
 
 /** Extracts relevant data from a workspace
-* @param startTime :: [input] First X value to consider
-* @param endTime :: [input] Last X value to consider
-* @return :: Pre-processed workspace to fit
-*/
+ * @param startTime :: [input] First X value to consider
+ * @param endTime :: [input] Last X value to consider
+ * @return :: Pre-processed workspace to fit
+ */
 API::MatrixWorkspace_sptr
 CalMuonDetectorPhases::extractDataFromWorkspace(double startTime,
                                                 double endTime) {

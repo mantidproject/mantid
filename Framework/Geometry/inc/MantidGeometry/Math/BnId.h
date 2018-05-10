@@ -3,9 +3,9 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include <iosfwd>
+#include <map>
 #include <set>
 #include <string>
-#include <map>
 #include <vector>
 
 namespace Mantid {

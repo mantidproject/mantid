@@ -32,8 +32,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __pqHelpWindow_h
 #define __pqHelpWindow_h
 
-#include <QMainWindow>
 #include "DllOption.h"
+#include <QMainWindow>
 
 class QHelpEngine;
 class QToolButton;

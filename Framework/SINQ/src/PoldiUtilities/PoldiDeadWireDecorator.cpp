@@ -1,8 +1,8 @@
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
-#include <algorithm>
 #include "boost/bind.hpp"
+#include <algorithm>
 
 namespace Mantid {
 namespace Poldi {

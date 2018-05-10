@@ -32,7 +32,7 @@ glEnd() are called within this function.
 EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
 renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
                      size_t index, const std::vector<GLColor> &color);
-} // namespace RenderingHelpers
+} // namespace BankRenderingHelpers
 } // namespace MantidWidgets
 } // namespace MantidQt
 

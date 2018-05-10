@@ -1,10 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_BOXCONTROLLERSETTINGSALGORITHM_H_
 #define MANTID_MDALGORITHMS_BOXCONTROLLERSETTINGSALGORITHM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

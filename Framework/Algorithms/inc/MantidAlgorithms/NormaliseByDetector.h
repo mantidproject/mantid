@@ -13,7 +13,7 @@ namespace API {
 /// Forward declaration for MatrixWorkspace.
 class MatrixWorkspace;
 class Progress;
-}
+} // namespace API
 namespace Algorithms {
 /** NormaliseByDetector : Normalises a workspace with respect to the detector
   efficiency function stored against components in the instrument parameters.

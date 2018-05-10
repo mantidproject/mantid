@@ -1,17 +1,17 @@
 #ifndef MANTID_MDALGORITHMS_CUTMD_H_
 #define MANTID_MDALGORITHMS_CUTMD_H_
 
-#include <MantidAPI/IMDWorkspace.h>
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidKernel/System.h"
+#include <MantidAPI/IMDWorkspace.h>
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-std::vector<std::string> DLLExport
-findOriginalQUnits(Mantid::API::IMDWorkspace_const_sptr inws,
-                   Mantid::Kernel::Logger &logger);
+std::vector<std::string>
+    DLLExport findOriginalQUnits(Mantid::API::IMDWorkspace_const_sptr inws,
+                                 Mantid::Kernel::Logger &logger);
 
 /** CutMD : Slices multidimensional workspaces.
 

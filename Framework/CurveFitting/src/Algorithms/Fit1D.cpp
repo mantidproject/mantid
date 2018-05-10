@@ -2,20 +2,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit1D.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
+#include <MantidKernel/StringTokenizer.h>
 
-#include <gsl/gsl_statistics.h>
+#include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
-#include <gsl/gsl_blas.h>
+#include <gsl/gsl_statistics.h>
 #include <gsl/gsl_version.h>
 
 #include <cmath>
@@ -27,11 +27,11 @@ namespace CurveFitting {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_const_sptr;
-using API::MatrixWorkspace;
-using API::Progress;
 using API::Jacobian;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_const_sptr;
+using API::Progress;
+using API::WorkspaceProperty;
 
 /// The implementation of Jacobian
 class JacobianImpl : public Jacobian {
@@ -42,21 +42,21 @@ public:
   /// The index map
   std::map<int, int> m_map;
   /**  Set a value to a Jacobian matrix element.
-  *   @param iY :: The index of the data point.
-  *   @param iP :: The index of the parameter. It does not depend on the number
-  * of fixed parameters in a particular fit.
-  *   @param value :: The derivative value.
-  */
+   *   @param iY :: The index of the data point.
+   *   @param iP :: The index of the parameter. It does not depend on the number
+   * of fixed parameters in a particular fit.
+   *   @param value :: The derivative value.
+   */
   void set(size_t iY, size_t iP, double value) override {
     int j = m_map[static_cast<int>(iP)];
     if (j >= 0)
       gsl_matrix_set(m_J, iY, j, value);
   }
   /** Get a value to a Jacobian matrix element.
-  *   @param iY :: The index of the data point.
-  *   @param iP :: The index of the parameter. It does not depend on the number
-  * of fixed parameters in a particular fit.
-  */
+   *   @param iY :: The index of the data point.
+   *   @param iP :: The index of the parameter. It does not depend on the number
+   * of fixed parameters in a particular fit.
+   */
   double get(size_t iY, size_t iP) override {
     int j = m_map[static_cast<int>(iP)];
     if (j >= 0)
@@ -64,7 +64,7 @@ public:
     return 0.0;
   }
   /** Zero all matrix elements.
-  */
+   */
   void zero() override { gsl_matrix_set_zero(m_J); }
   /// Set the pointer to the GSL's jacobian
   void setJ(gsl_matrix *J) { m_J = J; }
@@ -104,11 +104,11 @@ struct FitData {
 };
 
 /** Fit1D GSL function wrapper
-* @param x :: Input function arguments
-* @param params :: Input data
-* @param f :: Output function values = (y_cal-y_data)/sigma for each data point
-* @return A GSL status information
-*/
+ * @param x :: Input function arguments
+ * @param params :: Input data
+ * @param f :: Output function values = (y_cal-y_data)/sigma for each data point
+ * @return A GSL status information
+ */
 static int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 
   for (size_t i = 0, j = 0;
@@ -135,11 +135,11 @@ static int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 }
 
 /** Fit1D GSL derivative function wrapper
-* @param x :: Input function arguments
-* @param params :: Input data
-* @param J :: Output derivatives
-* @return A GSL status information
-*/
+ * @param x :: Input function arguments
+ * @param params :: Input data
+ * @param J :: Output derivatives
+ * @return A GSL status information
+ */
 static int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   for (size_t i = 0, j = 0;
@@ -173,12 +173,12 @@ static int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 }
 
 /** Fit1D derivatives and function GSL wrapper
-* @param x :: Input function arguments
-* @param params :: Input data
-* @param f :: Output function values = (y_cal-y_cal)/sigma for each data point
-* @param J :: Output derivatives
-* @return A GSL status information
-*/
+ * @param x :: Input function arguments
+ * @param params :: Input data
+ * @param f :: Output function values = (y_cal-y_cal)/sigma for each data point
+ * @param J :: Output derivatives
+ * @return A GSL status information
+ */
 static int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f,
                    gsl_matrix *J) {
   gsl_f(x, params, f);
@@ -287,13 +287,15 @@ void Fit1D::init() {
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "The Workspace to fit, uses the workspace numbering of the "
                   "spectra (default 0)");
-  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
-                                         "boundary of, the first bin to "
-                                         "include in\n"
-                                         "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
-                                       "of, the last bin the fitting range\n"
-                                       "(default the highest value of x)");
+  declareProperty("StartX", EMPTY_DBL(),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   size_t i0 = getProperties().size();
 
@@ -306,8 +308,9 @@ void Fit1D::init() {
     m_parameterNames.push_back(props[i]->name());
   }
 
-  declareProperty("Fix", "", "A list of comma separated parameter names which "
-                             "should be fixed in the fit");
+  declareProperty("Fix", "",
+                  "A list of comma separated parameter names which "
+                  "should be fixed in the fit");
   declareProperty(
       "MaxIterations", 500, mustBePositive,
       "Stop after this number of iterations if a good fit is not found");
@@ -319,8 +322,9 @@ void Fit1D::init() {
 
   declareAdditionalProperties();
 
-  declareProperty("Output", "", "If not empty OutputParameters TableWorksace "
-                                "and OutputWorkspace will be created.");
+  declareProperty("Output", "",
+                  "If not empty OutputParameters TableWorksace "
+                  "and OutputWorkspace will be created.");
 }
 
 /** Executes the algorithm
@@ -723,8 +727,8 @@ void Fit1D::exec() {
             ->unit(); //    UnitFactory::Instance().create("TOF");
 
     for (int i = 0; i < 3; i++)
-      ws->dataX(i)
-          .assign(inputX.begin() + m_minX, inputX.begin() + m_maxX + histN);
+      ws->dataX(i).assign(inputX.begin() + m_minX,
+                          inputX.begin() + m_maxX + histN);
 
     ws->dataY(0).assign(inputY.begin() + m_minX, inputY.begin() + m_maxX);
 

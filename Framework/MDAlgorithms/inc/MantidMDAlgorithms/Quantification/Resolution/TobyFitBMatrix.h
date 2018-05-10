@@ -48,7 +48,7 @@ public:
   void recalculate(const CachedExperimentInfo &observation,
                    const QOmegaPoint &qOmega);
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_RESOLUTIONCOEFFICIENTS_H_ */

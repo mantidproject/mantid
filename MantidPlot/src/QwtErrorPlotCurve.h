@@ -30,8 +30,8 @@
 #ifndef ERRORBARS_H
 #define ERRORBARS_H
 
-#include "PlotCurve.h"
 #include "Mantid/ErrorBarSettings.h"
+#include "PlotCurve.h"
 #include <qwt_plot.h>
 
 //! Error bars curve

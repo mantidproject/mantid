@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/MDTransfNoQ.h"
-#include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 #include "MantidKernel/Unit.h"
+#include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -9,16 +9,16 @@ namespace MDAlgorithms {
 DECLARE_MD_TRANSFID(MDTransfNoQ, CopyToMD)
 
 /** Method fills-in all additional properties requested by user and not defined
-*by matrix workspace itselt.
-*  it fills in [nd - (1 or 2 -- depending on input ws)] values into the Coord
-*vector;
-*
-*@param Coord -- input-output vector of MD-coordinates
-*@param nd    -- number of current dimensions
-*
-*@returns     -- Coord vector with nd-(1 or 2, depending on input ws) values of
-*MD coordinates
-*/
+ *by matrix workspace itselt.
+ *  it fills in [nd - (1 or 2 -- depending on input ws)] values into the Coord
+ *vector;
+ *
+ *@param Coord -- input-output vector of MD-coordinates
+ *@param nd    -- number of current dimensions
+ *
+ *@returns     -- Coord vector with nd-(1 or 2, depending on input ws) values of
+ *MD coordinates
+ */
 bool MDTransfNoQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) {
   // sanity check. If fails, something went fundamentally wrong
   if (m_NMatrixDim + m_AddDimCoordinates.size() != nd) {
@@ -60,11 +60,12 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams) {
   this->getAxes(ConvParams.getInWS(), pXAx, m_YAxis);
 }
 /** Method updates the value of preprocessed detector coordinates in Q-space,
-*used by other functions
-*@param Coord : input-output vector of MD Coordinates
-*@param i -- index of the detector, which corresponds to the spectra to process.
-*
-*/
+ *used by other functions
+ *@param Coord : input-output vector of MD Coordinates
+ *@param i -- index of the detector, which corresponds to the spectra to
+ *process.
+ *
+ */
 bool MDTransfNoQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   if (m_YAxis) {
     Coord[1] = static_cast<coord_t>(m_YAxis->operator()(i));
@@ -192,5 +193,5 @@ void MDTransfNoQ::setDisplayNormalization(
   setter(mdWorkspace, underlyingWorkspace, isQ);
 }
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid

@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_TABLECOLUMNTEST_H_
 #define MANTID_DATAOBJECTS_TABLECOLUMNTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

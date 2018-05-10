@@ -40,14 +40,14 @@ PoldiPeakSearch::PoldiPeakSearch()
       m_peaks(new PoldiPeakCollection()) {}
 
 /** Sums the counts of neighboring d-values
-  *
-  * This method takes a vector of counts y with N elements and produces a new
-  *vector y'
-  * with N - 2 elements, such that y'[i] = y[i-1] + y[i] + y[i+1].
-  *
-  * @param correlationCounts :: Vector with correlation counts.
-  * @return Vector with sum of neighboring correlation counts.
-  */
+ *
+ * This method takes a vector of counts y with N elements and produces a new
+ *vector y'
+ * with N - 2 elements, such that y'[i] = y[i-1] + y[i] + y[i+1].
+ *
+ * @param correlationCounts :: Vector with correlation counts.
+ * @return Vector with sum of neighboring correlation counts.
+ */
 MantidVec
 PoldiPeakSearch::getNeighborSums(const HistogramY &correlationCounts) const {
   /* Since the first and last element in a list don't have two neighbors, they
@@ -85,23 +85,23 @@ PoldiPeakSearch::getNeighborSums(const HistogramY &correlationCounts) const {
 }
 
 /** Detects peaks in supplied vector
-  *
-  * This method returns a list of iterators that point to peak positions in the
-  *range
-  * defined by the arguments (start and end iterators). While the actual peak
-  *search is
-  * performed by PoldiPeakSearch::findPeaksRecursive, this method does some book
-  *keeping
-  * such as configuring borders of the vector and after searching, reducing the
-  *peak list
-  * according to the limit specified by MaximumPeakNumber.
-  *
-  * @param begin :: Iterator that points to the start of the vector to be
-  *searched.
-  * @param end :: End iterator.
-  * @return List of iterators which indicate peak positions with respect to the
-  *input range.
-  */
+ *
+ * This method returns a list of iterators that point to peak positions in the
+ *range
+ * defined by the arguments (start and end iterators). While the actual peak
+ *search is
+ * performed by PoldiPeakSearch::findPeaksRecursive, this method does some book
+ *keeping
+ * such as configuring borders of the vector and after searching, reducing the
+ *peak list
+ * according to the limit specified by MaximumPeakNumber.
+ *
+ * @param begin :: Iterator that points to the start of the vector to be
+ *searched.
+ * @param end :: End iterator.
+ * @return List of iterators which indicate peak positions with respect to the
+ *input range.
+ */
 std::list<MantidVec::const_iterator>
 PoldiPeakSearch::findPeaks(MantidVec::const_iterator begin,
                            MantidVec::const_iterator end) {
@@ -129,21 +129,21 @@ PoldiPeakSearch::findPeaks(MantidVec::const_iterator begin,
 }
 
 /** Actual recursive peak search method
-  *
-  * The maximum of the vector specified by the two iterators supplied as
-  *parameters is designated
-  * a peak in the given range and appended to a list. Then, the method is
-  *executed on the two sub-ranges
-  * of the vector [begin, max - m] and [max + m, end], where m is the user
-  *supplied value of MinimumPeakSeparation.
-  * The results of these two sub-searches are merged into the list, which is
-  *then returned.
-  *
-  * @param begin :: Starting iterator of currently searched vector.
-  * @param end :: End iterator.
-  * @return List of iterators which designate peaks in this range and all
-  *sub-ranges.
-  */
+ *
+ * The maximum of the vector specified by the two iterators supplied as
+ *parameters is designated
+ * a peak in the given range and appended to a list. Then, the method is
+ *executed on the two sub-ranges
+ * of the vector [begin, max - m] and [max + m, end], where m is the user
+ *supplied value of MinimumPeakSeparation.
+ * The results of these two sub-searches are merged into the list, which is
+ *then returned.
+ *
+ * @param begin :: Starting iterator of currently searched vector.
+ * @param end :: End iterator.
+ * @return List of iterators which designate peaks in this range and all
+ *sub-ranges.
+ */
 std::list<MantidVec::const_iterator>
 PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin,
                                     MantidVec::const_iterator end) const {
@@ -171,20 +171,20 @@ PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin,
 }
 
 /** Maps peak position iterators from one vector to another
-  *
-  * This method is required because the actual peak search is better performed
-  *in the summed neighbor data (see PoldiPeakSearch::getNeighborSums)
-  * and the detected peak positions have to be mapped to the original
-  *correlation spectrum (shifted by 1).
-  *
-  * @param peakPositions :: List with peak position iterators.
-  * @param baseDataStart :: Starting iterator of the vector in which the peak
-  *search was performed.
-  * @param originalDataStart :: Starting iterator of the vector with the
-  *original correlation data.
-  * @returns List with peak positions mapped to the original correlation count
-  *data.
-  */
+ *
+ * This method is required because the actual peak search is better performed
+ *in the summed neighbor data (see PoldiPeakSearch::getNeighborSums)
+ * and the detected peak positions have to be mapped to the original
+ *correlation spectrum (shifted by 1).
+ *
+ * @param peakPositions :: List with peak position iterators.
+ * @param baseDataStart :: Starting iterator of the vector in which the peak
+ *search was performed.
+ * @param originalDataStart :: Starting iterator of the vector with the
+ *original correlation data.
+ * @returns List with peak positions mapped to the original correlation count
+ *data.
+ */
 std::list<MantidVec::const_iterator>
 PoldiPeakSearch::mapPeakPositionsToCorrelationData(
     std::list<MantidVec::const_iterator> peakPositions,
@@ -223,18 +223,18 @@ double PoldiPeakSearch::getTransformedCenter(double value,
 }
 
 /** Creates PoldiPeak-objects from peak position iterators
-  *
-  * In this method, PoldiPeak objects are created from the raw peak position
-  *data and the original x-data. Estimates for peak height and FWHM
-  * provided along with the position.
-  *
-  * @param baseListStart :: Starting iterator of the vector which the peak
-  *positions refer to.
-  * @param peakPositions :: List with peakPositions.
-  * @param xData :: Vector with x-values of the correlation spectrum.
-  * @return Vector with PoldiPeak objects constructed from the raw peak position
-  *data.
-  */
+ *
+ * In this method, PoldiPeak objects are created from the raw peak position
+ *data and the original x-data. Estimates for peak height and FWHM
+ * provided along with the position.
+ *
+ * @param baseListStart :: Starting iterator of the vector which the peak
+ *positions refer to.
+ * @param peakPositions :: List with peakPositions.
+ * @param xData :: Vector with x-values of the correlation spectrum.
+ * @return Vector with PoldiPeak objects constructed from the raw peak position
+ *data.
+ */
 std::vector<PoldiPeak_sptr>
 PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
                           const MantidVec::const_iterator &baseListEnd,
@@ -263,15 +263,15 @@ PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
 }
 
 /** Generates an estimate for FWHM for each peak
-  *
-  * To make it easier for fitting routines, rough FWHM estimates are calculated.
-  *
-  * @param baseListStart :: Starting iterator of the vector which the peak
-  *positions refer to.
-  * @param peakPosition :: Peak position iterator.
-  * @param xData :: Vector with x-values of the correlation spectrum.
-  * @return Estimation of FWHM
-  */
+ *
+ * To make it easier for fitting routines, rough FWHM estimates are calculated.
+ *
+ * @param baseListStart :: Starting iterator of the vector which the peak
+ *positions refer to.
+ * @param peakPosition :: Peak position iterator.
+ * @param xData :: Vector with x-values of the correlation spectrum.
+ * @return Estimation of FWHM
+ */
 double
 PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
                                  const MantidVec::const_iterator &baseListEnd,
@@ -300,14 +300,14 @@ PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
 }
 
 /** Sets error of workspace to specified value
-  *
-  * Since an estimation of the error is calculated from background counts, this
-  *value is assigned to the workspace via this method.
-  *
-  * @param correlationWorkspace :: Workspace containing the correlation spectrum
-  *on which the peak search was performed.
-  * @param error :: Error that is set on the workspace.
-  */
+ *
+ * Since an estimation of the error is calculated from background counts, this
+ *value is assigned to the workspace via this method.
+ *
+ * @param correlationWorkspace :: Workspace containing the correlation spectrum
+ *on which the peak search was performed.
+ * @param error :: Error that is set on the workspace.
+ */
 void PoldiPeakSearch::setErrorsOnWorkspace(
     Workspace2D_sptr correlationWorkspace, double error) const {
   MantidVec &errors = correlationWorkspace->dataE(0);
@@ -316,16 +316,16 @@ void PoldiPeakSearch::setErrorsOnWorkspace(
 }
 
 /** Retrieves a vector with all counts that belong to the background
-  *
-  * In this method, a vector is assembled which contains all count data that is
-  *considered to be background.
-  * Whether a point is considered background depends on its distance to the
-  *given peak positions.
-  *
-  * @param peakPositions :: Peak positions.
-  * @param correlationCounts :: Vector with the complete correlation spectrum.
-  * @return Vector only with counts that belong to the background.
-  */
+ *
+ * In this method, a vector is assembled which contains all count data that is
+ *considered to be background.
+ * Whether a point is considered background depends on its distance to the
+ *given peak positions.
+ *
+ * @param peakPositions :: Peak positions.
+ * @param correlationCounts :: Vector with the complete correlation spectrum.
+ * @return Vector only with counts that belong to the background.
+ */
 MantidVec PoldiPeakSearch::getBackground(
     std::list<MantidVec::const_iterator> peakPositions,
     const MantidVec &correlationCounts) const {
@@ -346,20 +346,20 @@ MantidVec PoldiPeakSearch::getBackground(
 }
 
 /** Computes a background estimation with an error
-  *
-  * This method computes an estimate of the average background along with its
-  *deviation. Since the background does not
-  * follow a normal distribution and may contain outliers, instead of computing
-  *the average and standard deviation,
-  * the median is used as location estimator and Sn is used as scale estimator.
-  *For details regarding the latter
-  * refer to PoldiPeakSearch::getSn.
-  *
-  * @param peakPositions :: Peak positions.
-  * @param correlationCounts :: Data from which the peak positions were
-  *extracted.
-  * @return Background estimation with error.
-  */
+ *
+ * This method computes an estimate of the average background along with its
+ *deviation. Since the background does not
+ * follow a normal distribution and may contain outliers, instead of computing
+ *the average and standard deviation,
+ * the median is used as location estimator and Sn is used as scale estimator.
+ *For details regarding the latter
+ * refer to PoldiPeakSearch::getSn.
+ *
+ * @param peakPositions :: Peak positions.
+ * @param correlationCounts :: Data from which the peak positions were
+ *extracted.
+ * @return Background estimation with error.
+ */
 UncertainValue PoldiPeakSearch::getBackgroundWithSigma(
     std::list<MantidVec::const_iterator> peakPositions,
     const MantidVec &correlationCounts) const {
@@ -379,15 +379,15 @@ UncertainValue PoldiPeakSearch::getBackgroundWithSigma(
 }
 
 /** Checks if the distance of a given point is smaller than the minimum peak
-  *separation
-  *
-  * The method is required for background extraction.
-  *
-  * @param peakPositions :: Peak positions.
-  * @param point :: Point in the spectrum to check.
-  * @return Boolean value, true if point is not closer than
-  *MinimumPeakSeparation to any peakPosition, false otherwise.
-  */
+ *separation
+ *
+ * The method is required for background extraction.
+ *
+ * @param peakPositions :: Peak positions.
+ * @param point :: Point in the spectrum to check.
+ * @return Boolean value, true if point is not closer than
+ *MinimumPeakSeparation to any peakPosition, false otherwise.
+ */
 bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(
     std::list<MantidVec::const_iterator> peakPositions,
     MantidVec::const_iterator point) const {
@@ -403,17 +403,17 @@ bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(
 }
 
 /** Returns the number of background points
-  *
-  * Given a list of peaks and a vector with spectrum count data, this method
-  *returns the number of background points
-  * contained in this spectrum. It is used for extraction of the background in
-  *order to allocate the correct vector
-  * size before filling it.
-  *
-  * @param peakPositions :: Peak positions.
-  * @param correlationCounts :: Data vector the peak positions refer to.
-  * @return Number of background points.
-  */
+ *
+ * Given a list of peaks and a vector with spectrum count data, this method
+ *returns the number of background points
+ * contained in this spectrum. It is used for extraction of the background in
+ *order to allocate the correct vector
+ * size before filling it.
+ *
+ * @param peakPositions :: Peak positions.
+ * @param correlationCounts :: Data vector the peak positions refer to.
+ * @return Number of background points.
+ */
 size_t PoldiPeakSearch::getNumberOfBackgroundPoints(
     std::list<MantidVec::const_iterator> peakPositions,
     const MantidVec &correlationCounts) const {
@@ -433,11 +433,11 @@ size_t PoldiPeakSearch::getNumberOfBackgroundPoints(
 }
 
 /** Returns median of a sorted vector
-  *
-  * @param begin :: Beginning of vector.
-  * @param end :: End of vector.
-  * @return Median of supplied data.
-  */
+ *
+ * @param begin :: Beginning of vector.
+ * @param end :: End of vector.
+ * @return Median of supplied data.
+ */
 double PoldiPeakSearch::getMedianFromSortedVector(
     MantidVec::const_iterator begin, MantidVec::const_iterator end) const {
   size_t count = std::distance(begin, end);
@@ -450,15 +450,15 @@ double PoldiPeakSearch::getMedianFromSortedVector(
 }
 
 /** Calculates Sn as estimator of scale for given vector
-  *
-  * This method implements a naive calculation of Sn, as defined by Rousseeuw
-  *and Croux (http://dx.doi.org/10.2307%2F2291267).
-  * In contrast to standard deviation, this is more robust towards outliers.
-  *
-  * @param begin :: Beginning of vector.
-  * @param end :: End of vector.
-  * @return Sn of supplied data.
-  */
+ *
+ * This method implements a naive calculation of Sn, as defined by Rousseeuw
+ *and Croux (http://dx.doi.org/10.2307%2F2291267).
+ * In contrast to standard deviation, this is more robust towards outliers.
+ *
+ * @param begin :: Beginning of vector.
+ * @param end :: End of vector.
+ * @return Sn of supplied data.
+ */
 double PoldiPeakSearch::getSn(MantidVec::const_iterator begin,
                               MantidVec::const_iterator end) const {
   size_t numberOfPoints = std::distance(begin, end);
@@ -487,14 +487,14 @@ double PoldiPeakSearch::getSn(MantidVec::const_iterator begin,
 }
 
 /** Returns the minimum height a peak should have.
-  *
-  * This method is used when no user estimate of minimum required peak height is
-  *given. It is set to background
-  * plus 3 times Sn.
-  *
-  * @param backgroundWithSigma :: Background with error estimate.
-  * @return Minimum peak height.
-  */
+ *
+ * This method is used when no user estimate of minimum required peak height is
+ *given. It is set to background
+ * plus 3 times Sn.
+ *
+ * @param backgroundWithSigma :: Background with error estimate.
+ * @return Minimum peak height.
+ */
 double PoldiPeakSearch::minimumPeakHeightFromBackground(
     UncertainValue backgroundWithSigma) const {
   return 3.0 * backgroundWithSigma.error() + backgroundWithSigma.value();

@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::Kernel;
 

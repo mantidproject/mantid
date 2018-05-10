@@ -40,5 +40,5 @@ Message::Message(const char *text, Priority priority)
  */
 Message::Message(const Message &msg)
     : QObject(), m_text(msg.text()), m_priority(msg.priority()) {}
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

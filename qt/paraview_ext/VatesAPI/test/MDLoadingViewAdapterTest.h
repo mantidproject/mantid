@@ -3,10 +3,10 @@
 
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
+#include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MockObjects.h"
 
 using namespace Mantid::VATES;
 using namespace testing;

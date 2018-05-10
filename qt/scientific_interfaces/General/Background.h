@@ -43,7 +43,7 @@ private:
   double m_rangeMax;
   bool m_doRemoval;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_BACKGROUND_H_

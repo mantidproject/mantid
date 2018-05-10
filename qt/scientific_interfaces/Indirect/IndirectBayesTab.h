@@ -1,17 +1,17 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectTab.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtDoublePropertyManager>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser>
 
-#include <QMap>
 #include <QDoubleValidator>
+#include <QMap>
 #include <QSettings>
 #include <QWidget>
 
@@ -94,6 +94,6 @@ protected:
   QtTreePropertyBrowser *m_propTree;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif

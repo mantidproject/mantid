@@ -1,6 +1,6 @@
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
-#include "MantidQtWidgets/Common/Message.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/Message.h"
 
 #include <Poco/Message.h>
 
@@ -49,5 +49,5 @@ void QtSignalChannel::setGlobalLogLevel(int priority) {
   using Mantid::Kernel::Logger;
   Logger::setLevelForAll(priority);
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

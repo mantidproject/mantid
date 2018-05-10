@@ -44,7 +44,7 @@ MatrixWorkspace_sptr runInplace(const MatrixWorkspace_sptr &ws) {
   alg.execute();
   return ws;
 }
-}
+} // namespace
 
 class ClearMaskedSpectraTest : public CxxTest::TestSuite {
 public:

@@ -11,7 +11,7 @@ struct MatrixWorkspaceAccess {
       (std::vector<double> & (API::MatrixWorkspace::*)(const std::size_t)) &
       API::MatrixWorkspace::dataX)) x;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_MATRIXWORKSPACEACCESS_H_ */

@@ -1,12 +1,12 @@
 #include "MantidMDAlgorithms/ThresholdMD.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidAPI/Progress.h"
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -57,9 +57,10 @@ void ThresholdMD::init() {
   declareProperty("ReferenceValue", 0.0,
                   "Comparator value used by the Condition.");
 
-  declareProperty("OverwriteWithZero", true, "Flag for enabling overwriting "
-                                             "with a custom value. Defaults to "
-                                             "overwrite signals with zeros.");
+  declareProperty("OverwriteWithZero", true,
+                  "Flag for enabling overwriting "
+                  "with a custom value. Defaults to "
+                  "overwrite signals with zeros.");
 
   declareProperty("CustomOverwriteValue", 0.0,
                   "Custom overwrite value for the signal. Defaults to zero.");

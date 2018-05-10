@@ -6,15 +6,15 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
+#include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::WorkflowAlgorithms::IMuonAsymmetryCalculator;
-using Mantid::WorkflowAlgorithms::MuonGroupCountsCalculator;
 using Mantid::WorkflowAlgorithms::MuonGroupAsymmetryCalculator;
+using Mantid::WorkflowAlgorithms::MuonGroupCountsCalculator;
 using Mantid::WorkflowAlgorithms::MuonPairAsymmetryCalculator;
 using IMuonAsymCalc_uptr = std::unique_ptr<IMuonAsymmetryCalculator>;
 
@@ -145,8 +145,8 @@ public:
   }
 
   /**
-  * Test period 1+2+3 for group counts
-  */
+   * Test period 1+2+3 for group counts
+   */
   void test_groupCounts_threePeriods_plus() {
     MatrixWorkspace_sptr inWSFirst = createWorkspace();
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
@@ -185,8 +185,8 @@ public:
   }
 
   /**
-  * Test period 1+2-3 for group counts
-  */
+   * Test period 1+2-3 for group counts
+   */
   void test_groupCounts_threePeriods_minus() {
     MatrixWorkspace_sptr inWSFirst = createWorkspace();
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
@@ -335,8 +335,8 @@ public:
   }
 
   /**
-  * Test group asymmetry calculation for 3 periods 1+2+3
-  */
+   * Test group asymmetry calculation for 3 periods 1+2+3
+   */
   void test_groupAsymmetry_threePeriods_plus() {
     MatrixWorkspace_sptr periodOne = createWorkspace();
     periodOne->mutableRun().addProperty("goodfrm", 10);
@@ -378,8 +378,8 @@ public:
   }
 
   /**
-  * Test group asymmetry calculation for 3 periods 1+2-3
-  */
+   * Test group asymmetry calculation for 3 periods 1+2-3
+   */
   void test_groupAsymmetry_threePeriods_minus() {
     MatrixWorkspace_sptr periodOne = createWorkspace();
     periodOne->mutableRun().addProperty("goodfrm", 10);
@@ -619,17 +619,17 @@ public:
 
 private:
   /**
-  * Creates 3x3 workspace with values:
-  *     1 2 3
-  *     4 5 6
-  *     7 8 9
-  *
-  * Delta is added to every value if specified.
-  *
-  * Errors are the same values but divided by 10.
-  *
-  * X values are 1 2 3 for all the histograms.
-  */
+   * Creates 3x3 workspace with values:
+   *     1 2 3
+   *     4 5 6
+   *     7 8 9
+   *
+   * Delta is added to every value if specified.
+   *
+   * Errors are the same values but divided by 10.
+   *
+   * X values are 1 2 3 for all the histograms.
+   */
   MatrixWorkspace_sptr createWorkspace(const double delta = 0.0) {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(3, 3);
 

@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/SmoothData.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Algorithms {

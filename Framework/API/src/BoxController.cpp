@@ -1,21 +1,21 @@
 #include <sstream>
 
+#include "MantidAPI/BoxController.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/BoxController.h"
 
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/NodeList.h>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::convert;
@@ -289,7 +289,7 @@ void BoxController::clearFileBacked() {
  *@param newFileIO -- instance of the box controller responsible for the IO;
  *@param fileName  -- if newFileIO comes without opened file, this is the file
  *name to open for the file based IO operations
-*/
+ */
 void BoxController::setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
                                   const std::string &fileName) {
   if (!newFileIO->isOpened())
@@ -303,6 +303,6 @@ void BoxController::setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
   this->m_fileIO = newFileIO;
 }
 
-} // namespace Mantid
-
 } // namespace API
+
+} // namespace Mantid

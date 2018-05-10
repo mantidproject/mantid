@@ -1,17 +1,16 @@
 #ifndef MANTID_API_REPOMODEL_H_
 #define MANTID_API_REPOMODEL_H_
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QVariant>
-#include <QList>
-#include <QVariant>
-#include <QStringList>
-#include <QWidget>
-#include <QDialog>
 #include "MantidAPI/ScriptRepository.h"
-#include <QtConcurrentRun>
+#include <QAbstractItemModel>
+#include <QDialog>
 #include <QFutureWatcher>
+#include <QList>
 #include <QMessageBox>
+#include <QModelIndex>
+#include <QStringList>
+#include <QVariant>
+#include <QWidget>
+#include <QtConcurrentRun>
 
 class QLineEdit;
 class QCheckBox;
@@ -268,6 +267,6 @@ private slots:
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_SCRIPTREPOSITORYVIEW_H_ */

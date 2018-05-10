@@ -1,6 +1,6 @@
 #include "IFunctionWrapper.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 
 void IFunctionWrapper::setFunction(const QString &name) {

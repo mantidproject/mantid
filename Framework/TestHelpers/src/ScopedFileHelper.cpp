@@ -84,4 +84,4 @@ ScopedFile::~ScopedFile() {
     }
   }
 }
-}
+} // namespace ScopedFileHelper

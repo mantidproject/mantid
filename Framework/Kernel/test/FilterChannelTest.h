@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/TestChannel.h"
 #include <Poco/Channel.h>
-#include <Poco/Message.h>
 #include <Poco/LoggingFactory.h>
 #include <Poco/LoggingRegistry.h>
+#include <Poco/Message.h>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>

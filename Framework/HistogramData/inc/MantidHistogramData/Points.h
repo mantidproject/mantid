@@ -2,11 +2,11 @@
 #define MANTID_HISTOGRAMDATA_POINTS_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Scalable.h"
-#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/VectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -62,9 +62,9 @@ public:
   /// Move constructor.
   Points(Points &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  Points &operator=(const Points &)& = default;
+  Points &operator=(const Points &) & = default;
   /// Move assignment.
-  Points &operator=(Points &&)& = default;
+  Points &operator=(Points &&) & = default;
 
   Points(const BinEdges &edges);
 };

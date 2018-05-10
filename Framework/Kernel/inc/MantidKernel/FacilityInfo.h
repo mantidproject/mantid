@@ -4,16 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ComputeResourceInfo.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
-#include <vector>
 #include <string>
+#include <vector>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -22,7 +22,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {

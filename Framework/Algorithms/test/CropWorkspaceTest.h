@@ -1,8 +1,8 @@
 #ifndef CROPWORKSPACETEST_H_
 #define CROPWORKSPACETEST_H_
 
-#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Timer.h"

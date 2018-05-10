@@ -1,14 +1,14 @@
 #ifndef MANTID_GEOMETRY_MDHISTODIMENSION_BUILDER_TEST_H_
 #define MANTID_GEOMETRY_MDHISTODIMENSION_BUILDER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include <cxxtest/TestSuite.h>
 
+using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimensionBuilder;
-using Mantid::Geometry::IMDDimension_sptr;
 
 class MDHistoDimensionBuilderTest : public CxxTest::TestSuite {
 public:

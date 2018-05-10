@@ -4,8 +4,8 @@
 
 #include <boost/python/class.hpp>
 
-using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::RebinnedOutput;
+using Mantid::DataObjects::Workspace2D;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 

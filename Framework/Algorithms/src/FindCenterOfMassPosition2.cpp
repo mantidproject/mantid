@@ -1,16 +1,16 @@
 #include "MantidAlgorithms/FindCenterOfMassPosition2.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
@@ -38,9 +38,10 @@ void FindCenterOfMassPosition2::init() {
                   "Estimate for the beam center in X [m]. Default: 0");
   declareProperty("CenterY", 0.0,
                   "Estimate for the beam center in Y [m]. Default: 0");
-  declareProperty("Tolerance", 0.00125, "Tolerance on the center of mass "
-                                        "position between each iteration [m]. "
-                                        "Default: 0.00125");
+  declareProperty("Tolerance", 0.00125,
+                  "Tolerance on the center of mass "
+                  "position between each iteration [m]. "
+                  "Default: 0.00125");
 
   declareProperty(
       "DirectBeam", true,

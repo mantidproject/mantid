@@ -7,8 +7,8 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/System.h"
 
-#include <map>
 #include <iosfwd>
+#include <map>
 #include <set>
 #include <sstream>
 #include <string>
@@ -73,21 +73,21 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
 
 //------------------------------------------------------------------------------------------------
 /** Join a set or vector of (something that turns into a string) together
-* into one string, separated by a separator,
-* adjacent items that are precisely 1 away from each other
-* will be compressed into a list syntax e.g. 1-5.
-* Returns an empty string if the range is null.
-* Does not add the separator after the LAST item.
-*
-* For example, join a vector of strings with commas with:
-*  out = join(v.begin(), v.end(), ", ");
-*
-* @param begin :: iterator at the start
-* @param end :: iterator at the end
-* @param separator :: string to append between items.
-* @param listSeparator :: string to append between list items.
-* @return A string with contiguous values compressed using the list syntax
-*/
+ * into one string, separated by a separator,
+ * adjacent items that are precisely 1 away from each other
+ * will be compressed into a list syntax e.g. 1-5.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append between items.
+ * @param listSeparator :: string to append between list items.
+ * @return A string with contiguous values compressed using the list syntax
+ */
 template <typename ITERATOR_TYPE>
 DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
                                    const std::string &separator = ",",
@@ -238,8 +238,8 @@ MANTID_KERNEL_DLL void readToEndOfLine(std::istream &in, bool ConsumeEOL);
 MANTID_KERNEL_DLL std::string getWord(std::istream &in, bool consumeEOL);
 ///  function parses a path, found in input string "path" and returns vector of
 ///  the folders contributed into the path */
-MANTID_KERNEL_DLL size_t
-split_path(const std::string &path, std::vector<std::string> &path_components);
+MANTID_KERNEL_DLL size_t split_path(const std::string &path,
+                                    std::vector<std::string> &path_components);
 
 /// Loads the entire contents of a text file into a string
 MANTID_KERNEL_DLL std::string loadFile(const std::string &filename);

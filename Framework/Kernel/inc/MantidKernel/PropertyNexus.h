@@ -48,7 +48,7 @@ DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file,
                                                  const std::string &group);
 }
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
 
 #endif /* MANTID_KERNEL_PROPERTYNEXUS_H_ */

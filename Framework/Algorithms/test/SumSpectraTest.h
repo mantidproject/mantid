@@ -1,17 +1,17 @@
 #ifndef SUMSPECTRATEST_H_
 #define SUMSPECTRATEST_H_
 
-#include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/SumSpectra.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/lexical_cast.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <limits>
-#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;

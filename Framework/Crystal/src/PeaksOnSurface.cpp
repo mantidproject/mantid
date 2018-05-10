@@ -214,8 +214,8 @@ void PeaksOnSurface::exec() {
   m_line4 = m_vertex1 - m_vertex4;
 
   // Determine minimum and maximum in x, y and z.
-  using std::min;
   using std::max;
+  using std::min;
   m_extents[0] =
       min(m_vertex1.X(), min(m_vertex2.X(), min(m_vertex3.X(), m_vertex4.X())));
   m_extents[1] =

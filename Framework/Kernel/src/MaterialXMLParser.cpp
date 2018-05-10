@@ -5,8 +5,8 @@
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NamedNodeMap.h"
-#include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 
@@ -119,12 +119,12 @@ const BuilderHandle &findHandle(const std::string &name) {
 }
 
 /**
-  * Set a value on the builder base on the attribute name and the defined
-  * member function
-  * @param builder A pointer to the builder to update
-  * @param attr The attribute name
-  * @param value The value in the attribute
-  */
+ * Set a value on the builder base on the attribute name and the defined
+ * member function
+ * @param builder A pointer to the builder to update
+ * @param attr The attribute name
+ * @param value The value in the attribute
+ */
 void addToBuilder(MaterialBuilder *builder, const std::string &attr,
                   const std::string &value) {
   // Find the appropriate member function on the builder and set the value
@@ -133,7 +133,7 @@ void addToBuilder(MaterialBuilder *builder, const std::string &attr,
   const auto &setter = findHandle(attr);
   setter(*builder, value);
 }
-}
+} // namespace
 
 // -----------------------------------------------------------------------------
 // Public methods

@@ -1,14 +1,14 @@
 #include "MantidQtWidgets/SliceViewer/QwtScaleDrawNonOrthogonal.h"
 
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
+#include "qwt_layout_metrics.h"
+#include "qwt_painter.h"
+#include "qwt_plot_canvas.h"
+#include "qwt_scale_draw.h"
+#include "qwt_scale_engine.h"
 #include <QMatrix>
 #include <QPainter>
 #include <QPalette>
-#include "qwt_layout_metrics.h"
-#include "qwt_painter.h"
-#include "qwt_scale_draw.h"
-#include "qwt_scale_engine.h"
-#include "qwt_plot_canvas.h"
 
 QwtScaleDrawNonOrthogonal::QwtScaleDrawNonOrthogonal(
     QwtPlot *plot, ScreenDimension screenDimension,
@@ -199,7 +199,7 @@ void QwtScaleDrawNonOrthogonal::applyGridLinesY(
 /** Tranform from plot coordinates to pixel coordinates
  * @param xyz :: coordinate point in plot coordinates
  * @return pixel coordinates
-*/
+ */
 QPoint QwtScaleDrawNonOrthogonal::fromXyzToScreen(QPointF xyz) const {
   auto xScreen = m_plot->transform(QwtPlot::xBottom, xyz.x());
   auto yScreen = m_plot->transform(QwtPlot::yLeft, xyz.y());
@@ -209,7 +209,7 @@ QPoint QwtScaleDrawNonOrthogonal::fromXyzToScreen(QPointF xyz) const {
 /** Inverse transform: from pixels to plot coords
  * @param screen :: location in pixels
  * @return plot coordinates (float)
-*/
+ */
 QPointF QwtScaleDrawNonOrthogonal::fromScreenToXyz(QPoint screen) const {
   auto x = m_plot->invTransform(QwtPlot::xBottom, screen.x());
   auto y = m_plot->invTransform(QwtPlot::yLeft, screen.y());

@@ -61,15 +61,15 @@ class ComponentInfo;
 class MANTID_BEAMLINE_DLL DetectorInfo {
 public:
   DetectorInfo() = default;
-  DetectorInfo(
-      std::vector<Eigen::Vector3d> positions,
-      std::vector<Eigen::Quaterniond,
-                  Eigen::aligned_allocator<Eigen::Quaterniond>> rotations);
-  DetectorInfo(
-      std::vector<Eigen::Vector3d> positions,
-      std::vector<Eigen::Quaterniond,
-                  Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
-      const std::vector<size_t> &monitorIndices);
+  DetectorInfo(std::vector<Eigen::Vector3d> positions,
+               std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>
+                   rotations);
+  DetectorInfo(std::vector<Eigen::Vector3d> positions,
+               std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>
+                   rotations,
+               const std::vector<size_t> &monitorIndices);
 
   bool isEquivalent(const DetectorInfo &other) const;
 

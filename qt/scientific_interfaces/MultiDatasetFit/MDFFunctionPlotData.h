@@ -14,7 +14,7 @@ namespace Mantid {
 namespace API {
 class IFunction;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -51,8 +51,8 @@ private:
   static size_t g_defaultDomainSize;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFFUNCTIONPLOTDATA_H_*/

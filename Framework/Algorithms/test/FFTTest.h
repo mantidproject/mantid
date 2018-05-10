@@ -12,8 +12,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -535,10 +535,10 @@ public:
   }
 
   /**
- * Test that the algorithm can handle a WorkspaceGroup as input without
- * crashing
- * We have to use the ADS to test WorkspaceGroups
- */
+   * Test that the algorithm can handle a WorkspaceGroup as input without
+   * crashing
+   * We have to use the ADS to test WorkspaceGroups
+   */
   void testValidateInputsWithWSGroup() {
     auto ws1 =
         boost::static_pointer_cast<Workspace>(createWS(100, 0, "real_1"));
@@ -696,11 +696,11 @@ public:
   }
 
   /**
- * Test suggested by instrument scientists
- * A function that is symmetrical -- f(x) == f(-x) -- should give an entirely
- * real transform
- * (Test that this succeeds for point data)
- */
+   * Test suggested by instrument scientists
+   * A function that is symmetrical -- f(x) == f(-x) -- should give an entirely
+   * real transform
+   * (Test that this succeeds for point data)
+   */
   void test_symmetricalFunction_realTransform_point() {
     const auto &inputWS = createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI,
                                                      4.277321, 0.8, false);

@@ -77,5 +77,5 @@ void ComponentParser::endElement(const Poco::XML::XMLString &,
   }
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

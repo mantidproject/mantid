@@ -3,9 +3,9 @@
 
 #include "MantidKernel/System.h"
 
+#include "ui_DataProcessorOptionsDialog.h"
 #include <QDialog>
 #include <boost/shared_ptr.hpp>
-#include "ui_DataProcessorOptionsDialog.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -120,6 +120,6 @@ namespace Kernel {
 EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
     Mantid::Kernel::SingletonHolder<Mantid::MDAlgorithms::MDTransfFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif

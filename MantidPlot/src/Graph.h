@@ -95,7 +95,7 @@ namespace Mantid {
 namespace Kernel {
 class Unit;
 }
-}
+} // namespace Mantid
 
 //! Structure containing curve layout parameters
 typedef struct {
@@ -116,7 +116,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 /**
  * \brief A 2D-plotting widget.
  *

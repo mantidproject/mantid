@@ -9,7 +9,7 @@ namespace Mantid {
 namespace Parallel {
 class Communicator;
 }
-}
+} // namespace Mantid
 
 namespace ParallelTestHelpers {
 

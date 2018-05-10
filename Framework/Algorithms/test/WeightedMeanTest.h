@@ -1,10 +1,10 @@
 #ifndef WEIGHTEDMEANTEST_H_
 #define WEIGHTEDMEANTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/WeightedMean.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

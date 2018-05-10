@@ -5,11 +5,11 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
-* Returns the first derivative at a given point.
-* @param values : [input] The values of the image as a vector
-* @param background : [input] The background
-* @return : The first derivative as a vector
-*/
+ * Returns the first derivative at a given point.
+ * @param values : [input] The values of the image as a vector
+ * @param background : [input] The background
+ * @return : The first derivative as a vector
+ */
 std::vector<double>
 MaxentEntropyNegativeValues::derivative(const std::vector<double> &values,
                                         double background) {
@@ -25,11 +25,11 @@ MaxentEntropyNegativeValues::derivative(const std::vector<double> &values,
 }
 
 /**
-* Returns the second derivative at a given point.
-* @param values : [input] The values of the image as a vector
-* @param background : [input] The background
-* @return : The second derivative as a vector
-*/
+ * Returns the second derivative at a given point.
+ * @param values : [input] The values of the image as a vector
+ * @param background : [input] The background
+ * @return : The second derivative as a vector
+ */
 std::vector<double>
 MaxentEntropyNegativeValues::secondDerivative(const std::vector<double> &values,
                                               double background) {
@@ -46,12 +46,12 @@ MaxentEntropyNegativeValues::secondDerivative(const std::vector<double> &values,
 }
 
 /**
-* Corrects the image. For PosNeg images there is nothing to correct so we just
-* return the vector we were given
-* @param values : [input] The values of the image as a vector
-* @param newValue : [input] The new value to use (unused variable)
-* @return : The corrected values as a vector
-*/
+ * Corrects the image. For PosNeg images there is nothing to correct so we just
+ * return the vector we were given
+ * @param values : [input] The values of the image as a vector
+ * @param newValue : [input] The new value to use (unused variable)
+ * @return : The corrected values as a vector
+ */
 std::vector<double>
 MaxentEntropyNegativeValues::correctValues(const std::vector<double> &values,
                                            double newValue) {

@@ -1,9 +1,9 @@
 #ifndef MANTIDPLOT_MANTIDMATRIXEXTENSIONREQUEST_H
 #define MANTIDPLOT_MANTIDMATRIXEXTENSIONREQUEST_H
 
+#include "IMantidMatrixExtensionHandler.h"
 #include "MantidMatrixModel.h"
 #include "MantidMatrixTabExtension.h"
-#include "IMantidMatrixExtensionHandler.h"
 #include <memory>
 
 class MantidMatrixExtensionRequest {

@@ -1,37 +1,37 @@
 #include "MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h"
 
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Statistics.h"
 
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
-#include "MantidCurveFitting/Functions/Polynomial.h"
-#include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Functions/BackToBackExponential.h"
-#include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
-#include "MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
+#include "MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h"
+#include "MantidCurveFitting/Functions/BackToBackExponential.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
+#include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
+#include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
 #include <fstream>
 #include <iostream>
 
-#include <gsl/gsl_sf_erf.h>
 #include <cmath>
+#include <gsl/gsl_sf_erf.h>
 
 /// Factor on FWHM for fitting a peak
 #define PEAKFITRANGEFACTOR 5.0
@@ -144,8 +144,9 @@ void FitPowderDiffPeaks::init() {
   vector<string> genpeakoptions{"(HKL) & Calculation", "From Bragg Peak Table"};
   auto propvalidator = boost::make_shared<StringListValidator>(genpeakoptions);
   declareProperty("PeakParametersStartingValueFrom", "(HKL) & Calculation",
-                  propvalidator, "Choice of how to generate starting values of "
-                                 "Bragg peak profile parmeters.");
+                  propvalidator,
+                  "Choice of how to generate starting values of "
+                  "Bragg peak profile parmeters.");
 
   declareProperty("MinimumPeakHeight", 0.20,
                   "Minimum peak height (with background removed) "
@@ -264,7 +265,7 @@ void FitPowderDiffPeaks::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Process input parameters
-  */
+ */
 void FitPowderDiffPeaks::processInputProperties() {
   // data workspace
   m_dataWS = this->getProperty("InputWorkspace");
@@ -351,13 +352,13 @@ void FitPowderDiffPeaks::processInputProperties() {
 
 //----------------------------------------------------------------------------------------------
 /** Fit peaks in Robust mode.
-  * Prerequisite:
-  * 1. There are not any peaks that overlap to others;
-  * Algorithm: All peaks are fit individually
-  * Challenge:
-  *   1. Starting geometry parameters can be off
-  *   2. Peak profile parameters cannot be trusted at all.
-  */
+ * Prerequisite:
+ * 1. There are not any peaks that overlap to others;
+ * Algorithm: All peaks are fit individually
+ * Challenge:
+ *   1. Starting geometry parameters can be off
+ *   2. Peak profile parameters cannot be trusted at all.
+ */
 void FitPowderDiffPeaks::fitPeaksRobust() {
   // I. Prepare
   BackToBackExponential_sptr rightpeak;
@@ -423,7 +424,8 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
         robmsgss << parname << " = " << thispeak->getParameter(parname) << '\n';
       }
       g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2
-                          << '\n' << robmsgss.str();
+                          << '\n'
+                          << robmsgss.str();
 
       rightpeak = thispeak;
       isrightmost = false;
@@ -511,8 +513,8 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
 
 //----------------------------------------------------------------------------------------------
 /** Observe peak range with hint from right peak's properties
-  * Assumption: the background is reasonably flat within peak range
-  */
+ * Assumption: the background is reasonably flat within peak range
+ */
 void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
                                           BackToBackExponential_sptr rightpeak,
                                           double refpeakshift,
@@ -562,43 +564,43 @@ void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
 
 //----------------------------------------------------------------------------------------------
 /** Fit a single peak including its background by a robust algorithm
-  * Algorithm will
-  *  1. Locate Maximum
-  *  2.
-  *
-  * Assumption:
-  * 1. peak must be in the range of [input peak center - leftdev, + rightdev]
-  *
-  * Prerequisites:
-  * ---- NONE!
-  *
-  * Algorithms:
-  *  1. Build partial workspace for peak
-  *  2. Estimate background
-  *  3. Estimate peak position and height (by observing)
-  *  4. Fit peak by Gaussian for more accurate peak position, height and sigma
-  *
-  * Peak Fit Algorithms: 4 different approaches are used.  3 of them use normal
-  *minimzers such that
-  * 1. Use X0 and I calculated by Gaussian, then use A, B, S from input;
-  * 2. Use X0, I and S calculated by Gaussian, then use A and B from input;
-  * 3. Use X0, I and S calculated by Gaussian, then use A and B from right peak;
-  * 4. Use X0, I and S calculated by Gaussian, then use simulated annealing on A
-  *and B;
-  *
-  * Arguments
-  * @param peak :: A peak function.
-  * @param backgroundfunction :: A background function
-  * @param peakleftbound :: peak left bound
-  * @param peakrightbound :: peak right bound
-  * @param rightpeakparammap :: peakrightbound
-  * @param finalchi2   ::  (output) chi square of the fit result
-  *
-  * Arguments:
-  * 1. leftdev, rightdev:  search range for the peak from the estimatio
-  *(theoretical)
-  * Return: chi2 ... all the other parameter should be just in peak
-  */
+ * Algorithm will
+ *  1. Locate Maximum
+ *  2.
+ *
+ * Assumption:
+ * 1. peak must be in the range of [input peak center - leftdev, + rightdev]
+ *
+ * Prerequisites:
+ * ---- NONE!
+ *
+ * Algorithms:
+ *  1. Build partial workspace for peak
+ *  2. Estimate background
+ *  3. Estimate peak position and height (by observing)
+ *  4. Fit peak by Gaussian for more accurate peak position, height and sigma
+ *
+ * Peak Fit Algorithms: 4 different approaches are used.  3 of them use normal
+ *minimzers such that
+ * 1. Use X0 and I calculated by Gaussian, then use A, B, S from input;
+ * 2. Use X0, I and S calculated by Gaussian, then use A and B from input;
+ * 3. Use X0, I and S calculated by Gaussian, then use A and B from right peak;
+ * 4. Use X0, I and S calculated by Gaussian, then use simulated annealing on A
+ *and B;
+ *
+ * Arguments
+ * @param peak :: A peak function.
+ * @param backgroundfunction :: A background function
+ * @param peakleftbound :: peak left bound
+ * @param peakrightbound :: peak right bound
+ * @param rightpeakparammap :: peakrightbound
+ * @param finalchi2   ::  (output) chi square of the fit result
+ *
+ * Arguments:
+ * 1. leftdev, rightdev:  search range for the peak from the estimatio
+ *(theoretical)
+ * Return: chi2 ... all the other parameter should be just in peak
+ */
 bool FitPowderDiffPeaks::fitSinglePeakRobust(
     BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
     double peakleftbound, double peakrightbound,
@@ -828,8 +830,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
 
 //----------------------------------------------------------------------------------------------
 /** Fit single peak with background to raw data
-  * Note 1: in a limited range (4*FWHM)
-  */
+ * Note 1: in a limited range (4*FWHM)
+ */
 bool FitPowderDiffPeaks::doFit1PeakBackground(
     Workspace2D_sptr dataws, size_t wsindex, BackToBackExponential_sptr peak,
     BackgroundFunction_sptr backgroundfunction, double &chi2) {
@@ -897,7 +899,7 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(
 
 //----------------------------------------------------------------------------------------------
 /** Fit signle peak by Monte Carlo/simulated annealing
-  */
+ */
 bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
     BackToBackExponential_sptr peak, vector<string> paramtodomc) {
   UNUSED_ARG(peak);
@@ -1096,11 +1098,11 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
 
 //----------------------------------------------------------------------------------------------
 /** Fit individual peak or group of overlapped peaks with good starting values
-  *
-  * Strategy:
-  * 1. From high d-spacing, search for peak or overlapped peaks
-  *
-  * Output: (1) goodfitpeaks, (2) goodfitchi2
+ *
+ * Strategy:
+ * 1. From high d-spacing, search for peak or overlapped peaks
+ *
+ * Output: (1) goodfitpeaks, (2) goodfitchi2
  */
 void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
   // 1. Initialize (local) background function
@@ -1206,13 +1208,13 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
 
 //----------------------------------------------------------------------------------------------
 /** Fit peak with trustful peak parameters
-  * @param peak :: A peak BackToBackExponential function
-  * @param backgroundfunction :: A background function
-  * @param leftbound ::  left boundary of the peak for fitting
-  * @param rightbound :: right boundary of the peak for fitting
-  * @param chi2 :: The output chi squared
-  * @param annhilatedpeak :: (output) annhilatedpeak
-  */
+ * @param peak :: A peak BackToBackExponential function
+ * @param backgroundfunction :: A background function
+ * @param leftbound ::  left boundary of the peak for fitting
+ * @param rightbound :: right boundary of the peak for fitting
+ * @param chi2 :: The output chi squared
+ * @param annhilatedpeak :: (output) annhilatedpeak
+ */
 bool FitPowderDiffPeaks::fitSinglePeakConfident(
     BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
     double leftbound, double rightbound, double &chi2, bool &annhilatedpeak) {
@@ -1446,16 +1448,16 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
 
 //----------------------------------------------------------------------------------------------
 /** Calculate the range to fit peak/peaks group
-  * by avoiding including the tails of the neighboring peaks
-  *
-  * Assumption: all peaks' parameters on centre and FWHM are close to the true
-  *value
-  *
-  * @param ileftpeak ::  index of the left most peak in the peak groups;
-  * @param irightpeak :: index of the right most peak in the peak groups;
-  * @param peakleftboundary ::  left boundary of the peak for fitting (output)
-  * @param peakrightboundary :: right boundary of the peak for fitting (output)
-  */
+ * by avoiding including the tails of the neighboring peaks
+ *
+ * Assumption: all peaks' parameters on centre and FWHM are close to the true
+ *value
+ *
+ * @param ileftpeak ::  index of the left most peak in the peak groups;
+ * @param irightpeak :: index of the right most peak in the peak groups;
+ * @param peakleftboundary ::  left boundary of the peak for fitting (output)
+ * @param peakrightboundary :: right boundary of the peak for fitting (output)
+ */
 void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak,
                                                   size_t irightpeak,
                                                   double &peakleftboundary,
@@ -1503,16 +1505,16 @@ void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak,
 
 //----------------------------------------------------------------------------
 /** Fit peak with flexiblity in multiple steps
-  * Prerequisit:
-  * 1. Peak parameters are set up to the peak function
-  * 2. Background is removed
-  *
-  * @param dataws :: The data workspace
-  * @param peakfunction :: An instance of the BackToBackExponential peak
-  *function
-  * @param guessedfwhm: Guessed fwhm in order to constain the peak.  If
-  *negative, then no constraint
-  */
+ * Prerequisit:
+ * 1. Peak parameters are set up to the peak function
+ * 2. Background is removed
+ *
+ * @param dataws :: The data workspace
+ * @param peakfunction :: An instance of the BackToBackExponential peak
+ *function
+ * @param guessedfwhm: Guessed fwhm in order to constain the peak.  If
+ *negative, then no constraint
+ */
 std::pair<bool, double>
 FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
                               BackToBackExponential_sptr peakfunction,
@@ -1618,7 +1620,7 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
 
 //----------------------------------------------------------------------------
 /** Store the function's parameter values to a map
-  */
+ */
 void FitPowderDiffPeaks::storeFunctionParameters(
     IFunction_sptr function, std::map<string, double> &parammaps) {
   vector<string> paramnames = function->getParameterNames();
@@ -1629,7 +1631,7 @@ void FitPowderDiffPeaks::storeFunctionParameters(
 
 //----------------------------------------------------------------------------
 /** Restore the function's parameter values from a map
-  */
+ */
 void FitPowderDiffPeaks::restoreFunctionParameters(
     IFunction_sptr function, map<string, double> parammap) {
   vector<string> paramnames = function->getParameterNames();
@@ -1642,17 +1644,17 @@ void FitPowderDiffPeaks::restoreFunctionParameters(
 
 //----------------------------------------------------------------------------
 /** Fit 1 peak by 1 minimizer of 1 call of minimzer (simple version)
-  * @param dataws :: A data aworkspace
-  * @param workspaceindex :: A histogram index
-  * @param peakfunction :: An instance of the BackToBackExponential function
-  * @param minimzername :: A name of the minimizer to use
-  * @param maxiteration :: A maximum number of iterations
-  * @param chi2 :: The chi squared value (output)
-  *
-  * Return
-  * 1. fit success?
-  * 2. chi2
-  */
+ * @param dataws :: A data aworkspace
+ * @param workspaceindex :: A histogram index
+ * @param peakfunction :: An instance of the BackToBackExponential function
+ * @param minimzername :: A name of the minimizer to use
+ * @param maxiteration :: A maximum number of iterations
+ * @param chi2 :: The chi squared value (output)
+ *
+ * Return
+ * 1. fit success?
+ * 2. chi2
+ */
 bool FitPowderDiffPeaks::doFit1PeakSimple(
     Workspace2D_sptr dataws, size_t workspaceindex,
     BackToBackExponential_sptr peakfunction, string minimzername,
@@ -1715,14 +1717,14 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
 
 //----------------------------------------------------------------------------------------------
 /** Fit 1 peak by using a sequential of minimizer
-  * @param dataws :: A data aworkspace
-  * @param workspaceindex :: A histogram index
-  * @param peakfunction :: An instance of the BackToBackExponential function
-  * @param minimzernames :: A vector of the minimizer names
-  * @param maxiterations :: A vector if maximum numbers of iterations
-  * @param dampfactors :: A vector of damping factors
-  * @param chi2 :: The chi squared value (output)
-  */
+ * @param dataws :: A data aworkspace
+ * @param workspaceindex :: A histogram index
+ * @param peakfunction :: An instance of the BackToBackExponential function
+ * @param minimzernames :: A vector of the minimizer names
+ * @param maxiterations :: A vector if maximum numbers of iterations
+ * @param dampfactors :: A vector of damping factors
+ * @param chi2 :: The chi squared value (output)
+ */
 bool FitPowderDiffPeaks::doFit1PeakSequential(
     Workspace2D_sptr dataws, size_t workspaceindex,
     BackToBackExponential_sptr peakfunction, vector<string> minimzernames,
@@ -1784,7 +1786,7 @@ bool FitPowderDiffPeaks::doFit1PeakSequential(
 
 //----------------------------------------------------------------------------
 /** Fit background-removed peak by Gaussian
-  */
+ */
 bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
                                            size_t workspaceindex,
                                            double in_center, double leftfwhm,
@@ -1840,7 +1842,8 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   bool fitsuccess;
   std::string fitresult = parseFitResult(fitalg, chi2, fitsuccess);
   g_log.information() << "[Fit Gaussian Peak] Successful = " << fitsuccess
-                      << ", Result:\n" << fitresult << '\n';
+                      << ", Result:\n"
+                      << fitresult << '\n';
 
   // 4. Get result
   center = gaussianpeak->centre();
@@ -1854,18 +1857,18 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // 5. Debug output
   API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
   std::string infofit = parseFitParameterWorkspace(paramws);
-  g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n" << infofit
-                      << '\n';
+  g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n"
+                      << infofit << '\n';
 
   return true;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Fit peaks with confidence in fwhm and etc.
-  * @param peaks :: A vector of instances of BackToBackExponential
-  * @param backgroundfunction :: An instance of BackgroundFunction
-  * @param gfwhm : guessed fwhm.  If negative, then use the input value
-  */
+ * @param peaks :: A vector of instances of BackToBackExponential
+ * @param backgroundfunction :: An instance of BackgroundFunction
+ * @param gfwhm : guessed fwhm.  If negative, then use the input value
+ */
 bool FitPowderDiffPeaks::fitOverlappedPeaks(
     vector<BackToBackExponential_sptr> peaks,
     BackgroundFunction_sptr backgroundfunction, double gfwhm) {
@@ -1944,7 +1947,7 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(
 
 //----------------------------------------------------------------------------------------------
 /** Fit multiple (overlapped) peaks
-  */
+ */
 bool FitPowderDiffPeaks::doFitMultiplePeaks(
     Workspace2D_sptr dataws, size_t wsindex, CompositeFunction_sptr peaksfunc,
     vector<BackToBackExponential_sptr> peakfuncs, vector<bool> &vecfitgood,
@@ -2055,10 +2058,10 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
 
 //----------------------------------------------------------------------------------------------
 /** Use Le Bail method to estimate and set the peak heights
-  * @param dataws:  workspace containing the background-removed data
-  * @param wsindex: workspace index of the data without background
-  * @param peaks :: A vector of instances of BackToBackExponential function
-  */
+ * @param dataws:  workspace containing the background-removed data
+ * @param wsindex: workspace index of the data without background
+ * @param peaks :: A vector of instances of BackToBackExponential function
+ */
 void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
     Workspace2D_sptr dataws, size_t wsindex,
     vector<BackToBackExponential_sptr> peaks) {
@@ -2106,7 +2109,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
 
 //----------------------------------------------------------------------------------------------
 /** Set constraints on a group of overlapped peaks for fitting
-  */
+ */
 void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     vector<BackToBackExponential_sptr> peaks) {
   for (const auto &thispeak : peaks) {
@@ -2124,7 +2127,7 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
 
 //----------------------------------------------------------------------------------------------
 /** Fit N overlapped peaks in a simple manner
-  */
+ */
 bool FitPowderDiffPeaks::doFitNPeaksSimple(
     Workspace2D_sptr dataws, size_t wsindex, CompositeFunction_sptr peaksfunc,
     vector<BackToBackExponential_sptr> peakfuncs, string minimizername,
@@ -2187,7 +2190,7 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
 //=====================================
 //----------------------------------------------------------------------------------------------
 /** Parse fit result
-  */
+ */
 std::string FitPowderDiffPeaks::parseFitResult(API::IAlgorithm_sptr fitalg,
                                                double &chi2, bool &fitsuccess) {
   stringstream rss;
@@ -2205,7 +2208,7 @@ std::string FitPowderDiffPeaks::parseFitResult(API::IAlgorithm_sptr fitalg,
 
 //----------------------------------------------------------------------------------------------
 /** Parse parameter workspace returned from Fit()
-  */
+ */
 std::string FitPowderDiffPeaks::parseFitParameterWorkspace(
     API::ITableWorkspace_sptr paramws) {
   // 1. Check
@@ -2280,7 +2283,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
 }
 
 /** Import Bragg peak table workspace
-  */
+ */
 void FitPowderDiffPeaks::parseBraggPeakTable(
     TableWorkspace_sptr peakws, vector<map<string, double>> &parammaps,
     vector<map<string, int>> &hklmaps) {
@@ -2331,7 +2334,7 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
 //----------------------------------------------------------------------------
 /** Create a Workspace2D for fitted peaks (pattern) and also the workspace for
  * Zscores!
-  */
+ */
 Workspace2D_sptr
 FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
                                                     int workspaceindex) {
@@ -2379,7 +2382,7 @@ FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
 
 //----------------------------------------------------------------------------
 /** Create data workspace for X0, A, B and S of peak with good fit
-  */
+ */
 Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
   // 1. Check and prepare
   if (m_vecPeakFunctions.size() != m_peakFitChi2.size()) {
@@ -2442,9 +2445,9 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
 
 //----------------------------------------------------------------------------
 /** Generate a TableWorkspace for peaks with good fitting.
-  * Table has column as H, K, L, d_h, X0, A(lpha), B(eta), S(igma), Chi2
-  * Each row is a peak
-  */
+ * Table has column as H, K, L, d_h, X0, A(lpha), B(eta), S(igma), Chi2
+ * Each row is a peak
+ */
 pair<TableWorkspace_sptr, TableWorkspace_sptr>
 FitPowderDiffPeaks::genPeakParametersWorkspace() {
   // 1. Debug/Test Output
@@ -2579,9 +2582,9 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /** Genearte peaks from input workspace;
-  * Each peak within requirement will put into both (1) m_peaks and (2)
+ * Each peak within requirement will put into both (1) m_peaks and (2)
  * m_peaksmap
-  */
+ */
 void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
   // Check and clear input and output
   if (!peakparamws) {
@@ -2606,12 +2609,9 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
 
   // Create a map to convert the Bragg peak Table paramter name to Back to back
   // exponential+pseudo-voigt
-  map<string, string> bk2bk2braggmap{{"A", "Alpha"},
-                                     {"B", "Beta"},
-                                     {"X0", "TOF_h"},
-                                     {"I", "Height"},
-                                     {"S", "Sigma"},
-                                     {"S2", "Sigma2"}};
+  map<string, string> bk2bk2braggmap{{"A", "Alpha"},  {"B", "Beta"},
+                                     {"X0", "TOF_h"}, {"I", "Height"},
+                                     {"S", "Sigma"},  {"S2", "Sigma2"}};
 
   // Generate Peaks
   size_t numbadrows = 0;
@@ -2704,20 +2704,21 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
           << ") @ d = " << d_h << ", TOF = " << tof_h << '\n';
   }
   g_log.information() << "[DBx531] Peaks To Fit:  Number of peaks = "
-                      << m_vecPeakFunctions.size() << "\n" << dbout.str();
+                      << m_vecPeakFunctions.size() << "\n"
+                      << dbout.str();
 }
 
 //-----------------------------------------------------------------------------------------
 /** Generate a peak
-  *
-  * @param hklmap: a map containing one (HKL) entry
-  * @param parammap :: a map of parameters
-  * @param bk2bk2braggmap :: bk2bk2braggmap
-  * @param good :: (output) peak is valid
-  * @param hkl   : (output) (HKL) of the peak generated.
-  * @param d_h :: (output) d_h
-  * @return      : BackToBackExponential peak
-  */
+ *
+ * @param hklmap: a map containing one (HKL) entry
+ * @param parammap :: a map of parameters
+ * @param bk2bk2braggmap :: bk2bk2braggmap
+ * @param good :: (output) peak is valid
+ * @param hkl   : (output) (HKL) of the peak generated.
+ * @param d_h :: (output) d_h
+ * @return      : BackToBackExponential peak
+ */
 BackToBackExponential_sptr
 FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
                             map<string, double> parammap,
@@ -2906,12 +2907,12 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
 
 //----------------------------------------------------------------------------------------------
 /** Plot a single peak to output vector
-  *
-  * @param domain:       domain/region of the peak to plot.  It is very
-  *localized.
-  * @param peakfunction: function to plot
-  * @param background:   background of the peak
-  */
+ *
+ * @param domain:       domain/region of the peak to plot.  It is very
+ *localized.
+ * @param peakfunction: function to plot
+ * @param background:   background of the peak
+ */
 void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
                                       BackgroundFunction_sptr background,
                                       FunctionDomain1DVector domain) {
@@ -2945,10 +2946,10 @@ void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
 //===================================
 //----------------------------------------------------------------------------------------------
 /** Get (HKL) from a map
-  * Return false if the information is incomplete
-  * @param intmap:  map as a pair of string and integer
-  * @param hkl:     output integer vector for miller index
-  */
+ * Return false if the information is incomplete
+ * @param intmap:  map as a pair of string and integer
+ * @param hkl:     output integer vector for miller index
+ */
 bool FitPowderDiffPeaks::getHKLFromMap(map<string, int> intmap,
                                        vector<int> &hkl) {
   vector<string> strhkl(3);
@@ -2973,9 +2974,9 @@ bool FitPowderDiffPeaks::getHKLFromMap(map<string, int> intmap,
 
 //----------------------------------------------------------------------------------------------
 /** Crop data workspace: the original workspace will not be affected
-  * @param tofmin:  minimum value for cropping
-  * @param tofmax:  maximum value for cropping
-  */
+ * @param tofmin:  minimum value for cropping
+ * @param tofmax:  maximum value for cropping
+ */
 void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
   API::IAlgorithm_sptr cropalg =
       this->createChildAlgorithm("CropWorkspace", -1, -1, true);
@@ -3009,9 +3010,9 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
 
 //----------------------------------------------------------------------------------------------
 /** Get parameter value from m_instrumentParameters
-  * Exception: throw runtime error if there is no such parameter
-  * @param parname:  parameter name to get from m_instrumentParameters
-  */
+ * Exception: throw runtime error if there is no such parameter
+ * @param parname:  parameter name to get from m_instrumentParameters
+ */
 double FitPowderDiffPeaks::getParameter(string parname) {
   map<string, double>::iterator mapiter;
   mapiter = m_instrumentParmaeters.find(parname);
@@ -3030,11 +3031,11 @@ double FitPowderDiffPeaks::getParameter(string parname) {
 
 //----------------------------------------------------------------------------------------------
 /** Build a partial workspace from original data workspace
-  * @param sourcews:  data workspace which the new workspace is built from
-  * @param workspaceindex:  workspace index of the source spectrum in sourcews
-  * @param leftbound:  lower boundary of the source data
-  * @param rightbound: upper boundary of the source data
-  */
+ * @param sourcews:  data workspace which the new workspace is built from
+ * @param workspaceindex:  workspace index of the source spectrum in sourcews
+ * @param leftbound:  lower boundary of the source data
+ * @param rightbound: upper boundary of the source data
+ */
 Workspace2D_sptr
 FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
                                           size_t workspaceindex,
@@ -3093,8 +3094,8 @@ FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
 
 //----------------------------------------------------------------------------------------------
 /** Get function parameter values information and returned as a string
-  * @param function:  function to have information written out
-  */
+ * @param function:  function to have information written out
+ */
 string getFunctionInfo(IFunction_sptr function) {
   stringstream outss;
   vector<string> parnames = function->getParameterNames();
@@ -3109,16 +3110,16 @@ string getFunctionInfo(IFunction_sptr function) {
 
 //----------------------------------------------------------------------------------------------
 /** Estimate background for a pattern in a coarse mode
-  * Assumption: the peak must be in the data range completely
-  * Algorithm: use two end data points for a linear background
-  * Output: dataws spectrum 3 (workspace index 2)
-  * @param dataws:  data workspace to estimate background for
-  * @param background:  background function
-  * @param wsindexraw:  workspace index of spectrum holding raw data
-  * @param wsindexbkgd: workspace index of spectrum holding background data
-  * @param wsindexpeak: workspace index of spectrum holding pure peak data (with
+ * Assumption: the peak must be in the data range completely
+ * Algorithm: use two end data points for a linear background
+ * Output: dataws spectrum 3 (workspace index 2)
+ * @param dataws:  data workspace to estimate background for
+ * @param background:  background function
+ * @param wsindexraw:  workspace index of spectrum holding raw data
+ * @param wsindexbkgd: workspace index of spectrum holding background data
+ * @param wsindexpeak: workspace index of spectrum holding pure peak data (with
  * background removed)
-  */
+ */
 void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
                               BackgroundFunction_sptr background,
                               size_t wsindexraw, size_t wsindexbkgd,
@@ -3182,18 +3183,18 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
 
 //-----------------------------------------------------------------------------------------------------------
 /** Estimate peak parameters;
-  * Prerequisit:
-  * (1) Background removed
-  * (2) Peak is inside
-  * Algorithm: From the top.  Get the maximum value. Calculate the half maximum
+ * Prerequisit:
+ * (1) Background removed
+ * (2) Peak is inside
+ * Algorithm: From the top.  Get the maximum value. Calculate the half maximum
  * value.  Find the range of X
-  * @param dataws:  data workspace containing peak data
-  * @param wsindex :: index of a histogram
-  * @param centre :: (output) peak centre
-  * @param height :: (output) peak height
-  * @param fwhm :: (output) peak FWHM
-  * @param errmsg :: (output) error message
-  */
+ * @param dataws:  data workspace containing peak data
+ * @param wsindex :: index of a histogram
+ * @param centre :: (output) peak centre
+ * @param height :: (output) peak height
+ * @param fwhm :: (output) peak FWHM
+ * @param errmsg :: (output) error message
+ */
 bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex,
                            double &centre, double &height, double &fwhm,
                            string &errmsg) {

@@ -152,7 +152,7 @@ protected:
 
   bool CalcVariances; ///< from experimental data versus fit the (Co)Variances
 
-  double initCommon(); ///<Check for changes in parameters, etc. Calculates
+  double initCommon(); ///< Check for changes in parameters, etc. Calculates
   /// common values
 
   // Returns penalty.
@@ -179,7 +179,7 @@ protected:
                   //<derivatives
 };
 } // namespace Functions
-}
-}
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif

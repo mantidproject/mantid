@@ -1,6 +1,6 @@
+#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 
 #include <functional>
 #include <map>

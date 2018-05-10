@@ -63,25 +63,23 @@ private:
 };
 
 /**
-* Populates a DataBlockComposite with DataBlocks which are extracted from a
-* indexable collection (array-type). Note that std::is_array does not
-* work on boost::shared_array which is one of the use cases. Hence this
-* function could get abused. Monitor spectra get their own data block
-* @param dataBlockComposite: the detector block composite which will get
-* populated
-* @param indexContainer: the container of indices
-* @param nArray: the number of array elements
-* @param numberOfPeriods: the number of periods
-* @param numberOfChannels: the number of channels
-* @param monitorSpectra: a collection of monitor spectrum numbers
-*/
+ * Populates a DataBlockComposite with DataBlocks which are extracted from a
+ * indexable collection (array-type). Note that std::is_array does not
+ * work on boost::shared_array which is one of the use cases. Hence this
+ * function could get abused. Monitor spectra get their own data block
+ * @param dataBlockComposite: the detector block composite which will get
+ * populated
+ * @param indexContainer: the container of indices
+ * @param nArray: the number of array elements
+ * @param numberOfPeriods: the number of periods
+ * @param numberOfChannels: the number of channels
+ * @param monitorSpectra: a collection of monitor spectrum numbers
+ */
 template <typename T>
-void DLLExport
-populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
-                                        T &indexContainer, int64_t nArray,
-                                        int numberOfPeriods,
-                                        size_t numberOfChannels,
-                                        std::vector<int64_t> monitorSpectra) {
+void DLLExport populateDataBlockCompositeWithContainer(
+    DataBlockComposite &dataBlockComposite, T &indexContainer, int64_t nArray,
+    int numberOfPeriods, size_t numberOfChannels,
+    std::vector<int64_t> monitorSpectra) {
   auto isMonitor = [&monitorSpectra](int64_t index) {
     return std::find(std::begin(monitorSpectra), std::end(monitorSpectra),
                      index) != std::end(monitorSpectra);
@@ -166,6 +164,6 @@ populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
                                numberOfChannels, previousValue, startValue);
   }
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif

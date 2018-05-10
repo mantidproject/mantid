@@ -1,10 +1,10 @@
 #include "MantidKernel/Matrix.h"
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <memory>
@@ -52,11 +52,11 @@ template <typename T> struct PSep {
 };
 
 /**
-* Function to take a vector and sort the vector
-* so as to produce an index. Leaves the vector unchanged.
-* @param pVec :: Input vector
-* @param Index :: Output vector
-*/
+ * Function to take a vector and sort the vector
+ * so as to produce an index. Leaves the vector unchanged.
+ * @param pVec :: Input vector
+ * @param Index :: Output vector
+ */
 template <typename T>
 void indexSort(const std::vector<T> &pVec, std::vector<int> &Index) {
   Index.resize(pVec.size());
@@ -70,7 +70,7 @@ void indexSort(const std::vector<T> &pVec, std::vector<int> &Index) {
 template void indexSort(const std::vector<double> &, std::vector<int> &);
 template void indexSort(const std::vector<float> &, std::vector<int> &);
 template void indexSort(const std::vector<int> &, std::vector<int> &);
-} // End of Anonymous name space
+} // namespace
 
 template <typename T> std::vector<T> Matrix<T>::getVector() const {
   std::vector<T> rez(m_numRows * m_numColumns);
@@ -122,8 +122,7 @@ Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
 }
 //
 template <typename T>
-Matrix<T>::Matrix(const std::vector<T> &data)
-    : m_numRows(0), m_numColumns(0) {
+Matrix<T>::Matrix(const std::vector<T> &data) : m_numRows(0), m_numColumns(0) {
   size_t numElements = data.size();
   size_t numRows = static_cast<size_t>(sqrt(double(numElements)));
   size_t numRowsSquare = numRows * numRows;
@@ -240,8 +239,7 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 
 template <typename T>
 Matrix<T>::Matrix(Matrix<T> &&other) noexcept
-    : m_numRows(other.m_numRows),
-      m_numColumns(other.m_numColumns),
+    : m_numRows(other.m_numRows), m_numColumns(other.m_numColumns),
       m_rawDataAlloc(std::move(other.m_rawDataAlloc)),
       m_rawData(std::move(other.m_rawData)) {
   other.m_numRows = 0;
@@ -1552,7 +1550,7 @@ std::string Matrix<T>::str() const
  * @param os :: output stream
  * @param matrix :: Matrix to write out
  * @return The output stream (of)
-*/
+ */
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix) {
   dumpToStream(os, matrix, ',');
@@ -1565,7 +1563,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix) {
  * @param os :: output stream
  * @param matrix :: Matrix to write out
  * @param delimiter :: A character to use as delimiter for the string
-*/
+ */
 template <typename T>
 void dumpToStream(std::ostream &os, const Kernel::Matrix<T> &matrix,
                   const char delimiter) {
@@ -1581,12 +1579,12 @@ void dumpToStream(std::ostream &os, const Kernel::Matrix<T> &matrix,
 }
 
 /**
-* Fill an object from a stream. Format should be
-* Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
-* @param is :: A stream object
-* @param in :: An object to fill
-* @returns A reference to the stream
-*/
+ * Fill an object from a stream. Format should be
+ * Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
+ * @param is :: A stream object
+ * @param in :: An object to fill
+ * @returns A reference to the stream
+ */
 template <typename T>
 std::istream &operator>>(std::istream &is, Kernel::Matrix<T> &in) {
   fillFromStream(is, in, ',');
@@ -1594,13 +1592,13 @@ std::istream &operator>>(std::istream &is, Kernel::Matrix<T> &in) {
 }
 
 /**
-* Fill a Matrix from a stream using the given separator. Format should be
-* Matrix(nrowsSEPncols)x_00SEPx_01...SEPx_10SEPx_11
-* where SEP is replaced by the given separator
-* @param is :: A stream object
-* @param in :: An Matrix object to fill
-* @param delimiter :: A single character separator that delimits the entries
-*/
+ * Fill a Matrix from a stream using the given separator. Format should be
+ * Matrix(nrowsSEPncols)x_00SEPx_01...SEPx_10SEPx_11
+ * where SEP is replaced by the given separator
+ * @param is :: A stream object
+ * @param in :: An Matrix object to fill
+ * @param delimiter :: A single character separator that delimits the entries
+ */
 template <typename T>
 void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
                     const char delimiter) {
@@ -1699,4 +1697,4 @@ template MANTID_KERNEL_DLL void fillFromStream(std::istream &, IntMatrix &,
 ///\endcond TEMPLATE
 
 } // namespace Kernel
-} // namespace
+} // namespace Mantid

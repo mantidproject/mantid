@@ -2,8 +2,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidKernel/Strings.h"
 
 #include <cmath>
 
@@ -120,5 +120,5 @@ void SlitCalculator::on_recalculate_triggered() {
   ui.slit1Text->setText(QString::number(s1, 'f', 3));
   ui.slit2Text->setText(QString::number(s2, 'f', 3));
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

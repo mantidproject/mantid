@@ -7,9 +7,9 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LiveListenerInfo.h"
 
+#include <map>
 #include <set>
 #include <string>
-#include <map>
 #include <vector>
 
 //----------------------------------------------------------------------
@@ -19,7 +19,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {

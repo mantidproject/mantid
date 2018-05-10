@@ -20,7 +20,7 @@ bool isAngleEitherValueOr180DegreesRoated(double expectedAngle,
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle + M_PI) ||
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle - M_PI);
 }
-}
+} // namespace
 
 class PeakRepresentationEllipsoidExposeProtectedWrapper
     : public PeakRepresentationEllipsoid {

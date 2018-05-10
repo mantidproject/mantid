@@ -154,8 +154,8 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 }
 
 /** Removes multiple peaks
-* @param badPeaks peaks to be removed
-*/
+ * @param badPeaks peaks to be removed
+ */
 void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
   if (badPeaks.empty())
     return;
@@ -977,8 +977,8 @@ PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
   throw Kernel::Exception::NotImplementedError(
       "PeaksWorkspace cannot clone columns.");
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 ///\cond TEMPLATE
 

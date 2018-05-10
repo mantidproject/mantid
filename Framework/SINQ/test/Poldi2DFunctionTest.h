@@ -1,12 +1,12 @@
 #ifndef MANTID_SINQ_POLDI2DFUNCTIONTEST_H_
 #define MANTID_SINQ_POLDI2DFUNCTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;

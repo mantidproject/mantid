@@ -2,12 +2,12 @@
 #define MANTID_DATAOBJECTS_MDBOXITERATOR_H_
 
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/SkippingPolicy.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -119,7 +119,7 @@ private:
   SkippingPolicy_scptr m_skippingPolicy;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_MDBOXITERATOR_H_ */

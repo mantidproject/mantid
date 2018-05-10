@@ -113,7 +113,8 @@ public:
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
     API::MatrixWorkspace_sptr ws(
         DataObjects::create<DataObjects::Workspace2D>(
-            nHist, HistogramData::Histogram(edges, counts, stdDevs)).release());
+            nHist, HistogramData::Histogram(edges, counts, stdDevs))
+            .release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
@@ -144,7 +145,8 @@ public:
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
     API::MatrixWorkspace_sptr ws(
         DataObjects::create<DataObjects::Workspace2D>(
-            nHist, HistogramData::Histogram(edges, counts)).release());
+            nHist, HistogramData::Histogram(edges, counts))
+            .release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))

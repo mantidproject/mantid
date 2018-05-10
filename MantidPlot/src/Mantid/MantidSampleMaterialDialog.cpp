@@ -7,8 +7,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/Material.h"
 
-#include <QTreeWidgetItem>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 using namespace Mantid;
 using namespace Mantid::API;

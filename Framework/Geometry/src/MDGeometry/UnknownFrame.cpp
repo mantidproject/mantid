@@ -48,5 +48,5 @@ bool UnknownFrame::isSameType(const MDFrame &frame) const {
   }
   return isSameType;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

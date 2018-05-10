@@ -12,7 +12,7 @@ class V3D;
 namespace Geometry {
 class IDetector;
 class BoundingBox;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 /**

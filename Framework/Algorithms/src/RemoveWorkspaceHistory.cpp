@@ -1,6 +1,6 @@
+#include "MantidAlgorithms/RemoveWorkspaceHistory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAlgorithms/RemoveWorkspaceHistory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

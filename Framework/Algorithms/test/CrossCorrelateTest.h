@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;

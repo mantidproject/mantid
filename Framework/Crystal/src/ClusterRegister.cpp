@@ -1,8 +1,8 @@
 #include "MantidCrystal/ClusterRegister.h"
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/CompositeCluster.h"
-#include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/make_shared.hpp>
 #include <list>
 #include <unordered_set>
 
@@ -12,7 +12,7 @@ template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
   T max = std::max(a, b);
   return std::pair<T, T>(min, max);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {
@@ -113,11 +113,11 @@ public:
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 ClusterRegister::ClusterRegister() : m_Impl(new ImplClusterRegister) {}
 
 /** Destructor
-*/
+ */
 ClusterRegister::~ClusterRegister() = default;
 
 /**

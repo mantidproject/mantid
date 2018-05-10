@@ -30,7 +30,7 @@ const std::string g_hdrBITPIX = "16";
 const std::string g_hdrNAXIS = "2";
 const std::string g_hdrNAXIS1 = "512";
 const std::string g_hdrNAXIS2 = "512";
-}
+} // namespace
 
 class LoadFITSTest : public CxxTest::TestSuite {
 public:

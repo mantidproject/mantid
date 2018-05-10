@@ -46,7 +46,7 @@ template <typename Type> struct TypedValidatorExporter {
 };
 
 #define EXPORT_TYPEDVALIDATOR(Type)
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_TYPEDVALIDATOREXPORTER_H_

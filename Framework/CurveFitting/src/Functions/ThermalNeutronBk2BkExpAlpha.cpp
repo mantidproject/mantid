@@ -1,9 +1,9 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpAlpha.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/System.h"
 
-#include <gsl/gsl_sf_erf.h>
 #include <cmath>
+#include <gsl/gsl_sf_erf.h>
 
 using namespace std;
 
@@ -23,7 +23,7 @@ DECLARE_FUNCTION(ThermalNeutronBk2BkExpAlpha)
 
 //----------------------------------------------------------------------------------------------
 /** Defintion of parameter
-  */
+ */
 void ThermalNeutronBk2BkExpAlpha::init() {
   // Geometry related
   declareParameter("Width", 1.0);
@@ -37,7 +37,7 @@ void ThermalNeutronBk2BkExpAlpha::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Function 1D
-  */
+ */
 void ThermalNeutronBk2BkExpAlpha::function1D(double *out, const double *xValues,
                                              const size_t nData) const {
   double width = getParameter("Width");
@@ -54,7 +54,7 @@ void ThermalNeutronBk2BkExpAlpha::function1D(double *out, const double *xValues,
 }
 
 /** Derivative: use numerical derivative
-  */
+ */
 void ThermalNeutronBk2BkExpAlpha::functionDeriv(const FunctionDomain &domain,
                                                 Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
@@ -62,7 +62,7 @@ void ThermalNeutronBk2BkExpAlpha::functionDeriv(const FunctionDomain &domain,
 
 //----------------------------------------------------------------------------------------------
 /** Core function
-  */
+ */
 double ThermalNeutronBk2BkExpAlpha::corefunction(double dh, double width,
                                                  double tcross, double alph0,
                                                  double alph1, double alph0t,

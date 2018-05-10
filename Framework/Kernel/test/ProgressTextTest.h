@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_PROGRESSTEXTTEST_H_
 #define MANTID_KERNEL_PROGRESSTEXTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include <cstdlib>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/ProgressText.h"
 

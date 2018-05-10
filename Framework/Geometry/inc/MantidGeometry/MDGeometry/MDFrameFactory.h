@@ -1,14 +1,14 @@
 #ifndef MANTID_GEOMETRY_MDFRAMEFACTORY_H_
 #define MANTID_GEOMETRY_MDFRAMEFACTORY_H_
 
-#include "MantidKernel/ChainableFactory.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
-#include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/ChainableFactory.h"
 #include <memory>
 
 namespace Mantid {

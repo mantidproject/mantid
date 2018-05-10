@@ -3,12 +3,12 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
+#include <QDebug>
 #include <QDoubleSpinBox>
 #include <QDoubleValidator>
 #include <QLineEdit>
-#include <QVariant>
-#include <QDebug>
 #include <QString>
+#include <QVariant>
 
 namespace MantidQt {
 namespace API {

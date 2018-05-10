@@ -352,5 +352,5 @@ PoldiTruncateData::getSummedSpectra(MatrixWorkspace_sptr workspace) {
   return getOutputWorkspace(sumSpectra);
 }
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid

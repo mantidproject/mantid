@@ -31,8 +31,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef AXISDETAILS_H_
 #define AXISDETAILS_H_
 
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 class ApplicationWindow;
 class QTimeEdit;
 class QDateTimeEdit;

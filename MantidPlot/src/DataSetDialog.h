@@ -30,8 +30,8 @@
 #ifndef DATASETDIALOG_H
 #define DATASETDIALOG_H
 
-#include <QDialog>
 #include "ApplicationWindow.h"
+#include <QDialog>
 
 class QGroupBox;
 class QPushButton;

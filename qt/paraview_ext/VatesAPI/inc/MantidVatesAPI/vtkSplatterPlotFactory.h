@@ -2,18 +2,17 @@
 #define MANTID_VATES_vtkSplatterPlotFactory_H_
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidAPI/IMDNode.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
-#include <vtkPoints.h>
-#include <boost/shared_ptr.hpp>
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <vtkPoints.h>
 
 namespace Mantid {
 namespace VATES {
@@ -159,7 +158,7 @@ private:
   /// Sort boxes by normalized signal value
   virtual void sortBoxesByDecreasingSignal(const bool VERBOSE) const;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

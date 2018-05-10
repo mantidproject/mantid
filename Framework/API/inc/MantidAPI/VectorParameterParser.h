@@ -11,9 +11,9 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #ifndef Q_MOC_RUN
@@ -144,7 +144,7 @@ void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

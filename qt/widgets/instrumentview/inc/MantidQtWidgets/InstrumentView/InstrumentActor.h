@@ -2,13 +2,13 @@
 #define INSTRUMENTACTOR_H_
 
 #include "DllOption.h"
-#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "GLColor.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
-#include "MantidGeometry/IComponent.h"
 #include <boost/weak_ptr.hpp>
 #include <vector>
 
@@ -19,13 +19,13 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 class IMaskWorkspace;
-}
+} // namespace API
 namespace Geometry {
 class Instrument;
 class ComponentInfo;
 class DetectorInfo;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -266,7 +266,7 @@ private:
   std::unique_ptr<InstrumentRenderer> m_renderer;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*InstrumentActor_H_*/

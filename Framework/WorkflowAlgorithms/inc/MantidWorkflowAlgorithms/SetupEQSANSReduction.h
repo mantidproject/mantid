@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
@@ -63,7 +63,7 @@ private:
   setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SETUPEQSANSREDUCTION_H_*/

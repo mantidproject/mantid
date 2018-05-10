@@ -29,7 +29,7 @@ void MDBoxSaveable::save() const {
 }
 
 /** Loads the data from HDD if these data has not been loaded before.
-  * private function called from the DiskBuffer
+ * private function called from the DiskBuffer
  */
 void MDBoxSaveable::load() {
   // Is the data in memory right now (cached copy)?
@@ -40,5 +40,5 @@ void MDBoxSaveable::load() {
     this->setLoaded(true);
   }
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

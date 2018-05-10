@@ -1,8 +1,8 @@
-#include <fstream>
+#include "MantidGeometry/Math/RotCounter.h"
 #include <algorithm>
+#include <fstream>
 #include <iterator>
 #include <vector>
-#include "MantidGeometry/Math/RotCounter.h"
 
 namespace Mantid {
 
@@ -183,5 +183,5 @@ void RotaryCounter::write(std::ostream &OX) const
   copy(RC.begin(), RC.end() - 1, std::ostream_iterator<int>(OX, ":"));
   OX << RC.back() << " ";
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

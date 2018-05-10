@@ -31,15 +31,15 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 
-#include <QPushButton>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QGridLayout>
-#include <QRegExp>
-#include <QLabel>
-#include <QVBoxLayout>
 #include <QFrame>
+#include <QGridLayout>
 #include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QRegExp>
+#include <QVBoxLayout>
 
 FindDialog::FindDialog(QWidget *parent, Qt::WFlags fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot") + " - " + tr("Find"));

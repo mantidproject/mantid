@@ -111,7 +111,7 @@ private:
       false; ///< If true, will take log of transmission curve before fitting
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_*/

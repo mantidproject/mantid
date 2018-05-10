@@ -27,7 +27,7 @@ public:
   static int getMaxIntValue();
   static int getDecimals();
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_

@@ -1,9 +1,9 @@
 #ifndef MANTID_GEOMETRY_QUADRILATERALTEST_H_
 #define MANTID_GEOMETRY_QUADRILATERALTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include <cfloat>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V2D;

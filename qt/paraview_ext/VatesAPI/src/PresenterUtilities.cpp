@@ -1,27 +1,27 @@
-#include "MantidVatesAPI/PresenterFactories.h"
 #include "MantidVatesAPI/FactoryChains.h"
+#include "MantidVatesAPI/PresenterFactories.h"
 
 #include "MantidVatesAPI/MDLoadingPresenter.h"
+#include "MantidVatesAPI/vtkMD0DFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
-#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidVatesAPI/vtkMD0DFactory.h"
-#include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
 #include <vtkBox.h>
 
+#include <algorithm>
 #include <chrono>
 #include <ctime>
-#include <algorithm>
 
 namespace {
 /// Static logger
 Mantid::Kernel::Logger g_log_presenter_utilities("PresenterUtilities");
-}
+} // namespace
 
 namespace Mantid {
 namespace VATES {
@@ -84,42 +84,44 @@ std::unique_ptr<vtkMDHexFactory>
 createFactoryChainForEventWorkspace(VisualNormalization normalization,
                                     double time) {
   auto factory = Mantid::Kernel::make_unique<vtkMDHexFactory>(normalization);
-  factory->setSuccessor(
-               Mantid::Kernel::make_unique<vtkMDQuadFactory>(normalization))
+  factory
+      ->setSuccessor(
+          Mantid::Kernel::make_unique<vtkMDQuadFactory>(normalization))
       .setSuccessor(
-           Mantid::Kernel::make_unique<vtkMDLineFactory>(normalization))
+          Mantid::Kernel::make_unique<vtkMDLineFactory>(normalization))
       .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
   factory->setTime(time);
   return factory;
 }
 
 /**
-* Creates a factory chain for MDHisto workspaces
-* @param normalization: the normalization option
-* @param time: the time slice time
-* @returns a factory chain
-*/
+ * Creates a factory chain for MDHisto workspaces
+ * @param normalization: the normalization option
+ * @param time: the time slice time
+ * @returns a factory chain
+ */
 std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>>
 createFactoryChainForHistoWorkspace(VisualNormalization normalization,
                                     double time) {
   auto factory =
       Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
           normalization, time);
-  factory->setSuccessor(
-               Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(normalization))
+  factory
+      ->setSuccessor(
+          Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(normalization))
       .setSuccessor(
-           Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(normalization))
+          Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(normalization))
       .setSuccessor(
-           Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(normalization))
+          Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(normalization))
       .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
   return factory;
 }
 
 /**
-* Creates a time stamped name
-* @param name: the input name
-* @return a name with a time stamp
-*/
+ * Creates a time stamped name
+ * @param name: the input name
+ * @return a name with a time stamp
+ */
 std::string createTimeStampedName(const std::string &name) {
   auto currentTime =
       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -137,5 +139,5 @@ std::string createTimeStampedName(const std::string &name) {
   stampedName = stampedName + timeInReadableFormat;
   return stampedName;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

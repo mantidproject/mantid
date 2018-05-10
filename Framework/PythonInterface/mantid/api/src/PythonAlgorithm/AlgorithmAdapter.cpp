@@ -1,13 +1,13 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/SerialAlgorithm.h"
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
@@ -18,8 +18,8 @@
 namespace Mantid {
 namespace PythonInterface {
 using namespace boost::python;
-using Environment::callMethod;
 using Environment::UndefinedAttributeError;
+using Environment::callMethod;
 
 /**
  * Construct the "wrapper" and stores the reference to the PyObject
@@ -94,9 +94,9 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
 }
 
 /**
-* Returns seeAlso related algorithms. If not overridden
-* it returns an empty vector of strings
-*/
+ * Returns seeAlso related algorithms. If not overridden
+ * it returns an empty vector of strings
+ */
 template <typename BaseAlgorithm>
 const std::vector<std::string>
 AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
@@ -137,8 +137,8 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::helpURL() const {
 }
 
 /**
-*@return True if the algorithm is considered to be running
-*/
+ *@return True if the algorithm is considered to be running
+ */
 template <typename BaseAlgorithm>
 bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
   if (!m_isRunningObj) {
@@ -340,5 +340,5 @@ template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::SerialDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::ParallelDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::DistributedDataProcessorAlgorithm>;
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

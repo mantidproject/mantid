@@ -1,15 +1,14 @@
 #include "MantidGeometry/Crystal/NiggliCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Quat.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <stdexcept>
 #include <algorithm>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Geometry {
 using Mantid::Kernel::DblMatrix;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 namespace {
 const double RAD_TO_DEG = 180. / M_PI;

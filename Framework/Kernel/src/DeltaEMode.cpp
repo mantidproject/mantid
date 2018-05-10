@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace Kernel {
 namespace // unnamed
-    {
+{
 struct ModeIndex {
   std::map<DeltaEMode::Type, std::string> index{
       {DeltaEMode::Elastic, "Elastic"},
@@ -22,7 +22,7 @@ ModeIndex &typeStringLookup() {
   static ModeIndex typeLookup;
   return typeLookup;
 }
-}
+} // namespace
 
 /**
  * Returns the string list of available modes
@@ -74,5 +74,5 @@ DeltaEMode::Type DeltaEMode::fromString(const std::string &modeStr) {
   throw std::invalid_argument(
       "DeltaEMode::fromString - Unknown energy transfer mode: " + modeStr);
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

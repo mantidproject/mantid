@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_TEST_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
 #include "MantidCrystal/LoadIsawUB.h"

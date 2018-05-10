@@ -1,13 +1,13 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
-#include <boost/python/tuple.hpp>
-#include <boost/python/list.hpp>
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/tuple.hpp>
 
 using Mantid::Kernel::Material;
 using Mantid::PhysicalConstants::NeutronAtom;
@@ -42,7 +42,7 @@ double relativeMolecularMass(Material &self) {
   }
   return retval;
 }
-}
+} // namespace
 
 void export_Material() {
   register_ptr_to_python<Material *>();
@@ -62,17 +62,19 @@ void export_Material() {
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Coherent Scattering Cross-Section for the given wavelength in "
            "barns")
-      .def("incohScatterXSection", (double (Material::*)(double)
-                                        const)(&Material::incohScatterXSection),
-           (arg("self"),
-            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Incoherent Scattering Cross-Section for the given wavelength in "
-           "barns")
-      .def("totalScatterXSection", (double (Material::*)(double)
-                                        const)(&Material::totalScatterXSection),
-           (arg("self"),
-            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Total Scattering Cross-Section for the given wavelength in barns")
+      .def(
+          "incohScatterXSection",
+          (double (Material::*)(double) const)(&Material::incohScatterXSection),
+          (arg("self"),
+           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+          "Incoherent Scattering Cross-Section for the given wavelength in "
+          "barns")
+      .def(
+          "totalScatterXSection",
+          (double (Material::*)(double) const)(&Material::totalScatterXSection),
+          (arg("self"),
+           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+          "Total Scattering Cross-Section for the given wavelength in barns")
       .def("absorbXSection",
            (double (Material::*)(double) const)(&Material::absorbXSection),
            (arg("self"),
@@ -95,12 +97,13 @@ void export_Material() {
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Total Scattering Length for the given wavelength in fm")
 
-      .def("cohScatterLengthReal", (double (Material::*)(double)
-                                        const)(&Material::cohScatterLengthReal),
-           (arg("self"),
-            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Real part of Coherent Scattering Length for the given wavelength "
-           "in fm")
+      .def(
+          "cohScatterLengthReal",
+          (double (Material::*)(double) const)(&Material::cohScatterLengthReal),
+          (arg("self"),
+           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+          "Real part of Coherent Scattering Length for the given wavelength "
+          "in fm")
       .def("cohScatterLengthImg",
            (double (Material::*)(double) const)(&Material::cohScatterLengthImg),
            (arg("self"),
@@ -108,33 +111,38 @@ void export_Material() {
            "Imaginary part of Coherent Scattering Length for the given "
            "wavelength "
            "in fm")
-      .def("incohScatterLengthReal", (double (Material::*)(double) const)(
-                                         &Material::incohScatterLengthReal),
+      .def("incohScatterLengthReal",
+           (double (Material::*)(double)
+                const)(&Material::incohScatterLengthReal),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Real part of Incoherent Scattering Length for the given wavelength "
            "in fm")
-      .def("incohScatterLengthImg", (double (Material::*)(double) const)(
-                                        &Material::incohScatterLengthImg),
+      .def("incohScatterLengthImg",
+           (double (Material::*)(double)
+                const)(&Material::incohScatterLengthImg),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Imaginary part of Incoherent Scattering Length for the given "
            "wavelength "
            "in fm")
-      .def("cohScatterLengthSqrd", (double (Material::*)(double)
-                                        const)(&Material::cohScatterLengthSqrd),
-           (arg("self"),
-            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Coherent Scattering Length Squared <b>^2 for the given wavelength "
-           "in fm^2")
-      .def("incohScatterLengthSqrd", (double (Material::*)(double) const)(
-                                         &Material::incohScatterLengthSqrd),
+      .def(
+          "cohScatterLengthSqrd",
+          (double (Material::*)(double) const)(&Material::cohScatterLengthSqrd),
+          (arg("self"),
+           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+          "Coherent Scattering Length Squared <b>^2 for the given wavelength "
+          "in fm^2")
+      .def("incohScatterLengthSqrd",
+           (double (Material::*)(double)
+                const)(&Material::incohScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Incoherent Scattering Length Squared <b>^2 for the given "
            "wavelength in fm^2")
-      .def("totalScatterLengthSqrd", (double (Material::*)(double) const)(
-                                         &Material::totalScatterLengthSqrd),
+      .def("totalScatterLengthSqrd",
+           (double (Material::*)(double)
+                const)(&Material::totalScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Total Scattering Length Squared <b^2> for the given wavelength in "

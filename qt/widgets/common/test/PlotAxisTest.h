@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtWidgets/Common/PlotAxis.h"
-#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Unit.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class PlotAxisTest : public CxxTest::TestSuite {
@@ -88,8 +88,8 @@ public:
   }
 
   void test_Axis_With_Y_Axis_Normalised_By_X_Axis_Unit() {
-    using MantidQt::API::PlotAxis;
     using Mantid::Kernel::UnitLabel;
+    using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->getAxis(0)->setUnit("TOF");
     const auto xunit = ws->getAxis(0)->unit();
@@ -102,8 +102,8 @@ public:
   }
 
   void test_Axis_With_Unit_But_Empty_Utf8_Lable_Uses_Ascii_In_Parentheses() {
-    using MantidQt::API::PlotAxis;
     using Mantid::Kernel::Units::Degrees;
+    using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->getAxis(0)->unit() = boost::make_shared<EmptyUtf8Label>();
     TS_ASSERT_EQUALS("Caption (unittext)", PlotAxis(*ws, 0).title());
@@ -134,9 +134,9 @@ public:
   }
 
   void test_title_from_just_dimension() {
-    using MantidQt::API::PlotAxis;
     using Mantid::Geometry::MDHistoDimension;
     using Mantid::Kernel::UnitLabel;
+    using MantidQt::API::PlotAxis;
     Mantid::Geometry::GeneralFrame frame(
         Mantid::Geometry::GeneralFrame::GeneralFrameTOF,
         UnitLabel("us", L"\u03bcs", "\\mu s"));

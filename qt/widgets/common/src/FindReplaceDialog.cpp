@@ -1,16 +1,16 @@
 #include "MantidQtWidgets/Common/FindReplaceDialog.h"
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 
-#include <QLabel>
-#include <QPushButton>
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QGroupBox>
-#include <QRegExp>
 #include <QGridLayout>
-#include <QVBoxLayout>
+#include <QGroupBox>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QRegExp>
+#include <QVBoxLayout>
 
 //------------------------------------------------------
 // Public member functions

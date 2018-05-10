@@ -1,8 +1,8 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include <boost/python/class.hpp>
 
-using Mantid::API::MultiDomainFunction;
 using Mantid::API::CompositeFunction;
+using Mantid::API::MultiDomainFunction;
 using namespace boost::python;
 
 void export_MultiDomainFunction() {

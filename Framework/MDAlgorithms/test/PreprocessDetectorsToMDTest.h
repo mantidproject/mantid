@@ -1,11 +1,11 @@
 #ifndef MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
 #define MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;

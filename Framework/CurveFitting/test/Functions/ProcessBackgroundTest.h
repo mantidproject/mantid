@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/ProcessBackground.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Functions/ProcessBackground.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/MersenneTwister.h"
 
 #include <fstream>
@@ -28,7 +28,7 @@ Workspace2D_sptr createInputWS(std::string name, size_t sizex, size_t sizey) {
 
   return inputWS;
 }
-}
+} // namespace
 
 class ProcessBackgroundTest : public CxxTest::TestSuite {
 public:
@@ -127,7 +127,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test automatic background selection
-    * Disabled because it requires a data file
+   * Disabled because it requires a data file
    */
   void Passed_test_AutoBackgroundSelection() {
 

@@ -131,7 +131,7 @@ private:
   /// Largeste effective radius of all sub-representations
   double m_largestEffectiveRadius;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

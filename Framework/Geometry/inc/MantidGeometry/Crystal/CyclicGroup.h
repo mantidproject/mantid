@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_CYCLICGROUP_H_
 #define MANTID_GEOMETRY_CYCLICGROUP_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/DllConfig.h"
 
 #include <boost/shared_ptr.hpp>
 #include <set>

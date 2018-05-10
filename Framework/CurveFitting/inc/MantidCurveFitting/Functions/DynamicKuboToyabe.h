@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/IPeakFunction.h"
 #include <cmath>
 
 namespace Mantid {

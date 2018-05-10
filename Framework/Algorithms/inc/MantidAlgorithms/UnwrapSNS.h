@@ -89,7 +89,7 @@ private:
   std::unique_ptr<API::Progress> m_progress;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_UNWRAPSNS_H_ */

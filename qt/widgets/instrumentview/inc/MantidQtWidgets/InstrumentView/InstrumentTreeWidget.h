@@ -4,10 +4,10 @@
 //---------------------------------------
 // Includes
 //--------------------------------------
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
-#include <QTreeView>
 #include "InstrumentTreeModel.h"
 #include "MantidGeometry/IComponent.h"
+#include <MantidQtWidgets/Common/WidgetDllOption.h>
+#include <QTreeView>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,8 +17,8 @@ namespace MantidWidgets {
 class InstrumentActor;
 
 /** The InstrumentTreeWidget is a tree view
-*  of the components of an instrument.
-*/
+ *  of the components of an instrument.
+ */
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentTreeWidget
     : public QTreeView {
   Q_OBJECT
@@ -42,7 +42,7 @@ private:
   InstrumentWidget *m_instrWidget;
   InstrumentTreeModel *m_treeModel;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // INSTRUMENTTREEWIDGET_H

@@ -5,9 +5,9 @@
 
 #include "MantidAlgorithms/LineProfile.h"
 
-#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CompareWorkspaces;

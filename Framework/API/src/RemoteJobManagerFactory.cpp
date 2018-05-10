@@ -8,7 +8,7 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("RemoteJobManagerFactory");
-}
+} // namespace
 
 /// Private constructor, singleton class
 RemoteJobManagerFactoryImpl::RemoteJobManagerFactoryImpl()

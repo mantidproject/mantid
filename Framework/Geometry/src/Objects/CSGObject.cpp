@@ -11,7 +11,6 @@
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -20,35 +19,36 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/error_of_mean.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
 
 #include <array>
 #include <deque>
 #include <iostream>
-#include <stack>
 #include <random>
+#include <stack>
 
 namespace Mantid {
 namespace Geometry {
 
 using Kernel::Material;
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 /**
-*  Default constuctor
-*/
+ *  Default constuctor
+ */
 CSGObject::CSGObject() : CSGObject("") {}
 
 /**
-*  Construct with original shape xml knowledge.
-*  @param shapeXML : string with original shape xml.
-*/
+ *  Construct with original shape xml knowledge.
+ *  @param shapeXML : string with original shape xml.
+ */
 CSGObject::CSGObject(const std::string &shapeXML)
     : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
@@ -61,16 +61,16 @@ CSGObject::CSGObject(const std::string &shapeXML)
 }
 
 /**
-* Copy constructor
-* @param A :: The object to initialise this copy from
-*/
+ * Copy constructor
+ * @param A :: The object to initialise this copy from
+ */
 CSGObject::CSGObject(const CSGObject &A) : CSGObject() { *this = A; }
 
 /**
-* Assignment operator
-* @param A :: Object to copy
-* @return *this
-*/
+ * Assignment operator
+ * @param A :: Object to copy
+ * @return *this
+ */
 CSGObject &CSGObject::operator=(const CSGObject &A) {
   if (this != &A) {
     TopRule = (A.TopRule) ? A.TopRule->clone() : nullptr;
@@ -117,21 +117,21 @@ const Kernel::Material CSGObject::material() const {
 }
 
 /**
-* Returns whether this object has a valid shape
-* @returns True if the surface list is populated and there is a
-* defined TopRule, false otherwise.
-*/
+ * Returns whether this object has a valid shape
+ * @returns True if the surface list is populated and there is a
+ * defined TopRule, false otherwise.
+ */
 bool CSGObject::hasValidShape() const {
   // Assume invalid shape if object has no 'TopRule' or surfaces
   return (TopRule != nullptr && !m_SurList.empty());
 }
 
 /**
-* Object line ==  cell
-* @param ON :: Object name
-* @param Ln :: Input string must be :  {rules}
-* @returns 1 on success and zero on failure
-*/
+ * Object line ==  cell
+ * @param ON :: Object name
+ * @param Ln :: Input string must be :  {rules}
+ * @returns 1 on success and zero on failure
+ */
 int CSGObject::setObject(const int ON, const std::string &Ln) {
   // Split line
   const boost::regex letters("[a-zA-Z]"); // Does the string now contain junk...
@@ -150,11 +150,11 @@ int CSGObject::setObject(const int ON, const std::string &Ln) {
 }
 
 /**
-* Returns just the cell string object
-* @param MList :: List of indexable Hulls
-* @return Cell String (from TopRule)
-* @todo Break infinite recusion
-*/
+ * Returns just the cell string object
+ * @param MList :: List of indexable Hulls
+ * @return Cell String (from TopRule)
+ * @todo Break infinite recusion
+ */
 void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
 
 {
@@ -162,11 +162,11 @@ void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
 }
 
 /**
-* Returns just the cell string object
-* @param MList :: List of indexable Hulls
-* @return Cell String (from TopRule)
-* @todo Break infinite recusion
-*/
+ * Returns just the cell string object
+ * @param MList :: List of indexable Hulls
+ * @return Cell String (from TopRule)
+ * @todo Break infinite recusion
+ */
 std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
   std::string TopStr = this->topRule()->display();
   std::string::size_type pos = TopStr.find('#');
@@ -197,14 +197,14 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
 }
 
 /*
-* Calcluate if there are any complementary components in
-* the object. That is lines with #(....)
-* @throw ColErr::ExBase :: Error with processing
-* @param Ln :: Input string must:  ID Mat {Density}  {rules}
-* @param Cnum :: Number for cell since we don't have one
-* @retval 0 on no work to do
-* @retval 1 :: A (maybe there are many) #(...) object found
-*/
+ * Calcluate if there are any complementary components in
+ * the object. That is lines with #(....)
+ * @throw ColErr::ExBase :: Error with processing
+ * @param Ln :: Input string must:  ID Mat {Density}  {rules}
+ * @param Cnum :: Number for cell since we don't have one
+ * @retval 0 on no work to do
+ * @retval 1 :: A (maybe there are many) #(...) object found
+ */
 int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
   std::string::size_type posA = Ln.find("#(");
   // No work to do ?
@@ -245,10 +245,10 @@ int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
 }
 
 /**
-* Determine if the object has a complementary object
-* @retval 1 :: true
-* @retval 0 :: false
-*/
+ * Determine if the object has a complementary object
+ * @retval 1 :: true
+ * @retval 0 :: false
+ */
 int CSGObject::hasComplement() const {
 
   if (TopRule)
@@ -257,12 +257,12 @@ int CSGObject::hasComplement() const {
 }
 
 /**
-* Goes through the cell objects and adds the pointers
-* to the SurfPoint keys (using their keyN)
-* @param Smap :: Map of surface Keys and Surface Pointers
-* @retval 1000+ keyNumber :: Error with keyNumber
-* @retval 0 :: successfully populated all the whole Object.
-*/
+ * Goes through the cell objects and adds the pointers
+ * to the SurfPoint keys (using their keyN)
+ * @param Smap :: Map of surface Keys and Surface Pointers
+ * @retval 1000+ keyNumber :: Error with keyNumber
+ * @retval 0 :: successfully populated all the whole Object.
+ */
 int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
   Rst.push_back(TopRule.get());
@@ -298,16 +298,16 @@ int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
 }
 
 /**
-* This takes a string Ln, finds the first two
-* Rxxx function, determines their join type
-* make the rule,  adds to vector then removes two old rules from
-* the vector, updates string
-* @param Ln :: String to porcess
-* @param Rlist :: Map of rules (added to)
-* @param compUnit :: Last computed unit
-* @retval 0 :: No rule to find
-* @retval 1 :: A rule has been combined
-*/
+ * This takes a string Ln, finds the first two
+ * Rxxx function, determines their join type
+ * make the rule,  adds to vector then removes two old rules from
+ * the vector, updates string
+ * @param Ln :: String to porcess
+ * @param Rlist :: Map of rules (added to)
+ * @param compUnit :: Last computed unit
+ * @retval 0 :: No rule to find
+ * @retval 1 :: A rule has been combined
+ */
 int CSGObject::procPair(std::string &Ln,
                         std::map<int, std::unique_ptr<Rule>> &Rlist,
                         int &compUnit) const
@@ -371,10 +371,10 @@ int CSGObject::procPair(std::string &Ln,
 }
 
 /**
-* Takes a Rule item and makes it a complementary group
-* @param RItem :: to encapsulate
-* @returns the complementary group
-*/
+ * Takes a Rule item and makes it a complementary group
+ * @param RItem :: to encapsulate
+ * @returns the complementary group
+ */
 std::unique_ptr<CompGrp>
 CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
   if (!RItem)
@@ -437,15 +437,15 @@ bool CSGObject::isOnSide(const Kernel::V3D &point) const {
 }
 
 /**
-* Determine if a point is valid by checking both
-* directions of the normal away from the line
-* A good point will have one valid and one invalid.
-* @param C :: Point on a basic surface to check
-* @param Nm :: Direction +/- to be checked
-* @retval +1 ::  Point outlayer (ie not in object)
-* @retval -1 :: Point included (e.g at convex intersection)
-* @retval 0 :: success
-*/
+ * Determine if a point is valid by checking both
+ * directions of the normal away from the line
+ * A good point will have one valid and one invalid.
+ * @param C :: Point on a basic surface to check
+ * @param Nm :: Direction +/- to be checked
+ * @retval +1 ::  Point outlayer (ie not in object)
+ * @retval -1 :: Point included (e.g at convex intersection)
+ * @retval 0 :: success
+ */
 int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
                                  const Kernel::V3D &Nm) const {
   int status(0);
@@ -457,10 +457,10 @@ int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
 }
 
 /**
-* Determines is point is within the object or on the surface
-* @param point :: Point to be tested
-* @returns 1 if true and 0 if false
-*/
+ * Determines is point is within the object or on the surface
+ * @param point :: Point to be tested
+ * @returns 1 if true and 0 if false
+ */
 bool CSGObject::isValid(const Kernel::V3D &point) const {
   if (!TopRule)
     return false;
@@ -468,10 +468,10 @@ bool CSGObject::isValid(const Kernel::V3D &point) const {
 }
 
 /**
-* Determines is group of surface maps are valid
-* @param SMap :: map of SurfaceNumber : status
-* @returns 1 if true and 0 if false
-*/
+ * Determines is group of surface maps are valid
+ * @param SMap :: map of SurfaceNumber : status
+ * @returns 1 if true and 0 if false
+ */
 bool CSGObject::isValid(const std::map<int, int> &SMap) const {
   if (!TopRule)
     return false;
@@ -479,11 +479,11 @@ bool CSGObject::isValid(const std::map<int, int> &SMap) const {
 }
 
 /**
-* Uses the topRule* to create a surface list
-* by iterating throught the tree
-* @param outFlag :: Sends output to standard error if true
-* @return 1 (should be number of surfaces)
-*/
+ * Uses the topRule* to create a surface list
+ * by iterating throught the tree
+ * @param outFlag :: Sends output to standard error if true
+ * @return 1 (should be number of surfaces)
+ */
 int CSGObject::createSurfaceList(const int outFlag) {
   m_SurList.clear();
   std::stack<const Rule *> TreeLine;
@@ -523,9 +523,9 @@ int CSGObject::createSurfaceList(const int outFlag) {
 }
 
 /**
-* Returns all of the numbers of surfaces
-* @return Surface numbers
-*/
+ * Returns all of the numbers of surfaces
+ * @return Surface numbers
+ */
 std::vector<int> CSGObject::getSurfaceIndex() const {
   std::vector<int> out;
   transform(m_SurList.begin(), m_SurList.end(),
@@ -535,12 +535,12 @@ std::vector<int> CSGObject::getSurfaceIndex() const {
 }
 
 /**
-* Removes a surface and then re-builds the
-* cell. This could be done by just removing
-* the surface from the object.
-* @param SurfN :: Number for the surface
-* @return number of surfaces removes
-*/
+ * Removes a surface and then re-builds the
+ * cell. This could be done by just removing
+ * the surface from the object.
+ * @param SurfN :: Number for the surface
+ * @return number of surfaces removes
+ */
 int CSGObject::removeSurface(const int SurfN) {
   if (!TopRule)
     return -1;
@@ -551,12 +551,12 @@ int CSGObject::removeSurface(const int SurfN) {
 }
 
 /**
-* Removes a surface and then re-builds the cell.
-* @param SurfN :: Number for the surface
-* @param NsurfN :: New surface number
-* @param SPtr :: Surface pointer for surface NsurfN
-* @return number of surfaces substituted
-*/
+ * Removes a surface and then re-builds the cell.
+ * @param SurfN :: Number for the surface
+ * @param NsurfN :: New surface number
+ * @param SPtr :: Surface pointer for surface NsurfN
+ * @return number of surfaces substituted
+ */
 int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
                               const boost::shared_ptr<Surface> &SPtr) {
   if (!TopRule)
@@ -568,8 +568,8 @@ int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
 }
 
 /**
-* Prints almost everything
-*/
+ * Prints almost everything
+ */
 void CSGObject::print() const {
   std::deque<Rule *> Rst;
   std::vector<int> Cells;
@@ -607,26 +607,26 @@ void CSGObject::print() const {
 }
 
 /**
-* Takes the complement of a group
-*/
+ * Takes the complement of a group
+ */
 void CSGObject::makeComplement() {
   std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
   TopRule = std::move(NCG);
 }
 
 /**
-* Displays the rule tree
-*/
+ * Displays the rule tree
+ */
 void CSGObject::printTree() const {
   std::cout << "Name == " << ObjNum << '\n';
   std::cout << TopRule->display() << '\n';
 }
 
 /**
-* Write the object to a string.
-* This includes only rules.
-* @return Object Line
-*/
+ * Write the object to a string.
+ * This includes only rules.
+ * @return Object Line
+ */
 std::string CSGObject::cellCompStr() const {
   std::ostringstream cx;
   if (TopRule)
@@ -635,10 +635,10 @@ std::string CSGObject::cellCompStr() const {
 }
 
 /**
-* Write the object to a string.
-* This includes the Name but not post-fix operators
-* @return Object Line
-*/
+ * Write the object to a string.
+ * This includes the Name but not post-fix operators
+ * @return Object Line
+ */
 std::string CSGObject::str() const {
   std::ostringstream cx;
   if (TopRule) {
@@ -649,10 +649,10 @@ std::string CSGObject::str() const {
 }
 
 /**
-* Write the object to a standard stream
-* in standard MCNPX output format.
-* @param OX :: Output stream (required for multiple std::endl)
-*/
+ * Write the object to a standard stream
+ * in standard MCNPX output format.
+ * @param OX :: Output stream (required for multiple std::endl)
+ */
 void CSGObject::write(std::ostream &OX) const {
   std::ostringstream cx;
   cx.precision(10);
@@ -661,11 +661,11 @@ void CSGObject::write(std::ostream &OX) const {
 }
 
 /**
-* Processes the cell string. This is an internal function
-* to process a string with - String type has #( and ( )
-* @param Line :: String value
-* @returns 1 on success
-*/
+ * Processes the cell string. This is an internal function
+ * to process a string with - String type has #( and ( )
+ * @param Line :: String value
+ * @returns 1 on success
+ */
 int CSGObject::procString(const std::string &Line) {
   TopRule = nullptr;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
@@ -746,10 +746,10 @@ int CSGObject::procString(const std::string &Line) {
 }
 
 /**
-* Given a track, fill the track with valid section
-* @param UT :: Initial track
-* @return Number of segments added
-*/
+ * Given a track, fill the track with valid section
+ * @param UT :: Initial track
+ * @return Number of segments added
+ */
 int CSGObject::interceptSurface(Geometry::Track &UT) const {
   int originalCount = UT.count(); // Number of intersections original track
   // Loop over all the surfaces.
@@ -777,13 +777,13 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
 }
 
 /**
-* Calculate if a point PT is a valid point on the track
-* @param point :: Point to calculate from.
-* @param uVec :: Unit vector of the track
-* @retval 0 :: Not valid / double valid
-* @retval 1 :: Entry point
-* @retval -1 :: Exit Point
-*/
+ * Calculate if a point PT is a valid point on the track
+ * @param point :: Point to calculate from.
+ * @param uVec :: Unit vector of the track
+ * @retval 0 :: Not valid / double valid
+ * @retval 1 :: Entry point
+ * @retval -1 :: Exit Point
+ */
 int CSGObject::calcValidType(const Kernel::V3D &point,
                              const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
@@ -797,15 +797,15 @@ int CSGObject::calcValidType(const Kernel::V3D &point,
 }
 
 /**
-* Find soild angle of object wrt the observer. This interface routine calls
-* either
-* getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of
-* triangles
-* in the discete surface representation.
-* @param observer :: point to measure solid angle from
-* @return :: estimate of solid angle of object. Accuracy depends on object
-* shape.
-*/
+ * Find soild angle of object wrt the observer. This interface routine calls
+ * either
+ * getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of
+ * triangles
+ * in the discete surface representation.
+ * @param observer :: point to measure solid angle from
+ * @return :: estimate of solid angle of object. Accuracy depends on object
+ * shape.
+ */
 double CSGObject::solidAngle(const Kernel::V3D &observer) const {
   if (this->numberOfTriangles() > 30000)
     return rayTraceSolidAngle(observer);
@@ -813,12 +813,13 @@ double CSGObject::solidAngle(const Kernel::V3D &observer) const {
 }
 
 /**
-* Find solid angle of object wrt the observer with a scaleFactor for the object.
-* @param observer :: point to measure solid angle from
-* @param scaleFactor :: V3D giving scaling of the object
-* @return :: estimate of solid angle of object. Accuracy depends on
-* triangulation quality.
-*/
+ * Find solid angle of object wrt the observer with a scaleFactor for the
+ * object.
+ * @param observer :: point to measure solid angle from
+ * @param scaleFactor :: V3D giving scaling of the object
+ * @return :: estimate of solid angle of object. Accuracy depends on
+ * triangulation quality.
+ */
 double CSGObject::solidAngle(const Kernel::V3D &observer,
                              const Kernel::V3D &scaleFactor) const
 
@@ -827,10 +828,10 @@ double CSGObject::solidAngle(const Kernel::V3D &observer,
 }
 
 /**
-* Given an observer position find the approximate solid angle of the object
-* @param observer :: position of the observer (V3D)
-* @return Solid angle in steradians (+/- 1% if accurate bounding box available)
-*/
+ * Given an observer position find the approximate solid angle of the object
+ * @param observer :: position of the observer (V3D)
+ * @return Solid angle in steradians (+/- 1% if accurate bounding box available)
+ */
 double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
   // Calculation of solid angle as numerical double integral over all
   // angles. This could be optimised further e.g. by
@@ -947,17 +948,17 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
 }
 
 /**
-* Find the solid angle of a triangle defined by vectors a,b,c from point
-*"observer"
-*
-* formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
-*
-* @param a :: first point of triangle
-* @param b :: second point of triangle
-* @param c :: third point of triangle
-* @param observer :: point from which solid angle is required
-* @return :: solid angle of triangle in Steradians.
-*/
+ * Find the solid angle of a triangle defined by vectors a,b,c from point
+ *"observer"
+ *
+ * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
+ *
+ * @param a :: first point of triangle
+ * @param b :: second point of triangle
+ * @param c :: third point of triangle
+ * @param observer :: point from which solid angle is required
+ * @return :: solid angle of triangle in Steradians.
+ */
 double CSGObject::getTriangleSolidAngle(const V3D &a, const V3D &b,
                                         const V3D &c,
                                         const V3D &observer) const {
@@ -980,12 +981,12 @@ double CSGObject::getTriangleSolidAngle(const V3D &a, const V3D &b,
 }
 
 /**
-* Find solid angle of object from point "observer" using the
-* OC triangluation of the object, if it exists
-*
-* @param observer :: Point from which solid angle is required
-* @return the solid angle
-*/
+ * Find solid angle of object from point "observer" using the
+ * OC triangluation of the object, if it exists
+ *
+ * @param observer :: Point from which solid angle is required
+ * @return the solid angle
+ */
 double CSGObject::triangleSolidAngle(const V3D &observer) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
@@ -1055,15 +1056,15 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
   }
 }
 /**
-* Find solid angle of object from point "observer" using the
-* OC triangluation of the object, if it exists. This method expects a
-* scaling vector scaleFactor that scales the three axes.
-*
-* @param observer :: Point from which solid angle is required.
-* @param scaleFactor :: V3D each component giving the scaling of the object only
-*(not observer)
-* @return the solid angle
-*/
+ * Find solid angle of object from point "observer" using the
+ * OC triangluation of the object, if it exists. This method expects a
+ * scaling vector scaleFactor that scales the three axes.
+ *
+ * @param observer :: Point from which solid angle is required.
+ * @param scaleFactor :: V3D each component giving the scaling of the object
+ *only (not observer)
+ * @return the solid angle
+ */
 double CSGObject::triangleSolidAngle(const V3D &observer,
                                      const V3D &scaleFactor) const {
   //
@@ -1136,13 +1137,13 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
   return (0.5 * (sangle - sneg));
 }
 /**
-* Get the solid angle of a sphere defined by centre and radius using an analytic
-* formula
-* @param observer :: point from which solid angle required
-* @param vectors :: vector of V3D - the only value is the sphere centre
-* @param radius :: sphere radius
-* @return :: solid angle of sphere
-*/
+ * Get the solid angle of a sphere defined by centre and radius using an
+ * analytic formula
+ * @param observer :: point from which solid angle required
+ * @param vectors :: vector of V3D - the only value is the sphere centre
+ * @param radius :: sphere radius
+ * @return :: solid angle of sphere
+ */
 double CSGObject::SphereSolidAngle(const V3D observer,
                                    const std::vector<Kernel::V3D> vectors,
                                    const double radius) const {
@@ -1158,14 +1159,14 @@ double CSGObject::SphereSolidAngle(const V3D observer,
 }
 
 /**
-* Get the solid angle of a cuboid defined by 4 points. Simple use of triangle
-* based soild angle
-* calculation. Should work for parallel-piped as well.
-* @param observer :: point from which solid angle required
-* @param vectors :: vector of V3D - the values are the 4 points used to defined
-* the cuboid
-* @return :: solid angle of cuboid - good accuracy
-*/
+ * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle
+ * based soild angle
+ * calculation. Should work for parallel-piped as well.
+ * @param observer :: point from which solid angle required
+ * @param vectors :: vector of V3D - the values are the 4 points used to defined
+ * the cuboid
+ * @return :: solid angle of cuboid - good accuracy
+ */
 double
 CSGObject::CuboidSolidAngle(const V3D observer,
                             const std::vector<Kernel::V3D> vectors) const {
@@ -1237,15 +1238,15 @@ CSGObject::CuboidSolidAngle(const V3D observer,
 }
 
 /**
-* Calculate the solid angle for a cylinder using triangulation EXCLUDING the end
-* caps.
-* @param observer :: The observer's point
-* @param centre :: The centre vector
-* @param axis :: The axis vector
-* @param radius :: The radius
-* @param height :: The height
-* @returns The solid angle value
-*/
+ * Calculate the solid angle for a cylinder using triangulation EXCLUDING the
+ * end caps.
+ * @param observer :: The observer's point
+ * @param centre :: The centre vector
+ * @param axis :: The axis vector
+ * @param radius :: The radius
+ * @param height :: The height
+ * @returns The solid angle value
+ */
 double CSGObject::CylinderSolidAngle(const V3D &observer,
                                      const Mantid::Kernel::V3D &centre,
                                      const Mantid::Kernel::V3D &axis,
@@ -1319,14 +1320,14 @@ double CSGObject::CylinderSolidAngle(const V3D &observer,
 }
 
 /**
-* Calculate the solid angle for a cone using triangulation.
-* @param observer :: The observer's point
-* @param centre :: The centre vector
-* @param axis :: The axis vector
-* @param radius :: The radius
-* @param height :: The height
-* @returns The solid angle value
-*/
+ * Calculate the solid angle for a cone using triangulation.
+ * @param observer :: The observer's point
+ * @param centre :: The centre vector
+ * @param axis :: The axis vector
+ * @param radius :: The radius
+ * @param height :: The height
+ * @returns The solid angle value
+ */
 double CSGObject::ConeSolidAngle(const V3D &observer,
                                  const Mantid::Kernel::V3D &centre,
                                  const Mantid::Kernel::V3D &axis,
@@ -1621,9 +1622,9 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
 }
 
 /**
-* Returns an axis-aligned bounding box that will fit the shape
-* @returns A reference to a bounding box for this shape.
-*/
+ * Returns an axis-aligned bounding box that will fit the shape
+ * @returns A reference to a bounding box for this shape.
+ */
 const BoundingBox &CSGObject::getBoundingBox() const {
   // This member function is const given that from a user's perspective it is
   // perfectly reasonable to call it on a const object. We need to call a
@@ -1660,8 +1661,8 @@ const BoundingBox &CSGObject::getBoundingBox() const {
   // Set to a large box so that a) we don't keep trying to calculate a box
   // every time this is called and b) to serve as a visual indicator that
   // something went wrong.
-  const_cast<CSGObject *>(this)
-      ->defineBoundingBox(100, 100, 100, -100, -100, -100);
+  const_cast<CSGObject *>(this)->defineBoundingBox(100, 100, 100, -100, -100,
+                                                   -100);
   return m_boundingBox;
 }
 
@@ -1859,17 +1860,17 @@ void CSGObject::calcBoundingBoxByGeometry() {
 }
 
 /**
-* Takes input axis aligned bounding box max and min points and calculates the
-*bounding box for the
-* object and returns them back in max and min points.
-*
-* @param xmax :: Maximum value for the bounding box in x direction
-* @param ymax :: Maximum value for the bounding box in y direction
-* @param zmax :: Maximum value for the bounding box in z direction
-* @param xmin :: Minimum value for the bounding box in x direction
-* @param ymin :: Minimum value for the bounding box in y direction
-* @param zmin :: Minimum value for the bounding box in z direction
-*/
+ * Takes input axis aligned bounding box max and min points and calculates the
+ *bounding box for the
+ * object and returns them back in max and min points.
+ *
+ * @param xmax :: Maximum value for the bounding box in x direction
+ * @param ymax :: Maximum value for the bounding box in y direction
+ * @param zmax :: Maximum value for the bounding box in z direction
+ * @param xmin :: Minimum value for the bounding box in x direction
+ * @param ymin :: Minimum value for the bounding box in y direction
+ * @param zmin :: Minimum value for the bounding box in z direction
+ */
 void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                double &xmin, double &ymin, double &zmin) const {
   if (!TopRule) { // If no rule defined then return zero boundbing box
@@ -1900,19 +1901,19 @@ void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
 }
 
 /**
-* Takes input axis aligned bounding box max and min points and stores these as
-*the
-* bounding box for the object. Can be used when getBoundingBox fails and bounds
-*are
-* known.
-*
-* @param xMax :: Maximum value for the bounding box in x direction
-* @param yMax :: Maximum value for the bounding box in y direction
-* @param zMax :: Maximum value for the bounding box in z direction
-* @param xMin :: Minimum value for the bounding box in x direction
-* @param yMin :: Minimum value for the bounding box in y direction
-* @param zMin :: Minimum value for the bounding box in z direction
-*/
+ * Takes input axis aligned bounding box max and min points and stores these as
+ *the
+ * bounding box for the object. Can be used when getBoundingBox fails and bounds
+ *are
+ * known.
+ *
+ * @param xMax :: Maximum value for the bounding box in x direction
+ * @param yMax :: Maximum value for the bounding box in y direction
+ * @param zMax :: Maximum value for the bounding box in z direction
+ * @param xMin :: Minimum value for the bounding box in x direction
+ * @param yMin :: Minimum value for the bounding box in y direction
+ * @param zMin :: Minimum value for the bounding box in z direction
+ */
 void CSGObject::defineBoundingBox(const double &xMax, const double &yMax,
                                   const double &zMax, const double &xMin,
                                   const double &yMin, const double &zMin) {
@@ -1932,8 +1933,8 @@ void CSGObject::defineBoundingBox(const double &xMax, const double &yMax,
 }
 
 /**
-* Set the bounding box to a null box
-*/
+ * Set the bounding box to a null box
+ */
 void CSGObject::setNullBoundingBox() { m_boundingBox = BoundingBox(); }
 
 /**
@@ -2013,10 +2014,10 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
 }
 
 /**
-* Try to find a point that lies within (or on) the object, given a seed point
-* @param point :: on entry the seed point, on exit point in object, if found
-* @return 1 if point found, 0 otherwise
-*/
+ * Try to find a point that lies within (or on) the object, given a seed point
+ * @param point :: on entry the seed point, on exit point in object, if found
+ * @return 1 if point found, 0 otherwise
+ */
 int CSGObject::searchForObject(Kernel::V3D &point) const {
   //
   // Method - check if point in object, if not search directions along
@@ -2038,10 +2039,10 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
 }
 
 /**
-* Set the geometry handler for Object
-* @param[in] h is pointer to the geometry handler. don't delete this pointer in
-* the calling function.
-*/
+ * Set the geometry handler for Object
+ * @param[in] h is pointer to the geometry handler. don't delete this pointer in
+ * the calling function.
+ */
 void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
   if (h == nullptr)
     return;
@@ -2049,9 +2050,9 @@ void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
 }
 
 /**
-* Draws the Object using geometry handler, If the handler is not set then this
-* function does nothing.
-*/
+ * Draws the Object using geometry handler, If the handler is not set then this
+ * function does nothing.
+ */
 void CSGObject::draw() const {
   if (m_handler == nullptr)
     return;
@@ -2060,10 +2061,10 @@ void CSGObject::draw() const {
 }
 
 /**
-* Initializes/prepares the object to be rendered, this will generate geometry
-* for object,
-* If the handler is not set then this function does nothing.
-*/
+ * Initializes/prepares the object to be rendered, this will generate geometry
+ * for object,
+ * If the handler is not set then this function does nothing.
+ */
 void CSGObject::initDraw() const {
   if (m_handler == nullptr)
     return;
@@ -2071,8 +2072,8 @@ void CSGObject::initDraw() const {
   m_handler->initialize();
 }
 /**
-* set vtkGeometryCache writer
-*/
+ * set vtkGeometryCache writer
+ */
 void CSGObject::setVtkGeometryCacheWriter(
     boost::shared_ptr<vtkGeometryCacheWriter> writer) {
   vtkCacheWriter = writer;
@@ -2080,8 +2081,8 @@ void CSGObject::setVtkGeometryCacheWriter(
 }
 
 /**
-* set vtkGeometryCache reader
-*/
+ * set vtkGeometryCache reader
+ */
 void CSGObject::setVtkGeometryCacheReader(
     boost::shared_ptr<vtkGeometryCacheReader> reader) {
   vtkCacheReader = reader;
@@ -2098,8 +2099,8 @@ boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
 }
 
 /**
-* Updates the geometry handler if needed
-*/
+ * Updates the geometry handler if needed
+ */
 void CSGObject::updateGeometryHandler() {
   if (bGeometryCaching)
     return;
@@ -2132,8 +2133,8 @@ size_t CSGObject::numberOfVertices() const {
   return m_handler->numberOfPoints();
 }
 /**
-* get vertices
-*/
+ * get vertices
+ */
 const std::vector<double> &CSGObject::getTriangleVertices() const {
   static const std::vector<double> empty;
   if (m_handler == nullptr)
@@ -2152,8 +2153,8 @@ const std::vector<uint32_t> &CSGObject::getTriangleFaces() const {
 }
 
 /**
-* get info on standard shapes
-*/
+ * get info on standard shapes
+ */
 void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                               std::vector<Kernel::V3D> &vectors,
                               double &myradius, double &myheight) const {

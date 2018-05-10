@@ -2,8 +2,8 @@
 #define MANTID_ISISREFLECTOMETRY_REFLTABLESCHEMA_H_
 
 #include "DllConfig.h"
-#include "string"
 #include "map"
+#include "string"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -57,8 +57,8 @@ ColumnIndexNameMap makeColumnIndexMap();
 /// Make the column name map.
 ColumnNameIndexMap makeColumnNameMap();
 
-} // ReflTableSchema
+} // namespace ReflTableSchema
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_ISISREFLECTOMETRY_REFLTABLESCHEMA_H_ */

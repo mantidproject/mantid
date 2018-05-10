@@ -25,8 +25,8 @@
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
-#include <boost/python/class.hpp>
 #include <boost/python/call_method.hpp>
+#include <boost/python/class.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -68,8 +68,8 @@ ReturnType callMethod(PyObject *obj, const char *methodName,
     throw UndefinedAttributeError();
   }
 }
-}
-}
-}
+} // namespace Environment
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_CALLMETHOD_H_

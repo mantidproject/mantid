@@ -1,19 +1,19 @@
+#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <cmath>
-#include <vector>
-#include <set>
-#include <map>
-#include <stack>
-#include <sstream>
-#include <algorithm>
 #include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <vector>
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Math/MapSupport.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 
@@ -321,6 +321,6 @@ int Algebra::logicalEqual(const Algebra &A) const
   return F.logicalEqual(A.F);
 }
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

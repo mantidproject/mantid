@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 
+#include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 
@@ -11,7 +11,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 class Command;
 }
-}
+} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
@@ -83,6 +83,6 @@ public:
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H */

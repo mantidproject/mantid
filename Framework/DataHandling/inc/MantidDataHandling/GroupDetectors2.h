@@ -257,15 +257,15 @@ private:
 };
 
 /**
-*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
-* were not selected
-*  to be in a group to the end of the output spectrum
-*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
-* group
-*  @param inputWS :: user selected input workspace for the algorithm
-*  @param outputWS :: user selected output workspace for the algorithm
-*  @param outIndex :: the next spectra index available after the grouped spectra
-*/
+ *  Only to be used if the KeepUnGrouped property is true, moves the spectra
+ * that were not selected to be in a group to the end of the output spectrum
+ *  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
+ * group
+ *  @param inputWS :: user selected input workspace for the algorithm
+ *  @param outputWS :: user selected output workspace for the algorithm
+ *  @param outIndex :: the next spectra index available after the grouped
+ * spectra
+ */
 template <class TIn, class TOut>
 void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
                                  const TIn &inputWS, TOut &outputWS,

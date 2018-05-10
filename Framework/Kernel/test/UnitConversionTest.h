@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_UNITCONVERTERTEST_H_
 #define MANTID_KERNEL_UNITCONVERTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitConversion.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::UnitConversion;
 

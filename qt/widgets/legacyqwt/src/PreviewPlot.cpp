@@ -3,8 +3,8 @@
 //------------------------------------------------------
 #include "MantidQtWidgets/LegacyQwt/PreviewPlot.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -22,7 +22,7 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
 bool isNegative(double v) { return v <= 0.0; }
-}
+} // namespace
 
 PreviewPlot::PreviewPlot(QWidget *parent, bool init)
     : API::MantidWidget(parent),

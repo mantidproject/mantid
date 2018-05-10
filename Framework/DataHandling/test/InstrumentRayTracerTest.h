@@ -1,20 +1,20 @@
 #ifndef INSTRUMENTRAYTRACERTEST_H_
 #define INSTRUMENTRAYTRACERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
-using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::API::AnalysisDataService;
-using Mantid::Kernel::V3D;
 using Mantid::API::FrameworkManager;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::Kernel::V3D;
 
 //-------------------------------------------------------------
 // Fake test suite to keep cxxtest happy

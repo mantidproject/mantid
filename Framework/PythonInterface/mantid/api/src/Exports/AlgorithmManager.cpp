@@ -75,7 +75,7 @@ GCC_DIAG_ON(conversion)
 #pragma clang diagnostic pop
 #endif
 ///@endcond
-}
+} // namespace
 
 void export_AlgorithmManager() {
 

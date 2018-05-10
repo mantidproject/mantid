@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_NEUTRONBK2BKEXPCONVPVOIGT_H_
 #define MANTID_CURVEFITTING_NEUTRONBK2BKEXPCONVPVOIGT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

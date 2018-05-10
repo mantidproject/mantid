@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_SIMPLECHEBFUN_H_
 #define MANTID_CURVEFITTING_SIMPLECHEBFUN_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -50,6 +50,6 @@ public:
   virtual void onReductionResumed() = 0;
   virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H */

@@ -1,8 +1,8 @@
 #ifndef ERRORBARSETTINGS_H
 #define ERRORBARSETTINGS_H
 
-#include <QObject>
 #include <QColor>
+#include <QObject>
 
 /** Holds the settings for how a set of error bars are to be drawn.
     The class is a QObject purely so that our python proxy objects will work

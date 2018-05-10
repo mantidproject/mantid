@@ -1,9 +1,9 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 
+#include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidQtWidgets/SliceViewer/PeakPrimitives.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
-#include "MantidGeometry/Crystal/PeakTransform.h"
 #include <boost/optional.hpp>
 
 class QPainter;
@@ -84,7 +84,7 @@ protected:
 
 using PeakRepresentation_sptr = std::shared_ptr<PeakRepresentation>;
 using VecPeakRepresentation = std::vector<PeakRepresentation_sptr>;
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

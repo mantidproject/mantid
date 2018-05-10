@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H
 #define MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

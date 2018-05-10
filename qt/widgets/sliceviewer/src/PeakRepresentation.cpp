@@ -24,5 +24,5 @@ void PeakRepresentation::draw(
   doDraw(painter, foregroundColor, backgroundColor, drawingInformation,
          viewInformation);
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

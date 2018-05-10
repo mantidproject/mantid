@@ -16,10 +16,10 @@ const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY =
     "graph1d.autodistribution";
 
 using Mantid::API::WorkspaceProperty;
-using Mantid::Kernel::Direction;
-using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::Histogram;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateUserDefinedBackground)

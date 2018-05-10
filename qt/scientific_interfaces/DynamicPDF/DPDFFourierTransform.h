@@ -30,9 +30,9 @@ namespace DynamicPDF {
 class BackgroundRemover;
 class InputDataControl;
 class FitControl;
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 // end of forward declarations
 
 namespace MantidQt {
@@ -124,7 +124,7 @@ private:
   /// Fit algorithm runner
   std::unique_ptr<MantidQt::API::AlgorithmRunner> m_algorithmRunner;
 }; // class FourierTransform
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_FOURIERTRANSFORM_H_

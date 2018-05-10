@@ -38,7 +38,7 @@ public:
   int version() const override { return 1; }
   const std::string summary() const override { return ""; }
 };
-}
+} // namespace
 
 class ISISHistoDataListenerTest : public CxxTest::TestSuite {
 public:

@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
 #define MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidKernel/Exception.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -19,9 +19,9 @@ public:
   PeakColumnTestHelper(std::vector<Peak> &peaks, const std::string &name)
       : PeakColumn(peaks, name) {}
 
-  using PeakColumn::resize;
   using PeakColumn::insert;
   using PeakColumn::remove;
+  using PeakColumn::resize;
 };
 
 class PeakColumnTest : public CxxTest::TestSuite {

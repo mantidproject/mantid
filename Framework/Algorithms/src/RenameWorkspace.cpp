@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/RenameWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -40,10 +40,10 @@ void RenameWorkspace::init() {
 }
 
 /**
-  * Tests that the inputs are all valid
-  * @return A map containing the incorrect workspace
-  * properties and an error message
-  */
+ * Tests that the inputs are all valid
+ * @return A map containing the incorrect workspace
+ * properties and an error message
+ */
 std::map<std::string, std::string> RenameWorkspace::validateInputs() {
   using namespace std;
   map<string, string> errorList;

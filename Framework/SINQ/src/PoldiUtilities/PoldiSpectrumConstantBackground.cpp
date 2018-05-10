@@ -97,5 +97,5 @@ void PoldiSpectrumConstantBackground::init() {
   declareParameter("A0");
 }
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid

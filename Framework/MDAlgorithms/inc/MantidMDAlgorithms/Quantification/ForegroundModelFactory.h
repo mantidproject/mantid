@@ -22,9 +22,9 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace API {
@@ -71,14 +71,14 @@ private:
 /// Typedef singleton instance to ForegroundFactory
 using ForegroundModelFactory =
     Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
     Kernel::SingletonHolder<Mantid::MDAlgorithms::ForegroundModelFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_FOREGROUNDMODELFACTORY_H_ */

@@ -5,9 +5,9 @@
 #include "MantidGeometry/Math/PolygonEdge.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V2D.h"
+#include <algorithm>
 #include <cfloat>
 #include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace Geometry {
@@ -18,8 +18,8 @@ using Kernel::V2D;
 // Public member functions
 //-----------------------------------------------------------------------------
 /**
-  * Constructs a 'null' polygon with no points
-  */
+ * Constructs a 'null' polygon with no points
+ */
 ConvexPolygon::ConvexPolygon()
     : m_minX(DBL_MAX), m_maxX(-DBL_MAX), m_minY(DBL_MAX), m_maxY(-DBL_MAX),
       m_vertices() {}

@@ -1,16 +1,16 @@
 #ifndef MANTID_DATAHANDLING_LOADFULLPROFRESOLUTION_H_
 #define MANTID_DATAHANDLING_LOADFULLPROFRESOLUTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Poco {
 namespace XML {
 class Document;
 class Element;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {

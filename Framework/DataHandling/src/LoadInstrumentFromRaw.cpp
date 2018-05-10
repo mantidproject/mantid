@@ -6,9 +6,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -160,7 +160,8 @@ void LoadInstrumentFromRaw::exec() {
       << "Source component added with position set to (0,0,-" << l1
       << "). In standard configuration, with \n"
       << "the beam along z-axis pointing from source to sample, this implies "
-         "the source is " << l1 << "m in front \n"
+         "the source is "
+      << l1 << "m in front \n"
       << "of the sample. This value can be changed via the 'instrument.l1' "
          "configuration property.\n";
 }

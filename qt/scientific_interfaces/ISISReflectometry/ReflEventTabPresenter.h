@@ -58,6 +58,6 @@ private:
   /// The presenters for each group as a vector
   std::vector<IReflEventPresenter *> m_eventPresenters;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTTABPRESENTER_H */

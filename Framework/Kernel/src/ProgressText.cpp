@@ -1,8 +1,8 @@
 #include "MantidKernel/ProgressText.h"
 
 #include <atomic>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 namespace Mantid {
 namespace Kernel {
@@ -72,5 +72,5 @@ void ProgressText::doReport(const std::string &msg) {
   this->m_last_reported.store(m_i.load());
 }
 
+} // namespace Kernel
 } // namespace Mantid
-} // namespace API

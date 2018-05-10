@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
-#include "MantidAlgorithms/SofQW.h"
-#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -340,8 +340,8 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
         }
         if (dPhi > phiWidth) {
           phiWidth = dPhi;
-          g_log.information() << "Current PhiWidth: " << phiWidth * 180 / M_PI
-                              << '\n';
+          g_log.information()
+              << "Current PhiWidth: " << phiWidth * 180 / M_PI << '\n';
         }
       }
     }
@@ -352,5 +352,5 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

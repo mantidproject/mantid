@@ -6,8 +6,8 @@
 #include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/VectorOf.h"
 
-using Mantid::HistogramData::detail::VectorOf;
 using Mantid::HistogramData::detail::Iterable;
+using Mantid::HistogramData::detail::VectorOf;
 
 class IterableTester : public VectorOf<IterableTester, std::vector<double>>,
                        public Iterable<IterableTester> {

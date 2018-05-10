@@ -32,8 +32,8 @@
 
 QwtBarCurve::QwtBarCurve(BarStyle style, Table *t, const QString &xColName,
                          const QString &name, int startRow, int endRow)
-    : DataCurve(t, xColName, name, startRow, endRow), bar_gap{0}, bar_offset{0},
-      bar_style{style} {
+    : DataCurve(t, xColName, name, startRow, endRow), bar_gap{0},
+      bar_offset{0}, bar_style{style} {
 
   setPen(QPen(Qt::black, 1, Qt::SolidLine));
   setBrush(QBrush(Qt::red));

@@ -13,8 +13,8 @@
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class StructuredDetectorTest : public CxxTest::TestSuite {
 public:
@@ -190,8 +190,8 @@ public:
   }
 
   /** Test on a structured detector that will be
-  * repeated on an un-moved parametrized version.
-  */
+   * repeated on an un-moved parametrized version.
+   */
   void do_test_on(StructuredDetector *det) {
     TS_ASSERT_EQUALS(det->xPixels(), 2);
     TS_ASSERT_EQUALS(det->yPixels(), 2);

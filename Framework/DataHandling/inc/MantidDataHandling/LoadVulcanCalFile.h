@@ -103,7 +103,7 @@ private:
   std::map<int, std::pair<double, double>> m_effLTheta;
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LOADVULCANCALFILE_H_ */

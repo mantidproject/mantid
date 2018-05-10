@@ -5,8 +5,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidKernel/ConfigService.h"
 #include "../ISISReflectometry/ReflRunsTabPresenter.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "ReflMockObjects.h"
@@ -16,7 +16,7 @@ using namespace testing;
 
 namespace {
 ACTION(ICATRuntimeException) { throw std::runtime_error(""); }
-}
+} // namespace
 
 //=====================================================================================
 // Functional tests
@@ -258,12 +258,14 @@ public:
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonSrc.str()))
         .Times(Exactly(1))
         .WillRepeatedly(ICATRuntimeException());
-    EXPECT_CALL(mockMainPresenter, giveUserCritical("Error Logging in:\n",
-                                                    "login failed")).Times(1);
+    EXPECT_CALL(mockMainPresenter,
+                giveUserCritical("Error Logging in:\n", "login failed"))
+        .Times(1);
     EXPECT_CALL(
         mockMainPresenter,
         giveUserInfo("Error Logging in: Please press 'Search' to try again.",
-                     "Login Failed")).Times(1);
+                     "Login Failed"))
+        .Times(1);
     presenter.notify(IReflRunsTabPresenter::SearchFlag);
   }
 

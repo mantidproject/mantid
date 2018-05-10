@@ -1,5 +1,5 @@
-#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
+#include "MantidKernel/Logger.h"
 // includes for workspace handling
 
 // includes for interface development
@@ -117,8 +117,8 @@ void DisplayCurveFit::addSpectrum(
     const size_t specIndex) {
   const QString &curveName{m_curveTypeToQString.at(aType)};
   const QColor curveColor(m_curveTypeToColor.at(aType));
-  m_plotPanel.at(aType)
-      ->addSpectrum(curveName, workspace, specIndex, curveColor);
+  m_plotPanel.at(aType)->addSpectrum(curveName, workspace, specIndex,
+                                     curveColor);
 }
 
 /**
@@ -217,5 +217,5 @@ DisplayCurveFit::namesToTypes(const QStringList &curveNames) const {
   return typesFound;
 }
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

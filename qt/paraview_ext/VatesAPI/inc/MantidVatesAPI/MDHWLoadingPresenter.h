@@ -1,13 +1,13 @@
 #ifndef MANTID_VATES_MDHW_LOADING_PRESENTER
 #define MANTID_VATES_MDHW_LOADING_PRESENTER
 
-#include "MantidVatesAPI/MDLoadingPresenter.h"
-#include "MantidVatesAPI/MetadataJsonManager.h"
-#include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include "MantidVatesAPI/VatesConfigurations.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidVatesAPI/MDLoadingPresenter.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -86,7 +86,7 @@ protected:
   boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
   boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

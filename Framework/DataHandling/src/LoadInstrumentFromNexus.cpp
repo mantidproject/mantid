@@ -2,13 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidNexus/MuonNexusReader.h"
 
 #include <fstream>
 

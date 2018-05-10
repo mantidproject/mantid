@@ -1,8 +1,8 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEVIEW_H
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEVIEW_H
 
-#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/IProjectSaveView.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/ProjectSavePresenter.h"
 #include "ProjectSerialiser.h"
 #include "ui_ProjectSave.h"
@@ -122,6 +122,6 @@ private:
   /// Handle to the UI
   Ui::ProjectSave m_ui;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /* MANTIDQT_MANTIDWIDGETS_PROJECTSAVEVIEW_H */

@@ -39,8 +39,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace ADARA {
 
@@ -105,7 +105,7 @@ enum Version {
   VAR_VALUE_DOUBLE_VERSION = 0x00,
   VAR_VALUE_STRING_VERSION = 0x00,
 };
-}
+} // namespace PacketType
 
 /* These are defined in the SNS Timing Master Functional System Description,
  * section 1.3.4.

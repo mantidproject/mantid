@@ -1,7 +1,7 @@
 #include "MantidDataHandling/SaveReflCustomAscii.h"
-#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <fstream>

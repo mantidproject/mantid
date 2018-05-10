@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_CREATECHOPPERMODELTEST_H_
 #define MANTID_DATAHANDLING_CREATECHOPPERMODELTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/CreateChopperModel.h"
 #include "MantidAPI/FermiChopperModel.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataHandling/CreateChopperModel.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::DataHandling::CreateChopperModel;
 

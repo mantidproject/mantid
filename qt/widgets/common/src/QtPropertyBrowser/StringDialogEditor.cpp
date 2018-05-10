@@ -1,10 +1,10 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h"
 
+#include <QDialog>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QLabel>
-#include <QDialog>
 #include <QSettings>
 
 /**

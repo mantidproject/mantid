@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_LOGGERTEST_H_
 #define MANTID_KERNEL_LOGGERTEST_H_
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 
@@ -15,8 +15,8 @@
 #include <fstream>
 
 using namespace Mantid::Kernel;
-using Poco::SimpleFileChannel;
 using Poco::AutoPtr;
+using Poco::SimpleFileChannel;
 
 class LoggerTest : public CxxTest::TestSuite {
   std::string m_logFile;

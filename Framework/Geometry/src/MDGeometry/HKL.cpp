@@ -8,7 +8,7 @@ void checkUnitCompatibility(Mantid::Kernel::MDUnit const *const unit) {
     throw std::invalid_argument("HKL unit must be a QUnit");
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Geometry {

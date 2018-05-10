@@ -42,7 +42,7 @@ void addToInstrument(MatrixWorkspace_sptr testWS,
         "Moderator.TimeZero.intercept", -5.0);
   }
 }
-}
+} // namespace
 
 class ModeratorTzeroLinearTest : public CxxTest::TestSuite {
 public:

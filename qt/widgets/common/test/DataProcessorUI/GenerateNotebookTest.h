@@ -34,10 +34,10 @@ private:
         {"Run(s)",
          PreprocessingAlgorithm("Plus", plusPrefix, "+", std::set<QString>())},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", transPrefix,
-                                "_", std::set<QString>{"FirstTransmissionRun",
-                                                       "SecondTransmissionRun",
-                                                       "OutputWorkspace"})}};
+         PreprocessingAlgorithm(
+             "CreateTransmissionWorkspaceAuto", transPrefix, "_",
+             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
+                               "OutputWorkspace"})}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -152,10 +152,17 @@ public:
 
     auto notebookLines = splitIntoLines(generatedNotebook);
     const QString result[] = {
-        "{", "   \"metadata\" : {", R"(      "name" : "Mantid Notebook")",
-        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [", "      {", "         \"cells\" : [",
-        "            {", R"(               "cell_type" : "markdown",)",
+        "{",
+        "   \"metadata\" : {",
+        R"(      "name" : "Mantid Notebook")",
+        "   },",
+        "   \"nbformat\" : 3,",
+        "   \"nbformat_minor\" : 0,",
+        "   \"worksheets\" : [",
+        "      {",
+        "         \"cells\" : [",
+        "            {",
+        R"(               "cell_type" : "markdown",)",
     };
 
     // Check that the first 10 lines are output as expected
@@ -218,7 +225,8 @@ public:
         "0 | 12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
         "0 | 12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ",
         "1 | 24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
-        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ", ""};
+        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ",
+        ""};
 
     assertContainsMatchingLines(result, output);
   }

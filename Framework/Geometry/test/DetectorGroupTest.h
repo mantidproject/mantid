@@ -10,8 +10,8 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class DetectorGroupTest : public CxxTest::TestSuite {
 public:

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -80,8 +80,10 @@ public:
 
   void test_removedWhenOutOfScope() {
     TS_ASSERT_EQUALS(
-        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        m_ads
+            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Include)
+            .size(),
         0);
 
     { // Simulated scope
@@ -95,15 +97,19 @@ public:
 
     // Should be removed when goes out of scope
     TS_ASSERT_EQUALS(
-        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        m_ads
+            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Include)
+            .size(),
         0);
   }
 
   void test_removedWhenException() {
     TS_ASSERT_EQUALS(
-        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        m_ads
+            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Include)
+            .size(),
         0);
 
     try {
@@ -121,15 +127,19 @@ public:
     }
 
     TS_ASSERT_EQUALS(
-        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        m_ads
+            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Include)
+            .size(),
         0);
   }
 
   void test_workspaceGroups() {
     TS_ASSERT_EQUALS(
-        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        m_ads
+            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Include)
+            .size(),
         0);
 
     { // Simulated scope
@@ -145,16 +155,19 @@ public:
       m_ads.add(testGroup.name(), wsGroup);
 
       TS_ASSERT_EQUALS(
-          m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                               Mantid::Kernel::DataServiceHidden::Include)
+          m_ads
+              .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                              Mantid::Kernel::DataServiceHidden::Include)
               .size(),
           3);
     }
 
     // Whole group should be removed
     TS_ASSERT_EQUALS(
-        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        m_ads
+            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Include)
+            .size(),
         0);
   }
 
@@ -190,8 +203,10 @@ public:
     TS_ASSERT_EQUALS(ws2->getName(), test.name());
     TS_ASSERT(ws1->getName().empty());
     TS_ASSERT_EQUALS(
-        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        m_ads
+            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Include)
+            .size(),
         1);
   }
 

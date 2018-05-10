@@ -1,27 +1,27 @@
 #include "MantidAlgorithms/Stitch1D.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/HistogramE.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/BoundedValidator.h"
 
-#include <boost/tuple/tuple.hpp>
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/math/special_functions.hpp>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+#include <boost/math/special_functions.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramY;
 
 namespace {
 
@@ -32,7 +32,7 @@ MinMaxTuple calculateXIntersection(MatrixWorkspace_sptr lhsWS,
 }
 
 bool isNonzero(double i) { return (0 != i); }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -179,8 +179,9 @@ double Stitch1D::getStartOverlap(const double &intesectionMin,
   if (startOverlapProp->isDefault() || startOverlapBeyondRange) {
     if (!startOverlapProp->isDefault() && startOverlapBeyondRange) {
       char message[200];
-      std::sprintf(message, "StartOverlap is outside range at %0.4f, Min is "
-                            "%0.4f, Max is %0.4f . Forced to be: %0.4f",
+      std::sprintf(message,
+                   "StartOverlap is outside range at %0.4f, Min is "
+                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
                    startOverlapVal, intesectionMin, intesectionMax,
                    intesectionMin);
       g_log.warning(std::string(message));
@@ -210,8 +211,9 @@ double Stitch1D::getEndOverlap(const double &intesectionMin,
   if (endOverlapProp->isDefault() || endOverlapBeyondRange) {
     if (!endOverlapProp->isDefault() && endOverlapBeyondRange) {
       char message[200];
-      std::sprintf(message, "EndOverlap is outside range at %0.4f, Min is "
-                            "%0.4f, Max is %0.4f . Forced to be: %0.4f",
+      std::sprintf(message,
+                   "EndOverlap is outside range at %0.4f, Min is "
+                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
                    endOverlapVal, intesectionMin, intesectionMax,
                    intesectionMax);
       g_log.warning(std::string(message));

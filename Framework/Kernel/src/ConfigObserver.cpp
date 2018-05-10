@@ -68,5 +68,5 @@ void ConfigObserver::notifyValueChanged(
   notifyValueChanged(notification->key(), notification->curValue(),
                      notification->preValue());
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

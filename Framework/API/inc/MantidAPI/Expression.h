@@ -7,10 +7,10 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
-#include <string>
-#include <vector>
 #include <map>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -235,7 +235,7 @@ private:
   boost::shared_ptr<Operators> m_operators; ///< pointer ot the operators
 };
 
-} // API
-} // Mantid
+} // namespace API
+} // namespace Mantid
 
 #endif /* EXPRESSION_H */

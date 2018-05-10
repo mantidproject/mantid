@@ -1,9 +1,9 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include <gsl/gsl_sf_erf.h>
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/System.h"
 #include <cmath>
+#include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid::API;
 
@@ -19,8 +19,8 @@ using namespace CurveFitting;
 DECLARE_FUNCTION(ThermalNeutronDtoTOFFunction)
 
 /**
-* Define the fittable parameters
-*/
+ * Define the fittable parameters
+ */
 void ThermalNeutronDtoTOFFunction::init() {
 
   /// Instrument geometry related
@@ -35,8 +35,8 @@ void ThermalNeutronDtoTOFFunction::init() {
 }
 
 /** Main function
-  * xValues containing the d-space value of peaks centres
-  */
+ * xValues containing the d-space value of peaks centres
+ */
 void ThermalNeutronDtoTOFFunction::function1D(double *out,
                                               const double *xValues,
                                               const size_t nData) const {
@@ -58,8 +58,8 @@ void ThermalNeutronDtoTOFFunction::function1D(double *out,
 
 //------------------------------------------------------------------------------------------------
 /** Main function
-  * xValues containing the d-space value of peaks centres
-  */
+ * xValues containing the d-space value of peaks centres
+ */
 void ThermalNeutronDtoTOFFunction::function1D(
     vector<double> &out, const vector<double> xValues) const {
   double dtt1 = getParameter(0);
@@ -119,7 +119,7 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
 }
 
 /** Some forbidden function
-  */
+ */
 void ThermalNeutronDtoTOFFunction::functionDerivLocal(API::Jacobian *,
                                                       const double *,
                                                       const size_t) {

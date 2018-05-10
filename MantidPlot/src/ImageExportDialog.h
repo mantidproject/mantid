@@ -33,10 +33,10 @@
 
 #include "ExtensibleFileDialog.h"
 
-#include <QSpinBox>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QPrinter>
+#include <QSpinBox>
 
 class QStackedWidget;
 class QGroupBox;

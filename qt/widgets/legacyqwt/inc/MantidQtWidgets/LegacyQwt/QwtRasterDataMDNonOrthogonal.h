@@ -1,10 +1,10 @@
 #ifndef QwtRasterDataMDNonOrthogonal_H_
 #define QwtRasterDataMDNonOrthogonal_H_
 
-#include "MantidQtWidgets/LegacyQwt/DllOption.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidQtWidgets/LegacyQwt/DllOption.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
 #include <array>
 
 namespace MantidQt {
@@ -33,7 +33,7 @@ protected:
                 QwtRasterDataMDNonOrthogonal &dest) const;
 };
 
-} // namespace SliceViewer
-} // namespace Mantid
+} // namespace API
+} // namespace MantidQt
 
 #endif /* QwtRasterDataMDNonOrthogonal_H_ */

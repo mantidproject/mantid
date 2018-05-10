@@ -25,8 +25,8 @@
 #ifndef PR_QUEUE_K_H
 #define PR_QUEUE_K_H
 
-#include "MantidKernel/ANN/ANNx.h"    // all ANN includes
 #include "MantidKernel/ANN/ANNperf.h" // performance evaluation
+#include "MantidKernel/ANN/ANNx.h"    // all ANN includes
 
 //----------------------------------------------------------------------
 //	Basic types

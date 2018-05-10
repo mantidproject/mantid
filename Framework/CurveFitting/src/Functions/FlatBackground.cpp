@@ -91,6 +91,6 @@ void FlatBackground::histogramDerivative1D(Jacobian *jacobian, double left,
   }
 }
 
-} // namespace Mantid
 } // namespace Functions
 } // namespace CurveFitting
+} // namespace Mantid

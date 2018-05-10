@@ -216,18 +216,18 @@ inline bool Increment(const size_t numDims, size_t *index, size_t *index_max) {
 
 } // namespace NestedForLoop
   //------------------------------------------------------------------------------------------------
-  /** Convert an linear index in nDim workspace into vector of loop indexes of
-   *nDim depth loop
-   *  Unsafe (pointers) version, used by safe vectors version
-   *
-   * @param linear_index :: linear index into the nested for loop.
-   * @param numBins    :: an array[numDims], with number of bins in each dimension
-   * @param numDims :: how many levels of nesting do the for loops have and the
-   *size of the numBins array above
-   *
-   * @param[out] out_indices :: an array, sized numDims, which will be
-   *             filled with the index for each dimension, given the linear index
-   */
+/** Convert an linear index in nDim workspace into vector of loop indexes of
+ *nDim depth loop
+ *  Unsafe (pointers) version, used by safe vectors version
+ *
+ * @param linear_index :: linear index into the nested for loop.
+ * @param numBins    :: an array[numDims], with number of bins in each dimension
+ * @param numDims :: how many levels of nesting do the for loops have and the
+ *size of the numBins array above
+ *
+ * @param[out] out_indices :: an array, sized numDims, which will be
+ *             filled with the index for each dimension, given the linear index
+ */
 inline void getIndicesFromLinearIndex(const size_t linear_index,
                                       size_t const *const numBins,
                                       const size_t numDims,
@@ -306,7 +306,7 @@ isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index,
 
 } // namespace Utils
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_UTILS_H_ */

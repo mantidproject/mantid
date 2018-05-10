@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
 namespace Mantid {
 namespace Poldi {

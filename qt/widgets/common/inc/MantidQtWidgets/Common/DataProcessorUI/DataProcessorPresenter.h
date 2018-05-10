@@ -108,7 +108,7 @@ public:
 
   virtual void skipProcessing() = 0;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H*/

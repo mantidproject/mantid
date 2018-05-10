@@ -16,7 +16,7 @@ class FunctionDomain;
 class FunctionDomain1D;
 class FunctionValues;
 class MatrixWorkspace;
-}
+} // namespace API
 
 namespace CurveFitting {
 

@@ -3,18 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadGSASInstrumentFile.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadGSASInstrumentFile.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include <fstream>
 #include <Poco/File.h>
+#include <fstream>
 
 using Mantid::DataHandling::LoadGSASInstrumentFile;
 
@@ -37,7 +37,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import from a 1-bank prm file
-    */
+   */
   void test_1BankCase() {
     // 1. Generate file
     string filename("Test1Bank.prm");
@@ -81,7 +81,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import from a 2-bank prm file
-    */
+   */
   void test_2BankCase() {
     // 1. Generate file
     string filename("Test2Bank.prm");
@@ -134,8 +134,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import of ALFBE, GAMMA and SIGMA parameters
-  *   and check they are given their expected names.
-  */
+   *   and check they are given their expected names.
+   */
   void test_ags_parameters() {
     // 1. Generate file
     string filename("TestAGS.prm");
@@ -182,7 +182,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test invalid histrogram type
-    */
+   */
   void test_Invalid_Histogram_Type() {
     // Generate file
     string filename("TestBadHistogramType.prm");
@@ -316,7 +316,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
-    */
+   */
   void parseTableWorkspace(TableWorkspace_sptr tablews,
                            map<string, double> &parammap) {
     parammap.clear();
@@ -335,7 +335,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace's 2nd bank to a map
-    */
+   */
   void parseTableWorkspace2(TableWorkspace_sptr tablews,
                             map<string, double> &parammap) {
     parammap.clear();
@@ -354,7 +354,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .prm file
-    */
+   */
   void generate1BankPrmFile(string filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -396,7 +396,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a 2 bank .irf file
-    */
+   */
   void generate2BankPrmFile(string filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -450,7 +450,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .prm file
-    */
+   */
   void generateBadHistogramTypePrmFile(string filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -490,7 +490,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create a workspace group with specified number of workspaces.
-    */
+   */
   void createWorkspaceGroup(size_t numberOfWorkspaces,
                             std::string workspaceName) {
     // create a workspace with some sample data
@@ -512,7 +512,7 @@ public:
   }
 
   /* Return the number of rows the table must have
-  */
+   */
   int getExpectedNumberOfRows() {
     return 12; // Change this value if you add or remove any rows from the
                // OutputTableWorkspace

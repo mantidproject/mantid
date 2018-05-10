@@ -3,15 +3,15 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IDTypes.h" //For specnum_t
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 
 #include "tbb/concurrent_unordered_map.h"
 
 #include <memory>
-#include <vector>
 #include <typeinfo>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

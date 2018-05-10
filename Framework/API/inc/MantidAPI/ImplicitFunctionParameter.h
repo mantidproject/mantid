@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <memory>
 #include <sstream>
 #include <vector>
-#include <memory>
 
 #include "MantidAPI/DllConfig.h"
 
@@ -16,8 +16,8 @@
 #endif
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 
@@ -101,7 +101,7 @@ chosen.
 template <typename T> struct ElementTraits {};
 
 /** ElementTraits for boolean element types.
-*/
+ */
 template <> struct ElementTraits<size_t> {
   using ValueType = size_t;
   static std::string formatCS(const ValueType &value) {
@@ -113,7 +113,7 @@ template <> struct ElementTraits<size_t> {
 };
 
 /** ElementTraits for boolean element types.
-*/
+ */
 template <> struct ElementTraits<bool> {
   using ValueType = bool;
   static std::string formatCS(const ValueType &value) {
@@ -125,7 +125,7 @@ template <> struct ElementTraits<bool> {
 };
 
 /** ElementTraits for double element types.
-*/
+ */
 template <> struct ElementTraits<double> {
   using ValueType = double;
   static std::string formatCS(const ValueType &value) {
@@ -137,7 +137,7 @@ template <> struct ElementTraits<double> {
 };
 
 /** ElementTraits for float element types.
-*/
+ */
 template <> struct ElementTraits<float> {
   using ValueType = double;
   static std::string formatCS(const ValueType &value) {
@@ -151,7 +151,7 @@ template <> struct ElementTraits<float> {
 //------------------------------------------------------------------------------------
 // End ElementTraits TypeTraits region
 //------------------------------------------------------------------------------------
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

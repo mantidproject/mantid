@@ -33,7 +33,7 @@ bool isMonitorDeprecated(const DetectorGroup &self) {
   }
   return true;
 }
-}
+} // namespace
 
 void export_DetectorGroup() {
   class_<DetectorGroup, bases<IDetector>, boost::noncopyable>("DetectorGroup",

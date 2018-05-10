@@ -97,5 +97,5 @@ std::string DLLExport sprintfd(const double data, const double eps) {
   return boost::str(boost::format("%d") % dist);
 }
 
-} // endnamespace MDAlgorithms
-} // endnamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid

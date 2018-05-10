@@ -76,7 +76,7 @@ private:
                                       const int padding);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_PADDINGANDAPODUIZTION_H_*/

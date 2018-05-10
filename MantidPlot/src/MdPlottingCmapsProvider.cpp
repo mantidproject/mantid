@@ -1,22 +1,22 @@
-#include <QStringList>
 #include <QDir>
+#include <QStringList>
 #include <fstream>
 #include <vector>
 
-#include "MdPlottingCmapsProvider.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MdPlottingCmapsProvider.h"
 
 #ifdef MAKE_VATES
-#include "vtkSMTransferFunctionPresets.h"
 #include "vtkNew.h"
+#include "vtkSMTransferFunctionPresets.h"
 #include "vtk_jsoncpp.h"
 #endif
 
 namespace {
 /// Static logger
 Mantid::Kernel::Logger g_log("MdViewerWidget");
-}
+} // namespace
 
 MdPlottingCmapsProvider::MdPlottingCmapsProvider() {}
 

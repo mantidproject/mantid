@@ -288,5 +288,5 @@ void QwtRasterDataMD::copyFrom(const QwtRasterDataMD &source,
   dest.m_overlayInSlice = source.m_overlayInSlice;
 }
 
-} // namespace
-} // namespace
+} // namespace API
+} // namespace MantidQt

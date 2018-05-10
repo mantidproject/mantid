@@ -22,8 +22,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace std;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 class He3TubeEfficiencyTest : public CxxTest::TestSuite {
 public:

@@ -486,11 +486,10 @@ private:
       strm << "Error in Peak " << i << ": " << peak->intensity().value()
            << " != " << referencePeak->intensity().value();
 
-      TSM_ASSERT_DELTA(
-          strm.str().c_str(),
-          fabs(1.0 -
-               peak->intensity().value() / referencePeak->intensity().value()),
-          0.0, relativePrecision);
+      TSM_ASSERT_DELTA(strm.str().c_str(),
+                       fabs(1.0 - peak->intensity().value() /
+                                      referencePeak->intensity().value()),
+                       0.0, relativePrecision);
     }
   }
 

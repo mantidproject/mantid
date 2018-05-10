@@ -8,8 +8,8 @@
 #include "MantidHistogramData/VectorOf.h"
 #include "MantidKernel/make_cow.h"
 
-using Mantid::HistogramData::detail::VectorOf;
 using Mantid::HistogramData::detail::Iterable;
+using Mantid::HistogramData::detail::VectorOf;
 using Mantid::Kernel::cow_ptr;
 using Mantid::Kernel::make_cow;
 
@@ -21,8 +21,8 @@ public:
   VectorOfTester() = default;
   VectorOfTester(const VectorOfTester &) = default;
   VectorOfTester(VectorOfTester &&) = default;
-  VectorOfTester &operator=(const VectorOfTester &)& = default;
-  VectorOfTester &operator=(VectorOfTester &&)& = default;
+  VectorOfTester &operator=(const VectorOfTester &) & = default;
+  VectorOfTester &operator=(VectorOfTester &&) & = default;
 };
 
 class VectorOfTest : public CxxTest::TestSuite {

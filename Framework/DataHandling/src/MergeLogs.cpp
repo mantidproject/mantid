@@ -1,8 +1,8 @@
 #include "MantidDataHandling/MergeLogs.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,8 +19,9 @@ void Merge2WorkspaceLogs::init() {
                   "Workspace to have logs merged");
   declareProperty("LogName1", "", "The name of the first log to be merged.");
   declareProperty("LogName2", "", "The name of the second log to be merged.");
-  declareProperty("MergedLogName", "", "The name of the new log as the result "
-                                       "of log 1 being merged with log 2.");
+  declareProperty("MergedLogName", "",
+                  "The name of the new log as the result "
+                  "of log 1 being merged with log 2.");
   declareProperty("ResetLogValue", false,
                   "Reset both logs' values to unity for each one.");
   declareProperty("LogValue1", 0.0, "Unity value of log 1.");
@@ -184,5 +185,5 @@ Merge2WorkspaceLogs::getTimeSeriesLog(std::string logname) {
   return timeprop;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

@@ -1,12 +1,12 @@
 #ifndef MANTID_DATAHANDLING_SAVECALFILE_H_
 #define MANTID_DATAHANDLING_SAVECALFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -55,7 +55,7 @@ private:
   int m_precision{7};
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_SAVECALFILE_H_ */

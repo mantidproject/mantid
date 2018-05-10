@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
-#include <gsl/gsl_multifit_nlin.h>
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/GSLFunctions.h"
+#include <gsl/gsl_multifit_nlin.h>
 
 namespace Mantid {
 namespace CurveFitting {

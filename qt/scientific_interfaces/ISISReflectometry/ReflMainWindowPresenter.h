@@ -118,6 +118,6 @@ private:
   /// State boolean on whether runs are currently being processed or not
   mutable bool m_isProcessing;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLMAINWINDOWPRESENTER_H */

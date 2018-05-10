@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_NEARESTNEIGHBOURSTEST_H_
 #define MANTID_KERNEL_NEARESTNEIGHBOURSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/NearestNeighbours.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::NearestNeighbours;
 using namespace Eigen;

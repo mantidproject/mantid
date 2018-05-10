@@ -1,7 +1,7 @@
 #include "MantidKernel/NexusDescriptor.h"
 
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -75,7 +75,7 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   std::rewind(fileHandle);
   return result;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------------------------------------------------
 // static NexusDescriptor methods

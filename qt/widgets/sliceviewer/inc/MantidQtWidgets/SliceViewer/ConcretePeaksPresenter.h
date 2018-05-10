@@ -1,15 +1,15 @@
 #ifndef MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
-#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
-#include "MantidAPI/MDGeometry.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
-#include <vector>
+#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -108,7 +108,7 @@ private:
   /// Set the visible peak list.
   void setVisiblePeaks(const std::vector<size_t> &indexes);
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_ */

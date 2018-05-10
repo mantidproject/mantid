@@ -4,10 +4,10 @@
 #include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 

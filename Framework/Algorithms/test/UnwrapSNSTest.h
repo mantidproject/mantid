@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_UNWRAPSNSTEST_H_
 #define MANTID_ALGORITHMS_UNWRAPSNSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 #include <string>
 
 #include "MantidAlgorithms/UnwrapSNS.h"

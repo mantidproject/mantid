@@ -1,8 +1,8 @@
 #ifndef VIEWFRUSTUM_TEST_H_
 #define VIEWFRUSTUM_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/ViewFrustum.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::VATES;
 

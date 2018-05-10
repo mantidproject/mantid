@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADBANKFROMDISKTASK_H_
 #define MANTID_DATAHANDLING_LOADBANKFROMDISKTASK_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Progress.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 

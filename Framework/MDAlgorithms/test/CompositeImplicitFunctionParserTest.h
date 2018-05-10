@@ -2,12 +2,12 @@
 #define TEST_COMPOSITE_FUNCTION_PARSER_H_
 
 #include "FunctionParserTest.h"
-#include <vector>
-#include <memory>
 #include <boost/scoped_ptr.hpp>
+#include <memory>
+#include <vector>
 
-#include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunctionParser.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
 //#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 

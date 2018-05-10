@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_PERFORMINDEXOPERATIONSTEST_H_
 #define MANTID_ALGORITHMS_PERFORMINDEXOPERATIONSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PerformIndexOperations.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/PerformIndexOperations.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::PerformIndexOperations;
 using namespace Mantid::API;

@@ -1,20 +1,20 @@
 #ifndef MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOKTEST_H_
 #define MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <fstream>
+#include "MantidKernel/Timer.h"
 #include <boost/regex.hpp>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
-#include "MantidAlgorithms/GenerateIPythonNotebook.h"
-#include "MantidAlgorithms/CreateWorkspace.h"
-#include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidAlgorithms/Power.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
+#include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAlgorithms/GenerateIPythonNotebook.h"
+#include "MantidAlgorithms/Power.h"
 #include "MantidKernel/make_unique.h"
 #include <Poco/File.h>
 
@@ -64,10 +64,14 @@ public:
     std::string workspaceName = "testGenerateIPythonNotebook";
     create_test_workspace(workspaceName);
 
-    std::string result[] = {
-        "{", "   \"metadata\" : {", R"(      "name" : "Mantid Notebook")",
-        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [", "      {"};
+    std::string result[] = {"{",
+                            "   \"metadata\" : {",
+                            R"(      "name" : "Mantid Notebook")",
+                            "   },",
+                            "   \"nbformat\" : 3,",
+                            "   \"nbformat_minor\" : 0,",
+                            "   \"worksheets\" : [",
+                            "      {"};
 
     // Set up and execute the algorithm.
     GenerateIPythonNotebook alg;

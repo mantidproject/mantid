@@ -60,6 +60,6 @@ private:
   IReflEventView *m_view;
   SliceType m_sliceType;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

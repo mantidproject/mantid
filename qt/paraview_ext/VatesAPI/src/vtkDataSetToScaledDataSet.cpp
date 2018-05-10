@@ -3,14 +3,14 @@
 
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
-#include <vtkNew.h>
-#include <vtkPoints.h>
-#include <vtkUnsignedCharArray.h>
-#include <vtkPointSet.h>
-#include <vtkSmartPointer.h>
-#include <vtkMatrix4x4.h>
-#include <vtkPVChangeOfBasisHelper.h>
 #include <vtkInformation.h>
+#include <vtkMatrix4x4.h>
+#include <vtkNew.h>
+#include <vtkPVChangeOfBasisHelper.h>
+#include <vtkPointSet.h>
+#include <vtkPoints.h>
+#include <vtkSmartPointer.h>
+#include <vtkUnsignedCharArray.h>
 
 #include <stdexcept>
 

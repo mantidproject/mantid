@@ -64,8 +64,8 @@ void MergeMDFiles::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Loads all of the box data required (no events) for later use.
-* Calculates total number events in each box
-* Also opens the files and leaves them open */
+ * Calculates total number events in each box
+ * Also opens the files and leaves them open */
 void MergeMDFiles::loadBoxData() {
   this->progress(0.05, "Loading File Info");
   // Get plain box structure and box tree
@@ -148,8 +148,8 @@ void MergeMDFiles::loadBoxData() {
 }
 
 /** Task that loads all of the events from corresponded boxes of all files
-  * that is being merged into a particular box in the output workspace.
-*/
+ * that is being merged into a particular box in the output workspace.
+ */
 
 uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox) {
   /// get rid of the events and averages which are in the memory erroneously
@@ -367,8 +367,9 @@ void MergeMDFiles::exec() {
     m_fileBasedTargetWS = true;
     if (Poco::File(outputFile).exists())
       throw std::invalid_argument(
-          " File " + outputFile + " already exists. Can not use existing file "
-                                  "as the target to MergeMD files.\n" +
+          " File " + outputFile +
+          " already exists. Can not use existing file "
+          "as the target to MergeMD files.\n" +
           " Use it as one of source files if you want to add MD data to it");
   }
 
@@ -403,5 +404,5 @@ void MergeMDFiles::clearEventLoaders() {
   }
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

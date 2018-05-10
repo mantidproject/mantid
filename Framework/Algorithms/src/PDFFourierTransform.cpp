@@ -4,13 +4,13 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidHistogramData/LinearGenerator.h"
 
 #include <cmath>
 #include <sstream>
@@ -43,7 +43,7 @@ const string S_OF_Q_MINUS_ONE("S(Q)-1");
 const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
 
 constexpr double TWO_OVER_PI(2. / M_PI);
-}
+} // namespace
 
 const std::string PDFFourierTransform::name() const {
   return "PDFFourierTransform";
@@ -56,7 +56,7 @@ const std::string PDFFourierTransform::category() const {
 }
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void PDFFourierTransform::init() {
   auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
@@ -227,7 +227,7 @@ double PDFFourierTransform::determineRho0() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -411,5 +411,5 @@ void PDFFourierTransform::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

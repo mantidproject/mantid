@@ -92,7 +92,7 @@ private:
                      const API::MatrixWorkspace_const_sptr rhs) const override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MINUS_H_*/

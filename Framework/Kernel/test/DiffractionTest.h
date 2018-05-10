@@ -6,8 +6,8 @@
 
 #include "MantidKernel/Diffraction.h"
 
-using Mantid::Kernel::Diffraction::calcTofMin;
 using Mantid::Kernel::Diffraction::calcTofMax;
+using Mantid::Kernel::Diffraction::calcTofMin;
 
 namespace {                // anonymous
 const double DIFC = 2100.; // sensible value
@@ -18,7 +18,7 @@ const double DIFA1 = .25 * DIFC * DIFC;
 const double DIFA2 = 25 * DIFC * DIFC;
 // intentionally goofy
 const double DIFA3 = -.25 * DIFC * DIFC;
-}
+} // namespace
 
 class DiffractionTest : public CxxTest::TestSuite {
 public:

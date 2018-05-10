@@ -1,14 +1,14 @@
 #ifndef MANTID_ALGORITHMS_RRFMUON_H_
 #define MANTID_ALGORITHMS_RRFMUON_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/RRFMuon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/RRFMuon.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

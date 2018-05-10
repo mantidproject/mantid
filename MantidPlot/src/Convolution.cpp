@@ -219,8 +219,8 @@ void Convolution::convlv(double *sig, int n, double *dres, int m, int sign) {
   gsl_fft_halfcomplex_radix2_inverse(sig, 1, n); // inverse fft
 }
 /**************************************************************************
-*             Class Deconvolution                                         *
-***************************************************************************/
+ *             Class Deconvolution                                         *
+ ***************************************************************************/
 
 Deconvolution::Deconvolution(ApplicationWindow *parent, Table *t,
                              const QString &signalColName,

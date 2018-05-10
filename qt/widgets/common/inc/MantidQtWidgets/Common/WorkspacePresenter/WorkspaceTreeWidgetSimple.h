@@ -6,8 +6,8 @@
 
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 
-#include <QWidget>
 #include <QMenu>
+#include <QWidget>
 
 class QTreeWidgetItem;
 class QSignalMapper;
@@ -71,6 +71,6 @@ private slots:
 private:
   QAction *m_plotSpectrum, *m_plotSpectrumWithErrs, *m_plotColorfill;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGETSIMPLE_H

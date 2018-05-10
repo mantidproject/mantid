@@ -12,7 +12,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 /** Takes a 2D workspace as input and regroups the data according to the input
    regroup parameters.
@@ -80,7 +80,7 @@ private:
              bool distribution);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REGROUP_H_*/

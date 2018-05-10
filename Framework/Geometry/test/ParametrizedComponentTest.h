@@ -1,20 +1,20 @@
 #ifndef MANTID_TESTPARCOMPONENT__
 #define MANTID_TESTPARCOMPONENT__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
-#include <boost/make_shared.hpp>
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <boost/make_shared.hpp>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 /** This test used to refer to ParametrizedComponent, a
  * class that has (as of Nov 2010) been folded back into

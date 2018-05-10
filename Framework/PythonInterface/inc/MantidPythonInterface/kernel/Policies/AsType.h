@@ -22,9 +22,9 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+#include <boost/mpl/and.hpp>
 #include <boost/python/detail/prefix.hpp>
 #include <boost/python/to_python_value.hpp>
-#include <boost/mpl/and.hpp>
 #include <type_traits>
 
 /**
@@ -64,7 +64,7 @@ template <typename ReturnType, typename InputType> struct AsTypeImpl {
 template <typename T>
 struct AsType_Requires_New_Type_Automatically_Convertible_To_Original {};
 
-} // ends anonymous namespace
+} // namespace
 
 /**
  * Implements the AsType policy.
@@ -81,8 +81,8 @@ template <class ReturnType> struct AsType {
   };
 };
 
-} // ends Policies namespace
-}
-} // ends Mantid::PythonInterface namespaces
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_ASTYPE_H */

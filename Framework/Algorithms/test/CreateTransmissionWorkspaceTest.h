@@ -8,15 +8,15 @@
 #ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
 #define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <algorithm>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <algorithm>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

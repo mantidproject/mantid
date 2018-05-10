@@ -56,6 +56,6 @@ private:
 public:
   Strontium122();
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 #endif /* MANTID_MDALGORITHMS_STRONTIUM122_H_ */

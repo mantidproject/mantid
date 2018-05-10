@@ -1,9 +1,9 @@
+#include "SANSBackgroundCorrectionWidget.h"
 #include "MantidKernel/Logger.h"
 #include "SANSBackgroundCorrectionSettings.h"
-#include "SANSBackgroundCorrectionWidget.h"
 namespace {
 bool convertQtInt(int state) { return state == 2 ? true : false; }
-}
+} // namespace
 
 namespace {
 /// static logger for main window
@@ -17,7 +17,7 @@ bool hasRunNumber(
   }
   return hasNumber;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -62,10 +62,10 @@ void SANSBackgroundCorrectionWidget::setDarkRunSettingForTimeDetectors(
 }
 
 /**
-* Set the dark run settings for time-based subtractions for monitors
-* @param setting: the dark run settings for time-based subtractions, ie when we
-* want
-*/
+ * Set the dark run settings for time-based subtractions for monitors
+ * @param setting: the dark run settings for time-based subtractions, ie when we
+ * want
+ */
 void SANSBackgroundCorrectionWidget::setDarkRunSettingForTimeMonitors(
     SANSBackgroundCorrectionSettings setting) {
   if (!hasRunNumber(setting)) {
@@ -86,10 +86,10 @@ void SANSBackgroundCorrectionWidget::setDarkRunSettingForTimeMonitors(
 }
 
 /**
-* Set the dark run settings for uamp-based subtractions for detectors
-* @param setting: the dark run settings for uamp-based subtractions, ie when we
-* want
-*/
+ * Set the dark run settings for uamp-based subtractions for detectors
+ * @param setting: the dark run settings for uamp-based subtractions, ie when we
+ * want
+ */
 void SANSBackgroundCorrectionWidget::setDarkRunSettingForUampDetectors(
     SANSBackgroundCorrectionSettings setting) {
   if (!hasRunNumber(setting)) {
@@ -107,10 +107,10 @@ void SANSBackgroundCorrectionWidget::setDarkRunSettingForUampDetectors(
 }
 
 /**
-* Set the dark run settings for uamp-based subtractions for detectors
-* @param setting: the dark run settings for uamp-based subtractions, ie when we
-* want
-*/
+ * Set the dark run settings for uamp-based subtractions for detectors
+ * @param setting: the dark run settings for uamp-based subtractions, ie when we
+ * want
+ */
 void SANSBackgroundCorrectionWidget::setDarkRunSettingForUampMonitors(
     SANSBackgroundCorrectionSettings setting) {
   if (!hasRunNumber(setting)) {
@@ -132,9 +132,9 @@ void SANSBackgroundCorrectionWidget::setDarkRunSettingForUampMonitors(
 //---------------- GETTERS
 
 /**
-* Get the dark run settings for time-based subtractions for detectors
-* @returns the dark run settings for time-based subtractions
-*/
+ * Get the dark run settings for time-based subtractions for detectors
+ * @returns the dark run settings for time-based subtractions
+ */
 SANSBackgroundCorrectionSettings
 SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeDetectors() {
   QString runNumber("");
@@ -151,9 +151,9 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeDetectors() {
 }
 
 /**
-* Get the dark run settings for time-based subtractions for detectors
-* @returns the dark run settings for time-based subtractions
-*/
+ * Get the dark run settings for time-based subtractions for detectors
+ * @returns the dark run settings for time-based subtractions
+ */
 SANSBackgroundCorrectionSettings
 SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeMonitors() {
   QString runNumber("");
@@ -171,9 +171,9 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeMonitors() {
 }
 
 /**
-* Get the dark run settings for uamp-based subtractions for detectors
-* @returns the dark run settings for uamp-based subtractions
-*/
+ * Get the dark run settings for uamp-based subtractions for detectors
+ * @returns the dark run settings for uamp-based subtractions
+ */
 SANSBackgroundCorrectionSettings
 SANSBackgroundCorrectionWidget::getDarkRunSettingForUampDetectors() {
   QString runNumber("");
@@ -189,9 +189,9 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForUampDetectors() {
 }
 
 /**
-* Get the dark run settings for uamp-based subtractions for detectors
-* @returns the dark run settings for uamp-based subtractions
-*/
+ * Get the dark run settings for uamp-based subtractions for detectors
+ * @returns the dark run settings for uamp-based subtractions
+ */
 SANSBackgroundCorrectionSettings
 SANSBackgroundCorrectionWidget::getDarkRunSettingForUampMonitors() {
   QString runNumber("");
@@ -260,5 +260,5 @@ void SANSBackgroundCorrectionWidget::resetEntries() {
   m_ui.bckgnd_cor_mon_uamp_run_line_edit->setText("");
   m_ui.bckgnd_cor_mon_uamp_mon_num_line_edit->setText("");
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

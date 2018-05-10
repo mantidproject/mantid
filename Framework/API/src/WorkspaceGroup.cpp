@@ -1,9 +1,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid {
@@ -13,7 +13,7 @@ namespace {
 size_t MAXIMUM_DEPTH = 100;
 /// static logger object
 Kernel::Logger g_log("WorkspaceGroup");
-}
+} // namespace
 
 WorkspaceGroup::WorkspaceGroup(const Parallel::StorageMode storageMode)
     : Workspace(storageMode),

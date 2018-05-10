@@ -4,8 +4,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -84,7 +84,7 @@ private:
   getPresenter(bool isHistoWorkspace, Mantid::API::IMDWorkspace_sptr workspace,
                int recursionDepth) const;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

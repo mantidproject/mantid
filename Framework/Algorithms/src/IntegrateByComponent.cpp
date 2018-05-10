@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -213,8 +213,8 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID,
                                       size_t>::iterator,
               std::unordered_multimap<Mantid::Geometry::ComponentID,
-                                      size_t>::iterator> keyRange =
-        mymap.equal_range(theKey);
+                                      size_t>::iterator>
+        keyRange = mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();

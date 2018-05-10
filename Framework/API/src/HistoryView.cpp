@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/HistoryView.h"
-#include <iterator>
 #include <algorithm>
+#include <iterator>
 
 namespace Mantid {
 namespace API {

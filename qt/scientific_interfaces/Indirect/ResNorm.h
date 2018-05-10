@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_RESNORM_H_
 #define MANTIDQTCUSTOMINTERFACES_RESNORM_H_
 
-#include "ui_ResNorm.h"
 #include "IndirectBayesTab.h"
+#include "ui_ResNorm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

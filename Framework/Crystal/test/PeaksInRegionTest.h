@@ -1,13 +1,13 @@
 #ifndef MANTID_CRYSTAL_PEAKSINREGIONTEST_H_
 #define MANTID_CRYSTAL_PEAKSINREGIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidCrystal/PeaksInRegion.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/tuple/tuple.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;

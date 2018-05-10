@@ -68,9 +68,9 @@ public:
   // prevents mistakes in client code, assigning to an rvalue, such as
   // histogram.getBinEdges() = { 0.1, 0.2 };
   /// Copy assignment. Lightweight, stored object will be shared.
-  VectorOf &operator=(const VectorOf &)& = default;
+  VectorOf &operator=(const VectorOf &) & = default;
   /// Move assignment.
-  VectorOf &operator=(VectorOf &&)& = default;
+  VectorOf &operator=(VectorOf &&) & = default;
 
   /// Assigns the stored object with the contents of the initializer list init.
   VectorOf &operator=(std::initializer_list<double> ilist) & {

@@ -1,14 +1,14 @@
 #ifndef MANTID_GEOMETRY_MATRIXVECTORPAIRPARSER_H_
 #define MANTID_GEOMETRY_MATRIXVECTORPAIRPARSER_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/MatrixVectorPair.h"
 #include "MantidGeometry/Crystal/V3R.h"
+#include "MantidGeometry/DllConfig.h"
 
 #include "MantidKernel/Exception.h"
+#include <boost/spirit/include/qi.hpp>
 #include <functional>
 #include <map>
-#include <boost/spirit/include/qi.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -203,37 +203,39 @@ public:
     namespace qi = boost::spirit::qi;
 
     using qi::int_;
-    using qi::uint_;
     using qi::lit;
+    using qi::uint_;
 
     /* MSVC currently has some problems using std::bind in connection
      * with boost::spirit in some circumstances, but they can be circumvented
      * using lambda-expressions as a sort of call proxy. For consistency,
      * all semantic parse actions are formulated like that.
      */
-    auto positiveSignAction =
-        [&builder](unused_type, unused_type, unused_type) {
-          builder.setCurrentSignPositive();
+    auto positiveSignAction = [&builder](unused_type, unused_type,
+                                         unused_type) {
+      builder.setCurrentSignPositive();
+    };
+
+    auto negativeSignAction = [&builder](unused_type, unused_type,
+                                         unused_type) {
+      builder.setCurrentSignNegative();
+    };
+
+    auto currentFactorAction =
+        [&builder](const ParsedRationalNumber &rationalNumberComponents,
+                   unused_type, unused_type) {
+          builder.setCurrentFactor(rationalNumberComponents);
         };
 
-    auto negativeSignAction =
-        [&builder](unused_type, unused_type, unused_type) {
-          builder.setCurrentSignNegative();
-        };
+    auto currentDirectionAction = [&builder](const std::string &s, unused_type,
+                                             unused_type) {
+      builder.setCurrentDirection(s);
+    };
 
-    auto currentFactorAction = [&builder](
-        const ParsedRationalNumber &rationalNumberComponents, unused_type,
-        unused_type) { builder.setCurrentFactor(rationalNumberComponents); };
-
-    auto currentDirectionAction =
-        [&builder](const std::string &s, unused_type, unused_type) {
-          builder.setCurrentDirection(s);
-        };
-
-    auto addCurrentStateToResultAction =
-        [&builder](unused_type, unused_type, unused_type) {
-          builder.addCurrentStateToResult();
-        };
+    auto addCurrentStateToResultAction = [&builder](unused_type, unused_type,
+                                                    unused_type) {
+      builder.addCurrentStateToResult();
+    };
 
     auto advanceRowAction = [&builder](unused_type, unused_type, unused_type) {
       builder.advanceRow();

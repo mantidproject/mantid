@@ -1,14 +1,14 @@
 #ifndef MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYDIRECTTEST_H_
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYDIRECTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 

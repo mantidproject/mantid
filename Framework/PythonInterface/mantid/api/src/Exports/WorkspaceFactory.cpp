@@ -62,7 +62,7 @@ GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-}
+} // namespace
 
 void export_WorkspaceFactory() {
   const char *createFromParentDoc = "Create a workspace based on the given "
@@ -73,9 +73,9 @@ void export_WorkspaceFactory() {
 
   const char *createFromScratchDoc =
       "Create a clean new worksapce of the given size.";
-  using createFromScratchPtr = MatrixWorkspace_sptr (
-      WorkspaceFactoryImpl::*)(const std::string &, const size_t &,
-                               const size_t &, const size_t &) const;
+  using createFromScratchPtr = MatrixWorkspace_sptr (WorkspaceFactoryImpl::*)(
+      const std::string &, const size_t &, const size_t &, const size_t &)
+      const;
 
   class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl",
                                                    no_init)

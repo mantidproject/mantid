@@ -48,7 +48,7 @@ public:
   QString whatsthis() override { return QString("Deletes the selected row"); }
   QString shortcut() override { return QString(); }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEROWCOMMAND_H*/

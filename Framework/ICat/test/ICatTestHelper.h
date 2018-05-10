@@ -14,6 +14,6 @@ bool login();
 
 /// Helper to logout of ICat
 void logout();
-}
+} // namespace ICatTestHelper
 
 #endif

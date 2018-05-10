@@ -3,28 +3,28 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAlgorithms/Stitch1D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
-#include <math.h>
-#include <boost/tuple/tuple.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <math.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::Stitch1D;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::LinearGenerator;
 
 double roundSix(double i) { return floor(i * 1000000 + 0.5) / 1000000; }
@@ -59,7 +59,7 @@ MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
 
   return outWS;
 }
-}
+} // namespace
 
 class Stitch1DTest : public CxxTest::TestSuite {
 private:

@@ -1,16 +1,16 @@
 #ifndef MANTID_DATAHANDLING_GENERATEGROUPINGPOWDERTEST_H_
 #define MANTID_DATAHANDLING_GENERATEGROUPINGPOWDERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <fstream>
-#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

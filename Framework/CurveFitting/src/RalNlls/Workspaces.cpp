@@ -56,5 +56,5 @@ void NLLS_workspace::initialize(int n, int m, const nlls_options &options) {
 }
 
 } // namespace NLLS
-} // CurveFitting
-} // Mantid
+} // namespace CurveFitting
+} // namespace Mantid

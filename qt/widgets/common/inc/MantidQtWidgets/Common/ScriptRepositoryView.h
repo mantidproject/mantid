@@ -1,10 +1,10 @@
 #ifndef MANTID_API_SCRIPTREPOSITORYVIEW_H_
 #define MANTID_API_SCRIPTREPOSITORYVIEW_H_
 
+#include "DllOption.h"
+#include "ui_ScriptRepositoryView.h"
 #include <QDialog>
 #include <QStyledItemDelegate>
-#include "ui_ScriptRepositoryView.h"
-#include "DllOption.h"
 
 namespace MantidQt {
 namespace API {
@@ -104,6 +104,6 @@ private:
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_SCRIPTREPOSITORYVIEW_H_ */

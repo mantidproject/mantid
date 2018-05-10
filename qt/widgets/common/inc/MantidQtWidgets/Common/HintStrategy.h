@@ -41,7 +41,7 @@ public:
    */
   virtual std::map<std::string, std::string> createHints() = 0;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_HINTSTRATEGY_H */

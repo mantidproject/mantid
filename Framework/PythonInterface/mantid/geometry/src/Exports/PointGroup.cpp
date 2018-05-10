@@ -1,15 +1,15 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/Group.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/self.hpp>
-#include <boost/python/operators.hpp>
 #include <boost/python/enum.hpp>
-#include <boost/python/scope.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/scope.hpp>
+#include <boost/python/self.hpp>
 
 using Mantid::Geometry::Group;
 using Mantid::Geometry::PointGroup;
@@ -19,7 +19,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(PointGroup)
 
 namespace //<unnamed>
-    {
+{
 using namespace Mantid::PythonInterface;
 
 bool isEquivalent(PointGroup &self, const object &hkl1, const object &hkl2) {
@@ -50,7 +50,7 @@ std::string __repr__implementation(const PointGroup &self) {
   ss << "\")";
   return ss.str();
 }
-}
+} // namespace
 
 void export_PointGroup() {
   register_ptr_to_python<boost::shared_ptr<PointGroup>>();

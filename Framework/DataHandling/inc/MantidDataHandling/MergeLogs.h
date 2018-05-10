@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_MERGELOGS_H_
 #define MANTID_DATAHANDLING_MERGELOGS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {

@@ -1,10 +1,10 @@
 #ifndef MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
 #define MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid;
@@ -20,7 +20,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe;
   return out;
 }
-}
+} // namespace boost
 
 class PeakTransformQSampleTest : public CxxTest::TestSuite {
 

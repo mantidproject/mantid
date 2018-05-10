@@ -349,8 +349,9 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
   }
   if (!eventListener && getPropertyValue("AccumulationMethod") == "Add") {
     out["AccumulationMethod"] =
-        "The " + instrument + " live stream produces histograms. Add is not a "
-                              "sensible accumulation method.";
+        "The " + instrument +
+        " live stream produces histograms. Add is not a "
+        "sensible accumulation method.";
   }
 
   if (this->getPropertyValue("OutputWorkspace").empty())

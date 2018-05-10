@@ -7,18 +7,18 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 #include <cstdarg>
 
@@ -112,14 +112,16 @@ void OptimizeCrystalPlacement::init() {
   declareProperty("MaxAngularChange", 5.0,
                   "Max offset in degrees from current settings(def=5)");
 
-  declareProperty("MaxIndexingError", .25, "Use only peaks whose fractional "
-                                           "hkl values are below this "
-                                           "tolerance(def=.25)");
+  declareProperty("MaxIndexingError", .25,
+                  "Use only peaks whose fractional "
+                  "hkl values are below this "
+                  "tolerance(def=.25)");
 
-  declareProperty("MaxHKLPeaks2Use", -1.0, "If less than 0 all peaks are used, "
-                                           "otherwise only peaks whose h,k, "
-                                           "and l values are below the level "
-                                           "are used(def=-1)");
+  declareProperty("MaxHKLPeaks2Use", -1.0,
+                  "If less than 0 all peaks are used, "
+                  "otherwise only peaks whose h,k, "
+                  "and l values are below the level "
+                  "are used(def=-1)");
   declareProperty("MaxSamplePositionChangeMeters", .0005,
                   "Maximum Change in Sample position in meters(def=.0005)");
 

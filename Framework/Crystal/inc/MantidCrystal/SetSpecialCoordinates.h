@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_SETSPECIALCOORDINATES_H_
 #define MANTID_CRYSTAL_SETSPECIALCOORDINATES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include <vector>
+#include "MantidKernel/System.h"
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Crystal {

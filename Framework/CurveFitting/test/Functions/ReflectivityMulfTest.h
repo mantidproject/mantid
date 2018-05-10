@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/ReflectivityMulf.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Functions/ReflectivityMulf.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

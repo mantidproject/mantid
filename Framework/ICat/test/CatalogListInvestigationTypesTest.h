@@ -1,11 +1,11 @@
 #ifndef LISTINVESTIGATIONTYPES_H_
 #define LISTINVESTIGATIONTYPES_H_
 
-#include <cxxtest/TestSuite.h>
+#include "ICatTestHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
 #include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidICat/CatalogLogin.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
-#include "ICatTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;

@@ -1,11 +1,11 @@
 #ifndef Q1DWEIGHTEDTEST_H_
 #define Q1DWEIGHTEDTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

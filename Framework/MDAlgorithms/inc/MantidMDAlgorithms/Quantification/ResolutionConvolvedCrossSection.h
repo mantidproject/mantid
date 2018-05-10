@@ -32,7 +32,7 @@ namespace Mantid {
 namespace API {
 /// Forward declarations
 class ExperimentInfo;
-}
+} // namespace API
 
 namespace MDAlgorithms {
 //
@@ -104,7 +104,7 @@ private:
   /// Output events. Need to find a better way to handle other dimensions
   mutable std::list<DataObjects::MDEvent<4>> m_simulatedEvents;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_RESOLUTIONCONVOLVEDCROSSSECTION_H_ */

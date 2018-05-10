@@ -1,7 +1,7 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/SaveCalFile.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/System.h"
 #include <cmath>
 #include <fstream>
 
@@ -151,5 +151,5 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
   }
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

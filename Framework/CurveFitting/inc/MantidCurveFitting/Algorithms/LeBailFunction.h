@@ -1,17 +1,17 @@
 #ifndef MANTID_CURVEFITTING_LEBAILFUNCTION_H_
 #define MANTID_CURVEFITTING_LEBAILFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 namespace CurveFitting {
 namespace Algorithms {
 
@@ -154,8 +154,9 @@ private:
 
   /// Group close peaks together
   void groupPeaks(
-      std::vector<std::vector<
-          std::pair<double, API::IPowderDiffPeakFunction_sptr>>> &peakgroupvec,
+      std::vector<
+          std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>>>
+          &peakgroupvec,
       std::vector<API::IPowderDiffPeakFunction_sptr> &outboundpeakvec,
       double xmin, double xmax);
 

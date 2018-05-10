@@ -28,9 +28,9 @@
  ***************************************************************************/
 #include "ColorBox.h"
 
-#include <QSettings>
-#include <QPixmap>
 #include <QPainter>
+#include <QPixmap>
+#include <QSettings>
 #include <algorithm>
 
 /**

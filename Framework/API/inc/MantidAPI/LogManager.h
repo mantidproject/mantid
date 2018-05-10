@@ -2,9 +2,9 @@
 #define MANTID_API_LOGMANAGER_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/make_unique.h"
 #include <memory>
 #include <vector>
 
@@ -24,7 +24,7 @@ template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 using TimeSplitterType = std::vector<SplittingInterval>;
 class PropertyManager;
-}
+} // namespace Kernel
 
 namespace API {
 
@@ -245,7 +245,7 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
   newProp->setUnits(units);
   addProperty(std::move(newProp), overwrite);
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_LOGMANAGER_H_

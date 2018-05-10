@@ -3,22 +3,22 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include <numeric>
 #include <cmath>
+#include <numeric>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
-using HistogramData::Points;
 using HistogramData::Counts;
+using HistogramData::Points;
 
 using namespace std;
 
@@ -81,14 +81,14 @@ public:
     std::iota(xdata.begin(), xdata.end(), 0);
 
     ws->setHistogram(0, Points(xdata),
-                     Counts{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77,
-                            67, 33, 27, 20, 9, 2});
+                     Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
+                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
     return ws;
   }
 
   //--------------------------------------------------------------------------------------------
   /** Test on a spectrum without peak
-    */
+   */
   void test_FindBackgroundOnFlat() {
     // Add workspace
     MatrixWorkspace_sptr testws = generate2SpectraTestWorkspace();
@@ -132,7 +132,7 @@ public:
 
   //--------------------------------------------------------------------------------------------
   /** Test on a spectrum without peak
-    */
+   */
   void test_FindBackgroundOnSpec1() {
     // Add workspace
     MatrixWorkspace_sptr testws = generate2SpectraTestWorkspace();
@@ -195,8 +195,8 @@ public:
 
     // Workspace index = 1
     ws->setHistogram(1, ws->points(0),
-                     Counts{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77,
-                            67, 33, 27, 20, 9, 2});
+                     Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
+                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
 
     return ws;
   }

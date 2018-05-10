@@ -1,8 +1,8 @@
 #ifndef VTKDATASET_TO_WS_LOCATION_H
 #define VTKDATASET_TO_WS_LOCATION_H
 
-#include <string>
 #include "MantidKernel/System.h"
+#include <string>
 
 class vtkDataSet;
 namespace Mantid {
@@ -50,7 +50,7 @@ public:
 private:
   vtkDataSet *m_dataset;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

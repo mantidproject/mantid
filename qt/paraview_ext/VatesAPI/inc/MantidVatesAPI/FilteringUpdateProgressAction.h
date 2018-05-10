@@ -57,7 +57,7 @@ private:
   /// Message associated with the progress action
   std::string m_message;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif /* PARAVIEWPROGRESSACTION_H_ */

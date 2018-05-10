@@ -28,19 +28,19 @@
  *                                                                         *
  ***************************************************************************/
 #include "FilterDialog.h"
-#include "Graph.h"
-#include "MyParser.h"
 #include "ColorBox.h"
 #include "FFTFilter.h"
+#include "Graph.h"
+#include "MyParser.h"
 
-#include <QGroupBox>
 #include <QCheckBox>
-#include <QMessageBox>
-#include <QLayout>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
 #include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 
 FilterDialog::FilterDialog(int type, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), graph(nullptr), buttonFilter(nullptr),

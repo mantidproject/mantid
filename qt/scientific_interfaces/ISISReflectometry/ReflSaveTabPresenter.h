@@ -2,13 +2,13 @@
 #define MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H
 
 #include "DllConfig.h"
+#include "IReflAsciiSaver.h"
 #include "IReflSaveTabPresenter.h"
-#include <vector>
-#include <string>
-#include <memory>
 #include <MantidKernel/ConfigPropertyObserver.h>
 #include <boost/optional.hpp>
-#include "IReflAsciiSaver.h"
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -99,6 +99,6 @@ private:
   IReflMainWindowPresenter *m_mainPresenter;
   bool m_shouldAutosave;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H */

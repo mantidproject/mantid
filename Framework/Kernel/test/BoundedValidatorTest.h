@@ -1,8 +1,8 @@
 #ifndef BOUNDEDVALIDATORTEST_H_
 #define BOUNDEDVALIDATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/BoundedValidator.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 

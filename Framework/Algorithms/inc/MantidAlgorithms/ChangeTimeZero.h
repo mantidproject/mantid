@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_CHANGETIMEZERO_H_
 #define MANTID_ALGORITHMS_CHANGETIMEZERO_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateTimeValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -69,7 +69,7 @@ private:
   const std::string m_defaultAbsoluteTimeShift;
 };
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_CHANGEPULSETIME_H_ */

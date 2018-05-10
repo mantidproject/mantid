@@ -4,11 +4,11 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_SampleTransmission.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_SampleTransmission.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,7 +45,7 @@ private:
   /// Algorithm runner
   API::AlgorithmRunner *m_algRunner;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SAMPLETRANSMISSION_H_

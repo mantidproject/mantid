@@ -35,8 +35,8 @@
 
 #include "MantidKernel/DllConfig.h"
 #include <Poco/Channel.h>
-#include <string>
 #include <mutex>
+#include <string>
 
 namespace Poco {
 // Forward declare

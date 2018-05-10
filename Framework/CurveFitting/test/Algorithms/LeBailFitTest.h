@@ -9,8 +9,8 @@
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
+#include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -23,9 +23,9 @@ using namespace WorkspaceCreationHelper;
 using namespace std;
 
 using Mantid::CurveFitting::Algorithms::LeBailFit;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 namespace {
 //----------------------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ void genPeakParameterBank7(std::map<std::string, double> &paramvaluemap) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate peak parameters for NOMAD Bank4
-  */
+ */
 void genPeakParameterNomBank4(map<std::string, double> &paramvaluemap) {
   paramvaluemap.clear();
 
@@ -135,7 +135,7 @@ void genPeakParameterNomBank4(map<std::string, double> &paramvaluemap) {
 //----------------------------------------------------------------------------------------------
 /** Generate peak parameters for GPPD bank 1 from arg_si.pcr (Fullprof
  * example)
-  */
+ */
 void generateGPPDBank1(map<std::string, double> &parammap) {
   parammap.emplace("Dtt1", 16370.650);
   parammap.emplace("Dtt2", 0.10);
@@ -328,8 +328,8 @@ API::MatrixWorkspace_sptr generateTwinPeakData() {
 
 //----------------------------------------------------------------------------------------------
 /** Generate data with background
-  * The data comes from NOMAD 11848-4 (bank 4)
-  */
+ * The data comes from NOMAD 11848-4 (bank 4)
+ */
 API::MatrixWorkspace_sptr generate1PeakDataPlusBackground() {
 
   Points vecX = {
@@ -386,7 +386,7 @@ API::MatrixWorkspace_sptr generate1PeakDataPlusBackground() {
 
 //----------------------------------------------------------------------------------------------
 /** Generate backgroundless peak 220 from arg_si.dat (Fullprof example)
-  */
+ */
 API::MatrixWorkspace_sptr generateArgSiPeak220() {
 
   Points vecx = {31019.300000, 31050.400000, 31081.400000, 31112.500000,
@@ -512,12 +512,12 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
 
 //----------------------------------------------------------------------------------------------
 /** Create parameter workspace for peak calculation.
-  * If a parameter is to be modifed by absolute value, then this parameter
+ * If a parameter is to be modifed by absolute value, then this parameter
  * will be fit.
-  * @param parammodifymap :: map containing parameter and its value to update
+ * @param parammodifymap :: map containing parameter and its value to update
  * from original
-  * @param option :: choice to select parameter values.
-  */
+ * @param option :: choice to select parameter values.
+ */
 TableWorkspace_sptr
 createPeakParameterWorkspace(map<std::string, double> parammodifymap,
                              int option) {
@@ -611,7 +611,7 @@ createPeakParameterWorkspace(map<std::string, double> parammodifymap,
 
   return parameterws;
 }
-}
+} // namespace
 
 class LeBailFitTest : public CxxTest::TestSuite {
 public:
@@ -730,8 +730,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test calculation mode on calculating 1 peak using Fullprof #9 profile
-    * It is same as LeBailFunctionTest.test_calculateLeBailFunctionProf9()
-    * Task of this test is to make sure the workflow is correct.
+   * It is same as LeBailFunctionTest.test_calculateLeBailFunctionProf9()
+   * Task of this test is to make sure the workflow is correct.
    */
   void test_CalculationSimpleModeProfile9() {
     // Create input workspaces
@@ -916,8 +916,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Fit 1 parameter value in a 2 peak pattern
-    * Due to the strongly correlated peak parameters, only 1 parameter
-    * has its value shifted from true value for unit test purpose
+   * Due to the strongly correlated peak parameters, only 1 parameter
+   * has its value shifted from true value for unit test purpose
    */
   void test_fit1Parameter() {
     std::string testplan("zero");
@@ -1189,7 +1189,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test refining background.  The data to test against is from NOM 11848-4
-    */
+   */
   void Xtest_refineBackground() {
     // 1. Create input workspace
     // a) Data workspace
@@ -1318,7 +1318,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create a table worskpace for background parameters
-    * Note: It is just desired for bank 7 run 4862
+   * Note: It is just desired for bank 7 run 4862
    */
   DataObjects::TableWorkspace_sptr
   createBackgroundParameterWorksapce(int option) {

@@ -85,5 +85,5 @@ void LoadDAEDialog::initLayout() {
   setWindowTitle(tr("Load Workspace from DAE"));
   setFixedHeight(sizeHint().height());
 }
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt

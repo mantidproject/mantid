@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_ARRAYLENGTHVALIDATORTEST_H_
 #define MANTID_KERNEL_ARRAYLENGTHVALIDATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <vector>
 
 #include "MantidKernel/ArrayLengthValidator.h"

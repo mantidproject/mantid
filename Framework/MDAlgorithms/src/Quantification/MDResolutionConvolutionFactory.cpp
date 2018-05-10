@@ -26,5 +26,5 @@ MDResolutionConvolution *MDResolutionConvolutionFactoryImpl::createConvolution(
   convolution->initialize();
   return convolution;
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

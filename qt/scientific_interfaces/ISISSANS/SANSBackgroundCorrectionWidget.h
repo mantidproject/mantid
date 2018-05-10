@@ -1,8 +1,8 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONWIDGET_H_
 #define MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONWIDGET_H_
 
-#include "MantidKernel/System.h"
 #include "DllConfig.h"
+#include "MantidKernel/System.h"
 #include "ui_SANSBackgroundCorrectionWidget.h"
 
 #include <QWidget>

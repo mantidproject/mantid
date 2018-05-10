@@ -3,18 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadRawBin0.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadRawBin0.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/Instrument.h"
-#include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -49,7 +49,7 @@ private:
   QString const &m_prefix;
   QString const &m_description;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLUMN_H

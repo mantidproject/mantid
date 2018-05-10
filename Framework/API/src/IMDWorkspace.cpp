@@ -1,8 +1,8 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/VMD.h"
 
 #include <sstream>
@@ -190,8 +190,8 @@ none for the generic case, but overriden elsewhere.
 MDNormalization IMDWorkspace::displayNormalizationHisto() const {
   return NoNormalization;
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

@@ -72,7 +72,7 @@ private:
   template <class T> size_t convertEventList(size_t workspaceIndex);
 };
 
-} // endNamespace DataObjects
-} // endNamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

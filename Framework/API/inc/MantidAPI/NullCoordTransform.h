@@ -25,7 +25,7 @@ private:
   /// Number of dimensions.
   size_t m_ndims;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

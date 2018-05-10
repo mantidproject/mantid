@@ -19,8 +19,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -31,7 +31,7 @@ bool compareMomentum(const std::array<double, 4> &v1,
                      const std::array<double, 4> &v2) {
   return (v1[3] < v2[3]);
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormDirectSC)
@@ -65,8 +65,8 @@ const std::string MDNormDirectSC::summary() const {
 const std::string MDNormDirectSC::name() const { return "MDNormDirectSC"; }
 
 /**
-  * Initialize the algorithm's properties.
-  */
+ * Initialize the algorithm's properties.
+ */
 void MDNormDirectSC::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),

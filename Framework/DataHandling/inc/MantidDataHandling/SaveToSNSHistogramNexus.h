@@ -9,8 +9,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <climits>
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace DataHandling {

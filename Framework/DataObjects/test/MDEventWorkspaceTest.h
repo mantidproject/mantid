@@ -2,29 +2,29 @@
 #define MDEVENTWORKSPACETEST_H
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidKernel/ProgressText.h"
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ProgressText.h"
+#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "PropertyManagerHelper.h"
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
-#include <vector>
 #include <typeinfo>
-#include <cmath>
+#include <vector>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -764,9 +764,9 @@ public:
   }
 
   /**
-  * Test declaring an input IMDEventWorkspace and retrieving as const_sptr or
-  * sptr
-  */
+   * Test declaring an input IMDEventWorkspace and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     IMDEventWorkspace_sptr wsInput(new MDEventWorkspace<MDLeanEvent<3>, 3>());
@@ -839,7 +839,8 @@ public:
   void teadDown() { m_ws.reset(); }
   void test_splitting_performance_single_threaded() {
     std::cout << "Starting Workspace splitting performance test, single "
-                 "threaded with " << nBoxes << " events \n";
+                 "threaded with "
+              << nBoxes << " events \n";
     Kernel::Timer clock;
     m_ws->splitAllIfNeeded(nullptr);
     std::cout

@@ -16,7 +16,7 @@ namespace Mantid {
 namespace API {
 class IAlgorithm;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace API {
@@ -57,19 +57,19 @@ class EXPORT_OPT_MANTIDQT_COMMON MWRunFiles : public API::MantidWidget {
   Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
   Q_PROPERTY(bool findDirectory READ isForDirectory WRITE isForDirectory)
   Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
-  Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE
-                 allowMultipleFiles)
+  Q_PROPERTY(
+      bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
   Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
   Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
   Q_PROPERTY(ButtonOpts buttonOpt READ doButtonOpt WRITE doButtonOpt)
   Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE
                  setAlgorithmProperty)
-  Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE
-                 setFileExtensions)
-  Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE
-                 extsAsSingleOption)
-  Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE
-                 liveButtonState)
+  Q_PROPERTY(
+      QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
+  Q_PROPERTY(
+      bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
+  Q_PROPERTY(
+      LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
   Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE
                  setInstrumentOverride)
   Q_ENUMS(ButtonOpts)
@@ -294,7 +294,7 @@ private:
   /// Handle to any results found
   FindFilesSearchResults m_cachedResults;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_

@@ -15,7 +15,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF

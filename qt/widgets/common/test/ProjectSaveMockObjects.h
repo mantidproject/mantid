@@ -2,8 +2,8 @@
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMOCKOBJECTS_H
 
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/IProjectSaveView.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <gmock/gmock.h>
 

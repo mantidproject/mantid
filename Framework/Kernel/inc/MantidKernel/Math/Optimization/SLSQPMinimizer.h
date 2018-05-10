@@ -156,8 +156,7 @@ private:
   public:
     /// Construct
     template <typename T>
-    FunctionWrapper(const T &func)
-        : m_funcHolder(new TypeHolder<T>(func)) {}
+    FunctionWrapper(const T &func) : m_funcHolder(new TypeHolder<T>(func)) {}
     ~FunctionWrapper() { delete m_funcHolder; }
     /**
      * Calls user supplied function
@@ -185,7 +184,7 @@ private:
 };
 
 } // namespace Math
-}
-} // namespace Mantid::Kernel
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_SLSQPMINIMIZER_H_ */

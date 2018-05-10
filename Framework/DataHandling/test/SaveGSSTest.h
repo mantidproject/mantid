@@ -157,7 +157,7 @@ public:
 
     // Check file is identical
     TS_ASSERT(!FileComparisonHelper::isEqualToReferenceFile(
-                  "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
+        "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
 
     // Clean
     AnalysisDataService::Instance().remove(wsName);

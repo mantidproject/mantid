@@ -1,8 +1,8 @@
 #ifndef BINDIALOG_H_
 #define BINDIALOG_H_
 
-#include <QDialog>
 #include <QCheckBox>
+#include <QDialog>
 
 // Qt forward declarations
 class QLineEdit;
@@ -63,7 +63,7 @@ private:
   QLineEdit *mIntegralMaxValue;
   QCheckBox *mEntireRange;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*BINDIALOG_H_*/

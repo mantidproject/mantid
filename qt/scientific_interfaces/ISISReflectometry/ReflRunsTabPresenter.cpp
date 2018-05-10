@@ -21,13 +21,13 @@
 #include "ReflSearchModel.h"
 
 #include <QStringList>
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <vector>
-#include <algorithm>
-#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -46,14 +46,14 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
                  &QString::fromStdString);
   return outVec;
 }
-}
+} // namespace
 
 /** Constructor
-* @param mainView :: [input] The view we're managing
-* @param progressableView :: [input] The view reporting progress
-* @param tablePresenters :: [input] The data processor presenters
-* @param searcher :: [input] The search implementation
-*/
+ * @param mainView :: [input] The view we're managing
+ * @param progressableView :: [input] The view reporting progress
+ * @param tablePresenters :: [input] The data processor presenters
+ * @param searcher :: [input] The search implementation
+ */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
     std::vector<DataProcessorPresenter *> tablePresenters,
@@ -104,8 +104,8 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
 
 /** Accept a main presenter
-* @param mainPresenter :: [input] A main presenter
-*/
+ * @param mainPresenter :: [input] A main presenter
+ */
 void ReflRunsTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
@@ -244,8 +244,8 @@ void ReflRunsTabPresenter::search() {
 }
 
 /** Populates the search results table
-* @param searchAlg : [input] The search algorithm
-*/
+ * @param searchAlg : [input] The search algorithm
+ */
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
@@ -258,9 +258,9 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
-* runs to table and processes them
-* @param startNew : Boolean on whether to start a new autoreduction
-*/
+ * runs to table and processes them
+ * @param startNew : Boolean on whether to start a new autoreduction
+ */
 void ReflRunsTabPresenter::autoreduce(bool startNew) {
   m_autoSearchString = m_view->getSearchString();
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
@@ -286,8 +286,8 @@ void ReflRunsTabPresenter::autoreduce(bool startNew) {
 }
 
 /** Transfers the selected runs in the search results to the processing table
-* @return : The runs to transfer as a vector of maps
-*/
+ * @return : The runs to transfer as a vector of maps
+ */
 void ReflRunsTabPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
@@ -372,10 +372,10 @@ void ReflRunsTabPresenter::transfer() {
 }
 
 /**
-* Select and make a transfer strategy on demand based. Pick up the
-* user-provided transfer strategy to do this.
-* @return new TransferStrategy
-*/
+ * Select and make a transfer strategy on demand based. Pick up the
+ * user-provided transfer strategy to do this.
+ * @return new TransferStrategy
+ */
 std::unique_ptr<ReflTransferStrategy>
 ReflRunsTabPresenter::getTransferStrategy() {
   std::unique_ptr<ReflTransferStrategy> rtnStrategy;
@@ -409,10 +409,10 @@ ReflRunsTabPresenter::getTransferStrategy() {
 }
 
 /** Used to tell the presenter something has changed in the ADS
-*
-* @param workspaceList :: the list of table workspaces in the ADS that could be
-* loaded into the interface
-*/
+ *
+ * @param workspaceList :: the list of table workspaces in the ADS that could be
+ * loaded into the interface
+ */
 void ReflRunsTabPresenter::notifyADSChanged(
     const QSet<QString> &workspaceList) {
 
@@ -423,13 +423,13 @@ void ReflRunsTabPresenter::notifyADSChanged(
 }
 
 /** Requests global pre-processing options. Options are supplied by
-  * the main presenter and there can be multiple sets of options for different
-  * columns that need to be preprocessed.
-  * @return :: A map of the column name to the global pre-processing options
-  * for that column
-  * the main presenter.
-  * @return :: Global pre-processing options
-  */
+ * the main presenter and there can be multiple sets of options for different
+ * columns that need to be preprocessed.
+ * @return :: A map of the column name to the global pre-processing options
+ * for that column
+ * the main presenter.
+ * @return :: Global pre-processing options
+ */
 ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
   ColumnOptionsQMap result;
   assert(m_mainPresenter != nullptr &&
@@ -445,9 +445,9 @@ ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
 }
 
 /** Requests global processing options. Options are supplied by the main
-* presenter
-* @return :: Global processing options
-*/
+ * presenter
+ * @return :: Global processing options
+ */
 OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
   assert(m_mainPresenter != nullptr &&
          "The main presenter must be set with acceptMainPresenter.");
@@ -455,10 +455,10 @@ OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
 }
 
 /** Requests global post-processing options as a string. Options are supplied by
-* the main
-* presenter
-* @return :: Global post-processing options as a string
-*/
+ * the main
+ * presenter
+ * @return :: Global post-processing options as a string
+ */
 QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
 
   return QString::fromStdString(
@@ -466,25 +466,25 @@ QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
 }
 
 /** Requests time-slicing values. Values are supplied by the main presenter
-* @return :: Time-slicing values
-*/
+ * @return :: Time-slicing values
+ */
 QString ReflRunsTabPresenter::getTimeSlicingValues() const {
   return QString::fromStdString(
       m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup()));
 }
 
 /** Requests time-slicing type. Type is supplied by the main presenter
-* @return :: Time-slicing values
-*/
+ * @return :: Time-slicing values
+ */
 QString ReflRunsTabPresenter::getTimeSlicingType() const {
   return QString::fromStdString(
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
 /** Requests transmission runs for a particular run angle. Values are supplied
-* by the main presenter
-* @return :: Transmission run(s) as a comma-separated list
-*/
+ * by the main presenter
+ * @return :: Transmission run(s) as a comma-separated list
+ */
 OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle) const {
   return m_mainPresenter->getOptionsForAngle(m_view->getSelectedGroup(), angle);
 }
@@ -514,18 +514,18 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
-*/
+ */
 void ReflRunsTabPresenter::pause() const { updateWidgetEnabledState(false); }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is in progress
-*/
+ */
 void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number, transfer method or instrument has changed
-* @return : Boolean on whether to start a new autoreduction
-*/
+ * either the search number, transfer method or instrument has changed
+ * @return : Boolean on whether to start a new autoreduction
+ */
 bool ReflRunsTabPresenter::startNewAutoreduction() const {
   bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
   bool transferMethodChanged =
@@ -535,21 +535,21 @@ bool ReflRunsTabPresenter::startNewAutoreduction() const {
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
-*/
+ */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   m_mainPresenter->notifyReductionPaused(group);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
-*/
+ */
 void ReflRunsTabPresenter::confirmReductionResumed(int group) {
   m_mainPresenter->notifyReductionResumed(group);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears the
-* and the table selection model and updates the config service, printing an
-* information message
-*/
+ * and the table selection model and updates the config service, printing an
+ * information message
+ */
 void ReflRunsTabPresenter::changeInstrument() {
   auto const instrument = m_view->getSearchInstrument();
   m_mainPresenter->setInstrumentName(instrument);
@@ -561,5 +561,5 @@ void ReflRunsTabPresenter::changeInstrument() {
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
 const std::string ReflRunsTabPresenter::LegacyTransferMethod = "Description";
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

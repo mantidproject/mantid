@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_FindPeakBackground_H_
 #define MANTID_ALGORITHMS_FindPeakBackground_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -11,7 +11,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 

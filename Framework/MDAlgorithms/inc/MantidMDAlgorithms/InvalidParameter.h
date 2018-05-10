@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidKernel/System.h"
+#include <vector>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -59,7 +59,7 @@ public:
 
   static std::string parameterName() { return "InvalidParameter"; }
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

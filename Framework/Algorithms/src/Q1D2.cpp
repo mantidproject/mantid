@@ -1,26 +1,26 @@
-#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Q1D2.h"
-#include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidAlgorithms/Qhelper.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -352,10 +352,10 @@ void Q1D2::exec() {
 }
 
 /** Creates the output workspace, its size, units, etc.
-*  @param binParams the bin boundary specification using the same same syntax as
-* param the Rebin algorithm
-*  @return A pointer to the newly-created workspace
-*/
+ *  @param binParams the bin boundary specification using the same same syntax
+ * as param the Rebin algorithm
+ *  @return A pointer to the newly-created workspace
+ */
 API::MatrixWorkspace_sptr
 Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   // Calculate the output binning
@@ -364,9 +364,10 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
       binParams, XOut.mutableRawData()));
 
   // Create output workspace. On all but rank 0 this is a temporary workspace.
-  Indexing::IndexInfo indexInfo(1, communicator().rank() == 0
-                                       ? Parallel::StorageMode::MasterOnly
-                                       : Parallel::StorageMode::Cloned,
+  Indexing::IndexInfo indexInfo(1,
+                                communicator().rank() == 0
+                                    ? Parallel::StorageMode::MasterOnly
+                                    : Parallel::StorageMode::Cloned,
                                 communicator());
   indexInfo.setSpectrumDefinitions(std::vector<SpectrumDefinition>(1));
   auto outputWS = create<MatrixWorkspace>(*m_dataWS, indexInfo, XOut);
@@ -383,22 +384,22 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 }
 
 /** Calculate the normalization term for each output bin
-*  @param wavStart [in] the index number of the first bin in the input
-* wavelengths that is actually being used
-*  @param wsIndex [in] the ws index of the spectrum to calculate
-*  @param pixelAdj [in] if not NULL this is workspace contains single bins with
-* the adjustments, e.g. detector efficencies, for the given ws index
-*  @param wavePixelAdj [in] if not NULL this is workspace that contains the
-* adjustments for the pixels and wavelenght dependend values.
-*  @param binNorms [in] pointer to a contigious array of doubles that are the
-* wavelength correction from waveAdj workspace, can be NULL
-*  @param binNormEs [in] pointer to a contigious array of doubles which
-* corrospond to the corrections and are their errors, can be NULL
-*  @param norm [out] normalization for each bin, including soild angle, pixel
-* correction, the proportion that is not masked and the normalization workspace
-*  @param normETo2 [out] this pointer must point to the end of the norm array,
-* it will be filled with the total of the error on the normalization
-*/
+ *  @param wavStart [in] the index number of the first bin in the input
+ * wavelengths that is actually being used
+ *  @param wsIndex [in] the ws index of the spectrum to calculate
+ *  @param pixelAdj [in] if not NULL this is workspace contains single bins with
+ * the adjustments, e.g. detector efficencies, for the given ws index
+ *  @param wavePixelAdj [in] if not NULL this is workspace that contains the
+ * adjustments for the pixels and wavelenght dependend values.
+ *  @param binNorms [in] pointer to a contigious array of doubles that are the
+ * wavelength correction from waveAdj workspace, can be NULL
+ *  @param binNormEs [in] pointer to a contigious array of doubles which
+ * corrospond to the corrections and are their errors, can be NULL
+ *  @param norm [out] normalization for each bin, including soild angle, pixel
+ * correction, the proportion that is not masked and the normalization workspace
+ *  @param normETo2 [out] this pointer must point to the end of the norm array,
+ * it will be filled with the total of the error on the normalization
+ */
 void Q1D2::calculateNormalization(
     const size_t wavStart, const size_t wsIndex,
     API::MatrixWorkspace_const_sptr pixelAdj,
@@ -410,7 +411,7 @@ void Q1D2::calculateNormalization(
   // use that the normalization array ends at the start of the error array
   for (auto n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
-    *e = detAdjErr *detAdjErr;
+    *e = detAdjErr * detAdjErr;
   }
 
   if (binNorms && binNormEs) {
@@ -426,16 +427,16 @@ void Q1D2::calculateNormalization(
 }
 
 /** Calculates the normalisation for the spectrum specified by the index number
-* that was passed
-*  as the solid angle multiplied by the pixelAdj that was passed
-*  @param[in] pixelAdj if not NULL this is workspace contains single bins with
-* the adjustments, e.g. detector efficiencies, for the given ws index
-*  @param[in] wsIndex the workspace index to return the data from
-*  @param[out] weight the solid angle or if pixelAdj the solid angle times the
-* pixel adjustment for this spectrum
-*  @param[out] error the error on the weight, only non-zero if pixelAdj
-*  @throw LogicError if the solid angle is tiny or negative
-*/
+ * that was passed
+ *  as the solid angle multiplied by the pixelAdj that was passed
+ *  @param[in] pixelAdj if not NULL this is workspace contains single bins with
+ * the adjustments, e.g. detector efficiencies, for the given ws index
+ *  @param[in] wsIndex the workspace index to return the data from
+ *  @param[out] weight the solid angle or if pixelAdj the solid angle times the
+ * pixel adjustment for this spectrum
+ *  @param[out] error the error on the weight, only non-zero if pixelAdj
+ *  @throw LogicError if the solid angle is tiny or negative
+ */
 void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
                        const size_t wsIndex, double &weight,
                        double &error) const {
@@ -466,17 +467,17 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
 }
 
 /** Calculates the contribution to the normalization terms from each bin in a
-* spectrum
-*  @param[in] c pointer to the start of a contigious array of wavelength
-* dependent normalization terms
-*  @param[in] Dc pointer to the start of a contigious array that corrosponds to
-* wavelength dependent term, having its error
-*  @param[in,out] bInOut normalization for each bin, this method multiplise this
-* by the proportion that is not masked and the normalization workspace
-*  @param[in, out] e2InOut this array must follow straight after the
-* normalization array and will contain the error on the normalisation term
-* before the WavelengthAdj term
-*/
+ * spectrum
+ *  @param[in] c pointer to the start of a contigious array of wavelength
+ * dependent normalization terms
+ *  @param[in] Dc pointer to the start of a contigious array that corrosponds to
+ * wavelength dependent term, having its error
+ *  @param[in,out] bInOut normalization for each bin, this method multiplise
+ * this by the proportion that is not masked and the normalization workspace
+ *  @param[in, out] e2InOut this array must follow straight after the
+ * normalization array and will contain the error on the normalisation term
+ * before the WavelengthAdj term
+ */
 void Q1D2::addWaveAdj(const double *c, const double *Dc,
                       HistogramData::HistogramY::iterator bInOut,
                       HistogramData::HistogramY::iterator e2InOut) const {
@@ -501,21 +502,21 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
   }
 }
 /** Calculates the contribution to the normalization terms from each bin in a
-* spectrum
-*  @param[in] c pointer to the start of a contigious array of wavelength
-* dependent normalization terms
-*  @param[in] Dc pointer to the start of a contigious array that corrosponds to
-* wavelength dependent term, having its error
-*  @param[in,out] bInOut normalization for each bin, this method multiplise this
-* by the proportion that is not masked and the normalization workspace
-*  @param[in, out] e2InOut this array must follow straight after the
-* normalization array and will contain the error on the normalisation term
-* before the WavelengthAdj term
-* @param[in] wavePixelAdjData normalization correction for each bin for each
-* detector pixel.
-* @param[in] wavePixelAdjError normalization correction incertainty for each bin
-* for each detector pixel.
-*/
+ * spectrum
+ *  @param[in] c pointer to the start of a contigious array of wavelength
+ * dependent normalization terms
+ *  @param[in] Dc pointer to the start of a contigious array that corrosponds to
+ * wavelength dependent term, having its error
+ *  @param[in,out] bInOut normalization for each bin, this method multiplise
+ * this by the proportion that is not masked and the normalization workspace
+ *  @param[in, out] e2InOut this array must follow straight after the
+ * normalization array and will contain the error on the normalisation term
+ * before the WavelengthAdj term
+ * @param[in] wavePixelAdjData normalization correction for each bin for each
+ * detector pixel.
+ * @param[in] wavePixelAdjError normalization correction incertainty for each
+ * bin for each detector pixel.
+ */
 void Q1D2::addWaveAdj(
     const double *c, const double *Dc,
     HistogramData::HistogramY::iterator bInOut,
@@ -559,14 +560,14 @@ void Q1D2::addWaveAdj(
 }
 
 /** Scaled to bin masking, to the normalization
-*  @param[in] offSet the index number of the first bin in the input wavelengths
-* that is actually being used
-*  @param[in] wsIndex the spectrum to calculate
-*  @param[in,out] theNorms normalization for each bin, this is multiplied by the
-* proportion that is not masked and the normalization workspace
-*  @param[in,out] errorSquared the running total of the square of the
-* uncertainty in the normalization
-*/
+ *  @param[in] offSet the index number of the first bin in the input wavelengths
+ * that is actually being used
+ *  @param[in] wsIndex the spectrum to calculate
+ *  @param[in,out] theNorms normalization for each bin, this is multiplied by
+ * the proportion that is not masked and the normalization workspace
+ *  @param[in,out] errorSquared the running total of the square of the
+ * uncertainty in the normalization
+ */
 void Q1D2::normToMask(
     const size_t offSet, const size_t wsIndex,
     const HistogramData::HistogramY::iterator theNorms,
@@ -594,18 +595,18 @@ void Q1D2::normToMask(
 }
 
 /** Fills a vector with the Q values calculated from the wavelength bin centers
-* from the input workspace and
-*  the workspace geometry as Q = 4*pi*sin(theta)/lambda
-*  @param[in] spectrumInfo SpectrumInfo for workspace
-*  @param[in] wsInd the spectrum to calculate
-*  @param[in] doGravity if to include gravity in the calculation of Q
-*  @param[in] offset index number of the first input bin to use
-*  @param[in] extraLength for gravitational correction
-*  @param[out] Qs points to a preallocated array that is large enough to contain
-* all the calculated Q values
-*  @throw NotFoundError if the detector associated with the spectrum is not
-* found in the instrument definition
-*/
+ * from the input workspace and
+ *  the workspace geometry as Q = 4*pi*sin(theta)/lambda
+ *  @param[in] spectrumInfo SpectrumInfo for workspace
+ *  @param[in] wsInd the spectrum to calculate
+ *  @param[in] doGravity if to include gravity in the calculation of Q
+ *  @param[in] offset index number of the first input bin to use
+ *  @param[in] extraLength for gravitational correction
+ *  @param[out] Qs points to a preallocated array that is large enough to
+ * contain all the calculated Q values
+ *  @throw NotFoundError if the detector associated with the spectrum is not
+ * found in the instrument definition
+ */
 void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
                           const bool doGravity, const size_t offset,
                           HistogramData::HistogramY::iterator Qs,
@@ -626,7 +627,7 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
       // different for each bin with each detector
       const double sinTheta = grav.calcSinTheta(lambda);
       // Now we're ready to go to Q
-      *Qs = FOUR_PI *sinTheta / lambda;
+      *Qs = FOUR_PI * sinTheta / lambda;
     }
   } else {
     // Calculate the Q values for the current spectrum, using Q =
@@ -641,18 +642,18 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
   }
 }
 /** This is a slightly "clever" method as it makes some guesses about where is
-* best
-*  to look for the right Q bin based on the fact that the input Qs (calcualted
-* from wavelengths) tend
-*  to go down while the output Qs are always in accending order
-*  @param[in] OutQs the array of output Q bin boundaries, this finds the bin
-* that contains the QIn value
-*  @param[in] QToFind the Q value to find the correct bin for
-*  @param[in, out] loc points to the bin boundary (in the OutQs array) whos Q is
-* higher than QToFind and higher by the smallest amount. Algorithm starts by
-* checking the value of loc passed and then all the bins _downwards_ through the
-* array
-*/
+ * best
+ *  to look for the right Q bin based on the fact that the input Qs (calcualted
+ * from wavelengths) tend
+ *  to go down while the output Qs are always in accending order
+ *  @param[in] OutQs the array of output Q bin boundaries, this finds the bin
+ * that contains the QIn value
+ *  @param[in] QToFind the Q value to find the correct bin for
+ *  @param[in, out] loc points to the bin boundary (in the OutQs array) whos Q
+ * is higher than QToFind and higher by the smallest amount. Algorithm starts by
+ * checking the value of loc passed and then all the bins _downwards_ through
+ * the array
+ */
 void Q1D2::getQBinPlus1(const HistogramData::HistogramX &OutQs,
                         const double QToFind,
                         HistogramData::HistogramX::const_iterator &loc) const {
@@ -681,15 +682,15 @@ void Q1D2::getQBinPlus1(const HistogramData::HistogramX &OutQs,
 }
 
 /** Divides the number of counts in each output Q bin by the wrighting ("number
-* that would expected to arrive")
-*  The errors are propogated using the uncorrolated error estimate for
-* multiplication/division
-*  @param[in] normSum the weighting for each bin
-*  @param[in] normError2 square of the error on the normalization
-*  @param[in, out] counts counts in each bin
-*  @param[in, out] errors input the _square_ of the error on each bin, output
-* the total error (unsquared)
-*/
+ * that would expected to arrive")
+ *  The errors are propogated using the uncorrolated error estimate for
+ * multiplication/division
+ *  @param[in] normSum the weighting for each bin
+ *  @param[in] normError2 square of the error on the normalization
+ *  @param[in, out] counts counts in each bin
+ *  @param[in, out] errors input the _square_ of the error on each bin, output
+ * the total error (unsquared)
+ */
 void Q1D2::normalize(const HistogramData::HistogramY &normSum,
                      const HistogramData::HistogramE &normError2,
                      HistogramData::HistogramY &counts,
@@ -719,7 +720,7 @@ void checkStorageMode(
     throw std::runtime_error(name + " must have " +
                              Parallel::toString(Parallel::StorageMode::Cloned));
 }
-}
+} // namespace
 
 Parallel::ExecutionMode Q1D2::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {

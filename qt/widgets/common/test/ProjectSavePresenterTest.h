@@ -324,10 +324,10 @@ public:
   //============================================================================
 
   /**
- * Create some workspaces and add them to the ADS
- * @param workspaces :: List of workspace names
- * @return a vector of workspace info structs
- */
+   * Create some workspaces and add them to the ADS
+   * @param workspaces :: List of workspace names
+   * @return a vector of workspace info structs
+   */
   std::vector<WorkspaceInfo>
   setUpWorkspaces(const std::vector<std::string> &workspaces) {
     std::vector<WorkspaceInfo> wsInfo;
@@ -344,9 +344,9 @@ public:
   }
 
   /**
- * Remove a list of workspaces from the ADS
- * @param workspaces :: List of workspace names
- */
+   * Remove a list of workspaces from the ADS
+   * @param workspaces :: List of workspace names
+   */
   void tearDownWorkspaces(const std::vector<WorkspaceInfo> &workspaces) {
     for (auto &info : workspaces) {
       WorkspaceCreationHelper::removeWS(info.name);

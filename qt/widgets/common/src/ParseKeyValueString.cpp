@@ -190,5 +190,5 @@ QString convertMapToString(const std::map<QString, QString> &optionsMap) {
 
   return result;
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,10 +1,10 @@
 #ifndef MANTID_API_QWTHELPER_H_
 #define MANTID_API_QWTHELPER_H_
 
-#include "MantidKernel/System.h"
 #include "DllOption.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 #include <qwt_data.h>
 

@@ -93,7 +93,7 @@ typedef union {
   char *(*func)();
   void *ptr;
 } ff_union;
-}
+} // namespace
 
 bool PluginFit::load(const QString &pluginName) {
   if (!QFile::exists(pluginName)) {
@@ -115,7 +115,8 @@ bool PluginFit::load(const QString &pluginName) {
         static_cast<ApplicationWindow *>(parent()),
         tr("MantidPlot - Plugin Error"),
         tr("The plugin does not implement a %1 method necessary for simplex "
-           "fitting.").arg("function_d"));
+           "fitting.")
+            .arg("function_d"));
     return false;
   }
 
@@ -127,7 +128,8 @@ bool PluginFit::load(const QString &pluginName) {
         static_cast<ApplicationWindow *>(parent()),
         tr("MantidPlot - Plugin Error"),
         tr("The plugin does not implement a %1 method necessary for "
-           "Levenberg-Marquardt fitting.").arg("function_f"));
+           "Levenberg-Marquardt fitting.")
+            .arg("function_f"));
     return false;
   }
 
@@ -139,7 +141,8 @@ bool PluginFit::load(const QString &pluginName) {
         static_cast<ApplicationWindow *>(parent()),
         tr("MantidPlot - Plugin Error"),
         tr("The plugin does not implement a %1 method necessary for "
-           "Levenberg-Marquardt fitting.").arg("function_df"));
+           "Levenberg-Marquardt fitting.")
+            .arg("function_df"));
     return false;
   }
 
@@ -151,7 +154,8 @@ bool PluginFit::load(const QString &pluginName) {
         static_cast<ApplicationWindow *>(parent()),
         tr("MantidPlot - Plugin Error"),
         tr("The plugin does not implement a %1 method necessary for "
-           "Levenberg-Marquardt fitting.").arg("function_fdf"));
+           "Levenberg-Marquardt fitting.")
+            .arg("function_fdf"));
     return false;
   }
 

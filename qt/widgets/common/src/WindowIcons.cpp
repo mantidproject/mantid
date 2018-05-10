@@ -78,5 +78,5 @@ QIcon WindowIcons::makeIconFromFile(const std::string &path) const {
                QIcon::Off);
   return icon;
 }
-}
-}
+} // namespace API
+} // namespace MantidQt

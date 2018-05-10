@@ -1,10 +1,10 @@
 #ifndef MANTIDQTAPI_QWTWORKSPACEBINDATA_H
 #define MANTIDQTAPI_QWTWORKSPACEBINDATA_H
 
+#include "DllOption.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
-#include "DllOption.h"
 
 #include <boost/shared_ptr.hpp>
 

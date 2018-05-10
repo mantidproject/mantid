@@ -10,8 +10,8 @@
 #include <cstdlib>
 #include <fstream>
 
-using Mantid::API::FileProperty;
 using Mantid::API::FileFinder;
+using Mantid::API::FileProperty;
 using Mantid::Kernel::ConfigService;
 
 class FilePropertyTest : public CxxTest::TestSuite {

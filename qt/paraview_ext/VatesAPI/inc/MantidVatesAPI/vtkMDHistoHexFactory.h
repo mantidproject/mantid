@@ -30,13 +30,13 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/Normalization.h"
-#include <vtkFloatArray.h>
-#include <vtkCellData.h>
-#include <vtkHexahedron.h>
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include <vtkCellData.h>
+#include <vtkFloatArray.h>
+#include <vtkHexahedron.h>
 
 namespace Mantid {
 namespace VATES {
@@ -82,7 +82,7 @@ protected:
   /// Normalization option
   VisualNormalization m_normalizationOption;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

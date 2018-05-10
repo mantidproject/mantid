@@ -1,11 +1,11 @@
 #ifndef ISISDATAARCHIVETEST_H_
 #define ISISDATAARCHIVETEST_H_
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 
-#include "MantidDataHandling/ISISDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
+#include "MantidDataHandling/ISISDataArchive.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

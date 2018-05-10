@@ -2,26 +2,26 @@
 #define MANTID_MDAGORITHMS_MDEWPEAKINTEGRATION2TEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>
 
-#include <random>
 #include <cxxtest/TestSuite.h>
+#include <random>
 
 #include <Poco/File.h>
 
@@ -167,7 +167,8 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
-               "IntegratePeaksMD2Test_MDEWSGaussian.dat").remove();
+               "IntegratePeaksMD2Test_MDEWSGaussian.dat")
+        .remove();
 
     // Test profile back to back exponential
     fnct = "BackToBackExponential";
@@ -179,7 +180,8 @@ public:
     // 0.2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
-               "IntegratePeaksMD2Test_MDEWSBackToBackExponential.dat").remove();
+               "IntegratePeaksMD2Test_MDEWSBackToBackExponential.dat")
+        .remove();
     /*fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMD2Test_peaks",0.0,true,true,fnct);
 

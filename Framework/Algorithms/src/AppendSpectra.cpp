@@ -5,9 +5,9 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidIndexing/IndexInfo.h"
 
 using namespace Mantid::Indexing;
 using namespace Mantid::Kernel;
@@ -176,5 +176,5 @@ void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

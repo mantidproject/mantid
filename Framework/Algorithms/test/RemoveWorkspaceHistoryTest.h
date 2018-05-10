@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/RemoveWorkspaceHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/RemoveWorkspaceHistory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Kernel;

@@ -57,6 +57,6 @@ private:
   /// Which coordinate has been chosen
   size_t m_coord;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 #endif /* MANTID_MDALGORITHMS_QCOORDINATE_H_ */

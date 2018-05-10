@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_PSEUDOVOIGT_H_
 #define MANTID_CURVEFITTING_PSEUDOVOIGT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

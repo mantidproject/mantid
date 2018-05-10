@@ -14,8 +14,8 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -85,8 +85,8 @@ void SaveNXTomo::exec() {
 }
 
 /**
-* Run instead of exec when operating on groups
-*/
+ * Run instead of exec when operating on groups
+ */
 bool SaveNXTomo::processGroups() {
   try {
     std::string name = getPropertyValue("InputWorkspaces");

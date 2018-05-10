@@ -43,7 +43,7 @@ MANTID_KERNEL_DLL std::string sha1FromFile(const std::string &filepath,
                                            const bool unixEOL);
 /// create a git checksum from a file (these match the git hash-object command)
 MANTID_KERNEL_DLL std::string gitSha1FromFile(const std::string &filepath);
-}
+} // namespace ChecksumHelper
 
 } // namespace Kernel
 } // namespace Mantid

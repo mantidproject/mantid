@@ -269,11 +269,11 @@ void ConvertAxesToRealSpace::exec() {
 
 /** Fills the values in an axis linearly from min to max for a given number of
  * steps
-  * @param vector the vector to fill
-  * @param axisData the data about the axis
-  * @param isHistogram true if the data should be a histogram rather than point
+ * @param vector the vector to fill
+ * @param axisData the data about the axis
+ * @param isHistogram true if the data should be a histogram rather than point
  * data
-  */
+ */
 void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector,
                                             const AxisData &axisData,
                                             bool isHistogram) {
@@ -290,11 +290,11 @@ void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector,
 }
 
 /** Fills the unit map and ordered vector with the same data
-  * @param orderedVector the vector to fill
-  * @param unitMap the map to fill
-  * @param caption the caption of the unit
-  * @param unit the unit of measure of the unit
-  */
+ * @param orderedVector the vector to fill
+ * @param unitMap the map to fill
+ * @param caption the caption of the unit
+ * @param unit the unit of measure of the unit
+ */
 void ConvertAxesToRealSpace::fillUnitMap(
     std::vector<std::string> &orderedVector,
     std::map<std::string, std::string> &unitMap, const std::string &caption,

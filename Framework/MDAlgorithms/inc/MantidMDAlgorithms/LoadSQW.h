@@ -2,10 +2,10 @@
 #define MANTID_MDALGORITHMS_LOAD_SQW_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/FileDescriptor.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <fstream>
 #include <string>
 
@@ -78,7 +78,7 @@ struct dataPositions {
                        std::vector<size_t> &nBins,
                        uint64_t &nDataPoints); // Legacy - candidate for removal
 };
-}
+} // namespace LoadSQWHelper
 
 class DLLExport LoadSQW : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
@@ -166,7 +166,7 @@ protected: // for testing
   ==================================================================================*/
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

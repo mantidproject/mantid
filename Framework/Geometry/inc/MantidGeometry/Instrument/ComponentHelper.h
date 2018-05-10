@@ -9,7 +9,7 @@ namespace Kernel {
 // Forward declarations
 class Quat;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 // Forward declarations
@@ -68,7 +68,7 @@ createSphere(double radius, const Kernel::V3D &centre, const std::string &id);
 
 MANTID_GEOMETRY_DLL std::string
 sphereXML(double radius, const Kernel::V3D &centre, const std::string &id);
-}
+} // namespace ComponentHelper
 } // namespace Geometry
 } // namespace Mantid
 

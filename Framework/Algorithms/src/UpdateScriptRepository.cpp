@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/UpdateScriptRepository.h"
-#include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidAPI/ScriptRepository.h"
+#include "MantidAPI/ScriptRepositoryFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -34,9 +34,9 @@ void UpdateScriptRepository::init() {}
  */
 void UpdateScriptRepository::exec() {
   // TODO Auto-generated execute stub
+  using Mantid::API::ScriptRepository;
   using Mantid::API::ScriptRepositoryFactory;
   using Mantid::API::ScriptRepository_sptr;
-  using Mantid::API::ScriptRepository;
   auto repo_ptr =
       ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
 

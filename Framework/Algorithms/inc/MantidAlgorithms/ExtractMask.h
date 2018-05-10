@@ -68,7 +68,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif // MANTID_ALGORITHMS_EXTRACTMASK_H_

@@ -1,10 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "MantidKernel/ICatalogInfo.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "../ISISReflectometry/ExperimentOptionDefaults.h"
+#include "../ISISReflectometry/IReflAsciiSaver.h"
 #include "../ISISReflectometry/IReflEventPresenter.h"
 #include "../ISISReflectometry/IReflEventTabPresenter.h"
 #include "../ISISReflectometry/IReflEventView.h"
@@ -17,10 +15,12 @@
 #include "../ISISReflectometry/IReflSettingsPresenter.h"
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
-#include "../ISISReflectometry/ReflSearchModel.h"
-#include "../ISISReflectometry/ExperimentOptionDefaults.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
-#include "../ISISReflectometry/IReflAsciiSaver.h"
+#include "../ISISReflectometry/ReflSearchModel.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"

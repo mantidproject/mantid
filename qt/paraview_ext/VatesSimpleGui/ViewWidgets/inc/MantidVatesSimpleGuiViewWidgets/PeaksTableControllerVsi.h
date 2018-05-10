@@ -1,20 +1,20 @@
 #ifndef PeaksTableControllerVSI_H_
 #define PeaksTableControllerVSI_H_
 
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidGeometry/Crystal/PeakTransformSelector.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
+#include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
 #include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h"
-#include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
-#include "MantidGeometry/Crystal/PeakTransformSelector.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
-#include <map>
-#include <QWidget>
 #include <QColor>
 #include <QPointer>
+#include <QWidget>
 #include <boost/shared_ptr.hpp>
+#include <map>
 
 class pqPipelineSource;
 
@@ -72,7 +72,7 @@ private:
   pqPipelineSource *m_peakMarker;
   Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 #endif

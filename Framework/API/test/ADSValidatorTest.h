@@ -26,7 +26,7 @@ private:
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
-}
+} // namespace
 
 using StringVector = std::vector<std::string>;
 

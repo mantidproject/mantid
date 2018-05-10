@@ -1,11 +1,11 @@
+#include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/CoordTransform.h"
+#include "MantidKernel/VMD.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "MantidKernel/VMD.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -52,5 +52,5 @@ CoordTransform::applyVMD(const Mantid::Kernel::VMD &inputVector) const {
   return out;
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

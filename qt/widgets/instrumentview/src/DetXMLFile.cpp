@@ -1,20 +1,20 @@
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 
-#include <QTemporaryFile>
 #include <QDir>
+#include <QTemporaryFile>
 
 #include <fstream>
 
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-* Create a grouping file to extract all detectors in detector_list excluding
-* those in exclude.
-* @param detector_list :: List of detector ids to include in the grouping file.
-* @param exclude :: List of detector ids which if founfd in detector_list to be
-* excluded from grouping.
-* @param fname :: Name of the file to save the grouping to.
-*/
+ * Create a grouping file to extract all detectors in detector_list excluding
+ * those in exclude.
+ * @param detector_list :: List of detector ids to include in the grouping file.
+ * @param exclude :: List of detector ids which if founfd in detector_list to be
+ * excluded from grouping.
+ * @param fname :: Name of the file to save the grouping to.
+ */
 DetXMLFile::DetXMLFile(const std::vector<int> &detector_list,
                        const QList<int> &exclude, const QString &fname) {
   m_fileName = fname;
@@ -32,11 +32,10 @@ DetXMLFile::DetXMLFile(const std::vector<int> &detector_list,
 }
 
 /**
-* Create a grouping file to extract detectors in dets. Option List - one group -
-* one detector,
-* Option Sum - one group which is a sum of the detectors
-* If fname is empty create a temporary file
-*/
+ * Create a grouping file to extract detectors in dets. Option List - one group
+ * - one detector, Option Sum - one group which is a sum of the detectors If
+ * fname is empty create a temporary file
+ */
 DetXMLFile::DetXMLFile(const QList<int> &dets, Option opt,
                        const QString &fname) {
   if (dets.empty()) {
@@ -88,8 +87,8 @@ void DetXMLFile::makeSumFile(const QList<int> &dets) {
 }
 
 /**
-* Destructor. Removes the temporary file.
-*/
+ * Destructor. Removes the temporary file.
+ */
 DetXMLFile::~DetXMLFile() {
   if (m_delete) {
     QDir dir;
@@ -97,5 +96,5 @@ DetXMLFile::~DetXMLFile() {
   }
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

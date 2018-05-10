@@ -1,11 +1,11 @@
 #include "ALCPeakFittingModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <Poco/ActiveResult.h>
 #include <QApplication>

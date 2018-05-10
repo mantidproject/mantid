@@ -1,8 +1,8 @@
 #ifndef MANTID_SUPPORTTEST_H_
 #define MANTID_SUPPORTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 #include "MantidKernel/Strings.h"

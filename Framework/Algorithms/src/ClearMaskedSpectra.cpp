@@ -1,7 +1,7 @@
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAlgorithms/ClearMaskedSpectra.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -200,5 +200,5 @@ void SaveParameterFile::exec() {
   file.close();
 }
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid

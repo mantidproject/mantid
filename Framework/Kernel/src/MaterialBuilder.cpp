@@ -17,7 +17,7 @@ inline bool isEmpty(const boost::optional<double> value) {
     return true;
   return (value == Mantid::EMPTY_DBL());
 }
-}
+} // namespace
 
 /**
  * Constructor

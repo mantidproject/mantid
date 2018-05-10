@@ -42,5 +42,5 @@ int VatesConfigurations::getMaxRecursionDepth() {
 std::string VatesConfigurations::getMetadataIdJson() {
   return this->metaDataId;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
+#include "ImplicitFunctionParameter.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "ImplicitFunctionParameter.h"
+#include <vector>
 
 namespace Mantid {
 
@@ -44,7 +44,7 @@ public:
   virtual Mantid::Geometry::MDImplicitFunction *create() const = 0;
   virtual ~ImplicitFunctionBuilder() = default;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

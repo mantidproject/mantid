@@ -1,24 +1,24 @@
+#include "MantidMDAlgorithms/LoadSQW.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidMDAlgorithms/LoadSQW.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include <cfloat>
-#include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidKernel/Memory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,18 +30,18 @@ namespace MDAlgorithms {
 
 namespace {
 /** Helper function allowing to typecast sequence of bytes into proper expected
-*type.
-* The input buffer is interpreted as the template type
-*
-* @param Buf -- the vector of characters, representing data to cast
-* @param ind -- the starting position of first byte of data within the data
-*buffer
-* @returns the data type produced by type-casing proper sequence of bytes
-*/
+ *type.
+ * The input buffer is interpreted as the template type
+ *
+ * @param Buf -- the vector of characters, representing data to cast
+ * @param ind -- the starting position of first byte of data within the data
+ *buffer
+ * @returns the data type produced by type-casing proper sequence of bytes
+ */
 template <typename T> T interpretAs(std::vector<char> &Buf, size_t ind = 0) {
   return *((reinterpret_cast<T *>(&Buf[ind])));
 }
-}
+} // namespace
 
 DECLARE_FILELOADER_ALGORITHM(LoadSQW)
 
@@ -53,11 +53,11 @@ LoadSQW::LoadSQW()
       m_mdImageSize(0), m_nDims(0), m_nBins() {}
 
 /**
-* Return the confidence with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadSQW::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // only .sqw can be considered
@@ -141,8 +141,9 @@ void LoadSQW::exec() {
     MemoryStats stat;
     if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
       g_log.notice() << "You have enough memory available to load the "
-                     << m_nDataPoints << " points into memory; this would be "
-                                         "faster than using a file back-end.\n";
+                     << m_nDataPoints
+                     << " points into memory; this would be "
+                        "faster than using a file back-end.\n";
 
     IAlgorithm_sptr saver =
         this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
@@ -167,8 +168,9 @@ void LoadSQW::exec() {
         stat.availMem())
       g_log.warning()
           << "You may not have enough physical memory available to load the "
-          << m_nDataPoints << " points into memory. You can cancel and specify "
-                              "OutputFilename to load to a file back-end.\n";
+          << m_nDataPoints
+          << " points into memory. You can cancel and specify "
+             "OutputFilename to load to a file back-end.\n";
   }
 
   if (bc->isFileBacked()) {
@@ -706,8 +708,8 @@ namespace LoadSQWHelper {
 
 // auxiliary functions
 /**Block 1:  Main_header: Parse SQW main data header
-*@param dataStream -- the open file handler responsible for IO operations
-**/
+ *@param dataStream -- the open file handler responsible for IO operations
+ **/
 void dataPositions::parse_sqw_main_header(
     std::ifstream &dataStream) { // we do not need this header  at the moment ->
                                  // just need to calculated its length;
@@ -749,12 +751,12 @@ void dataPositions::parse_sqw_main_header(
   }
 }
 /**Block 2: Header: Parse header of single SPE file
-*@param dataStream -- the open file handler responsible for IO operations
-*@param start_location -- initial file position of the header within the binary
-*file
-*
-*@returns: the file location of the first byte behind this header
-*/
+ *@param dataStream -- the open file handler responsible for IO operations
+ *@param start_location -- initial file position of the header within the binary
+ *file
+ *
+ *@returns: the file location of the first byte behind this header
+ */
 std::streamoff dataPositions::parse_component_header(
     std::ifstream &dataStream,
     std::streamoff start_location) { // we do not need this header  at the
@@ -805,12 +807,12 @@ std::streamoff dataPositions::parse_component_header(
   return end_location;
 }
 /**Block 3: Detpar: parse positions of the contributed detectors. These
-*detectors have to be the same for all contributing spe files
-*@param dataStream -- the open file handler responsible for IO operations
-*@param start_location -- initial file position of the detectors data within the
-*binary file
-*
-*@returns: the file location of the first byte behind this header   */
+ *detectors have to be the same for all contributing spe files
+ *@param dataStream -- the open file handler responsible for IO operations
+ *@param start_location -- initial file position of the detectors data within
+ *the binary file
+ *
+ *@returns: the file location of the first byte behind this header   */
 std::streamoff
 dataPositions::parse_sqw_detpar(std::ifstream &dataStream,
                                 std::streamoff start_location) { //
@@ -966,6 +968,6 @@ void dataPositions::parse_data_locations(std::ifstream &dataStream,
 /*==================================================================================
 EndRegion:
 ==================================================================================*/
-} // endNamespace LoadSQWHelper
-}
-}
+} // namespace LoadSQWHelper
+} // namespace MDAlgorithms
+} // namespace Mantid

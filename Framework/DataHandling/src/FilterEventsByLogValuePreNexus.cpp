@@ -1,6 +1,5 @@
 #include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -13,6 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -51,15 +51,15 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
-using Types::Core::DateAndTime;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
+using Types::Core::DateAndTime;
 using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
-using std::stringstream;
 using std::string;
+using std::stringstream;
 using std::vector;
 
 //----------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ static const int NUM_EXT = 6;
 
 //----------------------------------------------------------------------------------------------
 /** Get run number
-  */
+ */
 static string getRunnumber(const string &filename) {
   // start by trimming the filename
   string runnumber(Poco::Path(filename).getBaseName());
@@ -113,7 +113,7 @@ static string getRunnumber(const string &filename) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate pulse ID
-  */
+ */
 static string generatePulseidName(string eventfile) {
   // initialize vector of endings and put live at the beginning
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
@@ -134,7 +134,7 @@ static string generatePulseidName(string eventfile) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate mapping file name
-  */
+ */
 static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   // get the name of the mapping file as set in the parameter files
   std::vector<string> temp =
@@ -202,7 +202,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
     : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_protonChargeTot(0),
       m_detid_max(0), m_eventFile(nullptr), m_numEvents(0), m_numPulses(0),
@@ -254,7 +254,7 @@ int FilterEventsByLogValuePreNexus::confidence(
 
 //----------------------------------------------------------------------------------------------
 /**  Initialize the algorithm
-  */
+ */
 void FilterEventsByLogValuePreNexus::init() {
   // File files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
@@ -337,9 +337,10 @@ void FilterEventsByLogValuePreNexus::init() {
       Kernel::make_unique<ArrayProperty<std::string>>("LogPIxelTags"),
       "Pixel ID tags for event log. Must have same items as 'LogPixelIDs'. ");
 
-  declareProperty("AcceleratorFrequency", 60, "Freuqency of the accelerator at "
-                                              "which the experiment runs. It "
-                                              "can 20, 30 or 60.");
+  declareProperty("AcceleratorFrequency", 60,
+                  "Freuqency of the accelerator at "
+                  "which the experiment runs. It "
+                  "can 20, 30 or 60.");
 
   declareProperty("CorrectTOFtoSample", false,
                   "Correct TOF to sample position. ");
@@ -405,8 +406,8 @@ void FilterEventsByLogValuePreNexus::exec() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < numberOfSpectra; i++) {
       PARALLEL_START_INTERUPT_REGION
-      m_localWorkspace->getSpectrum(i)
-          .setSortOrder(DataObjects::PULSETIME_SORT);
+      m_localWorkspace->getSpectrum(i).setSortOrder(
+          DataObjects::PULSETIME_SORT);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -429,7 +430,7 @@ void FilterEventsByLogValuePreNexus::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Process input properties
-  */
+ */
 void FilterEventsByLogValuePreNexus::processProperties() {
   // Process and check input properties
   // Check 'chunk' properties are valid, if set
@@ -454,8 +455,8 @@ void FilterEventsByLogValuePreNexus::processProperties() {
     if (!m_pulseIDFileName.empty()) {
       // Check existence of pulse ID file with generated name
       if (Poco::File(m_pulseIDFileName).exists()) {
-        g_log.information() << "Found pulseid file " << m_pulseIDFileName
-                            << "\n";
+        g_log.information()
+            << "Found pulseid file " << m_pulseIDFileName << "\n";
         m_throwError = false;
       } else {
         m_pulseIDFileName = "";
@@ -533,7 +534,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
 
 //----------------------------------------------------------------------------------------------
 /** Create, initialize and set up output EventWorkspace
-  */
+ */
 DataObjects::EventWorkspace_sptr
 FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   // Create and initialize output EventWorkspace
@@ -600,10 +601,10 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /** Process imbed logs (marked by bad pixel IDs)
-  * (1) Add special event log to workspace log
-  * (2) (Optionally) do statistic to each pixel
-  * (3) (Optionally) write out information
-  */
+ * (1) Add special event log to workspace log
+ * (2) (Optionally) do statistic to each pixel
+ * (3) (Optionally) write out information
+ */
 void FilterEventsByLogValuePreNexus::processEventLogs() {
   std::map<PixelType, size_t>::iterator mit;
   for (const auto pid : this->wrongdetids) {
@@ -663,9 +664,9 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
 
 //----------------------------------------------------------------------------------------------
 /** Add absolute time series to log
-  * @param logtitle :: title of the log to be inserted to workspace
-  * @param mindex ::  index of the the series in the wrong detectors map
-  */
+ * @param logtitle :: title of the log to be inserted to workspace
+ * @param mindex ::  index of the the series in the wrong detectors map
+ */
 void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
                                                        size_t mindex) {
   // Create TimeSeriesProperty
@@ -695,8 +696,8 @@ void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
 
 //----------------------------------------------------------------------------------------------
 /** Perform statistics to event (wrong pixel ID) logs
-  * @param mindex ::  index of the the series in the list
-  */
+ * @param mindex ::  index of the the series in the list
+ */
 void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
   // Create a vector of event log time entries
   size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
@@ -1098,15 +1099,15 @@ void FilterEventsByLogValuePreNexus::procEvents(
 
 //----------------------------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
-  * @param workspace :: EventWorkspace to write to.
-  * @param arrayOfVectors :: For speed up: this is an array, of size
+ * @param workspace :: EventWorkspace to write to.
+ * @param arrayOfVectors :: For speed up: this is an array, of size
  * m_detid_max+1, where the
-  *        index is a pixel ID, and the value is a pointer to the
+ *        index is a pixel ID, and the value is a pointer to the
  * vector<tofEvent> in the given EventList.
-  * @param event_buffer :: The buffer containing the DAS events
-  * @param current_event_buffer_size :: The length of the given DAS buffer
-  * @param fileOffset :: Value for an offset into the binary file
-  */
+ * @param event_buffer :: The buffer containing the DAS events
+ * @param current_event_buffer_size :: The length of the given DAS buffer
+ * @param fileOffset :: Value for an offset into the binary file
+ */
 void FilterEventsByLogValuePreNexus::procEventsLinear(
     DataObjects::EventWorkspace_sptr & /*workspace*/,
     std::vector<TofEvent> **arrayOfVectors, DasEvent *event_buffer,
@@ -1372,7 +1373,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
 //----------------------------------------------------------------------------------------------
 /** Correct wrong event indexes
-  */
+ */
 void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
   // Check pulse ID with events
   size_t numveto = 0;
@@ -1440,9 +1441,9 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
       uint64_t eventindex = m_vecEventIndex[i];
       if (eventindex > static_cast<uint64_t>(m_numEvents)) {
         PARALLEL_CRITICAL(unmask_veto_check) {
-          g_log.information() << "Check: Pulse " << i
-                              << ": unphysical event index = " << eventindex
-                              << "\n";
+          g_log.information()
+              << "Check: Pulse " << i
+              << ": unphysical event index = " << eventindex << "\n";
         }
       }
 
@@ -1702,15 +1703,15 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
 
 //----------------------------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
-  * @param workspace :: EventWorkspace to write to.
-  * @param arrayOfVectors :: For speed up: this is an array, of size
+ * @param workspace :: EventWorkspace to write to.
+ * @param arrayOfVectors :: For speed up: this is an array, of size
  * m_detid_max+1, where the
-  *        index is a pixel ID, and the value is a pointer to the
+ *        index is a pixel ID, and the value is a pointer to the
  * vector<tofEvent> in the given EventList.
-  * @param event_buffer :: The buffer containing the DAS events
-  * @param current_event_buffer_size :: The length of the given DAS buffer
-  * @param fileOffset :: Value for an offset into the binary file
-  */
+ * @param event_buffer :: The buffer containing the DAS events
+ * @param current_event_buffer_size :: The length of the given DAS buffer
+ * @param fileOffset :: Value for an offset into the binary file
+ */
 void FilterEventsByLogValuePreNexus::filterEventsLinear(
     DataObjects::EventWorkspace_sptr & /*workspace*/,
     std::vector<TofEvent> **arrayOfVectors, DasEvent *event_buffer,
@@ -2109,9 +2110,9 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 //----------------------------------------------------------------------------------------------
 /** Set up instrument related parameters such as detector map and etc for
  * 'eventws'
-  * and create a pixel-spectrum map
-  * We want to pad out empty pixels: monitor
-  */
+ * and create a pixel-spectrum map
+ * We want to pad out empty pixels: monitor
+ */
 size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
     DataObjects::EventWorkspace_sptr eventws) {
   const auto &detectorInfo = eventws->detectorInfo();
@@ -2150,8 +2151,8 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
 //----------------------------------------------------------------------------------------------
 /** Set up instrument related parameters such as detector map and etc for
  * 'eventws' create a
-  * pixel-spectrum map
-  */
+ * pixel-spectrum map
+ */
 void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
     DataObjects::EventWorkspace_sptr eventws) {
   const auto &detectorInfo = eventws->detectorInfo();
@@ -2177,7 +2178,7 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
 
 //----------------------------------------------------------------------------------------------
 /** Use pulse index/ event index to find out the frequency of instrument running
-  */
+ */
 int FilterEventsByLogValuePreNexus::findRunFrequency() {
   g_log.debug() << "Size of pulse / event index  = " << m_vecEventIndex.size()
                 << "\n";

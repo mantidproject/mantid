@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SNSDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
+#include "MantidDataHandling/SNSDataArchive.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

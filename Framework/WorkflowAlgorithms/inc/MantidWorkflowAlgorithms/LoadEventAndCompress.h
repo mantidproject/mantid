@@ -1,9 +1,9 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_
 #define MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

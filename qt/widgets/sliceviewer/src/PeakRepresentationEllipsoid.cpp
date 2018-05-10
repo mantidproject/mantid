@@ -1,7 +1,7 @@
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
-#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("PeakRepresentation");
@@ -48,7 +48,7 @@ QPainterPath getTransformedPainterPath(double angle, double transX,
 
   return transform.map(painterPath);
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -162,7 +162,7 @@ void PeakRepresentationEllipsoid::movePosition(
 /**
  * Setter for showing/hiding the background radius.
  * @param show: Flag indicating what to do.
-*/
+ */
 void PeakRepresentationEllipsoid::showBackgroundRadius(const bool show) {
   m_showBackgroundRadii = show;
 }
@@ -193,8 +193,8 @@ const Mantid::Kernel::V3D &PeakRepresentationEllipsoid::getOrigin() const {
 }
 
 std::shared_ptr<PeakPrimitives>
-    PeakRepresentationEllipsoid::getDrawingInformation(
-        PeakRepresentationViewInformation) {
+PeakRepresentationEllipsoid::getDrawingInformation(
+    PeakRepresentationViewInformation) {
   auto drawingInformation = std::make_shared<PeakPrimitivesEllipse>(
       Mantid::Kernel::V3D() /*peakOrigin*/, 0.0 /*peakOpacityAtDistance*/,
       0 /* peakLineWidth */, 0.0 /*peakInnerRadiusMajorAxis*/,
@@ -334,5 +334,5 @@ void PeakRepresentationEllipsoid::doDraw(
 double PeakRepresentationEllipsoid::getZoomOutFactor() const {
   return m_calculator->getZoomOutFactor();
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

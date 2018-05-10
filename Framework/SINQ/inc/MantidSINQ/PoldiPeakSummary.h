@@ -1,11 +1,11 @@
 #ifndef MANTID_POLDI_POLDIPEAKSUMMARY_H_
 #define MANTID_POLDI_POLDIPEAKSUMMARY_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidSINQ/DllConfig.h"
 
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 namespace Mantid {

@@ -27,9 +27,9 @@ namespace { // Anonymous namespace for helper functions
 bool space(const char &c) { return isspace(c) != 0; }
 
 /** Is a character not whitespace (here considered space or tab)?
-* @param c The character
-* @return Whether it is not whitespace
-*/
+ * @param c The character
+ * @return Whether it is not whitespace
+ */
 bool notSpace(const char &c) { return !space(c); }
 
 /** Is a string all whitespace?
@@ -46,7 +46,7 @@ bool allSpaces(const std::string &str) {
  * @param delim The delimiter
  * @param n The number of times to repeat
  * @return The repeated string
-*/
+ */
 std::string repeatAndJoin(const std::string &str, const std::string &delim,
                           const int &n) {
   std::string result = "";
@@ -194,14 +194,14 @@ void LoadSESANS::exec() {
 }
 
 /** Read headers from the input file into the attribute map, until BEGIN_DATA is
-* found
-* @param infile Reference to the input file
-* @param line Reference to the line currently being processed
-* @param lineNum Number of the line currently being processed
-* @return Map of attributes read
-* @throw runtime_error If incorrectly formatted headers are found (empty lines
-* are permitted)
-*/
+ * found
+ * @param infile Reference to the input file
+ * @param line Reference to the line currently being processed
+ * @param lineNum Number of the line currently being processed
+ * @return Map of attributes read
+ * @throw runtime_error If incorrectly formatted headers are found (empty lines
+ * are permitted)
+ */
 AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
                                         std::string &line, int &lineNum) {
   AttributeMap attributes;
@@ -222,15 +222,15 @@ AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile,
 }
 
 /** Read numerical data from the file into a map of the form [column name] ->
-* [column data]. Any lines which are badly formed are ignored, and a warning
-* passed to the user
-* @param infile Reference to the input file
-* @param line Reference to the line of the file currently being processed
-* @param lineNum The number of the line being processed
-* @return A mapping from column header to vector of strings representing the
-* numbers in that column
-* @throw runtime_error If the 4 mandatory columns are not supplied in the file
-*/
+ * [column data]. Any lines which are badly formed are ignored, and a warning
+ * passed to the user
+ * @param infile Reference to the input file
+ * @param line Reference to the line of the file currently being processed
+ * @param lineNum The number of the line being processed
+ * @return A mapping from column header to vector of strings representing the
+ * numbers in that column
+ * @throw runtime_error If the 4 mandatory columns are not supplied in the file
+ */
 ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
                                   int &lineNum) {
   std::getline(infile, line);
@@ -242,9 +242,9 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
   for (const std::string &header : m_mandatoryColumnHeaders)
     if (std::find(columnHeaders.begin(), columnHeaders.end(), header) ==
         columnHeaders.end())
-      throwFormatError(line, "Failed to supply mandatory column header: \"" +
-                                 header + "\"",
-                       lineNum);
+      throwFormatError(
+          line, "Failed to supply mandatory column header: \"" + header + "\"",
+          lineNum);
 
   std::string numberRegex = R"((-?\d+(\.\d+)?([Ee][-\+]?\d+)?))";
   // static_cast is safe as realistically our file is never going to have enough
@@ -284,14 +284,14 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
 }
 
 /**
-* Split a header into a key-value pair delimited by whitespace, where the first
-* token is the key and the remainder the value
-* @param untrimmedLine A string containing the line to split, possibly with
-* whitespace at each end
-* @param lineNum The number of the line in the file, used for error messaging
-* @return A key-value pair
-* @throw runtime_error If the line contains less than two tokens
-*/
+ * Split a header into a key-value pair delimited by whitespace, where the first
+ * token is the key and the remainder the value
+ * @param untrimmedLine A string containing the line to split, possibly with
+ * whitespace at each end
+ * @param lineNum The number of the line in the file, used for error messaging
+ * @return A key-value pair
+ * @throw runtime_error If the line contains less than two tokens
+ */
 std::pair<std::string, std::string>
 LoadSESANS::splitHeader(const std::string &untrimmedLine, const int &lineNum) {
   std::pair<std::string, std::string> attribute;
@@ -318,11 +318,11 @@ LoadSESANS::splitHeader(const std::string &untrimmedLine, const int &lineNum) {
 }
 
 /** Helper function to throw an error relating to the format of the file
-* @param line The line where a format error was found
-* @param message A message detailing the reason for the error
-* @param lineNum The number of the line
-* @throw runtime_error Under all circumstances
-*/
+ * @param line The line where a format error was found
+ * @param message A message detailing the reason for the error
+ * @param lineNum The number of the line
+ * @throw runtime_error Under all circumstances
+ */
 void LoadSESANS::throwFormatError(const std::string &line,
                                   const std::string &message,
                                   const int &lineNum) {
@@ -333,8 +333,8 @@ void LoadSESANS::throwFormatError(const std::string &line,
 }
 
 /** Make sure that all mandatory headers are supplied in the file
-* @throw runtime_error If any other the mandatory headers are missing
-*/
+ * @throw runtime_error If any other the mandatory headers are missing
+ */
 void LoadSESANS::checkMandatoryHeaders(const AttributeMap &attributes) {
   for (const std::string &attr : m_mandatoryAttributes) {
     if (!attributes.count(attr)) {

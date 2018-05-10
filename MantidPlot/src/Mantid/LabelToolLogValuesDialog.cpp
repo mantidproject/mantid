@@ -25,14 +25,14 @@ using namespace Mantid::Kernel;
 // Public methods
 //----------------------------------
 /**
-* Construct an object of this type
-* @param wsname :: The name of the workspace object from which to retrieve the
-* log files
-* @param parentContainer :: The widget that is the container this dialog
-* @param flags :: Window flags that are passed the the QDialog constructor
-* @param experimentInfoIndex :: optional index in the array of
-*        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
-*/
+ * Construct an object of this type
+ * @param wsname :: The name of the workspace object from which to retrieve the
+ * log files
+ * @param parentContainer :: The widget that is the container this dialog
+ * @param flags :: Window flags that are passed the the QDialog constructor
+ * @param experimentInfoIndex :: optional index in the array of
+ *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
+ */
 LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
                                                    QWidget *parentContainer,
                                                    Qt::WFlags flags,
@@ -90,20 +90,20 @@ LabelToolLogValuesDialog::~LabelToolLogValuesDialog() {}
 
 //------------------------------------------------------------------------------------------------
 /** Changes the LabelWidget parent object by using the setText
-* method and constructing a label based on the selected log
-* and value or generated statistics, and then calls close()
-* inherited from the parent widget after importing the label.
-*
-* This is intentional because importing multiple labels will
-* place them on the same spot and it can get unreadable.
-*
-* The parent container variable is dynamically cast up to LegendWidget.
-*
-*	@param item :: The currently selected item from the log list
-*	@throws std::bad_cast :: The exception is throws if the dynamic_cast
-*							fails
-*
-*/
+ * method and constructing a label based on the selected log
+ * and value or generated statistics, and then calls close()
+ * inherited from the parent widget after importing the label.
+ *
+ * This is intentional because importing multiple labels will
+ * place them on the same spot and it can get unreadable.
+ *
+ * The parent container variable is dynamically cast up to LegendWidget.
+ *
+ *	@param item :: The currently selected item from the log list
+ *	@throws std::bad_cast :: The exception is throws if the dynamic_cast
+ *							fails
+ *
+ */
 void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
 
   // Dynamic cast up to LegendWidget, which is the class of the

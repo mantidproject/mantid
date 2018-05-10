@@ -103,16 +103,16 @@ void BaseConvertToDiffractionMDWorkspace::init() {
 }
 
 /** method to convert the value of the target frame specified for the
-  *ConvertToDiffractionMDWorksapce into the properties names of the ConvertToMD
-  * @param  TargFrame -- the string, describing target transformation frame in
-  *the form accepted by convertToDiffractionWorksapce
-  * @param  TargFrameName -- the string describing target transformation frame
-  *in the form acepted by convertToMD
-  * @param  ScalingName    -- default coordinate scaling name accepted by
-  *convertToMD;
-  *
-  *@return TargFrameName and ScalingName
-*/
+ *ConvertToDiffractionMDWorksapce into the properties names of the ConvertToMD
+ * @param  TargFrame -- the string, describing target transformation frame in
+ *the form accepted by convertToDiffractionWorksapce
+ * @param  TargFrameName -- the string describing target transformation frame
+ *in the form acepted by convertToMD
+ * @param  ScalingName    -- default coordinate scaling name accepted by
+ *convertToMD;
+ *
+ *@return TargFrameName and ScalingName
+ */
 void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(
     const std::string &TargFrame, std::string &TargFrameName,
     std::string &ScalingName) {
@@ -212,5 +212,5 @@ void BaseConvertToDiffractionMDWorkspace::exec() {
   this->setProperty("OutputWorkspace", iOut);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

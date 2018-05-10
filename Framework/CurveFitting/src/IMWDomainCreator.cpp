@@ -1,19 +1,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IMWDomainCreator.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
+#include "MantidCurveFitting/SeqDomain.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -51,11 +51,11 @@ private:
 };
 
 bool greaterIsLess(double x1, double x2) { return x1 > x2; }
-}
+} // namespace
 
 using namespace Kernel;
-using API::Workspace;
 using API::MatrixWorkspace;
+using API::Workspace;
 
 /**
  * Constructor.
@@ -377,18 +377,18 @@ void IMWDomainCreator::appendCompositeFunctionMembers(
 }
 
 /**
-  * If the fit function is Convolution and flag m_convolutionCompositeMembers is
+ * If the fit function is Convolution and flag m_convolutionCompositeMembers is
  * set and Convolution's
-  * second function (the model) is composite then use members of the model for
+ * second function (the model) is composite then use members of the model for
  * the output.
-  * @param functionList :: A list of Convolutions constructed from the
+ * @param functionList :: A list of Convolutions constructed from the
  * resolution of the fitting function (index 0)
-  *   and members of the model.
-  * @param function A Convolution function which model may or may not be a
+ *   and members of the model.
+ * @param function A Convolution function which model may or may not be a
  * composite function.
-  * @return True if all conditions are fulfilled and it is possible to produce
+ * @return True if all conditions are fulfilled and it is possible to produce
  * the output.
-  */
+ */
 void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
     std::list<API::IFunction_sptr> &functionList,
     const API::IFunction_sptr &function) const {
@@ -507,5 +507,5 @@ void IMWDomainCreator::addFunctionValuesToWS(
   }
 }
 
-} // namespace Algorithm
+} // namespace CurveFitting
 } // namespace Mantid

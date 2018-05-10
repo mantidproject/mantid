@@ -1,5 +1,5 @@
-#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/NormaliseByCurrent.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/LogFilter.h"
@@ -132,5 +132,5 @@ void NormaliseByCurrent::exec() {
   outputWS->setYUnitLabel("Counts per microAmp.hour");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

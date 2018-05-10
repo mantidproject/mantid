@@ -1,17 +1,17 @@
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidMDAlgorithms/MDTransfFactory.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -19,27 +19,27 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** set specific (non-default) dimension name
-* @param nDim   -- number of dimension;
-* @param Name   -- the name to assign into dimension names vector;
-*/
+ * @param nDim   -- number of dimension;
+ * @param Name   -- the name to assign into dimension names vector;
+ */
 void MDWSDescription::setDimName(unsigned int nDim, const std::string &Name) {
   if (nDim >= m_NDims) {
-    std::string ERR = "setDimName::Dimension index: " + std::to_string(nDim) +
-                      " out of total dimensions range: " +
-                      std::to_string(m_NDims);
+    std::string ERR =
+        "setDimName::Dimension index: " + std::to_string(nDim) +
+        " out of total dimensions range: " + std::to_string(m_NDims);
     throw(std::invalid_argument(ERR));
   }
   m_DimNames[nDim] = Name;
 }
 /** this is rather misleading function, as MD workspace does not currently have
-*dimension units.
-*It actually sets the units for the dimension names, which will be displayed
-*along axis and have nothing in common with units, defined by unit factory */
+ *dimension units.
+ *It actually sets the units for the dimension names, which will be displayed
+ *along axis and have nothing in common with units, defined by unit factory */
 void MDWSDescription::setDimUnit(unsigned int nDim, const std::string &Unit) {
   if (nDim >= m_NDims) {
-    std::string ERR = "setDimUnit::Dimension index: " + std::to_string(nDim) +
-                      " out of total dimensions range: " +
-                      std::to_string(m_NDims);
+    std::string ERR =
+        "setDimUnit::Dimension index: " + std::to_string(nDim) +
+        " out of total dimensions range: " + std::to_string(m_NDims);
     throw(std::invalid_argument(ERR));
   }
   m_DimUnits[nDim] = Unit;
@@ -138,9 +138,9 @@ Kernel::Matrix<double> MDWSDescription::getGoniometerMatr() const {
 }
 
 /** the function builds MD event WS description from existing workspace.
-* Primary used to obtain existing ws parameters
-*@param pWS -- shared pointer to existing MD workspace
-*/
+ * Primary used to obtain existing ws parameters
+ *@param pWS -- shared pointer to existing MD workspace
+ */
 void MDWSDescription::buildFromMDWS(
     const API::IMDEventWorkspace_const_sptr &pWS) {
   m_NDims = static_cast<unsigned int>(pWS->getNumDims());
@@ -165,18 +165,18 @@ void MDWSDescription::buildFromMDWS(
   m_Wtransf = Kernel::DblMatrix(pWS->getWTransf());
 }
 /** When the workspace has been build from existing MDWrokspace, some target
-*workspace parameters can not be defined,
-* as these parameters are defined by the algorithm and input matrix workspace.
-*  examples are emode or input energy, which is actually source workspace
-*parameters, or some other parameters
-*  defined by the transformation algorithm
-*
-* This method used to define such parameters from MDWS description, build from
-*workspace and the transformation algorithm parameters
-*
-*@param SourceMatrWS -- the MDWS description obtained from input matrix
-*workspace and the algorithm parameters
-*/
+ *workspace parameters can not be defined,
+ * as these parameters are defined by the algorithm and input matrix workspace.
+ *  examples are emode or input energy, which is actually source workspace
+ *parameters, or some other parameters
+ *  defined by the transformation algorithm
+ *
+ * This method used to define such parameters from MDWS description, build from
+ *workspace and the transformation algorithm parameters
+ *
+ *@param SourceMatrWS -- the MDWS description obtained from input matrix
+ *workspace and the algorithm parameters
+ */
 void MDWSDescription::setUpMissingParameters(
     const MDWSDescription &SourceMatrWS) {
   m_InWS = SourceMatrWS.m_InWS;
@@ -190,22 +190,22 @@ void MDWSDescription::setUpMissingParameters(
 }
 
 /**function compares old workspace description with the new workspace
-*description, defined by the algorithm properties and
-* selects/changes the properties which can be changed through input parameters
-*given that target MD workspace exist
-*
-* This situation occurs if the base description has been obtained from MD
-*workspace, and one is building a description from
-* other matrix workspace to add new data to the existing workspace. The
-*workspaces have to be comparable.
-*
-* @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm
-*parameters
-*
-* @returns NewMDWorkspaceD -- modified md workspace description, which is
-*compatible with existing MD workspace
-*
-*/
+ *description, defined by the algorithm properties and
+ * selects/changes the properties which can be changed through input parameters
+ *given that target MD workspace exist
+ *
+ * This situation occurs if the base description has been obtained from MD
+ *workspace, and one is building a description from
+ * other matrix workspace to add new data to the existing workspace. The
+ *workspaces have to be comparable.
+ *
+ * @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm
+ *parameters
+ *
+ * @returns NewMDWorkspaceD -- modified md workspace description, which is
+ *compatible with existing MD workspace
+ *
+ */
 void MDWSDescription::checkWSCorresponsMDWorkspace(
     MDWSDescription &NewMDWorkspaceD) {
   if (m_NDims != NewMDWorkspaceD.m_NDims) {
@@ -298,10 +298,10 @@ void MDWSDescription::setNumBins(const std::vector<int> &nBins_toSplit) {
 }
 
 /**function sets up min-max values to the dimensions, described by the class
-*@param minVal  -- vector of minimal dimension's values
-*@param maxVal  -- vector of maximal dimension's values
-*
-*/
+ *@param minVal  -- vector of minimal dimension's values
+ *@param maxVal  -- vector of maximal dimension's values
+ *
+ */
 void MDWSDescription::setMinMax(const std::vector<double> &minVal,
                                 const std::vector<double> &maxVal) {
   m_DimMin.assign(minVal.begin(), minVal.end());
@@ -331,17 +331,17 @@ std::string MDWSDescription::getEModeStr() const {
 }
 
 /** function extracts the coordinates from additional workspace properties and
-*places them to proper position within
-*  the vector of MD coordinates for the particular workspace.
-*
-*  @param inWS2D -- input workspace
-*  @param dimPropertyNames  -- names of properties which should be treated as
-*dimensions
-*  @param AddCoord --
-*
-*  @return AddCoord       -- vector of additional coordinates (derived from WS
-*properties) for current multidimensional event
-*/
+ *places them to proper position within
+ *  the vector of MD coordinates for the particular workspace.
+ *
+ *  @param inWS2D -- input workspace
+ *  @param dimPropertyNames  -- names of properties which should be treated as
+ *dimensions
+ *  @param AddCoord --
+ *
+ *  @return AddCoord       -- vector of additional coordinates (derived from WS
+ *properties) for current multidimensional event
+ */
 void MDWSDescription::fillAddProperties(
     Mantid::API::MatrixWorkspace_const_sptr inWS2D,
     const std::vector<std::string> &dimPropertyNames,
@@ -366,8 +366,9 @@ void MDWSDescription::fillAddProperties(
       if (!proc_property) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
-            dimPropertyNames[i] + " is neither a time series (run) property "
-                                  "nor a property with value<double>";
+            dimPropertyNames[i] +
+            " is neither a time series (run) property "
+            "nor a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
       AddCoord[i] = coord_t(*(proc_property));
@@ -376,8 +377,8 @@ void MDWSDescription::fillAddProperties(
 }
 
 /** function verifies the consistency of the min and max dimensions values
-* checking if all necessary
-* values were defined and min values are smaller then max values */
+ * checking if all necessary
+ * values were defined and min values are smaller then max values */
 void MDWSDescription::checkMinMaxNdimConsistent(
     const std::vector<double> &minVal, const std::vector<double> &maxVal) {
   if (minVal.size() != maxVal.size()) {

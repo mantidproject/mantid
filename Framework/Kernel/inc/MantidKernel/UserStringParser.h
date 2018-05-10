@@ -90,6 +90,6 @@ private:
   bool isValidStepSeparator(const std::string &input,
                             const std::vector<std::string> &tokens);
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 #endif

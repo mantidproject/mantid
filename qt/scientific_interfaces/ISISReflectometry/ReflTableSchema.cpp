@@ -25,6 +25,6 @@ ColumnNameIndexMap makeColumnNameMap() {
   }
   return columnMap;
 }
-}
+} // namespace ReflTableSchema
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

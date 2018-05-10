@@ -1,11 +1,11 @@
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidAPI/Run.h"
 #include "Poco/NumberParser.h"
 
 namespace Mantid {

@@ -1,16 +1,16 @@
 #ifndef MANTID_GEOMETRY_IDFOBJECTTEST_H_
 #define MANTID_GEOMETRY_IDFOBJECTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
-#include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
-#include <Poco/Thread.h>
+#include <Poco/DigestStream.h>
+#include <Poco/Path.h>
 #include <Poco/SHA1Engine.h>
 #include <Poco/String.h>
-#include <Poco/DigestStream.h>
+#include <Poco/Thread.h>
+#include <cxxtest/TestSuite.h>
 
 #include <boost/regex.hpp>
 
@@ -91,8 +91,8 @@ public:
     Poco::Path path(filename);
 
     using Poco::DigestEngine;
-    using Poco::SHA1Engine;
     using Poco::DigestOutputStream;
+    using Poco::SHA1Engine;
 
     std::ifstream filein(filename.c_str(), std::ios::in | std::ios::binary);
     if (!filein) {

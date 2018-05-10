@@ -158,4 +158,4 @@ bool ReflMeasureTransferStrategy::knownFileType(
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

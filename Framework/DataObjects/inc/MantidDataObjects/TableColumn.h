@@ -285,7 +285,7 @@ public:
                        : !(m_data[i] < m_data[j] || m_data[i] == m_data[j]);
   }
 };
-}
+} // namespace
 
 /// Sort a vector of indices according to values in corresponding cells of this
 /// column. @see Column::sortIndex

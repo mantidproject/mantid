@@ -97,7 +97,7 @@ private:
   boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGQTWIDGET_H_

@@ -2,12 +2,12 @@
 // MantidPlot
 #include "Graph.h"
 #include "LegendWidget.h"
+#include "Mantid/LabelToolLogValuesDialog.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "TextDialog.h"
-#include "Mantid/LabelToolLogValuesDialog.h"
 // Mantid
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 // Qwt
 #include <qwt_picker.h>
 #include <qwt_plot_canvas.h>
@@ -200,12 +200,13 @@ void LabelTool::graphAreaClicked(const QwtPolygon &c) {
     size_t numberOfDataPoints = mwd->size();
 
     /**
-    * Gets the pixel value of the x-coordinate value of each data point within
-    * range.
-    * Of the data points within range along x-axis, finds out if the pixel
-    * values of their y-coordinates are within range.
-    * If they are, their position within the iteration - i - is stored in a set.
-    */
+     * Gets the pixel value of the x-coordinate value of each data point within
+     * range.
+     * Of the data points within range along x-axis, finds out if the pixel
+     * values of their y-coordinates are within range.
+     * If they are, their position within the iteration - i - is stored in a
+     * set.
+     */
 
     QSet<size_t> pointsWithinRange;
 
@@ -227,10 +228,10 @@ void LabelTool::graphAreaClicked(const QwtPolygon &c) {
     // If there are points within the specified ranges.
     if (!pointsWithinRange.isEmpty()) {
       /**
-      * Uses Pythagoras' theorem to calculate the distance between the position
-      * of a click and
-      * the surrounding data points that lie within both the x and y ranges.
-      */
+       * Uses Pythagoras' theorem to calculate the distance between the position
+       * of a click and
+       * the surrounding data points that lie within both the x and y ranges.
+       */
 
       QMap<double, size_t> map;
 

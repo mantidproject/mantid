@@ -4,8 +4,8 @@
 #include "MantidHistogramData/DllConfig.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <functional>
+#include <stdexcept>
 #include <type_traits>
 
 namespace Mantid {

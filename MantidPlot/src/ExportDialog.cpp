@@ -30,13 +30,13 @@
 #include "ExportDialog.h"
 #include "ApplicationWindow.h"
 
+#include <QCheckBox>
 #include <QCloseEvent>
-#include <QLayout>
+#include <QComboBox>
 #include <QLabel>
+#include <QLayout>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QCheckBox>
-#include <QComboBox>
 
 ExportDialog::ExportDialog(const QString &tableName, QWidget *parent,
                            Qt::WFlags fl)

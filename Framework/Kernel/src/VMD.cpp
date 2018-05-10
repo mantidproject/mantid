@@ -1,5 +1,5 @@
-#include "MantidKernel/Matrix.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
@@ -39,8 +39,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd) : nd(nd) {
  * @param val1 :: value at second dimension
  */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(double val0, double val1)
-    : nd(2) {
+VMDBase<TYPE>::VMDBase(double val0, double val1) : nd(2) {
   data = new TYPE[nd];
   data[0] = TYPE(val0);
   data[1] = TYPE(val1);
@@ -52,8 +51,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1)
  * @param val2 :: value at third dimension
  */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(double val0, double val1, double val2)
-    : nd(3) {
+VMDBase<TYPE>::VMDBase(double val0, double val1, double val2) : nd(3) {
   data = new TYPE[nd];
   data[0] = TYPE(val0);
   data[1] = TYPE(val1);
@@ -119,8 +117,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3,
 /** Copy constructor
  * @param other :: other to copy */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(const VMDBase &other)
-    : nd(other.nd) {
+VMDBase<TYPE>::VMDBase(const VMDBase &other) : nd(other.nd) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -147,8 +144,8 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator=(const VMDBase &other) {
  * @param other :: move into this
  */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept : nd(other.nd),
-                                                   data(other.data) {
+VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept
+    : nd(other.nd), data(other.data) {
   other.data = nullptr;
   other.nd = 0;
 }
@@ -172,8 +169,7 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator=(VMDBase &&other) noexcept {
  * @param nd :: number of dimensions
  * @param bareData :: pointer to a nd-sized bare data array */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(size_t nd, const double *bareData)
-    : nd(nd) {
+VMDBase<TYPE>::VMDBase(size_t nd, const double *bareData) : nd(nd) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -185,8 +181,7 @@ VMDBase<TYPE>::VMDBase(size_t nd, const double *bareData)
  * @param nd :: number of dimensions
  * @param bareData :: pointer to a nd-sized bare data array */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(size_t nd, const float *bareData)
-    : nd(nd) {
+VMDBase<TYPE>::VMDBase(size_t nd, const float *bareData) : nd(nd) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -205,8 +200,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(const V3D &vector) : nd(3) {
 /** Constructor
  * @param vector :: vector of doubles */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(const std::vector<double> &vector)
-    : nd(vector.size()) {
+VMDBase<TYPE>::VMDBase(const std::vector<double> &vector) : nd(vector.size()) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -217,8 +211,7 @@ VMDBase<TYPE>::VMDBase(const std::vector<double> &vector)
 /** Constructor
  * @param vector :: vector of floats */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(const std::vector<float> &vector)
-    : nd(vector.size()) {
+VMDBase<TYPE>::VMDBase(const std::vector<float> &vector) : nd(vector.size()) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
@@ -625,5 +618,5 @@ std::ostream &operator<<(std::ostream &os, const VMDBase<float> &v) {
   return os;
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

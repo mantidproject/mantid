@@ -1,10 +1,10 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/PatchBBY.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 
-#include <Poco/TemporaryFile.h>
 #include <Poco/String.h>
+#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -311,5 +311,5 @@ void PatchBBY::exec() {
     throw std::runtime_error("unable to patch");
 }
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid

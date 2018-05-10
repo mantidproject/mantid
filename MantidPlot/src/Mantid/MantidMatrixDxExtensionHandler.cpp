@@ -1,7 +1,7 @@
 #include "MantidMatrixDxExtensionHandler.h"
 #include "Preferences.h"
-#include <QTableView>
 #include <QHeaderView>
+#include <QTableView>
 
 MantidMatrixDxExtensionHandler::MantidMatrixDxExtensionHandler()
     : m_type(MantidMatrixModel::Type::DX) {}

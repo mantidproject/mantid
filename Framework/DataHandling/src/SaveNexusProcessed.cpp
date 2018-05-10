@@ -63,8 +63,9 @@ void SaveNexusProcessed::init() {
                   "List of spectrum numbers to read, only for single period\n"
                   "data.");
 
-  declareProperty("Append", false, "Determines whether .nxs file needs to be\n"
-                                   "over written or appended");
+  declareProperty("Append", false,
+                  "Determines whether .nxs file needs to be\n"
+                  "over written or appended");
 
   declareProperty(
       "PreserveEvents", true,
@@ -527,11 +528,11 @@ bool SaveNexusProcessed::processGroups() {
 }
 
 /** Save the spectra detector map to an open NeXus file.
-* @param ws :: Workspace containing spectrum data
-* @param file :: open NeXus file
-* @param spec :: list of the Workspace Indices to save.
-* @param compression :: NXcompression int to indicate how to compress
-*/
+ * @param ws :: Workspace containing spectrum data
+ * @param file :: open NeXus file
+ * @param spec :: list of the Workspace Indices to save.
+ * @param compression :: NXcompression int to indicate how to compress
+ */
 void SaveNexusProcessed::saveSpectraMapNexus(
     const MatrixWorkspace &ws, ::NeXus::File *file,
     const std::vector<int> &spec,

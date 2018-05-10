@@ -3,10 +3,10 @@
 
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
-#include "MantidParallel/Nonblocking.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventDataPartitioner.h"
+#include "MantidParallel/Nonblocking.h"
 #include "MantidTypes/Event/TofEvent.h"
 
 #include <chrono>
@@ -64,8 +64,9 @@ public:
               std::vector<int32_t> bankOffsets,
               std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
 
-  void setEventDataPartitioner(std::unique_ptr<
-      AbstractEventDataPartitioner<TimeOffsetType>> partitioner);
+  void setEventDataPartitioner(
+      std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>
+          partitioner);
   void setEventTimeOffsetUnit(const std::string &unit);
 
   void startAsync(int32_t *event_id_start,

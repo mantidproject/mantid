@@ -15,7 +15,7 @@ namespace Kernel {
 namespace {
 // static logger object
 Logger g_log("ComputeResourceInfo");
-}
+} // namespace
 
 /**
  * Construct a compute resource from information found in a facilities
@@ -79,12 +79,12 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
 }
 
 /**
-* Equality operator. Two different resources cannot have the same name
-*
-* @param rhs object to compare this with
-*
-* @return True if the objects (names) are equal
-*/
+ * Equality operator. Two different resources cannot have the same name
+ *
+ * @param rhs object to compare this with
+ *
+ * @return True if the objects (names) are equal
+ */
 bool ComputeResourceInfo::operator==(const ComputeResourceInfo &rhs) const {
   return (this->name() == rhs.name());
 }

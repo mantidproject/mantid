@@ -3,8 +3,8 @@
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 
-using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::SpecialWorkspace2D;
+using Mantid::DataObjects::Workspace2D;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 

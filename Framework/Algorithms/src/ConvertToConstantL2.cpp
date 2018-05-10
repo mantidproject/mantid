@@ -1,19 +1,19 @@
 #include "MantidAlgorithms/ConvertToConstantL2.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Strings.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include <cmath>
 #include <boost/format.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -171,5 +171,5 @@ double ConvertToConstantL2::calculateTOF(double distance) {
   return distance / velocity;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

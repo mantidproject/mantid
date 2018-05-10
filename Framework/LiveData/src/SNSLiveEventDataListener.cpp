@@ -74,7 +74,7 @@ DECLARE_LISTENER(SNSLiveEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("SNSLiveEventDataListener");
-}
+} // namespace
 
 /// Constructor
 SNSLiveEventDataListener::SNSLiveEventDataListener()
@@ -484,8 +484,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
       // sufficient.
       g_log.error()
           << "Mantid cannot handle monitor ID's higher than 5.  If "
-          << monitorID << " is actually valid, then an appropriate "
-                          "entry must be made to the "
+          << monitorID
+          << " is actually valid, then an appropriate "
+             "entry must be made to the "
           << " ADDABLE list at the top of Framework/API/src/Run.cpp\n";
     } else {
       std::string monName("monitor");
@@ -1095,9 +1096,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
             prop = new TimeSeriesProperty<std::string>(pvName);
           } else {
             // invalid type string
-            g_log.warning() << "Ignoring process variable " << pvName
-                            << " because it had an unrecognized type ("
-                            << pvType << ").\n";
+            g_log.warning()
+                << "Ignoring process variable " << pvName
+                << " because it had an unrecognized type (" << pvType << ").\n";
           }
 
           if (prop) {

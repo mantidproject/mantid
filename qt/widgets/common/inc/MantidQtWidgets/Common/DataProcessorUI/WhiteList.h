@@ -71,7 +71,7 @@ private:
   std::vector<QString> m_prefixes;
   std::vector<QString> m_descriptions;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORWHITELIST_H*/

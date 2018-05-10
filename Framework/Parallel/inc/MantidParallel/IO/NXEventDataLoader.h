@@ -1,14 +1,14 @@
 #ifndef MANTID_PARALLEL_IO_NXEVENTDATALOADER_H_
 #define MANTID_PARALLEL_IO_NXEVENTDATALOADER_H_
 
-#include <vector>
 #include <H5Cpp.h>
+#include <vector>
 
+#include "MantidKernel/make_unique.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
 #include "MantidParallel/IO/PulseTimeGenerator.h"
 #include "MantidTypes/Core/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Parallel {
@@ -189,7 +189,7 @@ makeEventDataPartitioner(const H5::DataType &type, T2 &&... args) {
   // Compile-time branching for float types.
   return ConditionalFloat<R, T1...>::forward(type, args...);
 }
-}
+} // namespace detail
 
 /** Constructor from group and bank names in group to load from.
  *

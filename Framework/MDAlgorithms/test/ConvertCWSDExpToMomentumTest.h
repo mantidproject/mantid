@@ -73,7 +73,7 @@ void generateTestInputs() {
 
   m_pixelDimension.resize(8, 0.0);
 }
-}
+} // namespace
 
 class ConvertCWSDExpToMomentumTest : public CxxTest::TestSuite {
 public:

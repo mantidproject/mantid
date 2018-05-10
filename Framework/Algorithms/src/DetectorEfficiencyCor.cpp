@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -8,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -69,7 +69,7 @@ const double DIST_TO_UNIVERSE_EDGE = 1e3;
 const std::string PRESSURE_PARAM = "TubePressure";
 // Name of wall thickness parameter
 const std::string THICKNESS_PARAM = "TubeThickness";
-}
+} // namespace
 
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
@@ -106,11 +106,11 @@ void DetectorEfficiencyCor::init() {
 }
 
 /** Executes the algorithm
-*  @throw NullPointerException if a getDetector() returns NULL or pressure or
-* wall thickness is not set
-*  @throw invalid_argument if the shape of a detector is isn't a cylinder
-* aligned on axis or there is no baseInstrument
-*/
+ *  @throw NullPointerException if a getDetector() returns NULL or pressure or
+ * wall thickness is not set
+ *  @throw invalid_argument if the shape of a detector is isn't a cylinder
+ * aligned on axis or there is no baseInstrument
+ */
 void DetectorEfficiencyCor::exec() {
   // gets and checks the values passed to the algorithm
   retrieveProperties();
@@ -155,10 +155,10 @@ void DetectorEfficiencyCor::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 }
 /** Loads and checks the values passed to the algorithm
-*
-*  @throw invalid_argument if there is an incompatible property value so the
-*algorithm can't continue
-*/
+ *
+ *  @throw invalid_argument if there is an incompatible property value so the
+ *algorithm can't continue
+ */
 void DetectorEfficiencyCor::retrieveProperties() {
   // these first three properties are fully checked by validators
   m_inputWS = getProperty("InputWorkspace");
@@ -296,10 +296,10 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
 }
 
 /** Update the shape cache if necessary
-* @param det :: a pointer to the detector to query
-* @param detRadius :: An output parameter that contains the detector radius
-* @param detAxis :: An output parameter that contains the detector axis vector
-*/
+ * @param det :: a pointer to the detector to query
+ * @param detRadius :: An output parameter that contains the detector radius
+ * @param detAxis :: An output parameter that contains the detector axis vector
+ */
 void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
                                                 double &detRadius,
                                                 V3D &detAxis) {
@@ -411,16 +411,16 @@ double DetectorEfficiencyCor::detectorEfficiency(const double alpha) const {
 }
 
 /** Calculates an expansion similar to that in CHEBEV of "Numerical Recipes"
-*  copied from the fortran code in effic_3he_cylinder.for
-* @param a :: a fit parameter, only the difference between a and b enters this
-* equation
-* @param b :: a fit parameter, only the difference between a and b enters this
-* equation
-* @param exspansionCoefs :: one of the 25 element constant arrays declared in
-* this file
-* @param x :: a fit parameter
-* @return a numerical approximation provided by the expansion
-*/
+ *  copied from the fortran code in effic_3he_cylinder.for
+ * @param a :: a fit parameter, only the difference between a and b enters this
+ * equation
+ * @param b :: a fit parameter, only the difference between a and b enters this
+ * equation
+ * @param exspansionCoefs :: one of the 25 element constant arrays declared in
+ * this file
+ * @param x :: a fit parameter
+ * @return a numerical approximation provided by the expansion
+ */
 double DetectorEfficiencyCor::chebevApprox(double a, double b,
                                            const double exspansionCoefs[],
                                            double x) const {
@@ -440,7 +440,7 @@ double DetectorEfficiencyCor::chebevApprox(double a, double b,
  * Logs if there were any problems locating spectra.
  * @param totalNDetectors -- number of all detectors in the workspace
  *
-*/
+ */
 void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
   if (!m_spectraSkipped.empty()) {
@@ -457,5 +457,5 @@ void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

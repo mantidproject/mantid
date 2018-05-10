@@ -1,7 +1,7 @@
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
-#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -25,7 +25,7 @@ ReflectionGenerator::ReflectionGenerator(
     ReflectionConditionFilter defaultFilter)
     : m_crystalStructure(crystalStructure),
       m_sfCalculator(StructureFactorCalculatorFactory::create<
-          StructureFactorCalculatorSummation>(m_crystalStructure)),
+                     StructureFactorCalculatorSummation>(m_crystalStructure)),
       m_defaultHKLFilter(getReflectionConditionFilter(defaultFilter)) {}
 
 /// Returns the internally stored crystal structure

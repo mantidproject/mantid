@@ -9,16 +9,16 @@ namespace MDAlgorithms {
 Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
 
 /** method which initates all main class variables
-* @param WSD        -- class describing the target workspace.
-*                      the algorithm uses target workspace limints,
-* transformation matix from source to the target workspace and the parameters,
-* needed for
-*                      unit conversion (if any)
-* @param inWSWrapper -- shared pointer to target MD Event workspace to add
-* converted events to.
-* @param ignoreZeros -- if true, 0 values on input histograms do not copied as
-* events into resulting MD workspace. By false(default), they do.
-*/
+ * @param WSD        -- class describing the target workspace.
+ *                      the algorithm uses target workspace limints,
+ * transformation matix from source to the target workspace and the parameters,
+ * needed for
+ *                      unit conversion (if any)
+ * @param inWSWrapper -- shared pointer to target MD Event workspace to add
+ * converted events to.
+ * @param ignoreZeros -- if true, 0 values on input histograms do not copied as
+ * events into resulting MD workspace. By false(default), they do.
+ */
 size_t ConvToMDBase::initialize(
     const MDAlgorithms::MDWSDescription &WSD,
     boost::shared_ptr<MDAlgorithms::MDEventWSWrapper> inWSWrapper,
@@ -117,5 +117,5 @@ void ConvToMDBase::setDisplayNormalization(
   }
 }
 
-} // endNamespace MDAlgorithms
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

@@ -1,12 +1,12 @@
 #ifndef MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTION_H_
 #define MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <vector>
 #include <boost/tuple/tuple.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -50,8 +50,8 @@ public:
   double volume() const;
 
   double
-  fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>> &
-               boxExtents) const;
+  fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>>
+               &boxExtents) const;
 
 private:
   void construct(const Mantid::Kernel::VMD &min,

@@ -27,7 +27,7 @@ void ISpectrum::copyInfoFrom(const ISpectrum &other) {
  * Return the min/max X values for this spectrum.
  * @returns A pair where the first is the minimum X value
  *          and the second the maximum
-*/
+ */
 std::pair<double, double> ISpectrum::getXDataRange() const {
   const auto &xdata = readX();
   return std::pair<double, double>(xdata.front(), xdata.back());
@@ -213,5 +213,5 @@ void ISpectrum::copyDataInto(SpectrumTester &) const {
   throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

@@ -1,20 +1,20 @@
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 
+#include <QApplication>
 #include <QCursor>
 #include <QMessageBox>
-#include <QApplication>
 
 using namespace Mantid::Geometry;
 
 namespace {
 // The logger object
 Mantid::Kernel::Logger g_log("RotationSurface");
-}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -26,8 +26,8 @@ RotationSurface::RotationSurface(const InstrumentActor *rootActor,
       m_manual_u_correction(false) {}
 
 /**
-* Initialize the surface.
-*/
+ * Initialize the surface.
+ */
 void RotationSurface::init() {
   // the actor calls this->callback for each detector
   m_unwrappedDetectors.clear();
@@ -268,11 +268,11 @@ void RotationSurface::findAndCorrectUGap() {
 }
 
 /**
-* Apply a correction to u value of a projected point due to
-* change of u-scale by findAndCorrectUGap()
-* @param u :: u-coordinate to be corrected
-* @return :: Corrected u-coordinate.
-*/
+ * Apply a correction to u value of a projected point due to
+ * change of u-scale by findAndCorrectUGap()
+ * @param u :: u-coordinate to be corrected
+ * @return :: Corrected u-coordinate.
+ */
 double RotationSurface::applyUCorrection(double u) const {
   double period = uPeriod();
   if (period == 0.0)
@@ -289,9 +289,9 @@ double RotationSurface::applyUCorrection(double u) const {
 }
 
 /**
-* Set new value for the u-correction.
-* Correct all uv corrdinates of detectors.
-*/
+ * Set new value for the u-correction.
+ * Correct all uv corrdinates of detectors.
+ */
 void RotationSurface::setUCorrection(double umin, double umax) {
   m_u_min = umin;
   m_u_max = umax;
@@ -309,13 +309,13 @@ void RotationSurface::setUCorrection(double umin, double umax) {
 }
 
 /**
-* Set automatic u-correction
-*/
+ * Set automatic u-correction
+ */
 void RotationSurface::setAutomaticUCorrection() {
   m_manual_u_correction = false;
   updateDetectors();
   updateViewRectForUCorrection();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

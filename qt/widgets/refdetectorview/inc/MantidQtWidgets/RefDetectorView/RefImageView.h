@@ -3,9 +3,9 @@
 
 #include <QMainWindow>
 
+#include "DllOption.h"
 #include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
-#include "DllOption.h"
 
 /**
     @class RefImageView

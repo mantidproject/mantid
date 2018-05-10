@@ -4,12 +4,12 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Math/PolygonEdge.h"
 #include "MantidKernel/V2D.h"
+#include <cxxtest/TestSuite.h>
 
-using Mantid::Geometry::PolygonEdge;
 using Mantid::Geometry::PointClassification;
+using Mantid::Geometry::PolygonEdge;
 using Mantid::Kernel::V2D;
 
 class PolygonEdgeTest : public CxxTest::TestSuite {

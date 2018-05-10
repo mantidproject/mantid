@@ -1,5 +1,5 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/reference_existing_object.hpp>
 

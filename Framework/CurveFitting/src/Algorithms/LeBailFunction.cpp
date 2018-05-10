@@ -1,11 +1,11 @@
+#include "MantidCurveFitting/Algorithms/LeBailFunction.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/Algorithms/LeBailFunction.h"
-#include "MantidKernel/System.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidKernel/System.h"
 
 #include <sstream>
 
@@ -28,14 +28,14 @@ const double PEAKRANGECONSTANT = 5.0;
 const string CHEBYSHEV_BACKGROUND("Chebyshev");
 const string POLYNOMIAL_BACKGROUND("Polynomial");
 const string FULLPROF_POLYNOMIAL_BACKGROUND("FullprofPolynomial");
-}
+} // namespace
 
 // Get a reference to the logger
 Kernel::Logger g_log("LeBailFunction");
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 LeBailFunction::LeBailFunction(std::string peaktype) {
   // Set initial values to some class variables
   CompositeFunction_sptr m_function(new CompositeFunction());
@@ -81,12 +81,12 @@ LeBailFunction::LeBailFunction(std::string peaktype) {
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 LeBailFunction::~LeBailFunction() {}
 
 //----------------------------------------------------------------------------------------------
 /** Return the composite function
-*/
+ */
 API::IFunction_sptr LeBailFunction::getFunction() {
   return m_compsiteFunction;
   // return boost::dynamic_pointer_cast<IFunction_sptr>(m_compsiteFunction);
@@ -94,12 +94,12 @@ API::IFunction_sptr LeBailFunction::getFunction() {
 
 //----------------------------------------------------------------------------------------------
 /** Calculate powder diffraction pattern by Le Bail algorithm
-* @param xvalues :: input vector
-* @param calpeaks :: if true, calculate peaks
-* @param calbkgd :: if true, then calculate background and add to output.
-* otherwise, assume zero background
-* @return :: output vector
-*/
+ * @param xvalues :: input vector
+ * @param calpeaks :: if true, calculate peaks
+ * @param calbkgd :: if true, then calculate background and add to output.
+ * otherwise, assume zero background
+ * @return :: output vector
+ */
 HistogramY
 LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
                          bool calpeaks, bool calbkgd) const {
@@ -140,7 +140,7 @@ LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
 }
 
 /**  Calculate a single peak's value
-*/
+ */
 HistogramY LeBailFunction::calPeak(size_t ipk,
                                    const std::vector<double> &xvalues,
                                    size_t ySize) const {
@@ -161,8 +161,8 @@ HistogramY LeBailFunction::calPeak(size_t ipk,
 
 //----------------------------------------------------------------------------------------------
 /** Check whether a parameter is a profile parameter
-* @param paramname :: parameter name to check with
-*/
+ * @param paramname :: parameter name to check with
+ */
 bool LeBailFunction::hasProfileParameter(std::string paramname) {
   auto fiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
                            m_orderedProfileParameterNames.cend(), paramname);
@@ -183,9 +183,9 @@ bool LeBailFunction::hasProfileParameter(std::string paramname) {
 
 //----------------------------------------------------------------------------------------------
 /** Check whether the newly set parameters are correct, i.e., all peaks are
-* physical
-* This function would be used with setParameters() and etc.
-*/
+ * physical
+ * This function would be used with setParameters() and etc.
+ */
 bool LeBailFunction::isParameterValid(double maxfwhm) const {
   // Re-calculate peak parameter if there is some modification
   if (m_hasNewPeakValue) {
@@ -218,7 +218,7 @@ bool LeBailFunction::isParameterValid(double maxfwhm) const {
 
 //----------------------------------------------------------------------------------------------
 /** Calculate all peaks' parameter value
-*/
+ */
 void LeBailFunction::calculatePeakParameterValues() const {
   for (size_t i = 0; i < m_numPeaks; ++i) {
     IPowderDiffPeakFunction_sptr peak = m_vecPeaks[i];
@@ -230,10 +230,10 @@ void LeBailFunction::calculatePeakParameterValues() const {
 
 //----------------------------------------------------------------------------------------------
 /** Set peak position tolerance during importing/adding peaks
-* @param peakpostol :: tolerance for peak position
-* @param tofmin :: minimum TOF for peak position
-* @param tofmax :: maximum TOF for peak position
-*/
+ * @param peakpostol :: tolerance for peak position
+ * @param tofmin :: minimum TOF for peak position
+ * @param tofmax :: maximum TOF for peak position
+ */
 void LeBailFunction::setPeakCentreTolerance(double peakpostol, double tofmin,
                                             double tofmax) {
   // m_usePeakPosTol = true;
@@ -243,8 +243,8 @@ void LeBailFunction::setPeakCentreTolerance(double peakpostol, double tofmin,
 
 //----------------------------------------------------------------------------------------------
 /** Generate peaks, and add them to this composite function
-* @param peakhkls :: list of Miller indexes (HKL)
-*/
+ * @param peakhkls :: list of Miller indexes (HKL)
+ */
 void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
   // Prerequisit
   if (!m_isInputValue)
@@ -302,10 +302,10 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate a peak with parameter set by
-* @param h :: H
-* @param k :: K
-* @param l :: L
-*/
+ * @param h :: H
+ * @param k :: K
+ * @param l :: L
+ */
 IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
   IFunction_sptr f = FunctionFactory::Instance().createFunction(m_peakType);
   IPowderDiffPeakFunction_sptr peak =
@@ -322,19 +322,19 @@ IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
 
 //----------------------------------------------------------------------------------------------
 /** Calculate peak heights from the model to the observed data
-* Algorithm will deal with
-* (1) Peaks are close enough to overlap with each other
-* The procedure will be
-* (a) Assign peaks into groups; each group contains either (1) one peak or (2)
-*peaks overlapped
-* (b) Calculate peak intensities for every peak per group
-*
-* @param vecX :: vector for x values
-* @param vecY :: vector for data with background removed
-* @param vec_summedpeaks:  output vector storing peaks' values calculated
-*
-* Return: True if all peaks' height are physical.  False otherwise
-*/
+ * Algorithm will deal with
+ * (1) Peaks are close enough to overlap with each other
+ * The procedure will be
+ * (a) Assign peaks into groups; each group contains either (1) one peak or (2)
+ *peaks overlapped
+ * (b) Calculate peak intensities for every peak per group
+ *
+ * @param vecX :: vector for x values
+ * @param vecY :: vector for data with background removed
+ * @param vec_summedpeaks:  output vector storing peaks' values calculated
+ *
+ * Return: True if all peaks' height are physical.  False otherwise
+ */
 bool LeBailFunction::calculatePeaksIntensities(
     const vector<double> &vecX, const vector<double> &vecY,
     vector<double> &vec_summedpeaks) {
@@ -371,15 +371,15 @@ bool LeBailFunction::calculatePeaksIntensities(
 
 //----------------------------------------------------------------------------------------------
 /** Calculate peak's intensities in a group and set the calculated peak height
-* to the corresponding peak function.
-* @param peakgroup:  vector of peak-centre-dpsace value and peak function pair
-* for peaks that are overlapped
-* @param vecX:  vector of X array
-* @param vecY:  vector for data with background removed.
-* @param vec_summedpeaks :: vector of summation of all peaks, i.e., output of
-* sum_peaks
-* @return :: boolean whether the peaks' heights are physical
-*/
+ * to the corresponding peak function.
+ * @param peakgroup:  vector of peak-centre-dpsace value and peak function pair
+ * for peaks that are overlapped
+ * @param vecX:  vector of X array
+ * @param vecY:  vector for data with background removed.
+ * @param vec_summedpeaks :: vector of summation of all peaks, i.e., output of
+ * sum_peaks
+ * @return :: boolean whether the peaks' heights are physical
+ */
 bool LeBailFunction::calculateGroupPeakIntensities(
     vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroup,
     const vector<double> &vecX, const vector<double> &vecY,
@@ -606,13 +606,13 @@ bool LeBailFunction::calculateGroupPeakIntensities(
 
 //----------------------------------------------------------------------------------------------
 /** From table/map to set parameters to an individual peak.
-* It mostly is called by function in calculation.
-* @param peak :  ThermalNeutronBk2BkExpConvPVoigt function to have parameters'
-* value set
-* @param parammap:  map of Parameters to set to peak
-* @param peakheight: height of the peak
-* @param setpeakheight:  boolean as the option to set peak height or not.
-*/
+ * It mostly is called by function in calculation.
+ * @param peak :  ThermalNeutronBk2BkExpConvPVoigt function to have parameters'
+ * value set
+ * @param parammap:  map of Parameters to set to peak
+ * @param peakheight: height of the peak
+ * @param setpeakheight:  boolean as the option to set peak height or not.
+ */
 void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak,
                                        map<string, double> parammap,
                                        double peakheight, bool setpeakheight) {
@@ -665,15 +665,15 @@ void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak,
 
 //----------------------------------------------------------------------------------------------
 /** From a parameter name/value map to
-* 1. store values to LeBailFunction;
-* 2. new values to each peak
-*
-* Request: order of parameter names in m_peakParameterNameVec must be same as
-*the order in
-*          IPowderDiffPeakFunction.
-*
-* @param parammap: map of Parameters to set to peak
-*/
+ * 1. store values to LeBailFunction;
+ * 2. new values to each peak
+ *
+ * Request: order of parameter names in m_peakParameterNameVec must be same as
+ *the order in
+ *          IPowderDiffPeakFunction.
+ *
+ * @param parammap: map of Parameters to set to peak
+ */
 void LeBailFunction::setProfileParameterValues(
     map<std::string, double> parammap) {
   const double MINDIFF = 1.0E-10;
@@ -733,12 +733,12 @@ void LeBailFunction::setProfileParameterValues(
 
 //----------------------------------------------------------------------------------------------
 /** Group peaks together
-* @param peakgroupvec:  output vector containing peaks grouped together.
-* @param outboundpeakvec: output vector containing peaks out of bound range
-* @param xmin : minimim x value of the data
-* @param xmax : maximum x value of the data
-* Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
-*/
+ * @param peakgroupvec:  output vector containing peaks grouped together.
+ * @param outboundpeakvec: output vector containing peaks out of bound range
+ * @param xmin : minimim x value of the data
+ * @param xmax : maximum x value of the data
+ * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
+ */
 void LeBailFunction::groupPeaks(
     vector<vector<pair<double, IPowderDiffPeakFunction_sptr>>> &peakgroupvec,
     vector<IPowderDiffPeakFunction_sptr> &outboundpeakvec, double xmin,
@@ -839,15 +839,15 @@ void LeBailFunction::groupPeaks(
 
 //----------------------------------------------------------------------------------------------
 /** Add background function.
-* The supported background types are Polynomial/Linear/Flat and Chebyshev
-* @param backgroundtype :: string, type of background, such as Polynomial,
-* Chebyshev
-* @param order :: polynomial order for the background
-* @param vecparnames :: vector of parameter names
-* @param vecparvalues :: vector of parameter values from order 0.
-* @param startx :: background's StartX.  Used by Chebyshev
-* @param endx :: background's EndX.  Used by Chebyshev
-*/
+ * The supported background types are Polynomial/Linear/Flat and Chebyshev
+ * @param backgroundtype :: string, type of background, such as Polynomial,
+ * Chebyshev
+ * @param order :: polynomial order for the background
+ * @param vecparnames :: vector of parameter names
+ * @param vecparvalues :: vector of parameter values from order 0.
+ * @param startx :: background's StartX.  Used by Chebyshev
+ * @param endx :: background's EndX.  Used by Chebyshev
+ */
 void LeBailFunction::addBackgroundFunction(
     string backgroundtype, const unsigned int &order,
     const std::vector<std::string> &vecparnames,
@@ -901,10 +901,10 @@ void LeBailFunction::addBackgroundFunction(
 
 //----------------------------------------------------------------------------------------------
 /** Set up a profile parameter to fit but tied among all peaks
-* @param paramname :: name of parameter
-* @param minvalue :: lower boundary
-* @param maxvalue :: upper boundary
-*/
+ * @param paramname :: name of parameter
+ * @param minvalue :: lower boundary
+ * @param maxvalue :: upper boundary
+ */
 void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
                                             double maxvalue) {
   // Make ties in composition function
@@ -930,9 +930,9 @@ void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
 
 //----------------------------------------------------------------------------------------------
 /** Set up a parameter to be fixed
-* @param paramname :: name of parameter
-* @param paramvalue :: value of parameter to be fixed to
-*/
+ * @param paramname :: name of parameter
+ * @param paramvalue :: value of parameter to be fixed to
+ */
 void LeBailFunction::fixPeakParameter(string paramname, double paramvalue) {
   for (size_t ipk = 0; ipk < m_numPeaks; ++ipk) {
     stringstream ss1, ss2;
@@ -958,7 +958,7 @@ void LeBailFunction::fixPeakParameter(string paramname, double paramvalue) {
 
 //----------------------------------------------------------------------------------------------
 /** Fix all background parameters
-*/
+ */
 void LeBailFunction::fixBackgroundParameters() {
   size_t numbkgdparams = m_background->nParams();
 
@@ -968,7 +968,7 @@ void LeBailFunction::fixBackgroundParameters() {
 
 //----------------------------------------------------------------------------------------------
 /** Fix all peaks' intensity/height
-*/
+ */
 void LeBailFunction::setFixPeakHeights() {
   for (size_t ipk = 0; ipk < m_numPeaks; ++ipk) {
     // a. Get peak height
@@ -979,8 +979,8 @@ void LeBailFunction::setFixPeakHeights() {
 
 //----------------------------------------------------------------------------------------------
 /** Reset all peaks' height
-* @param inheights :: list of peak heights corresponding to each peak
-*/
+ * @param inheights :: list of peak heights corresponding to each peak
+ */
 void LeBailFunction::setPeakHeights(std::vector<double> inheights) {
   UNUSED_ARG(inheights);
   throw runtime_error("It is not implemented properly.");
@@ -1001,7 +1001,7 @@ void LeBailFunction::setPeakHeights(std::vector<double> inheights) {
 
 //----------------------------------------------------------------------------------------------
 /** Get the reference to a peak
-*/
+ */
 IPowderDiffPeakFunction_sptr LeBailFunction::getPeak(size_t peakindex) {
   if (peakindex >= m_numPeaks) {
     stringstream errmsg;
@@ -1018,7 +1018,7 @@ IPowderDiffPeakFunction_sptr LeBailFunction::getPeak(size_t peakindex) {
 
 //----------------------------------------------------------------------------------------------
 /** Get value of one specific peak's parameter
-*/
+ */
 double LeBailFunction::getPeakParameter(std::vector<int> hkl,
                                         std::string parname) const {
   // Search peak in map
@@ -1041,7 +1041,7 @@ double LeBailFunction::getPeakParameter(std::vector<int> hkl,
 
 //----------------------------------------------------------------------------------------------
 /** Get value of one specific peak's parameter
-*/
+ */
 double LeBailFunction::getPeakParameter(size_t index,
                                         std::string parname) const {
   if (index >= m_numPeaks) {
@@ -1061,9 +1061,9 @@ double LeBailFunction::getPeakParameter(size_t index,
 
 //----------------------------------------------------------------------------------------------
 /** Retrieve peak's parameter.  may be native or calculated
-* @param peak :: shared pointer to peak function
-* @param parname :: name of the peak parameter
-*/
+ * @param peak :: shared pointer to peak function
+ * @param parname :: name of the peak parameter
+ */
 double
 LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
                                       std::string parname) const {
@@ -1098,7 +1098,7 @@ LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
 
 //----------------------------------------------------------------------------------------------
 /** Get the maximum value of a peak in a given set of data points
-*/
+ */
 double LeBailFunction::getPeakMaximumValue(std::vector<int> hkl,
                                            const std::vector<double> &xvalues,
                                            size_t &ix) {
@@ -1120,6 +1120,6 @@ double LeBailFunction::getPeakMaximumValue(std::vector<int> hkl,
   return maxvalue;
 }
 
-} // namespace Mantid
 } // namespace Algorithms
 } // namespace CurveFitting
+} // namespace Mantid

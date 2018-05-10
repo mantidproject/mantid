@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_Q3D_TRANSF_H
 #define MANTID_MDALGORITHMS_Q3D_TRANSF_H
 //
-#include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfModQ.h"
 //
 namespace Mantid {
@@ -114,7 +114,7 @@ private:
                                          std::vector<coord_t> &Coord) const;
 };
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

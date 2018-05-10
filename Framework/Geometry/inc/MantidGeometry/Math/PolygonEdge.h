@@ -81,8 +81,8 @@ enum PointClassification {
   Destination /**< Point equals edge destination */
 };
 /// Helper function for classification
-MANTID_GEOMETRY_DLL PointClassification
-classify(const Kernel::V2D &pt, const PolygonEdge &edge);
+MANTID_GEOMETRY_DLL PointClassification classify(const Kernel::V2D &pt,
+                                                 const PolygonEdge &edge);
 
 /// Calculate the orientation type of one edge wrt to another
 MANTID_GEOMETRY_DLL PolygonEdge::Orientation

@@ -2,4 +2,4 @@
 
 namespace Mantid {
 namespace VATES {}
-}
+} // namespace Mantid

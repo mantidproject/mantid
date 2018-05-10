@@ -7,20 +7,20 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ConfigService.h"
 
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
-#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 
+using Mantid::Geometry::InstrumentDefinitionParser;
+using Poco::XML::AutoPtr;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::AutoPtr;
-using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid {
 namespace DataHandling {

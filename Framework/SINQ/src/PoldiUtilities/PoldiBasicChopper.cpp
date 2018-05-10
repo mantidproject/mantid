@@ -82,6 +82,6 @@ void PoldiBasicChopper::initializeVariableParameters(double rotationSpeed) {
 double PoldiBasicChopper::slitPositionToTimeFraction(double slitPosition) {
   return slitPosition * m_cycleTime;
 }
-}
+} // namespace Poldi
 // namespace Poldi
 } // namespace Mantid

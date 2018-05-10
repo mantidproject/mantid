@@ -5,8 +5,8 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 #include <vector>
 

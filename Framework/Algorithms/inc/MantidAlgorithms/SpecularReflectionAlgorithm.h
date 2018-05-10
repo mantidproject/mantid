@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONALGORITHM_H_
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONALGORITHM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

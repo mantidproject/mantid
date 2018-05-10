@@ -1,8 +1,8 @@
 #include "MantidCrystal/CombinePeaksWorkspaces.h"
+#include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {

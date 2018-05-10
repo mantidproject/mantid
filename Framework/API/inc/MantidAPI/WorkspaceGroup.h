@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <Poco/NObserver.h>
 #include <iterator>

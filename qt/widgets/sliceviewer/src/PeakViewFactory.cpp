@@ -1,14 +1,14 @@
 #include "MantidQtWidgets/SliceViewer/PeakViewFactory.h"
-#include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
-#include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
-#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
-#include "MantidQtWidgets/SliceViewer/PeakView.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
+#include "MantidQtWidgets/SliceViewer/PeakView.h"
 
 namespace {
 struct ZMinAndMax {
@@ -59,7 +59,7 @@ std::vector<Mantid::Kernel::V3D> getDirectionsForEllipticalPeak(
   }
   return directions;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -73,7 +73,7 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
                                  colorNumber),
       m_mdWS(mdWS), m_peaksWS(peaksWS),
       m_calculator(std::make_shared<
-          Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>()) {
+                   Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>()) {
   setForegroundAndBackgroundColors(colorNumber);
 }
 
@@ -199,5 +199,5 @@ void PeakViewFactory::setForegroundAndBackgroundColors(
   m_foregroundColor = peakColourEnum;
   m_backgroundColor = backColourEnum;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

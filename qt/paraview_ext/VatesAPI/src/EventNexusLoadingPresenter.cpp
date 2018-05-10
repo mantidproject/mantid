@@ -9,9 +9,9 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "MantidAPI/AlgorithmManager.h"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include <vtkUnstructuredGrid.h>
 
@@ -191,5 +191,5 @@ void EventNexusLoadingPresenter::executeLoadMetadata() {
 std::string EventNexusLoadingPresenter::getWorkspaceTypeName() {
   return m_wsTypeName;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

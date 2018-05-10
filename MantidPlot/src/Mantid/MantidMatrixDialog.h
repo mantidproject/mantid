@@ -17,9 +17,9 @@ class MantidMatrixDialog : public QDialog {
 public:
   //! Constructor
   /**
-  * @param parent :: parent widget
-  * @param fl :: window flags
-  */
+   * @param parent :: parent widget
+   * @param fl :: window flags
+   */
   MantidMatrixDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
   void setMatrix(MantidMatrix *m);
 

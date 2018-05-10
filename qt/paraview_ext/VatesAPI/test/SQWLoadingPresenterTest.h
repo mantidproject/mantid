@@ -2,18 +2,18 @@
 #define SQW_LOADING_PRESENTER_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <vtkUnstructuredGrid.h>
 #include <vtkSmartPointer.h>
+#include <vtkUnstructuredGrid.h>
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "MockObjects.h"
 #include <fstream>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidVatesAPI/SQWLoadingPresenter.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/SQWLoadingPresenter.h"
 
 using namespace Mantid::VATES;
 

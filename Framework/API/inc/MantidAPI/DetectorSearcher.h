@@ -101,7 +101,7 @@ private:
   /// instrument ray tracer object for searching in rectangular detectors
   std::unique_ptr<Geometry::InstrumentRayTracer> m_rayTracer;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

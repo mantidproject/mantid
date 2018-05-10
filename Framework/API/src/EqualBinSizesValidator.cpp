@@ -18,9 +18,9 @@ Kernel::IValidator_sptr EqualBinSizesValidator::clone() const {
 }
 
 /** Checks that the bin sizes of each histogram in the workspace are the same
-  * @param value :: [input] The workspace to test
-  * @return :: An error message (empty if no error)
-  */
+ * @param value :: [input] The workspace to test
+ * @return :: An error message (empty if no error)
+ */
 std::string
 EqualBinSizesValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (!value)

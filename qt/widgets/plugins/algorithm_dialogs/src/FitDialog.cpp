@@ -6,19 +6,19 @@
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
-#include <QSpinBox>
-#include <QUrl>
 #include <QDesktopWidget>
 #include <QFileInfo>
+#include <QSpinBox>
+#include <QUrl>
 
 // Mantid
-#include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidKernel/Property.h"
 
 #include <limits>
 
@@ -324,8 +324,8 @@ void FitDialog::initLayout() {
 }
 
 /**
-* Save the input after OK is clicked
-*/
+ * Save the input after OK is clicked
+ */
 void FitDialog::saveInput() {
   storePropertyValue("DomainType", getDomainTypeString());
   QString funStr = m_form.function->getFunctionString();
@@ -360,9 +360,9 @@ void FitDialog::parseInput() {
 }
 
 /**
-* Tie static widgets to their properties
-* @param readHistory :: If true then the history will be re read.
-*/
+ * Tie static widgets to their properties
+ * @param readHistory :: If true then the history will be re read.
+ */
 void FitDialog::tieStaticWidgets(const bool readHistory) {
   QString funValue = getStoredPropertyValue("Function");
   if (!funValue.isEmpty()) {
@@ -487,9 +487,9 @@ void FitDialog::functionChanged() {
 }
 
 /**
-  * Return property value stored in history
-  * @param propName :: A property name
-  */
+ * Return property value stored in history
+ * @param propName :: A property name
+ */
 QString FitDialog::getStoredPropertyValue(const QString &propName) const {
   // Get the value from either the previous input store or from Python argument
   QString value("");
@@ -541,7 +541,7 @@ bool isFunctionMD(Mantid::API::IFunction_sptr fun) {
   }
   return false;
 }
-}
+} // namespace
 
 /**
  * Is the function MD?
@@ -572,5 +572,5 @@ QString FitDialog::getDomainTypeString() const {
   return m_form.cbDomainType->currentText();
 }
 
-} // CustomDialogs
-} // MantidQt
+} // namespace CustomDialogs
+} // namespace MantidQt

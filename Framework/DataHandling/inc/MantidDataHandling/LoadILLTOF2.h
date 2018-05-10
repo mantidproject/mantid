@@ -2,9 +2,9 @@
 #define MANTID_DATAHANDLING_LOADILLTOF2_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {

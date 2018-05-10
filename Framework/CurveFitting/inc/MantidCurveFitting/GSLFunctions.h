@@ -1,14 +1,14 @@
 #ifndef MANTID_CURVEFITTING_GSLFUNCTIONS_H_
 #define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
 
-#include <gsl/gsl_statistics.h>
-#include <gsl/gsl_multifit_nlin.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_blas.h>
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ICostFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/GSLJacobian.h"
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
+#include <gsl/gsl_statistics.h>
 
 namespace Mantid {
 namespace CurveFitting {

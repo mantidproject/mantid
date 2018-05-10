@@ -22,8 +22,8 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include "MantidKernel/System.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include <boost/python/detail/prefix.hpp>
 
@@ -56,8 +56,8 @@ struct DLLExport MatrixToNDArray {
     return policy::createFromArray(&(cmatrix[0][0]), 2, dims);
   }
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /// MANTID_PYTHONINTERFACE_MATRIXTONDARRAY_H_

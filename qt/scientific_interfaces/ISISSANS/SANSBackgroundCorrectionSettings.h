@@ -1,8 +1,8 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONSETTINGS_H_
 #define MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONSETTINGS_H_
 
-#include "MantidKernel/System.h"
 #include "DllConfig.h"
+#include "MantidKernel/System.h"
 
 #include <QString>
 #include <boost/optional.hpp>

@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidCurveFitting/ComplexVector.h"
 #include "MantidCurveFitting/FortranVector.h"
 #include "MantidCurveFitting/GSLVector.h"
-#include "MantidCurveFitting/ComplexVector.h"
 
-using Mantid::CurveFitting::FortranVector;
 using Mantid::CurveFitting::ComplexType;
+using Mantid::CurveFitting::FortranVector;
 using FortranDoubleVector = FortranVector<Mantid::CurveFitting::GSLVector>;
 using FortranComplexVector = FortranVector<Mantid::CurveFitting::ComplexVector>;
 

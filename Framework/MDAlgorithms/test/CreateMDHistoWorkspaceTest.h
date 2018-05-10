@@ -1,13 +1,13 @@
 #ifndef MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;

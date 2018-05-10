@@ -15,9 +15,9 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
@@ -28,11 +28,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 
 #include "MantidTypes/SpectrumDefinition.h"
@@ -61,7 +61,7 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
-}
+} // namespace
 
 /** Constructor
  */
@@ -181,11 +181,11 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "DetectorInfo and number of detectors in "
                              "instrument");
 }
-}
+} // namespace
 
 /** Set the instrument
-* @param instr :: Shared pointer to an instrument.
-*/
+ * @param instr :: Shared pointer to an instrument.
+ */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
 
@@ -210,10 +210,10 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
-*workspace
-*
-*  @return The instrument class
-*/
+ *workspace
+ *
+ *  @return The instrument class
+ */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   populateIfNotLoaded();
   checkDetectorInfoSize(*sptr_instrument, detectorInfo());
@@ -222,24 +222,24 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
 }
 
 /**  Returns a new copy of the instrument parameters
-*    @return a (new) copy of the instruments parameter map
-*/
+ *    @return a (new) copy of the instruments parameter map
+ */
 Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
   populateIfNotLoaded();
   return *m_parmap;
 }
 
 /**  Returns a const reference to the instrument parameters.
-*    @return a const reference to the instrument ParameterMap.
-*/
+ *    @return a const reference to the instrument ParameterMap.
+ */
 const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
   populateIfNotLoaded();
   return *m_parmap;
 }
 
 /**  Returns a const reference to the instrument parameters.
-*    @return a const reference to the instrument ParameterMap.
-*/
+ *    @return a const reference to the instrument ParameterMap.
+ */
 const Geometry::ParameterMap &
 ExperimentInfo::constInstrumentParameters() const {
   populateIfNotLoaded();
@@ -285,7 +285,7 @@ struct ParameterValue {
   const Run &runData;
 };
 ///@endcond
-}
+} // namespace
 
 namespace {
 bool isPositionParameter(const std::string &name) {
@@ -352,14 +352,14 @@ void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo,
   applyRectangularDetectorScaleToComponentInfo(
       componentInfo, component->getComponentID(), ScaleX, ScaleY);
 }
-}
+} // namespace
 
 /** Add parameters to the instrument parameter map that are defined in
-* instrument
-*   definition file or parameter file, which may contain parameters that require
-*   logfile data to be available. Logs must be loaded before running this
-* method.
-*/
+ * instrument
+ *   definition file or parameter file, which may contain parameters that
+ * require logfile data to be available. Logs must be loaded before running this
+ * method.
+ */
 void ExperimentInfo::populateInstrumentParameters() {
   populateIfNotLoaded();
 
@@ -597,36 +597,36 @@ ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
 }
 
 /** Get a constant reference to the Sample associated with this workspace.
-* @return const reference to Sample object
-*/
+ * @return const reference to Sample object
+ */
 const Sample &ExperimentInfo::sample() const {
   populateIfNotLoaded();
   return *m_sample;
 }
 
 /** Get a reference to the Sample associated with this workspace.
-*  This non-const method will copy the sample if it is shared between
-*  more than one workspace, and the reference returned will be to the copy.
-* @return reference to sample object
-*/
+ *  This non-const method will copy the sample if it is shared between
+ *  more than one workspace, and the reference returned will be to the copy.
+ * @return reference to sample object
+ */
 Sample &ExperimentInfo::mutableSample() {
   populateIfNotLoaded();
   return m_sample.access();
 }
 
 /** Get a constant reference to the Run object associated with this workspace.
-* @return const reference to run object
-*/
+ * @return const reference to run object
+ */
 const Run &ExperimentInfo::run() const {
   populateIfNotLoaded();
   return *m_run;
 }
 
 /** Get a reference to the Run object associated with this workspace.
-*  This non-const method will copy the Run object if it is shared between
-*  more than one workspace, and the reference returned will be to the copy.
-* @return reference to Run object
-*/
+ *  This non-const method will copy the Run object if it is shared between
+ *  more than one workspace, and the reference returned will be to the copy.
+ * @return reference to Run object
+ */
 Run &ExperimentInfo::mutableRun() {
   populateIfNotLoaded();
   return m_run.access();
@@ -734,9 +734,8 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   std::string emodeStr;
   if (run().hasProperty(emodeTag)) {
     emodeStr = run().getPropertyValueAsType<std::string>(emodeTag);
-  } else if (sptr_instrument &&
-             constInstrumentParameters().contains(sptr_instrument.get(),
-                                                  emodeTag)) {
+  } else if (sptr_instrument && constInstrumentParameters().contains(
+                                    sptr_instrument.get(), emodeTag)) {
     Geometry::Parameter_sptr param =
         constInstrumentParameters().get(sptr_instrument.get(), emodeTag);
     emodeStr = param->asString();
@@ -850,11 +849,11 @@ class myContentHandler : public Poco::XML::ContentHandler {
 };
 
 /** Return from an IDF the values of the valid-from and valid-to attributes
-*
-*  @param IDFfilename :: Full path of an IDF
-*  @param[out] outValidFrom :: Used to return valid-from date
-*  @param[out] outValidTo :: Used to return valid-to date
-*/
+ *
+ *  @param IDFfilename :: Full path of an IDF
+ *  @param[out] outValidFrom :: Used to return valid-from date
+ *  @param[out] outValidTo :: Used to return valid-to date
+ */
 void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
                                     std::string &outValidFrom,
                                     std::string &outValidTo) {
@@ -875,13 +874,13 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
 }
 
 /** Return workspace start date as an ISO 8601 string. If this info not stored
-*in workspace the
-*   method returns current date. This date is used for example to retrieve the
-*instrument file.
-*
-*  @return workspace start date as a string (current time if start date not
-*available)
-*/
+ *in workspace the
+ *   method returns current date. This date is used for example to retrieve the
+ *instrument file.
+ *
+ *  @return workspace start date as a string (current time if start date not
+ *available)
+ */
 std::string ExperimentInfo::getWorkspaceStartDate() const {
   populateIfNotLoaded();
   std::string date;
@@ -930,24 +929,24 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
 }
 
 /** A given instrument may have multiple IDFs associated with it. This method
-*return an identifier which identify a given IDF for a given instrument.
-* An IDF filename is required to be of the form IDFname + _Definition +
-*Identifier + .xml, the identifier then is the part of a filename that
-*identifies the IDF valid at a given date.
-*
-*  If several IDF files are valid at the given date the file with the most
-*recent from date is selected. If no such files are found the file with the
-*latest from date is selected.
-*
-*  If no file is found for the given instrument, an empty string is returned.
-*
-*  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
-*  @param date :: ISO 8601 date
-*  @return full path of IDF
-*
-* @throws Exception::NotFoundError If no valid instrument definition filename is
-* found
-*/
+ *return an identifier which identify a given IDF for a given instrument.
+ * An IDF filename is required to be of the form IDFname + _Definition +
+ *Identifier + .xml, the identifier then is the part of a filename that
+ *identifies the IDF valid at a given date.
+ *
+ *  If several IDF files are valid at the given date the file with the most
+ *recent from date is selected. If no such files are found the file with the
+ *latest from date is selected.
+ *
+ *  If no file is found for the given instrument, an empty string is returned.
+ *
+ *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+ *  @param date :: ISO 8601 date
+ *  @return full path of IDF
+ *
+ * @throws Exception::NotFoundError If no valid instrument definition filename
+ *is found
+ */
 std::string
 ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
                                       const std::string &date) {

@@ -41,5 +41,5 @@ void DeleteWorkspaces::exec() {
     prog.report();
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

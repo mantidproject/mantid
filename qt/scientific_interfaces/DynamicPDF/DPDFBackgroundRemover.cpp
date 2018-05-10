@@ -2,15 +2,15 @@
 // Main Module Header
 #include "DPDFBackgroundRemover.h"
 // Mantid Headers from the same project
-#include "SliceSelector.h"
-#include "DPDFInputDataControl.h"
 #include "DPDFDisplayControl.h"
 #include "DPDFFitControl.h"
 #include "DPDFFourierTransform.h"
+#include "DPDFInputDataControl.h"
+#include "SliceSelector.h"
 // Mantid headers from other projects
+#include "MantidKernel/UsageService.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidKernel/UsageService.h"
 // 3rd party library headers
 // System includes
 
@@ -119,6 +119,6 @@ void BackgroundRemover::summonSliceSelector() {
   m_sliceSelector->raise();          // raise on top
   m_sliceSelector->activateWindow(); // set as active window
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

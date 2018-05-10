@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILETEST_H_
 #define MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/GramCharlierComptonProfile.h"
+#include <cxxtest/TestSuite.h>
 
 #include "ComptonProfileTestHelpers.h"
 

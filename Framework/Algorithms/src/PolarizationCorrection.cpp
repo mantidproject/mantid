@@ -4,10 +4,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/Instrument.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -103,7 +103,7 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
 }
 
 using VecDouble = std::vector<double>;
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {

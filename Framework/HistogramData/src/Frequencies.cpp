@@ -1,6 +1,6 @@
+#include "MantidHistogramData/Frequencies.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
-#include "MantidHistogramData/Frequencies.h"
 
 namespace Mantid {
 namespace HistogramData {

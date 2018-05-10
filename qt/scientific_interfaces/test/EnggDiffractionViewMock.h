@@ -1,8 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 
-#include "MantidKernel/WarningSuppressions.h"
 #include "../EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <gmock/gmock.h>
 

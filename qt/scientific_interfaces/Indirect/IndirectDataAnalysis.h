@@ -86,7 +86,8 @@ private:
 
   /// Change Observer for ConfigService (monitors user directories)
   Poco::NObserver<IndirectDataAnalysis,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;

@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADDSPACEMAP_H_
 #define MANTID_DATAHANDLING_LOADDSPACEMAP_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,7 +51,7 @@ private:
       Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LOADDSPACEMAP_H_ */

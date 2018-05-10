@@ -81,8 +81,8 @@ protected:
   virtual std::istream &
   httpPost(const std::string &path,
            const MantidWebServiceAPIHelper::PostDataMap &postData,
-           const MantidWebServiceAPIHelper::PostDataMap &
-               fileData = MantidWebServiceAPIHelper::PostDataMap(),
+           const MantidWebServiceAPIHelper::PostDataMap &fileData =
+               MantidWebServiceAPIHelper::PostDataMap(),
            const std::string &username = "",
            const std::string &password = "") const {
     return m_helper.httpPost(path, postData, fileData, username, password);

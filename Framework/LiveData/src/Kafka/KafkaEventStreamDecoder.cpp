@@ -18,8 +18,8 @@ GCC_DIAG_OFF(conversion)
 #include "private/Schema/ba57_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
-#include "private/Schema/is84_isis_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
+#include "private/Schema/is84_isis_events_generated.h"
 GCC_DIAG_ON(conversion)
 
 using namespace Mantid::Types;
@@ -61,12 +61,12 @@ void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
     mutableRunInfo.addLogData(property);
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace LiveData {
-using Types::Event::TofEvent;
 using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -580,7 +580,8 @@ void KafkaEventStreamDecoder::initLocalCaches() {
     std::ostringstream os;
     os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec=" << nspec << ", ndet=" << nudet;
+          "found nspec="
+       << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
   // Create buffer

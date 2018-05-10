@@ -207,5 +207,5 @@ void PointByPointVCorrection::check_masks(
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -72,7 +72,7 @@ template <typename ArgType> struct ToWeakPtrImpl {
 // Error handler
 //-----------------------------------------------------------------------
 template <typename T> struct ToWeakPtr_Requires_Shared_Ptr_Return_Value {};
-} // ends anonymous namespace
+} // namespace
 
 /**
  * Implements the ToWeakPtr policy as required by boost.python
@@ -86,8 +86,8 @@ struct ToWeakPtr {
   };
 };
 
-} // ends Policies namespace
-}
-} // ends Mantid::PythonInterface namespaces
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_REMOVECONST_H_REMOVECONST_H_ */

@@ -81,7 +81,7 @@ private:
   double m_wavelength;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_ConvertToConstantL2_H_*/

@@ -107,7 +107,7 @@ private:
   void setupUI();
 };
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEWQTWIDGET_H_

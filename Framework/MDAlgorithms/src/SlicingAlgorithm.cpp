@@ -1,16 +1,16 @@
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
-#include "MantidDataObjects/CoordTransformAligned.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidMDAlgorithms/SlicingAlgorithm.h"
-#include "MantidAPI/Run.h"
 
 #include <boost/regex.hpp>
 
@@ -1004,5 +1004,5 @@ void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame,
   // else leave the unit the same as the input workspace
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

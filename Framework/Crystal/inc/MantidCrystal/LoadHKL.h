@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_LOADHKL_H_
 #define MANTID_CRYSTAL_LOADHKL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_poly.h>
 
@@ -42,7 +42,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_LOADHKL_H_ */

@@ -34,7 +34,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 
 /**
  * Base class for Workspace Qwt data types

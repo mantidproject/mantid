@@ -4,12 +4,12 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -218,7 +218,7 @@ void VesuvioCalculateMS::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp *nmasses << " values, however, only "
+       << nExptdAtomProp * nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
@@ -504,11 +504,11 @@ double VesuvioCalculateMS::calculateCounts(
 }
 
 /**
-  * Sample from the moderator assuming it can be seen
-  * as a cylindrical ring with inner and outer radius
-  * @param l1 Src-sample distance (m)
-  * @returns Position on the moderator of the generated point
-  */
+ * Sample from the moderator assuming it can be seen
+ * as a cylindrical ring with inner and outer radius
+ * @param l1 Src-sample distance (m)
+ * @returns Position on the moderator of the generated point
+ */
 V3D VesuvioCalculateMS::generateSrcPos(const double l1) const {
   double radius(-1.0), widthPos(0.0), heightPos(0.0);
   do {

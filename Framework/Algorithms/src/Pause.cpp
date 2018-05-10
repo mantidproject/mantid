@@ -67,5 +67,5 @@ void Pause::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

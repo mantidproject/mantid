@@ -1,6 +1,6 @@
 #include "MantidGeometry/Crystal/GroupTransformation.h"
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidGeometry/Crystal/MatrixVectorPairParser.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 #include <functional>
 

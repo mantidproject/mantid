@@ -65,7 +65,7 @@ void BoxControllerDummyIO::setDataType(const size_t blockSize,
  *in save/load operations
  *@return typeName  -- the name of the event used in the operations. The name
  *itself defines the size and the format of the event
-*/
+ */
 
 void BoxControllerDummyIO::getDataType(size_t &CoordSize,
                                        std::string &typeName) const {
@@ -80,7 +80,7 @@ void BoxControllerDummyIO::getDataType(size_t &CoordSize,
  *with 100 floats equal 2.
  *                 othewise if assumed to be new and size 0
  *@param mode  opening mode (read ("r" ) or read/write "w")
-*/
+ */
 bool BoxControllerDummyIO::openFile(const std::string &fileName,
                                     const std::string &mode) {
   m_fileName = fileName;
@@ -163,4 +163,4 @@ void BoxControllerDummyIO::loadBlock(std::vector<float> &Block,
 }
 
 BoxControllerDummyIO::~BoxControllerDummyIO() { this->closeFile(); }
-}
+} // namespace MantidTestHelpers

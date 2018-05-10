@@ -7,9 +7,9 @@
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "MantidAPI/AlgorithmManager.h"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid {
@@ -148,5 +148,5 @@ Getter for the workspace type name.
 std::string MDEWEventNexusLoadingPresenter::getWorkspaceTypeName() {
   return m_wsTypeName;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

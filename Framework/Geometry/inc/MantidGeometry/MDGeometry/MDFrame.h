@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 
 #include "MantidKernel/MDUnit.h"
-#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/UnitLabel.h"
 #include <memory>
 
 namespace Mantid {

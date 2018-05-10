@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::SplineInterpolation;
 using namespace Mantid::API;

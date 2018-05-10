@@ -39,7 +39,7 @@ private:
                                 std::vector<double> &maxVal);
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE3_H_ */

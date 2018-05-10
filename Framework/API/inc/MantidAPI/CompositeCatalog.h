@@ -73,6 +73,6 @@ public:
 private:
   std::list<ICatalog_sptr> m_catalogs;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 #endif /* MANTID_ICAT_COMPOSITECATALOG_H_ */

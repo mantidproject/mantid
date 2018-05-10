@@ -103,6 +103,6 @@ public:
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H */

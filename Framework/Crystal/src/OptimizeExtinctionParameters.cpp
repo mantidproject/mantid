@@ -1,14 +1,14 @@
 #include "MantidCrystal/OptimizeExtinctionParameters.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VectorHelper.h"
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -220,5 +220,5 @@ double OptimizeExtinctionParameters::fitMosaic(
   return Chisq;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

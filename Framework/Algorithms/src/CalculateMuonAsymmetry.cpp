@@ -11,8 +11,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -82,10 +82,10 @@ void CalculateMuonAsymmetry::init() {
                   " to estimate asymmetry");
 }
 /*
-* Validate the input parameters
-* @returns map with keys corresponding to properties with errors and values
-* containing the error messages.
-*/
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
 std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
@@ -225,7 +225,7 @@ void CalculateMuonAsymmetry::exec() {
  * @param startX :: the smallest x value for the fit
  * @param endX :: the largest x value for the fit
  * @return normalisation constant
-*/
+ */
 
 double CalculateMuonAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
                                                int wsIndex,
@@ -278,5 +278,5 @@ double CalculateMuonAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
   return retVal;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

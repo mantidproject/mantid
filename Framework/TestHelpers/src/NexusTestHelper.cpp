@@ -4,20 +4,20 @@
  *  This file MAY NOT be modified to use anything from a package other than
  *Kernel.
  *********************************************************************************/
-#include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 
 //----------------------------------------------------------------------------------------------
 /** Constructor.
-   * */
+ * */
 NexusTestHelper::NexusTestHelper(bool deleteFile)
     : file(nullptr), deleteFile(deleteFile) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor.
-   * Close the NXS file and delete it.
-   */
+ * Close the NXS file and delete it.
+ */
 NexusTestHelper::~NexusTestHelper() {
   if (!file)
     return;
@@ -31,8 +31,8 @@ NexusTestHelper::~NexusTestHelper() {
 
 //----------------------------------------------------------------------------------------------
 /** Creates a NXS file with an entry, for use in a test
-   * @param barefilename :: simple filename (no path) to save to.
-   * */
+ * @param barefilename :: simple filename (no path) to save to.
+ * */
 void NexusTestHelper::createFile(std::string barefilename) {
   filename = (Mantid::Kernel::ConfigService::Instance().getString(
                   "defaultsave.directory") +

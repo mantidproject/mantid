@@ -65,6 +65,6 @@ private:
 };
 
 } // end namespace DataHandling
-} // end namespace Mandid
+} // namespace Mantid
 
 #endif /* DATAHANDLING_LOAD_SHAPE_H_ */

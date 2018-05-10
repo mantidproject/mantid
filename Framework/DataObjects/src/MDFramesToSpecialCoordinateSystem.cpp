@@ -12,8 +12,8 @@ namespace DataObjects {
  * @returns either a special coordinate or an empty optional
  */
 boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
-    MDFramesToSpecialCoordinateSystem::
-    operator()(const Mantid::API::IMDWorkspace *workspace) const {
+MDFramesToSpecialCoordinateSystem::
+operator()(const Mantid::API::IMDWorkspace *workspace) const {
   // Make sure that the workspaces are either an MDHisto or MDEvent workspaces
   if (!dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace) &&
       !dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(workspace)) {
@@ -82,9 +82,9 @@ void MDFramesToSpecialCoordinateSystem::checkQCompatibility(
 }
 
 /* Checks if an MDFrame is an UnknownFrame
-* @param dimension: a dimension
-* @returns true if the MDFrame is of UnknownFrame type.
-*/
+ * @param dimension: a dimension
+ * @returns true if the MDFrame is of UnknownFrame type.
+ */
 bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
     Mantid::Geometry::IMDDimension_const_sptr dimension) const {
   Mantid::Geometry::MDFrame_uptr replica(dimension->getMDFrame().clone());
@@ -94,5 +94,5 @@ bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
   }
   return isUnknown;
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

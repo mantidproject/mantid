@@ -4,8 +4,8 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
-using Mantid::PythonInterface::std_vector_exporter;
 using Mantid::PythonInterface::std_set_exporter;
+using Mantid::PythonInterface::std_vector_exporter;
 
 void exportStlContainers() {
   // Export some frequently used stl containers

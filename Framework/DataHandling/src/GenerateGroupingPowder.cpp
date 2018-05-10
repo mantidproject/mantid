@@ -1,16 +1,15 @@
 #include "MantidDataHandling/GenerateGroupingPowder.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
@@ -161,7 +160,7 @@ void GenerateGroupingPowder::exec() {
       outPAR_file.width(10);
       outPAR_file << 0.;
       outPAR_file.width(10);
-      outPAR_file << step *Geometry::deg2rad *rAverage.at(i) /
+      outPAR_file << step * Geometry::deg2rad * rAverage.at(i) /
                          static_cast<double>(gSize);
       outPAR_file.width(10);
       outPAR_file << 0.01;
@@ -174,5 +173,5 @@ void GenerateGroupingPowder::exec() {
   outPAR_file.close();
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

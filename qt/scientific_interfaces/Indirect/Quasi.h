@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_QUASI_H_
 #define MANTIDQTCUSTOMINTERFACES_QUASI_H_
 
-#include "ui_Quasi.h"
 #include "IndirectBayesTab.h"
+#include "ui_Quasi.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

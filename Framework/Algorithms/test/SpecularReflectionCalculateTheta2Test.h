@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "SpecularReflectionAlgorithmTest.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "SpecularReflectionAlgorithmTest.h"
 
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta2.h"
 
@@ -14,8 +14,8 @@ using namespace Mantid::API;
 // clang-format off
 class SpecularReflectionCalculateTheta2Test: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
-      // clang-format on
-      {
+// clang-format on
+{
 
 private:
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const {

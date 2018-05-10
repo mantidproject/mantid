@@ -8,8 +8,8 @@
 #include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
@@ -69,7 +69,7 @@ void run_parallel_WorkspaceIndexRange(const Parallel::Communicator &comm) {
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
   }
 }
-}
+} // namespace
 
 class ExtractSpectraTest : public CxxTest::TestSuite {
 public:

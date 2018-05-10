@@ -20,5 +20,5 @@ void MDLoadingViewSimple::setLoadInMemory(bool loadInMemory) {
 }
 
 bool MDLoadingViewSimple::getLoadInMemory() const { return m_loadInMemory; }
-}
-}
+} // namespace VATES
+} // namespace Mantid

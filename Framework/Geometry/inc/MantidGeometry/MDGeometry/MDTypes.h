@@ -76,6 +76,6 @@ using signal_t = double;
 #define UNDEF_SIZET std::numeric_limits<size_t>::max()
 #define UNDEF_COORDT std::numeric_limits<coord_t>::quiet_NaN()
 #define UNDEF_UINT64 std::numeric_limits<uint64_t>::max()
-}
+} // namespace Mantid
 
 #endif // MANTID_GEOMETRY_MDTYPES_H_

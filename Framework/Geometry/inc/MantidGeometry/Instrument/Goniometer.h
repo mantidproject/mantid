@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_GONIOMETER_H_
 #define MANTID_GEOMETRY_GONIOMETER_H_
 
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Crystal/AngleUnits.h"
-#include <string>
 #include <nexus/NeXusFile.hpp>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {

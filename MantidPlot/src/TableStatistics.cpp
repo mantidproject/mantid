@@ -27,19 +27,19 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "ApplicationWindow.h"
 #include "TableStatistics.h"
+#include "ApplicationWindow.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
-#include <QList>
 #include <QHeaderView>
+#include <QList>
 
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_statistics.h>
 #include <boost/algorithm/string.hpp>
+#include <gsl/gsl_statistics.h>
+#include <gsl/gsl_vector.h>
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(TableStatistics)

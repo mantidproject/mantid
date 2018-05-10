@@ -1,18 +1,18 @@
-#include <sstream>
 #include <cfloat>
+#include <sstream>
 
-#include <QVector>
-#include <QString>
 #include <QImage>
+#include <QString>
+#include <QVector>
 #include <qwt_scale_engine.h>
 
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidQtWidgets/SpectrumViewer/SliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
 
 namespace MantidQt {

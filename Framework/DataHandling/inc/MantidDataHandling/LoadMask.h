@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADMASK_H_
 #define MANTID_DATAHANDLING_LOADMASK_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/System.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -14,8 +14,8 @@ namespace Poco {
 namespace XML {
 class Document;
 class Element;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {

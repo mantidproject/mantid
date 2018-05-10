@@ -7,8 +7,8 @@
 #include "MantidKernel/System.h"
 
 #include <QObject>
-#include <qwt_data.h>
 #include <boost/optional.hpp>
+#include <qwt_data.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {

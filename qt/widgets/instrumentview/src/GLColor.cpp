@@ -32,17 +32,17 @@ GLColor::GLColor(int r, int g, int b, int a) {
 }
 
 /**
-* (virtual) Destructor
-*/
+ * (virtual) Destructor
+ */
 GLColor::~GLColor() {}
 
 /**
-* This method sets the Red, Green, Blue, Alpha values of the color
-* @param red :: Red component of color value between [0 - 1]
-* @param green :: Green Componenent of color value between [0 - 1]
-* @param blue :: Blue Componenent of color value between [0 - 1]
-* @param alpha :: Alpha componenet of color value between [0 - 1]
-*/
+ * This method sets the Red, Green, Blue, Alpha values of the color
+ * @param red :: Red component of color value between [0 - 1]
+ * @param green :: Green Componenent of color value between [0 - 1]
+ * @param blue :: Blue Componenent of color value between [0 - 1]
+ * @param alpha :: Alpha componenet of color value between [0 - 1]
+ */
 void GLColor::set(float red, float green, float blue, float alpha) {
   m_rgba[0] = (unsigned char)(red * 255);
   m_rgba[1] = (unsigned char)(green * 255);
@@ -51,12 +51,12 @@ void GLColor::set(float red, float green, float blue, float alpha) {
 }
 
 /**
-* This method sets the Red, Green, Blue, Alpha values of the color
-* @param red :: Red component of color value between [0 - 1]
-* @param green :: Green Componenent of color value between [0 - 1]
-* @param blue :: Blue Componenent of color value between [0 - 1]
-* @param alpha :: Alpha componenet of color value between [0 - 1]
-*/
+ * This method sets the Red, Green, Blue, Alpha values of the color
+ * @param red :: Red component of color value between [0 - 1]
+ * @param green :: Green Componenent of color value between [0 - 1]
+ * @param blue :: Blue Componenent of color value between [0 - 1]
+ * @param alpha :: Alpha componenet of color value between [0 - 1]
+ */
 void GLColor::get(float &red, float &green, float &blue, float &alpha) const {
   red = float(m_rgba[0]) / 255;
   green = float(m_rgba[1]) / 255;
@@ -71,10 +71,11 @@ void GLColor::get(unsigned char &r, unsigned char &g, unsigned char &b) const {
 }
 
 /**
-* This method sets copies red,green, and blue color components into a provided
-* buffer
-* @param c :: Pointer to an array of unsigned chars big enough to accept 3 bytes
-*/
+ * This method sets copies red,green, and blue color components into a provided
+ * buffer
+ * @param c :: Pointer to an array of unsigned chars big enough to accept 3
+ * bytes
+ */
 void GLColor::getUB3(unsigned char *c) const {
   *c = m_rgba[0];
   *(c + 1) = m_rgba[1];
@@ -82,8 +83,8 @@ void GLColor::getUB3(unsigned char *c) const {
 }
 
 /**
-* This method executes opengl color commands based on the method provided.
-*/
+ * This method executes opengl color commands based on the method provided.
+ */
 void GLColor::paint() const { glColor4ubv(m_rgba); }
 
 std::ostream &operator<<(std::ostream &ostr, const GLColor &c) {
@@ -91,5 +92,5 @@ std::ostream &operator<<(std::ostream &ostr, const GLColor &c) {
        << c.alpha() << ']';
   return ostr;
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

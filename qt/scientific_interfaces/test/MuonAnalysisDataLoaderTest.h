@@ -5,6 +5,7 @@
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
+#include "../Muon/MuonAnalysisDataLoader.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -14,14 +15,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "../Muon/MuonAnalysisDataLoader.h"
 
-using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
-using MantidQt::CustomInterfaces::Muon::DeadTimesType;
-using MantidQt::CustomInterfaces::Muon::LoadResult;
-using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
-using MantidQt::CustomInterfaces::Muon::PlotType;
-using MantidQt::CustomInterfaces::Muon::ItemType;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::TableRow;
 using Mantid::API::Workspace;
@@ -29,6 +23,12 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 using Mantid::DataObjects::TableWorkspace;
 using Mantid::DataObjects::TableWorkspace_sptr;
+using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using MantidQt::CustomInterfaces::Muon::ItemType;
+using MantidQt::CustomInterfaces::Muon::LoadResult;
+using MantidQt::CustomInterfaces::Muon::PlotType;
+using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 
 /// Inherits from class under test so that protected methods can be tested
 class TestDataLoader : public MuonAnalysisDataLoader {

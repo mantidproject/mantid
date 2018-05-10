@@ -7,8 +7,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -47,18 +47,19 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty("NormalizationIn", 0.0, "If this value is non-zero then this "
-                                          "is used for the normalization, "
-                                          "instead of being estimated.");
+  declareProperty("NormalizationIn", 0.0,
+                  "If this value is non-zero then this "
+                  "is used for the normalization, "
+                  "instead of being estimated.");
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
       "NormalizationConstant", Direction::Output));
 }
 
 /*
-* Validate the input parameters
-* @returns map with keys corresponding to properties with errors and values
-* containing the error messages.
-*/
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
 std::map<std::string, std::string>
 EstimateMuonAsymmetryFromCounts::validateInputs() {
   // create the map
@@ -168,5 +169,5 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 
   setProperty("OutputWorkspace", outputWS);
 }
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

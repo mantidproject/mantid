@@ -78,7 +78,7 @@ private:
 using SampleEnvironment_uptr = std::unique_ptr<SampleEnvironment>;
 // Typedef a unique_ptr to const
 using SampleEnvironment_const_uptr = std::unique_ptr<const SampleEnvironment>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif // MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_

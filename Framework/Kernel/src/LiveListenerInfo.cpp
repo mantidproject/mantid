@@ -15,7 +15,7 @@ namespace Kernel {
 namespace {
 // static logger object
 Logger g_log("InstrumentInfo");
-}
+} // namespace
 
 /**
  * Construct from Facility Info XML.

@@ -61,7 +61,7 @@ void run_all_to_all(const Communicator &comm) {
     TS_ASSERT_EQUALS(result[i], 1000 * i + comm.rank());
   }
 }
-}
+} // namespace
 
 class CollectivesTest : public CxxTest::TestSuite {
 public:

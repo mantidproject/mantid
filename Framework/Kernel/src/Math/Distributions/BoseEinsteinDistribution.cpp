@@ -79,8 +79,8 @@ namespace {
  * @param value :: Appends string Value=value after
  */
 void throwDomainError(const std::string &msg, const double value) {
-  throw std::domain_error(msg + " Value=" +
-                          boost::lexical_cast<std::string>(value));
+  throw std::domain_error(msg +
+                          " Value=" + boost::lexical_cast<std::string>(value));
 }
 
 /**
@@ -103,16 +103,15 @@ double yOver1MinusExpY(const double y) {
     const double by2(0.5), by6(1.0 / 6.0), by60(1.0 / 60.0), by42(1.0 / 42.0),
         by40(1.0 / 40.0);
     const double ysqr = y * y;
-    return 1.0 +
-           by2 * y *
-               (1.0 +
-                by6 * y *
-                    (1.0 -
-                     by60 * ysqr * (1.0 - by42 * ysqr * (1.0 - by40 * ysqr))));
+    return 1.0 + by2 * y *
+                     (1.0 + by6 * y *
+                                (1.0 - by60 * ysqr *
+                                           (1.0 - by42 * ysqr *
+                                                      (1.0 - by40 * ysqr))));
   }
 }
 } // namespace
 
-} // Math
-} // Kernel
-} // Mantid
+} // namespace Math
+} // namespace Kernel
+} // namespace Mantid

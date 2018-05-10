@@ -50,7 +50,7 @@ void AlgorithmObserver::observeProgress(IAlgorithm_const_sptr alg) {
 }
 
 /**   Connect to AlgorithmManager and observe its starting notifications
-*/
+ */
 void AlgorithmObserver::observeStarting() {
   AlgorithmManager::Instance().notificationCenter.addObserver(
       m_startingObserver);

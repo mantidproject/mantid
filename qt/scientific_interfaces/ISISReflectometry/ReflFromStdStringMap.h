@@ -35,9 +35,9 @@ namespace CustomInterfaces {
 std::map<QString, QString> MANTIDQT_ISISREFLECTOMETRY_DLL
 fromStdStringMap(std::map<std::string, std::string> const &inMap);
 
-std::vector<std::map<QString, QString>> MANTIDQT_ISISREFLECTOMETRY_DLL
-fromStdStringVectorMap(
-    std::vector<std::map<std::string, std::string>> const &inVectorMap);
-}
-}
+std::vector<std::map<QString, QString>>
+    MANTIDQT_ISISREFLECTOMETRY_DLL fromStdStringVectorMap(
+        std::vector<std::map<std::string, std::string>> const &inVectorMap);
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /*MANTID_CUSTOMINTERFACES_REFLFROMSTDSTRINGMAP_H*/

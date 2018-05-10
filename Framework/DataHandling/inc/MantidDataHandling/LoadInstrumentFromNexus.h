@@ -12,7 +12,7 @@ namespace Geometry {
 class CompAssembly;
 class Component;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /** @class LoadInstrumentFromNexus LoadInstrumentFromNexus.h

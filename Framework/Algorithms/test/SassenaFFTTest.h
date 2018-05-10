@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 #define MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include "MantidAlgorithms/SassenaFFT.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/SassenaFFT.h"
+#include "MantidDataHandling/SaveAscii.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 
@@ -60,8 +60,8 @@ public:
   }
 
   /* FFT of a real symmetric Gaussian with detailed balance condition
-  *
-  */
+   *
+   */
   void test_DetailedBalanceCondition() {
     const double T(100);
     // params defines (height,stdev) values for fqt.Re, fqt.Im, and fqt0,

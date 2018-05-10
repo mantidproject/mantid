@@ -1,8 +1,8 @@
 #ifndef TIMECONTROLWIDGET_H_
 #define TIMECONTROLWIDGET_H_
 
-#include "ui_TimeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_TimeControlWidget.h"
 
 namespace Mantid {
 namespace Vates {
@@ -56,8 +56,8 @@ public slots:
 private:
   Ui::TimeControlWidgetClass ui; ///< The time control widget's UI form
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // TIMECONTROLWIDGET_H_

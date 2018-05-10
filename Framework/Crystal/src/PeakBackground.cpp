@@ -11,7 +11,7 @@ namespace Crystal {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
                                const double &radiusEstimate,
                                const double &thresholdSignal,

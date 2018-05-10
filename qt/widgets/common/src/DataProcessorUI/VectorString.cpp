@@ -7,6 +7,6 @@ namespace DataProcessor {
 @return The comma separated list of items.
 */
 QString vectorString(const QStringList &items) { return items.join(", "); }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

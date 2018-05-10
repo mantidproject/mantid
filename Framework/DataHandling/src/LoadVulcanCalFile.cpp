@@ -106,7 +106,7 @@ void LoadVulcanCalFile::exec() {
 }
 
 /** Process input and output
-  */
+ */
 void LoadVulcanCalFile::processInOutProperites() {
   // Input
   m_offsetFilename = getPropertyValue("OffsetFilename");
@@ -201,7 +201,7 @@ void LoadVulcanCalFile::processInOutProperites() {
 }
 
 /** Set up grouping workspace
-  */
+ */
 void LoadVulcanCalFile::setupGroupingWorkspace() {
   // Get the right group option for CreateGroupingWorkspace
   std::string groupdetby;
@@ -251,7 +251,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
 }
 
 /** Set up masking workspace
-  */
+ */
 void LoadVulcanCalFile::setupMaskWorkspace() {
 
   // Skip if bad pixel file is not given
@@ -302,7 +302,7 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
 }
 
 /** Generate offset workspace
-  */
+ */
 void LoadVulcanCalFile::generateOffsetsWorkspace() {
   std::map<detid_t, double> map_detoffset;
 
@@ -321,7 +321,7 @@ void LoadVulcanCalFile::generateOffsetsWorkspace() {
 }
 
 /** Read VULCAN's offset file
-  */
+ */
 void LoadVulcanCalFile::readOffsetFile(
     std::map<detid_t, double> &map_detoffset) {
   // Read file
@@ -345,8 +345,8 @@ void LoadVulcanCalFile::readOffsetFile(
 }
 
 /** Process offsets by generating maps
-  * Output: Offset workspace : 10^(xi_0 + xi_1 + xi_2)
-  */
+ * Output: Offset workspace : 10^(xi_0 + xi_1 + xi_2)
+ */
 void LoadVulcanCalFile::processOffsets(
     std::map<detid_t, double> map_detoffset) {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
@@ -473,7 +473,7 @@ void LoadVulcanCalFile::processOffsets(
 }
 
 /** Align the input EventWorkspace
-  */
+ */
 void LoadVulcanCalFile::alignEventWorkspace() {
   g_log.notice("Align input EventWorkspace.");
 
@@ -497,19 +497,19 @@ void LoadVulcanCalFile::alignEventWorkspace() {
 }
 
 /** Translate the VULCAN's offset to Mantid
-  * Input Offset workspace : 10^(xi_0 + xi_1 + xi_2)
-  *
-  * This is the rigorous way to calcualte 2theta
-  * detPos -= samplePos;
-  * l2 = detPos.norm();
-  * halfcosTwoTheta = detPos.scalar_prod(beamline)/(l2*beamline_norm);
-  * sinTheta=sqrt(0.5-halfcosTwoTheta);
-  *
-  * 6 pixels in each bank to be focussed on
-  * // (detid == 26870 || detid == 28120 || detid == 29370 ||
-  * //  detid == 33120 || detid == 34370 || detid == 35620)
-  *
-  */
+ * Input Offset workspace : 10^(xi_0 + xi_1 + xi_2)
+ *
+ * This is the rigorous way to calcualte 2theta
+ * detPos -= samplePos;
+ * l2 = detPos.norm();
+ * halfcosTwoTheta = detPos.scalar_prod(beamline)/(l2*beamline_norm);
+ * sinTheta=sqrt(0.5-halfcosTwoTheta);
+ *
+ * 6 pixels in each bank to be focussed on
+ * // (detid == 26870 || detid == 28120 || detid == 29370 ||
+ * //  detid == 33120 || detid == 34370 || detid == 35620)
+ *
+ */
 void LoadVulcanCalFile::convertOffsets() {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
@@ -549,7 +549,7 @@ void LoadVulcanCalFile::convertOffsets() {
 
 /** Get a pointer to an instrument in one of 3 ways: InputWorkspace,
  * InstrumentName, InstrumentFilename
-  */
+ */
 Geometry::Instrument_const_sptr LoadVulcanCalFile::getInstrument() {
   // Set up name
   std::string InstrumentName("VULCAN");
@@ -685,12 +685,12 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
         << " errors (invalid Detector ID's) found when reading .cal file '"
         << calFileName << "'.\n";
   if (doGroup && (!hasGrouped))
-    Logger("LoadVulcanCalFile").warning() << "'" << calFileName
-                                          << "' has no spectra grouped\n";
+    Logger("LoadVulcanCalFile").warning()
+        << "'" << calFileName << "' has no spectra grouped\n";
   if (doMask && (!hasUnmasked))
-    Logger("LoadVulcanCalFile").warning() << "'" << calFileName
-                                          << "' masks all spectra\n";
+    Logger("LoadVulcanCalFile").warning()
+        << "'" << calFileName << "' masks all spectra\n";
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

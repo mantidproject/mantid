@@ -6,10 +6,10 @@
 //----------------------------------------------------------------------
 #include <vector>
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidMDAlgorithms/InvalidParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/InvalidParameter.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -53,7 +53,7 @@ protected:
   ImplicitFunctionParameterParser::SuccessorType m_successor;
   InvalidParameter *parseInvalidParameter(std::string value);
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

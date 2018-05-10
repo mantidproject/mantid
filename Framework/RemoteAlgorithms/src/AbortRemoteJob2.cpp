@@ -1,10 +1,10 @@
+#include "MantidRemoteAlgorithms/AbortRemoteJob2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidRemoteAlgorithms/AbortRemoteJob2.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {

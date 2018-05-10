@@ -1,19 +1,19 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <vector>
-#include <set>
-#include <memory>
-#include <unordered_set>
 #include <boost/bind.hpp>
+#include <memory>
+#include <set>
+#include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -42,7 +42,7 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
     }
   }
 }
-}
+} // namespace
 
 /** Constructor
  */
@@ -50,9 +50,9 @@ EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
 /**
-* Create a blank event workspace
-* @returns A shared pointer to a new empty EventWorkspace object
-*/
+ * Create a blank event workspace
+ * @returns A shared pointer to a new empty EventWorkspace object
+ */
 EventWorkspace_sptr
 EventWorkspaceCollection::createEmptyEventWorkspace() const {
   // Create the output workspace

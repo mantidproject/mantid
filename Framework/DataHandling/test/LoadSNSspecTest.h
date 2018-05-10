@@ -1,10 +1,10 @@
 #ifndef LOADSNSSPECTEST_H_
 #define LOADSNSSPECTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadSNSspec.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadSNSspec.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 

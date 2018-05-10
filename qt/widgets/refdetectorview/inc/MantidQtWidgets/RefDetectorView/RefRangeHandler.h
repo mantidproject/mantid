@@ -1,10 +1,10 @@
 #ifndef REF_RANGE_HANDLER_H
 #define REF_RANGE_HANDLER_H
 
-#include "MantidQtWidgets/SpectrumViewer/IRangeHandler.h"
-#include "ui_RefImageView.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/SpectrumViewer/IRangeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "ui_RefImageView.h"
 
 /**
     @class RangeHandler

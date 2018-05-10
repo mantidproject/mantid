@@ -39,7 +39,7 @@ PyArray_Descr *func_PyArray_Descr(const std::string &datadescr) {
 
   return descr;
 }
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

@@ -64,7 +64,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_CHANGEBINOFFSET_H_*/

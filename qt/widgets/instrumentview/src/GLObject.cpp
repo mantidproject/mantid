@@ -1,9 +1,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "MantidQtWidgets/InstrumentView/GLObject.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/InstrumentView/GLObject.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -23,8 +23,8 @@ GLObject::~GLObject() {
 }
 
 /**
-* This method draws the opengl display list.
-*/
+ * This method draws the opengl display list.
+ */
 void GLObject::draw() const {
   // std::cout << "GLObject::draw() for " << this->mName << "\n";
   if (mChanged)
@@ -38,8 +38,8 @@ void GLObject::draw() const {
 }
 
 /**
-* This method constructs the opengl display list
-*/
+ * This method constructs the opengl display list
+ */
 void GLObject::construct() const {
   if (mDisplayListId == 0) {
     mChanged = false;
@@ -57,18 +57,18 @@ void GLObject::construct() const {
 }
 
 /**
-* Virtual method which initializes the the Object before creating the display
-* list
-*/
+ * Virtual method which initializes the the Object before creating the display
+ * list
+ */
 void GLObject::init() const {}
 
 /**
-* Virtual method which constructs the opengl rendering commands.
-*/
+ * Virtual method which constructs the opengl rendering commands.
+ */
 void GLObject::define() const {}
 
 void GLObject::setName(const std::string &name) { mName = name; }
 std::string GLObject::getName() const { return mName; }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

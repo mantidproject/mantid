@@ -17,7 +17,7 @@ namespace Geometry {
 class CrystalStructure;
 class OrientedLattice;
 class SampleEnvironment;
-}
+} // namespace Geometry
 
 namespace API {
 

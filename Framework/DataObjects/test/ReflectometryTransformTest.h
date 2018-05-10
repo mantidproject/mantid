@@ -1,14 +1,14 @@
 #ifndef MANTID_DATAOBJECTS_REFLECTOMETRYTRANSFORTEST_H_
 #define MANTID_DATAOBJECTS_REFLECTOMETRYTRANSFORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;

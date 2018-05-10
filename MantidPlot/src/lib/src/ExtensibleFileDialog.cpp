@@ -30,9 +30,9 @@
  ***************************************************************************/
 
 #include "ExtensibleFileDialog.h"
+#include <QComboBox>
 #include <QGridLayout>
 #include <QUrl>
-#include <QComboBox>
 
 ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended,
                                            Qt::WFlags flags)

@@ -63,7 +63,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_CREATESAMPLESHAPE_H_*/

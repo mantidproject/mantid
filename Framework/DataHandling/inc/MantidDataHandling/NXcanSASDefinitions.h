@@ -111,7 +111,7 @@ const std::string sasTransmissionSpectrumTimeStampAttr = "timestamp";
 const std::string sasTransmissionSpectrumLambda = "lambda";
 const std::string sasTransmissionSpectrumT = "T";
 const std::string sasTransmissionSpectrumTdev = "Tdev";
-}
-}
-}
+} // namespace NXcanSAS
+} // namespace DataHandling
+} // namespace Mantid
 #endif

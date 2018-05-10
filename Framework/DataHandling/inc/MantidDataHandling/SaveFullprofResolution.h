@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_
 #define MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

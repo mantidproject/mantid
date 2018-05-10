@@ -7,10 +7,10 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidIndexing/IndexInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -24,11 +24,11 @@ using namespace DataObjects;
 using namespace HistogramData;
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filePath = descriptor.filename();
 
@@ -122,8 +122,9 @@ void LoadEmptyInstrument::exec() {
     const double detector_value = getProperty("DetectorValue");
     const double monitor_value = getProperty("MonitorValue");
     auto ws2D = create<MatrixWorkspace>(
-        *ws, indexInfo, Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
-                                  CountStandardDeviations(1, detector_value)));
+        *ws, indexInfo,
+        Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
+                  CountStandardDeviations(1, detector_value)));
 
     Counts v_monitor_y(1, monitor_value);
     CountStandardDeviations v_monitor_e(1, monitor_value);

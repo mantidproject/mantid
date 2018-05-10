@@ -5,7 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 
 // NeXus
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #endif // MANTID_DATAHANDLING_PRECOMPILEDHEADER_H_

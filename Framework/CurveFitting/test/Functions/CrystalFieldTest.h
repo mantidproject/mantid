@@ -6,13 +6,13 @@
 #include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
+using Mantid::CurveFitting::ComplexFortranMatrix;
+using Mantid::CurveFitting::ComplexMatrix;
+using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
-using Mantid::CurveFitting::ComplexFortranMatrix;
-using Mantid::CurveFitting::IntFortranVector;
-using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::GSLVector;
-using Mantid::CurveFitting::ComplexMatrix;
+using Mantid::CurveFitting::IntFortranVector;
 
 using namespace Mantid::CurveFitting::Functions;
 

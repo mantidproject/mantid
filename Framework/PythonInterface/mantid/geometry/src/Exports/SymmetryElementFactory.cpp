@@ -1,5 +1,5 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 

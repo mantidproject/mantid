@@ -33,10 +33,10 @@
 
 #include "Script.h"
 
-#include <QVariant>
-#include <QStringList>
-#include <QObject>
 #include <QEvent>
+#include <QObject>
+#include <QStringList>
+#include <QVariant>
 
 #include "customevents.h"
 

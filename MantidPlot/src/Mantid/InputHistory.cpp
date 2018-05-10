@@ -3,8 +3,8 @@
 
 #include <QSettings>
 #include <QStringList>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

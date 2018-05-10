@@ -2,11 +2,11 @@
 #define MANTID_SINQ_POLDITIMETRANSFORMERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 
 using namespace Mantid::Poldi;
 

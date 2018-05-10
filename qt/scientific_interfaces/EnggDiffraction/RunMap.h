@@ -48,8 +48,8 @@ private:
   std::array<std::unordered_map<int, T>, NumBanks> m_map;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #include "RunMap.tpp"
 

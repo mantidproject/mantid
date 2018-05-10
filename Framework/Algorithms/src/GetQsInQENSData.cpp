@@ -4,8 +4,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 
 #include <stdexcept>
 
@@ -29,9 +29,10 @@ void GetQsInQENSData::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Input QENS data as MatrixWorkspace");
 
-  declareProperty("RaiseMode", false, "Set to True if an Exception, instead of "
-                                      "any empty list of Q values, is "
-                                      "desired.");
+  declareProperty("RaiseMode", false,
+                  "Set to True if an Exception, instead of "
+                  "any empty list of Q values, is "
+                  "desired.");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("Qvalues", Direction::Output));
@@ -128,5 +129,5 @@ MantidVec GetQsInQENSData::extractQValues(
 
   return qValues;
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

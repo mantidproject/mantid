@@ -1,8 +1,8 @@
 #ifndef MANTID_VATESAPI_WORKSPACE_PROVIDER_H
 #define MANTID_VATESAPI_WORKSPACE_PROVIDER_H
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/System.h"
 #include <string>
 
 namespace Mantid {
@@ -48,7 +48,7 @@ public:
   virtual void disposeWorkspace(std::string wsName) const = 0;
   virtual ~WorkspaceProvider() {}
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

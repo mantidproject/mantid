@@ -2,8 +2,8 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayOrderedPairsValidator.h"
@@ -21,13 +21,13 @@ const static std::string INPUT_WS = "InputWorkspace";
 const static std::string OUTPUT_WS = "OutputWorkspace";
 const static std::string POLY_DEGREE = "Degree";
 const static std::string XRANGES = "XRanges";
-}
+} // namespace Prop
 
 /// String constants for cost function options.
 namespace CostFunc {
 const static std::string UNWEIGHTED_LEAST_SQUARES = "Unweighted least squares";
 const static std::string WEIGHTED_LEAST_SQUARES = "Least squares";
-}
+} // namespace CostFunc
 
 /** Filters ranges completely outside the histogram X values.
  *  @param ranges a vector of start-end pairs to filter
@@ -93,12 +93,13 @@ includedRanges(const std::vector<double> &ranges,
     edges[i].first = ranges[i];
     edges[i].second = i % 2 == 0 ? Edge::start : Edge::end;
   }
-  std::sort(edges.begin(), edges.end(), [](const std::pair<double, Edge> &p1,
-                                           const std::pair<double, Edge> &p2) {
-    if (p1.first == p2.first)
-      return p1.second == Edge::start;
-    return p1.first < p2.first;
-  });
+  std::sort(
+      edges.begin(), edges.end(),
+      [](const std::pair<double, Edge> &p1, const std::pair<double, Edge> &p2) {
+        if (p1.first == p2.first)
+          return p1.second == Edge::start;
+        return p1.first < p2.first;
+      });
   // If an 'end' edge is followed by a 'start', we have a new range. Everything
   // else can be merged.
   std::vector<double> mergedRanges;
@@ -227,7 +228,7 @@ void evaluateInPlace(const std::string &function,
   double *y = const_cast<double *>(ws.mutableY(wsIndex).rawData().data());
   bkg->function1D(y, ws.points(wsIndex).rawData().data(), ws.y(wsIndex).size());
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {

@@ -748,5 +748,5 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
   }
 }
 
-} // namespace DataHandling
+} // namespace MDAlgorithms
 } // namespace Mantid

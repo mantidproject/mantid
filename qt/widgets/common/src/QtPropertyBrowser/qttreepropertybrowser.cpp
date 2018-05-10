@@ -86,19 +86,19 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include <QSet>
-#include <QIcon>
-#include <QTreeWidget>
-#include <QItemDelegate>
+#include <QApplication>
+#include <QCheckBox>
+#include <QFocusEvent>
 #include <QHBoxLayout>
 #include <QHeaderView>
-#include <QPainter>
-#include <QApplication>
-#include <QFocusEvent>
-#include <QStyle>
-#include <QPalette>
-#include <QCheckBox>
+#include <QIcon>
+#include <QItemDelegate>
 #include <QLineEdit>
+#include <QPainter>
+#include <QPalette>
+#include <QSet>
+#include <QStyle>
+#include <QTreeWidget>
 
 namespace {
 // Translation function for Qt4/Qt5. Qt5 has no encoding option
@@ -111,7 +111,7 @@ QString translateUtf8Encoded(const char *context, const char *key,
   return QApplication::translate(context, key, disambiguation, n);
 #endif
 }
-}
+} // namespace
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

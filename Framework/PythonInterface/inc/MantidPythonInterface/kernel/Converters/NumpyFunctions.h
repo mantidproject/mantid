@@ -26,8 +26,8 @@
 #pragma GCC system_header
 #endif
 
-#include <boost/python/list.hpp>
 #include "MantidKernel/WarningSuppressions.h"
+#include <boost/python/list.hpp>
 
 // clang-format off
 GCC_DIAG_OFF(cast-qual)
@@ -43,9 +43,9 @@ GCC_DIAG_ON(cast-qual)
 // clang-format on
 
 /**functions containing numpy macros. We put them in a separate header file to
-  *suppress the warning
-  *ISO C++ forbids casting between pointer-to-function and pointer-to-object
-  */
+ *suppress the warning
+ *ISO C++ forbids casting between pointer-to-function and pointer-to-object
+ */
 namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
@@ -58,8 +58,8 @@ PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
 PyArrayObject *func_PyArray_NewFromDescr(const std::string &datadescr,
                                          const int ndims, Py_intptr_t *dims);
 PyArray_Descr *func_PyArray_Descr(const std::string &datadescr);
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 #endif // NUMPY_FUNCTIONS_H

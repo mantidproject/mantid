@@ -2,9 +2,9 @@
 #define FUNCTIONATTRIBUTETEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 
 #include <cxxtest/TestSuite.h>
 

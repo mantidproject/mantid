@@ -60,6 +60,6 @@ template <> DLLExport bool checkIsEmpty(const int64_t &value) {
 template <> DLLExport bool checkIsEmpty(const OptionalBool &value) {
   return (value.getValue() == OptionalBool::Unset);
 }
-}
-}
-}
+} // namespace Detail
+} // namespace Kernel
+} // namespace Mantid

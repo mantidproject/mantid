@@ -1,5 +1,5 @@
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileValidator.h"
+#include "MantidKernel/Logger.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -7,7 +7,7 @@ namespace Kernel {
 namespace {
 // static logger
 Logger g_log("MultiFileValidator");
-}
+} // namespace
 
 /// Default constructor.
 MultiFileValidator::MultiFileValidator()

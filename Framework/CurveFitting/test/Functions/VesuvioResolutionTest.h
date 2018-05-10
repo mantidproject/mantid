@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_VESUVIORESOLUTIONTEST_H_
 #define MANTID_CURVEFITTING_VESUVIORESOLUTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
+#include <cxxtest/TestSuite.h>
 
 #include "ComptonProfileTestHelpers.h"
 

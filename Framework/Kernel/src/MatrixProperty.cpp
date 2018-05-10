@@ -20,9 +20,9 @@ MatrixProperty<TYPE>::MatrixProperty(const std::string &propName,
     : PropertyWithValue<HeldType>(propName, HeldType(), validator, direction) {}
 
 /**
-* Copy constructor
-* @param rhs :: Contruct this object from rhs
-*/
+ * Copy constructor
+ * @param rhs :: Contruct this object from rhs
+ */
 template <typename TYPE>
 MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty &rhs)
     : PropertyWithValue<HeldType>(rhs) {}
@@ -36,8 +36,8 @@ template class MANTID_KERNEL_DLL MatrixProperty<double>;
 template class MANTID_KERNEL_DLL MatrixProperty<int>;
 template class MANTID_KERNEL_DLL MatrixProperty<float>;
 ///@endcond
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 ///@cond
 /**

@@ -1,7 +1,6 @@
 #ifndef MANTID_API_DATAPROCESSORALGORITHM_H_
 #define MANTID_API_DATAPROCESSORALGORITHM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/DistributedAlgorithm.h"
@@ -10,6 +9,7 @@
 #include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {

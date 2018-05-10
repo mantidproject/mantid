@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_HKLGENERATOR_H_
 #define MANTID_GEOMETRY_HKLGENERATOR_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
 #include <boost/iterator/iterator_facade.hpp>

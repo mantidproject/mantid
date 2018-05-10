@@ -84,6 +84,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::DomainCreatorFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_API_DOMAINCREATORFACTORY_H_ */

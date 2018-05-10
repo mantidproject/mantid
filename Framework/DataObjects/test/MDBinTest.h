@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_MDBINTEST_H_
 #define MANTID_DATAOBJECTS_MDBINTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

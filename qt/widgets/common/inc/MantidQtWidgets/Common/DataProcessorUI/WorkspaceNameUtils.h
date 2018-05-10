@@ -55,8 +55,8 @@ OptionsMap DLLExport getCanonicalOptions(
     const WhiteList &whitelist, const bool allowInsertions,
     const std::vector<QString> &outputProperties = std::vector<QString>(),
     const std::vector<QString> &prefixes = std::vector<QString>());
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETSDATAPROCESSOR_WORKSPACENAMEUTILS_H

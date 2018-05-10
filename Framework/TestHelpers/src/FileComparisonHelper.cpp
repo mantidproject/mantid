@@ -66,18 +66,18 @@ void logDifferenceError(char refChar, char testChar, size_t numNewLines,
 
 namespace FileComparisonHelper {
 /**
-* Takes a pair of iterators and checks that all the values
-* those iterators point to are identical. If they differ in size
-* or value it will return false. If they are identical it will
-* return true.
-*
-* @param refStream:: The starting position of the reference stream to check
-* @param testStream:: The starting position of the test stream to check
-* @param refStreamEnd:: The final position of the reference stream to check
-* @param testStreamEnd:: The final position of the second stream to check
-*
-* @return True if iterators are identical in value and length else false
-*/
+ * Takes a pair of iterators and checks that all the values
+ * those iterators point to are identical. If they differ in size
+ * or value it will return false. If they are identical it will
+ * return true.
+ *
+ * @param refStream:: The starting position of the reference stream to check
+ * @param testStream:: The starting position of the test stream to check
+ * @param refStreamEnd:: The final position of the reference stream to check
+ * @param testStreamEnd:: The final position of the second stream to check
+ *
+ * @return True if iterators are identical in value and length else false
+ */
 bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
                        streamCharIter refStreamEnd,
                        streamCharIter testStreamEnd) {
@@ -122,16 +122,16 @@ bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
 }
 
 /**
-* Checks the two files at the specified paths are equal in both
-* length and content. This does not take into account line endings
-* i.e. CRLF and LF between Windows and Unix. If the files cannot
-* be opened it will throw. a runtime error.
-*
-* @param referenceFileFullPath:: The full path to the reference file
-* @param outFileFullPath:: The full path to the output file to check
-*
-* @return True if files are equal in content and length, else false.
-*/
+ * Checks the two files at the specified paths are equal in both
+ * length and content. This does not take into account line endings
+ * i.e. CRLF and LF between Windows and Unix. If the files cannot
+ * be opened it will throw. a runtime error.
+ *
+ * @param referenceFileFullPath:: The full path to the reference file
+ * @param outFileFullPath:: The full path to the output file to check
+ *
+ * @return True if files are equal in content and length, else false.
+ */
 bool areFilesEqual(const std::string &referenceFileFullPath,
                    const std::string &outFileFullPath) {
   std::ifstream refFileStream(referenceFileFullPath, std::ifstream::binary);
@@ -149,16 +149,16 @@ bool areFilesEqual(const std::string &referenceFileFullPath,
 }
 
 /**
-* Compares two file streams for equality and returns
-* true if these are equal, false if they differ in any way.
-* This does not account for line endings i.e. CRLF and LF
-* on Windows and Unix files would return false
-*
-* @param referenceFileStream :: The ifstream to the reference file
-* @param fileToCheck :: The ifstream to the file to check
-*
-* @return True if files are identical else false
-*/
+ * Compares two file streams for equality and returns
+ * true if these are equal, false if they differ in any way.
+ * This does not account for line endings i.e. CRLF and LF
+ * on Windows and Unix files would return false
+ *
+ * @param referenceFileStream :: The ifstream to the reference file
+ * @param fileToCheck :: The ifstream to the file to check
+ *
+ * @return True if files are identical else false
+ */
 bool areFileStreamsEqual(std::ifstream &referenceFileStream,
                          std::ifstream &fileToCheck) {
   // Open iterators for function to run on
@@ -170,30 +170,30 @@ bool areFileStreamsEqual(std::ifstream &referenceFileStream,
 }
 
 /**
-  * Attempts to find a reference file with the given name using
-  * the FileFinder. If it cannot be found it will throw a
-  * std::invalid_argument. If the file is found it will compare
-  * the two specified files are equal in length and content
-  * whilst ignoring EOL differences
-  *
-  * @param referenceFileName :: The filename of the reference file
-  * @param outFileFullPath :: The path to the file written by the test to
-  *compare
-  * @throws :: If the reference file could not be found throws
-  *std::invalid_argument
-  *
-  * @return :: True if files are equal length and content (ignoring EOL) else
-  *false.
-  */
+ * Attempts to find a reference file with the given name using
+ * the FileFinder. If it cannot be found it will throw a
+ * std::invalid_argument. If the file is found it will compare
+ * the two specified files are equal in length and content
+ * whilst ignoring EOL differences
+ *
+ * @param referenceFileName :: The filename of the reference file
+ * @param outFileFullPath :: The path to the file written by the test to
+ *compare
+ * @throws :: If the reference file could not be found throws
+ *std::invalid_argument
+ *
+ * @return :: True if files are equal length and content (ignoring EOL) else
+ *false.
+ */
 bool isEqualToReferenceFile(const std::string &referenceFileName,
                             const std::string &outFileFullPath) {
   const std::string referenceFilePath =
       Mantid::API::FileFinder::Instance().getFullPath(referenceFileName);
 
   if (referenceFilePath.empty()) {
-    throw std::invalid_argument("No reference file with the name: " +
-                                referenceFileName +
-                                " could be found by FileComparisonHelper");
+    throw std::invalid_argument(
+        "No reference file with the name: " + referenceFileName +
+        " could be found by FileComparisonHelper");
   }
   return areFilesEqual(referenceFilePath, outFileFullPath);
 }

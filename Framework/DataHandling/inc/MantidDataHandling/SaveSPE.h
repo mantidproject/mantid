@@ -12,7 +12,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace DataHandling {
 /**
      Saves a workspace into an ASCII SPE file.

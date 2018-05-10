@@ -1,15 +1,15 @@
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
 
-#include <QPainter>
-#include <QPainterPath>
 #include <QFontMetrics>
 #include <QMouseEvent>
+#include <QPainter>
+#include <QPainterPath>
 #include <QWheelEvent>
 
 #include <algorithm>
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -18,12 +18,12 @@ namespace MantidWidgets {
 const int PeakMarker2D::g_defaultMarkerSize = 5;
 
 /**
-* Constructor.
-* @param peakOverlay :: shape for the overlay
-* @param u :: x screen coordinate of peak center
-* @param v :: y screen coordinate of peak center
-* @param style :: marker symbol style
-*/
+ * Constructor.
+ * @param peakOverlay :: shape for the overlay
+ * @param u :: x screen coordinate of peak center
+ * @param v :: y screen coordinate of peak center
+ * @param style :: marker symbol style
+ */
 PeakMarker2D::PeakMarker2D(PeakOverlay &peakOverlay, double u, double v,
                            const Style &style)
     : m_peakOverlay(peakOverlay), m_symbol(style.symbol), m_h(-99.0),
@@ -42,8 +42,8 @@ PeakMarker2D::PeakMarker2D(PeakOverlay &peakOverlay, double u, double v,
 }
 
 /**
-* Return the style of the marker.
-*/
+ * Return the style of the marker.
+ */
 PeakMarker2D::Style PeakMarker2D::getStyle() const {
   return Style(m_symbol, getColor(), m_markerSize);
 }
@@ -114,8 +114,8 @@ void PeakMarker2D::drawSquare(QPainter &painter) const {
 }
 
 /**
-* Save some peak information.
-*/
+ * Save some peak information.
+ */
 void PeakMarker2D::setPeak(const Mantid::Geometry::IPeak &peak, int row) {
   m_h = peak.getH();
   m_k = peak.getK();
@@ -128,11 +128,11 @@ void PeakMarker2D::setPeak(const Mantid::Geometry::IPeak &peak, int row) {
 }
 
 /**
-* Return reference to the peak.
-*/
+ * Return reference to the peak.
+ */
 const Mantid::Geometry::IPeak &PeakMarker2D::getPeak() const {
   return m_peakOverlay.getPeak(m_row);
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

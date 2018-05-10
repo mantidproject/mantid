@@ -27,15 +27,17 @@ void FilterByXValue::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  declareProperty("XMin", EMPTY_DBL(), "The minimum X value (in the units of "
-                                       "the input workspace) for which events "
-                                       "will be retained\n"
-                                       "(default: event list min)");
-  declareProperty("XMax", EMPTY_DBL(), "The maximum X value (in the units of "
-                                       "the input workspace) for which events "
-                                       "will be retained. Must be greater than "
-                                       "XMin.\n"
-                                       "(default: event list max)");
+  declareProperty("XMin", EMPTY_DBL(),
+                  "The minimum X value (in the units of "
+                  "the input workspace) for which events "
+                  "will be retained\n"
+                  "(default: event list min)");
+  declareProperty("XMax", EMPTY_DBL(),
+                  "The maximum X value (in the units of "
+                  "the input workspace) for which events "
+                  "will be retained. Must be greater than "
+                  "XMin.\n"
+                  "(default: event list max)");
 }
 
 std::map<std::string, std::string> FilterByXValue::validateInputs() {

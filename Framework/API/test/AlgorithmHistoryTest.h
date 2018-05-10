@@ -1,10 +1,10 @@
 #ifndef ALGORITHMHISTORYTEST_H_
 #define ALGORITHMHISTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include <cxxtest/TestSuite.h>
 #include <sstream>
 
 using namespace Mantid::API;

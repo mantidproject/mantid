@@ -1,6 +1,5 @@
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -11,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -52,12 +52,12 @@ using namespace DataObjects;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using Types::Event::TofEvent;
 using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
-using std::stringstream;
 using std::string;
+using std::stringstream;
 using std::vector;
 
 //------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ static const int NUM_EXT = 7;
 
 //----------------------------------------------------------------------------------------------
 /** Parse preNexus file name to get run number
-  */
+ */
 static string getRunnumber(const string &filename) {
   // start by trimming the filename
   string runnumber(Poco::Path(filename).getBaseName());
@@ -113,7 +113,7 @@ static string getRunnumber(const string &filename) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate Pulse ID file name from preNexus event file's name
-  */
+ */
 static string generatePulseidName(string eventfile) {
   // initialize vector of endings and put live at the beginning
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
@@ -134,7 +134,7 @@ static string generatePulseidName(string eventfile) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate mapping file name from Event workspace's instrument
-  */
+ */
 static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   // get the name of the mapping file as set in the parameter files
   std::vector<string> temp =
@@ -245,7 +245,7 @@ LoadEventPreNexus2::~LoadEventPreNexus2() { delete this->eventfile; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm, i.e, declare properties
-*/
+ */
 void LoadEventPreNexus2::init() {
   // which files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
@@ -329,12 +329,12 @@ void LoadEventPreNexus2::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm
-  * Procedure:
-  * 1. check all the inputs
-  * 2. create an EventWorkspace object
-  * 3. process events
-  * 4. set out output
-  */
+ * Procedure:
+ * 1. check all the inputs
+ * 2. create an EventWorkspace object
+ * 3. process events
+ * 4. set out output
+ */
 void LoadEventPreNexus2::exec() {
   g_log.information("Executing LoadEventPreNexus Ver 2.0");
 
@@ -358,8 +358,8 @@ void LoadEventPreNexus2::exec() {
     pulseid_filename = generatePulseidName(event_filename);
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
-        this->g_log.information() << "Found pulseid file " << pulseid_filename
-                                  << '\n';
+        this->g_log.information()
+            << "Found pulseid file " << pulseid_filename << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -402,7 +402,7 @@ void LoadEventPreNexus2::exec() {
 
 //------------------------------------------------------------------------------------------------
 /** Create and set up output Event Workspace
-  */
+ */
 void LoadEventPreNexus2::createOutputWorkspace(
     const std::string event_filename) {
   // Create the output workspace
@@ -444,8 +444,8 @@ void LoadEventPreNexus2::createOutputWorkspace(
   if (mapping_filename.empty()) {
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
-      this->g_log.information() << "Found mapping file \"" << mapping_filename
-                                << "\"\n";
+      this->g_log.information()
+          << "Found mapping file \"" << mapping_filename << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
@@ -462,7 +462,7 @@ void LoadEventPreNexus2::createOutputWorkspace(
 
 //------------------------------------------------------------------------------------------------
 /** Some Pulse ID and event indexes might be wrong.  Remove them.
-  */
+ */
 void LoadEventPreNexus2::unmaskVetoEventIndex() {
   // Unmask veto bit from vetoed events
 
@@ -491,10 +491,10 @@ void LoadEventPreNexus2::unmaskVetoEventIndex() {
 
 //------------------------------------------------------------------------------------------------
 /** Generate a workspace with distribution of events with pulse
-  * Workspace has 2 spectrum.  spectrum 0 is the number of events in one
+ * Workspace has 2 spectrum.  spectrum 0 is the number of events in one
  * pulse.
-  * specrum 1 is the accumulated number of events
-  */
+ * specrum 1 is the accumulated number of events
+ */
 API::MatrixWorkspace_sptr
 LoadEventPreNexus2::generateEventDistribtionWorkspace() {
   // Generate workspace of 2 spectrum
@@ -565,10 +565,10 @@ void LoadEventPreNexus2::processImbedLogs() {
 //----------------------------------------------------------------------------------------------
 /** Add absolute time series to log. Use TOF as log value for this type of
  * events
-  * @param logtitle :: name of the log
-  * @param mindex :: index of the log in pulse time ...
-  * - mindex:  index of the the series in the list
-  */
+ * @param logtitle :: name of the log
+ * @param mindex :: index of the log in pulse time ...
+ * - mindex:  index of the the series in the list
+ */
 void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
                                            size_t mindex) {
   // Create TimeSeriesProperty
@@ -638,8 +638,8 @@ void LoadEventPreNexus2::runLoadInstrument(
 
 //----------------------------------------------------------------------------------------------
 /** Turn a pixel id into a "corrected" pixelid and period.
-  *
-  */
+ *
+ */
 inline void LoadEventPreNexus2::fixPixelId(PixelType &pixel,
                                            uint32_t &period) const {
   if (!this->using_mapping_file) { // nothing to do here
@@ -654,8 +654,8 @@ inline void LoadEventPreNexus2::fixPixelId(PixelType &pixel,
 
 //----------------------------------------------------------------------------------------------
 /** Process the event file properly in parallel
-  * @param workspace :: EventWorkspace to write to.
-  */
+ * @param workspace :: EventWorkspace to write to.
+ */
 void LoadEventPreNexus2::procEvents(
     DataObjects::EventWorkspace_sptr &workspace) {
   //-------------------------------------------------------------------------
@@ -953,16 +953,16 @@ void LoadEventPreNexus2::procEvents(
 
 //----------------------------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
-  * @param workspace :: EventWorkspace to write to.
-  * @param arrayOfVectors :: For speed up: this is an array, of size
+ * @param workspace :: EventWorkspace to write to.
+ * @param arrayOfVectors :: For speed up: this is an array, of size
  * detid_max+1, where the
-  *        index is a pixel ID, and the value is a pointer to the
+ *        index is a pixel ID, and the value is a pointer to the
  * vector<tofEvent> in the given EventList.
-  * @param event_buffer :: The buffer containing the DAS events
-  * @param current_event_buffer_size :: The length of the given DAS buffer
-  * @param fileOffset :: Value for an offset into the binary file
-  * @param dbprint :: flag to print out events information
-  */
+ * @param event_buffer :: The buffer containing the DAS events
+ * @param current_event_buffer_size :: The length of the given DAS buffer
+ * @param fileOffset :: Value for an offset into the binary file
+ * @param dbprint :: flag to print out events information
+ */
 void LoadEventPreNexus2::procEventsLinear(
     DataObjects::EventWorkspace_sptr & /*workspace*/,
     std::vector<TofEvent> **arrayOfVectors, DasEvent *event_buffer,
@@ -1168,20 +1168,20 @@ void LoadEventPreNexus2::procEventsLinear(
 
 //----------------------------------------------------------------------------------------------
 /** Comparator for sorting dasevent lists
-  */
+ */
 bool vzintermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y) {
   return (x.pid < y.pid);
 }
 
 //-----------------------------------------------------------------------------
 /**
-  * Add a sample environment log for the proton chage (charge of the pulse in
-  *picoCoulombs)
-  * and set the scalar value (total proton charge, microAmps*hours, on the
-  *sample)
-  *
-  * @param workspace :: Event workspace to set the proton charge on
-  */
+ * Add a sample environment log for the proton chage (charge of the pulse in
+ *picoCoulombs)
+ * and set the scalar value (total proton charge, microAmps*hours, on the
+ *sample)
+ *
+ * @param workspace :: Event workspace to set the proton charge on
+ */
 void LoadEventPreNexus2::setProtonCharge(
     DataObjects::EventWorkspace_sptr &workspace) {
   if (this->proton_charge.empty()) // nothing to do
@@ -1209,8 +1209,8 @@ void LoadEventPreNexus2::setProtonCharge(
 
 //-----------------------------------------------------------------------------
 /** Load a pixel mapping file
-  * @param filename :: Path to file.
-  */
+ * @param filename :: Path to file.
+ */
 void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
   this->using_mapping_file = false;
 
@@ -1250,8 +1250,8 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
 
 //-----------------------------------------------------------------------------
 /** Open an event file
-  * @param filename :: file to open.
-  */
+ * @param filename :: file to open.
+ */
 void LoadEventPreNexus2::openEventFile(const std::string &filename) {
   // Open the file
   eventfile = new BinaryFile<DasEvent>(filename);
@@ -1356,7 +1356,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
 
 //----------------------------------------------------------------------------------------------
 /** Process input properties for purpose of investigation
-  */
+ */
 void LoadEventPreNexus2::processInvestigationInputs() {
   m_dbOpBlockNumber = getProperty("DBOutputBlockNumber");
   if (isEmpty(m_dbOpBlockNumber)) {

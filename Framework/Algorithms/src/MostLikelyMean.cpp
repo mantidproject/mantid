@@ -8,8 +8,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::Kernel::ArrayProperty;
+using Mantid::Kernel::Direction;
 using Mantid::Kernel::NullValidator;
 using Mantid::Kernel::PropertyWithValue;
 

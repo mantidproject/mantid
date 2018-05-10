@@ -1,14 +1,14 @@
 #include "MantidVatesAPI/vtkSinglePeakMarker.h"
-#include <vtkPolyData.h>
-#include "vtkFloatArray.h"
-#include "vtkPoints.h"
-#include "vtkUnstructuredGrid.h"
-#include "vtkVertex.h"
-#include "vtkPVGlyphFilter.h"
 #include "vtkCellData.h"
+#include "vtkFloatArray.h"
+#include "vtkPVGlyphFilter.h"
+#include "vtkPoints.h"
 #include "vtkSphereSource.h"
 #include "vtkTransform.h"
 #include "vtkTransformPolyDataFilter.h"
+#include "vtkUnstructuredGrid.h"
+#include "vtkVertex.h"
+#include <vtkPolyData.h>
 
 namespace Mantid {
 namespace VATES {
@@ -71,5 +71,5 @@ vtkPolyData *vtkSinglePeakMarker::createSinglePeakMarker(double x, double y,
 
   return glyphed;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -28,14 +28,14 @@
  *                                                                         *
  ***************************************************************************/
 #include "muParserScript.h"
-#include "muParserScripting.h"
-#include "Table.h"
-#include "Matrix.h"
 #include "Folder.h"
+#include "Matrix.h"
+#include "Table.h"
+#include "muParserScripting.h"
 
-#include <QStringList>
 #include <QApplication>
 #include <QMessageBox>
+#include <QStringList>
 
 #include <gsl/gsl_math.h>
 
@@ -361,7 +361,7 @@ QString muParserScript::compileColArg(const QString &in) {
       for (i += 4; i < in.size() && paren > 0; i++)
         if (in[i] == '"') {
           arg += "\"";
-          for (i++; i < in.size() && in [i] != '"'; i++)
+          for (i++; i < in.size() && in[i] != '"'; i++)
             if (in[i] == '\\') {
               arg += "\\";
               arg += in[++i];

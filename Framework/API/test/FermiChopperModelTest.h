@@ -5,8 +5,8 @@
 #include "MantidAPI/Run.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 class FermiChopperModelTest : public CxxTest::TestSuite {
   using FermiChopperModel_sptr =

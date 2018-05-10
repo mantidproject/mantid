@@ -1,12 +1,12 @@
 #ifndef MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_
 #define MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_
 
-#include "ui_MuonFitDataSelector.h"
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitDataSelector.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "ui_MuonFitDataSelector.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

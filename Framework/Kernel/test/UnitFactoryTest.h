@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Kernel;

@@ -34,20 +34,20 @@
 #define MATRIX_H
 
 #include <QHeaderView>
-#include <QTableView>
-#include <QPrinter>
-#include <qpixmap.h>
 #include <QMessageBox>
+#include <QPrinter>
+#include <QTableView>
+#include <qpixmap.h>
 
 #include "MatrixModel.h"
 #include "MdiSubWindow.h"
-#include "ScriptingEnv.h"
 #include "Scripted.h"
+#include "ScriptingEnv.h"
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
-#include <qwt_double_rect.h>
 #include <qwt_color_map.h>
+#include <qwt_double_rect.h>
 
 #include <math.h>
 

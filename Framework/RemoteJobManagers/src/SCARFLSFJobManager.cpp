@@ -17,7 +17,7 @@ DECLARE_REMOTEJOBMANAGER(SCARFLSFJobManager)
 namespace {
 // static logger object
 Mantid::Kernel::Logger g_log("SCARFLSFJobManager");
-}
+} // namespace
 
 std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk";
 std::string LSFJobManager::g_loginPath = "/cgi-bin/token.py";
@@ -89,8 +89,8 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got status code " +
-                             std::to_string(code) + ", with this response: " +
-                             resp);
+                             std::to_string(code) +
+                             ", with this response: " + resp);
   }
 }
 
@@ -129,7 +129,8 @@ bool SCARFLSFJobManager::ping() {
       ok = true;
     } else {
       g_log.warning() << "Pinged compute resource but got what looks like an "
-                         "error message: " << resp << '\n';
+                         "error message: "
+                      << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -188,9 +189,9 @@ void SCARFLSFJobManager::logout(const std::string &username) {
     g_log.notice() << "Logged out.\n";
     g_log.debug() << "Response from server: " << ss.str() << '\n';
   } else {
-    throw std::runtime_error("Failed to logout from the web service at: " +
-                             fullURL.toString() +
-                             ". Please check your username.");
+    throw std::runtime_error(
+        "Failed to logout from the web service at: " + fullURL.toString() +
+        ". Please check your username.");
   }
 
   // successfully logged out, forget the token

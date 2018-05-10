@@ -4,9 +4,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidHistogramData/HistogramMath.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 

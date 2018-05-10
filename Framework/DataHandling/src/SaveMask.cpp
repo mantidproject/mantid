@@ -6,8 +6,8 @@
 #include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
@@ -150,7 +150,8 @@ void SaveMask::exec() {
   } // for
   std::string textvalue = ss.str();
   g_log.debug() << "SaveMask main text:  available section = " << idx0sts.size()
-                << "\n" << textvalue << '\n';
+                << "\n"
+                << textvalue << '\n';
 
   // c2. Create element
   AutoPtr<Element> pDetid = pDoc->createElement("detids");

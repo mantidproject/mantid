@@ -41,8 +41,8 @@ void GramCharlier::function1D(double *out, const double *x,
                               const size_t n) const {
   using boost::math::hermite;
   using std::exp;
-  using std::sqrt;
   using std::pow;
+  using std::sqrt;
   // formula
   // f(x) = Aexp(-z^2)*(1/sqrt(2*Pi*Sigma^2))*(1 + (C4/2^4/(4/2)!)*H_4(z) +
   //        (C6/2^6/(6/2)!)*H_6(z) + (C8/2^8/(8/2)!)*H_8(z) +

@@ -1,3 +1,4 @@
+#include "MantidDataHandling/LoadFITS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/NumericAxis.h"
@@ -5,7 +6,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadFITS.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Unit.h"
@@ -32,7 +32,7 @@ template <typename InterpretType> double toDouble(uint8_t *src) {
   // cppcheck-suppress invalidPointerCast
   return static_cast<double>(*reinterpret_cast<InterpretType *>(src));
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -81,11 +81,11 @@ LoadFITS::LoadFITS()
 }
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadFITS::confidence(Kernel::FileDescriptor &descriptor) const {
   // Should really improve this to check the file header (of first file at
   // least) to make sure it contains the fields wanted
@@ -95,10 +95,9 @@ int LoadFITS::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 /**
-* Initialise the algorithm. Declare properties which can be set before execution
-* (input) or
-* read from after the execution (output).
-*/
+ * Initialise the algorithm. Declare properties which can be set before
+ * execution (input) or read from after the execution (output).
+ */
 void LoadFITS::init() {
   // Specify file extensions which can be associated with a FITS file.
   std::vector<std::string> exts, exts2;
@@ -378,16 +377,16 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the first dimension differs "
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
+                     "from the first file loaded ("
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
                   << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
   if (hdr.axisPixelLengths[1] != hdrFirst.axisPixelLengths[1]) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the second dimension differs"
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
+                     "from the first file loaded ("
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
                   << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
 

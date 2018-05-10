@@ -41,7 +41,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Increments the loop counter by 1, then
    * sends the progress notification on behalf of its algorithm.
-  */
+   */
   void report() {
     // This function was put inline for highest speed.
     if (++m_i - m_last_reported < m_notifyStep)
@@ -86,7 +86,7 @@ protected:
   int m_notifyStepPrecision;
 };
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_PROGRESSBASE_H_ */

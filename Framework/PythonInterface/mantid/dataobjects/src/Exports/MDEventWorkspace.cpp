@@ -8,8 +8,8 @@
 #include <boost/python/class.hpp>
 
 using Mantid::API::IMDEventWorkspace;
-using Mantid::DataObjects::MDEventWorkspace;
 using Mantid::DataObjects::MDEvent;
+using Mantid::DataObjects::MDEventWorkspace;
 using Mantid::DataObjects::MDLeanEvent;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
@@ -48,7 +48,7 @@ void MDEventWorkspaceExportImpl(const char *className) {
   // register pointers
   RegisterWorkspacePtrToPython<ExportType>();
 }
-}
+} // namespace
 
 void export_MDEventWorkspaces() {
 // The maximum number of dimensions is defined in the MDWorkspaceFactory

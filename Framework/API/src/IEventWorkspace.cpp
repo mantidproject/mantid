@@ -25,7 +25,7 @@ const std::string IEventWorkspace::toString() const {
   }
   return os.str();
 }
-}
+} // namespace API
 
 ///\cond TEMPLATE
 /*
@@ -68,7 +68,7 @@ IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(
     throw std::runtime_error(message);
   }
 }
-}
+} // namespace Kernel
 
 // namespace Kernel
 } // namespace Mantid

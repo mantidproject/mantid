@@ -8,29 +8,29 @@
 #include <QIcon>
 #include <QPixmap>
 
-#include <QDebug>
-#include <stdexcept>
 #include <QCheckBox>
-#include <QLabel>
-#include <QLineEdit>
-#include <QVBoxLayout>
+#include <QDebug>
+#include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QDialogButtonBox>
-#include <QtConcurrentRun>
+#include <QLabel>
+#include <QLineEdit>
 #include <QSettings>
 #include <QTextEdit>
 #include <QTextStream>
+#include <QVBoxLayout>
+#include <QtConcurrentRun>
+#include <stdexcept>
 
 using namespace MantidQt::API;
-using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::ConfigServiceImpl;
 
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("RepoModel");
-}
+} // namespace
 
 // flag to indicate that the thread is delete thread
 const char *delete_mark = "*DELETE*";
@@ -157,9 +157,9 @@ RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
   ConfigServiceImpl &config = ConfigService::Instance();
   repo_path = QString::fromStdString(config.getString("ScriptLocalRepository"));
   rootItem = new RepoItem("/");
+  using Mantid::API::ScriptRepository;
   using Mantid::API::ScriptRepositoryFactory;
   using Mantid::API::ScriptRepository_sptr;
-  using Mantid::API::ScriptRepository;
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   connect(&download_watcher, SIGNAL(finished()), this,
           SLOT(downloadFinished()));
@@ -511,9 +511,10 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
     // it requires a new connection to the uploader server
     if (!upload_threads.isFinished()) {
       QWidget *father = qobject_cast<QWidget *>(QObject::parent());
-      QMessageBox::information(father, "Wait", "The connection with the server "
-                                               "is busy now, wait a while and "
-                                               "try again. ");
+      QMessageBox::information(father, "Wait",
+                               "The connection with the server "
+                               "is busy now, wait a while and "
+                               "try again. ");
       return false;
     }
     // query the user if he wants to delete only locally or remote as well.
@@ -1043,7 +1044,8 @@ RepoModel::DeleteQueryBox::DeleteQueryBox(const QString &path, QWidget *parent)
 
   info << "<html><head/><body><p>Are you sure you want to delete this file "
           "from the Repository?</p><p align=\"center\"><span style=\" "
-          "font-style:italic;\">" << path << "</span></p></body></html>";
+          "font-style:italic;\">"
+       << path << "</span></p></body></html>";
 
   // creation of the new widgets
   comment_te = nullptr;

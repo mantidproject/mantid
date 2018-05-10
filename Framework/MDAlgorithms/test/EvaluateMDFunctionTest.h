@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/EvaluateMDFunction.h"
-#include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
+#include "MantidMDAlgorithms/EvaluateMDFunction.h"
 
-using Mantid::MDAlgorithms::EvaluateMDFunction;
 using Mantid::MDAlgorithms::CreateMDHistoWorkspace;
+using Mantid::MDAlgorithms::EvaluateMDFunction;
 using namespace Mantid::API;
 
 class EvaluateMDFunctionTest : public CxxTest::TestSuite {

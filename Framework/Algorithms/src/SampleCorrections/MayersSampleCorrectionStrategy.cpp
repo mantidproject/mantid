@@ -11,9 +11,9 @@
 
 using Mantid::Kernel::ChebyshevPolyFit;
 using Mantid::Kernel::ChebyshevSeries;
-using Mantid::Kernel::getStatistics;
 using Mantid::Kernel::MersenneTwister;
 using Mantid::Kernel::StatOptions;
+using Mantid::Kernel::getStatistics;
 using std::pow;
 
 namespace {
@@ -60,7 +60,7 @@ double integrate(const std::vector<double> &y, const double dx) {
   }
   return dx * (y.front() + 4.0 * sumOdd + 2.0 * sumEven + y.back()) / 3.0;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {

@@ -284,14 +284,16 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (BackgroundOuterRadius > PeakRadius) {
       if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak " << i << '\n';
+                           "edge of detector for peak "
+                        << i << '\n';
         if (!integrateEdge)
           continue;
       }
     } else {
       if (!detectorQ(p.getQLabFrame(), PeakRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak " << i << '\n';
+                           "edge of detector for peak "
+                        << i << '\n';
         if (!integrateEdge)
           continue;
       }
@@ -344,8 +346,9 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (BackgroundOuterRadius > PeakRadius) {
         // Get the total signal inside "BackgroundOuterRadius"
         ws->getBox()->integrateSphere(
-            sphere, static_cast<coord_t>(lenQpeak * BackgroundOuterRadius *
-                                         lenQpeak * BackgroundOuterRadius),
+            sphere,
+            static_cast<coord_t>(lenQpeak * BackgroundOuterRadius * lenQpeak *
+                                 BackgroundOuterRadius),
             bgSignal, bgErrorSquared);
 
         // Evaluate the signal inside "BackgroundInnerRadius"
@@ -355,8 +358,9 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Integrate this 3rd radius, if needed
         if (BackgroundInnerRadius != PeakRadius) {
           ws->getBox()->integrateSphere(
-              sphere, static_cast<coord_t>(lenQpeak * BackgroundInnerRadius *
-                                           lenQpeak * BackgroundInnerRadius),
+              sphere,
+              static_cast<coord_t>(lenQpeak * BackgroundInnerRadius * lenQpeak *
+                                   BackgroundInnerRadius),
               interiorSignal, interiorErrorSquared);
         } else {
           // PeakRadius == BackgroundInnerRadius, so use the previous value
@@ -675,5 +679,5 @@ double f_eval(double x, void *params) {
   return yval[0];
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

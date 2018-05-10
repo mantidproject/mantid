@@ -85,7 +85,7 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
   return std::to_string(runLabel.runNumber) + "_" +
          std::to_string(runLabel.bank) + "_lattice_params";
 }
-}
+} // namespace
 
 GSASIIRefineFitPeaksOutputProperties
 EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
@@ -150,8 +150,9 @@ void EnggDiffGSASFittingModel::doRefinements(
           SLOT(doRefinements()));
   connect(worker,
           SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
-          this, SLOT(processRefinementSuccessful(
-                    const GSASIIRefineFitPeaksOutputProperties &)));
+          this,
+          SLOT(processRefinementSuccessful(
+              const GSASIIRefineFitPeaksOutputProperties &)));
   connect(worker, SIGNAL(refinementsComplete()), this,
           SLOT(processRefinementsComplete()));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
@@ -240,5 +241,5 @@ void EnggDiffGSASFittingModel::setObserver(
   m_observer = observer;
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

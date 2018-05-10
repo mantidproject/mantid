@@ -2,15 +2,15 @@
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, STFC eScience. Modified to fit with SaveNexusProcessed
 #include "MantidDataHandling/SaveNexus.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <cmath>
-#include <boost/shared_ptr.hpp>
 #include <Poco/File.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
@@ -71,8 +71,9 @@ void SaveNexus::init() {
       make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "List of WorkspaceIndex numbers to read, only for single period data.\n"
       "Not yet implemented");
-  declareProperty("Append", false, "Determines whether .nxs file needs to be\n"
-                                   "over written or appended");
+  declareProperty("Append", false,
+                  "Determines whether .nxs file needs to be\n"
+                  "over written or appended");
   // option which might be required in future - should be a choice e.g.
   // MantidProcessed/Muon1
   // declareProperty("Filetype","",new NullValidator<std::string>);

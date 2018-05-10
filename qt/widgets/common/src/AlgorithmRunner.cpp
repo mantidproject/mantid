@@ -124,5 +124,5 @@ void AlgorithmRunner::handleAlgorithmErrorNotification(
   emit algorithmComplete(true);
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace MantidQt

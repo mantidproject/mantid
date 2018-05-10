@@ -1,19 +1,19 @@
 #ifndef MANTID_GEOMETRY_SCALAR_UTILS_TEST_H_
 #define MANTID_GEOMETRY_SCALAR_UTILS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
-#include <MantidKernel/V3D.h>
 #include <MantidKernel/Matrix.h>
+#include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
+#include <MantidKernel/V3D.h>
+#include <cxxtest/TestSuite.h>
 
-#include <MantidGeometry/Crystal/ScalarUtils.h>
-#include <MantidGeometry/Crystal/ReducedCell.h>
 #include <MantidGeometry/Crystal/ConventionalCell.h>
+#include <MantidGeometry/Crystal/ReducedCell.h>
+#include <MantidGeometry/Crystal/ScalarUtils.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class ScalarUtilsTest : public CxxTest::TestSuite {
 public:

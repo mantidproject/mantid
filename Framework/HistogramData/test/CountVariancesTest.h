@@ -21,8 +21,9 @@ public:
 
   void test_has_correct_mixins() {
     CountVariances data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::VarianceVectorOf<
-        CountVariances, HistogramE, CountStandardDeviations> &>(data))));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
+        (dynamic_cast<detail::VarianceVectorOf<
+             CountVariances, HistogramE, CountStandardDeviations> &>(data))));
   }
 
   void test_construct_default() {

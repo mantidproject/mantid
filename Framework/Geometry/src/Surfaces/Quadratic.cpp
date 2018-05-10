@@ -1,24 +1,24 @@
+#include <algorithm>
+#include <boost/multi_array.hpp>
+#include <complex>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <complex>
 #include <list>
-#include <vector>
-#include <set>
 #include <map>
+#include <set>
+#include <sstream>
 #include <stack>
-#include <algorithm>
-#include <boost/multi_array.hpp>
+#include <vector>
 
-#include "MantidKernel/Tolerance.h"
-#include "MantidGeometry/Math/mathSupport.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Math/PolyBase.h"
+#include "MantidGeometry/Math/mathSupport.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
 
 #include "MantidKernel/Strings.h"
 
@@ -218,8 +218,9 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
          16 * bb2 * da * db * dc2 + 64 * cc * da2 * db * dc2 -
          16 * ba2 * db2 * dc2 + 64 * cc * da * db2 * dc2;
 
-  T[6] = 16 * da * db * dc * (-bc2 * da * db - bb2 * da * dc - ba2 * db * dc +
-                              4 * cc * da * db * dc);
+  T[6] =
+      16 * da * db * dc *
+      (-bc2 * da * db - bb2 * da * dc - ba2 * db * dc + 4 * cc * da * db * dc);
 
   std::vector<double> TRange = T.realRoots(1e-10);
   if (TRange.empty())

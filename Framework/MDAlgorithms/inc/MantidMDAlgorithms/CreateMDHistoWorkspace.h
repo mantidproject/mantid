@@ -52,7 +52,7 @@ private:
   void exec() override;
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_CREATEMDHISTOWORKSPACE_H_ */

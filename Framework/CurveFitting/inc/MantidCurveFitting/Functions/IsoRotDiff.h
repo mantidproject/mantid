@@ -5,9 +5,9 @@
 #include "MantidCurveFitting/Functions/ElasticIsoRotDiff.h"
 #include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
 // Mantid headers from other projects
-#include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ImmutableCompositeFunction.h"
 // third party library headers (N/A)
 // standard library headers (N/A)
 

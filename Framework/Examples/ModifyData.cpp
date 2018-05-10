@@ -14,7 +14,7 @@ using namespace API;
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
-*/
+ */
 void ModifyData::init() {
 
   // Declare a 2D input workspace property.
@@ -91,5 +91,5 @@ void ModifyData::exec() {
     }
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

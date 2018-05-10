@@ -8,8 +8,8 @@
 #include "MantidKernel/System.h"
 
 // STL
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 #endif // MANTID_KERNEL_PRECOMPILEDHEADER_H_

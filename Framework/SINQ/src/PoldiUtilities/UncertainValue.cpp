@@ -1,7 +1,7 @@
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include <stdexcept>
-#include <cmath>
 #include "boost/format.hpp"
+#include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Poldi {
@@ -90,5 +90,5 @@ UncertainValue operator+(double d, const UncertainValue &v) {
 UncertainValue operator-(double d, const UncertainValue &v) {
   return UncertainValue(d - v.value(), v.error());
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

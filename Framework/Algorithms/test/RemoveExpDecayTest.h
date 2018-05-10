@@ -1,17 +1,17 @@
 #ifndef MUONREMOVEEXPDECAYTEST_H_
 #define MUONREMOVEEXPDECAYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/RemoveExpDecay.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::MantidVec;
 using Mantid::Algorithms::MuonRemoveExpDecay;
+using Mantid::MantidVec;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
@@ -32,11 +32,11 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
       double x = static_cast<double>(t) / static_cast<double>(maxt);
       double e = exp(-x / tau);
       X.push_back(x);
-      Y.push_back(
-          a * sin(w * x +
-                  static_cast<double>(s) * M_PI / static_cast<double>(nspec)) *
-              e +
-          e);
+      Y.push_back(a *
+                      sin(w * x + static_cast<double>(s) * M_PI /
+                                      static_cast<double>(nspec)) *
+                      e +
+                  e);
       E.push_back(0.005);
     }
   }
@@ -54,7 +54,7 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
 
   return ws;
 }
-}
+} // namespace
 
 class RemoveExpDecayTest : public CxxTest::TestSuite {
 public:

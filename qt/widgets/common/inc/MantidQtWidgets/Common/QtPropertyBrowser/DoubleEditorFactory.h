@@ -1,8 +1,8 @@
 #ifndef DOUBLEEDITORFACTORY_H
 #define DOUBLEEDITORFACTORY_H
 
-#include "qtpropertymanager.h"
 #include "ParameterPropertyManager.h"
+#include "qtpropertymanager.h"
 
 #include <QLineEdit>
 

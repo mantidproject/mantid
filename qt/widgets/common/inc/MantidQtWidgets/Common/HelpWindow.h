@@ -2,8 +2,8 @@
 #define HELPWINDOW_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <string>
 #include <QString>
+#include <string>
 
 // forward declarations
 class QUrl;

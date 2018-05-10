@@ -9,12 +9,12 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/scoped_ptr.hpp>
 
-using Mantid::CurveFitting::Functions::Voigt;
 using Mantid::API::IFunction;
 using Mantid::API::IPeakFunction;
+using Mantid::CurveFitting::Functions::Voigt;
 
 class VoigtTest : public CxxTest::TestSuite {
 public:

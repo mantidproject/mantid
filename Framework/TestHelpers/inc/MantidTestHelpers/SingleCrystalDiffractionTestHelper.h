@@ -1,15 +1,15 @@
 #ifndef SINGLECRYSTALDIFFRACTIONHELPER_H_
 #define SINGLECRYSTALDIFFRACTIONHELPER_H_
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NearestNeighbours.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <tuple>
 #include <random>
+#include <tuple>
 
 namespace Mantid {
 namespace SingleCrystalDiffractionTestHelper {
@@ -103,7 +103,7 @@ private:
   /// Random generator for making events
   std::mt19937 m_generator;
 };
-}
-}
+} // namespace SingleCrystalDiffractionTestHelper
+} // namespace Mantid
 
 #endif

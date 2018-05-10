@@ -43,7 +43,7 @@ using IMDEventWorkspace_uptr = std::unique_ptr<IMDEventWorkspace>;
 /// unique pointer to Mantid::API::IMDEventWorkspace (const version)
 using IMDEventWorkspace_const_uptr = std::unique_ptr<const IMDEventWorkspace>;
 
-} // namespace MDEvents
+} // namespace API
 } // namespace Mantid
 
 #endif /* IMDEVENTWORKSPACE_FWD_H_ */

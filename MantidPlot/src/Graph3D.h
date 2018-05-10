@@ -32,17 +32,17 @@
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
-#include <qwt3d_surfaceplot.h>
 #include <qwt3d_function.h>
 #include <qwt3d_parametricsurface.h>
+#include <qwt3d_surfaceplot.h>
 
+#include <QEvent>
 #include <QTimer>
 #include <QVector>
-#include <QEvent>
 
-#include "Table.h"
-#include "Matrix.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "Matrix.h"
+#include "Table.h"
 
 class MantidMatrix;
 class UserFunction2D;

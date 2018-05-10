@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
 
 using Mantid::MDAlgorithms::ConvertCWSDMDtoHKL;
 

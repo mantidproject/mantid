@@ -1,8 +1,8 @@
 #ifndef MANTIDQT_API_SIGNALRANGE_H_
 #define MANTIDQT_API_SIGNALRANGE_H_
 
-#include "MantidQtWidgets/LegacyQwt/DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtWidgets/LegacyQwt/DllOption.h"
 
 #include <qwt_double_interval.h>
 

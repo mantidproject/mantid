@@ -21,5 +21,5 @@ TimeStepToTimeStep::TimeStepToTimeStep()
 size_t TimeStepToTimeStep::operator()(double timeStep) const {
   return static_cast<size_t>(timeStep);
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

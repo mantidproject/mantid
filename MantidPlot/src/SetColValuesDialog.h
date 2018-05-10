@@ -32,8 +32,8 @@
 #ifndef VALUESDIALOG_H
 #define VALUESDIALOG_H
 
-#include "ScriptingEnv.h"
 #include "Scripted.h"
+#include "ScriptingEnv.h"
 #include <QDialog>
 
 class QComboBox;

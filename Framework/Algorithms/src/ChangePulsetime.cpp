@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/ChangePulsetime.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -74,5 +74,5 @@ void ChangePulsetime::exec() {
   setProperty("OutputWorkspace", out_ws);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

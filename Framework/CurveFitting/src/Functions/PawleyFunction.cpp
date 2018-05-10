@@ -7,9 +7,9 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -407,8 +407,8 @@ void PawleyFunction::setPeakPositions(std::string centreName, double zeroShift,
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double centre = getTransformedCenter(cell.d(m_hkls[i]));
 
-    m_peakProfileComposite->getFunction(i)
-        ->setParameter(centreName, centre + zeroShift);
+    m_peakProfileComposite->getFunction(i)->setParameter(centreName,
+                                                         centre + zeroShift);
   }
 }
 

@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_FLOATINGPOINTCOMPARISONTEST_H_
 #define MANTID_KERNEL_FLOATINGPOINTCOMPARISONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/FloatingPointComparison.h"
-#include <limits>
 #include <cfloat>
+#include <cxxtest/TestSuite.h>
+#include <limits>
 
 class FloatingPointComparisonTest : public CxxTest::TestSuite {
 public:

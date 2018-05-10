@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/DateAndTime.h"
 #include "../Muon/ALCLatestFileFinder.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
-#include <Poco/File.h>
 #include <Poco/DateTime.h>
+#include <Poco/File.h>
 
+using Mantid::Types::Core::DateAndTime;
 using MantidQt::CustomInterfaces::ALCLatestFileFinder;
 using ScopedFileHelper::ScopedFile;
-using Mantid::Types::Core::DateAndTime;
 
 /**
  * Temporary directory that is deleted when it goes out of scope
@@ -62,14 +62,14 @@ public:
 
 private:
   /**
- * Generate a filename from supplied instrument, run number
- * @param directory :: [input] Name of directory to create files in (must
- * already exist)
- * @param instrument [input] :: instrument name
- * @param run [input] :: run number
- * @param extension [input] :: extension
- * @returns :: filename
- */
+   * Generate a filename from supplied instrument, run number
+   * @param directory :: [input] Name of directory to create files in (must
+   * already exist)
+   * @param instrument [input] :: instrument name
+   * @param run [input] :: run number
+   * @param extension [input] :: extension
+   * @returns :: filename
+   */
   std::string createFileName(const std::string &directory,
                              const std::string &instrument,
                              const std::string &run,
@@ -87,10 +87,10 @@ private:
     return stream.str();
   }
   /**
- * Set file's last modified time (resolution: nearest second)
- * @param path :: [input] Path to file
- * @param time :: [input] ISO8601 formatted time string
- */
+   * Set file's last modified time (resolution: nearest second)
+   * @param path :: [input] Path to file
+   * @param time :: [input] ISO8601 formatted time string
+   */
   void adjustFileTime(const std::string &path,
                       const std::string &modifiedTime) {
     // Make sure the file exists

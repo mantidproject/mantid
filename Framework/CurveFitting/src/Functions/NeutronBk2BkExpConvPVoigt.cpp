@@ -7,8 +7,8 @@
 
 #include "MantidKernel/ConfigService.h"
 
-#include <gsl/gsl_sf_erf.h>
 #include <boost/lexical_cast.hpp>
+#include <gsl/gsl_sf_erf.h>
 
 const double PEAKRANGE = 5.0;
 const double NEG_DBL_MAX = -1. * DBL_MAX;
@@ -23,7 +23,7 @@ using namespace CurveFitting;
 namespace {
 /// static logger
 Kernel::Logger g_log("NeutronBk2BkExpConvPV");
-}
+} // namespace
 
 DECLARE_FUNCTION(NeutronBk2BkExpConvPVoigt)
 
@@ -72,19 +72,25 @@ void NeutronBk2BkExpConvPVoigt::init() {
       "exponential constant of decaying part of epithermal neutron pulse");
 
   // Pseudo-Voigt (8 ~ 13)
-  declareParameter("Sig0", 1.0, "variance parameter 1 of the Gaussian "
-                                "component of the psuedovoigt function");
-  declareParameter("Sig1", 1.0, "variance parameter 2 of the Gaussian "
-                                "component of the psuedovoigt function");
-  declareParameter("Sig2", 1.0, "variance parameter 3 of the Gaussian "
-                                "component of the psuedovoigt function");
+  declareParameter("Sig0", 1.0,
+                   "variance parameter 1 of the Gaussian "
+                   "component of the psuedovoigt function");
+  declareParameter("Sig1", 1.0,
+                   "variance parameter 2 of the Gaussian "
+                   "component of the psuedovoigt function");
+  declareParameter("Sig2", 1.0,
+                   "variance parameter 3 of the Gaussian "
+                   "component of the psuedovoigt function");
 
-  declareParameter("Gam0", 0.0, "FWHM parameter 1 of the Lorentzian component "
-                                "of the psuedovoigt function");
-  declareParameter("Gam1", 0.0, "FWHM parameter 2 of the Lorentzian component "
-                                "of the psuedovoigt function");
-  declareParameter("Gam2", 0.0, "FWHM parameter 3 of the Lorentzian component "
-                                "of the psuedovoigt function");
+  declareParameter("Gam0", 0.0,
+                   "FWHM parameter 1 of the Lorentzian component "
+                   "of the psuedovoigt function");
+  declareParameter("Gam1", 0.0,
+                   "FWHM parameter 2 of the Lorentzian component "
+                   "of the psuedovoigt function");
+  declareParameter("Gam2", 0.0,
+                   "FWHM parameter 3 of the Lorentzian component "
+                   "of the psuedovoigt function");
 
   // Lattice parameter (14)
   declareParameter("LatticeConstant", 10.0, "lattice constant for the sample");
@@ -150,8 +156,8 @@ double NeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
 
 //----------------------------------------------------------------------------------------------
 /** Calculate peak parameters (fundamential Back-to-back PV),including
-* alpha, beta, sigma^2, eta, H
-*/
+ * alpha, beta, sigma^2, eta, H
+ */
 void NeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const {
   // Obtain parameters (class) with pre-set order
   double dtt1 = getParameter(1);
@@ -268,7 +274,7 @@ void NeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const {
 
 //----------------------------------------------------------------------------------------------
 /** Override setting parameter by parameter index
-  */
+ */
 void NeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double &value,
                                              bool explicitlySet) {
   if (i == LATTICEINDEX) {
@@ -289,7 +295,7 @@ void NeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double &value,
 
 //----------------------------------------------------------------------------------------------
 /** Overriding setting parameter by parameter name
-  */
+ */
 void NeutronBk2BkExpConvPVoigt::setParameter(const std::string &name,
                                              const double &value,
                                              bool explicitlySet) {
@@ -310,10 +316,10 @@ void NeutronBk2BkExpConvPVoigt::setParameter(const std::string &name,
 
 //----------------------------------------------------------------------------------------------
 /** Function (local) of the vector version
-  * @param out: The calculated peak intensities. This is assume to been
+ * @param out: The calculated peak intensities. This is assume to been
  * initialized to the correct length
-  * with a value of zero everywhere.
-  * @param xValues: The x-values to evaluate the peak at.
+ * with a value of zero everywhere.
+ * @param xValues: The x-values to evaluate the peak at.
  */
 void NeutronBk2BkExpConvPVoigt::function(vector<double> &out,
                                          const vector<double> &xValues) const {
@@ -347,7 +353,7 @@ void NeutronBk2BkExpConvPVoigt::function(vector<double> &out,
 
 //----------------------------------------------------------------------------------------------
 /** virtual function from IFunction
-  */
+ */
 void NeutronBk2BkExpConvPVoigt::function1D(double *out, const double *xValues,
                                            const size_t nData) const {
   // Calculate peak parameters
@@ -411,8 +417,8 @@ void NeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
 
 //----------------------------------------------------------------------------------------------
 /** Calculate Omega(x) = ... ...
-* This is the core component to calcualte peak profile
-*/
+ * This is the core component to calcualte peak profile
+ */
 double NeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta,
                                            const double N, const double alpha,
                                            const double beta, const double H,

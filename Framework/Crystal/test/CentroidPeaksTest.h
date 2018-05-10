@@ -15,8 +15,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <random>
 
 using namespace Mantid;

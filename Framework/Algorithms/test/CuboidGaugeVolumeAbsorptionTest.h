@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

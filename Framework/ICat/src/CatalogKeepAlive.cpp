@@ -43,5 +43,5 @@ void CatalogKeepAlive::exec() {
     }
   }
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

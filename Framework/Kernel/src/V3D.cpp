@@ -3,11 +3,11 @@
 #include <complex>
 #include <vector>
 
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
 #include <boost/math/common_factor.hpp>
 #include <nexus/NeXusFile.hpp>
 
@@ -705,13 +705,13 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
 }
 
 /** transform vector into form, used to describe directions in crystallogaphical
-  *coodinate system, assuming that
-  * the vector describes perpendicular to a crystallogaphic plain or is close to
-  *such plain.
-  *
-  *  As crystallographical coordinate sytem is based on 3 integers, eps is used
-  *as accuracy to convert into integers
-*/
+ *coodinate system, assuming that
+ * the vector describes perpendicular to a crystallogaphic plain or is close to
+ *such plain.
+ *
+ *  As crystallographical coordinate sytem is based on 3 integers, eps is used
+ *as accuracy to convert into integers
+ */
 double nearInt(double val, double eps, double mult) {
   if (val > 0) {
     if (val < 1) {

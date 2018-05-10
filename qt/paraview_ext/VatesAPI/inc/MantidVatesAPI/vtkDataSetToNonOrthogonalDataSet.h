@@ -10,8 +10,8 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 
-#include <string>
 #include <array>
+#include <string>
 
 class vtkDataSet;
 

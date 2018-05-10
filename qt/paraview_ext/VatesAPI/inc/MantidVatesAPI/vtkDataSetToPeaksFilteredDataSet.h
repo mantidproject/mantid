@@ -72,7 +72,7 @@ private:
   double m_radiusFactor;  ///< By how much we want to trim the data set.
   double m_defaultRadius; ///< A default radius.
   Geometry::PeakShape::RadiusType m_radiusType;
-  bool m_isInitialised; ///<Flag if the filter is initialized
+  bool m_isInitialised; ///< Flag if the filter is initialized
   Mantid::Kernel::SpecialCoordinateSystem
       m_coordinateSystem;                            ///< A coordinate system.
   vtkSmartPointer<vtkUnstructuredGrid> m_inputData;  ///< Data to peak filter
@@ -80,6 +80,6 @@ private:
   std::vector<Mantid::API::IPeaksWorkspace_sptr>
       m_peaksWorkspaces; ///< A list of peaks workspace names.
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

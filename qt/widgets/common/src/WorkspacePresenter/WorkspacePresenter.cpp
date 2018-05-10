@@ -364,5 +364,5 @@ void WorkspacePresenter::updateView() {
   m_view->updateTree(m_adapter->topLevelItems());
 }
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

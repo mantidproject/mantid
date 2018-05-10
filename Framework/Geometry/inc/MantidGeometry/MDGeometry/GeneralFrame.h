@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_GENERALFRAME_H_
 #define MANTID_GEOMETRY_GENERALFRAME_H_
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/UnitLabel.h"
 #include <memory>
 

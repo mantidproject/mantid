@@ -4,8 +4,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
-#include "MantidCurveFitting/RalNlls/TrustRegion.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
 #include <cmath>
 
@@ -25,7 +25,7 @@ TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
 }
 
 /** Name of the minimizer.
-*/
+ */
 std::string TrustRegionMinimizer::name() const { return "Trust Region"; }
 
 /** Initialise the minimizer.
@@ -445,7 +445,7 @@ const double ROOTS_TOL = TEN_EPSILON_MCH;
 const double INFINITE_NUMBER = HUGEST;
 
 /** Replacement for FORTRAN's SIGN intrinsic function
-*/
+ */
 inline double sign(double x, double y) { return y >= 0.0 ? fabs(x) : -fabs(x); }
 
 //!  - - - - - - - - - - - - - - - - - - - - - - -
@@ -516,46 +516,46 @@ struct inform_type {
 };
 
 /** Get the largest of the four values.
-*  @param a :: Value number 1.
-*  @param b :: Value number 2.
-*  @param c :: Value number 3.
-*  @param d :: Value number 4.
-*/
+ *  @param a :: Value number 1.
+ *  @param b :: Value number 2.
+ *  @param c :: Value number 3.
+ *  @param d :: Value number 4.
+ */
 double biggest(double a, double b, double c, double d) {
   return std::max(std::max(a, b), std::max(c, d));
 }
 
 /** Get the largest of the three values.
-*  @param a :: Value number 1.
-*  @param b :: Value number 2.
-*  @param c :: Value number 3.
-*/
+ *  @param a :: Value number 1.
+ *  @param b :: Value number 2.
+ *  @param c :: Value number 3.
+ */
 double biggest(double a, double b, double c) {
   return std::max(std::max(a, b), c);
 }
 
 /** Find the largest by absolute value element of a vector.
-*  @param v :: The searched vector.
-*/
+ *  @param v :: The searched vector.
+ */
 double maxAbsVal(const DoubleFortranVector &v) {
   auto p = v.indicesOfMinMaxElements();
   return std::max(fabs(v.get(p.first)), fabs(v.get(p.second)));
 }
 
 /** Find the minimum and maximum elements of a vector.
-*  @param v :: The searched vector.
-*  @returns :: A pair of doubles where the first is the minimum and
-*      the second is the maxumum.
-*/
+ *  @param v :: The searched vector.
+ *  @returns :: A pair of doubles where the first is the minimum and
+ *      the second is the maxumum.
+ */
 std::pair<double, double> minMaxValues(const DoubleFortranVector &v) {
   auto p = v.indicesOfMinMaxElements();
   return std::make_pair(v.get(p.first), v.get(p.second));
 }
 
 /** Compute the 2-norm of a vector which is a square root of the
-*  sum of squares of its elements.
-*  @param v :: The vector.
-*/
+ *  sum of squares of its elements.
+ *  @param v :: The vector.
+ */
 double twoNorm(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
@@ -563,18 +563,18 @@ double twoNorm(const DoubleFortranVector &v) {
 }
 
 /** Get the dot-product of two vectors of the same size.
-*  @param v1 :: The first vector.
-*  @param v2 :: The second vector.
-*/
+ *  @param v1 :: The first vector.
+ *  @param v2 :: The second vector.
+ */
 double dotProduct(const DoubleFortranVector &v1,
                   const DoubleFortranVector &v2) {
   return v1.dot(v2);
 }
 
 /** Find the maximum element in the first n elements of a vector.
-*  @param v :: The vector.
-*  @param n :: The number of elements to examine.
-*/
+ *  @param v :: The vector.
+ *  @param n :: The number of elements to examine.
+ */
 double maxVal(const DoubleFortranVector &v, int n) {
   double res = std::numeric_limits<double>::lowest();
   for (int i = 1; i <= n; ++i) {
@@ -587,18 +587,18 @@ double maxVal(const DoubleFortranVector &v, int n) {
 }
 
 /**  Find the number and values of real roots of the quadratic equation
-*
-*                    a2 * x**2 + a1 * x + a0 = 0
-*
-*   where a0, a1 and a2 are real
-*  @param a0 :: The free coefficient.
-*  @param a1 :: The coefficient at the linear term.
-*  @param a2 :: The coefficient at the quadratic term.
-*  @param tol :: A tolerance for comparing doubles.
-*  @param nroots :: The output number of real roots.
-*  @param root1 :: The first real root if nroots > 0.
-*  @param root2 :: The second real root if nroots = 2.
-*/
+ *
+ *                    a2 * x**2 + a1 * x + a0 = 0
+ *
+ *   where a0, a1 and a2 are real
+ *  @param a0 :: The free coefficient.
+ *  @param a1 :: The coefficient at the linear term.
+ *  @param a2 :: The coefficient at the quadratic term.
+ *  @param tol :: A tolerance for comparing doubles.
+ *  @param nroots :: The output number of real roots.
+ *  @param root1 :: The first real root if nroots > 0.
+ *  @param root2 :: The second real root if nroots = 2.
+ */
 void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
                     double &root1, double &root2) {
 
@@ -670,20 +670,20 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
 }
 
 /**  Find the number and values of real roots of the cubic equation
-*
-*                 a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
-*
-*   where a0, a1, a2 and a3 are real
-*  @param a0 :: The free coefficient.
-*  @param a1 :: The coefficient at the linear term.
-*  @param a2 :: The coefficient at the quadratic term.
-*  @param a3 :: The coefficient at the cubic term.
-*  @param tol :: A tolerance for comparing doubles.
-*  @param nroots :: The output number of real roots.
-*  @param root1 :: The first real root.
-*  @param root2 :: The second real root if nroots > 1.
-*  @param root3 :: The third real root if nroots == 3.
-*/
+ *
+ *                 a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
+ *
+ *   where a0, a1, a2 and a3 are real
+ *  @param a0 :: The free coefficient.
+ *  @param a1 :: The coefficient at the linear term.
+ *  @param a2 :: The coefficient at the quadratic term.
+ *  @param a3 :: The coefficient at the cubic term.
+ *  @param tol :: A tolerance for comparing doubles.
+ *  @param nroots :: The output number of real roots.
+ *  @param root1 :: The first real root.
+ *  @param root2 :: The second real root if nroots > 1.
+ *  @param root3 :: The third real root if nroots == 3.
+ */
 void rootsCubic(double a0, double a1, double a2, double a3, double tol,
                 int &nroots, double &root1, double &root2, double &root3) {
 
@@ -814,15 +814,15 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
 }
 
 /**  Compute pi_beta = ||x||^beta and its derivatives
-*   Extracted wholesale from module RAL_NLLS_RQS
-*
-*  @param max_order :: Maximum order of derivative.
-*  @param beta :: Power.
-*  @param x_norm2 :: (0) value of ||x||^2,
-*                    (i) ith derivative of ||x||^2, i = 1, max_order
-*  @param pi_beta :: (0) value of ||x||^beta,
-*                    (i) ith derivative of ||x||^beta, i = 1, max_order
-*/
+ *   Extracted wholesale from module RAL_NLLS_RQS
+ *
+ *  @param max_order :: Maximum order of derivative.
+ *  @param beta :: Power.
+ *  @param x_norm2 :: (0) value of ||x||^2,
+ *                    (i) ith derivative of ||x||^2, i = 1, max_order
+ *  @param pi_beta :: (0) value of ||x||^beta,
+ *                    (i) ith derivative of ||x||^beta, i = 1, max_order
+ */
 void PiBetaDerivs(int max_order, double beta,
                   const DoubleFortranVector &x_norm2,
                   DoubleFortranVector &pi_beta) {
@@ -842,30 +842,30 @@ void PiBetaDerivs(int max_order, double beta,
 }
 
 /**  Set initial values for the TRS control parameters
-*
-*  @param control :: A structure containing control information.
-*/
+ *
+ *  @param control :: A structure containing control information.
+ */
 void intitializeControl(control_type &control) {
   control.stop_normal = pow(EPSILON_MCH, 0.75);
   control.stop_absolute_normal = pow(EPSILON_MCH, 0.75);
 }
 
 /**  Solve the trust-region subproblem
-*
-*       minimize     1/2 <x, H x> + <c, x> + f
-*       subject to    ||x||_2 <= radius  or ||x||_2 = radius
-*
-*   where H is diagonal, using a secular iteration
-*
-*  @param n :: The number of unknowns.
-*  @param radius :: The trust-region radius.
-*  @param f :: The value of constant term for the quadratic function
-*  @param c :: A vector of values for the linear term c.
-*  @param h :: A vector of values for the diagonal matrix H.
-*  @param x :: The required solution vector x.
-*  @param control :: A structure containing control information.
-*  @param inform :: A structure containing information.
-*/
+ *
+ *       minimize     1/2 <x, H x> + <c, x> + f
+ *       subject to    ||x||_2 <= radius  or ||x||_2 = radius
+ *
+ *   where H is diagonal, using a secular iteration
+ *
+ *  @param n :: The number of unknowns.
+ *  @param radius :: The trust-region radius.
+ *  @param f :: The value of constant term for the quadratic function
+ *  @param c :: A vector of values for the linear term c.
+ *  @param h :: A vector of values for the diagonal matrix H.
+ *  @param x :: The required solution vector x.
+ *  @param control :: A structure containing control information.
+ *  @param inform :: A structure containing information.
+ */
 void solveSubproblemMain(int n, double radius, double f,
                          const DoubleFortranVector &c,
                          const DoubleFortranVector &h, DoubleFortranVector &x,
@@ -1184,21 +1184,21 @@ void solveSubproblemMain(int n, double radius, double f,
 }
 
 /**  Solve the trust-region subproblem
-*
-*       minimize     q(x) = 1/2 <x, H x> + <c, x> + f
-*       subject to   ||x||_2 <= radius  or ||x||_2 = radius
-*
-*   where H is diagonal, using a secular iteration
-*
-*  @param n :: The number of unknowns.
-*  @param radius :: The trust-region radius.
-*  @param f :: The value of constant term for the quadratic function.
-*  @param c :: A vector of values for the linear term c.
-*  @param h ::  A vector of values for the diagonal matrix H.
-*  @param x :: The required solution vector x.
-*  @param control :: A structure containing control information.
-*  @param inform :: A structure containing information.
-*/
+ *
+ *       minimize     q(x) = 1/2 <x, H x> + <c, x> + f
+ *       subject to   ||x||_2 <= radius  or ||x||_2 = radius
+ *
+ *   where H is diagonal, using a secular iteration
+ *
+ *  @param n :: The number of unknowns.
+ *  @param radius :: The trust-region radius.
+ *  @param f :: The value of constant term for the quadratic function.
+ *  @param c :: A vector of values for the linear term c.
+ *  @param h ::  A vector of values for the diagonal matrix H.
+ *  @param x :: The required solution vector x.
+ *  @param control :: A structure containing control information.
+ *  @param inform :: A structure containing information.
+ */
 void solveSubproblem(int n, double radius, double f,
                      const DoubleFortranVector &c, const DoubleFortranVector &h,
                      DoubleFortranVector &x, const control_type &control,
@@ -1284,21 +1284,21 @@ void solveSubproblem(int n, double radius, double f,
 } // namespace
 
 /**   Solve the trust-region subproblem using
-*    the DTRS method from Galahad
-*
-*    This method needs H to be diagonal, so we need to
-*    pre-process
-*
-*    main output  d, the soln to the TR subproblem
-*  @param J :: The Jacobian.
-*  @param f :: The residuals.
-*  @param hf :: The Hessian (sort of).
-*  @param Delta :: The raduis of the trust region.
-*  @param d :: The output vector of corrections to the parameters giving the
-*        solution to the TR subproblem.
-*  @param normd :: The 2-norm of d.
-*  @param options :: The options.
-*/
+ *    the DTRS method from Galahad
+ *
+ *    This method needs H to be diagonal, so we need to
+ *    pre-process
+ *
+ *    main output  d, the soln to the TR subproblem
+ *  @param J :: The Jacobian.
+ *  @param f :: The residuals.
+ *  @param hf :: The Hessian (sort of).
+ *  @param Delta :: The raduis of the trust region.
+ *  @param d :: The output vector of corrections to the parameters giving the
+ *        solution to the TR subproblem.
+ *  @param normd :: The 2-norm of d.
+ *  @param options :: The options.
+ */
 void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J,
                                          const DoubleFortranVector &f,
                                          const DoubleFortranMatrix &hf,

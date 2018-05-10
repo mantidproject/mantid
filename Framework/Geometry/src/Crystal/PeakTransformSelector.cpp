@@ -81,7 +81,8 @@ PeakTransformSelector::makeChoice(const std::string labelX,
   if (!found) {
     std::stringstream ss;
     ss << "PeakTransformSelector could not find a suitable transform for "
-          "labelX " << labelX << " labelY " << labelY;
+          "labelX "
+       << labelX << " labelY " << labelY;
     throw std::invalid_argument(ss.str());
   }
   return selected;
@@ -104,5 +105,5 @@ bool PeakTransformSelector::hasFactoryForTransform(
   }
   return hasFactoryForTransform;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

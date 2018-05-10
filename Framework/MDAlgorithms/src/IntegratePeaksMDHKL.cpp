@@ -1,16 +1,16 @@
 #include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
-#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include <boost/math/special_functions/round.hpp>
 #include <algorithm>
+#include <boost/math/special_functions/round.hpp>
 #include <limits>
 
 namespace Mantid {
@@ -28,8 +28,8 @@ DECLARE_ALGORITHM(IntegratePeaksMDHKL)
 
 //----------------------------------------------------------------------------------------------
 /**
-  * Initialize the algorithm's properties.
-  */
+ * Initialize the algorithm's properties.
+ */
 void IntegratePeaksMDHKL::init() {
   declareProperty(
       make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "",
@@ -39,9 +39,10 @@ void IntegratePeaksMDHKL::init() {
                   "Distance from integer HKL to integrate peak.");
   declareProperty("GridPoints", 201,
                   "Number of grid points for each dimension of HKL box.");
-  declareProperty("NeighborPoints", 10, "Number of points in 5^3 surrounding "
-                                        "points above intensity threshold for "
-                                        "point to be part of peak.");
+  declareProperty("NeighborPoints", 10,
+                  "Number of points in 5^3 surrounding "
+                  "points above intensity threshold for "
+                  "point to be part of peak.");
   auto fluxValidator = boost::make_shared<CompositeValidator>();
   fluxValidator->add<WorkspaceUnitValidator>("Momentum");
   fluxValidator->add<InstrumentValidator>();

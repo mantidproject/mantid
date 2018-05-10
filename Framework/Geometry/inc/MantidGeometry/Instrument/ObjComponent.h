@@ -2,8 +2,8 @@
 #define MANTID_GEOMETRY_OBJCOMPONENT_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
 
 #ifdef _WIN32
 #pragma warning(disable : 4250)

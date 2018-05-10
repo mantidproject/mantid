@@ -77,7 +77,7 @@ private:
   /// Exponent to raise the base workspace to
   double m_exponent;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif

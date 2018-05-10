@@ -1,11 +1,11 @@
 #ifndef MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
 #define MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
 
-#include <boost/weak_ptr.hpp>
-#include "MantidKernel/VMD.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/LegacyQwt/DllOption.h"
 #include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
+#include <boost/weak_ptr.hpp>
 
 /** This class is used to plot MDWorkspace line plots.
  * For example, in the LineViewer and via the "Plot MD" menu on workspaces.

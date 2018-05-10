@@ -1,16 +1,16 @@
 #ifndef MANTID_SINQ_POLDIINSTRUMENTADAPTER_H_
 #define MANTID_SINQ_POLDIINSTRUMENTADAPTER_H_
 
-#include "MantidKernel/System.h"
-#include "MantidSINQ/DllConfig.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 
 #include <map>
 
-#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
 namespace Mantid {
@@ -64,8 +64,9 @@ public:
 
   double operator()(const API::Run &runInformation,
                     const std::string &propertyName) const override {
-    return runInformation.getPropertyValueAsType<std::vector<double>>(
-                              propertyName).front();
+    return runInformation
+        .getPropertyValueAsType<std::vector<double>>(propertyName)
+        .front();
   }
 };
 

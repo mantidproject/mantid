@@ -123,7 +123,7 @@ private:
 
   std::string m_formula;     ///< the formula
   std::string m_formulaUnit; ///< the unit that the formula expects
-  std::string m_resultUnit;  ///<the result unit
+  std::string m_resultUnit;  ///< the result unit
 };
 
 // defining operator << and >>

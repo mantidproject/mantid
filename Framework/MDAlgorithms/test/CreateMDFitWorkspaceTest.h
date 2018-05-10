@@ -1,13 +1,13 @@
 #ifndef CREATEMDFITWORKSPACE_TEST_H_
 #define CREATEMDFITWORKSPACE_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <vector>
-#include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/CreateMDFitWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidMDAlgorithms/CreateMDFitWorkspace.h"
+#include <boost/scoped_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <vector>
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;

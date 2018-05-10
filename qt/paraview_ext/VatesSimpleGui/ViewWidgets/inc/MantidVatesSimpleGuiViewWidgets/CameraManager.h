@@ -1,8 +1,8 @@
 #ifndef CAMERAMANAGER_H_
 #define CAMERAMANAGER_H_
 
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
 namespace Mantid {
 namespace Vates {
@@ -46,8 +46,8 @@ public:
   void setCameraToPeak(double xpos, double ypos, double zpos,
                        double peakRadius);
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif

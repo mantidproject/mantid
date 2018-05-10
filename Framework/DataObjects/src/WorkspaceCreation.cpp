@@ -1,9 +1,9 @@
-#include "MantidKernel/make_unique.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -95,12 +95,10 @@ void fixDistributionFlag(API::MatrixWorkspace &workspace,
                             HistogramData::Histogram::YMode::Frequencies);
 }
 
-template void MANTID_DATAOBJECTS_DLL
-initializeFromParent<std::true_type>(const API::MatrixWorkspace &,
-                                     API::MatrixWorkspace &);
-template void MANTID_DATAOBJECTS_DLL
-initializeFromParent<std::false_type>(const API::MatrixWorkspace &,
-                                      API::MatrixWorkspace &);
-}
+template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::true_type>(
+    const API::MatrixWorkspace &, API::MatrixWorkspace &);
+template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::false_type>(
+    const API::MatrixWorkspace &, API::MatrixWorkspace &);
+} // namespace detail
 } // namespace DataObjects
 } // namespace Mantid

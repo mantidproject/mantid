@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/PawleyFit.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/PawleyFit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

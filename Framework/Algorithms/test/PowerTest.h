@@ -1,16 +1,16 @@
 #ifndef POWERTEST_H_
 #define POWERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/Power.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/Power.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

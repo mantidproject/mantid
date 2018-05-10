@@ -166,7 +166,7 @@ using EventWorkspace_sptr = boost::shared_ptr<EventWorkspace>;
 /// shared pointer to a const Workspace2D
 using EventWorkspace_const_sptr = boost::shared_ptr<const EventWorkspace>;
 
-} /// namespace DataObjects
-} /// namespace Mantid
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ */

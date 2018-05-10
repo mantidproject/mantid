@@ -1,8 +1,8 @@
 #include "MantidCrystal/CalculatePeaksHKL.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

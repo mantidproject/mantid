@@ -1,10 +1,10 @@
 #ifndef SCRIPTREPOSITORYIMPLTEST_H_
 #define SCRIPTREPOSITORYIMPLTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 // Visual Studion compains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
@@ -15,17 +15,17 @@
 #else
 #include <Poco/FileStream.h>
 #endif
+#include "MantidKernel/ConfigService.h"
+#include <Poco/DateTimeFormatter.h>
 #include <Poco/TemporaryFile.h>
 #include <algorithm>
-#include <Poco/DateTimeFormatter.h>
 #include <boost/algorithm/string.hpp>
-#include "MantidKernel/ConfigService.h"
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Types::Core::DateAndTime;
 using namespace std;
-using Mantid::API::ScriptRepositoryImpl;
 using Mantid::API::ScriptRepoException;
+using Mantid::API::ScriptRepositoryImpl;
 
 const bool TEST_MANUALLY = false;
 
@@ -391,8 +391,8 @@ public:
   }
 
   /*************************************
-    *   File Info
-    *************************************/
+   *   File Info
+   *************************************/
   void test_info_correctly_parses_the_repository_json() {
     using Mantid::API::ScriptInfo;
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
@@ -407,8 +407,8 @@ public:
   }
 
   /*************************************
-    *   Download
-    *************************************/
+   *   Download
+   *************************************/
 
   /** Test that we are able to download files from the remote repository
    */
@@ -453,8 +453,8 @@ public:
   }
 
   /*************************************
-    *  UPDATE
-    *************************************/
+   *  UPDATE
+   *************************************/
   void test_update() {
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     std::vector<string> list_of_files;
@@ -621,8 +621,8 @@ public:
   }
 
   /*************************************
-    *   FILE STATUS
-    *************************************/
+   *   FILE STATUS
+   *************************************/
   void test_info_of_one_file() {
     std::string file_name = "TofConv/README.txt";
     std::string dir_name = "TofConv";
@@ -729,8 +729,8 @@ public:
   }
 
   /*************************************
-     *   FILE STATUS
-     *************************************/
+   *   FILE STATUS
+   *************************************/
   void test_info_of_downloaded_folder() {
     std::string file_name = "TofConv/TofConverter.py";
     std::string folder_name = "TofConv";
@@ -896,8 +896,8 @@ public:
   }
 
   /*************************************
-    *   SET IGNORE FILES
-    *************************************/
+   *   SET IGNORE FILES
+   *************************************/
 
   void test_ignore_files() {
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));

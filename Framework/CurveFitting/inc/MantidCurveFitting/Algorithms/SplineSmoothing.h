@@ -1,11 +1,11 @@
 #ifndef MANTID_CURVEFITTING_SPLINESMOOTHING_H_
 #define MANTID_CURVEFITTING_SPLINESMOOTHING_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -3,8 +3,8 @@
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
-#include <QWidget>
 #include <QPainter>
+#include <QWidget>
 #include <qwt_plot.h>
 
 namespace MantidQt {
@@ -172,6 +172,6 @@ protected:
 };
 
 } // namespace SliceViewer
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_LINEOVERLAY_H_ */

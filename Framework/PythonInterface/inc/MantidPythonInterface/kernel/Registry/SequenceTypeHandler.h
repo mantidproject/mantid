@@ -46,8 +46,8 @@ struct DLLExport SequenceTypeHandler
          const boost::python::object &validator,
          const unsigned int direction) const override;
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_SEQUENCETYPEHANDLER_H_ */

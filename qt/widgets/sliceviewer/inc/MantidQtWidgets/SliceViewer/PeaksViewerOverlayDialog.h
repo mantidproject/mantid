@@ -1,8 +1,8 @@
 #ifndef MANTIDSLICEVIEWER_PEAKSVIEWEROVERLAYDIALOG_H
 #define MANTIDSLICEVIEWER_PEAKSVIEWEROVERLAYDIALOG_H
 
-#include <QDialog>
 #include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
+#include <QDialog>
 
 class QAbstractButton;
 namespace Ui {
@@ -37,7 +37,7 @@ private:
   double m_originalOnProjectionFraction;
   double m_originalIntoProjectionFraction;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif // MANTIDSLICEVIEWER_PEAKSVIEWEROVERLAYDIALOG_H

@@ -15,7 +15,7 @@ namespace FuncMinimisers {
 namespace {
 // Get a reference to the logger
 Kernel::Logger g_log("SteepestDescentMinimizer");
-}
+} // namespace
 
 DECLARE_FUNCMINIMIZER(SteepestDescentMinimizer, SteepestDescent)
 

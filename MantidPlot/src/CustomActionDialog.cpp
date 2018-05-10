@@ -29,23 +29,23 @@
 #include "CustomActionDialog.h"
 #include "ApplicationWindow.h"
 
-#include <QPushButton>
-#include <QRadioButton>
-#include <QLabel>
-#include <QGroupBox>
-#include <QComboBox>
-#include <QLineEdit>
 #include <QAction>
 #include <QApplication>
+#include <QComboBox>
 #include <QDir>
-#include <QListWidget>
-#include <QLayout>
 #include <QFileDialog>
-#include <QToolBar>
-#include <QMenu>
+#include <QGroupBox>
 #include <QImageReader>
-#include <QShortcut>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QShortcut>
+#include <QToolBar>
 
 CustomActionDialog::CustomActionDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
@@ -298,7 +298,8 @@ bool CustomActionDialog::validUserInput() {
       QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
                             tr("You have already defined an action having "
                                "description: %1 <br>Please provide a different "
-                               "description text!").arg(textBox->text()));
+                               "description text!")
+                                .arg(textBox->text()));
       textBox->setFocus();
       return false;
     }
@@ -466,7 +467,8 @@ void CustomActionDialog::saveAction(QAction *action) {
     QMessageBox::critical(
         app, tr("MantidPlot") + " - " + tr("File Save Error"),
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!").arg(fileName));
+           "you have the right to write to this location!")
+            .arg(fileName));
     return;
   }
 

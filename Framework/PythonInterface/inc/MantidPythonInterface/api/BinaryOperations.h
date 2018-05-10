@@ -59,7 +59,7 @@ ResultType performBinaryOpMDWithDouble(const LHSType lhs, const double value,
                                        const std::string &name, bool inplace,
                                        bool reverse);
 //@}
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_BINARYOPERATIONS_H_ */

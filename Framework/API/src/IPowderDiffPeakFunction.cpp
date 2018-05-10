@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPowderDiffPeakFunction.h"
 #include "MantidAPI/Jacobian.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
@@ -19,7 +19,7 @@ int IPowderDiffPeakFunction::s_peakRadius = 5;
 //----------------------------------------------------------------------------------------------
 /** Constructor. Sets peak radius to the value of curvefitting.peakRadius
  * property
-  */
+ */
 IPowderDiffPeakFunction::IPowderDiffPeakFunction()
     : m_centre(0.), m_dcentre(0.), m_fwhm(0.), m_hasNewParameterValue(false),
       m_cellParamValueChanged(false), m_sortedProfileParameterNames(),
@@ -37,10 +37,10 @@ IPowderDiffPeakFunction::IPowderDiffPeakFunction()
 
 //----------------------------------------------------------------------------------------------
 /** Override setting parameter by parameter index
-  * @param i :: parameter index in function;
-  * @param value :: parameter name
-  * @param explicitlySet ::
-  */
+ * @param i :: parameter index in function;
+ * @param value :: parameter name
+ * @param explicitlySet ::
+ */
 void IPowderDiffPeakFunction::setParameter(size_t i, const double &value,
                                            bool explicitlySet) {
   double origparamvalue = getParameter(i);
@@ -52,10 +52,10 @@ void IPowderDiffPeakFunction::setParameter(size_t i, const double &value,
 
 //----------------------------------------------------------------------------------------------
 /** Overriding setting parameter by parameter name
-  * @param name :: name of the parameter to set
-  * @param value :: parameter name
-  * @param explicitlySet ::
-  */
+ * @param name :: name of the parameter to set
+ * @param value :: parameter name
+ * @param explicitlySet ::
+ */
 void IPowderDiffPeakFunction::setParameter(const std::string &name,
                                            const double &value,
                                            bool explicitlySet) {
@@ -68,7 +68,7 @@ void IPowderDiffPeakFunction::setParameter(const std::string &name,
 
 //----------------------------------------------------------------------------------------------
 /** Get peak centre
-  */
+ */
 double IPowderDiffPeakFunction::centre() const {
   // Re-calcualte peak parameters if required
   if (m_hasNewParameterValue)
@@ -105,7 +105,7 @@ void IPowderDiffPeakFunction::setHeight(const double h) {
 
 //----------------------------------------------------------------------------------------------
 /** Get peak's height
-  */
+ */
 double IPowderDiffPeakFunction::height() const {
   double height = this->getParameter(HEIGHTINDEX);
   return height;
@@ -113,7 +113,7 @@ double IPowderDiffPeakFunction::height() const {
 
 //----------------------------------------------------------------------------------------------
 /**  Get peak's FWHM
-  */
+ */
 double IPowderDiffPeakFunction::fwhm() const {
   if (m_hasNewParameterValue)
     calculateParameters(false);
@@ -123,7 +123,7 @@ double IPowderDiffPeakFunction::fwhm() const {
 
 //----------------------------------------------------------------------------------------------
 /** Get maximum value on a given set of data points
-  */
+ */
 double
 IPowderDiffPeakFunction::getMaximumValue(const std::vector<double> &xValues,
                                          size_t &indexmax) const {
@@ -183,8 +183,8 @@ void IPowderDiffPeakFunction::getMillerIndex(int &h, int &k, int &l) {
 
 //----------------------------------------------------------------------------------------------
 /** Set peak radius
-  * @param r :: radius
-  */
+ * @param r :: radius
+ */
 void IPowderDiffPeakFunction::setPeakRadius(const int &r) {
   if (r > 0) {
     s_peakRadius = r;
@@ -196,7 +196,7 @@ void IPowderDiffPeakFunction::setPeakRadius(const int &r) {
 
 //----------------------------------------------------------------------------------------------
 /** Check whether a parameter is a profile parameter
-  */
+ */
 bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname) {
   auto candname = lower_bound(m_sortedProfileParameterNames.begin(),
                               m_sortedProfileParameterNames.end(), paramname);

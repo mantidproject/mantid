@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_PRODUCTQUADRATICEXP_H_
 #define MANTID_CURVEFITTING_PRODUCTQUADRATICEXP_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

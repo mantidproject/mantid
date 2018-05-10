@@ -1,12 +1,12 @@
 #ifndef MANTID_ALGORITHMS_GENERATEEVENTSFILTER_H_
 #define MANTID_ALGORITHMS_GENERATEEVENTSFILTER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
 namespace Algorithms {

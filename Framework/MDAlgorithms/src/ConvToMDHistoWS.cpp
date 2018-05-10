@@ -40,11 +40,11 @@ ConvToMDHistoWS::initialize(const MDWSDescription &WSD,
 }
 
 /** convert range of spectra starting from initial spectra  startSpectra into MD
-*events
-*@param startSpectra -- initial spectra number to begin conversion from
-*
-* @returns -- number of events added to the workspace.
-*/
+ *events
+ *@param startSpectra -- initial spectra number to begin conversion from
+ *
+ * @returns -- number of events added to the workspace.
+ */
 size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
   size_t nAddedEvents(0), nBufEvents(0);
   // cache global variable locally
@@ -261,11 +261,11 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
   m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
 }
 /**function calculates the size of temporary memory used to keep convertTo MD
-* data before these data should be added to DataObjects
-* @param nThreads        -- number of threads used to process data
-* @param specSize        -- the size of single spectra in matrix workspace;
-* @param nPointsToProcess -- total number of data points in the workspace
-*/
+ * data before these data should be added to DataObjects
+ * @param nThreads        -- number of threads used to process data
+ * @param specSize        -- the size of single spectra in matrix workspace;
+ * @param nPointsToProcess -- total number of data points in the workspace
+ */
 void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize,
                                          size_t nPointsToProcess) {
   if (nThreads == 0)
@@ -282,4 +282,4 @@ void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize,
 }
 
 } // endNamespace DataObjects
-} // endNamespace Mantid
+} // namespace Mantid

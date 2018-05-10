@@ -58,5 +58,5 @@ vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws,
 
 // What we call the scalar array bearing the signal values in the vtk data set.
 const std::string vtkDataSetFactory::ScalarName = "signal";
-}
-}
+} // namespace VATES
+} // namespace Mantid

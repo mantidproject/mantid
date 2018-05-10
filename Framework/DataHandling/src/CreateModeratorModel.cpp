@@ -7,8 +7,8 @@
 
 namespace Mantid {
 namespace DataHandling {
-using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 using Kernel::Direction;
 using Kernel::ListValidator;
 using Kernel::MandatoryValidator;

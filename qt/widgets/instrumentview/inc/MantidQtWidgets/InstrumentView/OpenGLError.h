@@ -7,8 +7,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-* Exception for wrapping an OpenGL error
-*/
+ * Exception for wrapping an OpenGL error
+ */
 class OpenGLError : public std::exception {
 public:
   explicit OpenGLError(const std::string &msg) : m_msg(msg) {}
@@ -21,7 +21,7 @@ public:
 private:
   std::string m_msg;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*OPENGLERROR_H_*/

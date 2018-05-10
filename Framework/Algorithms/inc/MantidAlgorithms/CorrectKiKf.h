@@ -96,7 +96,7 @@ private:
                                  const Mantid::Geometry::ParameterMap &pmap);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CORRECTKIKF_H_*/

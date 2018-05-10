@@ -7,8 +7,8 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: [input] The parent of this widget
-*/
+ * @param parent :: [input] The parent of this widget
+ */
 QtReflSettingsTabView::QtReflSettingsTabView(QWidget *parent) {
 
   UNUSED_ARG(parent);
@@ -17,7 +17,7 @@ QtReflSettingsTabView::QtReflSettingsTabView(QWidget *parent) {
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 QtReflSettingsTabView::~QtReflSettingsTabView() {}
 
 /**
@@ -40,12 +40,12 @@ void QtReflSettingsTabView::initLayout() {
 }
 
 /** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
+ * @return :: A pointer to the presenter
+ */
 IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
 
   return m_presenter.get();
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
