@@ -97,8 +97,8 @@ public:
   }
 
   void test_load_diff_sizes() {
-    ScopedFile f1(m_data1, "Efficiency1.dat");
-    ScopedFile f2(m_data2, "Efficiency2.dat");
+    ScopedFile f1(m_data1, "Efficiency4.dat");
+    ScopedFile f2(m_data2, "Efficiency5.dat");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
@@ -144,8 +144,8 @@ public:
   }
 
   void test_diff_methods() {
-    ScopedFile f1(m_data1, "Efficiency1.dat");
-    ScopedFile f2(m_data1, "Efficiency2.dat");
+    ScopedFile f1(m_data1, "Efficiency6.dat");
+    ScopedFile f2(m_data1, "Efficiency7.dat");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
