@@ -26,7 +26,7 @@ public:
 
 private:
   QtStandardItemTreeModelAdapter &m_adaptedMainModel;
-  RowLocationAdapter const &m_rowLocations;
+  RowLocationAdapter m_rowLocations;
 };
 
 } // namespace Batch

@@ -169,7 +169,6 @@ void JobTreeView::replaceRows(std::vector<RowLocation> replacementPoints,
   assertOrThrow(replacementPoints.size() > 0,
                 "replaceRows: Passed an empty list of replacement points."
                 "At least one replacement point is required.");
-
   auto replacementPoint = replacementPoints.cbegin();
   auto replacement = replacements.cbegin();
 

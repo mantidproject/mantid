@@ -22,8 +22,8 @@ auto BuildSubtreeItems::buildRecursively(int index, RowLocation const &parent,
                                          SubtreeConstIterator current,
                                          SubtreeConstIterator end)
     -> SubtreeConstIterator {
-  m_adaptedMainModel.insertChildRow(m_rowLocations.indexAt(parent), index,
-                                    (*current).cells());
+  auto insertedRow = m_adaptedMainModel.insertChildRow(
+      m_rowLocations.indexAt(parent), index, (*current).cells());
   ++current;
   while (current != end) {
     auto currentRow = (*current).location();
@@ -31,8 +31,8 @@ auto BuildSubtreeItems::buildRecursively(int index, RowLocation const &parent,
 
     if (depth < currentDepth) {
       current = buildRecursively(currentRow.rowRelativeToParent(),
-                                 parent.child(currentRow.rowRelativeToParent()),
-                                 depth + 1, current, end);
+                                 parent.child(insertedRow.row()), depth + 1,
+                                 current, end);
     } else if (depth > currentDepth) {
       return current;
     } else {
