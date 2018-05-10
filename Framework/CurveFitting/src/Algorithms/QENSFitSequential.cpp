@@ -239,8 +239,9 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 
-  auto getName =
-      [&](std::size_t i) { return outputBase + "_" + getNameSuffix(i); };
+  auto getName = [&](std::size_t i) {
+    return outputBase + "_" + getNameSuffix(i);
+  };
 
   auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
     renameWorkspace(renameAlgorithm, workspace, name);
@@ -333,16 +334,19 @@ void QENSFitSequential::init() {
   declareProperty(
       make_unique<FunctionProperty>("Function"),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "", "Name of the log value to plot the "
-                                  "parameters against. Default: use spectra "
-                                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
-                                         "boundary of, the first bin to "
-                                         "include in\n"
-                                         "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
-                                       "of, the last bin the fitting range\n"
-                                       "(default the highest value of x)");
+  declareProperty("LogValue", "",
+                  "Name of the log value to plot the "
+                  "parameters against. Default: use spectra "
+                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
@@ -400,6 +404,9 @@ void QENSFitSequential::init() {
   declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
+
+  declareProperty("IgnoreInvalidData", false,
+                  "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 std::map<std::string, std::string> QENSFitSequential::validateInputs() {
@@ -603,6 +610,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   const std::vector<double> exclude = getProperty("Exclude");
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
+  const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
@@ -612,6 +620,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
   plotPeaks->setProperty("Exclude", exclude);
+  plotPeaks->setProperty("IgnoreInvalidData", ignoreInvalidData);
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
   plotPeaks->setProperty("OutputCompositeMembers", true);
