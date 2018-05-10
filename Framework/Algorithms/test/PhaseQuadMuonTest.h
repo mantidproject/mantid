@@ -37,10 +37,6 @@ void populatePhaseTableWithDeadDetectors(ITableWorkspace_sptr phaseTable,
     }
   }
 }
-bool isZero(double value) {
-  bool result = value == 0;
-  return result;
-}
 void populatePhaseTable(ITableWorkspace_sptr phaseTable,
                         std::vector<std::string> names, bool swap = false) {
   phaseTable->addColumn("int", names[0]);
@@ -167,7 +163,7 @@ public:
     std::vector<bool> emptySpectrum;
     for (size_t h = 0; h < nspec; h++) {
       emptySpectrum.push_back(
-          std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
+          std::all_of(ws->y(h).begin(), ws->y(h).end(), [](double value) { return value == 0.; }));
     }
     for (size_t j = 0; j < emptySpectrum.size(); j++) {
       if (j == dead1 || j == dead2) {

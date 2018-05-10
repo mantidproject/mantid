@@ -28,7 +28,7 @@ int findName(const T1 &patterns, const T2 &names) {
   }
   return -1;
 }
-bool isZero(double value) { return value == 0; }
+double ASYMM_ERROR = 999.0;
 }
 
 namespace Mantid {
@@ -231,7 +231,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
     if (phase->Double(h, asymmetryIndex) > maxAsym &&
-        phase->Double(h, asymmetryIndex) != 999.0) {
+        phase->Double(h, asymmetryIndex) != ASYMM_ERROR) {
       maxAsym = phase->Double(h, asymmetryIndex);
     }
   }
@@ -250,7 +250,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double sxy = 0.;
     for (size_t h = 0; h < nspec; h++) {
       emptySpectrum.push_back(
-          std::all_of(ws->y(h).begin(), ws->y(h).end(), isZero));
+		  std::all_of(ws->y(h).begin(), ws->y(h).end(), [](double value) { return value == 0.; }));
       if (!emptySpectrum[h]) {
         const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
         const double phi = phase->Double(h, phaseIndex);

@@ -16,9 +16,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 namespace {
-bool isZero(double value) { return value == 0; }
-int phaseRow = 2;
-double asymError = 999.0;
+int PHASE_ROW = 2;
+double ASYMM_ERROR = 999.0;
 }
 
 namespace Mantid {
@@ -167,8 +166,8 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   const static std::string success = "success";
   for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
     reportProgress(wsIndex, nhist);
-    auto yValues = ws->readY(wsIndex);
-    auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(), isZero);
+    auto yValues = ws->y(wsIndex);
+    auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(), [](double value) { return value == 0.; });
     if (emptySpectrum) {
       g_log.warning("Spectrum " + std::to_string(wsIndex) + " is empty");
       auto tab =
@@ -178,10 +177,10 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
       tab->addColumn("double", "Error");
       for (int j = 0; j < 4; j++) {
         API::TableRow row = tab->appendRow();
-        if (j == phaseRow) {
+        if (j == PHASE_ROW) {
           row << "dummy" << 0.0 << 0.0;
         } else {
-          row << "dummy" << asymError << 0.0;
+          row << "dummy" << ASYMM_ERROR << 0.0;
         }
       }
 

@@ -19,8 +19,6 @@ constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 /// Muon lifetime in microseconds
 constexpr double MUON_LIFETIME_MICROSECONDS{
     Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
-
-bool isZero(double value) { return value == 0; }
 }
 
 namespace Mantid {
@@ -102,9 +100,8 @@ void MuonRemoveExpDecay::exec() {
       throw std::invalid_argument(
           "Spectra size greater than the number of spectra!");
     }
-    auto fsdaf = (inputWS->y(specNum));
     auto emptySpectrum = std::all_of(inputWS->y(specNum).begin(),
-                                     inputWS->y(specNum).end(), isZero);
+		inputWS->y(specNum).end(), [](double value) { return value == 0.; });
     if (emptySpectrum) {
       // if the y values are all zero do not change them
       m_log.warning("Dead detector found at spectrum number " +
