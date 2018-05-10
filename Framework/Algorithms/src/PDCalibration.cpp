@@ -593,7 +593,7 @@ void PDCalibration::exec() {
       if (height < 0.5 * std::sqrt(height + background)) {
         continue;
       }
-      d_vec.push_back(peaks.inDPos[peakIndex]);
+      d_vec.push_back(m_peaksInDspacing[peakIndex]);
       tof_vec.push_back(centre);
       height2.push_back(height * height);
       tof_vec_full[peakIndex] = centre;
