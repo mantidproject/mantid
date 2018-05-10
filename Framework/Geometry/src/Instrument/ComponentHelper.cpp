@@ -1,10 +1,10 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/Detector.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
@@ -122,5 +122,5 @@ std::string sphereXML(double radius, const Kernel::V3D &centre,
 }
 
 } // namespace ComponentHelper
-}
-} // namespace Mantid::Geometry
+} // namespace Geometry
+} // namespace Mantid

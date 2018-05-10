@@ -1,12 +1,12 @@
 #ifndef MANTID_KERNEL_COMPOSITEVALIDATORTEST_H_
 #define MANTID_KERNEL_COMPOSITEVALIDATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid;

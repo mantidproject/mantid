@@ -1,16 +1,16 @@
 #ifndef GETDETECTOROFFSETSTEST_H_
 #define GETDETECTOROFFSETSTEST_H_
 
-#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;

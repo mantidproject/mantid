@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -337,5 +337,5 @@ void EditInstrumentGeometry::exec() {
   workspace->setInstrument(instrument);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

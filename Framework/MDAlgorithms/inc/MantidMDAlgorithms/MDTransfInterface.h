@@ -5,8 +5,8 @@
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
@@ -100,7 +100,7 @@ public:
    *
    * @return true         -- if all Coord are within the range requested by the
    *conversion algorithm. false otherwise
-  */
+   */
   virtual bool calcGenericVariables(std::vector<coord_t> &Coord,
                                     size_t n_ws_variabes) = 0;
 
@@ -219,7 +219,7 @@ public:
 
   /** return the number of dimensions, calculated by the transformation from the
    * workspace. This number is usually varies from 1 to 4
-    * and depends on emode and possibly on some WS parameters.     */
+   * and depends on emode and possibly on some WS parameters.     */
   virtual unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                        API::MatrixWorkspace_const_sptr inWS) const = 0;
@@ -239,7 +239,7 @@ public:
 using MDTransf_sptr = boost::shared_ptr<MDTransfInterface>;
 using MDTransf_const_sptr = boost::shared_ptr<const MDTransfInterface>;
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

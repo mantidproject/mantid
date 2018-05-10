@@ -1,13 +1,13 @@
 #ifndef FUNCTIONPARAMETERDECORATORFITTEST_H
 #define FUNCTIONPARAMETERDECORATORFITTEST_H
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 

@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_HKL_H_
 #define MANTID_GEOMETRY_HKL_H_
 
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidGeometry/DllConfig.h"
 #include <memory>
 
 namespace Mantid {

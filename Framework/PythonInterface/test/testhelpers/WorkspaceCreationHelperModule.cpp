@@ -1,9 +1,9 @@
 /******************************************************************************
  * Python module wrapper for the WorkspaceCreationHelper methods
  ******************************************************************************/
-#include <boost/python/docstring_options.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/docstring_options.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -68,7 +68,7 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //=================================== Event Workspaces
   //===================================
 
-  def("createEventWorkspace", (EventWorkspace_sptr (*)())createEventWorkspace,
+  def("createEventWorkspace", (EventWorkspace_sptr(*)())createEventWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
   def("createEventWorkspace2", &createEventWorkspace2,
       return_value_policy<AsType<Workspace_sptr>>());
@@ -81,15 +81,15 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
           createPeaksWorkspace),
       return_value_policy<AsType<Workspace_sptr>>());
   def("createPeaksWorkspace",
-      (PeaksWorkspace_sptr (*)(const int, const bool))createPeaksWorkspace,
+      (PeaksWorkspace_sptr(*)(const int, const bool))createPeaksWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== MD Workspaces
   //===================================
 
   // Typedef for function pointer to disabiguate references
-  using Signature1_MDHisto = MDHistoWorkspace_sptr (
-      *)(double, size_t, size_t, Mantid::coord_t, double, std::string, double);
+  using Signature1_MDHisto = MDHistoWorkspace_sptr (*)(
+      double, size_t, size_t, Mantid::coord_t, double, std::string, double);
 
   def("makeFakeMDHistoWorkspace", (Signature1_MDHisto)&makeFakeMDHistoWorkspace,
       makeFakeMDHistoWorkspace_overloads()

@@ -95,7 +95,7 @@ private:
   /// The x-axis minimum
   double m_Xmax;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // MANTID_DATAHANDLING_SAVEVTP_H_

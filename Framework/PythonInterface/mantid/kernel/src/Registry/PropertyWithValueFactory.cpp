@@ -2,10 +2,10 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/make_shared.hpp>
 
@@ -102,7 +102,7 @@ const PyArrayIndex &getArrayIndex() {
     initArrayLookup(index);
   return index;
 }
-}
+} // namespace
 
 /**
  * Creates a PropertyWithValue<Type> instance from the given information.
@@ -223,6 +223,6 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     return std::string("");
   }
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

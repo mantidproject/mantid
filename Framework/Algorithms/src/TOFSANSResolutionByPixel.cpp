@@ -1,15 +1,15 @@
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
-#include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
-#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
+#include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Interpolation.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
+#include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_unique.h"
 
@@ -120,8 +120,8 @@ void TOFSANSResolutionByPixel::exec() {
     auto collimationLengthEstimator = SANSCollimationLengthEstimator();
     LCollim = collimationLengthEstimator.provideCollimationLength(inWS);
     g_log.information() << "No collimation length was specified. A default "
-                           "collimation length was estimated to be " << LCollim
-                        << '\n';
+                           "collimation length was estimated to be "
+                        << LCollim << '\n';
   } else {
     g_log.information() << "The collimation length is  " << LCollim << '\n';
   }

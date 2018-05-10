@@ -1,21 +1,21 @@
 #include "MantidQtWidgets/Common/CatalogSearch.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/ICatalogInfo.h"
-#include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/UserCatalogInfo.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
 
+#include <QDesktopWidget>
 #include <QFileDialog>
 #include <QSettings>
 #include <QStyle>
 #include <QUrl>
-#include <QDesktopWidget>
 
 #include <fstream>
 
@@ -920,9 +920,9 @@ void CatalogSearch::investigationSelected(QTableWidgetItem *item) {
   // investigation.
   m_icatHelper->executeGetDataFiles(
       investigationId->text().toStdString(),
-      searchResultsTable->item(item->row(),
-                               headerIndexByName(searchResultsTable,
-                                                 "SessionID"))
+      searchResultsTable
+          ->item(item->row(),
+                 headerIndexByName(searchResultsTable, "SessionID"))
           ->text()
           .toStdString());
 
@@ -1081,22 +1081,24 @@ void CatalogSearch::updateDataFileLabels(QTableWidgetItem *item) {
   // Set the "title" label using the data from the investigation results
   // workspace.
   m_icatUiForm.dataFileTitleRes->setText(
-      searchResultsTable->item(item->row(),
-                               headerIndexByName(searchResultsTable, "Title"))
+      searchResultsTable
+          ->item(item->row(), headerIndexByName(searchResultsTable, "Title"))
           ->text());
 
   // Set the instrument label using data from the investigation results
   // workspace.
   m_icatUiForm.dataFileInstrumentRes->setText(
-      searchResultsTable->item(item->row(),
-                               headerIndexByName(searchResultsTable,
-                                                 "Instrument"))->text());
+      searchResultsTable
+          ->item(item->row(),
+                 headerIndexByName(searchResultsTable, "Instrument"))
+          ->text());
 
   // Show the related "run-range" for the specific dataFiles.
   m_icatUiForm.dataFileRunRangeRes->setText(
-      searchResultsTable->item(item->row(),
-                               headerIndexByName(searchResultsTable,
-                                                 "Run range"))->text());
+      searchResultsTable
+          ->item(item->row(),
+                 headerIndexByName(searchResultsTable, "Run range"))
+          ->text());
 }
 
 /**

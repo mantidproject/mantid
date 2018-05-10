@@ -88,5 +88,5 @@ bool VatesKnowledgeSerializer::hasFunctionInfo() const {
 bool VatesKnowledgeSerializer::hasGeometryInfo() const {
   return !m_geomXML.empty() && !m_wsName.empty();
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

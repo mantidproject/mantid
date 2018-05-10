@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {
@@ -49,16 +49,16 @@ public:
   Attribute getAttribute(const std::string &attName) const override;
   void setAttribute(const std::string &attName, const Attribute &attr) override;
   /**
-    * Defining function's parameters here, ie after the workspace is set and
-    * the dimensions are known.
-    */
+   * Defining function's parameters here, ie after the workspace is set and
+   * the dimensions are known.
+   */
   void initDimensions() override;
 
 protected:
   /**
-    * Calculate the function value at a point r in the MD workspace
-    * @param r :: MD workspace iterator with a reference to the current point
-    */
+   * Calculate the function value at a point r in the MD workspace
+   * @param r :: MD workspace iterator with a reference to the current point
+   */
   double functionMD(const API::IMDIterator &r) const override;
   /** Static callback function used by MuParser to initialize variables
   implicitly
@@ -68,8 +68,8 @@ protected:
   static double *AddVariable(const char *varName, void *pufun);
 
   /**
-    * Initializes the mu::Parser.
-    */
+   * Initializes the mu::Parser.
+   */
   void setFormula();
 
 private:

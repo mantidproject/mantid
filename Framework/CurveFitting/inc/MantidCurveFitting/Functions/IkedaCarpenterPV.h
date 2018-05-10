@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IPeakFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {

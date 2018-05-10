@@ -1,13 +1,13 @@
 #ifndef MULTIDOMAINFUNCTIONTEST_H_
 #define MULTIDOMAINFUNCTIONTEST_H_
 
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"

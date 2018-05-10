@@ -3,9 +3,10 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
@@ -15,8 +16,6 @@
 #include <vtkNew.h>
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/make_unique.h"
 
 #include <iterator>
 
@@ -45,12 +44,12 @@ vtkMDHexFactory::~vtkMDHexFactory() {}
 
 //-------------------------------------------------------------------------------------------------
 /* Generate the vtkDataSet from the objects input MDEventWorkspace (of a given
-*type an dimensionality 3+)
-*
-* @param ws: workspace to draw from
-* @return a fully constructed vtkUnstructuredGrid containing geometric and
-*scalar data.
-*/
+ *type an dimensionality 3+)
+ *
+ * @param ws: workspace to draw from
+ * @return a fully constructed vtkUnstructuredGrid containing geometric and
+ *scalar data.
+ */
 template <typename MDE, size_t nd>
 void vtkMDHexFactory::doCreate(
     typename MDEventWorkspace<MDE, nd>::sptr ws) const {
@@ -306,12 +305,12 @@ void vtkMDHexFactory::validate() const {
 }
 
 /** Sets the recursion depth to a specified level in the workspace.
-*/
+ */
 void vtkMDHexFactory::setRecursionDepth(size_t depth) { m_maxDepth = depth; }
 
 /*
 Set the time value.
 */
 void vtkMDHexFactory::setTime(double time) { m_time = time; }
-}
-}
+} // namespace VATES
+} // namespace Mantid

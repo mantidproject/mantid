@@ -16,7 +16,7 @@ namespace PropertyNames {
 const static std::string ALGORITHM("Algorithm");
 const static std::string IO_MAP("InputOutputMap");
 const static std::string SETUP_TABLE("SetupTable");
-}
+} // namespace PropertyNames
 
 /** Checks if a string is a hard coded workspace name.
  * @param s string to be checked

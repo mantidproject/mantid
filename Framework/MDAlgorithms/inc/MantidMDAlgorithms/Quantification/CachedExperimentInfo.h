@@ -125,7 +125,7 @@ private:
   /// Store sample to detector transformation
   Kernel::DblMatrix m_sampleToDetMatrix;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_CACHEDEXPERIMENTINFO_H_ */

@@ -67,24 +67,21 @@ public:
     TS_ASSERT_EQUALS(
         outputWs->y(0)[0],
         inputWs->y(0)[0] /
-            (1 -
-             inputWs->y(0)[0] *
-                 (deadValue() /
-                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
+            (1 - inputWs->y(0)[0] *
+                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
+                                     numGoodFrames))));
     TS_ASSERT_EQUALS(
         outputWs->y(0)[40],
         inputWs->y(0)[40] /
-            (1 -
-             inputWs->y(0)[40] *
-                 (deadValue() /
-                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
+            (1 - inputWs->y(0)[40] *
+                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
+                                     numGoodFrames))));
     TS_ASSERT_EQUALS(
         outputWs->y(31)[20],
         inputWs->y(31)[20] /
-            (1 -
-             inputWs->y(31)[20] *
-                 (deadValue() /
-                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
+            (1 - inputWs->y(31)[20] *
+                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
+                                     numGoodFrames))));
 
     TS_ASSERT_DELTA(35.9991, outputWs->y(12)[2], 0.001);
     TS_ASSERT_DELTA(4901.5439, outputWs->y(20)[14], 0.001);
@@ -155,10 +152,9 @@ public:
     TS_ASSERT_EQUALS(
         outputWs->y(14)[40],
         inputWs->y(14)[40] /
-            (1 -
-             inputWs->y(14)[40] *
-                 (deadValue() /
-                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
+            (1 - inputWs->y(14)[40] *
+                     (deadValue() / ((inputWs->x(0)[1] - inputWs->x(0)[0]) *
+                                     numGoodFrames))));
     TS_ASSERT_EQUALS(outputWs->y(31)[20], inputWs->y(31)[20]);
 
     // Should be the same (no dead time associated with it)

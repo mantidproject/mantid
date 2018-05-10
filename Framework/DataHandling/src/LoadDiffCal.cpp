@@ -14,17 +14,17 @@
 #include "MantidKernel/Diffraction.h"
 #include "MantidKernel/OptionalBool.h"
 
-#include <cmath>
 #include <H5Cpp.h>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::Progress;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Progress;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;

@@ -1,27 +1,27 @@
 #ifndef MANTID_CRYSTAL_PREDICTPEAKSTEST_H_
 #define MANTID_CRYSTAL_PREDICTPEAKSTEST_H_
 
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 
 class PredictPeaksTest : public CxxTest::TestSuite {
 public:

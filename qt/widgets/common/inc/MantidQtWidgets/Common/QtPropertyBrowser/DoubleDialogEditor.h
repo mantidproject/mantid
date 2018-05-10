@@ -1,8 +1,8 @@
 #ifndef DOUBLEDIALOGEDITORFACTORY_H
 #define DOUBLEDIALOGEDITORFACTORY_H
 
-#include "ParameterPropertyManager.h"
 #include "DoubleEditorFactory.h"
+#include "ParameterPropertyManager.h"
 
 class QLineEdit;
 class QPushButton;
@@ -39,13 +39,13 @@ private:
 };
 
 /**
-* An abstract editor factory to be used with QtPropertyBrowser. Implementations
-* need to
-* implement QWidget *createEditor(QtStringPropertyManager *manager, QtProperty
-* *property,QWidget *parent)
-* method which creates a specific editor. The underlying type of the edited
-* property must be string.
-*/
+ * An abstract editor factory to be used with QtPropertyBrowser. Implementations
+ * need to
+ * implement QWidget *createEditor(QtStringPropertyManager *manager, QtProperty
+ * *property,QWidget *parent)
+ * method which creates a specific editor. The underlying type of the edited
+ * property must be string.
+ */
 class DoubleDialogEditorFactory
     : public QtAbstractEditorFactory<ParameterPropertyManager> {
   Q_OBJECT

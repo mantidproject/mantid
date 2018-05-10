@@ -7,7 +7,7 @@ namespace Mantid {
 namespace API {
 // Forward declare
 class MatrixWorkspace;
-}
+} // namespace API
 namespace Algorithms {
 /** Normalises a workspace according to the good proton charge figure taken from
    the
@@ -73,7 +73,7 @@ private:
                        const bool integratePCharge) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_ */

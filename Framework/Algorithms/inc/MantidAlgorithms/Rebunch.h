@@ -11,7 +11,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 /**
 
@@ -97,7 +97,7 @@ private:
                      HistogramData::HistogramE &enew, const size_t n_bunch);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REBUNCH_H_*/

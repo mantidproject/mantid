@@ -4,9 +4,9 @@
 
 #include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/FileProperty.h>
+#include <MantidAPI/ITableWorkspace.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
-#include <MantidAPI/ITableWorkspace.h>
 
 #include <QMenu>
 #include <QSignalMapper>

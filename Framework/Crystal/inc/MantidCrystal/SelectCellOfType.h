@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_SELECT_CELL_OF_TYPE_H_
 #define MANTID_CRYSTAL_SELECT_CELL_OF_TYPE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

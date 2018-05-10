@@ -64,7 +64,7 @@ Workspace2D::~Workspace2D() {
  *
  * @param YLength :: The number of data/error points in each vector
  * (must all be the same)
-*/
+ */
 void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
                        const std::size_t &YLength) {
   data.resize(NVectors);
@@ -147,11 +147,11 @@ size_t Workspace2D::blocksize() const {
 }
 
 /**
-  * Copy the data (Y's) from an image to this workspace.
-  * @param image :: An image to copy the data from.
-  * @param start :: Startinf workspace indx to copy data to.
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data (Y's) from an image to this workspace.
+ * @param image :: An image to copy the data from.
+ * @param start :: Startinf workspace indx to copy data to.
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageY(const MantidImage &image, size_t start,
                             bool parallelExecution) {
   MantidImage m;
@@ -159,11 +159,11 @@ void Workspace2D::setImageY(const MantidImage &image, size_t start,
 }
 
 /**
-  * Copy the data from an image to this workspace's errors.
-  * @param image :: An image to copy the data from.
-  * @param start :: Startinf workspace indx to copy data to.
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data from an image to this workspace's errors.
+ * @param image :: An image to copy the data from.
+ * @param start :: Startinf workspace indx to copy data to.
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageE(const MantidImage &image, size_t start,
                             bool parallelExecution) {
   MantidImage m;
@@ -171,21 +171,21 @@ void Workspace2D::setImageE(const MantidImage &image, size_t start,
 }
 
 /**
-  * Copy the data from an image to the (Y's) and the errors for this
-  * workspace.
-  *
-  * @param imageY :: An image to copy the data from.
-  * @param imageE :: An image to copy the errors from.
-  * @param start :: Startinf workspace indx to copy data to.
-  *
-  * @param loadAsRectImg :: load using one histogram per row and one
-  * bin per column, instead of the default one histogram per pixel
-  *
-  * @param scale_1 :: scale factor for the X axis (norammly
-  * representing the inverse of the pixel width or similar.
-  *
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data from an image to the (Y's) and the errors for this
+ * workspace.
+ *
+ * @param imageY :: An image to copy the data from.
+ * @param imageE :: An image to copy the errors from.
+ * @param start :: Startinf workspace indx to copy data to.
+ *
+ * @param loadAsRectImg :: load using one histogram per row and one
+ * bin per column, instead of the default one histogram per pixel
+ *
+ * @param scale_1 :: scale factor for the X axis (norammly
+ * representing the inverse of the pixel width or similar.
+ *
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
                                 const API::MantidImage &imageE, size_t start,
                                 bool loadAsRectImg, double scale_1,
@@ -359,7 +359,7 @@ Workspace2D *Workspace2D::doCloneEmpty() const {
 }
 
 } // namespace DataObjects
-} // NamespaceMantid
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

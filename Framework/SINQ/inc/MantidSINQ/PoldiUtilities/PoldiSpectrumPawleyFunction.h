@@ -1,9 +1,9 @@
 #ifndef MANTID_SINQ_POLDISPECTRUMPAWLEYFUNCTION_H_
 #define MANTID_SINQ_POLDISPECTRUMPAWLEYFUNCTION_H_
 
+#include "MantidAPI/IPawleyFunction.h"
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
-#include "MantidAPI/IPawleyFunction.h"
 
 namespace Mantid {
 namespace Poldi {

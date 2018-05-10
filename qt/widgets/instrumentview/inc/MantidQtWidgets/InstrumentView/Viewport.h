@@ -1,8 +1,8 @@
 #ifndef VIEWPORT_H_
 #define VIEWPORT_H_
 
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -170,7 +170,7 @@ protected:
   /// Translation in z direction
   mutable double m_zTrans;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*VIEWPORT_H_*/

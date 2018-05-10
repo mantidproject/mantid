@@ -101,7 +101,8 @@ void MultiPeakFitTool::selectPeak(QwtPlotCurve *curve, int point_index) {
   else
     emit statusText(tr("Peak %1 selected! Click to select a point and "
                        "double-click/press 'Enter' to set the position of the "
-                       "next peak!").arg(QString::number(d_selected_peaks)));
+                       "next peak!")
+                        .arg(QString::number(d_selected_peaks)));
 }
 
 void MultiPeakFitTool::finalize() {

@@ -36,10 +36,10 @@ using Mantid::HistogramData::HistogramX;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
+using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 
 //==========================================================================================
 class LoadEventPreNexus2Test : public CxxTest::TestSuite {

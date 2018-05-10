@@ -3,8 +3,8 @@
 
 #include "MantidMDAlgorithms/ReflectometryTransformKiKf.h"
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

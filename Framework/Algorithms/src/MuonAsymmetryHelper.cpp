@@ -24,7 +24,7 @@ constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 /// Muon lifetime in microseconds
 constexpr double MUON_LIFETIME_MICROSECONDS{
     Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
-}
+} // namespace
 
 namespace Mantid {
 
@@ -65,18 +65,18 @@ normaliseCounts(const HistogramData::Histogram &histogram,
   return result;
 }
 /**
-* Estimates normalisation constant via
-* N_0 = (Delta/f)*(sum_i W_i)/(int_a^b exp(-t/tau)dt )
-* where W is the raw data, tau is the muon
-* lifetime, t is time, f is the
-* number of good frames Delta is the time step,
-* a is the start of the range and b is the end of the range.
-* @param histogram :: [input] Input histogram
-* @param numGoodFrames :: [input] the number of good frames
-* @param  startX :: [input] the start time
-* @param  endX :: [input] the end time
-* @returns :: The normalization constant N_0
-*/
+ * Estimates normalisation constant via
+ * N_0 = (Delta/f)*(sum_i W_i)/(int_a^b exp(-t/tau)dt )
+ * where W is the raw data, tau is the muon
+ * lifetime, t is time, f is the
+ * number of good frames Delta is the time step,
+ * a is the start of the range and b is the end of the range.
+ * @param histogram :: [input] Input histogram
+ * @param numGoodFrames :: [input] the number of good frames
+ * @param  startX :: [input] the start time
+ * @param  endX :: [input] the end time
+ * @returns :: The normalization constant N_0
+ */
 double estimateNormalisationConst(const HistogramData::Histogram &histogram,
                                   const double numGoodFrames,
                                   const double startX, const double endX) {
@@ -97,12 +97,12 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   return summation / (denominator * numGoodFrames);
 }
 /**
-* Finds the first index in bin edges that is after
-* the start time.
-* @param xData :: [input] Input HistogramData as bin edges
-* @param startX :: [input] the start time
-* @returns :: The index to start calculations from
-*/
+ * Finds the first index in bin edges that is after
+ * the start time.
+ * @param xData :: [input] Input HistogramData as bin edges
+ * @param startX :: [input] the start time
+ * @returns :: The index to start calculations from
+ */
 size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
@@ -110,12 +110,12 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
   return std::distance(xData.rawData().begin(), upper);
 }
 /**
-* find the first index in bin edges that is after
-* the endtime.
-* @param xData :: [input] HistogramData as bin edges
-* @param endX :: [input] the end time
-* @returns :: The last index to  include in calculations
-*/
+ * find the first index in bin edges that is after
+ * the endtime.
+ * @param xData :: [input] HistogramData as bin edges
+ * @param endX :: [input] the end time
+ * @returns :: The last index to  include in calculations
+ */
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX) {
   auto lower =

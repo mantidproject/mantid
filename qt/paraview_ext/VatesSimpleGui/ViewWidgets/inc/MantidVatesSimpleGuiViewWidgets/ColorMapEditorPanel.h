@@ -1,10 +1,10 @@
 #ifndef COLORMAPEDITORPANEL_H
 #define COLORMAPEDITORPANEL_H
 
-#include "ui_ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include <QWidget>
+#include "ui_ColorMapEditorPanel.h"
 #include <QDialog>
+#include <QWidget>
 
 namespace Mantid {
 namespace Vates {
@@ -62,8 +62,8 @@ public slots:
 private:
   Ui::ColorMapEditorPanel ui; ///< The dialog's UI form
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // COLORMAPEDITORPANEL_H

@@ -94,7 +94,7 @@ protected:
 private:
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_DETECTOREFFICIENCYVARIATION_H_*/

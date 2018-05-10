@@ -41,5 +41,5 @@ const std::string &CatalogSession::getSoapEndpoint() const {
  * @return The facility used to create the catalog.
  */
 const std::string &CatalogSession::getFacility() const { return m_facility; }
-}
-}
+} // namespace API
+} // namespace Mantid

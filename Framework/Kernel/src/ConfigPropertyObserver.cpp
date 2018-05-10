@@ -20,5 +20,5 @@ void ConfigPropertyObserver::onValueChanged(const std::string &name,
   if (name == m_propertyName)
     onPropertyValueChanged(newValue, prevValue);
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

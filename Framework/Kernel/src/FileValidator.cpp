@@ -1,9 +1,9 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Logger.h"
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/make_shared.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -11,7 +11,7 @@ namespace Kernel {
 namespace {
 // Initialize the static logger
 Logger g_log("FileValidator");
-}
+} // namespace
 
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)

@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_VOIGT_H_
 #define MANTID_CURVEFITTING_VOIGT_H_
 
-#include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {

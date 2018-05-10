@@ -95,6 +95,6 @@ private:
   /// Output type - Integer
   const std::string m_intType = "Integer";
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_SAVEOPENGENIEASCII_H_

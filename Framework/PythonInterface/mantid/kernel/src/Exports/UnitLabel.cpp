@@ -45,7 +45,7 @@ PyObject *utf8ToUnicode(UnitLabel &self) {
   const auto &label = self.utf8();
   return PyUnicode_FromWideChar(label.c_str(), label.size());
 }
-}
+} // namespace
 
 void export_UnitLabel() {
   class_<UnitLabel>("UnitLabel", no_init)

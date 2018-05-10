@@ -5,8 +5,8 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAlgorithms/Transpose.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/Transpose.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 

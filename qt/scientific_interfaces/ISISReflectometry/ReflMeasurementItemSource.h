@@ -45,6 +45,6 @@ public:
 };
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_REFLMEASUREMENTITEMSOURCE_H_ */

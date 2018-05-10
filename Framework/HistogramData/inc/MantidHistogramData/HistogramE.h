@@ -18,7 +18,7 @@ template <class CountStandardDeviations, class HistogramE> class VectorOf;
 template <class CountVariances, class HistogramE> class VectorOf;
 template <class FrequencyStandardDeviations, class HistogramE> class VectorOf;
 template <class FrequencyVariances, class HistogramE> class VectorOf;
-}
+} // namespace detail
 
 /** HistogramE
 
@@ -64,8 +64,8 @@ public:
   // the using declaration above, so we need them here explicitly.
   HistogramE(const HistogramE &) = default;
   HistogramE(HistogramE &&) = default;
-  HistogramE &operator=(const HistogramE &)& = default;
-  HistogramE &operator=(HistogramE &&)& = default;
+  HistogramE &operator=(const HistogramE &) & = default;
+  HistogramE &operator=(HistogramE &&) & = default;
 
   // These classes are friends, such that they can modify the length.
   friend class Histogram;

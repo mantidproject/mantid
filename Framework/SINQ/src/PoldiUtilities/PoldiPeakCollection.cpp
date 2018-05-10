@@ -1,13 +1,13 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
+#include "MantidAPI/LogManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/LogManager.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 
-#include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
+#include "boost/format.hpp"
 
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
@@ -199,9 +199,15 @@ bool PoldiPeakCollection::checkColumns(
     return false;
   }
 
-  std::vector<std::string> shouldNames{"HKL", "d", "delta d", "Q", "delta Q",
-                                       "Intensity", "delta Intensity",
-                                       "FWHM (rel.)", "delta FWHM (rel.)"};
+  std::vector<std::string> shouldNames{"HKL",
+                                       "d",
+                                       "delta d",
+                                       "Q",
+                                       "delta Q",
+                                       "Intensity",
+                                       "delta Intensity",
+                                       "FWHM (rel.)",
+                                       "delta FWHM (rel.)"};
 
   std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 
@@ -326,5 +332,5 @@ UnitCell PoldiPeakCollection::unitCellFromString(
 
   return cell;
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

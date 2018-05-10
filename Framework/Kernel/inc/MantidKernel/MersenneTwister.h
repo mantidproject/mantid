@@ -90,7 +90,7 @@ private:
   /// that it is only instantiated when required
   std::unique_ptr<std::mt19937> m_savedEngine;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif

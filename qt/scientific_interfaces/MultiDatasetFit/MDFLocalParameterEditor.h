@@ -68,8 +68,8 @@ private:
   bool m_othersTied;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFDATASETPLOTDATA_H_*/

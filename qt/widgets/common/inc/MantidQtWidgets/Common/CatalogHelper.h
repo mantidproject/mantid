@@ -1,8 +1,8 @@
 #ifndef MANTIDQTWIDGETS_CATALOGHELPER_H_
 #define MANTIDQTWIDGETS_CATALOGHELPER_H_
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "DllOption.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

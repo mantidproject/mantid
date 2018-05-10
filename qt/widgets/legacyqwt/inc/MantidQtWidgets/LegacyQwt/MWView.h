@@ -2,29 +2,29 @@
 #define MANTID_MANTIDWIDGETS_MWVIEW_H_
 
 // includes for interface development
-#include <QWidget>
-#include <qwt_plot_spectrogram.h>
-#include "ui_MWView.h"
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
+#include "ui_MWView.h"
+#include <QWidget>
+#include <qwt_plot_spectrogram.h>
 // includes for workspace handling
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 namespace Mantid {
 namespace API {
 class MWDimension;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 
 namespace API {
 class QwtRasterDataMD;
 class MdSettings;
-}
+} // namespace API
 
 namespace MantidWidgets {
 // forward declarations

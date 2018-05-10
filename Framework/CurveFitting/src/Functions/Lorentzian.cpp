@@ -158,8 +158,9 @@ void Lorentzian::histogramDerivative1D(Jacobian *jacobian, double left,
     double cRight = cumulFun(xr);
     jacobian->set(i, 0, cRight - cLeft);
     jacobian->set(i, 1, -2.0 * (g / denomRight - g / denomLeft) * amplitude);
-    jacobian->set(i, 2, -2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft) *
-                            amplitude);
+    jacobian->set(i, 2,
+                  -2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft) *
+                      amplitude);
     denomLeft = denomRight;
     cLeft = cRight;
     xl = xr;

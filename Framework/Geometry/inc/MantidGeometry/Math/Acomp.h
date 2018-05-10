@@ -3,10 +3,10 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/BnId.h"
-#include <vector>
 #include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

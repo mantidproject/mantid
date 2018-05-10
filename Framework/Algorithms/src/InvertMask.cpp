@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/InvertMask.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -57,5 +57,5 @@ void InvertMask::exec() {
   this->setProperty("OutputWorkspace", outputws);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

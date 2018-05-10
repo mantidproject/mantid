@@ -123,7 +123,7 @@ public:
   Quat &operator+=(const Quat &);
   Quat operator-(const Quat &) const;
   Quat &operator-=(const Quat &);
-  Quat operator*(const Quat &) const;
+  Quat operator*(const Quat &)const;
   Quat &operator*=(const Quat &);
   bool operator==(const Quat &) const;
   bool operator!=(const Quat &) const;
@@ -161,8 +161,8 @@ private:
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Quat &);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, Quat &q);
 
-} // Namespace Mantid
+} // namespace Kernel
 
-} // Namespace Kernel
+} // namespace Mantid
 
 #endif /*MANTID_KERNEL_QUAT_H_*/

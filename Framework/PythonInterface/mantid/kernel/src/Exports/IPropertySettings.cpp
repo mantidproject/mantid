@@ -1,6 +1,6 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 

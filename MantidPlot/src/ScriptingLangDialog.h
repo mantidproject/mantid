@@ -30,8 +30,8 @@
 #ifndef SCRIPTING_LANG_DIALOG_H
 #define SCRIPTING_LANG_DIALOG_H
 
-#include "ScriptingEnv.h"
 #include "Scripted.h"
+#include "ScriptingEnv.h"
 
 #include <QDialog>
 

@@ -5,9 +5,9 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <vtkSmartPointer.h>

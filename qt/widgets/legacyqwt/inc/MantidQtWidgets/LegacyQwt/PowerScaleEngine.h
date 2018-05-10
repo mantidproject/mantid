@@ -30,10 +30,10 @@
 #ifndef POWER_SCALE_ENGINE_H
 #define POWER_SCALE_ENGINE_H
 
+#include "MantidQtWidgets/LegacyQwt/DllOption.h"
+#include "ScaleEngine.h"
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
-#include "ScaleEngine.h"
-#include "MantidQtWidgets/LegacyQwt/DllOption.h"
 
 class EXPORT_OPT_MANTIDQT_LEGACYQWT PowerScaleTransformation
     : public ScaleTransformation {

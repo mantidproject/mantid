@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
+#include <vector>
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
@@ -66,7 +66,7 @@ protected:
   using FunctionIterator =
       std::vector<Mantid::Geometry::MDImplicitFunction_sptr>::const_iterator;
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

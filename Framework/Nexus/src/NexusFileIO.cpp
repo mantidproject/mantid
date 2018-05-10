@@ -34,7 +34,7 @@ using namespace DataObjects;
 namespace {
 /// static logger
 Logger g_log("NexusFileIO");
-}
+} // namespace
 
 /// Empty default constructor
 NexusFileIO::NexusFileIO()
@@ -510,13 +510,13 @@ int NexusFileIO::writeNexusProcessedData2D(
 
 //-------------------------------------------------------------------------------------
 /**
-  * Save a numeric columns of a TableWorkspace to currently open nexus file.
-  * @param type :: Nexus code for the element data type.
-  * @param interpret_as :: Value of the interpret_as attribute.
-  * @param col :: Reference to the column being svaed.
-  * @param columnName :: Name of the nexus data set in which the column values
+ * Save a numeric columns of a TableWorkspace to currently open nexus file.
+ * @param type :: Nexus code for the element data type.
+ * @param interpret_as :: Value of the interpret_as attribute.
+ * @param col :: Reference to the column being svaed.
+ * @param columnName :: Name of the nexus data set in which the column values
  * are saved.
-  */
+ */
 template <typename ColumnT, typename NexusT>
 void NexusFileIO::writeTableColumn(int type, const std::string &interpret_as,
                                    const API::Column &col,
@@ -550,7 +550,7 @@ template <typename VecType> size_t getSizeOf(const VecType &vec) {
 
 // Special case of V3D
 size_t getSizeOf(const Kernel::V3D &) { return 3; }
-}
+} // namespace
 
 /**
  * Writes given vector column to the currently open Nexus file.

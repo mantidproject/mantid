@@ -27,7 +27,7 @@ using namespace Kernel;
 using namespace API;
 
 namespace // anonymous
-    {
+{
 // For LOQ at least, the transmission monitor is 3.  (The incident beam
 // monitor's UDET is 2.)
 const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
@@ -51,7 +51,7 @@ size_t getIndexFromDetectorID(const MatrixWorkspace &ws, detid_t detid) {
 
   return result[0];
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmission)
@@ -103,9 +103,10 @@ void CalculateTransmission::init() {
                   "Linear, Log or Polynomial.");
   auto twoOrMore = boost::make_shared<BoundedValidator<int>>();
   twoOrMore->setLower(2);
-  declareProperty("PolynomialOrder", 2, twoOrMore, "Order of the polynomial to "
-                                                   "fit. It is considered only "
-                                                   "for FitMethod=Polynomial");
+  declareProperty("PolynomialOrder", 2, twoOrMore,
+                  "Order of the polynomial to "
+                  "fit. It is considered only "
+                  "for FitMethod=Polynomial");
 
   declareProperty("OutputUnfittedData", false,
                   "If True, will output an additional workspace called "
@@ -284,15 +285,15 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
 }
 
 /** Calculate a workspace that contains the result of the fit to the
-* transmission fraction that was calculated
-*  @param raw [in] the workspace with the unfitted transmission ratio data
-*  @param rebinParams [in] the parameters for rebinning
-*  @param fitMethod [in] string can be Log, Linear, Poly2, Poly3, Poly4, Poly5,
-* Poly6
-*  @return a workspace that contains the evaluation of the fit
-*  @throw runtime_error if the Linear or ExtractSpectrum algorithm fails during
-* execution
-*/
+ * transmission fraction that was calculated
+ *  @param raw [in] the workspace with the unfitted transmission ratio data
+ *  @param rebinParams [in] the parameters for rebinning
+ *  @param fitMethod [in] string can be Log, Linear, Poly2, Poly3, Poly4, Poly5,
+ * Poly6
+ *  @return a workspace that contains the evaluation of the fit
+ *  @throw runtime_error if the Linear or ExtractSpectrum algorithm fails during
+ * execution
+ */
 API::MatrixWorkspace_sptr
 CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
                            const std::vector<double> &rebinParams,
@@ -459,11 +460,11 @@ CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order,
 }
 
 /** Calls rebin as Child Algorithm
-*  @param binParams this string is passed to rebin as the "Params" property
-*  @param ws the workspace to rebin
-*  @return the resultant rebinned workspace
-*  @throw runtime_error if the rebin algorithm fails during execution
-*/
+ *  @param binParams this string is passed to rebin as the "Params" property
+ *  @param ws the workspace to rebin
+ *  @return the resultant rebinned workspace
+ *  @throw runtime_error if the rebin algorithm fails during execution
+ */
 API::MatrixWorkspace_sptr
 CalculateTransmission::rebin(const std::vector<double> &binParams,
                              API::MatrixWorkspace_sptr ws) {
@@ -497,5 +498,5 @@ void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
     g_log.information(message + "direct workspace.");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -354,4 +354,4 @@ void ILLEnergyTransfer::setInstrumentDefault() {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

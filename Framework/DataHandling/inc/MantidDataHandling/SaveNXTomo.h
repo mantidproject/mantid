@@ -4,10 +4,10 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include <vector>
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {

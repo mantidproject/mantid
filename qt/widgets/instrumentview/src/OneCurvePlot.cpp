@@ -2,19 +2,19 @@
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
 #include <MantidQtWidgets/LegacyQwt/qwt_compat.h>
-#include <qwt_plot_curve.h>
-#include <qwt_scale_div.h>
-#include <qwt_scale_engine.h>
-#include <qwt_scale_draw.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
+#include <qwt_scale_div.h>
+#include <qwt_scale_draw.h>
+#include <qwt_scale_engine.h>
 #include <qwt_scale_widget.h>
 
+#include <QContextMenuEvent>
+#include <QFont>
 #include <QFontMetrics>
 #include <QMouseEvent>
-#include <QContextMenuEvent>
 #include <QPainter>
-#include <QFont>
 
 #include <cmath>
 
@@ -47,15 +47,15 @@ OneCurvePlot::OneCurvePlot(QWidget *parent)
 }
 
 /**
-* Destructor.
-*/
+ * Destructor.
+ */
 OneCurvePlot::~OneCurvePlot() { clearAll(); }
 
 /**
-* Set the scale of the horizontal axis
-* @param from :: Minimum value
-* @param to :: Maximum value
-*/
+ * Set the scale of the horizontal axis
+ * @param from :: Minimum value
+ * @param to :: Maximum value
+ */
 void OneCurvePlot::setXScale(double from, double to) {
   QFontMetrics fm(axisFont(QwtPlot::xBottom));
   int n = from != 0.0 ? abs(static_cast<int>(floor(log10(fabs(from))))) : 0;
@@ -149,10 +149,10 @@ void OneCurvePlot::setXScale(double from, double to) {
 }
 
 /**
-* Set the scale of the vertical axis
-* @param from :: Minimum value
-* @param to :: Maximum value
-*/
+ * Set the scale of the vertical axis
+ * @param from :: Minimum value
+ * @param to :: Maximum value
+ */
 void OneCurvePlot::setYScale(double from, double to) {
   if (isYLogScale()) {
     if (from == 0 && to == 0) {
@@ -190,12 +190,12 @@ void OneCurvePlot::setYScale(double from, double to) {
 }
 
 /**
-* Set the data for the curve to display
-* @param x :: A pointer to x values
-* @param y :: A pointer to y values
-* @param dataSize :: The size of the data
-* @param xUnits :: Units for the data
-*/
+ * Set the data for the curve to display
+ * @param x :: A pointer to x values
+ * @param y :: A pointer to y values
+ * @param dataSize :: The size of the data
+ * @param xUnits :: Units for the data
+ */
 void OneCurvePlot::setData(const double *x, const double *y, int dataSize,
                            const std::string &xUnits) {
   m_xUnits = xUnits;
@@ -220,13 +220,13 @@ void OneCurvePlot::setData(const double *x, const double *y, int dataSize,
 }
 
 /**
-* Set a label which will identify the curve when it is stored.
-*/
+ * Set a label which will identify the curve when it is stored.
+ */
 void OneCurvePlot::setLabel(const QString &label) { m_label = label; }
 
 /**
-* Remove the curve. Rescale the axes if there are stored curves.
-*/
+ * Remove the curve. Rescale the axes if there are stored curves.
+ */
 void OneCurvePlot::clearCurve() {
   // remove the curve
   if (m_curve) {
@@ -265,16 +265,16 @@ void OneCurvePlot::resizeEvent(QResizeEvent *e) {
 }
 
 /**
-* Recalculate axis divisions to make sure that tick labels don't overlap
-*/
+ * Recalculate axis divisions to make sure that tick labels don't overlap
+ */
 void OneCurvePlot::recalcAxisDivs() {
   recalcXAxisDivs();
   recalcYAxisDivs();
 }
 
 /**
-* Recalculate x-axis divisions to make sure that tick labels don't overlap
-*/
+ * Recalculate x-axis divisions to make sure that tick labels don't overlap
+ */
 void OneCurvePlot::recalcXAxisDivs() {
   const QwtScaleDiv *div0 = axisScaleDiv(QwtPlot::xBottom);
   double from = div0->lBound();
@@ -283,8 +283,8 @@ void OneCurvePlot::recalcXAxisDivs() {
 }
 
 /**
-* Recalculate y-axis divisions to make sure that tick labels don't overlap
-*/
+ * Recalculate y-axis divisions to make sure that tick labels don't overlap
+ */
 void OneCurvePlot::recalcYAxisDivs() {
   const QwtScaleDiv *div0 = axisScaleDiv(QwtPlot::yLeft);
   double from = div0->lBound();
@@ -327,8 +327,8 @@ void OneCurvePlot::setYAxisLabelRotation(double degrees) {
 }
 
 /**
-* Set the log scale on the y axis
-*/
+ * Set the log scale on the y axis
+ */
 void OneCurvePlot::setYLogScale() {
   const QwtScaleDiv *div = axisScaleDiv(QwtPlot::yLeft);
   double from = div->lBound();
@@ -341,8 +341,8 @@ void OneCurvePlot::setYLogScale() {
 }
 
 /**
-* Set the linear scale on the y axis
-*/
+ * Set the linear scale on the y axis
+ */
 void OneCurvePlot::setYLinearScale() {
   QwtLinearScaleEngine *engine = new QwtLinearScaleEngine();
   setAxisScaleEngine(yLeft, engine);
@@ -350,9 +350,9 @@ void OneCurvePlot::setYLinearScale() {
 }
 
 /**
-* Add new peak label
-* @param marker :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
-*/
+ * Add new peak label
+ * @param marker :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
+ */
 void OneCurvePlot::addPeakLabel(const PeakMarker2D *marker) {
   PeakLabel *label = new PeakLabel(marker, this);
   label->attach(this);
@@ -360,8 +360,8 @@ void OneCurvePlot::addPeakLabel(const PeakMarker2D *marker) {
 }
 
 /**
-* Removes all peak labels.
-*/
+ * Removes all peak labels.
+ */
 void OneCurvePlot::clearPeakLabels() {
   foreach (PeakLabel *label, m_peakLabels) {
     label->detach();
@@ -371,13 +371,13 @@ void OneCurvePlot::clearPeakLabels() {
 }
 
 /**
-* Returns true if the current curve isn't NULL
-*/
+ * Returns true if the current curve isn't NULL
+ */
 bool OneCurvePlot::hasCurve() const { return m_curve != nullptr; }
 
 /**
-* Store current curve.
-*/
+ * Store current curve.
+ */
 void OneCurvePlot::store() {
   if (m_curve) {
     removeCurve(m_label);
@@ -391,8 +391,8 @@ void OneCurvePlot::store() {
 }
 
 /**
-* Returns true if there are some stored curves.
-*/
+ * Returns true if there are some stored curves.
+ */
 bool OneCurvePlot::hasStored() const { return !m_stored.isEmpty(); }
 
 QStringList OneCurvePlot::getLabels() const {
@@ -405,9 +405,9 @@ QStringList OneCurvePlot::getLabels() const {
 }
 
 /**
-* Return the colour of a stored curve.
-* @param label :: The label of that curve.
-*/
+ * Return the colour of a stored curve.
+ * @param label :: The label of that curve.
+ */
 QColor OneCurvePlot::getCurveColor(const QString &label) const {
   if (m_stored.contains(label)) {
     return m_stored[label]->pen().color();
@@ -416,9 +416,9 @@ QColor OneCurvePlot::getCurveColor(const QString &label) const {
 }
 
 /**
-* Remove a stored curve.
-* @param label :: The label of a curve to remove.
-*/
+ * Remove a stored curve.
+ * @param label :: The label of a curve to remove.
+ */
 void OneCurvePlot::removeCurve(const QString &label) {
   QMap<QString, QwtPlotCurve *>::iterator it = m_stored.find(label);
   if (it != m_stored.end()) {
@@ -429,16 +429,16 @@ void OneCurvePlot::removeCurve(const QString &label) {
 }
 
 /**
-* Does the y axis have the log scale?
-*/
+ * Does the y axis have the log scale?
+ */
 bool OneCurvePlot::isYLogScale() const {
   const QwtScaleEngine *engine = axisScaleEngine(yLeft);
   return dynamic_cast<const QwtLog10ScaleEngine *>(engine) != nullptr;
 }
 
 /**
-* Remove all displayable objects from the plot.
-*/
+ * Remove all displayable objects from the plot.
+ */
 void OneCurvePlot::clearAll() {
   QMap<QString, QwtPlotCurve *>::const_iterator it = m_stored.begin();
   for (; it != m_stored.end(); ++it) {
@@ -454,8 +454,8 @@ void OneCurvePlot::clearAll() {
 /* ---------------------------- PeakLabel --------------------------- */
 
 /**
-* Draw PeakLabel on a plot
-*/
+ * Draw PeakLabel on a plot
+ */
 void PeakLabel::draw(QPainter *painter, const QwtScaleMap &xMap,
                      const QwtScaleMap &yMap, const QRect &canvasRect) const {
   (void)yMap;
@@ -476,5 +476,5 @@ void PeakLabel::draw(QPainter *painter, const QwtScaleMap &xMap,
   // std::cerr << x << ' ' << y << ' ' << m_marker->getLabel().toStdString() <<
   // '\n';
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

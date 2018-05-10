@@ -1,14 +1,14 @@
 #ifndef MANTID_GEOMETRY_CRYSTALSTRUCTURE_H_
 #define MANTID_GEOMETRY_CRYSTALSTRUCTURE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/HKLFilter.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/System.h"
 
 #include <boost/make_shared.hpp>
 

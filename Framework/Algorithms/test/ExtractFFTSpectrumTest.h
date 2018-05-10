@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ExtractFFTSpectrum.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadNexus.h"
+#include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

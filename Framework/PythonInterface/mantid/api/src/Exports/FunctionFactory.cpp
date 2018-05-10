@@ -1,10 +1,10 @@
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -15,8 +15,8 @@
 // include of Python.h which it ensures is done correctly
 #include <frameobject.h>
 
-using Mantid::API::FunctionFactoryImpl;
 using Mantid::API::FunctionFactory;
+using Mantid::API::FunctionFactoryImpl;
 using Mantid::API::IFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 
@@ -49,14 +49,14 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
 
 //------------------------------------------------------------------------------------------------------
 /**
-* Something that makes Function Factory return to python a composite function
-* for Product function, Convolution or
-* any similar superclass of composite function.
-* @param self :: Enables it to be called as a member function on the
-* FunctionFactory class
-* @param name :: Name of the superclass of composite function,
-* e.g. "ProductFunction".
-*/
+ * Something that makes Function Factory return to python a composite function
+ * for Product function, Convolution or
+ * any similar superclass of composite function.
+ * @param self :: Enables it to be called as a member function on the
+ * FunctionFactory class
+ * @param name :: Name of the superclass of composite function,
+ * e.g. "ProductFunction".
+ */
 Mantid::API::CompositeFunction_sptr
 createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
   auto fun = self.createFunction(name);
@@ -110,7 +110,7 @@ void subscribe(FunctionFactoryImpl &self, const boost::python::object &obj) {
   self.subscribe(func->name(), creator, FunctionFactoryImpl::OverwriteCurrent);
 }
 ///@endcond
-}
+} // namespace
 
 void export_FunctionFactory() {
 

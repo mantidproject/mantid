@@ -38,7 +38,7 @@ void encode(std::string &data) {
 
   data.swap(buffer);
 }
-}
+} // namespace
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -314,5 +314,5 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
                                fileName);
   }
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

@@ -32,8 +32,8 @@ class Histogram;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-MANTID_HISTOGRAMDATA_DLL Histogram
-interpolateLinear(const Histogram &input, const size_t stepSize);
+MANTID_HISTOGRAMDATA_DLL Histogram interpolateLinear(const Histogram &input,
+                                                     const size_t stepSize);
 
 MANTID_HISTOGRAMDATA_DLL void interpolateLinearInplace(Histogram &inOut,
                                                        const size_t stepSize);
@@ -41,8 +41,8 @@ MANTID_HISTOGRAMDATA_DLL void interpolateLinearInplace(Histogram &inOut,
 MANTID_HISTOGRAMDATA_DLL void interpolateLinearInplace(const Histogram &input,
                                                        Histogram &output);
 
-MANTID_HISTOGRAMDATA_DLL Histogram
-interpolateCSpline(const Histogram &input, const size_t stepSize);
+MANTID_HISTOGRAMDATA_DLL Histogram interpolateCSpline(const Histogram &input,
+                                                      const size_t stepSize);
 
 MANTID_HISTOGRAMDATA_DLL void interpolateCSplineInplace(Histogram &inOut,
                                                         const size_t stepSize);

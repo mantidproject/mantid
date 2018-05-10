@@ -1,15 +1,15 @@
 #ifndef MANTID_SINQ_POLDIFITPEAKS1D_H_
 #define MANTID_SINQ_POLDIFITPEAKS1D_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 
 namespace Mantid {
 namespace Poldi {

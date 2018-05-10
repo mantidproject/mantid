@@ -1,33 +1,33 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
-#include "MantidKernel/Quat.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Quat.h"
+#include <Eigen/Geometry>
 #include <algorithm>
-#include <cmath>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/numeric/conversion/cast.hpp>
+#include <cmath>
 #include <stdexcept>
-#include <Eigen/Geometry>
 
 extern "C" {
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_fft_real.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_sys.h>
 #include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_fft_real.h>
 }
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
-using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Matrix;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 namespace {
 const constexpr double DEG_TO_RAD = M_PI / 180.;
 const constexpr double RAD_TO_DEG = 180. / M_PI;
-}
+} // namespace
 
 /**
   STATIC method Find_UB: Calculates the matrix that most nearly indexes

@@ -5,10 +5,10 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <Qsci/qsciscintilla.h>
+#include "DllOption.h"
 #include <QDialog>
 #include <QTextDocument>
-#include "DllOption.h"
+#include <Qsci/qsciscintilla.h>
 
 //----------------------------------
 // Forward declarations

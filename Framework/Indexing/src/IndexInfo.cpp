@@ -1,10 +1,10 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
-#include "MantidParallel/Collectives.h"
-#include "MantidParallel/Communicator.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidParallel/Collectives.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>

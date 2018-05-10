@@ -19,10 +19,10 @@ Kernel::IValidator_sptr HistogramValidator::clone() const {
 }
 
 /** Checks if the workspace contains a histogram when it shouldn't and
-  * vice-versa
-  *  @param value :: The workspace to test
-  *  @return A user level description if a problem exists or ""
-  */
+ * vice-versa
+ *  @param value :: The workspace to test
+ *  @return A user level description if a problem exists or ""
+ */
 std::string
 HistogramValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (m_mustBeHistogram) {

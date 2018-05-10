@@ -24,7 +24,7 @@ using Mantid::Kernel::ReadLock;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidMatrixCurve");
-}
+} // namespace
 
 /**
  *  @param name :: The curve's name - shown in the legend
@@ -350,7 +350,7 @@ void MantidMatrixCurve::afterReplaceHandle(
 }
 /* This method saves the curve details to a string.
  * Useful for loading/saving mantid project.
-*/
+ */
 QString MantidMatrixCurve::saveToString() {
   QString s;
   s = "MantidMatrixCurve\t" + m_wsName + "\t sp \t" + QString::number(m_index) +

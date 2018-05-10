@@ -83,7 +83,7 @@ private:
   // lhs,API::MatrixWorkspace_sptr out);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_EXPONENTIAL_H_*/

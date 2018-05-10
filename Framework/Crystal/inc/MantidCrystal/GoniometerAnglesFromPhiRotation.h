@@ -35,9 +35,9 @@
 #ifndef GoniometerAnglesFromPhiRotation_H_
 #define GoniometerAnglesFromPhiRotation_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -82,7 +82,7 @@ private:
   void exec() override;
 };
 
-} // Crystal
-} // Mantid
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* GoniometerAnglesFromPhiRotation_H_ */

@@ -59,10 +59,10 @@ private:
   template <std::size_t...> struct seq {};
   // Doxygen does not like recursive types.
   template <std::size_t N, std::size_t... S>
-  struct gens                                     /** @cond */
-      : gens<N - 1, N - 1, S...> /** @endcond */ {/** @cond */
+  struct gens                                      /** @cond */
+      : gens<N - 1, N - 1, S...> /** @endcond */ { /** @cond */
   };
-  template <std::size_t... S> struct gens<0, S...> {/** @endcond */
+  template <std::size_t... S> struct gens<0, S...> { /** @endcond */
     using type = seq<S...>;
   };
 

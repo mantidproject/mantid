@@ -19,7 +19,7 @@ ArrayOrderedPairsValidator<TYPE> *createArrayOrderedPairsValidator() {
       .def("__init__",                                                         \
            make_constructor(&createArrayOrderedPairsValidator<type>,           \
                             default_call_policies()));
-}
+} // namespace
 void export_ArrayOrderedPairsValidator() {
   EXPORT_PAIRSVALIDATOR(double, Float);
   EXPORT_PAIRSVALIDATOR(long, Int);

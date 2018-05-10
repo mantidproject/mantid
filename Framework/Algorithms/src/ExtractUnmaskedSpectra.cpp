@@ -1,12 +1,12 @@
+#include "MantidAlgorithms/ExtractUnmaskedSpectra.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/ExtractUnmaskedSpectra.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractUnmaskedSpectra)

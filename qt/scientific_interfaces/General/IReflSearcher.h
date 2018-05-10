@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtCustomInterfaces/IReflPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -39,6 +39,6 @@ public:
   virtual ~IReflSearcher(){};
   virtual Mantid::API::ITableWorkspace_sptr search(const std::string &text) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif

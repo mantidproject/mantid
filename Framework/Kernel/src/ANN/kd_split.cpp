@@ -23,9 +23,9 @@
 //	Revision 1.0  04/01/05
 //----------------------------------------------------------------------
 
+#include "kd_split.h" // splitting functions
 #include "kd_tree.h"  // kd-tree definitions
 #include "kd_util.h"  // kd-tree utilities
-#include "kd_split.h" // splitting functions
 
 //----------------------------------------------------------------------
 //	Constants

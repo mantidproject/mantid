@@ -3,9 +3,9 @@
 
 #include "MantidMatrixModel.h"
 
+#include <QPointer>
 #include <QString>
 #include <QTableView>
-#include <QPointer>
 /**
  * Holds the information for a new tab.
  */

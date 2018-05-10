@@ -24,5 +24,5 @@ void WorkspaceEditor::updateProperty(const QString &text) {
     mgr->setValue(m_property, text);
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

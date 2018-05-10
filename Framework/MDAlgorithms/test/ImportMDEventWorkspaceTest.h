@@ -1,11 +1,11 @@
 #ifndef MANTID_MDEVENTS_IMPORTMDEVENTWORKSPACETEST_H_
 #define MANTID_MDEVENTS_IMPORTMDEVENTWORKSPACETEST_H_
 
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidMDAlgorithms/ImportMDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidMDAlgorithms/ImportMDEventWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
 

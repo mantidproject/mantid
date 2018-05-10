@@ -1,22 +1,22 @@
 #ifndef SETSCALINGPSDTEST_H_
 #define SETSCALINGPSDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SetScalingPSD.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <fstream>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using Mantid::DataHandling::SetScalingPSD;
 using Mantid::DataHandling::LoadEmptyInstrument;
+using Mantid::DataHandling::SetScalingPSD;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Kernel::ConfigService;
@@ -27,7 +27,7 @@ bool isDefaultScaleFactor(const V3D &scaleFactor) {
   const V3D defaultScaleFactor(1.0, 1.0, 1.0);
   return (scaleFactor - defaultScaleFactor).norm() < 1e-9;
 }
-}
+} // namespace
 
 class SetScalingPSDTest : public CxxTest::TestSuite {
 public:

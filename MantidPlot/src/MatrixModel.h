@@ -31,10 +31,10 @@
 #define MATRIXMODEL_H
 
 #include <QAbstractTableModel>
-#include <QVector>
 #include <QLocale>
-#include <QSize>
 #include <QMessageBox>
+#include <QSize>
+#include <QVector>
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_permutation.h>

@@ -4,10 +4,10 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
@@ -34,7 +34,7 @@ public:
   MOCK_CONST_METHOD0(max, double());
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
-}
+} // namespace
 
 class SampleEnvironmentTest : public CxxTest::TestSuite {
 public:

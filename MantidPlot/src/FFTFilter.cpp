@@ -28,8 +28,8 @@
  ***************************************************************************/
 #include "FFTFilter.h"
 
-#include <QMessageBox>
 #include <QLocale>
+#include <QMessageBox>
 
 #include <gsl/gsl_fft_halfcomplex.h>
 

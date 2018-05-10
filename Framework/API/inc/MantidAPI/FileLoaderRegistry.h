@@ -109,18 +109,20 @@ private:
         if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
-              typeid(T).name() + "' registered as Nexus loader but it does not "
-                                 "inherit from "
-                                 "API::IFileLoader<Kernel::NexusDescriptor>");
+              typeid(T).name() +
+              "' registered as Nexus loader but it does not "
+              "inherit from "
+              "API::IFileLoader<Kernel::NexusDescriptor>");
         }
         break;
       case Generic:
         if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
-              typeid(T).name() + "' registered as Generic loader but it does "
-                                 "not inherit from "
-                                 "API::IFileLoader<Kernel::FileDescriptor>");
+              typeid(T).name() +
+              "' registered as Generic loader but it does "
+              "not inherit from "
+              "API::IFileLoader<Kernel::FileDescriptor>");
         }
         break;
       default:
@@ -155,6 +157,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::FileLoaderRegistryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_API_FILELOADERREGISTRY_H_ */

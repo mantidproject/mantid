@@ -61,8 +61,9 @@ void ScanningWorkspaceBuilder::setHistogram(
  * @param timeRanges A vector of DateAndTime pairs, corresponding to the start
  *and end times
  */
-void ScanningWorkspaceBuilder::setTimeRanges(std::vector<
-    std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> timeRanges) {
+void ScanningWorkspaceBuilder::setTimeRanges(
+    std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+        timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
   m_timeRanges = std::move(timeRanges);
 }

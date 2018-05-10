@@ -263,6 +263,6 @@ QString RowData::reducedName(const QString prefix) {
   else
     return prefix + m_reducedName;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -60,7 +60,7 @@ public:
   virtual void removeRun(const RunLabel &runLabel) = 0;
 };
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_

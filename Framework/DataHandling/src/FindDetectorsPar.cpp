@@ -3,8 +3,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -198,11 +198,11 @@ double AvrgDetector::nearAngle(const double &baseAngle, const double &anAngle) {
 }
 
 /** method to cacluate the detectors parameters and add them to the detectors
-*averages
-*@param det      -- reference to the Mantid Detector
-*@param Observer -- sample position or the centre of the polar system of
-*coordinates to calculate detector's parameters.
-*/
+ *averages
+ *@param det      -- reference to the Mantid Detector
+ *@param Observer -- sample position or the centre of the polar system of
+ *coordinates to calculate detector's parameters.
+ */
 void AvrgDetector::addDetInfo(const Geometry::IDetector &det,
                               const Kernel::V3D &Observer) {
   m_nComponents++;
@@ -331,7 +331,8 @@ void FindDetectorsPar::calcDetPar(const Geometry::IDetector &det,
     auto detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&det);
     if (!detGroup) {
       g_log.error() << "calc_cylDetPar: can not downcast IDetector_sptr to "
-                       "detector group for det->ID: " << det.getID() << '\n';
+                       "detector group for det->ID: "
+                    << det.getID() << '\n';
       throw(std::bad_cast());
     }
     for (const auto &det : detGroup->getDetectors()) {
@@ -506,9 +507,9 @@ int FindDetectorsPar::count_changes(const char *const Buf, size_t buf_size) {
 }
 
 /**! The function reads line from inout stream and puts it into buffer.
-*   It behaves like std::ifstream getline but the getline reads additional
-* symbol from a row in a Unix-formatted file under windows;
-*/
+ *   It behaves like std::ifstream getline but the getline reads additional
+ * symbol from a row in a Unix-formatted file under windows;
+ */
 size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
                                      size_t buf_size, const char DELIM) {
   size_t i;
@@ -534,7 +535,7 @@ size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
  *  it also returns the FileTypeDescriptor, which identifyes the position of the
  *data in correcponding ASCII file
  *  plus characteristics of the data extracted from correspondent data header.
-*/
+ */
 FileTypeDescriptor
 FindDetectorsPar::get_ASCII_header(std::string const &fileName,
                                    std::ifstream &data_stream) {
@@ -601,9 +602,10 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     file_descriptor.nData_records = static_cast<size_t>(nData_records);
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
     if (nDatas != 2) {
-      g_log.error() << " File " << fileName << " iterpreted as SPE but does "
-                                               "not have two numbers in the "
-                                               "first row\n";
+      g_log.error() << " File " << fileName
+                    << " iterpreted as SPE but does "
+                       "not have two numbers in the "
+                       "first row\n";
       throw(Kernel::Exception::FileError(" File iterpreted as SPE but does not "
                                          "have two numbers in the first row",
                                          fileName));
@@ -654,7 +656,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
  *  the file should be already opened and the FILE_TYPE structure properly
  * defined using
  *  get_ASCII_header function
-*/
+ */
 static std::vector<char> BUF(1024, 0);
 void FindDetectorsPar::load_plain(std::ifstream &stream,
                                   std::vector<double> &Data,
@@ -733,5 +735,5 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
   }
 }
 
-} // end DataHandling namespace
-} // end MantidNamespace
+} // namespace DataHandling
+} // namespace Mantid

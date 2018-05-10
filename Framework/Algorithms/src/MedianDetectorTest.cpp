@@ -378,5 +378,5 @@ int MedianDetectorTest::doDetectorTests(
   return numFailed;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

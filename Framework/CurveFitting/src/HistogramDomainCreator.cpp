@@ -1,8 +1,8 @@
+#include "MantidCurveFitting/HistogramDomainCreator.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidCurveFitting/HistogramDomainCreator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/lexical_cast.hpp>

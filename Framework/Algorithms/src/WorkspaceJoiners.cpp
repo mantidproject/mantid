@@ -3,9 +3,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -161,15 +161,15 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 }
 
 /** Checks that the two input workspace have common size and the same
-* instrument & unit. There is an option to check whether their binning is
-* compatible
-*  Also calls the checkForOverlap method.
-*  @param ws1 :: The first input workspace
-*  @param ws2 :: The second input workspace
-*  @param checkBinning :: A flag for whether to check that the workspaces have
-* compatible binning (default true)
-*  @throw std::invalid_argument If the workspaces are not compatible
-*/
+ * instrument & unit. There is an option to check whether their binning is
+ * compatible
+ *  Also calls the checkForOverlap method.
+ *  @param ws1 :: The first input workspace
+ *  @param ws2 :: The second input workspace
+ *  @param checkBinning :: A flag for whether to check that the workspaces have
+ * compatible binning (default true)
+ *  @throw std::invalid_argument If the workspaces are not compatible
+ */
 void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
     const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
     const bool checkBinning) {

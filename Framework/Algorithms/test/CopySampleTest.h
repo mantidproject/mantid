@@ -3,18 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CopySample.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/NeutronAtom.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/CopySample.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/NeutronAtom.h"
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"

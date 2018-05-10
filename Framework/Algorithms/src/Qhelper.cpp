@@ -136,16 +136,16 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 }
 
 /** Finds the first index number of the first wavelength bin that should
-* included based on the
-*  the calculation: W = Wcut (Rcut-R)/Rcut
-*  @param dataWS data workspace
+ * included based on the
+ *  the calculation: W = Wcut (Rcut-R)/Rcut
+ *  @param dataWS data workspace
  * @param spectrumInfo the spectrumInfo associated with the data workspace
-*  @param RCut the radius cut off, should be value of the property RadiusCut
-* (unit is mm)
-*  @param WCut this wavelength cut off, should be equal to the value WaveCut
-*  @param wsInd spectrum that is being analysed
-*  @return index number of the first bin to include in the calculation
-*/
+ *  @param RCut the radius cut off, should be value of the property RadiusCut
+ * (unit is mm)
+ *  @param WCut this wavelength cut off, should be equal to the value WaveCut
+ *  @param wsInd spectrum that is being analysed
+ *  @return index number of the first bin to include in the calculation
+ */
 size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
                                  const SpectrumInfo &spectrumInfo,
                                  const double RCut, const double WCut,

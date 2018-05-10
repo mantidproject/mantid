@@ -1,8 +1,8 @@
+#include "MantidRemoteAlgorithms/StartRemoteTransaction2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidRemoteAlgorithms/StartRemoteTransaction2.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {

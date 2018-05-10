@@ -28,9 +28,9 @@
  ***************************************************************************/
 #include "ImageDialog.h"
 
-#include <QLayout>
 #include <QGroupBox>
 #include <QLabel>
+#include <QLayout>
 
 ImageDialog::ImageDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), aspect_ratio(1.) {

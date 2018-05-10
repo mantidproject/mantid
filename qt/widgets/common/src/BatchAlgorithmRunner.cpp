@@ -168,5 +168,5 @@ void BatchAlgorithmRunner::handleNotification(
   }
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace MantidQt

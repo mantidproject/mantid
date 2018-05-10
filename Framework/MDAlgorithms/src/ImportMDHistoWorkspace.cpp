@@ -105,5 +105,5 @@ void ImportMDHistoWorkspace::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

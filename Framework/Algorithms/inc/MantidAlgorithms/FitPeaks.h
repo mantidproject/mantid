@@ -18,7 +18,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 
@@ -50,7 +50,7 @@ private:
   // fitted peak and background parameters
   std::vector<std::vector<double>> function_parameters_vector;
 };
-}
+} // namespace FitPeaksAlgorithm
 
 class DLLExport FitPeaks : public API::Algorithm {
 public:

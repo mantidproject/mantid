@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomainGeneral.h"
+#include "MantidAPI/Column.h"
 
 namespace Mantid {
 namespace API {

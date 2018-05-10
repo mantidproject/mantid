@@ -1,16 +1,16 @@
 #ifndef MANTID_CURVEFITTING_THERMALNEUTRONDTOTOFFUNCTION_H_
 #define MANTID_CURVEFITTING_THERMALNEUTRONDTOTOFFUNCTION_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidKernel/Logger.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
-#include <gsl/gsl_sf_erf.h>
 #include <cmath>
+#include <gsl/gsl_sf_erf.h>
 
 namespace Mantid {
 namespace CurveFitting {

@@ -1,11 +1,11 @@
 #ifndef POLDISOURCESPECTRUMTEST_H
 #define POLDISOURCESPECTRUMTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
+#include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
 using namespace Mantid::Poldi;

@@ -51,6 +51,6 @@ private:
   std::string instrument;
   int specialCoordinates;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

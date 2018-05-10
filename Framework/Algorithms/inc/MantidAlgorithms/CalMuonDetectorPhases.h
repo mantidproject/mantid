@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_CALMUONDETECTORPHASES_H_
 #define MANTID_ALGORITHMS_CALMUONDETECTORPHASES_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {

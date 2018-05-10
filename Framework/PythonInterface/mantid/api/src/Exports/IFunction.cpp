@@ -1,9 +1,9 @@
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -72,7 +72,7 @@ GCC_DIAG_ON(conversion)
 #pragma clang diagnostic pop
 #endif
 ///@endcond
-}
+} // namespace
 
 void export_IFunction() {
 
@@ -127,8 +127,9 @@ void export_IFunction() {
                IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
-      .def("__getitem__", (double (IFunction::*)(const std::string &) const) &
-                              IFunction::getParameter,
+      .def("__getitem__",
+           (double (IFunction::*)(const std::string &) const) &
+               IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,

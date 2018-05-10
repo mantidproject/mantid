@@ -1,5 +1,5 @@
-#include "MantidKernel/V2D.h"
 #include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidKernel/V2D.h"
 
 #include <algorithm>
 #include <cmath>
@@ -220,7 +220,7 @@ bool isBetweenEndpoints(double endpoint1, double endpoint2, double z) {
 
   return isBetween1And2 || isBetween2And1;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace SliceViewer {
@@ -485,5 +485,5 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
 double EllipsoidPlaneSliceCalculator::getZoomOutFactor() const {
   return m_zoomOutFactor;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace Mantid

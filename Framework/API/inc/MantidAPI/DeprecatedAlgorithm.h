@@ -1,9 +1,9 @@
 #ifndef DEPRECATEDALGORITHM_H_
 #define DEPRECATEDALGORITHM_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Algorithm.h"
 #include <string>
 
 namespace Mantid {

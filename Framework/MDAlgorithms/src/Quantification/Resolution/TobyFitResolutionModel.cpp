@@ -1,13 +1,13 @@
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
-#include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/NDPseudoRandomNumberGenerator.h"
 #include "MantidKernel/SobolSequence.h"
@@ -17,16 +17,16 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-using Geometry::Instrument_const_sptr;
-using Geometry::IObjComponent_const_sptr;
-using Geometry::IDetector_const_sptr;
 using API::IFunction;
+using Geometry::IDetector_const_sptr;
+using Geometry::IObjComponent_const_sptr;
+using Geometry::Instrument_const_sptr;
 
 DECLARE_MDRESOLUTIONCONVOLUTION(TobyFitResolutionModel,
                                 "TobyFitResolutionModel")
 
 namespace // anonymous
-    {
+{
 /// Map strings to attributes names
 const char *CRYSTAL_MOSAIC = "CrystalMosaic";
 const char *MC_MIN_NAME = "MCLoopMin";
@@ -37,7 +37,7 @@ const char *FOREGROUNDONLY_NAME = "ForegroundOnly";
 
 /// static logger
 Kernel::Logger g_log("TobyFitResolutionModel");
-}
+} // namespace
 
 /*
  * Default constructor
@@ -619,5 +619,5 @@ void TobyFitResolutionModel::deleteRandomNumberGenerator() {
   }
   // Leave the vector at the size it was
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

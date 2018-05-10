@@ -118,5 +118,5 @@ void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out,
     IFunction1D::functionDeriv1D(out, xValues, nData);
   }
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

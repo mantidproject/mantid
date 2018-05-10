@@ -1,10 +1,10 @@
 #ifndef COW_PTR_TEST_H_
 #define COW_PTR_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/cow_ptr.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
@@ -16,7 +16,7 @@ public:
   MyType(int val) : value(val) {}
   int value;
 };
-}
+} // namespace
 
 class CowPtrTest : public CxxTest::TestSuite {
 public:

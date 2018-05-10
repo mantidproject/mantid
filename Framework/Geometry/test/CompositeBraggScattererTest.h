@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 #include <iostream>
@@ -41,11 +41,13 @@ public:
     TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
     TS_ASSERT_EQUALS(
         boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            scatterer->getScatterer(0))->getPosition(),
+            scatterer->getScatterer(0))
+            ->getPosition(),
         V3D(0.35, 0, 0));
     TS_ASSERT_EQUALS(
         boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            scatterer->getScatterer(1))->getPosition(),
+            scatterer->getScatterer(1))
+            ->getPosition(),
         V3D(0.25, 0.25, 0.25));
   }
 
@@ -60,11 +62,13 @@ public:
     TS_ASSERT_EQUALS(collectionClone->nScatterers(), 2);
     TS_ASSERT_EQUALS(
         boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            collectionClone->getScatterer(0))->getPosition(),
+            collectionClone->getScatterer(0))
+            ->getPosition(),
         V3D(0.35, 0, 0));
     TS_ASSERT_EQUALS(
         boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            collectionClone->getScatterer(1))->getPosition(),
+            collectionClone->getScatterer(1))
+            ->getPosition(),
         V3D(0.25, 0.25, 0.25));
   }
 
@@ -174,60 +178,24 @@ private:
   }
 
   std::map<V3D, double> getCalculatedStructureFactors() {
-    return {{{2, 0, 0}, 167.84},
-            {{3, 0, 0}, 153.50},
-            {{4, 0, 0}, 19.76},
-            {{5, 0, 0}, 176.21},
-            {{1, 1, 0}, 2.44},
-            {{2, 1, 0}, 15.83},
-            {{3, 1, 0}, 14.48},
-            {{4, 1, 0}, 1.86},
-            {{5, 1, 0}, 16.62},
-            {{2, 2, 0}, 104.66},
-            {{3, 2, 0}, 95.72},
-            {{4, 2, 0}, 12.32},
-            {{5, 2, 0}, 109.88},
-            {{3, 3, 0}, 90.10},
-            {{4, 3, 0}, 11.60},
-            {{5, 3, 0}, 103.43},
-            {{4, 4, 0}, 1.55},
-            {{5, 4, 0}, 13.86},
-            {{5, 5, 0}, 130.22},
-            {{1, 1, 1}, 16.45},
-            {{2, 1, 1}, 2.26},
-            {{3, 1, 1}, 21.53},
-            {{4, 1, 1}, 1.80},
-            {{5, 1, 1}, 10.47},
-            {{2, 2, 1}, 14.95},
-            {{3, 2, 1}, 142.33},
-            {{4, 2, 1}, 11.92},
-            {{5, 2, 1}, 69.17},
-            {{3, 3, 1}, 133.97},
-            {{4, 3, 1}, 11.22},
-            {{5, 3, 1}, 65.11},
-            {{4, 4, 1}, 1.50},
-            {{5, 4, 1}, 8.73},
-            {{5, 5, 1}, 81.98},
-            {{2, 2, 2}, 14.36},
-            {{3, 2, 2}, 88.94},
-            {{4, 2, 2}, 77.57},
-            {{5, 2, 2}, 9.52},
-            {{3, 3, 2}, 83.72},
-            {{4, 3, 2}, 73.02},
-            {{5, 3, 2}, 8.96},
-            {{4, 4, 2}, 9.79},
-            {{5, 4, 2}, 1.20},
-            {{5, 5, 2}, 11.29},
-            {{3, 3, 3}, 11.44},
-            {{4, 3, 3}, 103.89},
-            {{5, 3, 3}, 8.30},
-            {{4, 4, 3}, 13.93},
-            {{5, 4, 3}, 1.11},
-            {{5, 5, 3}, 10.45},
-            {{4, 4, 4}, 8.33},
-            {{5, 4, 4}, 6.93},
-            {{5, 5, 4}, 65.05},
-            {{5, 5, 5}, 88.57}};
+    return {{{2, 0, 0}, 167.84}, {{3, 0, 0}, 153.50}, {{4, 0, 0}, 19.76},
+            {{5, 0, 0}, 176.21}, {{1, 1, 0}, 2.44},   {{2, 1, 0}, 15.83},
+            {{3, 1, 0}, 14.48},  {{4, 1, 0}, 1.86},   {{5, 1, 0}, 16.62},
+            {{2, 2, 0}, 104.66}, {{3, 2, 0}, 95.72},  {{4, 2, 0}, 12.32},
+            {{5, 2, 0}, 109.88}, {{3, 3, 0}, 90.10},  {{4, 3, 0}, 11.60},
+            {{5, 3, 0}, 103.43}, {{4, 4, 0}, 1.55},   {{5, 4, 0}, 13.86},
+            {{5, 5, 0}, 130.22}, {{1, 1, 1}, 16.45},  {{2, 1, 1}, 2.26},
+            {{3, 1, 1}, 21.53},  {{4, 1, 1}, 1.80},   {{5, 1, 1}, 10.47},
+            {{2, 2, 1}, 14.95},  {{3, 2, 1}, 142.33}, {{4, 2, 1}, 11.92},
+            {{5, 2, 1}, 69.17},  {{3, 3, 1}, 133.97}, {{4, 3, 1}, 11.22},
+            {{5, 3, 1}, 65.11},  {{4, 4, 1}, 1.50},   {{5, 4, 1}, 8.73},
+            {{5, 5, 1}, 81.98},  {{2, 2, 2}, 14.36},  {{3, 2, 2}, 88.94},
+            {{4, 2, 2}, 77.57},  {{5, 2, 2}, 9.52},   {{3, 3, 2}, 83.72},
+            {{4, 3, 2}, 73.02},  {{5, 3, 2}, 8.96},   {{4, 4, 2}, 9.79},
+            {{5, 4, 2}, 1.20},   {{5, 5, 2}, 11.29},  {{3, 3, 3}, 11.44},
+            {{4, 3, 3}, 103.89}, {{5, 3, 3}, 8.30},   {{4, 4, 3}, 13.93},
+            {{5, 4, 3}, 1.11},   {{5, 5, 3}, 10.45},  {{4, 4, 4}, 8.33},
+            {{5, 4, 4}, 6.93},   {{5, 5, 4}, 65.05},  {{5, 5, 5}, 88.57}};
   }
 };
 

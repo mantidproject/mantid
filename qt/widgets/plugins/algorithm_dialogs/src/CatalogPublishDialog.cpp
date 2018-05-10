@@ -175,5 +175,5 @@ void CatalogPublishDialog::accept() {
     AlgorithmDialog::accept();
   }
 }
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt

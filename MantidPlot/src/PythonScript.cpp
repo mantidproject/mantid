@@ -692,7 +692,7 @@ private:
   Q_DISABLE_COPY(InstallTrace)
   PyObject *m_sipWrappedScript;
 };
-}
+} // namespace
 
 /**
  * Executes the compiled code object. If NULL nothing happens

@@ -9,20 +9,20 @@
 #define BIVARIATENORMALTEST_H_
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidCurveFitting/Functions/BivariateNormal.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidAPI/Jacobian.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Functions/BivariateNormal.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <cmath>
-#include <stdio.h>
-#include <stdlib.h>
 #include <exception>
 #include <numeric>
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -69,10 +69,9 @@ public:
     const double expCoeffy2 = -Vx / 2 / uu;
     const double dx = col - Mcol;
     const double dy = row - Mrow;
-    return Background +
-           coefNorm * Intensity *
-               exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy +
-                   expCoeffy2 * dy * dy);
+    return Background + coefNorm * Intensity *
+                            exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy +
+                                expCoeffy2 * dy * dy);
   }
   void test_Normal() {
     BivariateNormal NormalFit;

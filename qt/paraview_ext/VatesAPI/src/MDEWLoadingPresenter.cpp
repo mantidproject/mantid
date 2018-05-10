@@ -1,22 +1,22 @@
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
-#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
-#include "MantidVatesAPI/Common.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string.hpp>
-#include <vtkFieldData.h>
+#include <boost/scoped_ptr.hpp>
 #include <vtkDataSet.h>
+#include <vtkFieldData.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("MDEWLoadingPresenter");
@@ -235,5 +235,5 @@ std::string MDEWLoadingPresenter::getTimeStepLabel() const {
 const std::string &MDEWLoadingPresenter::getInstrument() {
   return m_metadataJsonManager->getInstrument();
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

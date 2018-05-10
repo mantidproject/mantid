@@ -42,16 +42,16 @@ using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeList;
 
 namespace Mantid {
 namespace Geometry {
 namespace {
 // initialize the static logger
 Kernel::Logger g_log("InstrumentDefinitionParser");
-}
+} // namespace
 //----------------------------------------------------------------------------------------------
 /** Default Constructor - not very functional in this state
  */
@@ -561,21 +561,19 @@ void InstrumentDefinitionParser::getTypeAndComponentPointers(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Assumes second argument is a XML location element and its parent is a
-*component element
-*  which is assigned to be an assembly. This method appends the parent component
-*element of
-*  the location element to the CompAssembly passed as the 1st arg. Note this
-*method may call
-*  itself, i.e. it may act recursively.
-*
-*  @param parent :: CompAssembly to append new component to
-*  @param pLocElems ::  Poco::XML element that points to a locations element in
-*an instrument description XML file, which optionally may be detached (meaning
-*it is not required to be part of the DOM tree of the IDF)
-*  @param pCompElem :: The Poco::XML \<component\> element that contains the
-*\<locations\> element
-*  @param idList :: The current IDList
-*/
+ *component element
+ *  which is assigned to be an assembly. This method appends the parent
+ *component element of the location element to the CompAssembly passed as the
+ *1st arg. Note this method may call itself, i.e. it may act recursively.
+ *
+ *  @param parent :: CompAssembly to append new component to
+ *  @param pLocElems ::  Poco::XML element that points to a locations element in
+ *an instrument description XML file, which optionally may be detached (meaning
+ *it is not required to be part of the DOM tree of the IDF)
+ *  @param pCompElem :: The Poco::XML \<component\> element that contains the
+ *\<locations\> element
+ *  @param idList :: The current IDList
+ */
 void InstrumentDefinitionParser::appendLocations(
     Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElems,
     const Poco::XML::Element *pCompElem, IdList &idList) {
@@ -759,18 +757,18 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Calculate the position of comp relative to its parent from info provided by
-*\<location\> element.
-*
-*  @param comp :: To set position/location off
-*  @param pElem ::  Poco::XML element that points a \<location\> element, which
-*optionally may be detached (meaning it is not required to be part of the DOM
-*tree of the IDF)
-*  @param angleConvertConst :: constant for converting deg to rad
-*  @param deltaOffsets :: radial position offsets
-*
-*  @return  Thrown if second argument is not a pointer to a 'location' XML
-*element
-*/
+ *\<location\> element.
+ *
+ *  @param comp :: To set position/location off
+ *  @param pElem ::  Poco::XML element that points a \<location\> element, which
+ *optionally may be detached (meaning it is not required to be part of the DOM
+ *tree of the IDF)
+ *  @param angleConvertConst :: constant for converting deg to rad
+ *  @param deltaOffsets :: radial position offsets
+ *
+ *  @return  Thrown if second argument is not a pointer to a 'location' XML
+ *element
+ */
 Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
     const double angleConvertConst, const bool deltaOffsets) {
@@ -852,13 +850,13 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Get parent \<component\> element of \<location\> element.
-*
-*  @param pLocElem ::  Poco::XML element that points a location element in the
-*XML doc
-*  @return Parent XML element to a location XML element
-*
-*  @throw logic_error Thrown if argument is not a child of component element
-*/
+ *
+ *  @param pLocElem ::  Poco::XML element that points a location element in the
+ *XML doc
+ *  @return Parent XML element to a location XML element
+ *
+ *  @throw logic_error Thrown if argument is not a child of component element
+ */
 Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
     const Poco::XML::Element *pLocElem) {
   if (((pLocElem->tagName()) != "location") &&
@@ -976,10 +974,10 @@ PointingAlong axisNameToAxisType(std::string &input) {
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Reads the contents of the \<defaults\> element to set member variables,
-*  requires m_instrument to be already set
-*  @param defaults :: points to the data read from the \<defaults\> element, can
-* be null.
-*/
+ *  requires m_instrument to be already set
+ *  @param defaults :: points to the data read from the \<defaults\> element,
+ * can be null.
+ */
 void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
   // Return without complaint, if there are no defaults
   if (!defaults)
@@ -1105,21 +1103,19 @@ std::vector<std::string> InstrumentDefinitionParser::buildExcludeList(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Assumes second argument is a XML location element and its parent is a
-*component element
-*  which is assigned to be an assembly. This method appends the parent component
-*element of
-*  the location element to the CompAssembly passed as the 1st arg. Note this
-*method may call
-*  itself, i.e. it may act recursively.
-*
-*  @param parent :: CompAssembly to append new component to
-*  @param pLocElem ::  Poco::XML element that points to a location element in an
-*instrument description XML file, which optionally may be detached (meaning it
-*is not required to be part of the DOM tree of the IDF)
-*  @param pCompElem :: The Poco::XML \<component\> element that contains the
-*\<location\> element
-*  @param idList :: The current IDList
-*/
+ *component element
+ *  which is assigned to be an assembly. This method appends the parent
+ *component element of the location element to the CompAssembly passed as the
+ *1st arg. Note this method may call itself, i.e. it may act recursively.
+ *
+ *  @param parent :: CompAssembly to append new component to
+ *  @param pLocElem ::  Poco::XML element that points to a location element in
+ *an instrument description XML file, which optionally may be detached (meaning
+ *it is not required to be part of the DOM tree of the IDF)
+ *  @param pCompElem :: The Poco::XML \<component\> element that contains the
+ *\<location\> element
+ *  @param idList :: The current IDList
+ */
 void InstrumentDefinitionParser::appendAssembly(
     Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
     const Poco::XML::Element *pCompElem, IdList &idList) {
@@ -1619,23 +1615,23 @@ void InstrumentDefinitionParser::createStructuredDetector(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Assumes second argument is pointing to a leaf, which here means the
-*location
-*element (indirectly
-*  representing a component element) that contains no sub-components. This
-*component is appended
-*  to the parent (1st argument).
-*
-*  @param parent :: CompAssembly to append component to
-*  @param pLocElem ::  Poco::XML element that points to the element in the XML
-*doc we want to add, which optionally may be detached (meaning it is not
-*required to be part of the DOM tree of the IDF)
-*  @param pCompElem :: The Poco::XML \<component\> element that contains the
-*\<location\> element, which may optionally be detached from the DOM tree also
-*  @param idList :: The current IDList
-*
-*  @throw InstrumentDefinitionError Thrown if issues with the content of XML
-*instrument file
-*/
+ *location
+ *element (indirectly
+ *  representing a component element) that contains no sub-components. This
+ *component is appended
+ *  to the parent (1st argument).
+ *
+ *  @param parent :: CompAssembly to append component to
+ *  @param pLocElem ::  Poco::XML element that points to the element in the XML
+ *doc we want to add, which optionally may be detached (meaning it is not
+ *required to be part of the DOM tree of the IDF)
+ *  @param pCompElem :: The Poco::XML \<component\> element that contains the
+ *\<location\> element, which may optionally be detached from the DOM tree also
+ *  @param idList :: The current IDList
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ *instrument file
+ */
 void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
                                             const Poco::XML::Element *pLocElem,
                                             const Poco::XML::Element *pCompElem,
@@ -1726,14 +1722,14 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Method for populating IdList.
-*
-*  @param pE ::  Poco::XML element that points to an \<idlist\>
-*  @param idList :: The structure to populate with detector ID numbers
-*
-*  @throw logic_error Thrown if argument is not a child of component element
-*  @throw InstrumentDefinitionError Thrown if issues with the content of XML
-*instrument file
-*/
+ *
+ *  @param pE ::  Poco::XML element that points to an \<idlist\>
+ *  @param idList :: The structure to populate with detector ID numbers
+ *
+ *  @throw logic_error Thrown if argument is not a child of component element
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ *instrument file
+ */
 void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
                                                 IdList &idList) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
@@ -1873,7 +1869,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
  *  @return True if the type is an assembly
  *  @throw InstrumentDefinitionError Thrown if type not defined in XML
  *definition
-*/
+ */
 bool InstrumentDefinitionParser::isAssembly(std::string type) const {
   const std::string filename = m_xmlFile->getFileFullPathStr();
   auto it = isTypeAssembly.find(type);
@@ -1888,15 +1884,15 @@ bool InstrumentDefinitionParser::isAssembly(std::string type) const {
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Make the shape defined in 1st argument face the component in the second
-*argument,
-*  by rotating the z-axis of the component passed in 1st argument so that it
-*points in the
-*  direction: from the component as specified 2nd argument to the component as
-*specified in 1st argument.
-*
-*  @param in ::  Component to be rotated
-*  @param facing :: Object to face
-*/
+ *argument,
+ *  by rotating the z-axis of the component passed in 1st argument so that it
+ *points in the
+ *  direction: from the component as specified 2nd argument to the component as
+ *specified in 1st argument.
+ *
+ *  @param in ::  Component to be rotated
+ *  @param facing :: Object to face
+ */
 void InstrumentDefinitionParser::makeXYplaneFaceComponent(
     Geometry::IComponent *&in, const Geometry::ObjComponent *facing) {
   makeXYplaneFaceComponent(in, facing->getPos());
@@ -1904,15 +1900,15 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Make the shape defined in 1st argument face the position in the second
-*argument,
-*  by rotating the z-axis of the component passed in 1st argument so that it
-*points in the
-*  direction: from the position (as specified 2nd argument) to the component
-*(1st argument).
-*
-*  @param in ::  Component to be rotated
-*  @param facingPoint :: position to face
-*/
+ *argument,
+ *  by rotating the z-axis of the component passed in 1st argument so that it
+ *points in the
+ *  direction: from the position (as specified 2nd argument) to the component
+ *(1st argument).
+ *
+ *  @param in ::  Component to be rotated
+ *  @param facingPoint :: position to face
+ */
 void InstrumentDefinitionParser::makeXYplaneFaceComponent(
     Geometry::IComponent *&in, const Kernel::V3D &facingPoint) {
   Kernel::V3D pos = in->getPos();
@@ -1950,10 +1946,10 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Parse position of facing element to V3D
-*
-*  @param pElem ::  Facing type element to parse
-*  @return Return parsed position as a V3D
-*/
+ *
+ *  @param pElem ::  Facing type element to parse
+ *  @return Return parsed position as a V3D
+ */
 Kernel::V3D
 InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
   Kernel::V3D retV3D;
@@ -1987,18 +1983,18 @@ InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Set facing of comp as specified in XML facing element (which must be
-*sub-element of a location element).
-*
-*  @param comp :: To set facing of
-*  @param pElem ::  Poco::XML element that points a \<location\> element,
-*which
-*optionally may be detached (meaning it is not required to be part of the DOM
-*tree of the IDF)
-*
-*  @throw logic_error Thrown if second argument is not a pointer to a
-*'location'
-*XML element
-*/
+ *sub-element of a location element).
+ *
+ *  @param comp :: To set facing of
+ *  @param pElem ::  Poco::XML element that points a \<location\> element,
+ *which
+ *optionally may be detached (meaning it is not required to be part of the DOM
+ *tree of the IDF)
+ *
+ *  @throw logic_error Thrown if second argument is not a pointer to a
+ *'location'
+ *XML element
+ */
 void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
                                            const Poco::XML::Element *pElem) {
   // Require that pElem points to an element with tag name 'location'
@@ -2048,14 +2044,14 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Set parameter/logfile info (if any) associated with component
-*
-*  @param comp :: Some component
-*  @param pElem ::  Poco::XML element that may hold \<parameter\> elements
-*  @param logfileCache :: Cache to add information about parameter to
-*
-*  @throw InstrumentDefinitionError Thrown if issues with the content of XML
-*instrument file
-*/
+ *
+ *  @param comp :: Some component
+ *  @param pElem ::  Poco::XML element that may hold \<parameter\> elements
+ *  @param logfileCache :: Cache to add information about parameter to
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ *instrument file
+ */
 void InstrumentDefinitionParser::setLogfile(
     const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
     InstrumentParameterCache &logfileCache) {
@@ -2345,16 +2341,16 @@ void InstrumentDefinitionParser::setLogfile(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Apply parameters that may be specified in \<component-link\> XML elements.
-*  Input variable pRootElem may e.g. be the root element of an XML parameter
-*file or
-*  the root element of a IDF
-*
-*  @param instrument :: Instrument
-*  @param pRootElem ::  Associated Poco::XML element that may contain
-*\<component-link\> elements
-*  @param progress :: Optional progress object for reporting progress to an
-*algorithm
-*/
+ *  Input variable pRootElem may e.g. be the root element of an XML parameter
+ *file or
+ *  the root element of a IDF
+ *
+ *  @param instrument :: Instrument
+ *  @param pRootElem ::  Associated Poco::XML element that may contain
+ *\<component-link\> elements
+ *  @param progress :: Optional progress object for reporting progress to an
+ *algorithm
+ */
 void InstrumentDefinitionParser::setComponentLinks(
     boost::shared_ptr<Geometry::Instrument> &instrument,
     Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress) {
@@ -2401,7 +2397,8 @@ void InstrumentDefinitionParser::setComponentLinks(
         // user, and throw an exception.
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
-                           "found with id '" << detid << "'\n";
+                           "found with id '"
+                        << detid << "'\n";
           g_log.error()
               << "Please check that your detectors' ids are correct.\n";
           throw Kernel::Exception::InstrumentDefinitionError(
@@ -2419,9 +2416,9 @@ void InstrumentDefinitionParser::setComponentLinks(
             bool consistent =
                 (comp->getFullName() == name || comp->getName() == name);
             if (!consistent) {
-              g_log.warning() << "Error whilst loading parameters. Name '"
-                              << name << "' does not match id '" << detid
-                              << "'.\n";
+              g_log.warning()
+                  << "Error whilst loading parameters. Name '" << name
+                  << "' does not match id '" << detid << "'.\n";
               g_log.warning()
                   << "Parameters have been applied to detector with id '"
                   << detid << "'. Please check the name is correct.\n";
@@ -2968,10 +2965,10 @@ InstrumentDefinitionParser::convertLocationsElement(
 }
 
 /** Generates a vtp filename from a xml filename
-*
-*  @return The vtp filename
-*
-*/
+ *
+ *  @return The vtp filename
+ *
+ */
 const std::string InstrumentDefinitionParser::createVTPFileName() {
   std::string retVal;
   std::string filename = getMangledName();
@@ -3107,5 +3104,5 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(
   }
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

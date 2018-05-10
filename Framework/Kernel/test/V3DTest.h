@@ -1,14 +1,14 @@
 #ifndef MANTID_TESTV3D__
 #define MANTID_TESTV3D__
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <sstream>
 #include <vector>
 
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::V3D;

@@ -2,8 +2,8 @@
 #define MANTID_HISTOGRAMDATA_POINTVARIANCES_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VarianceVectorOf.h"
 #include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/VarianceVectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -58,9 +58,9 @@ public:
   /// Move constructor.
   PointVariances(PointVariances &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  PointVariances &operator=(const PointVariances &)& = default;
+  PointVariances &operator=(const PointVariances &) & = default;
   /// Move assignment.
-  PointVariances &operator=(PointVariances &&)& = default;
+  PointVariances &operator=(PointVariances &&) & = default;
 };
 
 } // namespace HistogramData

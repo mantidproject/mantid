@@ -6,9 +6,9 @@
 #include "MantidKernel/V3D.h"
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -97,8 +97,8 @@ public:
   // otherwise absolute
   virtual void setPos(double, double, double) = 0;
   /** Set the position of the component
-  *  The position is with respect to the parent component
-  */
+   *  The position is with respect to the parent component
+   */
   virtual void setPos(const Kernel::V3D &) = 0;
   //! Set the orientation Kernel::Quaternion relative to parent (if present)
   // otherwise absolute
@@ -130,8 +130,8 @@ public:
   virtual void getBoundingBox(BoundingBox &boundingBox) const = 0;
 
   /** Gets the scaling factor of the object for the Object Component.
-    * @return a vector with 1 in all 3 directions.
-    */
+   * @return a vector with 1 in all 3 directions.
+   */
   virtual Kernel::V3D getScaleFactor() const {
     return Kernel::V3D(1.0, 1.0, 1.0);
   }
@@ -178,7 +178,7 @@ public:
                                            bool recursive = true) const = 0;
   //@}
   /** Prints a text representation of itself
-  */
+   */
   virtual void printSelf(std::ostream &) const = 0;
   //! Returns true if the Component is parametrized (has a parameter map)
   virtual bool isParametrized() const = 0;

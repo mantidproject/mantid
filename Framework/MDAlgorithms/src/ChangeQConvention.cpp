@@ -1,20 +1,20 @@
+#include "MantidMDAlgorithms/ChangeQConvention.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/Progress.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/ChangeQConvention.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include <Poco/File.h>
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -57,5 +57,5 @@ void ChangeQConvention::exec() {
   setProperty("InputWorkspace", ws);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_RAYTRACERTESTERTEST_H_
 #define MANTID_ALGORITHMS_RAYTRACERTESTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAlgorithms/RayTracerTester.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

@@ -23,14 +23,14 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-#include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
+#include <boost/python/object.hpp>
 #include <vector>
 
 namespace Mantid {
 namespace PythonInterface {
 namespace // <anonymous>
-    {
+{
 /**
  * Extract a C type from a Python object.
  */
@@ -59,7 +59,7 @@ template <> struct ExtractCType<std::string> {
   }
 };
 
-} // end <anonymous>
+} // namespace
 
 namespace Converters {
 /**
@@ -114,8 +114,8 @@ private:
   /// Python object to convert
   boost::python::object m_obj;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PYSEQUENCETOVECTORCONVERTER_H_ */

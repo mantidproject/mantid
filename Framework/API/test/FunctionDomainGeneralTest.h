@@ -1,8 +1,8 @@
 #ifndef FUNCTIONDOMAINGENERALTEST_H_
 #define FUNCTIONDOMAINGENERALTEST_H_
 
-#include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/FunctionDomainGeneral.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -61,7 +61,7 @@ protected:
   std::vector<T> m_data;
 };
 
-} // anonymoius namespace
+} // namespace
 
 class FunctionDomainGeneralTest : public CxxTest::TestSuite {
 public:

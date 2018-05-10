@@ -1,21 +1,21 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
 
+#include "../Muon/MuonAnalysisResultTableCreator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "../Muon/MuonAnalysisResultTableCreator.h"
 
-#include <cxxtest/TestSuite.h>
 #include <QMap>
 #include <QString>
 #include <QVariant>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
@@ -466,10 +466,18 @@ private:
     auto table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "workspace_Name");
     const std::vector<std::string> titles = {
-        "f0.A0",    "f0.A0Error",  "f1.A",               "f1.AError",
+        "f0.A0",
+        "f0.A0Error",
+        "f1.A",
+        "f1.AError",
         "f1.Omega", // no omega error as param is fixed
-        "f1.Phi",   "f1.PhiError", "f1.Sigma",           "f1.SigmaError",
-        "f1.Tau",   "f1.TauError", "Cost function value"};
+        "f1.Phi",
+        "f1.PhiError",
+        "f1.Sigma",
+        "f1.SigmaError",
+        "f1.Tau",
+        "f1.TauError",
+        "Cost function value"};
     for (const auto &log : m_logs) {
       table->addColumn("double", log.toStdString());
     }

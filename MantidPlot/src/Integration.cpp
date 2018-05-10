@@ -27,14 +27,14 @@
  *                                                                         *
  ***************************************************************************/
 #include "Integration.h"
-#include "nrutil.h"
+#include "FunctionCurve.h"
 #include "MultiLayer.h"
 #include "MyParser.h"
-#include "FunctionCurve.h"
+#include "nrutil.h"
 
-#include <QMessageBox>
 #include <QDateTime>
 #include <QLocale>
+#include <QMessageBox>
 
 #include <gsl/gsl_vector.h>
 

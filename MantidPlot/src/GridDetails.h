@@ -31,9 +31,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef GRIDDETAILS_H_
 #define GRIDDETAILS_H_
 
-#include <QWidget>
-#include <QList>
 #include <MantidQtWidgets/Common/DoubleSpinBox.h>
+#include <QList>
+#include <QWidget>
 class ApplicationWindow;
 class Graph;
 class QCheckBox;

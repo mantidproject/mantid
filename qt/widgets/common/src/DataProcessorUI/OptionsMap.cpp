@@ -39,6 +39,6 @@ ColumnOptionsMap convertColumnOptionsFromQMap(const ColumnOptionsQMap &src) {
   }
   return dest;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

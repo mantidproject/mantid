@@ -1,18 +1,18 @@
 #ifndef MANTID_DATAHANDLING_LOADMASKTEST_H_
 #define MANTID_DATAHANDLING_LOADMASKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <sstream>
 
-#include "MantidDataHandling/LoadMask.h"
-#include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadMask.h"
+#include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

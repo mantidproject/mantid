@@ -8,8 +8,8 @@
 #include "MantidKernel/Timer.h"
 
 #include <Poco/ActiveResult.h>
-#include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/TCPServer.h>
 
 namespace Mantid {
 namespace LiveData {
@@ -21,10 +21,10 @@ using namespace API;
 
 namespace {
 /**
-* Implements Poco TCPServerConnection and does the actual job of interpreting
-* commands
-* from a client and sending data.
-*/
+ * Implements Poco TCPServerConnection and does the actual job of interpreting
+ * commands
+ * from a client and sending data.
+ */
 class TestServerConnection : public Poco::Net::TCPServerConnection {
   int m_nPeriods;
   int m_nSpectra;
@@ -34,9 +34,9 @@ class TestServerConnection : public Poco::Net::TCPServerConnection {
 
 public:
   /**
-  * Constructor. Defines the simulated dataset dimensions.
-  * @param soc :: A socket that provides communication with the client.
-  */
+   * Constructor. Defines the simulated dataset dimensions.
+   * @param soc :: A socket that provides communication with the client.
+   */
   TestServerConnection(const Poco::Net::StreamSocket &soc, int nper, int nspec,
                        int rate, int nevents, boost::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper),
@@ -59,8 +59,8 @@ public:
   }
 
   /**
-  * Main method that sends out the data.
-  */
+   * Main method that sends out the data.
+   */
   void run() override {
     Kernel::MersenneTwister tof(0, 10000.0, 20000.0);
     Kernel::MersenneTwister spec(1234, 0.0, static_cast<double>(m_nSpectra));
@@ -112,8 +112,8 @@ public:
 };
 
 /**
-* Implements Poco TCPServerConnectionFactory
-*/
+ * Implements Poco TCPServerConnectionFactory
+ */
 class TestServerConnectionFactory
     : public Poco::Net::TCPServerConnectionFactory {
   int m_nPeriods; ///< Number of periods in the fake dataset
@@ -124,27 +124,27 @@ class TestServerConnectionFactory
 
 public:
   /**
-  * Constructor.
-  */
+   * Constructor.
+   */
   TestServerConnectionFactory(int nper, int nspec, int rate, int nevents,
                               boost::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper),
         m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {}
   /**
-  * The factory method.
-  * @param socket :: The socket.
-  */
+   * The factory method.
+   * @param socket :: The socket.
+   */
   Poco::Net::TCPServerConnection *
   createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_Rate,
                                     m_nEvents, m_prog);
   }
 };
-} // end anonymous
+} // namespace
 
 /**
-* Declare the algorithm properties
-*/
+ * Declare the algorithm properties
+ */
 void FakeISISEventDAE::init() {
   declareProperty(
       make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
@@ -165,8 +165,8 @@ void FakeISISEventDAE::init() {
 }
 
 /**
-* Execute the algorithm.
-*/
+ * Execute the algorithm.
+ */
 void FakeISISEventDAE::exec() {
   int nper = getProperty("NPeriods");
   int nspec = getProperty("NSpectra");

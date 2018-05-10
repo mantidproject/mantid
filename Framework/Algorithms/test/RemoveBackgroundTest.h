@@ -6,10 +6,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 
-#include "MantidAlgorithms/RemoveBackground.h"
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CalculateFlatBackground.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid;

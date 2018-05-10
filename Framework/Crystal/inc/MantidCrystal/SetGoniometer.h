@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_SETGONIOMETER_H_
 #define MANTID_CRYSTAL_SETGONIOMETER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -38,7 +38,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_SETGONIOMETER_H_ */

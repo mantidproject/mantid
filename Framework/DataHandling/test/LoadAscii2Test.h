@@ -1,14 +1,14 @@
 #ifndef LOADASCIITEST_H_
 #define LOADASCIITEST_H_
 
-#include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadAscii2.h"
+#include "cxxtest/TestSuite.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Unit.h"
 

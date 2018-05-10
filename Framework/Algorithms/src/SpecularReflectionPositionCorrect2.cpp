@@ -40,7 +40,7 @@ const std::string SpecularReflectionPositionCorrect2::category() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void SpecularReflectionPositionCorrect2::init() {
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -92,7 +92,7 @@ void SpecularReflectionPositionCorrect2::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void SpecularReflectionPositionCorrect2::exec() {
 
   MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");

@@ -51,8 +51,8 @@ private:
   // reference to the held array
   NumPy::NdArray m_arr;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_NDARRAYTOVECTORCONVERTER_H_ */

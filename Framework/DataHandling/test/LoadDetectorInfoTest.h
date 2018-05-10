@@ -5,20 +5,20 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
-#include <nexus/NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <vector>
 
 using namespace Mantid::DataHandling;
@@ -27,8 +27,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::LinearGenerator;
 
 /* choose an instrument to test, we could test all instruments
@@ -235,7 +235,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
   // Register the workspace in the data service
   AnalysisDataService::Instance().add(ads_name, space2D);
 }
-}
+} // namespace
 
 class LoadDetectorInfoTest : public CxxTest::TestSuite {
 public:

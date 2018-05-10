@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DataService.h"
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/DataService.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <Poco/AutoPtr.h>
 
@@ -200,15 +200,15 @@ using WorkspaceAfterReplaceNotification_ptr =
 
 using WorkspacePreDeleteNotification =
     Mantid::Kernel::DataService<Mantid::API::Workspace>::PreDeleteNotification;
-using WorkspacePreDeleteNotification_ptr =
-    const Poco::AutoPtr<Mantid::Kernel::DataService<
-        Mantid::API::Workspace>::PreDeleteNotification> &;
+using WorkspacePreDeleteNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PreDeleteNotification>
+    &;
 
 using WorkspacePostDeleteNotification =
     Mantid::Kernel::DataService<Mantid::API::Workspace>::PostDeleteNotification;
-using WorkspacePostDeleteNotification_ptr =
-    const Poco::AutoPtr<Mantid::Kernel::DataService<
-        Mantid::API::Workspace>::PostDeleteNotification> &;
+using WorkspacePostDeleteNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PostDeleteNotification>
+    &;
 
 using ClearADSNotification =
     Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification;
@@ -243,6 +243,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AnalysisDataServiceImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /*MANTID_KERNEL_ANALYSISDATASERVICE_H_*/

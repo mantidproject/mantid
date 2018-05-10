@@ -53,7 +53,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*USER_ALGORITHMS_PROPERTYALGORITHM_H_*/

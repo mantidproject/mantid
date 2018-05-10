@@ -1,20 +1,20 @@
 #ifndef MANTID_VATES_VTKDATASETTONONORTHOGONALDATASETTEST_H_
 #define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASETTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidVatesAPI/ADSWorkspaceProvider.h>
-#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidKernel/MDUnit.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include <MantidVatesAPI/ADSWorkspaceProvider.h>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 #include <vtkDataArray.h>

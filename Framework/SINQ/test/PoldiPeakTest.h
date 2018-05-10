@@ -1,11 +1,11 @@
 #ifndef MANTID_SINQ_POLDIPEAKTEST_H
 #define MANTID_SINQ_POLDIPEAKTEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
-#include <stdexcept>
 #include "boost/bind.hpp"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::Poldi;
 

@@ -237,15 +237,15 @@ Object of write is to output a MCNPX plane info
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 /**
-* Calculates the bounding box for the sphere and returns the bounding box
-* values.
-* @param xmax :: input and output for the bounding box X axis max value
-* @param ymax :: input and output for the bounding box Y axis max value
-* @param zmax :: input and output for the bounding box Z axis max value
-* @param xmin :: input and output for the bounding box X axis min value
-* @param ymin :: input and output for the bounding box Y axis min value
-* @param zmin :: input and output for the bounding box Z axis min value
-*/
+ * Calculates the bounding box for the sphere and returns the bounding box
+ * values.
+ * @param xmax :: input and output for the bounding box X axis max value
+ * @param ymax :: input and output for the bounding box Y axis max value
+ * @param zmax :: input and output for the bounding box Z axis max value
+ * @param xmin :: input and output for the bounding box X axis min value
+ * @param ymin :: input and output for the bounding box Y axis min value
+ * @param zmin :: input and output for the bounding box Z axis min value
+ */
 void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax,
                             double &xmin, double &ymin, double &zmin) {
   xmax = Centre[0] + Radius;

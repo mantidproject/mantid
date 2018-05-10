@@ -4,10 +4,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 
 namespace Mantid {

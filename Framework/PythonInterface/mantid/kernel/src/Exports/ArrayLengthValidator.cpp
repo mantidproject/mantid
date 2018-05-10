@@ -1,7 +1,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include <boost/python/class.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::IValidator;

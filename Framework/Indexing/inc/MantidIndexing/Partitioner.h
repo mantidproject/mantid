@@ -2,8 +2,8 @@
 #define MANTID_INDEXING_PARTITIONER_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/PartitionIndex.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidIndexing/PartitionIndex.h"
 
 #include <vector>
 

@@ -63,7 +63,7 @@ private:
       Kernel::cow_ptr<HistogramData::HistogramX> inputX) const override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_*/

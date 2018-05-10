@@ -8,11 +8,11 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
+#include "MantidDataHandling/LoadEventPreNexus2.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

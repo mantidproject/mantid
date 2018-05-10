@@ -1,12 +1,12 @@
 #ifndef MANTID_CRYSTAL_PEAKSONSURFACETEST_H_
 #define MANTID_CRYSTAL_PEAKSONSURFACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCrystal/PeaksOnSurface.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidCrystal/PeaksOnSurface.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;

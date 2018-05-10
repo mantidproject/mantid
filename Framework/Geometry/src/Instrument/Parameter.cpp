@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/V3D.h"

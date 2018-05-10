@@ -197,7 +197,7 @@ template <typename T> void sortDataBlocks(T &dataBlcokCollection) {
   std::sort(std::begin(dataBlcokCollection), std::end(dataBlcokCollection),
             comparison);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -464,5 +464,5 @@ std::vector<int64_t> DataBlockComposite::getAllSpectrumNumbers() {
 }
 
 bool DataBlockComposite::isEmpty() { return m_dataBlocks.empty(); }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

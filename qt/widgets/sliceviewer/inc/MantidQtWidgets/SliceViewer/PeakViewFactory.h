@@ -1,12 +1,12 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_VIEW_FACTORY_H_
 #define MANTID_SLICEVIEWER_PEAK_VIEW_FACTORY_H_
 
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactoryBase.h"
 #include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
-#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
 
 #include <QColor>
 
@@ -91,7 +91,7 @@ private:
   std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
       m_calculator;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

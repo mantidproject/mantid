@@ -3,11 +3,11 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/default_call_policies.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/make_constructor.hpp>
 
-using Mantid::Kernel::StringContainsValidator;
 using Mantid::Kernel::IValidator;
+using Mantid::Kernel::StringContainsValidator;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
@@ -27,7 +27,7 @@ void setRequiredStrings(StringContainsValidator &self,
                         const boost::python::list &strs) {
   self.setRequiredStrings(Converters::PySequenceToVector<std::string>(strs)());
 }
-}
+} // namespace
 
 void export_StringContainsValidator() {
   class_<StringContainsValidator, bases<IValidator>, boost::noncopyable>(

@@ -6,8 +6,8 @@
 #include <boost/format.hpp>
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 
@@ -89,5 +89,5 @@ bool CompositeImplicitFunction::isPointContained(
   }
   return evalResult;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

@@ -4,11 +4,11 @@
 #include "MantidKernel/DynamicFactory.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/shared_ptr.hpp>
 #include <Poco/NObserver.h>
+#include <boost/shared_ptr.hpp>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace Mantid::Kernel;
 

@@ -1,14 +1,14 @@
 #ifndef MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_
 #define MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
-#include "../Muon/IALCDataLoadingView.h"
 #include "../Muon/ALCDataLoadingPresenter.h"
+#include "../Muon/IALCDataLoadingView.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -23,7 +23,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe->first << ", " << maybe->second;
   return out;
 }
-}
+} // namespace boost
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -189,11 +189,13 @@ public:
                 setAvailableLogs(
                     AllOf(Property(&std::vector<std::string>::size, 39),
                           Contains("run_number"), Contains("sample_magn_field"),
-                          Contains("Field_Danfysik")))).Times(1);
+                          Contains("Field_Danfysik"))))
+        .Times(1);
     // Test periods
     EXPECT_CALL(*m_view, setAvailablePeriods(
                              AllOf(Property(&std::vector<std::string>::size, 2),
-                                   Contains("1"), Contains("2")))).Times(1);
+                                   Contains("1"), Contains("2"))))
+        .Times(1);
     // Test time limits
     auto timeRange = std::make_pair<double, double>(0.0, 0.0);
     ON_CALL(*m_view, timeRange())
@@ -209,11 +211,13 @@ public:
                 setAvailableLogs(
                     AllOf(Property(&std::vector<std::string>::size, 39),
                           Contains("run_number"), Contains("sample_magn_field"),
-                          Contains("Field_Danfysik")))).Times(1);
+                          Contains("Field_Danfysik"))))
+        .Times(1);
     // Test periods
     EXPECT_CALL(*m_view, setAvailablePeriods(
                              AllOf(Property(&std::vector<std::string>::size, 2),
-                                   Contains("1"), Contains("2")))).Times(1);
+                                   Contains("1"), Contains("2"))))
+        .Times(1);
     // Test time limits
     auto timeRange =
         std::make_pair<double, double>(0.1, 10.0); // not the first run loaded

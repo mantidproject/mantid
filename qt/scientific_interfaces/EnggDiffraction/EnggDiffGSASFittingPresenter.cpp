@@ -137,8 +137,8 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
     m_view->userError("Invalid run identifier",
                       "Unexpectedly tried to display fit results for invalid "
                       "run, run number = " +
-                          std::to_string(runLabel.runNumber) + ", bank ID = " +
-                          std::to_string(runLabel.bank) +
+                          std::to_string(runLabel.runNumber) +
+                          ", bank ID = " + std::to_string(runLabel.bank) +
                           ". Please contact the development team");
     return;
   }
@@ -253,5 +253,5 @@ void EnggDiffGSASFittingPresenter::processStart() {
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt

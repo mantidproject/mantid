@@ -4,13 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidLiveData/ADARA/ADARAParser.h"
 #include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidLiveData/ADARA/ADARAParser.h"
 
-#include <Poco/Timer.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Runnable.h>
+#include <Poco/Timer.h>
 
 namespace Mantid {
 namespace LiveData {

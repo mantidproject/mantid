@@ -1,5 +1,5 @@
-#include <QStyledItemDelegate>
 #include <QPainter>
+#include <QStyledItemDelegate>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,4 +24,4 @@ public:
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt

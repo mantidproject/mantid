@@ -47,9 +47,10 @@ void RefRoi::init() {
       "SumPixels", false,
       "If true, all the pixels will be summed,"
       " so that the resulting workspace will be a single histogram");
-  declareProperty("NormalizeSum", false, "If true, and SumPixels is true, the"
-                                         " resulting histogram will be divided "
-                                         "by the number of pixels in the ROI");
+  declareProperty("NormalizeSum", false,
+                  "If true, and SumPixels is true, the"
+                  " resulting histogram will be divided "
+                  "by the number of pixels in the ROI");
   declareProperty("AverageOverIntegratedAxis", false,
                   "If true, and SumPixels and NormalizeSum are true, the"
                   " resulting histogram will also be divided by the number of "
@@ -63,10 +64,12 @@ void RefRoi::init() {
       " If false, the X direction will be integrated over. The result will be"
       " a histogram for each of the pixels in the hi-resolution direction of"
       " the 2D detector");
-  declareProperty("ConvertToQ", true, "If true, the X-axis will be converted"
-                                      " to momentum transfer");
-  declareProperty("ScatteringAngle", 0.0, "Value of the scattering angle to use"
-                                          " when converting to Q");
+  declareProperty("ConvertToQ", true,
+                  "If true, the X-axis will be converted"
+                  " to momentum transfer");
+  declareProperty("ScatteringAngle", 0.0,
+                  "Value of the scattering angle to use"
+                  " when converting to Q");
 }
 
 /// Execute algorithm
@@ -235,5 +238,5 @@ void RefRoi::extract2D() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid

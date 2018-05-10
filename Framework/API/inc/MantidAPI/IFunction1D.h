@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid {
@@ -15,7 +15,7 @@ namespace CurveFitting {
 namespace Algorithms {
 class Fit;
 }
-}
+} // namespace CurveFitting
 namespace API {
 
 //----------------------------------------------------------------------

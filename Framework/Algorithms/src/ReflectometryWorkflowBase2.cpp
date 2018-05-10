@@ -1,8 +1,8 @@
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -21,7 +21,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Initialize properties related to the type of reduction
-*/
+ */
 void ReflectometryWorkflowBase2::initReductionProperties() {
   // Summation type
   std::vector<std::string> summationTypes = {"SumInLambda", "SumInQ"};
@@ -42,7 +42,7 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
 }
 
 /** Initialize properties related to direct beam normalization
-*/
+ */
 void ReflectometryWorkflowBase2::initDirectBeamProperties() {
 
   declareProperty(make_unique<ArrayProperty<int>>("RegionOfDirectBeam"),
@@ -52,7 +52,7 @@ void ReflectometryWorkflowBase2::initDirectBeamProperties() {
 }
 
 /** Initialize properties related to monitors
-*/
+ */
 void ReflectometryWorkflowBase2::initMonitorProperties() {
 
   // Monitor workspace index
@@ -86,7 +86,7 @@ void ReflectometryWorkflowBase2::initMonitorProperties() {
 }
 
 /** Initialize properties related to transmission normalization
-*/
+ */
 void ReflectometryWorkflowBase2::initTransmissionProperties() {
 
   declareProperty(
@@ -120,7 +120,7 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
 }
 
 /** Initialize properties used for stitching transmission runs
-*/
+ */
 void ReflectometryWorkflowBase2::initStitchProperties() {
 
   declareProperty(
@@ -144,9 +144,9 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
 }
 
 /** Initialize algorithmic correction properties
-*
-* @param autoDetect :: True to include 'AutoDetect' option. False otherwise.
-*/
+ *
+ * @param autoDetect :: True to include 'AutoDetect' option. False otherwise.
+ */
 void ReflectometryWorkflowBase2::initAlgorithmicProperties(bool autoDetect) {
 
   std::vector<std::string> correctionAlgorithms = {
@@ -181,7 +181,7 @@ void ReflectometryWorkflowBase2::initAlgorithmicProperties(bool autoDetect) {
 }
 
 /** Initialize momentum transfer properties
-*/
+ */
 void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
 
   declareProperty("MomentumTransferMin", Mantid::EMPTY_DBL(),
@@ -205,18 +205,19 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
 }
 
 /** Initialize properties for diagnostics
-*/
+ */
 void ReflectometryWorkflowBase2::initDebugProperties() {
   // Diagnostics
-  declareProperty("Diagnostics", false, "Whether to enable the output of "
-                                        "interim workspaces for debugging "
-                                        "purposes.");
+  declareProperty("Diagnostics", false,
+                  "Whether to enable the output of "
+                  "interim workspaces for debugging "
+                  "purposes.");
 }
 
 /** Validate reduction properties, if given
-*
-* @return :: A map with results of validation
-*/
+ *
+ * @return :: A map with results of validation
+ */
 std::map<std::string, std::string>
 ReflectometryWorkflowBase2::validateReductionProperties() const {
 
@@ -241,9 +242,9 @@ ReflectometryWorkflowBase2::validateReductionProperties() const {
 }
 
 /** Validate direct beam if given
-*
-* @return :: A map with results of validation
-*/
+ *
+ * @return :: A map with results of validation
+ */
 std::map<std::string, std::string>
 ReflectometryWorkflowBase2::validateDirectBeamProperties() const {
 
@@ -268,9 +269,9 @@ ReflectometryWorkflowBase2::validateDirectBeamProperties() const {
 }
 
 /** Validate transmission runs if given
-*
-* @return :: A map with results of validation
-*/
+ *
+ * @return :: A map with results of validation
+ */
 std::map<std::string, std::string>
 ReflectometryWorkflowBase2::validateTransmissionProperties() const {
 
@@ -303,9 +304,9 @@ ReflectometryWorkflowBase2::validateTransmissionProperties() const {
 }
 
 /** Validate various wavelength ranges
-*
-* @return :: A map with results of validation
-*/
+ *
+ * @return :: A map with results of validation
+ */
 std::map<std::string, std::string>
 ReflectometryWorkflowBase2::validateWavelengthRanges() const {
 
@@ -338,9 +339,9 @@ ReflectometryWorkflowBase2::validateWavelengthRanges() const {
 }
 
 /** Converts an input workspace in TOF to wavelength
-* @param inputWS :: the workspace to convert
-* @return :: the workspace in wavelength
-*/
+ * @param inputWS :: the workspace to convert
+ * @return :: the workspace in wavelength
+ */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
 
@@ -357,13 +358,13 @@ ReflectometryWorkflowBase2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
 }
 
 /** Crops a workspace in wavelength to specified limits
-* @param inputWS :: the workspace to crop
-* @param useArgs :: if true, use the given args as the min and max;
-* otherwise, use the input properties to the algorithm
-* @param argMin :: the minimum wavelength to crop to if useArgs is true
-* @param argMax :: the maximum wavelength to crop to if useArgs is true
-* @return :: the cropped workspace
-*/
+ * @param inputWS :: the workspace to crop
+ * @param useArgs :: if true, use the given args as the min and max;
+ * otherwise, use the input properties to the algorithm
+ * @param argMin :: the minimum wavelength to crop to if useArgs is true
+ * @param argMax :: the maximum wavelength to crop to if useArgs is true
+ * @return :: the cropped workspace
+ */
 MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
     MatrixWorkspace_sptr inputWS, const bool useArgs, const double argMin,
     const double argMax) {
@@ -394,11 +395,11 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
 }
 
 /** Process an input workspace in TOF according to specified processing commands
-* to get a detector workspace in wavelength.
-* @param inputWS :: the input workspace in TOF
-* @param convert :: whether the result should be converted to wavelength
-* @return :: the detector workspace in wavelength
-*/
+ * to get a detector workspace in wavelength.
+ * @param inputWS :: the input workspace in TOF
+ * @param convert :: whether the result should be converted to wavelength
+ * @return :: the detector workspace in wavelength
+ */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
                                            const bool convert) {
@@ -420,14 +421,14 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
 }
 
 /** Creates a monitor workspace in wavelength from an input workspace in TOF.
-* This method should only be called if IOMonitorIndex has been specified and
-* MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax have been
-* given.
-* @param inputWS :: the input workspace in TOF
-* @param integratedMonitors :: boolean to indicate if monitors should be
-* integrated
-* @return :: the monitor workspace in wavelength
-*/
+ * This method should only be called if IOMonitorIndex has been specified and
+ * MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax have been
+ * given.
+ * @param inputWS :: the input workspace in TOF
+ * @param integratedMonitors :: boolean to indicate if monitors should be
+ * integrated
+ * @return :: the monitor workspace in wavelength
+ */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
                                           const bool integratedMonitors) {
@@ -485,11 +486,11 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
 }
 
 /** Rebin a detector workspace in wavelength to a given monitor workspace in
-* wavelength.
-* @param detectorWS :: the detector workspace in wavelength
-* @param monitorWS :: the monitor workspace in wavelength
-* @return :: the rebinned detector workspace
-*/
+ * wavelength.
+ * @param detectorWS :: the detector workspace in wavelength
+ * @param monitorWS :: the monitor workspace in wavelength
+ * @return :: the rebinned detector workspace
+ */
 MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
     MatrixWorkspace_sptr detectorWS, MatrixWorkspace_sptr monitorWS) {
 
@@ -504,10 +505,10 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
 }
 
 /** Set monitor properties
-*
-* @param alg :: ReflectometryReductionOne algorithm
-* @param instrument :: the instrument attached to the workspace
-*/
+ *
+ * @param alg :: ReflectometryReductionOne algorithm
+ * @param instrument :: the instrument attached to the workspace
+ */
 void ReflectometryWorkflowBase2::populateMonitorProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
@@ -546,12 +547,12 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
 }
 
 /** Set processing instructions
-*
-* @param alg :: ReflectometryReductionOne algorithm
-* @param instrument :: the instrument attached to the workspace
-* @param inputWS :: the input workspace
-* @return :: processing instructions as a string
-*/
+ *
+ * @param alg :: ReflectometryReductionOne algorithm
+ * @param instrument :: the instrument attached to the workspace
+ * @param inputWS :: the input workspace
+ * @return :: processing instructions as a string
+ */
 std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument,
     MatrixWorkspace_sptr inputWS) const {
@@ -603,10 +604,10 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
 }
 
 /** Set transmission properties
-*
-* @param alg :: The algorithm to populate parameters for
-* @return Boolean, whether or not any transmission runs were found
-*/
+ *
+ * @param alg :: The algorithm to populate parameters for
+ * @return Boolean, whether or not any transmission runs were found
+ */
 bool ReflectometryWorkflowBase2::populateTransmissionProperties(
     IAlgorithm_sptr alg) const {
 
@@ -629,13 +630,13 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
 }
 
 /**
-* Get the value of theta from a named log value
-*
-* @param inputWs :: the input workspace
-* @param logName :: the name of the log value to use
-* @return :: the value of theta found from the logs
-* @throw :: NotFoundError if the log value was not found
-*/
+ * Get the value of theta from a named log value
+ *
+ * @param inputWs :: the input workspace
+ * @param logName :: the name of the log value to use
+ * @return :: the value of theta found from the logs
+ * @throw :: NotFoundError if the log value was not found
+ */
 double
 ReflectometryWorkflowBase2::getThetaFromLogs(MatrixWorkspace_sptr inputWs,
                                              const std::string &logName) {

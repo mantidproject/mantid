@@ -2,8 +2,8 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 
 #include "IReflSettingsTabPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 
 #include <string>
 
@@ -72,6 +72,6 @@ public:
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H */

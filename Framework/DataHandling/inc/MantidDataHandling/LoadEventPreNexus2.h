@@ -124,7 +124,7 @@ private:
   std::unique_ptr<Mantid::API::Progress> prog = nullptr;
 
   DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
-  std::vector<int64_t> spectra_list;               ///<the list of Spectra
+  std::vector<int64_t> spectra_list;               ///< the list of Spectra
 
   /// The times for each pulse.
   std::vector<Types::Core::DateAndTime> pulsetimes;
@@ -146,15 +146,16 @@ private:
   /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> *eventfile;
   std::size_t num_events; ///< The number of events in the file
-  std::size_t num_pulses; ///<the number of pulses
-  uint32_t numpixel;      ///<the number of pixels
+  std::size_t num_pulses; ///< the number of pulses
+  uint32_t numpixel;      ///< the number of pixels
 
   std::size_t num_good_events;  ///< The number of good events loaded
   std::size_t num_error_events; ///< The number of error events encountered
-  std::size_t num_bad_events; ///<The number of bad events. Part of error events
-  std::size_t num_wrongdetid_events; ///<The number of events with wrong
+  std::size_t num_bad_events;   ///< The number of bad events. Part of error
+                                ///< events
+  std::size_t num_wrongdetid_events; ///< The number of events with wrong
   /// detector IDs. Part of error events.
-  std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
+  std::set<PixelType> wrongdetids; ///< set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
   std::vector<std::vector<Types::Core::DateAndTime>> wrongdetid_pulsetimes;
   std::vector<std::vector<double>> wrongdetid_tofs;
@@ -233,5 +234,5 @@ private:
   void processInvestigationInputs();
 };
 }
-}
+} // namespace Mantid
 #endif /*LOADEVENTPRENEXUS_H_*/

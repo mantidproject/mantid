@@ -1,16 +1,16 @@
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
 
-#include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -32,32 +32,32 @@
 #endif
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include <Poco/ActiveResult.h>
 
-#include <QSettings>
-#include <QMessageBox>
 #include <QAction>
 #include <QFormLayout>
+#include <QMessageBox>
+#include <QSettings>
 
-#include <QLayout>
-#include <QSplitter>
 #include <QLabel>
+#include <QLayout>
 #include <QPushButton>
+#include <QSplitter>
 
+#include <QCheckBox>
 #include <QMenu>
+#include <QMessageBox>
 #include <QSignalMapper>
 #include <QTableWidgetItem>
-#include <QCheckBox>
-#include <QMessageBox>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
@@ -65,7 +65,7 @@ const QString CUSTOM_LABEL{"Custom"};
 const QString ALL_GROUPS_LABEL{"All Groups"};
 const QString ALL_PAIRS_LABEL{"All Pairs"};
 const QString ALL_PERIODS_LABEL{"All Periods"};
-}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -78,15 +78,15 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
  * @param mantidui :: The UI form for MantidPlot
-*/
+ */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
     : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
       m_mainSplitter(nullptr), m_isMultiFittingMode(false) {}
 
 /**
-* Initialise the muon fit property browser.
-*/
+ * Initialise the muon fit property browser.
+ */
 void MuonFitPropertyBrowser::init() {
   QWidget *w = new QWidget(this);
 
@@ -343,8 +343,8 @@ void MuonFitPropertyBrowser::checkFitEnabled() {
   }
 }
 /**
-* Set the input workspace name
-*/
+ * Set the input workspace name
+ */
 void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
   int i = m_workspaceNames.indexOf(wsName);
   if (i < 0) {
@@ -357,8 +357,8 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     m_enumManager->setValue(m_workspace, i);
 }
 /** Called when a dropdown menu is changed
-* @param prop :: A pointer to the function name property
-*/
+ * @param prop :: A pointer to the function name property
+ */
 void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
   if (m_workspaceNames.empty()) {
     if (this->isVisible()) {
@@ -434,8 +434,8 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
   }
 }
 /** Sets the display for
-* selected groups
-*/
+ * selected groups
+ */
 void MuonFitPropertyBrowser::updateGroupDisplay() {
   m_showGroupValue.clear();
   m_showGroupValue << getChosenGroups().join(",");
@@ -443,8 +443,8 @@ void MuonFitPropertyBrowser::updateGroupDisplay() {
   m_multiFitSettingsGroup->property()->addSubProperty(m_showGroup);
 }
 /** Sets the display for
-* selected periods
-*/
+ * selected periods
+ */
 void MuonFitPropertyBrowser::updatePeriodDisplay() {
   m_showPeriodValue.clear();
   auto tmp = getChosenPeriods();
@@ -499,7 +499,7 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
   }
 }
 /** @returns the normalization
-*/
+ */
 double MuonFitPropertyBrowser::normalization() const {
   return readNormalization()[0];
 }
@@ -507,9 +507,9 @@ void MuonFitPropertyBrowser::setNormalization() {
   setNormalization(workspaceName());
 }
 /**
-* @param name :: the ws name to get normalization for
-* @returns the normalization
-*/
+ * @param name :: the ws name to get normalization for
+ * @returns the normalization
+ */
 void MuonFitPropertyBrowser::setNormalization(const std::string name) {
   m_normalizationValue.clear();
   QString label;
@@ -590,8 +590,8 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
 }
 
 /**
-*Get the registered function names
-*/
+ *Get the registered function names
+ */
 void MuonFitPropertyBrowser::populateFunctionNames() {
   const std::vector<std::string> names = FunctionFactory::Instance().getKeys();
   m_registeredFunctions.clear();
@@ -626,8 +626,8 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
   }
 }
 /**
-* Creates an instance of Fit algorithm, sets its properties and launches it.
-*/
+ * Creates an instance of Fit algorithm, sets its properties and launches it.
+ */
 void MuonFitPropertyBrowser::doTFAsymmFit() {
   std::string wsName = workspaceName();
   if (wsName.empty()) {
@@ -741,10 +741,10 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
   runFit();
 }
 /**
-* Updates the normalization in the table WS
-* assumes that the change is due to a calculation
-* @param norms :: map of updated normalization values
-*/
+ * Updates the normalization in the table WS
+ * assumes that the change is due to a calculation
+ * @param norms :: map of updated normalization values
+ */
 void MuonFitPropertyBrowser::updateMultipleNormalization(
     std::map<std::string, double> norms) {
   auto oldNorm = readMultipleNormalization();
@@ -768,10 +768,10 @@ void MuonFitPropertyBrowser::updateMultipleNormalization(
   }
 }
 /** Gets the fitting function for TFAsymmetry fit
-* @param original :: The function defined by the user (in GUI)
-* @param norms :: vector of normalization constants
-* @returns :: The fitting function for the TFAsymmetry fit
-*/
+ * @param original :: The function defined by the user (in GUI)
+ * @param norms :: vector of normalization constants
+ * @returns :: The fitting function for the TFAsymmetry fit
+ */
 Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
     Mantid::API::IFunction_sptr original, const std::vector<double> norms) {
 
@@ -837,9 +837,9 @@ std::vector<double> readNormalization() {
   return norm;
 }
 /** Reads the normalization constants and which WS
-* they belong to
-* @returns :: A map of normalization constants and WS names
-*/
+ * they belong to
+ * @returns :: A map of normalization constants and WS names
+ */
 std::map<std::string, double> readMultipleNormalization() {
   std::map<std::string, double> norm;
   if (AnalysisDataService::Instance().doesExist(
@@ -857,10 +857,10 @@ std::map<std::string, double> readMultipleNormalization() {
   return norm;
 }
 /** The transformation between normalized counts and asymmetry
-* @param norm :: map of normalization constants
-* @param wsName :: the name of the WS to rescale
-* @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
-*/
+ * @param norm :: map of normalization constants
+ * @param wsName :: the name of the WS to rescale
+ * @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
+ */
 void MuonFitPropertyBrowser::rescaleWS(const std::map<std::string, double> norm,
                                        const std::string wsName,
                                        const double shift) {
@@ -880,10 +880,10 @@ void MuonFitPropertyBrowser::rescaleWS(const std::map<std::string, double> norm,
   }
 }
 /** The transformation between normalized counts and asymmetry
-* @param value :: normalization constants
-* @param wsName :: the name of the WS to rescale
-* @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
-*/
+ * @param value :: normalization constants
+ * @param wsName :: the name of the WS to rescale
+ * @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
+ */
 void MuonFitPropertyBrowser::rescaleWS(const double value,
                                        const std::string wsName,
                                        const double shift) {
@@ -1026,9 +1026,9 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
 }
 
 /** Check if the workspace can be used in the fit. The accepted types are
-  * MatrixWorkspaces same size and that it isn't the generated raw file.
-  * @param ws :: The workspace
-  */
+ * MatrixWorkspaces same size and that it isn't the generated raw file.
+ * @param ws :: The workspace
+ */
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
   QString workspaceName(QString::fromStdString(ws->getName()));
 
@@ -1222,21 +1222,21 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 }
 
 /**
-* Returns true is the browser is set to multi fitting mode
-* This works using the visibility state of the button group
-* which is controlled in setMultiFittingMode
-*/
+ * Returns true is the browser is set to multi fitting mode
+ * This works using the visibility state of the button group
+ * which is controlled in setMultiFittingMode
+ */
 bool MuonFitPropertyBrowser::isMultiFittingMode() const {
   return m_isMultiFittingMode;
 }
 
 /**
-* Set TF asymmetry mode on or off.
-* If turned off, the fit property browser looks like Mantid 3.8.
-* If turned on, the fit menu has an extra button and
-* normalization is shown in the data table
-* @param enabled :: [input] Whether to turn this mode on or off
-*/
+ * Set TF asymmetry mode on or off.
+ * If turned off, the fit property browser looks like Mantid 3.8.
+ * If turned on, the fit menu has an extra button and
+ * normalization is shown in the data table
+ * @param enabled :: [input] Whether to turn this mode on or off
+ */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   modifyFitMenu(m_fitActionTFAsymm, enabled);
 
@@ -1275,10 +1275,10 @@ bool MuonFitPropertyBrowser::hasGuess() const {
   }
 }
 /**
-* Sets group names and updates checkboxes on UI
-* By default sets all unchecked
-* @param groups :: [input] List of group names
-*/
+ * Sets group names and updates checkboxes on UI
+ * By default sets all unchecked
+ * @param groups :: [input] List of group names
+ */
 void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
   // If it's the same list, do nothing
   auto selected = getChosenGroups();
@@ -1308,9 +1308,9 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
   }
 }
 /**
-* Selects a single group/pair
-* @param group :: [input] Group/pair to select
-*/
+ * Selects a single group/pair
+ * @param group :: [input] Group/pair to select
+ */
 void MuonFitPropertyBrowser::setChosenGroup(const QString &group) {
   clearChosenGroups();
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
@@ -1321,9 +1321,9 @@ void MuonFitPropertyBrowser::setChosenGroup(const QString &group) {
   }
 }
 /**
-* Clears all group names and checkboxes
-* (ready to add new ones)
-*/
+ * Clears all group names and checkboxes
+ * (ready to add new ones)
+ */
 void MuonFitPropertyBrowser::clearGroupCheckboxes() {
   for (const auto &checkbox : m_groupBoxes) {
     delete (checkbox);
@@ -1331,19 +1331,19 @@ void MuonFitPropertyBrowser::clearGroupCheckboxes() {
   m_groupBoxes.clear();
 }
 /**
-* Add a new checkbox to the list of groups with given name
-* The new checkbox is checked according to dropdown menu selection
-* @param name :: [input] Name of group to add
-*/
+ * Add a new checkbox to the list of groups with given name
+ * The new checkbox is checked according to dropdown menu selection
+ * @param name :: [input] Name of group to add
+ */
 void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
   m_groupBoxes.insert(name, m_boolManager->addProperty(name));
   int j = m_enumManager->value(m_groupsToFit);
   auto option = m_groupsToFitOptions[j].toStdString();
 }
 /**
-* Returns a list of the selected groups (checked boxes)
-* @returns :: list of selected groups
-*/
+ * Returns a list of the selected groups (checked boxes)
+ * @returns :: list of selected groups
+ */
 QStringList MuonFitPropertyBrowser::getChosenGroups() const {
   QStringList chosen;
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
@@ -1355,8 +1355,8 @@ QStringList MuonFitPropertyBrowser::getChosenGroups() const {
   return chosen;
 }
 /**
-* Clears the list of selected groups (unchecks boxes)
-*/
+ * Clears the list of selected groups (unchecks boxes)
+ */
 void MuonFitPropertyBrowser::clearChosenGroups() const {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
@@ -1365,8 +1365,8 @@ void MuonFitPropertyBrowser::clearChosenGroups() const {
 }
 
 /**
-* Selects all groups
-*/
+ * Selects all groups
+ */
 void MuonFitPropertyBrowser::setAllGroups() {
 
   clearChosenGroups();
@@ -1380,8 +1380,8 @@ void MuonFitPropertyBrowser::setAllGroups() {
   }
 }
 /*
-* Sets all pairs
-*/
+ * Sets all pairs
+ */
 void MuonFitPropertyBrowser::setAllPairs() {
   clearChosenGroups();
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
@@ -1399,9 +1399,9 @@ void MuonFitPropertyBrowser::setAllPairs() {
 }
 
 /*
-* Create a popup window to select a custom
-* selection of groups/pairs
-*/
+ * Create a popup window to select a custom
+ * selection of groups/pairs
+ */
 void MuonFitPropertyBrowser::genGroupWindow() {
   // reset group window
   m_groupWindow = new QDialog(this);
@@ -1423,8 +1423,8 @@ void MuonFitPropertyBrowser::genGroupWindow() {
   m_groupWindow->show();
 }
 /**
-* Selects all periods
-*/
+ * Selects all periods
+ */
 void MuonFitPropertyBrowser::setAllPeriods() {
 
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
@@ -1434,9 +1434,9 @@ void MuonFitPropertyBrowser::setAllPeriods() {
 }
 
 /**
-* Sets checkboxes for periods
-* @param numPeriods :: [input] Number of periods
-*/
+ * Sets checkboxes for periods
+ * @param numPeriods :: [input] Number of periods
+ */
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
   // has to go here to get the original value
   int j = m_enumManager->value(m_periodsToFit);
@@ -1482,10 +1482,10 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
   }
 }
 /**
-* Sets period names and updates checkboxes on UI
-* By default sets all unchecked
-* @param periods :: [input] List of period names
-*/
+ * Sets period names and updates checkboxes on UI
+ * By default sets all unchecked
+ * @param periods :: [input] List of period names
+ */
 void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
   // If it's the same list, do nothing
   if (periods.size() == m_periodBoxes.size()) {
@@ -1505,9 +1505,9 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
   }
 }
 /**
-* Clears all pair names and checkboxes
-* (ready to add new ones)
-*/
+ * Clears all pair names and checkboxes
+ * (ready to add new ones)
+ */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
   if (m_periodBoxes.size() > 1) {
     for (auto iter = std::next(m_periodBoxes.constBegin());
@@ -1521,8 +1521,8 @@ void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
 }
 /**
-* Clears the list of selected groups (unchecks boxes)
-*/
+ * Clears the list of selected groups (unchecks boxes)
+ */
 void MuonFitPropertyBrowser::clearChosenPeriods() const {
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
@@ -1530,21 +1530,21 @@ void MuonFitPropertyBrowser::clearChosenPeriods() const {
   }
 }
 /**
-* updates the period displays
-*/
+ * updates the period displays
+ */
 void MuonFitPropertyBrowser::updatePeriods() {
   int j = m_enumManager->value(m_periodsToFit);
   // auto selected = getChosenPeriods();
   updatePeriods(j);
 }
 /**
-* updates the period displays and conserves the selection
-* if selection is niot available default to all periods
-* @param j :: [input] index of selection in combobox
-* selected is an input for changing runs and preserving selection (list of
-* selected periods)
-* currently has a bug
-*/
+ * updates the period displays and conserves the selection
+ * if selection is niot available default to all periods
+ * @param j :: [input] index of selection in combobox
+ * selected is an input for changing runs and preserving selection (list of
+ * selected periods)
+ * currently has a bug
+ */
 void MuonFitPropertyBrowser::updatePeriods(const int j) {
   // this is for switching but has a bug at the moment
   // const QStringList &selected) {
@@ -1572,10 +1572,10 @@ void MuonFitPropertyBrowser::updatePeriods(const int j) {
   }
 }
 /**
-* Adds a new checkbox to the list of periods with given name
-* It updates the display
-* @param name :: [input] Name of period to add
-*/
+ * Adds a new checkbox to the list of periods with given name
+ * It updates the display
+ * @param name :: [input] Name of period to add
+ */
 void MuonFitPropertyBrowser::addPeriodCheckboxToMap(const QString &name) {
   if (m_periodBoxes.find(name) != m_periodBoxes.end()) {
     // if the box already exists
@@ -1588,9 +1588,9 @@ void MuonFitPropertyBrowser::addPeriodCheckboxToMap(const QString &name) {
   updatePeriods(j);
 }
 /**
-* Check if a period is valid
-* @param name :: [input] Name of period to add
-*/
+ * Check if a period is valid
+ * @param name :: [input] Name of period to add
+ */
 bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
   // check period is sensible
   // no frational periods
@@ -1631,10 +1631,10 @@ bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
   return true;
 }
 /**
-* Add a new checkbox to the list of periods with given name
-* The new checkbox is unchecked by default
-* @param name :: [input] Name of period to add
-*/
+ * Add a new checkbox to the list of periods with given name
+ * The new checkbox is unchecked by default
+ * @param name :: [input] Name of period to add
+ */
 void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   // check period is sensible
   // no frational periods
@@ -1651,9 +1651,9 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   }
 }
 /**
-* Returns a list of the selected periods (checked boxes)
-* @returns :: list of selected periods
-*/
+ * Returns a list of the selected periods (checked boxes)
+ * @returns :: list of selected periods
+ */
 QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
   QStringList chosen;
   // if single period
@@ -1670,9 +1670,9 @@ QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
   return chosen;
 }
 /**
-* Ticks the selected periods
-* @param chosenPeriods :: list of selected periods
-*/
+ * Ticks the selected periods
+ * @param chosenPeriods :: list of selected periods
+ */
 void MuonFitPropertyBrowser::setChosenPeriods(
     const QStringList &chosenPeriods) {
   clearChosenPeriods();
@@ -1686,9 +1686,9 @@ void MuonFitPropertyBrowser::setChosenPeriods(
   }
 }
 /**
-* Ticks the selected periods
-* @param period :: selected periods
-*/
+ * Ticks the selected periods
+ * @param period :: selected periods
+ */
 void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
   clearChosenPeriods();
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
@@ -1699,9 +1699,9 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
   }
 }
 /*
-* Create a pop up window to select a custom
-* selection of periods
-*/
+ * Create a pop up window to select a custom
+ * selection of periods
+ */
 void MuonFitPropertyBrowser::genPeriodWindow() {
   // reset period window
   m_periodWindow = new QDialog(this);
@@ -1723,9 +1723,9 @@ void MuonFitPropertyBrowser::genPeriodWindow() {
   m_periodWindow->show();
 }
 /*
-* Create a pop up window to create
-* a combination of periods
-*/
+ * Create a pop up window to create
+ * a combination of periods
+ */
 void MuonFitPropertyBrowser::genCombinePeriodWindow() {
   // reset combine window
   m_comboWindow = new QDialog(this);
@@ -1746,10 +1746,10 @@ void MuonFitPropertyBrowser::genCombinePeriodWindow() {
   m_comboWindow->show();
 }
 /*
-* Get the positive and negative parts of the
-* combination of periods and produce a new
-* tick box. Unticked by default.
-*/
+ * Get the positive and negative parts of the
+ * combination of periods and produce a new
+ * tick box. Unticked by default.
+ */
 void MuonFitPropertyBrowser::combineBtnPressed() {
   QString value = m_positiveCombo->text();
   if (value.isEmpty()) {
@@ -1768,10 +1768,10 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
   }
 }
 /**
-* sets the label for a single fit and
-* selects the relevant group/pair
-* @param name :: string of the ws
-*/
+ * sets the label for a single fit and
+ * selects the relevant group/pair
+ * @param name :: string of the ws
+ */
 void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
   clearChosenGroups();
   clearChosenPeriods();
@@ -1795,11 +1795,11 @@ void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
   }
 }
 /**
-* Sets the multifit mode to all groups
-* or all pairs depending on if a  group
-* or pair is selected in the home tab
-* @param isItGroup :: [input] if it is a group (true)
-*/
+ * Sets the multifit mode to all groups
+ * or all pairs depending on if a  group
+ * or pair is selected in the home tab
+ * @param isItGroup :: [input] if it is a group (true)
+ */
 void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
 
   auto index = m_enumManager->value(m_groupsToFit);
@@ -1849,5 +1849,5 @@ void MuonFitPropertyBrowser::setTFAsymm(bool state) {
   m_boolManager->setValue(m_TFAsymmMode, state);
 }
 
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt

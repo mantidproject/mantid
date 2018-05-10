@@ -2,11 +2,11 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -18,12 +18,12 @@ using namespace Kernel;
 
 //----------------------------------------------------------------------------------------------
 /** Flattens the list of group workspaces (if any) into list of workspaces
-* @param inputs : input workspaces vector [including] group workspaces (all must
-* be on ADS)
-* @return : the flat vector of the input workspaces
-* @throw : std::runtime_error if the input workspaces are neither groups nor
-* MatrixWorkspaces
-*/
+ * @param inputs : input workspaces vector [including] group workspaces (all
+ * must be on ADS)
+ * @return : the flat vector of the input workspaces
+ * @throw : std::runtime_error if the input workspaces are neither groups nor
+ * MatrixWorkspaces
+ */
 std::vector<std::string>
 RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
   std::vector<std::string> outputs;

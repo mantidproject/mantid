@@ -7,15 +7,15 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 #include <fstream>
 
 //-----------------------------------------------------------------------------
@@ -182,8 +182,9 @@ int MuonGroupingHelper::fillGroupingTable(
 
     // Set alpha
     m_uiForm.pairTable->setItem(
-        pi, 3, new QTableWidgetItem(boost::lexical_cast<std::string>(
-                                        grouping.pairAlphas[pi]).c_str()));
+        pi, 3,
+        new QTableWidgetItem(
+            boost::lexical_cast<std::string>(grouping.pairAlphas[pi]).c_str()));
   }
 
   // Set description
@@ -290,6 +291,6 @@ std::vector<int> MuonGroupingHelper::whichPairToWhichRow() const {
   }
   return pairToRow;
 }
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -83,8 +83,8 @@ ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger &logger,
  */
 ThreadSafeLogStream::ThreadSafeLogStream(const std::string &loggerName,
                                          Poco::Message::Priority priority)
-    : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority),
-      std::ostream(&m_buf) {}
+    : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority), std::ostream(
+                                                                     &m_buf) {}
 
 /**
  * Return a reference to the log stream with the priority set to fatal

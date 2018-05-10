@@ -1,15 +1,15 @@
+#include "MantidCrystal/TOFExtinction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/TOFExtinction.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/ListValidator.h"
-#include <fstream>
 #include <cmath>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -398,5 +398,5 @@ double TOFExtinction::absor_sphere(double &twoth, double &wl) {
   return tbar;
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

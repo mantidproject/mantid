@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/IndexSet.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/IndexSet.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

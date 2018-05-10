@@ -72,7 +72,7 @@ public:
   setObserver(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
 };
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_

@@ -3,16 +3,16 @@
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
-#include <QUrl>
 #include <QDesktopWidget>
 #include <QFileInfo>
+#include <QUrl>
 
 // Mantid
-#include "MantidKernel/Property.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidKernel/Property.h"
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -25,10 +25,10 @@ ConvertTableToMatrixWorkspaceDialog::ConvertTableToMatrixWorkspaceDialog(
     : API::AlgorithmDialog(parent), m_form() {}
 
 /**
-* When the input workspace changes the column name comboboxes have to
-* be updated.
-* @param qWSName :: The new table workspace name
-*/
+ * When the input workspace changes the column name comboboxes have to
+ * be updated.
+ * @param qWSName :: The new table workspace name
+ */
 void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(
     const QString &qWSName) {
   m_form.cbColumnX->clear();
@@ -116,5 +116,5 @@ void ConvertTableToMatrixWorkspaceDialog::initLayout() {
           this, SLOT(fillColumnNames(const QString &)));
   fillColumnNames(m_form.cbInputWorkspace->currentText());
 }
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt

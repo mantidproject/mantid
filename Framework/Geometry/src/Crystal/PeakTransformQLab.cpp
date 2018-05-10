@@ -38,5 +38,5 @@ Mantid::Kernel::SpecialCoordinateSystem
 PeakTransformQLab::getCoordinateSystem() const {
   return Mantid::Kernel::QLab;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

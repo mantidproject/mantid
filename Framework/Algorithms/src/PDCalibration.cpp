@@ -37,15 +37,15 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::MaskWorkspace_sptr;
-using Mantid::Kernel::ArrayProperty;
+using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Kernel::ArrayBoundedValidator;
+using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::RebinParamsValidator;
 using Mantid::Kernel::StringListValidator;
-using Mantid::Geometry::Instrument_const_sptr;
 using std::vector;
 
 // Register the algorithm into the AlgorithmFactory
@@ -216,10 +216,11 @@ void PDCalibration::init() {
   declareProperty(
       "FWHM", 7, min,
       "Estimated number of points covered by the fwhm of a peak (default 7)");
-  declareProperty("Tolerance", 4, min, "A measure of the strictness desired in "
-                                       "meeting the condition on peak "
-                                       "candidates,\n Mariscotti recommends 2 "
-                                       "(default 4)");
+  declareProperty("Tolerance", 4, min,
+                  "A measure of the strictness desired in "
+                  "meeting the condition on peak "
+                  "candidates,\n Mariscotti recommends 2 "
+                  "(default 4)");
   std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian",
                                      "Lorentzian"};
   declareProperty("PeakFunction", "Gaussian",

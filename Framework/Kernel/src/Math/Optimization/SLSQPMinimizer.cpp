@@ -2,8 +2,8 @@
 #include "MantidKernel/Exception.h"
 
 #include <algorithm>
-#include <cmath>
 #include <cassert>
+#include <cmath>
 #include <sstream>
 
 namespace Mantid {
@@ -17,7 +17,7 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
            double *f, double *c__, double *g, double *a, double *acc, int *iter,
            int *mode, double *w, int *l_w__, int *jw, int *l_jw__);
 ///@endcond
-}
+} // namespace
 
 /**
  * Perform the minimization using the SLSQP routine
@@ -160,7 +160,8 @@ void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
       std::ostringstream os;
       os << "SLSQPMinimizer::initializeConstraints - Invalid " << matrix
          << " constraint matrix. Number of columns must match number of "
-            "parameters. ncols=" << ncols << ", nparams=" << numParameters();
+            "parameters. ncols="
+         << ncols << ", nparams=" << numParameters();
       throw std::invalid_argument(os.str());
     }
   }
@@ -709,7 +710,7 @@ L130:
     /* Computing MAX */
     d__1 = h3, d__2 = (mu[j] + h3) / two;
     mu[j] = std::max(d__1, d__2);
-    h1 += h3 *(d__1 = c__[j], std::abs(d__1));
+    h1 += h3 * (d__1 = c__[j], std::abs(d__1));
     /* L170: */
   }
   /*   CHECK CONVERGENCE */
@@ -1641,8 +1642,7 @@ L130:
     }
     wmax = w[j];
     izmax = iz;
-  L140:
-    ;
+  L140:;
   }
   /* .....EXIT LOOP A */
   if (wmax <= zero) {
@@ -1656,7 +1656,7 @@ L130:
   h12_(&c__1, &npp1, &i__2, m, &a[j * a_dim1 + 1], &c__1, &up, &z__[1], &c__1,
        &c__1, &c__0);
   unorm = dnrm2___(&nsetp, &a[j * a_dim1 + 1], &c__1);
-  t = factor *(d__1 = a[npp1 + j * a_dim1], std::abs(d__1));
+  t = factor * (d__1 = a[npp1 + j * a_dim1], std::abs(d__1));
   d__1 = unorm + t;
   if (d__1 - unorm <= zero) {
     goto L150;
@@ -1728,8 +1728,7 @@ L220:
     }
     alpha = t;
     jj = ip;
-  L230:
-    ;
+  L230:;
   }
   i__2 = nsetp;
   for (ip = 1; ip <= i__2; ++ip) {
@@ -2003,8 +2002,7 @@ L180:
       tmp = b[l + jb * b_dim1];
       b[l + jb * b_dim1] = b[j + jb * b_dim1];
       b[j + jb * b_dim1] = tmp;
-    L250:
-      ;
+    L250:;
     }
   }
 L270:
@@ -2136,8 +2134,7 @@ L40:
       /* L60: */
       i4 += *ice;
     }
-  L70:
-    ;
+  L70:;
   }
 L80:
   return 0;
@@ -3008,8 +3005,8 @@ L40:
 
 ///@endcond
 
-} // <anonymous>
+} // namespace
 
 } // namespace Math
-}
-} // namespace Mantid::Kernel
+} // namespace Kernel
+} // namespace Mantid

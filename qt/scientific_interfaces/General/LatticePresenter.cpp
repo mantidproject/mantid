@@ -1,10 +1,10 @@
 #include "MantidQtCustomInterfaces/LatticePresenter.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include "MantidQtCustomInterfaces/LatticeView.h"
 #include "MantidQtCustomInterfaces/LoanedMemento.h"
-#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoService.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -81,5 +81,5 @@ void LatticePresenter::update() {
     }
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

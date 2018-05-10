@@ -1,5 +1,5 @@
-#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramMath.h"
+#include "MantidHistogramData/Histogram.h"
 
 #include <algorithm>
 #include <cmath>
@@ -69,7 +69,7 @@ void checkSameX(const Histogram &hist1, const Histogram &hist2) {
       (hist1.x().rawData() != hist2.x().rawData()))
     throw std::runtime_error("Invalid operation: Histogram X data must match");
 }
-}
+} // namespace
 
 /// Adds data in other Histogram to this Histogram, propagating uncertainties.
 Histogram &operator+=(Histogram &histogram, const Histogram &other) {
@@ -79,8 +79,9 @@ Histogram &operator+=(Histogram &histogram, const Histogram &other) {
   histogram.mutableY() += other.y();
   std::transform(histogram.e().cbegin(), histogram.e().cend(),
                  other.e().begin(), histogram.mutableE().begin(),
-                 [](const double &lhs, const double &rhs)
-                     -> double { return std::sqrt(lhs * lhs + rhs * rhs); });
+                 [](const double &lhs, const double &rhs) -> double {
+                   return std::sqrt(lhs * lhs + rhs * rhs);
+                 });
   return histogram;
 }
 
@@ -93,8 +94,9 @@ Histogram &operator-=(Histogram &histogram, const Histogram &other) {
   histogram.mutableY() -= other.y();
   std::transform(histogram.e().cbegin(), histogram.e().cend(),
                  other.e().begin(), histogram.mutableE().begin(),
-                 [](const double &lhs, const double &rhs)
-                     -> double { return std::sqrt(lhs * lhs + rhs * rhs); });
+                 [](const double &lhs, const double &rhs) -> double {
+                   return std::sqrt(lhs * lhs + rhs * rhs);
+                 });
   return histogram;
 }
 

@@ -9,23 +9,23 @@ Description          : Preferences dialog
 ***************************************************************************/
 
 /***************************************************************************
-*                                                                         *
-*  This program is free software; you can redistribute it and/or modify   *
-*  it under the terms of the GNU General Public License as published by   *
-*  the Free Software Foundation; either version 2 of the License, or      *
-*  (at your option) any later version.                                    *
-*                                                                         *
-*  This program is distributed in the hope that it will be useful,        *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
-*  GNU General Public License for more details.                           *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the Free Software           *
-*   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
-*   Boston, MA  02110-1301  USA                                           *
-*                                                                         *
-***************************************************************************/
+ *                                                                         *
+ *  This program is free software; you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation; either version 2 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the Free Software           *
+ *   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
+ *   Boston, MA  02110-1301  USA                                           *
+ *                                                                         *
+ ***************************************************************************/
 #include "ConfigDialog.h"
 #include "ApplicationWindow.h"
 #include "ColorBox.h"
@@ -59,7 +59,6 @@ Description          : Preferences dialog
 #include <QPushButton>
 #include <QRadioButton>
 #include <QRegExp>
-#include <QRegExp>
 #include <QSpinBox>
 #include <QStackedWidget>
 #include <QStringList>
@@ -76,10 +75,10 @@ Description          : Preferences dialog
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtWidgets/Common/MdConstants.h"
-#include "MdPlottingCmapsProvider.h"
-#include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
+#include "MdPlottingCmapsProvider.h"
 
 #include <limits>
 
@@ -666,8 +665,8 @@ void ConfigDialog::initAppPage() {
 }
 
 /**
-* Configure a Mantid page on the config dialog
-*/
+ * Configure a Mantid page on the config dialog
+ */
 void ConfigDialog::initMantidPage() {
   mtdTabWidget = new QTabWidget(generalDialog);
   mtdTabWidget->setUsesScrollButtons(false);
@@ -934,7 +933,7 @@ void ConfigDialog::changeUsageGeneralMdColorMap() {
 
 /**
  * Handle a change of the Last Session selection.
-  * @param isDefaultColorMapVsiChecked The state of the vsi default checkbox.
+ * @param isDefaultColorMapVsiChecked The state of the vsi default checkbox.
  */
 void ConfigDialog::changeUsageLastSession() {
   // Set the color map of the VSI default
@@ -946,8 +945,8 @@ void ConfigDialog::changeUsageLastSession() {
 }
 
 /**
-* Configure a Mantid Options page on the config dialog
-*/
+ * Configure a Mantid Options page on the config dialog
+ */
 void ConfigDialog::initMantidOptionsTab() {
   mantidOptionsPage = new QWidget();
   mtdTabWidget->addTab(mantidOptionsPage, "Options");
@@ -1006,7 +1005,8 @@ void ConfigDialog::initMantidOptionsTab() {
 
   setting = QString::fromStdString(
                 Mantid::Kernel::ConfigService::Instance().getString(
-                    "MantidOptions.InstrumentView.UseOpenGL")).toUpper();
+                    "MantidOptions.InstrumentView.UseOpenGL"))
+                .toUpper();
   if (setting == "ON") {
     m_useOpenGL->setChecked(true);
   } else {
@@ -1150,7 +1150,8 @@ void ConfigDialog::deleteDialog() {
     int status = QMessageBox::question(
         this, tr("Delete save options?"),
         tr("Are you sure you want to delete \nthe (%1) selected save "
-           "option(s)?").arg(selectedItems.size()),
+           "option(s)?")
+            .arg(selectedItems.size()),
         QMessageBox::Yes | QMessageBox::Default,
         QMessageBox::No | QMessageBox::Escape, QMessageBox::NoButton);
 
@@ -2719,8 +2720,9 @@ void ConfigDialog::updateMdPlottingSettings() {
   if (mdPlottingGeneralColorMap) {
     QString generalTabColorMapName = mdPlottingGeneralColorMap->currentText();
     QString generalTabColorMapFile =
-        mdPlottingGeneralColorMap->itemData(mdPlottingGeneralColorMap
-                                                ->currentIndex()).toString();
+        mdPlottingGeneralColorMap
+            ->itemData(mdPlottingGeneralColorMap->currentIndex())
+            .toString();
 
     m_mdSettings.setGeneralMdColorMap(generalTabColorMapName,
                                       generalTabColorMapFile);

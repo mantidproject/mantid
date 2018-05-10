@@ -23,7 +23,7 @@ IEventList &deprecatedGetEventList(IEventWorkspace &self, const size_t index) {
              "'getEventList' is deprecated, use 'getSpectrum' instead.");
   return self.getSpectrum(index);
 }
-}
+} // namespace
 
 /**
  * Python exports of the Mantid::API::IEventWorkspace class.

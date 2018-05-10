@@ -2,9 +2,9 @@
 #define Algebra_h
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Math/BnId.h"
 #include "MantidGeometry/Math/Acomp.h"
+#include "MantidGeometry/Math/BnId.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 
@@ -58,7 +58,7 @@ public:
   Algebra &operator+=(const Algebra &);
   Algebra &operator*=(const Algebra &);
   Algebra operator+(const Algebra &) const;
-  Algebra operator*(const Algebra &) const;
+  Algebra operator*(const Algebra &)const;
   int logicalEqual(const Algebra &) const;
 
   void Complement();

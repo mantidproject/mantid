@@ -7,11 +7,11 @@
 #include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-#include <Poco/Timer.h>
-#include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/SocketAddress.h>
+#include <Poco/Net/StreamSocket.h>
 #include <Poco/Runnable.h>
+#include <Poco/Timer.h>
 #include <mutex>
 
 namespace Mantid {

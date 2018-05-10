@@ -9,7 +9,6 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
@@ -110,9 +109,9 @@ void LoadNexusMonitors2::init() {
 
 //------------------------------------------------------------------------------
 /**
-* Executes the algorithm. Reading in the file and creating and populating
-* the output workspace
-*/
+ * Executes the algorithm. Reading in the file and creating and populating
+ * the output workspace
+ */
 void LoadNexusMonitors2::exec() {
   // Retrieve the filename from the properties
   m_filename = this->getPropertyValue("Filename");
@@ -367,12 +366,12 @@ void LoadNexusMonitors2::exec() {
 
 //------------------------------------------------------------------------------
 /**
-* Can we get a histogram (non event data) for every monitor?
-*
-* @param file :: NeXus file object (open)
-* @param monitorNames :: names of monitors of interest
-* @return If there seems to be histograms for all monitors (they have "data")
-**/
+ * Can we get a histogram (non event data) for every monitor?
+ *
+ * @param file :: NeXus file object (open)
+ * @param monitorNames :: names of monitors of interest
+ * @return If there seems to be histograms for all monitors (they have "data")
+ **/
 bool LoadNexusMonitors2::allMonitorsHaveHistoData(
     ::NeXus::File &file, const std::vector<std::string> &monitorNames) {
   bool res = true;
@@ -393,14 +392,14 @@ bool LoadNexusMonitors2::allMonitorsHaveHistoData(
 
 //------------------------------------------------------------------------------
 /**
-* Fix the detector numbers if the defaults are not correct. Currently checks
-* the isis_vms_compat block and reads them from there if possible.
-*
-* @param det_ids :: An array of prefilled detector IDs
-* @param file :: A reference to the NeXus file opened at the root entry
-* @param spec_ids :: An array of spectrum numbers that the monitors have
-* @param nmonitors :: The size of the det_ids and spec_ids arrays
-*/
+ * Fix the detector numbers if the defaults are not correct. Currently checks
+ * the isis_vms_compat block and reads them from there if possible.
+ *
+ * @param det_ids :: An array of prefilled detector IDs
+ * @param file :: A reference to the NeXus file opened at the root entry
+ * @param spec_ids :: An array of spectrum numbers that the monitors have
+ * @param nmonitors :: The size of the det_ids and spec_ids arrays
+ */
 void LoadNexusMonitors2::fixUDets(
     boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
     const boost::scoped_array<specnum_t> &spec_ids,
@@ -460,11 +459,11 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
 
 //------------------------------------------------------------------------------
 /**
-* Helper method to make sure that a file is / can be openend as a NeXus file
-*
-* @param fname :: name of the file
-* @return True if opening the file as NeXus and retrieving entries succeeds
-**/
+ * Helper method to make sure that a file is / can be openend as a NeXus file
+ *
+ * @param fname :: name of the file
+ * @return True if opening the file as NeXus and retrieving entries succeeds
+ **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
   ::NeXus::File *f = nullptr;
@@ -484,11 +483,11 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
 
 //------------------------------------------------------------------------------
 /**
-* Splits multiperiod histogram data into seperate workspaces and puts them in
-* a group
-*
-* @param numPeriods :: number of periods
-**/
+ * Splits multiperiod histogram data into seperate workspaces and puts them in
+ * a group
+ *
+ * @param numPeriods :: number of periods
+ **/
 void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
     const size_t numPeriods) {
   // protection - we should not have entered the routine if these are not true
@@ -648,16 +647,16 @@ size_t LoadNexusMonitors2::getMonitorInfo(
 }
 
 /** Create output workspace
-* @brief LoadNexusMonitors2::createOutputWorkspace
-* @param numHistMon
-* @param numEventMon
-* @param monitorsAsEvents
-* @param monitorNames
-* @param isEventMonitors
-* @param monitorNumber2Name
-* @param loadMonitorFlags
-* @return
-*/
+ * @brief LoadNexusMonitors2::createOutputWorkspace
+ * @param numHistMon
+ * @param numEventMon
+ * @param monitorsAsEvents
+ * @param monitorNames
+ * @param isEventMonitors
+ * @param monitorNumber2Name
+ * @param loadMonitorFlags
+ * @return
+ */
 bool LoadNexusMonitors2::createOutputWorkspace(
     size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
     std::vector<std::string> &monitorNames, std::vector<bool> &isEventMonitors,

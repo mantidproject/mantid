@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_HARDTHRESHOLDBACKGROUND_H_
 #define MANTID_CRYSTAL_HARDTHRESHOLDBACKGROUND_H_
 
-#include "MantidKernel/System.h"
-#include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidCrystal/BackgroundStrategy.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

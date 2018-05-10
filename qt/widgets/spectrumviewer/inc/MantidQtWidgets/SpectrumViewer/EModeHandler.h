@@ -1,9 +1,9 @@
 #ifndef EMODE_HANDLER_H
 #define EMODE_HANDLER_H
 
-#include "ui_SpectrumView.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "ui_SpectrumView.h"
 
 /**
     @class EModeHandler

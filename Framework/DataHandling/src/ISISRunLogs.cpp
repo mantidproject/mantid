@@ -2,15 +2,15 @@
 #include "MantidDataHandling/ISISRunLogs.h"
 
 #include "MantidKernel/LogFilter.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataHandling {
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISRunLogs");
-}
+} // namespace
 
 using Kernel::LogFilter;
 using Kernel::LogParser;

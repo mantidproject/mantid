@@ -242,16 +242,22 @@ public:
 
   void test_Build_Unrolled() {
     std::string result[] = {
-        "", "# Child algorithms of TopLevelAlgorithm", "",
+        "",
+        "# Child algorithms of TopLevelAlgorithm",
+        "",
         "## Child algorithms of NestedAlgorithm",
         "BasicAlgorithm(PropertyA='FirstOne')",
         "BasicAlgorithm(PropertyA='SecondOne')",
-        "## End of child algorithms of NestedAlgorithm", "",
+        "## End of child algorithms of NestedAlgorithm",
+        "",
         "## Child algorithms of NestedAlgorithm",
         "BasicAlgorithm(PropertyA='FirstOne')",
         "BasicAlgorithm(PropertyA='SecondOne')",
-        "## End of child algorithms of NestedAlgorithm", "",
-        "# End of child algorithms of TopLevelAlgorithm", "", "",
+        "## End of child algorithms of NestedAlgorithm",
+        "",
+        "# End of child algorithms of TopLevelAlgorithm",
+        "",
+        "",
     };
 
     boost::shared_ptr<WorkspaceTester> input =
@@ -288,15 +294,23 @@ public:
 
   void test_Partially_Unrolled() {
     std::string result[] = {
-        "", "# Child algorithms of TopLevelAlgorithm", "",
+        "",
+        "# Child algorithms of TopLevelAlgorithm",
+        "",
         "## Child algorithms of NestedAlgorithm",
         "BasicAlgorithm(PropertyA='FirstOne')",
         "BasicAlgorithm(PropertyA='SecondOne')",
-        "## End of child algorithms of NestedAlgorithm", "",
-        "NestedAlgorithm()", "# End of child algorithms of TopLevelAlgorithm",
-        "", "# Child algorithms of TopLevelAlgorithm", "NestedAlgorithm()",
-        "NestedAlgorithm()", "# End of child algorithms of TopLevelAlgorithm",
-        "", "",
+        "## End of child algorithms of NestedAlgorithm",
+        "",
+        "NestedAlgorithm()",
+        "# End of child algorithms of TopLevelAlgorithm",
+        "",
+        "# Child algorithms of TopLevelAlgorithm",
+        "NestedAlgorithm()",
+        "NestedAlgorithm()",
+        "# End of child algorithms of TopLevelAlgorithm",
+        "",
+        "",
     };
 
     boost::shared_ptr<WorkspaceTester> input =

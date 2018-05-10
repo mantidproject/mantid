@@ -1,8 +1,8 @@
 #ifndef MANTIDQT_API_SYNCEDCHECKBOXES_H_
 #define MANTIDQT_API_SYNCEDCHECKBOXES_H_
 
-#include "MantidKernel/System.h"
 #include "DllOption.h"
+#include "MantidKernel/System.h"
 #include <QAction>
 #include <QPushButton>
 #include <QWidget>

@@ -1,11 +1,11 @@
 #ifndef MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
 #define MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
 
-#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -20,8 +20,8 @@ using namespace Mantid::API;
 using Mantid::Kernel::V3D;
 
 /**
-* Everything must be in one test or the instrument/detector list goes AWOL.
-*/
+ * Everything must be in one test or the instrument/detector list goes AWOL.
+ */
 
 namespace {
 boost::shared_ptr<MatrixWorkspace> makeWorkspace(const specnum_t start,
@@ -41,7 +41,7 @@ std::vector<specnum_t> getSpectrumNumbers(const MatrixWorkspace &workspace) {
     spectrumNumbers.push_back(workspace.getSpectrum(i).getSpectrumNo());
   return spectrumNumbers;
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional tests

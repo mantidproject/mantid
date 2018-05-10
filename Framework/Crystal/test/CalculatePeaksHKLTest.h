@@ -1,12 +1,12 @@
 #ifndef MANTID_CRYSTAL_CALCULATEPEAKSHKLTEST_H_
 #define MANTID_CRYSTAL_CALCULATEPEAKSHKLTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/CalculatePeaksHKL.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::CalculatePeaksHKL;
 using namespace Mantid::DataObjects;

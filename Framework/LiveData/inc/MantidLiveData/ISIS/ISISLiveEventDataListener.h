@@ -12,8 +12,8 @@
 #include "Poco/Net/StreamSocket.h"
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
-#include <mutex>
 #include <map>
+#include <mutex>
 
 // Time we'll wait on a receive call (in seconds)
 const long RECV_TIMEOUT = 30;

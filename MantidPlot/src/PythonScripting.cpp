@@ -42,8 +42,8 @@
 #include <QApplication>
 #include <Qsci/qscilexerpython.h>
 
-#include <cassert>
 #include <array>
+#include <cassert>
 
 #include "sipAPI_qti.h"
 
@@ -68,7 +68,7 @@ bool checkAndPrintError() {
   }
   return false;
 }
-}
+} // namespace
 
 // Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
@@ -249,8 +249,9 @@ void PythonScripting::setupPythonPath() {
 
   if (!pvPythonPaths.empty()) {
     Mantid::Kernel::StringTokenizer tokenizer(
-        pvPythonPaths, ";", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
-                                Mantid::Kernel::StringTokenizer::TOK_TRIM);
+        pvPythonPaths, ";",
+        Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+            Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (const auto &pvPath : tokenizer) {
       if (pvPath.substr(0, 3) == "../") {
         std::string fullPath = appPath + pvPath;

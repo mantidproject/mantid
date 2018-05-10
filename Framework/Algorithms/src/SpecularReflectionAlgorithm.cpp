@@ -2,12 +2,12 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <boost/make_shared.hpp>
 
@@ -52,7 +52,7 @@ void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers,
     }
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {

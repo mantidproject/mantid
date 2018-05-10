@@ -64,7 +64,7 @@ private:
   std::string m_output_message;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SANSBEAMFINDER_H_*/

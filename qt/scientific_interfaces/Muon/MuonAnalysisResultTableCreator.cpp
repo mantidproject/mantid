@@ -10,8 +10,8 @@
 #include "MuonAnalysisResultTableCreator.h"
 
 using Mantid::API::AnalysisDataService;
-using Mantid::API::ITableWorkspace;
 using Mantid::API::ExperimentInfo;
+using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::TableRow;
 using Mantid::API::WorkspaceFactory;
@@ -59,7 +59,7 @@ constexpr static size_t ERROR_LENGTH(5);
 const static QString ERROR_QSTRING{QString::fromStdString(ERROR_STRING)};
 const static std::string COSTFN_STRING("Cost function value");
 const static QString COSTFN_QSTRING{QString::fromStdString(COSTFN_STRING)};
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -363,7 +363,8 @@ QStringList MuonAnalysisResultTableCreator::addParameterColumns(
 
   // Add columns to table and update list of parameters to display
   const auto addToTableAndList = [&table, &paramsToDisplay](
-      const QString &paramName, const std::string &colName) {
+                                     const QString &paramName,
+                                     const std::string &colName) {
     addColumnToTable(table, "double", colName, PLOT_TYPE_Y);
     addColumnToTable(table, "double", colName + ERROR_STRING, PLOT_TYPE_YERR);
     paramsToDisplay.append(paramName);
@@ -512,13 +513,13 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
   }
 }
 /**
-* Add column for a log to the table for the case of multiple fits.
-* Have to check multiple values are not returned
-* @param table :: [input, output] Table to write to
-* @param paramsByLabel :: [input] Map of <label name, <workspace name,
-* <parameter, value>>>
-* @param log :: [input] the log we are going to add to the table
-*/
+ * Add column for a log to the table for the case of multiple fits.
+ * Have to check multiple values are not returned
+ * @param table :: [input, output] Table to write to
+ * @param paramsByLabel :: [input] Map of <label name, <workspace name,
+ * <parameter, value>>>
+ * @param log :: [input] the log we are going to add to the table
+ */
 void MuonAnalysisResultTableCreator::addColumnToResultsTable(
     ITableWorkspace_sptr &table,
     const QMap<QString, WSParameterList> &paramsByLabel,
@@ -622,26 +623,25 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
     const auto parseColumnName =
         [&paramsToDisplay](
             const std::string &columnName) -> std::pair<int, std::string> {
-          if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
-            return {0, columnName};
-          } else {
-            // column name is f[n].param
-            size_t pos = columnName.find_first_of('.');
-            if (pos != std::string::npos) {
-              try {
-                const auto &paramName = columnName.substr(pos + 1);
-                const auto wsIndex = std::stoi(columnName.substr(1, pos));
-                return {wsIndex, paramName};
-              } catch (const std::exception &ex) {
-                throw std::runtime_error("Failed to parse column name " +
-                                         columnName + ": " + ex.what());
-              }
-            } else {
-              throw std::runtime_error("Failed to parse column name " +
-                                       columnName);
-            }
+      if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
+        return {0, columnName};
+      } else {
+        // column name is f[n].param
+        size_t pos = columnName.find_first_of('.');
+        if (pos != std::string::npos) {
+          try {
+            const auto &paramName = columnName.substr(pos + 1);
+            const auto wsIndex = std::stoi(columnName.substr(1, pos));
+            return {wsIndex, paramName};
+          } catch (const std::exception &ex) {
+            throw std::runtime_error("Failed to parse column name " +
+                                     columnName + ": " + ex.what());
           }
-        };
+        } else {
+          throw std::runtime_error("Failed to parse column name " + columnName);
+        }
+      }
+    };
 
     // Add param values
     const auto &params = paramsByLabel[labelName];

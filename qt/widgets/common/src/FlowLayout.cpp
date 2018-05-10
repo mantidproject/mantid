@@ -160,5 +160,5 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const {
     return static_cast<QLayout *>(parent)->spacing();
   }
 }
-}
-}
+} // namespace API
+} // namespace MantidQt

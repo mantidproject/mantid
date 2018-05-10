@@ -112,7 +112,7 @@ private:
   /// Flag to indicating if we are populating the dialog
   bool m_populating;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOM_DIALOGS_LOADDIALOG_H

@@ -54,7 +54,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -71,9 +72,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr,
-                doRefinements(std::vector<GSASIIRefineFitPeaksParameters>(
-                    {params}))).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -90,9 +92,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr,
-                doRefinements(std::vector<GSASIIRefineFitPeaksParameters>(
-                    {params}))).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();

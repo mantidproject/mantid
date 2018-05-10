@@ -35,7 +35,7 @@ void ConvertToMDMinMaxLocal::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 
 void ConvertToMDMinMaxLocal::exec() {
 

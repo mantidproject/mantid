@@ -4,12 +4,12 @@
 //----------------------
 // Includes
 //----------------------
+#include "MantidQtWidgets/Common/SaveWorkspaces.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "SANSAddFiles.h"
 #include "SANSConstants.h"
 #include "SANSDiagnostics.h"
 #include "SANSPlotSpecial.h"
-#include "MantidQtWidgets/Common/SaveWorkspaces.h"
 #include "ui_SANSRunWindow.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -28,7 +28,7 @@ class Logger;
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 
 class QAction;
 
@@ -524,7 +524,7 @@ private:
 
   UserSubWindow *slicingWindow;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SANSRUNWINDOW_H_

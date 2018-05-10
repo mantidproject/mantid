@@ -73,7 +73,7 @@ private:
   /// Moderator tilt angle in radians
   double m_tiltAngle;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_MODERATORMODEL_H_ */

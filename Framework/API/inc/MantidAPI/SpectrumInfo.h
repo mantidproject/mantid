@@ -20,7 +20,7 @@ class DetectorInfo;
 class IDetector;
 class Instrument;
 class ParameterMap;
-}
+} // namespace Geometry
 namespace API {
 
 class ExperimentInfo;

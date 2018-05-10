@@ -1,14 +1,14 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORY_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShapeFactory.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
 // Forward declare
 class PeakShape;
-}
+} // namespace Geometry
 namespace DataObjects {
 
 /** PeakShapeSphericalFactory : Factory for spherical peak shapes for

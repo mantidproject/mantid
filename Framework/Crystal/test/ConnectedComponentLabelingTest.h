@@ -1,18 +1,18 @@
 #ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
 #define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
 
+#include <algorithm>
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <set>
-#include <algorithm>
-#include <boost/scoped_ptr.hpp>
 
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
-#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MockObjects.h"
@@ -48,7 +48,7 @@ connection_workspace_to_set_of_labels(IMDHistoWorkspace const *const ws) {
   }
   return unique_values;
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests

@@ -1,10 +1,10 @@
 #ifndef WEIGHTEDEVENTNOTIMETEST_H_
 #define WEIGHTEDEVENTNOTIMETEST_H_ 1
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

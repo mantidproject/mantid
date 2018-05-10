@@ -59,7 +59,7 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
       propsTable->getColumn("SampleOutputBins")->cell<int>(0),
       propsTable->getColumn("ResolutionBins")->cell<int>(0));
 }
-}
+} // namespace
 
 using namespace Mantid::API;
 

@@ -2,10 +2,10 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
@@ -23,7 +23,7 @@ namespace DataObjects {
 template <size_t nd> using MDEventWS = MDEventWorkspace<MDEvent<nd>, nd>;
 template <size_t nd>
 using MDLeanEventWS = MDEventWorkspace<MDLeanEvent<nd>, nd>;
-}
+} // namespace DataObjects
 namespace Kernel {
 
 /// @cond

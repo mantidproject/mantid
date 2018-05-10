@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidKernel/Exception.h"
-#include <limits>
 #include <cmath>
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

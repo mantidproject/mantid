@@ -94,6 +94,6 @@ public:
   /// Determine if gemetry information is available/set.
   bool hasGeometryInfo() const;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

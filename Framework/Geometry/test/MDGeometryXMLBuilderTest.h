@@ -5,16 +5,16 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>

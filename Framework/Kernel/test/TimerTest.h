@@ -1,8 +1,8 @@
 #ifndef TIMERTEST_H_
 #define TIMERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #ifdef _WIN32
 #include <Windows.h>
 #else

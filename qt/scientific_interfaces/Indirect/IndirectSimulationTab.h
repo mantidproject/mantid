@@ -1,10 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 
+#include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "IndirectTab.h"
 #include <QSettings>
 #include <QWidget>
 
@@ -52,6 +52,6 @@ public:
   virtual void loadSettings(const QSettings &settings) = 0;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif

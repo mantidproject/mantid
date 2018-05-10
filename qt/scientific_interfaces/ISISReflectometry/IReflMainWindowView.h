@@ -48,6 +48,6 @@ public:
   /// Run a python algorithm
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H */

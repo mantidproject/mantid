@@ -1,8 +1,8 @@
 #ifndef MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDS_H_
 #define MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDS_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 namespace Mantid {

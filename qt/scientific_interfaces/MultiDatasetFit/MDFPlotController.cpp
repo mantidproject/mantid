@@ -1,24 +1,24 @@
 #include "MDFPlotController.h"
 
-#include "MultiDatasetFit.h"
 #include "MDFDataController.h"
 #include "MDFDatasetPlotData.h"
 #include "MDFFunctionPlotData.h"
+#include "MultiDatasetFit.h"
 
-#include "MantidQtWidgets/Common/PythonRunner.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/PythonRunner.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <boost/make_shared.hpp>
 
 #include <QMessageBox>
 
-#include <qwt_plot_zoomer.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_magnifier.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_magnifier.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_zoomer.h>
 
 #include <qwt_scale_widget.h>
 
@@ -30,7 +30,7 @@ const int startXColumn = 2;
 const int endXColumn = 3;
 QColor rangeSelectorDisabledColor = Qt::darkGray;
 QColor rangeSelectorEnabledColor = Qt::blue;
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -415,6 +415,6 @@ void PlotController::showGuessFunction(bool ok) {
   }
 }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

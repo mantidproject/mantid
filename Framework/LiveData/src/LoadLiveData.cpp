@@ -47,12 +47,12 @@ void copyInstrument(const API::Workspace *source, API::Workspace &target) {
   } else {
     if (auto *sourceExpInfo =
             dynamic_cast<const API::ExperimentInfo *>(source)) {
-      dynamic_cast<API::ExperimentInfo &>(target)
-          .setInstrument(sourceExpInfo->getInstrument());
+      dynamic_cast<API::ExperimentInfo &>(target).setInstrument(
+          sourceExpInfo->getInstrument());
     }
   }
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadLiveData)
@@ -135,8 +135,8 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       for (auto prop : proplist) {
         if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
-            g_log.information() << "Using " << prop->name()
-                                << " as the input property.\n";
+            g_log.information()
+                << "Using " << prop->name() << " as the input property.\n";
             alg->setPropertyValue(prop->name(), inputName);
             inputPropertyWorkspaceFound = true;
           }

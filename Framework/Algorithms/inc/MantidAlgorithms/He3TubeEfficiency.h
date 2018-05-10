@@ -3,8 +3,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 
@@ -13,7 +13,7 @@ namespace Geometry {
 class IDetector;
 class IObject;
 class ParameterMap;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 /**

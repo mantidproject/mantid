@@ -1,9 +1,9 @@
 #include "ISISDiagnostics.h"
 
+#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
-#include "../General/UserInputValidator.h"
 
 #include <QFileInfo>
 
@@ -485,4 +485,4 @@ void ISISDiagnostics::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

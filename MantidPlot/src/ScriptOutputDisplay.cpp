@@ -62,9 +62,9 @@ void ScriptOutputDisplay::mouseMoveEvent(QMouseEvent *e) {
 }
 
 /** Mouse move release handler - overridden to prevent middle mouse button
-* clicks from pasting on linux
-* @param e the mouse move event
-*/
+ * clicks from pasting on linux
+ * @param e the mouse move event
+ */
 void ScriptOutputDisplay::mouseReleaseEvent(QMouseEvent *e) {
   this->setReadOnly(true);
   QTextEdit::mousePressEvent(e);

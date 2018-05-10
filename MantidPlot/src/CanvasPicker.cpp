@@ -29,16 +29,16 @@
  *                                                                         *
  ***************************************************************************/
 #include "CanvasPicker.h"
+#include "ApplicationWindow.h"
+#include "ArrowMarker.h"
 #include "ImageMarker.h"
 #include "LegendWidget.h"
-#include "ArrowMarker.h"
 #include "PlotCurve.h"
-#include "ApplicationWindow.h"
 #include "Spectrogram.h"
 
 #include <QVector>
-#include <qwt_text_label.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_text_label.h>
 
 CanvasPicker::CanvasPicker(Graph *graph) : QObject(graph) {
   pointSelected = false;

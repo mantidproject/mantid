@@ -15,15 +15,15 @@
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/Diffraction.h"
 
-using Mantid::Algorithms::PDCalibration;
-using Mantid::API::Workspace_sptr;
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::MatrixWorkspace_const_sptr;
+using Mantid::API::AnalysisDataService;
+using Mantid::API::FrameworkManager;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
-using Mantid::API::FrameworkManager;
-using Mantid::API::AnalysisDataService;
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_const_sptr;
+using Mantid::API::Workspace_sptr;
 using Mantid::Algorithms::CreateSampleWorkspace;
+using Mantid::Algorithms::PDCalibration;
 using Mantid::DataHandling::MoveInstrumentComponent;
 using Mantid::DataHandling::RotateInstrumentComponent;
 
@@ -56,8 +56,8 @@ const std::vector<double> PEAK_TOFS = {1636.5, 3272.5,  4908.5,  6544.5, 8180.5,
                                        9816.5, 11452.5, 13088.5, 14724.5};
 
 /**
-* Creates a workspace with peaks at 400, 800, 1300, 1600 us
-*/
+ * Creates a workspace with peaks at 400, 800, 1300, 1600 us
+ */
 void createSampleWS() {
   // all values are at the same TOF so calibrations will be the same with
   // different starting guesses
@@ -93,7 +93,7 @@ void createSampleWS() {
   moveInstr.setProperty("RelativePosition", false);
   moveInstr.execute();
 }
-}
+} // namespace
 
 class PDCalibrationTest : public CxxTest::TestSuite {
 public:

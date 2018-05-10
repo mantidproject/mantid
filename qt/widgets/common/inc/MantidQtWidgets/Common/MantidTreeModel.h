@@ -7,8 +7,8 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
-#include <QObject>
 #include <QHash>
+#include <QObject>
 
 //----------------------------------
 // Forward declarations
@@ -162,6 +162,6 @@ private:
   MantidTreeModel(const MantidTreeModel &);
   MantidTreeModel &operator=(const MantidTreeModel &);
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_MANTIDTREEMODEL_H

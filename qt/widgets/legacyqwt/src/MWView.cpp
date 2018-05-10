@@ -1,17 +1,17 @@
 #include "MantidQtWidgets/LegacyQwt/MWView.h"
 // includes for workspace handling
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtWidgets/LegacyQwt/SignalRange.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <boost/pointer_cast.hpp>
 #include <boost/shared_ptr.hpp>
-#include "MantidAPI/AlgorithmManager.h"
 // includes for interface development
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
 #include <QSettings>
 #include <qwt_color_map.h>
 #include <qwt_double_rect.h>
@@ -32,8 +32,9 @@ namespace MantidWidgets {
 MWView::MWView(QWidget *parent)
     : QWidget(parent), MantidQt::API::WorkspaceObserver(),
       m_mdSettings(boost::make_shared<MantidQt::API::MdSettings>()),
-      m_workspace(), m_wellcomeWorkspace(),
-      m_wellcomeName{"__MWViewWellcomeWorkspace"}, m_dimensions() {
+      m_workspace(),
+      m_wellcomeWorkspace(), m_wellcomeName{"__MWViewWellcomeWorkspace"},
+      m_dimensions() {
   // Watch for the deletion of the associated workspace
   this->observePreDelete(true);
   m_spect = new QwtPlotSpectrogram();
@@ -134,8 +135,8 @@ void MWView::setTransparentZerosSlot(bool transparent) {
 }
 
 /*                 ***************************
-                   ***  Protected Members  ***
-                   ***************************/
+ ***  Protected Members  ***
+ ***************************/
 
 /*
  * @brief Clean shown data when associated workspace is deleted
@@ -316,5 +317,5 @@ void MWView::showWellcomeWorkspace() {
   m_uiForm.colorBar->setScale(0); // reset to linear color scale
 }
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

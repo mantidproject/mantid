@@ -14,7 +14,7 @@ class IMDIterator;
 class IMDNode;
 class IMDWorkspace;
 class IMDEventWorkspace;
-}
+} // namespace API
 
 namespace VATES {
 
@@ -55,7 +55,7 @@ IMDWorkspace
 DLLExport std::unique_ptr<Mantid::API::IMDIterator>
 createIteratorWithNormalization(const VisualNormalization normalizationOption,
                                 Mantid::API::IMDWorkspace const *const ws);
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif /*MANTID_VATES_NORMALIZATION_H_*/

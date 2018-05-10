@@ -1,23 +1,23 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 
+#include "../MultiDatasetFit/MDFLogValueFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "../MultiDatasetFit/MDFLogValueFinder.h"
 
-#include <cxxtest/TestSuite.h>
 #include <QStringList>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::ScopedWorkspace;
 using Mantid::API::WorkspaceFactory;
-using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::Math::StatisticType;
 using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Types::Core::DateAndTime;
 using MantidQt::CustomInterfaces::MDFLogValueFinder;
 
 class MDFLogValueFinderTest : public CxxTest::TestSuite {

@@ -4,16 +4,16 @@
 #include <MantidKernel/SingletonHolder.h>
 #include <boost/shared_ptr.hpp>
 
-#include <QString>
-#include <QMap>
 #include <QList>
+#include <QMap>
+#include <QString>
 
 namespace Mantid {
 namespace API {
 class IAlgorithm;
 using IAlgorithm_sptr = boost::shared_ptr<IAlgorithm>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 struct PropertyData {
   PropertyData(const QString &nm, const QString &vl) : name(nm), value(vl) {}

@@ -1,13 +1,13 @@
 #ifndef MANTID_API_FILEPROPERTYWIDGET_H_
 #define MANTID_API_FILEPROPERTYWIDGET_H_
 
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/TextPropertyWidget.h"
-#include <QStringList>
-#include <QString>
-#include "MantidAPI/MultipleFileProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include <QPushButton>
+#include <QString>
+#include <QStringList>
 
 namespace MantidQt {
 namespace API {

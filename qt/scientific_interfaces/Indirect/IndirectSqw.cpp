@@ -198,4 +198,4 @@ void IndirectSqw::saveClicked() {
   m_batchAlgoRunner->executeBatch();
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

@@ -4,8 +4,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>
@@ -63,7 +63,7 @@ struct SqrtError {
 
   double zeroSqrtValue;
 };
-}
+} // namespace
 
 /// Algorithm's name
 const std::string SetUncertainties::name() const { return "SetUncertainties"; }

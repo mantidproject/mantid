@@ -5,12 +5,12 @@
 
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
-#include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {

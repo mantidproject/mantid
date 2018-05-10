@@ -12,7 +12,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("GridDomain");
-}
+} // namespace
 
 /// number of points in the grid
 size_t GridDomain::size() const {

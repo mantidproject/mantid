@@ -143,5 +143,5 @@ template class ArrayBoundedValidator<int64_t>;
 template class ArrayBoundedValidator<long>;
 #endif
 
-} // Kernel
-} // Mantid
+} // namespace Kernel
+} // namespace Mantid

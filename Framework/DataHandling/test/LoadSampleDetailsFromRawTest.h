@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadSampleDetailsFromRaw.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/LoadSampleDetailsFromRaw.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;

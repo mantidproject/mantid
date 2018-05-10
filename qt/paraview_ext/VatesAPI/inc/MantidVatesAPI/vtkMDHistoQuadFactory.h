@@ -6,8 +6,8 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "vtkUnstructuredGrid.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "vtkUnstructuredGrid.h"
 
 namespace Mantid {
 namespace VATES {
@@ -78,6 +78,6 @@ private:
 
   VisualNormalization m_normalizationOption;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

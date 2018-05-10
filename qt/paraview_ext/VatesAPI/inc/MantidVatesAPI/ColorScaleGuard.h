@@ -1,7 +1,7 @@
 #ifndef MANTID_VATES_API_COLOR_SCALE_LOCK_H
 #define MANTID_VATES_API_COLOR_SCALE_LOCK_H
-#include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace VATES {
@@ -36,6 +36,6 @@ public:
 private:
   ColorScaleLock *m_lock;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

@@ -1,8 +1,8 @@
 #ifndef MANTIDPLOT_GLOBJECT_H_
 #define MANTIDPLOT_GLOBJECT_H_
 
-#include <string>
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include <string>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -70,7 +70,7 @@ protected:
   mutable GLuint mDisplayListId; ///< OpengGL Display list id
   mutable bool mChanged;         ///< Flag holding the change in the object
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MANTIDPLOT_GLOBJECT_H*/

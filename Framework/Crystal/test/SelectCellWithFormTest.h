@@ -1,18 +1,18 @@
 #ifndef MANTID_CRYSTAL_SELECT_CELL_WITH_FORM_TEST_H_
 #define MANTID_CRYSTAL_SELECT_CELL_WITH_FORM_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Sample.h"
+#include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/LoadIsawUB.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Sample.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;

@@ -1,13 +1,13 @@
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include <cmath>
 
 using namespace Mantid::Kernel;

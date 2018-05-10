@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_REPLICATEMD_H_
 #define MANTID_MDALGORITHMS_REPLICATEMD_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {

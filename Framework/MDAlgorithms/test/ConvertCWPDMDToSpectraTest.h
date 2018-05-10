@@ -15,8 +15,8 @@
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
-using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
 using Mantid::DataHandling::LoadSpiceAscii;
+using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
 using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

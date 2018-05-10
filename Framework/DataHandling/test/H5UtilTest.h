@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/System.h"
 #include "MantidDataHandling/H5Util.h"
+#include "MantidKernel/System.h"
 
-#include <boost/numeric/conversion/cast.hpp>
 #include <H5Cpp.h>
-#include <limits>
 #include <Poco/File.h>
+#include <boost/numeric/conversion/cast.hpp>
+#include <limits>
 
 using namespace H5;
 using namespace Mantid::DataHandling;

@@ -19,7 +19,7 @@ void setLabelFromStdString(Label &self, const std::string &caption,
                            const std::string &label) {
   self.setLabel(caption, label);
 }
-}
+} // namespace
 
 // We only export the concrete unit classes that
 // have additional functionality over the base class

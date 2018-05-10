@@ -26,9 +26,9 @@ void DesignerPlugin::initialize(QDesignerFormEditorInterface *formEditor) {
 }
 
 /**
-* Returns whether the plugin initialized or not
-* @returns True if initialize() has been called, false otherwise
-*/
+ * Returns whether the plugin initialized or not
+ * @returns True if initialize() has been called, false otherwise
+ */
 bool DesignerPlugin::isInitialized() const { return m_initialized; }
 
 /**
@@ -105,8 +105,8 @@ QString DesignerPlugin::domXml() const {
   std::string name = this->getShortName();
   name[0] = static_cast<char>(tolower(static_cast<int>(name[0])));
 
-  return QString::fromStdString("<widget class=\"" +
-                                this->name().toStdString() + "\" name=\"" +
-                                name + "\">\n"
-                                       "</widget>\n");
+  return QString::fromStdString(
+      "<widget class=\"" + this->name().toStdString() + "\" name=\"" + name +
+      "\">\n"
+      "</widget>\n");
 }

@@ -1,10 +1,10 @@
 #ifndef PYTHONOBJECTINSTANTIATORTEST_H_
 #define PYTHONOBJECTINSTANTIATORTEST_H_
 
-#include <cxxtest/GlobalFixture.h>
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include <cxxtest/GlobalFixture.h>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/ConfigService.h"
 #include <boost/python/object.hpp>
@@ -40,9 +40,9 @@ static PythonProcessHandler pythonProcessHandler;
 
 //-------------------------------------------------------------------------
 
-using Mantid::PythonInterface::PythonObjectInstantiator;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::PythonInterface::PythonObjectInstantiator;
 
 class PythonObjectInstantiatorTest : public CxxTest::TestSuite {
 public:
@@ -91,10 +91,11 @@ private:
       // Assume this is where the mantid package is too
       std::string code = "import sys\n"
                          "sys.path.append(r'" +
-                         propDir + "')\n"
-                                   "from mantid.api import PythonAlgorithm\n"
-                                   "class PyAlg(PythonAlgorithm):\n"
-                                   "  pass\n";
+                         propDir +
+                         "')\n"
+                         "from mantid.api import PythonAlgorithm\n"
+                         "class PyAlg(PythonAlgorithm):\n"
+                         "  pass\n";
       PyRun_SimpleString(code.c_str());
       PyObject *main = PyImport_AddModule("__main__");
       TS_ASSERT(main);

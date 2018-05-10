@@ -180,5 +180,5 @@ MaskDetectorsIf::allowedValuesStatement(const std::vector<std::string> &vals) {
   return statement.str();
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
@@ -131,7 +131,7 @@ void Unit::initialize(const double &_l1, const double &_l2,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-*/
+ */
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
                  const int &_emode, const double &_efixed,
@@ -162,7 +162,7 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-*/
+ */
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
                    const double &_twoTheta, const int &_emode,
@@ -256,8 +256,8 @@ Label::Label(const std::string &caption, const std::string &label)
 }
 
 /**
-  * Set a caption and a label
-  */
+ * Set a caption and a label
+ */
 void Label::setLabel(const std::string &cpt, const UnitLabel &lbl) {
   m_caption = cpt;
   m_label = lbl;

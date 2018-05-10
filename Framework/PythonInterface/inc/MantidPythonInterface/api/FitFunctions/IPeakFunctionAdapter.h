@@ -94,7 +94,7 @@ public:
 
 private:
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_IPEAKFUNCTIONADAPTER_H_ */

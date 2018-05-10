@@ -5,11 +5,11 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
-#include <map>
-#include <iostream>
-#include <fstream>
 #include <algorithm>
 #include <boost/tokenizer.hpp>
+#include <fstream>
+#include <iostream>
+#include <map>
 
 namespace Mantid {
 namespace DataHandling {
@@ -202,8 +202,9 @@ std::vector<double> LoadSwans::loadMetaData() {
     if (!line.empty() && line[0] != '#') {
       g_log.debug() << "Metadata parsed line: " << line << '\n';
       auto tokenizer = Mantid::Kernel::StringTokenizer(
-          line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+          line, "\t ",
+          Mantid::Kernel::StringTokenizer::TOK_TRIM |
+              Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       for (const auto &token : tokenizer) {
         metadata.push_back(boost::lexical_cast<double>(token));
       }

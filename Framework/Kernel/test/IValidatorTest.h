@@ -34,7 +34,7 @@ private:
   /// The pointer to the head of the vector
   mutable const double *m_head;
 };
-}
+} // namespace
 
 class IValidatorTest : public CxxTest::TestSuite {
 public:

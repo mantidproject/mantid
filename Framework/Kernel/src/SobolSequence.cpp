@@ -76,5 +76,5 @@ void SobolSequence::deleteCurrentGenerator() {
     gsl_qrng_free(m_savedGenerator);
   }
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

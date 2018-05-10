@@ -1,11 +1,11 @@
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidKernel/Logger.h"
 
-#include <QTemporaryFile>
 #include <QDir>
+#include <QTemporaryFile>
 #include <QTextStream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 using namespace MantidQt::API;
 
@@ -14,14 +14,14 @@ Mantid::Kernel::Logger g_log("PythonRunner");
 
 /// Format of python warning message. It will be removed from any output string
 QString PYTHON_V1_WARN = "Warning: Python API v1 call has been made.\n";
-}
+} // namespace
 
 /** Run a piece of python code and return any output that it writes to stdout
-*  @param code :: the Python commands to execute
-*  @param no_output :: if set to true this method returns an empty string, if
-* false it returns the output from any Python print statements
-*  @return output from Python print statements unless no_output is false
-*/
+ *  @param code :: the Python commands to execute
+ *  @param no_output :: if set to true this method returns an empty string, if
+ * false it returns the output from any Python print statements
+ *  @return output from Python print statements unless no_output is false
+ */
 QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   using Mantid::Kernel::Logger;
 
@@ -63,15 +63,15 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   // FIXME: Ticket-9217 - Commented out for the moment to try and get working
   // with clang
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    g_log.debug() << "Raw output from execution:\n" << qPrintable(tmpstring)
-                  << "\n";
+    g_log.debug() << "Raw output from execution:\n"
+                  << qPrintable(tmpstring) << "\n";
   return tmpstring;
 }
 /** This Python helper function converts a list of strings into one
-* string that Python will recognise as a Python tuple
-* @param list string entries
-* @return the strings as a comma separated list in brakets
-*/
+ * string that Python will recognise as a Python tuple
+ * @param list string entries
+ * @return the strings as a comma separated list in brakets
+ */
 const QString PythonRunner::stringList2Tuple(const QStringList &list) {
   QString tuple("(");
   QStringList::const_iterator end = list.end();

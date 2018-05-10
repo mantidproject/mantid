@@ -112,7 +112,7 @@ private:
   bool m_calculateWeightedSum{false};
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SUMSPECTRA_H_*/

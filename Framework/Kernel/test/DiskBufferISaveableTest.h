@@ -1,17 +1,17 @@
 #ifndef MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
 #define MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
 
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/ISaveable.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index_container.hpp>
 #include <cxxtest/TestSuite.h>
 #include <mutex>
 
@@ -357,7 +357,8 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, 1 "
-                 "thread in " << clock.elapsed() << " sec\n";
+                 "thread in "
+              << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory
@@ -397,7 +398,8 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, "
-                 "multithread in " << clock.elapsed() << " sec\n";
+                 "multithread in "
+              << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory

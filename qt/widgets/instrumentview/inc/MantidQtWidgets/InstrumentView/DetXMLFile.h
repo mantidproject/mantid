@@ -1,8 +1,8 @@
 #ifndef DETXMLFILE_H
 #define DETXMLFILE_H
 
-#include <QString>
 #include <QList>
+#include <QString>
 
 #include <vector>
 
@@ -46,7 +46,7 @@ private:
   bool m_delete;      ///< if true delete the file on destruction
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // DETXMLFILE_H

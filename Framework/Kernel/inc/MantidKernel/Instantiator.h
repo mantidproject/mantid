@@ -39,8 +39,8 @@ namespace Kernel {
 */
 template <class Base>
 class DLLExport AbstractInstantiator
-    /// The base class for instantiators
-    {
+/// The base class for instantiators
+{
 public:
   /// Creates the AbstractInstantiator.
   AbstractInstantiator() = default;

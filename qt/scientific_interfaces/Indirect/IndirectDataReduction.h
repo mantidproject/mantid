@@ -6,9 +6,9 @@
 //----------------------
 #include "ui_IndirectDataReduction.h"
 
+#include "IndirectDataReductionTab.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "IndirectDataReductionTab.h"
 
 #include "MantidGeometry/IComponent.h"
 
@@ -181,14 +181,15 @@ private:
 
   /// Poco observer for changes in user directory settings
   Poco::NObserver<IndirectDataReduction,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
   QString m_dataDir; ///< default data search directory
   QString m_saveDir; ///< default data save directory
 
   // Pointer to the current empty instrument workspace
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_

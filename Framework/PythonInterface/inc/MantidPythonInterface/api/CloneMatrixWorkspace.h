@@ -43,7 +43,7 @@ PyObject *cloneE(API::MatrixWorkspace &self);
 /// Create a numpy array from the E values of the given workspace reference
 PyObject *cloneDx(API::MatrixWorkspace &self);
 ///@}
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_CLONEMATRIXWORKSPACE_H_ */

@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "qstring.h"
-#include <QPoint>
 #include <QColor>
+#include <QPoint>
 #include <QRect>
 
 /** Parses the formatting used in MantidPlot project files
@@ -175,7 +175,7 @@ private:
   std::stringstream m_output;
   bool m_midLine;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif

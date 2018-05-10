@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <fstream>
@@ -22,7 +22,7 @@ namespace Kernel {
 namespace {
 /// static logger
 Logger g_log("LogParser");
-}
+} // namespace
 
 /// @returns the name of the log created that defines the status during a run
 const std::string LogParser::statusLogName() { return std::string("running"); }
@@ -189,8 +189,8 @@ void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time,
 }
 
 /** Create given the icpevent log property.
-*  @param log :: A pointer to the property
-*/
+ *  @param log :: A pointer to the property
+ */
 LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   Kernel::TimeSeriesProperty<int> *periods =
       new Kernel::TimeSeriesProperty<int>(periodsLogName());
@@ -273,7 +273,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
 /**
  * Create a log vale for the current period.
  * @param period: The period number to create the log entry for.
-*/
+ */
 Kernel::Property *LogParser::createCurrentPeriodLog(const int &period) const {
   Kernel::PropertyWithValue<int> *currentPeriodProperty =
       new Kernel::PropertyWithValue<int>("current_period", period);
@@ -299,7 +299,7 @@ struct hasNewStyleCommands {
            p.second.find(STOP_COLLECTION) != std::string::npos;
   }
 };
-}
+} // namespace
 
 /**
  * Check if the icp log commands are in the new style. The new style is the one
@@ -324,7 +324,7 @@ bool LogParser::isICPEventLogNewStyle(
  *             TimeSeriesProperty<double>.
  * @return The mean value over time.
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
-*/
+ */
 double timeMean(const Kernel::Property *p) {
   const Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
@@ -360,5 +360,5 @@ double timeMean(const Kernel::Property *p) {
   return res;
 }
 
-} // namespace Geometry
+} // namespace Kernel
 } // namespace Mantid

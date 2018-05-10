@@ -7,8 +7,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* Implementation of UnwrappedSurface as a cylinder
-*/
+ * Implementation of UnwrappedSurface as a cylinder
+ */
 class UnwrappedCylinder : public RotationSurface {
 public:
   UnwrappedCylinder(const InstrumentActor *rootActor,
@@ -21,7 +21,7 @@ protected:
   void rotate(const UnwrappedDetector &udet,
               Mantid::Kernel::Quat &R) const override;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // UNWRAPPEDCYLINDER_H

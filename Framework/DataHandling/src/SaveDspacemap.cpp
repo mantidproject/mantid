@@ -1,8 +1,8 @@
 #include "MantidDataHandling/SaveDspacemap.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
 #include <fstream>
 
 namespace Mantid {
@@ -108,5 +108,5 @@ void SaveDspacemap::CalculateDspaceFromCal(
   fout.close();
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

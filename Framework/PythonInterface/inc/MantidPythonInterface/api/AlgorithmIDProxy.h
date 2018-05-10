@@ -38,7 +38,7 @@ struct AlgorithmIDProxy {
   /// held ID value
   API::AlgorithmID id;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_ALGORITHMIDPROXY_H_ */

@@ -39,5 +39,5 @@ std::string CommutativeBinaryOperation::checkSizeCompatibility(
   // call the base routine
   return BinaryOperation::checkSizeCompatibility(wsLarger, wsSmaller);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

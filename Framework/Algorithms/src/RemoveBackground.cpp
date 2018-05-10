@@ -18,9 +18,9 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/make_unique.h"
 
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 
 namespace Mantid {
 namespace Algorithms {
@@ -32,8 +32,8 @@ using namespace Kernel;
 using namespace API;
 
 /** Initialization method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void RemoveBackground::init() {
   auto sourceValidator = boost::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
@@ -80,10 +80,10 @@ void RemoveBackground::init() {
 }
 
 /** Executes the rebin algorithm
-*
-*  @throw runtime_error Thrown if the bin range does not intersect the range of
-*the input workspace
-*/
+ *
+ *  @throw runtime_error Thrown if the bin range does not intersect the range of
+ *the input workspace
+ */
 void RemoveBackground::exec() {
 
   // Get the input workspace
@@ -234,16 +234,16 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   m_Efix = this->getEi(sourceWS);
 }
 /**Method removes background from vectors which represent a histogram data for a
-* single spectra
-* @param nHist   -- number (workspaceID) of the spectra in the workspace, where
-* background going to be removed
-* @param x_data  -- the spectra x-values (presumably not in TOF units)
-* @param y_data  -- the spectra signal
-* @param e_data  -- the spectra errors
-* @param threadNum -- the number of thread doing conversion (by default 0,
-* single thread, in multithreading -- result of
-*                      omp_get_thread_num() )
-*/
+ * single spectra
+ * @param nHist   -- number (workspaceID) of the spectra in the workspace, where
+ * background going to be removed
+ * @param x_data  -- the spectra x-values (presumably not in TOF units)
+ * @param y_data  -- the spectra signal
+ * @param e_data  -- the spectra errors
+ * @param threadNum -- the number of thread doing conversion (by default 0,
+ * single thread, in multithreading -- result of
+ *                      omp_get_thread_num() )
+ */
 void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
                                         HistogramY &y_data, HistogramE &e_data,
                                         int threadNum) const {
@@ -322,17 +322,17 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
   }
 }
 /** Method returns the efixed or Ei value stored in properties of the input
-*workspace.
-*  Indirect instruments can have eFxed and Direct instruments can have Ei
-*defined as the properties of the workspace.
-*
-*  This method provide guess for efixed for all other kind of instruments.
-*Correct indirect instrument will overwrite
-*  this value while wrongly defined or different types of instruments will
-*provide the value of "Ei" property (log value)
-*  or undefined if "Ei" property is not found.
-*
-*/
+ *workspace.
+ *  Indirect instruments can have eFxed and Direct instruments can have Ei
+ *defined as the properties of the workspace.
+ *
+ *  This method provide guess for efixed for all other kind of instruments.
+ *Correct indirect instrument will overwrite
+ *  this value while wrongly defined or different types of instruments will
+ *provide the value of "Ei" property (log value)
+ *  or undefined if "Ei" property is not found.
+ *
+ */
 double
 BackgroundHelper::getEi(const API::MatrixWorkspace_const_sptr &inputWS) const {
   double Efi = std::numeric_limits<double>::quiet_NaN();
@@ -362,5 +362,5 @@ BackgroundHelper::getEi(const API::MatrixWorkspace_const_sptr &inputWS) const {
   return Efi;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

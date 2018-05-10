@@ -45,7 +45,7 @@ public:
   */
   virtual std::unique_ptr<GenericDataProcessorPresenter> create() = 0;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERFACTORY_H*/

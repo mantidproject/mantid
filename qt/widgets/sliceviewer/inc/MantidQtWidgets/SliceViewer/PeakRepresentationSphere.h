@@ -106,6 +106,6 @@ private:
   /// Zoom out factor
   const double zoomOutFactor = 2.;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

@@ -13,7 +13,7 @@ namespace API {
 // Forward declaration
 //----------------------------------------------------------------------
 class Jacobian;
-}
+} // namespace API
 
 namespace Mantid {
 namespace CurveFitting {

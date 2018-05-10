@@ -1,9 +1,9 @@
 #ifndef HISTORYITEMTEST_H_
 #define HISTORYITEMTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/HistoryView.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

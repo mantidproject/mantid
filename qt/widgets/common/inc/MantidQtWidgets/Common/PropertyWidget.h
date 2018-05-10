@@ -1,8 +1,8 @@
 #ifndef MANTID_API_PROPERTYWIDGET_H_
 #define MANTID_API_PROPERTYWIDGET_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
 
 #include <QGridLayout>
 #include <QLabel>

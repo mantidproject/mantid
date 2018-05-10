@@ -8,7 +8,7 @@ namespace Mantid {
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -27,7 +27,7 @@ public:
   // Destructor
   virtual ~UpdateableOnDemand() {}
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* UPDATEABLEONDEMAND_H_ */

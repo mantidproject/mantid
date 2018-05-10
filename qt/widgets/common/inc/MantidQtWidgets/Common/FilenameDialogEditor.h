@@ -37,7 +37,7 @@ protected:
     return new FilenameDialogEditor(property, parent);
   }
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQT_MANTIDWIDGETS_FILENAMEDIALOGEDITFACTORY_H

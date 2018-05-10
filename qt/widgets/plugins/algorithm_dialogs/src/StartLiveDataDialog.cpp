@@ -2,27 +2,26 @@
 // Includes
 //----------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/StartLiveDataDialog.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/LiveListenerInfo.h"
+#include "MantidKernel/SingletonHolder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "qboxlayout.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include <QVariant>
 #include <QStringList>
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/LiveListenerInfo.h"
-#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include <QVariant>
 
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
-using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::ConfigService;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
@@ -63,7 +62,7 @@ template class Mantid::Kernel::SingletonHolder<
 /// The specific instantiation of the templated type
 using LiveDataPostProcessingAlgInputHistory =
     Mantid::Kernel::SingletonHolder<LiveDataPostProcessingAlgInputHistoryImpl>;
-}
+} // namespace
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
@@ -534,5 +533,5 @@ void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
   ui.edtConnAddress->setText(address);
   ui.edtConnAddress->home(false); // display long lines from beginning, not end
 }
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt

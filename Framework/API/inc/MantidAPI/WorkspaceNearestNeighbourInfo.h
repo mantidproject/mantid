@@ -5,8 +5,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/V3D.h"
 
-#include <memory>
 #include <map>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {

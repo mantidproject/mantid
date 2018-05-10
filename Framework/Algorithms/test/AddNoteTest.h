@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_ADDNOTETEST_H_
 #define MANTID_ALGORITHMS_ADDNOTETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/AddNote.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 class AddNoteTest : public CxxTest::TestSuite {
 
@@ -109,8 +109,8 @@ private:
                                const int &logEndTime,
                                const std::string logValue,
                                const size_t position) {
-    using Mantid::Types::Core::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
+    using Mantid::Types::Core::DateAndTime;
 
     const auto &run = testWS->run();
     TSM_ASSERT("Run does not contain the expected log entry",

@@ -1,6 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
-#include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 
 #include <array>
 #include <cmath>
@@ -138,6 +138,6 @@ void BackgroundRgbProvider::backgroundColorChangeCallbackFunction(
     currentBackgroundColor = QColor(red, green, blue);
   }
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

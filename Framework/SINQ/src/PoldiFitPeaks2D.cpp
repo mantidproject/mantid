@@ -1208,9 +1208,10 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LinearBackgroundParameter", 0.0,
                   "Initial value of linear background.");
 
-  declareProperty("MaximumIterations", 0, "Maximum number of iterations for "
-                                          "the fit. Use 0 to calculate "
-                                          "2D-spectrum without fitting.");
+  declareProperty("MaximumIterations", 0,
+                  "Maximum number of iterations for "
+                  "the fit. Use 0 to calculate "
+                  "2D-spectrum without fitting.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

@@ -393,6 +393,6 @@ void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
 //  }
 //}
 
-} // NLLS
-} // CurveFitting
-} // Mantid
+} // namespace NLLS
+} // namespace CurveFitting
+} // namespace Mantid

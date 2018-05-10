@@ -9,9 +9,9 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 #define DECLARE_ARCHIVESEARCH(classname, facility)                             \
   namespace {                                                                  \
@@ -56,12 +56,12 @@ public:
   /// Virtual destructor
   virtual ~IArchiveSearch() = default;
   /**
-    * Return the full path to a data file in an archive. The first match is
+   * Return the full path to a data file in an archive. The first match is
    * returned
-    * @param filenames :: A list of filenames (without extensions) to pass to
+   * @param filenames :: A list of filenames (without extensions) to pass to
    * the archive
-    * @param exts :: A list of extensions to check for in turn against each file
-    */
+   * @param exts :: A list of extensions to check for in turn against each file
+   */
   virtual std::string
   getArchivePath(const std::set<std::string> &filenames,
                  const std::vector<std::string> &exts) const = 0;
@@ -69,7 +69,7 @@ public:
 
 /// Typedef for a shared pointer to an IArchiveSearch
 using IArchiveSearch_sptr = boost::shared_ptr<IArchiveSearch>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_IARCHIVESEARCH_H_

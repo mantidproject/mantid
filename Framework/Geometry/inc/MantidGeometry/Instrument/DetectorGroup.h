@@ -4,8 +4,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -94,63 +94,63 @@ public:
   std::string getParameterType(const std::string &name,
                                bool recursive = true) const override;
   /**
-  * Get a parameter defined as a double
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a double
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<double> getNumberParameter(const std::string &pname,
                                          bool recursive = true) const override;
   /**
-  * Get a parameter defined as a Kernel::V3D
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a Kernel::V3D
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<Kernel::V3D>
   getPositionParameter(const std::string &pname,
                        bool recursive = true) const override;
   /**
-  * Get a parameter defined as a Kernel::Quaternion
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a Kernel::Quaternion
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<Kernel::Quat>
   getRotationParameter(const std::string &pname,
                        bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as a string
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a string
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<std::string>
   getStringParameter(const std::string &pname,
                      bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as an integer
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as an integer
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<int> getIntParameter(const std::string &pname,
                                    bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as an integer
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as an integer
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<bool> getBoolParameter(const std::string &pname,
                                      bool recursive = true) const override;
 
@@ -194,9 +194,9 @@ protected:
   /// The collection of grouped detectors
   DetCollection m_detectors;
   /** the parameter describes the topology of the detector's group namely if
-  * detectors form a box or a ring.
-  *  the topology is undefined on construction and calculated on first request
-  */
+   * detectors form a box or a ring.
+   *  the topology is undefined on construction and calculated on first request
+   */
   mutable det_topology group_topology;
   /// group centre is the geometrical centre of the detectors group calculated
   /// when the calculate group topology is invoked

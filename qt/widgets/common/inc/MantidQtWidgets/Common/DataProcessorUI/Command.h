@@ -66,7 +66,7 @@ protected:
 
 /// Typedef for a shared pointer to \c ReflSearchModel
 using Command_uptr = std::unique_ptr<Command>;
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMAND_H*/

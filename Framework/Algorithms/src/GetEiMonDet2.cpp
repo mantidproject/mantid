@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/GetEiMonDet2.h"
 
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -33,7 +33,7 @@ const static std::string FIT_STATUS_COLUMN("FitStatus");
 const static std::string PEAK_CENTRE_COLUMN("PeakCentre");
 /// Tag for successfully fitted rows in EPP tables
 const static std::string FIT_STATUS_SUCCESS("success");
-}
+} // namespace EPPTableLiterals
 
 /** A private namespace listing the different ways to index
  *  spectra in Mantid.
@@ -45,7 +45,7 @@ const static std::string DETECTOR_ID("Detector ID");
 const static std::string SPECTRUM_NUMBER("Spectrum Number");
 /// Tag for workspace indices
 const static std::string WORKSPACE_INDEX("Workspace Index");
-}
+} // namespace IndexTypes
 
 /** A private namespace holding the property names of
  *  GetEiMonDet algorithm, version 2.
@@ -71,14 +71,14 @@ const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
 const static std::string NOMINAL_ENERGY("NominalIncidentEnergy");
 /// Name of the neutron pulse interval property
 const static std::string PULSE_INTERVAL("PulseInterval");
-}
+} // namespace PropertyNames
 
 /** A private namespace holding names for sample log entries.
  */
 namespace SampleLogs {
 /// Name of the pulse interval sample log
 const static std::string PULSE_INTERVAL("pulse_interval");
-}
+} // namespace SampleLogs
 } // anonymous namespace
 
 // Register the algorithm into the algorithm factory.
@@ -404,7 +404,7 @@ void mapIndices(const std::vector<int> &detectors, const int monitor,
     throw std::runtime_error(PropertyNames::MONITOR + " out of range.");
   }
 }
-} // namespace anonymous
+} // namespace
 
 /** Parser detector and monitor indices from user's input and
  *  transfrorms them to workspace indices.

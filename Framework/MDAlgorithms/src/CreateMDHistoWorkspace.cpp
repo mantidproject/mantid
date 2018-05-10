@@ -1,8 +1,8 @@
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
 
 using namespace Mantid::Kernel;
@@ -126,9 +126,9 @@ void CreateMDHistoWorkspace::exec() {
                                 stream.str());
   }
   if (!numberOfEvents.empty() && binProduct != numberOfEvents.size()) {
-    throw std::invalid_argument("Expected size of the NumberOfEvents is: " +
-                                stream.str() +
-                                ". Leave empty to auto fill with 1.0");
+    throw std::invalid_argument(
+        "Expected size of the NumberOfEvents is: " + stream.str() +
+        ". Leave empty to auto fill with 1.0");
   }
 
   // Auto fill number of events.
@@ -154,5 +154,5 @@ void CreateMDHistoWorkspace::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

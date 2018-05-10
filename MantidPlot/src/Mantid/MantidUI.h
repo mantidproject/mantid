@@ -56,14 +56,14 @@ namespace MantidWidgets {
 class FitPropertyBrowser;
 class WorkspaceTreeWidget;
 class Message;
-}
+} // namespace MantidWidgets
 namespace SliceViewer {
 class SliceViewerWindow;
 }
 namespace SpectrumView {
 class SpectrumView;
 }
-}
+} // namespace MantidQt
 namespace Ui {
 class SequentialFitDialog;
 }
@@ -72,7 +72,7 @@ namespace Mantid {
 namespace API {
 class AlgorithmObserver;
 }
-}
+} // namespace Mantid
 
 /**
 MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid
@@ -373,11 +373,12 @@ public slots:
   void renameWorkspace(QStringList = QStringList()) override;
 
   /**
-  * Set the currently used fit property browser. Is needed because e.g. Muon
-  * Analysis is using its
-  * own fit browser.
-  * @param newBrowser The browser to be used. If is null, is set to default one.
-  */
+   * Set the currently used fit property browser. Is needed because e.g. Muon
+   * Analysis is using its
+   * own fit browser.
+   * @param newBrowser The browser to be used. If is null, is set to default
+   * one.
+   */
   void setFitFunctionBrowser(
       MantidQt::MantidWidgets::FitPropertyBrowser *newBrowser);
 
@@ -648,11 +649,11 @@ private:
 
   ApplicationWindow *m_appWindow; // QtiPlot main ApplicationWindow
   QDockWidget *m_workspaceDockWidget;
-  MantidQt::MantidWidgets::WorkspaceTreeWidget *
-      m_exploreMantid; // Widget for manipulating workspaces
+  MantidQt::MantidWidgets::WorkspaceTreeWidget
+      *m_exploreMantid; // Widget for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
-  RemoteClusterDockWidget *
-      m_exploreRemoteTasks; // Dock window for using remote tasks
+  RemoteClusterDockWidget
+      *m_exploreRemoteTasks; // Dock window for using remote tasks
   /// Current fit property browser being used
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;
   /// Default fit property browser (the one docked on the left)
@@ -695,8 +696,8 @@ private:
   // ones
   // must be closed as well.
   std::unordered_multimap<MdiSubWindow *, MdiSubWindow *> m_mdiDependency;
-  QMdiSubWindow *
-      m_vatesSubWindow; ///< Holder for the Vates interface sub-window
+  QMdiSubWindow
+      *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
   // prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);

@@ -2,11 +2,11 @@
 #define MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMDTEST_H_
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

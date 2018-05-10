@@ -373,8 +373,8 @@ int isisds_recv_command_alloc(SOCKET s, char **command, void **data,
 int isisds_send_close(SOCKET s) {
   /*	shutdown((*pfh)->s, SD_SEND);   indicate no more data to send SHUT_WR
    * check for FD_READ and recv any other stuff from server
-*check for FD_CLOSE and closesocket()
-*/
+   *check for FD_CLOSE and closesocket()
+   */
   closesocket(s);
   return 0;
 }

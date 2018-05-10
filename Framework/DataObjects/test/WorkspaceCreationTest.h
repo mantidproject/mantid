@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/StorageMode.h"
 #include "MantidTypes/SpectrumDefinition.h"
-#include "MantidAPI/Run.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/ParallelRunner.h"
@@ -111,7 +111,7 @@ void run_indexInfo_legacy_compatibility_partitioned_workspace_failure(
     TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(0).setSpectrumNo(7));
   }
 }
-}
+} // namespace
 
 class WorkspaceCreationTest : public CxxTest::TestSuite {
 public:

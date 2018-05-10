@@ -126,6 +126,6 @@ void PostprocessingStep::postProcessGroup(
   if (!alg->isExecuted())
     throw std::runtime_error("Failed to post-process workspaces.");
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

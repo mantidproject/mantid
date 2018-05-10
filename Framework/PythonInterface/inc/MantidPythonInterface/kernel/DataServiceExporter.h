@@ -206,7 +206,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     return names;
   }
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_ */

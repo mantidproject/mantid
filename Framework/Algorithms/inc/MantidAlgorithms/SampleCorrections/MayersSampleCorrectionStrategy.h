@@ -22,8 +22,8 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-#include "MantidKernel/System.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/System.h"
 #include <memory>
 #include <utility>
 #include <vector>

@@ -69,7 +69,7 @@ enum TargetFrame {
   // to establish what coordinate system is actually defined/needed.
   NTargetFrames
 };
-}
+} // namespace CnvrtToMD
 
 class DLLExport MDWSTransform {
 public:
@@ -77,7 +77,7 @@ public:
 
   /** helper function which verifies if projection vectors are specified and if
    * their values are correct when present.
-      * sets default values u and v to [1,0,0] and [0,1,0] if not present or any
+   * sets default values u and v to [1,0,0] and [0,1,0] if not present or any
    * error. */
   void setUVvectors(const std::vector<double> &ut,
                     const std::vector<double> &vt,
@@ -112,7 +112,7 @@ private:
   /** vectors, which describe the projection plain the target ws is based on
    * (notional or cryst cartezian coordinate system). The transformation matrix
    * below
-    * should bring the momentums from lab coordinate system into orthogonal,
+   * should bring the momentums from lab coordinate system into orthogonal,
    * related to u,v vectors, coordinate system */
   mutable Kernel::V3D m_UProj, m_VProj, m_WProj;
 
@@ -146,7 +146,7 @@ protected: // for testing
   void checkTargetFrame(const MDAlgorithms::MDWSDescription &TargWSDescription,
                         const CnvrtToMD::TargetFrame CoordFrameID) const;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYINDIRECT_H_
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYINDIRECT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -10,7 +10,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 class SpectrumInfo;
-}
+} // namespace API
 
 namespace Algorithms {
 

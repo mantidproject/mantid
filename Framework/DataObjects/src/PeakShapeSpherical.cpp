@@ -1,6 +1,6 @@
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include <stdexcept>
 #include <json/json.h>
+#include <stdexcept>
 
 namespace Mantid {
 namespace DataObjects {

@@ -41,6 +41,6 @@ using IPeaksWorkspace_const_sptr = boost::shared_ptr<const IPeaksWorkspace>;
 using IPeaksWorkspace_uptr = std::unique_ptr<IPeaksWorkspace>;
 /// unique pointer to Mantid::API::IPeaksWorkspace (const version)
 using IPeaksWorkspace_const_uptr = std::unique_ptr<const IPeaksWorkspace>;
-}
-}
+} // namespace API
+} // namespace Mantid
 #endif // MANTID_API_IPEAKWORKSPACE_FWD_H_

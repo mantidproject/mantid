@@ -71,5 +71,5 @@ ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
 
   return createImplicitFunctionParserFromXML(pRootElem);
 }
-}
-}
+} // namespace API
+} // namespace Mantid

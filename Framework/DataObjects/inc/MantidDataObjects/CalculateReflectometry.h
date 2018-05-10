@@ -47,7 +47,7 @@ public:
                                                      double thetaLower,
                                                      double thetaUpper) = 0;
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif

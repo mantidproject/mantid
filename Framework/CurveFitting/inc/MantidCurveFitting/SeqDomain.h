@@ -4,16 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
+#include "MantidCurveFitting/DllConfig.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <vector>
-#include <algorithm>
 
 namespace Mantid {
 namespace CurveFitting {

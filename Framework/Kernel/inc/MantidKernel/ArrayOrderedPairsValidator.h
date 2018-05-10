@@ -47,7 +47,7 @@ private:
   std::string checkValidity(const std::vector<TYPE> &value) const override;
 };
 
-} // Kernel
-} // Mantid
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_ARRAYORDEREDPAIRSVALIDATOR_H_ */

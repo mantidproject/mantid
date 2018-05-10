@@ -101,7 +101,7 @@ private:
   int m_wi_max;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_SCALEX_H_*/

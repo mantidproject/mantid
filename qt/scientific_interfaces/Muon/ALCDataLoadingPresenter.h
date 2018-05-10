@@ -6,8 +6,8 @@
 #include "DllConfig.h"
 #include "IALCDataLoadingView.h"
 
-#include <QObject>
 #include <QFileSystemWatcher>
+#include <QObject>
 
 #include <atomic>
 

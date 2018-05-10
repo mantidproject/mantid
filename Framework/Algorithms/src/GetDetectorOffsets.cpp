@@ -250,5 +250,5 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   return boost::shared_ptr<IFunction>(fitFunc);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

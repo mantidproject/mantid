@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_EQUALTOMDTEST_H_
 #define MANTID_MDALGORITHMS_EQUALTOMDTEST_H_
 
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/EqualToMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
 

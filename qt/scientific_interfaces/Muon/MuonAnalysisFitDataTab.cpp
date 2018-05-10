@@ -27,18 +27,19 @@ void MuonAnalysisFitDataTab::init() {
 }
 
 /**
-* Muon Analysis Data Analysis help (slot)
-*/
+ * Muon Analysis Data Analysis help (slot)
+ */
 void MuonAnalysisFitDataTab::muonAnalysisHelpDataAnalysisClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
       nullptr, QString("Muon Analysis"), QString("data-analysis"));
 }
 
 /**
-* Make a raw workspace by cloning the workspace given which isn't bunched.
-*
-* @param wsName :: The name of the current data (shouldn't be bunched) to clone.
-*/
+ * Make a raw workspace by cloning the workspace given which isn't bunched.
+ *
+ * @param wsName :: The name of the current data (shouldn't be bunched) to
+ * clone.
+ */
 void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string &wsName) {
   Mantid::API::Workspace_sptr inputWs =
       boost::dynamic_pointer_cast<Mantid::API::Workspace>(
@@ -52,10 +53,10 @@ void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string &wsName) {
 }
 
 /**
-* Group the fitted workspaces that are created from the 'fit' algorithm
-*
-* @param workspaceName :: The workspaceName that the fit has been done against
-*/
+ * Group the fitted workspaces that are created from the 'fit' algorithm
+ *
+ * @param workspaceName :: The workspaceName that the fit has been done against
+ */
 void MuonAnalysisFitDataTab::groupFittedWorkspaces(
     const QString &workspaceName) {
   std::string wsNormalised =
@@ -86,6 +87,6 @@ void MuonAnalysisFitDataTab::groupFittedWorkspaces(
     MuonAnalysisHelper::groupWorkspaces(groupName, inputWorkspaces);
   }
 }
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt

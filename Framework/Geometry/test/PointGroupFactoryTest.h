@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"

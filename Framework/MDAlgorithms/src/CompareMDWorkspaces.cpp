@@ -1,11 +1,11 @@
+#include "MantidMDAlgorithms/CompareMDWorkspaces.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/CompareMDWorkspaces.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -14,8 +14,8 @@ using namespace Mantid::Geometry;
 
 //=============================================================================
 /** Custom exception class to signal a failure
-* in the comparison
-*/
+ * in the comparison
+ */
 class CompareFailsException : public std::runtime_error {
 public:
   explicit CompareFailsException(const std::string &msg)
@@ -47,7 +47,7 @@ const std::string CompareMDWorkspaces::category() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void CompareMDWorkspaces::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "Workspace1", "", Direction::Input),
@@ -59,9 +59,10 @@ void CompareMDWorkspaces::init() {
   declareProperty(
       "Tolerance", 0.0,
       "The maximum amount by which values may differ between the workspaces.");
-  declareProperty("CheckEvents", true, "Whether to compare each MDEvent. If "
-                                       "False, will only look at the box "
-                                       "structure.");
+  declareProperty("CheckEvents", true,
+                  "Whether to compare each MDEvent. If "
+                  "False, will only look at the box "
+                  "structure.");
 
   declareProperty(
       make_unique<PropertyWithValue<bool>>("Equals", false, Direction::Output),
@@ -70,9 +71,10 @@ void CompareMDWorkspaces::init() {
       make_unique<PropertyWithValue<std::string>>("Result", "",
                                                   Direction::Output),
       "String describing the difference found between the workspaces");
-  declareProperty("IgnoreBoxID", false, "To ignore box ID-s when comparing MD "
-                                        "boxes as Multithreaded splitting "
-                                        "assigns box id-s randomly");
+  declareProperty("IgnoreBoxID", false,
+                  "To ignore box ID-s when comparing MD "
+                  "boxes as Multithreaded splitting "
+                  "assigns box id-s randomly");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -83,12 +85,12 @@ template <typename T> std::string versus(T a, T b) {
 
 //----------------------------------------------------------------------------------------------
 /** Compare a and b. Throw if they dont match
-*
-* @param a :: any type
-* @param b :: any type
-* @param message :: message for result
-* @throw CompareFailsException if the two DONT match
-*/
+ *
+ * @param a :: any type
+ * @param b :: any type
+ * @param message :: message for result
+ * @throw CompareFailsException if the two DONT match
+ */
 template <typename T>
 void CompareMDWorkspaces::compare(T a, T b, const std::string &message) {
   if (a != b)
@@ -97,12 +99,12 @@ void CompareMDWorkspaces::compare(T a, T b, const std::string &message) {
 
 //----------------------------------------------------------------------------------------------
 /** Compare a and b. Throw if they dont match within Tolerance
-*
-* @param a :: double
-* @param b :: double
-* @param message :: message for result
-* @throw CompareFailsException if the two DONT match
-*/
+ *
+ * @param a :: double
+ * @param b :: double
+ * @param message :: message for result
+ * @throw CompareFailsException if the two DONT match
+ */
 template <class T>
 void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
   double diff = fabs(a - b);
@@ -120,7 +122,7 @@ void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
 
 //----------------------------------------------------------------------------------------------
 /** Compare the dimensions etc. of two MDWorkspaces
-*/
+ */
 void CompareMDWorkspaces::compareMDGeometry(
     Mantid::API::IMDWorkspace_sptr ws1, Mantid::API::IMDWorkspace_sptr ws2) {
   compare(ws1->getNumDims(), ws2->getNumDims(),
@@ -146,7 +148,7 @@ void CompareMDWorkspaces::compareMDGeometry(
 
 //----------------------------------------------------------------------------------------------
 /** Compare the dimensions etc. of two MDWorkspaces
-*/
+ */
 void CompareMDWorkspaces::compareMDHistoWorkspaces(
     Mantid::DataObjects::MDHistoWorkspace_sptr ws1,
     Mantid::DataObjects::MDHistoWorkspace_sptr ws2) {
@@ -173,9 +175,9 @@ void CompareMDWorkspaces::compareMDHistoWorkspaces(
 
 //----------------------------------------------------------------------------------------------
 /** Perform the comparison on MDEventWorkspaces
-*
-* @param ws ::  MDEventWorkspace to compare
-*/
+ *
+ * @param ws ::  MDEventWorkspace to compare
+ */
 template <typename MDE, size_t nd>
 void CompareMDWorkspaces::compareMDWorkspaces(
     typename MDEventWorkspace<MDE, nd>::sptr ws1) {
@@ -290,7 +292,7 @@ void CompareMDWorkspaces::compareMDWorkspaces(
 
 //----------------------------------------------------------------------------------------------
 /** Perform comparison, set m_result if not matching.
-*/
+ */
 void CompareMDWorkspaces::doComparison() {
   m_tolerance = getProperty("Tolerance");
   m_CheckEvents = getProperty("CheckEvents");
@@ -334,7 +336,7 @@ void CompareMDWorkspaces::doComparison() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void CompareMDWorkspaces::exec() {
   m_result.clear();
   m_CompareBoxID = !getProperty("IgnoreBoxID");
@@ -351,5 +353,5 @@ void CompareMDWorkspaces::exec() {
   setProperty("Result", m_result);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

@@ -4,8 +4,8 @@
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidScriptRepository/DllConfig.h"
-#include <map>
 #include <json/value.h>
+#include <map>
 
 namespace Mantid {
 namespace API {

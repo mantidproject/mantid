@@ -165,7 +165,7 @@ INSTANTIATE_CLONEND(Types::Core::DateAndTime)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)
 ///@endcond
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

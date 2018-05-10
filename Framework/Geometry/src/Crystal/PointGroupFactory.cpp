@@ -1,9 +1,9 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 
+#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidKernel/LibraryManager.h"
 #include <boost/algorithm/string.hpp>
-#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 
 namespace Mantid {
 namespace Geometry {

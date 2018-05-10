@@ -2,8 +2,8 @@
 #pragma warning(disable : 4251)
 #endif
 
-#include "MyParser.h"
 #include "UserFunction.h"
+#include "MyParser.h"
 #include <QMessageBox>
 
 Function2D::Function2D() : Qwt3D::Function(), d_rows(0), d_columns(0) {}

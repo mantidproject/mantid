@@ -2,17 +2,17 @@
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_
 
 #include "DllConfig.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
-#include <QSettings>
-#include <QVector>
 #include <QDoubleValidator>
 #include <QLineEdit>
+#include <QSettings>
+#include <QVector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,7 +36,7 @@ struct DatasetParams {
 };
 /// Whether multiple fitting is enabled or disabled
 enum class MultiFitState { Enabled, Disabled };
-}
+} // namespace Muon
 
 namespace MuonAnalysisHelper {
 
@@ -216,6 +216,6 @@ public:
 
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_ */

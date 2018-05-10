@@ -199,5 +199,5 @@ Minus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
   } else
     return BinaryOperation::checkSizeCompatibility(lhs, rhs);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

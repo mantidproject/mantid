@@ -1,11 +1,11 @@
 #ifndef MANTID_CURVEFITTING_LATTICEDOMAINCREATOR_H_
 #define MANTID_CURVEFITTING_LATTICEDOMAINCREATOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IDomainCreator.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -1,10 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_
 #define MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

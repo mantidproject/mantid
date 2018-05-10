@@ -2,13 +2,13 @@
 #define MANTID_FACTORY_WIDGETFACTORY_H_
 
 #include "DllOption.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
-#include <Qsci/qscilexer.h>
 #include <QPointer>
 #include <QVector>
+#include <Qsci/qscilexer.h>
 
 namespace MantidQt {
 namespace SliceViewer {

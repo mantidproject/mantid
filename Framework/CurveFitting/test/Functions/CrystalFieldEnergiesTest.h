@@ -7,13 +7,13 @@
 #include "MantidCurveFitting/FortranDefs.h"
 #include <map>
 
+using Mantid::CurveFitting::ComplexFortranMatrix;
+using Mantid::CurveFitting::ComplexMatrix;
+using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::CrystalFieldEnergies;
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
-using Mantid::CurveFitting::ComplexFortranMatrix;
-using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::GSLVector;
-using Mantid::CurveFitting::ComplexMatrix;
 
 class CrystalFieldEnergiesTest : public CxxTest::TestSuite {
 public:

@@ -4,8 +4,8 @@
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
 
-#include <QObject>
 #include <Poco/NObserver.h>
+#include <QObject>
 
 namespace MantidQt {
 namespace API {
@@ -91,6 +91,6 @@ protected:
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_ALGORITHMRUNNER_H_ */

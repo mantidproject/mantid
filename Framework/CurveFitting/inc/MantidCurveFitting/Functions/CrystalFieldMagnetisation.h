@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDMAGNETISATION_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDMAGNETISATION_H_
 
-#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
-#include "MantidCurveFitting/FortranDefs.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 
 namespace Mantid {
 namespace CurveFitting {

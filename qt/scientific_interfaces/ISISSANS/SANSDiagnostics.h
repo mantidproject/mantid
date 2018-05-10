@@ -1,11 +1,11 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_SANSDIAGNOSTICS_H_
 #define MANTIDQTCUSTOMINTERFACES_SANSDIAGNOSTICS_H_
 
-#include "ui_SANSRunWindow.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_SANSRunWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -218,17 +218,17 @@ private:
   QString m_settingsGroup; ///< settings used for permanent store.
   QString m_wsName;        ///<  workspace name created by load raw
   QString m_fileName;      ///< name of the file
-  QString m_spec_min;      ///<spectrum min
-  QString m_spec_max;      ///<spectrum max
-  QString m_outws_load;    ///<output workspace for load algorithm
+  QString m_spec_min;      ///< spectrum min
+  QString m_spec_max;      ///< spectrum max
+  QString m_outws_load;    ///< output workspace for load algorithm
   QString m_memberwsName;
   /// set to point to the object that has the Add Files controls
   Ui::SANSRunWindow *m_SANSForm;
   // set to a pointer to the parent form
   QWidget *parForm;
 
-  int m_totalPeriods;               ///<total periods
-  int m_Period;                     ///<Current period
+  int m_totalPeriods;               ///< total periods
+  int m_Period;                     ///< Current period
   std::vector<std::string> m_wsVec; ///< workspace vector
   std::vector<boost::shared_ptr<RectDetectorDetails>> m_rectDetectors;
 
@@ -255,7 +255,7 @@ private slots:
   /// enable the mask controls in the diagnostics UI
   void enableMaskFileControls();
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_

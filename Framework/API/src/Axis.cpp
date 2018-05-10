@@ -29,10 +29,10 @@ const Kernel::Unit_sptr &Axis::unit() const { return m_unit; }
  */
 Kernel::Unit_sptr &Axis::unit() { return m_unit; }
 /**
-* Sets the Unit that is in use on this axis.
-* @param unitName :: name of the unit as known to the UnitFactory
-* @returns The new unit instance
-*/
+ * Sets the Unit that is in use on this axis.
+ * @param unitName :: name of the unit as known to the UnitFactory
+ * @returns The new unit instance
+ */
 const Kernel::Unit_sptr &Axis::setUnit(const std::string &unitName) {
   m_unit = Mantid::Kernel::UnitFactory::Instance().create(unitName);
   return unit();

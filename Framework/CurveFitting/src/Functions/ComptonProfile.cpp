@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -20,7 +20,7 @@ namespace {
 // const char * WSINDEX_NAME = "WorkspaceIndex";
 const char *MASS_NAME = "Mass";
 ///@endcond
-}
+} // namespace
 
 /**
  */

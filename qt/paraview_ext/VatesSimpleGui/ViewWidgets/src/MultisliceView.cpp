@@ -1,10 +1,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
-#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
-#include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
-#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidQtWidgets/Factory/WidgetFactory.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
@@ -294,8 +294,8 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
 
     std::vector<double> scaling =
         vtkSMPropertyHelper(src2->getProxy(),
-                            scalingProperty.toLatin1().constData(),
-                            true).GetDoubleArray();
+                            scalingProperty.toLatin1().constData(), true)
+            .GetDoubleArray();
 
     if (!scaling.empty()) {
       sliceOffsetOnAxis /= scaling[0];

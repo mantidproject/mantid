@@ -6,8 +6,8 @@
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 // Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ImmutableCompositeFunction.h"
 // 3rd party library headers (N/A)
 // standard library headers  (N/A)
 

@@ -35,7 +35,7 @@ extern template char NDArrayTypeIndex<unsigned int>::typecode;
 extern template char NDArrayTypeIndex<unsigned long>::typecode;
 extern template char NDArrayTypeIndex<unsigned long long>::typecode;
 extern template char NDArrayTypeIndex<double>::typecode;
-}
+} // namespace Converters
 
 namespace {
 
@@ -102,7 +102,7 @@ template <typename DestElementType> struct CoerceType {
 template <> struct CoerceType<std::string> {
   object operator()(const NumPy::NdArray &x) { return x; }
 };
-}
+} // namespace
 
 namespace Converters {
 //-------------------------------------------------------------------------
@@ -124,8 +124,7 @@ NDArrayToVector<DestElementType>::NDArrayToVector(const NumPy::NdArray &value)
  */
 template <typename DestElementType>
 const typename NDArrayToVector<DestElementType>::TypedVector
-    NDArrayToVector<DestElementType>::
-    operator()() {
+NDArrayToVector<DestElementType>::operator()() {
   std::vector<DestElementType> cvector(
       PyArray_SIZE((PyArrayObject *)m_arr.ptr()));
   copyTo(cvector);
@@ -184,6 +183,6 @@ INSTANTIATE_TOVECTOR(double)
 INSTANTIATE_TOVECTOR(bool)
 INSTANTIATE_TOVECTOR(std::string)
 ///@endcond
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

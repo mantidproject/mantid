@@ -24,9 +24,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::CurveFitting::Functions;
-using Mantid::CurveFitting::HistogramDomainCreator;
 using Mantid::CurveFitting::Algorithms::Fit;
 using Mantid::CurveFitting::GSLJacobian;
+using Mantid::CurveFitting::HistogramDomainCreator;
 
 class HistogramDomainCreatorTest : public CxxTest::TestSuite {
 public:
@@ -487,8 +487,9 @@ private:
 
   MatrixWorkspace_sptr createGaussWorkspace(const size_t ny = 10) {
     double sigma = 0.2;
-    auto cumulFun =
-        [sigma](double x) { return 0.5 * erf(x / sigma / sqrt(2.0)); };
+    auto cumulFun = [sigma](double x) {
+      return 0.5 * erf(x / sigma / sqrt(2.0));
+    };
     return createFitWorkspace(ny, cumulFun);
   }
 

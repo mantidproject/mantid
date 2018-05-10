@@ -4,16 +4,16 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/IFunction.h"
+#include "../Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "../Muon/MuonAnalysisFitFunctionPresenter.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitFunctionModel.h"
 
-using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::CustomInterfaces::Muon::MultiFitState;
+using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 using namespace testing;
@@ -241,8 +241,9 @@ private:
     const auto &function = createFunction();
     ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
     EXPECT_CALL(*m_fitBrowser, getFunction()).Times(times);
-    EXPECT_CALL(*m_funcBrowser, updateMultiDatasetParameters(
-                                    testing::Ref(*function))).Times(times);
+    EXPECT_CALL(*m_funcBrowser,
+                updateMultiDatasetParameters(testing::Ref(*function)))
+        .Times(times);
     m_presenter->handleFitFinished(wsName);
   }
 

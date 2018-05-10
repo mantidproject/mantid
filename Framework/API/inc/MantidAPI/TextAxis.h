@@ -4,13 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
-#include "MantidAPI/Axis.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
 #include <string>

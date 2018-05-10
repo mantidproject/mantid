@@ -1,12 +1,12 @@
 #ifndef MANTID_TESTPOLY__
 #define MANTID_TESTPOLY__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <ostream>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <ostream>
 #include <sstream>
+#include <vector>
 
 #include "MantidGeometry/Math/PolyVar.h"
 #include "MantidKernel/Matrix.h"

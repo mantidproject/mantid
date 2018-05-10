@@ -11,14 +11,14 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidLiveData/Exception.h"
 
-#include <Poco/Net/NetException.h>
-#include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
+#include <Poco/Net/NetException.h>
 #include <Poco/Net/SocketAddress.h>
+#include <Poco/Net/StreamSocket.h>
 
-#include <string>
-#include <fstream>
 #include <exception>
+#include <fstream>
+#include <string>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -138,7 +138,7 @@ DECLARE_LISTENER(TOPAZLiveEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("SNSLiveEventDataListener");
-}
+} // namespace
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()

@@ -84,7 +84,7 @@ private:
   }
   std::string getCurrentVersion() const override { return CurrentVersion; }
 };
-}
+} // namespace
 
 class CheckMantidVersionTest : public CxxTest::TestSuite {
 public:

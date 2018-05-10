@@ -41,8 +41,8 @@
 #include <Qsci/qsciprinter.h>
 
 #include "ApplicationWindow.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Note)
@@ -119,7 +119,8 @@ QString Note::exportASCII(const QString &filename) {
       QMessageBox::critical(
           nullptr, tr("MantidPlot - File Save Error"),
           tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-             "you have the right to write to this location!").arg(fn));
+             "you have the right to write to this location!")
+              .arg(fn));
       return QString::null;
     }
 

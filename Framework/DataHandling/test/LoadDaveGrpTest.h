@@ -1,13 +1,13 @@
 #ifndef LOADDAVEGRPTEST_H_
 #define LOADDAVEGRPTEST_H_
 
-#include "cxxtest/TestSuite.h"
-#include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidKernel/Unit.h"
+#include "cxxtest/TestSuite.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

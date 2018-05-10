@@ -98,14 +98,14 @@ private:
 
 using AlgorithmInputHistory =
     Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
     Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmInputHistoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif // ALGORITHMINPUTHISTORY_H_

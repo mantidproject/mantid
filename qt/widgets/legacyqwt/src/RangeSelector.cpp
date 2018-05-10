@@ -134,65 +134,65 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
   }
   case QEvent::MouseMove: // User is in the process of moving something
                           // (perhaps)
-    {
-      if (m_minChanging || m_maxChanging) {
-        QPoint p = ((QMouseEvent *)evn)->pos();
-        double x(0.0);
-        switch (m_type) {
-        case XMINMAX:
-        case XSINGLE:
-          x = m_plot->invTransform(QwtPlot::xBottom, p.x());
-          break;
-        case YMINMAX:
-        case YSINGLE:
-          x = m_plot->invTransform(QwtPlot::yLeft, p.y());
-          break;
-        }
-        if (inRange(x)) {
-          if (m_minChanging) {
-            if (x <= m_max) {
-              setMin(x);
-            } else {
-              setMax(x);
-              m_minChanging = false;
-              m_maxChanging = true;
-            }
+  {
+    if (m_minChanging || m_maxChanging) {
+      QPoint p = ((QMouseEvent *)evn)->pos();
+      double x(0.0);
+      switch (m_type) {
+      case XMINMAX:
+      case XSINGLE:
+        x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+        break;
+      case YMINMAX:
+      case YSINGLE:
+        x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+        break;
+      }
+      if (inRange(x)) {
+        if (m_minChanging) {
+          if (x <= m_max) {
+            setMin(x);
           } else {
-            if (x >= m_min) {
-              setMax(x);
-            } else {
-              setMin(x);
-              m_minChanging = true;
-              m_maxChanging = false;
-            }
+            setMax(x);
+            m_minChanging = false;
+            m_maxChanging = true;
           }
         } else {
-          m_canvas->setCursor(Qt::PointingHandCursor);
-          m_minChanging = false;
-          m_maxChanging = false;
-          emit selectionChangedLazy(m_min, m_max);
+          if (x >= m_min) {
+            setMax(x);
+          } else {
+            setMin(x);
+            m_minChanging = true;
+            m_maxChanging = false;
+          }
         }
-        m_plot->replot();
-        return true;
       } else {
-        return false;
-      }
-      break;
-    }
-  case QEvent::MouseButtonRelease: // User has finished moving something
-                                   // (perhaps)
-    {
-      if (m_minChanging || m_maxChanging) {
         m_canvas->setCursor(Qt::PointingHandCursor);
         m_minChanging = false;
         m_maxChanging = false;
         emit selectionChangedLazy(m_min, m_max);
-        return true;
-      } else {
-        return false;
       }
-      break;
+      m_plot->replot();
+      return true;
+    } else {
+      return false;
     }
+    break;
+  }
+  case QEvent::MouseButtonRelease: // User has finished moving something
+                                   // (perhaps)
+  {
+    if (m_minChanging || m_maxChanging) {
+      m_canvas->setCursor(Qt::PointingHandCursor);
+      m_minChanging = false;
+      m_maxChanging = false;
+      emit selectionChangedLazy(m_min, m_max);
+      return true;
+    } else {
+      return false;
+    }
+    break;
+  }
   default:
     return false;
   }

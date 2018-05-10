@@ -1,11 +1,11 @@
 #ifndef VATES_API_SINGLE_WORKSPACE_PROVIDER_TEST_H_
 #define VATES_API_SINGLE_WORKSPACE_PROVIDER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/SingleWorkspaceProvider.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidVatesAPI/SingleWorkspaceProvider.h"
 #include <boost/pointer_cast.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 

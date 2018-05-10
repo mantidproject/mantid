@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
 
-#include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/TCPServer.h>
 
 namespace Mantid {
 namespace LiveData {
@@ -307,7 +307,7 @@ public:
   }
 };
 
-} // end anonymous
+} // namespace
 
 using namespace Kernel;
 using namespace API;

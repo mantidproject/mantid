@@ -4,8 +4,8 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 

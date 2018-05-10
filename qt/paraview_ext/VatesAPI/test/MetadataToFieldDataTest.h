@@ -1,11 +1,11 @@
 #ifndef METADATATOFIELDDATATEST_H_
 #define METADATATOFIELDDATATEST_H_
 
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include <boost/algorithm/string.hpp>
 #include <cxxtest/TestSuite.h>
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
-#include "MantidVatesAPI/MetadataToFieldData.h"
-#include <boost/algorithm/string.hpp>
 #include <vtkNew.h>
 
 using Mantid::VATES::MetadataToFieldData;

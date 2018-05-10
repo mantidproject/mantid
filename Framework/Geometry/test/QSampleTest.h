@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_QSAMPLETEST_H_
 #define MANTID_GEOMETRY_QSAMPLETEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Geometry::QSample;
 using namespace Mantid::Kernel;

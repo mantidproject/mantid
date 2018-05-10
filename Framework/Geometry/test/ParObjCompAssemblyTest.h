@@ -1,19 +1,18 @@
 #ifndef MANTID_TESTParObjObjCompAssembly__
 #define MANTID_TESTParObjObjCompAssembly__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class ParObjCompAssemblyTest : public CxxTest::TestSuite {
 public:

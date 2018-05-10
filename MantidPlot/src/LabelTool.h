@@ -2,11 +2,11 @@
 #define LABEL_TOOL_H
 
 #include "PlotToolInterface.h"
-#include <qwt_polygon.h>
 #include <QObject>
 #include <QSet>
 #include <QString>
 #include <QVector>
+#include <qwt_polygon.h>
 
 class MantidMatrixCurve;
 

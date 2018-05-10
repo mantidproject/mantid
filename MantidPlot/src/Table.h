@@ -37,8 +37,8 @@
 
 #include "Graph.h"
 #include "MdiSubWindow.h"
-#include "ScriptingEnv.h"
 #include "Scripted.h"
+#include "ScriptingEnv.h"
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 

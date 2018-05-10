@@ -51,8 +51,8 @@ template <class T> bool Validator<HistogramX>::isValid(const T &data) {
   ++it;
   // after first NAN everything must be NAN
   return std::find_if_not(it, data.end(), [](const double d) {
-    return std::isnan(d);
-  }) == data.end();
+           return std::isnan(d);
+         }) == data.end();
 }
 
 template <class T> void Validator<HistogramX>::checkValidity(const T &data) {

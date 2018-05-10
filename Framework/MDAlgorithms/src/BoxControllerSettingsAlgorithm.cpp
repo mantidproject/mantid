@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -149,5 +149,5 @@ void BoxControllerSettingsAlgorithm::setBoxController(BoxController_sptr bc) {
   bc->resetNumBoxes();
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

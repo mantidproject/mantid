@@ -1,7 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 

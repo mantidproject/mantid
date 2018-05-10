@@ -1,10 +1,10 @@
 #ifndef TRANSFORMSCALEFACTORYTEST_H_
 #define TRANSFORMSCALEFACTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/ConfigService.h"
-#include "MantidAPI/TransformScaleFactory.h"
 #include "ITransformScale.h"
+#include "MantidAPI/TransformScaleFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -1,7 +1,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include <ctime>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -84,5 +84,5 @@ std::ostream &operator<<(std::ostream &out, CPUTimer &obj) {
   return out;
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

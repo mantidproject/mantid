@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(StartLiveData)
 namespace {
 /// name for a group of properties that get copied from the listener
 const char *listenerPropertyGroup = "ListenerProperties";
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

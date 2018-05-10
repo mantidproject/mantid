@@ -206,5 +206,5 @@ void PeakRepresentationSphere::doDraw(
 double PeakRepresentationSphere::getZoomOutFactor() const {
   return zoomOutFactor;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

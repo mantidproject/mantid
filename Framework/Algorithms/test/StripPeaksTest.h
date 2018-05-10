@@ -1,13 +1,13 @@
 #ifndef STRIPPEAKSTEST_H_
 #define STRIPPEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/StripPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/StripPeaks.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;

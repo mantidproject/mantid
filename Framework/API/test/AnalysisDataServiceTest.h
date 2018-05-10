@@ -24,7 +24,7 @@ private:
   }
 };
 using MockWorkspace_sptr = boost::shared_ptr<MockWorkspace>;
-}
+} // namespace
 
 class AnalysisDataServiceTest : public CxxTest::TestSuite {
 private:

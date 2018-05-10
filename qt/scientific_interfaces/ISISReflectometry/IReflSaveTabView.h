@@ -75,6 +75,6 @@ public:
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H */

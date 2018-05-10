@@ -6,10 +6,10 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/VarianceVectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::VarianceVectorOf;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class SigmasTester : public VectorOf<SigmasTester, HistogramX>,
                      public Iterable<SigmasTester> {

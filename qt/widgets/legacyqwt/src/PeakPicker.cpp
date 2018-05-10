@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
-#include <qwt_plot_canvas.h>
 #include <qwt_painter.h>
+#include <qwt_plot_canvas.h>
 
 #include <QMouseEvent>
 #include <QPainter>

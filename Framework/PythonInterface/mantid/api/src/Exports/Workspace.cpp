@@ -6,8 +6,8 @@
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/overloads.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/overloads.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -69,8 +69,9 @@ void export_Workspace() {
                                       "(Default=1)"))
       .def("getMemorySize", &Workspace::getMemorySize, arg("self"),
            "Returns the memory footprint of the workspace in KB")
-      .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &
-                             Workspace::getHistory,
+      .def("getHistory",
+           (const WorkspaceHistory &(Workspace::*)() const) &
+               Workspace::getHistory,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Return read-only access to the "
            ":class:`~mantid.api.WorkspaceHistory`");

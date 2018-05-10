@@ -18,7 +18,7 @@ PointGroup_sptr getPointGroupFromSpaceGroupSymbol(PointGroupFactoryImpl &self,
   return self.createPointGroupFromSpaceGroup(
       SpaceGroupFactory::Instance().createSpaceGroup(group));
 }
-}
+} // namespace
 
 void export_PointGroupFactory() {
 

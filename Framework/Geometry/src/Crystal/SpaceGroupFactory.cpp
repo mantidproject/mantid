@@ -2,14 +2,14 @@
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
 #include "MantidKernel/Exception.h"
 
-#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidGeometry/Crystal/CenteringGroup.h"
 #include "MantidGeometry/Crystal/GroupTransformation.h"
+#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 
 #include "MantidKernel/LibraryManager.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 #include <locale>
 
 namespace Mantid {

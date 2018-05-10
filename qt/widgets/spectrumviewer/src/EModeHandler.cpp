@@ -1,8 +1,8 @@
 #include <iostream>
 
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
-#include "MantidKernel/Logger.h"
 
 #include <QLineEdit>
 

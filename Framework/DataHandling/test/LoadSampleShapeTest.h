@@ -1,11 +1,11 @@
 #ifndef LOAD_SHAPETEST_H_
 #define LOAD_SHAPETEST_H_
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

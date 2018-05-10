@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_COMPOSITECLUSTERTEST_H_
 #define MANTID_CRYSTAL_COMPOSITECLUSTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCrystal/CompositeCluster.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidCrystal/CompositeCluster.h"
 #include "MockObjects.h"
 #include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -15,7 +15,7 @@ namespace {
 struct null_deleter {
   void operator()(void const *) const {}
 };
-}
+} // namespace
 
 class CompositeClusterTest : public CxxTest::TestSuite {
 public:

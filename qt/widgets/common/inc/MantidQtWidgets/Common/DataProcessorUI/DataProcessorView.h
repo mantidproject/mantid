@@ -119,7 +119,7 @@ public:
   virtual void enableGrouping() = 0;
   virtual void disableGrouping() = 0;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORVIEW_H*/

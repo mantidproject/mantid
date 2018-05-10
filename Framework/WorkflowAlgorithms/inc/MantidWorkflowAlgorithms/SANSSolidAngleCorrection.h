@@ -61,7 +61,7 @@ private:
   void execEvent();
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_*/

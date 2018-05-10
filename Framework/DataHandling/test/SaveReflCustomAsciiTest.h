@@ -1,14 +1,14 @@
 #ifndef SAVEREFLCUSTOMASCIITEST_H_
 #define SAVEREFLCUSTOMASCIITEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataHandling/SaveReflCustomAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <fstream>
-#include <boost/algorithm/string.hpp>
 #include <Poco/File.h>
+#include <boost/algorithm/string.hpp>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

@@ -5,11 +5,11 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
-* Returns the first derivative at a given point.
-* @param values : [input] The values of the image as a vector
-* @param background : [input] The background
-* @return : The first derivative as a vector
-*/
+ * Returns the first derivative at a given point.
+ * @param values : [input] The values of the image as a vector
+ * @param background : [input] The background
+ * @return : The first derivative as a vector
+ */
 std::vector<double>
 MaxentEntropyPositiveValues::derivative(const std::vector<double> &values,
                                         double background) {
@@ -24,11 +24,11 @@ MaxentEntropyPositiveValues::derivative(const std::vector<double> &values,
 }
 
 /**
-* Returns the second derivative at a given point.
-* @param values : [input] The values of the image as a vector
-* @param background : [input] The background (unused)
-* @return : The second derivative as a vector
-*/
+ * Returns the second derivative at a given point.
+ * @param values : [input] The values of the image as a vector
+ * @param background : [input] The background (unused)
+ * @return : The second derivative as a vector
+ */
 std::vector<double>
 MaxentEntropyPositiveValues::secondDerivative(const std::vector<double> &values,
                                               double background) {
@@ -40,11 +40,11 @@ MaxentEntropyPositiveValues::secondDerivative(const std::vector<double> &values,
 }
 
 /**
-* Corrects a negative value
-* @param values : [input] The values of the image as a vector
-* @param newValue : [input] The new value to use
-* @return : The corrected values
-*/
+ * Corrects a negative value
+ * @param values : [input] The values of the image as a vector
+ * @param newValue : [input] The new value to use
+ * @return : The corrected values
+ */
 std::vector<double>
 MaxentEntropyPositiveValues::correctValues(const std::vector<double> &values,
                                            double newValue) {

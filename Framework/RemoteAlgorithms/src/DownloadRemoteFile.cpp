@@ -1,10 +1,10 @@
 #include "MantidRemoteAlgorithms/DownloadRemoteFile.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/RemoteJobManager.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"

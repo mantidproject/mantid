@@ -22,8 +22,8 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include <boost/shared_ptr.hpp>
 #include <boost/python/dict.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -35,8 +35,8 @@ namespace Registry {
 /// Create a C++ PropertyMananager from a Python dictionary
 boost::shared_ptr<Kernel::PropertyManager>
 createPropertyManager(const boost::python::dict &mapping);
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_PROPERTYMANAGERFACTORY_H

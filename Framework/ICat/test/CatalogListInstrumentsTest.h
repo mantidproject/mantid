@@ -1,11 +1,11 @@
 #ifndef LISTINSTRUMENTS_H_
 #define LISTINSTRUMENTS_H_
 
-#include <cxxtest/TestSuite.h>
+#include "ICatTestHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
 #include "MantidICat/CatalogListInstruments.h"
 #include "MantidICat/CatalogLogin.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
-#include "ICatTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;

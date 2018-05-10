@@ -6,8 +6,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -124,8 +124,8 @@ void LoadMcStasNexus::exec() {
       try {
         nxFile.readData<double>("errors", errors);
       } catch (::NeXus::Exception &) {
-        g_log.information() << "Field " << dataName
-                            << " contains no error information.\n";
+        g_log.information()
+            << "Field " << dataName << " contains no error information.\n";
       }
 
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(

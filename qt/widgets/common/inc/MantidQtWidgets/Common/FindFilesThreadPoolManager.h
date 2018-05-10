@@ -10,9 +10,9 @@
 #include <QString>
 #include <QThreadPool>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace MantidQt {
 namespace API {

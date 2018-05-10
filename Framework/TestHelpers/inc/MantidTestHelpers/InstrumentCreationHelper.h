@@ -7,7 +7,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace InstrumentCreationHelper {
 

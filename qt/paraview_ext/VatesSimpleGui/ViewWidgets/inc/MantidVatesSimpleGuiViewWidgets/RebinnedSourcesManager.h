@@ -1,25 +1,25 @@
 #ifndef REBINNEDSOURCESMANAGER_H_
 #define REBINNEDSOURCESMANAGER_H_
 
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1170
 #endif
 
-#include <pqPipelineSource.h>
 #include <pqPipelineFilter.h>
+#include <pqPipelineSource.h>
 #include <vtkSMProxy.h>
 
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
 #endif
 
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 #include <map>
 #include <string>
 
@@ -169,8 +169,8 @@ private:
                             const std::vector<std::string> &trackedSources);
 };
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif

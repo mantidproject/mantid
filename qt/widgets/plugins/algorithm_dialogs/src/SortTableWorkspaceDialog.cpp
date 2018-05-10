@@ -2,10 +2,10 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/SortTableWorkspaceDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 using namespace MantidQt::API;
 
@@ -79,9 +79,9 @@ void SortTableWorkspaceDialog::parseInput() {
 }
 
 /**
-* Tie static widgets to their properties
-* @param readHistory :: If true then the history will be re read.
-*/
+ * Tie static widgets to their properties
+ * @param readHistory :: If true then the history will be re read.
+ */
 void SortTableWorkspaceDialog::tieStaticWidgets(const bool) {
   QStringList allowedTypes;
   allowedTypes << "TableWorkspace";
@@ -249,5 +249,5 @@ void SortTableWorkspaceDialog::removeColumn() {
   m_form.btnAddColumn->setEnabled(true);
 }
 
-} // CustomDialogs
-} // MantidQt
+} // namespace CustomDialogs
+} // namespace MantidQt

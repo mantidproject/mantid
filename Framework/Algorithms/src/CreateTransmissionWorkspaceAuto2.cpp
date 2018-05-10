@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto2.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;

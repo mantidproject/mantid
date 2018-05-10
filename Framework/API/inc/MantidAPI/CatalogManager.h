@@ -1,8 +1,8 @@
 #ifndef MANTID_ICAT_CATALOGMANAGERIMPL_H_
 #define MANTID_ICAT_CATALOGMANAGERIMPL_H_
 
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/ICatalog.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <map>
 #include <string>
@@ -68,13 +68,13 @@ private:
 };
 
 using CatalogManager = Kernel::SingletonHolder<CatalogManagerImpl>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Kernel::SingletonHolder<Mantid::API::CatalogManagerImpl>;
 }
-}
+} // namespace Mantid
 #endif /* MANTID_ICAT_CATALOGMANAGERIMPL_H_ */

@@ -1,8 +1,8 @@
 #ifndef SOLIDANGLETEST_H_
 #define SOLIDANGLETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -22,8 +22,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:

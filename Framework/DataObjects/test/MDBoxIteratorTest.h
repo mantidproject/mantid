@@ -19,10 +19,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::MDBoxImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
-using Mantid::Geometry::MDBoxImplicitFunction;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite {
 public:

@@ -216,7 +216,7 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
 }
 
 /** Load and validate properties common to both group and non-group workspaces.
-*/
+ */
 void Stitch1DMany::validateCommonInputs(
     std::map<std::string, std::string> &errors) {
 

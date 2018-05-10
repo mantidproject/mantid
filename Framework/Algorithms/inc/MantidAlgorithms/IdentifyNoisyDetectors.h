@@ -67,6 +67,6 @@ private:
                  Mantid::API::MatrixWorkspace_sptr valid,
                  Mantid::API::MatrixWorkspace_sptr values);
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 #endif

@@ -339,5 +339,5 @@ void SliceMD::exec() {
   CALL_MDEVENT_FUNCTION(this->doExec, m_inWS);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

@@ -1,15 +1,14 @@
 #include "MantidAlgorithms/UnwrapMonitorsInTOF.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Points.h"
-#include "MantidHistogramData/Counts.h"
-#include "MantidAPI/ISpectrum.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include <numeric>
 
 namespace {
@@ -254,13 +253,13 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
   }
   return workspaceIndices;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(UnwrapMonitorsInTOF)

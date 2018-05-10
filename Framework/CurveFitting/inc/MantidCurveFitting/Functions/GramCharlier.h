@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_GRAMCHARLIER_H_
 #define MANTID_CURVEFITTING_GRAMCHARLIER_H_
 
-#include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -4,13 +4,13 @@
 #include "MantidSampleLogDialog.h"
 
 // Mantid
-#include <MantidAPI/MultipleExperimentInfos.h>
 #include "MantidUI.h"
+#include <MantidAPI/MultipleExperimentInfos.h>
 
 // Qt
-#include <QRadioButton>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QRadioButton>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -20,14 +20,14 @@ using namespace Mantid::Kernel;
 // Public methods
 //----------------------------------
 /**
-* Construct an object of this type
-*	@param wsname :: The name of the workspace object from
-*			which to retrieve the log files
-*	@param mui :: The MantidUI area
-*	@param flags :: Window flags that are passed the the QDialog constructor
-*	@param experimentInfoIndex :: optional index in the array of
-*        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
-*/
+ * Construct an object of this type
+ *	@param wsname :: The name of the workspace object from
+ *			which to retrieve the log files
+ *	@param mui :: The MantidUI area
+ *	@param flags :: Window flags that are passed the the QDialog constructor
+ *	@param experimentInfoIndex :: optional index in the array of
+ *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
+ */
 MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
                                              MantidUI *mui, Qt::WFlags flags,
                                              size_t experimentInfoIndex)
@@ -104,11 +104,11 @@ MantidSampleLogDialog::~MantidSampleLogDialog() {}
 
 //------------------------------------------------------------------------------------------------
 /**
-* Import an item from sample logs
-*
-*	@param item :: The item to be imported
-*	@throw invalid_argument if format identifier for the item is wrong
-*/
+ * Import an item from sample logs
+ *
+ *	@param item :: The item to be imported
+ *	@throw invalid_argument if format identifier for the item is wrong
+ */
 void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
   // used in numeric time series below, the default filter value
   int filter = 0;

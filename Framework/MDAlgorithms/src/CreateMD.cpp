@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/CreateMD.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -16,8 +16,8 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Box manager parameters for child algorithms
 static const std::string SPLITINTO("2");

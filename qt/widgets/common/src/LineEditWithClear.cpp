@@ -8,8 +8,8 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/LineEditWithClear.h"
-#include <QToolButton>
 #include <QStyle>
+#include <QToolButton>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -45,5 +45,5 @@ void LineEditWithClear::resizeEvent(QResizeEvent *) {
 void LineEditWithClear::updateCloseButton(const QString &text) {
   clearButton->setVisible(!text.isEmpty());
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

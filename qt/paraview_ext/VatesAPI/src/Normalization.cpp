@@ -1,7 +1,7 @@
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDNode.h"
 
 namespace Mantid {
 namespace VATES {
@@ -69,5 +69,5 @@ createIteratorWithNormalization(const VisualNormalization normalizationOption,
   // Return it
   return iterator;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

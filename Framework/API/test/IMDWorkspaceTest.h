@@ -3,15 +3,15 @@
 
 // Tests the MatrixWorkspace as an IMDWorkspace.
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -112,8 +112,8 @@ public:
   }
 
   /**
-  * Test declaring an input workspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input workspace and retrieving as const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     IMDWorkspace_sptr wsInput(new WorkspaceTester());

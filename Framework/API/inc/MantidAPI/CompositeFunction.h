@@ -293,7 +293,7 @@ public:
     return m_J->get(m_iY0 + iY, m_iP0 + iP);
   }
   /** Zero all matrix elements.
-  */
+   */
   void zero() override {
     throw Kernel::Exception::NotImplementedError(
         "zero() is not implemented for PartialJacobian");

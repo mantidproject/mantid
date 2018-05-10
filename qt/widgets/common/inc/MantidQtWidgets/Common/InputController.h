@@ -2,10 +2,10 @@
 #define MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
 
 #include "DllOption.h"
-#include <QObject>
-#include <QRect>
 #include <QColor>
+#include <QObject>
 #include <QPolygonF>
+#include <QRect>
 
 class QMouseEvent;
 class QWheelEvent;
@@ -298,7 +298,7 @@ private:
   QColor m_borderColor, m_fillColor;
   bool m_creating;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H

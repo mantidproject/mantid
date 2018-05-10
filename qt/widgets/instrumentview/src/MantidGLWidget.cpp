@@ -3,19 +3,19 @@
 #endif
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include <boost/shared_ptr.hpp>
 
-#include <QtOpenGL>
-#include <QSpinBox>
 #include <QApplication>
+#include <QSpinBox>
 #include <QTime>
+#include <QtOpenGL>
 
+#include <cfloat>
 #include <map>
 #include <string>
-#include <cfloat>
 #include <typeinfo>
 
 namespace MantidQt {
@@ -58,10 +58,10 @@ void MantidGLWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface) {
 }
 
 /**
-* This method initializes the opengl settings. its invoked defaultly by Qt when
-* the widget
-* is initialized.
-*/
+ * This method initializes the opengl settings. its invoked defaultly by Qt when
+ * the widget
+ * is initialized.
+ */
 void MantidGLWidget::initializeGL() {
   setCursor(cursorShape); // This is to set the initial window mouse cursor to
                           // Hand icon
@@ -98,9 +98,9 @@ void MantidGLWidget::setRenderingOptions() {
 }
 
 /**
-* This is overridden function which is called by Qt when the widget needs to be
-* repainted.
-*/
+ * This is overridden function which is called by Qt when the widget needs to be
+ * repainted.
+ */
 void MantidGLWidget::paintEvent(QPaintEvent *event) {
   UNUSED_ARG(event)
   makeCurrent();
@@ -116,10 +116,10 @@ void MantidGLWidget::paintEvent(QPaintEvent *event) {
 }
 
 /**
-* This function is also overridden from the parent. This method is invoked when
-* the widget is resized
-* This method resizes the viewport according to the new widget width and height
-*/
+ * This function is also overridden from the parent. This method is invoked when
+ * the widget is resized
+ * This method resizes the viewport according to the new widget width and height
+ */
 void MantidGLWidget::resizeGL(int width, int height) {
   if (m_surface) {
     m_surface->resize(width, height);
@@ -127,22 +127,22 @@ void MantidGLWidget::resizeGL(int width, int height) {
 }
 
 /**
-* Called when a context menu event is recieved
-*/
+ * Called when a context menu event is recieved
+ */
 void MantidGLWidget::contextMenuEvent(QContextMenuEvent *event) {
   UNUSED_ARG(event) // avoid compiler warning
 }
 
 /**
-* Mouse press callback method, It implements mouse button press initialize
-* methods.
-* Left Button: Zoom
-* Right Button: Rotate
-* Middle Button: Translate
-* Key + Left Button: Pick (TODO: Yet to implement)
-* @param event :: This is the event variable which has the position and button
-* states
-*/
+ * Mouse press callback method, It implements mouse button press initialize
+ * methods.
+ * Left Button: Zoom
+ * Right Button: Rotate
+ * Middle Button: Translate
+ * Key + Left Button: Pick (TODO: Yet to implement)
+ * @param event :: This is the event variable which has the position and button
+ * states
+ */
 void MantidGLWidget::mousePressEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mousePressEvent(event);
@@ -151,16 +151,13 @@ void MantidGLWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 /**
-* This is mouse move callback method. It implements the actions to be taken when
-* the mouse is
-* moved with a particular button is pressed.
-* Left Button: Zoom
-* Right Button: Rotate
-* Middle Button: Translate
-* Key + Left Button: Pick (TODO: Yet to implement)
-* @param event :: This is the event variable which has the position and button
-* states
-*/
+ * This is mouse move callback method. It implements the actions to be taken
+ * when the mouse is moved with a particular button is pressed. Left Button:
+ * Zoom Right Button: Rotate Middle Button: Translate Key + Left Button: Pick
+ * (TODO: Yet to implement)
+ * @param event :: This is the event variable which has the position and button
+ * states
+ */
 void MantidGLWidget::mouseMoveEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseMoveEvent(event);
@@ -169,11 +166,11 @@ void MantidGLWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
-* This is mouse button release callback method. This resets the cursor to
-* pointing hand cursor
-* @param event :: This is the event variable which has the position and button
-* states
-*/
+ * This is mouse button release callback method. This resets the cursor to
+ * pointing hand cursor
+ * @param event :: This is the event variable which has the position and button
+ * states
+ */
 void MantidGLWidget::mouseReleaseEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseReleaseEvent(event);
@@ -182,9 +179,9 @@ void MantidGLWidget::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 /**
-* Mouse wheel event to set the zooming in and out
-* @param event :: This is the event variable which has the status of the wheel
-*/
+ * Mouse wheel event to set the zooming in and out
+ * @param event :: This is the event variable which has the status of the wheel
+ */
 void MantidGLWidget::wheelEvent(QWheelEvent *event) {
   if (m_surface) {
     m_surface->wheelEvent(event);
@@ -193,11 +190,11 @@ void MantidGLWidget::wheelEvent(QWheelEvent *event) {
 }
 
 /**
-* This method is to handle keyboard events to mimic the mouse operations of
-* click and move
-* @param event :: This is the event variable which has the status of the
-* keyboard
-*/
+ * This method is to handle keyboard events to mimic the mouse operations of
+ * click and move
+ * @param event :: This is the event variable which has the status of the
+ * keyboard
+ */
 void MantidGLWidget::keyPressEvent(QKeyEvent *event) {
   if (m_surface) {
     m_surface->keyPressEvent(event);
@@ -206,11 +203,11 @@ void MantidGLWidget::keyPressEvent(QKeyEvent *event) {
 }
 
 /**
-* This method is to handle keyboard events to mimic the mouse operations of
-* mouse button up.
-* @param event :: This is the event variable which has the status of the
-* keyboard
-*/
+ * This method is to handle keyboard events to mimic the mouse operations of
+ * mouse button up.
+ * @param event :: This is the event variable which has the status of the
+ * keyboard
+ */
 void MantidGLWidget::keyReleaseEvent(QKeyEvent *event) {
   releaseKeyboard();
   setCursor(cursorShape);
@@ -222,8 +219,8 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event) {
 }
 
 /**
-* This method set the background color.
-*/
+ * This method set the background color.
+ */
 void MantidGLWidget::setBackgroundColor(QColor input) {
   makeCurrent();
   glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0),
@@ -241,9 +238,9 @@ QColor MantidGLWidget::currentBackgroundColor() const {
 }
 
 /**
-* This saves the GL scene to a file.
-* @param filename :: The name of the file
-*/
+ * This saves the GL scene to a file.
+ * @param filename :: The name of the file
+ */
 void MantidGLWidget::saveToFile(const QString &filename) {
   if (filename.isEmpty())
     return;
@@ -256,17 +253,17 @@ void MantidGLWidget::saveToFile(const QString &filename) {
 }
 
 /**
-* Resets the widget for new instrument definition
-*/
+ * Resets the widget for new instrument definition
+ */
 void MantidGLWidget::resetWidget() {
   // setActorCollection(boost::shared_ptr<GLActorCollection>(new
   // GLActorCollection()));
 }
 
 /**
-* Enables / disables lighting on the surfaces that support it.
-* @param on :: Set true to turn lighting on or false to turn it off.
-*/
+ * Enables / disables lighting on the surfaces that support it.
+ * @param on :: Set true to turn lighting on or false to turn it off.
+ */
 void MantidGLWidget::enableLighting(bool on) {
   if (m_surface) {
     m_surface->enableLighting(on);
@@ -327,5 +324,5 @@ void MantidGLWidget::leaveEvent(QEvent *ev) {
   update();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,27 +1,27 @@
 #ifndef WORKSPACEGROUP_H_
 #define WORKSPACEGROUP_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAlgorithms/Plus.h"
 #include "MantidAlgorithms/PolynomialCorrection.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <fstream>
 #include <Poco/File.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 class WorkspaceGroupTest : public CxxTest::TestSuite {
 private:

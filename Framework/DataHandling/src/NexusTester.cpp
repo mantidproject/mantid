@@ -184,5 +184,5 @@ void NexusTester::exec() {
   delete[] fakeData;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

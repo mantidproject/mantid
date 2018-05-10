@@ -4,11 +4,11 @@
 #include "MantidPythonInterface/kernel/IsNone.h"
 
 #include <boost/make_shared.hpp>
-#include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/default_call_policies.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/make_constructor.hpp>
-#include <boost/python/default_call_policies.hpp>
 #include <boost/python/overloads.hpp>
 
 using Mantid::API::FileProperty;
@@ -54,7 +54,7 @@ createFileProperty(const std::string &name, const std::string &defaultValue,
   }
   return new FileProperty(name, defaultValue, action, extsAsVector, direction);
 }
-}
+} // namespace
 
 void export_FileProperty() {
   bpl::class_<FileProperty, bpl::bases<PropertyWithValue<std::string>>,

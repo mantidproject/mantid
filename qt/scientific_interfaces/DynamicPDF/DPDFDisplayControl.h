@@ -15,13 +15,13 @@ namespace MantidQt {
 namespace MantidWidgets {
 class DisplayCurveFit;
 class RangeSelector;
-}
+} // namespace MantidWidgets
 namespace CustomInterfaces {
 namespace DynamicPDF {
 class InputDataControl;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -85,8 +85,8 @@ private:
   const std::string m_dataShownName;
 
 }; // class DisplayControl
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_INPUTDATACONTROL_H_

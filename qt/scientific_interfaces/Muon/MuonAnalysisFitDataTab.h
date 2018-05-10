@@ -4,8 +4,8 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_MuonAnalysis.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_MuonAnalysis.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -72,8 +72,8 @@ private slots:
   /// Group all the workspaces made after a fitting.
   void groupFittedWorkspaces(const QString &workspaceName);
 };
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSISFITDATATAB_H_

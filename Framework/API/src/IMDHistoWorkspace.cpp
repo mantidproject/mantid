@@ -23,8 +23,8 @@ const std::string IMDHistoWorkspace::toString() const {
 
   return os.str();
 }
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

@@ -3,9 +3,9 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"

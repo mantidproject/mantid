@@ -9,8 +9,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 namespace {
 /// A private namespace defining property name constants.
@@ -19,8 +19,8 @@ const static std::string EPP_WORKSPACE{"EPPWorkspace"};
 const static std::string INPUT_WORKSPACE{"InputWorkspace"};
 const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 const static std::string WIDTH{"HalfWidthInSigmas"};
-}
-}
+} // namespace PropertyNames
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateEPP)

@@ -5,8 +5,8 @@
 
 #include <tuple>
 
-using Mantid::Kernel::V3D;
 using Mantid::Geometry::InstrumentRayTracer;
+using Mantid::Kernel::V3D;
 using namespace Mantid;
 using namespace Mantid::API;
 

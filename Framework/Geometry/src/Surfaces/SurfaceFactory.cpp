@@ -1,26 +1,26 @@
+#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <cmath>
-#include <vector>
-#include <map>
 #include <list>
+#include <map>
+#include <sstream>
 #include <stack>
-#include <algorithm>
+#include <vector>
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/General.h"
+#include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 //#include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 
@@ -97,7 +97,7 @@ public:
 private:
   std::string m_key;
 };
-}
+} // namespace
 
 std::unique_ptr<Surface>
 SurfaceFactory::createSurface(const std::string &Key) const

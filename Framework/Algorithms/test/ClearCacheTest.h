@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_CLEARCACHETEST_H_
 #define MANTID_ALGORITHMS_CLEARCACHETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidKernel/UsageService.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ClearCache.h"
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 using Mantid::Algorithms::ClearCache;
 using namespace Mantid::API;

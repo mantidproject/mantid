@@ -4,11 +4,11 @@
 // Mantid Headers from the same project
 #include "DPDFInputDataControl.h"
 // Mantid headers from other projects
-#include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
 // 3rd party library headers
 // System #includes
 #include <iostream>
@@ -37,8 +37,8 @@ DisplayControl::DisplayControl(
     InputDataControl *inputDataControl,
     MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit)
     : m_inputDataControl{inputDataControl}, m_displayModelFit{displayModelFit},
-      m_fitRangeSelector{nullptr}, m_dataShown(),
-      m_dataShownName{"__DPDFDataShown"} {
+      m_fitRangeSelector{nullptr},
+      m_dataShown(), m_dataShownName{"__DPDFDataShown"} {
   // nothing in the body
 }
 
@@ -176,6 +176,6 @@ void DisplayControl::updateModelEvaluationDisplay(
   m_displayModelFit->addSpectrum(curveType::fit, modelWorkspace, 1);
   m_displayModelFit->addSpectrum(curveType::residuals, modelWorkspace, 2);
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

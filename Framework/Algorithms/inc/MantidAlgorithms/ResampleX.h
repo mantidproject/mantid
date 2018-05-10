@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_REBINRAGGED_H_
 #define MANTID_ALGORITHMS_REBINRAGGED_H_
 
-#include <map>
-#include "MantidKernel/System.h"
-#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
+#include <map>
 
 namespace Mantid {
 namespace Algorithms {

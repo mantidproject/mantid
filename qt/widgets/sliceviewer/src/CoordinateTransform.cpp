@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
-#include "MantidQtWidgets/Common/NonOrthogonal.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -56,5 +56,5 @@ createCoordinateTransform(const Mantid::API::IMDWorkspace &ws, size_t dimX,
     return Mantid::Kernel::make_unique<NullTransform>();
   }
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

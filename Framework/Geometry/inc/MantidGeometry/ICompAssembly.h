@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_ICOMPASSEMBLY_
 #define MANTID_GEOMETRY_ICOMPASSEMBLY_
 
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IComponent.h"
 #include <deque>
 #include <string>
 #include <vector>

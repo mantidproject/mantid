@@ -1,19 +1,19 @@
 #ifndef MANTID_SINQ_POLDIPEAKCOLLECTIONTEST_H
 #define MANTID_SINQ_POLDIPEAKCOLLECTIONTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 #include <boost/bind.hpp>
 #include <stdexcept>

@@ -5,11 +5,11 @@
 
 #include "MantidAlgorithms/WorkflowAlgorithmRunner.h"
 
-#include "MantidAlgorithms/DeleteWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/DeleteWorkspace.h"
 
 using Mantid::Algorithms::DeleteWorkspace;
 using Mantid::Algorithms::WorkflowAlgorithmRunner;

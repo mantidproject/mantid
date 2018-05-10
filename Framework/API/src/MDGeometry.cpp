@@ -1,10 +1,10 @@
 #include "MantidAPI/MDGeometry.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CoordTransform.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/make_unique.h"
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
@@ -565,5 +565,5 @@ size_t MDGeometry::getNumberTransformsFromOriginal() const {
   return m_transforms_FromOriginal.size();
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

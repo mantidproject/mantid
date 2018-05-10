@@ -19,9 +19,9 @@ public:
 
   void test_has_correct_mixins() {
     PointStandardDeviations data;
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG((dynamic_cast<detail::StandardDeviationVectorOf<
-            PointStandardDeviations, HistogramDx, PointVariances> &>(data))));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
+        (dynamic_cast<detail::StandardDeviationVectorOf<
+             PointStandardDeviations, HistogramDx, PointVariances> &>(data))));
   }
 
   void test_construct_default() {

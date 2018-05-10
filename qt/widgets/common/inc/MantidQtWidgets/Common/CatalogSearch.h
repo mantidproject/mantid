@@ -1,12 +1,12 @@
 #ifndef MANTIDQTWIDGETS_CATALOGSEARCH_H_
 #define MANTIDQTWIDGETS_CATALOGSEARCH_H_
 
-#include "ui_CatalogSearch.h"
 #include "DllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSelector.h"
 #include "MantidQtWidgets/Common/CheckboxHeader.h"
+#include "ui_CatalogSearch.h"
 
 #include <QCalendarWidget>
 
@@ -213,6 +213,6 @@ private:
   /// The current page the user is on in the results window. Used for paging.
   int m_currentPageNumber;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTWIDGETS_CATALOGSEARCH_H_

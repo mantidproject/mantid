@@ -64,10 +64,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqReaction.h"
 
 /**
-* @ingroup Reactions
-* pqCameraReaction has the logic to handle common operations associated with
-* the camera such as reset view along X axis etc.
-*/
+ * @ingroup Reactions
+ * pqCameraReaction has the logic to handle common operations associated with
+ * the camera such as reset view along X axis etc.
+ */
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
     pqCameraReactionNonOrthogonalAxes : public pqReaction {
   Q_OBJECT
@@ -105,15 +105,15 @@ public:
 
 public slots:
   /**
-  * Updates the enabled state. Applications need not explicitly call
-  * this.
-  */
+   * Updates the enabled state. Applications need not explicitly call
+   * this.
+   */
   void updateEnableState() override;
 
 protected:
   /**
-  * Called when the action is triggered.
-  */
+   * Called when the action is triggered.
+   */
   void onTriggered() override;
 
 private:

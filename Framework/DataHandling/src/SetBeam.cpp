@@ -13,7 +13,7 @@ constexpr const char *SLIT_TYPE_NAME = "Slit";
 constexpr const char *WIDTH_PARAM_NAME = "beam-width";
 /// Name of height parameter in map
 constexpr const char *HEIGHT_PARAM_NAME = "beam-height";
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -62,8 +62,8 @@ std::map<std::string, std::string> SetBeam::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void SetBeam::init() {
-  using API::MatrixWorkspace;
   using API::InstrumentValidator;
+  using API::MatrixWorkspace;
   using API::WorkspaceProperty;
   using Kernel::Direction;
   using Kernel::PropertyManagerProperty;

@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/MaskInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -51,7 +51,7 @@ maskInstrumentInplace(const MatrixWorkspace_sptr &ws,
   alg.execute();
   return ws;
 }
-}
+} // namespace
 
 class MaskInstrumentTest : public CxxTest::TestSuite {
 public:

@@ -45,7 +45,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 LoadMD::LoadMD()
     : m_numDims(0), // uninitialized incorrect value
       m_coordSystem(None),
@@ -53,11 +53,11 @@ LoadMD::LoadMD()
       m_saveMDVersion(false), m_requiresMDFrameCorrection(false) {}
 
 /**
-* Return the confidence with which this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with which this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   const auto &rootPathNameType = descriptor.firstEntryNameType();
@@ -75,7 +75,7 @@ int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void LoadMD::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
@@ -114,7 +114,7 @@ void LoadMD::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void LoadMD::exec() {
   m_filename = getPropertyValue("Filename");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
@@ -260,13 +260,13 @@ void LoadMD::exec() {
 }
 
 /**
-* Load a slab of double data into a bare array.
-* Checks that the size is correct.
-* @param name
-* @param data bare pointer to double array
-* @param ws
-* @param dataType
-*/
+ * Load a slab of double data into a bare array.
+ * Checks that the size is correct.
+ * @param name
+ * @param data bare pointer to double array
+ * @param ws
+ * @param dataType
+ */
 void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
                       NeXus::NXnumtype dataType) {
   m_file->openData(name);
@@ -296,8 +296,8 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
 
 //----------------------------------------------------------------------------------------------
 /** Perform loading for a MDHistoWorkspace.
-* The entry should be open already.
-*/
+ * The entry should be open already.
+ */
 void LoadMD::loadHisto() {
   // Create the initial MDHisto.
   MDHistoWorkspace_sptr ws;
@@ -387,7 +387,7 @@ void LoadMD::loadDimensions() {
 
 //----------------------------------------------------------------------------------------------
 /** Load all the dimensions into this->m_dims
-* The dimensions are stored as an nxData array */
+ * The dimensions are stored as an nxData array */
 void LoadMD::loadDimensions2() {
   using namespace Geometry;
   m_dims.clear();
@@ -480,11 +480,11 @@ void LoadMD::loadQConvention() {
 
 //----------------------------------------------------------------------------------------------
 /** Do the loading.
-*
-* The m_file should be open at the entry level at this point.
-*
-* @param             ws :: MDEventWorkspace of the given type
-*/
+ *
+ * The m_file should be open at the entry level at this point.
+ *
+ * @param             ws :: MDEventWorkspace of the given type
+ */
 template <typename MDE, size_t nd>
 void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Are we using the file back end?
@@ -621,10 +621,10 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 }
 
 /**
-* Load all of the affine matrices from the file, create the
-* appropriate coordinate transform and set those on the workspace.
-* @param ws : workspace to set the coordinate transforms on
-*/
+ * Load all of the affine matrices from the file, create the
+ * appropriate coordinate transform and set those on the workspace.
+ * @param ws : workspace to set the coordinate transforms on
+ */
 void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws) {
   std::map<std::string, std::string> entries;
   m_file->getEntries(entries);
@@ -640,12 +640,12 @@ void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws) {
 }
 
 /**
-* Do that actual loading and manipulating of the read data to create
-* the affine matrix and then the appropriate transformation. This is
-* currently limited to CoordTransformAffine transforms.
-* @param entry_name : the entry point in the NeXus file to read
-* @return the coordinate transform object
-*/
+ * Do that actual loading and manipulating of the read data to create
+ * the affine matrix and then the appropriate transformation. This is
+ * currently limited to CoordTransformAffine transforms.
+ * @param entry_name : the entry point in the NeXus file to read
+ * @return the coordinate transform object
+ */
 CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   m_file->openData(entry_name);
   std::vector<coord_t> vec;
@@ -798,5 +798,5 @@ const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO =
     "visual_normalization_histo";
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

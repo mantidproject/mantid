@@ -1,14 +1,14 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/LoadIsawUB.h"
-#include <fstream>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/Strings.h"
+#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <fstream>
 
 using namespace Mantid::Kernel::Strings;
-using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::OrientedLattice;
+using Mantid::Kernel::DblMatrix;
 
 namespace Mantid {
 namespace Crystal {
@@ -32,9 +32,10 @@ void LoadIsawUB::init() {
                                                     FileProperty::Load, exts),
                   "Path to an ISAW-style UB matrix text file.");
 
-  declareProperty("CheckUMatrix", true, "If True (default) then a check is "
-                                        "performed to ensure the U matrix is a "
-                                        "proper rotation matrix");
+  declareProperty("CheckUMatrix", true,
+                  "If True (default) then a check is "
+                  "performed to ensure the U matrix is a "
+                  "proper rotation matrix");
 }
 
 /** Execute the algorithm.
@@ -126,5 +127,5 @@ void LoadIsawUB::exec() {
   this->setProperty("InputWorkspace", ws1);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

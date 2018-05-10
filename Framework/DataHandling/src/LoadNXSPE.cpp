@@ -11,8 +11,8 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -413,5 +413,5 @@ LoadNXSPE::createCuboid(double dx, double dy, double dz) {
   return retVal;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

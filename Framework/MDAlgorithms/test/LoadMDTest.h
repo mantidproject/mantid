@@ -1,21 +1,21 @@
 #ifndef MANTID_MDALGORITHMS_LOADMDEWTEST_H_
 #define MANTID_MDALGORITHMS_LOADMDEWTEST_H_
 
-#include "SaveMDTest.h"
 #include "SaveMD2Test.h"
+#include "SaveMDTest.h"
 
-#include "MantidKernel/Strings.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidDataObjects/MDGridBox.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/Strings.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 
 #include <cxxtest/TestSuite.h>

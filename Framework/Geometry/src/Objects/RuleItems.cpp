@@ -1,26 +1,26 @@
-#include <fstream>
-#include <complex>
+#include <algorithm>
+#include <cfloat>
 #include <cmath>
-#include <vector>
-#include <map>
+#include <complex>
+#include <fstream>
+#include <iterator>
 #include <list>
+#include <map>
+#include <sstream>
 #include <stack>
 #include <string>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
-#include <cfloat>
+#include <vector>
 
 #include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/Math/Triple.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Surfaces/BaseVisit.h"
+#include "MantidGeometry/Surfaces/Line.h"
+#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Line.h"
-#include "MantidGeometry/Surfaces/BaseVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -347,9 +347,9 @@ void Intersection::getBoundingBox(double &xmax, double &ymax, double &zmax,
 
 #ifdef ENABLE_OPENCASCADE
 /**
-* Analyze intersection
-* @return the resulting TopoDS_Shape
-*/
+ * Analyze intersection
+ * @return the resulting TopoDS_Shape
+ */
 TopoDS_Shape Intersection::analyze() {
   TopoDS_Shape left = A->analyze();
   TopoDS_Shape right = B->analyze();
@@ -809,7 +809,7 @@ std::string SurfPoint::display() const
 */
 {
   std::stringstream cx;
-  cx << sign *keyN;
+  cx << sign * keyN;
   return cx.str();
 }
 

@@ -37,8 +37,8 @@ void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
 //  const nlls_options& options, nlls_inform& inform, const DoubleFortranVector&
 //  weights);
 
-} // NLLS
-} // CurveFitting
-} // Mantid
+} // namespace NLLS
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // CURVEFITTING_RAL_NLLS_TRUST_REGION_H_

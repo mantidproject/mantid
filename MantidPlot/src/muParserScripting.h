@@ -30,8 +30,8 @@
 #ifndef MUPARSER_SCRIPTING_H
 #define MUPARSER_SCRIPTING_H
 
-#include "ScriptingEnv.h"
 #include "Script.h"
+#include "ScriptingEnv.h"
 #include "muParserScript.h"
 
 #include "MantidGeometry/muParser_Silent.h"

@@ -2,27 +2,27 @@
 // Includes
 //-----------------------------------------------
 #include "MantidQtWidgets/Common/ScriptEditor.h"
-#include "MantidQtWidgets/Common/FindReplaceDialog.h"
 #include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
+#include "MantidQtWidgets/Common/FindReplaceDialog.h"
 
 // Qt
 #include <QApplication>
 #include <QFile>
 #include <QFileDialog>
 
-#include <QTextStream>
-#include <QMessageBox>
 #include <QAction>
+#include <QClipboard>
+#include <QKeyEvent>
 #include <QMenu>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QMouseEvent>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QKeyEvent>
-#include <QMouseEvent>
 #include <QScrollBar>
-#include <QClipboard>
-#include <QShortcut>
 #include <QSettings>
-#include <QMimeData>
+#include <QShortcut>
+#include <QTextStream>
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
@@ -49,7 +49,7 @@ QsciLexer *createLexerFromName(const QString &lexerName) {
                                 "name. Supported names=Python, ");
   }
 }
-}
+} // namespace
 
 // The colour for a success marker
 QColor ScriptEditor::g_success_colour = QColor("lightgreen");

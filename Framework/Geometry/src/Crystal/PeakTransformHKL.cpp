@@ -40,5 +40,5 @@ Mantid::Kernel::SpecialCoordinateSystem
 PeakTransformHKL::getCoordinateSystem() const {
   return Mantid::Kernel::HKL;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

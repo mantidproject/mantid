@@ -88,8 +88,8 @@
 #ifndef QTEDITORFACTORY_H
 #define QTEDITORFACTORY_H
 
-#include "qtpropertymanager.h"
 #include "qtpropertybrowserutils_p.h"
+#include "qtpropertymanager.h"
 
 #include <QComboBox>
 #include <QDateTimeEdit>

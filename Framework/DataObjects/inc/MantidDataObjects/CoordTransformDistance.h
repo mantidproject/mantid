@@ -58,7 +58,7 @@ protected:
   bool *m_dimensionsUsed;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCE_H_ */

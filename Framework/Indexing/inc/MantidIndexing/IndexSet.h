@@ -122,8 +122,7 @@ template <class T> IndexSet<T>::IndexSet() : m_size(0) {}
 
 /// Constructor for a set covering the full range from 0 to fullRange-1.
 template <class T>
-IndexSet<T>::IndexSet(size_t fullRange)
-    : m_size(fullRange) {}
+IndexSet<T>::IndexSet(size_t fullRange) : m_size(fullRange) {}
 
 /// Constructor for a set covering the range from min to max. Range is verified
 /// at construction time.

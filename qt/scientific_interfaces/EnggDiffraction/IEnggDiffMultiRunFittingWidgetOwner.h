@@ -15,7 +15,7 @@ public:
   virtual void addWidget(IEnggDiffMultiRunFittingWidgetView *widget) = 0;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETOWNER_H_

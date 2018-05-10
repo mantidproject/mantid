@@ -30,9 +30,9 @@
 #ifndef PLOTDIALOG_H
 #define PLOTDIALOG_H
 
+#include "MultiLayer.h"
 #include <QDialog>
 #include <QTreeWidgetItem>
-#include "MultiLayer.h"
 //#include "MantidKernel/Logger.h"
 
 class QCheckBox;
@@ -258,7 +258,7 @@ private:
 
   SymbolBox *boxMaxStyle, *boxMinStyle, *boxMeanStyle, *box99Style, *box1Style;
   QDoubleSpinBox *whiskerCnt, *boxCnt;
-  //!Labels page
+  //! Labels page
   QGroupBox *labelsGroupBox;
   DoubleSpinBox *boxLabelsAngle;
   QSpinBox *boxLabelsXOffset, *boxLabelsYOffset;

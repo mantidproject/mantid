@@ -87,5 +87,5 @@ void SyncedCheckboxes::on_button_toggled(bool val) {
   emit toggled(val);
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace MantidQt

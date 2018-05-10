@@ -56,7 +56,7 @@ public:
   // arithmetic operations
   PolyBase operator+(const PolyBase &) const;
   PolyBase operator-(const PolyBase &) const;
-  PolyBase operator*(const PolyBase &) const;
+  PolyBase operator*(const PolyBase &)const;
   //  PolyBase operator/(const PolyBase&) const;
 
   // input is degree 0 poly
@@ -94,7 +94,7 @@ public:
 PolyBase operator*(double const, const PolyBase &);
 std::ostream &operator<<(std::ostream &, const PolyBase &);
 
-} // NAMESPACE mathlevel
+} // namespace mathLevel
 
 } // NAMESPACE Mantid
 #endif

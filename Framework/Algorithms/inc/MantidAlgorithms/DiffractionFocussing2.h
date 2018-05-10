@@ -147,7 +147,7 @@ private:
   std::vector<Indexing::SpectrumNumber> m_validGroups;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_DIFFRACTIONFOCUSSING2_H_*/

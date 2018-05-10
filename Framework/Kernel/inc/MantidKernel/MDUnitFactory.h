@@ -2,9 +2,9 @@
 #define MANTID_KERNEL_MDUNITFACTORY_H_
 
 #include "MantidKernel/ChainableFactory.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/System.h"
 #include <memory>
 
 namespace Mantid {

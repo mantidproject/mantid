@@ -5,8 +5,8 @@
 
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 
-#include <boost/make_shared.hpp>
 #include <Poco/Net/HTTPResponse.h>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::RemoteJobManagers;
 

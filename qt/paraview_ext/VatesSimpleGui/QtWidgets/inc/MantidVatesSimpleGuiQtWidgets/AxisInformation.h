@@ -80,8 +80,8 @@ private:
   double maximum;    ///< The maximum extent of the axis
   std::string title; ///< The axis title (or label)
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // AXISINFORMATION_H_

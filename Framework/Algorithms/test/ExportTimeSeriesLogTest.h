@@ -1,27 +1,25 @@
 #ifndef MANTID_ALGORITHMS_EXPORTTIMESERIESLOGTEST_H_
 #define MANTID_ALGORITHMS_EXPORTTIMESERIESLOGTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <cmath>
-#include <fstream>
+#include "MantidKernel/Timer.h"
 #include <Poco/File.h>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
-#include "MantidAlgorithms/ExportTimeSeriesLog.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/Column.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Events.h"
+#include "MantidAlgorithms/ExportTimeSeriesLog.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -38,7 +36,7 @@ public:
   static void destroySuite(ExportTimeSeriesLogTest *suite) { delete suite; }
 
   /** Test initialization
-    */
+   */
   void test_Init() {
     ExportTimeSeriesLog getalg;
     TS_ASSERT_THROWS_NOTHING(getalg.initialize());
@@ -46,7 +44,7 @@ public:
   }
 
   /** Test outpout event workspace
-    */
+   */
   void test_OutputEventWorkspace() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("EventWorkspace", eventWS);
@@ -77,7 +75,7 @@ public:
   }
 
   /** Test outpout Workspace2D
-    */
+   */
   void test_Output2DWorkspace() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("EventWorkspace", eventWS);
@@ -112,7 +110,7 @@ public:
   }
 
   /** Test outpout Workspace2D with start and stop time
-    */
+   */
   void test_Output2DWorkspaceTimeRange() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("EventWorkspace", eventWS);
@@ -152,7 +150,7 @@ public:
   }
 
   /** Test outpout Workspace2D with start and stop time
-    */
+   */
   void test_Output2DWorkspaceNanosecond() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("EventWorkspace", eventWS);
@@ -192,7 +190,7 @@ public:
   }
 
   /** Test outpout Workspace2D with limited number
-    */
+   */
   void test_Output2DWorkspacePartialLog() {
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("EventWorkspace", eventWS);

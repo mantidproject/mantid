@@ -1,19 +1,19 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/PropertyManager.h"
-#include <json/json.h>
 #include <algorithm>
+#include <json/json.h>
 
 namespace Mantid {
 namespace Kernel {
 namespace {
 // Get a reference to the logger
 Logger g_log("PropertyManagerOwner");
-}
+} // namespace
 
 /// Default constructor
 PropertyManagerOwner::PropertyManagerOwner()
@@ -32,12 +32,12 @@ operator=(const PropertyManagerOwner &po) {
 }
 
 /** Add a property to the list of managed properties
-*  @param p :: The property object to add
-*  @param doc :: A description of the property that may be displayed to users
-*  @throw Exception::ExistsError if a property with the given name already
-* exists
-*  @throw std::invalid_argument  if the property declared has an empty name.
-*/
+ *  @param p :: The property object to add
+ *  @param doc :: A description of the property that may be displayed to users
+ *  @throw Exception::ExistsError if a property with the given name already
+ * exists
+ *  @throw std::invalid_argument  if the property declared has an empty name.
+ */
 void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p,
                                            const std::string &doc) {
   m_properties->declareProperty(std::move(p), doc);
@@ -83,12 +83,13 @@ void PropertyManagerOwner::setPropertiesWithString(
 }
 
 /** Set the value of a property by string
-*  N.B. bool properties must be set using 1/0 rather than true/false
-*  @param name :: The name of the property (case insensitive)
-*  @param value :: The value to assign to the property
-*  @throw Exception::NotFoundError if the named property is unknown
-*  @throw std::invalid_argument If the value is not valid for the property given
-*/
+ *  N.B. bool properties must be set using 1/0 rather than true/false
+ *  @param name :: The name of the property (case insensitive)
+ *  @param value :: The value to assign to the property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ *  @throw std::invalid_argument If the value is not valid for the property
+ * given
+ */
 void PropertyManagerOwner::setPropertyValue(const std::string &name,
                                             const std::string &value) {
   m_properties->setPropertyValue(name, value);
@@ -96,11 +97,11 @@ void PropertyManagerOwner::setPropertyValue(const std::string &name,
 }
 
 /** Set the value of a property by an index
-*  N.B. bool properties must be set using 1/0 rather than true/false
-*  @param index :: The index of the property to assign
-*  @param value :: The value to assign to the property
-*  @throw std::runtime_error if the property index is too high
-*/
+ *  N.B. bool properties must be set using 1/0 rather than true/false
+ *  @param index :: The index of the property to assign
+ *  @param value :: The value to assign to the property
+ *  @throw std::runtime_error if the property index is too high
+ */
 void PropertyManagerOwner::setPropertyOrdinal(const int &index,
                                               const std::string &value) {
   m_properties->setPropertyOrdinal(index, value);
@@ -109,17 +110,17 @@ void PropertyManagerOwner::setPropertyOrdinal(const int &index,
 }
 
 /** Checks whether the named property is already in the list of managed
-* property.
-*  @param name :: The name of the property (case insensitive)
-*  @return True if the property is already stored
-*/
+ * property.
+ *  @param name :: The name of the property (case insensitive)
+ *  @return True if the property is already stored
+ */
 bool PropertyManagerOwner::existsProperty(const std::string &name) const {
   return m_properties->existsProperty(name);
 }
 
 /** Validates all the properties in the collection
-*  @return True if all properties have a valid value
-*/
+ *  @return True if all properties have a valid value
+ */
 bool PropertyManagerOwner::validateProperties() const {
   return m_properties->validateProperties();
 }
@@ -133,59 +134,59 @@ size_t PropertyManagerOwner::propertyCount() const {
 }
 
 /** Get the value of a property as a string
-*  @param name :: The name of the property (case insensitive)
-*  @return The value of the named property
-*  @throw Exception::NotFoundError if the named property is unknown
-*/
+ *  @param name :: The name of the property (case insensitive)
+ *  @return The value of the named property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ */
 std::string
 PropertyManagerOwner::getPropertyValue(const std::string &name) const {
   return m_properties->getPropertyValue(name);
 }
 
 /** Get a property by name
-*  @param name :: The name of the property (case insensitive)
-*  @return A pointer to the named property
-*  @throw Exception::NotFoundError if the named property is unknown
-*/
+ *  @param name :: The name of the property (case insensitive)
+ *  @return A pointer to the named property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ */
 Property *
 PropertyManagerOwner::getPointerToProperty(const std::string &name) const {
   return m_properties->getPointerToProperty(name);
 }
 
 /** Get a property by an index
-*  @param index :: The name of the property (case insensitive)
-*  @return A pointer to the named property
-*  @throw std::runtime_error if the property index is too high
-*/
+ *  @param index :: The name of the property (case insensitive)
+ *  @return A pointer to the named property
+ *  @throw std::runtime_error if the property index is too high
+ */
 Property *
 PropertyManagerOwner::getPointerToPropertyOrdinal(const int &index) const {
   return m_properties->getPointerToPropertyOrdinal(index);
 }
 
 /** Get the list of managed properties.
-*  The properties will be stored in the order that they were declared.
-*  @return A vector holding pointers to the list of properties
-*/
+ *  The properties will be stored in the order that they were declared.
+ *  @return A vector holding pointers to the list of properties
+ */
 const std::vector<Property *> &PropertyManagerOwner::getProperties() const {
   return m_properties->getProperties();
 }
 
 /** Get the value of a property. Allows you to assign directly to a variable of
-*the property's type
-*  (if a supported type).
-*
-*  *** This method does NOT work for assigning to an existing std::string.
-*      In this case you have to use getPropertyValue() instead.
-*      Note that you can, though, construct a local string variable by writing,
-*      e.g. std::string s = getProperty("myProperty"). ***
-*
-*  @param name :: The name of the property
-*  @return The value of the property. Will be cast to the desired type (if a
-*supported type).
-*  @throw std::runtime_error If an attempt is made to assign a property to a
-*different type
-*  @throw Exception::NotFoundError If the property requested does not exist
-*/
+ *the property's type
+ *  (if a supported type).
+ *
+ *  *** This method does NOT work for assigning to an existing std::string.
+ *      In this case you have to use getPropertyValue() instead.
+ *      Note that you can, though, construct a local string variable by writing,
+ *      e.g. std::string s = getProperty("myProperty"). ***
+ *
+ *  @param name :: The name of the property
+ *  @return The value of the property. Will be cast to the desired type (if a
+ *supported type).
+ *  @throw std::runtime_error If an attempt is made to assign a property to a
+ *different type
+ *  @throw Exception::NotFoundError If the property requested does not exist
+ */
 IPropertyManager::TypedValue
 PropertyManagerOwner::getProperty(const std::string &name) const {
   return m_properties->getProperty(name);
@@ -200,21 +201,21 @@ bool PropertyManagerOwner::isDefault(const std::string &name) const {
 }
 
 /**
-* Return the property manager serialized as a string.
-* The format is propName=value,propName=value,propName=value
-* @param withDefaultValues :: If true then the value of default parameters will
-* be included
-* @returns A stringized version of the manager
-*/
+ * Return the property manager serialized as a string.
+ * The format is propName=value,propName=value,propName=value
+ * @param withDefaultValues :: If true then the value of default parameters will
+ * be included
+ * @returns A stringized version of the manager
+ */
 std::string PropertyManagerOwner::asString(bool withDefaultValues) const {
   return m_properties->asString(withDefaultValues);
 }
 /**
-* Return the property manager serialized as a json object.
-* @param withDefaultValues :: If true then the value of default parameters will
-* be included
-* @returns A jsonValue of the manager
-*/
+ * Return the property manager serialized as a json object.
+ * @param withDefaultValues :: If true then the value of default parameters will
+ * be included
+ * @returns A jsonValue of the manager
+ */
 ::Json::Value PropertyManagerOwner::asJson(bool withDefaultValues) const {
   return m_properties->asJson(withDefaultValues);
 }

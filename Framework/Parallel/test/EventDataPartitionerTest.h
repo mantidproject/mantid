@@ -14,10 +14,10 @@ namespace detail {
 bool operator==(const Event<double> &a, const Event<double> &b) {
   return a.index == b.index && a.tof == b.tof && a.pulseTime == b.pulseTime;
 }
-}
-}
-}
-}
+} // namespace detail
+} // namespace IO
+} // namespace Parallel
+} // namespace Mantid
 using Event = detail::Event<double>;
 
 class EventDataPartitionerTest : public CxxTest::TestSuite {

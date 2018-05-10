@@ -1,13 +1,13 @@
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitLabel.h"
 
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <fstream>
 
@@ -39,16 +39,16 @@ std::string loadFile(const std::string &filename) {
 
 // ------------------------------------------------------------------------------------------------
 /** Return a string shortened with the center replace by " ... "
-* If the string is already short enough then the original string will be
-*returned.
-* If the max length or input string length is smaller than the ellipsis, the
-*input will be returned.
-*
-* @param input :: input string
-* @param max_length :: The maximum length of the return string (0 = return full
-*string)
-* @return the modified string.
-*/
+ * If the string is already short enough then the original string will be
+ *returned.
+ * If the max length or input string length is smaller than the ellipsis, the
+ *input will be returned.
+ *
+ * @param input :: input string
+ * @param max_length :: The maximum length of the return string (0 = return full
+ *string)
+ * @return the modified string.
+ */
 std::string shorten(const std::string &input, const size_t max_length) {
   const std::string ellipsis = " ... ";
   const size_t ellipsisSize = ellipsis.size();
@@ -181,7 +181,7 @@ int extractWord(std::string &Line, const std::string &Word, const int cnt) {
   // Pos == Start of find
   size_t LinePt = minSize + pos;
   for (; minSize < Word.size() && LinePt < Line.size() &&
-             Word[minSize] == Line[LinePt];
+         Word[minSize] == Line[LinePt];
        LinePt++, minSize++) {
   }
 
@@ -301,11 +301,11 @@ std::string removeSpace(const std::string &CLine) {
 
 //------------------------------------------------------------------------------------------------
 /**
-  *  Reads a line from the stream of max length spc.
-  *  Trailing comments are removed. (with # or ! character)
-  *  @param fh :: already open file handle
-  *  @return String read.
-  */
+ *  Reads a line from the stream of max length spc.
+ *  Trailing comments are removed. (with # or ! character)
+ *  @param fh :: already open file handle
+ *  @return String read.
+ */
 std::string getLine(std::istream &fh) {
   std::string line;
   getLine(fh, line);
@@ -391,10 +391,10 @@ std::string strip(const std::string &A) {
 }
 
 /**
-* Return true if the line is to be skipped (starts with #).
-* @param line :: The line to be checked
-* @return True if the line should be skipped
-*/
+ * Return true if the line is to be skipped (starts with #).
+ * @param line :: The line to be checked
+ * @return True if the line should be skipped
+ */
 bool skipLine(const std::string &line) {
   // Empty or comment
   return (line.empty() || boost::starts_with(line, "#"));
@@ -444,8 +444,9 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
  */
 std::vector<std::string> StrParts(const std::string &Ln) {
   auto tokenizer = Mantid::Kernel::StringTokenizer(
-      Ln, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      Ln, " ",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   return tokenizer.asVector();
 }
 
@@ -1135,16 +1136,14 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
 }
 
 /**
-* Extract a string until an EOL character is reached. There are 3 scenarios that
-* we need to deal with
-* 1) Windows-style  - CRLF ('\\r\\n');
-* 2) Unix-style     - LF ('\\n');
-* 3) Old MAC style  - CR ('\\r').
-* This function will give the string preceding any of these sequences
-* @param is :: The input stream to read from
-* @param str :: The output string to use to accumulate the line
-* @returns A reference to the input stream
-*/
+ * Extract a string until an EOL character is reached. There are 3 scenarios
+ * that we need to deal with 1) Windows-style  - CRLF ('\\r\\n'); 2) Unix-style
+ * - LF ('\\n'); 3) Old MAC style  - CR ('\\r'). This function will give the
+ * string preceding any of these sequences
+ * @param is :: The input stream to read from
+ * @param str :: The output string to use to accumulate the line
+ * @returns A reference to the input stream
+ */
 std::istream &extractToEOL(std::istream &is, std::string &str) {
   // Empty the string
   str = "";

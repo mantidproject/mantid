@@ -1,6 +1,6 @@
+#include "InstrumentWindow.h"
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
-#include "InstrumentWindow.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"

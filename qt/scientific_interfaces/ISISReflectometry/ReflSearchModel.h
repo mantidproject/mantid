@@ -5,8 +5,8 @@
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -75,6 +75,6 @@ protected:
 using ReflSearchModel_sptr = boost::shared_ptr<ReflSearchModel>;
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_ */

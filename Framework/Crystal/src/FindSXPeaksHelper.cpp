@@ -9,9 +9,9 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include <cmath>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
+#include <cmath>
 
 namespace {
 
@@ -34,7 +34,7 @@ bool isDifferenceLargerThanTolerance(const double angle1, const double angle2,
 
   return difference > tolerance;
 }
-}
+} // namespace
 
 using namespace boost;
 using Mantid::Kernel::UnitFactory;
@@ -314,12 +314,12 @@ PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
 }
 
 /**
-  * Calculates the average phi value if the workspace contains
-  * multiple detectors per spectrum, or returns the value
-  * of phi if it is a single detector to spectrum mapping.
-  * @param workspaceIndex :: The index to return the phi value of
-  * @return :: The averaged or exact value of phi
-  */
+ * Calculates the average phi value if the workspace contains
+ * multiple detectors per spectrum, or returns the value
+ * of phi if it is a single detector to spectrum mapping.
+ * @param workspaceIndex :: The index to return the phi value of
+ * @return :: The averaged or exact value of phi
+ */
 double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
   double phi = std::numeric_limits<double>::infinity();
 
@@ -433,8 +433,8 @@ PeakList AllPeaksStrategy::dofindSXPeaks(const HistogramData::HistogramX &x,
 std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
     const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
     Bound low, Bound high,
-    const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *
-        backgroundStrategy) const {
+    const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy
+        *backgroundStrategy) const {
   // We iterate over the data and only consider data which is above the
   // threshold.
   // Once data starts to be above the threshold we start to record it and add it
@@ -519,8 +519,8 @@ PeakList AllPeaksStrategy::convertToSXPeaks(
     const double phi = calculatePhi(workspaceIndex);
 
     std::vector<int> specs(1, workspaceIndex);
-    (*peaks)
-        .emplace_back(tof, phi, *maxY, specs, workspaceIndex, m_spectrumInfo);
+    (*peaks).emplace_back(tof, phi, *maxY, specs, workspaceIndex,
+                          m_spectrumInfo);
   }
 
   return peaks;

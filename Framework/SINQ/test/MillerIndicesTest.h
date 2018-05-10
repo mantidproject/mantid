@@ -1,10 +1,10 @@
 #ifndef MANTID_SINQ_MILLERINDICESTEST_H
 #define MANTID_SINQ_MILLERINDICESTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/PoldiUtilities/MillerIndices.h"
-#include <stdexcept>
 #include "MantidKernel/V3D.h"
+#include "MantidSINQ/PoldiUtilities/MillerIndices.h"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::Kernel;

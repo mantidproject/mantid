@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
-#include "ui_Iqt.h"
 #include "IndirectDataAnalysisTab.h"
+#include "ui_Iqt.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

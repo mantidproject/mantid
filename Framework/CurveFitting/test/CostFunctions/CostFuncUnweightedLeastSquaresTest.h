@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARESTEST_H_
 #define MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARESTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h"
 

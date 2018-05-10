@@ -1,24 +1,24 @@
+#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
-#include "MantidICat/CatalogDownloadDataFiles.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ICatalogInfo.h"
-#include "MantidKernel/CatalogInfo.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UserCatalogInfo.h"
-#include "MantidKernel/ArrayProperty.h"
 
 #include <Poco/Net/AcceptCertificateHandler.h>
-#include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/SecureStreamSocket.h>
-#include <Poco/Net/SSLException.h>
-#include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
+#include <Poco/Net/SSLException.h>
+#include <Poco/Net/SSLManager.h>
+#include <Poco/Net/SecureStreamSocket.h>
 #include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
@@ -123,10 +123,10 @@ void CatalogDownloadDataFiles::exec() {
 }
 
 /**
-* Checks to see if the file to be downloaded is a datafile.
-* @param fileName :: Name of data file to download.
-* @returns True if the file is a data file.
-*/
+ * Checks to see if the file to be downloaded is a datafile.
+ * @param fileName :: Name of data file to download.
+ * @returns True if the file is a data file.
+ */
 bool CatalogDownloadDataFiles::isDataFile(const std::string &fileName) {
   std::string extension = Poco::Path(fileName).getExtension();
   std::transform(extension.begin(), extension.end(), extension.begin(),
@@ -261,5 +261,5 @@ CatalogDownloadDataFiles::testDownload(const std::string &URL,
                                        const std::string &fileName) {
   return doDownloadandSavetoLocalDrive(URL, fileName);
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

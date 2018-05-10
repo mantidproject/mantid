@@ -70,12 +70,12 @@ private:
 };
 /** function to build mslice-like axis name from the vector, which describes
  * crystallographic direction along this axis*/
-std::string DLLExport
-makeAxisName(const Kernel::V3D &Dir, const std::vector<std::string> &QNames);
+std::string DLLExport makeAxisName(const Kernel::V3D &Dir,
+                                   const std::vector<std::string> &QNames);
 /**creates string representation of the number with accuracy, cpecified by eps*/
 std::string DLLExport sprintfd(const double data, const double eps);
 
-} // endnamespace MDAlgorithms
-} // endnamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

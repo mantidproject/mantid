@@ -28,8 +28,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include <QVarLengthArray>
 
 #include "ApplicationWindow.h"
@@ -124,7 +124,7 @@ using CurveType = GraphOptions::CurveType;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("Graph");
-}
+} // namespace
 
 Graph::Graph(int x, int y, int width, int height, QWidget *parent, Qt::WFlags f)
     : QWidget(parent, f) {
@@ -416,9 +416,9 @@ bool Graph::isColorBarEnabled(int axis) const {
   return false;
 }
 /** Finds out if the specified axis has a log scale or not
-*  @param axis the aixs to check e.g. yright ...
-*  @return true if there is a log scale on that axis
-*/
+ *  @param axis the aixs to check e.g. yright ...
+ *  @return true if there is a log scale on that axis
+ */
 bool Graph::isLog(const QwtPlot::Axis &axis) const {
   ScaleEngine *sc_engine =
       dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
@@ -2604,9 +2604,9 @@ bool Graph::addCurves(Table *w, const QStringList &names, int style,
       case Table::xErr:
       case Table::yErr:
         noOfErrorCols++;
-      // Fall through, as we want errors to be at the end of the list in the
-      // same way as labels
-      // are. So _no break_ here on purpose.
+        // Fall through, as we want errors to be at the end of the list in the
+        // same way as labels
+        // are. So _no break_ here on purpose.
 
       case Table::Label:
         // Keep error/label columns at the end of the list
@@ -5648,9 +5648,9 @@ void Graph::checkValuesInAxisRange(MantidMatrixCurve *mc) {
 }
 
 /**
-  * Process dragMousePress signal from d_plot.
-  * @param pos :: Mouse position.
-  */
+ * Process dragMousePress signal from d_plot.
+ * @param pos :: Mouse position.
+ */
 void Graph::slotDragMousePress(QPoint pos) {
   if (hasActiveTool())
     return;
@@ -5658,9 +5658,9 @@ void Graph::slotDragMousePress(QPoint pos) {
 }
 
 /**
-  * Process dragMouseRelease signal from d_plot.
-  * @param pos :: Mouse position.
-  */
+ * Process dragMouseRelease signal from d_plot.
+ * @param pos :: Mouse position.
+ */
 void Graph::slotDragMouseRelease(QPoint pos) {
   if (hasActiveTool())
     return;
@@ -5668,9 +5668,9 @@ void Graph::slotDragMouseRelease(QPoint pos) {
 }
 
 /**
-  * Process dragMouseMove signal from d_plot.
-  * @param pos :: Mouse position.
-  */
+ * Process dragMouseMove signal from d_plot.
+ * @param pos :: Mouse position.
+ */
 void Graph::slotDragMouseMove(QPoint pos) {
   if (hasActiveTool())
     return;
@@ -5706,24 +5706,27 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("AxesNumberColors")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesNumberColors")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("AxesNumberColors").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisLabelsColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleColors")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleColors")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("AxesTitleColors").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleAlignment")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleAlignment(i, sl[i].toInt());
@@ -5844,8 +5847,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("EnabledTickLabels")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("EnabledTickLabels")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("EnabledTickLabels").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       enableAxisLabels(i, sl[i].toInt());
@@ -5857,8 +5861,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   for (int i = 0; tsv.selectLine("ImageMarker", i); ++i) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("ImageMarker", i)
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("ImageMarker", i).c_str())
+            .split("\t");
     insertImageMarker(sl, fileVersion);
   }
 
@@ -5876,8 +5881,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("LabelsRotation")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("LabelsRotation")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("LabelsRotation").c_str())
+            .split("\t");
     setAxisLabelRotation(QwtPlot::xBottom, sl[1].toInt());
     setAxisLabelRotation(QwtPlot::xTop, sl[2].toInt());
   }
@@ -6243,12 +6249,12 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
       }
 
       /* You may notice we plot the spectrogram before loading it.
-        * Why? Because plotSpectrogram overrides the spectrograms' settings
-        * based off the second parameter (which has been chosen arbitrarily
-        * in this case). We're just use plotSpectrogram to add the spectrogram
-        * to the graph for us, and then loading the settings into the
-        * spectrogram.
-        */
+       * Why? Because plotSpectrogram overrides the spectrograms' settings
+       * based off the second parameter (which has been chosen arbitrarily
+       * in this case). We're just use plotSpectrogram to add the spectrogram
+       * to the graph for us, and then loading the settings into the
+       * spectrogram.
+       */
       if (!s)
         continue;
 
@@ -6467,8 +6473,8 @@ std::string Graph::saveToProject() {
   }
 
   if (d_plot->canvas()->lineWidth() > 0)
-    tsv.writeLine("CanvasFrame") << d_plot->canvas()->lineWidth()
-                                 << canvasFrameColor().name();
+    tsv.writeLine("CanvasFrame")
+        << d_plot->canvas()->lineWidth() << canvasFrameColor().name();
 
   tsv.writeLine("CanvasBackground");
   tsv << d_plot->canvasBackground().name();

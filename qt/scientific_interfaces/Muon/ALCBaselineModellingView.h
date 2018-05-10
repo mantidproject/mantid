@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class ErrorCurve;
 }
-}
+} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {

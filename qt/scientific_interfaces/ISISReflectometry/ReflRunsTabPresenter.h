@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 
-#include "MantidAPI/IAlgorithm.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <boost/shared_ptr.hpp>
@@ -16,7 +16,7 @@ class ProgressableView;
 namespace DataProcessor {
 class DataProcessorPresenter;
 }
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
@@ -27,8 +27,8 @@ class IReflSearcher;
 class ReflSearchModel;
 class ReflTransferStrategy;
 
-using MantidWidgets::ProgressableView;
 using MantidWidgets::DataProcessor::DataProcessorPresenter;
+using MantidWidgets::ProgressableView;
 
 /** @class ReflRunsTabPresenter
 
@@ -134,6 +134,6 @@ private:
   /// enable/disable widgets on the view
   void updateWidgetEnabledState(const bool isProcessing) const;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H */

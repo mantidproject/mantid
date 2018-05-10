@@ -1,9 +1,9 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_
 #define MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

@@ -42,7 +42,7 @@ std::string createCacheKey(const std::string &facility,
                            const std::string &specName) {
   return facility + "/" + instrument + "/" + specName;
 }
-}
+} // namespace
 
 //------------------------------------------------------------------------------
 // SampleEnvironmentFactory

@@ -22,12 +22,12 @@ threadSafe(Arg workspace) {
 }
 
 /** Thread-safety check
-  * Checks the workspace to ensure it is suitable for multithreaded access.
-  * NULL workspaces are assumed suitable
-  * @param workspace pointer to workspace to verify.
-  * @param others pointers to all other workspaces which need to be checked.
-  * @return whether workspace is threadsafe.
-  */
+ * Checks the workspace to ensure it is suitable for multithreaded access.
+ * NULL workspaces are assumed suitable
+ * @param workspace pointer to workspace to verify.
+ * @param others pointers to all other workspaces which need to be checked.
+ * @return whether workspace is threadsafe.
+ */
 template <typename Arg, typename... Args>
 inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
 threadSafe(Arg workspace, Args &&... others) {
@@ -126,17 +126,17 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
 #include <omp.h>
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
-*   This includes an arbirary check: condition.
-*   "condition" must evaluate to TRUE in order for the
-*   code to be executed in parallel
-*/
+ *   This includes an arbirary check: condition.
+ *   "condition" must evaluate to TRUE in order for the
+ *   code to be executed in parallel
+ */
 #define PARALLEL_FOR_IF(condition)                                             \
     PRAGMA(omp parallel for if (condition) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
-*   This includes no checks to see if workspaces are suitable
-*   and therefore should not be used in any loops that access workspaces.
-*/
+ *   This includes no checks to see if workspaces are suitable
+ *   and therefore should not be used in any loops that access workspaces.
+ */
 #define PARALLEL_FOR_NO_WSP_CHECK()                                            \
     PRAGMA(omp parallel for)
 
@@ -152,18 +152,18 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
 /** Ensures that the next execution line or block is only executed if
-* there are multple threads execting in this region
-*/
+ * there are multple threads execting in this region
+ */
 #define IF_PARALLEL if (omp_get_num_threads() > 1)
 
 /** Ensures that the next execution line or block is only executed if
-* there is only one thread in operation
-*/
+ * there is only one thread in operation
+ */
 #define IF_NOT_PARALLEL if (omp_get_num_threads() == 1)
 
 /** Specifies that the next code line or block will only allow one thread
  * through at a time
-*/
+ */
 #define PARALLEL_CRITICAL(name) PRAGMA(omp critical(name))
 
 /** Allows only one thread at a time to write to a specific memory location

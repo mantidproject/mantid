@@ -165,7 +165,7 @@ Property *get(IPropertyManager &self, const std::string &name,
     return Registry::PropertyWithValueFactory::create(name, value, 0).release();
   }
 }
-}
+} // namespace
 
 void export_IPropertyManager() {
   register_ptr_to_python<IPropertyManager *>();

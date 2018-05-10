@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

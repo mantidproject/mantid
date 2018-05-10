@@ -1,8 +1,8 @@
 #ifndef VATESPARAVIEWAPPLICATION_H_
 #define VATESPARAVIEWAPPLICATION_H_
 
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidKernel/Logger.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
 #include <QObject>
 #include <QPointer>
@@ -57,7 +57,7 @@ private:
   Mantid::Kernel::Logger m_logger;
   bool m_behaviorsSetup;
 };
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 #endif

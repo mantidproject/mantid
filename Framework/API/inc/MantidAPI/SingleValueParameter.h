@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_SingleValueParameter_H_
 #define MANTID_MDALGORITHMS_SingleValueParameter_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -166,7 +166,7 @@ std::string SingleValueParameter<Derived, ValType>::toXMLString() const {
     std::string getName() const override { return #classname; }                \
     classname *clone() const override { return new classname(m_value); }       \
   };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

@@ -133,12 +133,12 @@ void PeakFitResult::setRecord(size_t ipeak, const double cost,
 
   return;
 }
-}
+} // namespace FitPeaksAlgorithm
 
 //----------------------------------------------------------------------------------------------
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
-  */
+ */
 size_t findXIndex(const std::vector<double> &vecx, double x) {
   size_t index;
   if (x <= vecx.front()) {
@@ -753,7 +753,8 @@ void FitPeaks::convertParametersNameToIndex() {
       // out-of-range index is thus set to this
       g_log.warning() << "Given peak parameter " << paramName
                       << " is not an allowed parameter of peak "
-                         "function " << m_peakFunction->name() << "\n";
+                         "function "
+                      << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
     }
   }
@@ -2101,8 +2102,7 @@ void FitPeaks::writeFitResult(
       // case for fit peak with signals
       for (size_t iparam = 0;
            iparam <
-               fit_result
-                   ->getNumberParameters(); // peak_parameters[ipeak].size();
+           fit_result->getNumberParameters(); // peak_parameters[ipeak].size();
            ++iparam) {
         size_t col_index = iparam + 2;
         if (col_index >= m_fittedParamTable->columnCount()) {

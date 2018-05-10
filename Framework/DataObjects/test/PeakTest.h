@@ -1,16 +1,16 @@
 #ifndef MANTID_DATAOBJECTS_PEAKTEST_H_
 #define MANTID_DATAOBJECTS_PEAKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MockObjects.h"
-#include "MantidKernel/Timer.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
 #include "MantidDataObjects/Peak.h"
@@ -29,7 +29,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe;
   return out;
 }
-}
+} // namespace boost
 
 class PeakTest : public CxxTest::TestSuite {
 private:

@@ -2,5 +2,5 @@
 #include "MantidKernel/System.h"
 
 namespace Mantid {
-namespace DataObjects {} // namespace Mantid
-} // namespace DataObjects
+namespace DataObjects {} // namespace DataObjects
+} // namespace Mantid

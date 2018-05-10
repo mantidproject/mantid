@@ -146,7 +146,7 @@ private:
   size_t m_nDimensions = 3;
 };
 
-} // namespace DataHandling
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_ */

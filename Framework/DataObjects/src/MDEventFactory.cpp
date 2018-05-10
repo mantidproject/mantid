@@ -1,26 +1,26 @@
-#include <boost/shared_ptr.hpp>
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include <boost/shared_ptr.hpp>
 
-#include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDBin.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 
 // We need to include the .cpp files so that the declarations are picked up
 // correctly. Weird, I know.
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13
-#include "MantidDataObjects/MDBoxBase.tcc"
+#include "MantidDataObjects/MDBin.tcc"
 #include "MantidDataObjects/MDBox.tcc"
+#include "MantidDataObjects/MDBoxBase.tcc"
+#include "MantidDataObjects/MDBoxIterator.tcc"
 #include "MantidDataObjects/MDEventWorkspace.tcc"
 #include "MantidDataObjects/MDGridBox.tcc"
-#include "MantidDataObjects/MDBin.tcc"
-#include "MantidDataObjects/MDBoxIterator.tcc"
 
 namespace Mantid {
 namespace DataObjects {
@@ -222,8 +222,8 @@ accept events -- not used for MDGridBox
 API::IMDNode *MDEventFactory::createBox(
     size_t nDimensions, MDEventFactory::BoxType Type,
     API::BoxController_sptr &splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
     const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
 
   if (nDimensions > MAX_MD_DIMENSIONS_NUM)
@@ -270,7 +270,7 @@ std::vector<MDEventFactory::fpCreateMDWS>
  * workspace
  * @param preferredNormalizationHisto: the preferred normalization for a derived
  * histo workspace
-*/
+ */
 template <size_t nd>
 API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
     const std::string &eventType,
@@ -294,7 +294,7 @@ API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
  * @param preferredNormalization: the preferred normalization of the workspace
  * @param preferredNormalizationHisto: the preferred normalization of the
  * derived histo workspace
-*/
+ */
 template <>
 API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
     const std::string &eventType,
@@ -318,71 +318,71 @@ API::IMDNode *MDEventFactory::createMDBoxWrong(
 }
 /**Method to create MDBox for lean events (Constructor wrapper) with given
  * number of dimensions
-   * @param splitter :: BoxController that controls how boxes split
-   * @param extentsVector :: vector defining the extents of the box in all
+ * @param splitter :: BoxController that controls how boxes split
+ * @param extentsVector :: vector defining the extents of the box in all
  * n-dimensions
-   * @param depth :: splitting depth of the new box.
-   * @param nBoxEvents :: number of events to reserve memory for (if needed).
-   * @param boxID :: id for the given box
-*/
+ * @param depth :: splitting depth of the new box.
+ * @param nBoxEvents :: number of events to reserve memory for (if needed).
+ * @param boxID :: id for the given box
+ */
 template <size_t nd>
 API::IMDNode *MDEventFactory::createMDBoxLean(
     API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
     const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
   return new MDBox<MDLeanEvent<nd>, nd>(splitter, depth, extentsVector,
                                         nBoxEvents, boxID);
 }
 /**Method to create MDBox for events (Constructor wrapper) with given number of
  * dimensions
-   * @param splitter :: BoxController that controls how boxes split
-   * @param extentsVector :: vector defining the extents of the box in all
+ * @param splitter :: BoxController that controls how boxes split
+ * @param extentsVector :: vector defining the extents of the box in all
  * n-dimensions
-   * @param depth :: splitting depth of the new box.
-   * @param nBoxEvents :: number of events to reserve memory for (if needed).
-   * @param boxID :: id for the given box
-*/
+ * @param depth :: splitting depth of the new box.
+ * @param nBoxEvents :: number of events to reserve memory for (if needed).
+ * @param boxID :: id for the given box
+ */
 template <size_t nd>
 API::IMDNode *MDEventFactory::createMDBoxFat(
     API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
     const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
   return new MDBox<MDEvent<nd>, nd>(splitter, depth, extentsVector, nBoxEvents,
                                     boxID);
 }
 /**Method to create MDGridBox for lean events (Constructor wrapper) with given
  * number of dimensions
-   * @param splitter :: BoxController that controls how boxes split
-   * @param extentsVector :: vector defining the extents of the box in all
+ * @param splitter :: BoxController that controls how boxes split
+ * @param extentsVector :: vector defining the extents of the box in all
  * n-dimensions
-   * @param depth :: splitting depth of the new box.
-   * @param nBoxEvents  -- not used
-   * @param boxID ::   --- not used
-*/
+ * @param depth :: splitting depth of the new box.
+ * @param nBoxEvents  -- not used
+ * @param boxID ::   --- not used
+ */
 template <size_t nd>
 API::IMDNode *MDEventFactory::createMDGridBoxLean(
     API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
     const uint32_t depth, const size_t /*nBoxEvents*/, const size_t /*boxID*/) {
   return new MDGridBox<MDLeanEvent<nd>, nd>(splitter, depth, extentsVector);
 }
 /**Method to create MDGridBox for events (Constructor wrapper) with given number
  * of dimensions
-   * @param splitter :: BoxController that controls how boxes split
-   * @param extentsVector :: vector defining the extents of the box in all
+ * @param splitter :: BoxController that controls how boxes split
+ * @param extentsVector :: vector defining the extents of the box in all
  * n-dimensions
-   * @param depth :: splitting depth of the new box.
-   * @param nBoxEvents  -- not used
-   * @param boxID ::   --- not used
-*/
+ * @param depth :: splitting depth of the new box.
+ * @param nBoxEvents  -- not used
+ * @param boxID ::   --- not used
+ */
 template <size_t nd>
 API::IMDNode *MDEventFactory::createMDGridBoxFat(
     API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
     const uint32_t depth, const size_t /*nBoxEvents*/, const size_t /*boxID*/) {
   return new MDGridBox<MDEvent<nd>, nd>(splitter, depth, extentsVector);
 }
@@ -436,5 +436,5 @@ public:
 // with events factory
 LOOP<MDEventFactory::MAX_MD_DIMENSIONS_NUM> MDEventFactory::CODE_GENERATOR;
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

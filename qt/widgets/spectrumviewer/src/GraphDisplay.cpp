@@ -3,10 +3,10 @@
 #include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
-#include <boost/algorithm/clamp.hpp>
 #include <QHeaderView>
 #include <QString>
 #include <QVector>
+#include <boost/algorithm/clamp.hpp>
 #include <qwt_scale_engine.h>
 
 namespace MantidQt {

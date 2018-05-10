@@ -1,7 +1,7 @@
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/Component.h"
 
 namespace Mantid {
 namespace Geometry {

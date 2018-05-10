@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/ReflectometryWorkflowBase.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -22,7 +22,7 @@ namespace {
  * @return : True if negative.
  */
 bool checkNotPositive(const int value) { return value < 0; }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 

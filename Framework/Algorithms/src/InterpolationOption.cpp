@@ -2,8 +2,8 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/make_unique.h"
 
 #include <cassert>
 
@@ -13,11 +13,11 @@ std::string PROP_NAME("Interpolation");
 std::string LINEAR_OPT("Linear");
 std::string CSPLINE_OPT("CSpline");
 std::vector<std::string> OPTIONS{LINEAR_OPT, CSPLINE_OPT};
-}
+} // namespace
 
 namespace Mantid {
-using HistogramData::interpolateLinearInplace;
 using HistogramData::interpolateCSplineInplace;
+using HistogramData::interpolateLinearInplace;
 using HistogramData::minSizeForCSplineInterpolation;
 using HistogramData::minSizeForLinearInterpolation;
 using Kernel::Property;

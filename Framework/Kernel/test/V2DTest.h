@@ -4,11 +4,11 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Exception.h"
-#include <cxxtest/TestSuite.h>
 #include <cfloat>
+#include <cxxtest/TestSuite.h>
 #include <limits>
 
 using Mantid::Kernel::V2D;

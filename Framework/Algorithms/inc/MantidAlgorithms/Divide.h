@@ -97,7 +97,7 @@ private:
   bool m_warnOnZeroDivide = true;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_DIVIDE_H_*/

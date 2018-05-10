@@ -1,8 +1,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
 #include "boost/make_shared.hpp"
@@ -28,13 +28,13 @@ std::map<std::string, AbstractDoubleValueExtractor_sptr>
                        boost::make_shared<NumberDoubleValueExtractor>())}};
 
 /** Constructor with workspace argument
-  *
-  * This constructor directly takes a matrix workspace and extracts instrument
-  *and run information.
-  *
-  * @param matrixWorkspace :: Workspace with a valid POLDI instrument and run
-  *information
-  */
+ *
+ * This constructor directly takes a matrix workspace and extracts instrument
+ *and run information.
+ *
+ * @param matrixWorkspace :: Workspace with a valid POLDI instrument and run
+ *information
+ */
 PoldiInstrumentAdapter::PoldiInstrumentAdapter(
     const MatrixWorkspace_const_sptr &matrixWorkspace) {
   initializeFromInstrumentAndRun(matrixWorkspace->getInstrument(),
@@ -42,58 +42,58 @@ PoldiInstrumentAdapter::PoldiInstrumentAdapter(
 }
 
 /** Constructor with instrument and run information arguments
-  *
-  * This constructor internall calls
-  *PoldiInstrumentAdapter::initializeFromInstrumentAndRun.
-  *
-  * @param mantidInstrument :: Const shared pointer to
-  *Mantid::Geometry::Instrument
-  * @param runInformation :: Const Reference to Mantid::API::Run object
-  */
+ *
+ * This constructor internall calls
+ *PoldiInstrumentAdapter::initializeFromInstrumentAndRun.
+ *
+ * @param mantidInstrument :: Const shared pointer to
+ *Mantid::Geometry::Instrument
+ * @param runInformation :: Const Reference to Mantid::API::Run object
+ */
 PoldiInstrumentAdapter::PoldiInstrumentAdapter(
     const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
   initializeFromInstrumentAndRun(mantidInstrument, runInformation);
 }
 
 /** Returns the chopper stored in the adapter
-  *
-  * @return Abstract chopper, configured according to instrument and run
-  *(chopperspeed).
-  */
+ *
+ * @return Abstract chopper, configured according to instrument and run
+ *(chopperspeed).
+ */
 PoldiAbstractChopper_sptr PoldiInstrumentAdapter::chopper() const {
   return m_chopper;
 }
 
 /** Returns the detector stored in the adapter
-  *
-  * @return Abstract detector, configured with the data in instrument.
-  */
+ *
+ * @return Abstract detector, configured with the data in instrument.
+ */
 PoldiAbstractDetector_sptr PoldiInstrumentAdapter::detector() const {
   return m_detector;
 }
 
 /** Returns the spectrum stored in the adapter
-  *
-  * @return PoldiSourceSpectrum, as given in the insturment configuration.
-  */
+ *
+ * @return PoldiSourceSpectrum, as given in the insturment configuration.
+ */
 PoldiSourceSpectrum_sptr PoldiInstrumentAdapter::spectrum() const {
   return m_spectrum;
 }
 
 /** Initializes object from POLDI instrument definition and run information
-  *
-  * With the Instrument and Run data provided in the arguments, the resulting
-  *POLDI utility objects are
-  * created. Currently this is a detector, a chopper and the neutron source
-  *spectrum.
-  * When a NULL-instrument pointer is passed in, or the chopperspeed-property is
-  *not present in the
-  * experiment log, std::runtime_error is thrown.
-  *
-  * @param mantidInstrument :: Const shared pointer to
-  *Mantid::Geometry::Instrument
-  * @param runInformation :: Const Reference to Mantid::API::Run object
-  */
+ *
+ * With the Instrument and Run data provided in the arguments, the resulting
+ *POLDI utility objects are
+ * created. Currently this is a detector, a chopper and the neutron source
+ *spectrum.
+ * When a NULL-instrument pointer is passed in, or the chopperspeed-property is
+ *not present in the
+ * experiment log, std::runtime_error is thrown.
+ *
+ * @param mantidInstrument :: Const shared pointer to
+ *Mantid::Geometry::Instrument
+ * @param runInformation :: Const Reference to Mantid::API::Run object
+ */
 void PoldiInstrumentAdapter::initializeFromInstrumentAndRun(
     const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
   if (!mantidInstrument) {
@@ -107,15 +107,15 @@ void PoldiInstrumentAdapter::initializeFromInstrumentAndRun(
 }
 
 /** Constructs a detector and stores it
-  *
-  * A PoldiAbstractDetector is constructed through PoldiDetectorFactory.
-  *Currently, the He3-detector
-  * is hard-coded at this place, but as soon as the new detector is available
-  *and tests
-  * have been performed, this will be changed.
-  *
-  * @param mantidInstrument :: Mantid instrument with POLDI detector setup data.
-  */
+ *
+ * A PoldiAbstractDetector is constructed through PoldiDetectorFactory.
+ *Currently, the He3-detector
+ * is hard-coded at this place, but as soon as the new detector is available
+ *and tests
+ * have been performed, this will be changed.
+ *
+ * @param mantidInstrument :: Mantid instrument with POLDI detector setup data.
+ */
 void PoldiInstrumentAdapter::setDetector(
     const Instrument_const_sptr &mantidInstrument) {
   PoldiDetectorFactory detectorFactory;
@@ -125,15 +125,15 @@ void PoldiInstrumentAdapter::setDetector(
 }
 
 /** Constructs a chopper and stores it
-  *
-  * A PoldiAbstractChopper is constructed by PoldiChopperFactory. The
-  *configuration is taken
-  * from the passed instrument and the run information (for the chopper speed).
-  *
-  * @param mantidInstrument :: Mantid instrument with POLDI chopper information.
-  * @param runInformation :: Run information that contains a "chopperspeed"
-  *property.
-  */
+ *
+ * A PoldiAbstractChopper is constructed by PoldiChopperFactory. The
+ *configuration is taken
+ * from the passed instrument and the run information (for the chopper speed).
+ *
+ * @param mantidInstrument :: Mantid instrument with POLDI chopper information.
+ * @param runInformation :: Run information that contains a "chopperspeed"
+ *property.
+ */
 void PoldiInstrumentAdapter::setChopper(
     const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
   double rawChopperSpeed = getChopperSpeedFromRun(runInformation);
@@ -288,14 +288,14 @@ PoldiInstrumentAdapter::getExtractorForProperty(
 }
 
 /** Constructs a spectrum and stores it
-  *
-  * This method constructs a PoldiSourceSpectrum object with the spectrum data
-  *provided
-  * by the instrument.
-  *
-  * @param mantidInstrument :: Mantid instrument containing a lookup table with
-  *a neutron wavelength spectrum.
-  */
+ *
+ * This method constructs a PoldiSourceSpectrum object with the spectrum data
+ *provided
+ * by the instrument.
+ *
+ * @param mantidInstrument :: Mantid instrument containing a lookup table with
+ *a neutron wavelength spectrum.
+ */
 void PoldiInstrumentAdapter::setSpectrum(
     const Instrument_const_sptr &mantidInstrument) {
   m_spectrum = boost::make_shared<PoldiSourceSpectrum>(mantidInstrument);

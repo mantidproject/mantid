@@ -1,6 +1,6 @@
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 
 using Mantid::API::IMDEventWorkspace;
 using Mantid::API::WorkspaceProperty; // NOLINT

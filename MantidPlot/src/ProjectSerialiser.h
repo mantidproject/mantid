@@ -3,19 +3,19 @@
 
 #include <string>
 
+#include <QApplication>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QStringList>
-#include <QDir>
-#include <QApplication>
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include "qstring.h"
 #include "Folder.h"
 #include "Graph3D.h"
 #include "Mantid/MantidMatrix.h"
+#include "qstring.h"
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
@@ -148,7 +148,7 @@ private:
   /// Check if a vector of strings contains a string
   bool contains(const std::vector<std::string> &vec, const std::string &value);
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // PROJECT_SERIALISER_H

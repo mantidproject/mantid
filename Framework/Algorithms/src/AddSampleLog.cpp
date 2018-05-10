@@ -1,14 +1,14 @@
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 
 #include <string>
 
@@ -21,7 +21,7 @@ static const std::string autoTypeOption = "AutoDetect";
 static const std::string stringLogOption = "String";
 static const std::string numberLogOption = "Number";
 static const std::string numberSeriesLogOption = "Number Series";
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -78,9 +78,10 @@ void AddSampleLog::init() {
   declareProperty("TimeUnit", "Second",
                   boost::make_shared<Kernel::StringListValidator>(time_units),
                   "The unit of the time of the input workspace");
-  declareProperty("RelativeTime", true, "If specified as True, then then the "
-                                        "time stamps are relative to the run "
-                                        "start time of the target workspace.");
+  declareProperty("RelativeTime", true,
+                  "If specified as True, then then the "
+                  "time stamps are relative to the run "
+                  "start time of the target workspace.");
 }
 
 /**

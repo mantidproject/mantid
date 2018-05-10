@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_CONVERTDIFFCAL_H_
 #define MANTID_ALGORITHMS_CONVERTDIFFCAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidKernel/System.h"
 namespace Mantid {
 namespace Algorithms {
 

@@ -34,14 +34,16 @@ void CalMuonDeadTime::init() {
                   "The name of the TableWorkspace in which to store the list "
                   "of deadtimes for each spectrum");
 
-  declareProperty("FirstGoodData", 0.5, "The first good data point in units of "
-                                        "micro-seconds as measured from time "
-                                        "zero (default to 0.5)",
+  declareProperty("FirstGoodData", 0.5,
+                  "The first good data point in units of "
+                  "micro-seconds as measured from time "
+                  "zero (default to 0.5)",
                   Direction::Input);
 
-  declareProperty("LastGoodData", 5.0, "The last good data point in units of "
-                                       "micro-seconds as measured from time "
-                                       "zero (default to 5.0)",
+  declareProperty("LastGoodData", 5.0,
+                  "The last good data point in units of "
+                  "micro-seconds as measured from time "
+                  "zero (default to 5.0)",
                   Direction::Input);
 
   declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
@@ -225,5 +227,5 @@ void CalMuonDeadTime::exec() {
   setProperty("DeadTimeTable", outTable);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

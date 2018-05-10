@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DeleteWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include <cxxtest/TestSuite.h>
 

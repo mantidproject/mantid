@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/FilterByLogValue.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;

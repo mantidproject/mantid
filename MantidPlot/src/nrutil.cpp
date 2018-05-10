@@ -12,7 +12,7 @@ Mantid::Kernel::Logger &LOGGER() {
   static Mantid::Kernel::Logger glog("nrutil");
   return glog;
 }
-}
+} // namespace
 
 int IMIN(int ia, int ib) {
   if (ia <= ib)
@@ -152,7 +152,7 @@ void savgol(double *c, int np, int nl, int nr, int ld, int m) {
     // of powers of an integer with the inverse matrix row.
     fac = 1.0;
     for (mm = 1; mm <= m; mm++)
-      sum += b[mm + 1] *(fac *= k);
+      sum += b[mm + 1] * (fac *= k);
 
     kk = ((np - k) % np) + 1; // Store in wrap-around order.
     c[kk] = sum;
@@ -164,15 +164,15 @@ void savgol(double *c, int np, int nl, int nr, int ld, int m) {
 }
 
 /**************************************************************
-* Given an N x N matrix A, this routine replaces it by the LU *
-* decomposition of a rowwise permutation of itself. A and N   *
-* are input. INDX is an output vector which records the row   *
-* permutation effected by the partial pivoting; D is output   *
-* as -1 or 1, depending on whether the number of row inter-   *
-* changes was even or odd, respectively. This routine is used *
-* in combination with LUBKSB to solve linear equations or to  *
-* invert a matrix. Return code is 1, if matrix is singular.   *
-**************************************************************/
+ * Given an N x N matrix A, this routine replaces it by the LU *
+ * decomposition of a rowwise permutation of itself. A and N   *
+ * are input. INDX is an output vector which records the row   *
+ * permutation effected by the partial pivoting; D is output   *
+ * as -1 or 1, depending on whether the number of row inter-   *
+ * changes was even or odd, respectively. This routine is used *
+ * in combination with LUBKSB to solve linear equations or to  *
+ * invert a matrix. Return code is 1, if matrix is singular.   *
+ **************************************************************/
 void ludcmp(double **a, int n, int *indx, double *d) {
   int i(0), imax(0), j(0), k(0);
   double big, dum, sum, temp;
@@ -228,15 +228,15 @@ void ludcmp(double **a, int n, int *indx, double *d) {
 }
 
 /*****************************************************************
-* Solves the set of N linear equations A . X = B.  Here A is    *
-* input, not as the matrix A but rather as its LU decomposition, *
-* determined by the routine LUDCMP. INDX is input as the permuta-*
-* tion vector returned by LUDCMP. B is input as the right-hand   *
-* side vector B, and returns with the solution vector X. A, N and*
-* INDX are not modified by this routine and can be used for suc- *
-* cessive calls with different right-hand sides. This routine is *
-* also efficient for plain matrix inversion.                     *
-*****************************************************************/
+ * Solves the set of N linear equations A . X = B.  Here A is    *
+ * input, not as the matrix A but rather as its LU decomposition, *
+ * determined by the routine LUDCMP. INDX is input as the permuta-*
+ * tion vector returned by LUDCMP. B is input as the right-hand   *
+ * side vector B, and returns with the solution vector X. A, N and*
+ * INDX are not modified by this routine and can be used for suc- *
+ * cessive calls with different right-hand sides. This routine is *
+ * also efficient for plain matrix inversion.                     *
+ *****************************************************************/
 void lubksb(double **a, int n, int *indx, double b[]) {
   int i, ii = 0, ip, j;
   double sum;

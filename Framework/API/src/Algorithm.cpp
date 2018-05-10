@@ -491,7 +491,8 @@ bool Algorithm::execute() {
     callProcessGroups = this->checkGroups();
   } catch (std::exception &ex) {
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << "\n" << ex.what() << "\n";
+                        << "\n"
+                        << ex.what() << "\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     m_running = false;
@@ -596,22 +597,23 @@ bool Algorithm::execute() {
       setExecuted(true);
 
       // Log that execution has completed.
-      getLogger().debug("Time to validate properties: " +
-                        std::to_string(timingPropertyValidation) +
-                        " seconds\n" + "Time for other input validation: " +
-                        std::to_string(timingInputValidation) + " seconds\n" +
-                        "Time for other initialization: " +
-                        std::to_string(timingInit) + " seconds\n" +
-                        "Time to run exec: " + std::to_string(timingExec) +
-                        " seconds\n");
+      getLogger().debug(
+          "Time to validate properties: " +
+          std::to_string(timingPropertyValidation) + " seconds\n" +
+          "Time for other input validation: " +
+          std::to_string(timingInputValidation) + " seconds\n" +
+          "Time for other initialization: " + std::to_string(timingInit) +
+          " seconds\n" + "Time to run exec: " + std::to_string(timingExec) +
+          " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error() << "Error in execution of algorithm "
-                            << this->name() << '\n' << ex.what() << '\n';
+        getLogger().error()
+            << "Error in execution of algorithm " << this->name() << '\n'
+            << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -621,8 +623,9 @@ bool Algorithm::execute() {
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error() << "Logic Error in execution of algorithm "
-                            << this->name() << '\n' << ex.what() << '\n';
+        getLogger().error()
+            << "Logic Error in execution of algorithm " << this->name() << '\n'
+            << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -646,7 +649,8 @@ bool Algorithm::execute() {
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << ":\n" << ex.what() << "\n";
+                        << ":\n"
+                        << ex.what() << "\n";
     this->unlockWorkspaces();
     throw;
   }
@@ -1778,9 +1782,9 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
     getLogger().error() << error << "\n";
     throw(std::runtime_error(error));
   }
-  getLogger().information() << "MPI Rank " << communicator().rank()
-                            << " running with "
-                            << Parallel::toString(executionMode) << '\n';
+  getLogger().information()
+      << "MPI Rank " << communicator().rank() << " running with "
+      << Parallel::toString(executionMode) << '\n';
   return executionMode;
 }
 

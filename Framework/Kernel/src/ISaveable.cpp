@@ -28,10 +28,10 @@ ISaveable::ISaveable(const ISaveable &other)
 //---------------------------------------------------------------------------
 
 /** Set the start/end point in the file where the events are located
-* @param newPos :: start point,
-* @param newSize :: number of events in the file
-* @param wasSaved :: flag to mark if the info was saved, by default it does
-*/
+ * @param newPos :: start point,
+ * @param newSize :: number of events in the file
+ * @param wasSaved :: flag to mark if the info was saved, by default it does
+ */
 void ISaveable::setFilePosition(uint64_t newPos, size_t newSize,
                                 bool wasSaved) {
   std::lock_guard<std::mutex> lock(m_setter);
@@ -61,12 +61,12 @@ void ISaveable::saveAt(uint64_t newPos, uint64_t newSize) {
 }
 
 /** Method stores the position of the object in Disc buffer and returns the size
-* of this object for disk buffer to store
-* @param bufPosition -- the allocator which specifies the position of the object
-* in the list of objects to write
-* @returns the size of the object it currently occupies in memory. This size is
-* also stored by the object itself for further references
-*/
+ * of this object for disk buffer to store
+ * @param bufPosition -- the allocator which specifies the position of the
+ * object in the list of objects to write
+ * @returns the size of the object it currently occupies in memory. This size is
+ * also stored by the object itself for further references
+ */
 size_t
 ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition) {
   std::lock_guard<std::mutex> lock(m_setter);
@@ -86,5 +86,5 @@ void ISaveable::clearBufferState() {
   m_BufPosition = boost::optional<std::list<ISaveable *>::iterator>();
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

@@ -241,9 +241,8 @@ PowerScaleTransformation::~PowerScaleTransformation() {}
  */
 double PowerScaleTransformation::xForm(double s, double s1, double s2,
                                        double p1, double p2) const {
-  return p1 +
-         (p2 - p1) / (pow(s2, nth_power) - pow(s1, nth_power)) *
-             (pow(s, nth_power) - pow(s1, nth_power));
+  return p1 + (p2 - p1) / (pow(s2, nth_power) - pow(s1, nth_power)) *
+                  (pow(s, nth_power) - pow(s1, nth_power));
 }
 
 /*

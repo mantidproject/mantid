@@ -182,10 +182,10 @@ PeriodicTableWidget::elementsSelectedToString(QVector<QPushButton *> elements) {
 
 QString PeriodicTableWidget::getAllCheckedElementsStr() {
   /*checking all groups of buttons to see if they
-  * have been selected in the Widget.
-  * if they have been selected, the button text is added to
-  * the comma-separated list of elements checked.
-  */
+   * have been selected in the Widget.
+   * if they have been selected, the button text is added to
+   * the comma-separated list of elements checked.
+   */
   QString allCheckedElementsStr = "";
   allCheckedElementsStr += elementsSelectedToString(Actinides);
   allCheckedElementsStr += elementsSelectedToString(AlkaliMetals);

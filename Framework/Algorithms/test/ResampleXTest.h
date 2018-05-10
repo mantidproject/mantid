@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ResampleX.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/ResampleX.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::ResampleX;

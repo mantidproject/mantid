@@ -1,8 +1,8 @@
-#include <QDialogButtonBox>
-#include <QUrl>
 #include "MantidQtWidgets/SliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "ui_PeaksViewerOverlayDialog.h"
+#include <QDialogButtonBox>
+#include <QUrl>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -162,5 +162,5 @@ void PeaksViewerOverlayDialog::onHelp() {
   MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

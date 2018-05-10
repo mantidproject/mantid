@@ -64,7 +64,7 @@ private:
   /// Surface
   boost::shared_ptr<ProjectionSurface> m_surface;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MANTIDGLWIDGET_H_*/

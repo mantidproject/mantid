@@ -37,7 +37,7 @@ void createOrUpdateValue(API::Run &run, const std::string &name,
   }
   timeSeries->addValue(time, value);
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AddNote)

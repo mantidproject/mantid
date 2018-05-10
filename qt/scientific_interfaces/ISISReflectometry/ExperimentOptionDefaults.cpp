@@ -48,5 +48,5 @@ std::ostream &operator<<(std::ostream &os,
   os << "' }" << std::endl;
   return os;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

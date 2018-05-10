@@ -3,18 +3,18 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreateDummyCalFile.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include "MantidKernel/ConfigService.h"
 
-#include <queue>
-#include <fstream>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <fstream>
+#include <queue>
 
 namespace Mantid {
 namespace Algorithms {
@@ -257,5 +257,5 @@ void CreateDummyCalFile::writeHeaders(std::ostream &os,
      << "\n";
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -44,7 +44,7 @@ public:
   /// destructor
   virtual ~ZoomableOnDemand() {}
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* ZOOMABLEONDEMAND_H_ */

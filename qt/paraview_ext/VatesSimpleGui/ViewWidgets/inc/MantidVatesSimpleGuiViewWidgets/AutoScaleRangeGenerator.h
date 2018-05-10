@@ -30,9 +30,9 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include <QList>
 
 class pqPipelineSource;
@@ -97,7 +97,7 @@ private:
   /// Md Settings
   MantidQt::API::MdSettings m_mdSettings;
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 #endif

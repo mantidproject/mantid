@@ -1,9 +1,9 @@
 #ifndef MANTID_API_ISPECTRUMTEST_H_
 #define MANTID_API_ISPECTRUMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidTestHelpers/FakeObjects.h"

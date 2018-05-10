@@ -91,6 +91,6 @@ void QtDataProcessorOptionsDialog::loadOptions() {
   }
 }
 
-} // DataProcessor
-} // MantidWidgets
-} // MantidQt
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

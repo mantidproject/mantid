@@ -259,7 +259,7 @@ public:
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
           m_peaks.push_back(boost::make_shared<
-              PeakRepresentationSphereExposeProtectedWrapper>(
+                            PeakRepresentationSphereExposeProtectedWrapper>(
               peakOrigin, radius, innerBackgroundRadius,
               outerBackgroundRadius));
         }

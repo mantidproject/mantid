@@ -79,7 +79,7 @@ protected:
   }
 };
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

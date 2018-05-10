@@ -143,5 +143,5 @@ MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

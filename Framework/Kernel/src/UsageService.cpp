@@ -4,8 +4,8 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
@@ -20,7 +20,7 @@ Kernel::Logger g_log("UsageServiceImpl");
 
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
-*/
+ */
 FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
                            const bool internal)
     : type(type), name(name), internal(internal) {}
@@ -96,7 +96,7 @@ void UsageServiceImpl::registerStartup() {
 }
 
 /** registerFeatureUsage
-*/
+ */
 void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
                                             const bool internal) {
@@ -191,8 +191,8 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 }
 
 /**
-* This puts together the system information for the json document.
-*/
+ * This puts together the system information for the json document.
+ */
 ::Json::Value UsageServiceImpl::generateFeatureHeader() {
   ::Json::Value header;
 
@@ -203,8 +203,8 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 }
 
 /**
-* This puts together the system information for the json document.
-*/
+ * This puts together the system information for the json document.
+ */
 std::string UsageServiceImpl::generateStartupMessage() {
   ::Json::Value message;
 
@@ -279,17 +279,17 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
 //--------------------------------------------------------------------------------------------
 /**
-* Asynchronous execution
-*/
+ * Asynchronous execution
+ */
 
 /**Async method for sending startup messages
-*/
+ */
 int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
   return this->sendReport(message, m_url + "/api/usage");
 }
 
 /**Async method for sending feature messages
-*/
+ */
 int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
   return this->sendReport(message, m_url + "/api/feature");
 }
@@ -306,7 +306,8 @@ int UsageServiceImpl::sendReport(const std::string &message,
   } catch (Mantid::Kernel::Exception::InternetError &e) {
     status = e.errorCode();
     g_log.information() << "Call to \"" << url << "\" responded with " << status
-                        << "\n" << e.what() << "\n";
+                        << "\n"
+                        << e.what() << "\n";
   }
 
   return status;

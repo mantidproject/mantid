@@ -26,7 +26,7 @@ void run_wait_all(const Communicator &comm) {
   comm.send(dest, tag2, data);
   TS_ASSERT_THROWS_NOTHING(wait_all(requests.begin(), requests.end()));
 }
-}
+} // namespace
 
 class NonblockingTest : public CxxTest::TestSuite {
 public:

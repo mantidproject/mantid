@@ -1,6 +1,5 @@
 #include "MantidDataHandling/LoadMLZ.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
@@ -9,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
@@ -91,11 +91,11 @@ void LoadMLZ::exec() {
 }
 
 /**
-* Return the confidence with which this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with which this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadMLZ::confidence(Kernel::NexusDescriptor &descriptor) const {
   // fields existent only at the MLZ
   if (descriptor.pathExists("/Scan/wavelength") &&
@@ -144,7 +144,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
 
 /**
  * Set the instrument name along with its path on the nexus file
-*/
+ */
 void LoadMLZ::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
 
   m_instrumentPath = m_mlzloader.findInstrumentNexusPath(firstEntry);
@@ -261,12 +261,12 @@ void LoadMLZ::loadTimeDetails(NeXus::NXEntry &entry) {
 }
 
 /**
-* Load information about the run.
-* People from ISIS have this...
-* TODO: They also have a lot of info in XML format!
-*
-* @param entry :: The Nexus entry
-*/
+ * Load information about the run.
+ * People from ISIS have this...
+ * TODO: They also have a lot of info in XML format!
+ *
+ * @param entry :: The Nexus entry
+ */
 void LoadMLZ::loadRunDetails(NXEntry &entry) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();

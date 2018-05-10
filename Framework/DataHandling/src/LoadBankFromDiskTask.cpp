@@ -1,6 +1,6 @@
+#include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
-#include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 
@@ -8,17 +8,17 @@ namespace Mantid {
 namespace DataHandling {
 
 /** Constructor
-*
-* @param loader :: Handle to the main loader
-* @param entry_name :: The pathname of the bank to load
-* @param entry_type :: The classtype of the entry to load
-* @param numEvents :: The number of events in the bank.
-* @param oldNeXusFileNames :: Identify if file is of old variety.
-* @param prog :: an optional Progress object
-* @param ioMutex :: a mutex shared for all Disk I-O tasks
-* @param scheduler :: the ThreadScheduler that runs this task.
-* @param framePeriodNumbers :: Period numbers corresponding to each frame
-*/
+ *
+ * @param loader :: Handle to the main loader
+ * @param entry_name :: The pathname of the bank to load
+ * @param entry_type :: The classtype of the entry to load
+ * @param numEvents :: The number of events in the bank.
+ * @param oldNeXusFileNames :: Identify if file is of old variety.
+ * @param prog :: an optional Progress object
+ * @param ioMutex :: a mutex shared for all Disk I-O tasks
+ * @param scheduler :: the ThreadScheduler that runs this task.
+ * @param framePeriodNumbers :: Period numbers corresponding to each frame
+ */
 LoadBankFromDiskTask::LoadBankFromDiskTask(
     DefaultEventLoader &loader, const std::string &entry_name,
     const std::string &entry_type, const std::size_t numEvents,
@@ -37,8 +37,8 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(
 }
 
 /** Load the pulse times, if needed. This sets
-* thisBankPulseTimes to the right pointer.
-* */
+ * thisBankPulseTimes to the right pointer.
+ * */
 void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   try {
     // First, get info about the event_time_zero field in this bank
@@ -99,20 +99,20 @@ void LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file,
     if (event_index[0] == 0) {
       // One entry, only zero. This means NO events in this bank.
       m_loadError = true;
-      m_loader.alg->getLogger().debug() << "Bank " << entry_name
-                                        << " is empty.\n";
+      m_loader.alg->getLogger().debug()
+          << "Bank " << entry_name << " is empty.\n";
     }
   }
 }
 
 /** Open the event_id field and validate the contents
-*
-* @param file :: File handle for the NeXus file
-* @param start_event :: set to the index of the first event
-* @param stop_event :: set to the index of the last event + 1
-* @param event_index ::  (a list of size of # of pulses giving the index in
-*the event list for that pulse)
-*/
+ *
+ * @param file :: File handle for the NeXus file
+ * @param start_event :: set to the index of the first event
+ * @param stop_event :: set to the index of the last event + 1
+ * @param event_index ::  (a list of size of # of pulses giving the index in
+ *the event list for that pulse)
+ */
 void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
                                           size_t &start_event,
                                           size_t &stop_event,
@@ -172,13 +172,13 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
   if (stop_event > static_cast<size_t>(dim0))
     stop_event = dim0;
 
-  m_loader.alg->getLogger().debug() << entry_name << ": start_event "
-                                    << start_event << " stop_event "
-                                    << stop_event << "\n";
+  m_loader.alg->getLogger().debug()
+      << entry_name << ": start_event " << start_event << " stop_event "
+      << stop_event << "\n";
 }
 
 /** Load the event_id field, which has been open
-*/
+ */
 void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   // This is the data size
   ::NeXus::Info id_info = file.getInfo();
@@ -242,7 +242,7 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
 }
 
 /** Open and load the times-of-flight data
-*/
+ */
 void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
   auto temp = new float[m_loadSize[0]];
@@ -260,8 +260,9 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
   if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning()
-        << "Entry " << entry_name << "'s event_time_offset field is too small "
-                                     "to load the desired data.\n";
+        << "Entry " << entry_name
+        << "'s event_time_offset field is too small "
+           "to load the desired data.\n";
     m_loadError = true;
   }
 
@@ -280,8 +281,9 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     file.getAttr("units", units);
     if (units != "microsecond") {
       m_loader.alg->getLogger().warning()
-          << "Entry " << entry_name << "'s event_time_offset field's units are "
-                                       "not microsecond. It will be skipped.\n";
+          << "Entry " << entry_name
+          << "'s event_time_offset field's units are "
+             "not microsecond. It will be skipped.\n";
       m_loadError = true;
     }
     file.closeData();
@@ -289,7 +291,7 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
 }
 
 /** Load weight of weigthed events
-*/
+ */
 void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   try {
     // First, get info about the event_weight field in this bank
@@ -406,13 +408,13 @@ void LoadBankFromDiskTask::run() {
 
   } // try block
   catch (std::exception &e) {
-    m_loader.alg->getLogger().error() << "Error while loading bank "
-                                      << entry_name << ":\n";
+    m_loader.alg->getLogger().error()
+        << "Error while loading bank " << entry_name << ":\n";
     m_loader.alg->getLogger().error() << e.what() << '\n';
     m_loadError = true;
   } catch (...) {
-    m_loader.alg->getLogger().error() << "Unspecified error while loading bank "
-                                      << entry_name << '\n';
+    m_loader.alg->getLogger().error()
+        << "Unspecified error while loading bank " << entry_name << '\n';
     m_loadError = true;
   }
 
@@ -494,11 +496,11 @@ void LoadBankFromDiskTask::run() {
 }
 
 /**
-* Interpret the value describing the number of events. If the number is
-* positive return it unchanged.
-* If the value is negative (can happen at ISIS) add 2^32 to it.
-* @param size :: The size of events value.
-*/
+ * Interpret the value describing the number of events. If the number is
+ * positive return it unchanged.
+ * If the value is negative (can happen at ISIS) add 2^32 to it.
+ * @param size :: The size of events value.
+ */
 int64_t LoadBankFromDiskTask::recalculateDataSize(const int64_t &size) {
   if (size < 0) {
     const int64_t shift = int64_t(1) << 32;

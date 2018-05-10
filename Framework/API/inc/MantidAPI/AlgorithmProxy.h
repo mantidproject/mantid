@@ -21,7 +21,7 @@ namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
 template <class O> class ActiveStarter;
 class Void;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace API {
@@ -189,7 +189,7 @@ private:
   const std::vector<std::string> m_seeAlso; ///< seeAlso of the real algorithm
   const std::string m_alias;                ///< alias to the algorithm
   const std::string m_helpURL;              ///< Optional documentation URL
-  const std::string m_summary; ///<Message to display in GUI and help.
+  const std::string m_summary; ///< Message to display in GUI and help.
   const int m_version;         ///< version of the real algorithm
 
   mutable boost::shared_ptr<Algorithm>

@@ -308,5 +308,5 @@ void UnwrapSNS::runMaskDetectors() {
         "MaskDetectors Child Algorithm has not executed successfully");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

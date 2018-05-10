@@ -2,9 +2,9 @@
 #if defined(__APPLE__)
 
 #include "MantidKernel/NetworkProxy.h"
-#include <SystemConfiguration/SystemConfiguration.h>
-#include <CoreFoundation/CoreFoundation.h>
 #include <CFNetwork/CFProxySupport.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <SystemConfiguration/SystemConfiguration.h>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -124,8 +124,9 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
           kCFAllocatorDefault, pacData, kCFStringEncodingISOLatin1);
 
       CFURLRef targetURL = CFURLCreateWithBytes(
-          kCFAllocatorDefault, reinterpret_cast<UInt8 *>(
-                                   const_cast<char *>(targetURLString.c_str())),
+          kCFAllocatorDefault,
+          reinterpret_cast<UInt8 *>(
+              const_cast<char *>(targetURLString.c_str())),
           targetURLString.size(), kCFStringEncodingUTF8, nullptr);
       if (!targetURL) {
         logger.debug("Problem with Target URI for proxy script");
@@ -168,8 +169,9 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey,
   CFNumberRef protoEnabled;
   CFNumberRef protoPort;
   CFStringRef protoHost;
-  if (enableKey && (protoEnabled = reinterpret_cast<CFNumberRef>(
-                        CFDictionaryGetValue(dict, enableKey))) &&
+  if (enableKey &&
+      (protoEnabled = reinterpret_cast<CFNumberRef>(
+           CFDictionaryGetValue(dict, enableKey))) &&
       (protoHost = reinterpret_cast<CFStringRef>(
            CFDictionaryGetValue(dict, hostKey))) &&
       (protoPort = reinterpret_cast<CFNumberRef>(

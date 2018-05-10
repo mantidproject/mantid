@@ -14,7 +14,7 @@ namespace {
 // Parameter names
 const char *ANGULAR_VEL = "AngularVelocity";
 const char *JITTER = "JitterSigma";
-}
+} // namespace
 
 /// Default constructor required by the factory
 ChopperModel::ChopperModel()
@@ -133,5 +133,5 @@ void ChopperModel::setBaseParameters(
     keyValues.erase(JITTER);
   }
 }
-}
-}
+} // namespace API
+} // namespace Mantid

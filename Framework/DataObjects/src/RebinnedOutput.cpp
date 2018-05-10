@@ -153,5 +153,5 @@ void RebinnedOutput::unfinalize(bool hasSqrdErrs, bool force) {
   m_finalized = false;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

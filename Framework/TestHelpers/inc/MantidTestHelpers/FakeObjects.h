@@ -32,9 +32,9 @@
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
+using Mantid::MantidVec;
 using Mantid::detid_t;
 using Mantid::specnum_t;
-using Mantid::MantidVec;
 
 //===================================================================================================================
 /** Helper class that implements ISpectrum */

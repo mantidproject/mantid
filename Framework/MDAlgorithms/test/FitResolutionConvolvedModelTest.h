@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_
 #define MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

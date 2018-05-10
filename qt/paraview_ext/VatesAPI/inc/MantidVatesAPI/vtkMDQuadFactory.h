@@ -66,7 +66,7 @@ private:
   /// Data source for the visualisation.
   Mantid::API::Workspace_sptr m_workspace;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

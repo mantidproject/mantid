@@ -33,9 +33,9 @@ MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
 }
 
 /**
-* Accept a drag move event and selects whether to accept the action
-* @param de :: The drag move event
-*/
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
 void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de) {
   // The event needs to be accepted here
   if (de->mimeData()->hasUrls())
@@ -43,9 +43,9 @@ void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de) {
 }
 
 /**
-* Accept a drag enter event and selects whether to accept the action
-* @param de :: The drag enter event
-*/
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
 void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de) {
   // Set the drop action to be the proposed action.
   if (de->mimeData()->hasUrls())
@@ -53,9 +53,9 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de) {
 }
 
 /**
-* Accept a drag drop event and process the data appropriately
-* @param de :: The drag drop event
-*/
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
 void MantidTreeWidget::dropEvent(QDropEvent *de) {
   const auto filenames = DropEventHelper::getFileNames(de);
   de->acceptProposedAction();
@@ -154,10 +154,10 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 }
 
 /**
-* Returns a list of all selected workspaces.  It does NOT
-* extract child workspaces from groups - it only returns
-* exactly what has been selected.
-*/
+ * Returns a list of all selected workspaces.  It does NOT
+ * extract child workspaces from groups - it only returns
+ * exactly what has been selected.
+ */
 QStringList MantidTreeWidget::getSelectedWorkspaceNames() const {
   QStringList names;
 
@@ -170,12 +170,12 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const {
 }
 
 /**
-* Filter the list of selected workspace names to account for any
-* non-MatrixWorkspaces that may have been selected.  In particular
-* WorkspaceGroups (the children of which are to be included if they are
-* MatrixWorkspaces) and TableWorkspaces (which are implicitly excluded).
-* We only want workspaces we can actually plot!
-*/
+ * Filter the list of selected workspace names to account for any
+ * non-MatrixWorkspaces that may have been selected.  In particular
+ * WorkspaceGroups (the children of which are to be included if they are
+ * MatrixWorkspaces) and TableWorkspaces (which are implicitly excluded).
+ * We only want workspaces we can actually plot!
+ */
 QList<MatrixWorkspace_const_sptr>
 MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   // Check for any selected WorkspaceGroup names and replace with the names of
@@ -217,19 +217,19 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
 }
 
 /**
-* Allows users to choose spectra from the selected workspaces by presenting them
-* with a dialog box.  Skips showing the dialog box and automatically chooses
-* workspace index 0 for all selected workspaces if one or more of the them are
-* single-spectrum workspaces.
-*
-* @param showWaterfallOpt If true, show the waterfall option on the dialog
-* @param showPlotAll :: [input] If true, show the "Plot All" button on the
-* dialog
-* @param showTiledOpt :: [input] If true, show the "Tiled" option on the dialog
-* @param isAdvanced :: [input] If true, advanced plotting being done
-* @return :: A MantidWSIndexDialog::UserInput structure listing the selected
-* options
-*/
+ * Allows users to choose spectra from the selected workspaces by presenting
+ * them with a dialog box.  Skips showing the dialog box and automatically
+ * chooses workspace index 0 for all selected workspaces if one or more of the
+ * them are single-spectrum workspaces.
+ *
+ * @param showWaterfallOpt If true, show the waterfall option on the dialog
+ * @param showPlotAll :: [input] If true, show the "Plot All" button on the
+ * dialog
+ * @param showTiledOpt :: [input] If true, show the "Tiled" option on the dialog
+ * @param isAdvanced :: [input] If true, advanced plotting being done
+ * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
+ * options
+ */
 MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
     bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt,
     bool isAdvanced) const {
@@ -296,16 +296,16 @@ MantidItemSortScheme MantidTreeWidget::getSortScheme() const {
 }
 
 /**
-* Sort the items according to the current sort scheme and order.
-*/
+ * Sort the items according to the current sort scheme and order.
+ */
 void MantidTreeWidget::sort() { sortItems(sortColumn(), m_sortOrder); }
 
 /**
-* Log a warning message.
-* @param msg :: A message to log.
-*/
+ * Log a warning message.
+ * @param msg :: A message to log.
+ */
 void MantidTreeWidget::logWarningMessage(const std::string &msg) {
   treelog.warning(msg);
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -12,8 +12,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SavePDFGui)

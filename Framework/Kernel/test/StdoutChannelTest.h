@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/StdoutChannel.h"
+#include <Poco/AutoPtr.h>
 #include <Poco/Logger.h>
 #include <Poco/NullChannel.h>
-#include <Poco/AutoPtr.h>
 
 using namespace Mantid::Kernel;
 

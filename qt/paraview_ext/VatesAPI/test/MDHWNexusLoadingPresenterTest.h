@@ -1,28 +1,28 @@
 #ifndef MDHW_NEXUS_LOADING_PRESENTER_TEST_H_
 #define MDHW_NEXUS_LOADING_PRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkSmartPointer.h>
-#include <vtkMatrix4x4.h>
-#include <vtkPVChangeOfBasisHelper.h>
-#include <vtkDataArray.h>
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
-#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
-#include "MantidVatesAPI/TimeToTimeStep.h"
+#include <cxxtest/TestSuite.h>
+#include <vtkDataArray.h>
+#include <vtkMatrix4x4.h>
+#include <vtkPVChangeOfBasisHelper.h>
+#include <vtkSmartPointer.h>
+#include <vtkUnstructuredGrid.h>
 
+#include "MockObjects.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MockObjects.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 
 #include <limits>
 
@@ -161,8 +161,9 @@ public:
     auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
         normalizationOption, time);
 
-    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-                              normalizationOption))
+    factory
+        ->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+            normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
             normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
@@ -185,10 +186,22 @@ public:
     }
 
     // Assert that the COB matrix is a skewed matrix with the values below.
-    double expectedElements[16] = {
-        1.0, 0.50029480938126836, -0.0001890681732465397, 0.0, 0.0,
-        0.86585512859032043, 0.0015546654605598377, 0.0, 0.0, 0.0,
-        0.99999877363351386, 0.0, 0.0, 0.0, 0.0, 1.0};
+    double expectedElements[16] = {1.0,
+                                   0.50029480938126836,
+                                   -0.0001890681732465397,
+                                   0.0,
+                                   0.0,
+                                   0.86585512859032043,
+                                   0.0015546654605598377,
+                                   0.0,
+                                   0.0,
+                                   0.0,
+                                   0.99999877363351386,
+                                   0.0,
+                                   0.0,
+                                   0.0,
+                                   0.0,
+                                   1.0};
     vtkSmartPointer<vtkMatrix4x4> cobMatrix =
         vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(product);
 

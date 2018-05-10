@@ -40,7 +40,7 @@ const double rad2deg = 180. / M_PI;
 
 /// Flag for angle units used in UnitCell class
 enum AngleUnits { angDegrees, angRadians };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_ANGLEUNITS_H_ */

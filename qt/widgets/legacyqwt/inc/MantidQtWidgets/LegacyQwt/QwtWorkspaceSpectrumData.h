@@ -1,14 +1,14 @@
 #ifndef MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 #define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 
-#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
-#include "MantidQtWidgets/Common/DistributionOptions.h"
+#include "DllOption.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DistributionOptions.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
 
-#include <boost/shared_ptr.hpp>
 #include <QString>
+#include <boost/shared_ptr.hpp>
 
 //=================================================================================================
 //=================================================================================================

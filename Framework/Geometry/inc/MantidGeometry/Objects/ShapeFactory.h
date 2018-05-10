@@ -19,7 +19,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 /// @endcond
 
 namespace Mantid {

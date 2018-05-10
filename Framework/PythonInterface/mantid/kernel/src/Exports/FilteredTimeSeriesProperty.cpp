@@ -1,14 +1,14 @@
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::FilteredTimeSeriesProperty;
+using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::PythonInterface::Policies::RemoveConst;
 using namespace boost::python;
 

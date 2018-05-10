@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;

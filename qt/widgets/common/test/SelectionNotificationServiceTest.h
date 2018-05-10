@@ -1,8 +1,8 @@
 #ifndef MANTIDQT_API_SELECTION_NOTIFICATION_SERVICE_H_
 #define MANTIDQT_API_SELECTION_NOTIFICATION_SERVICE_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"
+#include <cxxtest/TestSuite.h>
 
 class SelectionNotificationServiceTest : public CxxTest::TestSuite {
 public:

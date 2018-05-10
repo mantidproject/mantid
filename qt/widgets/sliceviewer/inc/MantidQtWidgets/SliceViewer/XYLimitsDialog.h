@@ -1,10 +1,10 @@
 #ifndef XYLIMITSDIALOG_H
 #define XYLIMITSDIALOG_H
 
-#include <QDialog>
-#include "ui_XYLimitsDialog.h"
 #include "DllOption.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "ui_XYLimitsDialog.h"
+#include <QDialog>
 
 /** Dialog that prompts the user
  * to enter the X and Y limits to the axes

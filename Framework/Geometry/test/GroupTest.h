@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/V3D.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;

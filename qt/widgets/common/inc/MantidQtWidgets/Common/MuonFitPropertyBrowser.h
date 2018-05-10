@@ -32,8 +32,8 @@ namespace API {
 class IFitFunction;
 class IPeakFunction;
 class CompositeFunction;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -246,7 +246,7 @@ private:
 
 std::map<std::string, double> readMultipleNormalization();
 std::vector<double> readNormalization();
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MUONFITPROPERTYBROWSER_H_*/

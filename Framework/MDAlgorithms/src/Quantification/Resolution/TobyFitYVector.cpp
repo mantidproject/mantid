@@ -19,7 +19,7 @@ const char *SAMPLE_VOLUME = "SampleVolume";
 const char *DETECTOR_DEPTH = "DetectorDepth";
 const char *DETECTOR_AREA = "DetectorArea";
 const char *DETECTION_TIME = "DetectionTime";
-}
+} // namespace
 
 /// Returns the number length of the Y vector
 unsigned int TobyFitYVector::length() { return 11; }
@@ -281,5 +281,5 @@ const double &TobyFitYVector::nextRandomNumber() {
   return m_curRandNums->at(
       m_randIndex++); // Post-fix increments then returns previous value
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

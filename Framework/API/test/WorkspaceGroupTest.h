@@ -321,8 +321,9 @@ public:
   }
 
   void test_not_multiperiod_if_missing_nperiods_log() {
-    Workspace_sptr a = boost::make_shared<
-        WorkspaceTester>(); // workspace has no nperiods entry.
+    Workspace_sptr a = boost::make_shared<WorkspaceTester>(); // workspace has
+                                                              // no nperiods
+                                                              // entry.
     WorkspaceGroup group;
     group.addWorkspace(a);
     TSM_ASSERT("Cannot be multiperiod without nperiods log.",
@@ -366,8 +367,9 @@ public:
   }
 
   /**
-  * Test declaring an input workspace group and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input workspace group and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     WorkspaceGroup_sptr wsInput(new WorkspaceGroup());
@@ -397,9 +399,9 @@ public:
   }
 
   /**
-  * Test declaring an input workspace and retrieving as const_sptr or sptr
-  * (here Workspace rather than WorkspaceGroup)
-  */
+   * Test declaring an input workspace and retrieving as const_sptr or sptr
+   * (here Workspace rather than WorkspaceGroup)
+   */
   void testGetProperty_Workspace_const_sptr() {
     const std::string wsName = "InputWorkspace";
     Workspace_sptr wsInput(new WorkspaceTester());

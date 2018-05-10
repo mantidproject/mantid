@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_CONFIGOBSERVER_H_
 #define MANTID_KERNEL_CONFIGOBSERVER_H_
 #include "ConfigService.h"
-#include "Poco/NObserver.h"
 #include "MantidKernel/DllConfig.h"
+#include "Poco/NObserver.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -50,6 +50,6 @@ private:
   Poco::NObserver<ConfigObserver, Mantid::Kernel::ConfigValChangeNotification>
       m_valueChangeListener;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 #endif /*MANTID_KERNEL_CONFIGOBSERVER_H_*/

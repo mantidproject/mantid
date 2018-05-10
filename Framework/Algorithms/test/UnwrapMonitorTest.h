@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_UNWRAPMONITORTEST_H_
 #define MANTID_ALGORITHMS_UNWRAPMONITORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/Axis.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <string>
 

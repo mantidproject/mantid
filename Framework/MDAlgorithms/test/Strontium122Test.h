@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_STRONTIUM122TEST_H_
 #define MANTID_MDALGORITHMS_STRONTIUM122TEST_H_
 
-#include "MantidMDAlgorithms/Quantification/Models/Strontium122.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MDFittingTestHelpers.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MDFittingTestHelpers.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/Quantification/Models/Strontium122.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -58,8 +58,8 @@ public:
   }
 
   void test_Sr122_Has_DefaultIon_As_Fe2() {
-    using Mantid::MDAlgorithms::Strontium122;
     using Mantid::MDAlgorithms::ForegroundModel;
+    using Mantid::MDAlgorithms::Strontium122;
     Strontium122 sr122Default;
     sr122Default.initialize();
     sr122Default.setAttributeValue("MultEps", 0);

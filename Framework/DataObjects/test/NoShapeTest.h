@@ -10,11 +10,11 @@
 #pragma warning(disable : 4275)
 #endif
 
+#include "MantidDataObjects/NoShape.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 #include <json/json.h>
-#include "MantidDataObjects/NoShape.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::NoShape;

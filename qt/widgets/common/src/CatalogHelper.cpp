@@ -1,13 +1,13 @@
-#include "MantidAPI/CatalogManager.h"
 #include "MantidQtWidgets/Common/CatalogHelper.h"
+#include "MantidAPI/CatalogManager.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidKernel/DateAndTime.h"
 
-#include <boost/algorithm/string/regex.hpp>
 #include <Poco/ActiveResult.h>
 #include <QCoreApplication>
 #include <QTime>
+#include <boost/algorithm/string/regex.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -25,7 +25,7 @@ struct CaseInsensitiveStringComparator {
 template <class T>
 using CaseInsensitiveMap =
     std::map<std::string, T, CaseInsensitiveStringComparator>;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif // MANTID_KERNEL_CASE_INSENSITIVE_MAP_H

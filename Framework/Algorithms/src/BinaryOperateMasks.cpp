@@ -47,7 +47,7 @@ void BinaryOperateMasks::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void BinaryOperateMasks::exec() {
 
   // 1. Read input
@@ -97,5 +97,5 @@ void BinaryOperateMasks::exec() {
   this->setProperty("OutputWorkspace", outputws);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

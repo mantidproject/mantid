@@ -9,11 +9,11 @@ namespace Mantid {
 namespace API {
 
 using Kernel::Property;
-using Types::Core::DateAndTime;
-using Kernel::PropertyHistory;
-using Kernel::PropertyHistory_sptr;
-using Kernel::PropertyHistory_const_sptr;
 using Kernel::PropertyHistories;
+using Kernel::PropertyHistory;
+using Kernel::PropertyHistory_const_sptr;
+using Kernel::PropertyHistory_sptr;
+using Types::Core::DateAndTime;
 
 /** Constructor
  *  @param alg ::      A pointer to the algorithm for which the history should
@@ -148,11 +148,11 @@ size_t AlgorithmHistory::childHistorySize() const {
 }
 
 /**
-  * Retrieve a child algorithm history by index
-  * @param index ::  An index within the child algorithm history set
-  * @returns A pointer to an AlgorithmHistory object
-  * @throws std::out_of_range error if the index is invalid
-  */
+ * Retrieve a child algorithm history by index
+ * @param index ::  An index within the child algorithm history set
+ * @returns A pointer to an AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
+ */
 AlgorithmHistory_sptr
 AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
   if (index >= this->getChildHistories().size()) {
@@ -173,11 +173,11 @@ AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
 }
 
 /**
-* Gets the value of a specified algorithm property
-* @param name ::  The property to find
-* @returns The string value of the property
-* @throw Exception::NotFoundError if the named property is unknown
-*/
+ * Gets the value of a specified algorithm property
+ * @param name ::  The property to find
+ * @returns The string value of the property
+ * @throw Exception::NotFoundError if the named property is unknown
+ */
 const std::string &
 AlgorithmHistory::getPropertyValue(const std::string &name) const {
   for (const auto &hist : m_properties) {

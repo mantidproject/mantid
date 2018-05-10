@@ -1,3 +1,3 @@
 namespace Mantid {
-namespace Kernel {} // namespace Mantid
-} // namespace Kernel
+namespace Kernel {} // namespace Kernel
+} // namespace Mantid

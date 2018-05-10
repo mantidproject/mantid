@@ -33,7 +33,7 @@ const char *GAUSSIAN_FWHM = "GaussianFWHM";
 const double SQRTLN2 = std::sqrt(M_LN2);
 const double SQRTPI = std::sqrt(M_PI);
 ///@endcond
-}
+} // namespace
 
 /**
  * Declare the active parameters for the function

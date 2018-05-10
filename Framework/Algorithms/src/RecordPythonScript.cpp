@@ -23,7 +23,7 @@ RecordPythonScript::RecordPythonScript()
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void RecordPythonScript::init() {
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
@@ -33,7 +33,7 @@ void RecordPythonScript::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void RecordPythonScript::exec() {
   observeStarting();
   // Keep going until you get cancelled

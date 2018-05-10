@@ -8,20 +8,20 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param view :: The view we are handling
-*/
+ * @param view :: The view we are handling
+ */
 ReflEventPresenter::ReflEventPresenter(IReflEventView *view)
     : m_view(view), m_sliceType(SliceType::UniformEven) {
   m_view->enableSliceType(m_sliceType);
 }
 
 /** Destructor
-*/
+ */
 ReflEventPresenter::~ReflEventPresenter() {}
 
 /** Returns the time-slicing values
-* @return :: The time-slicing values
-*/
+ * @return :: The time-slicing values
+ */
 std::string ReflEventPresenter::getTimeSlicingValues() const {
   switch (m_sliceType) {
   case SliceType::UniformEven:
@@ -49,8 +49,8 @@ std::string ReflEventPresenter::logFilterAndSliceValues(
 }
 
 /** Returns the time-slicing type
-* @return :: The time-slicing type
-*/
+ * @return :: The time-slicing type
+ */
 std::string ReflEventPresenter::getTimeSlicingType() const {
   switch (m_sliceType) {
   case SliceType::UniformEven:
@@ -81,5 +81,5 @@ void ReflEventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
   m_view->enableSliceType(newSliceType);
   m_sliceType = newSliceType;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

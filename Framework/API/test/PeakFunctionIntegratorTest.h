@@ -1,8 +1,8 @@
 #ifndef PEAKFUNCTIONINTEGRATORTEST_H
 #define PEAKFUNCTIONINTEGRATORTEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/PeakFunctionIntegrator.h"
+#include <cxxtest/TestSuite.h>
 
 #include "gsl/gsl_errno.h"
 #include <boost/make_shared.hpp>

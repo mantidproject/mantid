@@ -10,7 +10,7 @@ namespace Mantid {
 namespace Kernel {
 class Property;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace API {

@@ -1,12 +1,12 @@
 #ifndef MANTID_CURVEFITTING_PAWLEYFUNCTION_H_
 #define MANTID_CURVEFITTING_PAWLEYFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPawleyFunction.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/System.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/UnitCell.h"

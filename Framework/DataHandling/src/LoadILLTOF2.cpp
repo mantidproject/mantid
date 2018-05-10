@@ -41,11 +41,10 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
       descriptor.pathExists("/entry0/mode") &&
       !descriptor.pathExists("/entry0/dataSD") // This one is for
                                                // LoadILLIndirect
-      &&
-      !descriptor.pathExists(
-          "/entry0/instrument/VirtualChopper") // This one is for
-                                               // LoadILLReflectometry
-      ) {
+      && !descriptor.pathExists(
+             "/entry0/instrument/VirtualChopper") // This one is for
+                                                  // LoadILLReflectometry
+  ) {
     return 80;
   } else {
     return 0;

@@ -5,12 +5,12 @@
 #include <cxxtest/WrappedTestSuite.h>
 
 // Mantid
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 // STL
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 #endif // MANTID_PYTHONAPI_PRECOMPILED_HEADER_H_

@@ -10,9 +10,9 @@ GUI
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 #include <cmath>
 #include <fstream>
 
@@ -35,9 +35,9 @@ void AsciiPointBase::init() {
 }
 
 /**
-*   Executes the algorithm. In this case it provides the process for any child
-* classes as this class is abstract
-*/
+ *   Executes the algorithm. In this case it provides the process for any child
+ * classes as this class is abstract
+ */
 void AsciiPointBase::exec() {
   std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str());

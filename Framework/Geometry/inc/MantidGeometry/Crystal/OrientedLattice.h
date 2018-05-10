@@ -90,6 +90,6 @@ private:
   }
   void recalculate() override;
 };
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 #endif /* MANTID_GEOMETRY_UNITCELL_H_ */

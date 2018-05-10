@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADNXSPE_H_
 #define MANTID_DATAHANDLING_LOADNXSPE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

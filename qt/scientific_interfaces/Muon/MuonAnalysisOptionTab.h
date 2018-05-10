@@ -126,8 +126,8 @@ private slots:
   /// Run when autoscale check-box state is changed
   void onAutoscaleToggled(bool state);
 };
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSISOPTIONTAB_H_

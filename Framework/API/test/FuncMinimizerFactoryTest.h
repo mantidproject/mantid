@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/System.h"
 

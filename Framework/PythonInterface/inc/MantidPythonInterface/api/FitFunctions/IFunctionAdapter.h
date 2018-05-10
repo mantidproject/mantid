@@ -121,7 +121,7 @@ private:
   /// The Python portion of the object
   PyObject *m_self;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_IFUNCTIONADAPTER_H_ */

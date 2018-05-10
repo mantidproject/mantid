@@ -169,5 +169,5 @@ void IPeakFunctionAdapter::functionDerivLocal(
   callMethod<void, object, object>(getSelf(), "functionDerivLocal", xvals,
                                    jacobian);
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

@@ -49,5 +49,5 @@ double TOFSANSResolutionByPixelCalculator::getSigmaQValue(
   return sqrt(wavlengthIndependentFactor / (wavelength * wavelength) +
               (sigWavelengthSquared * qbyWavelengthSquared));
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

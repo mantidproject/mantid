@@ -1,8 +1,8 @@
 #ifndef MANTID_VATES_SIMPLEGUIVIEWWIDGETS_VSI_APPLY_BEHAVIOUR_H
 #define MANTID_VATES_SIMPLEGUIVIEWWIDGETS_VSI_APPLY_BEHAVIOUR_H
 
-#include <QObject>
 #include "MantidVatesAPI/ColorScaleGuard.h"
+#include <QObject>
 #include <pqApplyBehavior.h>
 #include <pqPropertiesPanel.h>
 #include <pqProxy.h>
@@ -30,7 +30,7 @@ protected slots:
 private:
   Mantid::VATES::ColorScaleLock *m_colorScaleLock;
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 #endif

@@ -6,9 +6,9 @@
 //----------------------------------------------------------------------
 #include "FileValidator.h"
 
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

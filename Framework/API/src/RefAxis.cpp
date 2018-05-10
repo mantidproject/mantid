@@ -62,9 +62,9 @@ double RefAxis::operator()(const std::size_t &index,
 }
 
 /** Method not available for RefAxis. Will always throw.
-  * @param index location for setting
-  * @param value the value to set
-  */
+ * @param index location for setting
+ * @param value the value to set
+ */
 void RefAxis::setValue(const std::size_t &index, const double &value) {
   UNUSED_ARG(index)
   UNUSED_ARG(value)

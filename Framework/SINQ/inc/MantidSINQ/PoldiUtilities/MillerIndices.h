@@ -1,8 +1,8 @@
 #ifndef MANTID_SINQ_MILLERINDICES_H
 #define MANTID_SINQ_MILLERINDICES_H
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include "MantidSINQ/DllConfig.h"
 #include <vector>
 
 namespace Mantid {
@@ -64,7 +64,7 @@ private:
   std::vector<int> m_asVector;
   Kernel::V3D m_asV3D;
 };
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // MANTID_SINQ_MILLERINDICES_H

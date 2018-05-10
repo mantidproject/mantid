@@ -1,17 +1,17 @@
 #ifndef MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
 #define MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidCurveFitting/Functions/Polynomial.h"
-#include "MantidCurveFitting/Functions/BackToBackExponential.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -411,7 +411,7 @@ private:
 };
 
 /** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
-  */
+ */
 inline double linearInterpolateX(double x0, double xf, double y0, double yf,
                                  double y) {
   double x = ((xf - x0) * y - (xf * y0 - x0 * yf)) / (yf - y0);
@@ -419,7 +419,7 @@ inline double linearInterpolateX(double x0, double xf, double y0, double yf,
 }
 
 /** Formula for linear interpolation: Y = ( (xf*y0-x0*yf) + x*(yf-y0) )/(xf-x0)
-  */
+ */
 inline double linearInterpolateY(double x0, double xf, double y0, double yf,
                                  double x) {
   double y = ((xf * y0 - x0 * yf) + x * (yf - y0)) / (xf - x0);

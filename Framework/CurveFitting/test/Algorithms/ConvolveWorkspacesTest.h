@@ -3,19 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidCurveFitting/Algorithms/ConvolveWorkspaces.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidCurveFitting/Algorithms/ConvolveWorkspaces.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -38,7 +36,7 @@ struct NormGaussianFunc2 {
     return exp(-pow(x, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
   }
 };
-}
+} // namespace
 
 class ConvolveWorkspacesTest : public CxxTest::TestSuite {
 public:

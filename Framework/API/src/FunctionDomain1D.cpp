@@ -31,9 +31,9 @@ void FunctionDomain1D::setPeakRadius(int radius) { m_peakRadius = radius; }
 int FunctionDomain1D::getPeakRadius() const { return m_peakRadius; }
 
 /**
-  * Create a domain from a vector.
-  * @param xvalues :: Vector with function arguments to be copied from.
-  */
+ * Create a domain from a vector.
+ * @param xvalues :: Vector with function arguments to be copied from.
+ */
 FunctionDomain1DVector::FunctionDomain1DVector(
     const std::vector<double> &xvalues)
     : FunctionDomain1D(nullptr, 0) {
@@ -45,10 +45,10 @@ FunctionDomain1DVector::FunctionDomain1DVector(
 }
 
 /**
-  * Create a domain from a part of a vector.
-  * @param from :: Iterator to start copying values from.
-  * @param to :: Iterator to the end of the data.
-  */
+ * Create a domain from a part of a vector.
+ * @param from :: Iterator to start copying values from.
+ * @param to :: Iterator to the end of the data.
+ */
 FunctionDomain1DVector::FunctionDomain1DVector(
     std::vector<double>::const_iterator from,
     std::vector<double>::const_iterator to)
@@ -123,20 +123,20 @@ operator=(const FunctionDomain1DVector &right) {
 }
 
 /**
-  * Create a domain from a vector.
-  * @param wi :: The workspace index of a spectrum the xvalues come from.
-  * @param xvalues :: Vector with function arguments to be copied from.
-  */
+ * Create a domain from a vector.
+ * @param wi :: The workspace index of a spectrum the xvalues come from.
+ * @param xvalues :: Vector with function arguments to be copied from.
+ */
 FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
     size_t wi, const std::vector<double> &xvalues)
     : FunctionDomain1DVector(xvalues), m_workspaceIndex(wi) {}
 
 /**
-  * Create a domain from a part of a vector.
-  * @param wi :: The workspace index of a spectrum the x-values come from.
-  * @param from :: Iterator to start copying values from.
-  * @param to :: Iterator to the end of the data.
-  */
+ * Create a domain from a part of a vector.
+ * @param wi :: The workspace index of a spectrum the x-values come from.
+ * @param from :: Iterator to start copying values from.
+ * @param to :: Iterator to the end of the data.
+ */
 FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
     size_t wi, std::vector<double>::const_iterator from,
     std::vector<double>::const_iterator to)
@@ -149,10 +149,10 @@ FunctionDomain1DHistogram::FunctionDomain1DHistogram(
     : FunctionDomain1DHistogram(bins.begin(), bins.end()) {}
 
 /**
-  * Create a domain from a part of a vector.
-  * @param from :: Iterator to start copying values from.
-  * @param to :: Iterator to the end of the data.
-  */
+ * Create a domain from a part of a vector.
+ * @param from :: Iterator to start copying values from.
+ * @param to :: Iterator to the end of the data.
+ */
 FunctionDomain1DHistogram::FunctionDomain1DHistogram(
     std::vector<double>::const_iterator from,
     std::vector<double>::const_iterator to)

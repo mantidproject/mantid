@@ -1,11 +1,11 @@
 #ifndef ONECURVEPLOT_H_
 #define ONECURVEPLOT_H_
 
+#include <QList>
+#include <QMap>
+#include <QStringList>
 #include <qwt_plot.h>
 #include <qwt_plot_item.h>
-#include <QList>
-#include <QStringList>
-#include <QMap>
 
 class QwtPlotCurve;
 class QwtPlotZoomer;
@@ -16,9 +16,9 @@ class PeakLabel;
 class PeakMarker2D;
 
 /**
-* Implements a simple widget for plotting a single curve.
-* Allows to keep more than one curve.
-*/
+ * Implements a simple widget for plotting a single curve.
+ * Allows to keep more than one curve.
+ */
 class OneCurvePlot : public QwtPlot {
   Q_OBJECT
 public:
@@ -84,6 +84,6 @@ private:
   const OneCurvePlot *m_plot;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*ONECURVEPLOT_H_*/

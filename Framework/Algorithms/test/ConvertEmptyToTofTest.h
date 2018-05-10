@@ -1,16 +1,16 @@
 #ifndef MANTID_ALGORITHMS_CONVERTEMPTYTOTOFTEST_H_
 #define MANTID_ALGORITHMS_CONVERTEMPTYTOTOFTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertEmptyToTof.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAlgorithms/ConvertEmptyToTof.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ConvertEmptyToTof;
 using namespace Mantid;

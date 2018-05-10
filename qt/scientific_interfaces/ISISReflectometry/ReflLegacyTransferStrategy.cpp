@@ -1,10 +1,9 @@
 #include "ReflLegacyTransferStrategy.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/ProgressBase.h"
 #include "ReflTableSchema.h"
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -103,5 +102,5 @@ bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
   boost::smatch match; // Unused.
   return boost::regex_search(filename, match, pattern);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

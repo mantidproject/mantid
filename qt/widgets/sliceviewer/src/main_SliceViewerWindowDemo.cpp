@@ -1,14 +1,14 @@
-#include <QApplication>
-#include <QSplashScreen>
-#include <QMessageBox>
-#include <QDir>
-#include <QThread>
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include "qmainwindow.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "qmainwindow.h"
+#include <QApplication>
+#include <QDir>
+#include <QMessageBox>
+#include <QSplashScreen>
+#include <QThread>
 
 /** Demo application for quickly testing the SliceViewerWindow GUI.
  *

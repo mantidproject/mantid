@@ -1,9 +1,9 @@
 #ifndef METADATATOFIELDDATA_H_
 #define METADATATOFIELDDATA_H_
 
+#include "MantidKernel/System.h"
 #include <functional>
 #include <string>
-#include "MantidKernel/System.h"
 class vtkFieldData;
 namespace Mantid {
 namespace VATES {
@@ -46,7 +46,7 @@ public:
   void execute(vtkFieldData *fieldData, const std::string &metaData,
                const std::string &id) const;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

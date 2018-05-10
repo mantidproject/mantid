@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_CLUSTERTEST_H_
 #define MANTID_CRYSTAL_CLUSTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCrystal/Cluster.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidCrystal/Cluster.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::Cluster;
 using namespace Mantid::API;

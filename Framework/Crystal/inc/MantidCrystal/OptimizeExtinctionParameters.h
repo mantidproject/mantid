@@ -2,9 +2,9 @@
 #define MANTID_CRYSTAL_OptimizeExtinctionParameters_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -69,7 +69,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_CRYSTAL_OptimizeExtinctionParameters_H_*/

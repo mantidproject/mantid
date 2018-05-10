@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindSXPeaksHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <gmock/gmock.h>
 
 #include <string>
@@ -24,7 +24,7 @@ public:
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
-}
+} // namespace
 
 class FindSXPeaksHelperTest : public CxxTest::TestSuite {
 public:

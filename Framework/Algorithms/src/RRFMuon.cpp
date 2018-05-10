@@ -125,5 +125,5 @@ double RRFMuon::unitConversionFactor(std::string uin, std::string uuser) {
     throw std::runtime_error("X units must be in microseconds");
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

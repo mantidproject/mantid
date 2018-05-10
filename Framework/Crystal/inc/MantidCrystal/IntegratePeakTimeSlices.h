@@ -16,8 +16,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <array>
 
@@ -26,7 +26,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 }
-}
+} // namespace Mantid
 namespace Mantid {
 namespace Crystal {
 /**
@@ -268,7 +268,7 @@ private:
   Mantid::detid2index_map m_wi_to_detid_map;
 
   int *m_NeighborIDs; // Stores IDs of nearest neighbors
-  double m_R0;        ///<for Weak Peaks, these can be set using info from close
+  double m_R0; ///< for Weak Peaks, these can be set using info from close
 
   Kernel::V3D m_center; ///< for Describing the Plane at the Peak
   Kernel::V3D m_xvec;   ///< for Describing the Plane at the Peak
@@ -311,7 +311,7 @@ private:
                   const int chanMin, const int chanMax, double Radius,
                   Kernel::V3D CentPos, std::string &spec_idList
 
-                  );
+  );
 
   /**
    *  Tests several starting points in the Marquardt algorithm then calls Fit.

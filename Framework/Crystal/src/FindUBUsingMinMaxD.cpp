@@ -1,9 +1,9 @@
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidAPI/Sample.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -136,5 +136,5 @@ void FindUBUsingMinMaxD::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

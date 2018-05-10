@@ -1,15 +1,15 @@
 #include <string>
 
-#include "MantidWorkflowAlgorithms/HFIRLoad.h"
-#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
-#include "Poco/NumberFormatter.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+#include "MantidWorkflowAlgorithms/HFIRLoad.h"
+#include "Poco/NumberFormatter.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -311,9 +311,9 @@ void HFIRLoad::exec() {
 
     dataWS->mutableRun().addProperty("beam_center_x", center_x, "pixel", true);
     dataWS->mutableRun().addProperty("beam_center_y", center_y, "pixel", true);
-    output_message += "   Beam center: " +
-                      Poco::NumberFormatter::format(center_x, 1) + ", " +
-                      Poco::NumberFormatter::format(center_y, 1) + "\n";
+    output_message +=
+        "   Beam center: " + Poco::NumberFormatter::format(center_x, 1) + ", " +
+        Poco::NumberFormatter::format(center_y, 1) + "\n";
   } else {
     HFIRInstrument::getDefaultBeamCenter(dataWS, center_x, center_y);
 

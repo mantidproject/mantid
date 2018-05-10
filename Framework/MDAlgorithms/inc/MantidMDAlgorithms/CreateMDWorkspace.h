@@ -2,17 +2,17 @@
 #define MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-std::vector<std::string> MANTID_MDALGORITHMS_DLL
-parseNames(const std::string &names_string);
+std::vector<std::string>
+    MANTID_MDALGORITHMS_DLL parseNames(const std::string &names_string);
 
 /** CreateMDWorkspace :
  *
@@ -58,7 +58,7 @@ private:
                          const std::vector<std::string> &targetFrames);
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_ */

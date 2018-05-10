@@ -5,21 +5,21 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
+#include <boost/python/operators.hpp>
 #include <boost/python/scope.hpp>
 #include <boost/python/self.hpp>
-#include <boost/python/operators.hpp>
 
-using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::AngleUnits;
-using Mantid::Geometry::angRadians;
+using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::angDegrees;
+using Mantid::Geometry::angRadians;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
 
 // Functions purely to aid with wrapping
 namespace //<unnamed>
-    {
+{
 using namespace Mantid::PythonInterface;
 
 /// Pass-through function to set the unit cell from a 2D numpy array
@@ -58,7 +58,7 @@ std::string __repr__implementation(const UnitCell &self) {
 
   return ss.str();
 }
-}
+} // namespace
 
 void export_UnitCell() {
   enum_<AngleUnits>("AngleUnits")
@@ -192,8 +192,9 @@ void export_UnitCell() {
            (arg("self"), arg("hkl")),
            "Returns :math:`d`-spacing for a given H, K, L coordinate in "
            ":math:`\\rm{\\AA}`.")
-      .def("dstar", (double (UnitCell::*)(double, double, double) const) &
-                        UnitCell::dstar,
+      .def("dstar",
+           (double (UnitCell::*)(double, double, double) const) &
+               UnitCell::dstar,
            (arg("self"), arg("h"), arg("k"), arg("l")),
            "Returns :math:`d^{*} = 1/d` for a given H, K, L coordinate in "
            ":math:`\\rm{\\AA}^{3}`.")
@@ -222,9 +223,10 @@ void export_UnitCell() {
            arg("self"),
            "Returns the :math:`\\gamma^{*}` angle for this unit cell in "
            "degrees.")
-      .def("recAngle", (double (UnitCell::*)(double, double, double, double,
-                                             double, double, int const) const) &
-                           UnitCell::recAngle,
+      .def("recAngle",
+           (double (UnitCell::*)(double, double, double, double, double, double,
+                                 int const) const) &
+               UnitCell::recAngle,
            (arg("self"), arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"),
             arg("l2"), arg("Unit") = static_cast<int>(angDegrees)),
            "Returns the angle in reciprocal space between vectors given by "
@@ -233,11 +235,13 @@ void export_UnitCell() {
            "the units for the angles, and can have the value of ``Degrees`` or "
            "``Radians``. By default Unit = Degrees")
       .def("recVolume", (double (UnitCell::*)() const) & UnitCell::recVolume,
-           arg("self"), "Return the volume of the reciprocal unit cell (in "
-                        ":math:`\\rm{\\AA}^{-3}`)")
-      .def("set", (void (UnitCell::*)(double, double, double, double, double,
-                                      double, int const)) &
-                      UnitCell::set,
+           arg("self"),
+           "Return the volume of the reciprocal unit cell (in "
+           ":math:`\\rm{\\AA}^{-3}`)")
+      .def("set",
+           (void (UnitCell::*)(double, double, double, double, double, double,
+                               int const)) &
+               UnitCell::set,
            (arg("self"), arg("_a"), arg("_b"), arg("_c"), arg("_alpha"),
             arg("_beta"), arg("_gamma"),
             arg("Unit") = static_cast<int>(angDegrees)),
@@ -274,9 +278,10 @@ void export_UnitCell() {
            "Set the :math:`\\gamma` angle of the unit cell. The angle can be "
            "set "
            "either in degrees or radians using the ``Unit`` parameter.")
-      .def("setError", (void (UnitCell::*)(double, double, double, double,
-                                           double, double, int const)) &
-                           UnitCell::setError,
+      .def("setError",
+           (void (UnitCell::*)(double, double, double, double, double, double,
+                               int const)) &
+               UnitCell::setError,
            (arg("self"), arg("_aerr"), arg("_berr"), arg("_cerr"),
             arg("_alphaerr"), arg("_betaerr"), arg("_gammaerr"),
             arg("Unit") = static_cast<int>(angDegrees)),

@@ -70,7 +70,7 @@ private:
   /// Extracts Q-values from the specified matrix workspace
   MantidVec extractQValues(const Mantid::API::MatrixWorkspace_sptr workspace);
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_GETQSINQENSDATA_H */

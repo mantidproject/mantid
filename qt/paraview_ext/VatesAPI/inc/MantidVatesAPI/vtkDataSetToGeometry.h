@@ -2,8 +2,8 @@
 #define VTKDATASET_TO_GEOMETRY_H_
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
+#include "MantidKernel/System.h"
 
 class vtkDataSet;
 namespace Mantid {
@@ -56,7 +56,7 @@ public:
 
   vtkDataSetToGeometry &operator=(const vtkDataSetToGeometry &other);
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

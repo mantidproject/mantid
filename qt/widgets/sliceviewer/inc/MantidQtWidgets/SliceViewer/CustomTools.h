@@ -1,11 +1,11 @@
 #ifndef CUSTOMTOOLS_H_
 #define CUSTOMTOOLS_H_
+#include <QMouseEvent>
+#include <qwt_picker_machine.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_magnifier.h>
 #include <qwt_plot_picker.h>
 #include <qwt_plot_zoomer.h>
-#include <qwt_plot_magnifier.h>
-#include <qwt_plot_canvas.h>
-#include <qwt_picker_machine.h>
-#include <QMouseEvent>
 /*
  * CustomTools.h
  *
@@ -89,6 +89,6 @@ protected:
 };
 
 } // namespace SliceViewer
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* CUSTOMTOOLS_H_ */

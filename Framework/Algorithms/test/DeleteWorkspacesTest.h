@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DeleteWorkspaces.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_PEAKSINTERSECTION_H_
 #define MANTID_CRYSTAL_PEAKSINTERSECTION_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace Crystal {

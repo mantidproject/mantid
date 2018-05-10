@@ -28,8 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite {
 public:
@@ -113,12 +113,13 @@ public:
     BinEdges x(NXs, HistogramData::LinearGenerator(0.0, 1000.0));
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;
-    double yArray[ySize] = {
-        0.2, 4,  50,  14,    0.001, 0,        0,    0,     1,  0, 1e-3, 15,
-        4,   0,  9,   0.001, 2e-10, 1,        0,    8,     0,  7, 1e-4, 1,
-        7,   11, 101, 6,     53,    0.345324, 3444, 13958, 0.8}; // NXs = 34 so
-                                                                 // we need that
-                                                                 // many numbers
+    double yArray[ySize] = {0.2, 4,        50,    14,    0.001, 0,   0,
+                            0,   1,        0,     1e-3,  15,    4,   0,
+                            9,   0.001,    2e-10, 1,     0,     8,   0,
+                            7,   1e-4,     1,     7,     11,    101, 6,
+                            53,  0.345324, 3444,  13958, 0.8}; // NXs = 34 so
+                                                               // we need that
+                                                               // many numbers
 
     // the error values aren't used and aren't tested so we'll use some basic
     // data

@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT_H_
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

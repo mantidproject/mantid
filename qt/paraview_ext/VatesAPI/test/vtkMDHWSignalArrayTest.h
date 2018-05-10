@@ -1,7 +1,6 @@
 #ifndef VTKNULLMDHWSIGNALARRAY_TEST_H_
 #define VTKNULLMDHWSIGNALARRAY_TEST_H_
 
-#include "MantidVatesAPI/Normalization.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"

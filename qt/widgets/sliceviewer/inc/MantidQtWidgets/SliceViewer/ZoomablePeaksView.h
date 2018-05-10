@@ -47,7 +47,7 @@ public:
   /// Destructor
   virtual ~ZoomablePeaksView() {}
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_ZOOMABLE_PEAKS_VIEW_H_ */

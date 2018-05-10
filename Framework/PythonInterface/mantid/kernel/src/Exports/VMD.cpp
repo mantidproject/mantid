@@ -3,9 +3,9 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/operators.hpp>
+#include <boost/python/return_arg.hpp>
 #include <boost/python/return_internal_reference.hpp>
 #include <boost/python/return_value_policy.hpp>
-#include <boost/python/return_arg.hpp>
 
 using Mantid::Kernel::VMD;
 using Mantid::Kernel::VMD_t;
@@ -23,9 +23,9 @@ VMD_t getItem(VMD &self, const size_t index) {
   if (index < self.getNumDims()) {
     return self[index];
   } else
-    throw std::out_of_range("VMD index out of range. index=" +
-                            std::to_string(index) + ", len=" +
-                            std::to_string(self.getNumDims()));
+    throw std::out_of_range(
+        "VMD index out of range. index=" + std::to_string(index) +
+        ", len=" + std::to_string(self.getNumDims()));
 }
 
 /**
@@ -39,11 +39,11 @@ void setItem(VMD &self, const size_t index, const VMD_t value) {
   if (index < self.getNumDims()) {
     self[index] = value;
   } else
-    throw std::out_of_range("VMD index out of range. index=" +
-                            std::to_string(index) + ", len=" +
-                            std::to_string(self.getNumDims()));
+    throw std::out_of_range(
+        "VMD index out of range. index=" + std::to_string(index) +
+        ", len=" + std::to_string(self.getNumDims()));
 }
-}
+} // namespace
 
 void export_VMD() {
   class_<VMD>("VMD",
@@ -100,10 +100,10 @@ void export_VMD() {
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare
                          // object address
-      .def("__add__", &VMD::operator+, (arg("left"), arg("right")))
+      .def("__add__", &VMD::operator+,(arg("left"), arg("right")))
       .def("__iadd__", &VMD::operator+=, return_self<>(),
            (arg("self"), arg("other")))
-      .def("__sub__", &VMD::operator-, (arg("left"), arg("right")))
+      .def("__sub__", &VMD::operator-,(arg("left"), arg("right")))
       .def("__isub__", &VMD::operator-=, return_self<>(),
            (arg("self"), arg("other")))
       .def(self * self)

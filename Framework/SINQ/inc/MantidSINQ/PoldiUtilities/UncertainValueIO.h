@@ -3,8 +3,8 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
 namespace Mantid {
@@ -46,7 +46,8 @@ public:
     }
 
     return (boost::format("%f +/- %f") % uncertainValue.value() %
-            uncertainValue.error()).str();
+            uncertainValue.error())
+        .str();
   }
 
   static UncertainValue fromString(const std::string &uncertainValueString) {
@@ -79,7 +80,7 @@ public:
 private:
   UncertainValueIO() = default;
 };
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // MANTID_SINQ_UNCERTAINVALUEIO_H

@@ -6,11 +6,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CropToComponent.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <numeric>
 #include <array>
+#include <numeric>
 
 class CropToComponentTest : public CxxTest::TestSuite {
 public:

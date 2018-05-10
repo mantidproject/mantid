@@ -124,7 +124,7 @@ inline double fixZero(const double value) {
   else
     return value;
 }
-}
+} // namespace
 
 /**
  * Add -1.*minValue on each spectra.
@@ -190,5 +190,5 @@ void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

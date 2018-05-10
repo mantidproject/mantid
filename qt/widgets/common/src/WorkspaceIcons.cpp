@@ -67,5 +67,5 @@ void WorkspaceIcons::initInternalLookup() {
   m_idToPixmapName["MDHistoWorkspace"] = "mantid_mdws_xpm";
   m_idToPixmapName["MDEventWorkspace"] = "mantid_mdws_xpm";
 }
-}
-}
+} // namespace API
+} // namespace MantidQt

@@ -11,7 +11,7 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("Column");
-}
+} // namespace
 
 template <> bool Column::isType<bool>() const { return isBool(); }
 

@@ -20,9 +20,9 @@ namespace Algorithms {
 DECLARE_ALGORITHM(Rebunch)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
+using API::MatrixWorkspace_const_sptr;
+using API::WorkspaceProperty;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -186,17 +186,17 @@ void Rebunch::rebunch_hist_counts(const HistogramX &xold,
 }
 
 /** Rebunches histogram data data according to n_bunch input
-*
-* @param xold :: old x data
-* @param yold :: old y data
-* @param eold :: old e data
-* @param xnew :: new x data
-* @param ynew :: new y data
-* @param enew :: new e data
-* @param n_bunch :: number of data points to bunch together for each new point
-* @throw runtime_error Thrown if algorithm cannot execute
-* @throw invalid_argument Thrown if input to function is incorrect
-**/
+ *
+ * @param xold :: old x data
+ * @param yold :: old y data
+ * @param eold :: old e data
+ * @param xnew :: new x data
+ * @param ynew :: new y data
+ * @param enew :: new e data
+ * @param n_bunch :: number of data points to bunch together for each new point
+ * @throw runtime_error Thrown if algorithm cannot execute
+ * @throw invalid_argument Thrown if input to function is incorrect
+ **/
 void Rebunch::rebunch_hist_frequencies(const HistogramX &xold,
                                        const HistogramY &yold,
                                        const HistogramE &eold, HistogramX &xnew,
@@ -314,5 +314,5 @@ void Rebunch::rebunch_point(const HistogramX &xold, const HistogramY &yold,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

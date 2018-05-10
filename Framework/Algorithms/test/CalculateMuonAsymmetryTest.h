@@ -1,19 +1,19 @@
 #ifndef CALCULATEMUONASYMMETRYTEST_H_
 #define CALCULATEMUONASYMMETRYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CalculateMuonAsymmetry.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/CalculateMuonAsymmetry.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::MantidVec;
 using Mantid::Algorithms::CalculateMuonAsymmetry;
+using Mantid::MantidVec;
 
 const std::string outputName = "CalculateMuonAsymmetry_Output";
 
@@ -366,5 +366,5 @@ public:
 private:
   MatrixWorkspace_sptr input;
 };
-} // close namespace
+} // namespace
 #endif /*CALCULATEMUONASYMMETRYF_H_*/

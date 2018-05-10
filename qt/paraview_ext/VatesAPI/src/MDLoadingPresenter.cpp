@@ -49,5 +49,5 @@ void MDLoadingPresenter::makeNonOrthogonal(
                                              std::move(workspaceProvider));
   converter.execute(progress);
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

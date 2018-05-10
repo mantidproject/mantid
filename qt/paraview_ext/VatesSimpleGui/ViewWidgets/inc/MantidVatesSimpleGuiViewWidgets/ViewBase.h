@@ -2,10 +2,10 @@
 #define VIEWBASE_H_
 
 #include "MantidVatesAPI/ColorScaleGuard.h"
-#include "MantidVatesSimpleGuiViewWidgets/VisibleAxesColor.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
+#include "MantidVatesSimpleGuiViewWidgets/VisibleAxesColor.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "vtk_jsoncpp.h"
 #include <QPointer>
@@ -230,9 +230,9 @@ signals:
    */
   void rebin(std::string algorithmType);
   /**
-  * Signal to perform a possible unbin on a sources which has been
-  * rebinned in the VSI.
-  */
+   * Signal to perform a possible unbin on a sources which has been
+   * rebinned in the VSI.
+   */
   void unbin();
   /**
    * Signal to tell other elements that the log scale was altered
@@ -276,8 +276,8 @@ private:
 
   Mantid::VATES::ColorScaleLock *m_colorScaleLock;
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // VIEWBASE_H_

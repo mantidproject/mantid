@@ -106,21 +106,21 @@ MANTID_KERNEL_DLL bool operator!=(const NeutronAtom &left,
                                   const NeutronAtom &right);
 
 // addition
-MANTID_KERNEL_DLL NeutronAtom
-operator+(const NeutronAtom &left, const NeutronAtom &right);
+MANTID_KERNEL_DLL NeutronAtom operator+(const NeutronAtom &left,
+                                        const NeutronAtom &right);
 
 // multiplication
-MANTID_KERNEL_DLL NeutronAtom
-operator*(const NeutronAtom &left, const double right);
-MANTID_KERNEL_DLL NeutronAtom
-operator*(const double left, const NeutronAtom &right);
+MANTID_KERNEL_DLL NeutronAtom operator*(const NeutronAtom &left,
+                                        const double right);
+MANTID_KERNEL_DLL NeutronAtom operator*(const double left,
+                                        const NeutronAtom &right);
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out,
                                            const NeutronAtom &atom);
-MANTID_KERNEL_DLL NeutronAtom
-getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
-MANTID_KERNEL_DLL NeutronAtom
-getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number);
+MANTID_KERNEL_DLL NeutronAtom getNeutronAtom(const uint16_t z_number,
+                                             const uint16_t a_number = 0);
+MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
+                                                     const uint16_t a_number);
 MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const NeutronAtom &other);
 
 /// Utility function to calculate scattering lengths from cross-sections.

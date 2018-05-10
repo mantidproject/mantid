@@ -56,6 +56,6 @@ public:
   // Determine whether to start a new autoreduction
   virtual bool startNewAutoreduction() const = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H */

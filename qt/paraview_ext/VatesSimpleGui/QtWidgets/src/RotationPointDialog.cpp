@@ -38,6 +38,6 @@ void RotationPointDialog::getCoordinates() {
   double z = this->ui.zLineEdit->text().toDouble();
   emit this->sendCoordinates(x, y, z);
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

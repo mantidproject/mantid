@@ -6,8 +6,8 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: [input] The parent of this widget
-*/
+ * @param parent :: [input] The parent of this widget
+ */
 QtReflEventView::QtReflEventView(QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
@@ -55,8 +55,8 @@ void QtReflEventView::initLogValueSliceTypeLayout() {
 }
 
 /** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
+ * @return :: A pointer to the presenter
+ */
 IReflEventPresenter *QtReflEventView::getPresenter() const {
   return m_presenter.get();
 }
@@ -147,4 +147,4 @@ void QtReflEventView::toggleLogValue(bool isChecked) {
     m_presenter->notifySliceTypeChanged(SliceType::LogValue);
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

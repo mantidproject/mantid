@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/TypedValidator.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/TypedValidator.h"
 
 namespace Mantid {
 namespace API {

@@ -26,9 +26,9 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <qwt_plot.h>
-#include "PlotCurve.h"
 #include "LegendWidget.h"
+#include "PlotCurve.h"
+#include <qwt_plot.h>
 
 class PieLabel;
 

@@ -7,8 +7,8 @@
 namespace Mantid {
 namespace PythonInterface {
 using API::IFunction;
-using PythonInterface::Environment::callMethod;
 using PythonInterface::Environment::UndefinedAttributeError;
+using PythonInterface::Environment::callMethod;
 using namespace boost::python;
 
 namespace {
@@ -217,5 +217,5 @@ void IFunctionAdapter::setActiveParameter(size_t i, double value) {
     IFunction::setActiveParameter(i, value);
   }
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

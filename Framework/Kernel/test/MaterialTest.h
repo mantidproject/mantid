@@ -1,12 +1,12 @@
 #ifndef MANTID_TESTMATERIAL__
 #define MANTID_TESTMATERIAL__
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
-#include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 

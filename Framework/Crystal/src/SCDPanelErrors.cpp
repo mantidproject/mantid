@@ -1,18 +1,18 @@
 #include "MantidCrystal/SCDPanelErrors.h"
-#include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include <boost/math/special_functions/round.hpp>
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/FileValidator.h"
 #include <algorithm>
+#include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -29,7 +29,7 @@ using namespace API;
 namespace {
 /// static logger
 Logger g_log("SCDPanelErrors");
-}
+} // namespace
 
 DECLARE_FUNCTION(SCDPanelErrors)
 
@@ -328,8 +328,8 @@ void SCDPanelErrors::loadWorkspace(boost::shared_ptr<API::Workspace> ws) const {
 }
 
 /**
-  * Fill in the workspace name and bank
-  */
+ * Fill in the workspace name and bank
+ */
 void SCDPanelErrors::setupData() const {
   if (m_setupFinished) {
     g_log.debug() << "Re-setting isn't required.";

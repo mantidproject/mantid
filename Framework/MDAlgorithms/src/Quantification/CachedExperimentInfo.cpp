@@ -1,11 +1,11 @@
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -201,5 +201,5 @@ void CachedExperimentInfo::initCaches(
   m_efixed = m_exptInfo.getEFixed(
       boost::shared_ptr<const Geometry::IDetector>(&det, NoDeleting()));
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

@@ -59,7 +59,7 @@ MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
 
   return testWS;
 }
-}
+} // namespace
 
 class SumOverlappingTubesTest : public CxxTest::TestSuite {
 public:

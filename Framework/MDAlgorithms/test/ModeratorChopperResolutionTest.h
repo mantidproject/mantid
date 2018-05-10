@@ -3,11 +3,11 @@
 
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 
-#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -17,8 +17,8 @@
 class ModeratorChopperResolutionTest : public CxxTest::TestSuite {
 public:
   void test_Returned_Width_Is_NonZero() {
-    using Mantid::MDAlgorithms::ModeratorChopperResolution;
     using Mantid::MDAlgorithms::CachedExperimentInfo;
+    using Mantid::MDAlgorithms::ModeratorChopperResolution;
 
     boost::shared_ptr<CachedExperimentInfo> testCachedExperimentInfo =
         createTestCachedExperimentInfo();

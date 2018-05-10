@@ -1,14 +1,14 @@
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -46,9 +46,10 @@ void SANSSolidAngleCorrection::init() {
       "InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output));
-  declareProperty("DetectorTubes", false, "If true, the algorithm will assume "
-                                          "that the detectors are tubes in the "
-                                          "Y direction.");
+  declareProperty("DetectorTubes", false,
+                  "If true, the algorithm will assume "
+                  "that the detectors are tubes in the "
+                  "Y direction.");
   declareProperty("DetectorWing", false,
                   "If true, the algorithm will assume "
                   "that the detector is curved around the sample. E.g. BIOSANS "

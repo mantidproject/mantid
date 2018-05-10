@@ -3,16 +3,16 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Sample.h"
-#include <queue>
+#include "MantidKernel/Exception.h"
 #include <QMessageBox>
 #include <QString>
 #include <cfloat>
+#include <queue>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -90,5 +90,5 @@ InstrumentTreeWidget::findExpandedComponents(const QModelIndex &parent) const {
   return retval;
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

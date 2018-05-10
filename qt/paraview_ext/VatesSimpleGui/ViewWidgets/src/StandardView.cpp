@@ -9,16 +9,16 @@
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
+#include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
-#include <pqPipelineFilter.h>
 #include <pqRenderView.h>
-#include <pqServerManagerModel.h>
 #include <pqServer.h>
+#include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
+#include <vtkSMPVRepresentationProxy.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
-#include <vtkSMPVRepresentationProxy.h>
 
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
@@ -267,8 +267,9 @@ void StandardView::onScaleButtonClicked() {
   QObject::connect(this->m_scaler,
                    SIGNAL(representationAdded(pqPipelineSource *,
                                               pqDataRepresentation *, int)),
-                   this, SLOT(onScaleRepresentationAdded(
-                             pqPipelineSource *, pqDataRepresentation *, int)));
+                   this,
+                   SLOT(onScaleRepresentationAdded(
+                       pqPipelineSource *, pqDataRepresentation *, int)));
 
   // We need to attach the visibility listener to the newly
   // created filter, this is required for automatic updating the color scale
@@ -401,9 +402,9 @@ void StandardView::allowUnbinOption(bool allow) {
 }
 
 /**
-  * Listen for a change of the active source in order to check if the
-  * active source is an MDEventSource for which we allow rebinning.
-  */
+ * Listen for a change of the active source in order to check if the
+ * active source is an MDEventSource for which we allow rebinning.
+ */
 void StandardView::activeSourceChangeListener(pqPipelineSource *source) {
   // If there is no active source, then we do not allow rebinning
   if (!source) {
@@ -468,6 +469,6 @@ QString StandardView::getAlgNameFromMenuLabel(const QString &menuLbl) {
   return res;
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

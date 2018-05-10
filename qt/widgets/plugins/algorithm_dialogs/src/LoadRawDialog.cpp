@@ -3,26 +3,25 @@
 
 #include "MantidKernel/Property.h"
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDir>
+#include <QFileInfo>
+#include <QFontMetrics>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QGridLayout>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QComboBox>
-#include <QFontMetrics>
-#include <QFileInfo>
-#include <QDir>
-#include <QCheckBox>
 
 // Add this class to the list of specialized dialogs in this namespace
 namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(LoadRawDialog)
 }
-}
+} // namespace MantidQt
 
 // Just to save writing this everywhere
 using namespace MantidQt::CustomDialogs;
@@ -37,8 +36,8 @@ LoadRawDialog::LoadRawDialog(QWidget *parent)
     : AlgorithmDialog(parent), m_pathBox(nullptr), m_wsBox(nullptr) {}
 
 /**
-  *Destructor
-  */
+ *Destructor
+ */
 LoadRawDialog::~LoadRawDialog() {}
 
 //---------------------------------------
@@ -167,8 +166,8 @@ void LoadRawDialog::initLayout() {
 }
 
 /**
-  * A slot for the browse button "clicked" signal
-  */
+ * A slot for the browse button "clicked" signal
+ */
 void LoadRawDialog::browseClicked() {
   if (!m_pathBox->text().isEmpty()) {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(

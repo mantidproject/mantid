@@ -1,16 +1,16 @@
 #ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2TEST_H_
 #define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2TEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto2.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyHistory.h"
 #include <boost/lexical_cast.hpp>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::CreateTransmissionWorkspaceAuto2;
 using namespace Mantid::API;
@@ -36,7 +36,7 @@ T findPropertyValue(PropertyHistories &histories,
   auto it = std::find_if(histories.begin(), histories.end(), finder);
   return boost::lexical_cast<T>((*it)->value());
 }
-}
+} // namespace
 
 class CreateTransmissionWorkspaceAuto2Test : public CxxTest::TestSuite {
 

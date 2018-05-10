@@ -344,7 +344,7 @@ public:
     TS_ASSERT(!factory.isSubscribed("SymmetryElementMirrorGenerator"));
 
     TS_ASSERT_THROWS_NOTHING(factory.subscribeSymmetryElementGenerator<
-        TestableSymmetryElementMirrorGenerator>(
+                             TestableSymmetryElementMirrorGenerator>(
         "SymmetryElementMirrorGenerator"));
 
     TS_ASSERT(factory.isSubscribed("SymmetryElementMirrorGenerator"));

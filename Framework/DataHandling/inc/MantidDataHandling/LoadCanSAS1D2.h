@@ -14,7 +14,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -96,6 +96,6 @@ private:
                            const std::string &name,
                            const std::string &output_name);
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // MANTID_DATAHANDLING_LoadCanSAS1D2_H

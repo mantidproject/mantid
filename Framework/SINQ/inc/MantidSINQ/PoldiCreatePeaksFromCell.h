@@ -1,12 +1,12 @@
 #ifndef MANTID_SINQ_POLDICREATEPEAKSFROMCELL_H_
 #define MANTID_SINQ_POLDICREATEPEAKSFROMCELL_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidSINQ/DllConfig.h"
 
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
 namespace Mantid {
@@ -73,7 +73,7 @@ private:
   void exec() override;
 };
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid
 
 #endif /* MANTID_SINQ_POLDICREATEPEAKSFROMCELL_H_ */

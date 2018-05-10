@@ -1,12 +1,12 @@
 #ifndef FILTERBADPULSESTEST_H_
 #define FILTERBADPULSESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

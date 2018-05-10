@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MagneticFormFactorTable.h"
 #include "MantidKernel/MagneticIon.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -12,7 +12,7 @@ namespace {
 const int FORM_FACTOR_TABLE_LENGTH = 500;
 /// Name of the form factor attribute
 const char *FORM_FACTOR_ION = "FormFactorIon";
-}
+} // namespace
 
 /**
  * Default constructor only callable by the factory
@@ -231,5 +231,5 @@ void ForegroundModel::convertToHKL(const API::ExperimentInfo &exptSetup,
   arlu2 = (TWO_PI / lattice.b()) * (sa2 / factor);
   arlu3 = (TWO_PI / lattice.c()) * (sa3 / factor);
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

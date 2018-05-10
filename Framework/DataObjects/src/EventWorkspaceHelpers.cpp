@@ -1,8 +1,8 @@
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Exception.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -49,5 +49,5 @@ EventWorkspaceHelpers::convertEventTo2D(MatrixWorkspace_sptr inputMatrixW) {
   return outputW;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

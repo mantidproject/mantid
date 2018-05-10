@@ -5,8 +5,8 @@
 //   Includes
 //----------------------------
 
-#include "ui_SequentialFitDialog.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "ui_SequentialFitDialog.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -123,7 +123,7 @@ private:
 
   QString name(int row) const;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* SEQUENTIALFITDIALOG_H */

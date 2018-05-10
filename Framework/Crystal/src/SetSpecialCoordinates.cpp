@@ -1,7 +1,7 @@
 #include "MantidCrystal/SetSpecialCoordinates.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
@@ -121,7 +121,7 @@ bool SetSpecialCoordinates::writeCoordinatesToPeaksWorkspace(
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-   */
+ */
 void SetSpecialCoordinates::exec() {
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");

@@ -1,18 +1,18 @@
 #ifndef ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_
 #define ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::MantidVec;
 using Mantid::Algorithms::EstimateMuonAsymmetryFromCounts;
+using Mantid::MantidVec;
 
 const std::string outputName = "EstimateMuonAsymmetryFromCounts_Output";
 
@@ -53,7 +53,7 @@ IAlgorithm_sptr setUpAlg() {
   asymmAlg->setProperty("EndX", 0.9);
   return asymmAlg;
 }
-}
+} // namespace
 
 class EstimateMuonAsymmetryFromCountsTest : public CxxTest::TestSuite {
 public:

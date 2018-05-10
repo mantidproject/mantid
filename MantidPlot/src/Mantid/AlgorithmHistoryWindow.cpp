@@ -1,8 +1,8 @@
 #include "AlgorithmHistoryWindow.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Strings.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Strings.h"
 
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
@@ -32,7 +32,7 @@ namespace {
 Mantid::Kernel::Logger window_log("AlgorithmHistoryWindow");
 /// static tree widget logger
 Mantid::Kernel::Logger widget_log("AlgHistoryTreeWidget");
-}
+} // namespace
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
     : QGroupBox(w), m_execDurationlabel(nullptr), m_execDurationEdit(nullptr),
@@ -232,8 +232,9 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     m_histPropWindow = createAlgHistoryPropWindow();
 
   // connect history tree with window
-  connect(m_Historytree, SIGNAL(updateAlgorithmHistoryWindow(
-                             Mantid::API::AlgorithmHistory_const_sptr)),
+  connect(m_Historytree,
+          SIGNAL(updateAlgorithmHistoryWindow(
+              Mantid::API::AlgorithmHistory_const_sptr)),
           this, SLOT(updateAll(Mantid::API::AlgorithmHistory_const_sptr)));
   connect(m_Historytree,
           SIGNAL(unrollAlgorithmHistory(const std::vector<int> &)), this,

@@ -8,8 +8,8 @@ namespace XML {
 class Document;
 class Element;
 class DOMParser;
-}
-}
+} // namespace XML
+} // namespace Poco
 namespace Mantid {
 
 namespace Geometry {
