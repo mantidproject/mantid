@@ -28,6 +28,9 @@ New Algorithms
 - :ref:`LoadSampleShape <algm-LoadSampleShape>` loads a shape into the sample in a workspace from an STL file,
   which contains a list of triangles.
 
+- :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` outputs a group workspace with the separate absorption and multiple scattering corrections for flexibility to the User to apply them to the sample workspace
+
+- :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>` replaces *MultipleScatteringCylinderAbsorption* and uses :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` for calculating its corrections. 
 
 Improved
 ########
