@@ -33,7 +33,7 @@ Usage
 
     #run IqtFitSimultaneous
     result, params, fit_group = IqtFitSimultaneous(Function=function, InputWorkspace=input_ws, 
-                                                   StartX=0, EndX=0.2, SpecMin=0, SpecMax=16)
+                                                   WorkspaceIndex=0, StartX=0, EndX=0.2)
 
 
 .. categories::
