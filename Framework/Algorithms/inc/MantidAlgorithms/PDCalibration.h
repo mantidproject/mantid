@@ -80,11 +80,12 @@ private:
 
   API::ITableWorkspace_sptr
   sortTableWorkspace(API::ITableWorkspace_sptr &table);
-  API::MatrixWorkspace_sptr m_uncalibratedWS;
-  API::ITableWorkspace_sptr m_calibrationTable;
-  API::ITableWorkspace_sptr m_peakPositionTable;
-  API::ITableWorkspace_sptr m_peakWidthTable;
-  API::ITableWorkspace_sptr m_peakHeightTable;
+
+  API::MatrixWorkspace_sptr m_uncalibratedWS{nullptr};
+  API::ITableWorkspace_sptr m_calibrationTable{nullptr};
+  API::ITableWorkspace_sptr m_peakPositionTable{nullptr};
+  API::ITableWorkspace_sptr m_peakWidthTable{nullptr};
+  API::ITableWorkspace_sptr m_peakHeightTable{nullptr};
   std::vector<double> m_peaksInDspacing;
   std::map<detid_t, size_t> m_detidToRow;
   double m_tofMin{0.};
