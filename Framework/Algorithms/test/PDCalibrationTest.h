@@ -116,24 +116,31 @@ public:
                      const std::vector<double> &dValues) {
     ITableWorkspace_sptr peaksTable =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsname);
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = peaksTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
     // check for workspace index 55 which is spectrum 56
+    size_t index =
+        std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
     for (size_t i = 0; i < dValues.size(); ++i) {
-      TS_ASSERT_DELTA(peaksTable->cell<double>(55, 1 + i), dValues[i], 0.0002);
+      TS_ASSERT_DELTA(peaksTable->cell<double>(index, 1 + i), dValues[i], 0.0002);
     }
     // checks for chisq, first one is strange because of test framework missing
     // > operator
-    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(55, 1 + dValues.size()));
-    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(55, 1 + dValues.size()), 10.);
+    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(index, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(index, 1 + dValues.size()), 10.);
 
     // check for workspace index 95 which is spectrum 96 - last peak is out of
     // range???
+    index =
+        std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
     for (size_t i = 0; i < dValues.size() - 1; ++i) {
-      TS_ASSERT_DELTA(peaksTable->cell<double>(95, 1 + i), dValues[i], 0.0002);
+      TS_ASSERT_DELTA(peaksTable->cell<double>(index, 1 + i), dValues[i], 0.0002);
     }
     // checks for chisq, first one is strange because of test framework missing
     // > operator
-    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(95, 1 + dValues.size()));
-    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(95, 1 + dValues.size()), 10.);
+    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(index, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(index, 1 + dValues.size()), 10.);
   }
 
   void test_exec_difc() {
@@ -171,11 +178,13 @@ public:
     // since the wksp was calculated in TOF, all DIFC end up being the same
     size_t index =
         std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
 
     index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
@@ -231,11 +240,13 @@ public:
     // since the wksp was calculated in TOF, all DIFC end up being the same
     size_t index =
         std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, 0.1); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
     index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, 0.1); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
@@ -293,11 +304,13 @@ public:
     // since the wksp was calculated in TOF, all DIFC end up being the same
     size_t index =
         std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, 0.1); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
     index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, 0.1); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
