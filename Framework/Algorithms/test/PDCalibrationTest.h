@@ -123,24 +123,29 @@ public:
     size_t index =
         std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
     for (size_t i = 0; i < dValues.size(); ++i) {
-      TS_ASSERT_DELTA(peaksTable->cell<double>(index, 1 + i), dValues[i], 0.0002);
+      TS_ASSERT_DELTA(peaksTable->cell<double>(index, 1 + i), dValues[i],
+                      0.0002);
     }
     // checks for chisq, first one is strange because of test framework missing
     // > operator
-    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(index, 1 + dValues.size()));
-    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(index, 1 + dValues.size()), 10.);
+    TS_ASSERT_LESS_THAN(0.,
+                        peaksTable->cell<double>(index, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(index, 1 + dValues.size()),
+                        10.);
 
     // check for workspace index 95 which is spectrum 96 - last peak is out of
     // range???
-    index =
-        std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
     for (size_t i = 0; i < dValues.size() - 1; ++i) {
-      TS_ASSERT_DELTA(peaksTable->cell<double>(index, 1 + i), dValues[i], 0.0002);
+      TS_ASSERT_DELTA(peaksTable->cell<double>(index, 1 + i), dValues[i],
+                      0.0002);
     }
     // checks for chisq, first one is strange because of test framework missing
     // > operator
-    TS_ASSERT_LESS_THAN(0., peaksTable->cell<double>(index, 1 + dValues.size()));
-    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(index, 1 + dValues.size()), 10.);
+    TS_ASSERT_LESS_THAN(0.,
+                        peaksTable->cell<double>(index, 1 + dValues.size()));
+    TS_ASSERT_LESS_THAN(peaksTable->cell<double>(index, 1 + dValues.size()),
+                        10.);
   }
 
   void test_exec_difc() {
