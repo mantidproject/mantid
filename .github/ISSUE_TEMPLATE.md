@@ -1,6 +1,6 @@
 <!-- TEMPLATE FOR BUG REPORTS -->
 
-[username/email]/[nobody]. <!--If the issue was raised by a user they should be named here.-->
+**Original reporter:** [username/email]/[nobody]. <!--If the issue was raised by a user they should be named here.-->
 
 ### Expected behavior
 
