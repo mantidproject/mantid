@@ -15,10 +15,14 @@ class DirectILLCollectDataTest(unittest.TestCase):
         unittest.TestCase.__init__(self, methodName)
 
     def setUp(self):
-        if not DirectILLCollectDataTest._TEST_WS:
-            DirectILLCollectDataTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
-                                                                                          illhelpers.default_test_detectors)
-        mtd.addOrReplace(self._TEST_WS_NAME, DirectILLCollectDataTest._TEST_WS)
+        if self._TEST_WS is None:
+            self._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
+                                                                      illhelpers.default_test_detectors)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS,
+            'OutputWorkspace': self._TEST_WS_NAME,
+        }
+        run_algorithm('CloneWorkspace', **algProperties)        
 
     def tearDown(self):
         mtd.clear()
@@ -41,6 +45,36 @@ class DirectILLCollectDataTest(unittest.TestCase):
         self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
         ys = outWS.extractY()
         originalYs = inWS.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs[1:, :] - self._BKG_LEVEL)
+
+    def testTubeBackgroundSubtraction(self):
+        ws = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
+                                                       illhelpers.leave_a_few_tubes)
+        kwargs = {
+            'Workspace': ws,
+            'ParameterName': 'pixels-per-component',
+            'ParameterType': 'Number',
+            'Value': '256',
+            'child': True
+        }
+        run_algorithm('SetInstrumentParameter', **kwargs)
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': ws,
+            'OutputWorkspace': outWSName,
+            'FlatBkg': 'Flat Bkg Over Tubes',
+            'FlatBkgScaling': 1.0,
+            'NonBkgRegionInSigmas': 1.5,
+            'IncidentEnergyCalibration': 'Energy Calibration OFF',
+            'Normalisation': 'Normalisation OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLCollectData', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        self.assertEquals(outWS.getNumberHistograms(), ws.getNumberHistograms() - 1)
+        ys = outWS.extractY()
+        originalYs = ws.extractY()
         numpy.testing.assert_almost_equal(ys, originalYs[1:, :] - self._BKG_LEVEL)
 
     def testBackgroundOutput(self):

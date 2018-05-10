@@ -16,6 +16,7 @@ BEAM_STOP_DIAGNOSTICS_ON = 'Beam Stop Diagnostics ON'
 BKG_AUTO = 'Flat Bkg AUTO'
 BKG_OFF = 'Flat Bkg OFF'
 BKG_ON = 'Flat Bkg ON'
+BKG_PER_COMPONENT = 'Flat Bkg Over Tubes'
 
 BKG_DIAGNOSTICS_AUTO = 'Bkg Diagnostics AUTO'
 BKG_DIAGNOSTICS_OFF = 'Bkg Diagnostics OFF'

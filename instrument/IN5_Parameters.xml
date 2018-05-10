@@ -19,7 +19,9 @@
 		<parameter name="formula_eff" type="string">
 			<value val="1-exp(-5.6/sqrt(e))" />
 		</parameter>
-
+		<parameter name="pixels-per-component" type="int">
+			<value val="256" />
+		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
 			<value val="98305" />
