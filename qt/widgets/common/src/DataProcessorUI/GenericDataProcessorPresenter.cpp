@@ -970,14 +970,18 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
         QString propValue = QString::fromStdString(
             alg->getPropertyValue(column.algorithmProperty().toStdString()));
 
+        // Perform any rounding requested
         if (m_options["Round"].toBool()) {
-          QString exp = (propValue.indexOf("e") != -1)
-                            ? propValue.right(propValue.indexOf("e"))
-                            : "";
-          propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
-              exp;
+          QString exponential = "";
+          auto const exponentialPosition = propValue.indexOf("e");
+          if (exponentialPosition != -1)
+            exponential =
+                propValue.right(propValue.length() - exponentialPosition);
+
+          auto const decimalPosition = propValue.indexOf(".");
+          auto const precision = m_options["RoundPrecision"].toInt();
+          auto const endPosition = decimalPosition + precision + 1;
+          propValue = propValue.mid(0, endPosition) + exponential;
         }
 
         data->setValue(i, propValue, true);
