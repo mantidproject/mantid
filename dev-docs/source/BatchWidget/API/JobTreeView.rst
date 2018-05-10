@@ -27,7 +27,7 @@ table is unlike a traditional spreadsheet in that it is hierarchical, the table 
 tree of rows where all non-leaf nodes can have any number of children.
 
 In practice some interfaces, such as Reflectometry are likely to want to constrain the
-number of children or depth of the tree, and the batch widget has mechanisms for performing this.
+number of children or depth of the tree, the batch widget has mechanisms for performing this.
 
 Currently a row location is represented as a path from the root node to the row node in question,
 this is actualised in the :code:`RowLocation` class which contains an ordered list of integers where

@@ -61,9 +61,7 @@ bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
   return QTreeView::edit(index, trigger, event);
 }
 
-Cell JobTreeView::deadCell() const {
-  return g_deadCell;
-}
+Cell JobTreeView::deadCell() const { return g_deadCell; }
 
 boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
   auto rows = selectedRowLocations();
