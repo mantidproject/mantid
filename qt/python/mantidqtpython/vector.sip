@@ -1,4 +1,4 @@
-// Acquired from the wxpy project at
+// Acquired and modified based on the version from the wxpy project at
 // https://raw.githubusercontent.com/ifwe/wxpy/master/src/vector.sip
 // on 9th April 2018.
 //
