@@ -68,7 +68,6 @@ def MULTIMAX(
                     phaseConvX_k[j + 1] = (j + 1) * 1.0
                     phaseConvY_k[j + 1] = SENSE_phi[k-offset]
 
-
         prog.report((j + 1) * InnerIter, "")
                     # finished outer loop, jump progress bar
 
