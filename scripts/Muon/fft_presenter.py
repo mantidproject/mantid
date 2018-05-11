@@ -22,6 +22,10 @@ class FFTPresenter(object):
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
 
+    @property
+    def widget(self):
+	    return self.view
+
     # turn on button
     def activate(self):
         self.view.activateButton()

@@ -115,6 +115,9 @@ class FFTView(QtGui.QWidget):
         self.grid.addItem(self.horizontalSpacer2)
         self.grid.addWidget(self.button)
 
+    def getLayout(self):
+         return self.grid
+
    # add data to view
     def addItems(self,options):
         self.ws.clear()

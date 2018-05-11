@@ -15,15 +15,18 @@ class TransformSelectionView(QtGui.QWidget):
         self.grid = QtGui.QGridLayout(self)
         self.methods = QtGui.QComboBox()
         # default to FFT
-        options=["FFT"]
+        options=["FFT","MaxEnt"]
         self.methods.addItems(options)
         self.grid.addWidget(self.methods)
         self.methods.currentIndexChanged.connect(self.sendSignal)
 
-    # sets the methods in the selection widget
+    def getLayout(self):
+         return self.grid
+    
+	# sets the methods in the selection widget
     def setMethodsCombo(self,options):
         self.methods.clear()
         self.methods.addItems(options)
 
-    def sendSignal(self,index):
-        self.changeMethodSignal.emit(index)
+    def sendSignal(self):
+        self.changeMethodSignal.emit(self.methods.currentText())

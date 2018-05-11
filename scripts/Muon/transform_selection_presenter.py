@@ -9,5 +9,9 @@ class TransformSelectionPresenter(object):
     def __init__(self,view):
         self.view=view
 
+    @property
+    def widget(self):
+	    return self.view
+
     def setMethodsCombo(self,options):
         self.view.setMethodsCombo(options)

@@ -5,22 +5,20 @@ import sys
 
 import PyQt4.QtGui as QtGui
 
-from Muon import model_constructor
-from Muon import transform_presenter
-from Muon import transform_view
-from Muon import view_constructor
+from Muon.transform_widget import TransformWidget
+from Muon import load_utils
 
 
 class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
     def __init__(self,parent=None):
         super(FrequencyDomainAnalysisGui,self).__init__(parent)
 
-        groupedViews = view_constructor.ViewConstructor(True,self)
-        groupedModels = model_constructor.ModelConstructor(True)
-        view =transform_view.TransformView(groupedViews,self)
-        self.presenter =transform_presenter.TransformPresenter(view,groupedModels)
+        load = load_utils.LoadUtils()
+        if not load.MuonAnalysisExists:
+            return
+        self.transform = TransformWidget(load = load, parent = self)
 
-        self.setCentralWidget(view)
+        self.setCentralWidget(self.transform.widget)
         self.setWindowTitle("Frequency Domain Analysis")
 
     # cancel algs if window is closed

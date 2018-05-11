@@ -23,6 +23,10 @@ class MaxEntPresenter(object):
         self.view.cancelSignal.connect(self.cancel)
         self.view.phaseSignal.connect(self.handlePhase)
 
+    @property
+    def widget(self):
+	    return self.view
+
     # functions
     def getWorkspaceNames(self):
         final_options = self.load.getGroupedWorkspaceNames()

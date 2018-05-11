@@ -158,6 +158,9 @@ class MaxEntView(QtGui.QWidget):
         self.grid.addItem(self.horizontalSpacer2)
         self.grid.addLayout(self.buttonLayout)
 
+    def getLayout(self):
+         return self.grid
+
     # add data to view
     def addItems(self, options):
         self.ws.clear()
