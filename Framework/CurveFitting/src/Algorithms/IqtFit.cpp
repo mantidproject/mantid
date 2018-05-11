@@ -33,6 +33,27 @@ MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr workspace) {
   converter->execute();
   return converter->getProperty("OutputWorkspace");
 }
+
+struct HistogramConverter {
+  explicit HistogramConverter() : m_converted() {}
+
+  MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr workspace, double startX,
+                                  double endX) const {
+    auto it = m_converted.find(workspace.get());
+    if (it != m_converted.end())
+      return it->second;
+    else {
+      auto histogram =
+          convertToHistogram(cropWorkspace(workspace, startX, endX));
+      m_converted[workspace.get()] = histogram;
+      return histogram;
+    }
+  }
+
+private:
+  mutable std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr>
+      m_converted;
+};
 } // namespace
 
 namespace Mantid {
@@ -116,13 +137,27 @@ bool IqtFit<Base>::throwIfElasticQConversionFails() const {
 template <typename Base>
 std::vector<API::MatrixWorkspace_sptr> IqtFit<Base>::getWorkspaces() const {
   auto workspaces = Base::getWorkspaces();
-  const double startX = Base::getProperty("StartX");
-  const double endX = Base::getProperty("EndX");
+  HistogramConverter convert;
 
   for (auto i = 0u; i < workspaces.size(); ++i)
-    workspaces[i] =
-        convertToHistogram(cropWorkspace(workspaces[i], startX, endX));
+    workspaces[i] = convert(workspaces[i], getStartX(i), getEndX(i));
   return workspaces;
+}
+
+template <> double IqtFit<QENSFitSimultaneous>::getStartX(std::size_t index) {
+  return QENSFitSimultaneous::getProperty("StartX_" + std::to_string(index));
+}
+
+template <typename Base> double IqtFit<Base>::getStartX(std::size_t) {
+  return Base::getProperty("StartX");
+}
+
+template <> double IqtFit<QENSFitSimultaneous>::getEndX(std::size_t index) {
+  return QENSFitSimultaneous::getProperty("EndX_" + std::to_string(index));
+}
+
+template <typename Base> double IqtFit<Base>::getEndX(std::size_t) {
+  return Base::getProperty("EndX");
 }
 
 // Register the algorithms into the AlgorithmFactory
