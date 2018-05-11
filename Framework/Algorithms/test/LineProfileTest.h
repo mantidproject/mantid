@@ -402,7 +402,7 @@ public:
     TS_ASSERT(outputWS);
     const auto &logs = outputWS->run();
     TS_ASSERT(logs.hasProperty("test_property"));
- }
+  }
 
   void test_distribution_input_gives_distribution_output() {
     const size_t nHist = 13;
