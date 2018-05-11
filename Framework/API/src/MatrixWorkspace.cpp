@@ -803,9 +803,8 @@ MatrixWorkspace::detectorSignedTwoTheta(const Geometry::IDetector &det) const {
         "Source and sample are at same position!");
   }
   // Get the instrument up axis.
-  const V3D &instrumentUpAxis =
-      instrument->getReferenceFrame()->vecPointingUp();
-  return det.getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+  const V3D &thetaSignAxis = instrument->getReferenceFrame()->vecThetaSign();
+  return det.getSignedTwoTheta(samplePos, beamLine, thetaSignAxis);
 }
 
 /** Returns the 2Theta scattering angle for a detector

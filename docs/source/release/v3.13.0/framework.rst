@@ -54,4 +54,12 @@ Bug fixes
 - :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS. 
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
 
+Python
+------
+
+Bug fixes
+#########
+
+- Fixed a bug in ``detectorSignedTwoTheta`` method in ``MatrixWorkspace`` where the sign of the angle depended on the axis pointing up, not on the actual theta-sing axis defined in the IDF.
+
 :ref:`Release 3.13.0 <v3.13.0>`
