@@ -32,6 +32,5 @@
 #define CODE_OBJECT(x) (PyCodeObject *) x
 #define FROM_LONG PyInt_FromLong
 #endif
-// PyInt_FromLong
 
 #endif // PYTHONSYSTEMHEADER_H_
