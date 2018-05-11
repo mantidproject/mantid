@@ -4,10 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidAlgorithms/ConjoinXRuns.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
@@ -20,6 +23,7 @@
 using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::AddSampleLog;
 using Mantid::Algorithms::AddTimeSeriesLog;
+using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::HistogramE;
@@ -94,6 +98,23 @@ public:
     TS_ASSERT_EQUALS(out->y(0).rawData(), y);
     TS_ASSERT_EQUALS(out->e(0).rawData(), e);
     TSM_ASSERT_EQUALS("Dx and y values are the same", out->dx(0).rawData(), y);
+  }
+
+  void testTableInputWorkspaceInGroup() {
+    auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    storeWS("table", table);
+
+    GroupWorkspaces group;
+    group.initialize();
+    group.setProperty("InputWorkspaces",
+                      std::vector<std::string>{"table", "ws1"});
+    group.setProperty("OutputWorkspace", "group");
+    group.execute();
+    m_testee.setProperty("InputWorkspaces", "group");
+    m_testee.setProperty("OutputWorkspace", "out");
+    TS_ASSERT_THROWS_EQUALS(m_testee.execute(), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Some invalid Properties found");
   }
 
   void testWSWithoutDxValues() {

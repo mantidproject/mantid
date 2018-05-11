@@ -149,6 +149,9 @@ void PlotPeakByLogValue::init() {
   declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
+
+  declareProperty("IgnoreInvalidData", false,
+                  "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 /**
@@ -289,6 +292,7 @@ void PlotPeakByLogValue::exec() {
           wsBaseName = wsNames[i].name + "_" + spectrum_index;
 
         bool histogramFit = getPropertyValue("EvaluationType") == "Histogram";
+        bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
         // Fit the function
         API::IAlgorithm_sptr fit =
@@ -302,6 +306,7 @@ void PlotPeakByLogValue::exec() {
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
         fit->setProperty("Exclude", exclude);
+        fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
         fit->setPropertyValue(
             "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));

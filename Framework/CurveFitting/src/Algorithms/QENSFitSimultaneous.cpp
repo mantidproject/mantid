@@ -154,6 +154,15 @@ IFunction_sptr convertToSingleDomain(IFunction_sptr function) {
   return function;
 }
 
+WorkspaceGroup_sptr makeGroup(Workspace_sptr workspace) {
+  auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  if (group)
+    return group;
+  group = WorkspaceGroup_sptr(new WorkspaceGroup);
+  group->addWorkspace(workspace);
+  return group;
+}
+
 ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
                                        IFunction_sptr function) {
   auto transposed = WorkspaceFactory::Instance().createTable();
@@ -247,8 +256,8 @@ void QENSFitSimultaneous::initConcrete() {
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
                   "The output result workspace");
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputParameterWorkspace", "", Direction::Output,
@@ -302,8 +311,7 @@ void QENSFitSimultaneous::execConcrete() {
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
   const auto parameterWs = processParameterTable(
       transposeFitTable(fitResult.first, singleDomainFunction));
-  const auto groupWs =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(fitResult.second);
+  const auto groupWs = makeGroup(fitResult.second);
   const auto resultWs = processIndirectFitParameters(parameterWs);
   copyLogs(resultWs, workspaces);
 
@@ -346,8 +354,14 @@ QENSFitSimultaneous::performFit(
   fit->setProperty("CreateOutput", true);
   fit->setProperty("Output", output);
   fit->executeAsChildAlg();
-  return {fit->getProperty("OutputParameters"),
-          fit->getProperty("OutputWorkspace")};
+
+  if (workspaces.size() == 1) {
+    MatrixWorkspace_sptr outputWS = fit->getProperty("OutputWorkspace");
+    return {fit->getProperty("OutputParameters"), outputWS};
+  }
+
+  WorkspaceGroup_sptr outputWS = fit->getProperty("OutputWorkspace");
+  return {fit->getProperty("OutputParameters"), outputWS};
 }
 
 MatrixWorkspace_sptr QENSFitSimultaneous::processIndirectFitParameters(
