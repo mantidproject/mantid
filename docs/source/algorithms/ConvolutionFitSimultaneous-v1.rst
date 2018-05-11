@@ -51,7 +51,6 @@ Usage
                                                          InputWorkspace=sample, WorkspaceIndex=0,
                                                          InputWorkspace_1=sample, WorkspaceIndex_1=1,
                                                          StartX=startX, EndX=endX,
-                                                         SpecMin=specMin, SpecMax=specMax,
                                                          ConvolveMembers=convolve,
                                                          Minimizer=minimizer, MaxIterations=maxIt)
 
