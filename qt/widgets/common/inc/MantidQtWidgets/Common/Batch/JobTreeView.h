@@ -84,6 +84,12 @@ public:
   boost::optional<std::vector<Subtree>> selectedSubtrees() const;
   boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
 
+  bool hasNoSelectedChildren(QModelIndex const &index) const;
+  void appendAllDescendants(QModelIndexList &selectedRows,
+                            QModelIndex const &index) const;
+  QModelIndexList
+  findImplicitlySelected(QModelIndexList const &selectedRows) const;
+
   Cell deadCell() const;
   using QTreeView::edit;
 

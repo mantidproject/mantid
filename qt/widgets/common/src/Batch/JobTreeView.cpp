@@ -85,8 +85,45 @@ JobTreeView::selectedSubtreeRoots() const {
   return findSubtreeRoots(selectedRowLocations());
 }
 
+bool JobTreeView::hasNoSelectedDescendants(QModelIndex const &index) const {
+  for (auto row = 0; row < m_filteredModel.rowCount(index); ++row) {
+    auto childIndex = m_filteredModel.index(row, 0, index);
+    if (selectionModel()->isSelected(childIndex))
+      return false;
+    else if (!hasNoSelectedDescendants(childIndex))
+      return false;
+  }
+  return true;
+}
+
+void JobTreeView::appendAllDescendants(QModelIndexList &descendantsList,
+                                       QModelIndex const &index) const {
+  for (auto row = 0; row < m_filteredModel.rowCount(index); ++row) {
+    auto childIndex = m_filteredModel.index(row, 0, index);
+    if (!selectionModel()->isSelected(childIndex))
+      descendantsList.append(childIndex);
+    appendAllDescendants(descendantsList, childIndex);
+  }
+}
+
+QModelIndexList
+JobTreeView::findImplicitlySelected(QModelIndexList const &selectedRows) const {
+  auto implicitlySelected = QModelIndexList();
+  for (auto &&row : selectedRows) {
+    if (isExpanded(row)) {
+      if (hasNoSelectedDescendants(row))
+        appendAllDescendants(implicitlySelected, row);
+    } else {
+      appendAllDescendants(implicitlySelected, row);
+    }
+  }
+  return implicitlySelected;
+}
+
 std::vector<RowLocation> JobTreeView::selectedRowLocations() const {
   auto selection = selectionModel()->selectedRows();
+  selection.append(findImplicitlySelected(selection));
+
   std::vector<RowLocation> rowSelection;
   rowSelection.reserve(selection.size());
   std::transform(
