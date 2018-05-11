@@ -15,6 +15,9 @@ class FFTWrapper(object):
         self.name = "FFT"
         self.model = FFT
 
+    def cancel(self):
+        self.model.cancel()
+
     def loadData(self,inputs):
         """
         store the data in the wrapper for later
@@ -67,6 +70,11 @@ class FFTModel(object):
     """
     def __init__(self):
         self.name = "FFT"
+        self.alg = None
+
+    def cancel(self):
+        if self.alg is not None:
+            self.alg.cancel()
 
     def setRun(self,run):
         self.runName=run
@@ -75,60 +83,63 @@ class FFTModel(object):
         """
         PaddingAndApodization alg on the data
         """
-        preAlg = mantid.AlgorithmManager.create("PaddingAndApodization")
-        preAlg.initialize()
-        preAlg.setAlwaysStoreInADS(False)
+        self.alg = mantid.AlgorithmManager.create("PaddingAndApodization")
+        self.alg.initialize()
+        self.alg.setAlwaysStoreInADS(False)
         for name,value in iteritems(preInputs):
-            preAlg.setProperty(name,value)
-        preAlg.execute()
-        mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"], preAlg.getProperty("OutputWorkspace").value)
+            self.alg.setProperty(name,value)
+        self.alg.execute()
+        mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"], self.alg.getProperty("OutputWorkspace").value)
+        self.alg = None
 
     def FFTAlg(self,FFTInputs):
         """
         Use the FFT alg
         """
-        alg = mantid.AlgorithmManager.create("FFT")
-        alg.initialize()
-        alg.setAlwaysStoreInADS(False)
+        self.alg = mantid.AlgorithmManager.create("FFT")
+        self.alg.initialize()
+        self.alg.setAlwaysStoreInADS(False)
         for name,value in iteritems(FFTInputs):
-            alg.setProperty(name,value)
-        alg.execute()
-        mantid.AnalysisDataService.addOrReplace(FFTInputs["OutputWorkspace"],alg.getProperty("OutputWorkspace").value)
+            self.alg.setProperty(name,value)
+        self.alg.execute()
+        mantid.AnalysisDataService.addOrReplace(FFTInputs["OutputWorkspace"],self.alg.getProperty("OutputWorkspace").value)
 
-        ws = alg.getPropertyValue("OutputWorkspace")
+        ws = self.alg.getPropertyValue("OutputWorkspace")
         group = mantid.AnalysisDataService.retrieve(self.runName)
         group.add(ws)
+        self.alg = None
 
     def makePhaseQuadTable(self,inputs):
         """
         generates a phase table from CalMuonDetectorPhases
         """
-        alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
-        alg.initialize()
-        alg.setAlwaysStoreInADS(False)
+        self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+        self.alg.initialize()
+        self.alg.setAlwaysStoreInADS(False)
 
-        alg.setProperty("FirstGoodData",inputs["FirstGoodData"])
-        alg.setProperty("LastGoodData",inputs["LastGoodData"])
+        self.alg.setProperty("FirstGoodData",inputs["FirstGoodData"])
+        self.alg.setProperty("LastGoodData",inputs["LastGoodData"])
 
-        alg.setProperty("InputWorkspace","MuonAnalysis")
-        alg.setProperty("DetectorTable","PhaseTable")
-        alg.setProperty("DataFitted","fits")
-        alg.execute()
-        mantid.AnalysisDataService.addOrReplace("PhaseTable",alg.getProperty("DetectorTable").value)
+        self.alg.setProperty("InputWorkspace","MuonAnalysis")
+        self.alg.setProperty("DetectorTable","PhaseTable")
+        self.alg.setProperty("DataFitted","fits")
+        self.alg.execute()
+        mantid.AnalysisDataService.addOrReplace("PhaseTable",self.alg.getProperty("DetectorTable").value)
+        self.alg = None
 
     def PhaseQuad(self):
         """
         do the phaseQuad algorithm
         groups data into a single set
         """
-        phaseQuad = mantid.AlgorithmManager.create("PhaseQuad")
-        phaseQuad.initialize()
-        phaseQuad.setChild(False)
-        print (self.runName)
-        phaseQuad.setProperty("InputWorkspace","MuonAnalysis")
-        phaseQuad.setProperty("PhaseTable","PhaseTable")
-        phaseQuad.setProperty("OutputWorkspace","__phaseQuad__")
-        phaseQuad.execute()
+        self.alg = mantid.AlgorithmManager.create("PhaseQuad")
+        self.alg.initialize()
+        self.alg.setChild(False)
+        self.alg.setProperty("InputWorkspace","MuonAnalysis")
+        self.alg.setProperty("PhaseTable","PhaseTable")
+        self.alg.setProperty("OutputWorkspace","__phaseQuad__")
+        self.alg.execute()
+        self.alg = None
 
     def getName(self):
         return self.name

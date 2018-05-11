@@ -24,4 +24,6 @@ class MaxEntWidget(QtGui.QWidget):
     def widget(self):
         return self.presenter.widget
 
+    def closeEvent(self,event):
+        self.pres.cancel()
 

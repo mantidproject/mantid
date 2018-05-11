@@ -23,10 +23,14 @@ class TransformWidget(QtGui.QWidget):
 
         self.selector.setSelectionConnection(self.updateDisplay)
 
-
     @property
     def widget(self):
         return self.view
+
+    def closeEvent(self,event):
+        self.selector.closeEvent(event)
+        self.fft.closeEvent(event)
+        self.maxent.closeEvent(event)
 
     def updateDisplay(self,method):
         self.view.hideAll()

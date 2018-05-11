@@ -7,6 +7,7 @@ import PyQt4.QtGui as QtGui
 
 from Muon.transform_widget import TransformWidget
 from Muon import load_utils
+from Muon import message_box
 
 
 class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
@@ -23,7 +24,7 @@ class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
 
     # cancel algs if window is closed
     def closeEvent(self,event):
-        self.presenter.close()
+        self.transform.closeEvent(event)
 
 
 def qapp():
@@ -41,5 +42,4 @@ try:
     ex.show()
     app.exec_()
 except RuntimeError as error:
-    ex = QtGui.QWidget()
-    QtGui.QMessageBox.warning(ex,"Frequency Domain Analysis",str(error))
+    message_box.warning(str(error))

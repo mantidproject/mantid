@@ -22,6 +22,10 @@ class FFTPresenter(object):
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
 
+    def cancel(self):
+        if self.thread is not None:
+            self.thread.cancel()
+
     @property
     def widget(self):
 	    return self.view
