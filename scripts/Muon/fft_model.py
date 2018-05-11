@@ -41,22 +41,19 @@ class FFTWrapper(object):
         """
         runs the relevant parts of the FFT and the preprocessing
         """
-        try:
-            if self.phaseTable is not None:
-                if self.phaseTable["newTable"]:
-                    self.model.makePhaseQuadTable(self.phaseTable)
-                self.model.PhaseQuad()
+        if self.phaseTable is not None:
+            if self.phaseTable["newTable"]:
+                self.model.makePhaseQuadTable(self.phaseTable)
+            self.model.PhaseQuad()
 
-            if self.preRe is not None:
-                self.model.preAlg(self.preRe)
+        if self.preRe is not None:
+            self.model.preAlg(self.preRe)
 
-            if self.preIm is not None:
-                self.model.preAlg(self.preIm)
+        if self.preIm is not None:
+            self.model.preAlg(self.preIm)
 
-            if self.FFT is not None:
-                self.model.FFTAlg(self.FFT)
-        except:
-            pass
+        if self.FFT is not None:
+             self.model.FFTAlg(self.FFT)
 
     def output(self):
         return
@@ -80,7 +77,7 @@ class FFTModel(object):
         """
         preAlg = mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()
-        preAlg.setChild(True)
+        preAlg.setAlwaysStoreInADS(False)
         for name,value in iteritems(preInputs):
             preAlg.setProperty(name,value)
         preAlg.execute()
@@ -92,7 +89,7 @@ class FFTModel(object):
         """
         alg = mantid.AlgorithmManager.create("FFT")
         alg.initialize()
-        alg.setChild(True)
+        alg.setAlwaysStoreInADS(False)
         for name,value in iteritems(FFTInputs):
             alg.setProperty(name,value)
         alg.execute()
@@ -108,7 +105,7 @@ class FFTModel(object):
         """
         alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         alg.initialize()
-        alg.setChild(True)
+        alg.setAlwaysStoreInADS(False)
 
         alg.setProperty("FirstGoodData",inputs["FirstGoodData"])
         alg.setProperty("LastGoodData",inputs["LastGoodData"])
