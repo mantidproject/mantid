@@ -97,14 +97,14 @@ std::vector<T, Ts...> divideVectors(const std::vector<T, Ts...> &dividend,
 }
 
 template <typename T, typename... Ts>
-std::vector<double> addVectors(const std::vector<T, Ts...> &vec,
-                               const std::vector<T, Ts...> &vec2) {
+std::vector<T, Ts...> addVectors(const std::vector<T, Ts...> &vec,
+                                 const std::vector<T, Ts...> &vec2) {
   return combineVectors(vec, vec2, std::plus<T>());
 }
 
 template <typename T, typename... Ts>
-std::vector<double> multiplyVectors(const std::vector<T, Ts...> &vec,
-                                    const std::vector<T, Ts...> &vec2) {
+std::vector<T, Ts...> multiplyVectors(const std::vector<T, Ts...> &vec,
+                                      const std::vector<T, Ts...> &vec2) {
   return combineVectors(vec, vec2, std::multiplies<T>());
 }
 
