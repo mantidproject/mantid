@@ -29,12 +29,18 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
 }
 
 void JobTreeView::commitData(QWidget *editor) {
+  auto cellTextBefore =
+      m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
   QTreeView::commitData(editor);
-  auto cellProperties = m_adaptedMainModel.cellFromCellIndex(m_lastEdited);
-  auto cellText = cellProperties.contentText();
-  m_notifyee->notifyCellChanged(rowLocation().atIndex(m_lastEdited),
-                                m_lastEdited.column(), cellText);
-  m_hasEditorOpen = false;
+  auto cellText =
+      m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
+  if (cellText != cellTextBefore) {
+    resizeColumnToContents(m_lastEdited.column());
+    m_hasEditorOpen = false;
+    m_notifyee->notifyCellTextChanged(rowLocation().atIndex(m_lastEdited),
+                                      m_lastEdited.column(), cellTextBefore,
+                                      cellText);
+  }
 }
 
 void JobTreeView::filterRowsBy(std::unique_ptr<RowPredicate> predicate) {

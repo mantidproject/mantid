@@ -18,8 +18,9 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSubscriber {
 public:
-  virtual void notifyCellChanged(RowLocation const &itemIndex, int column,
-                                 std::string const &newValue) = 0;
+  virtual void notifyCellTextChanged(RowLocation const &itemIndex, int column,
+                                     std::string const &oldValue,
+                                     std::string const &newValue) = 0;
   virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
   virtual void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
@@ -32,12 +33,10 @@ public:
 class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView {
   Q_OBJECT
 public:
-  // JobTreeView(QWidget *parent = nullptr);
   JobTreeView(QStringList const &columnHeadings, Cell const &defaultCellStyle,
               QWidget *parent = nullptr);
 
   void enableFiltering();
-
   void filterRowsBy(std::unique_ptr<RowPredicate> predicate);
   void filterRowsBy(RowPredicate *predicate);
   void resetFilter();
@@ -84,7 +83,7 @@ public:
   boost::optional<std::vector<Subtree>> selectedSubtrees() const;
   boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
 
-  bool hasNoSelectedChildren(QModelIndex const &index) const;
+  bool hasNoSelectedDescendants(QModelIndex const &index) const;
   void appendAllDescendants(QModelIndexList &selectedRows,
                             QModelIndex const &index) const;
   QModelIndexList

@@ -1549,8 +1549,10 @@ class JobTreeViewSubscriber {
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 %End
 public:
-  virtual void notifyCellChanged(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex, int column,
-                                 const std::string& newValue) = 0;
+  virtual void notifyCellTextChanged(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex,
+                                     int column,
+                                     const std::string& oldValue,
+                                     const std::string& newValue) = 0;
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
@@ -1658,8 +1660,10 @@ class JobTreeViewSignalAdapter : public QObject, public MantidQt::MantidWidgets:
 %End
 public:
   JobTreeViewSignalAdapter(MantidQt::MantidWidgets::Batch::JobTreeView &view, QObject *parent = nullptr);
-  virtual void notifyCellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
-                                 const std::string &newValue);
+  virtual void notifyCellTextChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex,
+                                     int column,
+                                     const std::string &oldValue,
+                                     const std::string &newValue);
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
@@ -1667,8 +1671,10 @@ public:
   virtual void notifyPasteRowsRequested();
   virtual void notifyFilterReset();
 signals:
-  void cellChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex, int column,
-                   std::string newValue);
+  void cellTextChanged(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex,
+                       int column,
+                       std::string oldValue,
+                       std::string newValue);
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void filterReset();
   void removeRowsRequested(

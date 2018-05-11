@@ -12,8 +12,9 @@ class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSignalAdapter
 public:
   JobTreeViewSignalAdapter(JobTreeView &view, QObject *parent = nullptr);
 
-  void notifyCellChanged(RowLocation const &itemIndex, int column,
-                         std::string const &newValue) override;
+  void notifyCellTextChanged(RowLocation const &itemIndex, int column,
+                             std::string const &oldValue,
+                             std::string const &newValue) override;
   void notifyRowInserted(RowLocation const &newRowLocation) override;
   void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) override;
@@ -21,8 +22,10 @@ public:
   void notifyPasteRowsRequested() override;
   void notifyFilterReset() override;
 signals:
-  void cellChanged(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
-                   int column, std::string newValue);
+  void
+  cellTextChanged(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
+                  int column, std::string const &oldValue,
+                  std::string const &newValue);
   void rowInserted(
       MantidQt::MantidWidgets::Batch::RowLocation const &newRowLocation);
   void filterReset();

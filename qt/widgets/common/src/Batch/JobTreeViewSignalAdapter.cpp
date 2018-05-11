@@ -12,10 +12,10 @@ JobTreeViewSignalAdapter::JobTreeViewSignalAdapter(JobTreeView &view,
   view.subscribe(*this);
 }
 
-void JobTreeViewSignalAdapter::notifyCellChanged(RowLocation const &itemIndex,
-                                                 int column,
-                                                 std::string const &newValue) {
-  emit cellChanged(itemIndex, column, newValue);
+void JobTreeViewSignalAdapter::notifyCellTextChanged(
+    RowLocation const &itemIndex, int column, std::string const &oldValue,
+    std::string const &newValue) {
+  emit cellTextChanged(itemIndex, column, oldValue, newValue);
 }
 
 void JobTreeViewSignalAdapter::notifyRowInserted(

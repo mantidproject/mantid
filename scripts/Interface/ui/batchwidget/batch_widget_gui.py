@@ -52,7 +52,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
     def on_remove_runs_request(self, runs_to_remove):
         self.table.removeRows(runs_to_remove)
 
-    def on_cell_updated(self, row, col, cell_content):
+    def on_cell_updated(self, row, col, old_content, cell_content):
         cell = self.table.cellAt(row, col)
         if cell_content == 'Invalid':
             cell.setIconFilePath(':/invalid.png')
@@ -63,7 +63,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
             cell.setBorderColor('darkGrey')
             self.table.setCellAt(row, col, cell)
 
-        print("Updated row {} col {} with text {}".format(row.path(), col, cell_content))
+        print("Updated text at row {} col {} from {} to {}.".format(row.path(), col, old_content, cell_content))
 
     def on_row_inserted(self, rowLoc):
         print("Row inserted at {}".format(rowLoc.path()))
@@ -110,7 +110,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
         self.table_signals.removeRowsRequested.connect(self.on_remove_runs_request)
         self.table_signals.copyRowsRequested.connect(self.on_copy_runs_request)
         self.table_signals.pasteRowsRequested.connect(self.on_paste_rows_request)
-        self.table_signals.cellChanged.connect(self.on_cell_updated)
+        self.table_signals.cellTextChanged.connect(self.on_cell_updated)
         self.table_signals.rowInserted.connect(self.on_row_inserted)
         self.table_signals.filterReset.connect(self.on_filter_reset)
 
