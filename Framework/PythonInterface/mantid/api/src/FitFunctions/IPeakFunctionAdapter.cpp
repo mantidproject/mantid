@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------------------
 namespace Mantid {
 namespace PythonInterface {
-using Environment::callMethod;
+using Environment::callMethodNoCheck;
 using namespace boost::python;
 
 /**
@@ -21,18 +21,23 @@ using namespace boost::python;
  * @param self A reference to the calling Python object
  */
 IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
-    : API::IPeakFunction(), IFunction1DAdapter(self) {}
+    : API::IPeakFunction(), IFunctionAdapter(self) {
+  if (!Environment::typeHasAttribute(self, "init"))
+    throw std::runtime_error("Function does not define an init method.");
+  if (!Environment::typeHasAttribute(self, "functionLocal"))
+    throw std::runtime_error("Function does not define a function1D method.");
+}
 
 /**
  */
 double IPeakFunctionAdapter::centre() const {
-  return callMethod<double>(getSelf(), "centre");
+  return callMethodNoCheck<double>(getSelf(), "centre");
 }
 
 /**
  */
 double IPeakFunctionAdapter::height() const {
-  return callMethod<double>(getSelf(), "height");
+  return callMethodNoCheck<double>(getSelf(), "height");
 }
 
 /**
@@ -40,7 +45,7 @@ double IPeakFunctionAdapter::height() const {
  * @param c The centre of the peak
  */
 void IPeakFunctionAdapter::setCentre(const double c) {
-  callMethod<void, double>(getSelf(), "setCentre", c);
+  callMethodNoCheck<void, double>(getSelf(), "setCentre", c);
 }
 
 /**
@@ -48,12 +53,12 @@ void IPeakFunctionAdapter::setCentre(const double c) {
  * @param h The new height of the peak
  */
 void IPeakFunctionAdapter::setHeight(const double h) {
-  callMethod<void, double>(getSelf(), "setHeight", h);
+  callMethodNoCheck<void, double>(getSelf(), "setHeight", h);
 }
 
 /// Calls Python fwhm method
 double IPeakFunctionAdapter::fwhm() const {
-  return callMethod<double>(getSelf(), "fwhm");
+  return callMethodNoCheck<double>(getSelf(), "fwhm");
 }
 
 /**
@@ -62,7 +67,7 @@ double IPeakFunctionAdapter::fwhm() const {
  * such that fwhm=w
  */
 void IPeakFunctionAdapter::setFwhm(const double w) {
-  return callMethod<void, double>(getSelf(), "setFwhm", w);
+  return callMethodNoCheck<void, double>(getSelf(), "setFwhm", w);
 }
 
 /**
@@ -123,7 +128,7 @@ void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
  */
 object
 IPeakFunctionAdapter::functionLocal(const boost::python::object &xvals) const {
-  return callMethod<object, object>(getSelf(), "functionLocal", xvals);
+  return callMethodNoCheck<object, object>(getSelf(), "functionLocal", xvals);
 }
 
 /**
@@ -166,8 +171,8 @@ void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *out,
  */
 void IPeakFunctionAdapter::functionDerivLocal(
     const boost::python::object &xvals, boost::python::object &jacobian) {
-  callMethod<void, object, object>(getSelf(), "functionDerivLocal", xvals,
-                                   jacobian);
+  callMethodNoCheck<void, object, object>(getSelf(), "functionDerivLocal",
+                                          xvals, jacobian);
 }
 }
 }

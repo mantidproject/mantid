@@ -100,11 +100,13 @@ void subscribe(FunctionFactoryImpl &self, const boost::python::object &obj) {
   }
   // Instantiator will store a reference to the class object, so increase
   // reference count with borrowed template
-  auto classHandle = handle<>(borrowed(classObject));
-  auto *creator = new PythonObjectInstantiator<IFunction>(object(classHandle));
+  auto *creator = new PythonObjectInstantiator<IFunction>(
+      object(handle<>(borrowed(classObject))));
 
-  // Find the function name
+  // Can the function be created and initialized? It really shouldn't go in
+  // to the factory if not
   auto func = creator->createInstance();
+  func->initialize();
 
   // Takes ownership of instantiator
   self.subscribe(func->name(), creator, FunctionFactoryImpl::OverwriteCurrent);

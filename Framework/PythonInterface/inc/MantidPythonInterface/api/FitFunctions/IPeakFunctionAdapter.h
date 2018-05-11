@@ -26,7 +26,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
+#include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 
 #include <boost/python/object.hpp>
 
@@ -41,7 +41,7 @@ namespace PythonInterface {
  *into Python.
  */
 class IPeakFunctionAdapter : public API::IPeakFunction,
-                             public IFunction1DAdapter {
+                             public IFunctionAdapter {
 public:
   /// A constructor that looks like a Python __init__ method
   IPeakFunctionAdapter(PyObject *self);

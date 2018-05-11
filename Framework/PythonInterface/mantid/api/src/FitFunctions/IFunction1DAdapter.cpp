@@ -15,6 +15,7 @@
 namespace Mantid {
 namespace PythonInterface {
 using Environment::callMethod;
+using Environment::callMethodNoCheck;
 using namespace boost::python;
 
 /**
@@ -24,6 +25,11 @@ using namespace boost::python;
 IFunction1DAdapter::IFunction1DAdapter(PyObject *self)
     : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self),
       m_derivOveridden(false) {
+  if (!Environment::typeHasAttribute(self, "init"))
+    throw std::runtime_error("Function does not define an init method.");
+  if (!Environment::typeHasAttribute(self, "function1D"))
+    throw std::runtime_error("Function does not define a function1D method.");
+
   m_derivOveridden = Environment::typeHasAttribute(self, "functionDeriv1D");
 }
 
@@ -81,7 +87,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
  */
 boost::python::object
 IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
-  return callMethod<object, object>(getSelf(), "function1D", xvals);
+  return callMethodNoCheck<object, object>(getSelf(), "function1D", xvals);
 }
 
 /**
