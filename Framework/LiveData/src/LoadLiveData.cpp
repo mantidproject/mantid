@@ -500,6 +500,23 @@ void LoadLiveData::exec() {
     // Default to Add.
     this->addChunk(processed);
 
+  // If m_accumWS is an EventWorkspace, we have to update the bin boundaries
+  if (EventWorkspace_sptr accumEvent =
+          boost::dynamic_pointer_cast<EventWorkspace>(m_accumWS)) {
+    // Calculate fresh min and max based on all events in WS
+    double tofmin, tofmax;
+    accumEvent->getEventXMinMax(tofmin, tofmax);
+
+    // Ugly hack to update all X values in a performant way.
+    // There is currently no way to set X values for all spectra without
+    // breaking sharing of bin edges and paying an excessive performance cost.
+    // This hack depends on the premise that all spectra have shared bin edges
+    // (which should hold true at this point in the code).
+    auto &cowX =
+        *const_cast<HistogramData::HistogramX *>(accumEvent->sharedX(0).get());
+    cowX = std::vector<double>{tofmin, tofmax};
+  }
+
   // At this point, m_accumWS is set.
 
   if (this->hasPostProcessing()) {

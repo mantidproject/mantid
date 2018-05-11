@@ -42,6 +42,7 @@ Improved
 
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` joins Dx errors if present
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. Furthermore, Dx values will be considered if present. The documentation needed to be corrected.
+- :ref:`Live Data <algm-StartLiveData>` for events in PreserveEvents mode now produces workspaces that have reasonable bin boundaries.
 
 New
 ###
