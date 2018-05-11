@@ -139,7 +139,7 @@ std::vector<API::MatrixWorkspace_sptr> IqtFit<Base>::getWorkspaces() const {
   auto workspaces = Base::getWorkspaces();
   HistogramConverter convert;
 
-  for (auto i = 0u; i < workspaces.size(); ++i)
+  for (std::size_t i = 0; i < workspaces.size(); ++i)
     workspaces[i] = convert(workspaces[i], getStartX(i), getEndX(i));
   return workspaces;
 }
