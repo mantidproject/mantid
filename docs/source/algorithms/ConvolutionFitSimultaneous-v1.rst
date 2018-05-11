@@ -26,8 +26,6 @@ Usage
 
 .. testcode:: ConvolutionFitSimultaneousExample
 
-  from __future__ import print_function
-
   # Load sample and resolution files
   sample = Load('irs26176_graphite002_red.nxs')
   resolution = Load('irs26173_graphite002_red.nxs')
@@ -51,6 +49,7 @@ Usage
                                                          InputWorkspace=sample, WorkspaceIndex=0,
                                                          InputWorkspace_1=sample, WorkspaceIndex_1=1,
                                                          StartX=startX, EndX=endX,
+                                                         StartX_1=startX, EndX_1=endX,
                                                          ConvolveMembers=convolve,
                                                          Minimizer=minimizer, MaxIterations=maxIt)
 
