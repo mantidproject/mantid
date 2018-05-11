@@ -1,6 +1,5 @@
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
-#include <iostream>
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
