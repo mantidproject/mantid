@@ -36,8 +36,8 @@ protected:
   std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const override;
 
 private:
-  double getStartX(std::size_t index);
-  double getEndX(std::size_t index);
+  double getStartX(std::size_t index) const;
+  double getEndX(std::size_t index) const;
 
   std::map<std::string, std::string> validateInputs() override;
   bool isFitParameter(const std::string &name) const override;

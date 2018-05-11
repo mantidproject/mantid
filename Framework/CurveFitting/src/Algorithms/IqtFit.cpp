@@ -144,19 +144,21 @@ std::vector<API::MatrixWorkspace_sptr> IqtFit<Base>::getWorkspaces() const {
   return workspaces;
 }
 
-template <> double IqtFit<QENSFitSimultaneous>::getStartX(std::size_t index) {
+template <>
+double IqtFit<QENSFitSimultaneous>::getStartX(std::size_t index) const {
   return QENSFitSimultaneous::getProperty("StartX_" + std::to_string(index));
 }
 
-template <typename Base> double IqtFit<Base>::getStartX(std::size_t) {
+template <typename Base> double IqtFit<Base>::getStartX(std::size_t) const {
   return Base::getProperty("StartX");
 }
 
-template <> double IqtFit<QENSFitSimultaneous>::getEndX(std::size_t index) {
+template <>
+double IqtFit<QENSFitSimultaneous>::getEndX(std::size_t index) const {
   return QENSFitSimultaneous::getProperty("EndX_" + std::to_string(index));
 }
 
-template <typename Base> double IqtFit<Base>::getEndX(std::size_t) {
+template <typename Base> double IqtFit<Base>::getEndX(std::size_t) const {
   return Base::getProperty("EndX");
 }
 
