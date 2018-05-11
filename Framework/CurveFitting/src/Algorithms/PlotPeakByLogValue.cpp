@@ -73,19 +73,16 @@ void PlotPeakByLogValue::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The fitting function, common for all workspaces in the "
                   "input WorkspaceGroup");
-  declareProperty("LogValue", "",
-                  "Name of the log value to plot the "
-                  "parameters against. Default: use spectra "
-                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(),
-                  "A value of x in, or on the low x "
-                  "boundary of, the first bin to "
-                  "include in\n"
-                  "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(),
-                  "A value in, or on the high x boundary "
-                  "of, the last bin the fitting range\n"
-                  "(default the highest value of x)");
+  declareProperty("LogValue", "", "Name of the log value to plot the "
+                                  "parameters against. Default: use spectra "
+                                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
+                                         "boundary of, the first bin to "
+                                         "include in\n"
+                                         "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
+                                       "of, the last bin the fitting range\n"
+                                       "(default the highest value of x)");
 
   std::vector<std::string> fitOptions{"Sequential", "Individual"};
   declareProperty("FitType", "Sequential",
@@ -127,10 +124,9 @@ void PlotPeakByLogValue::init() {
                   "(FWHM) that fit into the interval on each side from the "
                   "centre. The default value of 0 means the whole x axis.");
 
-  declareProperty("CreateOutput", false,
-                  "Set to true to create output "
-                  "workspaces with the results of the "
-                  "fit(default is false).");
+  declareProperty("CreateOutput", false, "Set to true to create output "
+                                         "workspaces with the results of the "
+                                         "fit(default is false).");
 
   declareProperty("OutputCompositeMembers", false,
                   "If true and CreateOutput is true then the value of each "
