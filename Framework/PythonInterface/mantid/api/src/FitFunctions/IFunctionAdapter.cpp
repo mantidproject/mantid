@@ -7,9 +7,9 @@
 namespace Mantid {
 namespace PythonInterface {
 using API::IFunction;
+using PythonInterface::Environment::UndefinedAttributeError;
 using PythonInterface::Environment::callMethod;
 using PythonInterface::Environment::callMethodNoCheck;
-using PythonInterface::Environment::UndefinedAttributeError;
 using namespace boost::python;
 
 namespace {
@@ -51,10 +51,10 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
       vec.push_back(v);
     }
     attr = IFunction::Attribute(vec);
-  } else
+  } else {
     throw std::invalid_argument(
         "Invalid attribute type. Allowed types=float,int,str,bool,list(float)");
-
+  }
   return attr;
 }
 
@@ -65,7 +65,7 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
  * @param self A reference to the calling Python object
  */
 IFunctionAdapter::IFunctionAdapter(PyObject *self)
-    : IFunction(), m_name(self->ob_type->tp_name), m_self(self) {}
+    : m_name(self->ob_type->tp_name), m_self(self) {}
 
 /**
  * @returns The class name of the function. This cannot be overridden in Python.
@@ -153,8 +153,7 @@ IFunctionAdapter::getAttributeValue(IFunction &self,
 void IFunctionAdapter::setAttributePythonValue(IFunction &self,
                                                const std::string &name,
                                                const object &value) {
-  auto attr = createAttributeFromPythonValue(value);
-  self.setAttribute(name, attr);
+  self.setAttribute(name, createAttributeFromPythonValue(value));
 }
 
 /**
@@ -219,5 +218,5 @@ void IFunctionAdapter::setActiveParameter(size_t i, double value) {
     IFunction::setActiveParameter(i, value);
   }
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

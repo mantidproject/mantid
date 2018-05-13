@@ -21,11 +21,13 @@ using namespace boost::python;
  * @param self A reference to the calling Python object
  */
 IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
-    : API::IPeakFunction(), IFunctionAdapter(self) {
-  if (!Environment::typeHasAttribute(self, "init"))
+    : IFunctionAdapter(self) {
+  if (!Environment::typeHasAttribute(self, "init")) {
     throw std::runtime_error("Function does not define an init method.");
-  if (!Environment::typeHasAttribute(self, "functionLocal"))
+  }
+  if (!Environment::typeHasAttribute(self, "functionLocal")) {
     throw std::runtime_error("Function does not define a function1D method.");
+  }
 }
 
 /**
@@ -174,5 +176,5 @@ void IPeakFunctionAdapter::functionDerivLocal(
   callMethodNoCheck<void, object, object>(getSelf(), "functionDerivLocal",
                                           xvals, jacobian);
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
