@@ -2,8 +2,9 @@
 ## C++ unit tests
 ##
 set ( TEST_FILES
+  IFunction1DAdapterTest.h
   PropertyWithValueFactoryTest.h
-  PythonObjectInstantiatorTest.h
+  PythonAlgorithmInstantiatorTest.h
   PySequenceToVectorTest.h
   RunPythonScriptTest.h
 )

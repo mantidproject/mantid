@@ -5,7 +5,7 @@
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
 #include <boost/python/class.hpp>
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
@@ -62,22 +62,26 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
     Py_XDECREF(result);
     throw Environment::PythonException();
   }
-
-  PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(result);
-  if (PyArray_TYPE(nparray) ==
-      NPY_DOUBLE) // dtype matches so use memcpy for speed
-  {
-    std::memcpy(static_cast<void *>(out), PyArray_DATA(nparray),
-                nData * sizeof(npy_double));
-    Py_DECREF(result);
+  if (PyArray_Check(result)) {
+    auto nparray = reinterpret_cast<PyArrayObject *>(result);
+    if (PyArray_TYPE(nparray) ==
+        NPY_DOUBLE) // dtype matches so use memcpy for speed
+    {
+      std::memcpy(static_cast<void *>(out), PyArray_DATA(nparray),
+                  nData * sizeof(npy_double));
+      Py_DECREF(result);
+    } else {
+      Py_DECREF(result);
+      PyArray_Descr *dtype = PyArray_DESCR(nparray);
+      std::string err("Unsupported numpy data type: '");
+      err.append(dtype->typeobj->tp_name)
+          .append("'. Currently only numpy.float64 is supported.");
+      throw std::runtime_error(err);
+    }
   } else {
-    Py_DECREF(result);
-    PyArray_Descr *dtype = PyArray_DESCR(nparray);
-    PyObject *name = PyList_GetItem(dtype->names, 0);
-    std::ostringstream os;
-    os << "Unsupported numpy data type: '" << PyBytes_AsString(name)
-       << "'. Currently only numpy.float64 is supported";
-    throw std::runtime_error(os.str());
+    std::string err("Expected function1D to return a numpy array, however an ");
+    err.append(result->ob_type->tp_name).append(" was returned.");
+    throw std::runtime_error(err);
   }
 }
 
@@ -124,5 +128,5 @@ void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out,
     IFunction1D::functionDeriv1D(out, xValues, nData);
   }
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
