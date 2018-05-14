@@ -8,11 +8,11 @@ namespace API {
 *  Sets the property names but initialises the function pointer to null.
 *  @param name :: The name to assign to the property
 */
-FunctionProperty::FunctionProperty(const std::string &name)
+FunctionProperty::FunctionProperty(const std::string &name,const unsigned int direction)
     : Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>(
           name, boost::shared_ptr<IFunction>(),
           Kernel::IValidator_sptr(new Kernel::NullValidator()),
-          Kernel::Direction::InOut) {}
+          direction) {}
 
 /// Copy constructor
 FunctionProperty::FunctionProperty(const FunctionProperty &right)

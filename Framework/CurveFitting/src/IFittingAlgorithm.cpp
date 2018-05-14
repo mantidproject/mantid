@@ -67,7 +67,7 @@ const std::string IFittingAlgorithm::category() const { return "Optimization"; }
  */
 void IFittingAlgorithm::init() {
   declareProperty(
-      make_unique<API::FunctionProperty>("Function"),
+      make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(

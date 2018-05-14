@@ -86,7 +86,7 @@ void VesuvioCalculateGammaBackground::init() {
                   "An input workspace containing TOF data");
 
   declareProperty(
-      make_unique<API::FunctionProperty>("ComptonFunction"),
+      make_unique<API::FunctionProperty>("ComptonFunction", Direction::InOut),
       "Function that is able to compute the mass spectrum for the input data"
       "This will usually be the output from the Fitting");
 
