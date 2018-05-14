@@ -297,7 +297,7 @@ void MantidTable::cellEdited(int row, int col) {
     oldText.remove(QRegExp("\\s"));
   }
 
-  if (c->type() == "str" || c->type() == "V3D") {
+  if (c->isNumber()) {
     std::istringstream textStream(oldText.toStdString());
     c->read(index, textStream);
   } else {
