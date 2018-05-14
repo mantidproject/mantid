@@ -66,10 +66,10 @@ public:
         alg.setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("ProcessingProperties", ProcessingProperties));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PostProcessingProperties", PostProcessingProperties));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingAlgorithm",
+                                                  PostProcessingAlgorithm));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingProperties",
+                                                  PostProcessingProperties));
     if (!PostProcessingAlgorithm.empty())
       TS_ASSERT_THROWS_NOTHING(
           alg.setPropertyValue("AccumulationWorkspace", "fake_accum"));

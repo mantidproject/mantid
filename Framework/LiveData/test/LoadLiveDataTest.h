@@ -206,8 +206,8 @@ public:
   /** Simple processing of a chunk */
   void test_ProcessChunk_DoPreserveEvents() {
     EventWorkspace_sptr ws;
-    ws = doExec<EventWorkspace>("Replace", "", "",
-                                "Rebin", "Params=40e3, 1e3, 60e3", true);
+    ws = doExec<EventWorkspace>("Replace", "", "", "Rebin",
+                                "Params=40e3, 1e3, 60e3", true);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
