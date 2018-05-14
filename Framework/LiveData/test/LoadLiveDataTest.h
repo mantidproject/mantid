@@ -206,14 +206,14 @@ public:
   /** Simple processing of a chunk */
   void test_ProcessChunk_DoPreserveEvents() {
     EventWorkspace_sptr ws;
-    ws = doExec<EventWorkspace>("Replace", "Rebin", "Params=40e3, 1e3, 60e3",
-                                "", "", true);
+    ws = doExec<EventWorkspace>("Replace", "", "",
+                                "Rebin", "Params=40e3, 1e3, 60e3", true);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
     TS_ASSERT(ws->monitorWorkspace());
   }
 

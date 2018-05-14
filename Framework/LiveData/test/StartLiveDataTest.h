@@ -50,7 +50,9 @@ public:
   EventWorkspace_sptr doExecEvent(std::string AccumulationMethod,
                                   double UpdateEvery,
                                   std::string ProcessingAlgorithm = "",
-                                  std::string ProcessingProperties = "") {
+                                  std::string ProcessingProperties = "",
+                                  std::string PostProcessingAlgorithm = "",
+                                  std::string PostProcessingProperties = "") {
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FromNow", "1"));
@@ -64,6 +66,13 @@ public:
         alg.setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("ProcessingProperties", ProcessingProperties));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PostProcessingProperties", PostProcessingProperties));
+    if (!PostProcessingAlgorithm.empty())
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("AccumulationWorkspace", "fake_accum"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -81,10 +90,9 @@ public:
   /** StartLiveData and run LoadLiveData only once (UpdateEvery=0)
    * This checks that the properties are copied to LoadLiveData */
   void test_startOnce() {
-    // Declare all algorithms, e.g. Rebin
     FrameworkManager::Instance();
     EventWorkspace_sptr ws;
-    ws = doExecEvent("Replace", 0, "Rebin", "Params=40e3, 1e3, 60e3");
+    ws = doExecEvent("Replace", 0, "", "", "Rebin", "Params=40e3, 1e3, 60e3");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
@@ -97,7 +105,6 @@ public:
    * and you select "Add", it still REPLACES the input on the very first run.
    */
   void test_FirstCallReplacesTheOutputWorkspace() {
-    // Declare all algorithms, e.g. Rebin
     FrameworkManager::Instance();
 
     // Make an existing output workspace "fake" that should be overwritten
@@ -105,7 +112,7 @@ public:
         "fake", WorkspaceCreationHelper::create2DWorkspace(23, 12));
 
     EventWorkspace_sptr ws;
-    ws = doExecEvent("Add", 0, "", "");
+    ws = doExecEvent("Add", 0);
 
     // The "fake" workspace was replaced.
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
@@ -116,11 +123,10 @@ public:
   //--------------------------------------------------------------------------------------------
   /** Start and keep MonitorLiveData running */
   void test_start_andKeepRunning() {
-    // Declare all algorithms, e.g. Rebin
     FrameworkManager::Instance();
     AlgorithmManager::Instance().clear();
     EventWorkspace_sptr ws;
-    ws = doExecEvent("Replace", 1, "Rebin", "Params=40e3, 1e3, 60e3");
+    ws = doExecEvent("Replace", 1);
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
