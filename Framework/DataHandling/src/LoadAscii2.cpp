@@ -26,6 +26,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadAscii2)
 using namespace Kernel;
 using namespace API;
 
+bool g_isTestFile = false;
+
 /// Empty constructor
 LoadAscii2::LoadAscii2()
     : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0),
@@ -245,14 +247,23 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
   // but if the user specifies a number of lines to skip that check won't happen
   // in processheader
   processHeader(file);
+  if (g_isTestFile) {
+    g_log.warning() << "m_baseCols " << m_baseCols << std::endl;
+  }
   if (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2) {
     // first find the first data set and set that as the template for the number
     // of data columns we expect from this file
     while (getline(file, line) &&
            (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2)) {
+      if (g_isTestFile) {
+        g_log.warning() << "line " << line << std::endl;
+      }
       // std::string line = line;
       boost::trim(line);
       if (!line.empty()) {
+        if (g_isTestFile) {
+          g_log.warning() << "line not empty " << line << std::endl;
+        }
         if (std::isdigit(line.at(0)) || line.at(0) == '-' ||
             line.at(0) == '+') {
           const int cols = splitIntoColumns(columns, line);
@@ -675,6 +686,8 @@ void LoadAscii2::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
+  g_isTestFile = filename.find("Efficiency") != std::string::npos;
+
   std::string sepOption = getProperty("Separator");
   m_columnSep = m_separatorIndex[sepOption];
 
@@ -699,6 +712,10 @@ void LoadAscii2::exec() {
     sep = ",";
   }
   m_columnSep = sep;
+
+  if (g_isTestFile) {
+    g_log.warning() << "Separartor: " << m_columnSep << std::endl;
+  }
 
   // e + and - are included as they're part of the scientific notation
   if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(),
