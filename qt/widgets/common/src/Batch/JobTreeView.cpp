@@ -204,7 +204,7 @@ void JobTreeView::appendSubtreesAt(RowLocation const &parent,
 void JobTreeView::appendSubtreeAt(RowLocation const &parent,
                                   Subtree const &subtree) {
   auto parentIndex = rowLocation().indexAt(parent);
-  insertSubtreeAt(parent, model()->rowCount(parentIndex.untyped()), subtree);
+  insertSubtreeAt(parent, m_mainModel.rowCount(parentIndex.untyped()), subtree);
 }
 
 void JobTreeView::replaceRows(std::vector<RowLocation> replacementPoints,
