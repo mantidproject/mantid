@@ -66,7 +66,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
-  // TODO: Do we need to init m_monitorWorkspace?
+  m_monitorWorkspace = other.m_monitorWorkspace;
 }
 
 /// Destructor
