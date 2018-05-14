@@ -635,17 +635,18 @@ private:
     }
   }
 
-  void createHistogramWorkspace(const std::string &name, std::size_t nbins, double x0, double x1) {
+  void createHistogramWorkspace(const std::string &name, std::size_t nbins,
+                                double x0, double x1) {
     auto ws =
-      WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
+        WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
     double dx = (x1 - x0) / static_cast<double>(nbins);
     ws->setBinEdges(0, nbins + 1, HistogramData::LinearGenerator(x0, dx));
     ws->setSharedX(1, ws->sharedX(0));
     ws->setSharedX(2, ws->sharedX(0));
 
-    std::vector<double> amps{ 20.0, 30.0, 25.0 };
-    std::vector<double> cents{ 0.0, 0.1, -1.0 };
-    std::vector<double> fwhms{ 1.0, 1.1, 0.6 };
+    std::vector<double> amps{20.0, 30.0, 25.0};
+    std::vector<double> cents{0.0, 0.1, -1.0};
+    std::vector<double> fwhms{1.0, 1.1, 0.6};
     for (size_t i = 0; i < 3; ++i) {
       std::string fun = "name=FlatBackground,A0=" + std::to_string(fwhms[i]);
       auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
@@ -656,7 +657,7 @@ private:
       alg->setProperty("OutputWorkspace", "out");
       alg->execute();
       auto calc =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
       ws->dataY(i) = calc->readY(1);
     }
     AnalysisDataService::Instance().addOrReplace(name, ws);
