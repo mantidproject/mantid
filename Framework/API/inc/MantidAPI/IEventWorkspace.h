@@ -67,6 +67,7 @@ public:
                          MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override = 0;
 
+  virtual void setAllX(const HistogramData::BinEdges &x) = 0;
   virtual void updateAllX() = 0;
 
   virtual void clearMRU() const = 0;

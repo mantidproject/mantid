@@ -566,7 +566,7 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
   this->data[index]->generateHistogramPulseTime(X, Y, E, skipError);
 }
 
-/*** Set all histogram X vectors.
+/** Set all histogram X vectors.
  * @param x :: The X vector of histogram bins to use.
  */
 void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
