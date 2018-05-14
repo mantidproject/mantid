@@ -44,14 +44,7 @@ public:
 
   void test_load() {
     ScopedFile f1(m_data1, "Efficiency1.txt");
-    // ScopedFile f2(m_data1, "Efficiency2.txt");
-
-    std::ifstream fil(f1.getFileName());
-    std::string test_str;
-    fil >> test_str;
-    fil.close();
-    std::cerr << '\n' << test_str << std::endl;
-    TS_ASSERT_EQUALS(test_str, "1.10000,1.000000,0.322961");
+    ScopedFile f2(m_data1, "Efficiency2.txt");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
@@ -98,7 +91,7 @@ public:
 
   void test_load_diff_sizes() {
     ScopedFile f1(m_data1, "Efficiency4.txt");
-    // ScopedFile f2(m_data2, "Efficiency5.txt");
+    ScopedFile f2(m_data2, "Efficiency5.txt");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
@@ -145,7 +138,7 @@ public:
 
   void test_diff_methods() {
     ScopedFile f1(m_data1, "Efficiency6.txt");
-    // ScopedFile f2(m_data1, "Efficiency7.txt");
+    ScopedFile f2(m_data1, "Efficiency7.txt");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
