@@ -500,6 +500,23 @@ void LoadLiveData::exec() {
     // Default to Add.
     this->addChunk(processed);
 
+  // For EventWorkspaces, we adjust the X values such that all events fit
+  // within the bin boundaries. This will overwrite any rebinning that was
+  // done as a pre-process step. If different bin boundaries are desired, the
+  // user should do their rebinning as a Post-Process step instead.
+  if (EventWorkspace_sptr accum_event =
+          boost::dynamic_pointer_cast<EventWorkspace>(m_accumWS)) {
+    accum_event->updateAllX();
+  } else if (WorkspaceGroup_sptr accum_gws =
+                 boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS)) {
+    auto num_entries = static_cast<size_t>(accum_gws->getNumberOfEntries());
+    for (size_t i = 0; i < num_entries; ++i) {
+      auto ws = accum_gws->getItem(i);
+      if (auto ws_event = boost::dynamic_pointer_cast<EventWorkspace>(ws))
+        ws_event->updateAllX();
+    }
+  }
+
   // At this point, m_accumWS is set.
 
   if (this->hasPostProcessing()) {

@@ -580,6 +580,21 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
   this->clearMRU();
 }
 
+/**
+ * Set all X Histograms to a single bin with boundaries that fit the TOF of
+ * all events.
+ */
+void EventWorkspace::updateAllX() {
+  double tofmin, tofmax;
+  getEventXMinMax(tofmin, tofmax);
+
+  // Sanitize TOF min/max to ensure it always passes HistogramX validation.
+  // They would be invalid when number of events are 0 or 1, for example.
+  tofmin = tofmin < tofmax ? tofmin : 0;
+  tofmax = std::max(tofmax, tofmin + DBL_MIN);
+  setAllX({tofmin, tofmax});
+}
+
 /** Task for sorting an event list */
 class EventSortingTask {
 public:
