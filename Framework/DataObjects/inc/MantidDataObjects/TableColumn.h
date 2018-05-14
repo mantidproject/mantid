@@ -127,7 +127,7 @@ public:
   /// Type check
   bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
   bool isNumber() const override {
-    return std::is_convertible<double, Type>::value;
+    return std::is_convertible<Type, double>::value;
   }
   /// Memory used by the column
   long int sizeOfData() const override {
