@@ -1,12 +1,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/ConvertFitFunctionForMuonTFAsymmetry.h"
+#include "MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -38,17 +40,19 @@ namespace Mantid {
 		void ConvertFitFunctionForMuonTFAsymmetry::init() {
 			declareProperty(make_unique<FunctionProperty>("InputFunction"),
 				"The fitting function to be converted.");
-
+			// table of name, norms
+			// if construct -> read relevant norms into sorted list
+			// if Extract -> update values in table
 			declareProperty(
 				make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
 					"NormalisationTable", "", Direction::InOut),
 				"Name of the table containing the normalisations for the asymmetries.");
-
+			// list of workspaces 
 			declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
 				"WorkspaceList", boost::make_shared<API::ADSValidator>()),
 				"An ordered list of workspaces (to get the initial values for the normalisations).");
 
-			/*std::vector<std::string> allowedModes{ "Construct", "Extract" };
+			std::vector<std::string> allowedModes{ "Construct", "Extract" };
 			auto modeVal = boost::make_shared<Kernel::CompositeValidator>();
 			modeVal->add(boost::make_shared<Kernel::StringListValidator>(allowedModes));
 			modeVal->add(boost::make_shared<Kernel::MandatoryValidator<std::string>>());
@@ -56,7 +60,7 @@ namespace Mantid {
 				"Mode to run in. Construct will convert the"
 				"input function into one suitable for calculating the"
 				" TF Asymmetry. Extract will find the original user function"
-				" from a function that is suitable for TF Asymmetry calculations.");*/
+				" from a function that is suitable for TF Asymmetry calculations.");
 
 				declareProperty(make_unique<FunctionProperty>("OutputFunction",Direction::Output),
 					"The fitting function to be converted.");

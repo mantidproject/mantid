@@ -1,11 +1,15 @@
 set ( SRC_FILES
-	src/ApplyMuonDetectorsGrouping.cpp
-	src/MuonAlgorithmHelper.cpp
+	src/ConvertFitFunctionForMuonTFAsymmetry.cpp
+
+	#src/ApplyMuonDetectorsGrouping.cpp
+	#src/MuonAlgorithmHelper.cpp
 )
 
 set ( INC_FILES
-	inc/MantidMuon/ApplyMuonDetectorsGrouping.h
-	inc/MantidMuon/MuonAlgorithmHelper.h
+	inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
+
+	#inc/MantidMuon/ApplyMuonDetectorsGrouping.h
+	#inc/MantidMuon/MuonAlgorithmHelper.h
 )
 
 # set(SRC_UNITY_IGNORE_FILES)
