@@ -14,6 +14,10 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAlgorithms/Stitch1DMany.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/UnitFactory.h"
 #include <math.h>
 
@@ -109,9 +113,8 @@ private:
     gw.setProperty("OutputWorkspace", outWSName);
     gw.execute();
 
-    WorkspaceGroup_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
-    return ws;
+    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outWSName);
   }
 
   /** Obtain all algorithm histories from a workspace
@@ -320,9 +323,11 @@ public:
     alg.setProperty("EndOverlaps", "1.1");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
@@ -389,9 +394,11 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.8");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -445,6 +452,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
   }
 
   void test_three_workspaces_single_scale_factor_given() {
@@ -469,9 +477,11 @@ public:
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -526,9 +536,11 @@ public:
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
@@ -614,6 +626,7 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.8");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted())
 
     // The above is equivalent to what we've done in test_three_workspaces()
     // so we should get the same values in the output workspace
@@ -621,6 +634,7 @@ public:
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1);
     auto stitched =
@@ -691,9 +705,11 @@ public:
     alg.setProperty("EndOverlaps", "1.1");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
@@ -785,6 +801,7 @@ public:
     alg.setProperty("ManualScaleFactors", "0.5");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // The above is equivalent to what we've done in test_three_workspaces()
     // so we should get the same values in the output workspace
@@ -792,6 +809,7 @@ public:
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
@@ -890,9 +908,11 @@ public:
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
@@ -1011,6 +1031,7 @@ public:
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
@@ -1082,8 +1103,8 @@ public:
     // This test is functionally similar to test_two_workspaces
 
     // Two matrix workspaces with two spectra each
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws2");
+    createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws2");
 
     Stitch1DMany alg;
     alg.initialize();
@@ -1093,8 +1114,10 @@ public:
     alg.setProperty("EndOverlaps", "1.1");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
-    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    //TS_ASSERT(outws);
     auto stitched =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
 
@@ -1124,13 +1147,13 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
-    WorkspaceGroup_sptr group1 = doGroupWorkspaces("ws1, ws2", "group1");
+    createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
-    WorkspaceGroup_sptr group2 = doGroupWorkspaces("ws3, ws4", "group2");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
 
     Stitch1DMany alg;
     alg.initialize();
@@ -1140,9 +1163,11 @@ public:
     alg.setProperty("EndOverlaps", "1.1");
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    //TS_ASSERT(outws);
     auto group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
@@ -1180,17 +1205,17 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
-    WorkspaceGroup_sptr group1 = doGroupWorkspaces("ws1, ws2", "group1");
+    createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
-    WorkspaceGroup_sptr group2 = doGroupWorkspaces("ws3, ws4", "group2");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
     // Third group
-    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5, true, "ws5");
-    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0, true, "ws6");
-    WorkspaceGroup_sptr group3 = doGroupWorkspaces("ws5, ws6", "group3");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, true, "ws5");
+    createUniformWorkspace(1.6, 0.1, 1.6, 3.0, true, "ws6");
+    doGroupWorkspaces("ws5, ws6", "group3");
 
     Stitch1DMany alg;
     alg.initialize();
@@ -1200,11 +1225,13 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.9");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ScaleFactorFromPeriod", 2);
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    //TS_ASSERT(outws);
     auto group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     auto stitched =
@@ -1229,6 +1256,30 @@ public:
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_two_point_data_workspaces() {
+    const auto &x1 = Mantid::HistogramData::Points({0.2, 0.9, 1.6});
+    const auto &y1 = Mantid::HistogramData::Counts({56., 77., 48.});
+    Mantid::HistogramData::Histogram histogram1(x1, y1);
+    auto ws1 = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    ws1->initialize(1, histogram1);
+    const auto &x2 = Mantid::HistogramData::Points({0.23, 1.3, 2.6});
+    const auto &y2 = Mantid::HistogramData::Counts({1.1, 2., 3.7});
+    Mantid::HistogramData::Histogram histogram2(x2, y2);
+    auto ws2 = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    ws2->initialize(1, histogram2);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    //Stitch1DMany alg;
+    //alg.initialize();
+    //alg.setProperty("InputWorkspaces", "ws1, ws2");
+    //alg.setProperty("UseManualScaleFactors", "1");
+    //alg.setPropertyValue("OutputWorkspace", "ws");
+    //alg.execute();
+    //TS_ASSERT(alg.isExecuted());
+    Mantid::API::AnalysisDataService::Instance().remove("ws1");
+    Mantid::API::AnalysisDataService::Instance().remove("ws2");
   }
 };
 

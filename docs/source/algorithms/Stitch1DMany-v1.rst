@@ -9,12 +9,9 @@
 Description
 -----------
 
-Stitches single histogram :ref:`Matrix Workspaces <MatrixWorkspace>`
+Stitches :ref:`Matrix Workspaces <MatrixWorkspace>`
 together outputting a stitched Matrix Workspace. This algorithm is a
 wrapper over :ref:`algm-Stitch1D`.
-
-The workspaces must be histogrammed. Use :ref:`algm-ConvertToHistogram` on
-workspaces prior to passing them to this algorithm.
 
 The algorithm expects pairs of :literal:`StartOverlaps` and
 :literal:`EndOverlaps` values. The order in which these are provided determines
