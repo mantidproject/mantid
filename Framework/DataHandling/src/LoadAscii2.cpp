@@ -91,6 +91,9 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   setcolumns(file, line, columns);
 
   while (getline(file, line)) {
+    if (g_isTestFile) {
+      g_log.warning() << "line " << line << std::endl;
+    }
     std::string templine = line;
     m_lineNo++;
     boost::trim(templine);
@@ -255,9 +258,6 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
     // of data columns we expect from this file
     while (getline(file, line) &&
            (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2)) {
-      if (g_isTestFile) {
-        g_log.warning() << "line " << line << std::endl;
-      }
       // std::string line = line;
       boost::trim(line);
       if (!line.empty()) {
