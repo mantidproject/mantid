@@ -298,9 +298,6 @@ void MantidTable::cellEdited(int row, int col) {
   }
 
   if (c->isNumber()) {
-    std::istringstream textStream(oldText.toStdString());
-    c->read(index, textStream);
-  } else {
     // We must be dealing with numerical data. Since there semms to be no way
     // convert between QLocale and std::locale, get the number out
     // of the Qt locale and put it into default std::locale format.
@@ -319,6 +316,9 @@ void MantidTable::cellEdited(int row, int col) {
                                     1) << number;
     std::istringstream stream(textStream.str());
     c->read(index, stream);
+  } else {
+    std::istringstream textStream(oldText.toStdString());
+    c->read(index, textStream);
   }
 }
 
