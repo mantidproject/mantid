@@ -590,12 +590,19 @@ public:
   }
 
   void test_exclude_range() {
-    createHistogramWorkspace("InputWS", 10, -10.0, 10.0);
+    HistogramData::Points points{-2, -1, 0, 1, 2};
+    HistogramData::Counts counts(points.size(), 0.0);
+    // This value should be excluded.
+    counts.mutableData()[2] = 10.0;
+    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
+                                1, HistogramData::Histogram(points, counts))
+                                .release());
+    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input", "InputWS,i1");
-    alg.setPropertyValue("Exclude", "0.0, 1.0");
+    alg.setPropertyValue("Input", "InputWS,i0");
+    alg.setPropertyValue("Exclude", "-0.5, 0.5");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("CreateOutput", true);
     alg.setPropertyValue("WorkspaceIndex", "1");
@@ -606,9 +613,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     API::IFunction_sptr function = alg.getProperty("Function");
-    TS_ASSERT_DELTA(function->getParameter(0), 0.5, 1e-12)
-
-    deleteData();
+    TS_ASSERT_DELTA(function->getParameter(0), 0.0, 1e-12)
+    AnalysisDataService::Instance().remove("InputWS");
   }
 
 private:
