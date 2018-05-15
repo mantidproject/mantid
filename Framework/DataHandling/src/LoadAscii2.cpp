@@ -43,9 +43,6 @@ LoadAscii2::LoadAscii2()
 int LoadAscii2::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filePath = descriptor.filename();
   const size_t filenameLength = filePath.size();
-  if (g_isTestFile) {
-    g_log.warning() << "File name " << filePath << std::endl;
-  }
 
   // Avoid some known file types that have different loaders
   int confidence(0);
@@ -690,6 +687,9 @@ void LoadAscii2::exec() {
   }
 
   g_isTestFile = filename.find("Efficiency") != std::string::npos;
+  if (g_isTestFile) {
+    g_log.warning() << "File name " << filename << std::endl;
+  }
 
   std::string sepOption = getProperty("Separator");
   m_columnSep = m_separatorIndex[sepOption];
