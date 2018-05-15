@@ -24,13 +24,16 @@ JumpFit::JumpFit(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
       m_uiForm(new Ui::JumpFit) {
   m_uiForm->setupUi(parent);
-  m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  IndirectFitAnalysisTab::addPropertyBrowserToUI(m_uiForm.get());
-  m_uiForm->svSpectrumView->hideSpectrumSelector();
-  setSpectrumSelectionView(m_uiForm->svSpectrumView);
 }
 
-void JumpFit::setup() {
+void JumpFit::setupFitTab() {
+  m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
+  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  setSpectrumSelectionView(m_uiForm->svSpectrumView);
+
+  m_uiForm->svSpectrumView->hideSpectrumSelector();
+  m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
+
   auto chudleyElliot =
       FunctionFactory::Instance().createFunction("ChudleyElliot");
   auto hallRoss = FunctionFactory::Instance().createFunction("HallRoss");
@@ -64,12 +67,17 @@ void JumpFit::setup() {
 
   // Handle plotting and saving
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
-  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm->pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(updatePlotGuess()));
+  connect(this, SIGNAL(functionChanged()), this,
+          SLOT(updateModelFitTypeString()));
+}
+
+void JumpFit::updateModelFitTypeString() {
+  m_jumpFittingModel->setFitType(selectedFitType().toStdString());
 }
 
 bool JumpFit::doPlotGuess() const {
@@ -97,21 +105,6 @@ bool JumpFit::validate() {
   const auto errors = uiv.generateErrorMessage();
   emit showMessageBox(errors);
   return errors.isEmpty();
-}
-
-/**
- * Handles the JumpFit algorithm finishing, used to plot fit in miniplot.
- *
- * @param error True if the algorithm failed, false otherwise
- */
-void JumpFit::algorithmComplete(bool error) {
-  // Ignore errors
-  if (error)
-    return;
-  m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbSave->setEnabled(true);
-
-  IndirectFitAnalysisTab::fitAlgorithmComplete();
 }
 
 /**
@@ -207,13 +200,11 @@ void JumpFit::updatePlotRange() {
 
 void JumpFit::updatePlotOptions() {}
 
-void JumpFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
+void JumpFit::setPlotResultEnabled(bool enabled) {}
 
-void JumpFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
-
-void JumpFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
-
-void JumpFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+void JumpFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
+}
 
 void JumpFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
 
@@ -229,11 +220,6 @@ void JumpFit::removeGuessPlot() {
   m_uiForm->ppPlotTop->removeSpectrum("Guess");
   m_uiForm->ckPlotGuess->setChecked(false);
 }
-
-/**
- * Handles mantid plotting
- */
-void JumpFit::plotClicked() { IndirectFitAnalysisTab::plotResult("All"); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

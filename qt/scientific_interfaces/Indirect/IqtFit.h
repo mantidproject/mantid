@@ -30,15 +30,13 @@ public:
   bool doPlotGuess() const override;
 
 private:
-  void setup() override;
+  void setupFitTab() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
 protected:
-  void enablePlotResult() override;
-  void disablePlotResult() override;
-  void enableSaveResult() override;
-  void disableSaveResult() override;
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
   void enablePlotPreview() override;
   void disablePlotPreview() override;
   void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
@@ -46,13 +44,12 @@ protected:
 
 protected slots:
   void newDataLoaded(const QString wsName);
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   void updatePreviewPlots() override;
   void updatePlotRange() override;
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
   void backgroundSelectorChanged(double val);
-  void singleFit();
-  void algorithmComplete(bool error) override;
   void updatePlotOptions() override;
   void plotWorkspace();
   void fitFunctionChanged();
@@ -63,8 +60,7 @@ private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
 
-  void updateIntensityTie();
-  void updateIntensityTie(const QString &intensityTie);
+  void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;
 
   IqtFitModel *m_iqtFittingModel;

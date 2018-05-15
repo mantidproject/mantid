@@ -22,30 +22,16 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
-/**
- * Checks whether the specified algorithm has a property with the specified
- * name. If true, sets this property to the specified value, else returns.
- *
- * @param algorithm     The algorithm whose property to set.
- * @param propertyName  The name of the property to set.
- * @param value         The value to set.
- */
-template <typename T>
-void setAlgorithmProperty(IAlgorithm_sptr algorithm,
-                          const std::string &propertyName, const T &value) {
-  if (algorithm->existsProperty(propertyName))
-    algorithm->setProperty(propertyName, value);
-}
-
 void updateParameters(
     IFunction_sptr function,
     const std::unordered_map<std::string, ParameterValue> &parameters) {
-  for (const auto &parameter : parameters) {
-    const auto index = function->parameterIndex(parameter.first);
-    function->setParameter(index, parameter.second.value);
-
-    if (parameter.second.error)
-      function->setError(index, *parameter.second.error);
+  for (auto i = 0u; i < function->nParams(); ++i) {
+    auto value = parameters.find(function->parameterName(i));
+    if (value != parameters.end()) {
+      function->setParameter(i, value->second.value);
+      if (value->second.error)
+        function->setError(i, *value->second.error);
+    }
   }
 }
 
@@ -68,9 +54,10 @@ namespace IDA {
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
                                                QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_inputAndGuessWorkspace(nullptr),
-      m_fittingModel(model) {
-  m_fitPropertyBrowser = new MantidWidgets::IndirectFitPropertyBrowser(parent);
-  m_fitPropertyBrowser->init();
+      m_fittingModel(model) {}
+
+void IndirectFitAnalysisTab::setup() {
+  setupFitTab();
 
   connect(m_fitPropertyBrowser, SIGNAL(fitScheduled()), this,
           SLOT(executeSingleFit()));
@@ -92,6 +79,10 @@ IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
           SLOT(startXChanged(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
           SLOT(endXChanged(double)));
+  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
+          SLOT(setModelStartX(double)));
+  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
+          SLOT(setModelEndX(double)));
   connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)), this,
           SLOT(updateGuessPlots()));
 
@@ -122,6 +113,12 @@ void IndirectFitAnalysisTab::setSpectrumSelectionView(
       m_fittingModel.get(), view);
 }
 
+void IndirectFitAnalysisTab::setFitPropertyBrowser(
+    MantidWidgets::IndirectFitPropertyBrowser *browser) {
+  browser->init();
+  m_fitPropertyBrowser = browser;
+}
+
 IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
   return m_fittingModel.get();
 }
@@ -139,17 +136,17 @@ IFunction_sptr IndirectFitAnalysisTab::background() const {
  *          the background removed.
  */
 IFunction_sptr IndirectFitAnalysisTab::model() const {
-  m_fitPropertyBrowser->compositeFunction()->applyTies();
-  auto model = m_fitPropertyBrowser->compositeFunction()->clone();
-  auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
+  auto composite = m_fitPropertyBrowser->compositeFunction();
+  CompositeFunction_sptr model(new CompositeFunction);
+  for (auto i = 0u; i < composite->nFunctions(); ++i)
+    model->addFunction(composite->getFunction(i));
 
-  if (compositeModel) {
-    auto index = m_fitPropertyBrowser->backgroundIndex();
+  auto index = m_fitPropertyBrowser->backgroundIndex();
+  if (index)
+    model->removeFunction(*index);
 
-    if (index)
-      compositeModel->removeFunction(index.get());
-    return compositeModel;
-  }
+  if (model->nFunctions() == 1)
+    return model->getFunction(0);
   return model;
 }
 
@@ -240,8 +237,27 @@ bool IndirectFitAnalysisTab::canPlotGuess() const {
   return !isEmptyModel() && inputWorkspace();
 }
 
+UserInputValidator &
+IndirectFitAnalysisTab::validate(UserInputValidator &validator) {
+  return m_spectrumPresenter->validate(validator);
+}
+
 void IndirectFitAnalysisTab::setModelFitFunction() {
-  m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
+  try {
+    m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
+  } catch (const std::out_of_range &) {
+    m_fittingModel->setFitFunction(m_fitPropertyBrowser->compositeFunction());
+  }
+}
+
+void IndirectFitAnalysisTab::setModelStartX(double startX) {
+  if (m_fittingModel->getWorkspace(0))
+    m_fittingModel->setStartX(startX, 0, selectedSpectrum());
+}
+
+void IndirectFitAnalysisTab::setModelEndX(double endX) {
+  if (m_fittingModel->getWorkspace(0))
+    m_fittingModel->setEndX(endX, 0, selectedSpectrum());
 }
 
 /**
@@ -254,33 +270,11 @@ void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
 }
 
 /**
- * Adds the specified tie.
- *
- * @param tieString     A string containing the tie.
+ * Updates the ties displayed in the fit property browser, using
+ * the set fitting function.
  */
-void IndirectFitAnalysisTab::addTie(const QString &tieString) {
-  const auto index = tieString.split(".").first().right(1).toInt();
-  const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
-
-  if (handler)
-    handler->addTie(tieString);
-}
-
-/**
- * Removes tie from the parameter with the specified name.
- *
- * @param tieString A string containing the tie.
- */
-void IndirectFitAnalysisTab::removeTie(const QString &parameterName) {
-  const auto parts = parameterName.split(".");
-  const auto index = parts.first().right(1).toInt();
-  const auto name = parts.last();
-  const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
-
-  if (handler) {
-    const auto tieProperty = handler->getTies()[name];
-    handler->removeTie(tieProperty, parameterName.toStdString());
-  }
+void IndirectFitAnalysisTab::updateTies() {
+  m_fitPropertyBrowser->updateTies();
 }
 
 /**
@@ -292,14 +286,6 @@ void IndirectFitAnalysisTab::removeTie(const QString &parameterName) {
 void IndirectFitAnalysisTab::setCustomSettingEnabled(const QString &customName,
                                                      bool enabled) {
   m_fitPropertyBrowser->setCustomSettingEnabled(customName, enabled);
-}
-
-/**
- * Moves the functions attached to a custom function group, to the end of the
- * model.
- */
-void IndirectFitAnalysisTab::moveCustomFunctionsToEnd() {
-  m_fitPropertyBrowser->moveCustomFunctionsToEnd();
 }
 
 /**
@@ -526,7 +512,8 @@ void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
 
   m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
   IndirectDataAnalysisTab::setSelectedSpectrum(spectrum);
-  updateParameterValues();
+  updateParameterValues(
+      m_fittingModel->getFitParameters(0, selectedSpectrum()));
   updatePreviewPlots();
   updateGuessPlots();
 
@@ -535,25 +522,43 @@ void IndirectFitAnalysisTab::setSelectedSpectrum(int spectrum) {
           SLOT(updateGuessPlots()));
 }
 
+void IndirectFitAnalysisTab::updateFitOutput(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(updateFitOutput(bool)));
+
+  if (error)
+    m_fittingModel->cleanFailedRun(m_fittingAlgorithm);
+  else
+    m_fittingModel->addOutput(m_fittingAlgorithm);
+}
+
+void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(updateSingleFitOutput(bool)));
+
+  if (error)
+    m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm, 0);
+  else
+    m_fittingModel->addSingleFitOutput(m_fittingAlgorithm, 0);
+}
+
 /*
  * Performs necessary state changes when the fit algorithm was run
  * and completed within this interface.
- *
- * @param outputBaseName       The base name of every output of the fit.
- * @param propertyToParameter  Pre-existing property to parameter map to unite.
  */
-void IndirectFitAnalysisTab::fitAlgorithmComplete() {
-  m_fittingModel->addOutput(m_outputBaseName);
+void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
+  setSaveResultEnabled(error);
+  setPlotResultEnabled(error);
+  m_spectrumPresenter->enableView();
+  updateParameterValues();
   updatePreviewPlots();
   updatePlotRange();
-  enablePlotResult();
-  enableSaveResult();
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
           SLOT(updateGuessPlots()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
+             SLOT(fitAlgorithmComplete(bool)));
 }
 
 /**
@@ -589,9 +594,10 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_fittingModel->addWorkspace(wsName.toStdString());
   m_spectrumPresenter->setActiveModelIndex(0);
 
+  setInputWorkspace(m_fittingModel->getWorkspace(0));
   enablePlotPreview();
-  disablePlotResult();
-  disableSaveResult();
+  setPlotResultEnabled(false);
+  setSaveResultEnabled(false);
   updateParameterValues(m_fittingModel->getDefaultParameters(0));
   setPreviewPlotWorkspace(m_fittingModel->getWorkspace(0));
   updatePreviewPlots();
@@ -618,8 +624,12 @@ void IndirectFitAnalysisTab::updateParameterValues(
     auto fitFunction = m_fitPropertyBrowser->getFittingFunction();
     updateParameters(fitFunction, parameters);
     m_fitPropertyBrowser->updateParameters();
-    m_fitPropertyBrowser->updateErrors();
-  } catch (const std::runtime_error &) {
+
+    if (m_fittingModel->isPreviouslyFit(0, selectedSpectrum()))
+      m_fitPropertyBrowser->updateErrors();
+    else
+      m_fitPropertyBrowser->clearErrors();
+  } catch (const std::out_of_range &) {
   }
 }
 
@@ -702,10 +712,9 @@ void IndirectFitAnalysisTab::updatePlots(
 /**
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
-void IndirectFitAnalysisTab::executeSingleFit() {
+void IndirectFitAnalysisTab::singleFit() {
   if (validateTab())
-    runFitAlgorithm(
-        m_fittingModel->getSingleFitAlgorithm(0, selectedSpectrum()));
+    runSingleFit(m_fittingModel->getSingleFit(0, selectedSpectrum()));
 }
 
 /**
@@ -722,6 +731,24 @@ void IndirectFitAnalysisTab::executeFit() {
  */
 void IndirectFitAnalysisTab::run() { executeFit(); }
 
+void IndirectFitAnalysisTab::setAlgorithmProperties(
+    IAlgorithm_sptr fitAlgorithm) const {
+  fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
+  fitAlgorithm->setProperty("MaxIterations",
+                            m_fitPropertyBrowser->maxIterations());
+  fitAlgorithm->setProperty("ConvolveMembers",
+                            m_fitPropertyBrowser->convolveMembers());
+  fitAlgorithm->setProperty("PeakRadius",
+                            m_fitPropertyBrowser->getPeakRadius());
+  fitAlgorithm->setProperty("CostFunction",
+                            m_fitPropertyBrowser->costFunction());
+  fitAlgorithm->setProperty("IgnoreInvalidData",
+                            m_fitPropertyBrowser->ignoreInvalidData());
+
+  if (m_fitPropertyBrowser->isHistogramFit())
+    fitAlgorithm->setProperty("EvaluationType", "Histogram");
+}
+
 /*
  * Runs the specified fit algorithm and calls the algorithmComplete
  * method of this fit analysis tab once completed.
@@ -729,29 +756,31 @@ void IndirectFitAnalysisTab::run() { executeFit(); }
  * @param fitAlgorithm      The fit algorithm to run.
  */
 void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(updateFitOutput(bool)));
+  setupFit(fitAlgorithm);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(updateSingleFitOutput(bool)));
+  setupFit(fitAlgorithm);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
   disconnect(m_fitPropertyBrowser,
              SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
              SLOT(updateGuessPlots()));
 
-  setAlgorithmProperty(fitAlgorithm, "Minimizer",
-                       m_fitPropertyBrowser->minimizer(true));
-  setAlgorithmProperty(fitAlgorithm, "MaxIterations",
-                       m_fitPropertyBrowser->maxIterations());
-  setAlgorithmProperty(fitAlgorithm, "ConvolveMembers",
-                       m_fitPropertyBrowser->convolveMembers());
-  setAlgorithmProperty(fitAlgorithm, "PeakRadius",
-                       m_fitPropertyBrowser->getPeakRadius());
-  setAlgorithmProperty(fitAlgorithm, "CostFunction",
-                       m_fitPropertyBrowser->costFunction());
+  setAlgorithmProperties(fitAlgorithm);
 
-  if (m_fitPropertyBrowser->isHistogramFit())
-    setAlgorithmProperty(fitAlgorithm, "EvaluationType", "Histogram");
-
-  m_outputBaseName = outputPropertyValue(fitAlgorithm);
+  m_fittingAlgorithm = fitAlgorithm;
+  m_spectrumPresenter->disableView();
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+          SLOT(fitAlgorithmComplete(bool)));
 }
 
 /**
@@ -808,13 +837,9 @@ void IndirectFitAnalysisTab::setPlotOptions(
  * enabled/disabled.
  */
 void IndirectFitAnalysisTab::updateResultOptions() {
-  if (m_fittingModel->isPreviousFitSelected()) {
-    enablePlotResult();
-    enableSaveResult();
-  } else {
-    disablePlotResult();
-    disableSaveResult();
-  }
+  const bool isFit = m_fittingModel->isPreviouslyFit(0, selectedSpectrum());
+  setPlotResultEnabled(isFit);
+  setSaveResultEnabled(isFit);
 }
 
 /**

@@ -31,14 +31,12 @@ IqtFit::IqtFit(QWidget *parent)
     : IndirectFitAnalysisTab(new IqtFitModel, parent),
       m_uiForm(new Ui::IqtFit) {
   m_uiForm->setupUi(parent);
-  m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
-  setSpectrumSelectionView(m_uiForm->svSpectrumView);
-  addPropertyBrowserToUI(m_uiForm.get());
 }
 
-void IqtFit::setup() {
-  setMinimumSpectrum(0);
-  setMaximumSpectrum(0);
+void IqtFit::setupFitTab() {
+  m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
+  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  setSpectrumSelectionView(m_uiForm->svSpectrumView);
 
   m_uiForm->ckPlotGuess->setChecked(false);
   disablePlotGuess();
@@ -117,42 +115,24 @@ void IqtFit::fitFunctionChanged() {
     setCustomBoolSetting("ConstrainBeta", false);
     setCustomSettingEnabled("ConstrainBeta", false);
   }
-  updateIntensityTie();
+  setConstrainIntensitiesEnabled(m_iqtFittingModel->canConstrainIntensities());
+  m_iqtFittingModel->setFitTypeString(fitTypeString());
+}
+
+void IqtFit::setConstrainIntensitiesEnabled(bool enabled) {
+  setCustomSettingEnabled("ConstrainIntensities", enabled);
+  if (!enabled)
+    setCustomBoolSetting("ConstrainIntensities", false);
+  else if (boolSettingValue("ConstrainIntensities")) {
+    if (m_iqtFittingModel->setConstrainIntensities(true))
+      updateTies();
+  }
 }
 
 void IqtFit::customBoolUpdated(const QString &key, bool value) {
   if (key == "Constrain Intensities") {
-    if (value)
-      updateIntensityTie();
-    else
-      removeTie(m_tiedParameter);
-  }
-}
-
-void IqtFit::updateIntensityTie() {
-  if (m_iqtFittingModel->getFittingFunction()) {
-    removeTie(m_tiedParameter);
-    const auto tie =
-        QString::fromStdString(m_iqtFittingModel->createIntensityTie());
-    updateIntensityTie(tie);
-  } else {
-    setCustomBoolSetting("ConstrainIntensities", false);
-    setCustomSettingEnabled("ConstrainIntensities", false);
-  }
-}
-
-void IqtFit::updateIntensityTie(const QString &intensityTie) {
-
-  if (intensityTie.isEmpty()) {
-    setCustomBoolSetting("ConstrainIntensities", false);
-    setCustomSettingEnabled("ConstrainIntensities", false);
-  } else {
-    setCustomSettingEnabled("ConstrainIntensities", true);
-
-    if (boolSettingValue("ConstrainIntensities")) {
-      m_tiedParameter = intensityTie.split("=")[0];
-      addTie(intensityTie);
-    }
+    if (m_iqtFittingModel->setConstrainIntensities(value))
+      updateTies();
   }
 }
 
@@ -178,13 +158,13 @@ void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
-void IqtFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
+void IqtFit::setPlotResultEnabled(bool enabled) {
+  m_uiForm->pbPlot->setEnabled(enabled);
+}
 
-void IqtFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
-
-void IqtFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
-
-void IqtFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+void IqtFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
+}
 
 void IqtFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
 
@@ -197,27 +177,6 @@ void IqtFit::disablePlotPreview() {
  */
 void IqtFit::plotWorkspace() {
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
-}
-
-/**
- * Handles completion of the IqtFitMultiple algorithm.
- * @param error True if the algorithm was stopped due to error, false otherwise
- * @param outputWsName The name of the output workspace
- */
-void IqtFit::algorithmComplete(bool error) {
-
-  if (error) {
-    QString msg =
-        "There was an error executing the fitting algorithm. Please see the "
-        "Results Log pane for more details.";
-    showMessageBox(msg);
-    return;
-  }
-
-  IndirectFitAnalysisTab::fitAlgorithmComplete();
-  m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbSave->setEnabled(true);
-  m_uiForm->cbPlotType->setEnabled(true);
 }
 
 bool IqtFit::validate() {
@@ -258,6 +217,12 @@ void IqtFit::newDataLoaded(const QString wsName) {
   m_uiForm->spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm->spPlotSpectrum->setMinimum(0);
   m_uiForm->spPlotSpectrum->setValue(0);
+}
+
+void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+  fitAlgorithm->setProperty("ExtractMembers",
+                            boolSettingValue("ExtractMembers"));
+  IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
 void IqtFit::backgroundSelectorChanged(double val) {
@@ -302,8 +267,6 @@ void IqtFit::endXChanged(double endX) {
   MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMaximum(endX);
 }
-
-void IqtFit::singleFit() { executeSingleFit(); }
 
 void IqtFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 

@@ -23,28 +23,24 @@ public:
   bool doPlotGuess() const override;
 
 protected:
-  void enablePlotResult() override;
-  void disablePlotResult() override;
-  void enableSaveResult() override;
-  void disableSaveResult() override;
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
   void enablePlotPreview() override;
   void disablePlotPreview() override;
   void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
   void removeGuessPlot() override;
 
 private:
-  void setup() override;
-  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+  void setupFitTab() override;
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
 protected slots:
-  void setModelFitFunction() override;
-  void algorithmComplete(bool error) override;
+  void setModelResolution(const QString &resolutionName);
   void newDataLoaded(const QString &wsName);
   void updatePreviewPlots() override;
   void updatePlotRange() override;
-  void singleFit();
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
   void backgLevel(double);
@@ -66,7 +62,6 @@ private:
   std::string fitTypeString() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
-  bool m_confitResFileType;
 
   // ShortHand Naming for fit functions
   QHash<QString, std::string> m_fitStrings;

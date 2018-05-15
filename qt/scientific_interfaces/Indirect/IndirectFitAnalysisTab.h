@@ -83,6 +83,8 @@ public:
                          QWidget *parent = nullptr);
 
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
+  void
+  setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
   Mantid::API::IFunction_sptr background() const;
 
@@ -114,13 +116,9 @@ public:
 
   void setConvolveMembers(bool convolveMembers);
 
-  void addTie(const QString &tieString);
-
-  void removeTie(const QString &parameterName);
+  void updateTies();
 
   void setCustomSettingEnabled(const QString &customName, bool enabled);
-
-  void moveCustomFunctionsToEnd();
 
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);
@@ -178,19 +176,7 @@ public:
                                        bool changesFunction);
 
 protected:
-  /**
-   * Adds a fit property browser to the specified Indirect Fit Analysis Tab.
-   *
-   * @param tab The indirect fit analysis tab to add the fit property browser
-   *            to.
-   */
-  template <typename FitTab> void addPropertyBrowserToUI(FitTab tab) {
-    tab->properties->addWidget(m_fitPropertyBrowser);
-  }
-
   IndirectFittingModel *fittingModel() const;
-
-  void fitAlgorithmComplete();
 
   void plotResult(const QString &plotType);
 
@@ -199,7 +185,10 @@ protected:
   void updatePlots(MantidWidgets::PreviewPlot *fitPreviewPlot,
                    MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  virtual void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
+  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   virtual void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
   virtual void removeGuessPlot() = 0;
@@ -235,12 +224,12 @@ protected:
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
 
-  virtual void enablePlotResult() = 0;
-  virtual void disablePlotResult() = 0;
-  virtual void enableSaveResult() = 0;
-  virtual void disableSaveResult() = 0;
+  virtual void setPlotResultEnabled(bool enabled) = 0;
+  virtual void setSaveResultEnabled(bool enabled) = 0;
   virtual void enablePlotPreview() = 0;
   virtual void disablePlotPreview() = 0;
+
+  UserInputValidator &validate(UserInputValidator &validator);
 
 signals:
   void functionChanged();
@@ -250,7 +239,13 @@ signals:
   void customBoolChanged(const QString &key, bool value);
 
 protected slots:
-  virtual void setModelFitFunction();
+  void setModelFitFunction();
+  void setModelStartX(double startX);
+  void setModelEndX(double endX);
+
+  void updateFitOutput(bool error);
+  void updateSingleFitOutput(bool error);
+  void fitAlgorithmComplete(bool error);
 
   void clearGuessWindowPlot();
 
@@ -266,11 +261,9 @@ protected slots:
 
   virtual void updatePlotRange() = 0;
 
-  void executeSingleFit();
+  void singleFit();
 
   void executeFit();
-
-  virtual void algorithmComplete(bool error) = 0;
 
   void newInputDataLoaded(const QString &wsName);
 
@@ -303,7 +296,8 @@ protected slots:
 
 private:
   /// Overidden by child class.
-  void setup() override = 0;
+  void setup() override;
+  virtual void setupFitTab() = 0;
   void run() override;
   void loadSettings(const QSettings &settings) override = 0;
   virtual void disablePlotGuess() = 0;
@@ -335,7 +329,7 @@ private:
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
 
-  std::string m_outputBaseName;
+  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };
 
 } // namespace IDA

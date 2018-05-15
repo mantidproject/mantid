@@ -23,14 +23,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new MSDFitModel, parent), m_uiForm(new Ui::MSDFit) {
+    : IndirectFitAnalysisTab(new MSDFitModel, parent),
+      m_uiForm(new Ui::MSDFit) {
   m_uiForm->setupUi(parent);
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
+  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
-  IndirectFitAnalysisTab::addPropertyBrowserToUI(m_uiForm.get());
 }
 
-void MSDFit::setup() {
+void MSDFit::setupFitTab() {
   auto fitRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("MSDRange");
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(xMinSelected(double)));
@@ -64,14 +65,18 @@ void MSDFit::setup() {
 
   connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
           SLOT(updatePlotGuess()));
+  connect(this, SIGNAL(functionChanged()), this,
+          SLOT(updateModelFitTypeString()));
+}
+
+void MSDFit::updateModelFitTypeString() {
+  m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }
 
 bool MSDFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
          m_uiForm->ckPlotGuess->isChecked();
 }
-
-void MSDFit::singleFit() { executeSingleFit(); }
 
 bool MSDFit::validate() {
   UserInputValidator uiv;
@@ -95,21 +100,6 @@ void MSDFit::loadSettings(const QSettings &settings) {
   m_uiForm->dsSampleInput->readSettings(settings.group());
 }
 
-/**
- * Handles the completion of the MSDFit algorithm
- *
- * @param error If the algorithm chain failed
- */
-void MSDFit::algorithmComplete(bool error) {
-  if (error)
-    return;
-
-  IndirectFitAnalysisTab::fitAlgorithmComplete();
-  // Enable plot and save
-  m_uiForm->pbPlot->setEnabled(true);
-  m_uiForm->pbSave->setEnabled(true);
-}
-
 void MSDFit::updatePreviewPlots() {
   IndirectFitAnalysisTab::updatePlots(m_uiForm->ppPlotTop,
                                       m_uiForm->ppPlotBottom);
@@ -129,13 +119,13 @@ void MSDFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
 void MSDFit::updatePlotOptions() {}
 
-void MSDFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
+void MSDFit::setPlotResultEnabled(bool enabled) {
+  m_uiForm->pbPlot->setEnabled(enabled);
+}
 
-void MSDFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
-
-void MSDFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
-
-void MSDFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+void MSDFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
+}
 
 void MSDFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
 
@@ -187,9 +177,7 @@ void MSDFit::endXChanged(double endX) {
 /**
  * Handles mantid plotting
  */
-void MSDFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult("All");
-}
+void MSDFit::plotClicked() { IndirectFitAnalysisTab::plotResult("All"); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

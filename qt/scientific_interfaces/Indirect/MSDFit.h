@@ -19,26 +19,23 @@ public:
   bool doPlotGuess() const override;
 
 private:
-  void setup() override;
+  void setupFitTab() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
 protected slots:
-  void singleFit();
   void newDataLoaded(const QString wsName);
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
   void plotClicked();
-  void algorithmComplete(bool error) override;
   void updatePreviewPlots() override;
   void updatePlotRange() override;
   void updatePlotOptions() override;
+  void updateModelFitTypeString();
 
 protected:
-  void enablePlotResult() override;
-  void disablePlotResult() override;
-  void enableSaveResult() override;
-  void disableSaveResult() override;
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
   void enablePlotPreview() override;
   void disablePlotPreview() override;
   void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;

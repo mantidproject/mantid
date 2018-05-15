@@ -18,7 +18,7 @@ public:
   JumpFit(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectDataAnalysisTab
-  void setup() override;
+  void setupFitTab() override;
 
   bool validate() override;
   /// Load default settings into the interface
@@ -31,21 +31,17 @@ protected slots:
   void handleSampleInputReady(const QString &filename);
   /// Slot to handle plotting a different spectrum of the workspace
   void handleWidthChange(int);
-  /// Handles plotting results of algorithm on miniplot
-  void algorithmComplete(bool error) override;
   /// Handles plotting and saving
   void updatePreviewPlots() override;
   void startXChanged(double startX) override;
   void endXChanged(double endX) override;
   void updatePlotRange() override;
-  void plotClicked();
   void updatePlotOptions() override;
+  void updateModelFitTypeString();
 
 protected:
-  void enablePlotResult() override;
-  void disablePlotResult() override;
-  void enableSaveResult() override;
-  void disableSaveResult() override;
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
   void enablePlotPreview() override;
   void disablePlotPreview() override;
   void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;

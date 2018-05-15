@@ -30,17 +30,15 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
-      m_uiForm(new Ui::ConvFit), m_confitResFileType() {
+      m_uiForm(new Ui::ConvFit) {
   m_uiForm->setupUi(parent);
-  m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
-  setSpectrumSelectionView(m_uiForm->svSpectrumView);
-  addPropertyBrowserToUI(m_uiForm.get());
 }
 
-void ConvFit::setup() {
-  // Create Property Managers
-  setMinimumSpectrum(0);
-  setMaximumSpectrum(0);
+void ConvFit::setupFitTab() {
+  m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
+  setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+
   setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
 
@@ -135,10 +133,8 @@ void ConvFit::setup() {
 
   connect(m_uiForm->dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
-  connect(m_uiForm->dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
   connect(m_uiForm->dsResInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(extendResolutionWorkspace()));
+          SLOT(setModelResolution(const QString &)));
   connect(m_uiForm->dsResInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(updateGuessPlots()));
   connect(m_uiForm->pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
@@ -156,14 +152,14 @@ void ConvFit::setup() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
-void ConvFit::runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  m_uiForm->ckPlotGuess->setChecked(false);
-
+void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   if (boolSettingValue("UseTempCorrection"))
     m_convFittingModel->setTemperature(doubleSettingValue("TempCorrection"));
   else
     m_convFittingModel->setTemperature(boost::none);
-  IndirectFitAnalysisTab::runFitAlgorithm(fitAlgorithm);
+  fitAlgorithm->setProperty("ExtractMembers",
+                            boolSettingValue("ExtractMembers"));
+  IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
 bool ConvFit::canPlotGuess() const {
@@ -176,9 +172,12 @@ bool ConvFit::doPlotGuess() const {
          m_uiForm->ckPlotGuess->isChecked();
 }
 
-void ConvFit::setModelFitFunction() {
-  m_convFittingModel->setFitFunction(model(), background());
-  m_convFittingModel->setFitTypeString(fitTypeString());
+void ConvFit::setModelResolution(const QString &resolutionName) {
+  const auto name = resolutionName.toStdString();
+  const auto resolution =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+  m_convFittingModel->setResolution(resolution, 0);
+  setModelFitFunction();
 }
 
 /**
@@ -195,18 +194,6 @@ void ConvFit::plotClicked() {
 
 void ConvFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-}
-
-/**
- * Handles completion of the ConvolutionFitSequential algorithm.
- *
- * @param error True if the algorithm was stopped due to error, false otherwise
- */
-void ConvFit::algorithmComplete(bool error) {
-  if (!error) {
-    m_convFittingModel->addSampleLogs();
-    IndirectFitAnalysisTab::fitAlgorithmComplete();
-  }
 }
 
 /**
@@ -231,6 +218,7 @@ bool ConvFit::validate() {
            compositeModel->getFunction(0)->name() == "DeltaFunction")
     uiv.addErrorMessage(
         "Fit function is invalid; only a Delta Function has been supplied");
+  uiv = IndirectFitAnalysisTab::validate(uiv);
 
   const auto error = uiv.generateErrorMessage();
   emit showMessageBox(error);
@@ -279,11 +267,7 @@ void ConvFit::fitFunctionChanged() {
     backRangeSelector->setVisible(false);
   else
     backRangeSelector->setVisible(true);
-
-  // ConvolutionFitSequential requires the last functions to be the ones
-  // provided as custom groups in the interface.
-  if (model())
-    moveCustomFunctionsToEnd();
+  m_convFittingModel->setFitTypeString(fitTypeString());
 }
 
 void ConvFit::parameterUpdated(const Mantid::API::IFunction *function) {
@@ -347,13 +331,13 @@ void ConvFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
 
 void ConvFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
-void ConvFit::enablePlotResult() { m_uiForm->pbPlot->setEnabled(true); }
+void ConvFit::setPlotResultEnabled(bool enabled) {
+  m_uiForm->pbPlot->setEnabled(enabled);
+}
 
-void ConvFit::disablePlotResult() { m_uiForm->pbPlot->setEnabled(false); }
-
-void ConvFit::enableSaveResult() { m_uiForm->pbSave->setEnabled(true); }
-
-void ConvFit::disableSaveResult() { m_uiForm->pbSave->setEnabled(false); }
+void ConvFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
+}
 
 void ConvFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
 
@@ -369,11 +353,6 @@ void ConvFit::removeGuessPlot() {
   m_uiForm->ppPlotTop->removeSpectrum("Guess");
   m_uiForm->ckPlotGuess->setChecked(false);
 }
-
-/**
- * Runs the single fit algorithm
- */
-void ConvFit::singleFit() { executeSingleFit(); }
 
 void ConvFit::startXChanged(double startX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("ConvFitRange");
