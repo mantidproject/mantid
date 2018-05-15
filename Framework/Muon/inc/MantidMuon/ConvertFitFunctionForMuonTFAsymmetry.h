@@ -76,6 +76,7 @@ private:
   Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(Mantid::API::IFunction_sptr original);
   std::string extractUserFunction(std::string TFFunc);
   std::vector<double> getNorms();
+  void updateNorms(Mantid::API::IFunction_sptr original);
 };
 
 } // namespace Algorithm

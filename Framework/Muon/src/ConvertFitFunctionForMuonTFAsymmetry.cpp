@@ -80,20 +80,8 @@ namespace Mantid {
 			ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
 			// create the map
 			std::map<std::string, std::string> validationOutput;
-			// check start and end times
-			/*double startX = getProperty("StartX");
-			double endX = getProperty("EndX");
-			if (startX > endX) {
-			  validationOutput["StartX"] = "Start time is after the end time.";
-			} else if (startX == endX) {
-			  validationOutput["StartX"] = "Start and end times are equal, there is no "
-										   "data to apply the algorithm to.";
-			}
-			double norm = getProperty("NormalizationIn");
-			if (norm < 0.0) {
-			  validationOutput["NormalizationIn"] =
-				  "Normalization to use must be positive.";
-			}*/
+			// check norm table is correct
+
 			return validationOutput;
 		}
 
@@ -101,6 +89,10 @@ namespace Mantid {
 		 *
 		 */
 		void ConvertFitFunctionForMuonTFAsymmetry::exec() {
+
+			//will need to add preprocessing to table
+			//      std::replace(tmpWSName.begin(), tmpWSName.end(), ' ', ';');
+			// will also need to add 3rd row for tables
 
 			IFunction_sptr inputFitFunction =getProperty("InputFunction");
 			auto mode = getPropertyValue("Mode");
@@ -111,6 +103,7 @@ namespace Mantid {
 			}
 			else {
 				auto outputFitFunction = extractFromTFAsymmFitFunction(inputFitFunction);
+				updateNorms(inputFitFunction);
 				setProperty("OutputFunction", outputFitFunction);
 
 			}
@@ -118,25 +111,53 @@ namespace Mantid {
 		/*
 		Converts from a TF Asymmetry function N(1+f) to the original f.
 		*/
+		void ConvertFitFunctionForMuonTFAsymmetry::updateNorms(
+			Mantid::API::IFunction_sptr original) {
+
+			size_t numDomains = original->getNumberDomains();
+			for (size_t j = 0; j < numDomains;j++) {
+				std::string domain = "f" + std::to_string((int)j);
+				std::string normName= domain+ ".f0.f0.f0.A0";
+				// need to change the other side of =
+				auto value = original->getParameter(normName);
+				API::ITableWorkspace_sptr table = getProperty("NormalisationTable");
+				const std::vector<std::string> wsNames = getProperty("WorkspaceList");
+
+                				
+
+				for (size_t row = 0; row < table->rowCount(); row++) {
+					
+						if (table->String(row, 0) == wsNames[j]) {
+							table->removeRow(row);
+							Mantid::API::TableRow newRow = table->appendRow();
+							newRow <<  wsNames[j]<<value;
+						
+					}
+				}
+			}
+			}
+		
 		Mantid::API::IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
 			Mantid::API::IFunction_sptr original) {
 
 		    auto multi = boost::make_shared<MultiDomainFunction>();
-			std::string func = extractUserFunction(original->asString());
+			
 			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
 
 			size_t numDomains = original->getNumberDomains();
 			for (size_t j = 0; j < numDomains; j++) {
 				IFunction_sptr userFunc;
-				auto extracted = FunctionFactory::Instance().createInitialized(
-					func);
+				std::string func;
 				if (numDomains == 1) {
-					userFunc = extracted;
+					func = extractUserFunction(original->asString());
 				}
 				else {
 					userFunc = tmp->getFunction(j);
+					func = extractUserFunction(userFunc->asString());
 					multi->setDomainIndex(j, j);
 				}
+				userFunc = FunctionFactory::Instance().createInitialized(
+					func);
 				auto composite = boost::make_shared<CompositeFunction>();
 				composite->addFunction(userFunc);
 				multi->addFunction(composite);
@@ -150,11 +171,11 @@ namespace Mantid {
 			//removes everything up to start of user function
 			// we know the form to expect -> know where user 
 			// function should be
-			size_t start = out.find("((name=FlatBackground,A0=1,ties=(A0=1))");
+			size_t start = out.find("name=FlatBackground,A0=1,ties=(A0=1)");
 			out=out.substr(start,out.size()-start);
 			start = out.find(";")+1 ;
 			//expect it to end with an ExpDecayMuon
-			size_t end = out.find("));(name=ExpDecayMuon");
+			size_t end = out.rfind("));name=ExpDecayMuon");
 			out = out.substr(start, end-start);
 		    return out;
 		}
