@@ -3,11 +3,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/TextAxis.h"
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/range/adaptor/map.hpp>
-
-#include <unordered_map>
-
 using namespace Mantid::API;
 
 namespace {
