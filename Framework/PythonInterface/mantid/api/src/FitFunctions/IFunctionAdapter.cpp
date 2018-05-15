@@ -1,8 +1,13 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
+#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
+
+#define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -52,8 +57,8 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
     }
     attr = IFunction::Attribute(vec);
   } else {
-    throw std::invalid_argument(
-        "Invalid attribute type. Allowed types=float,int,str,bool,list(float)");
+    throw std::invalid_argument("Invalid attribute type. Allowed "
+                                "types=float,int,str,bool,list(float)");
   }
   return attr;
 }
@@ -216,6 +221,65 @@ void IFunctionAdapter::setActiveParameter(size_t i, double value) {
     callMethod<void, size_t, double>(getSelf(), "setActiveParameter", i, value);
   } catch (UndefinedAttributeError &) {
     IFunction::setActiveParameter(i, value);
+  }
+}
+
+/**
+ * The result is copied from the numpy array that is returned into the
+ * provided output array
+ * @param out A pre-sized array to accept the result values
+ * @param methodName The name of the overridden method on the subclass
+ * @param xValues The input domain
+ * @param nData The size of the input and output arrays
+ */
+void IFunctionAdapter::evaluateFunction(double *out, const char *methodName,
+                                        const double *xValues,
+                                        const size_t nData) const {
+  using namespace Converters;
+  // GIL must be held while numpy wrappers are destroyed as they access Python
+  // state information
+  Environment::GlobalInterpreterLock gil;
+
+  Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
+  PyObject *xvals =
+      WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
+
+  // Deliberately avoids using the CallMethod wrappers. They lock the GIL again
+  // and
+  // will check for each function call whether the wrapped method exists. It
+  // also avoid unnecessary construction of
+  // boost::python::objects whn using boost::python::call_method
+
+  PyObject *result =
+      PyObject_CallMethod(getSelf(), const_cast<char *>(methodName),
+                          const_cast<char *>("(O)"), xvals);
+  Py_DECREF(xvals);
+  if (PyErr_Occurred()) {
+    Py_XDECREF(result);
+    throw Environment::PythonException();
+  }
+  if (PyArray_Check(result)) {
+    auto nparray = reinterpret_cast<PyArrayObject *>(result);
+    // dtype matches so use memcpy for speed
+    if (PyArray_TYPE(nparray) == NPY_DOUBLE) {
+      std::memcpy(static_cast<void *>(out), PyArray_DATA(nparray),
+                  nData * sizeof(npy_double));
+      Py_DECREF(result);
+    } else {
+      Py_DECREF(result);
+      PyArray_Descr *dtype = PyArray_DESCR(nparray);
+      std::string err("Unsupported numpy data type: '");
+      err.append(dtype->typeobj->tp_name)
+          .append("'. Currently only numpy.float64 is supported.");
+      throw std::runtime_error(err);
+    }
+  } else {
+    std::string err("Expected ");
+    err.append(methodName)
+        .append(" to return a numpy array, however an ")
+        .append(result->ob_type->tp_name)
+        .append(" was returned.");
+    throw std::runtime_error(err);
   }
 }
 } // namespace PythonInterface

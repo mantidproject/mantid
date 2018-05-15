@@ -114,6 +114,9 @@ protected:
    * @returns A pointer to self
    */
   inline PyObject *getSelf() const { return m_self; }
+  /// Evaluate the function by calling the overridden method
+  void evaluateFunction(double *out, const char *methodName,
+                        const double *xValues, const size_t nData) const;
 
 private:
   /// The name of the function

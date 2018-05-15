@@ -41,48 +41,7 @@ IFunction1DAdapter::IFunction1DAdapter(PyObject *self)
  */
 void IFunction1DAdapter::function1D(double *out, const double *xValues,
                                     const size_t nData) const {
-  using namespace Converters;
-  // GIL must be held while numpy wrappers are destroyed as they access Python
-  // state information
-  Environment::GlobalInterpreterLock gil;
-
-  Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
-  PyObject *xvals =
-      WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
-
-  // Deliberately avoids using the CallMethod wrappers. They lock the GIL again
-  // and
-  // will check for each function call whether the wrapped method exists. It
-  // also avoid unnecessary construction of
-  // boost::python::objects whn using boost::python::call_method
-
-  PyObject *result = PyEval_CallMethod(getSelf(), "function1D", "(O)", xvals);
-  Py_DECREF(xvals);
-  if (PyErr_Occurred()) {
-    Py_XDECREF(result);
-    throw Environment::PythonException();
-  }
-  if (PyArray_Check(result)) {
-    auto nparray = reinterpret_cast<PyArrayObject *>(result);
-    if (PyArray_TYPE(nparray) ==
-        NPY_DOUBLE) // dtype matches so use memcpy for speed
-    {
-      std::memcpy(static_cast<void *>(out), PyArray_DATA(nparray),
-                  nData * sizeof(npy_double));
-      Py_DECREF(result);
-    } else {
-      Py_DECREF(result);
-      PyArray_Descr *dtype = PyArray_DESCR(nparray);
-      std::string err("Unsupported numpy data type: '");
-      err.append(dtype->typeobj->tp_name)
-          .append("'. Currently only numpy.float64 is supported.");
-      throw std::runtime_error(err);
-    }
-  } else {
-    std::string err("Expected function1D to return a numpy array, however an ");
-    err.append(result->ob_type->tp_name).append(" was returned.");
-    throw std::runtime_error(err);
-  }
+  evaluateFunction(out, "function1D", xValues, nData);
 }
 
 /**
