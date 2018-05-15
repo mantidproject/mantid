@@ -22,7 +22,12 @@
 #include <cmath>
 #include <numeric>
 #include <vector>
-
+namespace {
+	constexpr double MICROSECONDS_PER_SECOND{ 1000000.0 };
+	constexpr double MUON_LIFETIME_MICROSECONDS{
+	Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND };
+	constexpr bool FIX = false; // fix function needs false to work 
+}
 namespace Mantid {
 
 	namespace Algorithms {
@@ -96,17 +101,40 @@ namespace Mantid {
 		 *
 		 */
 		void ConvertFitFunctionForMuonTFAsymmetry::exec() {
-			auto inputFitFunction = getProperty("InputFunction");
-			std::vector<double> norms = getNorms();
-			auto outputFitFunction = getTFAsymmFitFunction(inputFitFunction, norms);
-			setProperty("OutputFunction", boost::dynamic_pointer_cast<IFunction>(outputFitFunction));
-		}
+			auto dfsat = getPropertyValue("InputFunction");
 
+			IFunction_sptr inputFitFunction = FunctionFactory::Instance().createInitialized(
+				dfsat);//getProperty("InputFunction");
+			auto ttweta = inputFitFunction->asString();
+			auto mode = getPropertyValue("Mode");
+			if (mode == "Construct") {
+				std::vector<double> norms = getNorms();
+				auto outputFitFunction = getTFAsymmFitFunction(inputFitFunction, norms);
+				setProperty("OutputFunction", outputFitFunction);
+			}
+			else {
+
+			}
+		}
+		/*
+		Converts from a TF Asymmetry function N(1+f) to the original f.
+		*/
+
+
+		/*
+		Convert to a TF Asymmetry function. Input f and changes it to N(1+f)
+		*/
 		std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
 			API::ITableWorkspace_sptr table = getProperty("NormalisationTable");
-			std::vector<double> norms;
-			for (size_t j = 0; j < table->rowCount(); j++) {
-				norms.push_back(table->Double(j, 1));
+			const std::vector<std::string> wsNames = getProperty("WorkspaceList");
+
+			std::vector<double> norms(wsNames.size() ,0);
+			for (size_t row = 0; row < table->rowCount(); row++) {
+				for (size_t wsPosition = 0; wsPosition < wsNames.size();wsPosition++) {
+					if (table->String(row, 0) == wsNames[wsPosition]) {
+						norms[wsPosition] = table->Double(row, 1);
+					}
+				}
 			}
 
 			return norms;
@@ -124,7 +152,7 @@ namespace Mantid {
 			for (size_t j = 0; j < numDomains; j++) {
 				IFunction_sptr userFunc;
 				auto constant = FunctionFactory::Instance().createInitialized(
-					"name = FlatBackground, A0 = 1.0, ties = (A0 = 1.0)");
+					"name = FlatBackground, A0 = 1.0; ties=(f0.A0=1)");
 				if (numDomains == 1) {
 					userFunc = original;
 				}
@@ -143,24 +171,33 @@ namespace Mantid {
 					FunctionFactory::Instance().createFunction("ProductFunction"));
 				product->addFunction(norm);
 				product->addFunction(inBrace);
-				multi->addFunction(product);
+				auto composite = boost::make_shared<CompositeFunction>();
+				constant = FunctionFactory::Instance().createInitialized(
+					"name = ExpDecayMuon, A = 0.0, Lambda = -" + std::to_string(MUON_LIFETIME_MICROSECONDS) + ";ties = (f0.A = 0.0, f0.Lambda = -" + std::to_string(MUON_LIFETIME_MICROSECONDS) + ")");
+				composite->addFunction(product);
+				composite->addFunction(constant);
+				multi->addFunction(composite);
 			}
-			// add ties
-			for (size_t j = 0; j < original->getParameterNames().size(); j++) {
-				auto originalTie = original->getTie(j);
-				if (originalTie) {
-					auto name = original->getParameterNames()[j];
-					auto stringTie = originalTie->asString();
-					// change name to reflect new postion
-					auto insertPosition = stringTie.find_first_of(".");
-					stringTie.insert(insertPosition + 1, "f1.f1.");
-					// need to change the other side of =
-					insertPosition = stringTie.find_first_of("=");
-					insertPosition = stringTie.find_first_of(".", insertPosition);
-					stringTie.insert(insertPosition + 1, "f1.f1.");
-					multi->addTies(stringTie);
+			// if multi data set we need to do the ties manually
+			if (numDomains > 1) {
+				auto originalNames = original->getParameterNames();
+				for (auto name : originalNames) {
+					auto index = original->parameterIndex(name);
+					auto originalTie = original->getTie(index);
+					if (originalTie) {
+						auto stringTie = originalTie->asString();
+						// change name to reflect new postion
+						auto insertPosition = stringTie.find_first_of(".");
+						stringTie.insert(insertPosition + 1, "f0.f1.f1.");
+						// need to change the other side of =
+						insertPosition = stringTie.find_first_of("=");
+						insertPosition = stringTie.find_first_of(".", insertPosition);
+						stringTie.insert(insertPosition + 1, "f0.f1.f1.");
+						multi->addTies(stringTie);
+					}
 				}
 			}
+
 			return boost::dynamic_pointer_cast<IFunction>(multi);
 		}
 	} // namespace Algorithm

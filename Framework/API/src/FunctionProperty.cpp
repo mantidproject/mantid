@@ -82,7 +82,12 @@ std::string FunctionProperty::setValue(const std::string &value) {
 *  @returns A user level description of the problem or "" if it is valid.
 */
 std::string FunctionProperty::isValid() const {
-  return isDefault() ? "Function is empty." : "";
+	if (direction() == Kernel::Direction::Output) {
+		return "";
+	}
+	else {
+		return isDefault() ? "Function is empty." : "";
+	}
 }
 
 /** Indicates if the function has not been created yet.
