@@ -21,14 +21,7 @@ using namespace boost::python;
  * @param self A reference to the calling Python object
  */
 IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
-    : IFunctionAdapter(self) {
-  if (!Environment::typeHasAttribute(self, "init")) {
-    throw std::runtime_error("Function does not define an init method.");
-  }
-  if (!Environment::typeHasAttribute(self, "functionLocal")) {
-    throw std::runtime_error("Function does not define a function1D method.");
-  }
-}
+    : IFunctionAdapter(self, "functionLocal", "functionDerivLocal") {}
 
 /**
  */
@@ -81,7 +74,7 @@ void IPeakFunctionAdapter::setFwhm(const double w) {
  */
 void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
                                          const size_t nData) const {
-  evaluateFunction(out, "functionLocal", xValues, nData);
+  evaluateFunction(out, xValues, nData);
 }
 
 /**
@@ -106,31 +99,14 @@ IPeakFunctionAdapter::functionLocal(const boost::python::object &xvals) const {
 void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *out,
                                               const double *xValues,
                                               const size_t nData) {
-  using namespace Converters;
-  // GIL must be held while numpy wrappers are destroyed as they access Python
-  // state information
-  Environment::GlobalInterpreterLock gil;
-
-  Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
-  PyObject *xvals =
-      WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
-  PyObject *jacobian = boost::python::to_python_value<API::Jacobian *>()(out);
-
-  // Deliberately avoids using the CallMethod wrappers. They lock the GIL again
-  // and
-  // will check for each function call whether the wrapped method exists. It
-  // also avoid unnecessary construction of
-  // boost::python::objects when using boost::python::call_method
-  PyEval_CallMethod(getSelf(), "functionDerivLocal", "(OO)", xvals, jacobian);
-  if (PyErr_Occurred())
-    throw Environment::PythonException();
+  evaluateDerivative(out, xValues, nData);
 }
 
 /**
  * Python-type signature version of above that can be called directly from
  * Python
  * @param xvals The input X values in read-only numpy array
- *  @param jacobian The Jacobian matrix storing the partial derivatives of the
+ * @param jacobian The Jacobian matrix storing the partial derivatives of the
  * function w.r.t to the parameters
  */
 void IPeakFunctionAdapter::functionDerivLocal(

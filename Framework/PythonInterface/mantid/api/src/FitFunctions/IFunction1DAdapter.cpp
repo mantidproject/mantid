@@ -1,6 +1,5 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
 
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
@@ -23,15 +22,8 @@ using namespace boost::python;
  * @param self A reference to the calling Python object
  */
 IFunction1DAdapter::IFunction1DAdapter(PyObject *self)
-    : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self),
-      m_derivOveridden(false) {
-  if (!Environment::typeHasAttribute(self, "init"))
-    throw std::runtime_error("Function does not define an init method.");
-  if (!Environment::typeHasAttribute(self, "function1D"))
-    throw std::runtime_error("Function does not define a function1D method.");
-
-  m_derivOveridden = Environment::typeHasAttribute(self, "functionDeriv1D");
-}
+    : API::ParamFunction(), API::IFunction1D(),
+      IFunctionAdapter(self, "function1D", "functionDeriv1D") {}
 
 /**
  * Translates between the C++ signature & the Python signature called by Fit
@@ -41,7 +33,7 @@ IFunction1DAdapter::IFunction1DAdapter(PyObject *self)
  */
 void IFunction1DAdapter::function1D(double *out, const double *xValues,
                                     const size_t nData) const {
-  evaluateFunction(out, "function1D", xValues, nData);
+  evaluateFunction(out, xValues, nData);
 }
 
 /**
@@ -64,27 +56,10 @@ IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
 void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out,
                                          const double *xValues,
                                          const size_t nData) {
-  if (m_derivOveridden) {
-    using namespace Converters;
-    // GIL must be held while numpy wrappers are destroyed as they access Python
-    // state information
-    Environment::GlobalInterpreterLock gil;
-
-    Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
-    PyObject *xvals =
-        WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
-    PyObject *jacobian = boost::python::to_python_value<API::Jacobian *>()(out);
-
-    // Deliberately avoids using the CallMethod wrappers. They lock the GIL
-    // again and
-    // will check for each function call whether the wrapped method exists. It
-    // also avoid unnecessary construction of
-    // boost::python::objects when using boost::python::call_method
-    PyEval_CallMethod(getSelf(), "functionDeriv1D", "(OO)", xvals, jacobian);
-    if (PyErr_Occurred())
-      throw Environment::PythonException();
+  if (derivativeOverridden()) {
+    evaluateDerivative(out, xValues, nData);
   } else {
-    IFunction1D::functionDeriv1D(out, xValues, nData);
+    Base::functionDeriv1D(out, xValues, nData);
   }
 }
 } // namespace PythonInterface

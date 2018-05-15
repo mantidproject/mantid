@@ -5,6 +5,8 @@
 #include "MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include <cxxtest/TestSuite.h>
+#include <algorithm>
+#include <array>
 
 class IPeakFunctionAdapterTest : public CxxTest::TestSuite {
 public:
@@ -12,6 +14,8 @@ public:
     return new IPeakFunctionAdapterTest();
   }
   static void destroySuite(IPeakFunctionAdapterTest *suite) { delete suite; }
+
+  // -------------- Failure tests -------------------------
 
   void testfunctionLocal_Returning_Non_Numpy_Array_Throws() {
     using Mantid::API::IPeakFunction_sptr;
@@ -44,6 +48,30 @@ public:
     TS_ASSERT_THROWS(
         badNdArrayFunc->function1D(retvalue.data(), xvalues.data(), 1),
         std::runtime_error);
+  }
+
+  // -------------- Success tests -------------------------
+
+  void testfunction_Uses_Supplied_Deriv() {
+    using Mantid::API::IPeakFunction_sptr;
+    using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    IPeakFunction_sptr peakFuncWithDeriv;
+    TS_ASSERT_THROWS_NOTHING(
+        peakFuncWithDeriv =
+            createTestFunction<IPeakFunction_sptr::element_type>(
+                "IPeakFunctionAdapterWithDeriv",
+                "        return self.getParameterValue(0)*x",
+                "        jacobian.set(0, 0, 2000)"));
+    TS_ASSERT(peakFuncWithDeriv);
+
+    std::array<double, 10> xvalues;
+    std::iota(std::begin(xvalues), std::end(xvalues), 10.0);
+    FunctionAdapterTestJacobian jacobian(xvalues.size(), 1);
+    peakFuncWithDeriv->functionDeriv1D(&jacobian, xvalues.data(),
+                                       xvalues.size());
+
+    TS_ASSERT_DELTA(2000, jacobian.get(0, 0), 1e-05);
   }
 };
 

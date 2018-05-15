@@ -5,6 +5,8 @@
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "FunctionAdapterTestCommon.h"
 #include <cxxtest/TestSuite.h>
+#include <algorithm>
+#include <array>
 
 class IFunction1DAdapterTest : public CxxTest::TestSuite {
 public:
@@ -13,6 +15,7 @@ public:
   }
   static void destroySuite(IFunction1DAdapterTest *suite) { delete suite; }
 
+  // ---------------- Failure tests -------------------------
   void testfunction1D_Returning_Non_Numpy_Array_Throws() {
     using Mantid::API::IFunction1D_sptr;
     using Mantid::PythonInterface::createTestFunction;
@@ -45,7 +48,69 @@ public:
         badNdArrayFunc1D->function1D(retvalue.data(), xvalues.data(), 1),
         std::runtime_error);
   }
+
+  // -------------- Success tests -------------------------
+  void testfunction1D_Return_Numpy_Array_Copies_Values_To_Output_Array() {
+    using Mantid::API::IFunction1D_sptr;
+    using Mantid::PythonInterface::createTestFunction;
+    IFunction1D_sptr timesTwo;
+    TS_ASSERT_THROWS_NOTHING(
+        timesTwo = createTestFunction<IFunction1D_sptr::element_type>(
+            "IFunction1DAdapterTimesTwo", "        return 2*x"));
+    TS_ASSERT(timesTwo);
+
+    std::array<double, 10> xvalues, result;
+    std::iota(std::begin(xvalues), std::end(xvalues), 0.0);
+    timesTwo->function1D(result.data(), xvalues.data(), xvalues.size());
+
+    std::array<double, 10> expected;
+    std::transform(std::begin(xvalues), std::end(xvalues), std::begin(expected),
+                   [](double x) { return 2. * x; });
+    TS_ASSERT(
+        std::equal(std::begin(result), std::end(result), std::begin(expected)));
+  }
+
+  void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
+    using Mantid::API::IFunction1D_sptr;
+    using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    IFunction1D_sptr noDerivFunc1D;
+    TS_ASSERT_THROWS_NOTHING(
+        noDerivFunc1D = createTestFunction<IFunction1D_sptr::element_type>(
+            "IFunction1DAdapterWithDeriv",
+            "        return self.getParameterValue(0)*x"));
+    TS_ASSERT(noDerivFunc1D);
+
+    std::array<double, 10> xvalues;
+    std::iota(std::begin(xvalues), std::end(xvalues), 10.0);
+    FunctionAdapterTestJacobian jacobian(xvalues.size(), 1);
+    noDerivFunc1D->functionDeriv1D(&jacobian, xvalues.data(), xvalues.size());
+
+    TS_ASSERT_DELTA(9.99999, jacobian.get(0, 0), 1e-05);
+  }
+
+  void testfunction_Uses_Supplied_Deriv() {
+    using Mantid::API::IFunction1D_sptr;
+    using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    IFunction1D_sptr func1DWithDeriv;
+    TS_ASSERT_THROWS_NOTHING(
+        func1DWithDeriv = createTestFunction<IFunction1D_sptr::element_type>(
+            "IFunction1DAdapterWithDeriv",
+            "        return self.getParameterValue(0)*x",
+            "        jacobian.set(0, 0, 1000)"));
+    TS_ASSERT(func1DWithDeriv);
+
+    std::array<double, 10> xvalues;
+    std::iota(std::begin(xvalues), std::end(xvalues), 10.0);
+    FunctionAdapterTestJacobian jacobian(xvalues.size(), 1);
+    func1DWithDeriv->functionDeriv1D(&jacobian, xvalues.data(), xvalues.size());
+
+    TS_ASSERT_DELTA(1000, jacobian.get(0, 0), 1e-05);
+  }
 };
+
+// Performance test
 
 class IFunction1DAdapterTestPerformance : public CxxTest::TestSuite {
 public:

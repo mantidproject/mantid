@@ -43,6 +43,9 @@ namespace PythonInterface {
 class IPeakFunctionAdapter : public API::IPeakFunction,
                              public IFunctionAdapter {
 public:
+  // Convenience typedef
+  using Base = API::IPeakFunction;
+
   /// A constructor that looks like a Python __init__ method
   IPeakFunctionAdapter(PyObject *self);
 
