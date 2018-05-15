@@ -6,6 +6,7 @@
 
 #include "../General/UserInputValidator.h"
 
+#include <boost/optional.hpp>
 #include <boost/variant.hpp>
 
 #include <unordered_map>
@@ -46,6 +47,9 @@ public:
   ~IndirectSpectrumSelectionPresenter() override;
   UserInputValidator &validate(UserInputValidator &validator);
 
+  void disableView();
+  void enableView();
+
 signals:
   void spectraChanged(Spectra spectra);
   void maskSpectrumChanged(std::size_t);
@@ -56,22 +60,25 @@ public slots:
   void setActiveModelIndex(std::size_t index);
 
 private slots:
-  void setBinMask(std::size_t index, const std::string &maskString);
-  void setMaskSpectraList(std::size_t, const std::string &maskString);
-  void displayBinMask(std::size_t index);
+  void setBinMask(const std::string &maskString);
+  void setMaskSpectraList(const std::string &spectraList);
+  void displayBinMask();
   void updateSpectraList(const std::string &spectraList);
   void updateSpectraRange(std::size_t minimum, std::size_t maximum);
+  void setMaskIndex(int index);
 
 private:
   void setSpectraRange(std::size_t minimum, std::size_t maximum);
   void setModelSpectra(const Spectra &spectra);
 
   UserInputValidator validateSpectraString();
+  UserInputValidator &validateSpectraString(UserInputValidator &validator);
   UserInputValidator validateMaskBinsString();
 
   IndirectFittingModel *m_model;
   std::unique_ptr<IndirectSpectrumSelectionView> m_view;
   std::size_t m_activeIndex;
+  std::size_t m_maskIndex;
   std::string m_spectraError;
 };
 
