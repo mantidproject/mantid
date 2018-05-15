@@ -49,7 +49,6 @@ public:
 
   std::size_t minimumSpectrum() const;
   std::size_t maximumSpectrum() const;
-  std::size_t selectedMaskSpectrum() const;
 
   std::string spectraString() const;
   std::string maskString() const;
@@ -68,6 +67,10 @@ public:
 
   void showSpectraErrorLabel();
   void showMaskBinErrorLabel();
+  void hideSpectraErrorLabel();
+  void hideMaskBinErrorLabel();
+
+  void setMaskSelectionEnabled(bool enabled);
 
 public slots:
   void setMinimumSpectrum(std::size_t spectrum);
@@ -80,22 +83,26 @@ public slots:
 
   void hideSpectrumSelector();
   void showSpectrumSelector();
+  void hideMaskSpectrumSelector();
+  void showMaskSpectrumSelector();
+
+  void clearMaskString();
 
 signals:
   void selectedSpectraChanged(const std::string &);
   void selectedSpectraChanged(std::size_t, std::size_t);
-  void maskSpectrumChanged(std::size_t);
-  void maskChanged(std::size_t, const std::string &);
+  void maskSpectrumChanged(int);
+  void maskChanged(const std::string &);
 
 private slots:
-  void emitMaskSpectrumChanged(int spectrum);
-  void emitMaskSpectrumChanged(const QString& spectrum);
-  void emitMaskChanged(const QString &mask);
+  void emitMaskChanged();
+  void emitMaskSpectrumChanged(const QString &spectrum);
   void emitSpectraChanged(int modeIndex);
   void emitSpectraStringChanged();
   void emitSpectraRangeChanged();
   void setSpectraRangeMiniMax(int value);
   void setSpectraRangeMaxiMin(int value);
+  void enableMaskLineEdit(int doEnable);
 
 private:
   QValidator *createValidator(const QString &regex);

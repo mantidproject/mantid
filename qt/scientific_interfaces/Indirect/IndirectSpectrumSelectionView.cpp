@@ -12,20 +12,23 @@ IndirectSpectrumSelectionView::IndirectSpectrumSelectionView(QWidget *parent)
     : API::MantidWidget(parent), m_selector(new Ui::IndirectSpectrumSelector) {
   m_selector->setupUi(this);
 
+  connect(m_selector->cbMaskSpectrum, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(enableMaskLineEdit(int)));
+
   connect(m_selector->spMaximumSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(emitSpectraRangeChanged()));
   connect(m_selector->spMinimumSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(emitSpectraRangeChanged()));
-  connect(m_selector->leSpectra, SIGNAL(textChanged(const QString &)), this,
+  connect(m_selector->leSpectra, SIGNAL(editingFinished()), this,
           SLOT(emitSpectraStringChanged()));
 
   connect(m_selector->spMaskSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(emitMaskSpectrumChanged(int)));
+          SIGNAL(maskSpectrumChanged(int)));
   connect(m_selector->cbMaskSpectrum,
-          SIGNAL(currentTextChanged(const QString &)), this,
+          SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitMaskSpectrumChanged(const QString &)));
-  connect(m_selector->leMaskBins, SIGNAL(textChanged(const QString &)), this,
-          SLOT(emitMaskChanged(const QString &)));
+  connect(m_selector->leMaskBins, SIGNAL(editingFinished()), this,
+          SLOT(emitMaskChanged()));
 
   connect(m_selector->spMaximumSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(setSpectraRangeMaxiMin(int)));
@@ -33,7 +36,9 @@ IndirectSpectrumSelectionView::IndirectSpectrumSelectionView(QWidget *parent)
           SLOT(setSpectraRangeMiniMax(int)));
 
   connect(m_selector->cbSelectionMode, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(emitSpectraChanged()));
+          SLOT(emitSpectraChanged(int)));
+  connect(m_selector->cbSelectionMode, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(clearMaskString()));
 }
 
 IndirectSpectrumSelectionView::~IndirectSpectrumSelectionView() {}
@@ -51,15 +56,6 @@ std::size_t IndirectSpectrumSelectionView::minimumSpectrum() const {
 std::size_t IndirectSpectrumSelectionView::maximumSpectrum() const {
   return boost::numeric_cast<std::size_t>(
       m_selector->spMaximumSpectrum->value());
-}
-
-std::size_t IndirectSpectrumSelectionView::selectedMaskSpectrum() const {
-  if (selectionMode() == SpectrumSelectionMode::RANGE)
-    return boost::numeric_cast<std::size_t>(
-        m_selector->spMaskSpectrum->value());
-  else
-    return boost::numeric_cast<std::size_t>(
-        m_selector->cbMaskSpectrum->currentText().toInt());
 }
 
 std::string IndirectSpectrumSelectionView::spectraString() const {
@@ -102,6 +98,12 @@ void IndirectSpectrumSelectionView::setMaskSpectraList(
     m_selector->cbMaskSpectrum->addItem(QString::number(spectrum));
 }
 
+void IndirectSpectrumSelectionView::setMaskSelectionEnabled(bool enabled) {
+  m_selector->cbMaskSpectrum->setEnabled(enabled);
+  m_selector->lbMaskSpectrum->setEnabled(enabled);
+  m_selector->leMaskBins->setEnabled(enabled);
+}
+
 void IndirectSpectrumSelectionView::setSpectraRegex(const std::string &regex) {
   m_selector->leSpectra->setValidator(
       createValidator(QString::fromStdString(regex)));
@@ -117,7 +119,7 @@ void IndirectSpectrumSelectionView::setMinimumSpectrum(std::size_t spectrum) {
 }
 
 void IndirectSpectrumSelectionView::setMaximumSpectrum(std::size_t spectrum) {
-  m_selector->spMinimumSpectrum->setValue(boost::numeric_cast<int>(spectrum));
+  m_selector->spMaximumSpectrum->setValue(boost::numeric_cast<int>(spectrum));
 }
 
 void IndirectSpectrumSelectionView::setMaskSpectrum(std::size_t spectrum) {
@@ -145,11 +147,21 @@ void IndirectSpectrumSelectionView::setSpectraRangeMiniMax(int value) {
 }
 
 void IndirectSpectrumSelectionView::showSpectraErrorLabel() {
-  UserInputValidator().setErrorLabel(m_selector->lbSpectraError, true);
+  UserInputValidator().setErrorLabel(m_selector->lbSpectraError, false);
 }
 
 void IndirectSpectrumSelectionView::showMaskBinErrorLabel() {
-  UserInputValidator().setErrorLabel(m_selector->lbMaskBinsError, true);
+  UserInputValidator().setErrorLabel(m_selector->lbMaskBinsError, false);
+}
+
+void IndirectSpectrumSelectionView::hideSpectraErrorLabel() {
+  m_selector->lbSpectraError->setText("");
+  m_selector->lbSpectraError->setVisible(false);
+}
+
+void IndirectSpectrumSelectionView::hideMaskBinErrorLabel() {
+  m_selector->lbMaskBinsError->setText("");
+  m_selector->lbMaskBinsError->setVisible(false);
 }
 
 QValidator *
@@ -176,12 +188,35 @@ void IndirectSpectrumSelectionView::hideSpectrumSelector() {
   m_selector->lbSelectionMode->hide();
   m_selector->cbSelectionMode->hide();
   m_selector->swSpectraSelection->hide();
+  m_selector->lbColon->hide();
 }
 
 void IndirectSpectrumSelectionView::showSpectrumSelector() {
   m_selector->lbSelectionMode->show();
   m_selector->cbSelectionMode->show();
   m_selector->swSpectraSelection->show();
+  m_selector->lbColon->show();
+}
+
+void IndirectSpectrumSelectionView::hideMaskSpectrumSelector() {
+  m_selector->spMaskSpectrum->hide();
+  m_selector->cbMaskSpectrum->hide();
+}
+
+void IndirectSpectrumSelectionView::showMaskSpectrumSelector() {
+  m_selector->spMaskSpectrum->show();
+  m_selector->cbMaskSpectrum->show();
+}
+
+void IndirectSpectrumSelectionView::clearMaskString() {
+  m_selector->leMaskBins->clear();
+}
+
+void IndirectSpectrumSelectionView::enableMaskLineEdit(int doEnable) {
+  if (doEnable >= 0)
+    m_selector->leMaskBins->setEnabled(true);
+  else
+    m_selector->leMaskBins->setEnabled(false);
 }
 
 void IndirectSpectrumSelectionView::emitSpectraChanged(int modeIndex) {
@@ -200,18 +235,13 @@ void IndirectSpectrumSelectionView::emitSpectraStringChanged() {
   emit selectedSpectraChanged(m_selector->leSpectra->text().toStdString());
 }
 
-void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(int spectrum) {
-  emit maskSpectrumChanged(boost::numeric_cast<std::size_t>(spectrum));
+void IndirectSpectrumSelectionView::emitMaskChanged() {
+  emit maskChanged(m_selector->leMaskBins->text().toStdString());
 }
 
 void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(
     const QString &spectrum) {
-  emit maskSpectrumChanged(
-      boost::numeric_cast<std::size_t>(spectrum.toULong()));
-}
-
-void IndirectSpectrumSelectionView::emitMaskChanged(const QString &mask) {
-  emit maskChanged(selectedMaskSpectrum(), mask.toStdString());
+  emit maskSpectrumChanged(spectrum.toInt());
 }
 
 } // namespace IDA
