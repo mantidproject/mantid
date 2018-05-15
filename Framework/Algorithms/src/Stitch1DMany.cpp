@@ -17,26 +17,21 @@ namespace Mantid {
 namespace Algorithms {
 DECLARE_ALGORITHM(Stitch1DMany)
 
-/** Initialize the algorithm's properties.
- */
+/// Initialize the algorithm's properties.
 void Stitch1DMany::init() {
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces", boost::make_shared<ADSValidator>()),
-      "Input Workspaces: List of histogram workspaces to stitch together, at "
-      "least 2 workspaces must be supplied for stitching and all must be "
-      "either Matrix Workspaces or Workspace Groups containing Matrix "
-      "Workspaces only.");
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+                      "InputWorkspaces", boost::make_shared<ADSValidator>()),
+                  "List or group of MatrixWorkspaces");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "Output stitched workspace.");
+                  "Stitched workspace.");
 
   declareProperty(make_unique<ArrayProperty<double>>(
-                      "Params", boost::make_shared<RebinParamsValidator>(false),
+                      "Params", boost::make_shared<RebinParamsValidator>(true),
                       Direction::Input),
-                  "Rebinning Parameters, see Rebin for format.");
+                  "Rebinning Parameters, see Rebin algorithm for format.");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("StartOverlaps", Direction::Input),
@@ -51,7 +46,8 @@ void Stitch1DMany::init() {
 
   declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
                                                        true, Direction::Input),
-                  "Scaling either with respect to workspace 1 or workspace 2");
+                  "Scaling either with respect to first (first hand side, LHS) "
+                  "or second (right hand side, RHS) workspace");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactors",
                                                        false, Direction::Input),

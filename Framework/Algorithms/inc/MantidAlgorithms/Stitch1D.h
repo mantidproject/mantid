@@ -45,7 +45,7 @@ public:
     return "Stitches single histogram matrix workspaces together";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"Stitch1DMany"};
+    return {"Rebin", "Stitch1DMany"};
   }
   /// Does the x-axis have non-zero errors
   bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr &ws);
