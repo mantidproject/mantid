@@ -591,7 +591,7 @@ void EventWorkspace::updateAllX() {
   // Sanitize TOF min/max to ensure it always passes HistogramX validation.
   // They would be invalid when number of events are 0 or 1, for example.
   tofmin = tofmin < tofmax ? tofmin : 0;
-  tofmax = std::max(tofmax, tofmin + DBL_MIN);
+  tofmax = std::max(tofmax, tofmin + std::numeric_limits<double>::min());
   setAllX({tofmin, tofmax});
 }
 
