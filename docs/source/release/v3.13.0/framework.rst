@@ -52,6 +52,7 @@ Bug fixes
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
 - :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS. 
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
+- Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed    
 
 New
 ###
