@@ -1112,6 +1112,11 @@ public:
     TSM_ASSERT_EQUALS("Monitor workspace not successfully set",
                       ws->monitorWorkspace(), ws2)
 
+    ws->initialize(1, 4, 3);
+    const auto clone = ws->clone();
+    TSM_ASSERT("Monitor workspace not successfully transferred to clone",
+               clone->monitorWorkspace())
+
     ws->setMonitorWorkspace(boost::shared_ptr<MatrixWorkspace>());
     TSM_ASSERT("Monitor workspace not successfully reset",
                !ws->monitorWorkspace())
