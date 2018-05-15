@@ -3,6 +3,7 @@
 ##
 set ( TEST_FILES
   IFunction1DAdapterTest.h
+  IPeakFunctionAdapterTest.h
   PropertyWithValueFactoryTest.h
   PythonAlgorithmInstantiatorTest.h
   PySequenceToVectorTest.h

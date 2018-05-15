@@ -35,6 +35,14 @@ public:
     return true;
   }
 
+  bool tearDown() override {
+    // Some test methods leave the Python error handler with an error
+    // set that confuse other tests when the executable is run as a whole
+    // Clear the errors after each suite method is run
+    PyErr_Clear();
+    return CxxTest::GlobalFixture::tearDown();
+  }
+
   bool tearDownWorld() override {
     Py_Finalize();
     return true;
