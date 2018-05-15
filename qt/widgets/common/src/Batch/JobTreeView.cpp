@@ -443,9 +443,15 @@ JobTreeView::fromFilteredModel(QModelIndex const &filteredModelIndex) const {
 QModelIndex JobTreeView::moveCursor(CursorAction cursorAction,
                                     Qt::KeyboardModifiers modifiers) {
   if (cursorAction == QAbstractItemView::MoveNext) {
-    return applyNavigationResult(navigation().moveCursorNext(currentIndex()));
+    auto result = navigation().moveCursorNext(currentIndex());
+    while (!result.first && result.second.isValid() && !(result.second.flags() & Qt::ItemIsEditable))
+      result = navigation().moveCursorNext(result.second);
+    return applyNavigationResult(result);
   } else if (cursorAction == QAbstractItemView::MovePrevious) {
-    return navigation().moveCursorPrevious(currentIndex());
+    auto nextIndex = navigation().moveCursorPrevious(currentIndex());
+    while (nextIndex.isValid() && !(nextIndex.flags() & Qt::ItemIsEditable))
+      nextIndex = navigation().moveCursorPrevious(nextIndex);
+    return nextIndex;
   } else {
     return QTreeView::moveCursor(cursorAction, modifiers);
   }
