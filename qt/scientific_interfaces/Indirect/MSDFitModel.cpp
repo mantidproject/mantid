@@ -20,6 +20,12 @@ std::string MSDFitModel::simultaneousFitOutputName() const {
   return sequentialFitOutputName();
 }
 
+std::string MSDFitModel::singleFitOutputName(std::size_t index,
+                                             std::size_t spectrum) const {
+  return createSingleFitOutputName("%1%_MSDFit_" + m_fitType + "_s%2%", index,
+                                   spectrum);
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

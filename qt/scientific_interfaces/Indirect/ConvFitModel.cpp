@@ -5,6 +5,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/Instrument.h"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 #include <stdexcept>
@@ -12,10 +13,44 @@
 using namespace Mantid::API;
 
 namespace {
-IFunction_sptr createResolutionFunction() {
+boost::optional<std::size_t>
+getFirstInCategory(CompositeFunction_const_sptr composite,
+                   const std::string &category) {
+  if (!composite)
+    return boost::none;
+
+  for (auto i = 0u; i < composite->nFunctions(); ++i) {
+    if (composite->getFunction(i)->category() == category)
+      return i;
+  }
+  return boost::none;
+}
+
+IFunction_sptr removeFunction(CompositeFunction_sptr composite,
+                              std::size_t index) {
+  auto function = composite->getFunction(index);
+  composite->removeFunction(index);
+  return function;
+}
+
+CompositeFunction_sptr shallowCopy(CompositeFunction_sptr composite) {
+  CompositeFunction_sptr copy(new CompositeFunction);
+  for (auto i = 0u; i < composite->nFunctions(); ++i)
+    copy->addFunction(composite->getFunction(i));
+  return copy;
+}
+
+IFunction_sptr shallowCopy(IFunction_sptr function) {
+  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  if (composite)
+    return shallowCopy(composite);
+  return function;
+}
+
+IFunction_sptr createResolutionFunction(const std::string &resolutionName) {
   auto func = FunctionFactory::Instance().createFunction("Resolution");
   // add resolution file
-  IFunction::Attribute attr("__ConvFit_Resolution");
+  IFunction::Attribute attr(resolutionName);
   func->setAttribute("Workspace", attr);
   return func;
 }
@@ -126,30 +161,31 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   }
 }
 
-MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS,
-                                    const std::string &outputWSName) {
+MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS) {
   IAlgorithm_sptr cloneAlg =
       AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
+  cloneAlg->setChild(true);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inputWS);
-  cloneAlg->setProperty("OutputWorkspace", outputWSName);
+  cloneAlg->setProperty("OutputWorkspace", "__cloned");
   cloneAlg->execute();
-  return cloneAlg->getProperty("OutputWorkspace");
+  Workspace_sptr workspace = cloneAlg->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
                                      MatrixWorkspace_sptr rightWS,
-                                     int numHistograms,
-                                     const std::string &outputWSName) {
+                                     int numHistograms) {
   IAlgorithm_sptr appendAlg =
       AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->setLogging(false);
+  appendAlg->setChild(true);
   appendAlg->initialize();
   appendAlg->setProperty("InputWorkspace1", leftWS);
   appendAlg->setProperty("InputWorkspace2", rightWS);
   appendAlg->setProperty("Number", numHistograms);
-  appendAlg->setProperty("OutputWorkspace", outputWSName);
+  appendAlg->setProperty("OutputWorkspace", "__appended");
   appendAlg->execute();
   return appendAlg->getProperty("OutputWorkspace");
 }
@@ -163,14 +199,12 @@ MatrixWorkspace_sptr extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
     throw std::runtime_error(msg);
   }
 
-  const auto resolutionName = "__ConvFit_Resolution";
-  auto resolutionWS = cloneWorkspace(resolution, resolutionName);
+  auto resolutionWS = cloneWorkspace(resolution);
 
   // Append to cloned workspace if necessary
   if (resolutionNumHist == 1 && numberOfHistograms > 1)
     return appendWorkspace(resolutionWS, resolution,
-                           static_cast<int>(numberOfHistograms - 1),
-                           resolutionName);
+                           static_cast<int>(numberOfHistograms - 1));
   return resolutionWS;
 }
 
@@ -179,17 +213,15 @@ void getParameterNameChanges(
     const std::string &newPrefix,
     std::unordered_map<std::string, std::string> &changes) {
   for (const auto &parameterName : model.getParameterNames())
-    changes[oldPrefix + parameterName] = newPrefix + parameterName;
+    changes[newPrefix + parameterName] = oldPrefix + parameterName;
 }
 
-std::unordered_map<std::string, std::string>
-parameterNameChanges(const CompositeFunction &model,
-                     const std::string &prefixPrefix,
-                     const std::string &prefixSuffix, std::size_t offset) {
-  std::unordered_map<std::string, std::string> changes;
-
+void getParameterNameChanges(
+    const CompositeFunction &model, const std::string &prefixPrefix,
+    const std::string &prefixSuffix, std::size_t from, std::size_t to,
+    std::unordered_map<std::string, std::string> &changes) {
   for (auto i = 0u; i < model.nFunctions(); ++i) {
-    const auto oldPrefix = "f" + std::to_string(i + offset) + ".";
+    const auto oldPrefix = "f" + std::to_string(i) + ".";
     const auto functionPrefix = "f" + std::to_string(i) + ".";
     const auto function = model.getFunction(i);
     auto newPrefix = prefixPrefix + functionPrefix;
@@ -199,30 +231,57 @@ parameterNameChanges(const CompositeFunction &model,
 
     getParameterNameChanges(*function, oldPrefix, newPrefix, changes);
   }
+}
+
+std::unordered_map<std::string, std::string> parameterNameChanges(
+    const CompositeFunction &model, const std::string &prefixPrefix,
+    const std::string &prefixSuffix, std::size_t backgroundIndex) {
+  std::unordered_map<std::string, std::string> changes;
+  getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0, backgroundIndex,
+                          changes);
+
+  const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
+  getParameterNameChanges(*model.getFunction(backgroundIndex), backgroundPrefix,
+                          "f0.", changes);
+
+  getParameterNameChanges(model, prefixPrefix, prefixSuffix,
+                          backgroundIndex + 1, model.nFunctions(), changes);
+  return changes;
+}
+
+std::unordered_map<std::string, std::string>
+parameterNameChanges(const CompositeFunction &model,
+                     const std::string &prefixPrefix,
+                     const std::string &prefixSuffix) {
+  std::unordered_map<std::string, std::string> changes;
+  getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0,
+                          model.nFunctions(), changes);
   return changes;
 }
 
 std::unordered_map<std::string, std::string>
 parameterNameChanges(const IFunction &model, const std::string &prefixPrefix,
-                     const std::string &prefixSuffix, std::size_t offset) {
+                     const std::string &prefixSuffix) {
   std::unordered_map<std::string, std::string> changes;
   getParameterNameChanges(model, "", prefixPrefix + prefixSuffix, changes);
   return changes;
 }
 
 std::unordered_map<std::string, std::string>
-constructParameterNameChanges(const IFunction &model, bool temperatureUsed,
-                              bool backgroundUsed) {
-  std::string prefixPrefix = backgroundUsed ? "f1.f1." : "f1.";
+constructParameterNameChanges(const IFunction &model,
+                              boost::optional<std::size_t> backgroundIndex,
+                              bool temperatureUsed) {
+  std::string prefixPrefix = backgroundIndex ? "f1.f1." : "f1.";
   std::string prefixSuffix = temperatureUsed ? "f1." : "";
-  std::size_t offset = backgroundUsed ? 1 : 0;
 
   try {
     const auto &compositeModel = dynamic_cast<const CompositeFunction &>(model);
-    return parameterNameChanges(compositeModel, prefixPrefix, prefixSuffix,
-                                offset);
+    if (backgroundIndex)
+      return parameterNameChanges(compositeModel, prefixPrefix, prefixSuffix,
+                                  *backgroundIndex);
+    return parameterNameChanges(compositeModel, prefixPrefix, prefixSuffix);
   } catch (const std::bad_cast &) {
-    return parameterNameChanges(model, prefixPrefix, prefixSuffix, offset);
+    return parameterNameChanges(model, prefixPrefix, prefixSuffix);
   }
 }
 
@@ -232,7 +291,7 @@ IAlgorithm_sptr addSampleLogAlgorithm(Workspace_sptr workspace,
                                       const std::string &type) {
   auto addSampleLog = AlgorithmManager::Instance().create("AddSampleLog");
   addSampleLog->setLogging(false);
-  addSampleLog->setProperty("Workspace", workspace);
+  addSampleLog->setProperty("Workspace", workspace->getName());
   addSampleLog->setProperty("LogName", name);
   addSampleLog->setProperty("LogText", text);
   addSampleLog->setProperty("LogType", type);
@@ -245,7 +304,7 @@ struct AddSampleLogRunner {
       : m_resultWorkspace(resultWorkspace), m_resultGroup(resultGroup) {}
 
   void operator()(const std::string &name, const std::string &text,
-                  const std::string &type) const {
+                  const std::string &type) {
     addSampleLogAlgorithm(m_resultWorkspace, name, text, type)->execute();
     addSampleLogAlgorithm(m_resultGroup, name, text, type)->execute();
   }
@@ -255,16 +314,70 @@ private:
   WorkspaceGroup_sptr m_resultGroup;
 };
 
+std::vector<std::string>
+getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>>
+             &workspaces) {
+  std::vector<std::string> names;
+  names.reserve(workspaces.size());
+  std::transform(workspaces.begin(), workspaces.end(),
+                 std::back_inserter(names),
+                 [](boost::weak_ptr<Mantid::API::MatrixWorkspace> workspace) {
+                   return workspace.lock()->getName();
+                 });
+  return names;
+}
+
 std::string backgroundString(IFunction_sptr function) {
   const auto functionName = function->name();
 
-  if (functionName == "FlatBackgroud") {
+  if (functionName == "FlatBackground") {
     if (function->isFixed(0))
       return "FixF";
     return "FitF";
   } else if (functionName == "LinearBackground")
     return "FitL";
   return "";
+}
+
+IFunction_sptr createConvolutionFitModel(IFunction_sptr model,
+                                         IFunction_sptr background,
+                                         boost::optional<double> temperature) {
+  CompositeFunction_sptr comp(new CompositeFunction);
+
+  if (!(model &&
+        AnalysisDataService::Instance().doesExist("__ConvFitResolution0")))
+    return model ? model : comp;
+
+  auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
+      FunctionFactory::Instance().createFunction("Convolution"));
+  conv->addFunction(createResolutionFunction("__ConvFitResolution0"));
+
+  if (temperature) {
+    auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
+    if (compositeModel)
+      model = addTemperatureCorrection(compositeModel, *temperature);
+    else
+      model = addTemperatureCorrection(model, *temperature);
+  }
+  conv->addFunction(model);
+
+  if (background) {
+    comp->addFunction(background);
+    comp->addFunction(conv);
+  } else
+    comp = conv;
+  return comp;
+}
+
+void setResolutionAttribute(CompositeFunction_sptr convolutionModel,
+                            const IFunction::Attribute &attr) {
+  if (convolutionModel->name() == "Convolution")
+    convolutionModel->getFunction(0)->setAttribute("Workspace", attr);
+  else {
+    auto convolution = boost::dynamic_pointer_cast<CompositeFunction>(
+        convolutionModel->getFunction(1));
+    convolution->getFunction(0)->setAttribute("Workspace", attr);
+  }
 }
 } // namespace
 
@@ -275,8 +388,8 @@ namespace IDA {
 ConvFitModel::ConvFitModel() {}
 
 ConvFitModel::~ConvFitModel() {
-  if (AnalysisDataService::Instance().doesExist("__ConvFit_Resolution"))
-    AnalysisDataService::Instance().remove("__ConvFit_Resolution");
+  for (const auto &resolution : m_extendedResolution)
+    AnalysisDataService::Instance().remove(resolution);
 }
 
 IAlgorithm_sptr ConvFitModel::sequentialFitAlgorithm() const {
@@ -298,52 +411,46 @@ std::string ConvFitModel::simultaneousFitOutputName() const {
   return sequentialFitOutputName();
 }
 
+std::string ConvFitModel::singleFitOutputName(std::size_t index,
+                                              std::size_t spectrum) const {
+  return createSingleFitOutputName(
+      "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", index, spectrum);
+}
+
 boost::optional<double>
 ConvFitModel::getInstrumentResolution(std::size_t dataIndex) const {
-  return instrumentResolution(getWorkspace(dataIndex));
+  if (dataIndex < numberOfWorkspaces())
+    return instrumentResolution(getWorkspace(dataIndex));
+  return boost::none;
 }
 
-std::size_t ConvFitModel::maximumHistograms() const {
-  std::size_t max = getWorkspace(0)->getNumberHistograms();
-
-  for (auto i = 1u; i < numberOfWorkspaces(); ++i) {
-    const auto histograms = getWorkspace(i)->getNumberHistograms();
-    max = max >= histograms ? max : histograms;
-  }
-  return max;
+std::size_t ConvFitModel::getNumberHistograms(std::size_t index) const {
+  return getWorkspace(index)->getNumberHistograms();
 }
 
-void ConvFitModel::setFitFunction(IFunction_sptr model,
-                                  IFunction_sptr background) {
-  setParameterNameChanges(*model, background != nullptr);
-  CompositeFunction_sptr comp(new CompositeFunction);
+CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
+  auto function = IndirectFittingModel::getMultiDomainFunction();
+  const std::string base = "__ConvFitResolution";
 
-  if (!(model &&
-        AnalysisDataService::Instance().doesExist("__ConvFit_Resolution")))
-    IndirectFittingModel::setFitFunction(
-        CompositeFunction_sptr(new CompositeFunction));
+  for (auto i = 0u; i < function->nFunctions(); ++i)
+    setResolutionAttribute(function,
+                           IFunction::Attribute(base + std::to_string(i)));
+  return function;
+}
 
-  auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
-      FunctionFactory::Instance().createFunction("Convolution"));
-  conv->addFunction(createResolutionFunction());
+void ConvFitModel::setFitFunction(IFunction_sptr function) {
+  function = shallowCopy(function);
+  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto backgroundIndex = getFirstInCategory(composite, "Background");
+  setParameterNameChanges(*function, backgroundIndex);
 
-  if (m_temperature) {
-    auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
-    if (compositeModel)
-      model = addTemperatureCorrection(compositeModel, m_temperature.get());
-    else
-      model = addTemperatureCorrection(model, m_temperature.get());
-  }
-  conv->addFunction(model);
-
-  if (background) {
-    comp->addFunction(background);
-    comp->addFunction(conv);
-  } else
-    comp = conv;
-
+  IFunction_sptr background(nullptr);
+  if (composite && backgroundIndex)
+    background = removeFunction(composite, *backgroundIndex);
   m_backgroundString = background ? backgroundString(background) : "";
-  IndirectFittingModel::setFitFunction(comp);
+
+  IndirectFittingModel::setFitFunction(
+      createConvolutionFitModel(function, background, m_temperature));
 }
 
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
@@ -353,23 +460,45 @@ void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
 void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                 const Spectra &spectra) {
   IndirectFittingModel::addWorkspace(workspace, spectra);
-  extendResolution();
+
+  if (numberOfWorkspaces() > m_resolution.size())
+    m_resolution.emplace_back(MatrixWorkspace_sptr());
+  else if (numberOfWorkspaces() == m_resolution.size())
+    addExtendedResolution(numberOfWorkspaces() - 1);
 }
 
 void ConvFitModel::removeWorkspace(std::size_t index) {
   IndirectFittingModel::removeWorkspace(index);
-  extendResolution();
+  m_resolution.erase(m_resolution.begin() + index);
+
+  if (m_extendedResolution.size() > index)
+    AnalysisDataService::Instance().remove(m_extendedResolution[index]);
 }
 
-void ConvFitModel::setResolution(Mantid::API::MatrixWorkspace_sptr resolution) {
-  m_resolutionWorkspace = resolution;
-  extendResolutionWorkspace(resolution, maximumHistograms());
+void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
+                                 std::size_t index) {
+  if (m_resolution.size() > index)
+    m_resolution[index] = resolution;
+  else if (m_resolution.size() == index)
+    m_resolution.emplace_back(resolution);
+  else
+    throw std::out_of_range("Provided resolution index '" +
+                            std::to_string(index) + "' was out of range.");
+
+  if (numberOfWorkspaces() > index)
+    addExtendedResolution(index);
 }
 
-void ConvFitModel::extendResolution() {
-  const auto resolutionWorkspace = m_resolutionWorkspace.lock();
-  if (resolutionWorkspace)
-    extendResolutionWorkspace(resolutionWorkspace, maximumHistograms());
+void ConvFitModel::addExtendedResolution(std::size_t index) {
+  const std::string name = "__ConvFitResolution" + std::to_string(index);
+  AnalysisDataService::Instance().addOrReplace(
+      name, extendResolutionWorkspace(m_resolution[index].lock(),
+                                      getNumberHistograms(index)));
+
+  if (m_extendedResolution.size() > index)
+    m_extendedResolution[index] = name;
+  else
+    m_extendedResolution.emplace_back(name);
 }
 
 void ConvFitModel::setFitTypeString(const std::string &fitType) {
@@ -377,7 +506,7 @@ void ConvFitModel::setFitTypeString(const std::string &fitType) {
 }
 
 std::unordered_map<std::string, ParameterValue>
-ConvFitModel::getDefaultParameters(std::size_t index) const {
+ConvFitModel::createDefaultParameters(std::size_t index) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
   defaultValues["PeakCentre"] = 0.0;
   defaultValues["Centre"] = 0.0;
@@ -386,23 +515,35 @@ ConvFitModel::getDefaultParameters(std::size_t index) const {
   defaultValues["beta"] = 1.0;
   defaultValues["Decay"] = 1.0;
   defaultValues["Diffusion"] = 1.0;
-  defaultValues["height"] = 1.0; // Lower case in StretchedExp - this can be
-                                 // improved with a case insensitive check
   defaultValues["Height"] = 1.0;
   defaultValues["Intensity"] = 1.0;
   defaultValues["Radius"] = 1.0;
-  defaultValues["tau"] = 1.0;
+  defaultValues["Tau"] = 1.0;
 
-  auto resolution = instrumentResolution(getWorkspace(index));
+  auto resolution = getInstrumentResolution(index);
   if (resolution)
     defaultValues["FWHM"] = *resolution;
   return defaultValues;
 }
 
+std::unordered_map<std::string, std::string>
+ConvFitModel::mapDefaultParameterNames() const {
+  const auto initialMapping = IndirectFittingModel::mapDefaultParameterNames();
+  std::unordered_map<std::string, std::string> mapping;
+  for (const auto &map : initialMapping) {
+    auto mapped = m_parameterNameChanges.find(map.second);
+    if (mapped != m_parameterNameChanges.end())
+      mapping[map.first] = mapped->second;
+    else
+      mapping.insert(map);
+  }
+  return mapping;
+}
+
 void ConvFitModel::addSampleLogs() {
   AddSampleLogRunner addSampleLog(getResultWorkspace(), getResultGroup());
-  addSampleLog("resolution_filename", m_resolutionWorkspace.lock()->getName(),
-               "String");
+  addSampleLog("resolution_filename",
+               boost::algorithm::join(getNames(m_resolution), ","), "String");
 
   if (m_temperature && m_temperature.get() != 0.0) {
     addSampleLog("temperature_correction", "true", "String");
@@ -413,24 +554,58 @@ void ConvFitModel::addSampleLogs() {
 
 IndirectFitOutput ConvFitModel::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    MatrixWorkspace_sptr resultWorkspace,
-    const std::vector<std::unique_ptr<IndirectFitData>> &m_fittingData) const {
-  return IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
-                           m_fittingData, m_parameterNameChanges);
+    MatrixWorkspace_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) const {
+  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
+                                  fitDataBegin, fitDataEnd);
+  output.mapParameterNames(m_parameterNameChanges, fitDataBegin, fitDataEnd);
+  return output;
 }
 
-void ConvFitModel::addOutput(
-    IndirectFitOutput *fitOutput, WorkspaceGroup_sptr resultGroup,
-    ITableWorkspace_sptr parameterTable, MatrixWorkspace_sptr resultWorkspace,
-    const std::vector<std::unique_ptr<IndirectFitData>> &m_fittingData) const {
+IndirectFitOutput
+ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                              Mantid::API::ITableWorkspace_sptr parameterTable,
+                              Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                              IndirectFitData *fitData,
+                              std::size_t spectrum) const {
+  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
+                                  fitData, spectrum);
+  output.mapParameterNames(m_parameterNameChanges, fitData, spectrum);
+  return output;
+}
+
+void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+  IndirectFittingModel::addOutput(fitAlgorithm);
+  addSampleLogs();
+}
+
+void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
+                             WorkspaceGroup_sptr resultGroup,
+                             ITableWorkspace_sptr parameterTable,
+                             MatrixWorkspace_sptr resultWorkspace,
+                             const FitDataIterator &fitDataBegin,
+                             const FitDataIterator &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
-                       m_fittingData, m_parameterNameChanges);
+                       fitDataBegin, fitDataEnd);
+  fitOutput->mapParameterNames(m_parameterNameChanges, fitDataBegin,
+                               fitDataEnd);
 }
 
-void ConvFitModel::setParameterNameChanges(const IFunction &model,
-                                           bool backgroundUsed) {
+void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
+                             WorkspaceGroup_sptr resultGroup,
+                             ITableWorkspace_sptr parameterTable,
+                             MatrixWorkspace_sptr resultWorkspace,
+                             IndirectFitData *fitData,
+                             std::size_t spectrum) const {
+  fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,
+                       spectrum);
+  fitOutput->mapParameterNames(m_parameterNameChanges, fitData, spectrum);
+}
+
+void ConvFitModel::setParameterNameChanges(
+    const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
   m_parameterNameChanges = constructParameterNameChanges(
-      model, backgroundUsed, m_temperature.is_initialized());
+      model, backgroundIndex, m_temperature.is_initialized());
 }
 
 } // namespace IDA

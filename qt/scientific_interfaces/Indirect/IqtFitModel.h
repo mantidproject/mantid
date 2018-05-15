@@ -9,21 +9,24 @@ namespace IDA {
 
 class DLLExport IqtFitModel : public IndirectFittingModel {
 public:
+  IqtFitModel();
   void setFitTypeString(const std::string &fitType);
-  void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra) override;
 
-  std::unordered_map<std::string, ParameterValue>
-  getDefaultParameters(std::size_t index) const override;
-
-  std::string createIntensityTie() const;
+  void setFitFunction(Mantid::API::IFunction_sptr function) override;
+  bool canConstrainIntensities() const;
+  bool setConstrainIntensities(bool constrain);
 
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
+  std::string singleFitOutputName(std::size_t index,
+                                  std::size_t spectrum) const override;
+  std::unordered_map<std::string, ParameterValue>
+  createDefaultParameters(std::size_t index) const override;
 
+  bool m_constrainIntensities;
   std::string m_fitType;
 };
 

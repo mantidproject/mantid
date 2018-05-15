@@ -13,49 +13,64 @@ public:
   ~ConvFitModel() override;
 
   boost::optional<double> getInstrumentResolution(std::size_t dataIndex) const;
+  std::size_t getNumberHistograms(std::size_t index) const;
 
-  void setFitFunction(Mantid::API::IFunction_sptr model,
-                      Mantid::API::IFunction_sptr background) override;
+  void setFitFunction(Mantid::API::IFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                     const Spectra &spectra) override;
   void removeWorkspace(std::size_t index) override;
-  void setResolution(Mantid::API::MatrixWorkspace_sptr resolution);
+  void setResolution(Mantid::API::MatrixWorkspace_sptr resolution,
+                     std::size_t index);
   void setFitTypeString(const std::string &fitType);
 
-  std::unordered_map<std::string, ParameterValue>
-  getDefaultParameters(std::size_t index) const override;
-
-  void addSampleLogs();
+  void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
+  std::string singleFitOutputName(std::size_t index,
+                                  std::size_t spectrum) const override;
+  Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const override;
+  std::unordered_map<std::string, ParameterValue>
+  createDefaultParameters(std::size_t index) const override;
+  std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
 
   IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-                  const std::vector<std::unique_ptr<IndirectFitData>>
-                      &m_fittingData) const override;
+                  const FitDataIterator &fitDataBegin,
+                  const FitDataIterator &fitDataEnd) const override;
+  IndirectFitOutput
+  createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                  Mantid::API::ITableWorkspace_sptr parameterTable,
+                  Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                  IndirectFitData *fitData,
+                  std::size_t spectrum) const override;
+
   void addOutput(IndirectFitOutput *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-                 const std::vector<std::unique_ptr<IndirectFitData>>
-                     &m_fittingData) const override;
-
-  std::size_t maximumHistograms() const;
-
-  void extendResolution();
+                 const FitDataIterator &fitDataBegin,
+                 const FitDataIterator &fitDataEnd) const override;
+  void addOutput(IndirectFitOutput *fitOutput,
+                 Mantid::API::WorkspaceGroup_sptr resultGroup,
+                 Mantid::API::ITableWorkspace_sptr parameterTable,
+                 Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                 IndirectFitData *fitData, std::size_t spectrum) const override;
+  void addExtendedResolution(std::size_t index);
+  void addSampleLogs();
 
   void setParameterNameChanges(const Mantid::API::IFunction &model,
-                               bool backgroundUsed);
+                               boost::optional<std::size_t> backgroundIndex);
 
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_resolutionWorkspace;
+  std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>> m_resolution;
+  std::vector<std::string> m_extendedResolution;
   std::unordered_map<std::string, std::string> m_parameterNameChanges;
   boost::optional<double> m_temperature;
   std::string m_backgroundString;

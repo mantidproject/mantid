@@ -13,6 +13,8 @@ public:
 
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
+  std::string singleFitOutputName(std::size_t index,
+                                  std::size_t spectrum) const override;
 
 private:
   std::string m_fitType;

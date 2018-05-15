@@ -6,35 +6,38 @@
 using namespace Mantid::API;
 
 namespace {
-MatrixWorkspace_sptr replaceInfinityAndNaN(MatrixWorkspace_sptr inputWS) {
-  auto replaceAlg = AlgorithmManager::Instance().create("ReplaceSpecialValues");
-  replaceAlg->setChild(true);
-  replaceAlg->initialize();
-  replaceAlg->setProperty("InputWorkspace", inputWS);
-  replaceAlg->setProperty("NaNValue", 0.0);
-  replaceAlg->setProperty("InfinityError", 0.0);
-  replaceAlg->setProperty("OutputWorkspace", inputWS->getName() + "_nospecial");
-  replaceAlg->execute();
-  return replaceAlg->getProperty("OutputWorkspace");
-}
+IFunction_sptr getFirstInCategory(IFunction_sptr function,
+                                  const std::string &category);
 
-IFunction_sptr getIndexOfFirstInCategory(CompositeFunction_sptr function,
-                                         const std::string &category) {
-  for (auto i = 0u; i < function->nFunctions(); ++i) {
-    if (function->getFunction(i)->category() == category)
-      return function->getFunction(i);
+IFunction_sptr getFirstInCategory(CompositeFunction_sptr composite,
+                                  const std::string &category) {
+  for (auto i = 0u; i < composite->nFunctions(); ++i) {
+    auto function = getFirstInCategory(composite->getFunction(i), category);
+    if (function)
+      return function;
   }
   return nullptr;
 }
 
 IFunction_sptr getFirstInCategory(IFunction_sptr function,
                                   const std::string &category) {
+  if (!function)
+    return nullptr;
+  if (function->category() == category)
+    return function;
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     return getFirstInCategory(composite, category);
-  else if (function->category() == category)
-    return function;
   return nullptr;
+}
+
+boost::optional<std::size_t> getFirstParameter(IFunction_sptr function,
+                                               const std::string &shortName) {
+  for (auto i = 0u; i < function->nParams(); ++i) {
+    if (boost::algorithm::ends_with(function->parameterName(i), shortName))
+      return i;
+  }
+  return boost::none;
 }
 
 std::vector<std::string> getParameters(IFunction_sptr function,
@@ -47,82 +50,157 @@ std::vector<std::string> getParameters(IFunction_sptr function,
   }
   return parameters;
 }
+
+bool containsNOrMore(IFunction_sptr function,
+                     const std::vector<std::string> &values, std::size_t n) {
+  const auto names = function->getParameterNames();
+  if (names.empty())
+    return values.empty() || n == 0;
+
+  std::size_t count = 0;
+  std::size_t index = 0;
+  do {
+    for (const auto &value : values)
+      count += boost::algorithm::ends_with(names[index], value) ? 1 : 0;
+  } while (count < n && ++index < names.size());
+  return count >= n;
+}
+
+bool constrainIntensities(IFunction_sptr function) {
+  const auto intensityParameters = getParameters(function, "Height");
+  const auto backgroundParameters = getParameters(function, "A0");
+
+  if (intensityParameters.size() + backgroundParameters.size() < 2 ||
+      intensityParameters.empty())
+    return false;
+
+  std::string tieString("1");
+
+  for (const auto &parameter : backgroundParameters)
+    tieString += "-" + parameter;
+
+  for (auto i = 1u; i < intensityParameters.size(); ++i)
+    tieString += "-" + intensityParameters[i];
+
+  function->tie(intensityParameters[0], tieString);
+  return true;
+}
+
+bool unconstrainIntensities(IFunction_sptr function) {
+  const auto index = getFirstParameter(function, "Height");
+  if (index)
+    return function->removeTie(*index);
+  return false;
+}
+
+bool hasConstrainableIntensities(IFunction_sptr function) {
+  return containsNOrMore(function, {"Height", "A0"}, 2);
+}
+
+double computeTauApproximation(MatrixWorkspace_sptr workspace) {
+  const auto x = workspace->x(0);
+  const auto y = workspace->y(0);
+
+  if (x.size() > 4)
+    return -x[4] / log(y[4]);
+  return 0.0;
+}
+
+double computeHeightApproximation(IFunction_sptr function) {
+  const auto background = getFirstInCategory(function, "Background");
+  const double height = 1.0;
+  if (background && background->hasParameter("A0"))
+    return height - background->getParameter("A0");
+  return height;
+}
+
+std::string getSuffix(MatrixWorkspace_sptr workspace) {
+  const auto position = workspace->getName().rfind("_");
+  return workspace->getName().substr(position + 1);
+}
+
+std::string getFitString(MatrixWorkspace_sptr workspace) {
+  auto suffix = getSuffix(workspace);
+  boost::algorithm::to_lower(suffix);
+  if (suffix == "iqt")
+    return "Fit";
+  return "_IqtFit";
+}
 }; // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-void IqtFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
-                                       const Spectra &spectra) {
-  IndirectFittingModel::addWorkspace(replaceInfinityAndNaN(workspace), spectra);
-}
+IqtFitModel::IqtFitModel()
+    : IndirectFittingModel(), m_constrainIntensities(false) {}
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
-  return AlgorithmManager::Instance().create("IqtFitSequential");
+  auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
+  algorithm->setProperty("IgnoreInvalidData", true);
+  return algorithm;
 }
 
 IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
-  return AlgorithmManager::Instance().create("IqtFitSimultaneous");
+  auto algorithm = AlgorithmManager::Instance().create("IqtFitSimultaneous");
+  algorithm->setProperty("IgnoreInvalidData", true);
+  return algorithm;
 }
 
 std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType;
-  return createOutputName("%1%_IqtFit_" + m_fitType + "_s%2%", "_to_", 0);
+  auto fitString = getFitString(getWorkspace(0));
+  return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
+                          0);
 }
 
 std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType;
-  return createOutputName("%1%_IqtFit_mult" + m_fitType + "_s%2%", "_to_", 0);
+  auto fitString = getFitString(getWorkspace(0));
+  return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
+                          "_to_", 0);
+}
+
+std::string IqtFitModel::singleFitOutputName(std::size_t index,
+                                             std::size_t spectrum) const {
+  auto fitString = getFitString(getWorkspace(0));
+  return createSingleFitOutputName(
+      "%1%" + fitString + "_" + m_fitType + "_s%2%", index, spectrum);
 }
 
 void IqtFitModel::setFitTypeString(const std::string &fitType) {
   m_fitType = fitType;
 }
 
-std::string IqtFitModel::createIntensityTie() const {
-  const auto intensityParameters =
-      getParameters(getFittingFunction(), "Height");
-  const auto backgroundParameters = getParameters(getFittingFunction(), "A0");
+void IqtFitModel::setFitFunction(Mantid::API::IFunction_sptr function) {
+  IndirectFittingModel::setFitFunction(function);
+  if (m_constrainIntensities)
+    constrainIntensities(function);
+}
 
-  if (intensityParameters.size() + backgroundParameters.size() < 2 ||
-      intensityParameters.empty())
-    return "";
+bool IqtFitModel::canConstrainIntensities() const {
+  return hasConstrainableIntensities(getFittingFunction());
+}
 
-  std::stringstream tieString;
-
-  for (const auto &parameter : backgroundParameters)
-    tieString << "-" << parameter;
-
-  for (auto i = 1u; i < intensityParameters.size(); ++i)
-    tieString << "-" << intensityParameters[i];
-
-  return intensityParameters[0] + "=" + tieString.str();
+bool IqtFitModel::setConstrainIntensities(bool constrain) {
+  if (constrain != m_constrainIntensities) {
+    m_constrainIntensities = constrain;
+    if (constrain)
+      return constrainIntensities(getFittingFunction());
+    return unconstrainIntensities(getFittingFunction());
+  }
+  return true;
 }
 
 std::unordered_map<std::string, ParameterValue>
-IqtFitModel::getDefaultParameters(std::size_t index) const {
+IqtFitModel::createDefaultParameters(std::size_t index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
-  auto background = getFirstInCategory(getFittingFunction(), "Background");
+  parameters["Height"] = computeHeightApproximation(getFittingFunction());
 
-  double height = 1.0;
-  if (background && background->hasParameter("A0"))
-    height -= background->getParameter("A0");
-  parameters["Height"] = height;
-
-  auto inputWs = getWorkspace(index);
-  double tau = 0;
-
-  if (inputWs) {
-    auto x = inputWs->x(0);
-    auto y = inputWs->y(0);
-
-    if (x.size() > 4) {
-      tau = -x[4] / log(y[4]);
-    }
-  }
+  const auto inputWs = getWorkspace(index);
+  const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
 
   parameters["Lifetime"] = tau;
   parameters["Stretching"] = 1.0;

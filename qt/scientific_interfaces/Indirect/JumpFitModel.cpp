@@ -67,7 +67,7 @@ MatrixWorkspace_sptr scaleWorkspace(MatrixWorkspace_sptr workspace,
   scaleAlg->setProperty("OutputWorkspace", output);
   scaleAlg->setProperty("Factor", factor);
   scaleAlg->execute();
-  return scaleAlg->getProperty("OutputWorkspace");
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output);
 }
 
 std::string getHWHMName(const std::string &resultName) {
@@ -120,13 +120,17 @@ std::size_t JumpFitModel::getWidthSpectrum(std::size_t widthIndex) const {
 
 std::string JumpFitModel::sequentialFitOutputName() const {
   auto name = createOutputName("%1%_JumpFit", "", 0);
-  auto position = name.rfind("_Result");
+  auto position = name.find("_Result");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());
   return name;
 }
 
 std::string JumpFitModel::simultaneousFitOutputName() const {
+  return sequentialFitOutputName();
+}
+
+std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
   return sequentialFitOutputName();
 }
 
