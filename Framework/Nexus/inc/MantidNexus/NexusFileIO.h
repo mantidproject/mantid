@@ -55,7 +55,7 @@ class DLLExport NexusFileIO {
 
 public:
   // Helper typedef
-  typedef boost::optional<size_t> optional_size_t;
+  using optional_size_t = boost::optional<size_t>;
 
   /// Default constructor
   NexusFileIO();
@@ -426,7 +426,7 @@ void NexusFileIO::writeNumericTimeLog(
 }
 
 /// Helper typedef for a shared pointer of a NexusFileIO.
-typedef boost::shared_ptr<NexusFileIO> NexusFileIO_sptr;
+using NexusFileIO_sptr = boost::shared_ptr<NexusFileIO>;
 
 } // namespace NeXus
 } // namespace Mantid

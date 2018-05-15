@@ -19,6 +19,7 @@ class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):
         self.load=mock.create_autospec(load_utils.LoadUtils,spec_set=True)
         self.load.getCurrentWS=mock.Mock(return_value=["TEST00000001",["fwd","bkwd"]])
+        self.load.hasDataChanged = mock.MagicMock(return_value=False)
 
         self.model=mock.create_autospec(maxent_model.MaxEntModel,spec_set=True)
 
@@ -45,6 +46,8 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.thread.finished=mock.Mock()
         self.thread.setInputs=mock.Mock()
         self.thread.loadData=mock.Mock()
+        self.thread.threadWrapperSetup = mock.Mock()
+        self.thread.threadWrapperTearDown = mock.Mock()
 
         self.presenter.createThread=mock.Mock(return_value=self.thread)
         self.presenter.createPhaseThread=mock.Mock(return_value=self.thread)
@@ -54,6 +57,10 @@ class MaxEntPresenterTest(unittest.TestCase):
         assert(self.view.initMaxEntInput.call_count==1)
         assert(self.thread.start.call_count==1)
 
+    def test_dataHasChanged(self):
+        self.load.hasDataChanged = mock.MagicMock(return_value=True)
+        self.presenter.handleMaxEntButton()
+        assert(self.view.initMaxEntInput.call_count==0)
 
     def test_activateButton(self):
         self.presenter.activate()

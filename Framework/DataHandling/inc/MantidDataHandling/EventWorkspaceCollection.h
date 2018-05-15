@@ -109,9 +109,9 @@ public:
   virtual bool threadSafe() const;
 };
 
-typedef boost::shared_ptr<EventWorkspaceCollection>
-    EventWorkspaceCollection_sptr;
-typedef std::unique_ptr<EventWorkspaceCollection> EventWorkspaceCollection_uptr;
+using EventWorkspaceCollection_sptr =
+    boost::shared_ptr<EventWorkspaceCollection>;
+using EventWorkspaceCollection_uptr = std::unique_ptr<EventWorkspaceCollection>;
 
 } // namespace DataHandling
 } // namespace Mantid

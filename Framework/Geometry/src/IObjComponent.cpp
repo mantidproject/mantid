@@ -3,12 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 
 namespace Mantid {
 namespace Geometry {
 
-IObjComponent::IObjComponent() { handle = new CacheGeometryHandler(this); }
+IObjComponent::IObjComponent() { handle = new GeometryHandler(this); }
 
 /** Constructor, specifying the GeometryHandler (renderer engine)
  * for this IObjComponent.
@@ -37,12 +37,10 @@ void IObjComponent::setGeometryHandler(GeometryHandler *h) {
 
 /**
  * Copy constructor
- * @param origin :: The object to initialize this with
  */
-IObjComponent::IObjComponent(const IObjComponent &origin) {
-  // Handler contains a pointer to 'this' therefore needs regenerating
-  // with new object
-  handle = origin.handle->createInstance(this);
+IObjComponent::IObjComponent(const IObjComponent &) {
+  // Copy constructor just creates new handle. Copies nothing.
+  handle = new GeometryHandler(this);
 }
 
 /**
@@ -52,10 +50,10 @@ IObjComponent::IObjComponent(const IObjComponent &origin) {
  */
 IObjComponent &IObjComponent::operator=(const IObjComponent &rhs) {
   if (&rhs != this) {
-    handle = rhs.handle->createInstance(this);
+    // Assignment operator copies nothing. Just creates new handle.
+    handle = new GeometryHandler(this);
   }
   return *this;
 }
-
 } // namespace Geometry
 } // namespace Mantid

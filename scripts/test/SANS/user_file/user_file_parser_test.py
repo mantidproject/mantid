@@ -8,7 +8,7 @@ from sans.user_file.user_file_parser import (DetParser, LimitParser, MaskParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
                                              UserFileParser, LARMORParser, CompatibilityParser)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                          single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
+                                          single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
                                           mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                           position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
@@ -130,6 +130,20 @@ class DetParserTest(unittest.TestCase):
                             " DET/CoRR/FRONT/ ZZ -957": RuntimeError,
                             "DeT/ CORR /reAR/SIDE D 12.3": RuntimeError,
                             " DET/CoRR/FRONT/ SidE -i3": RuntimeError}
+
+        det_parser = DetParser()
+
+        do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+    def test_that_DET_OVERLAP_option_is_parsed_correctly(self):
+        valid_settings = {"DET/OVERLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)},
+                          "DeT/OverLAP 0.13 0.15": {DetectorId.merge_range: det_fit_range(start=0.13, stop=0.15, use_fit=True)}
+                          }
+
+        invalid_settings = {"DET/OVERLAP 0.13 0.15 0.17": RuntimeError,
+                            "DET/OVERLAP 0.13": RuntimeError,
+                            "DET/OVERLAP": RuntimeError,
+                            "DET/OVERLAP 0.13 five": RuntimeError}
 
         det_parser = DetParser()
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -302,7 +316,11 @@ class MaskParserTest(unittest.TestCase):
                           "MASK/REAR/T 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
                                                 detector_type=DetectorType.LAB)},
                           "MASK/FRONT/TIME 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
-                                                    detector_type=DetectorType.HAB)}
+                                                    detector_type=DetectorType.HAB)},
+                          "MASK/TIME/REAR 13 35": {MaskId.time_detector: range_entry_with_detector(start=13, stop=35,
+                                                   detector_type=DetectorType.LAB)},
+                          "MASK/T/FRONT 33 35": {MaskId.time_detector: range_entry_with_detector(start=33, stop=35,
+                                                 detector_type=DetectorType.HAB)}
                           }
 
         invalid_settings = {"MASK/TIME 12 34 4 ": RuntimeError,
@@ -888,9 +906,13 @@ class PrintParserTest(unittest.TestCase):
         self.assertTrue(PrintParser.get_type(), "PRINT")
 
     def test_that_print_is_parsed_correctly(self):
-        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"}}
+        valid_settings = {"PRINT OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
+                          "PRiNt OdlfP slsk 23lksdl2 34l": {PrintId.print_line: "OdlfP slsk 23lksdl2 34l"},
+                          "  PRINT Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells":
+                          {PrintId.print_line: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells"}
+                          }
 
-        invalid_settings = {}
+        invalid_settings = {"j PRINT OdlfP slsk 23lksdl2 34l ": RuntimeError,}
 
         print_parser = PrintParser()
         do_test(print_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -1050,6 +1072,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # Act + Assert
         self.assertRaises(ValueError, user_file_parser.parse_line, "DetT/DKDK/ 23 23")
+
 
 if __name__ == "__main__":
     unittest.main()

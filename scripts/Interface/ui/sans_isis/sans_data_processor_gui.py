@@ -203,21 +203,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         runs_icon = QtGui.QIcon(runs_icon_path)
         _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
-        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
-        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
-
         settings_icon_path = os.path.join(path, "icons", "settings.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
-        settings_icon = QtGui.QIcon(settings_icon_path)
-        _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
+        centre_icon_path = os.path.join(path, "icons", "centre.png")
+        centre_icon = QtGui.QIcon(centre_icon_path)
+        _ = QtGui.QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
-        settings_icon = QtGui.QIcon(settings_icon_path)
-        _ = QtGui.QListWidgetItem(settings_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
+        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
+        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
+        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
+
+        diagnostic_icon_path = os.path.join(path, "icons", "diagnostic.png")
+        diagnostic_icon = QtGui.QIcon(diagnostic_icon_path)
+        _ = QtGui.QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
@@ -236,6 +236,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
 
         self.process_button.clicked.connect(self._on_python_process)
+
+        self.help_button.clicked.connect(self._on_help_button_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -320,8 +322,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                       entry.show_value, entry.prefix)
 
         # Processing algorithm (mandatory)
+        unused_postprocessing_index = 0
         alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
-                                                                       'unused_', self._black_list)
+                                                                       'unused_', unused_postprocessing_index, self._black_list)
 
         self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
         self.data_processor_table.setForcedReProcessing(True)
@@ -371,6 +374,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _instrument_changed(self):
         self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
+
+    def _on_help_button_clicked(self):
+        pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):
         """
@@ -1497,6 +1503,24 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def q_resolution_moderator_file(self, value):
         self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", value=value)
 
+    @property
+    def r_cut(self):
+        return self.get_simple_line_edit_field(line_edit="r_cut_line_edit",
+                                               expected_type=float)
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="r_cut_line_edit", value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_line_edit_field(line_edit="w_cut_line_edit",
+                                               expected_type=float)
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="w_cut_line_edit", value=value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # MASK TAB
@@ -1605,6 +1629,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_1d_step_line_edit.setValidator(positive_double_validator)
         self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
         self.q_xy_step_line_edit.setValidator(positive_double_validator)
+
+        self.r_cut_line_edit.setValidator(positive_double_validator)
+        self.w_cut_line_edit.setValidator(positive_double_validator)
 
         self.gravity_extra_length_line_edit.setValidator(double_validator)
 

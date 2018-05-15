@@ -34,7 +34,8 @@ public:
     auto func = createFunction();
     double x0(165.0), x1(166.0),
         dx(0.5); // chosen to give put us near the peak for this mass & spectrum
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),

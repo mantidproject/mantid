@@ -72,9 +72,9 @@ struct IsConstSharedPtr<boost::shared_ptr<const T>> : std::true_type {};
 // call to this struct
 template <typename ConstPtrType> struct RemoveConstImpl {
   // Remove the pointer type to leave value type
-  typedef typename std::remove_pointer<ConstPtrType>::type ValueType;
+  using ValueType = typename std::remove_pointer<ConstPtrType>::type;
   // Remove constness
-  typedef typename std::remove_const<ValueType>::type NonConstValueType;
+  using NonConstValueType = typename std::remove_const<ValueType>::type;
 
   inline PyObject *operator()(const ConstPtrType &p) const {
     using namespace boost::python;
@@ -99,10 +99,10 @@ template <typename T> struct RemoveConst_Requires_Pointer_Return_Value {};
 // a check as to whether the return type is valid, if so it forwards the
 // call to this struct
 template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
-  typedef typename ConstSharedPtr::element_type ConstElementType;
-  typedef
-      typename std::remove_const<ConstElementType>::type NonConstElementType;
-  typedef typename boost::shared_ptr<NonConstElementType> NonConstSharedPtr;
+  using ConstElementType = typename ConstSharedPtr::element_type;
+  using NonConstElementType =
+      typename std::remove_const<ConstElementType>::type;
+  using NonConstSharedPtr = typename boost::shared_ptr<NonConstElementType>;
 
   inline PyObject *operator()(const ConstSharedPtr &p) const {
     using namespace boost::python;
@@ -130,9 +130,9 @@ struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
 struct RemoveConst {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a "T*"
-    typedef typename boost::mpl::if_c<
+    using type = typename boost::mpl::if_c<
         std::is_pointer<T>::value, RemoveConstImpl<T>,
-        RemoveConst_Requires_Pointer_Return_Value<T>>::type type;
+        RemoveConst_Requires_Pointer_Return_Value<T>>::type;
   };
 };
 
@@ -143,10 +143,10 @@ struct RemoveConstSharedPtr {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a
     // "boost::shared_ptr<T>"
-    typedef typename boost::mpl::if_c<
+    using type = typename boost::mpl::if_c<
         IsConstSharedPtr<T>::value, RemoveConstSharedPtrImpl<T>,
         RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value<
-            T>>::type type;
+            T>>::type;
   };
 };
 

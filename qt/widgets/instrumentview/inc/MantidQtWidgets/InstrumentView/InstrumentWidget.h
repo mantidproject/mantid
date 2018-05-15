@@ -172,7 +172,7 @@ protected:
 
 public slots:
   void tabChanged(int);
-  void componentSelected(Mantid::Geometry::ComponentID id);
+  void componentSelected(size_t componentIndex);
   void executeAlgorithm(const QString &, const QString &);
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 

@@ -496,7 +496,11 @@ void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
     isTypeAssembly[typeName] = false;
 
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+    // Only CSGObjects can be combined into one shape.
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+            mapTypeNameToShape[typeName])) {
+      csgObj->setName(static_cast<int>(iType));
+    }
   }
 }
 
@@ -520,7 +524,11 @@ void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
     // for now try to create a geometry shape associated with every type
     // that does not contain any component elements
     mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+    // Name can be set only for a CSGObject.
+    if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(
+            mapTypeNameToShape[typeName])) {
+      csgObj->setName(static_cast<int>(iType));
+    }
   } else {
     isTypeAssembly[typeName] = true;
     if (pTypeElem->hasAttribute("outline")) {
@@ -1579,8 +1587,8 @@ void InstrumentDefinitionParser::createStructuredDetector(
   bool isZBeam =
       m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
   // Now, initialize all the pixels in the bank
-  bank->initialize(xpixels, ypixels, xValues, yValues, isZBeam, idstart,
-                   idfillbyfirst_y, idstepbyrow, idstep);
+  bank->initialize(xpixels, ypixels, std::move(xValues), std::move(yValues),
+                   isZBeam, idstart, idfillbyfirst_y, idstepbyrow, idstep);
 
   // Loop through all detectors in the newly created bank and mark those in
   // the instrument.
@@ -2465,7 +2473,11 @@ void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
       new Mantid::Geometry::vtkGeometryCacheReader(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
-    ((*objItr).second)->setVtkGeometryCacheReader(reader);
+    // caching only applies to CSGObject
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+      csgObj->setVtkGeometryCacheReader(reader);
+    }
   }
 }
 
@@ -2504,7 +2516,11 @@ InstrumentDefinitionParser::writeAndApplyCache(
       new Mantid::Geometry::vtkGeometryCacheWriter(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
        ++objItr) {
-    ((*objItr).second)->setVtkGeometryCacheWriter(writer);
+    // caching only applies to CSGObject
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
+      csgObj->setVtkGeometryCacheWriter(writer);
+    }
   }
   writer->write();
   return cachingOption;

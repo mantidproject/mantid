@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <string>
+#include <memory>
 #include <vector>
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -277,10 +278,11 @@ public:
   // -------------------------------- Geometry/vertexes-Related
   // -------------------------------------------
   virtual std::vector<Mantid::Kernel::VMD> getVertexes() const = 0;
-  virtual coord_t *getVertexesArray(size_t &numVertices) const = 0;
-  virtual coord_t *getVertexesArray(size_t &numVertices,
-                                    const size_t outDimensions,
-                                    const bool *maskDim) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const = 0;
   virtual void transformDimensions(std::vector<double> &scaling,
                                    std::vector<double> &offset) = 0;
 

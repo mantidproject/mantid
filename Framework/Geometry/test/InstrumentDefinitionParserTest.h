@@ -891,7 +891,7 @@ public:
 
   void testLocationsNaming() {
     std::string locations =
-        "<locations n-elements=\" 5\" name-count-start=\" 10\" name=\"det\" />";
+        R"(<locations n-elements=" 5" name-count-start=" 10" name="det" />)";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -903,7 +903,7 @@ public:
 
   void testLocationsStaticValues() {
     std::string locations =
-        "<locations n-elements=\"5\" x=\" 1.0\" y=\" 2.0\" z=\" 3.0\" />";
+        R"(<locations n-elements="5" x=" 1.0" y=" 2.0" z=" 3.0" />)";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -986,13 +986,13 @@ public:
 
   void testLocationsInvalidNoElements() {
     std::string locations =
-        "<locations n-elements=\"0\" t=\"0.0\" t-end=\"180.0\" />";
+        R"(<locations n-elements="0" t="0.0" t-end="180.0" />)";
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
                      Exception::InstrumentDefinitionError);
 
-    locations = "<locations n-elements=\"-1\" t=\"0.0\" t-end=\"180.0\" />";
+    locations = R"(<locations n-elements="-1" t="0.0" t-end="180.0" />)";
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
                      Exception::InstrumentDefinitionError);
@@ -1000,28 +1000,28 @@ public:
 
   void testLocationsNotANumber() {
     std::string locations =
-        "<locations n-elements=\"2\" t=\"0.0\" t-end=\"180.x\" />";
+        R"(<locations n-elements="2" t="0.0" t-end="180.x" />)";
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
 
-    locations = "<locations n-elements=\"2\" t=\"0.x\" t-end=\"180.0\" />";
+    locations = R"(<locations n-elements="2" t="0.x" t-end="180.0" />)";
 
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
 
-    locations = "<locations n-elements=\"x\" t=\"0.0\" t-end=\"180.0\" />";
+    locations = R"(<locations n-elements="x" t="0.0" t-end="180.0" />)";
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
 
-    locations = "<locations n-elements=\"2\" name-count-start=\"x\"/>";
+    locations = R"(<locations n-elements="2" name-count-start="x"/>)";
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
   }
 
   void testLocationsNoCorrespondingStartAttr() {
-    std::string locations = "<locations n-elements=\"2\" t-end=\"180.0\" />";
+    std::string locations = R"(<locations n-elements="2" t-end="180.0" />)";
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),

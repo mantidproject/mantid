@@ -280,8 +280,8 @@ public:
     TS_ASSERT_EQUALS(ws->getSpectrum(4).getNumberEvents(), 100);
 
     // Do the comparison algo to check that they really are the same
-    origWS->sortAll(TOF_SORT, NULL);
-    ws->sortAll(TOF_SORT, NULL);
+    origWS->sortAll(TOF_SORT, nullptr);
+    ws->sortAll(TOF_SORT, nullptr);
 
     IAlgorithm_sptr alg2 =
         AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
@@ -724,7 +724,7 @@ public:
         "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
-    auto instrument = parser.parseXML(NULL);
+    auto instrument = parser.parseXML(nullptr);
     peaksTestWS->populateInstrumentParameters();
     peaksTestWS->setInstrument(instrument);
 
@@ -769,7 +769,7 @@ public:
         "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
-    auto instrument = parser.parseXML(NULL);
+    auto instrument = parser.parseXML(nullptr);
     peaksTestWS->populateInstrumentParameters();
     peaksTestWS->setInstrument(instrument);
 

@@ -108,7 +108,7 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
   const std::string &fitFunctionName = foundFittingParam.getFunction();
   IFunction_sptr function =
       FunctionFactory::Instance().createFunction(fitFunctionName);
-  typedef std::vector<std::string> ParamNames;
+  using ParamNames = std::vector<std::string>;
   ParamNames allParamNames = function->getParameterNames();
 
   // Lookup each parameter name.

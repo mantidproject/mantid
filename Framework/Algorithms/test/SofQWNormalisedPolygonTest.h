@@ -62,7 +62,7 @@ public:
 
     // Spectra-detector mapping
     const size_t nspectra(6);
-    typedef std::set<int> IDSet;
+    using IDSet = std::set<int>;
     std::vector<IDSet> expectedIDs(nspectra);
     IDSet s1 = {3};
     expectedIDs[0] = s1;
@@ -83,6 +83,117 @@ public:
       Mantid::specnum_t specNoExpected = static_cast<Mantid::specnum_t>(i + 1);
       TS_ASSERT_EQUALS(specNoExpected, specNoActual);
       TS_ASSERT_EQUALS(expectedIDs[i], spectrum.getDetectorIDs());
+    }
+  }
+
+  void testEAndQBinningParams() {
+    // SofQWNormalisedPolygon uses it's own setUpOutputWorkspace while
+    // the other SofQW* algorithms use the one in SofQW.
+    auto inWS = SofQWTest::loadTestFile();
+    Mantid::Algorithms::SofQWNormalisedPolygon alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
+    const std::vector<double> eBinParams{-0.5, 0.1, -0.1, 0.2, 0.4};
+    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2,
+                                                -0.1, 0.1,  0.3,  0.4};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EAxisBinning", eBinParams))
+    const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+                                                1.2, 1.4, 1.6, 1.8, 2.};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    Mantid::API::MatrixWorkspace_sptr outWS =
+        alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
+    for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
+      const auto &x = outWS->x(i);
+      for (size_t j = 0; j < x.size(); ++j) {
+        TS_ASSERT_DELTA(x[j], expectedEBinEdges[j], 1e-12)
+      }
+    }
+    const auto axis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis->length(), expectedQBinEdges.size())
+    for (size_t i = 0; i < axis->length(); ++i) {
+      TS_ASSERT_DELTA(axis->getValue(i), expectedQBinEdges[i], 1e-12)
+    }
+  }
+
+  void testEBinWidthAsEAxisBinning() {
+    // SofQWNormalisedPolygon uses it's own setUpOutputWorkspace while
+    // the other SofQW* algorithms use the one in SofQW.
+    auto inWS = SofQWTest::loadTestFile();
+    Mantid::Algorithms::SofQWNormalisedPolygon alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
+    const double dE{0.3};
+    const std::vector<double> eBinParams{dE};
+    std::vector<double> expectedEBinEdges;
+    const auto firstEdge = inWS->x(0).front();
+    const auto lastEdge = inWS->x(0).back();
+    auto currentEdge = firstEdge;
+    while (currentEdge < lastEdge) {
+      expectedEBinEdges.emplace_back(currentEdge);
+      currentEdge += dE;
+    }
+    expectedEBinEdges.emplace_back(lastEdge);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EAxisBinning", eBinParams))
+    const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+                                                1.2, 1.4, 1.6, 1.8, 2.};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    Mantid::API::MatrixWorkspace_sptr outWS =
+        alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
+    for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
+      const auto &x = outWS->x(i);
+      for (size_t j = 0; j < x.size(); ++j) {
+        TS_ASSERT_DELTA(x[j], expectedEBinEdges[j], 1e-12)
+      }
+    }
+    const auto axis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis->length(), expectedQBinEdges.size())
+    for (size_t i = 0; i < axis->length(); ++i) {
+      TS_ASSERT_DELTA(axis->getValue(i), expectedQBinEdges[i], 1e-12)
+    }
+  }
+
+  void testQBinWidthAsQAxisBinning() {
+    // SofQWNormalisedPolygon uses it's own setUpOutputWorkspace while
+    // the other SofQW* algorithms use the one in SofQW.
+    auto inWS = SofQWTest::loadTestFile();
+    Mantid::Algorithms::SofQWNormalisedPolygon alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
+    const double dQ{0.023};
+    const std::vector<double> qBinParams{dQ};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    Mantid::API::MatrixWorkspace_sptr outWS =
+        alg.getProperty("OutputWorkspace");
+    const auto axis = outWS->getAxis(1);
+    // Test only the Q bin width, not the actual edges.
+    for (size_t i = 0; i < axis->length() - 1; ++i) {
+      const auto delta = axis->getValue(i + 1) - axis->getValue(i);
+      TS_ASSERT_DELTA(delta, dQ, 1e-12);
     }
   }
 };

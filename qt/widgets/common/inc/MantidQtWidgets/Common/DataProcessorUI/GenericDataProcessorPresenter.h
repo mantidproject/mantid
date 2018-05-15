@@ -38,9 +38,9 @@ class DataProcessorView;
 class TreeManager;
 class GenericDataProcessorPresenterThread;
 
-using RowItem = std::pair<int, RowData>;
-using RowQueue = std::queue<RowItem>;
-using GroupQueue = std::queue<std::pair<int, RowQueue>>;
+using RowItem = std::pair<int, RowData_sptr>;
+using RowQueue = std::vector<RowItem>;
+using GroupQueue = std::vector<std::pair<int, RowQueue>>;
 
 /** @class GenericDataProcessorPresenter
 
@@ -147,6 +147,7 @@ public:
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
+  void acceptTreeManager(std::unique_ptr<TreeManager> manager);
   void setModel(QString const &name) override;
   bool hasPostprocessing() const;
 
@@ -156,8 +157,7 @@ public:
   // Get the whitelist
   WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
-  QString getReducedWorkspaceName(const QStringList &data,
-                                  const QString &prefix = "") const;
+  QString getReducedWorkspaceName(const RowData_sptr data) const;
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
@@ -183,6 +183,11 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
+  // Get the processing options for this row
+  virtual OptionsMap getProcessingOptions(RowData_sptr data) {
+    UNUSED_ARG(data);
+    return m_processingOptions;
+  }
 
   boost::optional<PostprocessingStep> m_postprocessing;
 
@@ -195,40 +200,59 @@ protected:
   void postProcessGroup(const GroupData &data);
   // Preprocess the given column value if applicable
   void preprocessColumnValue(const QString &columnName, QString &columnValue,
-                             RowData *data);
+                             RowData_sptr data);
   // Preprocess all option values where applicable
-  void preprocessOptionValues(OptionsMap &options, RowData *data);
-  // Update the model with results from the algorithm
-  void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
-                                RowData *data);
+  void preprocessOptionValues(RowData_sptr data);
+  // Update the model with values used from the options and/or the results from
+  // the algorithm
+  void updateModelFromResults(Mantid::API::IAlgorithm_sptr alg,
+                              RowData_sptr data);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
-  void reduceRow(RowData *data);
+  void reduceRow(RowData_sptr data);
   // Finds a run in the AnalysisDataService
   QString findRunInADS(const QString &run, const QString &prefix,
                        bool &runFound);
   // Sets whether to prompt user when getting selected runs
   void setPromptUser(bool allowPrompt);
 
+  // Set up data required for processing a row
+  bool initRowForProcessing(RowData_sptr rowData);
   // Process selected rows
   virtual void process();
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
+  virtual void
+  completedRowReductionSuccessfully(GroupData const &groupData,
+                                    std::string const &workspaceName);
+  virtual void
+  completedGroupReductionSuccessfully(GroupData const &groupData,
+                                      std::string const &workspaceName);
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
-  QString getPostprocessedWorkspaceName(const GroupData &groupData);
+  QString getPostprocessedWorkspaceName(
+      const GroupData &groupData,
+      boost::optional<size_t> sliceIndex = boost::optional<size_t>());
   bool rowOutputExists(RowItem const &row) const;
   // Refl GUI Group.
   int m_group;
+  // The whitelist
+  WhiteList m_whitelist;
+  // The data processor algorithm
+  ProcessingAlgorithm m_processor;
+  // Save as ipython notebook
+  void saveNotebook(const TreeData &data);
 protected slots:
   void reductionError(QString ex);
-  void threadFinished(const int exitCode);
+  void groupThreadFinished(const int exitCode);
+  void rowThreadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
 
 private:
+  void threadFinished(const int exitCode);
   void applyDefaultOptions(std::map<QString, QVariant> &options);
   void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
                                        const std::string &hiddenOptions,
@@ -236,10 +260,6 @@ private:
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
-  // The whitelist
-  WhiteList m_whitelist;
-  // The data processor algorithm
-  ProcessingAlgorithm m_processor;
 
   // The current queue of groups to be reduced
   GroupQueue m_group_queue;
@@ -353,7 +373,6 @@ private:
                     const std::string &newName) override;
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
-  void saveNotebook(const TreeData &data);
   std::vector<std::unique_ptr<Command>> getTableList();
 
   // set/get values in the table

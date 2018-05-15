@@ -160,19 +160,15 @@ void ConvFit::setup() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
-/**
- * Handles the initial set up and running of the ConvolutionFitSequential
- * algorithm
- */
-void ConvFit::run() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
-    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
-    m_uiForm->ckPlotGuess->setChecked(false);
-    m_usedTemperature = boolSettingValue("UseTempCorrection");
-    m_temperature = doubleSettingValue("TempCorrection");
-    executeSequentialFit();
-  }
+int ConvFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
+
+int ConvFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
+
+void ConvFit::runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+  m_uiForm->ckPlotGuess->setChecked(false);
+  m_usedTemperature = boolSettingValue("UseTempCorrection");
+  m_temperature = doubleSettingValue("TempCorrection");
+  IndirectFitAnalysisTab::runFitAlgorithm(fitAlgorithm);
 }
 
 bool ConvFit::canPlotGuess() const {
@@ -340,13 +336,13 @@ std::string ConvFit::constructBaseName() const {
 }
 
 IAlgorithm_sptr ConvFit::singleFitAlgorithm() const {
-  const auto spectrum = selectedSpectrum();
+  const auto spectrum = static_cast<int>(selectedSpectrum());
   return sequentialFit(spectrum, spectrum);
 }
 
 IAlgorithm_sptr ConvFit::sequentialFitAlgorithm() const {
-  const auto specMin = minimumSpectrum();
-  const auto specMax = maximumSpectrum();
+  const auto specMin = static_cast<int>(minimumSpectrum());
+  const auto specMax = static_cast<int>(maximumSpectrum());
   return sequentialFit(specMin, specMax);
 }
 
@@ -358,7 +354,6 @@ IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin,
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("PassWSIndexToFunction", true);
-  cfs->setProperty("BackgroundType", backgroundType().toStdString());
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("ExtractMembers", boolSettingValue("ExtractMembers"));
@@ -481,8 +476,8 @@ void ConvFit::addSampleLogsToWorkspace(const std::string &workspaceName,
 bool ConvFit::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSampleInput);
-  uiv.checkDataSelectorIsValid("Resolution", m_uiForm->dsResInput);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
+  uiv.checkDataSelectorIsValid("Resolution Input", m_uiForm->dsResInput);
 
   uiv.checkValidRange("Fitting Range", std::make_pair(startX(), endX()));
 
@@ -496,12 +491,9 @@ bool ConvFit::validate() {
            compositeModel->getFunction(0)->name() == "DeltaFunction")
     uiv.addErrorMessage(
         "Fit function is invalid; only a Delta Function has been supplied");
-  else if (fitTypeString() == "")
-    uiv.addErrorMessage("No fit type has been selected");
 
   const auto error = uiv.generateErrorMessage();
-  showMessageBox(error);
-
+  emit showMessageBox(error);
   return error.isEmpty();
 }
 
@@ -716,7 +708,7 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
 
     // If the analyser component is not already in the data file then load it
     // from the parameter file
-    if (inst->getComponentByName(analyser) == NULL ||
+    if (inst->getComponentByName(analyser) == nullptr ||
         inst->getComponentByName(analyser)
                 ->getNumberParameter("resolution")
                 .size() == 0) {
@@ -736,7 +728,7 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) const {
 
       inst = workspace->getInstrument();
     }
-    if (inst->getComponentByName(analyser) != NULL) {
+    if (inst->getComponentByName(analyser) != nullptr) {
       resolution = inst->getComponentByName(analyser)
                        ->getNumberParameter("resolution")[0];
     } else {
@@ -849,15 +841,7 @@ void ConvFit::removeGuessPlot() {
 /**
  * Runs the single fit algorithm
  */
-void ConvFit::singleFit() {
-  // Validate tab before running a single fit
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
-    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
-    m_uiForm->ckPlotGuess->setChecked(false);
-    executeSingleFit();
-  }
-}
+void ConvFit::singleFit() { executeSingleFit(); }
 
 /**
  * Handles the user entering a new minimum spectrum index.

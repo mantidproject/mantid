@@ -2,9 +2,8 @@
 
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -27,14 +26,12 @@
 #include <boost/accumulators/statistics/error_of_mean.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/ranlux.hpp>
-#include <boost/random/uniform_01.hpp>
 
 #include <array>
 #include <deque>
 #include <iostream>
 #include <stack>
+#include <random>
 
 namespace Mantid {
 namespace Geometry {
@@ -60,7 +57,7 @@ CSGObject::CSGObject(const std::string &shapeXML)
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  m_handler = boost::make_shared<CacheGeometryHandler>(this);
+  m_handler = boost::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -410,19 +407,19 @@ CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
 * ie. sum of 2, sum of 3 sum of 4. etc. to be certain
 * to get a correct normal test.
 
-* @param Pt :: Point to check
+* @param point :: Point to check
 * @returns 1 if the point is on the surface
 */
-bool CSGObject::isOnSide(const Kernel::V3D &Pt) const {
+bool CSGObject::isOnSide(const Kernel::V3D &point) const {
   std::list<Kernel::V3D> Snorms; // Normals from the constact surface.
 
   std::vector<const Surface *>::const_iterator vc;
   for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-    if ((*vc)->onSurface(Pt)) {
-      Snorms.push_back((*vc)->surfaceNormal(Pt));
+    if ((*vc)->onSurface(point)) {
+      Snorms.push_back((*vc)->surfaceNormal(point));
       // can check direct normal here since one success
       // means that we can return 1 and finish
-      if (!checkSurfaceValid(Pt, Snorms.back()))
+      if (!checkSurfaceValid(point, Snorms.back()))
         return true;
     }
   }
@@ -432,7 +429,7 @@ bool CSGObject::isOnSide(const Kernel::V3D &Pt) const {
     for (ys = xs, ++ys; ys != Snorms.end(); ++ys) {
       NormPair = (*ys) + (*xs);
       NormPair.normalize();
-      if (!checkSurfaceValid(Pt, NormPair))
+      if (!checkSurfaceValid(point, NormPair))
         return true;
     }
   // Ok everthing failed return 0;
@@ -460,14 +457,14 @@ int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
 }
 
 /**
-* Determines is Pt is within the object or on the surface
-* @param Pt :: Point to be tested
+* Determines is point is within the object or on the surface
+* @param point :: Point to be tested
 * @returns 1 if true and 0 if false
 */
-bool CSGObject::isValid(const Kernel::V3D &Pt) const {
+bool CSGObject::isValid(const Kernel::V3D &point) const {
   if (!TopRule)
     return false;
-  return TopRule->isValid(Pt);
+  return TopRule->isValid(point);
 }
 
 /**
@@ -754,19 +751,19 @@ int CSGObject::procString(const std::string &Line) {
 * @return Number of segments added
 */
 int CSGObject::interceptSurface(Geometry::Track &UT) const {
-  int cnt = UT.count(); // Number of intersections original track
+  int originalCount = UT.count(); // Number of intersections original track
   // Loop over all the surfaces.
   LineIntersectVisit LI(UT.startPoint(), UT.direction());
   std::vector<const Surface *>::const_iterator vc;
   for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
     (*vc)->acceptVisitor(LI);
   }
-  const auto &IPts(LI.getPoints());
-  const auto &dPts(LI.getDistance());
+  const auto &IPoints(LI.getPoints());
+  const auto &dPoints(LI.getDistance());
 
-  auto ditr = dPts.begin();
-  auto itrEnd = IPts.end();
-  for (auto iitr = IPts.begin(); iitr != itrEnd; ++iitr, ++ditr) {
+  auto ditr = dPoints.begin();
+  auto itrEnd = IPoints.end();
+  for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
@@ -776,22 +773,22 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
   }
   UT.buildLink();
   // Return number of track segments added
-  return (UT.count() - cnt);
+  return (UT.count() - originalCount);
 }
 
 /**
 * Calculate if a point PT is a valid point on the track
-* @param Pt :: Point to calculate from.
+* @param point :: Point to calculate from.
 * @param uVec :: Unit vector of the track
 * @retval 0 :: Not valid / double valid
 * @retval 1 :: Entry point
 * @retval -1 :: Exit Point
 */
-int CSGObject::calcValidType(const Kernel::V3D &Pt,
+int CSGObject::calcValidType(const Kernel::V3D &point,
                              const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
-  const Kernel::V3D testA(Pt - shift);
-  const Kernel::V3D testB(Pt + shift);
+  const Kernel::V3D testA(point - shift);
+  const Kernel::V3D testB(point + shift);
   const int flagA = isValid(testA);
   const int flagB = isValid(testB);
   if (!(flagA ^ flagB))
@@ -810,7 +807,7 @@ int CSGObject::calcValidType(const Kernel::V3D &Pt,
 * shape.
 */
 double CSGObject::solidAngle(const Kernel::V3D &observer) const {
-  if (this->NumberOfTriangles() > 30000)
+  if (this->numberOfTriangles() > 30000)
     return rayTraceSolidAngle(observer);
   return triangleSolidAngle(observer);
 }
@@ -1008,28 +1005,25 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
 
   // If the object is a simple shape use the special methods
   double height(0.0), radius(0.0);
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Mantid::Kernel::V3D> geometry_vectors;
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
   this->GetObjectGeom(type, geometry_vectors, radius, height);
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
-
-  switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID:
+  switch (type) {
+  case detail::ShapeInfo::GeometryShape::CUBOID:
     return CuboidSolidAngle(observer, geometry_vectors);
     break;
-  case GluGeometryHandler::GeometryType::SPHERE:
+  case detail::ShapeInfo::GeometryShape::SPHERE:
     return SphereSolidAngle(observer, geometry_vectors, radius);
     break;
-  case GluGeometryHandler::GeometryType::CYLINDER:
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
     return CylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
     break;
-  case GluGeometryHandler::GeometryType::CONE:
+  case detail::ShapeInfo::GeometryShape::CONE:
     return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
     break;
@@ -1038,10 +1032,10 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
     {
       return rayTraceSolidAngle(observer);
     } else { // Compute a generic shape that has been triangulated
-      double *vertices = this->getTriangleVertices();
-      int *faces = this->getTriangleFaces();
+      const auto &vertices = this->getTriangleVertices();
+      const auto &faces = this->getTriangleFaces();
       double sangle(0.0), sneg(0.0);
-      for (int i = 0; i < nTri; i++) {
+      for (size_t i = 0; i < nTri; i++) {
         int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
         V3D vp1 =
             V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
@@ -1090,7 +1084,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     }
   }
 
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   //
   // If triangulation is not available fall back to ray tracing method, unless
   // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
@@ -1098,19 +1092,16 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
   //
   if (nTri == 0) {
     double height = 0.0, radius(0.0);
-    int type;
+    detail::ShapeInfo::GeometryShape type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    GluGeometryHandler::GeometryType gluType =
-        static_cast<GluGeometryHandler::GeometryType>(type);
-
-    switch (gluType) {
-    case GluGeometryHandler::GeometryType::CUBOID:
+    switch (type) {
+    case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
       break;
-    case GluGeometryHandler::GeometryType::SPHERE:
+    case detail::ShapeInfo::GeometryShape::SPHERE:
       return SphereSolidAngle(observer, vectors, radius);
       break;
     default:
@@ -1122,10 +1113,10 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     //
     return rayTraceSolidAngle(observer); // so is this
   }
-  double *vertices = this->getTriangleVertices();
-  int *faces = this->getTriangleFaces();
+  const auto &vertices = this->getTriangleVertices();
+  const auto &faces = this->getTriangleFaces();
   double sangle(0.0), sneg(0.0);
-  for (int i = 0; i < nTri; i++) {
+  for (size_t i = 0; i < nTri; i++) {
     int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
     // would be more efficient to pre-multiply the vertices (copy of) by these
     // factors beforehand
@@ -1491,15 +1482,13 @@ double CSGObject::ConeSolidAngle(const V3D &observer,
  * @return The volume.
  */
 double CSGObject::volume() const {
-  int type;
+  detail::ShapeInfo::GeometryShape type;
   double height;
   double radius;
   std::vector<Kernel::V3D> vectors;
   this->GetObjectGeom(type, vectors, radius, height);
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
-  switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID: {
+  switch (type) {
+  case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Here, the volume is calculated by the triangular method.
     // We use one of the vertices (vectors[0]) as the reference
     // point.
@@ -1529,9 +1518,9 @@ double CSGObject::volume() const {
     volume += brt.scalar_prod(brb.cross_prod(blb));
     return volume / 6;
   }
-  case GluGeometryHandler::GeometryType::SPHERE:
+  case detail::ShapeInfo::GeometryShape::SPHERE:
     return 4.0 / 3.0 * M_PI * radius * radius * radius;
-  case GluGeometryHandler::GeometryType::CYLINDER:
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
     return M_PI * radius * radius * height;
   default:
     // Fall back to Monte Carlo method.
@@ -1551,7 +1540,7 @@ double CSGObject::monteCarloVolume() const {
   accumulator_set<double, features<tag::mean, tag::error_of<tag::mean>>>
       accumulate;
   // For seeding the single shot runs.
-  boost::random::ranlux48 rnEngine;
+  std::ranlux48 rnEngine;
   // Warm up statistics.
   for (int i = 0; i < 10; ++i) {
     const auto seed = rnEngine();
@@ -1601,15 +1590,14 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
       // the worst case.
       blocksize = shotSize - (threadCount - 1) * blocksize;
     }
-    boost::random::mt19937 rnEngine(
-        static_cast<boost::random::mt19937::result_type>(seed));
+    std::mt19937 rnEngine(static_cast<std::mt19937::result_type>(seed));
     // All threads init their engine with the same seed.
     // We discard the random numbers used by the other threads.
     // This ensures reproducible results independent of the number
     // of threads.
     // We need three random numbers for each iteration.
     rnEngine.discard(currentThreadNum * 3 * blocksize);
-    boost::random::uniform_01<double> rnDistribution;
+    std::uniform_real_distribution<double> rnDistribution(0.0, 1.0);
     int hits = 0;
     for (int i = 0; i < static_cast<int>(blocksize); ++i) {
       double rnd = rnDistribution(rnEngine);
@@ -1717,10 +1705,10 @@ void CSGObject::calcBoundingBoxByRule() {
  */
 void CSGObject::calcBoundingBoxByVertices() {
   // Grab vertex information
-  auto vertCount = this->NumberOfPoints();
-  auto vertArray = this->getTriangleVertices();
+  auto vertCount = this->numberOfVertices();
 
-  if (vertCount && vertArray) {
+  if (vertCount > 0) {
+    const auto &vertArray = this->getTriangleVertices();
     // Unreasonable extents to be overwritten by loop
     constexpr double huge = 1e10;
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -1728,7 +1716,7 @@ void CSGObject::calcBoundingBoxByVertices() {
     maxX = maxY = maxZ = -huge;
 
     // Loop over all vertices and determine minima and maxima on each axis
-    for (int i = 0; i < vertCount; ++i) {
+    for (size_t i = 0; i < vertCount; ++i) {
       auto vx = vertArray[3 * i + 0];
       auto vy = vertArray[3 * i + 1];
       auto vz = vertArray[3 * i + 2];
@@ -1761,19 +1749,16 @@ void CSGObject::calcBoundingBoxByGeometry() {
   double minX, maxX, minY, maxY, minZ, maxZ;
 
   // Shape geometry data
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Kernel::V3D> vectors;
   double radius;
   double height;
 
-  // Will only work for shapes handled by GluGeometryHandler
+  // Will only work for shapes with ShapeInfo
   m_handler->GetObjectGeom(type, vectors, radius, height);
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
-
   // Type of shape is given as a simple integer
-  switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID: {
+  switch (type) {
+  case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
     auto &lft = vectors[1]; // Left-Front-Top
@@ -1806,7 +1791,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-  case GluGeometryHandler::GeometryType::HEXAHEDRON: {
+  case detail::ShapeInfo::GeometryShape::HEXAHEDRON: {
     // These will be replaced by more realistic values in the loop below
     minX = minY = minZ = std::numeric_limits<decltype(minZ)>::max();
     maxX = maxY = maxZ = -std::numeric_limits<decltype(maxZ)>::max();
@@ -1821,8 +1806,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-  case GluGeometryHandler::GeometryType::CYLINDER:
-  case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
+  case detail::ShapeInfo::GeometryShape::CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
     auto &axis = vectors[1];
@@ -1845,7 +1829,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
     maxZ = std::max(base.Z(), top.Z()) + rz;
   } break;
 
-  case GluGeometryHandler::GeometryType::CONE: {
+  case detail::ShapeInfo::GeometryShape::CONE: {
     auto &tip = vectors[0];            // Tip-point of cone
     auto &axis = vectors[1];           // Normalized axis
     auto base = tip + (axis * height); // Center of base
@@ -2072,7 +2056,7 @@ void CSGObject::draw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Render();
+  m_handler->render();
 }
 
 /**
@@ -2084,7 +2068,7 @@ void CSGObject::initDraw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Initialize();
+  m_handler->initialize();
 }
 /**
 * set vtkGeometryCache writer
@@ -2105,9 +2089,9 @@ void CSGObject::setVtkGeometryCacheReader(
 }
 
 /**
-* Returns the geometry handler
-*/
-boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() {
+ * Returns the geometry handler
+ */
+boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;
@@ -2137,49 +2121,43 @@ void CSGObject::updateGeometryHandler() {
 
 // Initialize Draw Object
 
-/**
-* get number of triangles
-* @return the number of triangles
-*/
-int CSGObject::NumberOfTriangles() const {
+size_t CSGObject::numberOfTriangles() const {
   if (m_handler == nullptr)
     return 0;
-  return m_handler->NumberOfTriangles();
+  return m_handler->numberOfTriangles();
 }
-
-/**
-* get number of points
-*/
-int CSGObject::NumberOfPoints() const {
+size_t CSGObject::numberOfVertices() const {
   if (m_handler == nullptr)
     return 0;
-  return m_handler->NumberOfPoints();
+  return m_handler->numberOfPoints();
 }
-
 /**
 * get vertices
 */
-double *CSGObject::getTriangleVertices() const {
+const std::vector<double> &CSGObject::getTriangleVertices() const {
+  static const std::vector<double> empty;
   if (m_handler == nullptr)
-    return nullptr;
+    return empty;
   return m_handler->getTriangleVertices();
 }
 
 /**
-* get faces
-*/
-int *CSGObject::getTriangleFaces() const {
+ * get faces
+ */
+const std::vector<uint32_t> &CSGObject::getTriangleFaces() const {
+  static const std::vector<uint32_t> empty;
   if (m_handler == nullptr)
-    return nullptr;
+    return empty;
   return m_handler->getTriangleFaces();
 }
 
 /**
 * get info on standard shapes
 */
-void CSGObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                              std::vector<Kernel::V3D> &vectors,
                               double &myradius, double &myheight) const {
-  type = 0;
+  type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
   m_handler->GetObjectGeom(type, vectors, myradius, myheight);

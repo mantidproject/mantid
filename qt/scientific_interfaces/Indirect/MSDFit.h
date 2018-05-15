@@ -19,7 +19,6 @@ public:
 
 private:
   void setup() override;
-  void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
@@ -38,6 +37,9 @@ protected slots:
   void updatePlotOptions() override;
 
 protected:
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
+
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
   std::string constructBaseName() const;
@@ -55,9 +57,7 @@ protected:
 private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
-  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               int specMin, int specMax) const;
-  std::string modelToAlgorithmProperty(const QString &model) const;
+  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(int specMin, int specMax) const;
 
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };

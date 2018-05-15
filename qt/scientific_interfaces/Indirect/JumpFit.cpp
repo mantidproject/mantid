@@ -68,6 +68,14 @@ void JumpFit::setup() {
           SLOT(updatePlotGuess()));
 }
 
+size_t JumpFit::getWidth() const {
+  return m_spectraList.at(m_uiForm->cbWidth->currentText().toStdString());
+}
+
+int JumpFit::minimumSpectrum() const { return static_cast<int>(getWidth()); }
+
+int JumpFit::maximumSpectrum() const { return static_cast<int>(getWidth()); }
+
 bool JumpFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
          m_uiForm->ckPlotGuess->isChecked();
@@ -80,38 +88,19 @@ bool JumpFit::doPlotGuess() const {
  */
 bool JumpFit::validate() {
   UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm->dsSample);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSample);
 
   // this workspace doesn't have any valid widths
-  if (m_spectraList.size() == 0) {
+  if (m_spectraList.empty())
     uiv.addErrorMessage(
-        "Input workspace doesn't appear to contain any width data.");
-  }
+        "Sample Input: Workspace doesn't appear to contain any width data");
 
   if (isEmptyModel())
     uiv.addErrorMessage("No fit function has been selected");
 
-  QString errors = uiv.generateErrorMessage();
-  if (!errors.isEmpty()) {
-    emit showMessageBox(errors);
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Collect the settings on the GUI and build a python
- * script that runs JumpFit
- */
-void JumpFit::run() {
-  const auto widthName = m_uiForm->cbWidth->currentText().toStdString();
-  const auto width = static_cast<int>(m_spectraList[widthName]);
-  setMinimumSpectrum(width);
-  setMaximumSpectrum(width);
-
-  if (validate())
-    executeSequentialFit();
+  const auto errors = uiv.generateErrorMessage();
+  emit showMessageBox(errors);
+  return errors.isEmpty();
 }
 
 /**
@@ -128,10 +117,6 @@ void JumpFit::algorithmComplete(bool error) {
 
   // Process the parameters table
   const auto paramWsName = outputWorkspaceName() + "_Parameters";
-  const auto resultWsName = outputWorkspaceName() + "_Result";
-  deleteWorkspaceAlgorithm(paramWsName)->execute();
-  renameWorkspaceAlgorithm(outputWorkspaceName(), paramWsName)->execute();
-  processParametersAlgorithm(paramWsName, resultWsName)->execute();
   IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName);
 }
 
@@ -169,8 +154,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   if (m_spectraList.size() > 0) {
     m_uiForm->cbWidth->setEnabled(true);
-    const auto currentWidth = m_uiForm->cbWidth->currentText().toStdString();
-    const auto width = static_cast<int>(m_spectraList[currentWidth]);
+    const auto width = static_cast<int>(getWidth());
     setMinimumSpectrum(width);
     setMaximumSpectrum(width);
     setSelectedSpectrum(width);
@@ -196,9 +180,8 @@ void JumpFit::findAllWidths(MatrixWorkspace_const_sptr ws) {
 
     for (const auto &iter : m_spectraList)
       m_uiForm->cbWidth->addItem(QString::fromStdString(iter.first));
-  } else {
+  } else
     m_spectraList.clear();
-  }
 }
 
 std::map<std::string, size_t> JumpFit::findAxisLabelsWithSubstrings(
@@ -267,47 +250,25 @@ void JumpFit::updatePlotRange() {
 
 std::string JumpFit::createSingleFitOutputName() const {
   auto outputName = inputWorkspace()->getName();
+  auto position = outputName.rfind("_Result");
 
-  // Remove _red
-  const auto cutIndex = outputName.find_last_of('_');
-  if (cutIndex != std::string::npos)
-    outputName = outputName.substr(0, cutIndex);
+  if (position != std::string::npos)
+    outputName = outputName.substr(0, position) +
+                 outputName.substr(position + 7, outputName.size());
   return outputName + "_" + selectedFitType().toStdString() + "_JumpFit";
 }
 
 IAlgorithm_sptr JumpFit::singleFitAlgorithm() const {
-  const auto sample = inputWorkspace()->getName();
   const auto widthText = m_uiForm->cbWidth->currentText().toStdString();
   const auto width = m_spectraList.at(widthText);
 
-  auto fitAlg = AlgorithmManager::Instance().create("PlotPeakByLogValue");
+  auto fitAlg = AlgorithmManager::Instance().create("QENSFitSequential");
   fitAlg->initialize();
-  fitAlg->setProperty("Input", sample + ",i" + std::to_string(width));
-  fitAlg->setProperty("OutputWorkspace", outputWorkspaceName());
-  fitAlg->setProperty("CreateOutput", true);
+  fitAlg->setProperty("SpecMin", static_cast<int>(width));
+  fitAlg->setProperty("SpecMax", static_cast<int>(width));
+  fitAlg->setProperty("OutputWorkspace",
+                      createSingleFitOutputName() + "_Result");
   return fitAlg;
-}
-
-/*
- * Creates an algorithm for processing an output parameters workspace.
- *
- * @param parameterWSName The name of the parameters workspace.
- * @return                A processing algorithm.
- */
-IAlgorithm_sptr
-JumpFit::processParametersAlgorithm(const std::string &parameterWSName,
-                                    const std::string &resultWSName) {
-  const auto parameterNames =
-      boost::algorithm::join(fitFunction()->getParameterNames(), ",");
-
-  auto processAlg =
-      AlgorithmManager::Instance().create("ProcessIndirectFitParameters");
-  processAlg->setProperty("InputWorkspace", parameterWSName);
-  processAlg->setProperty("ColumnX", "axis-1");
-  processAlg->setProperty("XAxisUnit", "MomentumTransfer");
-  processAlg->setProperty("ParameterNames", parameterNames);
-  processAlg->setProperty("OutputWorkspace", resultWSName);
-  return processAlg;
 }
 
 IAlgorithm_sptr
@@ -315,15 +276,6 @@ JumpFit::deleteWorkspaceAlgorithm(const std::string &workspaceName) {
   auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteAlg->setProperty("Workspace", workspaceName);
   return deleteAlg;
-}
-
-IAlgorithm_sptr
-JumpFit::renameWorkspaceAlgorithm(const std::string &workspaceToRename,
-                                  const std::string &newName) {
-  auto renameAlg = AlgorithmManager::Instance().create("RenameWorkspace");
-  renameAlg->setProperty("InputWorkspace", workspaceToRename);
-  renameAlg->setProperty("OutputWorkspace", newName);
-  return renameAlg;
 }
 
 IAlgorithm_sptr JumpFit::scaleAlgorithm(const std::string &workspaceToScale,

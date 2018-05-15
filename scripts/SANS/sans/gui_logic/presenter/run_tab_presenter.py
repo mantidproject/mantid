@@ -304,6 +304,7 @@ class RunTabPresenter(object):
 
         except Exception as e:
             self._view.halt_process_flag()
+            self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):
@@ -570,6 +571,9 @@ class RunTabPresenter(object):
         self._set_on_view("q_resolution_collimation_length")
         self._set_on_view("q_resolution_moderator_file")
 
+        self._set_on_view("r_cut")
+        self._set_on_view("w_cut")
+
         # Mask
         self._set_on_view("phi_limit_min")
         self._set_on_view("phi_limit_max")
@@ -768,6 +772,9 @@ class RunTabPresenter(object):
         self._set_on_state_model("q_resolution_collimation_length", state_model)
         self._set_on_state_model("q_resolution_moderator_file", state_model)
 
+        self._set_on_state_model("r_cut", state_model)
+        self._set_on_state_model("w_cut", state_model)
+
         # Mask
         self._set_on_state_model("phi_limit_min", state_model)
         self._set_on_state_model("phi_limit_max", state_model)
@@ -848,7 +855,7 @@ class RunTabPresenter(object):
 
     def _set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
-        if attribute or isinstance(attribute, bool):
+        if attribute is not None and attribute != '':
             setattr(state_model, attribute_name, attribute)
 
     def _get_table_model(self):
@@ -926,6 +933,7 @@ class RunTabPresenter(object):
         else:
             rows = range(number_of_rows)
         states = {}
+
         gui_state_director = GuiStateDirector(table_model, state_model, self._facility)
         for row in rows:
             self.sans_logger.information("Generating state for row {}".format(row))

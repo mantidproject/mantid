@@ -122,6 +122,7 @@ void Rebin2D::exec() {
 
   MatrixWorkspace_sptr outputWS =
       createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
+  auto outputRB = boost::dynamic_pointer_cast<RebinnedOutput>(outputWS);
 
   // Progress reports & cancellation
   const size_t nreports(static_cast<size_t>(numYBins));
@@ -144,13 +145,11 @@ void Rebin2D::exec() {
       const double x_jp1 = oldXEdges[j + 1];
       Quadrilateral inputQ = Quadrilateral(x_j, x_jp1, vlo, vhi);
       if (!useFractionalArea) {
-        FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j, outputWS,
+        FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j, *outputWS,
                                            newYBins.rawData());
       } else {
         FractionalRebinning::rebinToFractionalOutput(
-            inputQ, inputWS, i, j,
-            boost::dynamic_pointer_cast<RebinnedOutput>(outputWS),
-            newYBins.rawData());
+            inputQ, inputWS, i, j, *outputRB, newYBins.rawData(), inputHasFA);
       }
     }
 
@@ -158,7 +157,7 @@ void Rebin2D::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
   if (useFractionalArea) {
-    boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)->finalize(true, true);
+    outputRB->finalize(true, true);
   }
 
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
@@ -186,7 +185,7 @@ void Rebin2D::exec() {
  * @return A pointer to the output workspace
  */
 MatrixWorkspace_sptr
-Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
+Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent,
                                BinEdges &newXBins, BinEdges &newYBins,
                                const bool useFractionalArea) const {
   using Kernel::VectorHelper::createAxisFromRebinParams;

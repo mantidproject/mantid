@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
 	src/DataProcessorUI/AbstractTreeModel.cpp
+	src/DataProcessorUI/TreeData.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
         src/DataProcessorUI/OptionsMap.cpp
@@ -62,6 +63,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/PreprocessMap.cpp
 	src/DataProcessorUI/ProcessingAlgorithm.cpp
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
+	src/DataProcessorUI/TreeData.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/WhiteList.cpp
         src/DataProcessorUI/WorkspaceNameUtils.cpp
@@ -547,6 +549,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
     ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS

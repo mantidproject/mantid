@@ -25,7 +25,7 @@ class EXPORT_OPT_MANTIDQT_COMMON Message : public QObject {
 
 public:
   /// Priority matches Mantid Logger priority
-  typedef Mantid::Kernel::Logger::Priority Priority;
+  using Priority = Mantid::Kernel::Logger::Priority;
 
   /// Default constuctor required by Qt meta-type system
   Message();

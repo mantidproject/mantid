@@ -383,7 +383,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
   ews2.sortAll(PULSETIMETOF_SORT, m_progress.get());
 
   if (!m_progress) {
-    throw new std::runtime_error("The progress pointer was found to be null!");
+    throw std::runtime_error("The progress pointer was found to be null!");
   }
 
   // Determine the tolerance for "tof" attribute and "weight" of events

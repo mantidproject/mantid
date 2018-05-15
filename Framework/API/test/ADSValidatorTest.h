@@ -28,7 +28,7 @@ private:
 };
 }
 
-typedef std::vector<std::string> StringVector;
+using StringVector = std::vector<std::string>;
 
 class ADSValidatorTest : public CxxTest::TestSuite {
 public:

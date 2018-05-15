@@ -16,9 +16,9 @@ using std::cout;
 
 //==========================================================================================
 /// Make the code clearer by having this an explicit type
-typedef uint32_t PixelType;
+using PixelType = uint32_t;
 /// Type for the DAS time of flight (data file)
-typedef uint32_t DasTofType;
+using DasTofType = uint32_t;
 /// Structure that matches the form in the binary event list.
 struct DasEvent {
   /// Time of flight.

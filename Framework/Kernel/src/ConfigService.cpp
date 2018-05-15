@@ -110,7 +110,7 @@ std::vector<std::string> splitPath(const std::string &path) {
 template <typename T> class ConfigServiceImpl::WrappedObject : public T {
 public:
   /// The template type of class that is being wrapped
-  typedef T element_type;
+  using element_type = T;
   /// Simple constructor
   WrappedObject() : T() { m_pPtr = static_cast<T *>(this); }
 
@@ -1774,8 +1774,9 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
 
   // look through all the possible files
   for (; instrDir != directoryNames.end(); ++instrDir) {
-    std::string filename = (*instrDir) + "Facilities.xml";
-
+    Poco::Path p(*instrDir);
+    p.append("Facilities.xml");
+    std::string filename = p.toString();
     Poco::File fileObj(filename);
     // stop when you find the first one
     if (fileObj.exists())

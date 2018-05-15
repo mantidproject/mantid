@@ -446,8 +446,8 @@ public:
 
     MersenneTwister mt(1234, 0.0, 1000000.0);
     std::vector<double> bkgdpts(10000);
-    for (auto it = bkgdpts.begin(); it != bkgdpts.end(); it++) {
-      *it = mt.nextValue();
+    for (double &bkgdpt : bkgdpts) {
+      bkgdpt = mt.nextValue();
     }
 
     sbg.initialize();

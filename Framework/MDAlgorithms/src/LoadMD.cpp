@@ -31,7 +31,7 @@
 #include <nexus/NeXusException.hpp>
 #include <vector>
 
-typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
+using file_holder_type = std::unique_ptr<Mantid::API::IBoxControllerIO>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

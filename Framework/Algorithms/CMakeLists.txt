@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculateMuonAsymmetry.cpp
 	src/CalculatePoleFigure.cpp
 	src/CalculatePolynomialBackground.cpp
@@ -33,6 +34,7 @@ set ( SRC_FILES
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
+	src/CarpenterSampleCorrection.cpp
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
@@ -143,6 +145,7 @@ set ( SRC_FILES
 	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
 	src/FitPeak.cpp
+	src/FitPeaks.cpp
 	src/FixGSASInstrumentFile.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
@@ -198,7 +201,6 @@ set ( SRC_FILES
 	src/MonitorEfficiencyCorUser.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MostLikelyMean.cpp
-	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
 	src/MuonAsymmetryHelper.cpp
@@ -242,9 +244,8 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
-	src/ReflectometryReductionOne.cpp
+	src/ReflectometryMomentumTransfer.cpp
 	src/ReflectometryReductionOne2.cpp
-	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryReductionOneAuto2.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/ReflectometryWorkflowBase2.cpp
@@ -360,6 +361,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculatePoleFigure.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
@@ -367,6 +369,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
+	inc/MantidAlgorithms/CarpenterSampleCorrection.h
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
@@ -477,6 +480,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FitPeak.h
+	inc/MantidAlgorithms/FitPeaks.h
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
@@ -536,7 +540,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MostLikelyMean.h
-	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
 	inc/MantidAlgorithms/MuonAsymmetryHelper.h
@@ -580,9 +583,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
-	inc/MantidAlgorithms/ReflectometryReductionOne.h
+	inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
-	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
@@ -705,6 +707,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateCarpenterSampleCorrectionTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
@@ -716,6 +719,7 @@ set ( TEST_FILES
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
+	CarpenterSampleCorrectionTest.h
 	ChainedOperatorTest.h
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
@@ -823,6 +827,7 @@ set ( TEST_FILES
 	FindPeakBackgroundTest.h
 	FindPeaksTest.h
 	FitPeakTest.h
+	FitPeaksTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
 	GeneralisedSecondDifferenceTest.h
@@ -878,7 +883,6 @@ set ( TEST_FILES
 	MonitorEfficiencyCorUserTest.h
 	MonteCarloAbsorptionTest.h
 	MostLikelyMeanTest.h
-	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
 	MuonGroupDetectorsTest.h
@@ -918,10 +922,9 @@ set ( TEST_FILES
 	RebinToWorkspaceTest.h
 	RebunchTest.h
 	RectangularBeamProfileTest.h
+	ReflectometryMomentumTransferTest.h
 	ReflectometryReductionOne2Test.h
 	ReflectometryReductionOneAuto2Test.h
-	ReflectometryReductionOneAutoTest.h
-	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h
@@ -948,6 +951,7 @@ set ( TEST_FILES
 	SignalOverErrorTest.h
 	SmoothDataTest.h
 	SmoothNeighboursTest.h
+	SofQCommonTest.h
 	SofQWCentreTest.h
 	SofQWCutTest.h
 	SofQWNormalisedPolygonTest.h

@@ -43,6 +43,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LessThanMD", "EqualToMD"};
+  }
 
 private:
   bool acceptScalar() const override { return true; }

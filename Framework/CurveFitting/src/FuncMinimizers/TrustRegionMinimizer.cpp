@@ -1274,10 +1274,10 @@ void solveSubproblem(int n, double radius, double f,
   inform.obj *= pow(scale_c, 2) / scale_h;
   inform.multiplier *= scale_h;
   inform.pole *= scale_h;
-  for (size_t i = 0; i < inform.history.size();
-       ++i) { //      do i = 1, inform.len_history
-    inform.history[i].lambda *= scale_h;
-    inform.history[i].x_norm *= scale_c / scale_h;
+  for (auto &history_item :
+       inform.history) { //      do i = 1, inform.len_history
+    history_item.lambda *= scale_h;
+    history_item.x_norm *= scale_c / scale_h;
   }
 }
 

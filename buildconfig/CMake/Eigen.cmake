@@ -18,7 +18,7 @@ else()
   # for static libraries, object libraries, and executables without exports.
   cmake_policy(SET CMP0063 "OLD")
 
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
   execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
 
   set(Eigen3_DIR "${CMAKE_BINARY_DIR}/extern-eigen/install/share/eigen3/cmake" CACHE PATH "")

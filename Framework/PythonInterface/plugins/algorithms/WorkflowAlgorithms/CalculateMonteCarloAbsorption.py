@@ -51,6 +51,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
+    def seeAlso(self):
+        return [ "MonteCarloAbsorption","SimpleShapeMonteCarloAbsorption" ]
+
     def summary(self):
         return "Calculates indirect absorption corrections for a given sample shape, using a MonteCarlo simulation."
 
@@ -450,8 +453,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 raise ValueError('Sample and Container units must be the same!')
 
             if self._shape == 'Cylinder':
-                if self._container_inner_radius <= self._sample_radius:
-                    issues['ContainerInnerRadius'] = 'Must be greater than SampleRadius'
+                if self._container_inner_radius < self._sample_radius:
+                    issues['ContainerInnerRadius'] = 'Must be greater than or equal to SampleRadius'
                 if self._container_outer_radius <= self._container_inner_radius:
                     issues['ContainerOuterRadius'] = 'Must be greater than ContainerInnerRadius'
 

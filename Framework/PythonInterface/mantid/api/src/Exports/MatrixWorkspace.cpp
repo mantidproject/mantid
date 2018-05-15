@@ -38,14 +38,15 @@ GET_POINTER_SPECIALIZATION(MatrixWorkspace)
 
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members
-typedef Mantid::MantidVec &(MatrixWorkspace::*data_modifier)(const std::size_t);
+using data_modifier =
+    Mantid::MantidVec &(MatrixWorkspace::*)(const std::size_t);
 
 /// return_value_policy for read-only numpy array
-typedef return_value_policy<VectorRefToNumpy<WrapReadOnly>>
-    return_readonly_numpy;
+using return_readonly_numpy =
+    return_value_policy<VectorRefToNumpy<WrapReadOnly>>;
 /// return_value_policy for read-write numpy array
-typedef return_value_policy<VectorRefToNumpy<WrapReadWrite>>
-    return_readwrite_numpy;
+using return_readwrite_numpy =
+    return_value_policy<VectorRefToNumpy<WrapReadWrite>>;
 
 //------------------------------- Overload macros ---------------------------
 #ifdef __clang__

@@ -1,40 +1,109 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Rendering/GeometryTriangulator.h"
+#include "MantidGeometry/Rendering/RenderingHelpers.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
+GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
-/** Constructor
- *  @param[in] comp
- *  This geometry handler will be ObjComponent's geometry handler
- */
-GeometryHandler::GeometryHandler(IObjComponent *comp) : Obj() {
-  ObjComp = comp;
-  boolTriangulated = true;
-  boolIsInitialized = false;
-}
-
-/** Constructor
- *  @param[in] obj
- *  This geometry handler will be Object's geometry handler
- */
 GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
-    : Obj(obj.get()) {
-  ObjComp = nullptr;
-  boolTriangulated = false;
-  boolIsInitialized = false;
-}
+    : m_triangulator(new detail::GeometryTriangulator(obj.get())),
+      m_csgObj(obj.get()) {}
 
-/** Constructor
- *  @param[in] obj
- *  This geometry handler will be Object's geometry handler
- */
-GeometryHandler::GeometryHandler(CSGObject *obj) : Obj(obj) {
-  ObjComp = nullptr;
-  boolTriangulated = false;
-  boolIsInitialized = false;
+GeometryHandler::GeometryHandler(CSGObject *obj)
+    : m_triangulator(new detail::GeometryTriangulator(obj)), m_csgObj(obj) {}
+
+GeometryHandler::GeometryHandler(boost::shared_ptr<MeshObject> obj)
+    : m_triangulator(new detail::GeometryTriangulator(obj.get())),
+      m_meshObj(obj.get()) {}
+
+GeometryHandler::GeometryHandler(MeshObject *obj)
+    : m_triangulator(new detail::GeometryTriangulator(obj)), m_meshObj(obj) {}
+
+GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
+  if (handler.m_csgObj) {
+    m_csgObj = handler.m_csgObj;
+    if (handler.m_triangulator)
+      m_triangulator.reset(new detail::GeometryTriangulator(m_csgObj));
+  }
+  if (handler.m_objComp)
+    m_objComp = handler.m_objComp;
+  if (handler.m_shapeInfo)
+    m_shapeInfo = handler.m_shapeInfo;
 }
 
 /// Destructor
-GeometryHandler::~GeometryHandler() { ObjComp = nullptr; }
+GeometryHandler::~GeometryHandler() {}
+
+boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
+  return boost::make_shared<GeometryHandler>(*this);
 }
+
+void GeometryHandler::render() const {
+  if (m_shapeInfo)
+    RenderingHelpers::renderShape(*m_shapeInfo);
+  else if (m_objComp != nullptr)
+    RenderingHelpers::renderIObjComponent(*m_objComp);
+  else if (canTriangulate())
+    RenderingHelpers::renderTriangulated(*m_triangulator);
 }
+
+void GeometryHandler::initialize() const {
+  if (m_csgObj != nullptr)
+    m_csgObj->updateGeometryHandler();
+  render();
+}
+
+size_t GeometryHandler::numberOfTriangles() const {
+  if (canTriangulate())
+    return m_triangulator->numTriangleFaces();
+  return 0;
+}
+
+size_t GeometryHandler::numberOfPoints() const {
+  if (canTriangulate())
+    return m_triangulator->numTriangleVertices();
+  return 0;
+}
+
+const std::vector<double> &GeometryHandler::getTriangleVertices() const {
+  static std::vector<double> empty;
+  if (canTriangulate())
+    return m_triangulator->getTriangleVertices();
+  return empty;
+}
+
+const std::vector<uint32_t> &GeometryHandler::getTriangleFaces() const {
+  static std::vector<uint32_t> empty;
+  if (canTriangulate())
+    return m_triangulator->getTriangleFaces();
+  return empty;
+}
+
+void GeometryHandler::setGeometryCache(size_t nPts, size_t nFaces,
+                                       std::vector<double> &&pts,
+                                       std::vector<uint32_t> &&faces) {
+  if (canTriangulate()) {
+    m_triangulator->setGeometryCache(nPts, nFaces, std::move(pts),
+                                     std::move(faces));
+  }
+}
+
+void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &mytype,
+                                    std::vector<Kernel::V3D> &vectors,
+                                    double &myradius, double &myheight) const {
+  mytype = detail::ShapeInfo::GeometryShape::NOSHAPE;
+  if (m_shapeInfo)
+    m_shapeInfo->getObjectGeometry(mytype, vectors, myradius, myheight);
+}
+
+void GeometryHandler::setShapeInfo(detail::ShapeInfo &&shapeInfo) {
+  m_triangulator.reset(nullptr);
+  m_shapeInfo.reset(new detail::ShapeInfo(std::move(shapeInfo)));
+}
+} // namespace Geometry
+} // namespace Mantid
