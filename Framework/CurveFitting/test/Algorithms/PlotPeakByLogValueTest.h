@@ -6,6 +6,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
