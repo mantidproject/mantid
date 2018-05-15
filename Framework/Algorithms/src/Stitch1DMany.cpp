@@ -261,8 +261,6 @@ void Stitch1DMany::exec() {
   this->setProperty("OutScaleFactors", m_scaleFactors);
 }
 
-// doStitch1D(m_inputWSMatrix[i], periodScaleFactors, outStitchedWS, outName);
-
 /** Performs the Stitch1D algorithm at a specific workspace index.
  * @param toStitch :: Vector of workspaces to be stitched
  * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
@@ -421,7 +419,7 @@ bool Stitch1DMany::processGroups() {
   m_outputWorkspace =
       AnalysisDataService::Instance().retrieveWS<Workspace>(groupName);
 
-  this->setProperty("OutputWorkspace", m_outputWorkspace); // groupName
+  this->setProperty("OutputWorkspace", m_outputWorkspace);
   this->setProperty("OutScaleFactors", m_scaleFactors);
   return true;
 }

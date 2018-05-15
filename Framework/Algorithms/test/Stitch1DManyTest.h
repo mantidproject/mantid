@@ -155,7 +155,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "ws1");
     alg.setProperty("Params", "0.1, 0.1, 1.8");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -167,7 +167,7 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("StartOverlaps", "-0.5, -0.6");
     alg.setProperty("EndOverlaps", "0.5");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -179,7 +179,7 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("StartOverlaps", "-0.5");
     alg.setProperty("EndOverlaps", "0.5, 0.6");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -191,7 +191,7 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -206,7 +206,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "ws1, ws2");
     alg.setProperty("Params", "0.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -223,7 +223,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "group1, ws1");
     alg.setProperty("Params", "0.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -242,7 +242,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "group1, group2");
     alg.setProperty("Params", "0.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -265,7 +265,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "group1, group2");
     alg.setProperty("Params", "0.1, 0.1, 2.6");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -301,7 +301,7 @@ public:
     alg.setProperty("InputWorkspaces", "group1, group2, group3");
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("ScaleFactorFromPeriod", 4);
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
@@ -321,7 +321,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 1.8");
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -361,7 +361,7 @@ public:
     alg2.setProperty("Params", "0.1, 0.1, 1.8");
     alg2.setProperty("StartOverlap", "0.8");
     alg2.setProperty("EndOverlap", "1.1");
-    alg2.setPropertyValue("OutputWorkspace", "outws");
+    alg2.setProperty("OutputWorkspace", "outws");
     alg2.execute();
     MatrixWorkspace_sptr stitched2 = alg2.getProperty("OutputWorkspace");
 
@@ -392,7 +392,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.8");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -450,7 +450,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "ws1, ws2, ws3");
     alg.setProperty("Params", "0.1, 0.1, 2.6");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
   }
@@ -473,7 +473,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.8");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5");
     alg.execute();
@@ -532,7 +532,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.8");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
     alg.execute();
@@ -593,7 +593,7 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
 
     AnalysisDataService::Instance().clear();
@@ -624,7 +624,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.8");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted())
 
@@ -703,7 +703,7 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -799,7 +799,7 @@ public:
     alg.setProperty("EndOverlaps", "1.1");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -906,7 +906,7 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.9");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -1022,7 +1022,7 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.9");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ScaleFactorFromPeriod", 2);
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
 
     // By keeping ManualScaleFactors empty (default value) it allows workspaces
@@ -1112,7 +1112,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 1.8");
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -1161,7 +1161,7 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
-    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -1230,8 +1230,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    //TS_ASSERT(outws);
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     auto stitched =
@@ -1275,7 +1275,7 @@ public:
     //alg.initialize();
     //alg.setProperty("InputWorkspaces", "ws1, ws2");
     //alg.setProperty("UseManualScaleFactors", "1");
-    //alg.setPropertyValue("OutputWorkspace", "ws");
+    //alg.setProperty("OutputWorkspace", "ws");
     //alg.execute();
     //TS_ASSERT(alg.isExecuted());
     Mantid::API::AnalysisDataService::Instance().remove("ws1");
