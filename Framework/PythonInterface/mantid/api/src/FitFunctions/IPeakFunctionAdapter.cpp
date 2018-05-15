@@ -91,15 +91,19 @@ IPeakFunctionAdapter::functionLocal(const boost::python::object &xvals) const {
 /**
  * Translates between the C++ signature & the Python signature and will be
  * called by Fit
- * @param out The Jacobian matrix storing the partial derivatives of the
+ * @param jacobian The Jacobian matrix storing the partial derivatives of the
  * function w.r.t to the parameters
  * @param xValues The input X values
  * @param nData The size of the two arrays
  */
-void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *out,
+void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *jacobian,
                                               const double *xValues,
                                               const size_t nData) {
-  evaluateDerivative(out, xValues, nData);
+  if (derivativeOverridden()) {
+    evaluateDerivative(jacobian, xValues, nData);
+  } else {
+    Base::functionDerivLocal(jacobian, xValues, nData);
+  }
 }
 
 /**

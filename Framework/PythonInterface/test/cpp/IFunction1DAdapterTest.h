@@ -7,6 +7,7 @@
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
 #include <array>
+#include <numeric>
 
 class IFunction1DAdapterTest : public CxxTest::TestSuite {
 public:

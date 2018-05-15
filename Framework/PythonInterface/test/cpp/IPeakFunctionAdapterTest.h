@@ -7,6 +7,7 @@
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
 #include <array>
+#include <numeric>
 
 class IPeakFunctionAdapterTest : public CxxTest::TestSuite {
 public:
@@ -51,6 +52,27 @@ public:
   }
 
   // -------------- Success tests -------------------------
+
+  void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
+    using Mantid::API::IPeakFunction_sptr;
+    using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    IPeakFunction_sptr noDerivPeakFunction;
+    TS_ASSERT_THROWS_NOTHING(
+        noDerivPeakFunction =
+            createTestFunction<IPeakFunction_sptr::element_type>(
+                "IFunction1DAdapterWithDeriv",
+                "        return self.getParameterValue(0)*x"));
+    TS_ASSERT(noDerivPeakFunction);
+
+    std::array<double, 10> xvalues;
+    std::iota(std::begin(xvalues), std::end(xvalues), 10.0);
+    FunctionAdapterTestJacobian jacobian(xvalues.size(), 1);
+    noDerivPeakFunction->functionDeriv1D(&jacobian, xvalues.data(),
+                                         xvalues.size());
+
+    TS_ASSERT_DELTA(9.99999, jacobian.get(0, 0), 1e-05);
+  }
 
   void testfunction_Uses_Supplied_Deriv() {
     using Mantid::API::IPeakFunction_sptr;

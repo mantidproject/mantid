@@ -89,7 +89,7 @@ public:
   /// Python-type signature for above method
   boost::python::object functionLocal(const boost::python::object &xvals) const;
   /// Implemented base-class method
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+  void functionDerivLocal(API::Jacobian *jacobian, const double *xValues,
                           const size_t nData) override;
   /// Python signature
   void functionDerivLocal(const boost::python::object &xvals,
