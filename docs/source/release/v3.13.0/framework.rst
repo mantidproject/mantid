@@ -53,4 +53,19 @@ Bug fixes
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
 
+Python
+------
+
+Improved
+########
+
+- Python fit functions that use from ``IPeakFunction`` as a base no longer require a ``functionDeriveLocal`` method to compute an analytical derivative. If
+  the method is absent then a numerical derivative is calculate.
+
+Bugfixes
+########
+
+- Checks on the structure of Python fit function classes have been improved to avoid scenarios, such as writing ``function1d`` rather than ``function1D``, which
+  would previously have resulted in a hard crash.
+
 :ref:`Release 3.13.0 <v3.13.0>`
