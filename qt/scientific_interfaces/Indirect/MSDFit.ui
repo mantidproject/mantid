@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
-    <height>785</height>
+    <width>804</width>
+    <height>799</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1,0,0">
    <item>
     <widget class="QGroupBox" name="gbInput">
      <property name="title">
@@ -29,15 +29,13 @@
    <item>
     <layout class="QHBoxLayout" name="loMSDFit">
      <item>
-      <layout class="QVBoxLayout" name="loMSDPlot" stretch="0,0">
+      <layout class="QVBoxLayout" name="loMSDPlot" stretch="0">
        <item>
-        <layout class="QHBoxLayout" name="loPlotProperties" stretch="0,0">
+        <layout class="QHBoxLayout" name="loPlotProperties" stretch="1,1">
          <item>
-          <layout class="QVBoxLayout" name="loProperties">
-           <item>
-            <layout class="QVBoxLayout" name="properties"/>
-           </item>
-          </layout>
+          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
+           <widget class="QWidget" name="dockWidgetContents"/>
+          </widget>
          </item>
          <item>
           <layout class="QVBoxLayout" name="loPlotsLayout" stretch="5,3,0">
@@ -202,12 +200,12 @@
          </item>
         </layout>
        </item>
-       <item>
-        <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true"/>
-       </item>
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true"/>
    </item>
    <item>
     <widget class="QGroupBox" name="gbOutput">
@@ -272,6 +270,12 @@
    <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
    <extends>QWidget</extends>
    <header>IndirectSpectrumSelectionView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowser</class>
+   <extends>QDockWidget</extends>
+   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowser.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
