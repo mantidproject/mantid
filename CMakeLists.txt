@@ -364,7 +364,7 @@ if ( ENABLE_CPACK )
         endif()
         # Change DEPENDS_LIST for python 3
         if ( PYTHON_VERSION_MAJOR EQUAL 3 )
-          list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3)," "python-pycifrw (>= 4.2.1),")
+          list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3),")
           string ( REPLACE "python-" "python3-" DEPENDS_LIST ${DEPENDS_LIST} )
           string ( REPLACE "python3-qt4" "python3-pyqt4" DEPENDS_LIST ${DEPENDS_LIST} )
         endif ()
