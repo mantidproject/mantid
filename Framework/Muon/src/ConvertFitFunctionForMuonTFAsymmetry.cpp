@@ -101,11 +101,8 @@ namespace Mantid {
 		 *
 		 */
 		void ConvertFitFunctionForMuonTFAsymmetry::exec() {
-			auto dfsat = getPropertyValue("InputFunction");
 
-			IFunction_sptr inputFitFunction = FunctionFactory::Instance().createInitialized(
-				dfsat);//getProperty("InputFunction");
-			auto ttweta = inputFitFunction->asString();
+			IFunction_sptr inputFitFunction =getProperty("InputFunction");
 			auto mode = getPropertyValue("Mode");
 			if (mode == "Construct") {
 				std::vector<double> norms = getNorms();
@@ -113,14 +110,54 @@ namespace Mantid {
 				setProperty("OutputFunction", outputFitFunction);
 			}
 			else {
+				auto outputFitFunction = extractFromTFAsymmFitFunction(inputFitFunction);
+				setProperty("OutputFunction", outputFitFunction);
 
 			}
 		}
 		/*
 		Converts from a TF Asymmetry function N(1+f) to the original f.
 		*/
+		Mantid::API::IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
+			Mantid::API::IFunction_sptr original) {
 
+		    auto multi = boost::make_shared<MultiDomainFunction>();
+			std::string func = extractUserFunction(original->asString());
+			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
 
+			size_t numDomains = original->getNumberDomains();
+			for (size_t j = 0; j < numDomains; j++) {
+				IFunction_sptr userFunc;
+				auto extracted = FunctionFactory::Instance().createInitialized(
+					func);
+				if (numDomains == 1) {
+					userFunc = extracted;
+				}
+				else {
+					userFunc = tmp->getFunction(j);
+					multi->setDomainIndex(j, j);
+				}
+				auto composite = boost::make_shared<CompositeFunction>();
+				composite->addFunction(userFunc);
+				multi->addFunction(composite);
+			}
+			return boost::dynamic_pointer_cast<IFunction>(multi);
+
+		}
+
+		std::string ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(std::string TFFunc) {
+			auto out = TFFunc;
+			//removes everything up to start of user function
+			// we know the form to expect -> know where user 
+			// function should be
+			size_t start = out.find("((name=FlatBackground,A0=1,ties=(A0=1))");
+			out=out.substr(start,out.size()-start);
+			start = out.find(";")+1 ;
+			//expect it to end with an ExpDecayMuon
+			size_t end = out.find("));(name=ExpDecayMuon");
+			out = out.substr(start, end-start);
+		    return out;
+		}
 		/*
 		Convert to a TF Asymmetry function. Input f and changes it to N(1+f)
 		*/

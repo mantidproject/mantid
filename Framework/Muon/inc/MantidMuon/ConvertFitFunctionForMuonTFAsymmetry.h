@@ -73,8 +73,8 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   Mantid::API::IFunction_sptr getTFAsymmFitFunction(Mantid::API::IFunction_sptr original, const std::vector<double> norms);
-  Mantid::API::IFunction_sptr getTFAsymmFitFunctionMulti(Mantid::API::IFunction_sptr original, const std::vector<double> norms);
-  Mantid::API::IFunction_sptr getTFAsymmFitFunctionSingle(Mantid::API::IFunction_sptr original, const std::vector<double> norms);
+  Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(Mantid::API::IFunction_sptr original);
+  std::string extractUserFunction(std::string TFFunc);
   std::vector<double> getNorms();
 };
 
