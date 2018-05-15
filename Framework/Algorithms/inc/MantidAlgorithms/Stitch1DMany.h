@@ -55,23 +55,12 @@ public:
   void validateCommonInputs(std::map<std::string, std::string> &errors);
 
   /// Performs the Stitch1D algorithm at a specific workspace index
-  void doStitch1D(const std::vector<API::MatrixWorkspace_sptr> &toStitch,
-                  const std::vector<double> &startOverlaps,
-                  const std::vector<double> &endOverlaps,
-                  const std::vector<double> &params, const bool scaleRhsWS,
-                  const bool useManualScaleFactors,
+  void doStitch1D(std::vector<API::MatrixWorkspace_sptr> &toStitch,
                   const std::vector<double> &manualScaleFactors,
-                  API::Workspace_sptr &outWS, std::string &outName,
-                  std::vector<double> &outScaleFactors);
+                  API::Workspace_sptr &outWS, std::string &outName);
 
   /// Performs the Stitch1DMany algorithm at a specific period
-  void doStitch1DMany(std::vector<API::WorkspaceGroup_sptr> inputWSGroups,
-                      const size_t period, const bool storeInADS,
-                      const std::vector<double> &startOverlaps,
-                      const std::vector<double> &endOverlaps,
-                      const std::vector<double> &params, const bool scaleRhsWS,
-                      const bool useManualScaleFactors,
-                      const std::vector<double> &manualScaleFactors,
+  void doStitch1DMany(const size_t period, const bool useManualScaleFactors,
                       std::string &outName,
                       std::vector<double> &outScaleFactors);
 
