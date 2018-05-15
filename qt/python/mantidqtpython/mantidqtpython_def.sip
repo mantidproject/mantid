@@ -1679,8 +1679,7 @@ signals:
   void filterReset();
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
-  void copyRowsRequested(
-      const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
+  void copyRowsRequested();
 
 };
 
