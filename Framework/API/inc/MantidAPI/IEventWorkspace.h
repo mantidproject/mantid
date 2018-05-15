@@ -68,7 +68,7 @@ public:
                          bool skipError = false) const override = 0;
 
   virtual void setAllX(const HistogramData::BinEdges &x) = 0;
-  virtual void updateAllX() = 0;
+  virtual void resetAllXToSingleBin() = 0;
 
   virtual void clearMRU() const = 0;
 

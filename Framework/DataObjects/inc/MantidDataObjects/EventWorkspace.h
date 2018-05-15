@@ -115,7 +115,7 @@ public:
   void setAllX(const HistogramData::BinEdges &x) override;
 
   // Update all X values to fit around all events
-  void updateAllX() override;
+  void resetAllXToSingleBin() override;
 
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;

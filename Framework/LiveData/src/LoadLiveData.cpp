@@ -506,14 +506,14 @@ void LoadLiveData::exec() {
   // user should do their rebinning as a Post-Process step instead.
   if (EventWorkspace_sptr accum_event =
           boost::dynamic_pointer_cast<EventWorkspace>(m_accumWS)) {
-    accum_event->updateAllX();
+    accum_event->resetAllXToSingleBin();
   } else if (WorkspaceGroup_sptr accum_gws =
                  boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS)) {
     auto num_entries = static_cast<size_t>(accum_gws->getNumberOfEntries());
     for (size_t i = 0; i < num_entries; ++i) {
       auto ws = accum_gws->getItem(i);
       if (auto ws_event = boost::dynamic_pointer_cast<EventWorkspace>(ws))
-        ws_event->updateAllX();
+        ws_event->resetAllXToSingleBin();
     }
   }
 
