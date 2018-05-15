@@ -4,8 +4,8 @@
 #include "IndirectFitData.h"
 #include "IndirectFitOutput.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/IFunction.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -22,18 +22,23 @@ public:
   virtual ~IndirectFittingModel() = default;
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace(std::size_t index) const;
-  const Spectra &getSpectra(std::size_t index) const;
-  std::string getExcludeRegion(std::size_t index) const;
+  Spectra getSpectra(std::size_t index) const;
+  std::pair<double, double> getFittingRange(std::size_t dataIndex,
+                                            std::size_t spectrum) const;
+  std::string getExcludeRegion(std::size_t dataIndex, std::size_t index) const;
   std::string createOutputName(const std::string &formatString,
                                const std::string &rangeDelimiter,
                                std::size_t dataIndex) const;
   bool isMultiFit() const;
-  bool isPreviousFitSelected() const;
-  std::size_t numberOfSpectra() const;
+  bool isPreviouslyFit(std::size_t dataIndex, std::size_t spectrum) const;
+  std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
   Mantid::API::IFunction_sptr getFittingFunction() const;
 
-  virtual void setSpectra(const Spectra &spectra, std::size_t dataIndex);
+  void setSpectra(Spectra &&spectra, std::size_t dataIndex);
+  void setSpectra(const Spectra &spectra, std::size_t dataIndex);
+  void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
+  void setEndX(double endX, std::size_t dataIndex, std::size_t spectrum);
   void setExcludeRegion(const std::string &exclude, std::size_t dataIndex,
                         std::size_t index);
 
@@ -43,36 +48,36 @@ public:
   virtual void removeWorkspace(std::size_t index);
   void clearWorkspaces();
   void setFittingMode(FittingMode mode);
-  virtual void setFitFunction(Mantid::API::IFunction_sptr model,
-                              Mantid::API::IFunction_sptr background);
   virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   void setDefaultParameterValue(const std::string &name, double value,
                                 std::size_t dataIndex);
-  void addOutput(const std::string &outputBaseName);
-  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                 Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::MatrixWorkspace_sptr resultWorkspace);
+  void addSingleFitOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
+                          std::size_t index);
+  virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   template <typename F> void applySpectra(std::size_t index, const F &functor) {
     m_fittingData[index]->applySpectra(functor);
   }
 
-  FittingMode fittingMode() const;
+  FittingMode getFittingMode() const;
   std::unordered_map<std::string, ParameterValue>
   getParameterValues(std::size_t dataIndex, std::size_t spectrum) const;
   std::unordered_map<std::string, ParameterValue>
   getFitParameters(std::size_t dataIndex, std::size_t spectrum) const;
-  virtual std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValue>
   getDefaultParameters(std::size_t dataIndex) const;
   boost::optional<ResultLocation> getResultLocation(std::size_t dataIndex,
                                                     std::size_t spectrum) const;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const;
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
-  Mantid::API::IAlgorithm_sptr
-  getSingleFitAlgorithm(std::size_t dataIndex, std::size_t spectrum) const;
+  Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
+                                            std::size_t spectrum) const;
 
   void saveResult() const;
+  void cleanFailedRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm);
+  void cleanFailedSingleRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm,
+                            std::size_t index);
 
 protected:
   std::size_t numberOfWorkspaces() const;
@@ -80,6 +85,12 @@ protected:
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr
   createSimultaneousFit(Mantid::API::IFunction_sptr function) const;
+  virtual Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const;
+  virtual std::unordered_map<std::string, std::string>
+  mapDefaultParameterNames() const;
+  std::string createSingleFitOutputName(const std::string &formatString,
+                                        std::size_t index,
+                                        std::size_t spectrum) const;
 
 private:
   Mantid::API::IAlgorithm_sptr
@@ -90,25 +101,49 @@ private:
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
   virtual std::string sequentialFitOutputName() const = 0;
   virtual std::string simultaneousFitOutputName() const = 0;
+  virtual std::string singleFitOutputName(std::size_t index,
+                                          std::size_t spectrum) const = 0;
+  virtual std::unordered_map<std::string, ParameterValue>
+  createDefaultParameters(std::size_t index) const;
 
   bool isPreviousModelSelected() const;
 
-  IndirectFitOutput
+  virtual IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
-                  Mantid::API::MatrixWorkspace_sptr resultWorkspace) const;
+                  Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                  const FitDataIterator &fitDataBegin,
+                  const FitDataIterator &fitDataEnd) const;
+  virtual IndirectFitOutput
+  createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                  Mantid::API::ITableWorkspace_sptr parameterTable,
+                  Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                  IndirectFitData *fitData, std::size_t spectrum) const;
 
-  virtual IndirectFitOutput createFitOutput(
-      Mantid::API::WorkspaceGroup_sptr resultGroup,
-      Mantid::API::ITableWorkspace_sptr parameterTable,
-      Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-      const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) const;
-  virtual void addOutput(
-      IndirectFitOutput *fitOutput,
-      Mantid::API::WorkspaceGroup_sptr resultGroup,
-      Mantid::API::ITableWorkspace_sptr parameterTable,
-      Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-      const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) const;
+  void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
+                 const FitDataIterator &fitDataBegin,
+                 const FitDataIterator &fitDataEnd);
+  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                 Mantid::API::ITableWorkspace_sptr parameterTable,
+                 Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                 const FitDataIterator &fitDataBegin,
+                 const FitDataIterator &fitDataEnd);
+  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+                 Mantid::API::ITableWorkspace_sptr parameterTable,
+                 Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                 IndirectFitData *fitData, std::size_t spectrum);
+
+  virtual void addOutput(IndirectFitOutput *fitOutput,
+                         Mantid::API::WorkspaceGroup_sptr resultGroup,
+                         Mantid::API::ITableWorkspace_sptr parameterTable,
+                         Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                         const FitDataIterator &fitDataBegin,
+                         const FitDataIterator &fitDataEnd) const;
+  virtual void addOutput(IndirectFitOutput *fitOutput,
+                         Mantid::API::WorkspaceGroup_sptr resultGroup,
+                         Mantid::API::ITableWorkspace_sptr parameterTable,
+                         Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                         IndirectFitData *fitData, std::size_t spectrum) const;
 
   std::unique_ptr<IndirectFitOutput> m_fitOutput;
   std::vector<std::unique_ptr<IndirectFitData>> m_fittingData;

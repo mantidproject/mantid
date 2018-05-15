@@ -17,21 +17,10 @@ std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
   return std::to_string(range.first);
 }
 
-std::vector<double>
-excludeRegionsStringToVector(const std::string &excludeRegions) {
-  std::vector<std::string> regionStrings;
-  boost::split(regionStrings, excludeRegions, boost::is_any_of(",-"));
-  std::vector<double> regions;
-  std::transform(
-      regionStrings.begin(), regionStrings.end(), std::back_inserter(regions),
-      [](const std::string &str) { return boost::lexical_cast<double>(str); });
-  return regions;
-}
-
-template <typename T, typename... Ts>
-std::vector<T, Ts...> outOfRange(const std::vector<T, Ts...> &values,
-                                 const T &minimum, const T &maximum) {
-  std::vector<T, Ts...> result;
+template <template <class...> typename Vector, typename T, typename... Ts>
+std::vector<T> outOfRange(const Vector<T, Ts...> &values, const T &minimum,
+                          const T &maximum) {
+  std::vector<T> result;
   for (auto &&value : values) {
     if (value < minimum || value > maximum)
       result.emplace_back(value);
@@ -48,37 +37,26 @@ struct SpectraOutOfRange : boost::static_visitor<std::vector<T>> {
     std::vector<T> notInRange;
     if (range.first < m_minimum)
       notInRange.emplace_back(m_minimum);
-    else if (range.second > m_maximum)
+    if (range.second > m_maximum)
       notInRange.emplace_back(m_maximum);
     return notInRange;
   }
 
-  std::vector<T> operator()(const std::string &list) const {
-    return outOfRange(vectorFromString<T>(list), m_minimum, m_maximum);
+  std::vector<T> operator()(const VectorizedString<T> &spectra) const {
+    return outOfRange(spectra, m_minimum, m_maximum);
   }
 
 private:
   const T m_minimum, m_maximum;
 };
 
-struct ExtractFirstSpectrum : boost::static_visitor<std::size_t> {
-  std::size_t
-  operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
-    return spectra.first;
-  }
-
-  std::size_t operator()(const std::string &spectra) const {
-    auto index = spectra.find_first_of(",-");
-    auto spectrumString = spectra.substr(0, index);
-    return boost::lexical_cast<std::size_t>(spectrumString);
-  }
-};
-
 struct CheckZeroSpectrum : boost::static_visitor<bool> {
   bool operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     return false;
   }
-  bool operator()(const std::string &spectra) const { return spectra.empty(); }
+  bool operator()(const VectorizedString<std::size_t> &spectra) const {
+    return spectra.empty();
+  }
 };
 
 struct NumberOfSpectra : boost::static_visitor<std::size_t> {
@@ -87,8 +65,8 @@ struct NumberOfSpectra : boost::static_visitor<std::size_t> {
     return spectra.second - spectra.first;
   }
 
-  std::size_t operator()(const std::string &spectra) const {
-    return vectorFromString<std::size_t>(spectra).size();
+  std::size_t operator()(const VectorizedString<std::size_t> &spectra) const {
+    return spectra.size();
   }
 };
 
@@ -96,7 +74,9 @@ struct SpectraToString : boost::static_visitor<std::string> {
   SpectraToString(const std::string &rangeDelimiter = "-")
       : m_rangeDelimiter(rangeDelimiter) {}
 
-  std::string operator()(const std::string &spectra) const { return spectra; }
+  std::string operator()(const VectorizedString<std::size_t> &spectra) const {
+    return spectra.getString();
+  }
 
   std::string
   operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
@@ -133,33 +113,51 @@ struct GetSpectrum : boost::static_visitor<std::size_t> {
     return spectra.first + m_index;
   }
 
-  std::size_t operator()(const std::string &spectra) const {
-    return vectorFromString<std::size_t>(spectra)[m_index];
+  std::size_t operator()(const VectorizedString<std::size_t> &spectra) const {
+    return spectra[m_index];
   }
 
 private:
   std::size_t m_index;
 };
 
-template <typename Map> Map combineMaps(const Map &map1, const Map &map2) {
-  Map map(map1);
-  map.insert(map2.begin(), map2.end());
-  return map;
-}
-
 template <typename T>
 std::string join(const std::vector<T> &values, const char *delimiter) {
+  if (values.empty())
+    return "";
+
   std::stringstream stream;
-  std::copy(values.begin(), values.end(),
-            std::ostream_iterator<T>(stream, delimiter));
+  stream << values.front();
+  for (auto i = 1u; i < values.size(); ++i)
+    stream << "," << values[i];
   return stream.str();
 }
 
+template <typename T, typename... Ts>
+std::vector<T, Ts...> subvector(const std::vector<T, Ts...> vec,
+                                std::size_t start, std::size_t end) {
+  return std::vector<T, Ts...>(vec.begin() + start, vec.begin() + end);
+}
+
 std::string cutLastOf(const std::string &str, const std::string &delimiter) {
-  const auto cutIndex = str.find_last_of(delimiter);
+  const auto cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
-    return str.substr(0, cutIndex);
+    return str.substr(0, (cutIndex + 1) - delimiter.size());
   return str;
+}
+
+boost::basic_format<char> &
+tryPassFormatArgument(boost::basic_format<char> &formatString,
+                      const std::string &arg) {
+  try {
+    return formatString % arg;
+  } catch (const boost::io::too_many_args &) {
+    return formatString;
+  }
+}
+
+std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
+  return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
 }; // namespace
 
@@ -175,8 +173,21 @@ std::string
 IndirectFitData::displayName(const std::string &formatString,
                              const std::string &rangeDelimiter) const {
   const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
-  const auto formatted = boost::format(formatString) % workspaceName %
-                         boost::apply_visitor(SpectraToString(), m_spectra);
+  const auto spectraString = boost::apply_visitor(SpectraToString(), m_spectra);
+
+  auto formatted = boost::format(formatString);
+  formatted = tryPassFormatArgument(formatted, workspaceName);
+  formatted = tryPassFormatArgument(formatted, spectraString);
+  return formatted.str();
+}
+
+std::string IndirectFitData::displayName(const std::string &formatString,
+                                         std::size_t spectrum) const {
+  const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
+
+  auto formatted = boost::format(formatString);
+  formatted = tryPassFormatArgument(formatted, workspaceName);
+  formatted = tryPassFormatArgument(formatted, std::to_string(spectrum));
   return formatted.str();
 }
 
@@ -198,54 +209,76 @@ bool IndirectFitData::zeroSpectra() const {
   return boost::apply_visitor(CheckZeroSpectrum(), m_spectra);
 }
 
-std::size_t IndirectFitData::firstSpectrum() const {
-  return boost::apply_visitor(ExtractFirstSpectrum(), m_spectra);
+std::pair<double, double>
+IndirectFitData::getRange(std::size_t spectrum) const {
+  const auto range = m_ranges.find(spectrum);
+  if (range != m_ranges.end())
+    return range->second;
+  return getBinRange(m_workspace.lock());
 }
 
-std::string IndirectFitData::excludeRegionString(std::size_t spectrum) const {
-  auto excludeRegion = m_excludeRegions.find(spectrum);
-  if (excludeRegion != m_excludeRegions.end())
-    return excludeRegion->second;
+std::string IndirectFitData::getExcludeRegion(std::size_t spectrum) const {
+  const auto region = m_excludeRegions.find(spectrum);
+  if (region != m_excludeRegions.end())
+    return region->second;
   return "";
-}
-
-const std::pair<double, double> &
-IndirectFitData::range(std::size_t spectrum) const {
-  auto it = m_ranges.find(spectrum);
-  if (it != m_ranges.end())
-    return it->second;
-  return std::make_pair(0., 0.);
 }
 
 std::vector<double>
 IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
-  auto excludeRegion = m_excludeRegions.find(spectrum);
-  if (excludeRegion != m_excludeRegions.end())
-    return excludeRegionsStringToVector(excludeRegion->second);
-  return std::vector<double>();
+  return vectorFromString<double>(getExcludeRegion(spectrum));
+}
+
+void IndirectFitData::setSpectra(Spectra &&spectra) {
+  validateSpectra(spectra);
+  m_spectra = std::move(spectra);
 }
 
 void IndirectFitData::setSpectra(const Spectra &spectra) {
-  const auto visitor =
-      SpectraOutOfRange<std::size_t>(0, workspace()->getNumberHistograms() - 1);
-  const auto notInRange = boost::apply_visitor(visitor, m_spectra);
-
-  if (notInRange.empty())
-    m_spectra = spectra;
-  else
-    throw std::runtime_error("Spectra out of range: " + join(notInRange, ","));
+  validateSpectra(spectra);
+  m_spectra = spectra;
 }
 
-void IndirectFitData::setExcludeRegionString(std::size_t spectrum,
-                                             const std::string &excludeRegion) {
+void IndirectFitData::validateSpectra(const Spectra &spectra) {
+  const auto visitor =
+      SpectraOutOfRange<std::size_t>(0, workspace()->getNumberHistograms() - 1);
+  auto notInRange = boost::apply_visitor(visitor, spectra);
+  if (!notInRange.empty()) {
+    if (notInRange.size() > 5)
+      throw std::runtime_error("Spectra out of range: " +
+                               join(subvector(notInRange, 0, 5), ",") + "...");
+    throw std::runtime_error("Spectra out of range: " + join(notInRange, ","));
+  }
+}
+
+void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
+  const auto range = m_ranges.find(spectrum);
+  if (range != m_ranges.end())
+    range->second.first = startX;
+  else
+    m_ranges[spectrum] =
+        std::make_pair(startX, m_workspace.lock()->x(0).back());
+}
+
+void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
+  const auto range = m_ranges.find(spectrum);
+  if (range != m_ranges.end())
+    range->second.second = endX;
+  else
+    m_ranges[spectrum] = std::make_pair(m_workspace.lock()->x(0).front(), endX);
+}
+
+void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
+                                             std::size_t spectrum) {
   m_excludeRegions[spectrum] = excludeRegion;
 }
 
 IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {
   m_spectra =
       boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra);
-  m_excludeRegions = combineMaps(fitData.m_excludeRegions, m_excludeRegions);
-  m_ranges = combineMaps(fitData.m_ranges, m_ranges);
+  m_excludeRegions.insert(std::begin(fitData.m_excludeRegions),
+                          std::end(fitData.m_excludeRegions));
+  m_ranges.insert(std::begin(fitData.m_ranges), std::end(fitData.m_ranges));
   return *this;
 }
 
