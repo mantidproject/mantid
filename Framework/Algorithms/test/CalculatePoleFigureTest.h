@@ -1,6 +1,7 @@
 #ifndef MANTID_ALGORITHMS_CALCULATEPOLEFIGURE_H_
 #define MANTID_ALGORITHMS_CALCULATEPOLEFIGURE_H_
 
+// #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -9,7 +10,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -35,6 +35,20 @@ namespace {
 /** create a Bragg workspace containg 2 spectra.
  * Each has 100 data points containing a Gaussian peak
  * between d = 1.2 and 1.5
+ * More on test case
+ * 2    -0.16625    -0.3825
+2    0.16625    -0.3825
+2    0    0
+2    -0.16625    0.3825
+2    0.16625    0.3825
+
+Omega = -45    HROT = 30
+TD ND
+   pt1 0.823814639    1.619696448
+   pt2 0.990790951    1.523292629
+   pt3 1       1.732050808
+   pt4 -0.808630193    -1.63434472
+   pt5 -1.01106895    -1.51746665
  * @brief createBraggWorkspace
  * @return
  */
@@ -53,25 +67,26 @@ Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(const std::string &name) 
   std::string unitlabel("dSpacing");
   ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create(unitlabel);
+  std::cout << "Do something\n";
 
   // set instrument as reduced VULCAN east and west bank
   Instrument_sptr testInst(new Instrument);
 
   // Define a source component: [0,0,-43.754]
   Mantid::Geometry::ObjComponent *source =
-      new Mantid::Geometry::ObjComponent("moderator", Object_sptr(), testInst.get());
+      new Mantid::Geometry::ObjComponent("moderator", IObject_sptr(), testInst.get());
   source->setPos(V3D(0, 0.0, -43.754));
   testInst->add(source);
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
   Mantid::Geometry::ObjComponent *sample =
-      new Mantid::Geometry::ObjComponent("samplePos", Object_sptr(), testInst.get());
+      new Mantid::Geometry::ObjComponent("samplePos", IObject_sptr(), testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);
 
-  // add two pixels
+  // add 5 pixels to simulate VULCAN's east bank's 4 corners and center
   // pixel 1:  [-2,0,-3.67394e-16]
   Mantid::Geometry::Detector *physicalPixel = new Detector("pixel", 1, testInst.get());
   physicalPixel->setPos(-2, 0, 0);
