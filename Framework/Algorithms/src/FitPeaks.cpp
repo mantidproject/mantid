@@ -473,10 +473,15 @@ void FitPeaks::processInputs() {
   processInputFunctions();
 
   // about peak width and other peak parameter estimating method
+  // TODO FIXME - Need a method for supported peak profiles
   if (m_peakWidthPercentage > 0.)
     m_peakWidthEstimateApproach = EstimatePeakWidth::InstrumentResolution;
   else if (m_peakFunction->name() == "Gaussian")
     m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
+  else if (m_peakFunction->name() == "PseudoVoigt")
+      m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
+  else if (m_peakFunction->name() == "Voigt")
+      m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
   else
     m_peakWidthEstimateApproach = EstimatePeakWidth::NoEstimation;
   //  m_peakWidthEstimateApproach = EstimatePeakWidth::NoEstimation;
