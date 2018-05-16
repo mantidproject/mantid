@@ -269,11 +269,10 @@ public:
     TS_ASSERT(ws)
     TS_ASSERT(ws_accum)
 
-    // The accumulated workspace: it was rebinned starting at 20e3
+    // Accumulated workspace: it was rebinned, but rebinning should be reset
     TS_ASSERT_EQUALS(ws_accum->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws_accum->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(ws_accum->blocksize(), 40);
-    TS_ASSERT_DELTA(ws_accum->dataX(0)[0], 20e3, 1e-4);
+    TS_ASSERT_EQUALS(ws_accum->blocksize(), 1);
 
     // The post-processed workspace was rebinned starting at 40e3
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
