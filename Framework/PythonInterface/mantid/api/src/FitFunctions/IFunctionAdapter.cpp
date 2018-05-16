@@ -79,7 +79,7 @@ IFunctionAdapter::IFunctionAdapter(PyObject *self, std::string functionMethod,
   if (!Environment::typeHasAttribute(self, "init"))
     throw std::runtime_error("Function does not define an init method.");
   if (!Environment::typeHasAttribute(self, m_functionName.c_str()))
-    throw std::runtime_error("Function does not define a" + m_functionName +
+    throw std::runtime_error("Function does not define a " + m_functionName +
                              " method.");
 }
 
