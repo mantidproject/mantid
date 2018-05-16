@@ -3,7 +3,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
-
+#include <QDebug>
 #include <QFileInfo>
 #include <stdexcept>
 
@@ -756,6 +756,7 @@ IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(
       "Reflection",
       getInstrumentConfiguration()->getReflectionName().toStdString());
   reductionAlg->setProperty("InputFiles", inputFiles.toStdString());
+  reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   reductionAlg->setProperty("OutputWorkspace",
                             "__IndirectCalibration_reduction");
   reductionAlg->setProperty("SpectraRange",
