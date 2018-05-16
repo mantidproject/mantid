@@ -91,4 +91,5 @@ Output:
 .. categories::
 
 .. sourcelink::
+        :filename: ConvolutionFit
 

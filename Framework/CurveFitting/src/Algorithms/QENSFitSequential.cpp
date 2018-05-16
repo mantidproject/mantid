@@ -1,4 +1,4 @@
-#include "MantidWorkflowAlgorithms/QENSFitSequential.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -6,6 +6,7 @@
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -253,6 +254,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
 } // namespace
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
 using namespace API;
@@ -375,14 +377,14 @@ void QENSFitSequential::init() {
 
   declareProperty(
       "ExtractMembers", false,
-      "If true, then each member of the convolution fit will be extracted"
+      "If true, then each member of the fit will be extracted"
       ", into their own workspace. These workspaces will have a histogram"
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
 
   declareProperty(
       make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and ExtractMembers is true members of any "
+      "If true and OutputCompositeMembers is true members of any "
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
@@ -394,6 +396,13 @@ void QENSFitSequential::init() {
           new Kernel::ListValidator<std::string>(evaluationTypes)),
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
+
+  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+                  "A list of pairs of real numbers, defining the regions to "
+                  "exclude from the fit.");
+
+  declareProperty("IgnoreInvalidData", false,
+                  "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 std::map<std::string, std::string> QENSFitSequential::validateInputs() {
@@ -437,8 +446,9 @@ void QENSFitSequential::exec() {
       (workspaces.size() > 1 && workspaces.size() != spectra.size()))
     throw std::invalid_argument("A malformed input string was provided.");
 
-  const auto outputWs = performFit(inputString, outputBaseName);
-  const auto resultWs = processIndirectFitParameters(outputWs);
+  const auto parameterWs =
+      processParameterTable(performFit(inputString, outputBaseName));
+  const auto resultWs = processIndirectFitParameters(parameterWs);
   const auto groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outputBaseName + "_Workspaces");
@@ -461,7 +471,7 @@ void QENSFitSequential::exec() {
   copyLogs(resultWs, groupWs);
 
   setProperty("OutputWorkspace", resultWs);
-  setProperty("OutputParameterWorkspace", outputWs);
+  setProperty("OutputParameterWorkspace", parameterWs);
   setProperty("OutputWorkspaceGroup", groupWs);
 }
 
@@ -569,6 +579,11 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
   return pifp->getProperty("OutputWorkspace");
 }
 
+ITableWorkspace_sptr
+QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
+  return parameterTable;
+}
+
 void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
     const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
@@ -588,8 +603,10 @@ void QENSFitSequential::renameWorkspaces(
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
+  const std::vector<double> exclude = getProperty("Exclude");
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
+  const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
@@ -598,6 +615,8 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setPropertyValue("Function", getPropertyValue("Function"));
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
+  plotPeaks->setProperty("Exclude", exclude);
+  plotPeaks->setProperty("IgnoreInvalidData", ignoreInvalidData);
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
   plotPeaks->setProperty("OutputCompositeMembers", true);
@@ -692,4 +711,5 @@ std::string QENSFitSequential::getTemporaryName() const {
 }
 
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid
