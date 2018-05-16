@@ -311,11 +311,10 @@ void ISISCalibration::run() {
  * @param error If the algorithms failed.
  */
 void ISISCalibration::algorithmComplete(bool error) {
-  if (error)
-    return;
-
-  m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
+  if (!error) {
+    m_uiForm.pbSave->setEnabled(true);
+    m_uiForm.pbPlot->setEnabled(true);
+  }
 }
 
 bool ISISCalibration::validate() {
@@ -341,11 +340,10 @@ bool ISISCalibration::validate() {
 
   QString error = uiv.generateErrorMessage();
 
-  if (error != "") {
+  if (error != "")
     g_log.warning(error.toStdString());
-    return false;
-  }
-  return true;
+
+  return (error == "");
 }
 
 /**
