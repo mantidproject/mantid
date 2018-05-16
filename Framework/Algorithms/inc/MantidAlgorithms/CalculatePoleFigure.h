@@ -43,8 +43,17 @@ private:
   void convertCoordinates(Kernel::V3D unitQ, const double &hrot,
                           const double &omega, double &r_td, double &r_nd);
 
+  /// calculate peaks' intensities
+  void calculatePeaksIntensities();
+
+  /// integrate event counts within a region of d-spacing
+  void integrateEventCounts(double min_d, double max_d, std::vector<double> &events_counts_vec, std::vector<double> &estimated_bkgd_vec);
+
   /// generatae output workspace and set output properties
   void generateOutputs();
+
+  /// fit peaks within given d range
+  void fitPeaks(const double d_min, const double d_max);
 
   /// input workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

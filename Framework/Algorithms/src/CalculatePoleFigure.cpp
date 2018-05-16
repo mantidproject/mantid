@@ -148,10 +148,10 @@ void CalculatePoleFigure::calculatePeaksIntensities() {
   // Calculate the peak intensity by add the neutron events within the D-range
   std::vector<double> event_counts_vec(m_inputWS->getNumberHistograms(), 0.);
   std::vector<double> estimated_bkgd_vec(m_inputWS->getNumberHistograms(), 0.);
-  integrateEventCounts(m_minD, m_maxD, event_counts_vec, estiamted_bkgd_vec);
+  integrateEventCounts(m_peakDRange.first, m_peakDRange.second, event_counts_vec, estiamted_bkgd_vec);
 
   // Fit peaks
-  PeakFitResult fit_result = fitPeaks(m_minD, m_maxD);
+  PeakFitResult fit_result = fitPeaks(m_peakDRange.first, m_peakDRange.second);
 
   // Further process fitting result from simple integration and peak fitting
 
@@ -170,7 +170,7 @@ void CalculatePoleFigure::integrateEventCounts(double min_d, double max_d, std::
     double counts = 0.;
     // estimate background
     double y0 = m_inputWS->readY(iws)[index_min_d];
-    double yf = m_inputWS->readY(iws][index_max_d];
+    double yf = m_inputWS->histogram(iws).x()[index_max_d];
     double bkgd_a, bkgd_b;
     estimateLinearBackground(m_inputWS, iws, bkgd_a, bkgd_b);
     //
@@ -179,6 +179,12 @@ void CalculatePoleFigure::integrateEventCounts(double min_d, double max_d, std::
   }
 
   return;
+}
+
+
+void CalculatePoleFigure::fitPeaks(const double d_min, const double d_max) {
+
+    return;
 }
 
 
