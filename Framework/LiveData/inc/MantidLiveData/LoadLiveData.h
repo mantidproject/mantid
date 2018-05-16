@@ -65,6 +65,7 @@ private:
   void appendChunk(Mantid::API::Workspace_sptr chunkWS);
   API::Workspace_sptr appendMatrixWSChunk(API::Workspace_sptr accumWS,
                                           Mantid::API::Workspace_sptr chunkWS);
+  void resetAllXToSingleBin(API::Workspace_sptr workspace);
 
   /// The "accumulation" workspace = after adding, but before post-processing
   Mantid::API::Workspace_sptr m_accumWS;

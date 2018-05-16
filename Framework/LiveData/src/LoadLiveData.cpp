@@ -392,6 +392,32 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
 }
 
 //----------------------------------------------------------------------------------------------
+/** Resets all HistogramX in given workspace to a single bin.
+ *
+ * Ensures bin boundaries encompass all events currently in the workspace.
+ * This will overwrite any rebinning that was previously.
+ *
+ * Input should be an EventWorkspace or WorkspaceGroup containing
+ * EventWorkspaces. Any other workspace types are ignored.
+ *
+ * @param workspace :: Workspace that will have its bins reset
+ */
+void LoadLiveData::resetAllXToSingleBin(API::Workspace_sptr workspace) {
+  if (EventWorkspace_sptr ws_event =
+          boost::dynamic_pointer_cast<EventWorkspace>(workspace)) {
+    ws_event->resetAllXToSingleBin();
+  } else if (WorkspaceGroup_sptr ws_group =
+                 boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+    auto num_entries = static_cast<size_t>(ws_group->getNumberOfEntries());
+    for (size_t i = 0; i < num_entries; ++i) {
+      auto ws = ws_group->getItem(i);
+      if (auto ws_event = boost::dynamic_pointer_cast<EventWorkspace>(ws))
+        ws_event->resetAllXToSingleBin();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadLiveData::exec() {
@@ -440,6 +466,11 @@ void LoadLiveData::exec() {
   // TODO: Have the ILiveListener tell me exactly the time stamp
   DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
   this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
+
+  // For EventWorkspaces, we adjust the X values such that all events fit
+  // within the bin boundaries. This is done both before and after the
+  // "Process" step. Any custom rebinning should be done in Post-Processing.
+  this->resetAllXToSingleBin(chunkWS);
 
   // Now we process the chunk
   Workspace_sptr processed = this->processChunk(chunkWS);
@@ -501,21 +532,9 @@ void LoadLiveData::exec() {
     this->addChunk(processed);
 
   // For EventWorkspaces, we adjust the X values such that all events fit
-  // within the bin boundaries. This will overwrite any rebinning that was
-  // done as a pre-process step. If different bin boundaries are desired, the
-  // user should do their rebinning as a Post-Process step instead.
-  if (EventWorkspace_sptr accum_event =
-          boost::dynamic_pointer_cast<EventWorkspace>(m_accumWS)) {
-    accum_event->resetAllXToSingleBin();
-  } else if (WorkspaceGroup_sptr accum_gws =
-                 boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS)) {
-    auto num_entries = static_cast<size_t>(accum_gws->getNumberOfEntries());
-    for (size_t i = 0; i < num_entries; ++i) {
-      auto ws = accum_gws->getItem(i);
-      if (auto ws_event = boost::dynamic_pointer_cast<EventWorkspace>(ws))
-        ws_event->resetAllXToSingleBin();
-    }
-  }
+  // within the bin boundaries. This is done both before and after the
+  // "Process" step. Any custom rebinning should be done in Post-Processing.
+  this->resetAllXToSingleBin(m_accumWS);
 
   // At this point, m_accumWS is set.
 
