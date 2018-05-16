@@ -21,7 +21,7 @@ using namespace boost::python;
  * Construct the "wrapper" and stores the reference to the PyObject
  * @param self A reference to the calling Python object
  */
-IFunction1DAdapter::IFunction1DAdapter(PyObject *self)
+IFunction1DAdapter::IFunction1DAdapter(PyObject *self, bool)
     : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self),
       m_derivOveridden(false) {
   m_derivOveridden = Environment::typeHasAttribute(self, "functionDeriv1D");

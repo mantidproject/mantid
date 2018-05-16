@@ -55,7 +55,7 @@ class IFunction1DAdapter : public virtual API::ParamFunction,
 #endif
 public:
   /// A constructor that looks like a Python __init__ method
-  IFunction1DAdapter(PyObject *self);
+  IFunction1DAdapter(PyObject *self, bool isCreatedByFactory = false);
 
   /// Disable copy operator - The PyObject must be supplied to construct the
   /// object

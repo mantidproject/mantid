@@ -1,4 +1,4 @@
-from mantid.api import FunctionFactory, Workspace, AlgorithmManager
+from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
 
 
 class FunctionWrapper(object):
@@ -753,3 +753,21 @@ def _create_wrappers_for_all_fit_functions():
 
 
 _create_wrappers_for_all_fit_functions()
+
+
+_OldIFunction1D = IFunction1D
+
+
+class _NewIFunction1D(_OldIFunction1D):
+    """Overriden IFunction1D class that allows creation of
+    FunctionWrappers for newly defined fit functions.
+    """
+
+    def __new__(cls, _is_called_by_function_factory=False, **kwargs):
+        if _is_called_by_function_factory or (hasattr(cls.__init__, '__code__') and
+                cls.__init__.__code__.co_argcount == 1):
+            return _OldIFunction1D.__new__(cls)
+        return FunctionWrapper(cls.__name__, **kwargs)
+
+
+IFunction1D = _NewIFunction1D

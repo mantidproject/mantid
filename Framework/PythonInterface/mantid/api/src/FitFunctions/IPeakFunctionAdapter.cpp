@@ -20,7 +20,7 @@ using namespace boost::python;
  * Construct the "wrapper" and stores the reference to the PyObject
  * @param self A reference to the calling Python object
  */
-IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
+IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self, bool)
     : API::IPeakFunction(), IFunction1DAdapter(self) {}
 
 /**

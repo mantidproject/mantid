@@ -44,7 +44,7 @@ class IPeakFunctionAdapter : public API::IPeakFunction,
                              public IFunction1DAdapter {
 public:
   /// A constructor that looks like a Python __init__ method
-  IPeakFunctionAdapter(PyObject *self);
+  IPeakFunctionAdapter(PyObject *self, bool isCreatedByFactory = false);
 
   /// Disable copy operator - The PyObject must be supplied to construct the
   /// object

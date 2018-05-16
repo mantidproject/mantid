@@ -9,7 +9,7 @@ import platform
 from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit, FitDialog 
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper 
 from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction,\
-    CompositeFunction
+    CompositeFunction, IFunction1D, FunctionFactory, Fit
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -680,6 +680,64 @@ class FitFunctionsTest(unittest.TestCase):
     def test_attributes_passed_to_multidomain_function(self):
         cf = MultiDomainFunction(Gaussian(), Gaussian(), NumDeriv=True)
         self.assertEqual(cf.getAttributeValue('NumDeriv'), True)
+
+    def test_new_function(self):
+        class AFunction(IFunction1D):
+
+            def init(self):
+                self.declareParameter("C", 0.0)
+
+            def function1D(self, xvals):
+                c = self.getParameterValue("C")
+                return c * xvals
+
+        FunctionFactory.subscribe(AFunction)
+        fun = AFunction()
+        self.assertEqual(str(fun), 'name=AFunction,C=0')
+        fun.C = 2
+        self.assertEqual(fun(2), 4)
+        fun = AFunction(C=3)
+        self.assertEqual(fun.C, 3)
+        self.assertEqual(fun(2), 6)
+
+    def test_new_function_init(self):
+        class BFunction(IFunction1D):
+            def __init__(self, created_by_factory):
+                super(BFunction, self).__init__(created_by_factory)
+
+            def init(self):
+                self.declareParameter("C", 0.0)
+
+            def function1D(self, xvals):
+                c = self.getParameterValue("C")
+                return c * xvals
+
+        FunctionFactory.subscribe(BFunction)
+        fun = BFunction()
+        self.assertEqual(str(fun), 'name=BFunction,C=0')
+        fun.C = 2
+        self.assertEqual(fun(2), 4)
+        fun = BFunction(C=3)
+        self.assertEqual(fun.C, 3)
+        self.assertEqual(fun(2), 6)
+
+    def test_new_function_init_no_args_no_subscribe(self):
+        class BFunction(IFunction1D):
+            def __init__(self):
+                super(BFunction, self).__init__()
+                self.declareParameter("C", 2.0)
+
+            def function1D(self, xvals):
+                c = self.getParameterValue("C")
+                return c * xvals
+
+        fun = BFunction()
+        self.assertRaises(TypeError, fun, 4)
+
+        ws = CreateWorkspace(DataX=[0,1,2,3,4], DataY=[5,5,5,5,5])
+        cws = EvaluateFunction(fun,"ws", OutputWorkspace='out')
+        cvals = cws.readY(1)
+        self.assertEqual(list(cvals), [0.0, 2.0, 4.0, 6.0, 8.0])
 
 
 if __name__ == '__main__':
