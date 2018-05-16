@@ -59,8 +59,6 @@ public:
 
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
-  void moveCustomFunctionsToEnd();
-
   void addCheckBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions,
@@ -117,10 +115,12 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
-  void updateParameterValues(const QHash<QString, double> &parameterValues);
-
-  void updateParameterValues(PropertyHandler *functionHandler,
-                             const QHash<QString, double> &parameterValues);
+  void updateTies();
+  void updateTie(std::size_t index);
+  void addTie(const QString &tie);
+  void removeTie(const QString &parameter);
+  void updateErrors();
+  void clearErrors();
 
   void removeFunction(PropertyHandler *handler) override;
 

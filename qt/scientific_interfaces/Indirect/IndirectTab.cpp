@@ -456,35 +456,6 @@ void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
   preview->setAxisRange(range, QwtPlot::yLeft);
 }
 
-/*
- * Extracts the row at the specified index in the specified table workspace, as
- * a map from the column name to the value in that column in the extracted row.
- *
- * @param tableWs           The table workspace to extract a row from.
- * @param columnsToExtract  The names of the columns to extract.
- * @param wsIndex           The index of the row to extract.
- * @return                  A map from the name of a column to the value in that
- *                          column (from the extracted row).
- */
-QHash<QString, double>
-IndirectTab::extractRowFromTable(ITableWorkspace_sptr tableWs,
-                                 const QSet<QString> &columnsToExtract,
-                                 size_t wsIndex) {
-  std::vector<std::string> columnNames = tableWs->getColumnNames();
-  QHash<QString, double> parameters;
-
-  for (size_t column = 0; column < columnNames.size(); ++column) {
-    const auto columnName = QString::fromStdString(columnNames[column]);
-
-    if (columnsToExtract.contains(columnName)) {
-      double value = tableWs->Double(wsIndex, column);
-      parameters.insert(columnName, value);
-    }
-  }
-
-  return parameters;
-}
-
 /**
  * Sets the edge bounds of plot to prevent the user inputting invalid values
  * Also sets limits for range selector movement
@@ -682,106 +653,18 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
   return workspaceExists;
 }
 
-/*
- * Extracts the parameter values in the specified columns of the table
- * workspace, with the specified name, for each row in the table workspace.
- *
- * @param  tableWs            The table workspace to extract values from.
- * @param  columnsToExtract   A set of the names of the columns to extract
- *                            values from.
- * @param  minSpectrum        The spectrum index corresponding to the first row
- *                            in the table workspace.
- * @param  maxSpectrum        The max spectrum index, such that:
- *                            1 + maxSpectrum - minSpectrum
- *                            Is the number of rows, starting from the first,
- *                            extracted from the table workspace.
- * @return                    A map from spectrum index to a map of column name
- *                            to the value in the cell at the specified spectrum
- *                            index in the column with the specified name.
- */
-QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
-    const std::string &tableWsName, const QSet<QString> &columnsToExtract,
-    size_t minSpectrum, size_t maxSpectrum) {
-  std::vector<size_t> spectraIndices;
-  spectraIndices.reserve(1 + maxSpectrum - minSpectrum);
-
-  for (size_t index = minSpectrum; index <= maxSpectrum; ++index) {
-    spectraIndices.push_back(index);
-  }
-
-  return extractParametersFromTable(tableWsName, columnsToExtract,
-                                    spectraIndices);
-}
-
-/*
- * Extracts the parameter values in the specified columns of the table
- * workspace, with the specified name, for each row in the table workspace.
- *
- * @param  tableWs            The table workspace to extract values from.
- * @param  columnsToExtract   A set of the names of the columns to extract
- *                            values from.
- * @param  spectraIndices     The spectrum indices which each row in the table
- *                            workspace maps onto.
- * @return                    A map from spectrum index to a map of column name
- *                            to the value in the cell at the specified spectrum
- *                            index in the column with the specified name.
- */
-QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
-    const std::string &tableWsName, const QSet<QString> &columnsToExtract,
-    const std::vector<size_t> &spectraIndices) {
-  using AnalysisDataService = Mantid::API::AnalysisDataService;
-  using ITableWorkspace = Mantid::API::ITableWorkspace;
-
-  // Check if a table with the specified name exists in the ADS
-  if (AnalysisDataService::Instance().doesExist(tableWsName)) {
-    auto tableWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        tableWsName);
-    return extractParametersFromTable(tableWs, columnsToExtract,
-                                      spectraIndices);
-  }
-
-  throw std::invalid_argument("Table workspace with the specified name does "
-                              "not exist in the Analysis Data Service.");
-}
-
-/*
- * Extracts the parameter values in the specified columns of the table workspace
- * for each row in the table workspace.
- *
- * @param  tableWs            The table workspace to extract values from.
- * @param  columnsToExtract   A set of the names of the columns to extract
- *                            values from.
- * @param  spectraIndices     The spectrum indices which each row in the table
- *                            workspace maps onto.
- * @return                    A map from spectrum index to a map of column name
- *                            to the value in the cell at the specified spectrum
- *                            index in the column with the specified name.
- */
-QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
-    Mantid::API::ITableWorkspace_sptr tableWs,
-    const QSet<QString> &columnsToExtract,
-    const std::vector<size_t> &spectraIndices) {
-  QHash<size_t, QHash<QString, double>> parameterValues;
-
-  for (size_t i = 0; i < tableWs->rowCount(); ++i) {
-    parameterValues[spectraIndices[i]] =
-        extractRowFromTable(tableWs, columnsToExtract, i);
-  }
-  return parameterValues;
-}
-
-QHash<QString, size_t> IndirectTab::extractAxisLabels(
+std::unordered_map<std::string, size_t> IndirectTab::extractAxisLabels(
     Mantid::API::MatrixWorkspace_const_sptr workspace,
     const size_t &axisIndex) const {
   Axis *axis = workspace->getAxis(axisIndex);
   if (!axis->isText())
-    return QHash<QString, size_t>();
+    return std::unordered_map<std::string, size_t>();
 
   TextAxis *textAxis = boost::static_pointer_cast<TextAxis>(axis);
-  QHash<QString, size_t> labels;
+  std::unordered_map<std::string, size_t> labels;
 
   for (size_t i = 0; i < textAxis->length(); ++i)
-    labels[QString::fromStdString(textAxis->label(i))] = i;
+    labels[textAxis->label(i)] = i;
   return labels;
 }
 
