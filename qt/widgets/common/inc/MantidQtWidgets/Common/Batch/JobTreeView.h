@@ -36,7 +36,6 @@ public:
   JobTreeView(QStringList const &columnHeadings, Cell const &defaultCellStyle,
               QWidget *parent = nullptr);
 
-  void enableFiltering();
   void filterRowsBy(std::unique_ptr<RowPredicate> predicate);
   void filterRowsBy(RowPredicate *predicate);
   void resetFilter();
@@ -147,8 +146,9 @@ private:
   QModelIndex applyNavigationResult(QtTreeCursorNavigationResult const &result);
   std::pair<QModelIndexForFilteredModel, bool>
   findOrMakeCellBelow(QModelIndexForFilteredModel const &index);
-
   bool hasEditorOpen() const;
+
+  void enableFiltering();
 
   QtTreeCursorNavigation navigation() const;
   RowLocationAdapter rowLocation() const;
