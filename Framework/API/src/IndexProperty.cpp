@@ -19,6 +19,9 @@ bool IndexProperty::isDefault() const { return m_value.empty(); }
 
 std::string IndexProperty::isValid() const {
   std::string error;
+  // No workspace acts as an empty set and so is considered valid
+  if (!m_workspaceProp.getWorkspace())
+    return error;
 
   try {
     getIndices();

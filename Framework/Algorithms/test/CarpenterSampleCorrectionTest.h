@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
+#include "MantidAlgorithms/CarpenterSampleCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -20,16 +20,16 @@ using namespace Mantid::Kernel;
 
 using Mantid::DataObjects::EventWorkspace;
 
-class MultipleScatteringCylinderAbsorptionTest : public CxxTest::TestSuite {
+class CarpenterSampleCorrectionTest : public CxxTest::TestSuite {
 public:
   void testName() {
-    TS_ASSERT_EQUALS(algorithm.name(), "MultipleScatteringCylinderAbsorption");
+    TS_ASSERT_EQUALS(algorithm.name(), "CarpenterSampleCorrection");
   }
 
   void testVersion() { TS_ASSERT_EQUALS(algorithm.version(), 1); }
 
   void testInit() {
-    Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm_b;
+    Mantid::Algorithms::CarpenterSampleCorrection algorithm_b;
     TS_ASSERT_THROWS_NOTHING(algorithm_b.initialize());
     TS_ASSERT(algorithm_b.isInitialized());
 
@@ -81,7 +81,7 @@ public:
     convertUnitsAlg->execute();
 
     // create and execute the algorithm
-    Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm_c;
+    Mantid::Algorithms::CarpenterSampleCorrection algorithm_c;
     TS_ASSERT_THROWS_NOTHING(algorithm_c.initialize());
     TS_ASSERT(algorithm_c.isInitialized());
 
@@ -129,8 +129,7 @@ public:
   }
 
   void testCalculationEvent() {
-    const std::string outName(
-        "MultipleScatteringCylinderAbsorptionEventOutput");
+    const std::string outName("CarpenterSampleCorrectionEventOutput");
 
     // setup the test workspace
     auto wksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
@@ -140,10 +139,11 @@ public:
     wksp->getSpectrum(0)
         .convertTof(.09, 1.); // convert to be from 1->10 (about)
     const std::size_t NUM_EVENTS = wksp->getNumberEvents();
+
     AnalysisDataService::Instance().add(outName, wksp);
 
     // create the algorithm
-    Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm;
+    Mantid::Algorithms::CarpenterSampleCorrection algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize());
     TS_ASSERT(algorithm.isInitialized());
 
@@ -164,11 +164,10 @@ public:
     TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);
 
     // do the final comparison - this is done by bounding
-    std::vector<double> y_actual;
-    wksp->getSpectrum(0).getWeights(y_actual);
+    const auto &y_actual = wksp->histogram(0).y();
     for (size_t i = 0; i < y_actual.size(); ++i) {
-      TS_ASSERT_LESS_THAN(1.19811, y_actual[i]);
-      TS_ASSERT_LESS_THAN(y_actual[i], 3.3324);
+      TS_ASSERT_LESS_THAN(2.39621, y_actual[i]);
+      TS_ASSERT_LESS_THAN(y_actual[i], 6.66480);
     }
 
     // cleanup
@@ -176,7 +175,7 @@ public:
   }
 
 private:
-  Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm;
+  Mantid::Algorithms::CarpenterSampleCorrection algorithm;
 };
 
 #endif /*MULTIPLE_SCATTERING_ABSORPTION_TEST_H_*/

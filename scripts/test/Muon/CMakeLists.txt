@@ -6,6 +6,7 @@ set ( TEST_PY_FILES
    FFTPresenter_test.py
    FFTModel_test.py
    MaxEntPresenter_test.py
+   MaxEntModel_test.py
    transformPresenter_test.py
 )
 

@@ -151,6 +151,11 @@ public:
     }
   }
 
+  void test_cannot_be_converted_to_double() {
+    PeakColumn col(m_peaks, "DetID");
+    TS_ASSERT(!col.isNumber());
+  }
+
 private:
   /// A locale facet mocking non-english numerical punctuation.
   class TestingNumpunctFacet : public std::numpunct<char> {

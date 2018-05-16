@@ -23,45 +23,45 @@ examples in parallel using 8 cores):
 
 .. code-block:: sh
 
-   make -j8 AllTests
+   make -j8 AllTests
 
 To build only one package of tests (and its dependencies):
 
 .. code-block:: sh
 
-   make -j8 KernelTest
+   make -j8 KernelTest
 
 To run all the tests:
 
 .. code-block:: sh
 
-   ctest -j8
+   ctest -j8
 
 To build and run all the tests in one shot:
 
 .. code-block:: sh
 
-   make -j8 check
+   make -j8 check
 
 To run a specific test or set of tests (will run all those that match
 the search string):
 
 .. code-block:: sh
 
-   ctest -R KernelTest_TimerTest
+   ctest -R KernelTest_TimerTest
 
 So to run all tests in a suite (using a search string):
 
 .. code-block:: sh
 
-   ctest -j8 -R KernelTest
+   ctest -j8 -R KernelTest
 
 To exclude things from your tests (matches the string as with the -R
 option) - useful for those building the performance tests:
 
 .. code-block:: sh
 
-   ctest -j8 -E Performance
+   ctest -j8 -E Performance
 
 Useful CTest Options
 ####################
@@ -118,7 +118,7 @@ can run the tests by selecting the configuration;
 
 .. code-block:: sh
 
-   ctest -C Debug -j4
+   ctest -C Debug -j4
 
 This runs all tests in Debug mode (note that this will NOT build any
 outdated libraries). To select a subset use the ``-R`` option:
@@ -127,7 +127,7 @@ outdated libraries). To select a subset use the ``-R`` option:
 
    ctest -C Release -R Kernel -j4
 
-   (-R Kernel), with 4 cores (-j4), in Release mode (-C Release).
+   (-R Kernel), with 4 cores (-j4), in Release mode (-C Release).
 
 Debugging unit tests
 ####################
