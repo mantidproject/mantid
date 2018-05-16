@@ -135,8 +135,8 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
                                               latticeParams, params.runLabel);
 }
 
-void EnggDiffGSASFittingModel::doRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
+void EnggDiffGSASFittingModel::doRefinements(
+    const std::vector<GSASIIRefineFitPeaksParameters> &params) {
   m_workerThread = Mantid::Kernel::make_unique<QThread>(this);
   EnggDiffGSASFittingWorker *worker =
       new EnggDiffGSASFittingWorker(this, params);
@@ -147,11 +147,13 @@ void EnggDiffGSASFittingModel::doRefinement(
       "GSASIIRefineFitPeaksOutputProperties");
 
   connect(m_workerThread.get(), SIGNAL(started()), worker,
-          SLOT(doRefinement()));
+          SLOT(doRefinements()));
   connect(worker,
           SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
           this, SLOT(processRefinementSuccessful(
                     const GSASIIRefineFitPeaksOutputProperties &)));
+  connect(worker, SIGNAL(refinementsComplete()), this,
+          SLOT(processRefinementsComplete()));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
           SLOT(processRefinementFailed(const std::string &)));
   connect(worker, SIGNAL(refinementCancelled()), this,
@@ -204,6 +206,10 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(wsName);
   return ws;
+}
+
+void EnggDiffGSASFittingModel::processRefinementsComplete() {
+  m_observer->notifyRefinementsComplete();
 }
 
 void EnggDiffGSASFittingModel::processRefinementFailed(

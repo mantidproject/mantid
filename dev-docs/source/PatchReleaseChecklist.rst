@@ -92,8 +92,11 @@ updated to the patch milestone.
 Nightly Builds
 ##############
 
-The `Jenkins Release Pipeline <http://builds.mantidproject.org/view/Release%20Pipeline/>`__ contains jobs
-that check for changes on the current release branch each night (00:00 GMT). Any detected changes will cause a clean build of the code followed by a run of the system tests. The Linux clean builds should have the `PACKAGE_SUFFIX` set to `nightly` while testing the patch.
+The `release pipeline <release-pipeline>`_ contains jobs
+that check for changes on the current release branch each night (00:00 GMT).
+Any detected changes will cause a clean build of the code followed by a run
+of the system tests. The Linux clean builds should have the `PACKAGE_SUFFIX` set
+to `nightly` while testing the patch.
 
 These jobs should be checked each morning to confirm that everything is green.
 
@@ -104,7 +107,7 @@ On the day of release a few steps are required:
 
 * update the patch version:
 * navigate to
-  {{site.mantidrepo}}/blob/release-X.Y./buildconfig/CMake/VersionNumber.cmake,
+  https://www.github.com/mantidproject/mantid/blob/release-X.Y./buildconfig/CMake/VersionNumber.cmake,
   where ``X`` & ``Y`` are the major and minor release versions
   respectively.
 * edit the ``VERSION_PATCH`` to the required number for the patch and
@@ -125,13 +128,13 @@ particular the issues intended to be fixed should be tested.
 
 Once the testing has passed:
 
-* Use the manual deploy job at {{ site.mantidreleasebuilds }} to deploy
+* Use the manual deploy job at `release pipeline <release-pipeline>`_ to deploy
   packages and documentation to the public web.
 * The windows binary will **not** be deployed and must be signed by
   someone at ISIS and uploaded to sourceforge manually
 * Put packages on GitHub
 * RHEL 7 only: Build the suffix-package ``mantidXY`` by running another
-  clean RHEL 7 build at {{ site.mantidreleasebuilds }} but use the
+  clean RHEL 7 build from the `release pipeline <release-pipeline>`_ but use the
   suffix XY, where ``X`` is the major version and ``Y`` is the minor
   version (currently used at SNS)
 * Have someone at the SNS follow the instructions
@@ -149,3 +152,7 @@ Once the testing has passed:
 * Add topic to the news page on the `forum <http://forum.mantidproject.org/>`__
 * Close the release milestone in github
 * Remove the patch candidate tag from pull requests (if not already done)
+
+.. Link definitions
+
+.. _release-pipeline: http://builds.mantidproject.org/view/Release%20Pipeline/

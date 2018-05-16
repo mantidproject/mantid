@@ -46,6 +46,9 @@ Changes in this version
 * `21655 <https://github.com/mantidproject/mantid/pull/21655>`_ Remove dependence of Kafka Live Listener on ISIS specific event data
 * `22226 <https://github.com/mantidproject/mantid/pull/22226>`_ Error when deleting a workspace group in MantidPlot
 * `20997 <https://github.com/mantidproject/mantid/pull/20997>`_ Re #20991: Updated Reflectometry IDFs
+* `22290 <https://github.com/mantidproject/mantid/pull/22290>`_ Updated print statement to python 3 in SaveWorkspaces
+* `22152 <https://github.com/mantidproject/mantid/pull/22152>`_ Updated IDF for D2B
+* `22175 <https://github.com/mantidproject/mantid/pull/22175>`_ Fix failing Reflectometry doctests
 
 Summary of impact
 -----------------
@@ -81,6 +84,12 @@ Summary of impact
 | 20997 | Updated Reflectometry IDFs                                                              | Changed IDFs              | **low**      |
 +-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
 | 20997 | Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``| Removed old algorithms    | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22290 | Updated print statement in SaveWorkspaces                                               | Made Python3 compatible   | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 11152 | Updated IDF for D2B                                                                     | Updated IDF               | **low**      |
++-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
+| 22175 | Fix failing Reflectometry doctests                                                      | Updated expected values   | **low**      |
 +-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org

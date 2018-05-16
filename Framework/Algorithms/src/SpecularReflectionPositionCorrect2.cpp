@@ -71,10 +71,13 @@ void SpecularReflectionPositionCorrect2::init() {
 
   declareProperty(
       Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
-          "DetectorComponentName", "",
-          boost::make_shared<MandatoryValidator<std::string>>(),
-          Direction::Input),
+          "DetectorComponentName", "", Direction::Input),
       "Name of the detector component to correct, i.e. point-detector");
+
+  declareProperty("DetectorID", -1,
+                  "The ID of the detector to correct. If both "
+                  "the component name and the detector ID "
+                  "are set the latter will be used.");
 
   declareProperty(
       Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -108,10 +111,17 @@ void SpecularReflectionPositionCorrect2::exec() {
   auto inst = outWS->getInstrument();
 
   // Detector
+  const int detectorID = getProperty("DetectorID");
   const std::string detectorName = getProperty("DetectorComponentName");
-  if (!inst->getComponentByName(detectorName))
-    throw std::runtime_error("Detector component not found.");
-  IComponent_const_sptr detector = inst->getComponentByName(detectorName);
+
+  IComponent_const_sptr detector;
+  if (detectorID > 0) {
+    detector = inst->getDetector(detectorID);
+  } else {
+    if (!inst->getComponentByName(detectorName))
+      throw std::runtime_error("Detector component not found.");
+    detector = inst->getComponentByName(detectorName);
+  }
   const V3D detectorPosition = detector->getPos();
 
   // Sample
@@ -165,7 +175,11 @@ void SpecularReflectionPositionCorrect2::exec() {
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->initialize();
   moveAlg->setProperty("Workspace", outWS);
-  moveAlg->setProperty("ComponentName", detectorName);
+  if (!detectorName.empty()) {
+    moveAlg->setProperty("ComponentName", detectorName);
+  } else {
+    moveAlg->setProperty("DetectorID", detectorID);
+  }
   moveAlg->setProperty("RelativePosition", false);
   moveAlg->setProperty(beamAxis, beamOffsetFromOrigin);
   moveAlg->setProperty(horizontalAxis, 0.0);

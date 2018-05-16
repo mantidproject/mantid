@@ -21,6 +21,8 @@ using namespace Kernel;
 * @param inputs : input workspaces vector [including] group workspaces (all must
 * be on ADS)
 * @return : the flat vector of the input workspaces
+* @throw : std::runtime_error if the input workspaces are neither groups nor
+* MatrixWorkspaces
 */
 std::vector<std::string>
 RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
@@ -33,8 +35,15 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
       std::vector<std::string> group = wsgroup->getNames();
       outputs.insert(outputs.end(), group.begin(), group.end());
     } else {
-      // single workspace
-      outputs.push_back(input);
+      // MatrixWorkspace
+      MatrixWorkspace_sptr matrixws =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
+      if (matrixws)
+        outputs.push_back(matrixws->getName());
+      else
+        throw(std::runtime_error(
+            "The input " + input +
+            " is neither a WorkspaceGroup nor a MatrixWorkspace"));
     }
   }
   return outputs;
