@@ -8,16 +8,8 @@ set ( INC_FILES
 	inc/MantidMuon/MuonAlgorithmHelper.h
 )
 
-# set(SRC_UNITY_IGNORE_FILES)
-
-#if(UNITY_BUILD)
-#  include(UnityBuild)
-#  enable_unity_build(Muon SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-#endif(UNITY_BUILD)
-
-# set ( TEST_FILES )
-
-# set ( TEST_PY_FILES )
+set ( TEST_FILES 
+	ApplyMuonDetectorsGroupingTest.h)
 
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
