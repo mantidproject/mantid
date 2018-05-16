@@ -37,12 +37,11 @@ private:
   * @param value1 :: the Y counts in the first spectrum (constant for all X)
   * @param value2 :: the Y counts in the second spectrum (constant for all X)
   * @param runAlg :: set true to run the CreateWorkspace algorithm
-  * @oaram outWSName :: output workspace name used if running CreateWorkspace
+  * @param outWSName :: output workspace name used if running CreateWorkspace
   */
-  MatrixWorkspace_sptr createUniformWorkspace(double xstart, double deltax,
-                                              double value1, double value2,
-                                              bool runAlg = false,
-                                              std::string outWSName = "") {
+  void createUniformWorkspace(double xstart, double deltax, double value1,
+                              double value2, std::string outWSName,
+                              bool runAlg = false) {
 
     const int nbins = 10;
     std::vector<double> xData1(nbins + 1);
@@ -90,14 +89,13 @@ private:
       cw.setProperty("DataE", eData1);
       cw.setProperty("NSpec", 2);
       cw.setProperty("UnitX", "Wavelength");
-      cw.setPropertyValue("OutputWorkspace", outWSName);
+      cw.setProperty("OutputWorkspace", outWSName);
       cw.execute();
 
       ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           outWSName);
     }
-
-    return ws;
+    AnalysisDataService::Instance().addOrReplace(outWSName, ws);
   }
 
   /** Groups workspaces using GroupWorkspaces algorithm. The output workpace is
@@ -105,16 +103,15 @@ private:
   * @param inputWSNames :: input workspaces names
   * @param outputWSName :: output workspace name
   */
-  WorkspaceGroup_sptr doGroupWorkspaces(std::string inputWSNames,
-                                        std::string outWSName) {
+  void doGroupWorkspaces(std::string inputWSNames, std::string outWSName) {
     GroupWorkspaces gw;
     gw.initialize();
     gw.setProperty("InputWorkspaces", inputWSNames);
     gw.setProperty("OutputWorkspace", outWSName);
     gw.execute();
-
-    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        outWSName);
+    auto ws =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
+    AnalysisDataService::Instance().addOrReplace(outWSName, ws);
   }
 
   /** Obtain all algorithm histories from a workspace
@@ -136,11 +133,17 @@ public:
   static Stitch1DManyTest *createSuite() { return new Stitch1DManyTest(); }
   static void destroySuite(Stitch1DManyTest *suite) { delete suite; }
 
-  Stitch1DManyTest() {
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+  Stitch1DManyTest() {}
+
+  void test_testWorkspaces() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("ws1"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("ws2"));
+    doGroupWorkspaces("ws1, ws2", "out");
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("out"));
+    AnalysisDataService::Instance().clear();
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("out"));
   }
 
   void test_init() {
@@ -150,6 +153,7 @@ public:
   }
 
   void test_throws_with_too_few_workspaces() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -157,9 +161,12 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 1.8");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_throws_with_wrong_number_of_start_overlaps() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -169,9 +176,12 @@ public:
     alg.setProperty("EndOverlaps", "0.5");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_throws_with_wrong_number_of_end_overlaps() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -181,9 +191,12 @@ public:
     alg.setProperty("EndOverlaps", "0.5, 0.6");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_throws_with_wrong_number_of_given_scale_factors() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -193,13 +206,13 @@ public:
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_matrix_and_non_matrix_workspace_types_throws() {
     // One matrix workspace, one table workspace
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
     auto ws2 = WorkspaceFactory::Instance().createTable();
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     AnalysisDataService::Instance().addOrReplace("ws2", ws2);
     Stitch1DMany alg;
     alg.setChild(true);
@@ -208,16 +221,14 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_group_and_non_group_workspace_types_throws() {
     // One group workspace, one matrix workspace
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    doGroupWorkspaces("ws2", "group1");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -225,18 +236,16 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_group_containing_non_matrix_workspace_types_throws() {
     // One group workspace, one group workspace of non-matrix workspace types
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
     auto ws2 = WorkspaceFactory::Instance().createTable();
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws2);
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    doGroupWorkspaces("ws1", "group1");
+    doGroupWorkspaces("ws2", "group2");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -244,22 +253,16 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_workspace_group_size_differ_throws() {
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
+    doGroupWorkspaces("ws1, ws2", "group1");
+    doGroupWorkspaces("ws3", "group2");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -267,34 +270,23 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_scale_factor_from_period_out_of_range_throws() {
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    group2->addWorkspace(ws4);
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
     // Third group
-    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0);
-    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
-    group3->addWorkspace(ws5);
-    group3->addWorkspace(ws6);
-
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-    AnalysisDataService::Instance().addOrReplace("group3", group3);
-
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
+    createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
+    doGroupWorkspaces("ws5, ws6", "group3");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -303,17 +295,13 @@ public:
     alg.setProperty("ScaleFactorFromPeriod", 4);
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_two_workspaces() {
     // Two matrix workspaces with two spectra each
-
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -324,7 +312,6 @@ public:
     alg.setProperty("OutputWorkspace", "outws");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
@@ -343,7 +330,6 @@ public:
     TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
     TS_ASSERT_DELTA(stitched->e(1)[9], 1.10982, 0.00001);
     TS_ASSERT_DELTA(stitched->e(1)[16], 1.79063, 0.00001);
-
     // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 1);
@@ -356,8 +342,8 @@ public:
     Mantid::Algorithms::Stitch1D alg2;
     alg2.setChild(true);
     alg2.initialize();
-    alg2.setProperty("LHSWorkspace", ws1);
-    alg2.setProperty("RHSWorkspace", ws2);
+    alg2.setProperty("LHSWorkspace", "ws1");
+    alg2.setProperty("RHSWorkspace", "ws2");
     alg2.setProperty("Params", "0.1, 0.1, 1.8");
     alg2.setProperty("StartOverlap", "0.8");
     alg2.setProperty("EndOverlap", "1.1");
@@ -370,20 +356,15 @@ public:
     TS_ASSERT_EQUALS(stitched->e(0).rawData(), stitched2->e(0).rawData());
 
     // Remove workspaces from ADS
-    AnalysisDataService::Instance().remove("ws1");
-    AnalysisDataService::Instance().remove("ws2");
+    AnalysisDataService::Instance().clear();
   }
 
   void test_three_workspaces() {
     // Three matrix workspaces with two spectra each
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
 
     Stitch1DMany alg;
     alg.setChild(true);
@@ -430,20 +411,14 @@ public:
     TS_ASSERT_DELTA(scales.back(), 0.6666, 0.0001);
 
     // Remove workspaces from ADS
-    AnalysisDataService::Instance().remove("ws1");
-    AnalysisDataService::Instance().remove("ws2");
-    AnalysisDataService::Instance().remove("ws3");
+    AnalysisDataService::Instance().clear();
   }
 
   void test_stitches_three_no_overlaps_specified_should_still_work() {
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
 
     Stitch1DMany alg;
     alg.setChild(true);
@@ -458,13 +433,9 @@ public:
   void test_three_workspaces_single_scale_factor_given() {
     // Three matrix workspaces with two spectra each
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
 
     Stitch1DMany alg;
     alg.setChild(true);
@@ -509,21 +480,15 @@ public:
     TS_ASSERT_EQUALS(scales[1], 0.5);
 
     // Remove workspaces from ADS
-    AnalysisDataService::Instance().remove("ws1");
-    AnalysisDataService::Instance().remove("ws2");
-    AnalysisDataService::Instance().remove("ws3");
+    AnalysisDataService::Instance().clear();
   }
 
   void test_three_workspaces_multiple_scale_factors_given() {
     // Three matrix workspaces with two spectra each
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
 
     Stitch1DMany alg;
     alg.setChild(true);
@@ -569,22 +534,16 @@ public:
     TS_ASSERT_EQUALS(scales[1], 0.7);
 
     // Remove workspaces from ADS
-    AnalysisDataService::Instance().remove("ws1");
-    AnalysisDataService::Instance().remove("ws2");
-    AnalysisDataService::Instance().remove("ws3");
+    AnalysisDataService::Instance().clear();
   }
 
   void test_one_group_two_workspaces() {
     // One group with two workspaces
     // Wrong: this algorithm can't stitch workspaces within a group
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->addWorkspace(ws1);
-    group->addWorkspace(ws2);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
 
     Stitch1DMany alg;
     alg.setChild(true);
@@ -603,19 +562,12 @@ public:
     // Three groups with a single matrix workspace each. Each matrix workspace
     // has two spectra.
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws2);
-    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
-    group3->addWorkspace(ws3);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-    AnalysisDataService::Instance().addOrReplace("group3", group3);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
+    doGroupWorkspaces("ws1", "group1");
+    doGroupWorkspaces("ws2", "group2");
+    doGroupWorkspaces("ws3", "group3");
 
     Stitch1DMany alg;
     alg.setChild(true);
@@ -677,22 +629,13 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    group2->addWorkspace(ws4);
-
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
     // ws1 will be stitched with ws3
     // ws2 will be stitched with ws4
 
@@ -771,22 +714,13 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    group2->addWorkspace(ws4);
-
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
     // ws1 will be stitched with ws3
     // ws2 will be stitched with ws4
 
@@ -871,29 +805,17 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    group2->addWorkspace(ws4);
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
     // Third group
-    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0);
-    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
-    group3->addWorkspace(ws5);
-    group3->addWorkspace(ws6);
-
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-    AnalysisDataService::Instance().addOrReplace("group3", group3);
-
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
+    createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
+    doGroupWorkspaces("ws5, ws6", "group3");
     // ws1 will be stitched with ws3 and ws5
     // ws2 will be stitched with ws4 and ws6
 
@@ -987,29 +909,17 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    group2->addWorkspace(ws4);
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
     // Third group
-    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0);
-    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
-    group3->addWorkspace(ws5);
-    group3->addWorkspace(ws6);
-
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-    AnalysisDataService::Instance().addOrReplace("group3", group3);
-
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
+    createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
+    doGroupWorkspaces("ws5, ws6", "group3");
     // ws1 will be stitched with ws3 and ws5
     // ws2 will be stitched with ws4 and ws6
 
@@ -1103,8 +1013,8 @@ public:
     // This test is functionally similar to test_two_workspaces
 
     // Two matrix workspaces with two spectra each
-    createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
-    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws2");
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1", true);
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2", true);
 
     Stitch1DMany alg;
     alg.initialize();
@@ -1116,8 +1026,9 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    //TS_ASSERT(outws);
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("outws"));
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto stitched =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
 
@@ -1147,12 +1058,12 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
-    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1", true);
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2", true);
     doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
-    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3", true);
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4", true);
     doGroupWorkspaces("ws3, ws4", "group2");
 
     Stitch1DMany alg;
@@ -1166,8 +1077,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    //TS_ASSERT(outws);
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
     auto group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
@@ -1205,16 +1116,16 @@ public:
     // Each matrix workspace has two spectra.
 
     // First group
-    createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
-    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1", true);
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2", true);
     doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
-    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3", true);
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4", true);
     doGroupWorkspaces("ws3, ws4", "group2");
     // Third group
-    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, true, "ws5");
-    createUniformWorkspace(1.6, 0.1, 1.6, 3.0, true, "ws6");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5", true);
+    createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6", true);
     doGroupWorkspaces("ws5, ws6", "group3");
 
     Stitch1DMany alg;
@@ -1271,15 +1182,14 @@ public:
     ws2->initialize(1, histogram2);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-    //Stitch1DMany alg;
-    //alg.initialize();
-    //alg.setProperty("InputWorkspaces", "ws1, ws2");
-    //alg.setProperty("UseManualScaleFactors", "1");
-    //alg.setProperty("OutputWorkspace", "ws");
-    //alg.execute();
-    //TS_ASSERT(alg.isExecuted());
-    Mantid::API::AnalysisDataService::Instance().remove("ws1");
-    Mantid::API::AnalysisDataService::Instance().remove("ws2");
+    // Stitch1DMany alg;
+    // alg.initialize();
+    // alg.setProperty("InputWorkspaces", "ws1, ws2");
+    // alg.setProperty("UseManualScaleFactors", "1");
+    // alg.setProperty("OutputWorkspace", "ws");
+    // alg.execute();
+    // TS_ASSERT(alg.isExecuted());
+    Mantid::API::AnalysisDataService::Instance().clear();
   }
 };
 
