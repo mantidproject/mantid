@@ -1026,8 +1026,6 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    //TS_ASSERT(outws);
     auto stitched =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
 
@@ -1068,8 +1066,6 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    //TS_ASSERT(outws);
     auto group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
@@ -1123,8 +1119,6 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    //Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    //TS_ASSERT(outws);
     auto group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     auto stitched =
