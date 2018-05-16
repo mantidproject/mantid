@@ -595,9 +595,9 @@ public:
     HistogramData::Counts counts(points.size(), 0.0);
     // This value should be excluded.
     counts.mutableData()[2] = 10.0;
-    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
-                                1, HistogramData::Histogram(points, counts))
-                                .release());
+    MatrixWorkspace_sptr ws(
+        DataObjects::create<Workspace2D>(
+            1, HistogramData::Histogram(points, counts)).release());
     AnalysisDataService::Instance().addOrReplace("InputWS", ws);
 
     PlotPeakByLogValue alg;
