@@ -48,7 +48,7 @@ def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, positi
     # ------------------------------------------------------------------------------------------------------------------
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
     reduction_package = reduction_packages[0]
-    
+
     # ------------------------------------------------------------------------------------------------------------------
     # Setup the beam centre finder algorithm.
     # ------------------------------------------------------------------------------------------------------------------
