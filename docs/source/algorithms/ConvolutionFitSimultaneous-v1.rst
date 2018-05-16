@@ -31,11 +31,11 @@ Usage
   resolution = Load('irs26173_graphite002_red.nxs')
 
   # Set up algorithm parameters
-  function = """name=LinearBackground,$domains=i,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);
-                (composite=Convolution,FixResolution=true,NumDeriv=true;
-                name=Resolution,Workspace=resolution,WorkspaceIndex=0;
-                name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175);"""
-  multi_function = 'composite=MultiDomainFunction,NumDeriv=1;' + function + function
+  background = LinearBackground(A0=0, A1=0)
+  peak_function = Lorentzian(Amplitude=1, PeakCentre=0, FWHM=0.0175)
+  resolution_function = Resolution(Workspace=resolution.getName(), WorkspaceIndex=0)
+  model = CompositeFunction(background, Convolution(peak_function, resolution_function))
+  multi_function = MultiDomainFunction(model, model)
   startX = -0.547608
   endX = 0.543217
   specMin = 0
@@ -45,13 +45,17 @@ Usage
   maxIt = 500
 
   # Run algorithm (fit spectra 1 and 2)
-  result, params, fit_group = ConvolutionFitSimultaneous(Function=multi_function,
-                                                         InputWorkspace=sample, WorkspaceIndex=0,
-                                                         InputWorkspace_1=sample, WorkspaceIndex_1=1,
-                                                         StartX=startX, EndX=endX,
-                                                         StartX_1=startX, EndX_1=endX,
-                                                         ConvolveMembers=convolve,
-                                                         Minimizer=minimizer, MaxIterations=maxIt)
+  result, params, fit_group, status, chi2 = ConvolutionFitSimultaneous(Function=multi_function,
+                                                                       InputWorkspace=sample,
+                                                                       WorkspaceIndex=0,
+                                                                       InputWorkspace_1=sample,
+                                                                       WorkspaceIndex_1=1,
+                                                                       StartX=startX, EndX=endX,
+                                                                       StartX_1=startX, EndX_1=endX,
+                                                                       ConvolveMembers=convolve,
+                                                                       Minimizer=minimizer,
+                                                                       MaxIterations=maxIt,
+                                                                       OutputWorkspace="ConvFitResult")
 
 .. categories::
 

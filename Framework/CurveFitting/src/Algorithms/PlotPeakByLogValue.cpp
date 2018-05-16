@@ -305,7 +305,6 @@ void PlotPeakByLogValue::exec() {
         fit->setProperty("WorkspaceIndex", j);
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
-        fit->setProperty("Exclude", exclude);
         fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
         fit->setPropertyValue(
             "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
@@ -318,6 +317,7 @@ void PlotPeakByLogValue::exec() {
         if (!histogramFit) {
           fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
           fit->setProperty("ConvolveMembers", outputConvolvedMembers);
+          fit->setProperty("Exclude", exclude);
         }
         fit->setProperty("Output", wsBaseName);
         fit->execute();
