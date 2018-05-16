@@ -341,10 +341,11 @@ bool ISISCalibration::validate() {
 
   QString error = uiv.generateErrorMessage();
 
-  if (error != "")
+  if (error != "") {
     g_log.warning(error.toStdString());
-
-  return (error == "");
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -427,10 +428,6 @@ void ISISCalibration::calPlotRaw() {
  * Replots the energy mini plot
  */
 void ISISCalibration::calPlotEnergy() {
-  if (!m_uiForm.leRunNo->isValid()) {
-    emit showMessageBox("Run number not valid.");
-    return;
-  }
 
   const auto files = m_uiForm.leRunNo->getFilenames().join(",");
   auto reductionAlg = energyTransferReductionAlgorithm(files);
@@ -444,7 +441,7 @@ void ISISCalibration::calPlotEnergy() {
   WorkspaceGroup_sptr reductionOutputGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           "__IndirectCalibration_reduction");
-  if (reductionOutputGroup->size() == 0) {
+  if (reductionOutputGroup->isEmpty()) {
     g_log.warning("No result workspaces, cannot plot energy preview.");
     return;
   }
