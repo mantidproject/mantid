@@ -335,6 +335,7 @@ if ( ENABLE_CPACK )
                            "qt4-dev-tools,"
                            "libqwt5-qt4,"
                            "libqwtplot3d-qt4-0v5,"
+                           "libqtwebkit4"
                            "python-h5py,"
                            "python-numpy,"
                            "python-sip,"
