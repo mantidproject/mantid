@@ -45,13 +45,17 @@ Usage
   maxIt = 500
 
   # Run algorithm (fit spectra 1 and 2)
-  result, params, fit_group = ConvolutionFitSimultaneous(Function=multi_function,
-                                                         InputWorkspace=sample, WorkspaceIndex=0,
-                                                         InputWorkspace_1=sample, WorkspaceIndex_1=1,
-                                                         StartX=startX, EndX=endX,
-                                                         StartX_1=startX, EndX_1=endX,
-                                                         ConvolveMembers=convolve,
-                                                         Minimizer=minimizer, MaxIterations=maxIt)
+  result, params, fit_group, status, chi2 = ConvolutionFitSimultaneous(Function=multi_function,
+                                                                       InputWorkspace=sample,
+                                                                       WorkspaceIndex=0,
+                                                                       InputWorkspace_1=sample,
+                                                                       WorkspaceIndex_1=1,
+                                                                       StartX=startX, EndX=endX,
+                                                                       StartX_1=startX, EndX_1=endX,
+                                                                       ConvolveMembers=convolve,
+                                                                       Minimizer=minimizer,
+                                                                       MaxIterations=maxIt,
+                                                                       OutputWorkspace="ConvFitResult")
 
 .. categories::
 
