@@ -5,7 +5,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <QFileInfo>
-
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -390,11 +389,6 @@ void ISISCalibration::calPlotRaw() {
     return;
 
   m_lastCalPlotFilename = filename;
-
-  if (filename.isEmpty()) {
-    emit showMessageBox("Cannot plot raw data without filename");
-    return;
-  }
 
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
