@@ -34,6 +34,12 @@ QModelIndex StrictQModelIndex<Derived>::untyped() const {
   return m_untypedIndex;
 }
 
+template <typename Derived>
+bool operator==(StrictQModelIndex<Derived> const &lhs,
+                StrictQModelIndex<Derived> const &rhs) {
+  return lhs.untyped() == rhs.untyped();
+}
+
 template <typename Derived> int StrictQModelIndex<Derived>::row() const {
   return m_untypedIndex.row();
 }

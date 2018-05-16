@@ -45,12 +45,12 @@ public:
 
   void removeRowFrom(QModelIndexForMainModel const &index);
 
-private:
-  QList<QStandardItem *> rowItemsFromCells(std::vector<Cell> const &cells);
-
   template <typename Action>
   void enumerateCellsInRow(QModelIndexForMainModel const &startIndex,
                            int columns, Action const &action) const;
+
+private:
+  QList<QStandardItem *> rowItemsFromCells(std::vector<Cell> const &cells);
 
   QStandardItemModel &m_model;
   Cell m_emptyCellStyle;

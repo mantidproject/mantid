@@ -165,20 +165,48 @@ Cell JobTreeView::cellAt(RowLocation location, int column) const {
   return m_adaptedMainModel.cellFromCellIndex(cellIndex);
 }
 
+bool JobTreeView::isBeingEdited(
+    QModelIndexForFilteredModel const &cellIndex) const {
+  return hasEditorOpen() && fromFilteredModel(currentIndex()) == cellIndex;
+}
+
+void JobTreeView::closeEditorIfOpenAtCell(
+    QModelIndexForFilteredModel const &cellIndex) {
+  if (cellIndex.isValid() && isBeingEdited(cellIndex))
+    closePersistentEditor(cellIndex.untyped());
+}
+
+void JobTreeView::closeEditorIfCellIsUneditable(
+    QModelIndexForMainModel const &cellIndex, Cell const &cell) {
+  if (!cell.isEditable())
+    closeEditorIfOpenAtCell(mapToFilteredModel(cellIndex));
+}
+
 void JobTreeView::setCellAt(RowLocation location, int column,
                             Cell const &cell) {
   auto const cellIndex = rowLocation().indexAt(location, column);
   m_adaptedMainModel.setCellAtCellIndex(cellIndex, cell);
+  closeEditorIfCellIsUneditable(cellIndex, cell);
 }
 
 std::vector<Cell> JobTreeView::cellsAt(RowLocation const &location) const {
   return m_adaptedMainModel.cellsAtRow(rowLocation().indexAt(location));
 }
 
+void JobTreeView::closeAnyOpenEditorsOnUneditableCells(
+    QModelIndexForMainModel const &firstCellOnRow,
+    std::vector<Cell> const &cells) {
+  m_adaptedMainModel.enumerateCellsInRow(
+      firstCellOnRow, m_mainModel.columnCount(),
+      [&](QModelIndexForMainModel const &cellIndex, int column)
+          -> void { closeEditorIfCellIsUneditable(cellIndex, cells[column]); });
+}
+
 void JobTreeView::setCellsAt(RowLocation const &location,
                              std::vector<Cell> const &cells) {
-  return m_adaptedMainModel.setCellsAtRow(rowLocation().indexAt(location),
-                                          cells);
+  auto firstCellOnRow = rowLocation().indexAt(location);
+  m_adaptedMainModel.setCellsAtRow(firstCellOnRow, cells);
+  closeAnyOpenEditorsOnUneditableCells(firstCellOnRow, cells);
 }
 
 void JobTreeView::replaceSubtreeAt(RowLocation const &rootToRemove,
@@ -283,7 +311,7 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
                 "Attempted to delete the only child of the invisible root"
                 " for the main model. Try removeAllRows() instead.");
   if (rowRemovalWouldBeIneffective(indexToRemove)) {
-    // implies that indexToRemove corresponds to an index in filtered model.
+    // implies that indexToRemove corresponds to an index in the filtered model.
     auto rowIndexToSwitchTo =
         siblingIfExistsElseParent(mapToFilteredModel(indexToRemove).untyped());
     if (rowIndexToSwitchTo.isValid()) {
@@ -329,9 +357,11 @@ void JobTreeView::appendChildRowOf(RowLocation const &parent,
 }
 
 void JobTreeView::editAt(QModelIndexForFilteredModel const &index) {
-  clearSelection();
-  setCurrentIndex(index.untyped());
-  edit(index.untyped());
+  if (isEditable(index.untyped())) {
+    clearSelection();
+    setCurrentIndex(index.untyped());
+    edit(index.untyped());
+  }
 }
 
 QModelIndexForFilteredModel
@@ -354,9 +384,9 @@ RowLocationAdapter JobTreeView::rowLocation() const {
 
 std::pair<QModelIndexForFilteredModel, bool>
 JobTreeView::findOrMakeCellBelow(QModelIndexForFilteredModel const &index) {
-  if (hasRowBelow(index.untyped()))
+  if (hasRowBelow(index.untyped())) {
     return std::make_pair(fromFilteredModel(below(index.untyped())), false);
-  else {
+  } else {
     auto indexForModel = mapToMainModel(index);
     resetFilter();
     auto newIndex = m_adaptedMainModel.appendEmptySiblingRow(indexForModel);
@@ -385,9 +415,11 @@ void JobTreeView::appendAndEditAtChildRow() {
 }
 
 void JobTreeView::appendAndEditAtRowBelow() {
-  auto const below = findOrMakeCellBelow(fromFilteredModel(currentIndex()));
+  auto current = currentIndex();
+  auto const below = findOrMakeCellBelow(fromFilteredModel(current));
   auto index = below.first;
   auto isNew = below.second;
+
   editAt(index);
   if (isNew)
     m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));
@@ -440,21 +472,34 @@ JobTreeView::fromFilteredModel(QModelIndex const &filteredModelIndex) const {
                                                              m_filteredModel);
 }
 
+bool JobTreeView::isEditable(QModelIndex const &index) const {
+  return index.flags() & Qt::ItemIsEditable;
+}
+
+QtTreeCursorNavigationResult
+JobTreeView::moveNextUntilEditable(QModelIndex const &startingPoint) {
+  auto result = navigation().moveCursorNext(startingPoint);
+  while (!result.first && result.second.isValid() && !isEditable(result.second))
+    result = navigation().moveCursorNext(result.second);
+  return result;
+}
+
+QModelIndex
+JobTreeView::movePreviousUntilEditable(QModelIndex const &startingPoint) {
+  auto currentIndex = navigation().moveCursorPrevious(startingPoint);
+  while (currentIndex.isValid() && !isEditable(currentIndex))
+    currentIndex = navigation().moveCursorPrevious(currentIndex);
+  return currentIndex;
+}
+
 QModelIndex JobTreeView::moveCursor(CursorAction cursorAction,
                                     Qt::KeyboardModifiers modifiers) {
-  if (cursorAction == QAbstractItemView::MoveNext) {
-    auto result = navigation().moveCursorNext(currentIndex());
-    while (!result.first && result.second.isValid() && !(result.second.flags() & Qt::ItemIsEditable))
-      result = navigation().moveCursorNext(result.second);
-    return applyNavigationResult(result);
-  } else if (cursorAction == QAbstractItemView::MovePrevious) {
-    auto nextIndex = navigation().moveCursorPrevious(currentIndex());
-    while (nextIndex.isValid() && !(nextIndex.flags() & Qt::ItemIsEditable))
-      nextIndex = navigation().moveCursorPrevious(nextIndex);
-    return nextIndex;
-  } else {
+  if (cursorAction == QAbstractItemView::MoveNext)
+    return applyNavigationResult(moveNextUntilEditable(currentIndex()));
+  else if (cursorAction == QAbstractItemView::MovePrevious)
+    return movePreviousUntilEditable(currentIndex());
+  else
     return QTreeView::moveCursor(cursorAction, modifiers);
-  }
 }
 
 QModelIndex

@@ -128,10 +128,22 @@ private:
   bool rowRemovalWouldBeIneffective(
       QModelIndexForMainModel const &indexToRemove) const;
 
+  bool isBeingEdited(QModelIndexForFilteredModel const &cellIndex) const;
+  bool isEditable(const QModelIndex &index) const;
+  void closeEditorIfOpenAtCell(QModelIndexForFilteredModel const &cellIndex);
+  void closeAnyOpenEditorsOnUneditableCells(
+      QModelIndexForMainModel const &firstCellOnRow,
+      std::vector<Cell> const &cells);
+  void closeEditorIfCellIsUneditable(QModelIndexForMainModel const &cellIndex,
+                                     Cell const &cell);
+
   QModelIndexForFilteredModel
   expanded(QModelIndexForFilteredModel const &index);
   void editAt(QModelIndexForFilteredModel const &index);
 
+  QtTreeCursorNavigationResult
+  moveNextUntilEditable(QModelIndex const &startingPoint);
+  QModelIndex movePreviousUntilEditable(QModelIndex const &startingPoint);
   QModelIndex applyNavigationResult(QtTreeCursorNavigationResult const &result);
   std::pair<QModelIndexForFilteredModel, bool>
   findOrMakeCellBelow(QModelIndexForFilteredModel const &index);
