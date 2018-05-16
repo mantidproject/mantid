@@ -4,7 +4,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include <boost/filesystem.hpp>
+#include <Poco/File.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -83,7 +83,8 @@ EnggVanadiumCorrectionsModel::fetchCachedCurvesWorkspace(
   }
 
   const auto filename = generateCurvesFilename(vanadiumRunNumber);
-  if (boost::filesystem::exists(filename)) {
+  const Poco::File inputFile(filename);
+  if (inputFile.exists()) {
     m_curvesFilenameCache[vanadiumRunNumber] = filename;
     return loadMatrixWorkspace(filename, CURVES_WORKSPACE_NAME);
   }
@@ -102,7 +103,8 @@ EnggVanadiumCorrectionsModel::fetchCachedIntegratedWorkspace(
   }
 
   const auto filename = generateIntegratedFilename(vanadiumRunNumber);
-  if (boost::filesystem::exists(filename)) {
+  const Poco::File inputFile(filename);
+  if (inputFile.exists()) {
     m_integratedFilenameCache[vanadiumRunNumber] = filename;
     return loadTableWorkspace(filename, INTEGRATED_WORKSPACE_NAME);
   }

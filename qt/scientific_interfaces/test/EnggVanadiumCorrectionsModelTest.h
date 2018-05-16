@@ -10,7 +10,8 @@
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/filesystem.hpp>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -81,36 +82,43 @@ public:
     delete suite;
   }
 
-  EnggVanadiumCorrectionsModelTest()
-      : m_inputDir(boost::filesystem::temp_directory_path() / INPUT_DIR_NAME) {
+  EnggVanadiumCorrectionsModelTest() {
+    Poco::Path tempDir(Poco::Path::temp());
+    tempDir.append(INPUT_DIR_NAME);
+    m_inputDir = tempDir;
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void setUp() override { boost::filesystem::create_directory(m_inputDir); }
+  void setUp() override { m_inputDir.createDirectory(); }
 
-  void tearDown() override { boost::filesystem::remove_all(m_inputDir); }
+  void tearDown() override { m_inputDir.remove(true); }
 
   void test_generateNewWorkspacesWhenNoCache() {
     // We've created the calib directory but not populated it with any
     // workspaces, so we should get our fake ones
     EnggDiffCalibSettings calibSettings;
-    calibSettings.m_inputDirCalib = m_inputDir.string();
+    calibSettings.m_inputDirCalib = m_inputDir.path();
     calibSettings.m_forceRecalcOverwrite = false;
 
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
     std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+              Mantid::API::MatrixWorkspace_sptr>
+        correctionWorkspaces;
     TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
                                  model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(model.m_calculateCorrectionsCalled);
     TS_ASSERT(correctionWorkspaces.first);
     TS_ASSERT(correctionWorkspaces.second);
-    TS_ASSERT(boost::filesystem::exists(
-        m_inputDir / (CURRENT_INSTRUMENT +
-                      "00000123_precalculated_vanadium_run_bank_curves.nxs")));
-    TS_ASSERT(boost::filesystem::exists(
-        m_inputDir / (CURRENT_INSTRUMENT +
-                      "00000123_precalculated_vanadium_run_integration.nxs")));
+
+    Poco::Path curvesWSPath(m_inputDir.path());
+    curvesWSPath.append(CURRENT_INSTRUMENT +
+                        "00000123_precalculated_vanadium_run_bank_curves.nxs");
+    TS_ASSERT(Poco::File(curvesWSPath).exists());
+
+    Poco::Path integWSPath(m_inputDir.path());
+    integWSPath.append(CURRENT_INSTRUMENT +
+                       "00000123_precalculated_vanadium_run_integration.nxs");
+    TS_ASSERT(Poco::File(integWSPath).exists());
   }
 
   void test_cacheUsedWhenAvailable() {
@@ -119,12 +127,13 @@ public:
     writeOutSampleCorrectionWorkspaces(integratedWS, curvesWS);
 
     EnggDiffCalibSettings calibSettings;
-    calibSettings.m_inputDirCalib = m_inputDir.string();
+    calibSettings.m_inputDirCalib = m_inputDir.path();
     calibSettings.m_forceRecalcOverwrite = false;
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
 
     std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+              Mantid::API::MatrixWorkspace_sptr>
+        correctionWorkspaces;
     TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
                                  model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(!model.m_calculateCorrectionsCalled);
@@ -142,12 +151,13 @@ public:
     writeOutSampleCorrectionWorkspaces(integratedWS, curvesWS);
 
     EnggDiffCalibSettings calibSettings;
-    calibSettings.m_inputDirCalib = m_inputDir.string();
+    calibSettings.m_inputDirCalib = m_inputDir.path();
     calibSettings.m_forceRecalcOverwrite = true;
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
 
     std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+              Mantid::API::MatrixWorkspace_sptr>
+        correctionWorkspaces;
     TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
                                  model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(model.m_calculateCorrectionsCalled);
@@ -155,9 +165,9 @@ public:
 
 private:
   const static std::string CURRENT_INSTRUMENT;
-  const static boost::filesystem::path INPUT_DIR_NAME;
+  const static std::string INPUT_DIR_NAME;
 
-  const boost::filesystem::path m_inputDir;
+  Poco::File m_inputDir;
 
   void saveNexus(const std::string &filename,
                  const Mantid::API::Workspace_sptr workspace) const {
@@ -171,23 +181,22 @@ private:
   void writeOutSampleCorrectionWorkspaces(
       Mantid::API::ITableWorkspace_sptr integratedWS,
       Mantid::API::MatrixWorkspace_sptr curvesWS) {
-    saveNexus(
-        (m_inputDir / (CURRENT_INSTRUMENT +
-                       "00000123_precalculated_vanadium_run_bank_curves.nxs"))
-            .string(),
-        curvesWS);
-    saveNexus(
-        (m_inputDir / (CURRENT_INSTRUMENT +
-                       "00000123_precalculated_vanadium_run_integration.nxs"))
-            .string(),
-        integratedWS);
+    Poco::Path curvesWSPath(m_inputDir.path());
+    curvesWSPath.append(CURRENT_INSTRUMENT +
+                        "00000123_precalculated_vanadium_run_bank_curves.nxs");
+    saveNexus(curvesWSPath.toString(), curvesWS);
+
+    Poco::Path integWSPath(m_inputDir.path());
+    integWSPath.append(CURRENT_INSTRUMENT +
+                       "00000123_precalculated_vanadium_run_integration.nxs");
+    saveNexus(integWSPath.toString(), integratedWS);
   }
 };
 
 const std::string EnggVanadiumCorrectionsModelTest::CURRENT_INSTRUMENT =
     "TESTINST";
 
-const boost::filesystem::path EnggVanadiumCorrectionsModelTest::INPUT_DIR_NAME(
+const std::string EnggVanadiumCorrectionsModelTest::INPUT_DIR_NAME(
     "EnggVanadiumCorrectionsModelTestData");
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODELTEST_H_
