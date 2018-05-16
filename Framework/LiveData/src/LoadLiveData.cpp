@@ -470,12 +470,13 @@ void LoadLiveData::exec() {
   // For EventWorkspaces, we adjust the X values such that all events fit
   // within the bin boundaries. This is done both before and after the
   // "Process" step. Any custom rebinning should be done in Post-Processing.
-  this->resetAllXToSingleBin(chunkWS);
+  bool PreserveEvents = this->getProperty("PreserveEvents");
+  if (PreserveEvents)
+    this->resetAllXToSingleBin(chunkWS);
 
   // Now we process the chunk
   Workspace_sptr processed = this->processChunk(chunkWS);
 
-  bool PreserveEvents = this->getProperty("PreserveEvents");
   EventWorkspace_sptr processedEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(processed);
   if (!PreserveEvents && processedEvent) {
