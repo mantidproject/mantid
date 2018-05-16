@@ -581,8 +581,8 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
 }
 
 /**
- * Set all X Histograms to a single bin with boundaries that fit the TOF of
- * all events.
+ * Set all Histogram X vectors to a single bin with boundaries that fit the
+ * TOF of all events across all spectra.
  */
 void EventWorkspace::resetAllXToSingleBin() {
   double tofmin, tofmax;
