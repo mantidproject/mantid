@@ -392,15 +392,15 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Resets all HistogramX in given workspace to a single bin.
+/** Resets all HistogramX in given EventWorkspace(s) to a single bin.
  *
  * Ensures bin boundaries encompass all events currently in the workspace.
- * This will overwrite any rebinning that was previously.
+ * This will overwrite any rebinning that was previously done.
  *
  * Input should be an EventWorkspace or WorkspaceGroup containing
  * EventWorkspaces. Any other workspace types are ignored.
  *
- * @param workspace :: Workspace that will have its bins reset
+ * @param workspace :: Workspace(Group) that will have its bins reset
  */
 void LoadLiveData::resetAllXToSingleBin(API::Workspace_sptr workspace) {
   if (EventWorkspace_sptr ws_event =
