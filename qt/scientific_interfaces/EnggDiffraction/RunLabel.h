@@ -26,6 +26,9 @@ MANTIDQT_ENGGDIFFRACTION_DLL bool operator==(const RunLabel &lhs,
 MANTIDQT_ENGGDIFFRACTION_DLL bool operator!=(const RunLabel &lhs,
                                              const RunLabel &rhs);
 
+MANTIDQT_ENGGDIFFRACTION_DLL bool operator<(const RunLabel &lhs,
+                                            const RunLabel &rhs);
+
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
