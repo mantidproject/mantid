@@ -242,7 +242,6 @@ protected:
   QString getPostprocessedWorkspaceName(
       const GroupData &groupData,
       boost::optional<size_t> sliceIndex = boost::optional<size_t>());
-  bool rowOutputExists(RowItem const &row) const;
   // process the next group/row
   void processNextItem();
   // Refl GUI Group.
@@ -382,6 +381,10 @@ private:
                       int parentColumn) override;
   int getNumberOfRows() override;
   void clearTable() override;
+  void resetProcessedState(const int groupIndex);
+  void resetProcessedState(RowData_sptr rowData);
+  void resetProcessedState(const std::string &workspaceName);
+  void resetProcessedState();
 };
 }
 }

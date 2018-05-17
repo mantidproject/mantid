@@ -334,15 +334,62 @@ void GenericDataProcessorPresenter::settingsChanged() {
   }
 }
 
-bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
-  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-    auto outputWorkspaceName =
-        row.second->reducedName(m_processor.defaultOutputPrefix());
-    // The name may be empty if the row has not been reduced yet.
-    if (outputWorkspaceName.isEmpty() || !workspaceExists(outputWorkspaceName))
-      return false;
+/** Reset the processed state for a group
+ */
+void GenericDataProcessorPresenter::resetProcessedState(const int groupIndex) {
+  m_manager->setProcessed(false, groupIndex);
+  m_manager->setError("", groupIndex);
+}
+
+/** Reset the processed state for a row
+ */
+void GenericDataProcessorPresenter::resetProcessedState(RowData_sptr rowData) {
+  rowData->reset();
+}
+
+/** Reset the processed state for any rows that have the given workspace as an
+ * output
+ */
+void GenericDataProcessorPresenter::resetProcessedState(
+    const std::string &workspaceName) {
+  auto tree = m_manager->allData(false);
+
+  for (auto &groupItem : tree) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+
+    // Check if the workspace is an output of the group
+    if (hasPostprocessing() &&
+        getPostprocessedWorkspaceName(groupData).toStdString() == workspaceName)
+      resetProcessedState(groupIndex);
+
+    // Check all of the rows
+    for (auto &rowItem : groupData) {
+      auto rowData = rowItem.second;
+      // Only check the default output workspace (other output workspaces are
+      // optional)
+      if (rowData->reducedName(m_processor.defaultOutputPrefix())
+              .toStdString() == workspaceName)
+        resetProcessedState(rowData);
+    }
   }
-  return true;
+}
+
+/** Reset the processed state for all rows
+ */
+void GenericDataProcessorPresenter::resetProcessedState() {
+  auto tree = m_manager->allData(false);
+
+  for (auto &groupItem : tree) {
+    const auto groupIndex = groupItem.first;
+    auto groupData = groupItem.second;
+    resetProcessedState(groupIndex);
+
+    for (auto &rowItem : groupData) {
+      auto rowData = rowItem.second;
+      resetProcessedState(rowData);
+    }
+  }
 }
 
 /** Set up the row data so that it contains all of the information needed to
@@ -421,18 +468,8 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
   for (const auto &groupItem : m_itemsToProcess) {
     const auto groupIndex = groupItem.first;
     auto groupData = groupItem.second;
-
-    auto groupOutputNotFound =
-        hasPostprocessing() &&
-        !workspaceExists(getPostprocessedWorkspaceName(groupData));
-
-    // Reprocess the group if the output has been deleted (note that if the
-    // reduction failed we don'treprocess the group unless force is true)
-    if (m_forceProcessing ||
-        (groupOutputNotFound && !m_manager->reductionFailed(groupIndex))) {
-      m_manager->setProcessed(false, groupIndex);
-      m_manager->setError("", groupIndex);
-    }
+    if (m_forceProcessing)
+      resetProcessedState(groupIndex);
 
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
@@ -442,12 +479,10 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
 
     for (const auto &rowItem : groupData) {
       auto rowData = rowItem.second;
+      if (m_forceProcessing)
+        resetProcessedState(rowData);
 
-      // Skip rows that have been processed unless their output has been
-      // deleted. Note that if the reduction failed then we don't reprocess
-      // unless forcing reprocessing
-      if (!m_forceProcessing && rowData->isProcessed() &&
-          (rowOutputExists(rowItem) || rowData->reductionFailed()))
+      if (rowData->isProcessed())
         continue;
 
       // Reset the row ready for (re)processing
@@ -1338,6 +1373,7 @@ Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.remove(QString::fromStdString(name));
+  resetProcessedState(name);
   m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
@@ -1346,6 +1382,7 @@ Handle ADS clear events
 */
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
+  resetProcessedState();
   m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
@@ -1355,6 +1392,8 @@ Handle ADS rename events
 void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
                                                  const std::string &newName) {
 
+  resetProcessedState(oldName);
+
   // if a workspace with oldName exists then replace it for the same workspace
   // with newName
   auto qOldName = QString::fromStdString(oldName);
@@ -1362,8 +1401,9 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   if (m_workspaceList.contains(qOldName)) {
     m_workspaceList.remove(qOldName);
     m_workspaceList.insert(qNewName);
-    m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
   }
+
+  m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
 }
 
 /**
