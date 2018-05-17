@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
@@ -429,7 +430,8 @@ void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm,
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
-  m_fitFunction = fitAlgorithm->getProperty("Function");
+  m_fitFunction = FunctionFactory::Instance().createInitialized(
+      fitAlgorithm->getPropertyValue("Function"));
   addOutput(group, parameters, result, fitDataBegin, fitDataEnd);
 }
 
@@ -439,7 +441,8 @@ void IndirectFittingModel::addSingleFitOutput(IAlgorithm_sptr fitAlgorithm,
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
   int spectrum = fitAlgorithm->getProperty("WorkspaceIndex");
-  m_fitFunction = fitAlgorithm->getProperty("Function");
+  m_fitFunction = FunctionFactory::Instance().createInitialized(
+      fitAlgorithm->getPropertyValue("Function"));
   addOutput(group, parameters, result, m_fittingData[index].get(),
             boost::numeric_cast<std::size_t>(spectrum));
 }
