@@ -2,16 +2,15 @@
 #define MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "ReflTransferStrategy.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-// Forward declaration
-class ReflTransferStrategy;
 
 /** ReflSearchModel : Provides a QAbstractTableModel for a Mantid
 ITableWorkspace of Reflectometry search results.
@@ -58,26 +57,21 @@ public:
   /// clear the model
   void clear();
   /// Add details of an error
-  void addErrors(const std::map<std::string, std::string> &error);
+  void addError(const std::map<std::string, std::string> &error);
 
 protected:
-  /// maps each run number to why it was unusable in the process table
-  std::map<std::string, std::vector<std::string>> m_errors;
-
   // vector of the run numbers
   std::vector<std::string> m_runs;
-
-  /// maps each run number to its description
-  std::map<std::string, std::string> m_descriptions;
-
-  /// maps each run number to its location
-  std::map<std::string, std::string> m_locations;
+  // map of run numbers to search result details
+  SearchResultMap m_runDetails;
 
 private:
-  bool hasError(const std::string &run) const;
-  std::string getError(const std::string &run,
-                       const size_t maxNumberOfErrors = 1,
-                       const char separator = '\n') const;
+  bool runHasDetails(const std::string &run) const;
+  SearchResult runDetails(const std::string &run) const;
+  bool runHasError(const std::string &run) const;
+  std::string runError(const std::string &run) const;
+  std::string runDescription(const std::string &run) const;
+  std::string runLocation(const std::string &run) const;
 };
 
 /// Typedef for a shared pointer to \c ReflSearchModel

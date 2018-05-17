@@ -38,15 +38,14 @@ ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
     run = run.substr(numZeros, run.size() - numZeros);
 
     if (transferMethod.knownFileType(runFile)) {
-      m_runs.push_back(run);
       const std::string description = tableWorkspace->String(i, 6);
-      m_descriptions[run] = description;
       const std::string location = tableWorkspace->String(i, 1);
-      m_locations[run] = location;
+      m_runs.push_back(run);
+      m_runDetails[run] = SearchResult{description, location};
     }
   }
 
-  // By sorting the vector of runs, we sort the entire table
+  // Sort the table by run number
   std::sort(m_runs.begin(), m_runs.end());
 }
 
@@ -81,19 +80,19 @@ QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
   if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runs.size()))
     return QVariant();
 
-  const std::string run = m_runs[rowNumber];
+  const auto run = m_runs[rowNumber];
 
   /*SETTING TOOL TIP AND BACKGROUND FOR INVALID RUNS*/
   if (role != Qt::DisplayRole) {
     if (role == Qt::ToolTipRole) {
       // setting the tool tips for any unsuccessful transfers
-      if (hasError(run)) {
-        auto errorMessage = "Invalid transfer: " + getError(run);
+      if (runHasError(run)) {
+        auto errorMessage = "Invalid transfer: " + runError(run);
         return QString::fromStdString(errorMessage);
       }
     } else if (role == Qt::BackgroundRole) {
       // setting the background colour for any unsuccessful transfers
-      if (hasError(run))
+      if (runHasError(run))
         return QColor("#FF8040");
     } else {
       // we have no unsuccessful transfers so return empty QVariant
@@ -105,10 +104,10 @@ QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
     return QString::fromStdString(run);
 
   if (colNumber == 1)
-    return QString::fromStdString(m_descriptions.find(run)->second);
+    return QString::fromStdString(runDescription(run));
 
   if (colNumber == 2)
-    return QString::fromStdString(m_locations.find(run)->second);
+    return QString::fromStdString(runLocation(run));
 
   return QVariant();
 }
@@ -159,8 +158,7 @@ void ReflSearchModel::clear() {
   beginResetModel();
 
   m_runs.clear();
-  m_descriptions.clear();
-  m_locations.clear();
+  m_runDetails.clear();
 
   endResetModel();
 }
@@ -169,48 +167,79 @@ void ReflSearchModel::clear() {
 Add details about errors
 @param errorMap : a map of run numbers to error messages
 */
-void ReflSearchModel::addErrors(
+void ReflSearchModel::addError(
     const std::map<std::string, std::string> &errorMap) {
-  for (auto &errorKvp : errorMap)
-    m_errors[errorKvp.first].push_back(errorKvp.second);
+  // Loop through each run in the input map
+  for (auto &errorKvp : errorMap) {
+    // Add the error if we have details for this run (ignore it if not)
+    if (runHasDetails(errorKvp.first))
+      m_runDetails[errorKvp.first].issues = errorKvp.second;
+  }
+}
+
+bool ReflSearchModel::runHasDetails(const std::string &run) const {
+  return (m_runDetails.find(run) != m_runDetails.end());
+}
+
+/** Get the details for a given run.
+@param run : the run number
+@return : the details associated with this run
+*/
+SearchResult ReflSearchModel::runDetails(const std::string &run) const {
+  if (!runHasDetails(run))
+    return SearchResult();
+
+  return m_runDetails.find(run)->second;
 }
 
 /** Check whether a run has any error messages
 @param run : the run number
 @return : true if there is at least one error for this run
 */
-bool ReflSearchModel::hasError(const std::string &run) const {
-  if (m_errors.find(run) != m_errors.end())
-    return true;
+bool ReflSearchModel::runHasError(const std::string &run) const {
+  if (!runHasDetails(run))
+    return false;
 
-  return false;
+  if (runDetails(run).issues.empty())
+    return false;
+
+  return true;
 }
 
 /** Get the error message for a given run.
 @param run : the run number
-@param maxNumberOfErrors : if there are multiple errors associated with
-the run, they are concatenated into a single string containing at most
-this number of errors
-@return : the first error associated with this run, or an empty string
+@return : the error associated with this run, or an empty string
 if there is no error
 */
-std::string ReflSearchModel::getError(const std::string &run,
-                                      const size_t maxNumberOfErrors,
-                                      const char separator) const {
-  if (!hasError(run))
+std::string ReflSearchModel::runError(const std::string &run) const {
+  if (!runHasError(run))
     return std::string();
 
-  auto runErrorList = m_errors.find(run)->second;
-  std::string errorMessage;
-  auto numberOfErrors = std::min(maxNumberOfErrors, runErrorList.size());
-  for (size_t index = 0; index < numberOfErrors; ++index) {
-    if (index > 0)
-      errorMessage += separator;
+  return runDetails(run).issues;
+}
 
-    errorMessage += runErrorList[index];
-  }
+/** Get the description for a given run.
+@param run : the run number
+@return : the description associated with this run, or an empty string
+if there is no error
+*/
+std::string ReflSearchModel::runDescription(const std::string &run) const {
+  if (!runHasDetails(run))
+    return std::string();
 
-  return errorMessage;
+  return runDetails(run).description;
+}
+
+/** Get the file location for a given run.
+@param run : the run number
+@return : the location associated with this run, or an empty string
+if there is no error
+*/
+std::string ReflSearchModel::runLocation(const std::string &run) const {
+  if (!runHasDetails(run))
+    return std::string();
+
+  return runDetails(run).location;
 }
 
 } // namespace CustomInterfaces

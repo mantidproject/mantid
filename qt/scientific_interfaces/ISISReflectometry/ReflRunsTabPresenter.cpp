@@ -426,7 +426,7 @@ void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
           // our invalid run number
 
           // add this error to the member of m_searchModel that holds errors.
-          m_searchModel->addErrors(error);
+          m_searchModel->addError(error);
         }
       }
     }
