@@ -333,6 +333,7 @@ void ConvFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
 
 void ConvFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
 }
 
 void ConvFit::setSaveResultEnabled(bool enabled) {

@@ -547,8 +547,8 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
-  setSaveResultEnabled(error);
-  setPlotResultEnabled(error);
+  setSaveResultEnabled(!error);
+  setPlotResultEnabled(!error);
   m_spectrumPresenter->enableView();
   updateParameterValues();
   updatePreviewPlots();
