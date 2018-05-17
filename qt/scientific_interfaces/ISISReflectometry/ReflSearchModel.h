@@ -55,12 +55,15 @@ public:
                       int role) const override;
   // get flags for a cell
   Qt::ItemFlags flags(const QModelIndex &index) const override;
-  /// maps each run number to why it was unusable in the process table
-  std::vector<std::map<std::string, std::string>> m_errors;
   /// clear the model
   void clear();
+  /// Add details of an error
+  void addErrors(const std::map<std::string, std::string> &error);
 
 protected:
+  /// maps each run number to why it was unusable in the process table
+  std::map<std::string, std::vector<std::string>> m_errors;
+
   // vector of the run numbers
   std::vector<std::string> m_runs;
 
@@ -69,6 +72,12 @@ protected:
 
   /// maps each run number to its location
   std::map<std::string, std::string> m_locations;
+
+private:
+  bool hasError(const std::string &run) const;
+  std::string getError(const std::string &run,
+                       const size_t maxNumberOfErrors = 1,
+                       const char separator = '\n') const;
 };
 
 /// Typedef for a shared pointer to \c ReflSearchModel

@@ -394,36 +394,39 @@ SearchResultMap ReflRunsTabPresenter::getSearchResultRunDetails(
   return runDetails;
 }
 
+/** iterate through invalidRuns to set the 'invalid transfers' in the search
+ * model
+ * @param rowsToTransfer : row indices of all rows to transfer
+ * @param invalidRuns : details of runs that are invalid
+ */
 void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
     const std::set<int> &rowsToTransfer,
     const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
 
-  // iterate through invalidRuns to set the 'invalid transfers' in the search
-  // model
-  if (!invalidRuns.empty()) { // check if we have any invalid runs
-    for (auto invalidRowIt = invalidRuns.begin();
-         invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
-      auto &error = *invalidRowIt; // grab row from vector
-      // iterate over row containing run number and reason why it's invalid
-      for (auto errorRowIt = error.begin(); errorRowIt != error.end();
-           ++errorRowIt) {
-        const std::string runNumber = errorRowIt->first; // grab run number
+  if (invalidRuns.empty())
+    return;
 
-        // iterate over given rows
-        for (auto rowIt = rowsToTransfer.begin(); rowIt != rowsToTransfer.end();
-             ++rowIt) {
-          const int row = *rowIt;
-          // get the run number from that row
-          const auto searchRun =
-              m_searchModel->data(m_searchModel->index(row, 0))
-                  .toString()
-                  .toStdString();
-          if (searchRun == runNumber) { // if search run number is the same as
-                                        // our invalid run number
+  for (auto invalidRowIt = invalidRuns.begin();
+       invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
+    auto &error = *invalidRowIt; // grab row from vector
+    // iterate over row containing run number and reason why it's invalid
+    for (auto errorRowIt = error.begin(); errorRowIt != error.end();
+         ++errorRowIt) {
+      const std::string runNumber = errorRowIt->first; // grab run number
 
-            // add this error to the member of m_searchModel that holds errors.
-            m_searchModel->m_errors.push_back(error);
-          }
+      // iterate over given rows
+      for (auto rowIt = rowsToTransfer.begin(); rowIt != rowsToTransfer.end();
+           ++rowIt) {
+        const int row = *rowIt;
+        // get the run number from that row
+        const auto searchRun = m_searchModel->data(m_searchModel->index(row, 0))
+                                   .toString()
+                                   .toStdString();
+        if (searchRun == runNumber) { // if search run number is the same as
+          // our invalid run number
+
+          // add this error to the member of m_searchModel that holds errors.
+          m_searchModel->addErrors(error);
         }
       }
     }

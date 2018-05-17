@@ -87,25 +87,14 @@ QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole) {
     if (role == Qt::ToolTipRole) {
       // setting the tool tips for any unsuccessful transfers
-      for (auto errorRow = m_errors.begin(); errorRow != m_errors.end();
-           ++errorRow) {
-        if (errorRow->find(run) != errorRow->end()) {
-          // get the error message from the unsuccessful transfer
-          std::string errorMessage =
-              "Invalid transfer: " + errorRow->find(run)->second;
-          // set the message as the tooltip
-          return QString::fromStdString(errorMessage);
-        }
+      if (hasError(run)) {
+        auto errorMessage = "Invalid transfer: " + getError(run);
+        return QString::fromStdString(errorMessage);
       }
     } else if (role == Qt::BackgroundRole) {
       // setting the background colour for any unsuccessful transfers
-      for (auto errorRow = m_errors.begin(); errorRow != m_errors.end();
-           ++errorRow) {
-        if (errorRow->find(run) != errorRow->end()) {
-          // return the colour yellow for any successful runs
-          return QColor("#FF8040");
-        }
-      }
+      if (hasError(run))
+        return QColor("#FF8040");
     } else {
       // we have no unsuccessful transfers so return empty QVariant
       return QVariant();
@@ -174,6 +163,54 @@ void ReflSearchModel::clear() {
   m_locations.clear();
 
   endResetModel();
+}
+
+/**
+Add details about errors
+@param errorMap : a map of run numbers to error messages
+*/
+void ReflSearchModel::addErrors(
+    const std::map<std::string, std::string> &errorMap) {
+  for (auto &errorKvp : errorMap)
+    m_errors[errorKvp.first].push_back(errorKvp.second);
+}
+
+/** Check whether a run has any error messages
+@param run : the run number
+@return : true if there is at least one error for this run
+*/
+bool ReflSearchModel::hasError(const std::string &run) const {
+  if (m_errors.find(run) != m_errors.end())
+    return true;
+
+  return false;
+}
+
+/** Get the error message for a given run.
+@param run : the run number
+@param maxNumberOfErrors : if there are multiple errors associated with
+the run, they are concatenated into a single string containing at most
+this number of errors
+@return : the first error associated with this run, or an empty string
+if there is no error
+*/
+std::string ReflSearchModel::getError(const std::string &run,
+                                      const size_t maxNumberOfErrors,
+                                      const char separator) const {
+  if (!hasError(run))
+    return std::string();
+
+  auto runErrorList = m_errors.find(run)->second;
+  std::string errorMessage;
+  auto numberOfErrors = std::min(maxNumberOfErrors, runErrorList.size());
+  for (size_t index = 0; index < numberOfErrors; ++index) {
+    if (index > 0)
+      errorMessage += separator;
+
+    errorMessage += runErrorList[index];
+  }
+
+  return errorMessage;
 }
 
 } // namespace CustomInterfaces
