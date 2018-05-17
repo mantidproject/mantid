@@ -125,7 +125,7 @@ std::map<std::string, std::string> IqtFit<QENSFitSequential>::validateInputs() {
   return errors;
 }
 
-template <Base>
+template <typename Base>
 std::map<std::string, std::string> IqtFit<Base>::validateInputs() {
   return Base::validateInputs();
 }
