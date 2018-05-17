@@ -49,10 +49,6 @@ public:
   }
   /// Validates algorithm inputs
   std::map<std::string, std::string> validateInputs() override;
-  /// Validates algorithm inputs for group workspaces
-  void validateGroupWorkspacesInputs();
-  /// Validates inputs common to group and non-group workspaces
-  void validateCommonInputs(std::map<std::string, std::string> &errors);
 
   /// Performs the Stitch1D algorithm at a specific workspace index
   void doStitch1D(std::vector<API::MatrixWorkspace_sptr> &toStitch,
@@ -69,17 +65,11 @@ private:
   void init() override;
   /// Overwrites Algorithm method.
   void exec() override;
-  /// Override to deal with (multiperiod) workspace groups
-  bool checkGroups() override;
-  bool processGroups() override;
 
   // Data
 
   // A 2D matrix holding workspaces obtained from each workspace list/group
   std::vector<std::vector<API::MatrixWorkspace_sptr>> m_inputWSMatrix;
-
-  // List holding each workspace group
-  std::vector<API::WorkspaceGroup_sptr> m_inputWSGroups;
 
   std::vector<double> m_startOverlaps;
   std::vector<double> m_endOverlaps;
@@ -88,8 +78,6 @@ private:
   std::vector<double> m_manualScaleFactors;
   API::Workspace_sptr m_outputWorkspace;
 
-  size_t m_numWSPerPeriod = 0;
-  size_t m_numWSPerGroup = 0;
   bool m_scaleRHSWorkspace = true;
   bool m_useManualScaleFactors = false;
   size_t m_scaleFactorFromPeriod = 0;
