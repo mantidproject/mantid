@@ -223,8 +223,13 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
     std::vector<std::string> tokens;
     boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
     if (tokens.size() == 3) {
-      nVertices = boost::lexical_cast<uint16_t>(tokens[0]);
-      nTriangles = boost::lexical_cast<uint16_t>(tokens[1]);
+      try {
+        nVertices = boost::lexical_cast<uint16_t>(tokens[0]);
+        nTriangles = boost::lexical_cast<uint16_t>(tokens[1]);
+      }
+      catch (...) {
+        throw std::runtime_error("Error in reading numbers of OFF vertices and triangles, which may be too large");
+      }
       vertices.reserve(nVertices);
       triangleIndices.reserve(3 * nTriangles);
     } else {
