@@ -165,8 +165,8 @@ void readOFFVertices(std::ifstream &file, uint16_t nV,
       boost::split(tokens, line, boost::is_any_of(" "),
                    boost::token_compress_on);
       if (tokens.size() == 3) {
-        vertices.emplace_back(boost::lexical_cast<double>(tokens[0]), // x
-                              boost::lexical_cast<double>(tokens[1]), // y
+        vertices.emplace_back(boost::lexical_cast<double>(tokens[0]),  // x
+                              boost::lexical_cast<double>(tokens[1]),  // y
                               boost::lexical_cast<double>(tokens[2])); // z
       } else {
         throw std::runtime_error("Error on reading OFF vertex");
