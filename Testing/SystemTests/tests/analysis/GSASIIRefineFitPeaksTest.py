@@ -142,14 +142,9 @@ class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
         return 52.531414
 
     def _get_fit_params_reference_filename(self):
-        from mantid.simpleapi import SaveNexus
-        SaveNexus(InputWorkspace=self._LATTICE_PARAM_TBL_NAME, Filename="/home/joe/mantid/Testing/SystemTests/tests/analysis/reference/GSASIIRefineFitPeaksPawleyFitParams.nxs")
         return "GSASIIRefineFitPeaksPawleyFitParams.nxs"
 
     def _get_fitted_peaks_reference_filename(self):
-        from mantid.simpleapi import SaveNexus
-        SaveNexus(InputWorkspace=self._FITTED_PEAKS_WS_NAME,
-                  Filename="/home/joe/mantid/Testing/SystemTests/tests/analysis/reference/GSASIIRefineFitPeaksPawleyFittedPeaks.nxs")
         return "GSASIIRefineFitPeaksPawleyFittedPeaks.nxs"
 
     def _get_gsas_proj_filename(self):
