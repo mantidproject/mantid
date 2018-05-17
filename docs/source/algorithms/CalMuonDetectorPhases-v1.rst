@@ -77,7 +77,7 @@ Output:
   import random
 
   # create data
-  x=np.linspace(start=0,stop=20,num=2000)
+  x=np.linspace(start=0,stop=20,num=4000)
   xData = np.append(x,x)
   xData = np.append(xData,xData)
 
@@ -103,11 +103,10 @@ Output:
 
 .. testoutput:: CalMuonDetectorPhasesDeadExample
 
-  Detector 1 has phase 3.953943 and amplitude 0.075950
-  Detector 2 has phase 1.486624 and amplitude 0.595034
+  Detector 1 has phase 5.184885 and amplitude 0.130632
+  Detector 2 has phase 4.627370 and amplitude 0.003763
   Detector 3 has phase 0.000000 and amplitude 999.000000
-  Detector 4 has phase 4.669842 and amplitude 0.072808
-
+  Detector 4 has phase 1.707542 and amplitude 0.101908
 
 .. categories::
 
