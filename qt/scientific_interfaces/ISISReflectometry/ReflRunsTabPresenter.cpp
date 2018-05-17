@@ -258,7 +258,7 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   // Update the view with the new model and resize its columns (unless this is
   // a background autoreduction process)
   m_view->showSearch(m_searchModel);
-  if (!m_autoreduction.running())
+  if (!autoreductionRunning())
     m_view->resizeSearchTableToContents();
 }
 
@@ -301,7 +301,7 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   // If autoreduction is running, perform the next reduction using the new
   // search
   // results
-  if (m_autoreduction.running())
+  if (autoreductionRunning())
     runAutoreduction();
 }
 
@@ -334,7 +334,7 @@ bool ReflRunsTabPresenter::autoreductionRunning() const {
 /** Check whether autoreduction is running for a specific group
  */
 bool ReflRunsTabPresenter::autoreductionRunning(int group) const {
-  return m_autoreduction.running() && m_autoreduction.group() == group;
+  return autoreductionRunning() && m_autoreduction.group() == group;
 }
 
 /** Check that the given rows are valid for a transfer and warn the user if not
@@ -602,9 +602,9 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
   m_view->setInstrumentComboEnabled(!isProcessing);
 
   // These components are always enabled unless autoreduction is running
-  m_view->setTransferMethodComboEnabled(!m_autoreduction.running());
-  m_view->setSearchTextEntryEnabled(!m_autoreduction.running());
-  m_view->setSearchButtonEnabled(!m_autoreduction.running());
+  m_view->setTransferMethodComboEnabled(!autoreductionRunning());
+  m_view->setSearchTextEntryEnabled(!autoreductionRunning());
+  m_view->setSearchButtonEnabled(!autoreductionRunning());
 }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
