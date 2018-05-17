@@ -253,13 +253,17 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   // Update the model and state
   m_instrumentChanged = false;
   m_currentTransferMethod = m_view->getTransferMethod();
-  m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
-      *getTransferStrategy(), results, m_view->getSearchInstrument()));
-  // Update the view with the new model and resize its columns (unless this is
-  // a background autoreduction process)
-  m_view->showSearch(m_searchModel);
-  if (!autoreductionRunning())
-    m_view->resizeSearchTableToContents();
+
+  if (autoreductionRunning() && m_searchModel) {
+    // Just update the existing model with any new runs
+    m_searchModel->addDataFromTable(*getTransferStrategy(), results,
+                                    m_view->getSearchInstrument());
+  } else {
+    // Create a new model and display it on the view
+    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
+        *getTransferStrategy(), results, m_view->getSearchInstrument()));
+    m_view->showSearch(m_searchModel);
+  }
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers

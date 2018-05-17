@@ -70,7 +70,6 @@ public:
   ~QtReflRunsTabView() override;
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
-  void resizeSearchTableToContents() override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,

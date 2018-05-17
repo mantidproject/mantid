@@ -291,12 +291,6 @@ Set a new model for search results
 void QtReflRunsTabView::showSearch(ReflSearchModel_sptr model) {
   m_searchModel = model;
   ui.tableSearchResults->setModel(m_searchModel.get());
-}
-
-/**
-Resize the columns in the search-results table to their contents
-*/
-void QtReflRunsTabView::resizeSearchTableToContents() {
   ui.tableSearchResults->resizeColumnsToContents();
 }
 
