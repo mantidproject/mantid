@@ -156,10 +156,10 @@ bool getOFFline(std::ifstream &file, std::string &line) {
   return true;
 }
 
-void readOFFVertices(std::ifstream &file, uint16_t nV,
+void readOFFVertices(std::ifstream &file, uint16_t nVertices,
                      std::vector<V3D> &vertices) {
   std::string line;
-  for (uint16_t i = 0; i < nV; i++) {
+  for (uint16_t i = 0; i < nVertices; i++) {
     if (getOFFline(file, line)) {
       std::vector<std::string> tokens;
       boost::split(tokens, line, boost::is_any_of(" "),
