@@ -122,7 +122,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_preprocessing(ColumnOptionsMap(), std::move(preprocessMap)),
       m_group(group), m_whitelist(std::move(whitelist)),
       m_processor(std::move(processor)), m_progressReporter(nullptr),
-      m_pauseReduction(false), m_promptUser(true), m_tableDirty(false) {
+      m_pauseReduction(false), m_promptUser(true), m_tableDirty(false),
+      m_forceProcessing(false), m_forceProcessingFailed(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -443,6 +444,38 @@ void GenericDataProcessorPresenter::processAll() {
   process(m_manager->allData(m_promptUser));
 }
 
+/** Check whether a group should be processed
+ */
+bool GenericDataProcessorPresenter::groupNeedsProcessing(
+    const int groupIndex) const {
+  if (m_forceProcessing)
+    return true;
+
+  if (!m_manager->isProcessed(groupIndex))
+    return true;
+
+  if (m_manager->reductionFailed(groupIndex) && m_forceProcessingFailed)
+    return true;
+
+  return false;
+}
+
+/** Check whether a row should be processed
+ */
+bool GenericDataProcessorPresenter::rowNeedsProcessing(
+    RowData_sptr rowData) const {
+  if (m_forceProcessing)
+    return true;
+
+  if (!rowData->isProcessed())
+    return true;
+
+  if (rowData->reductionFailed() && m_forceProcessingFailed)
+    return true;
+
+  return false;
+}
+
 /** Process a given set of items
  */
 void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
@@ -468,21 +501,17 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
   for (const auto &groupItem : m_itemsToProcess) {
     const auto groupIndex = groupItem.first;
     auto groupData = groupItem.second;
-    if (m_forceProcessing)
+    if (groupNeedsProcessing(groupIndex))
       resetProcessedState(groupIndex);
 
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
-    if ((!isGroupProcessed(groupIndex) || m_forceProcessing) &&
-        groupData.size() > 1)
+    if (groupNeedsProcessing(groupIndex) && groupData.size() > 1)
       maxProgress++;
 
     for (const auto &rowItem : groupData) {
       auto rowData = rowItem.second;
-      if (m_forceProcessing)
-        resetProcessedState(rowData);
-
-      if (rowData->isProcessed())
+      if (!rowNeedsProcessing(rowData))
         continue;
 
       // Reset the row ready for (re)processing
@@ -522,8 +551,7 @@ void GenericDataProcessorPresenter::processNextItem() {
     const auto groupIndex = groupItem.first;
     m_currentGroupData = groupItem.second;
 
-    // Skip if the entire group has already been marked as processed
-    if (!m_forceProcessing && isGroupProcessed(groupIndex))
+    if (m_manager->isProcessed(groupIndex))
       continue;
 
     // Process all rows in the group
@@ -531,12 +559,13 @@ void GenericDataProcessorPresenter::processNextItem() {
       const auto rowIndex = rowItem.first;
       m_currentRowData = rowItem.second;
 
-      if (m_forceProcessing || !m_currentRowData->isProcessed()) {
-        // Start a thread to process this item and then return. The next
-        // item will be processed after this thread has finished.
-        startAsyncRowReduceThread(m_currentRowData, rowIndex, groupIndex);
-        return;
-      }
+      if (m_currentRowData->isProcessed())
+        continue;
+
+      // Start a thread to process this item and then return. The next
+      // item will be processed after this thread has finished.
+      startAsyncRowReduceThread(m_currentRowData, rowIndex, groupIndex);
+      return;
     }
 
     // Start a thread to perform any remaining processing required on the group
@@ -1166,10 +1195,16 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     deleteAll();
     break;
   case DataProcessorPresenter::ProcessFlag:
+    // Process is a user-initiated process so we'll re-process any failed rows
+    // because the user might be deliberately re-trying them
+    m_forceProcessingFailed = true;
     setPromptUser(true);
     processSelection();
     break;
   case DataProcessorPresenter::ProcessAllFlag:
+    // Process-All is a background process so we don't want to re-process
+    // failed rows
+    m_forceProcessingFailed = false;
     processAll();
     break;
   case DataProcessorPresenter::GroupRowsFlag:
@@ -1782,14 +1817,6 @@ void GenericDataProcessorPresenter::giveUserWarning(
 */
 bool GenericDataProcessorPresenter::isProcessing() const {
   return !m_reductionPaused;
-}
-
-/** Checks if a group in the table has been processed.
- * @param groupIndex :: the group index to check
- * @return :: true if the group has already been processed else false.
- */
-bool GenericDataProcessorPresenter::isGroupProcessed(int groupIndex) const {
-  return m_manager->isProcessed(groupIndex);
 }
 
 /** Set the forced reprocessing flag

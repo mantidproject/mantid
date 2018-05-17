@@ -356,9 +356,8 @@ private:
 
   void updateWidgetEnabledState(const bool isProcessing) const;
 
-  // Check if a group has been processed
-  bool isGroupProcessed(int groupIndex) const;
   bool m_forceProcessing = false;
+  bool m_forceProcessingFailed = false;
   bool m_skipProcessing = false;
 
   // List of workspaces the user can open
@@ -385,6 +384,8 @@ private:
   void resetProcessedState(RowData_sptr rowData);
   void resetProcessedState(const std::string &workspaceName);
   void resetProcessedState();
+  bool groupNeedsProcessing(const int groupIndex) const;
+  bool rowNeedsProcessing(RowData_sptr rowData) const;
 };
 }
 }
