@@ -1,0 +1,177 @@
+#ifndef CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
+#define CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
+
+#include <cxxtest/TestSuite.h>
+#include "MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+using namespace Mantid::API;
+using Mantid::Algorithms::ConvertFitFunctionForMuonTFAsymmetry;
+
+const std::string outputName = "EstimateMuonAsymmetryFromCounts_Output";
+
+namespace{
+
+const std::string NORM_PARAM  {"f0.f0.f0.f0.A0"};
+const std::string OFFSET_PARAM{"f0.f0.f1.f0.A0"};
+const std::string USER_FUNC   {"f0.f0.f1.f1."};
+const std::string EXP_PARAM   {"f0.f1.A"};
+
+struct yData {
+  double operator()(const double x, size_t) {
+    // Create a fake muon dataset
+    return (x);
+  }
+};
+
+struct eData {
+  double operator()(const double, size_t) { return 0.005; }
+};
+
+MatrixWorkspace_sptr createWorkspace() {
+  MatrixWorkspace_sptr ws =
+      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+          yData(), 1, 0.0, 1.0,
+          (1.0 / 50.), true, eData());
+  return ws;
+}
+
+
+ITableWorkspace_sptr genTable(){
+ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+table->addColumn("double","norm");
+table->addColumn("str","name");
+table->addColumn("str","method");
+std::vector<std::string> names= {"ws1","ws2","ws3"};
+for (size_t j =0;j<names.size();j++){
+TableRow row = table->appendRow();
+row<<double(j+1)<<names[j]<<"test";
+}
+return table;
+}
+
+IAlgorithm_sptr setUpAlg(std::vector<std::string> wsNames, std::string funcString) {
+  IAlgorithm_sptr asymmAlg =
+      AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
+  asymmAlg->initialize();
+  asymmAlg->setChild(true);
+  asymmAlg->setProperty("WorkspaceList", wsNames);
+  ITableWorkspace_sptr table = genTable();
+  asymmAlg->setProperty("NormalisationTable", table);
+  auto func = FunctionFactory::Instance().createInitialized(funcString);
+  asymmAlg->setProperty("InputFunction", func);
+  return asymmAlg;
+}
+
+
+void genData(){
+    auto ws1 = createWorkspace();
+    AnalysisDataService::Instance().addOrReplace("ws1",ws1);
+    AnalysisDataService::Instance().addOrReplace("ws2",ws1);
+    AnalysisDataService::Instance().addOrReplace("ws3",ws1);
+}
+
+IFunction_sptr doFit(const std::string funcIn, int iterations,std::vector<std::string> wsNames){
+ 
+  auto func = FunctionFactory::Instance().createInitialized(funcIn);
+  IAlgorithm_sptr  fit = AlgorithmManager::Instance().create("Fit");
+  fit->initialize();
+  fit->setProperty("Function",func);
+  fit->setProperty("InputWorkspace", wsNames[0]);
+  fit->setProperty("Output","fit");
+  fit->setProperty("MaxIterations",iterations);
+  fit->execute();
+  std::string funcString = fit->getPropertyValue("Function");
+  return FunctionFactory::Instance().createInitialized(funcString);
+} 
+
+}
+
+class ConvertFitFunctionForMuonTFAsymmetryTest : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertFitFunctionForMuonTFAsymmetryTest *createSuite() {
+    return new  ConvertFitFunctionForMuonTFAsymmetryTest();
+  }
+  static void destroySuite(ConvertFitFunctionForMuonTFAsymmetryTest *suite) {
+    delete suite;
+  }
+
+  ConvertFitFunctionForMuonTFAsymmetryTest() { FrameworkManager::Instance(); }
+
+  void testInit() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1"};
+    std::string func = "name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)";
+    IAlgorithm_sptr alg = setUpAlg(wsNames,func);
+    TS_ASSERT(alg->isInitialized())
+  }
+
+  void test_Execute() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1"};
+    std::string func = "name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)";
+    IAlgorithm_sptr alg = setUpAlg(wsNames,func);
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+  }
+
+  void test_1D() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1"};
+    std::string func = "name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)";
+    IAlgorithm_sptr alg = setUpAlg(wsNames,func);
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    auto normFuncString = alg->getPropertyValue("OutputFunction");
+    auto normFunc = FunctionFactory::Instance().createInitialized(normFuncString);
+
+    TS_ASSERT_DELTA(normFunc->getParameter(NORM_PARAM),1.,0.0001);
+    TS_ASSERT_DELTA(normFunc->getParameter(OFFSET_PARAM),1.,0.0001);
+    TS_ASSERT_DELTA(normFunc->getParameter(EXP_PARAM),0.0,0.0001);
+
+    TS_ASSERT_DELTA(normFunc->getParameter(USER_FUNC+"A0"),0.0,0.0001);
+    TS_ASSERT_DELTA(normFunc->getParameter(USER_FUNC+"A1"),2.0,0.0001);
+    //auto paramTable = doFit(normFunc, 0,wsNames);
+    
+  }
+
+  void test_1DFix() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1"};
+    std::string func = "name=LinearBackground,A0=0,A1=2;ties =(f0.A1=2)";
+    IAlgorithm_sptr alg = setUpAlg(wsNames,func);
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    auto normFuncString = alg->getPropertyValue("OutputFunction");
+
+    auto outFunc = doFit(normFuncString,200,wsNames);
+    TS_ASSERT_DELTA(outFunc->getParameter(OFFSET_PARAM),1.,0.0001);
+    TS_ASSERT_DELTA(outFunc->getParameter(EXP_PARAM),0.0,0.0001);
+    TS_ASSERT_DELTA(outFunc->getParameter(USER_FUNC+"A1"),2.0,0.0001);
+    TS_ASSERT_DELTA(outFunc->getParameter(USER_FUNC+"A0"),-1.02,0.0001);
+    
+  }
+  //test for 1D tie
+
+  // test for multi domain
+
+ // test for multi domain fix
+
+ // test for multi domain tie
+
+
+private:
+  MatrixWorkspace_sptr input;
+};
+#endif /*ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_*/

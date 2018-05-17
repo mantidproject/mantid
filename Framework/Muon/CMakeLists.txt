@@ -19,7 +19,8 @@ set ( INC_FILES
 #  enable_unity_build(Muon SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 #endif(UNITY_BUILD)
 
-# set ( TEST_FILES )
+ set ( TEST_FILES 
+        ConvertFitFunctionForMuonTFAsymmetryTest.h)
 
 # set ( TEST_PY_FILES )
 
