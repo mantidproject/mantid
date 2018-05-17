@@ -21,9 +21,11 @@ New Features
 New Algorithms
 ##############
 
-- :ref:`LoadSampleShape <algm-LoadSampleShape>` loads a shape into the sample in a workspace from an STL file,
-  which contains a list of triangles or an OFF file that has a list of vertices and triangles.
-
+- :ref:`LoadSampleShape <algm-LoadSampleShape>` loads a shape into the sample in a workspace from an 
+  ASCII `STL <https://en.wikipedia.org/wiki/STL_(file_format)>`_  file,
+  which contains a list of triangles or an 
+  ASCII `OFF <https://en.wikipedia.org/wiki/OFF_(file_format)>`_ file, 
+  which has a list of vertices and triangles. 
 
 Improved
 ########
