@@ -245,14 +245,21 @@ void ReflRunsTabPresenter::search() {
 * @param searchAlg : [input] The search algorithm
 */
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
-  if (searchAlg->isExecuted()) {
-    ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
-    m_instrumentChanged = false;
-    m_currentTransferMethod = m_view->getTransferMethod();
-    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
-        *getTransferStrategy(), results, m_view->getSearchInstrument()));
-    m_view->showSearch(m_searchModel);
-  }
+  if (!searchAlg->isExecuted())
+    return;
+
+  // Get the results from the algorithm
+  ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+  // Update the model and state
+  m_instrumentChanged = false;
+  m_currentTransferMethod = m_view->getTransferMethod();
+  m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
+      *getTransferStrategy(), results, m_view->getSearchInstrument()));
+  // Update the view with the new model and resize its columns (unless this is
+  // a background autoreduction process)
+  m_view->showSearch(m_searchModel);
+  if (!m_autoreduction.running())
+    m_view->resizeSearchTableToContents();
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
@@ -330,60 +337,66 @@ bool ReflRunsTabPresenter::autoreductionRunning(int group) const {
   return m_autoreduction.running() && m_autoreduction.group() == group;
 }
 
-/** Transfers the selected runs in the search results to the processing table
- * @param rowsToTransfer : a set of row indices in the search results to
- * transfer
- * @param group : the group number of the table to transfer to
- * @param strict :
- * @return : The runs to transfer as a vector of maps
-*/
-void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
-                                    int group, const TransferMatch matchType) {
-  // Build the input for the transfer strategy
-  SearchResultMap runs;
-
-  // Do not begin transfer if no rows are given or if the transfer method does
-  // not match the one used for populating search
+/** Check that the given rows are valid for a transfer and warn the user if not
+ * @param rowsToTransfer : a set of row indices to transfer
+ * @return : true if valid, false if not
+ */
+bool ReflRunsTabPresenter::validateRowsToTransfer(
+    const std::set<int> &rowsToTransfer) {
+  // Check that we have something to transfer
   if (rowsToTransfer.size() == 0) {
     m_mainPresenter->giveUserCritical(
         "Error: Please select at least one run to transfer.",
         "No runs selected");
-    return;
-  } else if (m_currentTransferMethod != m_view->getTransferMethod()) {
+    return false;
+  }
+
+  // Check that the transfer method matches the one used for populating the
+  // search
+  if (m_currentTransferMethod != m_view->getTransferMethod()) {
     m_mainPresenter->giveUserCritical(
         "Error: Method selected for transferring runs (" +
             m_view->getTransferMethod() +
             ") must match the method used for searching runs (" +
             m_currentTransferMethod + ").",
         "Transfer method mismatch");
-    return;
+    return false;
   }
 
+  return true;
+}
+
+/** Get the data for a cell in the search results model as a string
+ */
+std::string ReflRunsTabPresenter::searchModelData(const int row,
+                                                  const int column) {
+  return m_searchModel->data(m_searchModel->index(row, column))
+      .toString()
+      .toStdString();
+}
+
+/** Get the details of runs to transfer from the search results table
+ * @param rowsToTransfer : a set of row indices
+ * @return : a map of run name to a SearchResult struct containing details
+ * for that run
+ */
+SearchResultMap ReflRunsTabPresenter::getSearchResultRunDetails(
+    const std::set<int> &rowsToTransfer) {
+
+  SearchResultMap runDetails;
   for (const auto &row : rowsToTransfer) {
-    const auto run = m_searchModel->data(m_searchModel->index(row, 0))
-                         .toString()
-                         .toStdString();
-    SearchResult searchResult;
-
-    searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
-                                   .toString()
-                                   .toStdString();
-
-    searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
-                                .toString()
-                                .toStdString();
-    runs[run] = searchResult;
+    const auto run = searchModelData(row, 0);
+    const auto description = searchModelData(row, 1);
+    const auto location = searchModelData(row, 2);
+    runDetails[run] = SearchResult{description, location};
   }
 
-  ProgressPresenter progress(0, static_cast<double>(rowsToTransfer.size()),
-                             static_cast<int64_t>(rowsToTransfer.size()),
-                             this->m_progressView);
+  return runDetails;
+}
 
-  TransferResults results =
-      getTransferStrategy()->transferRuns(runs, progress, matchType);
-
-  auto invalidRuns =
-      results.getErrorRuns(); // grab our invalid runs from the transfer
+void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
+    const std::set<int> &rowsToTransfer,
+    const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
 
   // iterate through invalidRuns to set the 'invalid transfers' in the search
   // model
@@ -415,10 +428,38 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
       }
     }
   }
+}
 
+/** Transfers the selected runs in the search results to the processing table
+ * @param rowsToTransfer : a set of row indices in the search results to
+ * transfer
+ * @param group : the group number of the table to transfer to
+ * @param strict :
+ * @return : The runs to transfer as a vector of maps
+*/
+void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
+                                    int group, const TransferMatch matchType) {
+  if (!validateRowsToTransfer(rowsToTransfer))
+    return;
+
+  ProgressPresenter progress(0, static_cast<double>(rowsToTransfer.size()),
+                             static_cast<int64_t>(rowsToTransfer.size()),
+                             this->m_progressView);
+
+  // Extract details of runs to transfer
+  auto runDetails = getSearchResultRunDetails(rowsToTransfer);
+
+  // Apply the transfer strategy
+  TransferResults transferDetails =
+      getTransferStrategy()->transferRuns(runDetails, progress, matchType);
+
+  // Handle any runs that cannot be transferred
+  handleInvalidRunsForTransfer(rowsToTransfer, transferDetails.getErrorRuns());
+
+  // Do the transfer
   m_tablePresenters.at(group)->transfer(
       ::MantidQt::CustomInterfaces::fromStdStringVectorMap(
-          results.getTransferRuns()));
+          transferDetails.getTransferRuns()));
 }
 
 /**

@@ -143,6 +143,17 @@ private:
   void updateWidgetEnabledState(const bool isProcessing) const;
   /// Determine whether to start a new autoreduction
   bool requireNewAutoreduction() const;
+  /// Check that a given set of row indices are valid to transfer
+  bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
+  /// Get runs to transfer from row indices
+  SearchResultMap
+  getSearchResultRunDetails(const std::set<int> &rowsToTransfer);
+  /// Deal with rows that are invalid for transfer
+  void handleInvalidRunsForTransfer(
+      const std::set<int> &rowsToTransfer,
+      const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
+  /// Get the data for a cell in the search results table as a string
+  std::string searchModelData(const int row, const int column);
 };
 }
 }

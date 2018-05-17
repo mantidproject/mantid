@@ -56,6 +56,7 @@ public:
 
   // Connect the model
   virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
+  virtual void resizeSearchTableToContents() = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,

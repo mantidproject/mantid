@@ -83,6 +83,7 @@ public:
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
+  void resizeSearchTableToContents() override{};
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 };
 
