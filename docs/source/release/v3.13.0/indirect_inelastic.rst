@@ -12,7 +12,7 @@ Indirect Inelastic Changes
 :ref:`Release 3.13.0 <v3.13.0>`
 
 Data Reduction Interfaces
---------------
+-------------------------
 
 - Added 'Sum Files' checkbox to ISIS Calibration, to sum a specified range of input files on load.
 
