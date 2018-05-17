@@ -66,17 +66,20 @@ public:
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
+  /// Algorithm's seeAlso
+  const std::vector<std::string> seeAlso() const override {
+	  return{ "Fit", "EstimateMuonAsymmetryFromCounts","CalculateMuonAsymmetry"};
+  }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  Mantid::API::IFunction_sptr getTFAsymmFitFunction(Mantid::API::IFunction_sptr original, const std::vector<double> norms);
-  Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(Mantid::API::IFunction_sptr original);
-  std::string extractUserFunction(std::string TFFunc);
+  Mantid::API::IFunction_sptr getTFAsymmFitFunction(const Mantid::API::IFunction_sptr original, const std::vector<double> norms);
+  Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr original);
+  Mantid::API::IFunction_sptr extractUserFunction(const Mantid::API::IFunction_sptr TFFunc);
   std::vector<double> getNorms();
-  void updateNorms(Mantid::API::IFunction_sptr original);
 };
 
 } // namespace Algorithm

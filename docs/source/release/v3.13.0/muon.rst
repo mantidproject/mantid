@@ -22,7 +22,7 @@ Algorithms
 
 New
 ###
-
+- :ref:`ConvertFitFunctionForMuonTFAsymmetry <algm-ConvertFitFunctionForMuonTFAsymmetry>` has been added to help convert fitting functions for TF asymmetry fitting.
 Improvements
 ############
 

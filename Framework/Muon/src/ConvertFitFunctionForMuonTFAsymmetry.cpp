@@ -27,6 +27,39 @@ namespace {
 	constexpr double MUON_LIFETIME_MICROSECONDS{
 	Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND };
 	constexpr bool FIX = false; // fix function needs false to work 
+	const std::string INSERT_FUNCTION{"f0.f1.f1." };
+
+	std::string trimTie(const std::string stringTie) {
+		auto index = stringTie.find_first_of(".");
+		std::string domain = stringTie.substr(0,index);
+		std::string userFunc = stringTie.substr(9+index, std::string::npos);
+		return domain+userFunc;
+	};
+
+	std::string rmInsertFunction(const std::string originalTie) { 
+		auto stringTie = originalTie;
+		// check the tie only exists in the user function (f)
+		auto seperator = stringTie.find_first_of("=");
+		// the wrapped name added 9 characters
+		auto LHName = stringTie.substr(0, seperator);
+		LHName = trimTie(LHName);
+		// this one includes = sign
+		auto RHName = stringTie.substr(seperator, std::string::npos);
+		RHName = trimTie(RHName);
+
+		return LHName+ RHName;
+	};
+
+	template <typename T1>
+	int findName(const std::vector<std::string> &colNames, const T1 &name) {
+		for (int j = 0; j < colNames.size(); j++) {
+			if (colNames[j] == name) {
+				return j;
+			}
+		}
+		return -1;
+	};
+
 }
 namespace Mantid {
 
@@ -47,10 +80,9 @@ namespace Mantid {
 				"The fitting function to be converted.");
 			// table of name, norms
 			// if construct -> read relevant norms into sorted list
-			// if Extract -> update values in table
 			declareProperty(
 				make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-					"NormalisationTable", "", Direction::InOut),
+					"NormalisationTable", "", Direction::Input),
 				"Name of the table containing the normalisations for the asymmetries.");
 			// list of workspaces 
 			declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
@@ -68,7 +100,7 @@ namespace Mantid {
 				" from a function that is suitable for TF Asymmetry calculations.");
 
 				declareProperty(make_unique<FunctionProperty>("OutputFunction",Direction::Output),
-					"The fitting function to be converted.");
+					"The converted fitting function.");
 		}
 
 		/*
@@ -79,21 +111,54 @@ namespace Mantid {
 		std::map<std::string, std::string>
 			ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
 			// create the map
-			std::map<std::string, std::string> validationOutput;
+			std::map<std::string, std::string> result;
 			// check norm table is correct
+			API::ITableWorkspace_const_sptr tabWS = getProperty("NormalisationTable");
+			size_t ndet = tabWS->rowCount();
 
-			return validationOutput;
+			if (tabWS->columnCount() == 0) {
+				result["NormalisationTable"] = "Please provide a non-empty NormalisationTable.";
+			}
+
+			// NormalisationTable should have three columns: (norm, name, method)
+			if (tabWS->columnCount() != 3) {
+				result["NormalisationTable"] = "NormalisationTable must have three columns";
+			}
+			auto names = tabWS->getColumnNames();
+			int normCount = 0;
+			int wsNamesCount = 0;
+			for (const std::string &name : names) {
+				
+					if (name == "norm") {
+						normCount += 1;
+					}
+				
+					if (name == "name") {
+						wsNamesCount += 1;
+				}
+			}
+			if (normCount == 0) {
+				result["NormalisationTable"] = "NormalisationTable needs norm column";
+			}
+			if (wsNamesCount == 0) {
+				result["NormalisationTable"] = "NormalisationTable needs a name column";
+			}
+			if (normCount > 1) {
+				result["NormalisationTable"] =
+					"NormalisationTable has " + std::to_string(normCount) + " norm columns";
+			}
+			if (wsNamesCount > 1) {
+				result["PhaseTable"] = "PhaseTable has " + std::to_string(wsNamesCount) +
+					" name columns";
+			}
+			// Check units, should be microseconds
+			return result;
 		}
 
 		/** Executes the algorithm
 		 *
 		 */
 		void ConvertFitFunctionForMuonTFAsymmetry::exec() {
-
-			//will need to add preprocessing to table
-			//      std::replace(tmpWSName.begin(), tmpWSName.end(), ' ', ';');
-			// will also need to add 3rd row for tables
-
 			IFunction_sptr inputFitFunction =getProperty("InputFunction");
 			auto mode = getPropertyValue("Mode");
 			if (mode == "Construct") {
@@ -103,94 +168,100 @@ namespace Mantid {
 			}
 			else {
 				auto outputFitFunction = extractFromTFAsymmFitFunction(inputFitFunction);
-				updateNorms(inputFitFunction);
 				setProperty("OutputFunction", outputFitFunction);
-
 			}
 		}
-		/*
-		Converts from a TF Asymmetry function N(1+f) to the original f.
+		
+		/** Extracts the user's original function f from the normalisation function N(1+f)+expDecay
+		* and adds in the ties
+		* @param original :: [input] normalisation function
+		* @return :: user function
 		*/
-		void ConvertFitFunctionForMuonTFAsymmetry::updateNorms(
-			Mantid::API::IFunction_sptr original) {
+		Mantid::API::IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
+			const Mantid::API::IFunction_sptr original) {
+
+		    auto multi = boost::make_shared<MultiDomainFunction>();
+			IFunction_sptr tmp = original;
 
 			size_t numDomains = original->getNumberDomains();
-			for (size_t j = 0; j < numDomains;j++) {
-				std::string domain = "f" + std::to_string((int)j);
-				std::string normName= domain+ ".f0.f0.f0.A0";
-				// need to change the other side of =
-				auto value = original->getParameter(normName);
-				API::ITableWorkspace_sptr table = getProperty("NormalisationTable");
-				const std::vector<std::string> wsNames = getProperty("WorkspaceList");
+			for (size_t j = 0; j < numDomains; j++) {					
+				auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(original);
+					// get correct domain
+					tmp = TFFunc->getFunction(j);
+				if (numDomains >1){
+					multi->setDomainIndex(j, j);
+				}
+			IFunction_sptr userFunc = extractUserFunction(tmp);
+				multi->addFunction(userFunc);
+			}
+			// if multi data set we need to do the ties manually
+			if (numDomains > 1) {
+				auto originalNames = original->getParameterNames();
+				for (auto name : originalNames) {
+					auto index = original->parameterIndex(name);
+					auto originalTie = original->getTie(index);
+					if (originalTie) {
+						auto stringTie = originalTie->asString();
+						// check the tie only exists in the user function (f)
+						auto start = stringTie.find_first_of(".")+1;
+						auto end = stringTie.find_first_of("=");
+						// the wrapped name added 9 characters
+						auto LHName = stringTie.substr(start, 9);
+						// need to do in 2 steps
+						auto RHName = stringTie.substr(end, std::string::npos);
 
-                				
-
-				for (size_t row = 0; row < table->rowCount(); row++) {
-					
-						if (table->String(row, 0) == wsNames[j]) {
-							table->removeRow(row);
-							Mantid::API::TableRow newRow = table->appendRow();
-							newRow <<  wsNames[j]<<value;
-						
+						start = RHName.find_first_of(".")+1;
+						RHName = RHName.substr(start,9);
+						if (LHName == INSERT_FUNCTION && LHName == RHName) {
+							//get new tie
+							auto newTie = rmInsertFunction(stringTie);
+							multi->addTies(newTie); 
+						}
 					}
 				}
 			}
-			}
-		
-		Mantid::API::IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
-			Mantid::API::IFunction_sptr original) {
 
-		    auto multi = boost::make_shared<MultiDomainFunction>();
-			
-			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
-
-			size_t numDomains = original->getNumberDomains();
-			for (size_t j = 0; j < numDomains; j++) {
-				IFunction_sptr userFunc;
-				std::string func;
-				if (numDomains == 1) {
-					func = extractUserFunction(original->asString());
-				}
-				else {
-					userFunc = tmp->getFunction(j);
-					func = extractUserFunction(userFunc->asString());
-					multi->setDomainIndex(j, j);
-				}
-				userFunc = FunctionFactory::Instance().createInitialized(
-					func);
-				auto composite = boost::make_shared<CompositeFunction>();
-				composite->addFunction(userFunc);
-				multi->addFunction(composite);
-			}
 			return boost::dynamic_pointer_cast<IFunction>(multi);
 
 		}
+	/** Extracts the user's original function f from the normalisation function N(1+f)+expDecay
+		* @param original :: [input] normalisation function
+		* @return :: user function
+		*/
+	
+		IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(const IFunction_sptr TFFuncIn) {
+			// N(1+g) + exp
+			auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
 
-		std::string ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(std::string TFFunc) {
-			auto out = TFFunc;
-			//removes everything up to start of user function
-			// we know the form to expect -> know where user 
-			// function should be
-			size_t start = out.find("name=FlatBackground,A0=1,ties=(A0=1)");
-			out=out.substr(start,out.size()-start);
-			start = out.find(";")+1 ;
-			//expect it to end with an ExpDecayMuon
-			size_t end = out.rfind("));name=ExpDecayMuon");
-			out = out.substr(start, end-start);
-		    return out;
+			// getFunction(0) -> N(1+g)
+			TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(0));
+
+			// getFunction(1) -> 1+g
+			TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(1));
+
+			// getFunction(1) -> g
+			return TFFunc->getFunction(1);
 		}
-		/*
-		Convert to a TF Asymmetry function. Input f and changes it to N(1+f)
+
+		/** Get the nomralisation constants from the table
+		* the order is the same as the workspace list
+		* @return :: vector of normals
 		*/
 		std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
 			API::ITableWorkspace_sptr table = getProperty("NormalisationTable");
 			const std::vector<std::string> wsNames = getProperty("WorkspaceList");
 
 			std::vector<double> norms(wsNames.size() ,0);
+			auto colNames = table->getColumnNames();
+			auto wsNamesIndex = findName(colNames, "name");
+			auto normIndex = findName(colNames, "norm");
+
 			for (size_t row = 0; row < table->rowCount(); row++) {
 				for (size_t wsPosition = 0; wsPosition < wsNames.size();wsPosition++) {
-					if (table->String(row, 0) == wsNames[wsPosition]) {
-						norms[wsPosition] = table->Double(row, 1);
+					std::string wsName = wsNames[wsPosition];
+					std::replace(wsName.begin(), wsName.end(), ' ', ';');
+					if (table->String(row, wsNamesIndex) == wsName) {
+						norms[wsPosition] = table->Double(row, normIndex);
 					}
 				}
 			}
@@ -198,12 +269,12 @@ namespace Mantid {
 			return norms;
 		}
 		/** Gets the fitting function for TFAsymmetry fit
-		* @param original :: The function defined by the user (in GUI)
+		* @param original :: The user function f
 		* @param norms :: vector of normalization constants
-		* @returns :: The fitting function for the TFAsymmetry fit
+		* @returns :: The normalisation function N(1+f) +ExpDecay
 		*/
 		Mantid::API::IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
-			Mantid::API::IFunction_sptr original, const std::vector<double> norms) {
+			const Mantid::API::IFunction_sptr original, const std::vector<double> norms) {
 			auto multi = boost::make_shared<MultiDomainFunction>();
 			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
 			size_t numDomains = original->getNumberDomains();
@@ -229,7 +300,8 @@ namespace Mantid {
 					FunctionFactory::Instance().createFunction("ProductFunction"));
 				product->addFunction(norm);
 				product->addFunction(inBrace);
-				auto composite = boost::make_shared<CompositeFunction>();
+				auto composite = boost::dynamic_pointer_cast<CompositeFunction>(
+					FunctionFactory::Instance().createFunction("CompositeFunction"));
 				constant = FunctionFactory::Instance().createInitialized(
 					"name = ExpDecayMuon, A = 0.0, Lambda = -" + std::to_string(MUON_LIFETIME_MICROSECONDS) + ";ties = (f0.A = 0.0, f0.Lambda = -" + std::to_string(MUON_LIFETIME_MICROSECONDS) + ")");
 				composite->addFunction(product);
@@ -246,11 +318,11 @@ namespace Mantid {
 						auto stringTie = originalTie->asString();
 						// change name to reflect new postion
 						auto insertPosition = stringTie.find_first_of(".");
-						stringTie.insert(insertPosition + 1, "f0.f1.f1.");
+						stringTie.insert(insertPosition + 1, INSERT_FUNCTION);
 						// need to change the other side of =
 						insertPosition = stringTie.find_first_of("=");
 						insertPosition = stringTie.find_first_of(".", insertPosition);
-						stringTie.insert(insertPosition + 1, "f0.f1.f1.");
+						stringTie.insert(insertPosition + 1, INSERT_FUNCTION);
 						multi->addTies(stringTie);
 					}
 				}
