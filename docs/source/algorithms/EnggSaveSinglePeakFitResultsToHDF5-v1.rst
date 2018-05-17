@@ -10,10 +10,12 @@ Description
 -----------
 
 Exports the results of an :ref:`EnggFitPeaks <algm-EnggFitPeaks-v1>`
-fit to an HDF5 file indexed by bank ID. The results go in a sub-group
-of the **Bank** group called **Single Peak Fitting**. This group
-contains one dataset, which is a table of the fit parameters for every
-peak.
+fit to an HDF5 file indexed by bank ID. If multiple sets of fit
+results are provided, then the file is indexed by run number, with the
+**Run Number** groups indexed further by bank ID. The results go in a
+sub-group of the **Bank** group called **Single Peak Fitting**. This
+group contains one dataset, which is a table of the fit parameters for
+every peak.
 
 Fit Parameters
 ##############

@@ -402,7 +402,9 @@ During the Fit process, :ref:`EnggSaveSinglePeakFitResultsToHDF5
 to save *engggui_fitting_fitpeaks_param* TableWorkspace as a `hdf5`
 file. There will one file per run, indexed by bank ID, and the file
 will be found in the **Runs** directory of the user's output
-directory.
+directory. If **Fit All** was run on multiple runs, then an additional
+file for all runs will be output, which is indexed first by run number
+and then by bank ID.
 
 In the plots, the x or abscissa axis is in d-spacing units, which are
 more convenient for peak fitting than time-of-flight. However the run
