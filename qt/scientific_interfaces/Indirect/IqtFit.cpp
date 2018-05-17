@@ -160,6 +160,7 @@ void IqtFit::updatePlotOptions() {
 
 void IqtFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
 }
 
 void IqtFit::setSaveResultEnabled(bool enabled) {

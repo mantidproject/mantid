@@ -31,6 +31,7 @@ public:
                                std::size_t dataIndex) const;
   bool isMultiFit() const;
   bool isPreviouslyFit(std::size_t dataIndex, std::size_t spectrum) const;
+  std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
   Mantid::API::IFunction_sptr getFittingFunction() const;
@@ -80,7 +81,6 @@ public:
                             std::size_t index);
 
 protected:
-  std::size_t numberOfWorkspaces() const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr

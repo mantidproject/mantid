@@ -314,9 +314,10 @@ bool IndirectFittingModel::isMultiFit() const {
 
 bool IndirectFittingModel::isPreviouslyFit(std::size_t dataIndex,
                                            std::size_t spectrum) const {
-  if (!m_previousModelSelected)
+  if (!m_previousModelSelected || !m_fitOutput ||
+      m_fittingData.size() <= dataIndex)
     return false;
-  auto fitData = m_fittingData[dataIndex].get();
+  const auto fitData = m_fittingData[dataIndex].get();
   return m_fitOutput->isSpectrumFit(fitData, spectrum);
 }
 
