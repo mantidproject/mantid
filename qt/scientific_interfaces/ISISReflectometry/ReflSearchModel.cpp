@@ -17,6 +17,17 @@ using namespace Mantid::API;
 ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
                                  ITableWorkspace_sptr tableWorkspace,
                                  const std::string &instrument) {
+  addDataFromTable(transferMethod, tableWorkspace, instrument);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Destructor
+*/
+ReflSearchModel::~ReflSearchModel() {}
+
+void ReflSearchModel::addDataFromTable(
+    const ReflTransferStrategy &transferMethod,
+    ITableWorkspace_sptr tableWorkspace, const std::string &instrument) {
   // Copy the data from the input table workspace
   for (size_t i = 0; i < tableWorkspace->rowCount(); ++i) {
     const std::string runFile = tableWorkspace->String(i, 0);
@@ -37,22 +48,23 @@ ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
       numZeros++;
     run = run.substr(numZeros, run.size() - numZeros);
 
-    if (transferMethod.knownFileType(runFile)) {
-      const std::string description = tableWorkspace->String(i, 6);
-      const std::string location = tableWorkspace->String(i, 1);
-      m_runs.push_back(run);
-      m_runDetails[run] = SearchResult{description, location};
-    }
+    if (!transferMethod.knownFileType(runFile))
+      continue;
+
+    // Ignore if the run already exists
+    if (runHasDetails(run))
+      continue;
+
+    // Ok, insert the run
+    const std::string description = tableWorkspace->String(i, 6);
+    const std::string location = tableWorkspace->String(i, 1);
+    m_runs.push_back(run);
+    m_runDetails[run] = SearchResult{description, location};
   }
 
   // Sort the table by run number
   std::sort(m_runs.begin(), m_runs.end());
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflSearchModel::~ReflSearchModel() {}
 
 /**
 @return the row count.

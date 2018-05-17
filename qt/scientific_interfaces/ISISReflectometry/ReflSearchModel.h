@@ -43,6 +43,9 @@ public:
                   Mantid::API::ITableWorkspace_sptr tableWorkspace,
                   const std::string &instrument);
   ~ReflSearchModel() override;
+  void addDataFromTable(const ReflTransferStrategy &transferMethod,
+                        Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                        const std::string &instrument);
   // row and column counts
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
