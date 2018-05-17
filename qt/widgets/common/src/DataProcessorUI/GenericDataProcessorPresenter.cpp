@@ -1073,7 +1073,15 @@ void GenericDataProcessorPresenter::deleteGroup() { m_manager->deleteGroup(); }
 /**
 Delete all groups and rows from the model
 */
-void GenericDataProcessorPresenter::deleteAll() { m_manager->deleteAll(); }
+void GenericDataProcessorPresenter::deleteAll() {
+  if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
+    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+                              "sure you want to discard them?",
+                              "Delete all rows?"))
+      return;
+
+  m_manager->deleteAll();
+}
 
 /**
 Group rows together

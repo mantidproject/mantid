@@ -274,7 +274,9 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
   if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
+    // We'll prompt the user to check it's ok to delete existing rows
     auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+    tablePresenter->setPromptUser(false);
     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
   }
 
