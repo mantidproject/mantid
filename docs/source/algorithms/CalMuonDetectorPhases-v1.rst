@@ -78,6 +78,7 @@ Output:
 
   # create data
   x=np.linspace(start=0,stop=20,num=4000)
+
   xData = np.append(x,x)
   xData = np.append(xData,xData)
 
@@ -94,7 +95,7 @@ Output:
   label=ws.getAxis(0).setUnit("Label")
   label.setLabel("Time","microsecond")
 
-  detectorTable, fittingResults =   CalMuonDetectorPhases(InputWorkspace='ws', LastGoodData=20,ForwardSpectra="1,2", BackwardSpectra="3,4",Frequency=5.0)
+  detectorTable, fittingResults =   CalMuonDetectorPhases(InputWorkspace='ws',FirstGoodData=0.1, LastGoodData=20,ForwardSpectra="1,2", BackwardSpectra="3,4",Frequency=5.0)
   # Print the result
   for i in range(0,4):
      print("Detector {} has phase {:.6f} and amplitude {:.6f}".format(detectorTable.cell(i,0), detectorTable.cell(i,2), detectorTable.cell(i,1)))
