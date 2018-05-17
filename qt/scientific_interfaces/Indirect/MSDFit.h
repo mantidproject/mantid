@@ -57,9 +57,7 @@ protected:
 private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
-  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               int specMin, int specMax) const;
-  std::string modelToAlgorithmProperty(const QString &model) const;
+  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(int specMin, int specMax) const;
 
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };

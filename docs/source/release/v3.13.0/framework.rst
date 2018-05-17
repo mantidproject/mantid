@@ -9,6 +9,10 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Instrument Definition Updates
+-----------------------------
+
+- The ALF IDF has been updated following a detector array alteration.
 
 Algorithms
 ----------
@@ -27,6 +31,10 @@ New Algorithms
   ASCII `OFF <https://en.wikipedia.org/wiki/OFF_(file_format)>`_ file, 
   which has a list of vertices and triangles. 
 
+- :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` outputs a group workspace with the separate absorption and multiple scattering corrections for flexibility to the User to apply them to the sample workspace
+
+- :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>` replaces *MultipleScatteringCylinderAbsorption* and uses :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` for calculating its corrections. 
+
 Improved
 ########
 
@@ -38,10 +46,6 @@ Improved
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` joins Dx errors if present
 - The algorithm :ref:`SortXAxis <algm-SortXAxis>` has a new input option that allows ascending (default) and descending sorting. Furthermore, Dx values will be considered if present. The documentation needed to be corrected.
 
-New
-###
-
-- Algorithm :ref:`FitPeaks <algm-FitPeaks>` is implemented as a generalized multiple-spectra multiple-peak fitting algorithm.
 
 Bug fixes
 #########
@@ -49,6 +53,14 @@ Bug fixes
 - The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
 - The :ref:`ExtractMask <algm-ExtractMask>` algorithm now returns a non-empty list of detector ID's when given a MaskWorkspace.
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
+- :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS. 
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
+- Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed    
+
+New
+###
+
+- Algorithm :ref:`FitPeaks <algm-FitPeaks>` is implemented as a generalized multiple-spectra multiple-peak fitting algorithm.
+
 
 :ref:`Release 3.13.0 <v3.13.0>`

@@ -42,8 +42,11 @@ public:
   void test_fit_function_is_valid_for_convolution_fitting() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    createConvFitResWorkspace(1, 1);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Function", "function=test,name=Convolution,name=Resolution"));
+        "Function", "name=Convolution;name=Resolution,Workspace=__ConvFit_"
+                    "Resolution,WorkspaceIndex=0;"));
+    AnalysisDataService::Instance().clear();
   }
 
   //-------------------------- Failure cases ----------------------------
@@ -143,15 +146,15 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", 0);
     alg.setProperty("SpecMax", 5);
-    alg.setProperty("Convolve", true);
+    alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace", "Result");
+    alg.setProperty("OutputWorkspace",
+                    "ReductionWs_conv_1LFixF_s0_to_5_Result");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -197,12 +200,15 @@ public:
     // Check new Log data is present
     auto memberLogs = memberRun.getLogData();
 
-    TS_ASSERT_EQUALS(memberLogs.at(2)->value(), "FixF");
-    TS_ASSERT_EQUALS(memberLogs.at(3)->value(), "true");
-    TS_ASSERT_EQUALS(memberLogs.at(4)->value(), "false");
-    TS_ASSERT_EQUALS(memberLogs.at(5)->value(), "ConvFit");
-    TS_ASSERT_EQUALS(memberLogs.at(6)->value(), "ReductionWs_");
-    TS_ASSERT_EQUALS(memberLogs.at(7)->value(), "1");
+    TS_ASSERT_EQUALS(memberRun.getLogData("background")->value(),
+                     "Fixed Linear");
+    TS_ASSERT_EQUALS(memberRun.getLogData("convolve_members")->value(), "true");
+    TS_ASSERT_EQUALS(memberRun.getLogData("delta_function")->value(), "false");
+    TS_ASSERT_EQUALS(memberRun.getLogData("fit_program")->value(),
+                     "ConvolutionFit");
+    TS_ASSERT_EQUALS(memberRun.getLogData("sample_filename")->value(),
+                     "ReductionWs_");
+    TS_ASSERT_EQUALS(memberRun.getLogData("lorentzians")->value(), "1");
 
     AnalysisDataService::Instance().clear();
   }
@@ -221,15 +227,14 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 5.0);
     alg.setProperty("SpecMin", 0);
     alg.setProperty("SpecMax", 0);
-    alg.setProperty("Convolve", true);
+    alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace", "Result");
+    alg.setProperty("OutputWorkspace", "SqwWs_conv_1LFixF_s0_Result");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -263,6 +268,9 @@ public:
     size_t specMin = 0;
     size_t specMax = 5;
 
+    auto outputName = runName + "_conv_1LFixF_s" + std::to_string(specMin) +
+                      "_to_" + std::to_string(specMax) + "_Result";
+
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
@@ -273,16 +281,15 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
     alg.setProperty("SpecMin", boost::numeric_cast<int>(specMin));
     alg.setProperty("SpecMax", boost::numeric_cast<int>(specMax));
-    alg.setProperty("Convolve", true);
+    alg.setProperty("ConvolveMembers", true);
     alg.setProperty("ExtractMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
-    alg.setProperty("OutputWorkspace", "Result");
+    alg.setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 

@@ -12,6 +12,10 @@ if (POLICY CMP0022)
   cmake_policy (SET CMP0022 NEW)
 endif ()
 
+if (POLICY CMP0072)
+  cmake_policy (SET CMP0072 OLD)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
