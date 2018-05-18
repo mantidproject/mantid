@@ -187,13 +187,22 @@ void ReflSearchModel::clear() {
 
 /**
 Add details about errors
-@param errorMap : a map of run numbers to error messages
+@param run : the run number to set the error for
+@param errorMessage : the error message
 */
 void ReflSearchModel::addError(const std::string &run,
                                const std::string &errorMessage) {
   // Add the error if we have details for this run (ignore it if not)
   if (runHasDetails(run))
     m_runDetails[run].issues = errorMessage;
+}
+
+/** Clear any error messages for the given run
+@param run : the run number to clear the error for
+ */
+void ReflSearchModel::clearError(const std::string &run) {
+  if (runHasError(run))
+    m_runDetails[run].issues = "";
 }
 
 bool ReflSearchModel::runHasDetails(const std::string &run) const {

@@ -153,7 +153,7 @@ private:
   SearchResultMap
   getSearchResultRunDetails(const std::set<int> &rowsToTransfer);
   /// Deal with rows that are invalid for transfer
-  void handleInvalidRunsForTransfer(
+  void updateErrorStateInSearchModel(
       const std::set<int> &rowsToTransfer,
       const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string

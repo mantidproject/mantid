@@ -38,6 +38,7 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+// unnamed namespace
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
@@ -46,6 +47,34 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
   std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
                  &QString::fromStdString);
   return outVec;
+}
+
+/** Get the error message associated with the given run
+ * @param run : the run number as a string
+ * @param invalidRuns : the list of invalid runs as a map of description
+ * to error message, where the description may contain a list of run numbers
+ * separated by a '+' character
+ */
+std::string getRunErrorMessage(
+    const std::string &searchRun,
+    const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
+
+  // Loop through the list of invalid rows
+  for (auto row : invalidRuns) {
+    // Loop through all entries in the error map for this row
+    for (auto errorPair : row) {
+      // Extract the run numbers for this row
+      auto const runNumbers = errorPair.first;
+      StringTokenizer tokenizer(runNumbers, "+", StringTokenizer::TOK_TRIM);
+      auto const runList = tokenizer.asVector();
+
+      // If the requested run is in the list, return the error message
+      if (std::find(runList.begin(), runList.end(), searchRun) != runList.end())
+        return errorPair.second;
+    }
+  }
+
+  return std::string();
 }
 }
 
@@ -437,48 +466,28 @@ SearchResultMap ReflRunsTabPresenter::getSearchResultRunDetails(
   return runDetails;
 }
 
-/** iterate through invalidRuns to set the 'invalid transfers' in the search
- * model
+/** Iterate through the rows to transfer and set/clear the error state
+ * in the search results model
  * @param rowsToTransfer : row indices of all rows to transfer
  * @param invalidRuns : details of runs that are invalid
  */
-void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
+void ReflRunsTabPresenter::updateErrorStateInSearchModel(
     const std::set<int> &rowsToTransfer,
     const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns) {
 
-  if (invalidRuns.empty())
-    return;
+  // The run number is in column 0 in the search results table
+  int const columnIndex = 0;
 
-  for (auto invalidRowIt = invalidRuns.begin();
-       invalidRowIt != invalidRuns.end(); ++invalidRowIt) {
-    auto &error = *invalidRowIt; // grab row from vector
-    // iterate over row containing run number and reason why it's invalid
-    for (auto errorRowIt = error.begin(); errorRowIt != error.end();
-         ++errorRowIt) {
-      // Get the run number(s). If more than one, they are separated with "+"
-      auto const runNumbers = errorRowIt->first;
-      auto const errorMessage = errorRowIt->second;
+  // Loop through all the rows we want to transfer
+  for (auto rowIndex : rowsToTransfer) {
+    auto const runToTransfer = searchModelData(rowIndex, columnIndex);
+    auto const errorMessage = getRunErrorMessage(runToTransfer, invalidRuns);
 
-      StringTokenizer tokenizer(runNumbers, "+", StringTokenizer::TOK_TRIM);
-      auto const runList = tokenizer.asVector();
-
-      // iterate over given rows
-      for (auto rowIt = rowsToTransfer.begin(); rowIt != rowsToTransfer.end();
-           ++rowIt) {
-        const int row = *rowIt;
-        // get the run number from that row
-        const auto searchRun = m_searchModel->data(m_searchModel->index(row, 0))
-                                   .toString()
-                                   .toStdString();
-        // Check if the search run number is one of the runs associated with
-        // this error
-        if (std::find(runList.cbegin(), runList.cend(), searchRun) !=
-            runList.end()) {
-          // add this error to the member of m_searchModel that holds errors.
-          m_searchModel->addError(searchRun, errorMessage);
-        }
-      }
-    }
+    // Set or clear the error in the model for this run
+    if (errorMessage.empty())
+      m_searchModel->clearError(runToTransfer);
+    else
+      m_searchModel->addError(runToTransfer, errorMessage);
   }
 }
 
@@ -522,7 +531,7 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
       getTransferStrategy()->transferRuns(runDetails, progress, matchType);
 
   // Handle any runs that cannot be transferred
-  handleInvalidRunsForTransfer(rowsToTransfer, transferDetails.getErrorRuns());
+  updateErrorStateInSearchModel(rowsToTransfer, transferDetails.getErrorRuns());
 
   // Do the transfer
   m_tablePresenters.at(group)

@@ -61,6 +61,7 @@ public:
   void clear();
   /// Add details of an error
   void addError(const std::string &run, const std::string &errorMessage);
+  void clearError(const std::string &run);
 
 protected:
   // vector of the run numbers
