@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include "IBatchView.h"
 
 namespace MantidQt {
 
@@ -54,12 +55,15 @@ public:
   IReflRunsTabView(){};
   virtual ~IReflRunsTabView(){};
 
+  virtual void subscribe(IReflRunsTabPresenter *presenter) = 0;
+  virtual std::vector<IBatchView *> const &tableViews() const = 0;
+
   // Connect the model
   virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 const std::string &defaultInstrument) = 0;
+                                 int defaultInstrumentIndex) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
   virtual void setTableCommands(
       std::vector<std::unique_ptr<DataProcessor::Command>> tableCommands) = 0;

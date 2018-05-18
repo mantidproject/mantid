@@ -56,12 +56,19 @@ QStringList fromStdStringVector(std::vector<std::string> const &inVec) {
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    std::vector<DataProcessorPresenter *> tablePresenters,
+    BatchPresenterFactory makeBatchPresenter,
+    std::vector<std::string> const &instruments, int defaultInstrumentIndex,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
+      m_makeBatchPresenter(makeBatchPresenter), m_mainPresenter(nullptr),
       m_searcher(searcher), m_instrumentChanged(false) {
+
   assert(m_view != nullptr);
+  m_view->subscribe(this);
+  for (const auto &tableView : m_view->tableViews())
+    m_tablePresenters.emplace_back(m_makeBatchPresenter(tableView));
+
+  m_view->setInstrumentList(instruments, defaultInstrumentIndex);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -75,30 +82,6 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 
   // Set current transfer method
   m_currentTransferMethod = m_view->getTransferMethod();
-
-  // Set up the instrument selectors
-  std::vector<std::string> instruments;
-  instruments.emplace_back("INTER");
-  instruments.emplace_back("SURF");
-  instruments.emplace_back("CRISP");
-  instruments.emplace_back("POLREF");
-  instruments.emplace_back("OFFSPEC");
-
-  // If the user's configured default instrument is in this list, set it as the
-  // default, otherwise use INTER
-  const std::string defaultInst =
-      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-  if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
-      instruments.end()) {
-    m_view->setInstrumentList(instruments, defaultInst);
-    for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(fromStdStringVector(instruments),
-                                   QString::fromStdString(defaultInst));
-  } else {
-    m_view->setInstrumentList(instruments, "INTER");
-    for (const auto &presenter : m_tablePresenters)
-      presenter->setInstrumentList(fromStdStringVector(instruments), "INTER");
-  }
 }
 
 ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
@@ -113,8 +96,9 @@ void ReflRunsTabPresenter::acceptMainPresenter(
   // When doing so, the inner presenters will notify this
   // presenter with the list of commands
 
-  for (const auto &presenter : m_tablePresenters)
-    presenter->accept(this);
+  // for (const auto &presenter : m_tablePresenters)
+  //  presenter->accept(this);
+
   // Note this must be done here since notifying the gdpp of its view
   // will cause it to request settings only accessible via the main
   // presenter.
@@ -122,7 +106,7 @@ void ReflRunsTabPresenter::acceptMainPresenter(
 
 void ReflRunsTabPresenter::settingsChanged(int group) {
   assert(static_cast<std::size_t>(group) < m_tablePresenters.size());
-  m_tablePresenters[group]->settingsChanged();
+  // m_tablePresenters[group]->settingsChanged();
 }
 
 /**
@@ -176,8 +160,8 @@ void ReflRunsTabPresenter::pushCommands() {
 
   // The expected number of commands
   const size_t nCommands = 31;
-  auto commands =
-      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
+  auto commands = std::vector<MantidWidgets::DataProcessor::Command_uptr>();
+  //      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
@@ -263,26 +247,26 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 */
 void ReflRunsTabPresenter::autoreduce(bool startNew) {
   m_autoSearchString = m_view->getSearchString();
-  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+  auto &tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
 
   // If a new autoreduction is being made, we must remove all existing rows and
   // transfer the new ones (obtained by ICAT search) in
-  if (startNew) {
-    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
-
-    // Select all rows / groups in existing table and delete them
-    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
-
-    // Select and transfer all rows to the table
-    m_view->setAllSearchRowsSelected();
-    if (m_view->getSelectedSearchRows().size() > 0)
-      transfer();
-  }
-
-  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
-  if (tablePresenter->selectedParents().size() > 0)
-    tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
+  //  if (startNew) {
+  //    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+  //
+  //    // Select all rows / groups in existing table and delete them
+  //    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+  //    tablePresenter->notify(DataProcessorPresenter::DeleteGroupFlag);
+  //
+  //    // Select and transfer all rows to the table
+  //    m_view->setAllSearchRowsSelected();
+  //    if (m_view->getSelectedSearchRows().size() > 0)
+  //      transfer();
+  //  }
+  //
+  //  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
+  //  if (tablePresenter->selectedParents().size() > 0)
+  //    tablePresenter->notifyProcessRequested();
 }
 
 /** Transfers the selected runs in the search results to the processing table
@@ -366,9 +350,9 @@ void ReflRunsTabPresenter::transfer() {
     }
   }
 
-  m_tablePresenters.at(m_view->getSelectedGroup())
-      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
-          results.getTransferRuns()));
+  // m_tablePresenters.at(m_view->getSelectedGroup())
+  //    ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+  //        results.getTransferRuns()));
 }
 
 /**
@@ -418,8 +402,8 @@ void ReflRunsTabPresenter::notifyADSChanged(
 
   UNUSED_ARG(workspaceList);
   pushCommands();
-  m_view->updateMenuEnabledState(
-      m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
+  //  m_view->updateMenuEnabledState(
+  //     m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
 /** Requests global pre-processing options. Options are supplied by

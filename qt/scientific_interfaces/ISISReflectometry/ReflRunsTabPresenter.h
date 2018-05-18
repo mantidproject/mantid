@@ -4,6 +4,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "BatchPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <boost/shared_ptr.hpp>
@@ -62,7 +63,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
-                       std::vector<DataProcessorPresenter *> tablePresenter,
+                       BatchPresenterFactory makeBatchPresenter,
+                       std::vector<std::string> const& instruments,
+                       int defaultInstrumentIndex,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
   ~ReflRunsTabPresenter() override;
@@ -104,8 +107,9 @@ private:
   IReflRunsTabView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
+  BatchPresenterFactory m_makeBatchPresenter;
   /// The data processor presenters stored in a vector
-  std::vector<DataProcessorPresenter *> m_tablePresenters;
+  std::vector<std::unique_ptr<BatchPresenter>> m_tablePresenters;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
@@ -120,6 +124,7 @@ private:
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+
 
   /// searching
   void search();

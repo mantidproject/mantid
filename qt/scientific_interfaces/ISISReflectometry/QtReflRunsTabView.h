@@ -6,6 +6,8 @@
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
+#include "BatchPresenter.h"
+#include "BatchView.h"
 
 #include "ui_ReflRunsTabWidget.h"
 
@@ -62,16 +64,18 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
       public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
-  /// Constructor
-  QtReflRunsTabView(QWidget *parent = nullptr);
-  /// Destructor
+  QtReflRunsTabView(QWidget *parent, BatchViewFactory makeView);
   ~QtReflRunsTabView() override;
+
+  void subscribe(IReflRunsTabPresenter* presenter) override;
+  std::vector<IBatchView*> const& tableViews() const override;
+
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
-                         const std::string &defaultInstrument) override;
+                         int defaultInstrumentIndex) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
   void setTableCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                             tableCommands) override;
@@ -107,9 +111,9 @@ private:
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessor::Command> command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
-
   // the presenter
-  std::shared_ptr<IReflRunsTabPresenter> m_presenter;
+  IReflRunsTabPresenter* m_presenter;
+
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   // Command adapters
@@ -118,6 +122,10 @@ private:
   Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
+
+  std::vector<IBatchView*> m_tableViews;
+
+  BatchViewFactory m_makeBatchView;
 
 private slots:
   void on_actionSearch_triggered();

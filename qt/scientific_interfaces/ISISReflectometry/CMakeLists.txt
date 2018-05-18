@@ -1,4 +1,6 @@
 set ( SRC_FILES
+    BatchView.cpp
+    BatchPresenter.cpp
     MeasurementItem.cpp
     InstrumentOptionDefaults.cpp
     InstrumentParameters.cpp
@@ -36,6 +38,9 @@ set ( SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
     DllConfig.h
+    IBatchView.h
+    BatchView.h
+    BatchPresenter.h
     InstrumentParameters.h
     IReflEventPresenter.h
     IReflEventTabPresenter.h
@@ -97,6 +102,7 @@ set ( MOC_FILES
     QtReflSettingsTabView.h
     QtReflSettingsView.h
     QtReflMainWindowView.h
+    BatchView.h
 )
 
 set ( UI_FILES
@@ -108,6 +114,7 @@ set ( UI_FILES
    ReflSettingsTabWidget.ui
    ReflSettingsWidget.ui
    ReflWindow.ui
+   BatchView.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
