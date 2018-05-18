@@ -458,6 +458,25 @@ void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
   }
 }
 
+ProgressPresenter ReflRunsTabPresenter::setupProgressBar() {
+
+  boost::optional<ProgressPresenter> progress;
+  if (autoreductionRunning()) {
+    // For autoprocessing, set start=end=0 to get an infinitely scrolling
+    // progress bar to indicate a background process is running. Leave the
+    // return value unset because we don't want to report progress.
+    m_progressView->setProgressRange(0, 0);
+  } else {
+    // Set the range and return the progress presenter
+    progress = ProgressPresenter(0, static_cast<double>(rowsToTransfer.size()),
+                                 static_cast<int64_t>(rowsToTransfer.size()),
+                                 this->m_progressView);
+    
+  }
+
+  return progress;
+}
+
 /** Transfers the selected runs in the search results to the processing table
  * @param rowsToTransfer : a set of row indices in the search results to
  * transfer
@@ -470,10 +489,8 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
   if (!validateRowsToTransfer(rowsToTransfer))
     return;
 
-  ProgressPresenter progress(0, static_cast<double>(rowsToTransfer.size()),
-                             static_cast<int64_t>(rowsToTransfer.size()),
-                             this->m_progressView);
-
+  auto progress = setupProgressBar(rowsToTransfer);
+  
   // Extract details of runs to transfer
   auto runDetails = getSearchResultRunDetails(rowsToTransfer);
 
@@ -645,6 +662,7 @@ void ReflRunsTabPresenter::pause(int group) {
 
   m_view->stopTimer();
   updateWidgetEnabledState(false);
+  m_progressView->setProgressRange(0, 1);
 
   // We get here in two scenarios: processing is still running, in which case
   // do not confirm reduction has paused yet (confirmReductionPaused will be
