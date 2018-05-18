@@ -6,7 +6,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ReflAutoreduction::ReflAutoreduction() : m_running(false), m_group(0) {}
+ReflAutoreduction::ReflAutoreduction()
+    : m_running(false), m_group(0), m_searchResultsExist(false) {}
 
 /** Check whether autoreduction is currently running
  */
