@@ -742,6 +742,8 @@ _name_to_constructor_map = {
     'MultiDomainFunction': MultiDomainFunctionWrapper,
     }
 
+_do_not_wrap = ['VesuvioResolution']
+
 
 def _create_wrapper_function(name):
     """
@@ -762,7 +764,8 @@ def _create_wrapper_function(name):
 
 def _attach_wrappers(source_module):
     for name in FunctionFactory.getFunctionNames():
-        setattr(source_module, name, _create_wrapper_function(name))
+        if name not in _do_not_wrap:
+            setattr(source_module, name, _create_wrapper_function(name))
 
 
 _OldIFunction1D = IFunction1D

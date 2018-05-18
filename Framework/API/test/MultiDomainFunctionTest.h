@@ -481,7 +481,7 @@ public:
     auto f = FunctionFactory::Instance().createInitialized(ini);
     auto g = FunctionFactory::Instance().createInitialized(f->asString());
     TS_ASSERT_EQUALS(g->asString(),
-                     "composite=MultiDomainFunction,NumDeriv=false;(composite="
+                     "composite=MultiDomainFunction,NumDeriv=true;(composite="
                      "CompositeFunction,NumDeriv=false,$domains=i;name="
                      "MultiDomainFunctionTest_Function,A=0,B=0;(name="
                      "MultiDomainFunctionTest_Function,A=0,B=0;name="
