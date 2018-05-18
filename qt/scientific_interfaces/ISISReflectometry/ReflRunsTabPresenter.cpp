@@ -458,21 +458,20 @@ void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
   }
 }
 
-ProgressPresenter ReflRunsTabPresenter::setupProgressBar() {
+/** Set up the progress bar
+ */
+ProgressPresenter
+ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
 
-  boost::optional<ProgressPresenter> progress;
-  if (autoreductionRunning()) {
-    // For autoprocessing, set start=end=0 to get an infinitely scrolling
-    // progress bar to indicate a background process is running. Leave the
-    // return value unset because we don't want to report progress.
-    m_progressView->setProgressRange(0, 0);
-  } else {
-    // Set the range and return the progress presenter
-    progress = ProgressPresenter(0, static_cast<double>(rowsToTransfer.size()),
-                                 static_cast<int64_t>(rowsToTransfer.size()),
-                                 this->m_progressView);
-    
-  }
+  auto start = double(0.0);
+  auto end = static_cast<double>(rowsToTransfer.size());
+  auto nsteps = static_cast<int64_t>(rowsToTransfer.size());
+  auto progress = ProgressPresenter(start, end, nsteps, this->m_progressView);
+
+  if (autoreductionRunning())
+    progress.setStyle(ProgressableView::Style::ENDLESS);
+  else
+    progress.setStyle(ProgressableView::Style::PERCENTAGE);
 
   return progress;
 }
@@ -662,7 +661,7 @@ void ReflRunsTabPresenter::pause(int group) {
 
   m_view->stopTimer();
   updateWidgetEnabledState(false);
-  m_progressView->setProgressRange(0, 1);
+  m_progressView->setStyle(ProgressableView::Style::PERCENTAGE);
 
   // We get here in two scenarios: processing is still running, in which case
   // do not confirm reduction has paused yet (confirmReductionPaused will be

@@ -278,6 +278,7 @@ Set the range of the progress bar
 */
 void QtReflRunsTabView::setProgressRange(int min, int max) {
   ui.progressBar->setRange(min, max);
+  ProgressableView::setProgressRange(min, max);
 }
 
 /**

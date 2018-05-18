@@ -10,6 +10,8 @@
 #include "ReflTransferStrategy.h"
 #include <boost/shared_ptr.hpp>
 
+class ProgressPresenter;
+
 namespace MantidQt {
 
 namespace MantidWidgets {
@@ -133,6 +135,7 @@ private:
   void startAutoreduction();
   void pauseAutoreduction();
   void runAutoreduction();
+  ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer, int group,
                 const TransferMatch matchType = TransferMatch::Any);
   void pushCommands(int group);
