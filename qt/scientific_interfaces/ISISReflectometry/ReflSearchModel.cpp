@@ -189,14 +189,11 @@ void ReflSearchModel::clear() {
 Add details about errors
 @param errorMap : a map of run numbers to error messages
 */
-void ReflSearchModel::addError(
-    const std::map<std::string, std::string> &errorMap) {
-  // Loop through each run in the input map
-  for (auto &errorKvp : errorMap) {
-    // Add the error if we have details for this run (ignore it if not)
-    if (runHasDetails(errorKvp.first))
-      m_runDetails[errorKvp.first].issues = errorKvp.second;
-  }
+void ReflSearchModel::addError(const std::string &run,
+                               const std::string &errorMessage) {
+  // Add the error if we have details for this run (ignore it if not)
+  if (runHasDetails(run))
+    m_runDetails[run].issues = errorMessage;
 }
 
 bool ReflSearchModel::runHasDetails(const std::string &run) const {

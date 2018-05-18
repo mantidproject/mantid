@@ -7,6 +7,7 @@
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
@@ -454,7 +455,12 @@ void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
     // iterate over row containing run number and reason why it's invalid
     for (auto errorRowIt = error.begin(); errorRowIt != error.end();
          ++errorRowIt) {
-      const std::string runNumber = errorRowIt->first; // grab run number
+      // Get the run number(s). If more than one, they are separated with "+"
+      auto const runNumbers = errorRowIt->first;
+      auto const errorMessage = errorRowIt->second;
+
+      StringTokenizer tokenizer(runNumbers, "+", StringTokenizer::TOK_TRIM);
+      auto const runList = tokenizer.asVector();
 
       // iterate over given rows
       for (auto rowIt = rowsToTransfer.begin(); rowIt != rowsToTransfer.end();
@@ -464,11 +470,12 @@ void ReflRunsTabPresenter::handleInvalidRunsForTransfer(
         const auto searchRun = m_searchModel->data(m_searchModel->index(row, 0))
                                    .toString()
                                    .toStdString();
-        if (searchRun == runNumber) { // if search run number is the same as
-          // our invalid run number
-
+        // Check if the search run number is one of the runs associated with
+        // this error
+        if (std::find(runList.cbegin(), runList.cend(), searchRun) !=
+            runList.end()) {
           // add this error to the member of m_searchModel that holds errors.
-          m_searchModel->addError(error);
+          m_searchModel->addError(searchRun, errorMessage);
         }
       }
     }

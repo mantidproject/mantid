@@ -60,7 +60,7 @@ public:
   /// clear the model
   void clear();
   /// Add details of an error
-  void addError(const std::map<std::string, std::string> &error);
+  void addError(const std::string &run, const std::string &errorMessage);
 
 protected:
   // vector of the run numbers
