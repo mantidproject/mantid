@@ -140,7 +140,7 @@ void EnggDiffFittingModel::saveFitResultsToHDF5(
     cloneWorkspace(ws, clonedWSName);
     inputWorkspaces.emplace_back(clonedWSName);
     runNumbers.emplace_back(runLabel.runNumber);
-    bankIDs.emplace_back(runLabel.bank);
+    bankIDs.emplace_back(static_cast<long>(runLabel.bank));
   }
 
   auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
