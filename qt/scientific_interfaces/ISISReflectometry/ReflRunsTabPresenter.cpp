@@ -288,7 +288,12 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
     // We'll prompt the user to check it's ok to delete existing rows
     auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
     tablePresenter->setPromptUser(false);
-    tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
+    try {
+      tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
+    } catch (const std::runtime_error &e) {
+      // If the user cancelled the deletion, don't start autoreduction
+      return;
+    }
   }
 
   if (m_autoreduction.start(m_view->getSelectedGroup(),
