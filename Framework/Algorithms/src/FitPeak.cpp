@@ -744,6 +744,8 @@ double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc,
   boost::shared_ptr<MultiDomainFunction> funcmd =
       boost::make_shared<MultiDomainFunction>();
 
+  funcmd->setAttributeValue("NumDeriv", false);
+
   // Set function first
   funcmd->addFunction(fitfunc);
 
