@@ -1142,7 +1142,8 @@ void GenericDataProcessorPresenter::deleteAll() {
     if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
                               "sure you want to discard them?",
                               "Delete all rows?"))
-      throw std::runtime_error("User cancelled operation to delete existing rows");
+      throw std::runtime_error(
+          "User cancelled operation to delete existing rows");
 
   m_manager->deleteAll();
 }
