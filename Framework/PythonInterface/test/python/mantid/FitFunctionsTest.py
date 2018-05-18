@@ -765,6 +765,10 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(f[1].PeakCentre, 0, 6)
         self.assertAlmostEqual(f[2].PeakCentre, -2, 6)
 
+    def test_plugins_wrapped(self):
+        from mantid.simpleapi import Lorentz
+        self.assertEqual(str(Lorentz()), 'name=Lorentz,Scale=1,Length=50,Background=0')
+
 
 if __name__ == '__main__':
     unittest.main()

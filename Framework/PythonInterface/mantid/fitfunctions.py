@@ -757,15 +757,12 @@ def _create_wrapper_function(name):
 
     # ------------------------------------------------------------------------------------------------
     wrapper_function.__name__ = name
-    globals()[name] = wrapper_function
+    return wrapper_function
 
 
-def _create_wrappers_for_all_fit_functions():
+def _attach_wrappers(source_module):
     for name in FunctionFactory.getFunctionNames():
-        _create_wrapper_function(name)
-
-
-_create_wrappers_for_all_fit_functions()
+        setattr(source_module, name, _create_wrapper_function(name))
 
 
 _OldIFunction1D = IFunction1D
