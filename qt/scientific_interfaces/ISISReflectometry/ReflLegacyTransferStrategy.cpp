@@ -15,7 +15,7 @@ namespace {
 /** Check that the given row contains a valid theta value
  * @throws : std::invalid_argument if failed
  */
-void validateTheta(std::map<std::string, std::string> row) {
+void validateTheta(std::map<std::string, std::string> &row) {
   // Exclude empty strings
   auto const angleString = row[ReflTableSchema::ANGLE];
   if (angleString.empty())
@@ -35,14 +35,14 @@ void validateTheta(std::map<std::string, std::string> row) {
 /** Check that the given row values are all valid
  * @throws : std::invalid_argument if failed
  */
-void validateStrict(std::map<std::string, std::string> row) {
+void validateStrict(std::map<std::string, std::string> &row) {
   validateTheta(row);
 }
 
 /** Check that the given row contains valid data
  * @throws : std::invalid_argument if failed
  */
-void validateRow(std::map<std::string, std::string> row,
+void validateRow(std::map<std::string, std::string> &row,
                  const TransferMatch matchType) {
   switch (matchType) {
   case TransferMatch::Any:
