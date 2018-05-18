@@ -5,6 +5,18 @@ class FunctionWrapper(object):
     """
     Wrapper class for Fitting Function
     """
+    @staticmethod
+    def wrap(fun, *args, **kwargs):
+        fun_is_str = isinstance(fun, str)
+        name = fun if fun_is_str else fun.name()
+        if name in _name_to_constructor_map:
+            wrapper = _name_to_constructor_map[name]
+            if fun_is_str:
+                return wrapper(*args, **kwargs)
+            else:
+                return wrapper(fun, *args, **kwargs)
+        return FunctionWrapper(fun, **kwargs)
+
     def __init__ (self, name, **kwargs):
         """
         Called when creating an instance
@@ -397,6 +409,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
                        composite function itself.
         """
         if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
+            if isinstance(args[0], str):
+                raise RuntimeError('Whaaat? {}'.format(args[0]))
             # We have a composite function to wrap
             self.fun = args[0]
         else:
@@ -721,6 +735,14 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
         return self.fun.nDomains()
 
 
+_name_to_constructor_map = {
+    'CompositeFunction': CompositeFunctionWrapper,
+    'ProductFunction': ProductFunctionWrapper,
+    'Convolution': ConvolutionWrapper,
+    'MultiDomainFunction': MultiDomainFunctionWrapper,
+    }
+
+
 def _create_wrapper_function(name):
     """
     Create fake functions for the given name
@@ -731,16 +753,7 @@ def _create_wrapper_function(name):
     """
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
-        name_to_constructor = {
-            'CompositeFunction': CompositeFunctionWrapper,
-            'ProductFunction': ProductFunctionWrapper,
-            'Convolution': ConvolutionWrapper,
-            'MultiDomainFunction': MultiDomainFunctionWrapper,
-            }
-        # constructor is FunctionWrapper if the name is not in the registry.
-        if name in name_to_constructor:
-            return name_to_constructor[name](*args, **kwargs)
-        return FunctionWrapper(name, **kwargs)
+        return FunctionWrapper.wrap(name, *args, **kwargs)
 
     # ------------------------------------------------------------------------------------------------
     wrapper_function.__name__ = name

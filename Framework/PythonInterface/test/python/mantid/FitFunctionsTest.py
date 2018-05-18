@@ -753,17 +753,17 @@ class FitFunctionsTest(unittest.TestCase):
         res = Fit(mdf, InputWorkspace=ws1, InputWorkspace_1=ws2, InputWorkspace_2=ws3)
         f = res.Function
 
-        self.assertAlmostEqual(f['f0.Sigma'], 0.707107, 6)
-        self.assertAlmostEqual(f['f1.Sigma'], 0.707107, 6)
-        self.assertAlmostEqual(f['f2.Sigma'], 0.707107, 6)
+        self.assertAlmostEqual(f[0].Sigma, 0.707107, 6)
+        self.assertAlmostEqual(f[1].Sigma, 0.707107, 6)
+        self.assertAlmostEqual(f[2].Sigma, 0.707107, 6)
 
-        self.assertAlmostEqual(f['f0.Height'], 1, 6)
-        self.assertAlmostEqual(f['f1.Height'], 2, 6)
-        self.assertAlmostEqual(f['f2.Height'], 3, 6)
+        self.assertAlmostEqual(f[0].Height, 1, 6)
+        self.assertAlmostEqual(f[1].Height, 2, 6)
+        self.assertAlmostEqual(f[2].Height, 3, 6)
 
-        self.assertAlmostEqual(f['f0.PeakCentre'], 2, 6)
-        self.assertAlmostEqual(f['f1.PeakCentre'], 0, 6)
-        self.assertAlmostEqual(f['f2.PeakCentre'], -2, 6)
+        self.assertAlmostEqual(f[0].PeakCentre, 2, 6)
+        self.assertAlmostEqual(f[1].PeakCentre, 0, 6)
+        self.assertAlmostEqual(f[2].PeakCentre, -2, 6)
 
 
 if __name__ == '__main__':
