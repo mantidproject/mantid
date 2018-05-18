@@ -1,12 +1,5 @@
 #include "MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h"
-
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
-
-#include <boost/python/object.hpp>
-#define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
-#define NO_IMPORT_ARRAY
-#include <numpy/arrayobject.h>
 
 //-----------------------------------------------------------------------------
 // IPeakFunction definition

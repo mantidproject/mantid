@@ -1,9 +1,6 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
-
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
-#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
-#include <boost/python/class.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>

@@ -4,6 +4,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/kernel/kernel.h"
 #include <cxxtest/GlobalFixture.h>
 #include <cxxtest/TestSuite.h>
 
@@ -32,6 +33,11 @@ public:
                                            "sys.path.insert(0, '" +
                                            propDir + "')";
     PyRun_SimpleString(appendMantidToPath.c_str());
+    PyRun_SimpleString("import mantid");
+#ifdef _WIN32
+    // See kernel.h for the explanation
+    kernel_dll_import_numpy_capi_for_unittest();
+#endif
     return true;
   }
 

@@ -3,7 +3,6 @@
 
 #include "FunctionAdapterTestCommon.h"
 #include "MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h"
-#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
 #include <array>

@@ -2,7 +2,6 @@
 #define MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
 
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
-#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "FunctionAdapterTestCommon.h"
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
