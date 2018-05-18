@@ -739,6 +739,32 @@ class FitFunctionsTest(unittest.TestCase):
         cvals = cws.readY(1)
         self.assertEqual(list(cvals), [0.0, 2.0, 4.0, 6.0, 8.0])
 
+    def test_multi_domain_fit(self):
+        x = np.linspace(-10, 10)
+        y1 = np.exp(-(x-2)**2)
+        y2 = 2*np.exp(-x**2)
+        y3 = 3*np.exp(-(x+2)**2)
+
+        ws1 = CreateWorkspace(x, y1)
+        ws2 = CreateWorkspace(x, y2)
+        ws3 = CreateWorkspace(x, y3)
+
+        mdf = MultiDomainFunction(Gaussian(), Gaussian(), Gaussian(), Global=["Sigma"])
+        res = Fit(mdf, InputWorkspace=ws1, InputWorkspace_1=ws2, InputWorkspace_2=ws3)
+        f = res.Function
+
+        self.assertAlmostEqual(f['f0.Sigma'], 0.707107, 6)
+        self.assertAlmostEqual(f['f1.Sigma'], 0.707107, 6)
+        self.assertAlmostEqual(f['f2.Sigma'], 0.707107, 6)
+
+        self.assertAlmostEqual(f['f0.Height'], 1, 6)
+        self.assertAlmostEqual(f['f1.Height'], 2, 6)
+        self.assertAlmostEqual(f['f2.Height'], 3, 6)
+
+        self.assertAlmostEqual(f['f0.PeakCentre'], 2, 6)
+        self.assertAlmostEqual(f['f1.PeakCentre'], 0, 6)
+        self.assertAlmostEqual(f['f2.PeakCentre'], -2, 6)
+
 
 if __name__ == '__main__':
     unittest.main()
