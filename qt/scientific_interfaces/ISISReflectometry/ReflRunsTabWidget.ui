@@ -278,8 +278,11 @@
         <layout class="QHBoxLayout" name="layoutSearchBottomRow">
          <item>
           <widget class="QProgressBar" name="progressBar">
+           <property name="toolTip">
+            <string>Shows the current progress when transferring runs manually, or a busy indicator to show that auto-processing is running</string>
+           </property>
            <property name="whatsThis">
-            <string>Shows the current progress when transferring runs.</string>
+            <string>When transferring runs manually, this bar shows the progress as a percentage complete. Alternatively, when auto-processing is running, it shows a busy indicator to show that the background polling and transfer of runs is continually running.</string>
            </property>
            <property name="value">
             <number>0</number>
