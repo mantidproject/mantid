@@ -41,7 +41,7 @@ struct SpectraOutOfRange : boost::static_visitor<std::vector<T>> {
     return notInRange;
   }
 
-  std::vector<T> operator()(const VectorizedString<T> &spectra) const {
+  std::vector<T> operator()(const DiscontinuousSpectra<T> &spectra) const {
     return outOfRange(spectra, m_minimum, m_maximum);
   }
 
@@ -53,7 +53,7 @@ struct CheckZeroSpectrum : boost::static_visitor<bool> {
   bool operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     return false;
   }
-  bool operator()(const VectorizedString<std::size_t> &spectra) const {
+  bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.empty();
   }
 };
@@ -64,7 +64,7 @@ struct NumberOfSpectra : boost::static_visitor<std::size_t> {
     return spectra.second - spectra.first;
   }
 
-  std::size_t operator()(const VectorizedString<std::size_t> &spectra) const {
+  std::size_t operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.size();
   }
 };
@@ -73,7 +73,7 @@ struct SpectraToString : boost::static_visitor<std::string> {
   SpectraToString(const std::string &rangeDelimiter = "-")
       : m_rangeDelimiter(rangeDelimiter) {}
 
-  std::string operator()(const VectorizedString<std::size_t> &spectra) const {
+  std::string operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.getString();
   }
 
@@ -112,7 +112,7 @@ struct GetSpectrum : boost::static_visitor<std::size_t> {
     return spectra.first + m_index;
   }
 
-  std::size_t operator()(const VectorizedString<std::size_t> &spectra) const {
+  std::size_t operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra[m_index];
   }
 
