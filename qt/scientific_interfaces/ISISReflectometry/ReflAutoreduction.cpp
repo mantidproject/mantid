@@ -24,6 +24,18 @@ bool ReflAutoreduction::searchStringChanged(
   return m_searchString != newSearchString;
 }
 
+/** Check whether search results list has been created yet
+ */
+bool ReflAutoreduction::searchResultsExist() const {
+  return m_searchResultsExist;
+}
+
+/** Set the flag to indicate search results list has been created for the first
+ * run through for this autoreduction process. On subsequent runs, the existing
+ * search results will be updated, rather than being re-populated
+ */
+void ReflAutoreduction::setSearchResultsExist() { m_searchResultsExist = true; }
+
 /** Start an autoreduction on the given group
  *
  * @param group : the index of which group to start the reduction on
@@ -35,6 +47,7 @@ bool ReflAutoreduction::start(const int group,
   m_group = group;
   m_searchString = searchString;
   m_running = true;
+  m_searchResultsExist = false;
   return true;
 }
 

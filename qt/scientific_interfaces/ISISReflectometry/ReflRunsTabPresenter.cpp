@@ -261,16 +261,19 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 
   // Get the results from the algorithm
   ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
-  // Update the model and state
+
+  // Update the state and model
   m_instrumentChanged = false;
   m_currentTransferMethod = m_view->getTransferMethod();
 
-  if (autoreductionRunning() && m_searchModel) {
-    // Just update the existing model with any new runs
+  if (m_searchModel && autoreductionRunning() &&
+      m_autoreduction.searchResultsExist()) {
+    // We're continuing an existing autoreduction process. Just update the
+    // existing search results list with any new runs
     m_searchModel->addDataFromTable(*getTransferStrategy(), results,
                                     m_view->getSearchInstrument());
   } else {
-    // Create a new model and display it on the view
+    // Create a new search results list and display it on the view
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
         *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
@@ -338,8 +341,10 @@ void ReflRunsTabPresenter::icatSearchComplete() {
 
   // If autoreduction is running, perform the next reduction using the new
   // search results
-  if (autoreductionRunning())
+  if (autoreductionRunning()) {
+    m_autoreduction.setSearchResultsExist();
     runAutoreduction();
+  }
 }
 
 /** Run an autoreduction process based on the latest search results

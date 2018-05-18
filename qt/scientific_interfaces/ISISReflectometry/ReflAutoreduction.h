@@ -22,6 +22,10 @@ public:
   /// Return true if the given search string is different from when
   /// autoreduction was started
   bool searchStringChanged(const std::string &newSearchString) const;
+  /// Check whether search results have been created yet
+  bool searchResultsExist() const;
+  /// Set the flag to indicate search results list has been created
+  void setSearchResultsExist();
 
   /// Start an autoreduction on the given group
   bool start(const int group, const std::string &searchString);
@@ -37,6 +41,8 @@ private:
   int m_group;
   /// The string that was used to start the autoreduction
   std::string m_searchString;
+  /// Flag indicating that the search results list has been created
+  bool m_searchResultsExist;
 };
 }
 }
