@@ -18,7 +18,6 @@ MultiDomainFunction::MultiDomainFunction() : m_nDomains(0), m_maxIndex(0) {
   setAttributeValue("NumDeriv", true);
 }
 
-
 /**
  * Associate a member function and a domain. The function will only be applied
  * to this domain.

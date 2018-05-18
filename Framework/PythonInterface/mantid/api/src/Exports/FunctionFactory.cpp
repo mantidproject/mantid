@@ -27,10 +27,12 @@ GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
 namespace Mantid {
 namespace PythonInterface {
 
-/// Specialization for IFunction. It needs to pass a bool to the created instance indicating that
+/// Specialization for IFunction. It needs to pass a bool to the created
+/// instance indicating that
 /// it is created by the factory.
 template <>
-boost::shared_ptr<IFunction> PythonObjectInstantiator<IFunction>::createInstance() const {
+boost::shared_ptr<IFunction>
+PythonObjectInstantiator<IFunction>::createInstance() const {
   using namespace boost::python;
   Environment::GlobalInterpreterLock gil;
 

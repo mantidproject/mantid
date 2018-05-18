@@ -257,11 +257,9 @@ void export_IFunction() {
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
-      .def("getError", &IFunction::getError,
-           (arg("self"), arg("i")),
+      .def("getError", &IFunction::getError, (arg("self"), arg("i")),
            "Return fitting error of the ith parameter")
-      .def("getError", &getError,
-           (arg("self"), arg("name")),
+      .def("getError", &getError, (arg("self"), arg("name")),
            "Return fitting error of the named parameter")
 
       //-- Python special methods --
