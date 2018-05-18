@@ -71,7 +71,10 @@ protected:
   void addSigma(const RunLabel &runLabel, const double sigma);
 
 protected slots:
-  void processRefinementsComplete();
+  void processRefinementsComplete(
+      Mantid::API::IAlgorithm_sptr alg,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets);
 
   void processRefinementFailed(const std::string &failureMessage);
 

@@ -14,5 +14,10 @@ bool operator!=(const RunLabel &lhs, const RunLabel &rhs) {
   return !(lhs == rhs);
 }
 
+bool operator<(const RunLabel &lhs, const RunLabel &rhs) {
+  return lhs.runNumber < rhs.runNumber ||
+         (lhs.runNumber == rhs.runNumber && lhs.bank < rhs.bank);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

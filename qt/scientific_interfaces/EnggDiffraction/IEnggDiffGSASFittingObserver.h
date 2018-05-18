@@ -14,7 +14,10 @@ public:
   virtual ~IEnggDiffGSASFittingObserver() = default;
 
   /// Notify the observer that all refinements have terminated successfully
-  virtual void notifyRefinementsComplete() = 0;
+  virtual void notifyRefinementsComplete(
+      Mantid::API::IAlgorithm_sptr alg,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets) = 0;
 
   /// Notify the observer that a single refinement has terminated successfully
   virtual void notifyRefinementSuccessful(

@@ -149,6 +149,8 @@ void EnggDiffGSASFittingModel::doRefinements(
       MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
       "GSASIIRefineFitPeaksOutputProperties");
   qRegisterMetaType<Mantid::API::IAlgorithm_sptr>("IAlgorithm_sptr");
+  qRegisterMetaType<std::vector<GSASIIRefineFitPeaksOutputProperties>>(
+      "std::vector<GSASIIRefineFitPeaksOutputProperties>");
 
   connect(m_workerThread.get(), SIGNAL(started()), worker,
           SLOT(doRefinements()));
@@ -158,8 +160,13 @@ void EnggDiffGSASFittingModel::doRefinements(
           this, SLOT(processRefinementSuccessful(
                     Mantid::API::IAlgorithm_sptr,
                     const GSASIIRefineFitPeaksOutputProperties &)));
-  connect(worker, SIGNAL(refinementsComplete()), this,
-          SLOT(processRefinementsComplete()));
+  connect(worker, SIGNAL(refinementsComplete(
+                      Mantid::API::IAlgorithm_sptr,
+                      std::vector<GSASIIRefineFitPeaksOutputProperties>)),
+          this,
+          SLOT(processRefinementsComplete(
+              Mantid::API::IAlgorithm_sptr,
+              const std::vector<GSASIIRefineFitPeaksOutputProperties> &)));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
           SLOT(processRefinementFailed(const std::string &)));
   connect(worker, SIGNAL(refinementCancelled()), this,
@@ -215,8 +222,11 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   return ws;
 }
 
-void EnggDiffGSASFittingModel::processRefinementsComplete() {
-  m_observer->notifyRefinementsComplete();
+void EnggDiffGSASFittingModel::processRefinementsComplete(
+    Mantid::API::IAlgorithm_sptr alg,
+    const std::vector<GSASIIRefineFitPeaksOutputProperties>
+        &refinementResultSets) {
+  m_observer->notifyRefinementsComplete(alg, refinementResultSets);
 }
 
 void EnggDiffGSASFittingModel::processRefinementFailed(

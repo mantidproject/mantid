@@ -185,7 +185,25 @@ public:
     auto presenter = setUpPresenter();
     EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
-    presenter->notifyRefinementsComplete();
+
+    const Mantid::API::MatrixWorkspace_sptr fittedPeaks(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    const auto latticeParams =
+        Mantid::API::WorkspaceFactory::Instance().createTable();
+    const RunLabel runLabel1(123, 1);
+    const GSASIIRefineFitPeaksOutputProperties refinementResults1(
+        1, 2, 3, fittedPeaks, latticeParams, runLabel1);
+    const RunLabel runLabel2(125, 1);
+    const GSASIIRefineFitPeaksOutputProperties refinementResults2(
+        1, 2, 3, fittedPeaks, latticeParams, runLabel2);
+    const std::vector<GSASIIRefineFitPeaksOutputProperties> refinementResultSet(
+        {refinementResults1, refinementResults2});
+    const Mantid::API::IAlgorithm_sptr alg(nullptr);
+
+    EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
+                                     alg, refinementResultSet, "123_125.hdf5"));
+    presenter->notifyRefinementsComplete(alg, refinementResultSet);
+
     assertMocksUsedCorrectly();
   }
 
@@ -200,7 +218,7 @@ public:
         1, 2, 3, fittedPeaks, latticeParams, runLabel);
     const Mantid::API::IAlgorithm_sptr alg(nullptr);
 
-    const std::string hdfFilename = "directory/path/run.hdf5";
+    const std::string hdfFilename ="directory/path/run.hdf5";
     ON_CALL(*m_mockParamPtr, userHDFRunFilename(testing::_))
         .WillByDefault(Return(hdfFilename));
 
