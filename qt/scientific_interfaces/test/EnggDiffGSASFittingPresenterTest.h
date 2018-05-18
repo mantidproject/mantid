@@ -208,8 +208,11 @@ public:
                 addFittedPeaks(runLabel, fittedPeaks));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Saving refinement results"));
 
-    EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
-                                     alg, refinementResults, hdfFilename));
+    EXPECT_CALL(*m_mockModelPtr,
+                saveRefinementResultsToHDF5(
+                    alg, std::vector<GSASIIRefineFitPeaksOutputProperties>(
+                             {refinementResults}),
+                    hdfFilename));
     EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
 

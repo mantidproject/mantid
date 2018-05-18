@@ -49,7 +49,8 @@ public:
 
   void saveRefinementResultsToHDF5(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const GSASIIRefineFitPeaksOutputProperties &refinementResults,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets,
       const std::string &filename) const override;
 
 protected:

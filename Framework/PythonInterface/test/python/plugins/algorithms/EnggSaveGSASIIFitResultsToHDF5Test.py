@@ -19,23 +19,25 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
     TEMP_FILE_NAME = os.path.join(tempfile.gettempdir(),
                                   "EnggSaveGSASIIFitResultsToHDF5Test.hdf5")
 
+    def setUp(self):
+        self.defaultAlgParams = {"LatticeParamWorkspaces": [self._create_lattice_params_table()],
+                                 "BankIDs": [1],
+                                 "Filename": self.TEMP_FILE_NAME,
+                                 "Rwp": [75]}
+
     def tearDown(self):
         try:
             os.remove(self.TEMP_FILE_NAME)
-
         except OSError:
             pass
 
-        self._remove_ws_if_exists(self.FIT_RESULTS_TABLE_NAME)
-        self._remove_ws_if_exists(self.LATTICE_PARAMS_TABLE_NAME)
-
     def test_saveLatticeParams(self):
         lattice_params = self._create_lattice_params_table()
-
         test_alg = run_algorithm(self.ALG_NAME,
-                                 LatticeParams=lattice_params,
-                                 BankID=1,
-                                 Filename=self.TEMP_FILE_NAME)
+                                 LatticeParamWorkspaces=[lattice_params],
+                                 BankIDs=[1],
+                                 Filename=self.TEMP_FILE_NAME,
+                                 Rwp=[12])
         self.assertTrue(test_alg.isExecuted())
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
@@ -52,26 +54,22 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
                 self.assertAlmostEqual(val_from_file, val_from_input)
 
     def test_saveRefinementParameters(self):
-        lattice_params = self._create_lattice_params_table()
-
         refinement_method = "Rietveld refinement"
-        refine_sigma = True
-        refine_gamma = False
         x_min = 10000
         x_max = 40000
-
+        lattice_params = self._create_lattice_params_table()
         test_alg = run_algorithm(self.ALG_NAME,
-                                 LatticeParams=lattice_params,
+                                 LatticeParamWorkspaces=[lattice_params],
+                                 BankIDs=[2],
+                                 Filename=self.TEMP_FILE_NAME,
+                                 Rwp=[12],
                                  RefinementMethod=refinement_method,
-                                 XMin=x_min,
-                                 XMax=x_max,
-                                 RefineSigma=refine_sigma,
-                                 RefineGamma=refine_gamma,
-                                 Filename=self.TEMP_FILE_NAME)
+                                 RefineSigma=True, Sigma=[1], RefineGamma=False,
+                                 XMin=x_min, XMax=x_max)
         self.assertTrue(test_alg.isExecuted())
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
-            fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
+            fit_results_group = output_file["Bank 2"]["GSAS-II Fitting"]
             self.assertTrue("Refinement Parameters" in fit_results_group)
             refinement_params = fit_results_group["Refinement Parameters"][0]
 
@@ -85,17 +83,13 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
             self.assertEquals(refinement_params[4], x_max)
 
     def test_saveProfileCoefficients(self):
-        lattice_params = self._create_lattice_params_table()
         sigma = 13
         gamma = 14
 
         test_alg = run_algorithm(self.ALG_NAME,
-                                 LatticeParams=lattice_params,
-                                 RefineSigma=True,
-                                 RefineGamma=True,
-                                 Sigma=sigma,
-                                 Gamma=gamma,
-                                 Filename=self.TEMP_FILE_NAME)
+                                 RefineSigma=True, Sigma=sigma,
+                                 RefineGamma=True, Gamma=gamma,
+                                 **self.defaultAlgParams)
         self.assertTrue(test_alg.isExecuted())
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
@@ -108,45 +102,34 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
             self.assertEquals(profile_coeffs[1], gamma)
 
     def test_profileCoeffsNotSavedWhenNotRefined(self):
-        lattice_params = self._create_lattice_params_table()
         run_algorithm(self.ALG_NAME,
-                      LatticeParams=lattice_params,
-                      RefineSigma=False,
-                      RefineGamma=False,
-                      Filename=self.TEMP_FILE_NAME)
+                      **self.defaultAlgParams)
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
             self.assertFalse("Profile Coefficients" in fit_results_group)
 
     def test_pawleyRefinementSavesPawleyParams(self):
-        lattice_params = self._create_lattice_params_table()
         d_min = 1.0
         negative_weight = 1.5
 
         run_algorithm(self.ALG_NAME,
-                      BankID=2,
-                      LatticeParams=lattice_params,
-                      RefinementMethod="Pawley refinement",
                       PawleyDMin=d_min,
                       PawleyNegativeWeight=negative_weight,
-                      Filename=self.TEMP_FILE_NAME)
+                      **self.defaultAlgParams)
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
-            fit_results_group = output_file["Bank 2"]["GSAS-II Fitting"]
+            fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
             refinement_params = fit_results_group["Refinement Parameters"][0]
             self.assertEquals(len(refinement_params), 7)
             self.assertEquals(refinement_params[5], d_min)
             self.assertEquals(refinement_params[6], negative_weight)
 
     def test_saveRwp(self):
-        lattice_params = self._create_lattice_params_table()
         rwp = 75
 
         run_algorithm(self.ALG_NAME,
-                      LatticeParams=lattice_params,
-                      Rwp=rwp,
-                      Filename=self.TEMP_FILE_NAME)
+                      **self.defaultAlgParams)
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
@@ -155,29 +138,49 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
             self.assertEquals(rwp_from_file.value, rwp)
 
     def test_saveToExistingFileDoesNotOverwrite(self):
-        lattice_params = self._create_lattice_params_table()
         run_algorithm(self.ALG_NAME,
-                      LatticeParams=lattice_params,
-                      BankID=1,
-                      Filename=self.TEMP_FILE_NAME)
+                      LatticeParamWorkspaces=[self._create_lattice_params_table("tbl1")],
+                      BankIDs=[1],
+                      Filename=self.TEMP_FILE_NAME,
+                      Rwp=[1])
         run_algorithm(self.ALG_NAME,
-                      LatticeParams=lattice_params,
-                      BankID=2,
-                      Filename=self.TEMP_FILE_NAME)
+                      LatticeParamWorkspaces=[self._create_lattice_params_table("tbl2")],
+                      BankIDs=[2],
+                      Filename=self.TEMP_FILE_NAME,
+                      Rwp=[2])
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             self.assertTrue("Bank 1" in output_file)
             self.assertTrue("Bank 2" in output_file)
 
-    def _create_lattice_params_table(self):
-        lattice_params = mantid.CreateEmptyTableWorkspace(OutputWorkspace=self.LATTICE_PARAMS_TABLE_NAME)
+    def test_saveMultipleWorkspacesIsIndexedCorrectly(self):
+        alg = run_algorithm(self.ALG_NAME,
+                            LatticeParamWorkspaces=[self._create_lattice_params_table("tbl1"),
+                                                    self._create_lattice_params_table("tbl2")],
+                            RunNumbers=[123, 456],
+                            BankIDs=[1, 2],
+                            Filename=self.TEMP_FILE_NAME,
+                            Rwp=[1, 2])
+        self.assertTrue(alg.isExecuted())
+
+        with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
+            self.assertTrue("Run 123" in output_file)
+            run_123_group = output_file["Run 123"]
+            self.assertTrue("Bank 1" in run_123_group)
+            bank_1_group = run_123_group["Bank 1"]
+            self.assertTrue("GSAS-II Fitting" in bank_1_group)
+
+            self.assertTrue("Run 456" in output_file)
+            run_456_group = output_file["Run 456"]
+            self.assertTrue("Bank 2" in run_456_group)
+            bank_2_group = run_456_group["Bank 2"]
+            self.assertTrue("GSAS-II Fitting" in bank_2_group)
+
+    def _create_lattice_params_table(self, output_name=LATTICE_PARAMS_TABLE_NAME):
+        lattice_params = mantid.CreateEmptyTableWorkspace(OutputWorkspace=output_name)
         [lattice_params.addColumn("double", param) for param in self.LATTICE_PARAMS]
         lattice_params.addRow([random.random() for _ in self.LATTICE_PARAMS])
         return lattice_params
-
-    def _remove_ws_if_exists(self, name):
-        if mantid.mtd.doesExist(name):
-            mantid.mtd.remove(name)
 
 if __name__ == "__main__":
     unittest.main()

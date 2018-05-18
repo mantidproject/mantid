@@ -245,15 +245,51 @@ void EnggDiffGSASFittingModel::processRefinementCancelled() {
 
 void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
     const Mantid::API::IAlgorithm_sptr successfulAlg,
-    const GSASIIRefineFitPeaksOutputProperties &refinementResults,
+    const std::vector<GSASIIRefineFitPeaksOutputProperties>
+        &refinementResultSets,
     const std::string &filename) const {
   auto saveAlg = API::AlgorithmManager::Instance().create(
       "EnggSaveGSASIIFitResultsToHDF5");
 
-  const auto &runLabel = refinementResults.runLabel;
-  const auto latticeParams = *getLatticeParams(runLabel);
-  saveAlg->setProperty("LatticeParams", latticeParams);
-  saveAlg->setPropertyValue("BankID", std::to_string(runLabel.bank));
+  const auto numRuns = refinementResultSets.size();
+  std::vector<std::string> latticeParamWSNames;
+  latticeParamWSNames.reserve(numRuns);
+  std::vector<long> runNumbers;
+  runNumbers.reserve(numRuns);
+  std::vector<long> bankIDs;
+  bankIDs.reserve(numRuns);
+  std::vector<double> sigmas;
+  sigmas.reserve(numRuns);
+  std::vector<double> gammas;
+  gammas.reserve(numRuns);
+  std::vector<double> rwps;
+  rwps.reserve(numRuns);
+
+  const bool refineSigma = successfulAlg->getProperty("RefineSigma");
+  saveAlg->setProperty("RefineSigma", refineSigma);
+  const bool refineGamma = successfulAlg->getProperty("RefineGamma");
+  saveAlg->setProperty("RefineGamma", refineGamma);
+
+  for (const auto &refinementResults : refinementResultSets) {
+    const auto &runLabel = refinementResults.runLabel;
+    const auto latticeParams = *getLatticeParams(runLabel);
+
+    latticeParamWSNames.emplace_back(latticeParams->getName());
+    runNumbers.emplace_back(runLabel.runNumber);
+    bankIDs.emplace_back(runLabel.bank);
+    rwps.emplace_back(refinementResults.rwp);
+
+    if (refineSigma) {
+      sigmas.emplace_back(refinementResults.sigma);
+    }
+    if (refineGamma) {
+      gammas.emplace_back(refinementResults.gamma);
+    }
+  }
+
+  saveAlg->setProperty("LatticeParamWorkspaces", latticeParamWSNames);
+  saveAlg->setProperty("BankIDs", bankIDs);
+  saveAlg->setProperty("RunNumbers", runNumbers);
 
   const std::string refinementMethod =
       successfulAlg->getProperty("RefinementMethod");
@@ -269,19 +305,15 @@ void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
         successfulAlg->getPropertyValue("PawleyNegativeWeight"));
   }
 
-  const bool refineSigma = successfulAlg->getProperty("RefineSigma");
-  saveAlg->setProperty("RefineSigma", refineSigma);
   if (refineSigma) {
-    saveAlg->setProperty("Sigma", successfulAlg->getPropertyValue("Sigma"));
+    saveAlg->setProperty("Sigma", sigmas);
   }
 
-  const bool refineGamma = successfulAlg->getProperty("RefineGamma");
-  saveAlg->setProperty("RefineGamma", refineGamma);
   if (refineGamma) {
-    saveAlg->setProperty("Gamma", successfulAlg->getPropertyValue("Gamma"));
+    saveAlg->setProperty("Gamma", gammas);
   }
 
-  saveAlg->setProperty("Rwp", successfulAlg->getPropertyValue("Rwp"));
+  saveAlg->setProperty("Rwp", rwps);
   saveAlg->setProperty("Filename", filename);
   saveAlg->execute();
 }

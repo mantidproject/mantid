@@ -187,7 +187,7 @@ void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
         refinementResults.runLabel.runNumber);
 
     try {
-      m_model->saveRefinementResultsToHDF5(alg, refinementResults, filename);
+      m_model->saveRefinementResultsToHDF5(alg, {refinementResults}, filename);
     } catch (std::exception &e) {
       m_view->userWarning(
           "Could not save refinement results",
