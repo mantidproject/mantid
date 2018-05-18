@@ -53,8 +53,10 @@ we just mock one up here. See :ref:`EnggFitPeaks documenation
  
    output_filename = os.path.join(config["defaultsave.directory"],
                                   "EnggSaveSinglePeakFitResultsToHDF5DocTest.hdf5")
-   
-   EnggSaveSinglePeakFitResultsToHDF5(InputWorkspace=peaks, Filename=output_filename, BankID=1)
+
+   EnggSaveSinglePeakFitResultsToHDF5(InputWorkspaces=[peaks],
+                                      Filename=output_filename,
+                                      BankIDs=[1])
 
    with h5py.File(output_filename, "r") as f:
        bank_group = f["Bank 1"]
