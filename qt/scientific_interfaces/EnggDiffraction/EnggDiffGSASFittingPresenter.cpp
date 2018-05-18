@@ -165,8 +165,8 @@ void EnggDiffGSASFittingPresenter::doRefinements(
 
 void EnggDiffGSASFittingPresenter::notifyRefinementsComplete(
     Mantid::API::IAlgorithm_sptr alg,
-    const std::vector<GSASIIRefineFitPeaksOutputProperties>
-        &refinementResultSets) {
+    const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+        refinementResultSets) {
   if (!m_viewHasClosed) {
     const auto numRuns = refinementResultSets.size();
 

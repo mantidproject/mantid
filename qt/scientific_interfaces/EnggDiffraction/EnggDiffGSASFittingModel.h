@@ -49,8 +49,8 @@ public:
 
   void saveRefinementResultsToHDF5(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties>
-          &refinementResultSets,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets,
       const std::string &filename) const override;
 
 protected:
@@ -73,8 +73,8 @@ protected:
 protected slots:
   void processRefinementsComplete(
       Mantid::API::IAlgorithm_sptr alg,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties>
-          &refinementResultSets);
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets);
 
   void processRefinementFailed(const std::string &failureMessage);
 

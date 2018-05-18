@@ -79,8 +79,8 @@ public:
   */
   virtual void saveRefinementResultsToHDF5(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties>
-          &refinementResultSets,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets,
       const std::string &filename) const = 0;
 
   /// set the observer for refinement

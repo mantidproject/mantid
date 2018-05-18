@@ -218,7 +218,7 @@ public:
         1, 2, 3, fittedPeaks, latticeParams, runLabel);
     const Mantid::API::IAlgorithm_sptr alg(nullptr);
 
-    const std::string hdfFilename ="directory/path/run.hdf5";
+    const std::string hdfFilename = "directory/path/run.hdf5";
     ON_CALL(*m_mockParamPtr, userHDFRunFilename(testing::_))
         .WillByDefault(Return(hdfFilename));
 
