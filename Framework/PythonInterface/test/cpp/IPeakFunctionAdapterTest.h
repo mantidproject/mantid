@@ -27,7 +27,7 @@ public:
             "BadReturnFunction", funcImpl));
     TS_ASSERT(badReturnFunc);
 
-    std::array<double, 1> xvalues{10}, retvalue{0};
+    std::array<double, 1> xvalues{{10}}, retvalue{{0}};
     TS_ASSERT_THROWS(
         badReturnFunc->function1D(retvalue.data(), xvalues.data(), 1),
         std::runtime_error);
@@ -44,7 +44,7 @@ public:
             "BadNDArrayFunction", funcImpl));
     TS_ASSERT(badNdArrayFunc);
 
-    std::array<double, 1> xvalues{10}, retvalue{0};
+    std::array<double, 1> xvalues{{10}}, retvalue{{0}};
     TS_ASSERT_THROWS(
         badNdArrayFunc->function1D(retvalue.data(), xvalues.data(), 1),
         std::runtime_error);
