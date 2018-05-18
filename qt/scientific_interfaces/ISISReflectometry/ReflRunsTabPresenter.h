@@ -127,7 +127,7 @@ private:
   ReflAutoreduction m_autoreduction;
 
   /// searching
-  void search();
+  bool search();
   void icatSearchComplete();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   /// autoreduction

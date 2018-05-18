@@ -38,7 +38,7 @@ bool ReflAutoreduction::start(const int group,
   return true;
 }
 
-/** Stop an autoreduction
+/** Stop an autoreduction for a given group
  * @param group : the group to stop autoreduction for
  * @return : true if stopped
  */
@@ -48,6 +48,14 @@ bool ReflAutoreduction::stop(int group) {
   if (group != m_group)
     return false;
 
+  m_running = false;
+  return true;
+}
+
+/** Stop an autoreduction if there is one in progress
+ * @return : true if stopped
+ */
+bool ReflAutoreduction::stop() {
   m_running = false;
   return true;
 }

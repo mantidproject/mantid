@@ -131,7 +131,10 @@ Used by the view to tell the presenter something has changed
 void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   switch (flag) {
   case IReflRunsTabPresenter::SearchFlag:
-    search();
+    // Start the search algorithm. If it is not started, make sure
+    // autoreduction is not left running
+    if (!search())
+      m_autoreduction.stop();
     break;
   case IReflRunsTabPresenter::StartAutoreductionFlag:
     startNewAutoreduction();
@@ -197,12 +200,14 @@ void ReflRunsTabPresenter::pushCommands(int group) {
   m_view->setRowCommands(std::move(rowCommands));
 }
 
-/** Searches for runs that can be used */
-void ReflRunsTabPresenter::search() {
+/** Searches for runs that can be used
+ * @return : true if the search algorithm was started successfully, false if
+ * there was a problem */
+bool ReflRunsTabPresenter::search() {
   auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
-    return;
+    return false;
 
   // This is breaking the abstraction provided by IReflSearcher, but provides a
   // nice usability win
@@ -218,6 +223,7 @@ void ReflRunsTabPresenter::search() {
     } catch (std::runtime_error &e) {
       m_mainPresenter->giveUserCritical(
           "Error Logging in:\n" + std::string(e.what()), "login failed");
+      return false;
     }
   }
   std::string sessionId;
@@ -231,7 +237,7 @@ void ReflRunsTabPresenter::search() {
     m_mainPresenter->giveUserInfo(
         "Error Logging in: Please press 'Search' to try again.",
         "Login Failed");
-    return;
+    return false;
   }
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
   algSearch->initialize();
@@ -242,6 +248,8 @@ void ReflRunsTabPresenter::search() {
   algSearch->setProperty("InvestigationId", searchString);
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
+
+  return true;
 }
 
 /** Populates the search results table
@@ -324,8 +332,7 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   populateSearch(searchAlg);
 
   // If autoreduction is running, perform the next reduction using the new
-  // search
-  // results
+  // search results
   if (autoreductionRunning())
     runAutoreduction();
 }

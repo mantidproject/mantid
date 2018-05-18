@@ -27,6 +27,8 @@ public:
   bool start(const int group, const std::string &searchString);
   /// Stop an autoreduction on the given group
   bool stop(int group);
+  /// Stop an autoreduction on any group
+  bool stop();
 
 private:
   /// Flag indicating whether autoreduction is currently running
