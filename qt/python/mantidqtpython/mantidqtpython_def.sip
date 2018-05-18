@@ -1591,7 +1591,6 @@ public:
     void insertSubtreeAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent, int index,
                          std::vector<MantidQt::MantidWidgets::Batch::Row> subtree);
 
-    void enableFiltering();
     void filterRowsBy(MantidQt::MantidWidgets::Batch::RowPredicate* predicate /Transfer/);
     void resetFilter();
     bool hasFilter() const;
