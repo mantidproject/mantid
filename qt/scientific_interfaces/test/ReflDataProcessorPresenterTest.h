@@ -156,13 +156,15 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
 
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 
@@ -233,13 +235,15 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 
@@ -316,13 +320,15 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 
@@ -393,13 +399,15 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
     auto presenter = presenterFactory.create(DEFAULT_GROUP_NUMBER);
@@ -469,13 +477,15 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(QString()));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -531,13 +541,15 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPreprocessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
+    EXPECT_CALL(mockMainPresenter,
+                getPostprocessingOptionsAsString(DEFAULT_GROUP_NUMBER))
         .Times(1)
         .WillOnce(Return(""));
 

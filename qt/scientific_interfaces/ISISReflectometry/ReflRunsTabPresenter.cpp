@@ -489,7 +489,7 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
     return;
 
   auto progress = setupProgressBar(rowsToTransfer);
-  
+
   // Extract details of runs to transfer
   auto runDetails = getSearchResultRunDetails(rowsToTransfer);
 
@@ -501,8 +501,8 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
   handleInvalidRunsForTransfer(rowsToTransfer, transferDetails.getErrorRuns());
 
   // Do the transfer
-  m_tablePresenters.at(group)->transfer(
-      ::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+  m_tablePresenters.at(group)
+      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
           transferDetails.getTransferRuns()));
 }
 

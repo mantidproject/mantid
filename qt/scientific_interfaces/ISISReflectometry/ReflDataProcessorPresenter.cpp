@@ -1027,8 +1027,7 @@ End reduction
 * @param reductionSuccessful : true if the reduction completed successfully,
 * false if there were any errors
 */
-void ReflDataProcessorPresenter::endReduction(
-    const bool reductionSuccessful) {
+void ReflDataProcessorPresenter::endReduction(const bool reductionSuccessful) {
 
   // Create an ipython notebook if "Output Notebook" is checked.
   if (reductionSuccessful && m_view->getEnableNotebook())

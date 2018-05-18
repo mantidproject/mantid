@@ -480,8 +480,10 @@ private:
     constexpr int GROUP = 0;
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP)).Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP)).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
+          .Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
+          .Times(numTimes);
       EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
           .Times(numTimes);
     } else {

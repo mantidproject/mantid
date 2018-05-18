@@ -434,11 +434,11 @@ bool TwoLevelTreeManager::rowMatches(
     const auto newValue = rowValues.at(columnName);
     const auto oldValue = m_model->data(m_model->index(
         rowIndex, columnIndex, m_model->index(groupIndex, columnIndex)));
-    
+
     if (newValue != oldValue)
       return false;
   }
-  
+
   return true;
 }
 
@@ -459,7 +459,6 @@ bool TwoLevelTreeManager::rowExists(const std::map<QString, QString> &rowValues,
 
   return false;
 }
-
 
 /**
 Inserts a new group in the specified location

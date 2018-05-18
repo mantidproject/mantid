@@ -645,7 +645,7 @@ Handle reduction error
 */
 void GenericDataProcessorPresenter::reductionError(QString ex) {
   g_log.error(ex.toStdString());
-  //m_view->giveUserCritical(ex, "Error");
+  // m_view->giveUserCritical(ex, "Error");
 }
 
 /**
@@ -726,9 +726,9 @@ void GenericDataProcessorPresenter::postProcessGroup(
     return;
 
   const auto outputWSName = getPostprocessedWorkspaceName(groupData);
-  m_postprocessing->postProcessGroup(outputWSName,
-                                     m_processor.postprocessedOutputPropertyName(),
-                                     m_whitelist, groupData);
+  m_postprocessing->postProcessGroup(
+      outputWSName, m_processor.postprocessedOutputPropertyName(), m_whitelist,
+      groupData);
 }
 
 /**

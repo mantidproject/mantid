@@ -281,13 +281,12 @@ bool OneLevelTreeManager::rowMatches(
   // Only check non-blank values in the given row values
   if (rowValues.count(columnName)) {
     const auto newValue = rowValues.at(columnName);
-    const auto oldValue =
-        m_model->data(m_model->index(rowIndex, columnIndex));
+    const auto oldValue = m_model->data(m_model->index(rowIndex, columnIndex));
 
     if (newValue != oldValue)
       return false;
   }
-  
+
   return true;
 }
 
@@ -306,7 +305,6 @@ bool OneLevelTreeManager::rowExists(const std::map<QString, QString> &rowValues,
 
   return false;
 }
-
 
 TreeData OneLevelTreeManager::handleEmptyTable(bool prompt) {
   if (prompt)

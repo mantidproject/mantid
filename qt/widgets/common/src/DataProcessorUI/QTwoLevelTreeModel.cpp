@@ -954,14 +954,12 @@ bool QTwoLevelTreeModel::runListsMatch(const QString &newValue,
                                        const bool exactMatch) const {
   // Parse the individual runs from each list and check that they all
   // match, allowing for additional runs in one of the lists.
-  auto newRuns =
-      Mantid::Kernel::StringTokenizer(newValue.toStdString(), ",+",
-                                      Mantid::Kernel::StringTokenizer::TOK_TRIM)
-          .asVector();
-  auto oldRuns =
-      Mantid::Kernel::StringTokenizer(oldValue.toStdString(), ",+",
-                                      Mantid::Kernel::StringTokenizer::TOK_TRIM)
-          .asVector();
+  auto newRuns = Mantid::Kernel::StringTokenizer(
+                     newValue.toStdString(), ",+",
+                     Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
+  auto oldRuns = Mantid::Kernel::StringTokenizer(
+                     oldValue.toStdString(), ",+",
+                     Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
 
   // Loop through all values in the shortest list and check they exist
   // in the longer list (or they all match if they're the same length).
