@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
@@ -274,7 +275,7 @@ IndirectFittingModel::getWorkspace(std::size_t index) const {
 Spectra IndirectFittingModel::getSpectra(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->spectra();
-  return VectorizedString<std::size_t>("");
+  return DiscontinuousSpectra<std::size_t>("");
 }
 
 std::pair<double, double>
@@ -381,6 +382,13 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
                std::make_pair(0u, workspace->getNumberHistograms() - 1));
 }
 
+void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
+                                        const Spectra &spectra) {
+  auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+  addWorkspace(workspace, spectra);
+}
+
 void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                         const Spectra &spectra) {
   if (!m_fittingData.empty() && workspace == m_fittingData.back()->workspace())
@@ -429,7 +437,8 @@ void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm,
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
-  m_fitFunction = fitAlgorithm->getProperty("Function");
+  m_fitFunction = FunctionFactory::Instance().createInitialized(
+      fitAlgorithm->getPropertyValue("Function"));
   addOutput(group, parameters, result, fitDataBegin, fitDataEnd);
 }
 
@@ -439,7 +448,8 @@ void IndirectFittingModel::addSingleFitOutput(IAlgorithm_sptr fitAlgorithm,
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
   int spectrum = fitAlgorithm->getProperty("WorkspaceIndex");
-  m_fitFunction = fitAlgorithm->getProperty("Function");
+  m_fitFunction = FunctionFactory::Instance().createInitialized(
+      fitAlgorithm->getPropertyValue("Function"));
   addOutput(group, parameters, result, m_fittingData[index].get(),
             boost::numeric_cast<std::size_t>(spectrum));
 }
