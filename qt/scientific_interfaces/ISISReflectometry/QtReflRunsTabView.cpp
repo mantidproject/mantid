@@ -186,6 +186,15 @@ void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 }
 
 /**
+* Sets the "Autoreduce" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setAutoreducePauseButtonEnabled(bool enabled) {
+
+  ui.buttonAutoreducePause->setEnabled(enabled);
+}
+
+/**
 * Sets the "Transfer" button enabled or disabled
 * @param enabled : Whether to enable or disable the button
 */
@@ -321,6 +330,14 @@ This slot conducts a search operation before notifying the presenter that the
 */
 void QtReflRunsTabView::on_actionAutoreduce_triggered() {
   m_presenter->notify(IReflRunsTabPresenter::StartAutoreductionFlag);
+}
+
+/**
+This slot conducts a search operation before notifying the presenter that the
+"pause autoreduce" button has been pressed
+*/
+void QtReflRunsTabView::on_actionAutoreducePause_triggered() {
+  m_presenter->notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
 }
 
 /**

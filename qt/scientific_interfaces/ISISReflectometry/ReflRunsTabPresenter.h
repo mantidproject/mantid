@@ -131,6 +131,7 @@ private:
   /// autoreduction
   void startNewAutoreduction();
   void startAutoreduction();
+  void pauseAutoreduction();
   void runAutoreduction();
   void transfer(const std::set<int> &rowsToTransfer, int group,
                 const TransferMatch matchType = TransferMatch::Any);

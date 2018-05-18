@@ -72,6 +72,7 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
+  MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));
   MOCK_METHOD1(setTransferButtonEnabled, void(bool));
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
   MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));

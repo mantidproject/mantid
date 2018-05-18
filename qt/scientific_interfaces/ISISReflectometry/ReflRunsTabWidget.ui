@@ -195,7 +195,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0" colspan="2">
+         <item row="3" column="0">
           <widget class="QPushButton" name="buttonAutoreduce">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -215,6 +215,32 @@
            <property name="icon">
             <iconset resource="../../../MantidPlot/icons/icons.qrc">
              <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QPushButton" name="buttonAutoreducePause">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Pause auto-processing</string>
+           </property>
+           <property name="whatsThis">
+            <string>Pause any processing or auto-processing that is in progress. Pressing Autoprocess again after pausing will resume from where it was stopped, unless the instrument or investigation ID has changed, in which case the table will cleared and auto-processing will restart</string>
+           </property>
+           <property name="accessibleName">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Pause</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../MantidPlot/icons/icons.qrc">
+             <normaloff>:/pause.png</normaloff>:/pause.png</iconset>
            </property>
           </widget>
          </item>
@@ -264,6 +290,9 @@
           <widget class="QToolButton" name="buttonTransfer">
            <property name="toolTip">
             <string>Transfer the selected run(s) into the processing table</string>
+           </property>
+           <property name="whatsThis">
+            <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
            </property>
            <property name="text">
             <string>Transfer</string>
@@ -321,10 +350,26 @@
    <property name="text">
     <string>Search</string>
    </property>
+   <property name="toolTip">
+    <string>Search for runs using ICAT</string>
+   </property>
+   <property name="whatsThis">
+    <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
+   </property>
   </action>
   <action name="actionAutoreduce">
+   <property name="icon">
+    <iconset resource="../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
+   </property>
    <property name="text">
     <string>Autoreduce</string>
+   </property>
+   <property name="toolTip">
+    <string>Process all runs in this investigation and poll for new runs</string>
+   </property>
+   <property name="whatsThis">
+    <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
    </property>
   </action>
   <action name="actionTransfer">
@@ -336,10 +381,25 @@
     <string>Transfer</string>
    </property>
    <property name="toolTip">
-    <string>Process all runs in this investigation and poll for new runs</string>
+    <string>Transfer the selected run(s) into the processing table</string>
    </property>
    <property name="whatsThis">
-    <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
+    <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
+   </property>
+  </action>
+  <action name="actionAutoreducePause">
+   <property name="icon">
+    <iconset resource="../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/pause.png</normaloff>:/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pause</string>
+   </property>
+   <property name="toolTip">
+    <string>Pause auto-processing</string>
+   </property>
+   <property name="whatsThis">
+    <string>Pause any processing or auto-processing that is in progress. Pressing Autoprocess again after pausing will resume from where it was stopped, unless the instrument or investigation ID has changed, in which case the table will cleared and auto-processing will restart</string>
    </property>
   </action>
  </widget>
@@ -392,6 +452,22 @@
     <hint type="sourcelabel">
      <x>20</x>
      <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonAutoreducePause</sender>
+   <signal>clicked()</signal>
+   <receiver>actionAutoreducePause</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>478</x>
+     <y>159</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>

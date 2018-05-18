@@ -82,6 +82,7 @@ public:
   void clearCommands() override;
   void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
+  void setAutoreducePauseButtonEnabled(bool enabled) override;
   void setTransferButtonEnabled(bool enabled) override;
   void setInstrumentComboEnabled(bool enabled) override;
   void setTransferMethodComboEnabled(bool enabled) override;
@@ -138,6 +139,7 @@ private:
 private slots:
   void on_actionSearch_triggered();
   void on_actionAutoreduce_triggered();
+  void on_actionAutoreducePause_triggered();
   void on_actionTransfer_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();

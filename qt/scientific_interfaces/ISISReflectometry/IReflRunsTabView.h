@@ -68,6 +68,7 @@ public:
   virtual void clearCommands() = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
+  virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;
   virtual void setTransferButtonEnabled(bool enabled) = 0;
   virtual void setInstrumentComboEnabled(bool enabled) = 0;
   virtual void setTransferMethodComboEnabled(bool enabled) = 0;

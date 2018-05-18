@@ -287,6 +287,8 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(true))
         .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setAutoreducePauseButtonEnabled(false))
+        .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setTransferButtonEnabled(true))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setInstrumentComboEnabled(true))
@@ -322,6 +324,8 @@ public:
     EXPECT_CALL(mockRunsTabView, updateMenuEnabledState(true))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setAutoreducePauseButtonEnabled(true))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setTransferButtonEnabled(false))
         .Times(Exactly(1));

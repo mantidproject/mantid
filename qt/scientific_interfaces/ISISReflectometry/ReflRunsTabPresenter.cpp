@@ -136,6 +136,9 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::StartAutoreductionFlag:
     startNewAutoreduction();
     break;
+  case IReflRunsTabPresenter::PauseAutoreductionFlag:
+    pauseAutoreduction();
+    break;
   case IReflRunsTabPresenter::TimerEventFlag:
     startAutoreduction();
     break;
@@ -296,6 +299,22 @@ void ReflRunsTabPresenter::startAutoreduction() {
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
   m_view->startIcatSearch();
+}
+
+/** Called when the user clicks the pause-autoreduction button
+ */
+void ReflRunsTabPresenter::pauseAutoreduction() {
+  // The pause-autoprocess button does exactly the same as the pause button on
+  // the data processor, so we just notify the data processor to pause. We
+  // allow this button to be used to pause processing started manually as well
+  // as auto-processing - we use the active group to pause manual processing.
+  int group = 0;
+  if (autoreductionRunning())
+    group = m_autoreduction.group();
+  else
+    group = m_view->getSelectedGroup();
+
+  m_tablePresenters.at(group)->notify(DataProcessorPresenter::PauseFlag);
 }
 
 void ReflRunsTabPresenter::icatSearchComplete() {
@@ -607,6 +626,7 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
 
   // Update specific buttons
   m_view->setAutoreduceButtonEnabled(!isProcessing);
+  m_view->setAutoreducePauseButtonEnabled(isProcessing);
   m_view->setTransferButtonEnabled(!isProcessing);
   m_view->setInstrumentComboEnabled(!isProcessing);
 
