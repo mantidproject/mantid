@@ -21,7 +21,7 @@ struct SetViewSpectra : boost::static_visitor<> {
                            static_cast<int>(spectra.second));
   }
 
-  void operator()(const VectorizedString<std::size_t> &spectra) const {
+  void operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     m_view->displaySpectra(spectra.getString());
   }
 

@@ -21,6 +21,7 @@ public:
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                     const Spectra &spectra) override;
   void removeWorkspace(std::size_t index) override;
+  void addResolution(const std::string &name);
   void setResolution(Mantid::API::MatrixWorkspace_sptr resolution,
                      std::size_t index);
   void setFitTypeString(const std::string &fitType);
