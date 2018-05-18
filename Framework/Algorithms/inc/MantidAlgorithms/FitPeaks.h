@@ -221,6 +221,10 @@ private:
       size_t wi, const std::vector<double> &expected_positions,
       boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
 
+  /// check whether FitPeaks supports observation on a certain peak profile's
+  /// parameters (width!)
+  bool isObservablePeakProfile(const std::string &peakprofile);
+
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
   API::MatrixWorkspace_sptr m_inputMatrixWS;
@@ -233,6 +237,9 @@ private:
   /// optional output analysis workspaces
   /// table workspace for fitted parameters
   API::ITableWorkspace_sptr m_fittedParamTable;
+  /// flag to show that the pamarameters in table are raw parameters or
+  /// effective parameters
+  bool m_rawPeaksTable;
   /// matrix workspace contained calcalated peaks+background from fitted result
   /// it has same number of spectra of input workspace even if only part of
   /// spectra to have peaks to fit
@@ -310,6 +317,9 @@ private:
   //----- Result criterias ---------------
   /// peak positon tolerance case b, c and d
   bool m_peakPosTolCase234;
+
+  /// Supported peak profiles for observation
+  std::vector<std::string> m_observablePeakProfiles;
 };
 
 } // namespace Algorithms

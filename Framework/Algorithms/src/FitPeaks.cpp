@@ -160,7 +160,13 @@ enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
     : m_fitPeaksFromRight(true), m_numPeaksToFit(0), m_minPeakHeight(20.),
-      m_bkgdSimga(1.), m_peakPosTolCase234(false) {}
+      m_bkgdSimga(1.), m_peakPosTolCase234(false) {
+  m_observablePeakProfiles.clear();
+  m_observablePeakProfiles.push_back("Gaussian");
+  m_observablePeakProfiles.push_back("PseudoVoigt");
+  m_observablePeakProfiles.push_back("Voigt");
+  std::sort(m_observablePeakProfiles.begin(), m_observablePeakProfiles.end());
+}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -312,13 +318,16 @@ void FitPeaks::init() {
       "(highest Y value position) and "
       "the peak width either estimted by observation or calculate.");
 
-  std::string helpgrp("Additional Information");
-
   // additional output for reviewing
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputPeakParametersWorkspace", "", Direction::Output),
                   "Name of workspace containing all fitted peak parameters.  "
                   "X-values are spectra/workspace index.");
+  declareProperty("RawPeakParameters", true,
+                  "false generates table with effective centre/width/height "
+                  "parameters. true generates a table with peak function "
+                  "parameters");
+
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FittedPeaksWorkspace", "", Direction::Output,
@@ -331,6 +340,7 @@ void FitPeaks::init() {
   std::string addoutgrp("Analysis");
   setPropertyGroup("OutputPeakParametersWorkspace", addoutgrp);
   setPropertyGroup("FittedPeaksWorkspace", addoutgrp);
+  setPropertyGroup("RawPeakParameters", addoutgrp);
 
   return;
 }
@@ -473,15 +483,10 @@ void FitPeaks::processInputs() {
   processInputFunctions();
 
   // about peak width and other peak parameter estimating method
-  // TODO FIXME - Need a method for supported peak profiles
   if (m_peakWidthPercentage > 0.)
     m_peakWidthEstimateApproach = EstimatePeakWidth::InstrumentResolution;
-  else if (m_peakFunction->name() == "Gaussian")
+  else if (isObservablePeakProfile((m_peakFunction->name())))
     m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
-  else if (m_peakFunction->name() == "PseudoVoigt")
-      m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
-  else if (m_peakFunction->name() == "Voigt")
-      m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
   else
     m_peakWidthEstimateApproach = EstimatePeakWidth::NoEstimation;
   //  m_peakWidthEstimateApproach = EstimatePeakWidth::NoEstimation;
@@ -830,6 +835,7 @@ void FitPeaks::fitPeaks() {
                      fit_result);
 
     PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
+      // TODO : it is required to save fit_result (tiny memory issue?)
       writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
                      fit_result);
     }
@@ -1107,11 +1113,13 @@ void FitPeaks::processSinglePeakFitResult(
 }
 
 //----------------------------------------------------------------------------------------------
-// TODO/NOW - Implement such that it can be parallelized
 /** calculate fitted peaks with background in the output workspace
+ * The current version gets the peak parameters and background parameters from
+ * fitted parameter
+ * table
  */
 void FitPeaks::calculateFittedPeaks() {
-  // TODO don't calculate bad fits (above minchisq)
+  // TODO: get the parameters from
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
@@ -1323,6 +1331,17 @@ int FitPeaks::estimatePeakParameters(
   }
 
   return GOOD;
+}
+
+//----------------------------------------------------------------------------------------------
+/** check whether a peak profile is allowed to observe peak width and set width
+ * @brief isObservablePeakProfile
+ * @param peakprofile
+ * @return
+ */
+bool FitPeaks::isObservablePeakProfile(const std::string &peakprofile) {
+  return std::binary_search(m_observablePeakProfiles.begin(),
+                            m_observablePeakProfiles.end(), peakprofile);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1752,15 +1771,16 @@ void FitPeaks::generateOutputPeakPositionWS() {
 //----------------------------------------------------------------------------------------------
 void FitPeaks::generateFittedParametersValueWorkspace() {
   // peak parameter workspace
-  std::string param_table_name =
-      getPropertyValue("OutputPeakParametersWorkspace");
+  //  std::string param_table_name =
+  //      getPropertyValue("OutputPeakParametersWorkspace");
+  m_rawPeaksTable = getProperty("RawPeakParameters");
 
-  // check whether it is not asked to create such table workspace
-  if (param_table_name.size() == 0) {
-    // Skip if it is not specified
-    m_fittedParamTable = nullptr;
-    return;
-  }
+  //  // check whether it is not asked to create such table workspace
+  //  if (param_table_name.size() == 0) {
+  //    // Skip if it is not specified
+  //    m_fittedParamTable = nullptr;
+  //    return;
+  //  }
 
   // create
   m_fittedParamTable =
@@ -1768,15 +1788,27 @@ void FitPeaks::generateFittedParametersValueWorkspace() {
   // add columns
   m_fittedParamTable->addColumn("int", "wsindex");
   m_fittedParamTable->addColumn("int", "peakindex");
-  for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
-    m_fittedParamTable->addColumn("double",
-                                  m_peakFunction->parameterName(iparam));
+  // peaks
+  if (m_rawPeaksTable) {
+    for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
+      m_fittedParamTable->addColumn("double",
+                                    m_peakFunction->parameterName(iparam));
+  } else {
+    m_fittedParamTable->addColumn("double", "centre");
+    m_fittedParamTable->addColumn("double", "width");
+    m_fittedParamTable->addColumn("double", "height");
+    m_fittedParamTable->addColumn("double", "intensity");
+  }
+  // background
   for (size_t iparam = 0; iparam < m_bkgdFunction->nParams(); ++iparam)
     m_fittedParamTable->addColumn("double",
                                   m_bkgdFunction->parameterName(iparam));
+  // chi^2
   m_fittedParamTable->addColumn("double", "chi2");
 
-  const size_t numParam = m_peakFunction->nParams() + m_bkgdFunction->nParams();
+  const size_t numParam = m_fittedParamTable->columnCount() - 3;
+  // replace: m_peakFunction->nParams() + m_bkgdFunction->nParams();
+
   // add rows
   for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
