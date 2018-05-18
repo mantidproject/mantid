@@ -275,7 +275,7 @@ IndirectFittingModel::getWorkspace(std::size_t index) const {
 Spectra IndirectFittingModel::getSpectra(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->spectra();
-  return VectorizedString<std::size_t>("");
+  return DiscontinuousSpectra<std::size_t>("");
 }
 
 std::pair<double, double>
@@ -380,6 +380,13 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
       workspaceName);
   addWorkspace(workspace,
                std::make_pair(0u, workspace->getNumberHistograms() - 1));
+}
+
+void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
+                                        const Spectra &spectra) {
+  auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+  addWorkspace(workspace, spectra);
 }
 
 void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
