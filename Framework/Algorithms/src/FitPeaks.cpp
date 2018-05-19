@@ -423,10 +423,11 @@ void FitPeaks::exec() {
   generateCalculatedPeaksWS();
 
   // fit peaks
-  fitPeaks();
+  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results =
+      fitPeaks();
 
   // set the output workspaces to properites
-  processOutputs();
+  processOutputs(fit_results);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -809,9 +810,16 @@ void FitPeaks::convertParametersNameToIndex() {
 //----------------------------------------------------------------------------------------------
 /** main method to fit peaks among all
  */
-void FitPeaks::fitPeaks() {
+std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+FitPeaks::fitPeaks() {
   API::Progress prog(this, 0., 1.,
                      m_stopWorkspaceIndex - m_startWorkspaceIndex);
+
+  /// Vector to record all the FitResult (only containing specified number of
+  /// spectra. shift is expected)
+  size_t num_fit_result = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
+  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+      fit_result_vector(num_fit_result);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
@@ -838,6 +846,7 @@ void FitPeaks::fitPeaks() {
       // TODO : it is required to save fit_result (tiny memory issue?)
       writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
                      fit_result);
+      fit_result_vector[wi - m_startWorkspaceIndex] = fit_result;
     }
     prog.report();
 
@@ -845,6 +854,8 @@ void FitPeaks::fitPeaks() {
   }
 
   PARALLEL_CHECK_INTERUPT_REGION
+
+  return fit_result_vector;
 }
 
 namespace {
@@ -1118,7 +1129,9 @@ void FitPeaks::processSinglePeakFitResult(
  * fitted parameter
  * table
  */
-void FitPeaks::calculateFittedPeaks() {
+void FitPeaks::calculateFittedPeaks(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_results) {
   // TODO: get the parameters from
   // check
   if (!m_fittedParamTable)
@@ -1138,6 +1151,12 @@ void FitPeaks::calculateFittedPeaks() {
     IBackgroundFunction_sptr bkgd_function =
         boost::dynamic_pointer_cast<IBackgroundFunction>(
             m_bkgdFunction->clone());
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result_i =
+        fit_results[iws - m_startWorkspaceIndex];
+    // FIXME - This is a just a pure check
+    if (!fit_result_i)
+      throw std::runtime_error(
+          "There is something wroing with PeakFitResult vector!");
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
       // get and set the peak function parameters
@@ -1149,6 +1168,7 @@ void FitPeaks::calculateFittedPeaks() {
       if (chi2 > 10.e10)
         continue;
 
+      /* This is how a peak function and a background function is constructed
       for (size_t ipar = 0; ipar < num_peakfunc_params; ++ipar) {
         double value_i = m_fittedParamTable->cell<double>(row_index, 2 + ipar);
         peak_function->setParameter(ipar, value_i);
@@ -1164,6 +1184,20 @@ void FitPeaks::calculateFittedPeaks() {
             row_index, 2 + num_peakfunc_params + ipar);
         bkgd_function->setParameter(ipar, value_i);
       }
+      */
+      // DEBUG CHECK  TODO Remove after testing are passed
+      if (fit_result_i->getNumberParameters() !=
+          num_peakfunc_params + num_bkgdfunc_params)
+        throw std::runtime_error(
+            "Numbers of function parameters do not match!");
+
+      for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
+        peak_function->setParameter(
+            iparam, fit_result_i->getParameterValue(ipeak, iparam));
+      for (size_t iparam = 0; iparam < num_bkgdfunc_params; ++iparam)
+        bkgd_function->setParameter(iparam,
+                                    fit_result_i->getParameterValue(
+                                        ipeak, num_peakfunc_params + iparam));
 
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
@@ -1850,7 +1884,9 @@ void FitPeaks::generateCalculatedPeaksWS() {
 
 //----------------------------------------------------------------------------------------------
 /// set up output workspaces
-void FitPeaks::processOutputs() {
+void FitPeaks::processOutputs(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_result_vec) {
   setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
 
   // optional
@@ -1860,7 +1896,7 @@ void FitPeaks::processOutputs() {
   // optional
   if (m_fittedPeakWS && m_fittedParamTable) {
     g_log.debug("about to calcualte fitted peaks");
-    calculateFittedPeaks();
+    calculateFittedPeaks(fit_result_vec);
     setProperty("FittedPeaksWorkspace", m_fittedPeakWS);
   }
 }
