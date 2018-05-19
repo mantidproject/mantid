@@ -1129,9 +1129,8 @@ void FitPeaks::processSinglePeakFitResult(
  * fitted parameter
  * table
  */
-void FitPeaks::calculateFittedPeaks(
-    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
-        fit_results) {
+void FitPeaks::calculateFittedPeaks(std::vector<
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results) {
   // TODO: get the parameters from
   // check
   if (!m_fittedParamTable)
@@ -1884,9 +1883,8 @@ void FitPeaks::generateCalculatedPeaksWS() {
 
 //----------------------------------------------------------------------------------------------
 /// set up output workspaces
-void FitPeaks::processOutputs(
-    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
-        fit_result_vec) {
+void FitPeaks::processOutputs(std::vector<
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_result_vec) {
   setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
 
   // optional
