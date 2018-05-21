@@ -62,26 +62,43 @@ void ApplyMuonDetectorGrouping::init() {
   std::string emptyString("");
 
   declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", emptyString, Direction::Input, PropertyMode::Mandatory),"Input workspace containing data from detectors which are to be grouped.");
+                      "InputWorkspace", emptyString, Direction::Input,
+                      PropertyMode::Mandatory),
+                  "Input workspace containing data from detectors which are to "
+                  "be grouped.");
 
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "InputWorkspaceGroup", emptyString, Direction::InOut, PropertyMode::Mandatory),"Input workspace group, the output will be saved here.");
+  declareProperty(
+      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+          "InputWorkspaceGroup", emptyString, Direction::InOut,
+          PropertyMode::Mandatory),
+      "Input workspace group, the output will be saved here.");
 
-  declareProperty("groupName", emptyString, "The name of the group.", Direction::Input);
-  declareProperty("Grouping",  std::to_string(1), "The grouping of detectors, comma separated list of detector IDs or hyphenated ranges of IDs.", Direction::Input);
+  declareProperty("groupName", emptyString, "The name of the group.",
+                  Direction::Input);
+  declareProperty("Grouping", std::to_string(1),
+                  "The grouping of detectors, comma separated list of detector "
+                  "IDs or hyphenated ranges of IDs.",
+                  Direction::Input);
 
-  declareProperty("plotType", "Counts",
-	  boost::make_shared<Kernel::ListValidator<std::string>>(g_plotTypes),
-	  "The type of analysis to perform on the spectra.",
-	  Direction::Input);
+  declareProperty(
+      "plotType", "Counts",
+      boost::make_shared<Kernel::ListValidator<std::string>>(g_plotTypes),
+      "The type of analysis to perform on the spectra.", Direction::Input);
 
-  declareProperty("TimeMin", 0.0,  "start time for the data in ms.", Direction::Input);
-  setPropertySettings("TimeMin",make_unique<Kernel::EnabledWhenProperty>("plotType", Kernel::IS_EQUAL_TO, "Asymmetry"));
+  declareProperty("TimeMin", 0.0, "start time for the data in ms.",
+                  Direction::Input);
+  setPropertySettings("TimeMin",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "plotType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
-  declareProperty("TimeMax", 30.0, "end time for the data in ms.", Direction::Input);
-  setPropertySettings("TimeMax", make_unique<Kernel::EnabledWhenProperty>("plotType", Kernel::IS_EQUAL_TO, "Asymmetry"));
+  declareProperty("TimeMax", 30.0, "end time for the data in ms.",
+                  Direction::Input);
+  setPropertySettings("TimeMax",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "plotType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
-  declareProperty("RebinArgs", emptyString, "Rebin arguments.", Direction::Input);
+  declareProperty("RebinArgs", emptyString, "Rebin arguments.",
+                  Direction::Input);
 
   declareProperty("TimeZero", 0.0, "....", Direction::Input);
   declareProperty("TimeLoadZero", 0.0, "....", Direction::Input);
@@ -110,6 +127,10 @@ void ApplyMuonDetectorGrouping::exec() {
   WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
   Workspace_sptr inputWS        = getProperty("InputWorkspace");
   WorkspaceGroup_sptr muonWS    = getUserInput(inputWS, groupedWS);
+
+  MatrixWorkspace_sptr clipWS;
+  clipWS = boost::dynamic_pointer_cast<MatrixWorkspace>(muonWS->getItem(0));
+  clipXRangeToWorkspace(clipWS);
 
   auto ws    = createAnalysisWorkspace(inputWS, false);
   auto wsRaw = createAnalysisWorkspace(inputWS, true);
@@ -170,11 +191,6 @@ WorkspaceGroup_sptr ApplyMuonDetectorGrouping::getUserInput(Workspace_sptr& inpu
 	m_summedPeriods = this->getProperty("SummedPeriods");
 	m_subtractedPeriods = this->getProperty("SubtractedPeriods");
 
-	MatrixWorkspace_sptr clipWS;
-	clipWS = boost::dynamic_pointer_cast<MatrixWorkspace>(muonWS->getItem(0));
-	clipXRangeToWorkspace(clipWS);
-
-
 	std::string plotType;
 	plotType = this->getProperty("plotType");
 	if (plotType == "Counts") {
@@ -230,9 +246,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(Workspace_sptr
   options.plotType          = m_plotType;
   options.groupPairName     = m_groupName;
 
-  // 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonProcess");
-
   alg->initialize();
 
   // Set input workspace property
@@ -286,8 +300,6 @@ void ApplyMuonDetectorGrouping::setProcessAlgorithmProperties(IAlgorithm_sptr al
 		alg->setProperty("RebinParams", options.rebinArgs);
 	}
 
-	// ---- Analysis ----
-
 	// Find index of a name in a collection
 	const auto indexOf = [](const std::string &name,
 		const std::vector<std::string> &collection) {
@@ -316,7 +328,7 @@ void ApplyMuonDetectorGrouping::setProcessAlgorithmProperties(IAlgorithm_sptr al
 		alg->setProperty("GroupIndex", static_cast<int>(groupNum));
 	}
 	else {
-		throw std::invalid_argument("Cannot create analysis workspace: Group/pair "
+		throw std::invalid_argument("Cannot create analysis workspace: Group "
 			"name not found in grouping");
 	}
 }
@@ -324,20 +336,30 @@ void ApplyMuonDetectorGrouping::setProcessAlgorithmProperties(IAlgorithm_sptr al
 /**
 * Performs validation of inputs to the algorithm.
 * - Checks the bounds on X axis are sensible
+* - Checks that the workspaceGroup is named differently to the workspace with the data
 * @returns Map of parameter names to errors
 */
 std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
 	std::map<std::string, std::string> errors;
 
-	const std::string propTime("TimeBounds");
-	double tmin = getProperty("TimeMin");
-	double tmax = getProperty("TimeMax");
+	const std::string propTime("TimeMin");
+	double tmin = this->getProperty("TimeMin");
+	double tmax = this->getProperty("TimeMax");
 	if (tmin > tmax) {
 		errors[propTime] = "TimeMin > TimeMax";
 	}
-	if (tmin < 0 || tmax < 0) {
+	if (tmin < 0) {
 		errors[propTime] = "Time values are negative.";
 	}
+	if (tmax < 0) {
+		errors["TimeMax"] = "Time values are negative.";
+	}
+	
+	WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+	Workspace_sptr inputWS = getProperty("InputWorkspace");
+	if (groupedWS->getName() == inputWS->getName()) {
+		errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have the same name as InputWorkspace.";
+	};
 
 	return errors;
 }
