@@ -1,4 +1,6 @@
 from mantid.kernel import ErrorReporter, UsageService
+from mantid.kernel import Logger
+error_log = Logger("error")
 
 
 class ErrorReporterPresenter():
@@ -11,14 +13,17 @@ class ErrorReporterPresenter():
     def error_handler(self, continue_working, share, name, email):
         if share == 0:
             errorReporter = ErrorReporter(
-                "mantidplot",UsageService.getUpTime(), self._exit_code,
+                "mantidplot",UsageService.getUpTime(), UsageService.isEnabled(), self._exit_code,
                 True, str(name), str(email))
             errorReporter.sendErrorReport()
         elif share == 1:
             errorReporter = ErrorReporter(
-                "mantidplot",UsageService.getUpTime(), self._exit_code,
+                "mantidplot",UsageService.getUpTime(), UsageService.isEnabled(), self._exit_code,
                 False, str(name), str(email))
             errorReporter.sendErrorReport()
   
         if not continue_working:
+            error_log.error("Terminated by user.")
             self._view.quit()
+        else:
+            error_log.error("Continue working.")
