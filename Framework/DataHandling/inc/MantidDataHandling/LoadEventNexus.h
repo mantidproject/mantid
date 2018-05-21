@@ -79,6 +79,9 @@ public:
 
   /// Version
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadISISNexus", "LoadEventAndCompress"};
+  }
 
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }

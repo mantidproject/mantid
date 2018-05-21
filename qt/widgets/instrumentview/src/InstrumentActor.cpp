@@ -726,7 +726,9 @@ bool InstrumentActor::wholeRange() const {
          m_BinMaxValue == m_WkspBinMaxValue;
 }
 
-size_t InstrumentActor::ndetectors() const { return detectorInfo().size(); }
+size_t InstrumentActor::ndetectors() const {
+  return m_detIndex2WsIndex.size() - m_components.size();
+}
 
 /**
  * Set autoscaling of the y axis. If autoscaling is on the minValue() and

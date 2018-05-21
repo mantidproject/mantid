@@ -23,6 +23,7 @@ ALG_BAD_PARAMS = {
     "EstimateDivergence(v1)":("alpha", "beta0", "beta1"),
     "FindUBUsingLatticeParameters(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "IndexSXPeaks(v1)":("a", "b", "c", "alpha", "beta", "gamma", "dTolerance"),
+    "LoadDNSSCD(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "ModeratorTzero(v1)":("tolTOF"),
     "MuscatFunc(v1)":("dQ", "dW"),
     "OptimizeCrystalPlacement(v1)":("nPeaks", "nParams", "nIndexed"),

@@ -6,8 +6,9 @@ import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, StringListValidator)
-from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
-                              Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon, Transpose)
+from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
+                              DetectorEfficiencyCorUser, Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon,
+                              Transpose)
 import math
 import numpy
 import roundinghelper
@@ -169,6 +170,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         """Return the algorithm's category."""
         return common.CATEGORIES
 
+    def seeAlso(self):
+        return [ "DirectILLApplySelfShielding","DirectILLCollectData",
+                 "DirectILLDiagnostics","DirectILLIntegrateVanadium","DirectILLSelfShielding" ]
+
     def name(self):
         """Return the algorithm's name."""
         return 'DirectILLReduction'
@@ -220,6 +225,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         progress.report('Rebinning in energy')
         mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
                                 subalgLogging)
+
+        # Divide the energy transfer workspace by bin widths.
+        mainWS = self._convertToDistribution(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Detector efficiency correction.
         progress.report('Correcting detector efficiency')
@@ -335,6 +343,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
                       EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return maskedWS
+
+    def _convertToDistribution(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        """Convert the workspace into a distribution."""
+        distributionWSName = wsNames.withSuffix('as_distribution')
+        distributionWS = CloneWorkspace(InputWorkspace=mainWS,
+                                        OutputWorkspace=distributionWSName,
+                                        EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        ConvertToDistribution(Workspace=distributionWS,
+                              EnableLogging=subalgLogging)
+        return distributionWS
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Convert the X axis units from time-of-flight to energy transfer."""

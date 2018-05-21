@@ -893,6 +893,22 @@ class StateGuiModel(object):
     def q_xy_step_type(self, value):
         self._set_q_xy_limits(step_type_value=value)
 
+    @property
+    def r_cut(self):
+        return self.get_simple_element(element_id=LimitsId.radius_cut, default_value="")
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.set_simple_element(element_id=LimitsId.radius_cut, value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_element(element_id=LimitsId.wavelength_cut, default_value="")
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.set_simple_element(element_id=LimitsId.wavelength_cut, value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity
     # ------------------------------------------------------------------------------------------------------------------

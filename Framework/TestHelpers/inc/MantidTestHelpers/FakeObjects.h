@@ -374,6 +374,10 @@ class ColumnTester : public Column {
     throw std::runtime_error("isBool not implemented");
   }
 
+  bool isNumber() const override {
+    throw std::runtime_error("isNumber not implemented");
+  }
+
   long int sizeOfData() const override {
     throw std::runtime_error("sizeOfData not implemented");
   }

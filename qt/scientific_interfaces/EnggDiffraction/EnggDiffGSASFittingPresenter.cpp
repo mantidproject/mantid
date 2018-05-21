@@ -2,6 +2,20 @@
 #include "EnggDiffGSASRefinementMethod.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
+namespace {
+
+std::string addRunNumberToGSASIIProjectFile(
+    const std::string &filename,
+    const MantidQt::CustomInterfaces::RunLabel &runLabel) {
+  const auto dotPosition = filename.find_last_of(".");
+  return filename.substr(0, dotPosition) + "_" +
+         std::to_string(runLabel.runNumber) + "_" +
+         std::to_string(runLabel.bank) +
+         filename.substr(dotPosition, filename.length());
+}
+
+} // anonymous namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -31,6 +45,10 @@ void EnggDiffGSASFittingPresenter::notify(
     processLoadRun();
     break;
 
+  case IEnggDiffGSASFittingPresenter::RefineAll:
+    processRefineAll();
+    break;
+
   case IEnggDiffGSASFittingPresenter::SelectRun:
     processSelectRun();
     break;
@@ -45,10 +63,52 @@ void EnggDiffGSASFittingPresenter::notify(
   }
 }
 
+std::vector<GSASIIRefineFitPeaksParameters>
+EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
+  const auto runLabels = m_multiRunWidget->getAllRunLabels();
+  std::vector<GSASIIRefineFitPeaksParameters> inputParams;
+  std::vector<std::string> GSASIIProjectFiles;
+  inputParams.reserve(runLabels.size());
+  GSASIIProjectFiles.reserve(runLabels.size());
+
+  const auto refinementMethod = m_view->getRefinementMethod();
+  const auto instParamFile = m_view->getInstrumentFileName();
+  const auto phaseFiles = m_view->getPhaseFileNames();
+  const auto pathToGSASII = m_view->getPathToGSASII();
+  const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
+  if (runLabels.size() == 1) {
+    GSASIIProjectFiles = std::vector<std::string>({GSASIIProjectFile});
+  } else {
+    for (const auto &runLabel : runLabels) {
+      GSASIIProjectFiles.emplace_back(
+          addRunNumberToGSASIIProjectFile(GSASIIProjectFile, runLabel));
+    }
+  }
+
+  const auto dMin = m_view->getPawleyDMin();
+  const auto negativeWeight = m_view->getPawleyNegativeWeight();
+  const auto xMin = m_view->getXMin();
+  const auto xMax = m_view->getXMax();
+  const auto refineSigma = m_view->getRefineSigma();
+  const auto refineGamma = m_view->getRefineGamma();
+
+  for (size_t i = 0; i < runLabels.size(); i++) {
+    const auto &runLabel = runLabels[i];
+    const auto inputWS = *(m_multiRunWidget->getFocusedRun(runLabel));
+
+    inputParams.emplace_back(inputWS, runLabel, refinementMethod, instParamFile,
+                             phaseFiles, pathToGSASII, GSASIIProjectFiles[i],
+                             dMin, negativeWeight, xMin, xMax, refineSigma,
+                             refineGamma);
+  }
+  return inputParams;
+}
+
 GSASIIRefineFitPeaksParameters
 EnggDiffGSASFittingPresenter::collectInputParameters(
-    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr inputWS,
-    const GSASRefinementMethod refinementMethod) const {
+    const RunLabel &runLabel,
+    const Mantid::API::MatrixWorkspace_sptr inputWS) const {
+  const auto refinementMethod = m_view->getRefinementMethod();
   const auto instParamFile = m_view->getInstrumentFileName();
   const auto phaseFiles = m_view->getPhaseFileNames();
   const auto pathToGSASII = m_view->getPathToGSASII();
@@ -89,16 +149,41 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
   m_view->displayGamma(*gamma);
 }
 
-Mantid::API::MatrixWorkspace_sptr
-EnggDiffGSASFittingPresenter::doPawleyRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
-  return m_model->doPawleyRefinement(params);
+void EnggDiffGSASFittingPresenter::doRefinements(
+    const std::vector<GSASIIRefineFitPeaksParameters> &params) {
+  m_model->doRefinements(params);
 }
 
-Mantid::API::MatrixWorkspace_sptr
-EnggDiffGSASFittingPresenter::doRietveldRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
-  return m_model->doRietveldRefinement(params);
+void EnggDiffGSASFittingPresenter::notifyRefinementsComplete() {
+  if (!m_viewHasClosed) {
+    m_view->setEnabled(true);
+    m_view->showStatus("Ready");
+  }
+}
+
+void EnggDiffGSASFittingPresenter::notifyRefinementCancelled() {
+  if (!m_viewHasClosed) {
+    m_view->setEnabled(true);
+    m_view->showStatus("Ready");
+  }
+}
+
+void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
+    const std::string &failureMessage) {
+  if (!m_viewHasClosed) {
+    m_view->setEnabled(true);
+    m_view->userWarning("Refinement failed", failureMessage);
+    m_view->showStatus("Refinement failed");
+  }
+}
+
+void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
+    const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
+  if (!m_viewHasClosed) {
+    m_multiRunWidget->addFittedPeaks(refinementResults.runLabel,
+                                     refinementResults.fittedPeaksWS);
+    displayFitResults(refinementResults.runLabel);
+  }
 }
 
 void EnggDiffGSASFittingPresenter::processDoRefinement() {
@@ -121,31 +206,11 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
   }
 
   m_view->showStatus("Refining run");
-  const auto refinementMethod = m_view->getRefinementMethod();
   const auto refinementParams =
-      collectInputParameters(*runLabel, *inputWSOptional, refinementMethod);
+      collectInputParameters(*runLabel, *inputWSOptional);
 
-  try {
-    Mantid::API::MatrixWorkspace_sptr fittedPeaks;
-
-    switch (refinementMethod) {
-
-    case GSASRefinementMethod::PAWLEY:
-      fittedPeaks = doPawleyRefinement(refinementParams);
-      break;
-
-    case GSASRefinementMethod::RIETVELD:
-      fittedPeaks = doRietveldRefinement(refinementParams);
-      break;
-    }
-
-    m_multiRunWidget->addFittedPeaks(*runLabel, fittedPeaks);
-    displayFitResults(*runLabel);
-  } catch (const std::exception &ex) {
-    m_view->showStatus("An error occurred in refinement");
-    m_view->userError("Refinement failed", ex.what());
-  }
-  m_view->showStatus("Ready");
+  m_view->setEnabled(false);
+  doRefinements({refinementParams});
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
@@ -159,6 +224,18 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
   } catch (const std::exception &ex) {
     m_view->userWarning("Could not load file", ex.what());
   }
+}
+
+void EnggDiffGSASFittingPresenter::processRefineAll() {
+  const auto refinementParams = collectAllInputParameters();
+  if (refinementParams.size() == 0) {
+    m_view->userWarning("No runs loaded",
+                        "Please load at least one run before refining");
+    return;
+  }
+  m_view->showStatus("Refining run");
+  m_view->setEnabled(false);
+  doRefinements(refinementParams);
 }
 
 void EnggDiffGSASFittingPresenter::processSelectRun() {

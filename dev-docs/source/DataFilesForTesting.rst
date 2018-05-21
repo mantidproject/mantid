@@ -54,7 +54,7 @@ and it doesn't involve introducing extra work with git.
 CMake's External Data
 #####################
 
-.. figure:: ExternalDataSchematic.png
+.. figure:: images/ExternalDataSchematic.png
    :alt: Image originated at http://www.kitware.com/source/home/post/107
    :align: center
 
@@ -106,6 +106,8 @@ There are two places files may be found:
 -  `../mantid/instrument/IDFs_for_UNIT_TESTING <https://github.com/mantidproject/mantid/tree/master/instrument/IDFs_for_UNIT_TESTING>`__
    for test `IDF <IDF>`__ files
 
+
+.. _DataFilesForTesting_AddingANewFile:
 
 Adding A New File(s)
 ####################

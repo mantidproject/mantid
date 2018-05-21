@@ -16,6 +16,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
@@ -38,6 +39,8 @@ namespace Mantid {
 namespace DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(PeaksWorkspace)
+
+Mantid::Kernel::Logger g_log("PeaksWorkspace");
 
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
@@ -278,7 +281,29 @@ PeaksWorkspace::createPeak(const Kernel::V3D &position,
  */
 Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
   // Create a peak from QSampleFrame
-  const auto goniometer = run().getGoniometer();
+
+  Geometry::Goniometer goniometer;
+
+  LogManager_const_sptr props = getLogs();
+  if (props->hasProperty("wavelength") || props->hasProperty("energy")) {
+    // Assume constant wavelenth
+    // Calculate Q lab from Q sample and wavelength
+    double wavelength;
+    if (props->hasProperty("energy")) {
+      wavelength = Kernel::UnitConversion::run(
+          "Energy", "Wavelength",
+          props->getPropertyValueAsType<double>("energy"), 0, 0, 0,
+          Kernel::DeltaEMode::Elastic, 0);
+    } else {
+      wavelength = props->getPropertyValueAsType<double>("wavelength");
+    }
+    goniometer.calcFromQSampleAndWavelength(position, wavelength);
+    g_log.information() << "Found goniometer rotation to be "
+                        << goniometer.getEulerAngles()[0]
+                        << " degrees for Q sample = " << position << "\n";
+  } else {
+    goniometer = run().getGoniometer();
+  }
   // create a peak using the qLab frame
   auto peak = new Peak(getInstrument(), position, goniometer.getR());
   // Take the run number from this
@@ -630,6 +655,7 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("Col");
   addPeakColumn("QLab");
   addPeakColumn("QSample");
+  addPeakColumn("PeakNumber");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -694,6 +720,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> dSpacing(np);
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
+  std::vector<int> peakNumber(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 
@@ -715,6 +742,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
     dSpacing[i] = p.getDSpacing();
     TOF[i] = p.getTOF();
     runNumber[i] = p.getRunNumber();
+    peakNumber[i] = p.getPeakNumber();
     {
       Matrix<double> gm = p.getGoniometerMatrix();
       goniometerMatrix[9 * i] = gm[0][0];
@@ -857,6 +885,14 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->writeData("column_14", runNumber);
   file->openData("column_14");
   file->putAttr("name", "Run Number");
+  file->putAttr("interpret_as", specifyInteger);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Peak Number column
+  file->writeData("column_17", peakNumber);
+  file->openData("column_17");
+  file->putAttr("name", "Peak Number");
   file->putAttr("interpret_as", specifyInteger);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();

@@ -1,5 +1,11 @@
+.. _RemoteJobSubmissionAPI:
+
+=========================
 Remote Job Submission API
 =========================
+
+.. contents::
+  :local:
 
 This document describes the web service API that the Mantid Framework uses to submit algorithms to remote compute
 resources. The API is designed to be flexible enough that it can be implemented for just about any compute resource at
@@ -12,30 +18,6 @@ that the 'compute resource' will be used to execute tasks that are impractical t
 
 The reference implementation is the Fermi cluster at the Oak Ridge Spallation Neutron Source (fermi.ornl.gov). Specific
 details of the implementation on Fermi are used as examples throughout this document.
-
-Contents
-========
-
--  `1 Basic Requirements For API Implementations <#Basic_Requirements_For_API_Implementations>`__
--  `2 Versioning <#Versioning>`__
--  `3 Authentication <#Authentication>`__
--  `4 Transactions <#Transactions>`__
--  `5 A Note About File Uploads <#A_Note_About_File_Uploads>`__
--  `6 API v1 URL's <#API_v1_URL.27s>`__
-
-   -  `6.1 Information <#Information>`__
-   -  `6.2 Authentication <#Authentication_2>`__
-   -  `6.3 Transactions <#Transactions_2>`__
-   -  `6.4 File Transfer <#File_Transfer>`__
-   -  `6.5 File Listing <#File_Listing>`__
-   -  `6.6 Job Submission <#Job_Submission>`__
-   -  `6.7 Job Query <#Job_Query>`__
-   -  `6.8 Job Abort <#Job_Abort>`__
-
--  `7 API v1 Extensions <#API_v1_Extensions>`__
-
-   -  `7.1 JOB_DATES <#JOB_DATES>`__
-   -  `7.2 AUTH_USER_NAME <#AUTH_USER_NAME>`__
 
 Basic Requirements For API Implementations
 ==========================================
@@ -159,8 +141,8 @@ Information
 +--------------------------------+-------------------------------------------------------------------------------------+
 | Query Parameters               | None                                                                                |
 +--------------------------------+-------------------------------------------------------------------------------------+
-| JSON Output                    | API_Version : <integer> API_Extensions : [<extension_1>, <extensions_2>, .... ]     |
-|                                | Implementation_Specific_Post_Variables : [ <variable_1>, <variable_2>, .... ]       |
+| JSON Output                    | API_Version : <integer> API_Extensions : [<extension_1>, <extensions_2>, .... ]     |
+|                                | Implementation_Specific_Post_Variables : [ <variable_1>, <variable_2>, .... ]       |
 +--------------------------------+-------------------------------------------------------------------------------------+
 | Notes                          | May be called without first authenticating. The                                     |
 |                                | 'Implementation_Specific_Submit_Variables' field lists the particular POST          |
@@ -197,9 +179,9 @@ This URL has two forms: one to start a new transaction and the other to end an e
 +-------------------------------------------------+--------------------------------------------------------------------+
 | Query Parameters                                | Action=Start                                                       |
 +-------------------------------------------------+--------------------------------------------------------------------+
-| JSON Output                                     | TransID : <string>                                                 |
+| JSON Output                                     | TransID : <string>                                                 |
 +-------------------------------------------------+--------------------------------------------------------------------+
-| Notes                                           |                                                                    |
+| Notes                                           |                                                                    |
 +-------------------------------------------------+--------------------------------------------------------------------+
 
 +-----------------------------------------------------------+-----------------------------------------------------------+
@@ -226,7 +208,7 @@ File Transfer
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Query Parameters                                          | TransID=<transaction ID> File=<filename>                  |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| JSON Output                                               |                                                           |
+| JSON Output                                               |                                                           |
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Notes                                                     | <filename> does not include any path information. The     |
 |                                                           | actual directory where the file is stored is chosen by    |
@@ -267,7 +249,7 @@ File Listing
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Query Parameters                                          | TransID=<transaction ID>                                  |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| JSON Output                                               | Files : [ <file_1>, <file_2>, ... <file_n> ]              |
+| JSON Output                                               | Files : [ <file_1>, <file_2>, ... <file_n> ]              |
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Notes                                                     | No guarantees are made about the order files are listed   |
 +-----------------------------------------------------------+-----------------------------------------------------------+
@@ -283,16 +265,16 @@ Job Submission
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Query Parameters                                          | None                                                      |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| Mandatory POST Variables                                  | TransID : <trans_id>                                      |
-|                                                           | ScriptName : <name_of_python_script>                      |
-|                                                           | <name_of_python_script> : <python code>                   |
+| Mandatory POST Variables                                  | TransID : <trans_id>                                      |
+|                                                           | ScriptName : <name_of_python_script>                      |
+|                                                           | <name_of_python_script> : <python code>                   |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| Optional POST Variables                                   | JobName : <name>                                          |
+| Optional POST Variables                                   | JobName : <name>                                          |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| Implementation Specific POST Variables                    | NumNodes : <number_of_nodes>                              |
+| Implementation Specific POST Variables                    | NumNodes : <number_of_nodes>                              |
 |                                                           | CoresPerNode: <cores_per_node>                            |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| JSON Output                                               | JobID : <job_id>                                          |
+| JSON Output                                               | JobID : <job_id>                                          |
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Notes                                                     | This is a POST method                                     |
 |                                                           | Request is submitted as multipart form data (ie:          |
@@ -332,9 +314,9 @@ This URL has two forms: one to query a specific job and one to query all of a us
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Query Parameters                                          | None                                                      |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| JSON Output                                               | <job_id> : <job_description_object>                       |
-|                                                           | <job_id> : <job_description_object>                       |
-|                                                           | <job_id> : <job_description_object>                       |
+| JSON Output                                               | <job_id> : <job_description_object>                       |
+|                                                           | <job_id> : <job_description_object>                       |
+|                                                           | <job_id> : <job_description_object>                       |
 |                                                           | etc...                                                    |
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Notes                                                     | See below for a description of the job_description_object |
@@ -350,9 +332,9 @@ This URL has two forms: one to query a specific job and one to query all of a us
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | URL                                                       | <base_url>/query                                          |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| Query Parameters                                          | JobID : <job_id>                                          |
+| Query Parameters                                          | JobID : <job_id>                                          |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| JSON Output                                               | <job_id> : <job_description_object>                       |
+| JSON Output                                               | <job_id> : <job_description_object>                       |
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | Notes                                                     | See below for a description of the job_description_object |
 |                                                           | The length of time the compute resource will 'remember'   |
@@ -381,7 +363,7 @@ Job Abort
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | URL                                                       | <base_url>/abort                                          |
 +-----------------------------------------------------------+-----------------------------------------------------------+
-| Query Parameters                                          | JobID : <job_id>                                          |
+| Query Parameters                                          | JobID : <job_id>                                          |
 +-----------------------------------------------------------+-----------------------------------------------------------+
 | JSON Output                                               | None                                                      |
 +-----------------------------------------------------------+-----------------------------------------------------------+
@@ -405,4 +387,3 @@ AUTH_USER_NAME
 The AUTH_USER_NAME extension adds a single field the the JSON text returned by the 'info' URL. The field name is
 'Authenticated_As' and its value is either the name of the user that's been authenticated, or empty if no authentication
 has taken place yet.
-
