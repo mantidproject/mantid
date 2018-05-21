@@ -14,14 +14,6 @@ std::string addRunNumberToGSASIIProjectFile(
          filename.substr(dotPosition, filename.length());
 }
 
-std::string generateMultiRunFileName(
-    const std::vector<MantidQt::CustomInterfaces::RunLabel> &runLabels) {
-  const auto minLabel = std::min_element(runLabels.cbegin(), runLabels.cend());
-  const auto maxLabel = std::max_element(runLabels.cbegin(), runLabels.cend());
-  return std::to_string(minLabel->runNumber) + "_" +
-         std::to_string(maxLabel->runNumber) + ".hdf5";
-}
-
 } // anonymous namespace
 
 namespace MantidQt {
@@ -176,13 +168,9 @@ void EnggDiffGSASFittingPresenter::notifyRefinementsComplete(
       for (const auto &refinementResults : refinementResultSets) {
         runLabels.emplace_back(refinementResults.runLabel);
       }
-      const auto outputFilename = generateMultiRunFileName(runLabels);
-
-      auto userSaveDir = m_mainSettings->outFilesUserDir("Runs");
-      userSaveDir.append(outputFilename);
-
-      m_model->saveRefinementResultsToHDF5(alg, refinementResultSets,
-                                           userSaveDir.toString());
+      m_model->saveRefinementResultsToHDF5(
+          alg, refinementResultSets,
+          m_mainSettings->userHDFMultiRunFilename(runLabels));
     }
 
     m_view->setEnabled(true);

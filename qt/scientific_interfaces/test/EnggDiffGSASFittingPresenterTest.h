@@ -194,14 +194,20 @@ public:
     const GSASIIRefineFitPeaksOutputProperties refinementResults1(
         1, 2, 3, fittedPeaks, latticeParams, runLabel1);
     const RunLabel runLabel2(125, 1);
+    const std::vector<RunLabel> runLabels({runLabel1, runLabel2});
     const GSASIIRefineFitPeaksOutputProperties refinementResults2(
         1, 2, 3, fittedPeaks, latticeParams, runLabel2);
     const std::vector<GSASIIRefineFitPeaksOutputProperties> refinementResultSet(
         {refinementResults1, refinementResults2});
     const Mantid::API::IAlgorithm_sptr alg(nullptr);
 
+    const std::string outputFilename("/some/dir/Runs/123_125.hdf5");
+    EXPECT_CALL(*m_mockParamPtr, userHDFMultiRunFilename(runLabels))
+        .Times(1)
+        .WillOnce(Return(outputFilename));
+
     EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
-                                     alg, refinementResultSet, "123_125.hdf5"));
+                                     alg, refinementResultSet, outputFilename));
     presenter->notifyRefinementsComplete(alg, refinementResultSet);
 
     assertMocksUsedCorrectly();

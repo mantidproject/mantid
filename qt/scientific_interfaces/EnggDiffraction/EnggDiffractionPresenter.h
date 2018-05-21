@@ -274,6 +274,8 @@ private:
   // errors
   Poco::Path outFilesUserDir(const std::string &addToDir) const override;
   std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFMultiRunFilename(
+      const std::vector<RunLabel> &runLabels) const override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
   Poco::Path outFilesRootDir() const;
 
