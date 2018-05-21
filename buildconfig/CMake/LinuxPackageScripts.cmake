@@ -147,6 +147,7 @@ endif ()
 
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot )
+  set ( SCRIPTSDIR ${CMAKE_HOME_DIRECTORY}/scripts)
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
   # Needs to be executable
@@ -164,18 +165,6 @@ configure_file ( ${CMAKE_MODULE_PATH}/Packaging/AddPythonPath.py.in
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py"
                   OUTPUT_QUIET ERROR_QUIET )
 
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/error_dialog_app.py.in
-                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/error_dialog_app.py @ONLY )
-# Needs to be executable
-execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/error_dialog_app.py"
-                  OUTPUT_QUIET ERROR_QUIET )
-
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_error_report.sh.in
-                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_error_report.sh @ONLY )
-# Needs to be executable
-execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_error_report.sh"
-                  OUTPUT_QUIET ERROR_QUIET )
-
 # Package version
 set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
 if ( MAKE_VATES )
@@ -187,6 +176,7 @@ endif ()
 
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot_exe )
+  set ( SCRIPTSDIR "\${INSTALLDIR}/../scripts")
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
   install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install

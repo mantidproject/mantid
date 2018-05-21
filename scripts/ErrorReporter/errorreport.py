@@ -9,9 +9,12 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     action = pyqtSignal(bool, int, str, str)
     quit_signal = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
+        if not show_continue_terminate:
+            self.continue_terminate_frame.hide()
+            self.adjustSize()
         self.setFixedSize(self.width(), self.height())
 
         self.quit_signal.connect(QtGui.QApplication.instance().quit)

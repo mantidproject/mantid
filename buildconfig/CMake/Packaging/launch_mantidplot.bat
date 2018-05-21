@@ -43,5 +43,5 @@ start "MantidPlot" /B /WAIT %_BIN_DIR%\MantidPlot.exe %*
 :: If not launch the error reporter
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if %errorlevel% NEQ 0 (
-call launch_error_report.bat %errorlevel%
+python %_INSTALL_DIR%\scripts\ErrorReporter\error_dialog_app.py --exitcode=%1 --directory=%_BIN_DIR%
 )

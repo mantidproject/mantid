@@ -1,5 +1,4 @@
 from mantid.kernel import ErrorReporter, UsageService
-from ErrorReporter.errorreport import CrashReportPage
 
 
 class ErrorReporterPresenter():
