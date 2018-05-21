@@ -23,9 +23,13 @@ auto FindSubtreeRoots::operator()(std::vector<RowLocation> region)
         else
           nodeWasNotSubtreeRoot(currentNode);
       } else {
-        nodeWasSubtreeRoot(currentNode);
-        roots.emplace_back(currentNode);
-        previousRoot = std::move(currentNode);
+        if (previousRoot.depth() > currentNode.depth())
+          return boost::none;
+        else {
+          nodeWasSubtreeRoot(currentNode);
+          roots.emplace_back(currentNode);
+          previousRoot = std::move(currentNode);
+        }
       }
     }
     return roots;

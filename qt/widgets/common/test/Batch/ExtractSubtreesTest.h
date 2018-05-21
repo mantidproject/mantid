@@ -257,5 +257,33 @@ public:
     auto roots = extractSubtrees(region, regionData).get();
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
+
+  void testForDocumentationFailureTree() {
+    auto extractSubtrees = ExtractSubtrees();
+    // clang-format off
+    auto region = std::vector<RowLocation>({
+        RowLocation({0, 0}),
+        RowLocation({0, 0, 0}),
+        RowLocation({0, 0, 1}),
+        RowLocation({1}),
+        RowLocation({1, 0}),
+        RowLocation({1, 1}),
+        RowLocation({1, 2})
+    });
+
+    auto regionData = RegionData({
+        cells("Child 0, 0"),
+        cells("Child 0, 0, 0"),
+        cells("Child 0, 0, 1"),
+        cells("Root  1"),
+        cells("Child 1, 0"),
+        cells("Child 1, 1"),
+        cells("Child 1, 1"),
+    });
+    // clang-format on
+
+    auto subtrees = extractSubtrees(region, regionData);
+    TS_ASSERT(!subtrees.is_initialized())
+  }
 };
 #endif

@@ -63,8 +63,8 @@ auto ExtractSubtrees::extractSubtreeRecursive(
       } else
         return unsuitableTree();
     } else if (depthOfCurrentRow < currentDepth) {
-      if (currentIsInDifferentSubtree(depthOfCurrentRow, rootRelativeToTree))
-        return finishedSubtree(currentRow, currentRowData);
+      if (currentIsAboveSubtreeRoot(depthOfCurrentRow, rootRelativeToTree))
+        return unsuitableTree();
       else
         return continueOnLevelAbove(currentRow, currentRowData);
     } else {
@@ -90,7 +90,7 @@ bool ExtractSubtrees::isCorrectDepthForChild(int parentDepth,
   return maybeChildDepth == parentDepth + 1;
 }
 
-bool ExtractSubtrees::currentIsInDifferentSubtree(
+bool ExtractSubtrees::currentIsAboveSubtreeRoot(
     int depthOfCurrentRow, RowLocation const &rootRelativeToTree) {
   return depthOfCurrentRow < rootRelativeToTree.depth();
 }
