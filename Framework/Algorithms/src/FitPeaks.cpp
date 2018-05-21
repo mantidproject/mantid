@@ -165,6 +165,7 @@ FitPeaks::FitPeaks()
   m_observablePeakProfiles.push_back("Gaussian");
   m_observablePeakProfiles.push_back("PseudoVoigt");
   m_observablePeakProfiles.push_back("Voigt");
+  m_observablePeakProfiles.push_back("Lorentzian");
   std::sort(m_observablePeakProfiles.begin(), m_observablePeakProfiles.end());
 }
 
