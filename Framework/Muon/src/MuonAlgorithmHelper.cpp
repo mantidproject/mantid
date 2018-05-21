@@ -14,8 +14,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-
-
 /**
  * Return a first period MatrixWorkspace in a run workspace. If the run
  * workspace has one period
@@ -30,12 +28,10 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
   }
 }
 
-
 std::string getRunLabel(const Mantid::API::Workspace_sptr &ws) {
   const std::vector<Mantid::API::Workspace_sptr> wsList{ws};
   return getRunLabel(wsList);
 }
-
 
 /**
  * Get a run label for a list of workspaces.
@@ -63,7 +59,6 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
 
   return getRunLabel(instrument, runNumbers);
 }
-
 
 /**
  * Get a run label for a given instrument and list of runs.
@@ -129,7 +124,8 @@ std::string getRunLabel(const std::string &instrument,
  * @param runs :: [input] Vector of run numbers - need not be sorted
  * @returns Vector of pairs of (start, end) of consecutive runs
  */
-std::vector<std::pair<int, int>> findConsecutiveRuns(const std::vector<int> &runs) {
+std::vector<std::pair<int, int>>
+findConsecutiveRuns(const std::vector<int> &runs) {
   // Groups to output
   std::vector<std::pair<int, int>> ranges;
   // Sort the vector to begin with

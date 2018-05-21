@@ -26,21 +26,19 @@ struct DatasetParams {
   size_t version;
 };
 
-
 /// Parameters for creating analysis workspace
 struct AnalysisOptions {
-	std::string summedPeriods;            /// Set of periods to sum
-	std::string subtractedPeriods;        /// Set of periods to subtract
-	double timeZero = 0;                  /// Value to use for t0 correction
-	double loadedTimeZero = 0;            /// Time zero from data file
-	std::pair<double, double> timeLimits; /// Min, max X values
-	std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
-	std::string groupPairName; /// Name of group or pair to use
-	const Mantid::API::Grouping grouping; /// Grouping to use
-	PlotType plotType = {};               /// Type of analysis to perform
-	explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g) {}
+  std::string summedPeriods;            /// Set of periods to sum
+  std::string subtractedPeriods;        /// Set of periods to subtract
+  double timeZero = 0;                  /// Value to use for t0 correction
+  double loadedTimeZero = 0;            /// Time zero from data file
+  std::pair<double, double> timeLimits; /// Min, max X values
+  std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
+  std::string groupPairName; /// Name of group or pair to use
+  const Mantid::API::Grouping grouping; /// Grouping to use
+  PlotType plotType = {};               /// Type of analysis to perform
+  explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g) {}
 };
-
 
 /// Whether multiple fitting is enabled or disabled
 enum class MultiFitState { Enabled, Disabled };
@@ -48,28 +46,28 @@ enum class MultiFitState { Enabled, Disabled };
 
 namespace MuonAlgorithmHelper {
 
-	/// Returns a first period MatrixWorkspace in a run workspace
-	Mantid::API::MatrixWorkspace_sptr
-	firstPeriod(Mantid::API::Workspace_sptr ws);
+/// Returns a first period MatrixWorkspace in a run workspace
+Mantid::API::MatrixWorkspace_sptr firstPeriod(Mantid::API::Workspace_sptr ws);
 
-	/// Get a run label for the workspace
-	std::string getRunLabel(const Mantid::API::Workspace_sptr &ws);
-	
-	/// Get a run label for a list of workspaces
-	std::string getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
-	
-	/// Get a run label given instrument and run numbers
-	std::string getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
-	
-	/// Makes sure the specified workspaces are in specified group
-	void groupWorkspaces(const std::string &groupName,
-	                const std::vector<std::string> &inputWorkspaces);
+/// Get a run label for the workspace
+std::string getRunLabel(const Mantid::API::Workspace_sptr &ws);
 
-	/// Finds runs of consecutive numbers
-	std::vector<std::pair<int, int>> findConsecutiveRuns(const std::vector<int> &runs);
+/// Get a run label for a list of workspaces
+std::string getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
 
-	/// Generate new analysis workspace name
-	std::string generateWorkspaceName(const Muon::DatasetParams &params);
+/// Get a run label given instrument and run numbers
+std::string getRunLabel(const std::string &instrument,
+                        const std::vector<int> &runNumbers);
 
+/// Makes sure the specified workspaces are in specified group
+void groupWorkspaces(const std::string &groupName,
+                     const std::vector<std::string> &inputWorkspaces);
+
+/// Finds runs of consecutive numbers
+std::vector<std::pair<int, int>>
+findConsecutiveRuns(const std::vector<int> &runs);
+
+/// Generate new analysis workspace name
+std::string generateWorkspaceName(const Muon::DatasetParams &params);
 }
 #endif /* MANTIDQT_CUSTOMINTERFACES_MUONALGORITHMHELPER_H_ */
