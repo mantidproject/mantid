@@ -47,6 +47,16 @@ class FunctionFactoryTest(unittest.TestCase):
         self.assertTrue(len(func.__repr__()) > len(name))
         self.assertTrue("Peak" in func.categories())
 
+    def test_function_subscription_of_non_class_type_raises_error(self):
+        def not_a_fit_function(*args, **kwargs):
+            pass
+        self.assertRaises(ValueError, FunctionFactory.subscribe, not_a_fit_function)
+
+    def test_function_subscription_of_class_without_IFunction_base_raises_error(self):
+        class NotAFitFunction(object):
+            pass
+        self.assertRaises(ValueError, FunctionFactory.subscribe, NotAFitFunction)
+
     def test_function_subscription_without_required_attrs_fails(self):
         self.assertRaises(RuntimeError, FunctionFactory.Instance().subscribe, TestFunctionNoAttrs)
         self.assertTrue("TestFunctionNoAttrs" not in FunctionFactory.getFunctionNames())
