@@ -3,13 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/TableRow.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidMuon/ApplyMuonDetectorsGrouping.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidMuon/ApplyMuonDetectorsGrouping.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -48,6 +51,7 @@ public:
 	  auto data = loadEMU();
 	  auto wsGroup = boost::make_shared<WorkspaceGroup>(   );
 	  auto ws = data->workspace;
+
 
 	  std::string wsName = (data->workspace)->getName();
 	  std::string wsGroupName = (wsGroup)->getName();
