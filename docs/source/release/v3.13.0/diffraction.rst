@@ -20,6 +20,8 @@ Powder Diffraction
 
 - New SNAP instrument geometry for 2018 run cycle
 
+- New POWGEN instrument geometry for 2018 run cycle
+
 New Features
 ------------
 
