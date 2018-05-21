@@ -500,10 +500,10 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
       return;
     }
 
-  const auto outFilename = userHDFRunFilename(runLabel.runNumber);
-  m_model->saveFitResultsToHDF5({runLabel}, outFilename);
+    const auto outFilename = userHDFRunFilename(runLabel.runNumber);
+    m_model->saveFitResultsToHDF5({runLabel}, outFilename);
 
-  m_model->createFittedPeaksWS(runLabel);
+    m_model->createFittedPeaksWS(runLabel);
   }
 
   if (runLabels.size() > 1) {
