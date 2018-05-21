@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # Get the location that the script was called from
-cd $DIR
-./MantidPlot || sh launch_error_report.sh $?
+INSTALLDIR=$(cd "$(dirname "$0")"; pwd)
+cd $INSTALLDIR
+./MantidPlot || /usr/bin/python ../../scripts/ErrorReporter/error_dialog_app.py --exitcode=$1 --directory=$INSTALLDIR
