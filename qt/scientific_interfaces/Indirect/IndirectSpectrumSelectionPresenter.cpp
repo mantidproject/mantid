@@ -130,13 +130,13 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     const std::string &spectraList) {
   setModelSpectra(spectraList);
-  emit spectraChanged(Spectra(spectraList));
+  emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraRange(
     std::size_t minimum, std::size_t maximum) {
   setModelSpectra(std::make_pair(minimum, maximum));
-  emit spectraChanged(Spectra(std::make_pair(minimum, maximum)));
+  emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
