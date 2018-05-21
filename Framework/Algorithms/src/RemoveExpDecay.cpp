@@ -100,15 +100,24 @@ void MuonRemoveExpDecay::exec() {
       throw std::invalid_argument(
           "Spectra size greater than the number of spectra!");
     }
+    auto emptySpectrum =
+        std::all_of(inputWS->y(specNum).begin(), inputWS->y(specNum).end(),
+                    [](double value) { return value == 0.; });
+    if (emptySpectrum) {
+      // if the y values are all zero do not change them
+      m_log.warning("Dead detector found at spectrum number " +
+                    std::to_string(specNum));
+      outputWS->setHistogram(specNum, inputWS->histogram(specNum));
+    } else {
+      // Remove decay from Y and E
+      outputWS->setHistogram(specNum, removeDecay(inputWS->histogram(specNum)));
 
-    // Remove decay from Y and E
-    outputWS->setHistogram(specNum, removeDecay(inputWS->histogram(specNum)));
-
-    // do scaling and subtract 1
-    const double normConst = calNormalisationConst(outputWS, spectra[i]);
-    outputWS->mutableY(specNum) /= normConst;
-    outputWS->mutableY(specNum) -= 1.0;
-    outputWS->mutableE(specNum) /= normConst;
+      // do scaling and subtract 1
+      const double normConst = calNormalisationConst(outputWS, spectra[i]);
+      outputWS->mutableY(specNum) /= normConst;
+      outputWS->mutableY(specNum) -= 1.0;
+      outputWS->mutableE(specNum) /= normConst;
+    }
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION
