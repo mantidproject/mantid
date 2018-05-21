@@ -36,8 +36,8 @@ class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
 
         input_ws = self._create_fit_results_table(peaks)
         test_alg = run_algorithm(self.ALG_NAME,
-                                 InputWorkspace=input_ws,
-                                 BankID=1,
+                                 InputWorkspaces=[input_ws],
+                                 BankIDs=[1],
                                  Filename=self.TEMP_FILE_NAME)
 
         self.assertTrue(test_alg.isExecuted())
@@ -56,20 +56,44 @@ class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
         peaks1 = self._create_random_peak_row()
         table_ws1 = self._create_fit_results_table([peaks1])
         run_algorithm(self.ALG_NAME,
-                      InputWorkspace=table_ws1,
-                      BankID=1,
+                      InputWorkspaces=[table_ws1],
+                      BankIDs=[1],
                       Filename=self.TEMP_FILE_NAME)
 
         peaks2 = self._create_random_peak_row()
         table_ws2 = self._create_fit_results_table([peaks2])
         run_algorithm(self.ALG_NAME,
-                      InputWorkspace=table_ws2,
-                      BankID=2,
+                      InputWorkspaces=[table_ws2],
+                      BankIDs=[2],
                       Filename=self.TEMP_FILE_NAME)
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             self.assertTrue("Bank 1" in output_file)
             self.assertTrue("Bank 2" in output_file)
+
+    def test_saveMultipleWorkspacesIsIndexedCorrectly(self):
+        table_ws1 = self._create_fit_results_table([self._create_random_peak_row()])
+        table_ws1 = mantid.RenameWorkspace(InputWorkspace=table_ws1, OutputWorkspace="ws1")
+        table_ws2 = self._create_fit_results_table([self._create_random_peak_row()])
+        table_ws2 = mantid.RenameWorkspace(InputWorkspace=table_ws2, OutputWorkspace="ws2")
+        run_algorithm(self.ALG_NAME,
+                      InputWorkspaces=[table_ws1, table_ws2],
+                      BankIDs=[1, 2],
+                      RunNumbers=[123, 456],
+                      Filename=self.TEMP_FILE_NAME)
+
+        with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
+            self.assertTrue("Run 123" in output_file)
+            run_123_group = output_file["Run 123"]
+            self.assertTrue("Bank 1" in run_123_group)
+            bank_1_group = run_123_group["Bank 1"]
+            self.assertTrue("Single Peak Fitting" in bank_1_group)
+
+            self.assertTrue("Run 456" in output_file)
+            run_456_group = output_file["Run 456"]
+            self.assertTrue("Bank 2" in run_456_group)
+            bank_2_group = run_456_group["Bank 2"]
+            self.assertTrue("Single Peak Fitting" in bank_2_group)
 
     def _create_fit_results_table(self, rows):
         table = mantid.CreateEmptyTableWorkspace(OutputWorkspace=self.FIT_RESULTS_TABLE_NAME)

@@ -26,11 +26,14 @@ Engineering Diffraction
     loaded into the tab
 
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
+<<<<<<< HEAD
 - HDF5 is now the standard format for saving data from the GUI:
 
   - Single peak fitting output is now saved as HDF5 instead of CSV,
     using :ref:`EnggSaveSinglePeakFitResultsToHDF5
-    <algm-EnggSaveSinglePeakFitResultsToHDF5>`
+    <algm-EnggSaveSinglePeakFitResultsToHDF5>`. The algorithm
+    previously used for saving to CSV, **SaveDiffFittingAscii**, has
+    been removed from Mantid
   - Fit results and parameters are saved to HDF5 from the **GSAS
     Refinement** tab
 

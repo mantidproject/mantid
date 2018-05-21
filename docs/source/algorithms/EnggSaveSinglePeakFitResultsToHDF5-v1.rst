@@ -10,10 +10,12 @@ Description
 -----------
 
 Exports the results of an :ref:`EnggFitPeaks <algm-EnggFitPeaks-v1>`
-fit to an HDF5 file indexed by bank ID. The results go in a sub-group
-of the **Bank** group called **Single Peak Fitting**. This group
-contains one dataset, which is a table of the fit parameters for every
-peak.
+fit to an HDF5 file indexed by bank ID. If multiple sets of fit
+results are provided, then the file is indexed by run number, with the
+**Run Number** groups indexed further by bank ID. The results go in a
+sub-group of the **Bank** group called **Single Peak Fitting**. This
+group contains one dataset, which is a table of the fit parameters for
+every peak.
 
 Fit Parameters
 ##############
@@ -51,8 +53,10 @@ we just mock one up here. See :ref:`EnggFitPeaks documenation
  
    output_filename = os.path.join(config["defaultsave.directory"],
                                   "EnggSaveSinglePeakFitResultsToHDF5DocTest.hdf5")
-   
-   EnggSaveSinglePeakFitResultsToHDF5(InputWorkspace=peaks, Filename=output_filename, BankID=1)
+
+   EnggSaveSinglePeakFitResultsToHDF5(InputWorkspaces=[peaks],
+                                      Filename=output_filename,
+                                      BankIDs=[1])
 
    with h5py.File(output_filename, "r") as f:
        bank_group = f["Bank 1"]
