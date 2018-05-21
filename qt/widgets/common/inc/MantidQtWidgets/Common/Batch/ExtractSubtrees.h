@@ -65,8 +65,8 @@ public:
                        RowDataConstIterator currentRowData);
   RecursiveSubtreeExtractionResult unsuitableTree();
 
-  bool currentIsInDifferentSubtree(int depthOfCurrentRow,
-                                   RowLocation const &rootRelativeToTree);
+  bool currentIsAboveSubtreeRoot(int depthOfCurrentRow,
+                                 RowLocation const &rootRelativeToTree);
 
   RecursiveSubtreeExtractionResult extractSubtreeRecursive(
       Subtree &subtree, RowLocation const &rootRelativeToTree,
