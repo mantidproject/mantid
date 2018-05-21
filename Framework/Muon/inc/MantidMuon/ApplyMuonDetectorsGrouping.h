@@ -1,12 +1,8 @@
 #ifndef MANTID_MUON_APPLYMUONDETECTORSGROUPING_H_
 #define MANTID_MUON_APPLYMUONDETECTORSGROUPING_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidMuon/MuonAlgorithmHelper.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::API;
 

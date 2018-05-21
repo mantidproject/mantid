@@ -2,35 +2,13 @@
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ColumnFactory.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/GroupingLoader.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-
 #include "MantidKernel/ListValidator.h"
 
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/XML/XMLWriter.h>
-
 #include <algorithm>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 

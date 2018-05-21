@@ -1,13 +1,8 @@
 #ifndef MANTID_MUON_MUONALGORITHMHELPER_H_
 #define MANTID_MUON_MUONALGORITHMHELPER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/GroupingLoader.h"
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/System.h"
 
 #include <string>
 #include <vector>
