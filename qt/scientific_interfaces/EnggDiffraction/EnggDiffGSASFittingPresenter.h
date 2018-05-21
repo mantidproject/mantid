@@ -37,7 +37,10 @@ public:
 
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
-  void notifyRefinementsComplete() override;
+  void notifyRefinementsComplete(
+      Mantid::API::IAlgorithm_sptr alg,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets) override;
 
   void notifyRefinementSuccessful(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,

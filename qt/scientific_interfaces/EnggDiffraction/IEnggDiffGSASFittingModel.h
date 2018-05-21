@@ -70,13 +70,17 @@ public:
 
   /**
    Save results of refinement (and refinement settings used) to HDF5 file
-   @param successfulAlgorithm The completed refinement algorithm
-   @param refinementResults Results of refinement
+   @param successfulAlgorithm The completed refinement algorithm (note, even in
+   a multi-run fit, input properties like RefineSigma will be the same for all
+   runs, so it's fine to just use one algorithm)
+   @param refinementResultSets Output properties of all refinements from a
+   multi-run fit
    @param filename Name of the HDF5 file to save to
   */
   virtual void saveRefinementResultsToHDF5(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const GSASIIRefineFitPeaksOutputProperties &refinementResults,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets,
       const std::string &filename) const = 0;
 
   /// set the observer for refinement

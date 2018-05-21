@@ -2867,6 +2867,18 @@ EnggDiffractionPresenter::userHDFRunFilename(const int runNumber) const {
   return userOutputDir.toString();
 }
 
+std::string EnggDiffractionPresenter::userHDFMultiRunFilename(
+    const std::vector<RunLabel> &runLabels) const {
+  const auto &begin = runLabels.cbegin();
+  const auto &end = runLabels.cend();
+  const auto minLabel = std::min_element(begin, end);
+  const auto maxLabel = std::max_element(begin, end);
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(minLabel->runNumber) + "_" +
+                       std::to_string(maxLabel->runNumber) + ".hdf5");
+  return userOutputDir.toString();
+}
+
 /**
 * Produces a path to the output directory where files are going to be
 * written for a specific user + RB number / experiment ID. It creates

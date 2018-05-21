@@ -201,38 +201,6 @@ public:
   virtual void setFittingRunNumVec(std::vector<std::string> assignVec) = 0;
 
   /**
-   * to determine whether the current loop is multi-run or single to avoid
-   * regenerating the list-view widget when not required
-   *
-   * @return bool whether given multi-run or singular file
-   */
-  virtual bool getFittingMultiRunMode() = 0;
-
-  /**
-   * sets the fitting mode to multi-run or single to avoid
-   * regenerating the list-view widget when not required
-   *
-   * @param mode true if its multi-run
-   */
-  virtual void setFittingMultiRunMode(bool mode) = 0;
-
-  /**
-  * to determine whether the current loop is multi-run or single to avoid
-  * regenerating the list-view widget when not required
-  *
-  * @return bool whether given multi-run or singular file
-  */
-  virtual bool getFittingSingleRunMode() = 0;
-
-  /**
-  * sets the fitting mode to multi-run or single to avoid
-  * regenerating the list-view widget when not required
-  *
-  * @param mode true if its multi-run
-  */
-  virtual void setFittingSingleRunMode(bool mode) = 0;
-
-  /**
    * generates and sets the curves on the fitting tab
    *
    * @param data of the workspace to be passed as QwtData

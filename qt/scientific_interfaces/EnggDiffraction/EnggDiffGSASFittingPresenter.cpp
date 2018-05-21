@@ -155,8 +155,24 @@ void EnggDiffGSASFittingPresenter::doRefinements(
   m_model->doRefinements(params);
 }
 
-void EnggDiffGSASFittingPresenter::notifyRefinementsComplete() {
+void EnggDiffGSASFittingPresenter::notifyRefinementsComplete(
+    Mantid::API::IAlgorithm_sptr alg,
+    const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+        refinementResultSets) {
   if (!m_viewHasClosed) {
+    const auto numRuns = refinementResultSets.size();
+
+    if (numRuns > 1) {
+      std::vector<RunLabel> runLabels;
+      runLabels.reserve(numRuns);
+      for (const auto &refinementResults : refinementResultSets) {
+        runLabels.emplace_back(refinementResults.runLabel);
+      }
+      m_model->saveRefinementResultsToHDF5(
+          alg, refinementResultSets,
+          m_mainSettings->userHDFMultiRunFilename(runLabels));
+    }
+
     m_view->setEnabled(true);
     m_view->showStatus("Ready");
   }
@@ -188,7 +204,7 @@ void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
 
     try {
       m_model->saveRefinementResultsToHDF5(successfulAlgorithm,
-                                           refinementResults, filename);
+                                           {refinementResults}, filename);
     } catch (std::exception &e) {
       m_view->userWarning(
           "Could not save refinement results",

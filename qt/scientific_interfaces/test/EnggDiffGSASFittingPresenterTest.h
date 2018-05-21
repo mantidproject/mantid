@@ -185,7 +185,31 @@ public:
     auto presenter = setUpPresenter();
     EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
-    presenter->notifyRefinementsComplete();
+
+    const Mantid::API::MatrixWorkspace_sptr fittedPeaks(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    const auto latticeParams =
+        Mantid::API::WorkspaceFactory::Instance().createTable();
+    const RunLabel runLabel1(123, 1);
+    const GSASIIRefineFitPeaksOutputProperties refinementResults1(
+        1, 2, 3, fittedPeaks, latticeParams, runLabel1);
+    const RunLabel runLabel2(125, 1);
+    const std::vector<RunLabel> runLabels({runLabel1, runLabel2});
+    const GSASIIRefineFitPeaksOutputProperties refinementResults2(
+        1, 2, 3, fittedPeaks, latticeParams, runLabel2);
+    const std::vector<GSASIIRefineFitPeaksOutputProperties> refinementResultSet(
+        {refinementResults1, refinementResults2});
+    const Mantid::API::IAlgorithm_sptr alg(nullptr);
+
+    const std::string outputFilename("/some/dir/Runs/123_125.hdf5");
+    EXPECT_CALL(*m_mockParamPtr, userHDFMultiRunFilename(runLabels))
+        .Times(1)
+        .WillOnce(Return(outputFilename));
+
+    EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
+                                     alg, refinementResultSet, outputFilename));
+    presenter->notifyRefinementsComplete(alg, refinementResultSet);
+
     assertMocksUsedCorrectly();
   }
 
@@ -208,8 +232,11 @@ public:
                 addFittedPeaks(runLabel, fittedPeaks));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Saving refinement results"));
 
-    EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
-                                     alg, refinementResults, hdfFilename));
+    EXPECT_CALL(*m_mockModelPtr,
+                saveRefinementResultsToHDF5(
+                    alg, std::vector<GSASIIRefineFitPeaksOutputProperties>(
+                             {refinementResults}),
+                    hdfFilename));
     EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
 
