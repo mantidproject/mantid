@@ -4,10 +4,15 @@ import unittest
 from mantid.api import IFunction1D, IFunction, FunctionFactory
 import numpy as np
 
+
 class NoCatgeoryFunction(IFunction1D):
 
     def init(self):
         pass
+
+    def function1D(self, xvals):
+        return xvals
+
 
 class Times2(IFunction1D):
 
@@ -27,6 +32,7 @@ class Times2(IFunction1D):
 
     def function1D(self, xvals):
         return 2*xvals
+
 
 class IFunction1DTest(unittest.TestCase):
 
