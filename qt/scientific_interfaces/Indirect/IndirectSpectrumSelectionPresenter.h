@@ -51,8 +51,7 @@ public:
   void enableView();
 
 signals:
-  void spectraChanged(Spectra spectra);
-  void maskSpectrumChanged(std::size_t);
+  void spectraChanged(std::size_t);
   void invalidSpectraString(const QString &errorMessage);
   void invalidMaskBinsString(const QString &errorMessage);
 
