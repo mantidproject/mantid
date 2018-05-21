@@ -26,7 +26,6 @@ Engineering Diffraction
     loaded into the tab
 
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
-<<<<<<< HEAD
 - HDF5 is now the standard format for saving data from the GUI:
 
   - Single peak fitting output is now saved as HDF5 instead of CSV,
