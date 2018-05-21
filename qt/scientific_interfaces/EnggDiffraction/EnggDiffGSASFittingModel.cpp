@@ -286,7 +286,7 @@ void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
 
     latticeParamWSNames.emplace_back(latticeParams->getName());
     runNumbers.emplace_back(runLabel.runNumber);
-    bankIDs.emplace_back(runLabel.bank);
+    bankIDs.emplace_back(static_cast<long>(runLabel.bank));
     rwps.emplace_back(refinementResults.rwp);
 
     if (refineSigma) {
