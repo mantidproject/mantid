@@ -171,13 +171,11 @@ Output:
 
     Spectra masked by default mask file:
     None
-    Spectra masked by user:
-    None
     Spectra masked by beam stop diagnostics:
     None
-    Spectra marked as bad by elastic peak diagnostics:
+    Additional spectra marked as bad by elastic peak diagnostics:
     14, 102, 302-305, 314-317, 326-329, 338-341, 350-353, 362-365, 374-377, 386-389
-    Spectra marked as bad by flat background diagnostics:
+    Additional spectra marked as bad by flat background diagnostics:
     14, 102
     Some small-angle detectors got diagnosed as bad due to detector solid angle corrections.
     Solid-angle corrected elastic intensity of spectrum 1: 555524.7
