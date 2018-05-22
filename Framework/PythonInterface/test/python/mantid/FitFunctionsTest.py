@@ -727,6 +727,9 @@ class FitFunctionsTest(unittest.TestCase):
                 super(BFunction, self).__init__()
                 self.declareParameter("C", 2.0)
 
+            def init(self):
+                pass
+
             def function1D(self, xvals):
                 c = self.getParameterValue("C")
                 return c * xvals
