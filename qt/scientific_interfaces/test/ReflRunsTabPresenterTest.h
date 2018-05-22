@@ -101,7 +101,7 @@ public:
     // Expect that the view is populated with the list of row commands
     EXPECT_CALL(mockRunsTabView, setRowCommandsProxy()).Times(Exactly(1));
     // The presenter is notified that something changed in the ADS
-    int group = 199;
+    int group = 0;
     presenter.notifyADSChanged(QSet<QString>(), group);
 
     // Verify expectations
@@ -120,9 +120,7 @@ public:
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     int group = 199;
-    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
-        .Times(Exactly(1))
-        .WillOnce(Return(group));
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup()).Times(Exactly(0));
     EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
@@ -144,9 +142,7 @@ public:
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     int group = 199;
-    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
-        .Times(Exactly(1))
-        .WillOnce(Return(group));
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup()).Times(Exactly(0));
     EXPECT_CALL(mockMainPresenter, getReductionOptions(group))
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
@@ -168,9 +164,7 @@ public:
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     int group = 199;
-    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
-        .Times(Exactly(1))
-        .WillOnce(Return(group));
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup()).Times(Exactly(0));
     EXPECT_CALL(mockMainPresenter, getStitchOptions(group)).Times(1);
     presenter.getPostprocessingOptionsAsString(group);
 
@@ -331,11 +325,11 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setInstrumentComboEnabled(false))
         .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, setTransferMethodComboEnabled(false))
+    EXPECT_CALL(mockRunsTabView, setTransferMethodComboEnabled(true))
         .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, setSearchTextEntryEnabled(false))
+    EXPECT_CALL(mockRunsTabView, setSearchTextEntryEnabled(true))
         .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, setSearchButtonEnabled(false))
+    EXPECT_CALL(mockRunsTabView, setSearchButtonEnabled(true))
         .Times(Exactly(1));
     // Resume presenter
     constexpr int GROUP_NUMBER = 0;
