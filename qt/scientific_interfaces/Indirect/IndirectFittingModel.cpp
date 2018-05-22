@@ -322,6 +322,17 @@ bool IndirectFittingModel::isPreviouslyFit(std::size_t dataIndex,
   return m_fitOutput->isSpectrumFit(fitData, spectrum);
 }
 
+boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
+  if (!m_activeFunction)
+    return "No fit function has been defined.";
+
+  const auto composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(m_activeFunction);
+  if (composite && composite->nFunctions() == 0)
+    return "No fit function has been defined.";
+  return boost::none;
+}
+
 std::size_t IndirectFittingModel::numberOfWorkspaces() const {
   return m_fittingData.size();
 }
