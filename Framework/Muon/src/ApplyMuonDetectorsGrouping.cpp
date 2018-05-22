@@ -23,7 +23,7 @@ static bool isContainedIn(const std::string &name,
   return std::find(collection.begin(), collection.end(), name) !=
          collection.end();
 }
-};
+}
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -34,7 +34,7 @@ namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ApplyMuonDetectorGrouping);
+DECLARE_ALGORITHM(ApplyMuonDetectorGrouping)
 
 void ApplyMuonDetectorGrouping::init() {
 
@@ -158,18 +158,18 @@ ApplyMuonDetectorGrouping::getUserInput(Workspace_sptr &inputWS,
 
   m_groupedWS_name = groupedWS->getName();
   m_wsName = inputWS->getName();
-  m_groupName = this->getProperty("groupName");
-  m_groups = this->getProperty("Grouping");
-  m_rebinArgs = this->getProperty("rebinArgs");
+  m_groupName = this->getPropertyValue("groupName");
+  m_groups = this->getPropertyValue("Grouping");
+  m_rebinArgs = this->getPropertyValue("rebinArgs");
   m_Xmin = this->getProperty("TimeMin");
   m_Xmax = this->getProperty("TimeMax");
   m_timeZero = this->getProperty("TimeZero");
   m_loadedTimeZero = this->getProperty("TimeLoadZero");
-  m_summedPeriods = this->getProperty("SummedPeriods");
-  m_subtractedPeriods = this->getProperty("SubtractedPeriods");
+  m_summedPeriods = this->getPropertyValue("SummedPeriods");
+  m_subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
 
   std::string plotType;
-  plotType = this->getProperty("plotType");
+  plotType = this->getPropertyValue("plotType");
   if (plotType == "Counts") {
     m_plotType = Muon::PlotType::Counts;
   } else if (plotType == "Asymmetry") {

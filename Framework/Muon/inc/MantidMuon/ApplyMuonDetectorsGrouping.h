@@ -92,7 +92,7 @@ private:
   setProcessAlgorithmProperties(IAlgorithm_sptr alg,
                                 const Muon::AnalysisOptions &options) const;
   /// Generate the name of the new workspace
-  const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName();
+  const std::string getNewWorkspaceName();
 };
 
 } // namespace DataHandling
