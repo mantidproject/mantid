@@ -16,8 +16,8 @@ std::string addRunNumberToGSASIIProjectFile(
 
 const boost::optional<std::string> getCalibFilenameByBank(
     const size_t bankID,
-    const std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms>
-        &calibParams) {
+    const std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms> &
+        calibParams) {
   for (const auto &params : calibParams) {
     if (bankID == params.bankid) {
       return params.filename;
