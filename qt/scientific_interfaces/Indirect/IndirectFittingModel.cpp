@@ -407,7 +407,8 @@ void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFittingModel::removeWorkspace(std::size_t index) {
-  m_fitOutput->removeOutput(m_fittingData[index].get());
+  if (m_fitOutput)
+    m_fitOutput->removeOutput(m_fittingData[index].get());
   m_fittingData.erase(m_fittingData.begin() + index);
   m_defaultParameters.erase(m_defaultParameters.begin() + index);
 }
