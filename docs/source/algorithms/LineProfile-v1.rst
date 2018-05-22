@@ -24,6 +24,13 @@ By default, the profile is calculated as an average over the line width. This be
 'Sum'
     Sum the values, weighting them by :math:`n / n_{tot}` where :math:`n` is the number of summed data points (excluding special values if *IgnoreNans* or *IgnoreInfs* is set) and :math:`n_{tot}` is the total number of data points (including special values).
 
+Profiles over distributions
+---------------------------
+
+Horizontal profiles over distribution data (Y divided by bin width) will be distributions as well.
+
+However, vertical profiles over distribution data will be non-distributions, that is, the Y values will be multiplied by the X bin width before summation or averaging.
+
 Usage
 -----
 

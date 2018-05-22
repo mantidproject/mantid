@@ -97,12 +97,16 @@ struct IndexLimits {
  * @param Es Profile's E values.
  * @return A single histogram profile workspace.
  */
-Workspace2D_sptr makeOutput(const MatrixWorkspace &ws, std::vector<double> &&Xs,
-                            std::vector<double> &&Ys,
+Workspace2D_sptr makeOutput(const MatrixWorkspace &ws,
+                            const LineDirection direction,
+                            std::vector<double> &&Xs, std::vector<double> &&Ys,
                             std::vector<double> &&Es) {
   Workspace2D_sptr outWS;
-  if (ws.isHistogramData()) {
-    if (ws.isDistribution()) {
+  const bool histogramOutput = direction == LineDirection::horizontal
+                                   ? ws.isHistogramData()
+                                   : Xs.size() > Ys.size();
+  if (histogramOutput) {
+    if (direction == LineDirection::horizontal && ws.isDistribution()) {
       outWS = create<Workspace2D>(ws, 1,
                                   Histogram(BinEdges(Xs), Frequencies(Ys),
                                             FrequencyStandardDeviations(Es)));
@@ -229,6 +233,8 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
   Xs.resize(lineSize + (isBinEdges ? 1 : 0));
   Ys.resize(lineSize);
   Es.resize(lineSize);
+  const auto convertFromDistribution =
+      dir == LineDirection::vertical ? ws.isDistribution() : false;
   for (size_t i = limits.lineStart; i < limits.lineEnd; ++i) {
     Xs[i - limits.lineStart] = lineBins[i];
     double ySum = 0;
@@ -237,12 +243,18 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
     for (size_t j = limits.widthStart; j < limits.widthEnd; ++j) {
       const size_t iHor = dir == LineDirection::horizontal ? i : j;
       const size_t iVert = dir == LineDirection::horizontal ? j : i;
-      const double y = ws.y(iVert)[iHor];
+      double y = ws.y(iVert)[iHor];
       if ((ignoreNans && std::isnan(y)) || (ignoreInfs && std::isinf(y))) {
         continue;
       }
+      double e = ws.e(iVert)[iHor];
+      if (convertFromDistribution) {
+        const auto binWidth =
+            std::abs(ws.x(iVert)[iHor + 1] - ws.x(iVert)[iHor]);
+        y *= binWidth;
+        e *= binWidth;
+      }
       ySum += y;
-      const double e = ws.e(iVert)[iHor];
       eSqSum += e * e;
       ++n;
     }
@@ -430,7 +442,7 @@ void LineProfile::exec() {
             verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
   }
   // Prepare and set output.
-  auto outWS = makeOutput(*ws, std::move(Xs), std::move(profileYs),
+  auto outWS = makeOutput(*ws, dir, std::move(Xs), std::move(profileYs),
                           std::move(profileEs));
   // The actual profile might be of different size than what user
   // specified.

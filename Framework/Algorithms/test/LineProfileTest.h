@@ -6,8 +6,9 @@
 #include "MantidAlgorithms/LineProfile.h"
 
 #include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CompareWorkspaces;
@@ -404,7 +405,7 @@ public:
     TS_ASSERT(logs.hasProperty("test_property"));
   }
 
-  void test_distribution_input_gives_distribution_output() {
+  void test_horizontal_distribution_input_gives_distribution_output() {
     const size_t nHist = 13;
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins, true);
@@ -420,7 +421,7 @@ public:
     TS_ASSERT(outputWS->isDistribution());
   }
 
-  void test_nondistribution_input_gives_nondistribution_output() {
+  void test_horizontal_nondistribution_input_gives_nondistribution_output() {
     const size_t nHist = 13;
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins, true);
@@ -434,6 +435,107 @@ public:
     TS_ASSERT(outputWS);
     TS_ASSERT(outputWS->isHistogramData());
     TS_ASSERT(!outputWS->isDistribution());
+  }
+
+  void test_vertical_histogram_input_gives_nondistribution_histogram_output() {
+    const size_t nHist = 13;
+    const size_t nBins = 23;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
+    std::vector<double> verticalBinEdges(nHist + 1);
+    for (size_t i = 0; i < verticalBinEdges.size(); ++i) {
+      verticalBinEdges[i] = static_cast<double>(i);
+    }
+    auto vertAxis = make_unique<BinEdgeAxis>(verticalBinEdges);
+    inputWS->replaceAxis(1, vertAxis.release());
+    LineProfile alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("Centre", static_cast<double>(nBins) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+  }
+
+  void
+  test_vertical_point_data_input_gives_nondistribution_point_data_output() {
+    const size_t nHist = 13;
+    const size_t nBins = 23;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
+    const auto vertAxis = inputWS->getAxis(1);
+    TS_ASSERT_EQUALS(vertAxis->length(), inputWS->getNumberHistograms())
+    LineProfile alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("Centre", static_cast<double>(nBins) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+  }
+
+  void test_vertical_profile_from_distribution_multiplies_by_bin_widths() {
+    const size_t nHist{4};
+    const size_t nBins{3};
+    const BinEdges edges{{0., 0.1, 1.1, 11.1}};
+    const Frequencies frequencies{3., 2., 1.};
+    const Histogram histogram(edges, frequencies);
+    MatrixWorkspace_sptr inputWS = create<Workspace2D>(nHist, histogram);
+    LineProfile alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", 11.1 / 2.))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 6.))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    const auto &Xs = outputWS->x(0);
+    const std::vector<double> profilePoints{{1., 2., 3., 4.}};
+    TS_ASSERT_EQUALS(Xs.rawData(), profilePoints)
+    const auto &Ys = outputWS->y(0);
+    const auto horizontalIntegral = 3. * 0.1 + 2. * 1. + 1. * 10.;
+    const std::vector<double> profileCounts(nHist, horizontalIntegral / nBins);
+    TS_ASSERT_EQUALS(Ys.rawData(), profileCounts)
+    const auto &Es = outputWS->e(0);
+    const auto horizontalError =
+        std::sqrt(3. * 0.1 * 0.1 + 2. * 1. * 1. + 1. * 10. * 10.);
+    const std::vector<double> profileErrors(nHist, horizontalError / nBins);
+    TS_ASSERT_EQUALS(Es.rawData(), profileErrors)
   }
 
 private:
