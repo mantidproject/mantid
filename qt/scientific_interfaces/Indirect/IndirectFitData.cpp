@@ -141,7 +141,7 @@ std::vector<T, Ts...> subvector(const std::vector<T, Ts...> vec,
 std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   const auto cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
-    return str.substr(0, (cutIndex + 1) - delimiter.size());
+    return str.substr(cutIndex, delimiter.size());
   return str;
 }
 
