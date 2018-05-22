@@ -47,7 +47,9 @@ private:
   void calculatePeaksIntensities();
 
   /// integrate event counts within a region of d-spacing
-  void integrateEventCounts(double min_d, double max_d, std::vector<double> &events_counts_vec, std::vector<double> &estimated_bkgd_vec);
+  void integrateEventCounts(double min_d, double max_d,
+                            std::vector<double> &events_counts_vec,
+                            std::vector<double> &estimated_bkgd_vec);
 
   /// generatae output workspace and set output properties
   void generateOutputs();

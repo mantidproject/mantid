@@ -82,16 +82,15 @@ void CalculatePoleFigure::init() {
                   "Algorithm type to calcualte the peak intensity.");
 
   // output vectors
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "R_TD", Direction::Output),
-                  "Array for R_TD");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "R_ND", Direction::Output),
-                  "Array for R_ND");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "PeakIntensity", Direction::Output),
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("R_TD", Direction::Output),
+      "Array for R_TD");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("R_ND", Direction::Output),
+      "Array for R_ND");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakIntensity",
+                                                             Direction::Output),
                   "Array for peak intensities");
-
 
   // Set up input data type
 }
@@ -114,8 +113,8 @@ void CalculatePoleFigure::processInputs() {
   if (isEmpty(dmin) || isEmpty(dmax))
     throw std::invalid_argument("Peak range (dmin and dmax) must be given!");
   else {
-      m_peakDRange.first = dmin;
-      m_peakDRange.second = dmax;
+    m_peakDRange.first = dmin;
+    m_peakDRange.second = dmax;
   }
 
   // check whether the log exists
@@ -148,21 +147,21 @@ void CalculatePoleFigure::calculatePeaksIntensities() {
   // Calculate the peak intensity by add the neutron events within the D-range
   std::vector<double> event_counts_vec(m_inputWS->getNumberHistograms(), 0.);
   std::vector<double> estimated_bkgd_vec(m_inputWS->getNumberHistograms(), 0.);
-  integrateEventCounts(m_peakDRange.first, m_peakDRange.second, event_counts_vec, estiamted_bkgd_vec);
+  integrateEventCounts(m_peakDRange.first, m_peakDRange.second,
+                       event_counts_vec, estiamted_bkgd_vec);
 
   // Fit peaks
   PeakFitResult fit_result = fitPeaks(m_peakDRange.first, m_peakDRange.second);
 
   // Further process fitting result from simple integration and peak fitting
-
-
-
 }
 
 //----------------------------------------------------------------------------------------------
 /** Integate event counts within a range of D
  */
-void CalculatePoleFigure::integrateEventCounts(double min_d, double max_d, std::vector<double> &events_counts_vec, std::vector<double> &estimated_bkgd_vec) {
+void CalculatePoleFigure::integrateEventCounts(
+    double min_d, double max_d, std::vector<double> &events_counts_vec,
+    std::vector<double> &estimated_bkgd_vec) {
 
   for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
     double index_min_d = getXIndex(m_inputWS, iws, min_d);
@@ -181,12 +180,10 @@ void CalculatePoleFigure::integrateEventCounts(double min_d, double max_d, std::
   return;
 }
 
-
 void CalculatePoleFigure::fitPeaks(const double d_min, const double d_max) {
 
-    return;
+  return;
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Calcualte pole figure
@@ -214,7 +211,8 @@ void CalculatePoleFigure::calculatePoleFigure() {
   Kernel::V3D k_sample_srcpos = samplepos - srcpos;
   Kernel::V3D k_sample_src_unit = k_sample_srcpos / k_sample_srcpos.norm();
 
-  // TODO/NEXT - After unit test and user test are passed. try to parallelize this loop by openMP
+  // TODO/NEXT - After unit test and user test are passed. try to parallelize
+  // this loop by openMP
   for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
     // get detector position
     auto detector = m_inputWS->getDetector(iws);
@@ -265,11 +263,10 @@ double CalculatePoleFigure::calculatePeakIntensitySimple(
   size_t dmax_index = static_cast<size_t>(
       std::lower_bound(vecx.begin(), vecx.end(), d_max) - vecx.begin());
 
-  if (dmax_index <= dmin_index)
-  {
-    g_log.error() << "DMin " << d_min << " is equal or larger than DMax " << d_max
-                  << " or both of them exceeds range of X." << vecx.front() << ", "
-                  << vecx.back() << std::endl;
+  if (dmax_index <= dmin_index) {
+    g_log.error() << "DMin " << d_min << " is equal or larger than DMax "
+                  << d_max << " or both of them exceeds range of X."
+                  << vecx.front() << ", " << vecx.back() << std::endl;
     throw std::runtime_error("dmin and dmax either not in order or exceeds the "
                              "range of vector of X.");
   }
@@ -311,7 +308,6 @@ void CalculatePoleFigure::generateOutputs() {
   setProperty("R_TD", m_poleFigureRTDVector);
   setProperty("R_ND", m_poleFigureRNDVector);
   setProperty("PeakIntensity", m_poleFigurePeakIntensityVector);
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -350,7 +346,7 @@ void CalculatePoleFigure::convertCoordinates(Kernel::V3D unitQ,
   Kernel::V3D k2(0, 0, 1);
   part1 = unitQPrime * cos(tau_pp_rad);
   part2 = (k2.cross_prod(unitQPrime)) * sin(tau_pp_rad);
-  part3 = k2 * (k2.scalar_prod(unitQPrime) * (1-cos(tau_pp_rad)));
+  part3 = k2 * (k2.scalar_prod(unitQPrime) * (1 - cos(tau_pp_rad)));
   Kernel::V3D unitQpp = part1 + part2 + part3;
 
   // project to the pole figure
@@ -359,7 +355,7 @@ void CalculatePoleFigure::convertCoordinates(Kernel::V3D unitQ,
     sign = -1;
 
   r_td = unitQpp.Y() * sign;
-  r_nd = - unitQpp.X() * sign;
+  r_nd = -unitQpp.X() * sign;
 
   return;
 }

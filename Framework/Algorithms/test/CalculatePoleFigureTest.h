@@ -52,7 +52,8 @@ TD ND
  * @brief createBraggWorkspace
  * @return
  */
-Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(const std::string &name) {
+Mantid::API::MatrixWorkspace_sptr
+createBraggWorkspace(const std::string &name) {
 
   // TODO/NOW - Refer to convertUnitsTest for how to build an instrument
 
@@ -73,27 +74,29 @@ Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(const std::string &name) 
   Instrument_sptr testInst(new Instrument);
 
   // Define a source component: [0,0,-43.754]
-  Mantid::Geometry::ObjComponent *source =
-      new Mantid::Geometry::ObjComponent("moderator", IObject_sptr(), testInst.get());
+  Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent(
+      "moderator", IObject_sptr(), testInst.get());
   source->setPos(V3D(0, 0.0, -43.754));
   testInst->add(source);
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  Mantid::Geometry::ObjComponent *sample =
-      new Mantid::Geometry::ObjComponent("samplePos", IObject_sptr(), testInst.get());
+  Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent(
+      "samplePos", IObject_sptr(), testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);
 
   // add 5 pixels to simulate VULCAN's east bank's 4 corners and center
   // pixel 1:  [-2,0,-3.67394e-16]
-  Mantid::Geometry::Detector *physicalPixel = new Detector("pixel", 1, testInst.get());
+  Mantid::Geometry::Detector *physicalPixel =
+      new Detector("pixel", 1, testInst.get());
   physicalPixel->setPos(-2, 0, 0);
   testInst->add(physicalPixel);
   testInst->markAsDetector(physicalPixel);
 
-  Mantid::Geometry::Detector *physicalPixel2 = new Detector("pixel", 2, testInst.get());
+  Mantid::Geometry::Detector *physicalPixel2 =
+      new Detector("pixel", 2, testInst.get());
   physicalPixel2->setPos(2, 0, 0);
   testInst->add(physicalPixel2);
   testInst->markAsDetector(physicalPixel2);
@@ -112,26 +115,27 @@ Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(const std::string &name) 
   double dx = 0.01;
   for (size_t i = 0; i < n; i++) {
     X[i] = double(i) * dx + 1.2;
-    Y[i] = exp(-(X[i]-1.5)*(X[i]-1.5)/(0.02)) * (1.0+double(i));
+    Y[i] = exp(-(X[i] - 1.5) * (X[i] - 1.5) / (0.02)) * (1.0 + double(i));
     E[i] = sqrt(fabs(Y[i]));
   }
 
   // add properties
   // add HROT
-  Kernel::TimeSeriesProperty<double> *hrotprop = new Kernel::TimeSeriesProperty<double>("HROT");
+  Kernel::TimeSeriesProperty<double> *hrotprop =
+      new Kernel::TimeSeriesProperty<double>("HROT");
   Types::Core::DateAndTime time0(1000000);
   hrotprop->addValue(time0, -0.003857142);
   ws->mutableRun().addProperty(hrotprop);
 
   // add Omega
-  Kernel::TimeSeriesProperty<double> *omegaprop = new Kernel::TimeSeriesProperty<double>("OMEGA");
+  Kernel::TimeSeriesProperty<double> *omegaprop =
+      new Kernel::TimeSeriesProperty<double>("OMEGA");
   omegaprop->addValue(time0, 89.998);
   API::Run &run = ws->mutableRun();
   run.addProperty(omegaprop);
 
   // add to ADS
   Mantid::API::AnalysisDataService::Instance().add(name, ws);
-
 
   return ws;
 }
@@ -151,8 +155,7 @@ public:
    */
   void test_Execute() {
 
-    API::Workspace_sptr ws =
-        createBraggWorkspace("TwoSpecPoleFigure");
+    API::Workspace_sptr ws = createBraggWorkspace("TwoSpecPoleFigure");
 
     CalculatePoleFigure pfcalculator;
     pfcalculator.initialize();
@@ -168,11 +171,14 @@ public:
     TS_ASSERT(pfcalculator.isExecuted());
 
     // check results
-    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("TwoSpecPoleFigure"));
-    API::ITableWorkspace_sptr outws = boost::dynamic_pointer_cast<API::ITableWorkspace>(API::AnalysisDataService::Instance().retrieve("TwoSpecPoleFigure"));
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("TwoSpecPoleFigure"));
+    API::ITableWorkspace_sptr outws =
+        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("TwoSpecPoleFigure"));
     TS_ASSERT(outws);
     if (!outws)
-        return;
+      return;
 
     // shall have 2 rows
     TS_ASSERT_EQUALS(outws->rowCount(), 2);
