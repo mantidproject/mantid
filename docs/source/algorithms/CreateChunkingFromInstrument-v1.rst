@@ -40,7 +40,7 @@ Output:
 
 .. testcode:: ExSnap
 
-   ws = CreateChunkingFromInstrument(InstrumentName="snap", ChunkNames="East,West", MaxBankNumber=20)
+   ws = CreateChunkingFromInstrument(InstrumentName="snap", ChunkNames="East,West", MaxBankNumber=64)
    print("Created {} Chunks".format(ws.rowCount()))
 
 Output:

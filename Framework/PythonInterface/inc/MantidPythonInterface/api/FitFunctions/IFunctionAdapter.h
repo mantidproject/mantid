@@ -38,7 +38,8 @@ namespace PythonInterface {
 class IFunctionAdapter : virtual public API::IFunction {
 public:
   /// A constructor that looks like a Python __init__ method
-  IFunctionAdapter(PyObject *self);
+  IFunctionAdapter(PyObject *self, std::string functionMethod,
+                   std::string derivMethod);
 
   /// The PyObject must be supplied to construct the object
   IFunctionAdapter(const IFunctionAdapter &) = delete;
@@ -109,17 +110,26 @@ public:
   void setActiveParameter(size_t i, double value) override;
 
 protected:
-  /**
-   * Returns the PyObject that owns this wrapper, i.e. self
-   * @returns A pointer to self
-   */
+  /// @returns The PyObject that owns this wrapper, i.e. self
   inline PyObject *getSelf() const { return m_self; }
+  /// @returns True if the instance overrides the derivative method
+  inline bool derivativeOverridden() const { return m_derivOveridden; }
+  /// Evaluate the function by calling the overridden method
+  void evaluateFunction(double *out, const double *xValues,
+                        const size_t nData) const;
+  /// Evaluate the derivative by calling the overridden method
+  void evaluateDerivative(API::Jacobian *out, const double *xValues,
+                          const size_t nData) const;
 
 private:
-  /// The name of the function
-  std::string m_name;
   /// The Python portion of the object
   PyObject *m_self;
+  /// The name of the method to evaluate the function
+  std::string m_functionName;
+  /// The name of the method to evaluate the derivative
+  std::string m_derivName;
+  /// Flag if the derivateive method is overridden (avoids multiple checks)
+  bool m_derivOveridden;
 };
 }
 }
