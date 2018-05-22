@@ -128,6 +128,82 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
+  void test_bad_complex_linear_adjustment() {
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataLinearAdj", ws);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+  }
+
+  void test_bad_complex_const_adjustment() {
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataConstAdj", ws);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+  }
+
+  void test_linear_adjustment_with_too_few_spectra() {
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(6, 10);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataLinearAdj", ws); // We need twice as many histograms
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+  }
+
+  void test_const_adjustment_with_too_few_spectra() {
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(6, 10);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataConstAdj", ws); // We need twice as many histograms
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+  }
+
   void test_cosine() {
 
     auto ws = createWorkspaceReal(50, 0.0);
