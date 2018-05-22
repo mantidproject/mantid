@@ -64,7 +64,8 @@ struct NumberOfSpectra : boost::static_visitor<std::size_t> {
     return spectra.second - spectra.first;
   }
 
-  std::size_t operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+  std::size_t
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.size();
   }
 };
@@ -73,7 +74,8 @@ struct SpectraToString : boost::static_visitor<std::string> {
   SpectraToString(const std::string &rangeDelimiter = "-")
       : m_rangeDelimiter(rangeDelimiter) {}
 
-  std::string operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+  std::string
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.getString();
   }
 
@@ -112,7 +114,8 @@ struct GetSpectrum : boost::static_visitor<std::size_t> {
     return spectra.first + m_index;
   }
 
-  std::size_t operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+  std::size_t
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra[m_index];
   }
 
@@ -141,7 +144,7 @@ std::vector<T, Ts...> subvector(const std::vector<T, Ts...> vec,
 std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   const auto cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
-    return str.substr(cutIndex, delimiter.size());
+    return str.substr(0, cutIndex);
   return str;
 }
 
