@@ -20,6 +20,9 @@ class FFTView(QtGui.QWidget):
         super(FFTView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
 
+        #add splitter for resizing
+        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+
         #make table
         self.FFTTable = QtGui.QTableWidget(self)
         self.FFTTable.resize(800, 800)
@@ -108,11 +111,12 @@ class FFTView(QtGui.QWidget):
         self.horizontalSpacer1 = QtGui.QSpacerItem(20, 94, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.horizontalSpacer2 = QtGui.QSpacerItem(20, 280, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         # add to layout
-        self.grid.addWidget(self.FFTTable)
-        self.grid.addItem(self.horizontalSpacer1)
-        self.grid.addWidget(self.advancedLabel)
-        self.grid.addWidget(self.FFTTableA)
-        self.grid.addItem(self.horizontalSpacer2)
+        splitter.addWidget(self.FFTTable)
+        #self.grid.addItem(self.horizontalSpacer1)
+        splitter.addWidget(self.advancedLabel)
+        splitter.addWidget(self.FFTTableA)
+        #self.grid.addItem(self.horizontalSpacer2)
+        self.grid.addWidget(splitter)
         self.grid.addWidget(self.button)
 
     def getLayout(self):
