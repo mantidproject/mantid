@@ -26,6 +26,9 @@ public:
   std::pair<double, double> getFittingRange(std::size_t dataIndex,
                                             std::size_t spectrum) const;
   std::string getExcludeRegion(std::size_t dataIndex, std::size_t index) const;
+  std::string createDisplayName(const std::string &formatString,
+                                const std::string &rangeDelimiter,
+                                std::size_t dataIndex) const;
   std::string createOutputName(const std::string &formatString,
                                const std::string &rangeDelimiter,
                                std::size_t dataIndex) const;

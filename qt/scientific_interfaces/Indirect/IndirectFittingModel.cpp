@@ -302,11 +302,17 @@ std::string IndirectFittingModel::getExcludeRegion(std::size_t dataIndex,
 }
 
 std::string
+IndirectFittingModel::createDisplayName(const std::string &formatString,
+                                        const std::string &rangeDelimiter,
+                                        std::size_t dataIndex) const {
+  return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
+}
+
+std::string
 IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
                                        std::size_t dataIndex) const {
-  return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter) +
-         "_Result";
+  return createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
 }
 
 bool IndirectFittingModel::isMultiFit() const {
