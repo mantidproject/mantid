@@ -1225,9 +1225,7 @@ public:
     // "delete all" is called with no groups selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
-        .WillRepeatedly(Return(GroupList()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
     presenter->notify(DataProcessorPresenter::DeleteAllFlag);
 
     // The user hits "save"
@@ -1294,7 +1292,7 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
     auto presenter = makeDefaultPresenterNoThread();
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.01\"");
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1347,7 +1345,7 @@ public:
 
     // The user hits the "process" button
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(0));
+    expectGetSelection(mockDataProcessorView, Exactly(1));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
