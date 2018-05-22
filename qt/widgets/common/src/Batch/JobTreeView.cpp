@@ -102,13 +102,13 @@ bool JobTreeView::hasNoSelectedDescendants(QModelIndex const &index) const {
   return true;
 }
 
-void JobTreeView::appendAllDescendants(QModelIndexList &descendantsList,
-                                       QModelIndex const &index) const {
+void JobTreeView::appendAllUnselectedDescendants(
+    QModelIndexList &descendantsList, QModelIndex const &index) const {
   for (auto row = 0; row < m_filteredModel.rowCount(index); ++row) {
     auto childIndex = m_filteredModel.index(row, 0, index);
     if (!selectionModel()->isSelected(childIndex))
       descendantsList.append(childIndex);
-    appendAllDescendants(descendantsList, childIndex);
+    appendAllUnselectedDescendants(descendantsList, childIndex);
   }
 }
 
@@ -118,9 +118,9 @@ JobTreeView::findImplicitlySelected(QModelIndexList const &selectedRows) const {
   for (auto &&row : selectedRows) {
     if (isExpanded(row)) {
       if (hasNoSelectedDescendants(row))
-        appendAllDescendants(implicitlySelected, row);
+        appendAllUnselectedDescendants(implicitlySelected, row);
     } else {
-      appendAllDescendants(implicitlySelected, row);
+      appendAllUnselectedDescendants(implicitlySelected, row);
     }
   }
   return implicitlySelected;

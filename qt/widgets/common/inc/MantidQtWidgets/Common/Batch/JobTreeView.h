@@ -83,8 +83,8 @@ public:
   boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
 
   bool hasNoSelectedDescendants(QModelIndex const &index) const;
-  void appendAllDescendants(QModelIndexList &selectedRows,
-                            QModelIndex const &index) const;
+  void appendAllUnselectedDescendants(QModelIndexList &selectedRows,
+                                      QModelIndex const &index) const;
   QModelIndexList
   findImplicitlySelected(QModelIndexList const &selectedRows) const;
 
