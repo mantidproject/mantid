@@ -16,6 +16,7 @@ Algorithms
 New features
 ############
 
+- The *EPPWorkspace* input property has been removed from :ref:`DirectILLCollectData <algm-DirectILLCollectData>`.
 
 Improvements
 ############

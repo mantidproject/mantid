@@ -7,7 +7,9 @@
 #include "MantidAPI/FrameworkManager.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
@@ -20,6 +22,7 @@ using Mantid::Algorithms::RunCombinationHelper;
 using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
@@ -38,6 +41,21 @@ public:
         create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "test");
     setUnits(m_reference);
     m_testee.setReferenceProperties(m_reference);
+  }
+
+  void testUnwraping_throws() {
+
+    auto ws1 = create2DWorkspace(2, 3);
+    storeWS("ws1", ws1);
+    auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    storeWS("table", table);
+
+    TS_ASSERT_THROWS_EQUALS(
+        m_testee.unWrapGroups(std::vector<std::string>{"ws1", "table"}),
+        const std::runtime_error &e, std::string(e.what()),
+        "The input table is neither a WorkspaceGroup nor a MatrixWorkspace");
+
+    removeWS("ws1");
   }
 
   void testUnwraping() {

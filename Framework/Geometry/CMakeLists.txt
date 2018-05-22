@@ -459,7 +459,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 target_link_libraries ( Geometry LINK_PUBLIC ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} )
 

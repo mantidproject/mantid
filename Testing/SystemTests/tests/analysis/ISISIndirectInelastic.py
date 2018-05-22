@@ -750,7 +750,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
         # Load files into Mantid
         for sample in self.samples:
             LoadNexus(sample, OutputWorkspace=sample)
-        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
+        LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
         _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
                                    ResolutionWorkspace=self.resolution,
@@ -760,12 +760,9 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
                                    DryRun=False)
 
         # Test IqtFit Sequential
-        iqtfitSeq_ws, params, fit_group = IqtFitSequential(iqt_ws,
-                                                           self.func,
-                                                           self.ftype,
-                                                           self.startx,
-                                                           self.endx, 0,
-                                                           self.spec_max)
+        iqtfitSeq_ws, params, fit_group = IqtFitSequential(InputWorkspace=iqt_ws, Function=self.func,
+                                                           StartX=self.startx, EndX=self.endx,
+                                                           SpecMin=0, SpecMax=self.spec_max)
 
         self.result_names = [iqt_ws.name(),
                              iqtfitSeq_ws.name()]
@@ -792,8 +789,6 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
             raise RuntimeError("num_bins should be an int")
         if not isinstance(self.func, str):
             raise RuntimeError("Function should be a string.")
-        if not isinstance(self.ftype, str):
-            raise RuntimeError("Function type should be a string.")
         if not isinstance(self.startx, float):
             raise RuntimeError("startx should be a float")
         if not isinstance(self.endx, float):
@@ -818,7 +813,6 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
                     'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                     'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
-        self.ftype = '1E_s'
         self.spec_max = 41
         self.startx = 0.0
         self.endx = 0.118877
@@ -847,7 +841,6 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
                     'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                     'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
-        self.ftype = '1E_s'
         self.spec_max = 50
         self.startx = 0.0
         self.endx = 0.169171
@@ -875,7 +868,7 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirec
         #load files into mantid
         for sample in self.samples:
             LoadNexus(sample, OutputWorkspace=sample)
-        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
+        LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
         _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
                                    ResolutionWorkspace=self.resolution,
@@ -999,7 +992,7 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
         '''Defines the workflow for the test'''
         self.tolerance = 1e-4
         LoadNexus(self.sample, OutputWorkspace=self.sample)
-        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
+        LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
         ConvolutionFitSequential(
             InputWorkspace=self.sample,
@@ -1007,11 +1000,10 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
             PassWSIndexToFunction=self.passWSIndexToFunction,
             StartX=self.startx,
             EndX=self.endx,
-            BackgroundType=self.bg,
             SpecMin=self.spectra_min,
             SpecMax=self.spectra_max,
             PeakRadius=5,
-            OutputWorkspace='result')
+            OutputWorkspace=self.result_names[0])
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -1022,8 +1014,6 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
             raise RuntimeError("Resolution should be a string.")
         if not isinstance(self.func, str):
             raise RuntimeError("Function should be a string.")
-        if not isinstance(self.bg, str):
-            raise RuntimeError("Background type should be a string.")
         if not isinstance(self.startx, float):
             raise RuntimeError("startx should be a float")
         if not isinstance(self.endx, float):
@@ -1043,7 +1033,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
     def __init__(self):
         ISISIndirectInelasticConvFit.__init__(self)
         self.sample = 'osi97935_graphite002_red.nxs'
-        self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
+        self.resolution = 'osi97935_graphite002_res.nxs'
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
                     'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
@@ -1051,7 +1041,6 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.passWSIndexToFunction = False  # osi97935_graphite002_res is single histogram
         self.startx = -0.2
         self.endx = 0.2
-        self.bg = 'Fit Linear'
         self.spectra_min = 0
         self.spectra_max = 41
         self.ties = False
@@ -1070,7 +1059,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
     def __init__(self):
         ISISIndirectInelasticConvFit.__init__(self)
         self.sample = 'irs53664_graphite002_red.nxs'
-        self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
+        self.resolution = 'irs53664_graphite002_res.nxs'
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;' \
                     '(composite=Convolution,FixResolution=true,NumDeriv=true;' \
@@ -1079,7 +1068,6 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.passWSIndexToFunction = False  # irs53664_graphite002_res is single histogram
         self.startx = -0.2
         self.endx = 0.2
-        self.bg = 'Fit Linear'
         self.spectra_min = 0
         self.spectra_max = 50
         self.ties = False
