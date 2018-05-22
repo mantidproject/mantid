@@ -181,7 +181,7 @@ namespace Mantid {
                         if( wsNames.size()==1){
                         // if single domain func, strip off multi domain
 				auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(function);
-                                IFunction_sptr outputFitFunction = TFFunc->getFunction(0);
+                                outputFitFunction = TFFunc->getFunction(0);
                         }
 			setProperty("OutputFunction", outputFitFunction);
 		}
@@ -199,9 +199,9 @@ namespace Mantid {
 			size_t numDomains = original->getNumberDomains();
 			for (size_t j = 0; j < numDomains; j++) {					
 				auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(original);
+				if (numDomains >1){
 					// get correct domain
 					tmp = TFFunc->getFunction(j);
-				if (numDomains >1){
 					multi->setDomainIndex(j, j);
 				}
 			IFunction_sptr userFunc = extractUserFunction(tmp);

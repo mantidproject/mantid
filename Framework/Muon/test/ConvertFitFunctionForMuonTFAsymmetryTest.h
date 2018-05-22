@@ -294,8 +294,8 @@ public:
 
 
     //auto outFunc = doFit(normFunc,0,wsNames);
-    TS_ASSERT_DELTA(outFunc->getParameter("f0.A0"),0.0,0.0001);
-    TS_ASSERT_DELTA(outFunc->getParameter("f0.A1"),2.0,0.0001);
+    TS_ASSERT_DELTA(outFunc->getParameter("A0"),0.0,0.0001);
+    TS_ASSERT_DELTA(outFunc->getParameter("A1"),2.0,0.0001);
   } 
   
 
@@ -319,11 +319,8 @@ public:
     IFunction_sptr extractFunc = alg->getProperty("OutputFunction");
 
 
-    std::cout<<"moo"<<std::endl;
-    std::cout<<extractFunc->asString()<<std::endl;
-
-    TS_ASSERT_DELTA(extractFunc->getParameter("f0.A1"),2.0,0.0001);
-    TS_ASSERT_EQUALS(outFunc->getParameter(USER_FUNC+"A0"),extractFunc->getParameter("f0.A0"));
+    TS_ASSERT_DELTA(extractFunc->getParameter("A1"),2.0,0.0001);
+    TS_ASSERT_EQUALS(outFunc->getParameter(USER_FUNC+"A0"),extractFunc->getParameter("A0"));
     
   }
   void test_1DTieExtract() {
@@ -344,48 +341,103 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     IFunction_sptr extractFunc = alg->getProperty("OutputFunction");
-    std::cout<<extractFunc->asString()<<std::endl;
-    // fix alg to return a function (not multi domain) if single fit
-    TS_ASSERT_EQUALS(extractFunc->getParameter("f0.f0.A1"),1.0);//extractFunc->getParameter("f1.A1"));
-    TS_ASSERT_DIFFERS(extractFunc->getParameter("f0.f0.A0"),1.0);//func->getParameter("f0.A0"));
-    TS_ASSERT_DIFFERS(extractFunc->getParameter("f0.f1.A0"),1.0);//func->getParameter("f1.A0"));
+    
+    TS_ASSERT_EQUALS(extractFunc->getParameter("f0.A1"),extractFunc->getParameter("f1.A1"));
+    TS_ASSERT_DIFFERS(extractFunc->getParameter("f0.A0"),func->getParameter("f0.A0"));
+    TS_ASSERT_DIFFERS(extractFunc->getParameter("f1.A0"),func->getParameter("f1.A0"));
+    
+  }
+   // tests for multi domain
+  void test_2DExtract() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1","ws2"};
+    std::string multiFuncString = "composite=MultiDomainFunction,NumDeriv=1;";
+    multiFuncString += "name=LinearBackground, $domains=i,A0=0,A1=1;";
+    multiFuncString += "name=LinearBackground, $domains=i,A0=2,A1=3;";
+
+    IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
+
+    IAlgorithm_sptr alg = setUpAlg(wsNames,multiFunc);
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    IFunction_sptr normFunc = doFit(alg->getProperty("OutputFunction"),0,wsNames);
+
+    alg = setUpAlg(wsNames, normFunc);
+    alg->setProperty("Mode","Extract");
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    IFunction_sptr extractFunc = alg->getProperty("OutputFunction");
+ 
+    TS_ASSERT_DELTA(extractFunc->getParameter("f0.A0"),0.0,0.0001);
+    TS_ASSERT_DELTA(extractFunc->getParameter("f0.A1"),1.0,0.0001);
+    
+    TS_ASSERT_DELTA(extractFunc->getParameter("f1.A0"),2.0,0.0001);
+    TS_ASSERT_DELTA(extractFunc->getParameter("f1.A1"),3.0,0.0001);
+    
+  }
+   void test_2DFixExtract() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1","ws2"};
+    std::string multiFuncString = "composite=MultiDomainFunction,NumDeriv=1;";
+    multiFuncString += "name=LinearBackground, $domains=i,A0=0,A1=1.5;";
+    multiFuncString += "name=LinearBackground, $domains=i,A0=2,A1=3;";
+
+    IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
+    multiFunc->addTies("f0.A1=1.5");
+    IAlgorithm_sptr alg = setUpAlg(wsNames,multiFunc);
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    IFunction_sptr normFunc = doFit(alg->getProperty("OutputFunction"),200,wsNames);
+
+    alg = setUpAlg(wsNames, normFunc);
+    alg->setProperty("Mode","Extract");
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    IFunction_sptr extractFunc = alg->getProperty("OutputFunction");
+ 
+ 
+    TS_ASSERT_DIFFERS(extractFunc->getParameter("f0.A0"),0.0);
+    TS_ASSERT_DELTA(  extractFunc->getParameter(  "f0.A1"),1.5,0.0001);
+    
+    TS_ASSERT_DIFFERS(extractFunc->getParameter("f1.A0"),2.0);
+    TS_ASSERT_DIFFERS(extractFunc->getParameter("f1.A1"),3.0);
+    
+  }
+
+
+  void test_2DTieExtract() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1","ws2"};
+    std::string multiFuncString = "composite=MultiDomainFunction,NumDeriv=1;";
+    multiFuncString += "name=LinearBackground, $domains=i,A0=0,A1=1.5;";
+    multiFuncString += "name=LinearBackground, $domains=i,A0=2,A1=3;";
+
+    IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
+    multiFunc->addTies("f0.A1=f1.A1");
+    IAlgorithm_sptr alg = setUpAlg(wsNames,multiFunc);
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    IFunction_sptr normFunc = doFit(alg->getProperty("OutputFunction"),200,wsNames);
+
+    alg = setUpAlg(wsNames, normFunc);
+    alg->setProperty("Mode","Extract");
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    IFunction_sptr extractFunc = alg->getProperty("OutputFunction");
+ 
+    TS_ASSERT_DIFFERS(extractFunc->getParameter("f0.A0"),0.0);
+    TS_ASSERT_EQUALS( extractFunc->getParameter("f0.A1"),extractFunc->getParameter("f1.A1"));
+    
+    TS_ASSERT_DIFFERS(extractFunc->getParameter("f1.A0"),2.0);
     
   }
  
-//  void test_badInputFunction() {
-//    genData();
-//    std::vector<std::string> wsNames = {"ws1","ws2"};
-//    std::string multiFuncString = "composite=MultiDomainFunction,NumDeriv=1;";
-//    multiFuncString += "name=LinearBackground, $domains=i,A0=0,A1=1.5;";
-//    multiFuncString += "name=LinearBackground, $domains=i,A0=2,A1=3;";
-//
-//    IFunction_sptr multiFunc = FunctionFactory::Instance().createInitialized(multiFuncString);
-//    multiFunc->addTies("f0.A1=f1.A1");
-//    IAlgorithm_sptr alg = setUpAlg(wsNames,multiFunc);
-//    TS_ASSERT(alg->isInitialized())
-//    TS_ASSERT_THROWS_NOTHING(alg->execute());
-//    TS_ASSERT(alg->isExecuted());
-//    IFunction_sptr normFunc = doFit(alg->getProperty("OutputFunction"),200,wsNames);
-//
-//    TS_ASSERT_DIFFERS(normFunc->getParameter(NORM_PARAM),1.);
-//    TS_ASSERT_DELTA(normFunc->getParameter(OFFSET_PARAM),1.,0.0001);
-//    TS_ASSERT_DELTA(normFunc->getParameter(EXP_PARAM),0.0,0.0001);
-//
-//    TS_ASSERT_DIFFERS(normFunc->getParameter(USER_FUNC+"A0"),0.0);
-//    TS_ASSERT_EQUALS(normFunc->getParameter(USER_FUNC+"A1"),normFunc->getParameter(USER_FUNC2+"A1"));
-//    
-//
-//    TS_ASSERT_DIFFERS(normFunc->getParameter(NORM_PARAM2),2.);
-//    TS_ASSERT_DELTA(normFunc->getParameter(OFFSET_PARAM2),1.,0.0001);
-//    TS_ASSERT_DELTA(normFunc->getParameter(EXP_PARAM2),0.0,0.0001);
-//
-//    TS_ASSERT_DIFFERS(normFunc->getParameter(USER_FUNC2+"A0"),2.0);
-//    
-//  }
-
-
-
-
 private:
   MatrixWorkspace_sptr input;
 };
