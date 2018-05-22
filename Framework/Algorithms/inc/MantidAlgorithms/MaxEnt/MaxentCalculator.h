@@ -53,7 +53,10 @@ public:
   // Runs maxent iteration
   void iterate(const std::vector<double> &data,
                const std::vector<double> &errors,
-               const std::vector<double> &image, double background);
+               const std::vector<double> &image, double background,
+               const std::vector<double> &linearAdjustments,
+               const std::vector<double> &constAdjustments
+  );
 
   // Getters
   // Returns the reconstructed (calculated) data

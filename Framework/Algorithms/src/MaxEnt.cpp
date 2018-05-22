@@ -204,6 +204,19 @@ void MaxEnt::init() {
                                                          500, mustBePositive,
                                                          Direction::Input),
                   "Maximum number of iterations in alpha chop.");
+  declareProperty(
+    make_unique<WorkspaceProperty<>>(
+      "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
+      boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+      "Adjusts the calculated data by multiplying each value by the corresponding Y value of this workspace. "
+      "The data in this workspace is complex in the same manner as complex input data");
+  declareProperty(
+    make_unique<WorkspaceProperty<>>(
+      "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
+      boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+      "Adjusts the calculated data by adding to each value the corresponding Y value of this workspace. "
+      "If DataLinearAdj is also specified, this addition is done after its multiplication. "
+      "The data in this workspace is complex in the same manner as complex input data");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
@@ -283,6 +296,10 @@ void MaxEnt::exec() {
   size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+  // Linear adjustment of calculated data
+  MatrixWorkspace_const_sptr dataLinearAdj = getProperty("DataLinearAdj");
+  // Constant adjustment of calculated data
+  MatrixWorkspace_const_sptr dataConstAdj = getProperty("DataConstAdj");
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
@@ -365,6 +382,15 @@ void MaxEnt::exec() {
       errors = inWS->e(spec).rawData();
     }
 
+    std::vector<double> linearAdjustments;
+    std::vector<double> constAdjustments;
+    if (dataLinearAdj) {
+      linearAdjustments = toComplex(dataLinearAdj, spec, false);
+    }
+    if (dataConstAdj) {
+      constAdjustments = toComplex(dataConstAdj, spec, false);
+    }
+
     // To record the algorithm's progress
     std::vector<double> evolChi(nIter, 0.);
     std::vector<double> evolTest(nIter, 0.);
@@ -377,7 +403,7 @@ void MaxEnt::exec() {
 
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
-      maxentCalculator.iterate(data, errors, image, background);
+      maxentCalculator.iterate(data, errors, image, background, linearAdjustments, constAdjustments);
 
       // Calculate delta to construct new image (SB eq. 25)
       double currChisq = maxentCalculator.getChisq();
