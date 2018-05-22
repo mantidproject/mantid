@@ -494,9 +494,9 @@ public:
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
     // We don't care about values, we just want to test the number of
-    // X points in the image
+    // X points in the image.
     // For histogram input workspaces we should get the original number
-    // of points minus one
+    // of points minus one.
     for (size_t i = 0; i < size; i++) {
       double value = static_cast<double>(i);
       ws->dataX(0)[i] = value;
@@ -531,9 +531,9 @@ public:
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
     // We don't care about values, we just want to test the number of
-    // X points in the image
-    // For histogram input workspaces we should get the original number
-    // of points minus one
+    // X points in the image.
+    // For pointdata input workspaces we should get the original number
+    // of points.
     for (size_t i = 0; i < size; i++) {
       double value = static_cast<double>(i);
       ws->dataX(0)[i] = value;
