@@ -258,7 +258,8 @@ void Stitch1DMany::exec() {
         outName = groupName;
         Workspace_sptr outStitchedWS;
 
-        doStitch1D(m_inputWSMatrix[i], periodScaleFactors, outStitchedWS, outName);
+        doStitch1D(m_inputWSMatrix[i], periodScaleFactors, outStitchedWS,
+                   outName);
 
         // Add name of stitched workspaces to group list and ADS
         toGroup.push_back(outName);
