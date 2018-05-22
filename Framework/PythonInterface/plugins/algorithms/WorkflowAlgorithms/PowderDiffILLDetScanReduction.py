@@ -94,8 +94,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         """
         Generates the DetectorList input for MaskDetectors
         Masks the bottom and top n_pix pixels in each tube
-        @param n_pix : Number of pixles to mask from top and bottom of each tube
+        @param n_pix : Number of pixels to mask from top and bottom of each tube
         @param instrument : Instrument
+        @return the DetectorList string
         """
         mask = ''
         det = instrument.getComponentByName('detectors')

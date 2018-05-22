@@ -3,11 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 import numpy.ma as ma
-from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
-    CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
-    FloatArrayProperty, VisibleWhenProperty, PropertyCriterion, IntBoundedValidator, FloatArrayLengthValidator
-from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode, \
-    MultipleFileProperty
+from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
+    FloatArrayProperty, IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, \
+    IntArrayOrderedPairsValidator, IntBoundedValidator, PropertyCriterion, StringListValidator, VisibleWhenProperty
+from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, Progress, \
+    PropertyMode, PythonAlgorithm
+
 from mantid.simpleapi import *
 
 

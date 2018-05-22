@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import PowderDiffILLDetEffCorr, GroupWorkspaces
 from mantid import config, mtd
+import numpy as np
 
 
 class ILL_D2B_DetEffCorrTest(stresstesting.MantidStressTest):
@@ -29,8 +30,11 @@ class ILL_D2B_DetEffCorrTest(stresstesting.MantidStressTest):
                                 OutputWorkspace='masked',
                                 MaskCriterion=[0.3,3])
         data = mtd['masked'].extractY().flatten()
+        data = data[np.nonzero(data)]
         coeff_max = data.max()
-        self.assertTrue(coeff_max == 3.)
+        self.assertTrue(coeff_max <= 3.)
+        coeff_min = data.min()
+        self.assertTrue(coeff_min >= 0.3)
 
     def runTest(self):
 
