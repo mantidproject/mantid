@@ -77,6 +77,11 @@ private:
   void
   setProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
                                 const AnalysisOptions &options) const;
+
+  /// Set algorithm properties (input workspace, and period properties) according to the given options. For use with
+  /// MuonProcess.
+  void setMuonProcessPeriodProperties(
+	  API::IAlgorithm_sptr alg, const API::Workspace_sptr &inputWS, const Muon::AnalysisOptions &options) const;
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName(const Muon::AnalysisOptions& options, const std::string& groupWSName);
 };

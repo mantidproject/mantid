@@ -148,7 +148,7 @@ void ApplyMuonDetectorGrouping::exec() {
 const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(const Muon::AnalysisOptions& options, const std::string& groupWSName) {
 
   Muon::DatasetParams params;
-  // don't fill in instrument, runs, periods.
+  // don't fill in instrument, runs, periods; not required.
   params.label = groupWSName;
   params.itemType = Muon::ItemType::Group;
   params.itemName = options.groupPairName;
@@ -159,14 +159,14 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(const Muon::Ana
 }
 
 /*
-* Store the input properties as private member variables
+* Store the input properties in options
 */
 WorkspaceGroup_sptr
 ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
                                         const WorkspaceGroup_sptr &groupedWS, 
 										Muon::AnalysisOptions& options) {
 
-  // Cast input WS to a grouping
+  // Cast input WS to a WorkspaceGroup
   auto muonWS = boost::make_shared<WorkspaceGroup>();
   if (auto test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     muonWS->addWorkspace(inputWS);
@@ -174,7 +174,7 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
     muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
   }
 
-  // Store all the options for Muon Process
+  // Store all the options needed for MuonProcess
   Grouping grouping;
   grouping.description = "no description";
   grouping.groupNames.emplace_back(this->getPropertyValue("groupName"));
@@ -222,38 +222,44 @@ ApplyMuonDetectorGrouping::createAnalysisWorkspace(const Workspace_sptr &inputWS
 		options.rebinArgs = emptyString;
 	}
 
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+  
   alg->initialize();
-
-  // Set input workspace property
-  auto inputGroup = boost::make_shared<WorkspaceGroup>();
-  // If is a group, will need to handle periods
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
-    for (int i = 0; i < group->getNumberOfEntries(); i++) {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
-      inputGroup->addWorkspace(ws);
-    }
-    alg->setProperty("SummedPeriodSet", options.summedPeriods);
-    alg->setProperty("SubtractedPeriodSet", options.subtractedPeriods);
-  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-    // Put this single WS into a group and set it as the input property
-    inputGroup->addWorkspace(ws);
-    alg->setProperty("SummedPeriodSet", "1");
-  } else {
-    throw std::runtime_error(
-        "Cannot create analysis workspace: unsupported workspace type");
-  }
-  alg->setProperty("InputWorkspace", inputGroup);
-
-  // Set the rest of the algorithm properties
+  setMuonProcessPeriodProperties(alg, inputWS, options);
   setProcessAlgorithmProperties(alg, options);
-
-  // We don't want workspace in the ADS so far
   alg->setChild(true);
-  alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+  alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
   alg->execute();
   return alg->getProperty("OutputWorkspace");
+}
+
+/**
+* Set algorithm properties (input workspace, and period properties) according to the given options. For use with
+* MuonProcess.
+*/
+void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(IAlgorithm_sptr alg, const Workspace_sptr &inputWS, const Muon::AnalysisOptions &options) const {
+
+	// Set input workspace property
+	auto inputGroup = boost::make_shared<WorkspaceGroup>();
+	// If is a group, will need to handle periods
+	if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+		for (int i = 0; i < group->getNumberOfEntries(); i++) {
+			auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+			inputGroup->addWorkspace(ws);
+		}
+		alg->setProperty("SummedPeriodSet", options.summedPeriods);
+		alg->setProperty("SubtractedPeriodSet", options.subtractedPeriods);
+	}
+	else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+		// Put this single WS into a group and set it as the input property
+		inputGroup->addWorkspace(ws);
+		alg->setProperty("SummedPeriodSet", "1");
+	}
+	else {
+		throw std::runtime_error(
+			"Cannot create analysis workspace: unsupported workspace type");
+	}
+	alg->setProperty("InputWorkspace", inputGroup);
 }
 
 /**
