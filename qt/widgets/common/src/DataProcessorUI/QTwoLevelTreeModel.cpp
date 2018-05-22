@@ -823,8 +823,8 @@ bool QTwoLevelTreeModel::setProcessed(bool processed, int position,
   return true;
 }
 
-/** Sets the 'processed' status of a data item
-* @param processed : True to set processed, false to set unprocessed
+/** Sets the error status of a data item
+* @param error : the error message
 * @param position : The position of the item
 * @param parent : The parent of this item
 * @return : Boolean indicating whether process status was set successfully
@@ -986,6 +986,8 @@ bool QTwoLevelTreeModel::runListsMatch(const QString &newValue,
  * @param groupIndex : the group to check in the model
  * @param rowIndex : the row to check in the model
  * @param rowValues : the cell values to check against
+ * @param exactMatch : whether to match the entire row exactly or just
+ * the key columns
  * @return : true if the cell matches the given value
  */
 bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
@@ -1035,6 +1037,7 @@ bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
 }
 
 /** Find the index of a row in a group based on row data values.
+ * @param groupIndex : the index of the group the row is in
  * @param rowValues : the row values to look for
  * @return : an optional value that is set with the row's index if
  * it was found or is unset if it is not

@@ -1,3 +1,4 @@
+
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
@@ -58,6 +59,8 @@ QString RowData::value(const int i) {
 /** Set a data value
  * @param i [in] : the index of the value to set
  * @param value [in] : the new value
+ * @param isGenerated [in] : indicates whether the value is
+ * auto-generated or user-entered
  */
 void RowData::setValue(const int i, const QString &value,
                        const bool isGenerated) {

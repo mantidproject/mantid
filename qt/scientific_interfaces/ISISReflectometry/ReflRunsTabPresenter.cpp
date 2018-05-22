@@ -513,7 +513,8 @@ ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
  * @param rowsToTransfer : a set of row indices in the search results to
  * transfer
  * @param group : the group number of the table to transfer to
- * @param strict :
+ * @param matchType : an enum specifying how strictly to match runs against
+ * the transfer criteria
  * @return : The runs to transfer as a vector of maps
 */
 void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
@@ -580,6 +581,7 @@ ReflRunsTabPresenter::getTransferStrategy() {
 *
 * @param workspaceList :: the list of table workspaces in the ADS that could be
 * loaded into the interface
+* @param group :: the group that the notification came from
 */
 void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
                                             int group) {

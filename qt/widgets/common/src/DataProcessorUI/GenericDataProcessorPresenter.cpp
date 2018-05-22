@@ -1072,7 +1072,6 @@ void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
 
 /** Create an algorithm with the given properties and execute it
  * @param options : the options as a map of property name to value
- * @param success [out] : set to true if the algorithm completed successfully
  * @throws std::runtime_error if reduction fails
  * @returns : the algorithm
  */

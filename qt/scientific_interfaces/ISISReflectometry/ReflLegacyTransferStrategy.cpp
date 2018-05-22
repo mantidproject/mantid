@@ -13,6 +13,7 @@ namespace CustomInterfaces {
 // unnamed namespace
 namespace {
 /** Check that the given row contains a valid theta value
+ * @param row : row values as a map of field name to value
  * @throws : std::invalid_argument if failed
  */
 void validateTheta(std::map<std::string, std::string> &row) {
@@ -33,6 +34,7 @@ void validateTheta(std::map<std::string, std::string> &row) {
 }
 
 /** Check that the given row values are all valid
+ * @param row : row values as a map of field name to value
  * @throws : std::invalid_argument if failed
  */
 void validateStrict(std::map<std::string, std::string> &row) {
@@ -40,6 +42,8 @@ void validateStrict(std::map<std::string, std::string> &row) {
 }
 
 /** Check that the given row contains valid data
+ * @param row : row values as a map of field name to value
+ * @param matchType : defines how strictly to match criteria
  * @throws : std::invalid_argument if failed
  */
 void validateRow(std::map<std::string, std::string> &row,
@@ -58,6 +62,12 @@ void validateRow(std::map<std::string, std::string> &row,
 }
 }
 
+/** Transfer runs from the search results table to the data processor table.
+ * @param searchResults : the search results
+ * @param progress : the progress bar to update with progress of the transfer
+ * @param matchType : an enum defining how strictly to check that run titles
+ * match the required pattern
+ */
 TransferResults
 ReflLegacyTransferStrategy::transferRuns(SearchResultMap &searchResults,
                                          Mantid::Kernel::ProgressBase &progress,
