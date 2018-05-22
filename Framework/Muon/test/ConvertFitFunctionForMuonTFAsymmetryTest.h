@@ -12,7 +12,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
-using Mantid::Algorithms::ConvertFitFunctionForMuonTFAsymmetry;
+using Mantid::Muon::ConvertFitFunctionForMuonTFAsymmetry;
 
 const std::string outputName = "EstimateMuonAsymmetryFromCounts_Output";
 

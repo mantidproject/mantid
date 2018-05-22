@@ -23,7 +23,6 @@ namespace {
 constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 constexpr double MUON_LIFETIME_MICROSECONDS{
     Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
-constexpr bool FIX = false; // fix function needs false to work
 const std::string INSERT_FUNCTION{"f0.f1.f1."};
 
 std::string trimTie(const std::string &stringTie) {
@@ -59,7 +58,7 @@ int findName(const std::vector<std::string> &colNames, const T1 &name) {
 }
 namespace Mantid {
 
-namespace Algorithms {
+namespace Muon{
 
 using namespace Kernel;
 using namespace API;

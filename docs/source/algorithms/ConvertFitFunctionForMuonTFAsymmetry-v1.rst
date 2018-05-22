@@ -27,6 +27,7 @@ This example is for converting a function.
 
 .. testcode:: example
 
+   import mantid.simpleapi as mantid
    #create a normalisation table
    tab = CreateEmptyTableWorkspace()
    tab.addColumn('double', 'norm')

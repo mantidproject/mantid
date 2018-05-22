@@ -1,5 +1,5 @@
 #ifndef MANTID_ALGORITHM_CONVERTFITFUNCTIONFORMUONTFASYMMETRY_H_
-#define MANTID_ALGORITHM_ONVERTFITFUNCTIONFORMUONTFASYMMETRY_H_
+#define MANTID_ALGORITHM_CONVERTFITFUNCTIONFORMUONTFASYMMETRY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,7 +8,7 @@
 #include "MantidAPI/IFunction.h"
 
 namespace Mantid {
-namespace Algorithms {
+namespace Muon {
 /**Takes a fitting function and returns a modified fitting function.
 To be used as part of TF asymmetry calculations
 
@@ -89,4 +89,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ONVERTFITFUNCTIONFORMUONTFASYMMETRYS_H_*/
+#endif /*MANTID_CONVERTFITFUNCTIONFORMUONTFASYMMETRYS_H_*/
