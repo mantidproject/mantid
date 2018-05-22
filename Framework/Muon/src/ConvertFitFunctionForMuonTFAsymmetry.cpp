@@ -58,7 +58,7 @@ int findName(const std::vector<std::string> &colNames, const T1 &name) {
 }
 namespace Mantid {
 
-namespace Muon{
+namespace Muon {
 
 using namespace Kernel;
 using namespace API;
