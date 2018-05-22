@@ -70,12 +70,11 @@ public:
         alg.setProperty("InputWorkspaceGroup", wsGroup->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("groupName", "test"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Grouping", "1,2,3,4,5"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("plotType", "Counts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("analysisType", "Counts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", emptyString));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeZero", 0.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeLoadZero", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("SummedPeriods", std::to_string(1)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));
@@ -114,12 +113,11 @@ public:
         alg.setProperty("InputWorkspaceGroup", wsGroup->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("groupName", "test"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Grouping", "1"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("plotType", "Counts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("analysisType", "Counts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", emptyString));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeZero", 0.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeLoadZero", 0.0));
+	TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("SummedPeriods", std::to_string(1)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));
@@ -176,12 +174,11 @@ public:
         alg.setProperty("InputWorkspaceGroup", wsGroup->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("groupName", "test"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Grouping", "1,2,3,4,5"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("plotType", "Counts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("analysisType", "Counts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", emptyString));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeZero", 0.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeLoadZero", 0.0));
+	TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("SummedPeriods", std::to_string(1)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));

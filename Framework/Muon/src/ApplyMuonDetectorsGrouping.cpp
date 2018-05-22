@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-const std::vector<std::string> g_plotTypes = {"Counts", "Asymmetry"};
+const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
 
 namespace {
 
@@ -65,9 +65,9 @@ void ApplyMuonDetectorGrouping::init() {
       Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "InputWorkspaceGroup", emptyString, Direction::InOut,
           PropertyMode::Mandatory),
-      "Input workspace group, the output will be saved here.");
+      "The workspace group to which the output will be added.");
 
-  declareProperty("groupName", emptyString, "The name of the group.",
+  declareProperty("groupName", emptyString, "The name of the group. Must contain at least one alphanumeric character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "
@@ -75,27 +75,29 @@ void ApplyMuonDetectorGrouping::init() {
                   Direction::Input);
 
   declareProperty(
-      "plotType", "Counts",
-      boost::make_shared<Kernel::ListValidator<std::string>>(g_plotTypes),
+      "AnalysisType", "Counts",
+      boost::make_shared<Kernel::ListValidator<std::string>>(g_analysisTypes),
       "The type of analysis to perform on the spectra.", Direction::Input);
 
-  declareProperty("TimeMin", 0.0, "start time for the data in ms.",
+  declareProperty("TimeMin", 0.0, "Start time for the data in ms. Only used with the asymmetry analysis.",
                   Direction::Input);
   setPropertySettings("TimeMin",
                       make_unique<Kernel::EnabledWhenProperty>(
-                          "plotType", Kernel::IS_EQUAL_TO, "Asymmetry"));
+                          "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
-  declareProperty("TimeMax", 30.0, "end time for the data in ms.",
+  declareProperty("TimeMax", 30.0, "End time for the data in ms. Only used with the asymmetry analysis.",
                   Direction::Input);
   setPropertySettings("TimeMax",
                       make_unique<Kernel::EnabledWhenProperty>(
-                          "plotType", Kernel::IS_EQUAL_TO, "Asymmetry"));
+                          "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
-  declareProperty("RebinArgs", emptyString, "Rebin arguments.",
+  declareProperty("RebinArgs", emptyString, "Rebin arguments. No rebinning if left empty.",
                   Direction::Input);
 
-  declareProperty("TimeZero", 0.0, "....", Direction::Input);
-  declareProperty("TimeLoadZero", 0.0, "....", Direction::Input);
+  declareProperty("TimeOffset", 0.0,
+                  "Shift the times of all data by a fixed amount. The value "
+                  "given corresponds to the bin that will become 0.0 seconds.",
+                  Direction::Input);
 
   declareProperty("SummedPeriods", std::to_string(1), "A list of periods to sum in multiperiod data.", Direction::Input);
   declareProperty("SubtractedPeriods", emptyString, "A list of periods to subtract in multiperiod data.", Direction::Input);
@@ -111,7 +113,7 @@ void ApplyMuonDetectorGrouping::init() {
   setPropertyGroup("Grouping", groupingGrp);
 
   std::string analysisGrp("Analysis");
-  setPropertyGroup("plotType", analysisGrp);
+  setPropertyGroup("AnalysisType", analysisGrp);
   setPropertyGroup("TimeMin", analysisGrp);
   setPropertyGroup("TimeMax", analysisGrp);
 }
@@ -173,12 +175,12 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
   options.grouping = grouping ;
   options.summedPeriods = this->getPropertyValue("SummedPeriods");
   options.subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
-  options.timeZero = this->getProperty("TimeZero");
-  options.loadedTimeZero = this->getProperty("TimeLoadZero");
+  options.timeZero = 0.0;
+  options.loadedTimeZero = this->getProperty("TimeOffset");
   options.timeLimits.first = this->getProperty("TimeMin");
   options.timeLimits.second = this->getProperty("TimeMax");
   options.rebinArgs = this->getPropertyValue("rebinArgs");;
-  options.plotType = getPlotType(this->getPropertyValue("plotType"));
+  options.plotType = getPlotType(this->getPropertyValue("AnalysisType"));
   options.groupPairName = this->getPropertyValue("groupName");
   
   // Cast input WS to a WorkspaceGroup

@@ -54,7 +54,7 @@ public:
   }
   /// Algorithm's summary for identification
   const std::string summary() const override {
-    return "Group several muon detector IDs together and perform an analysis.";
+    return "Group several muon detector IDs together and perform an analysis (either counts or asymmetry).";
   }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
