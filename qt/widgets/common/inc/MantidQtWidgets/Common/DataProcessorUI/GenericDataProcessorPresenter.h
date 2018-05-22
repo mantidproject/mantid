@@ -278,6 +278,7 @@ private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
   // The current group we are reducing row data for
+  int m_currentGroupIndex;
   GroupData m_currentGroupData;
   // The current row item being reduced
   RowData_sptr m_currentRowData;

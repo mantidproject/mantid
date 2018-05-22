@@ -548,10 +548,10 @@ void GenericDataProcessorPresenter::processNextItem() {
   // first one that has not yet been processed. We only process one and
   // then return.
   for (auto &groupItem : m_itemsToProcess) {
-    const auto groupIndex = groupItem.first;
+    m_currentGroupIndex = groupItem.first;
     m_currentGroupData = groupItem.second;
 
-    if (m_manager->isProcessed(groupIndex))
+    if (m_manager->isProcessed(m_currentGroupIndex))
       continue;
 
     // Process all rows in the group
@@ -564,7 +564,8 @@ void GenericDataProcessorPresenter::processNextItem() {
 
       // Start a thread to process this item and then return. The next
       // item will be processed after this thread has finished.
-      startAsyncRowReduceThread(m_currentRowData, rowIndex, groupIndex);
+      startAsyncRowReduceThread(m_currentRowData, rowIndex,
+                                m_currentGroupIndex);
       return;
     }
 
@@ -574,7 +575,7 @@ void GenericDataProcessorPresenter::processNextItem() {
     // groups that only contain a single row because there is an assumption
     // that post-processing only applies to multi-row groups.
     if (m_currentGroupData.size() > 1) {
-      startAsyncGroupReduceThread(m_currentGroupData, groupIndex);
+      startAsyncGroupReduceThread(m_currentGroupData, m_currentGroupIndex);
       return;
     }
   }
@@ -671,16 +672,31 @@ void GenericDataProcessorPresenter::groupThreadFinished(const int exitCode) {
 
   auto postprocessedWorkspace =
       getPostprocessedWorkspaceName(m_currentGroupData).toStdString();
-  completedGroupReductionSuccessfully(m_currentGroupData,
-                                      postprocessedWorkspace);
+
+  try {
+    completedGroupReductionSuccessfully(m_currentGroupData,
+                                        postprocessedWorkspace);
+  } catch (std::exception &e) {
+    m_manager->setError(e.what(), m_currentGroupIndex);
+  } catch (...) {
+    m_manager->setError("Unknown error", m_currentGroupIndex);
+  }
+
   threadFinished(exitCode);
 }
 
 void GenericDataProcessorPresenter::rowThreadFinished(const int exitCode) {
-  completedRowReductionSuccessfully(
-      m_currentGroupData,
-      m_currentRowData->reducedName(m_processor.defaultOutputPrefix())
-          .toStdString());
+  try {
+    completedRowReductionSuccessfully(
+        m_currentGroupData,
+        m_currentRowData->reducedName(m_processor.defaultOutputPrefix())
+            .toStdString());
+  } catch (std::exception &e) {
+    m_currentRowData->setError(e.what());
+  } catch (...) {
+    m_currentRowData->setError("Unknown error");
+  }
+
   threadFinished(exitCode);
 }
 
