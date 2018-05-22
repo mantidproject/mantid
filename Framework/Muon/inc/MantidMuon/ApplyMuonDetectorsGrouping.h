@@ -62,35 +62,23 @@ public:
   bool checkGroups() override;
 
 private:
-  std::string m_groupName;
-  std::string m_groupedWS_name;
-  std::string m_groups;
-  std::string m_rebinArgs;
-  std::string m_wsName;
-  std::string m_summedPeriods;
-  std::string m_subtractedPeriods;
-  PlotType m_plotType;
-  double m_Xmin;
-  double m_Xmax;
-  double m_loadedTimeZero;
-  double m_timeZero;
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
   ///  Store the input properties as private member variables
   API::WorkspaceGroup_sptr getUserInput(const API::Workspace_sptr &inputWS,
-	  const API::WorkspaceGroup_sptr &groupedWS);
+	  const API::WorkspaceGroup_sptr &groupedWS, Muon::AnalysisOptions& options);
   /// Clip Xmin/Xmax to the range in the input WS
-  void clipXRangeToWorkspace(API::MatrixWorkspace &ws);
+  void clipXRangeToWorkspace(API::MatrixWorkspace &ws, Muon::AnalysisOptions& options);
   /// Creates and analyses a workspace, if isRaw does not rebin.
-  API::Workspace_sptr createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin);
+  API::Workspace_sptr createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin, Muon::AnalysisOptions &options);
   /// Sets algorithm properties according to options.
   void
   setProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
                                 const AnalysisOptions &options) const;
   /// Generate the name of the new workspace
-  const std::string getNewWorkspaceName();
+  const std::string getNewWorkspaceName(const Muon::AnalysisOptions& options, const std::string& groupWSName);
 };
 
 } // namespace Muon

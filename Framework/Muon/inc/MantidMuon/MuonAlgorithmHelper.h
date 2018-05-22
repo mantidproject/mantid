@@ -38,9 +38,9 @@ struct AnalysisOptions {
   std::pair<double, double> timeLimits; /// Min, max X values
   std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
   std::string groupPairName; /// Name of group or pair to use
-  const Mantid::API::Grouping grouping; /// Grouping to use
+  Mantid::API::Grouping grouping; /// Grouping to use
   PlotType plotType = {};               /// Type of analysis to perform
-  explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g) {}
+  explicit AnalysisOptions() {}
 };
 
 /// Whether multiple fitting is enabled or disabled

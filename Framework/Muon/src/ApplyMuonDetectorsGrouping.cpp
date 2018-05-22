@@ -117,19 +117,21 @@ void ApplyMuonDetectorGrouping::init() {
 }
 
 void ApplyMuonDetectorGrouping::exec() {
+  Muon::AnalysisOptions options;
 
   WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+  std::string groupedWSName = groupedWS->getName();
   const Workspace_sptr inputWS = getProperty("InputWorkspace");
-  WorkspaceGroup_sptr muonWS = getUserInput(inputWS, groupedWS);
+  WorkspaceGroup_sptr muonWS = getUserInput(inputWS, groupedWS, options);
 
   MatrixWorkspace_sptr clipWS;
   clipWS = boost::dynamic_pointer_cast<MatrixWorkspace>(muonWS->getItem(0));
-  clipXRangeToWorkspace(*clipWS);
+  clipXRangeToWorkspace(*clipWS, options);
 
-  auto ws = createAnalysisWorkspace(inputWS, false);
-  auto wsRaw = createAnalysisWorkspace(inputWS, true);
+  auto ws = createAnalysisWorkspace(inputWS, false, options);
+  auto wsRaw = createAnalysisWorkspace(inputWS, true, options);
 
-  const std::string wsName = getNewWorkspaceName();
+  const std::string wsName = getNewWorkspaceName(options, groupedWSName);
   const std::string wsRawName = wsName + "_Raw";
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
@@ -137,20 +139,20 @@ void ApplyMuonDetectorGrouping::exec() {
   ads.addOrReplace(wsRawName, wsRaw);
 
   std::vector<std::string> wsNames = {wsName, wsRawName};
-  MuonAlgorithmHelper::groupWorkspaces(m_groupedWS_name, wsNames);
+  MuonAlgorithmHelper::groupWorkspaces(groupedWSName, wsNames);
 }
 
 /*
 * Generate the name of the new workspace
 */
-const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName() {
+const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(const Muon::AnalysisOptions& options, const std::string& groupWSName) {
 
   Muon::DatasetParams params;
   // don't fill in instrument, runs, periods.
-  params.label = m_groupedWS_name;
+  params.label = groupWSName;
   params.itemType = Muon::ItemType::Group;
-  params.itemName = m_groupName;
-  params.plotType = m_plotType;
+  params.itemName = options.groupPairName;
+  params.plotType = options.plotType;
   params.version = 1;
   const std::string wsName = generateWorkspaceName(params);
   return wsName;
@@ -161,7 +163,8 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName() {
 */
 WorkspaceGroup_sptr
 ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
-                                        const WorkspaceGroup_sptr &groupedWS) {
+                                        const WorkspaceGroup_sptr &groupedWS, 
+										Muon::AnalysisOptions& options) {
 
   // Cast input WS to a grouping
   auto muonWS = boost::make_shared<WorkspaceGroup>();
@@ -171,29 +174,22 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
     muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
   }
 
-  m_groupedWS_name = groupedWS->getName();
-  m_wsName = inputWS->getName();
-  m_groupName = this->getPropertyValue("groupName");
-  m_groups = this->getPropertyValue("Grouping");
-  m_rebinArgs = this->getPropertyValue("rebinArgs");
-  m_Xmin = this->getProperty("TimeMin");
-  m_Xmax = this->getProperty("TimeMax");
-  m_timeZero = this->getProperty("TimeZero");
-  m_loadedTimeZero = this->getProperty("TimeLoadZero");
-  m_summedPeriods = this->getPropertyValue("SummedPeriods");
-  m_subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
-  m_plotType = getPlotType(this->getPropertyValue("plotType"));
+  // Store all the options for Muon Process
+  Grouping grouping;
+  grouping.description = "no description";
+  grouping.groupNames.emplace_back(this->getPropertyValue("groupName"));
+  grouping.groups.emplace_back(this->getPropertyValue("Grouping"));
 
-  //std::string plotType;
-  //plotType = this->getPropertyValue("plotType");
-  //if (plotType == "Counts") {
-  //  m_plotType = Muon::PlotType::Counts;
-  //} else if (plotType == "Asymmetry") {
-  //  m_plotType = Muon::PlotType::Asymmetry;
-  //} else {
-  //  // default to Counts.
-  //  m_plotType = Muon::PlotType::Counts;
-  //}
+  options.grouping = grouping ;
+  options.summedPeriods = this->getPropertyValue("SummedPeriods");
+  options.subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
+  options.timeZero = this->getProperty("TimeZero");
+  options.loadedTimeZero = this->getProperty("TimeLoadZero");
+  options.timeLimits.first = this->getProperty("TimeMin");
+  options.timeLimits.second = this->getProperty("TimeMax");
+  options.rebinArgs = this->getPropertyValue("rebinArgs");;
+  options.plotType = getPlotType(this->getPropertyValue("plotType"));
+  options.groupPairName = this->getPropertyValue("groupName");
 
   return muonWS;
 }
@@ -202,15 +198,15 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
 * Clip Xmin/Xmax to the range in the input WS
 */
 void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
-    MatrixWorkspace &ws) {
+    MatrixWorkspace &ws, Muon::AnalysisOptions& options) {
   double dataXMin;
   double dataXMax;
   ws.getXMinMax(dataXMin, dataXMax);
-  if (m_Xmin < dataXMin) {
-    m_Xmin = dataXMin;
+  if (options.timeLimits.first < dataXMin) {
+	  options.timeLimits.first = dataXMin;
   }
-  if (m_Xmax > dataXMax) {
-    m_Xmax = dataXMax;
+  if (options.timeLimits.second > dataXMax) {
+	  options.timeLimits.second = dataXMax;
   }
 }
 
@@ -219,25 +215,12 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
 */
 Workspace_sptr
 ApplyMuonDetectorGrouping::createAnalysisWorkspace(const Workspace_sptr &inputWS,
-                                                   bool noRebin) {
+                                                   bool noRebin, Muon::AnalysisOptions &options) {
 
-  // Store all the options for Muon Process
-  Grouping grouping;
-  grouping.description = "no description";
-  grouping.groupNames.emplace_back(m_groupName);
-  grouping.groups.emplace_back(m_groups);
-
-  Muon::AnalysisOptions options(grouping);
-
-  options.summedPeriods = m_summedPeriods;
-  options.subtractedPeriods = m_subtractedPeriods;
-  options.timeZero = m_timeZero;
-  options.loadedTimeZero = m_loadedTimeZero;
-  options.timeLimits.first = m_Xmin;
-  options.timeLimits.second = m_Xmax;
-  options.rebinArgs = noRebin ? "" : m_rebinArgs;
-  options.plotType = m_plotType;
-  options.groupPairName = m_groupName;
+	if (noRebin) {
+		const std::string emptyString("");
+		options.rebinArgs = emptyString;
+	}
 
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
