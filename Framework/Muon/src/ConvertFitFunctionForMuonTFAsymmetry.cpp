@@ -26,14 +26,14 @@ constexpr double MUON_LIFETIME_MICROSECONDS{
 constexpr bool FIX = false; // fix function needs false to work
 const std::string INSERT_FUNCTION{"f0.f1.f1."};
 
-std::string trimTie(const std::string stringTie) {
+std::string trimTie(const std::string &stringTie) {
   auto index = stringTie.find_first_of(".");
   std::string domain = stringTie.substr(0, index);
   std::string userFunc = stringTie.substr(9 + index, std::string::npos);
   return domain + userFunc;
 }
 
-std::string rmInsertFunction(const std::string originalTie) {
+std::string rmInsertFunction(const std::string &originalTie) {
   auto stringTie = originalTie;
   // check the tie only exists in the user function (f)
   auto seperator = stringTie.find_first_of("=");
