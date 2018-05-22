@@ -14,14 +14,13 @@ class EXPORT_OPT_MANTIDQT_COMMON FindSubtreeRoots {
 public:
   boost::optional<std::vector<RowLocation>>
   operator()(std::vector<RowLocation> region);
-  void nodeWasSubtreeRoot(RowLocation const &rowLocation);
-  void nodeWasNotSubtreeRoot(RowLocation const &rowLocation);
-  bool isChildOfPrevious(RowLocation const &location) const;
-  bool isSiblingOfPrevious(RowLocation const &location) const;
-
 private:
-  bool previousWasRoot;
-  RowLocation previousNode;
+  bool hasSubtreeRootHigherThanFirstRoot(
+      std::vector<RowLocation> const &sortedRegion) const;
+  bool
+  maximumIncreaseInDepthIsOne(std::vector<RowLocation> const &region) const;
+  void removeIfDepthNotEqualTo(std::vector<RowLocation> &region,
+                               int expectedDepth) const;
 };
 
 } // namespace Batch

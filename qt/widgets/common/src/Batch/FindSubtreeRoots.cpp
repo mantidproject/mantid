@@ -6,54 +6,47 @@ namespace Batch {
 auto FindSubtreeRoots::operator()(std::vector<RowLocation> region)
     -> boost::optional<std::vector<RowLocation>> {
   std::sort(region.begin(), region.end());
-  if (!region.empty()) {
-    nodeWasSubtreeRoot(*region.cbegin());
-    auto roots = std::vector<RowLocation>({previousNode});
-    auto current = region.begin() + 1;
-    auto previousRoot = previousNode;
-
-    for (; current != region.end(); ++current) {
-      auto &currentNode = *current;
-      if (isChildOfPrevious(currentNode) ||
-          (!previousWasRoot && isSiblingOfPrevious(currentNode))) {
-        nodeWasNotSubtreeRoot(currentNode);
-      } else if (currentNode.isDescendantOf(previousRoot)) {
-        if (previousNode.depth() < currentNode.depth())
-          return boost::none;
-        else
-          nodeWasNotSubtreeRoot(currentNode);
-      } else {
-        if (previousRoot.depth() > currentNode.depth())
-          return boost::none;
-        else {
-          nodeWasSubtreeRoot(currentNode);
-          roots.emplace_back(currentNode);
-          previousRoot = std::move(currentNode);
-        }
-      }
+  if (!hasSubtreeRootHigherThanFirstRoot(region)) {
+    if (maximumIncreaseInDepthIsOne(region)) {
+      if (!region.empty())
+        removeIfDepthNotEqualTo(region, region[0].depth());
+      return region;
     }
-    return roots;
-  } else {
-    return std::vector<RowLocation>();
   }
+  return boost::none;
 }
 
-void FindSubtreeRoots::nodeWasSubtreeRoot(RowLocation const &rowLocation) {
-  previousWasRoot = true;
-  previousNode = rowLocation;
+bool FindSubtreeRoots::hasSubtreeRootHigherThanFirstRoot(
+    std::vector<RowLocation> const &sortedRegion) {
+  auto firstLocationAtMinimumDepth =
+      std::min_element(sortedRegion.cbegin(), sortedRegion.cend(),
+                       [](RowLocation const &lhs, RowLocation const &rhs)
+                           -> bool { return lhs.depth() < rhs.depth(); });
+  return firstLocationAtMinimumDepth != sortedRegion.cbegin();
 }
 
-void FindSubtreeRoots::nodeWasNotSubtreeRoot(RowLocation const &rowLocation) {
-  previousWasRoot = false;
-  previousNode = rowLocation;
+bool FindSubtreeRoots::maximumIncreaseInDepthIsOne(
+    std::vector<RowLocation> const &region) {
+  auto previous = region.cbegin();
+  if (previous != region.cend()) {
+    auto current = region.cbegin() + 1;
+    for (; current != region.cend(); ++current, ++previous) {
+      auto currentDepth = (*current).depth();
+      auto previousDepth = (*previous).depth();
+      if ((previousDepth - currentDepth) < -1)
+        return false;
+    }
+  }
+  return true;
 }
 
-bool FindSubtreeRoots::isChildOfPrevious(RowLocation const &location) const {
-  return location.isChildOf(previousNode);
-}
-
-bool FindSubtreeRoots::isSiblingOfPrevious(RowLocation const &location) const {
-  return location.isSiblingOf(previousNode);
+void FindSubtreeRoots::removeIfDepthNotEqualTo(std::vector<RowLocation> &region,
+                                               int expectedDepth) {
+  region.erase(
+      std::remove_if(region.begin(), region.end(),
+                     [expectedDepth](RowLocation const &location)
+                         -> bool { return location.depth() != expectedDepth; }),
+      region.end());
 }
 
 } // namespace Batch
