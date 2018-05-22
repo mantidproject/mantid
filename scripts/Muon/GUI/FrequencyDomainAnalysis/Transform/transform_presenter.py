@@ -1,9 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon import fft_presenter
-from Muon import load_utils
-from Muon import maxent_presenter
-from Muon import transform_selection_presenter
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
+from Muon.GUI.Common import load_utils
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_presenter
 
 
 class TransformPresenter(object):

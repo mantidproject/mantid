@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 
 import math
-from Muon import thread_model
+from Muon.GUI.Common import thread_model
 
 
 class MaxEntPresenter(object):

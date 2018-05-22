@@ -6,8 +6,8 @@ import sys
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 
-from Muon.GUI.dummy_label.dummy_label_widget import DummyLabelWidget
-from Muon.GUI.dock.dock_widget import DockWidget
+from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
+from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):

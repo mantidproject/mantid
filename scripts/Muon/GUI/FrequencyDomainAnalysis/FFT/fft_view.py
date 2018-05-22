@@ -4,7 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 import mantid.simpleapi as mantid
 
-from Muon import table_utils
+from Muon.GUI.Common import table_utils
 
 
 class FFTView(QtGui.QWidget):

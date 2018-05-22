@@ -5,9 +5,9 @@ import sys
 
 import PyQt4.QtGui as QtGui
 
-from Muon.transform_widget import TransformWidget
-from Muon import load_utils
-from Muon import message_box
+from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
+from Muon.GUI.Common import load_utils
+from Muon.GUI.Common import message_box
 
 
 class FrequencyDomainAnalysisGui(QtGui.QMainWindow):

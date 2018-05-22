@@ -2,9 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
 
-from Muon.GUI.dummy.dummy_widget import DummyWidget
-from Muon.GUI.dummy_label.dummy_label_widget import DummyLabelWidget
-from Muon.GUI.dock.dock_view import DockView
+from Muon.GUI.Common.dummy.dummy_widget import DummyWidget
+from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
+from Muon.GUI.Common.dock.dock_view import DockView
 
 
 class DockWidget(QtGui.QWidget):

@@ -1,11 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.transform_view import TransformView
-from Muon.transform_presenter import TransformPresenter
+from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformView
+from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_presenter import TransformPresenter
 
-from Muon.fft_widget import FFTWidget
-from Muon.maxent_widget import MaxEntWidget
-from Muon.transform_selection_widget import TransformSelectionWidget
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
+from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
 
 from PyQt4 import QtGui
 

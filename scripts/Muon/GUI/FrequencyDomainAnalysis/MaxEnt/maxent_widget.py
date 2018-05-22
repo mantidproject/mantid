@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.maxent_view import MaxEntView
-from Muon.maxent_presenter import MaxEntPresenter
-from Muon.maxent_model import MaxEntModel, MaxEntWrapper
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_view import MaxEntView
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter import MaxEntPresenter
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_model import MaxEntModel, MaxEntWrapper
 
 from PyQt4 import QtGui
 

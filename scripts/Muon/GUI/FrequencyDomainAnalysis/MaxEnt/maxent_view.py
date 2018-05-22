@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
 
-from Muon import table_utils
+from Muon.GUI.Common import table_utils
 
 
 class MaxEntView(QtGui.QWidget):

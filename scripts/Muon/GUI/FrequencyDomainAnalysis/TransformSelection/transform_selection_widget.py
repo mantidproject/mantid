@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.transform_selection_view import TransformSelectionView
-from Muon.transform_selection_presenter import TransformSelectionPresenter
+from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_view import TransformSelectionView
+from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_presenter import TransformSelectionPresenter
 
 from PyQt4 import QtGui
 
