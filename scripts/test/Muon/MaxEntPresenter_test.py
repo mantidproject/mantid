@@ -46,6 +46,8 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.thread.finished=mock.Mock()
         self.thread.setInputs=mock.Mock()
         self.thread.loadData=mock.Mock()
+        self.thread.threadWrapperSetup = mock.Mock()
+        self.thread.threadWrapperTearDown = mock.Mock()
 
         self.presenter.createThread=mock.Mock(return_value=self.thread)
         self.presenter.createPhaseThread=mock.Mock(return_value=self.thread)

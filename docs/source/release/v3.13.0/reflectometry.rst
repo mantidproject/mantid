@@ -34,11 +34,14 @@ Algorithms
 New features
 ############
 
+- A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for relfectivity workspaces.
 
 Improvements
 ############
 
 Bug fixes
 #########
+
+* Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 
 :ref:`Release 3.13.0 <v3.13.0>`

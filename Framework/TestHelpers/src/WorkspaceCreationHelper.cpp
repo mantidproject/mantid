@@ -73,14 +73,6 @@ EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
       height(height_), fitStatus(fitStatus_) {}
 
 /**
- * @param name :: The name of the workspace
- * @param ws :: The workspace object
- */
-void storeWS(const std::string &name, Mantid::API::Workspace_sptr ws) {
-  Mantid::API::AnalysisDataService::Instance().add(name, ws);
-}
-
-/**
  * Deletes a workspace
  * @param name :: The name of the workspace
  */
@@ -497,13 +489,12 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   ws->replaceAxis(0, ax0);
 
   // re-assign detector IDs to the rectangular detector
-  int detID = numPixels * numPixels;
-  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
+  const auto detIds = inst->getDetectorIDs();
+  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); ++wi) {
     ws->getSpectrum(wi).clearDetectorIDs();
     if (clearEvents)
       ws->getSpectrum(wi).clear(true);
-    ws->getSpectrum(wi).setDetectorID(detID);
-    detID++;
+    ws->getSpectrum(wi).setDetectorID(detIds[wi]);
   }
   return ws;
 }

@@ -666,8 +666,8 @@ class StateDirectorISIS(object):
                     start_times_hab.append(times.start)
                     stop_times_hab.append(times.stop)
                 elif times.detector_type is DetectorType.LAB:
-                    start_times_hab.append(times.start)
-                    stop_times_hab.append(times.stop)
+                    start_times_lab.append(times.start)
+                    stop_times_lab.append(times.stop)
                 else:
                     RuntimeError("UserFileStateDirector: The specified detector {0} is not "
                                  "known".format(times.detector_type))

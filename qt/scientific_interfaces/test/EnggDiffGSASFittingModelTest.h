@@ -16,12 +16,13 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace { // Helpers
 
-GSASIIRefineFitPeaksParameters createGSASIIRefineFitPeaksParameters(
+std::vector<GSASIIRefineFitPeaksParameters>
+createGSASIIRefineFitPeaksParameters(
     const API::MatrixWorkspace_sptr &inputWS, const RunLabel &runLabel,
     const GSASRefinementMethod &refinementMethod) {
-  return GSASIIRefineFitPeaksParameters(
+  return {GSASIIRefineFitPeaksParameters(
       inputWS, runLabel, refinementMethod, "", std::vector<std::string>({}), "",
-      "", boost::none, boost::none, boost::none, boost::none, false, false);
+      "", boost::none, boost::none, boost::none, boost::none, false, false)};
 }
 
 template <size_t numColumns, size_t numRows>
@@ -53,7 +54,8 @@ public:
 
   void addSigmaValue(const RunLabel &runLabel, const double sigma);
 
-  void doRefinement(const GSASIIRefineFitPeaksParameters &params) override;
+  void doRefinements(
+      const std::vector<GSASIIRefineFitPeaksParameters> &params) override;
 };
 
 inline void
@@ -78,8 +80,8 @@ TestEnggDiffGSASFittingModel::addSigmaValue(const RunLabel &runLabel,
   addSigma(runLabel, sigma);
 }
 
-void TestEnggDiffGSASFittingModel::doRefinement(
-    const GSASIIRefineFitPeaksParameters &params) {
+void TestEnggDiffGSASFittingModel::doRefinements(
+    const std::vector<GSASIIRefineFitPeaksParameters> &params) {
   // Mock method - just create some dummy output and ignore all the parameters
   UNUSED_ARG(params);
 
@@ -97,7 +99,7 @@ void TestEnggDiffGSASFittingModel::doRefinement(
   ADS.add("FITTEDPEAKS", ws);
 
   processRefinementSuccessful(GSASIIRefineFitPeaksOutputProperties(
-      1, 2, 3, ws, latticeParams, params.runLabel));
+      1, 2, 3, ws, latticeParams, params[0].runLabel));
 }
 
 } // Anonymous namespace
@@ -229,7 +231,7 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
     TS_ASSERT_THROWS_NOTHING(
-        model.doRefinement(createGSASIIRefineFitPeaksParameters(
+        model.doRefinements(createGSASIIRefineFitPeaksParameters(
             inputWS, runLabel, GSASRefinementMethod::PAWLEY)));
 
     const auto rwp = model.getRwp(runLabel);
@@ -258,7 +260,7 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
     TS_ASSERT_THROWS_NOTHING(
-        model.doRefinement(createGSASIIRefineFitPeaksParameters(
+        model.doRefinements(createGSASIIRefineFitPeaksParameters(
             inputWS, runLabel, GSASRefinementMethod::RIETVELD)));
 
     const auto rwp = model.getRwp(runLabel);

@@ -48,7 +48,11 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         setup_mantid_paths()
-        run_vanadium_calibration(focus_mode=self.focus_mode)
+        inst_obj = setup_inst_object(tt_mode="tt70", focus_mode="trans")
+        run_vanadium_calibration(inst_obj, focus_mode=self.focus_mode)
+
+        # Make sure that inst settings reverted to the default after create_vanadium
+        self.assertEquals(inst_obj._inst_settings.focus_mode, "trans")
 
     def skipTests(self):
         # Don't actually run this test, as it is a dummy for the focus-mode-specific tests
@@ -107,7 +111,11 @@ class FocusTest(stresstesting.MantidStressTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus()
+        inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
+        self.focus_results = run_focus(inst_object, tt_mode="tt70")
+
+        # Make sure that inst settings reverted to the default after focus
+        self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
 
     def validate(self):
         self.tolerance = 1e-10  # Required for difference in spline data between operating systems
@@ -156,7 +164,11 @@ class CreateCalTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_create_cal()
+        inst_object = setup_inst_object(tt_mode="tt88", focus_mode="trans")
+        self.calibration_results = run_create_cal(inst_object, focus_mode="all")
+
+        # Make sure that inst_settings reverted to the default after create_cal
+        self.assertEquals(inst_object._inst_settings.focus_mode, "trans")
 
     def validate(self):
         self.tolerance = 1e-5
@@ -182,22 +194,19 @@ def _gen_required_files():
     return input_files
 
 
-def run_create_cal():
+def run_create_cal(inst_object, focus_mode):
     ceria_run = 98494
-    inst_obj = setup_inst_object(tt_mode="tt88", focus_mode="all")
-    return inst_obj.create_cal(run_number=ceria_run)
+    return inst_object.create_cal(run_number=ceria_run, focus_mode=focus_mode)
 
 
-def run_vanadium_calibration(focus_mode):
+def run_vanadium_calibration(inst_object, focus_mode):
     vanadium_run = 98507  # Choose arbitrary run in the cycle 17_1
 
-    inst_obj = setup_inst_object(tt_mode="tt70", focus_mode=focus_mode)
-
     # Run create vanadium twice to ensure we get two different output splines / files
-    inst_obj.create_vanadium(run_in_cycle=vanadium_run, do_absorb_corrections=True)
+    inst_object.create_vanadium(run_in_cycle=vanadium_run, do_absorb_corrections=True, focus_mode=focus_mode)
 
 
-def run_focus():
+def run_focus(inst_object, tt_mode):
     run_number = 98507
     attenuation_file_name = "PRL112_DC25_10MM_FF.OUT"
 
@@ -208,9 +217,8 @@ def run_focus():
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
 
-    inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
-                             perform_attenuation=True, attenuation_file_path=attenuation_path)
+                             perform_attenuation=True, attenuation_file_path=attenuation_path, tt_mode=tt_mode)
 
 
 def run_focus_with_absorb_corrections():
