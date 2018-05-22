@@ -13,9 +13,7 @@ void export_IFunction1D() {
    * the class' virtual functions to be overridden in Python
    */
   class_<IFunction1D, bases<IFunction>, boost::shared_ptr<IFunction1DAdapter>,
-         boost::noncopyable>("IFunction1D", "Base class for 1D Fit functions",
-                             init<>())
-      .def(init<bool>())
+         boost::noncopyable>("IFunction1D", "Base class for 1D Fit functions")
       .def("function1D",
            (object (IFunction1DAdapter::*)(const object &) const) &
                IFunction1DAdapter::function1D,

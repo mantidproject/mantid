@@ -58,7 +58,7 @@ public:
   using Base = API::IFunction1D;
 
   /// A constructor that looks like a Python __init__ method
-  IFunction1DAdapter(PyObject *self, bool isCreatedByFactory = false);
+  IFunction1DAdapter(PyObject *self);
 
   /// Disable copy operator - The PyObject must be supplied to construct the
   /// object

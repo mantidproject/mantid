@@ -36,12 +36,17 @@ PythonObjectInstantiator<IFunction>::createInstance() const {
   using namespace boost::python;
   Environment::GlobalInterpreterLock gil;
 
-  object instance;
-  try {
-    bool createdByFactory(true);
-    instance = m_classObject(createdByFactory);
-  } catch (...) {
-    instance = m_classObject();
+  // The class may instantiate different objects depending on whether
+  // it is being created by the function factory or not
+  bool const isClassFactoryAware =
+      PyObject_HasAttrString(m_classObject.ptr(), "_factory_use");
+
+  if (isClassFactoryAware) {
+    m_classObject.attr("_factory_use")();
+  }
+  object instance = m_classObject();
+  if (isClassFactoryAware) {
+    m_classObject.attr("_factory_free")();
   }
   auto instancePtr = extract<boost::shared_ptr<IFunction>>(instance)();
   auto *deleter =

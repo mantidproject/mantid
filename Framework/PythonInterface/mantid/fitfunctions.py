@@ -409,8 +409,6 @@ class CompositeFunctionWrapper(FunctionWrapper):
                        composite function itself.
         """
         if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
-            if isinstance(args[0], str):
-                raise RuntimeError('Whaaat? {}'.format(args[0]))
             # We have a composite function to wrap
             self.fun = args[0]
         else:
@@ -768,19 +766,27 @@ def _attach_wrappers(source_module):
             setattr(source_module, name, _create_wrapper_function(name))
 
 
-_OldIFunction1D = IFunction1D
+_ExportedIFunction1D = IFunction1D
 
 
-class _NewIFunction1D(_OldIFunction1D):
+class _IFunction1DWrapperCreator(_ExportedIFunction1D):
     """Overriden IFunction1D class that allows creation of
     FunctionWrappers for newly defined fit functions.
     """
+    _used_by_factory = False
 
-    def __new__(cls, _is_called_by_function_factory=False, **kwargs):
-        if _is_called_by_function_factory or (hasattr(cls.__init__, '__code__') and
-                cls.__init__.__code__.co_argcount == 1):
-            return _OldIFunction1D.__new__(cls)
+    def __new__(cls, **kwargs):
+        if cls._used_by_factory:
+            return _ExportedIFunction1D.__new__(cls)
         return FunctionWrapper(cls.__name__, **kwargs)
 
+    @classmethod
+    def _factory_use(cls):
+        cls._used_by_factory = True
 
-IFunction1D = _NewIFunction1D
+    @classmethod
+    def _factory_free(cls):
+        cls._used_by_factory = False
+
+
+IFunction1D = _IFunction1DWrapperCreator

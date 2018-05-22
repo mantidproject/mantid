@@ -36,8 +36,8 @@ from StretchedExpFTHelper import surrogate, function1Dcommon
 class StretchedExpFT(IFunction1D):
 
     # pylint: disable=super-on-old-class
-    def __init__(self, _is_called_by_function_factory):
-        super(self.__class__, self).__init__(_is_called_by_function_factory)
+    def __init__(self):
+        super(self.__class__, self).__init__()
         self._parmList = list()
 
     def category(self):

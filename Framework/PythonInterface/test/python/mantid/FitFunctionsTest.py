@@ -702,8 +702,8 @@ class FitFunctionsTest(unittest.TestCase):
 
     def test_new_function_init(self):
         class BFunction(IFunction1D):
-            def __init__(self, created_by_factory):
-                super(BFunction, self).__init__(created_by_factory)
+            def __init__(self):
+                super(BFunction, self).__init__()
 
             def init(self):
                 self.declareParameter("C", 0.0)
@@ -720,27 +720,6 @@ class FitFunctionsTest(unittest.TestCase):
         fun = BFunction(C=3)
         self.assertEqual(fun.C, 3)
         self.assertEqual(fun(2), 6)
-
-    def test_new_function_init_no_args_no_subscribe(self):
-        class BFunction(IFunction1D):
-            def __init__(self):
-                super(BFunction, self).__init__()
-                self.declareParameter("C", 2.0)
-
-            def init(self):
-                pass
-
-            def function1D(self, xvals):
-                c = self.getParameterValue("C")
-                return c * xvals
-
-        fun = BFunction()
-        self.assertRaises(TypeError, fun, 4)
-
-        ws = CreateWorkspace(DataX=[0,1,2,3,4], DataY=[5,5,5,5,5])
-        cws = EvaluateFunction(fun,"ws", OutputWorkspace='out')
-        cvals = cws.readY(1)
-        self.assertEqual(list(cvals), [0.0, 2.0, 4.0, 6.0, 8.0])
 
     def test_multi_domain_fit(self):
         x = np.linspace(-10, 10)
