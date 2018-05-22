@@ -97,8 +97,8 @@ void ApplyMuonDetectorGrouping::init() {
   declareProperty("TimeZero", 0.0, "....", Direction::Input);
   declareProperty("TimeLoadZero", 0.0, "....", Direction::Input);
 
-  declareProperty("SummedPeriods", std::to_string(1), "...", Direction::Input);
-  declareProperty("SubtractedPeriods", emptyString, "...", Direction::Input);
+  declareProperty("SummedPeriods", std::to_string(1), "A list of periods to sum in multiperiod data.", Direction::Input);
+  declareProperty("SubtractedPeriods", emptyString, "A list of periods to subtract in multiperiod data.", Direction::Input);
 
   // Perform Group Associations.
 
@@ -119,10 +119,10 @@ void ApplyMuonDetectorGrouping::init() {
 void ApplyMuonDetectorGrouping::exec() {
   Muon::AnalysisOptions options;
 
-  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+  WorkspaceGroup_sptr groupWS = getProperty("InputWorkspaceGroup");
   const Workspace_sptr inputWS = getProperty("InputWorkspace");
-  WorkspaceGroup_sptr muonWS = getUserInput(inputWS, groupedWS, options);
-  std::string groupedWSName = groupedWS->getName();
+  WorkspaceGroup_sptr muonWS = getUserInput(inputWS, groupWS, options);
+  std::string groupedWSName = groupWS->getName();
 
   clipXRangeToWorkspace(*muonWS, options);
 
@@ -193,7 +193,7 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
 }
 
 /**
-* Clip Xmin/Xmax to the range in the input WS
+* Clip Xmin/Xmax to the range in the first histogram of the input WS group.
 */
 void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
     const WorkspaceGroup& ws, Muon::AnalysisOptions& options) {
@@ -320,7 +320,8 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
 * Performs validation of inputs to the algorithm.
 * - Checks the bounds on X axis are sensible
 * - Checks that the workspaceGroup is named differently to the workspace with
-* the data
+* the data.
+* - Checks that a group name is entered.
 * @returns Map of parameter names to errors
 */
 std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
@@ -345,6 +346,16 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
     errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
                                     "the same name as InputWorkspace.";
   };
+
+  std::string groupName = getPropertyValue("groupName");
+  if (!groupName.size()) {
+	errors["groupName"] = "The group should be named.";
+  }
+
+  if (!std::any_of(std::begin(groupName), std::end(groupName), ::isalnum))
+  {
+	  errors["groupName"] = "The group name must contain at least one alphnumeric character.";
+  }
 
   return errors;
 }
