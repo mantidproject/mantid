@@ -7,6 +7,7 @@ namespace API {
 /** Constructor.
 *  Sets the property names but initialises the function pointer to null.
 *  @param name :: The name to assign to the property
+*  @param direction :: The direction of the function (i.e. input or output)
 */
 FunctionProperty::FunctionProperty(const std::string &name,
                                    const unsigned int direction)
