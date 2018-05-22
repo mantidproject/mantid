@@ -15,7 +15,8 @@ To be used as part of TF asymmetry calculations
 Required Properties:
 <UL>
 <LI> InputFunction - The function we want to change </LI>
-<LI> NormalisationTable - The name of the table workspace that contains the normalization constants
+<LI> NormalisationTable - The name of the table workspace that contains the
+normalization constants
 </LI>
 <LI> WorkspaceList - The workspaces we are interested in </LI>
 <LI> Mode - If constructing or destructing the TF asymmetry function </LI>
@@ -56,7 +57,8 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm converts adds/removes "
-           "the normalisation to the fit function for calculating the TF asymmetry.";
+           "the normalisation to the fit function for calculating the TF "
+           "asymmetry.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -65,7 +67,7 @@ public:
   const std::string category() const override { return "Muon"; }
   /// Algorithm's seeAlso
   const std::vector<std::string> seeAlso() const override {
-	  return{ "Fit", "EstimateMuonAsymmetryFromCounts","CalculateMuonAsymmetry"};
+    return {"Fit", "EstimateMuonAsymmetryFromCounts", "CalculateMuonAsymmetry"};
   }
 
 private:
@@ -73,9 +75,13 @@ private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  Mantid::API::IFunction_sptr getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original, const std::vector<double> norms);
-  Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original);
-  Mantid::API::IFunction_sptr extractUserFunction(const Mantid::API::IFunction_sptr &TFFunc);
+  Mantid::API::IFunction_sptr
+  getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original,
+                        const std::vector<double> norms);
+  Mantid::API::IFunction_sptr
+  extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original);
+  Mantid::API::IFunction_sptr
+  extractUserFunction(const Mantid::API::IFunction_sptr &TFFunc);
   void setOutput(const Mantid::API::IFunction_sptr &function);
   std::vector<double> getNorms();
 };

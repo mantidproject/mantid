@@ -8,11 +8,11 @@ namespace API {
 *  Sets the property names but initialises the function pointer to null.
 *  @param name :: The name to assign to the property
 */
-FunctionProperty::FunctionProperty(const std::string &name,const unsigned int direction)
+FunctionProperty::FunctionProperty(const std::string &name,
+                                   const unsigned int direction)
     : Kernel::PropertyWithValue<boost::shared_ptr<IFunction>>(
           name, boost::shared_ptr<IFunction>(),
-          Kernel::IValidator_sptr(new Kernel::NullValidator()),
-          direction) {}
+          Kernel::IValidator_sptr(new Kernel::NullValidator()), direction) {}
 
 /// Copy constructor
 FunctionProperty::FunctionProperty(const FunctionProperty &right)
@@ -82,12 +82,11 @@ std::string FunctionProperty::setValue(const std::string &value) {
 *  @returns A user level description of the problem or "" if it is valid.
 */
 std::string FunctionProperty::isValid() const {
-	if (direction() == Kernel::Direction::Output) {
-		return "";
-	}
-	else {
-		return isDefault() ? "Function is empty." : "";
-	}
+  if (direction() == Kernel::Direction::Output) {
+    return "";
+  } else {
+    return isDefault() ? "Function is empty." : "";
+  }
 }
 
 /** Indicates if the function has not been created yet.
