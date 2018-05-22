@@ -23,6 +23,21 @@ static bool isContainedIn(const std::string &name,
   return std::find(collection.begin(), collection.end(), name) !=
          collection.end();
 }
+
+// Convert input string plot type to PlotType.
+Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
+	if (plotType == "Counts") {
+		return Mantid::Muon::PlotType::Counts;
+	}
+	else if (plotType == "Asymmetry") {
+		return Mantid::Muon::PlotType::Asymmetry;
+	}
+	else {
+		// default to Counts.
+		return Mantid::Muon::PlotType::Counts;
+	}
+}
+
 }
 
 using namespace Mantid::API;
@@ -167,17 +182,18 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
   m_loadedTimeZero = this->getProperty("TimeLoadZero");
   m_summedPeriods = this->getPropertyValue("SummedPeriods");
   m_subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
+  m_plotType = getPlotType(this->getPropertyValue("plotType"));
 
-  std::string plotType;
-  plotType = this->getPropertyValue("plotType");
-  if (plotType == "Counts") {
-    m_plotType = Muon::PlotType::Counts;
-  } else if (plotType == "Asymmetry") {
-    m_plotType = Muon::PlotType::Asymmetry;
-  } else {
-    // default to Counts.
-    m_plotType = Muon::PlotType::Counts;
-  }
+  //std::string plotType;
+  //plotType = this->getPropertyValue("plotType");
+  //if (plotType == "Counts") {
+  //  m_plotType = Muon::PlotType::Counts;
+  //} else if (plotType == "Asymmetry") {
+  //  m_plotType = Muon::PlotType::Asymmetry;
+  //} else {
+  //  // default to Counts.
+  //  m_plotType = Muon::PlotType::Counts;
+  //}
 
   return muonWS;
 }
