@@ -28,10 +28,10 @@ static bool isContainedIn(const std::string &name,
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace MuonAlgorithmHelper;
+using namespace Mantid::MuonAlgorithmHelper;
 
 namespace Mantid {
-namespace DataHandling {
+namespace Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyMuonDetectorGrouping)

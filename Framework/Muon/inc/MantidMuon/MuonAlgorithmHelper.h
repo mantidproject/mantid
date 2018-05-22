@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+namespace Mantid {
 namespace Muon {
 /// Types of entities we are dealing with
 enum ItemType { Pair, Group };
@@ -44,18 +45,18 @@ struct AnalysisOptions {
 
 /// Whether multiple fitting is enabled or disabled
 enum class MultiFitState { Enabled, Disabled };
-}
+} // namespace Muon
 
 namespace MuonAlgorithmHelper {
 
 /// Returns a first period MatrixWorkspace in a run workspace
-Mantid::API::MatrixWorkspace_sptr firstPeriod(Mantid::API::Workspace_sptr ws);
+Mantid::API::MatrixWorkspace_sptr firstPeriod(API::Workspace_sptr ws);
 
 /// Get a run label for the workspace
-std::string getRunLabel(const Mantid::API::Workspace_sptr &ws);
+std::string getRunLabel(const API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
-std::string getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
+std::string getRunLabel(const std::vector<API::Workspace_sptr> &wsList);
 
 /// Get a run label given instrument and run numbers
 std::string getRunLabel(const std::string &instrument,
@@ -71,5 +72,7 @@ findConsecutiveRuns(const std::vector<int> &runs);
 
 /// Generate new analysis workspace name
 std::string generateWorkspaceName(const Muon::DatasetParams &params);
-}
+} // namespace MuonAlgorithmHelper
+} // namespace Mantid
+
 #endif /* MANTIDQT_CUSTOMINTERFACES_MUONALGORITHMHELPER_H_ */

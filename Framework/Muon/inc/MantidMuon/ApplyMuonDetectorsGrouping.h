@@ -7,10 +7,8 @@
 #include "MantidKernel/System.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
-using namespace Mantid::API;
-
 namespace Mantid {
-namespace DataHandling {
+namespace Muon {
 
 /** ApplyMuonDetectorsGrouping : TODO: DESCRIPTION
 
@@ -38,10 +36,10 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport ApplyMuonDetectorGrouping : public Mantid::API::Algorithm {
+class DLLExport ApplyMuonDetectorGrouping : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  ApplyMuonDetectorGrouping() : Mantid::API::Algorithm() {}
+  ApplyMuonDetectorGrouping() : API::Algorithm() {}
   /// Virtual destructor
   ~ApplyMuonDetectorGrouping() {}
   /// Algorithm's name
@@ -73,7 +71,7 @@ private:
   std::string m_wsName;
   std::string m_summedPeriods;
   std::string m_subtractedPeriods;
-  Muon::PlotType m_plotType;
+  PlotType m_plotType;
   double m_Xmin;
   double m_Xmax;
   double m_loadedTimeZero;
@@ -90,12 +88,12 @@ private:
   /// Sets algorithm properties according to options.
   void
   setProcessAlgorithmProperties(IAlgorithm_sptr alg,
-                                const Muon::AnalysisOptions &options) const;
+                                const AnalysisOptions &options) const;
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName();
 };
 
-} // namespace DataHandling
+} // namespace Muon
 } // namespace Mantid
 
 #endif /* MANTID_MUON_APPLYMUONDETECTORSGROUPING_H_ */

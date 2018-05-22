@@ -19,7 +19,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
+using namespace Mantid::Muon;
 using Mantid::DataHandling::LoadMuonNexus2;
 
 /// Holds data loaded from file

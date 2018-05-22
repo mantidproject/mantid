@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+namespace Mantid {
 namespace MuonAlgorithmHelper {
 
 using namespace Mantid::Kernel;
@@ -236,4 +237,5 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
   return workspaceName.str();
 }
 
+} // namespace MuonAlgorithmHelper
 } // namespace Mantid
