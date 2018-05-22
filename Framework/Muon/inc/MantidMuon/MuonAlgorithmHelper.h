@@ -36,10 +36,10 @@ struct AnalysisOptions {
   double timeZero = 0;                  /// Value to use for t0 correction
   double loadedTimeZero = 0;            /// Time zero from data file
   std::pair<double, double> timeLimits; /// Min, max X values
-  std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
-  std::string groupPairName; /// Name of group or pair to use
+  std::string rebinArgs;          /// Arguments for rebin (empty to not rebin)
+  std::string groupPairName;      /// Name of group or pair to use
   Mantid::API::Grouping grouping; /// Grouping to use
-  PlotType plotType = {};               /// Type of analysis to perform
+  PlotType plotType = {};         /// Type of analysis to perform
   explicit AnalysisOptions() {}
 };
 

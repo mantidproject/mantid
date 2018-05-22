@@ -117,7 +117,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", emptyString));
-	TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("SummedPeriods", std::to_string(1)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));
@@ -178,7 +178,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", emptyString));
-	TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("SummedPeriods", std::to_string(1)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));

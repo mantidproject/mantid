@@ -26,18 +26,15 @@ static bool isContainedIn(const std::string &name,
 
 // Convert input string plot type to PlotType.
 Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
-	if (plotType == "Counts") {
-		return Mantid::Muon::PlotType::Counts;
-	}
-	else if (plotType == "Asymmetry") {
-		return Mantid::Muon::PlotType::Asymmetry;
-	}
-	else {
-		// default to Counts.
-		return Mantid::Muon::PlotType::Counts;
-	}
+  if (plotType == "Counts") {
+    return Mantid::Muon::PlotType::Counts;
+  } else if (plotType == "Asymmetry") {
+    return Mantid::Muon::PlotType::Asymmetry;
+  } else {
+    // default to Counts.
+    return Mantid::Muon::PlotType::Counts;
+  }
 }
-
 }
 
 using namespace Mantid::API;
@@ -67,7 +64,9 @@ void ApplyMuonDetectorGrouping::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("groupName", emptyString, "The name of the group. Must contain at least one alphanumeric character.",
+  declareProperty("groupName", emptyString, "The name of the group. Must "
+                                            "contain at least one alphanumeric "
+                                            "character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "
@@ -79,19 +78,24 @@ void ApplyMuonDetectorGrouping::init() {
       boost::make_shared<Kernel::ListValidator<std::string>>(g_analysisTypes),
       "The type of analysis to perform on the spectra.", Direction::Input);
 
-  declareProperty("TimeMin", 0.0, "Start time for the data in ms. Only used with the asymmetry analysis.",
-                  Direction::Input);
+  declareProperty(
+      "TimeMin", 0.0,
+      "Start time for the data in ms. Only used with the asymmetry analysis.",
+      Direction::Input);
   setPropertySettings("TimeMin",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
-  declareProperty("TimeMax", 30.0, "End time for the data in ms. Only used with the asymmetry analysis.",
-                  Direction::Input);
+  declareProperty(
+      "TimeMax", 30.0,
+      "End time for the data in ms. Only used with the asymmetry analysis.",
+      Direction::Input);
   setPropertySettings("TimeMax",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
-  declareProperty("RebinArgs", emptyString, "Rebin arguments. No rebinning if left empty.",
+  declareProperty("RebinArgs", emptyString,
+                  "Rebin arguments. No rebinning if left empty.",
                   Direction::Input);
 
   declareProperty("TimeOffset", 0.0,
@@ -99,8 +103,12 @@ void ApplyMuonDetectorGrouping::init() {
                   "given corresponds to the bin that will become 0.0 seconds.",
                   Direction::Input);
 
-  declareProperty("SummedPeriods", std::to_string(1), "A list of periods to sum in multiperiod data.", Direction::Input);
-  declareProperty("SubtractedPeriods", emptyString, "A list of periods to subtract in multiperiod data.", Direction::Input);
+  declareProperty("SummedPeriods", std::to_string(1),
+                  "A list of periods to sum in multiperiod data.",
+                  Direction::Input);
+  declareProperty("SubtractedPeriods", emptyString,
+                  "A list of periods to subtract in multiperiod data.",
+                  Direction::Input);
 
   // Perform Group Associations.
 
@@ -145,7 +153,8 @@ void ApplyMuonDetectorGrouping::exec() {
 /*
 * Generate the name of the new workspace
 */
-const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(const Muon::AnalysisOptions& options, const std::string& groupWSName) {
+const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
+    const Muon::AnalysisOptions &options, const std::string &groupWSName) {
 
   Muon::DatasetParams params;
   // don't fill in instrument, runs, periods; not required.
@@ -159,12 +168,13 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(const Muon::Ana
 }
 
 /*
-* Store the input properties in options, returns inputWS cast to a WorkspaceGroup.
+* Store the input properties in options, returns inputWS cast to a
+* WorkspaceGroup.
 */
 WorkspaceGroup_sptr
 ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
-                                        const WorkspaceGroup_sptr &groupedWS, 
-										Muon::AnalysisOptions& options) {
+                                        const WorkspaceGroup_sptr &groupedWS,
+                                        Muon::AnalysisOptions &options) {
 
   // Store all the options needed for MuonProcess
   Grouping grouping;
@@ -172,24 +182,24 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
   grouping.groupNames.emplace_back(this->getPropertyValue("groupName"));
   grouping.groups.emplace_back(this->getPropertyValue("Grouping"));
 
-  options.grouping = grouping ;
+  options.grouping = grouping;
   options.summedPeriods = this->getPropertyValue("SummedPeriods");
   options.subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
   options.timeZero = 0.0;
   options.loadedTimeZero = this->getProperty("TimeOffset");
   options.timeLimits.first = this->getProperty("TimeMin");
   options.timeLimits.second = this->getProperty("TimeMax");
-  options.rebinArgs = this->getPropertyValue("rebinArgs");;
+  options.rebinArgs = this->getPropertyValue("rebinArgs");
+  ;
   options.plotType = getPlotType(this->getPropertyValue("AnalysisType"));
   options.groupPairName = this->getPropertyValue("groupName");
-  
+
   // Cast input WS to a WorkspaceGroup
   auto muonWS = boost::make_shared<WorkspaceGroup>();
   if (auto test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-	  muonWS->addWorkspace(inputWS);
-  }
-  else {
-	  muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+    muonWS->addWorkspace(inputWS);
+  } else {
+    muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
   }
   return muonWS;
 }
@@ -198,7 +208,7 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
 * Clip Xmin/Xmax to the range in the first histogram of the input WS group.
 */
 void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
-    const WorkspaceGroup& ws, Muon::AnalysisOptions& options) {
+    const WorkspaceGroup &ws, Muon::AnalysisOptions &options) {
 
   MatrixWorkspace_sptr clipWS;
   clipWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws.getItem(0));
@@ -207,19 +217,19 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
   clipWS->getXMinMax(dataXMin, dataXMax);
 
   if (options.timeLimits.first < dataXMin) {
-	  options.timeLimits.first = dataXMin;
+    options.timeLimits.first = dataXMin;
   }
   if (options.timeLimits.second > dataXMax) {
-	  options.timeLimits.second = dataXMax;
+    options.timeLimits.second = dataXMax;
   }
 }
 
 /**
 * Creates workspace, processing the data using the MuonProcess algorithm.
 */
-Workspace_sptr
-ApplyMuonDetectorGrouping::createAnalysisWorkspace(const Workspace_sptr &inputWS,
-                                                   bool noRebin, Muon::AnalysisOptions &options) {
+Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
+    const Workspace_sptr &inputWS, bool noRebin,
+    Muon::AnalysisOptions &options) {
 
   if (noRebin) {
     options.rebinArgs = "";
@@ -351,12 +361,12 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
 
   std::string groupName = getPropertyValue("groupName");
   if (!groupName.size()) {
-	errors["groupName"] = "The group should be named.";
+    errors["groupName"] = "The group should be named.";
   }
 
-  if (!std::any_of(std::begin(groupName), std::end(groupName), ::isalnum))
-  {
-	  errors["groupName"] = "The group name must contain at least one alphnumeric character.";
+  if (!std::any_of(std::begin(groupName), std::end(groupName), ::isalnum)) {
+    errors["groupName"] =
+        "The group name must contain at least one alphnumeric character.";
   }
 
   return errors;

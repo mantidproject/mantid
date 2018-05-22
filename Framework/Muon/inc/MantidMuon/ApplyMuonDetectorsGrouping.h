@@ -54,7 +54,8 @@ public:
   }
   /// Algorithm's summary for identification
   const std::string summary() const override {
-    return "Group several muon detector IDs together and perform an analysis (either counts or asymmetry).";
+    return "Group several muon detector IDs together and perform an analysis "
+           "(either counts or asymmetry).";
   }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
@@ -67,23 +68,31 @@ private:
   /// Execution code
   void exec() override;
   ///  Store the input properties as private member variables
-  API::WorkspaceGroup_sptr getUserInput(const API::Workspace_sptr &inputWS,
-	  const API::WorkspaceGroup_sptr &groupedWS, Muon::AnalysisOptions& options);
+  API::WorkspaceGroup_sptr
+  getUserInput(const API::Workspace_sptr &inputWS,
+               const API::WorkspaceGroup_sptr &groupedWS,
+               Muon::AnalysisOptions &options);
   /// Clip Xmin/Xmax to the range in the input WS
-  void clipXRangeToWorkspace(const API::WorkspaceGroup& ws, Muon::AnalysisOptions& options);
+  void clipXRangeToWorkspace(const API::WorkspaceGroup &ws,
+                             Muon::AnalysisOptions &options);
   /// Creates and analyses a workspace, if isRaw does not rebin.
-  API::Workspace_sptr createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin, Muon::AnalysisOptions &options);
+  API::Workspace_sptr
+  createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin,
+                          Muon::AnalysisOptions &options);
   /// Sets algorithm properties according to options.
-  void
-  setMuonProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
-                                const AnalysisOptions &options) const;
+  void setMuonProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
+                                         const AnalysisOptions &options) const;
 
-  /// Set algorithm properties (input workspace, and period properties) according to the given options. For use with
+  /// Set algorithm properties (input workspace, and period properties)
+  /// according to the given options. For use with
   /// MuonProcess.
-  void setMuonProcessPeriodProperties(
-	  API::IAlgorithm_sptr alg, const API::Workspace_sptr &inputWS, const Muon::AnalysisOptions &options) const;
+  void
+  setMuonProcessPeriodProperties(API::IAlgorithm_sptr alg,
+                                 const API::Workspace_sptr &inputWS,
+                                 const Muon::AnalysisOptions &options) const;
   /// Generate the name of the new workspace
-  const std::string getNewWorkspaceName(const Muon::AnalysisOptions& options, const std::string& groupWSName);
+  const std::string getNewWorkspaceName(const Muon::AnalysisOptions &options,
+                                        const std::string &groupWSName);
 };
 
 } // namespace Muon
