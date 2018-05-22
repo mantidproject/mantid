@@ -70,12 +70,12 @@ private:
   API::WorkspaceGroup_sptr getUserInput(const API::Workspace_sptr &inputWS,
 	  const API::WorkspaceGroup_sptr &groupedWS, Muon::AnalysisOptions& options);
   /// Clip Xmin/Xmax to the range in the input WS
-  void clipXRangeToWorkspace(API::MatrixWorkspace &ws, Muon::AnalysisOptions& options);
+  void clipXRangeToWorkspace(const API::WorkspaceGroup& ws, Muon::AnalysisOptions& options);
   /// Creates and analyses a workspace, if isRaw does not rebin.
   API::Workspace_sptr createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin, Muon::AnalysisOptions &options);
   /// Sets algorithm properties according to options.
   void
-  setProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
+  setMuonProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
                                 const AnalysisOptions &options) const;
 
   /// Set algorithm properties (input workspace, and period properties) according to the given options. For use with
