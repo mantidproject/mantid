@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace Muon {
 
-/** ApplyMuonDetectorsGrouping : TODO: DESCRIPTION
+/** ApplyMuonDetectorsGrouping :
 
 @date 2018-05-04
 
@@ -56,8 +56,6 @@ public:
   const std::string summary() const override {
     return "Group several muon detector IDs together and perform an analysis.";
   }
-  /// Clip Xmin/Xmax to the range in the input WS
-  void clipXRangeToWorkspace(MatrixWorkspace_sptr &ws);
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
   /// Allow WorkspaceGroup property to function correctly.
@@ -81,13 +79,15 @@ private:
   /// Execution code
   void exec() override;
   ///  Store the input properties as private member variables
-  WorkspaceGroup_sptr getUserInput(Workspace_sptr &inputWS,
-                                   WorkspaceGroup_sptr &groupedWS);
+  API::WorkspaceGroup_sptr getUserInput(const API::Workspace_sptr &inputWS,
+	  const API::WorkspaceGroup_sptr &groupedWS);
+  /// Clip Xmin/Xmax to the range in the input WS
+  void clipXRangeToWorkspace(API::MatrixWorkspace &ws);
   /// Creates and analyses a workspace, if isRaw does not rebin.
-  Workspace_sptr createAnalysisWorkspace(Workspace_sptr &inputWS, bool isRaw);
+  API::Workspace_sptr createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin);
   /// Sets algorithm properties according to options.
   void
-  setProcessAlgorithmProperties(IAlgorithm_sptr alg,
+  setProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
                                 const AnalysisOptions &options) const;
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName();

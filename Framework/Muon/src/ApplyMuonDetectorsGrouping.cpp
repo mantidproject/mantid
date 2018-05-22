@@ -104,12 +104,12 @@ void ApplyMuonDetectorGrouping::init() {
 void ApplyMuonDetectorGrouping::exec() {
 
   WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  const Workspace_sptr inputWS = getProperty("InputWorkspace");
   WorkspaceGroup_sptr muonWS = getUserInput(inputWS, groupedWS);
 
   MatrixWorkspace_sptr clipWS;
   clipWS = boost::dynamic_pointer_cast<MatrixWorkspace>(muonWS->getItem(0));
-  clipXRangeToWorkspace(clipWS);
+  clipXRangeToWorkspace(*clipWS);
 
   auto ws = createAnalysisWorkspace(inputWS, false);
   auto wsRaw = createAnalysisWorkspace(inputWS, true);
@@ -145,8 +145,8 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName() {
 * Store the input properties as private member variables
 */
 WorkspaceGroup_sptr
-ApplyMuonDetectorGrouping::getUserInput(Workspace_sptr &inputWS,
-                                        WorkspaceGroup_sptr &groupedWS) {
+ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
+                                        const WorkspaceGroup_sptr &groupedWS) {
 
   // Cast input WS to a grouping
   auto muonWS = boost::make_shared<WorkspaceGroup>();
@@ -186,10 +186,10 @@ ApplyMuonDetectorGrouping::getUserInput(Workspace_sptr &inputWS,
 * Clip Xmin/Xmax to the range in the input WS
 */
 void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
-    MatrixWorkspace_sptr &ws) {
+    MatrixWorkspace &ws) {
   double dataXMin;
   double dataXMax;
-  ws->getXMinMax(dataXMin, dataXMax);
+  ws.getXMinMax(dataXMin, dataXMax);
   if (m_Xmin < dataXMin) {
     m_Xmin = dataXMin;
   }
@@ -202,8 +202,8 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
 * Creates workspace, processing the data using the MuonProcess algorithm.
 */
 Workspace_sptr
-ApplyMuonDetectorGrouping::createAnalysisWorkspace(Workspace_sptr &inputWS,
-                                                   bool isRaw) {
+ApplyMuonDetectorGrouping::createAnalysisWorkspace(const Workspace_sptr &inputWS,
+                                                   bool noRebin) {
 
   // Store all the options for Muon Process
   Grouping grouping;
@@ -219,7 +219,7 @@ ApplyMuonDetectorGrouping::createAnalysisWorkspace(Workspace_sptr &inputWS,
   options.loadedTimeZero = m_loadedTimeZero;
   options.timeLimits.first = m_Xmin;
   options.timeLimits.second = m_Xmax;
-  options.rebinArgs = isRaw ? "" : m_rebinArgs;
+  options.rebinArgs = noRebin ? "" : m_rebinArgs;
   options.plotType = m_plotType;
   options.groupPairName = m_groupName;
 
