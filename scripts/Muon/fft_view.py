@@ -108,14 +108,10 @@ class FFTView(QtGui.QWidget):
         table_utils.setTableHeaders(self.FFTTable)
         table_utils.setTableHeaders(self.FFTTableA)
 
-        self.horizontalSpacer1 = QtGui.QSpacerItem(20, 94, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        self.horizontalSpacer2 = QtGui.QSpacerItem(20, 280, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         # add to layout
         splitter.addWidget(self.FFTTable)
-        #self.grid.addItem(self.horizontalSpacer1)
         splitter.addWidget(self.advancedLabel)
         splitter.addWidget(self.FFTTableA)
-        #self.grid.addItem(self.horizontalSpacer2)
         self.grid.addWidget(splitter)
         self.grid.addWidget(self.button)
 
