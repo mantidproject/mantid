@@ -523,6 +523,8 @@ Example Input:
 
 .. _texture_mode_isis-powder-diffraction-ref:
 
+texture_mode
+^^^^^^^^^^^^
 If set to **True**, then this specifies that the reduction is to be
 carried out using Gem's 160-bank texture mode, as opposed to the
 standard 6 banks. This means using altered cropping values for the
@@ -699,6 +701,16 @@ On GEM this is set to the following:
 ..  code-block:: python
 
   raw_tof_cropping_values: (500, 20000)
+
+.. _save_maud_gem_isis-powder-diffraction-ref:
+
+save_maud
+^^^^^^^^^
+
+If set to **True**, this saves the focus output to the Maud
+three-column format (``.gem`` file extension). If
+:ref:`texture_mode_gem_isis-powder-diffraction-ref` is set to **True**
+this is enabled, and disabled if it is set to **False**.
 
 .. _spline_coefficient_gem_isis-powder-diffraction-ref:
 

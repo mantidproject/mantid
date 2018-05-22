@@ -97,7 +97,8 @@ def get_mode_specific_variables(is_texture_mode):
     return {"focused_cropping_values": texture_focused_cropping_values if is_texture_mode else focused_cropping_values,
             "vanadium_cropping_values": texture_vanadium_cropping_values if is_texture_mode
             else vanadium_cropping_values,
-            "grouping_file_name": "offsets_xie_test_2.cal" if is_texture_mode else "GEM_Instrument_grouping.cal"}
+            "grouping_file_name": "offsets_xie_test_2.cal" if is_texture_mode else "GEM_Instrument_grouping.cal",
+            "save_maud": is_texture_mode}
 
 
 def get_all_adv_variables():
