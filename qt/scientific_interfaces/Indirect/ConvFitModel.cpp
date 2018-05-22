@@ -427,6 +427,10 @@ std::size_t ConvFitModel::getNumberHistograms(std::size_t index) const {
   return getWorkspace(index)->getNumberHistograms();
 }
 
+MatrixWorkspace_sptr ConvFitModel::getResolution(std::size_t index) const {
+  return m_resolution[index].lock();
+}
+
 CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   auto function = IndirectFittingModel::getMultiDomainFunction();
   const std::string base = "__ConvFitResolution";
