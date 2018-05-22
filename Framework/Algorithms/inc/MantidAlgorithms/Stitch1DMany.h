@@ -66,8 +66,6 @@ private:
   /// Overwrites Algorithm method.
   void exec() override;
 
-  // Data
-
   // A 2D matrix holding workspaces obtained from each workspace list/group
   std::vector<std::vector<API::MatrixWorkspace_sptr>> m_inputWSMatrix;
 
