@@ -21,12 +21,14 @@ class Gem(AbstractInst):
     # Public API
 
     def focus(self, **kwargs):
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(
             run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
@@ -88,6 +90,12 @@ class Gem(AbstractInst):
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
+
+    def _switch_texture_mode_specific_inst_settings(self, mode):
+        if mode is None and hasattr(self._inst_settings, "texture_mode"):
+            mode = self._inst_settings.texture_mode
+        self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode),
+                                              suppress_warnings=True)
 
 
 def _gem_generate_inst_name(run_number):

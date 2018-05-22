@@ -121,6 +121,7 @@ The following parameters may also be optionally set:
 - :ref:`file_ext_gem_isis-powder-diffraction-ref`
 - :ref:`sample_empty_gem_isis-powder-diffraction-ref`
 - :ref:`suffix_gem_isis-powder-diffraction-ref`
+- :ref:`texture_mode_isis-powder-diffraction-ref`
 - :ref:`unit_to_keep_gem_isis-powder-diffraction-ref`
 
 If :ref:`sample_empty_gem_isis-powder-diffraction-ref` is
@@ -520,6 +521,21 @@ Example Input:
   # Scale sample empty to 90% of original
   gem_example.focus(sample_empty_scale=0.9, ...)
 
+.. _texture_mode_isis-powder-diffraction-ref:
+
+If set to **True**, then this specifies that the reduction is to be
+carried out using Gem's 160-bank texture mode, as opposed to the
+standard 6 banks. This means using altered cropping values for the
+vanadium and sample workspaces, and using Men Xie's grouping file
+(which must be placed in the top level of your
+:ref:`calibration_directory_gem_isis-powder-diffraction-ref`).
+
+Example Input:
+
+.. code-block:: python
+
+   gem_example.focus(texture_mode=True, ...)
+
 .. _unit_to_keep_gem_isis-powder-diffraction-ref:
 
 unit_to_keep
@@ -627,6 +643,7 @@ On GEM this is set to the following TOF windows:
 
 ..  code-block:: python
 
+  # texture_mode = False (or not supplied)
   focused_cropping_values = [(550, 19900),  # Bank 1
                              (550, 19900),  # Bank 2
                              (550, 19900),  # Bank 3
@@ -634,6 +651,16 @@ On GEM this is set to the following TOF windows:
                              (550, 19480),  # Bank 5
                              (550, 17980)   # Bank 6
                              ]
+
+  # texture_mode = True
+  focused_cropping_values = [(448, 29344),  # Bank 1
+                             (390, 19225),  # Bank 2
+			     (390, 18673),  # Bank 3
+			         ...        # Too many to list here - see gem_advanced_config.py
+			     (600, 16828),  # Bank 158
+			     (600, 16822),  # Bank 159
+			     (600, 16827)   # Bank 160
+			     ]
 
 .. _grouping_file_name_gem_isis-powder-diffraction-ref:
 
@@ -649,7 +676,11 @@ On GEM this is set to the following:
 
 ..  code-block:: python
 
+  # texture_mode = False (or not supplied)
   grouping_file_name: "GEM_Instrument_grouping.cal"
+
+  # texture_mode = True
+  grouping_file_name: "offsets_xie_test_2.cal"
 
 .. _raw_tof_cropping_values_gem_isis-powder-diffraction-ref:
 
@@ -706,6 +737,7 @@ On GEM this is set to the following:
 
 ..  code-block:: python
 
+  # texture_mode = False (or not supplied)
   vanadium_cropping_values = [(510, 19997),  # Bank 1
                               (510, 19997),  # Bank 2
                               (510, 19997),  # Bank 3
@@ -713,6 +745,16 @@ On GEM this is set to the following:
                               (510, 19500),  # Bank 5
                               (510, 18000)   # Bank 6
                               ]
+
+  # texture_mode = True
+  vanadium_cropping_values = [(75, 34933),   # Bank 1
+                              (65, 22887),   # Bank 2
+			      (65, 22230),   # Bank 3
+			          ...        # Too many banks to list here -see gem_advanced_config.py
+			      (100, 20034),  # Bank 158
+			      (100, 20026),  # Bank 159
+			      (100, 20033)   # Bank 160
+			      ]
 
 .. _vanadium_sample_details_gem_isis-powder-diffraction-ref:
 
