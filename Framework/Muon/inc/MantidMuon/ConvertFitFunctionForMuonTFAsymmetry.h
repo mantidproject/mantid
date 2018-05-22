@@ -76,6 +76,7 @@ private:
   Mantid::API::IFunction_sptr getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original, const std::vector<double> norms);
   Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original);
   Mantid::API::IFunction_sptr extractUserFunction(const Mantid::API::IFunction_sptr &TFFunc);
+  void setOutput(const Mantid::API::IFunction_sptr &function);
   std::vector<double> getNorms();
 };
 

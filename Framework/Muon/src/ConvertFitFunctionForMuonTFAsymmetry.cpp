@@ -31,7 +31,7 @@ namespace {
 		std::string domain = stringTie.substr(0,index);
 		std::string userFunc = stringTie.substr(9+index, std::string::npos);
 		return domain+userFunc;
-	};
+	}
 
 	std::string rmInsertFunction(const std::string originalTie) { 
 		auto stringTie = originalTie;
@@ -45,17 +45,17 @@ namespace {
 		RHName = trimTie(RHName);
 
 		return LHName+ RHName;
-	};
+	}
 
 	template <typename T1>
 	int findName(const std::vector<std::string> &colNames, const T1 &name) {
-		for (int j = 0; j < colNames.size(); j++) {
+		for (size_t j = 0; j < colNames.size(); j++) {
 			if (colNames[j] == name) {
-				return j;
+				return static_cast<int>(j);
 			}
 		}
 		return -1;
-	};
+	}
 
 }
 namespace Mantid {
@@ -111,7 +111,6 @@ namespace Mantid {
 			std::map<std::string, std::string> result;
 			// check norm table is correct
 			API::ITableWorkspace_const_sptr tabWS = getProperty("NormalisationTable");
-			size_t ndet = tabWS->rowCount();
 
 			if (tabWS->columnCount() == 0) {
 				result["NormalisationTable"] = "Please provide a non-empty NormalisationTable.";
@@ -161,12 +160,12 @@ namespace Mantid {
 			if (mode == "Construct") {
 				std::vector<double> norms = getNorms();
 				auto outputFitFunction = getTFAsymmFitFunction(inputFitFunction, norms);
-				setProperty("OutputFunction", outputFitFunction);
+				setOutput(outputFitFunction);
 			}
 			else {
 				try {
 					auto outputFitFunction = extractFromTFAsymmFitFunction(inputFitFunction);
-					setProperty("OutputFunction", outputFitFunction);
+				setOutput(outputFitFunction);
 				}
 				catch(...){
 				throw std::runtime_error("The input function was not of the form N*(1+f)+A*exp(-lambda*t)");
@@ -174,7 +173,18 @@ namespace Mantid {
 				
 			}
 		}
-		
+ 
+	       void ConvertFitFunctionForMuonTFAsymmetry::setOutput(
+			const Mantid::API::IFunction_sptr &function) {
+                        IFunction_sptr outputFitFunction = function;
+			const std::vector<std::string> wsNames = getProperty("WorkspaceList");
+                        if( wsNames.size()==1){
+                        // if single domain func, strip off multi domain
+				auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(function);
+                                IFunction_sptr outputFitFunction = TFFunc->getFunction(0);
+                        }
+			setProperty("OutputFunction", outputFitFunction);
+		}
 		/** Extracts the user's original function f from the normalisation function N(1+f)+expDecay
 		* and adds in the ties
 		* @param original :: [input] normalisation function
