@@ -242,16 +242,45 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
+  size_t nHistograms = 0;
   if (inWS) {
     // If the input signal is complex, we expect an even number of histograms
     // in the input workspace
 
-    size_t nhistograms = inWS->getNumberHistograms();
+    size_t nHistograms = inWS->getNumberHistograms();
     bool complex = getProperty("ComplexData");
-    if (complex && (nhistograms % 2))
+    if (complex && (nHistograms % 2))
       result["InputWorkspace"] = "The number of histograms in the input "
                                  "workspace must be even for complex data";
+    if (!complex)
+      nHistograms *= 2; // Double number of histograms to compare with adjustments.
   }
+
+  // Check linear adjustments, we expect and even number of histograms
+  // and if any, they must be sufficient for all spectra in input workspace.
+  MatrixWorkspace_sptr linAdj = getProperty("DataLinearAdj");
+  size_t nAHistograms = 0;
+  if(linAdj) 
+    nAHistograms = linAdj->getNumberHistograms();
+  if (nAHistograms % 2) 
+    result["DataLinearAdj"] = "The number of histograms in the linear "
+    "adjustments workspace must be even, because they are complex data";
+  if (nAHistograms > 0 && nAHistograms < nHistograms)
+    result["DataLinearAdj"] = "The number of histograms in the linear"
+    "adjustments workspace is insufficient for the input workspace";
+
+  // Check constant adjustments, we expect and even number of histograms
+  // and if any, they must be sufficient for all spectra in input workspace.
+  MatrixWorkspace_sptr constAdj = getProperty("DataConstAdj");
+  nAHistograms = 0; 
+  if(constAdj) 
+    nAHistograms = constAdj->getNumberHistograms();
+  if (nAHistograms % 2)
+    result["DataConstAdj"] = "The number of histograms in the constant "
+    "adjustmants workspace must be even, because they are complex data";
+  if (nAHistograms > 0 && nAHistograms < nHistograms)
+    result["DataConstAdj"] = "The number of histograms in the linear"
+    "adjustments workspace is insufficient for the input workspace";
 
   return result;
 }
