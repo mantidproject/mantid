@@ -11,11 +11,13 @@ sys.path.insert(0, command_line_args.directory)
 from PyQt4 import QtGui, QtCore
 import mantid
 
+from mantid.kernel import UsageService
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter
 from ErrorReporter.errorreport import CrashReportPage
 
 def main():
-    command_line_args = parser.parse_args()
+    if not UsageService.isEnabled():
+        return
     app = QtGui.QApplication(sys.argv)
     form = CrashReportPage(show_continue_terminate=False)
     presenter = ErrorReporterPresenter(form, command_line_args.exit_code)
