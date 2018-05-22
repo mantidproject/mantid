@@ -127,7 +127,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
-    ${OPENGL_LIBRARIES}
+    ${OPENGL_gl_LIBRARY}
+    ${OPENGL_glu_LIBRARY}
   QT4_LINK_LIBS
     Qt4::QtOpenGL
     Qwt5
