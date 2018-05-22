@@ -468,7 +468,10 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
-  setProperty("OutputWorkspaceWavelength", IvsLam);
+  bool const isDebug = getProperty("Debug");
+  if (isDebug) {
+    setProperty("OutputWorkspaceWavelength", IvsLam);
+  }
   setProperty("OutputWorkspace", IvsQ);
 }
 

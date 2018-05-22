@@ -225,12 +225,12 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Output workspace in Q (unbinned)
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+                      "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
                   "Output workspace in Q (native binning)");
 
   // Output workspace in wavelength
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceWavelength", "", Direction::Output),
+                      "OutputWorkspaceWavelength", "", Direction::Output, PropertyMode::Optional),
                   "Output workspace in wavelength");
 }
 
@@ -248,6 +248,7 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
+  alg->setProperty("Debug", getPropertyValue("Debug"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
@@ -297,14 +298,18 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
 
-  MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
+
+  bool const isDebug = getProperty("Debug");
+  if (isDebug) {
+    MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
+    setProperty("OutputWorkspaceWavelength", IvsLam);
+    setProperty("OutputWorkspace", IvsQ);
+  }
 
   std::vector<double> params;
   MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
 
-  setProperty("OutputWorkspaceWavelength", IvsLam);
-  setProperty("OutputWorkspace", IvsQ);
   setProperty("OutputWorkspaceBinned", IvsQB);
 
   // Set other properties so they can be updated in the Reflectometry interface

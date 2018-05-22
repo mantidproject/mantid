@@ -211,6 +211,7 @@ void ReflectometryWorkflowBase2::initDebugProperties() {
   declareProperty("Diagnostics", false, "Whether to enable the output of "
                                         "interim workspaces for debugging "
                                         "purposes.");
+  declareProperty("Debug", true, "Whether to enable the output of extra workspaces.");
 }
 
 /** Validate reduction properties, if given
