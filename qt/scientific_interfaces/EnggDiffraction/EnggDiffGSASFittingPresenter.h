@@ -55,11 +55,12 @@ private:
   void processStart();
 
   /// Collect GSASIIRefineFitPeaks parameters for all runs loaded in
-  std::vector<GSASIIRefineFitPeaksParameters> collectAllInputParameters() const;
+  boost::optional<std::vector<GSASIIRefineFitPeaksParameters>>
+  collectAllInputParameters() const;
 
   /// Collect GSASIIRefineFitPeaks input parameters for a given run from the
   /// presenter's various children
-  GSASIIRefineFitPeaksParameters
+  boost::optional<GSASIIRefineFitPeaksParameters>
   collectInputParameters(const RunLabel &runLabel,
                          const Mantid::API::MatrixWorkspace_sptr ws) const;
 
