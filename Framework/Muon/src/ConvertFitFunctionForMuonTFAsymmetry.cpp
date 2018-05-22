@@ -2,26 +2,23 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h"
+
+#include "MantidAPI/ADSValidator.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/TableRow.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/ADSValidator.h"
-#include <cmath>
-#include <numeric>
+
 #include <vector>
+
 namespace {
 	constexpr double MICROSECONDS_PER_SECOND{ 1000000.0 };
 	constexpr double MUON_LIFETIME_MICROSECONDS{
@@ -167,8 +164,14 @@ namespace Mantid {
 				setProperty("OutputFunction", outputFitFunction);
 			}
 			else {
-				auto outputFitFunction = extractFromTFAsymmFitFunction(inputFitFunction);
-				setProperty("OutputFunction", outputFitFunction);
+				try {
+					auto outputFitFunction = extractFromTFAsymmFitFunction(inputFitFunction);
+					setProperty("OutputFunction", outputFitFunction);
+				}
+				catch(...){
+				throw std::runtime_error("The input function was not of the form N*(1+f)+A*exp(-lambda*t)");
+				}
+				
 			}
 		}
 		
@@ -178,7 +181,7 @@ namespace Mantid {
 		* @return :: user function
 		*/
 		Mantid::API::IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
-			const Mantid::API::IFunction_sptr original) {
+			const Mantid::API::IFunction_sptr &original) {
 
 		    auto multi = boost::make_shared<MultiDomainFunction>();
 			IFunction_sptr tmp = original;
@@ -229,7 +232,7 @@ namespace Mantid {
 		* @return :: user function
 		*/
 	
-		IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(const IFunction_sptr TFFuncIn) {
+		IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(const IFunction_sptr &TFFuncIn) {
 			// N(1+g) + exp
 			auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
 
@@ -274,7 +277,7 @@ namespace Mantid {
 		* @returns :: The normalisation function N(1+f) +ExpDecay
 		*/
 		Mantid::API::IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
-			const Mantid::API::IFunction_sptr original, const std::vector<double> norms) {
+			const Mantid::API::IFunction_sptr &original, const std::vector<double> norms) {
 			auto multi = boost::make_shared<MultiDomainFunction>();
 			auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
 			size_t numDomains = original->getNumberDomains();

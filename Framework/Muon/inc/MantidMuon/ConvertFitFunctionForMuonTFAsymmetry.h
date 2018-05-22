@@ -5,29 +5,26 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidHistogramData/Histogram.h"
-#include "MantidKernel/cow_ptr.h"
-
 #include "MantidAPI/IFunction.h"
 
 namespace Mantid {
 namespace Algorithms {
-/**Takes a muon workspace as input and estimates the asymmetry, using a simple
-method.
+/**Takes a fitting function and returns a modified fitting function.
+To be used as part of TF asymmetry calculations
 
 Required Properties:
 <UL>
-<LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-<LI> OutputWorkspace - The name of the workspace in which to store the result
+<LI> InputFunction - The function we want to change </LI>
+<LI> NormalisationTable - The name of the table workspace that contains the normalization constants
 </LI>
-<LI> Spectra - The spectra to be adjusted (by default all spectra are done)</LI>
-<LI> StartX - The minimum time to include in the analysis </LI>
-<LI> EndX - The maximum time to include in the analysis </LI>
+<LI> WorkspaceList - The workspaces we are interested in </LI>
+<LI> Mode - If constructing or destructing the TF asymmetry function </LI>
+<LI> OutputFunction - The transformed function </LI>
 </UL>
 
 
-@author
-@date 03/03/2017
+@author Anthony Lim
+@date 22/05/2018
 
 Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -76,9 +73,9 @@ private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  Mantid::API::IFunction_sptr getTFAsymmFitFunction(const Mantid::API::IFunction_sptr original, const std::vector<double> norms);
-  Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr original);
-  Mantid::API::IFunction_sptr extractUserFunction(const Mantid::API::IFunction_sptr TFFunc);
+  Mantid::API::IFunction_sptr getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original, const std::vector<double> norms);
+  Mantid::API::IFunction_sptr extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original);
+  Mantid::API::IFunction_sptr extractUserFunction(const Mantid::API::IFunction_sptr &TFFunc);
   std::vector<double> getNorms();
 };
 
