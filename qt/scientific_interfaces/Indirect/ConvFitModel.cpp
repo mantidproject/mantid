@@ -474,7 +474,9 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
 
 void ConvFitModel::removeWorkspace(std::size_t index) {
   IndirectFittingModel::removeWorkspace(index);
-  m_resolution.erase(m_resolution.begin() + index);
+
+  if (m_resolution.size() > index)
+    m_resolution.erase(m_resolution.begin() + index);
 
   if (m_extendedResolution.size() > index)
     AnalysisDataService::Instance().remove(m_extendedResolution[index]);
