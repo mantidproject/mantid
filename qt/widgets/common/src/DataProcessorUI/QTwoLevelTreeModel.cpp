@@ -863,7 +863,7 @@ void QTwoLevelTreeModel::updateGroupData(const int groupIdx, const int start,
   // Loop through all groups and all rows
   auto &group = m_groups[groupIdx];
   for (int row = start; row <= end; ++row) {
-    const auto &rowData = group.rowData(row);
+    const auto rowData = group.rowData(row);
     // Loop through all columns and update the value in the row data
     for (int col = 0; col < columnCount(); ++col) {
       auto value = data(index(row, col, index(groupIdx, 0))).toString();
@@ -884,7 +884,8 @@ void QTwoLevelTreeModel::updateAllGroupData() {
  */
 void QTwoLevelTreeModel::tableDataUpdated(const QModelIndex &topLeft,
                                           const QModelIndex &bottomRight) {
-  if (!topLeft.isValid() || !bottomRight.isValid())
+  if (!topLeft.isValid() || !bottomRight.isValid() ||
+      !topLeft.parent().isValid() || !bottomRight.parent().isValid())
     return;
 
   if (topLeft.parent() != bottomRight.parent())
