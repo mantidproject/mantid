@@ -14,6 +14,8 @@ public:
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD0(clearProgress, void());
+  MOCK_METHOD0(setAsPercentageIndicator, void());
+  MOCK_METHOD0(setAsEndlessIndicator, void());
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 

@@ -502,9 +502,9 @@ ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
   auto progress = ProgressPresenter(start, end, nsteps, this->m_progressView);
 
   if (autoreductionRunning())
-    progress.setStyle(ProgressableView::Style::ENDLESS);
+    progress.setAsEndlessIndicator();
   else
-    progress.setStyle(ProgressableView::Style::PERCENTAGE);
+    progress.setAsPercentageIndicator();
 
   return progress;
 }
@@ -696,7 +696,7 @@ void ReflRunsTabPresenter::pause(int group) {
 
   m_view->stopTimer();
   updateWidgetEnabledState(false);
-  m_progressView->setStyle(ProgressableView::Style::PERCENTAGE);
+  m_progressView->setAsPercentageIndicator();
 
   // We get here in two scenarios: processing is still running, in which case
   // do not confirm reduction has paused yet (confirmReductionPaused will be

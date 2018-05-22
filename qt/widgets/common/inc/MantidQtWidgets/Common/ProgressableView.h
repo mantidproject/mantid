@@ -31,6 +31,8 @@ namespace MantidWidgets {
 */
 class EXPORT_OPT_MANTIDQT_COMMON ProgressableView {
 public:
+  /// The style of the progress bar: either a standard percentage progress bar
+  /// or an endless busy indicator
   enum class Style { PERCENTAGE, ENDLESS };
 
   ProgressableView() : m_style{Style::PERCENTAGE}, m_min(0), m_max(100) {}
@@ -38,28 +40,13 @@ public:
 
   virtual void setProgress(int progress) = 0;
   virtual void clearProgress() = 0;
+  virtual void setProgressRange(int min, int max);
 
-  virtual void setProgressRange(int min, int max) {
-    // Cache values for a percentage-style progress bar i.e. where both are not
-    // zero
-    if (min != 0 || max != 0) {
-      m_min = min;
-      m_max = max;
-    }
-  }
+  bool isPercentageIndicator() const;
+  void setAsPercentageIndicator();
+  void setAsEndlessIndicator();
 
-  bool isPercentageIndicator() { return m_style == Style::PERCENTAGE; }
-  void setStyle(Style style) {
-    m_style = style;
-    // To get QProgressBar to display as an endless progress indicator, we need
-    // to set start=end=0
-    if (m_style == Style::ENDLESS)
-      setProgressRange(0, 0);
-    else
-      setProgressRange(m_min, m_max);
-  };
-
-private:
+protected:
   Style m_style;
   int m_min;
   int m_max;

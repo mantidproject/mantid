@@ -293,6 +293,8 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setSearchButtonEnabled(true))
         .Times(Exactly(1));
+    EXPECT_CALL(mockProgress, setAsPercentageIndicator())
+        .Times(Exactly(1));
 
     // Pause presenter
     presenter.pause(GROUP_NUMBER);
