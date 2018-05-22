@@ -2,6 +2,8 @@
 #define MANTID_MUON_MUONALGORITHMHELPER_H_
 
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/System.h"
 
 #include <string>

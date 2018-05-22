@@ -2,7 +2,10 @@
 #define MANTID_MUON_APPLYMUONDETECTORSGROUPING_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/System.h"
+#include "MantidMuon/MuonAlgorithmHelper.h"
 
 using namespace Mantid::API;
 
