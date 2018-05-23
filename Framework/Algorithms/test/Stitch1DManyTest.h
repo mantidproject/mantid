@@ -960,23 +960,23 @@ public:
     // First spectrum, Y values
     TS_ASSERT_DELTA(stitched->y(0)[0], 1., 0.00001);
     TS_ASSERT_DELTA(stitched->y(0)[9], 1.01589, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(0)[16], 0.97288, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(0)[24], 0.9375, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 0.97288, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 0.9375, 0.00001);
     // Second spectrum, Y values
     TS_ASSERT_DELTA(stitched->y(1)[0], 2., 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(1)[9], 1.98375, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(1)[16], 1.70307, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(1)[24], 1.56250, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 1.98375, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 1.70307, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 1.56250, 0.00001);
     // First spectrum, E values
     TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(0)[9], 0.70111, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(0)[16], 0.60401, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(0)[24], 0.76547, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.70111, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.60401, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 0.76547, 0.00001);
     // Second spectrum, E values
     TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(1)[9], 0.97973, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(1)[16], 0.79916, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(1)[24], 0.98821, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 0.97973, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.79916, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 0.98821, 0.00001);
 
     // Second item in the output group
     stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
@@ -984,33 +984,33 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
-    //TS_ASSERT_DELTA(stitched->y(0)[0], 1.5, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(0)[9], 1.5, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(0)[16], 1.15385, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(0)[24], 1., 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 1.15385, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 1., 0.00001);
     // Second spectrum, Y values
-    //TS_ASSERT_DELTA(stitched->y(1)[0], 2.5, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(1)[9], 2.46735, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(1)[16], 2.06568, 0.00001);
-    //TS_ASSERT_DELTA(stitched->y(1)[24], 1.87500, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2.46735, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 2.06568, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 1.87500, 0.00001);
     // First spectrum, E values
-    //TS_ASSERT_DELTA(stitched->e(0)[0], 1.22474, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(0)[9], 0.85194, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(0)[16], 0.65779, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(0)[24], 0.79057, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.22474, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.85194, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.65779, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 0.79057, 0.00001);
     // Second spectrum, E values
-    //TS_ASSERT_DELTA(stitched->e(1)[0], 1.58114, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(1)[9], 1.09265, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(1)[16], 0.88013, 0.00001);
-    //TS_ASSERT_DELTA(stitched->e(1)[24], 1.08253, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.58114, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.09265, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.88013, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 1.08253, 0.00001);
 
     // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     //TS_ASSERT_EQUALS(scales.size(), 4);
     TS_ASSERT_DELTA(scales[0], 0.9375, 0.0001);
-    //TS_ASSERT_DELTA(scales[1], 0.6249, 0.0001);
-    //TS_ASSERT_DELTA(scales[2], 0.9375, 0.0001);
-    //TS_ASSERT_DELTA(scales[3], 0.6249, 0.0001);
+    TS_ASSERT_DELTA(scales[1], 0.6249, 0.0001);
+    TS_ASSERT_DELTA(scales[2], 0.9375, 0.0001);
+    TS_ASSERT_DELTA(scales[3], 0.6249, 0.0001);
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();
