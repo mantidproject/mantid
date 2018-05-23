@@ -1,3 +1,4 @@
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -159,20 +160,22 @@ void Stitch1D::init() {
 }
 
 /** Validate the algorithm's properties.
- * @return A map of porperty names and their issues.
+ * @return A map of property names and their issues.
  */
 std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   std::map<std::string, std::string> issues;
-  MatrixWorkspace_const_sptr lhs = getProperty("LHSWorkspace");
-  MatrixWorkspace_const_sptr rhs = getProperty("RHSWorkspace");
+  MatrixWorkspace_sptr lhs = getProperty("LHSWorkspace");
+  MatrixWorkspace_sptr rhs = getProperty("RHSWorkspace");
   if (!lhs)
     issues["LHSWorkspace"] = "Cannot retrieve workspace";
   if (!rhs)
     issues["RHSWorkspace"] = "Cannot retrieve workspace";
-  if (lhs->isHistogramData() && !rhs->isHistogramData())
-    issues["RHSWorkspace"] = rhs->getName() + " must be a histogram.";
-  if (!lhs->isHistogramData() && rhs->isHistogramData())
-    issues["RHSWorkspace"] = lhs->getName() + " must be point data.";
+  RunCombinationHelper combHelper;
+  combHelper.setReferenceProperties(lhs);
+  std::string compatible = combHelper.checkCompatibility(rhs, true);
+  if (!compatible.empty())
+    issues["RHSWorkspace"] = "Workspace " + rhs->getName() +
+                             " is not compatible: " + compatible + "\n";
   return issues;
 }
 

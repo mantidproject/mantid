@@ -1149,7 +1149,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_input_manualScaleFactors(){
+  void test_input_manualScaleFactors() {
     createUniformWorkspace(0.1, 0.1, 1., 2., "ws1", true);
     createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2", true);
     Stitch1DMany alg;
