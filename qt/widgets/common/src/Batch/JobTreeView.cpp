@@ -70,19 +70,19 @@ bool JobTreeView::edit(const QModelIndex &index, EditTrigger trigger,
 Cell JobTreeView::deadCell() const { return g_deadCell; }
 
 boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
-  auto rows = selectedRowLocations();
-  std::sort(rows.begin(), rows.end());
+  auto selected = selectedRowLocations();
+  std::sort(selected.begin(), selected.end());
 
-  auto selectedRowData = std::vector<std::vector<Cell>>();
-  selectedRowData.reserve(rows.size());
+  auto selectedRows = std::vector<Row>();
+  selectedRows.reserve(selected.size());
 
-  std::transform(rows.cbegin(), rows.cend(),
-                 std::back_inserter(selectedRowData),
+  std::transform(selected.cbegin(), selected.cend(),
+                 std::back_inserter(selectedRows),
                  [&](RowLocation const &location)
-                     -> std::vector<Cell> { return cellsAt(location); });
+                     -> Row { return Row(location, cellsAt(location)); });
 
   auto extractSubtrees = ExtractSubtrees();
-  return extractSubtrees(rows, selectedRowData);
+  return extractSubtrees(selectedRows);
 }
 
 boost::optional<std::vector<RowLocation>>

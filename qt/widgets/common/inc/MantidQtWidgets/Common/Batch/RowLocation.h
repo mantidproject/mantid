@@ -36,7 +36,9 @@ private:
   RowPath m_path;
 };
 
-std::ostream &operator<<(std::ostream &os, RowLocation const &location);
+EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os, RowLocation const &location);
+EXPORT_OPT_MANTIDQT_COMMON bool pathsSameUntilDepth(int depth, RowLocation const &locationA,
+                          RowLocation const &locationB);
 
 } // namespace Batch
 } // namespace MantidWidgets

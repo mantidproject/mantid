@@ -4,7 +4,7 @@
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/Batch/Row.h"
+#include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include <QStandardItem>
 
 namespace MantidQt {

@@ -88,7 +88,7 @@ bool RowLocation::operator>(RowLocation const &other) const {
 }
 
 RowLocation RowLocation::relativeTo(RowLocation const &ancestor) const {
-  assertOrThrow((*this).isDescendantOf(ancestor),
+  assertOrThrow((*this) == ancestor || (*this).isDescendantOf(ancestor),
                 "RowLocation::relativeTo: Tried to get position relative to "
                 "node which was not an ancestor");
   return RowLocation(
@@ -122,6 +122,17 @@ bool RowLocation::isDescendantOf(RowLocation const &ancestor) const {
     }
   }
   return false;
+}
+
+bool pathsSameUntilDepth(int depth, RowLocation const &locationA,
+                         RowLocation const &locationB) {
+  auto &pathA = locationA.path();
+  auto &pathB = locationB.path();
+  assertOrThrow(depth <= std::min(locationA.depth(), locationB.depth()),
+                "pathsSameUntilDepth: Comparison depth must be less than or "
+                "equal to the depth of both locations");
+  return boost::algorithm::equal(pathA.cbegin(), pathA.cbegin() + depth,
+                                 pathB.cbegin(), pathB.cbegin() + depth);
 }
 }
 }

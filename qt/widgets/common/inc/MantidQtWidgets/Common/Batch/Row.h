@@ -25,8 +25,6 @@ private:
   std::vector<Cell> m_cells;
 };
 
-using Subtree = std::vector<Row>;
-
 EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,
                                                     Row const &location);
 EXPORT_OPT_MANTIDQT_COMMON bool operator==(Row const &lhs, Row const &rhs);

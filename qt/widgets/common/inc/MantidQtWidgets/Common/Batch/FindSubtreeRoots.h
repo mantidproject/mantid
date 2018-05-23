@@ -15,10 +15,6 @@ public:
   boost::optional<std::vector<RowLocation>>
   operator()(std::vector<RowLocation> region);
 private:
-  bool hasSubtreeRootHigherThanFirstRoot(
-      std::vector<RowLocation> const &sortedRegion) const;
-  bool
-  maximumIncreaseInDepthIsOne(std::vector<RowLocation> const &region) const;
   void removeIfDepthNotEqualTo(std::vector<RowLocation> &region,
                                int expectedDepth) const;
 };
