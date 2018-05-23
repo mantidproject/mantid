@@ -21,7 +21,9 @@ DECLARE_ALGORITHM(SaveDiffFittingAscii)
 
 /// Empty constructor
 SaveDiffFittingAscii::SaveDiffFittingAscii()
-    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {}
+    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {
+  useAlgorithm("EnggSaveSinglePeakFitResultsToHDF5", 1);
+}
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
