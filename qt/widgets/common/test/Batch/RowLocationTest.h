@@ -146,7 +146,8 @@ public:
     TS_ASSERT(!pathsSameUntilDepth(1, RowLocation({1}), RowLocation({2})));
 
     TS_ASSERT(pathsSameUntilDepth(1, RowLocation({1, 1}), RowLocation({1, 2})));
-    TS_ASSERT(!pathsSameUntilDepth(1, RowLocation({1, 1}), RowLocation({2, 2})));
+    TS_ASSERT(
+        !pathsSameUntilDepth(1, RowLocation({1, 1}), RowLocation({2, 2})));
   }
 };
 

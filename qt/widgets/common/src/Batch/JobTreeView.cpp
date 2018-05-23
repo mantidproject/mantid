@@ -506,22 +506,27 @@ QModelIndex
 JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult const &result) {
   auto shouldMakeNewRowBelow = result.first;
   if (shouldMakeNewRowBelow) {
-    // `newCellIndex` is the model index of the cell in the new row with a column which matches
-    // the column currently selected by the user. To correctly get the RowLocation we need the
+    // `newCellIndex` is the model index of the cell in the new row with a
+    // column which matches
+    // the column currently selected by the user. To correctly get the
+    // RowLocation we need the
     // model index of the first cell in the new row.
     auto newCellIndex = m_adaptedMainModel.appendEmptySiblingRow(
         mapToMainModel(fromFilteredModel(result.second)));
     auto newRowIndex = fromMainModel(firstCellOnRowOf(newCellIndex.untyped()));
 
-    // Resetting the filter ensures that the new row is visible and has a corresponding index in
+    // Resetting the filter ensures that the new row is visible and has a
+    // corresponding index in
     // the filtered model.
     resetFilter();
 
     auto newRowLocation = rowLocation().atIndex(newRowIndex);
     m_notifyee->notifyRowInserted(newRowLocation);
 
-    // The subscriber is entitled to remove the row at `newRowIndex` when we call
-    // `notifyRowInserted` hence we have to assume they did and try to get the index again.
+    // The subscriber is entitled to remove the row at `newRowIndex` when we
+    // call
+    // `notifyRowInserted` hence we have to assume they did and try to get the
+    // index again.
     auto maybeIndexOfNewRow = rowLocation().indexIfExistsAt(newRowLocation);
     if (maybeIndexOfNewRow.is_initialized()) {
       return expanded(mapToFilteredModel(maybeIndexOfNewRow.get())).untyped();

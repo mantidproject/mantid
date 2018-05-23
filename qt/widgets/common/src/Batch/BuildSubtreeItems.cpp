@@ -9,7 +9,8 @@ BuildSubtreeItems::BuildSubtreeItems(
     RowLocationAdapter const &rowLocationAdapter)
     : m_adaptedMainModel(adaptedModel), m_rowLocations(rowLocationAdapter) {}
 
-auto BuildSubtreeItems::buildRecursively(int insertionIndex, RowLocation const &parent,
+auto BuildSubtreeItems::buildRecursively(int insertionIndex,
+                                         RowLocation const &parent,
                                          SubtreeConstIterator current,
                                          SubtreeConstIterator end)
     -> SubtreeConstIterator {
@@ -18,7 +19,8 @@ auto BuildSubtreeItems::buildRecursively(int insertionIndex, RowLocation const &
   while (current != end) {
     auto currentRow = (*current).location();
     auto currentDepth = currentRow.depth();
-    // `currentDepth` tracks the depth of the currentRow whearas `insertionDepth` tracks
+    // `currentDepth` tracks the depth of the currentRow whearas
+    // `insertionDepth` tracks
     // the depth of the locations this recursive call will insert at.
 
     if (insertionDepth < currentDepth) {
@@ -38,7 +40,8 @@ auto BuildSubtreeItems::buildRecursively(int insertionIndex, RowLocation const &
 }
 
 void BuildSubtreeItems::operator()(RowLocation const &parentOfSubtreeRoot,
-                                   int firstInsertionIndex, Subtree const &subtree) {
+                                   int firstInsertionIndex,
+                                   Subtree const &subtree) {
   if (!subtree.empty()) {
     buildRecursively(firstInsertionIndex, parentOfSubtreeRoot, subtree.cbegin(),
                      subtree.cend());

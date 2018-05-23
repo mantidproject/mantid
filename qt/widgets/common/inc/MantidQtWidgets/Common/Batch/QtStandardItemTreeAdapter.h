@@ -51,17 +51,18 @@ public:
                           Cell const &newCellProperties);
 
   QModelIndexForMainModel appendSiblingRow(QModelIndexForMainModel const &index,
-                                           std::vector<Cell> const& cells);
+                                           std::vector<Cell> const &cells);
   QModelIndexForMainModel
   appendEmptySiblingRow(QModelIndexForMainModel const &index);
 
   QModelIndexForMainModel appendChildRow(QModelIndexForMainModel const &parent,
-                                         std::vector<Cell> const& cells);
+                                         std::vector<Cell> const &cells);
   QModelIndexForMainModel
   appendEmptyChildRow(QModelIndexForMainModel const &parent);
 
   QModelIndexForMainModel insertChildRow(QModelIndexForMainModel const &parent,
-                                         int row, std::vector<Cell> const& cells);
+                                         int row,
+                                         std::vector<Cell> const &cells);
   QModelIndexForMainModel
   insertEmptyChildRow(QModelIndexForMainModel const &parent, int column);
 

@@ -140,7 +140,7 @@ public:
       TS_ASSERT_EQUALS(firstChildItem->text(), "1st Child");
       TS_ASSERT_EQUALS(firstChildItem->rowCount(), 1);
 
-      auto *childOfChildItem =  firstChildItem->child(0);
+      auto *childOfChildItem = firstChildItem->child(0);
       TS_ASSERT_EQUALS(childOfChildItem->text(), "Child of 1st Child");
       TS_ASSERT_EQUALS(childOfChildItem->rowCount(), 0);
     }

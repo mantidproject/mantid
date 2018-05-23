@@ -21,8 +21,8 @@ RowLocationAdapter::atIndex(QModelIndexForMainModel const &index) const {
   }
 }
 
-QModelIndex
-RowLocationAdapter::walkFromRootToParentIndexOf(RowLocation const &location) const {
+QModelIndex RowLocationAdapter::walkFromRootToParentIndexOf(
+    RowLocation const &location) const {
   auto parentIndex = QModelIndex();
   auto &path = location.path();
   for (auto it = path.cbegin(); it != path.cend() - 1; ++it)
