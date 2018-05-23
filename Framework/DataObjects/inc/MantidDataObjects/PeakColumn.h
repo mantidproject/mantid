@@ -47,6 +47,8 @@ public:
   /// Specialized type check
   bool isBool() const override;
 
+  bool isNumber() const override;
+
   /// Must return overall memory size taken by the column.
   long int sizeOfData() const override;
 

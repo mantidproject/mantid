@@ -9,6 +9,10 @@
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/str.hpp>
 
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
+
 using boost::python::extract;
 using boost::python::handle;
 using boost::python::object;

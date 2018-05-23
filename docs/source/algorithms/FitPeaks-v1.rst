@@ -384,7 +384,7 @@ Output:
 .. testoutput::  ExFitVanadiumPeaks
 
   Spectrum 1: Expected right most 3 peaks at 2.1401000, 1.5133000, 1.2356000
-  Spectrum 1: Found    right most 3 peaks at 2.1483553, 1.5188663, 1.2401992
+  Spectrum 1: Found    right most 3 peaks at 2.1485553, 1.5190663, 1.2403992
 
 
 **Example - Fit back-to-back exponential peaks (Vulcan diamond):**

@@ -299,6 +299,18 @@ public:
     TS_ASSERT_EQUALS(data2[8], "twelve (1)");
     TS_ASSERT_EQUALS(data2[9], "twelve (2)");
   }
+  void test_strCannotBeConvertedToDouble() {
+    TableWorkspace ws;
+    ws.addColumn("str", "col");
+    const auto col = ws.getColumn("col");
+    TS_ASSERT(!col->isNumber());
+  }
+  void test_intCanBeConvertedToDouble() {
+    TableWorkspace ws;
+    ws.addColumn("int", "col");
+    const auto col = ws.getColumn("col");
+    TS_ASSERT(col->isNumber());
+  }
 
 private:
   std::vector<size_t> makeIndexVector(size_t n) {

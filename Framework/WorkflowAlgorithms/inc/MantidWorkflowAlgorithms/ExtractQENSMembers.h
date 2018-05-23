@@ -41,8 +41,12 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
-  std::vector<double> getQValues(Mantid::API::MatrixWorkspace_sptr workspace);
+  std::vector<Mantid::API::MatrixWorkspace_sptr> getInputWorkspaces() const;
+
+  std::vector<double>
+  getQValues(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces);
 
   std::vector<std::string>
   getAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,
