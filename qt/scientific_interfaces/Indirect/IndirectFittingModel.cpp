@@ -18,6 +18,13 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+bool equivalentWorkspaces(MatrixWorkspace_const_sptr lhs,
+                          MatrixWorkspace_const_sptr rhs) {
+  if (lhs->getName() == "" && rhs->getName() == "")
+    return lhs == rhs;
+  return lhs->getName() == rhs->getName();
+}
+
 /**
  * @return  True if the first function precedes the second when ordering by
  *          name.
@@ -414,7 +421,8 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
 
 void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                         const Spectra &spectra) {
-  if (!m_fittingData.empty() && workspace == m_fittingData.back()->workspace())
+  if (!m_fittingData.empty() &&
+      equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
     m_fittingData.back()->combine(IndirectFitData(workspace, spectra));
   else {
     m_fittingData.emplace_back(new IndirectFitData(workspace, spectra));
@@ -429,13 +437,17 @@ void IndirectFittingModel::removeWorkspace(std::size_t index) {
   m_fittingData.erase(m_fittingData.begin() + index);
   m_defaultParameters.erase(m_defaultParameters.begin() + index);
 
-  if (index > 0 && m_fittingData.size() > index &&
-      m_fittingData[index]->workspace() ==
-          m_fittingData[index - 1]->workspace()) {
-    m_fittingData[index - 1]->combine(*m_fittingData[index]);
-    m_fittingData.erase(m_fittingData.begin() + index);
+  if (index > 0 && m_fittingData.size() > index) {
+    const auto previousWS = m_fittingData[index - 1]->workspace();
+    const auto subsequentWS = m_fittingData[index]->workspace();
+
+    if (equivalentWorkspaces(previousWS, subsequentWS)) {
+      m_fittingData[index - 1]->combine(*m_fittingData[index]);
+      m_fittingData.erase(m_fittingData.begin() + index);
+    }
   }
 }
+} // namespace IDA
 
 void IndirectFittingModel::clearWorkspaces() {
   m_fittingData.clear();
@@ -713,6 +725,6 @@ void IndirectFittingModel::cleanFailedSingleRun(
   removeFromADSIfExists(base);
   cleanTemporaries(base + "_0");
 }
-} // namespace IDA
 } // namespace CustomInterfaces
+} // namespace MantidQt
 } // namespace MantidQt
