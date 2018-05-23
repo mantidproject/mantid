@@ -493,7 +493,7 @@ void ConvFitModel::addResolution(const std::string &name) {
     throw std::runtime_error("Resolution workspace must be a MatrixWorkspace.");
   else if (m_resolution.empty() || m_resolution.back().lock())
     m_resolution.emplace_back(MatrixWorkspace_sptr());
-  else {
+  else if (m_extendedResolution.size() != m_resolution.size()) {
     m_resolution.back() = resolution;
     addExtendedResolution(m_resolution.size() - 1);
   }
