@@ -5,6 +5,7 @@
 #include "EnggDiffGSASFittingModelMock.h"
 #include "EnggDiffGSASFittingViewMock.h"
 #include "EnggDiffMultiRunFittingWidgetPresenterMock.h"
+#include "EnggDiffractionCalibrationMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
@@ -248,9 +249,13 @@ public:
     EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
         .WillOnce(Return(params1.refinementMethod));
-    EXPECT_CALL(*m_mockViewPtr, getInstrumentFileName())
+
+    EXPECT_CALL(*m_mockCalibSettingsPtr, currentCalibration())
         .Times(1)
-        .WillOnce(Return(params1.instParamsFile));
+        .WillOnce(Return(std::vector<GSASCalibrationParms>(
+            {GSASCalibrationParms(1, 2, 3, 4, params1.instParamsFile),
+             GSASCalibrationParms(2, 3, 4, 5, params2.instParamsFile)})));
+
     EXPECT_CALL(*m_mockViewPtr, getPhaseFileNames())
         .Times(1)
         .WillOnce(Return(params1.phaseFiles));
@@ -304,6 +309,7 @@ private:
   MockEnggDiffGSASFittingModel *m_mockModelPtr;
   MockEnggDiffGSASFittingView *m_mockViewPtr;
   MockEnggDiffMultiRunFittingWidgetPresenter *m_mockMultiRunWidgetPtr;
+  MockEnggDiffractionCalibration *m_mockCalibSettingsPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
     auto mockModel = Mantid::Kernel::make_unique<
@@ -316,8 +322,13 @@ private:
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetPresenter>>();
     m_mockMultiRunWidgetPtr = mockMultiRunWidgetPresenter_sptr.get();
 
+    auto mockCalibSettings_sptr =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionCalibration>>();
+    m_mockCalibSettingsPtr = mockCalibSettings_sptr.get();
+
     auto pres_uptr = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
-        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr);
+        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr,
+        mockCalibSettings_sptr);
     return pres_uptr;
   }
 
@@ -345,9 +356,10 @@ private:
     EXPECT_CALL(*m_mockViewPtr, getRefinementMethod())
         .Times(1)
         .WillOnce(Return(params.refinementMethod));
-    EXPECT_CALL(*m_mockViewPtr, getInstrumentFileName())
+    EXPECT_CALL(*m_mockCalibSettingsPtr, currentCalibration())
         .Times(1)
-        .WillOnce(Return(params.instParamsFile));
+        .WillOnce(Return(std::vector<GSASCalibrationParms>(
+            {GSASCalibrationParms(1, 2, 3, 4, params.instParamsFile)})));
     EXPECT_CALL(*m_mockViewPtr, getPhaseFileNames())
         .Times(1)
         .WillOnce(Return(params.phaseFiles));

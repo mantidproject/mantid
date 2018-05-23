@@ -40,6 +40,9 @@ Engineering Diffraction
     tab no longer locks when a refinement is run
   - A **Refine All** button was added to run refinement on every run
     loaded into the tab
+  - The current GSAS calibration (calculated in the **Calibration**
+    tab) is now used for refinement, removing the need to select the
+    ``.prm`` file manually from the GUI
 
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
 

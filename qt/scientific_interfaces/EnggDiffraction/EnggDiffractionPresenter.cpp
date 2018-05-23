@@ -1,4 +1,6 @@
 #include "EnggDiffractionPresenter.h"
+#include "EnggDiffractionPresWorker.h"
+#include "IEnggDiffractionView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,8 +9,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "EnggDiffractionPresWorker.h"
-#include "IEnggDiffractionView.h"
 
 #include <algorithm>
 #include <cctype>
@@ -248,7 +248,7 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
             double difc = boost::lexical_cast<double>(tokenizer[3]);
             double difa = boost::lexical_cast<double>(tokenizer[4]);
             double tzero = boost::lexical_cast<double>(tokenizer[5]);
-            parms.emplace_back(GSASCalibrationParms(bid, difc, difa, tzero));
+            parms.emplace_back(bid, difc, difa, tzero, fname);
           } catch (std::runtime_error &rexc) {
             g_log.warning()
                 << "Error when trying to extract parameters from this line:  "
@@ -1208,8 +1208,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     writeOutCalibFile(generalCalFullPath, {difc[bankIdx]}, {tzero[bankIdx]},
                       {bankNames[bankIdx]}, ceriaNo, vanNo, templateFile);
 
-    m_currentCalibParms.emplace_back(
-        GSASCalibrationParms(bankIdx, difc[bankIdx], 0.0, tzero[bankIdx]));
+    m_currentCalibParms.emplace_back(bankIdx, difc[bankIdx], 0.0,
+                                     tzero[bankIdx], generalCalFullPath);
     if (1 == difc.size()) {
       // it is a  single bank or cropped calibration, so take its specific name
       m_calibFullPath = generalCalFullPath;

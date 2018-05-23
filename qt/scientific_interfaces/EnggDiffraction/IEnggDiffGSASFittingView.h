@@ -57,12 +57,6 @@ public:
   virtual std::string getGSASIIProjectPath() const = 0;
 
   /**
-   Get path to the instrument parameter file selected by the user for refinement
-   @return Instrument file path
-   */
-  virtual std::string getInstrumentFileName() const = 0;
-
-  /**
    Get path to the directory containing the GSAS-II API
    @return Path to GSAS-II installation directory
    */

@@ -86,7 +86,7 @@ void EnggDiffFittingModel::setDifcTzero(
     run.addProperty<double>("difa", DEFAULT_DIFA, units, true);
     run.addProperty<double>("tzero", DEFAULT_TZERO, units, true);
   } else {
-    GSASCalibrationParms params(0, 0.0, 0.0, 0.0);
+    GSASCalibrationParms params(0, 0.0, 0.0, 0.0, "");
     for (const auto &paramSet : calibParams) {
       if (paramSet.bankid == runLabel.bank) {
         params = paramSet;

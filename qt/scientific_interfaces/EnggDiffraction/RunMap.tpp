@@ -41,7 +41,7 @@ std::vector<RunLabel> RunMap<NumBanks, T>::getRunLabels() const {
   for (const auto runNumber : runNumbers) {
     for (size_t i = 0; i < NumBanks; ++i) {
       if (m_map[i].find(runNumber) != m_map[i].end()) {
-        pairs.push_back(RunLabel(runNumber, i + 1));
+        pairs.emplace_back(runNumber, i + 1);
       }
     }
   }

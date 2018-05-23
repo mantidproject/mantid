@@ -14,6 +14,18 @@ std::string addRunNumberToGSASIIProjectFile(
          filename.substr(dotPosition, filename.length());
 }
 
+const boost::optional<std::string> getCalibFilenameByBank(
+    const size_t bankID,
+    const std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms> &
+        calibParams) {
+  for (const auto &params : calibParams) {
+    if (bankID == params.bankid) {
+      return params.filename;
+    }
+  }
+  return boost::none;
+}
+
 } // anonymous namespace
 
 namespace MantidQt {
@@ -22,9 +34,10 @@ namespace CustomInterfaces {
 EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     std::unique_ptr<IEnggDiffGSASFittingModel> model,
     IEnggDiffGSASFittingView *view,
-    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget)
-    : m_model(std::move(model)), m_multiRunWidget(multiRunWidget), m_view(view),
-      m_viewHasClosed(false) {}
+    boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+    boost::shared_ptr<IEnggDiffractionCalibration> calibSettings)
+    : m_calibSettings(calibSettings), m_model(std::move(model)),
+      m_multiRunWidget(multiRunWidget), m_view(view), m_viewHasClosed(false) {}
 
 EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}
 
@@ -63,16 +76,17 @@ void EnggDiffGSASFittingPresenter::notify(
   }
 }
 
-std::vector<GSASIIRefineFitPeaksParameters>
+boost::optional<std::vector<GSASIIRefineFitPeaksParameters>>
 EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   const auto runLabels = m_multiRunWidget->getAllRunLabels();
   std::vector<GSASIIRefineFitPeaksParameters> inputParams;
   std::vector<std::string> GSASIIProjectFiles;
+  std::vector<std::string> calibFileNames;
   inputParams.reserve(runLabels.size());
   GSASIIProjectFiles.reserve(runLabels.size());
+  calibFileNames.reserve(runLabels.size());
 
   const auto refinementMethod = m_view->getRefinementMethod();
-  const auto instParamFile = m_view->getInstrumentFileName();
   const auto phaseFiles = m_view->getPhaseFileNames();
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
@@ -82,6 +96,16 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
     for (const auto &runLabel : runLabels) {
       GSASIIProjectFiles.emplace_back(
           addRunNumberToGSASIIProjectFile(GSASIIProjectFile, runLabel));
+    }
+  }
+  const auto &calibParams = m_calibSettings->currentCalibration();
+  for (const auto &runLabel : runLabels) {
+    const auto calibFilename =
+        getCalibFilenameByBank(runLabel.bank, calibParams);
+    if (!calibFilename) {
+      return boost::none;
+    } else {
+      calibFileNames.push_back(*calibFilename);
     }
   }
 
@@ -96,20 +120,25 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
     const auto &runLabel = runLabels[i];
     const auto inputWS = *(m_multiRunWidget->getFocusedRun(runLabel));
 
-    inputParams.emplace_back(inputWS, runLabel, refinementMethod, instParamFile,
-                             phaseFiles, pathToGSASII, GSASIIProjectFiles[i],
-                             dMin, negativeWeight, xMin, xMax, refineSigma,
-                             refineGamma);
+    inputParams.emplace_back(inputWS, runLabel, refinementMethod,
+                             calibFileNames[0], phaseFiles, pathToGSASII,
+                             GSASIIProjectFiles[i], dMin, negativeWeight, xMin,
+                             xMax, refineSigma, refineGamma);
   }
   return inputParams;
 }
 
-GSASIIRefineFitPeaksParameters
+boost::optional<GSASIIRefineFitPeaksParameters>
 EnggDiffGSASFittingPresenter::collectInputParameters(
     const RunLabel &runLabel,
     const Mantid::API::MatrixWorkspace_sptr inputWS) const {
+  const auto instParamFile = getCalibFilenameByBank(
+      runLabel.bank, m_calibSettings->currentCalibration());
+  if (!instParamFile) {
+    return boost::none;
+  }
+
   const auto refinementMethod = m_view->getRefinementMethod();
-  const auto instParamFile = m_view->getInstrumentFileName();
   const auto phaseFiles = m_view->getPhaseFileNames();
   const auto pathToGSASII = m_view->getPathToGSASII();
   const auto GSASIIProjectFile = m_view->getGSASIIProjectPath();
@@ -121,10 +150,10 @@ EnggDiffGSASFittingPresenter::collectInputParameters(
   const auto refineSigma = m_view->getRefineSigma();
   const auto refineGamma = m_view->getRefineGamma();
 
-  return GSASIIRefineFitPeaksParameters(inputWS, runLabel, refinementMethod,
-                                        instParamFile, phaseFiles, pathToGSASII,
-                                        GSASIIProjectFile, dMin, negativeWeight,
-                                        xMin, xMax, refineSigma, refineGamma);
+  return GSASIIRefineFitPeaksParameters(
+      inputWS, runLabel, refinementMethod, *instParamFile, phaseFiles,
+      pathToGSASII, GSASIIProjectFile, dMin, negativeWeight, xMin, xMax,
+      refineSigma, refineGamma);
 }
 
 void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
@@ -205,12 +234,18 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     return;
   }
 
-  m_view->showStatus("Refining run");
   const auto refinementParams =
       collectInputParameters(*runLabel, *inputWSOptional);
+  if (!refinementParams) {
+    m_view->userWarning("Could not initialise refinement",
+                        "Are you sure you've run a calibration for bank " +
+                            std::to_string(runLabel->bank) + "?");
+    return;
+  }
 
+  m_view->showStatus("Refining run");
   m_view->setEnabled(false);
-  doRefinements({refinementParams});
+  doRefinements({*refinementParams});
 }
 
 void EnggDiffGSASFittingPresenter::processLoadRun() {
@@ -228,14 +263,21 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
 
 void EnggDiffGSASFittingPresenter::processRefineAll() {
   const auto refinementParams = collectAllInputParameters();
-  if (refinementParams.size() == 0) {
+  if (!refinementParams) {
+    m_view->userWarning("Could not initialise refinement",
+                        "Are you sure you've run a calibration for the banks "
+                        "you're trying to focus?");
+    return;
+  }
+
+  if (refinementParams->size() == 0) {
     m_view->userWarning("No runs loaded",
                         "Please load at least one run before refining");
     return;
   }
   m_view->showStatus("Refining run");
   m_view->setEnabled(false);
-  doRefinements(refinementParams);
+  doRefinements(*refinementParams);
 }
 
 void EnggDiffGSASFittingPresenter::processSelectRun() {
