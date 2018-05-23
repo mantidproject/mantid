@@ -247,7 +247,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
     // If the input signal is complex, we expect an even number of histograms
     // in the input workspace
 
-    size_t nHistograms = inWS->getNumberHistograms();
+    nHistograms = inWS->getNumberHistograms();
     bool complex = getProperty("ComplexData");
     if (complex && (nHistograms % 2))
       result["InputWorkspace"] = "The number of histograms in the input "
@@ -265,8 +265,8 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   if (nAHistograms % 2) 
     result["DataLinearAdj"] = "The number of histograms in the linear "
     "adjustments workspace must be even, because they are complex data";
-  if (nAHistograms > 0 && nAHistograms < nHistograms)
-    result["DataLinearAdj"] = "The number of histograms in the linear"
+  else if (nAHistograms > 0 && nAHistograms < nHistograms)
+    result["DataLinearAdj"] = "The number of histograms in the linear "
     "adjustments workspace is insufficient for the input workspace";
 
   // Check constant adjustments, we expect and even number of histograms
@@ -277,9 +277,9 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
     nAHistograms = constAdj->getNumberHistograms();
   if (nAHistograms % 2)
     result["DataConstAdj"] = "The number of histograms in the constant "
-    "adjustmants workspace must be even, because they are complex data";
-  if (nAHistograms > 0 && nAHistograms < nHistograms)
-    result["DataConstAdj"] = "The number of histograms in the linear"
+    "adjustments workspace must be even, because they are complex data";
+  else if (nAHistograms > 0 && nAHistograms < nHistograms)
+    result["DataConstAdj"] = "The number of histograms in the linear "
     "adjustments workspace is insufficient for the input workspace";
 
   return result;
