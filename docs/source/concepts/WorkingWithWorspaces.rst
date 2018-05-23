@@ -29,7 +29,6 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 
     The variable myWS now points to the workspace called my_new_workspace
-    my_new_workspace has been created that also points to the workspace called my_new_workspace
     myOtherWS now points to the workspace called myOtherWS
 
 Workspace Properties
