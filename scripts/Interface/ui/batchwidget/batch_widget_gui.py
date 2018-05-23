@@ -1,9 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-try:
-    canMantidPlot = True
-except ImportError:
-    canMantidPlot = False
-
 from PyQt4 import QtGui
 from mantidqtpython import MantidQt
 from ui.batchwidget.ui_batch_widget_window import Ui_BatchWidgetWindow
