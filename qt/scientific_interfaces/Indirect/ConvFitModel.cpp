@@ -427,12 +427,6 @@ std::size_t ConvFitModel::getNumberHistograms(std::size_t index) const {
   return getWorkspace(index)->getNumberHistograms();
 }
 
-MatrixWorkspace_sptr ConvFitModel::getResolution(std::size_t index) const {
-  if (index < m_resolution.size())
-    return m_resolution[index].lock();
-  return nullptr;
-}
-
 CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   auto function = IndirectFittingModel::getMultiDomainFunction();
   const std::string base = "__ConvFitResolution";
@@ -474,26 +468,22 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
 
 void ConvFitModel::removeWorkspace(std::size_t index) {
   IndirectFittingModel::removeWorkspace(index);
-
-  if (m_resolution.size() > index)
-    m_resolution.erase(m_resolution.begin() + index);
+  m_resolution.erase(m_resolution.begin() + index);
 
   if (m_extendedResolution.size() > index)
     AnalysisDataService::Instance().remove(m_extendedResolution[index]);
 }
 
 void ConvFitModel::addResolution(const std::string &name) {
+  const auto index = m_resolution.size();
   const auto resolution =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
 
-  if (!resolution)
+  if (resolution) {
+    m_resolution.emplace_back(resolution);
+    addExtendedResolution(index);
+  } else
     throw std::runtime_error("Resolution workspace must be a MatrixWorkspace.");
-  else if (m_resolution.empty() || m_resolution.back().lock())
-    m_resolution.emplace_back(MatrixWorkspace_sptr());
-  else {
-    m_resolution.back() = resolution;
-    addExtendedResolution(m_resolution.size() - 1);
-  }
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
