@@ -436,7 +436,6 @@ void IndirectFittingModel::removeWorkspace(std::size_t index) {
     }
   }
 }
-} // namespace IDA
 
 void IndirectFittingModel::clearWorkspaces() {
   m_fittingData.clear();
@@ -714,6 +713,7 @@ void IndirectFittingModel::cleanFailedSingleRun(
   removeFromADSIfExists(base);
   cleanTemporaries(base + "_0");
 }
+
+} // namespace IDA
 } // namespace CustomInterfaces
-} // namespace MantidQt
 } // namespace MantidQt
