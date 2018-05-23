@@ -104,6 +104,7 @@ protected slots:
   void commitData(QWidget *) override;
 
 private:
+  // The view property values for an uneditable, unselectable cell.
   static Cell const g_deadCell;
 
   void appendAndEditAtChildRow();
