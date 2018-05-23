@@ -36,7 +36,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MaskBinsData {
 public:
-  void addXRange(double start, double end, const QList<int> &indices);
+  void addXRange(double start, double end, const std::vector<size_t> &indices);
   void mask(const std::string &wsName) const;
   bool isEmpty() const;
   void subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace,
@@ -53,7 +53,7 @@ private:
     BinMask(double s = 0.0, double e = 0.0) : start(s), end(e) {}
     double start;
     double end;
-    QList<int> spectra;
+    std::vector<size_t> spectra;
   };
   QList<BinMask> m_masks;
 };

@@ -160,7 +160,7 @@ def set_single_entry(builder, method_name, tag, all_entries, apply_to_value=None
 
 
 class StateDirectorISIS(object):
-    def __init__(self, data_info):
+    def __init__(self, data_info, file_information):
         super(StateDirectorISIS, self).__init__()
         data_info.validate()
         self._data = data_info
@@ -174,7 +174,7 @@ class StateDirectorISIS(object):
         self._slice_event_builder = get_slice_event_builder(self._data)
         self._wavelength_builder = get_wavelength_builder(self._data)
         self._save_builder = get_save_builder(self._data)
-        self._scale_builder = get_scale_builder(self._data)
+        self._scale_builder = get_scale_builder(self._data, file_information)
 
         self._adjustment_builder = get_adjustment_builder(self._data)
         self._normalize_to_monitor_builder = get_normalize_to_monitor_builder(self._data)
@@ -666,8 +666,8 @@ class StateDirectorISIS(object):
                     start_times_hab.append(times.start)
                     stop_times_hab.append(times.stop)
                 elif times.detector_type is DetectorType.LAB:
-                    start_times_hab.append(times.start)
-                    stop_times_hab.append(times.stop)
+                    start_times_lab.append(times.start)
+                    stop_times_lab.append(times.stop)
                 else:
                     RuntimeError("UserFileStateDirector: The specified detector {0} is not "
                                  "known".format(times.detector_type))

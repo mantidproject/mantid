@@ -59,9 +59,9 @@ protected:
   Kernel::Interpolation m_spectrum;
 };
 
-typedef boost::shared_ptr<PoldiSourceSpectrum> PoldiSourceSpectrum_sptr;
-typedef boost::shared_ptr<const PoldiSourceSpectrum>
-    PoldiSourceSpectrum_const_sptr;
+using PoldiSourceSpectrum_sptr = boost::shared_ptr<PoldiSourceSpectrum>;
+using PoldiSourceSpectrum_const_sptr =
+    boost::shared_ptr<const PoldiSourceSpectrum>;
 }
 }
 

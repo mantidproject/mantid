@@ -90,6 +90,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AlignDetectors", "AlignAndFocusPowder", "LoadCalFile"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Diffraction\\Focussing";
@@ -123,7 +126,7 @@ private:
 
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
-  typedef std::map<int, boost::shared_ptr<MantidVec>> group2vectormap;
+  using group2vectormap = std::map<int, boost::shared_ptr<MantidVec>>;
   /// Map from udet to group
   std::vector<int> udet2group;
   /// The list of group numbers

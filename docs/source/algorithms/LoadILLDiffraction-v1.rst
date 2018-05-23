@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -43,6 +43,12 @@ Logs
 ####
 
 The loader creates time series logs for each of the scanned variable in the `.nxs` file.
+
+D2B alignment
+-------------
+
+For D2B, the loader applies tube alignment; first rotating them horizontally around the sample, then translating them vertically.
+This is done based on *tube_centers* and *tube_angles* parameters defined in the Instrument Parameter File.
 
 Usage
 -----

@@ -253,7 +253,7 @@ to the process for :math:`F^2`:
 
     # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
     reflections = sorted([(hkl, d, fsq, len(pg.getEquivalents(hkl))) for hkl, d, fsq in zip(hkls, dValues, fSquared)],
-                                    key=lambda x: x[1], reverse=True)
+                                    key=lambda x: x[1] - x[0][0]*1e-6, reverse=True)
 
     print('{0:<8}{1:>8}{2:>8}{3:>4}'.format('HKL', 'd', 'F^2', 'M'))
     for reflection in reflections:

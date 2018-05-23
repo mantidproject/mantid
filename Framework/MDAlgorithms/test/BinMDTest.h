@@ -1111,7 +1111,7 @@ public:
   BinMDTestPerformance() {
     in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     in_ws->getBoxController()->setSplitThreshold(2000);
-    in_ws->splitAllIfNeeded(NULL);
+    in_ws->splitAllIfNeeded(nullptr);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
                                       "BinMDTest_ws", "UniformParams",

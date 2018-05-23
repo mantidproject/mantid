@@ -6,8 +6,12 @@
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 #include "MantidTypes/Core/DateAndTime.h"
-
+#include <boost/python/list.hpp>
 #include <string>
+
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -22,6 +26,7 @@ extern template int NDArrayTypeIndex<unsigned long>::typenum;
 extern template int NDArrayTypeIndex<unsigned long long>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
+extern template int NDArrayTypeIndex<Mantid::Types::Core::DateAndTime>::typenum;
 
 namespace Impl {
 /**

@@ -180,7 +180,7 @@ public:
     TS_ASSERT_DELTA(param->value<double>(), 32.0, 0.0001);
 
     param = paramMap.get(&det, "boevs");
-    TS_ASSERT(param == NULL);
+    TS_ASSERT(param == nullptr);
 
     param = paramMap.getRecursive(&det, "boevs", "double");
     TS_ASSERT_DELTA(param->value<double>(), 8.0, 0.0001);
@@ -780,7 +780,7 @@ public:
     // And finally demonstrate that the get() method does not perform recursive
     // look-up
     param = paramMap.get(&det1, "tube_pressure2");
-    TS_ASSERT(param == NULL);
+    TS_ASSERT(param == nullptr);
 
     AnalysisDataService::Instance().remove(wsName);
   }

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -10,6 +10,8 @@ Description
 -----------
 
 This algorithm calculates a single frequency spectrum from the time domain spectra recorded by multiple groups/detectors. 
+
+If a group contains zero counts (i.e. the detectors are dead) then they are excluded from the frequency calculation. In the outputs these groups record the phase and asymmetry as zero and :math:`999` respectively. 
 
 The time domian data :math:`D_k(t)`, where :math:`t` is time and :math:`k` is the spectrum number, has associated errors :math:`E_k(t)`. If the number of points chosen is greater than the number of time domain data points then extra points are
 added with infinite errors. The time domain data prior to :code:`FirstGoodTime` also have their errors set to infinity. The algorithm will produce the frequency spectra :math:`f(\omega)` and this is assumed to be real and positive. 

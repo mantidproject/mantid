@@ -4,6 +4,7 @@ from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
                                FitType)
+from sans.user_file.settings_tags import (det_fit_range)
 
 
 class StateGuiModelTest(unittest.TestCase):
@@ -129,7 +130,7 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.All)
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Reduction range
+    # Merge range
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_merge_mask_is_false_by_default(self):
         state_gui_model = StateGuiModel({"test": [1]})
@@ -152,6 +153,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model = StateGuiModel({"test": [1]})
         state_gui_model.merge_min = 78.9
         self.assertTrue(state_gui_model.merge_min == 78.9)
+
+    def test_that_merge_range_set_correctly(self):
+        state_gui_model = StateGuiModel({DetectorId.merge_range: [det_fit_range(use_fit=True, start=0.13, stop=0.15)]})
+        self.assertEqual(state_gui_model.merge_min, 0.13)
+        self.assertEqual(state_gui_model.merge_max, 0.15)
+        self.assertTrue(state_gui_model.merge_mask)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reduction dimensionality
@@ -422,6 +429,8 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.q_xy_max == "")
         self.assertTrue(state_gui_model.q_xy_step == "")
         self.assertTrue(state_gui_model.q_xy_step_type is None)
+        self.assertEqual(state_gui_model.r_cut, "")
+        self.assertEqual(state_gui_model.w_cut, "")
 
     def test_that_can_set_the_q_limits(self):
         state_gui_model = StateGuiModel({"test": [1]})
@@ -429,11 +438,15 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.q_xy_max = 1.
         state_gui_model.q_xy_step = 122.
         state_gui_model.q_xy_step_type = RangeStepType.Log
+        state_gui_model.r_cut = 45.
+        state_gui_model.w_cut = 890.
 
         self.assertTrue(state_gui_model.q_1d_rebin_string == "test")
         self.assertTrue(state_gui_model.q_xy_max == 1.)
         self.assertTrue(state_gui_model.q_xy_step == 122.)
         self.assertTrue(state_gui_model.q_xy_step_type is RangeStepType.Log)
+        self.assertEqual(state_gui_model.r_cut, 45.)
+        self.assertEqual(state_gui_model.w_cut, 890.)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity

@@ -18,35 +18,35 @@ void export_BinaryOperations() {
   using namespace boost::python;
 
   // Typedefs the various function types
-  typedef IMDWorkspace_sptr (*binary_fn_md_md)(
-      const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_md_gp)(
-      const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_md)(
-      const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_gp)(
-      const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string &,
-      const std::string &, bool, bool);
+  using binary_fn_md_md = IMDWorkspace_sptr (
+      *)(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
+         const std::string &, bool, bool);
+  using binary_fn_md_gp = WorkspaceGroup_sptr (
+      *)(const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
+         const std::string &, const std::string &, bool, bool);
+  using binary_fn_gp_md = WorkspaceGroup_sptr (
+      *)(const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
+         const std::string &, const std::string &, bool, bool);
+  using binary_fn_gp_gp = WorkspaceGroup_sptr (
+      *)(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
+         const std::string &, const std::string &, bool, bool);
 
-  typedef IMDHistoWorkspace_sptr (*binary_fn_mh_mh)(
-      const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
-      const std::string &, const std::string &, bool, bool);
+  using binary_fn_mh_mh = IMDHistoWorkspace_sptr (
+      *)(const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
+         const std::string &, const std::string &, bool, bool);
 
-  typedef IMDWorkspace_sptr (*binary_fn_md_db)(const IMDWorkspace_sptr, double,
-                                               const std::string &,
-                                               const std::string &, bool, bool);
-  typedef IMDHistoWorkspace_sptr (*binary_fn_mh_db)(
-      const IMDHistoWorkspace_sptr, double, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_db)(
-      const WorkspaceGroup_sptr, double, const std::string &,
-      const std::string &, bool, bool);
+  using binary_fn_md_db = IMDWorkspace_sptr (
+      *)(const IMDWorkspace_sptr, double, const std::string &,
+         const std::string &, bool, bool);
+  using binary_fn_mh_db = IMDHistoWorkspace_sptr (
+      *)(const IMDHistoWorkspace_sptr, double, const std::string &,
+         const std::string &, bool, bool);
+  using binary_fn_gp_db = WorkspaceGroup_sptr (
+      *)(const WorkspaceGroup_sptr, double, const std::string &,
+         const std::string &, bool, bool);
 
   // Always a return a Workspace_sptr
-  typedef return_value_policy<AsType<Workspace_sptr>> ReturnWorkspaceSptr;
+  using ReturnWorkspaceSptr = return_value_policy<AsType<Workspace_sptr>>;
 
   // Binary operations that return a workspace
   using boost::python::def;

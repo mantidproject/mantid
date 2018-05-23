@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Poco/Path.h>
 
@@ -52,13 +53,11 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
-      m_presenter(nullptr) {
+      m_presenter(boost::make_shared<EnggDiffFittingPresenter>(
+          this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
+          mainParam)) {
 
   initLayout();
-
-  m_presenter.reset(new EnggDiffFittingPresenter(
-      this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
-      mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 

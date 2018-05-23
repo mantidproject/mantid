@@ -12,10 +12,33 @@ Direct Inelastic Changes
 Algorithms
 ----------
 
+
+New features
+############
+
+- The *EPPWorkspace* input property has been removed from :ref:`DirectILLCollectData <algm-DirectILLCollectData>`.
+
+Improvements
+############
+
+- :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>`:
+    - a hard mask is applied over the beamstop region of IN5
+    - user masked detectors are not included in the report anymore
+- :ref:`DirectILLReduction <algm-DirectILLReduction>`:
+    - all output workspaces are now converted to distributions, i.e. the histograms are divided by the bin width.
+    - The default :math:`Q` binning has been revised.
+
 Bug fixes
 #########
 
-- The default :math:`Q` binning in :ref:`algm-DirectILLReduction` has been revised and it should now give slightly smaller bin widths.
+- Fixed a crash in :ref:`SofQW <algm-SofQW>`, :ref:`SofQWCentre <algm-SofQWCentre>`, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and :ref:`SofQWPolygon <algm-SofQWPolygon>` algorithms when they were supplied with energy or :math:`Q` binning params containing the bin width only.
+
+Instrument Definitions
+----------------------
+
+
+- The source component of ILL's IN5 has been moved from :math:`z = -2` to :math:`z = -2.10945` meters and renamed to ``frame-overlap_chopper``.
+- The source component of ILL's IN6 has been moved from :math:`z = -0.395` to :math:`z = -0.595` meters and renamed to ``suppressor_chopper``.
 
 :ref:`Release 3.13.0 <v3.13.0>`
 

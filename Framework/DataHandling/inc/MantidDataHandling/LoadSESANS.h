@@ -6,9 +6,9 @@
 
 #include <unordered_map>
 
-typedef std::vector<double> Column;
-typedef std::unordered_map<std::string, Column> ColumnMap;
-typedef std::unordered_map<std::string, std::string> AttributeMap;
+using Column = std::vector<double>;
+using ColumnMap = std::unordered_map<std::string, Column>;
+using AttributeMap = std::unordered_map<std::string, std::string>;
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,6 +51,9 @@ public:
   const std::string name() const override;
   const std::string summary() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveSESANS"};
+  }
   const std::string category() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 

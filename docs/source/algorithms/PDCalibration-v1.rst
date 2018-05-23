@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,8 @@ The resulting calibration table can be saved with
 applied to a workspace with :ref:`algm-AlignDetectors`. There are also
 three workspaces placed in the ``DiagnosticWorkspace`` group. They
 contain the fitted positions in dspace( ``_dspacing``), peak widths
-(``_width``), peak heights (``_height``), and instrument resolution
+(``_width``), peak heights (``_height``), raw peak fit values (``_fitparam``),
+evaluated fit functions (``_fitparam``), and instrument resolution
 (delta-d/d ``_resolution``). Since multiple peak shapes can be used,
 see the documentation for the individual `fit functions
 <../fitfunctions/index.html>`_ to see how they relate to the effective
@@ -43,10 +44,6 @@ can be directly compared with the results of
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - PDCalibration**
 
@@ -58,10 +55,10 @@ Usage
    # list of d values for diamond
    dvalues = (0.3117,0.3257,0.3499,0.4205,0.4645,0.4768,0.4996,0.5150,0.5441,0.5642,0.5947,0.6307,.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599)
 
-   PDCalibration(SignalWorkspace='uncalibrated',
-                 SignalFile='NOM_72460',
+   LoadEventNexus(Filename='NOM_72460', OutputWorkspace='NOM_72460')
+   PDCalibration(InputWorkspace='NOM_72460',
                  TofBinning=[300,-.001,16666.7],
-                 PreviousCalibration=oldCal,
+                 PreviousCalibrationTable=oldCal,
                  PeakPositions=dvalues,
                  OutputCalibrationTable='cal',
                  DiagnosticWorkspaces='diag')
@@ -73,7 +70,7 @@ Output:
 
 .. code-block:: none
 
-  The calibrated difc at detid 40896 is 5522.64160156
+  The calibrated difc at detid 40896 is 5523.060327692842
 
 .. categories::
 

@@ -18,7 +18,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /// Type of the approximated function
-typedef std::function<double(double)> ChebfunFunctionType;
+using ChebfunFunctionType = std::function<double(double)>;
 
 /**
 
@@ -200,7 +200,7 @@ private:
   static const size_t g_maxNumberPoints;
 };
 
-typedef boost::shared_ptr<ChebfunBase> ChebfunBase_sptr;
+using ChebfunBase_sptr = boost::shared_ptr<ChebfunBase>;
 
 /// Find best fit with highest possible tolerance (to be used with noisy data).
 template <class FunctionType>

@@ -26,6 +26,8 @@ public:
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
+  std::vector<RunLabel> getAllRunLabels() const override;
+
   boost::optional<RunLabel> getSelectedRunLabel() const override;
 
   void plotFittedPeaks(
@@ -45,6 +47,8 @@ public:
   void reportPlotInvalidFocusedRun(const RunLabel &runLabel) override;
 
   void resetCanvas() override;
+
+  void setEnabled(const bool enabled) override;
 
   void setMessageProvider(
       boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;

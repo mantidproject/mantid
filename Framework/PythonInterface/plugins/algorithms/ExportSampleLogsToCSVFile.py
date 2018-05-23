@@ -41,6 +41,9 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         """
         return "DataHandling\\Logs"
 
+    def seeAlso(self):
+        return [ "ExportExperimentLog" ]
+
     def name(self):
         """ Algorithm name
         """

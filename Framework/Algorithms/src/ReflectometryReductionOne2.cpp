@@ -10,6 +10,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -789,24 +790,48 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
   return corrAlg->getProperty("OutputWorkspace");
 }
 
-/**
-* The input workspace (in wavelength) to convert to Q
-* @param inputWS : the input workspace to convert
+/** Convert a workspace to Q
+*
+* @param inputWS : The input workspace (in wavelength) to convert to Q
 * @return : output workspace in Q
 */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
-
-  // Convert to Q
-  auto convertUnits = this->createChildAlgorithm("ConvertUnits");
-  convertUnits->initialize();
-  convertUnits->setProperty("InputWorkspace", inputWS);
-  convertUnits->setProperty("Target", "MomentumTransfer");
-  convertUnits->setProperty("AlignBins", false);
-  convertUnits->execute();
-  MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
-
-  return IvsQ;
+  bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
+  bool const shouldCorrectAngle =
+      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
+  if (shouldCorrectAngle && moreThanOneDetector) {
+    if (inputWS->getNumberHistograms() > 1) {
+      throw std::invalid_argument(
+          "Expected a single group in "
+          "ProcessingInstructions to be able to "
+          "perform angle correction, found " +
+          std::to_string(inputWS->getNumberHistograms()));
+    }
+    MatrixWorkspace_sptr IvsQ = inputWS->clone();
+    auto &XOut0 = IvsQ->mutableX(0);
+    const auto &XIn0 = inputWS->x(0);
+    double const theta = getProperty("ThetaIn");
+    double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
+    std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
+                   [factor](double x) { return factor / x; });
+    auto &Y0 = IvsQ->mutableY(0);
+    auto &E0 = IvsQ->mutableE(0);
+    std::reverse(Y0.begin(), Y0.end());
+    std::reverse(E0.begin(), E0.end());
+    IvsQ->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+    return IvsQ;
+  } else {
+    auto convertUnits = this->createChildAlgorithm("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setProperty("InputWorkspace", inputWS);
+    convertUnits->setProperty("Target", "MomentumTransfer");
+    convertUnits->setProperty("AlignBins", false);
+    convertUnits->execute();
+    MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
+    return IvsQ;
+  }
 }
 
 /**
@@ -1334,5 +1359,6 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
     }
   }
 }
+
 } // namespace Algorithms
 } // namespace Mantid

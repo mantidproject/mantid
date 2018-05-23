@@ -57,6 +57,7 @@
 #include <QSignalMapper>
 #include <QTableWidgetItem>
 #include <QCheckBox>
+#include <QMessageBox>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
@@ -335,12 +336,10 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 }
 
 void MuonFitPropertyBrowser::checkFitEnabled() {
-  if (m_reselectGroupBtn->isVisible()) {
+  if (count() == 0) {
     setFitEnabled(false);
-  } else if (getAutoBackgroundString() != "") {
-    setFitEnabled(true);
   } else {
-    setFitEnabled(false);
+    setFitEnabled(true);
   }
 }
 /**
@@ -407,10 +406,11 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     }
     updatePeriodDisplay();
   } else if (prop == m_workspace) {
-    // make sure the output is updated
-    FitPropertyBrowser::enumChanged(prop);
     int j = m_enumManager->value(m_workspace);
     std::string option = m_workspaceNames[j].toStdString();
+    // update plot
+    emit workspaceNameChanged(QString::fromStdString(option));
+
     setOutputName(option);
     // only do this if in single fit mode
     if (m_periodBoxes.size() > 1 &&
@@ -430,6 +430,27 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
         m_boolManager->setValue(iter.value(), selectedPeriod == iter.key());
       }
     }
+    if (!m_browser->isItemVisible(m_multiFitSettingsGroup)) {
+      size_t end = 0;
+      // assumed structure of name
+      // isolate the group/pair
+      for (int k = 0; k < 2; k++) {
+        end = option.find_first_of(";");
+        option = option.substr(end + 1, option.size());
+      }
+      end = option.find_first_of(";");
+
+      boost::erase_all(option, " ");
+
+      auto tmp = option.substr(0, end - 1);
+      QString selectedGroup = QString::fromStdString(tmp);
+      // turn on only the relevant box
+      for (auto iter = m_groupBoxes.constBegin();
+           iter != m_groupBoxes.constEnd(); ++iter) {
+        m_boolManager->setValue(iter.value(), selectedGroup == iter.key());
+      }
+    }
+
   } else {
     FitPropertyBrowser::enumChanged(prop);
   }
@@ -1041,7 +1062,7 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
   if (workspaceName.endsWith("_Workspace"))
     return false;
 
-  return dynamic_cast<MatrixWorkspace *>(ws.get()) != 0;
+  return dynamic_cast<MatrixWorkspace *>(ws.get()) != nullptr;
 }
 
 void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
@@ -1197,8 +1218,8 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
     setAllGroups();
     setAllPeriods();
     setAutoBackgroundName("");
-
-  } else { // clear current selection
+    this->clear(); // force update of composite function
+  } else {         // clear current selection
     if (m_autoBackground != "") {
       setAutoBackgroundName(m_autoBackground);
       addAutoBackground();
@@ -1549,6 +1570,12 @@ void MuonFitPropertyBrowser::updatePeriods() {
 void MuonFitPropertyBrowser::updatePeriods(const int j) {
   // this is for switching but has a bug at the moment
   // const QStringList &selected) {
+  if (m_periodsToFitOptions.size() == 0) {
+    QMessageBox::warning(this, "Muon Analysis",
+                         "Data not found. Please turn on the data archive, "
+                         "using the Manage Directories button.");
+    return;
+  }
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   m_enumManager->setValue(m_periodsToFit, j);
   if (m_periodsToFitOptions[j] == CUSTOM_LABEL) {

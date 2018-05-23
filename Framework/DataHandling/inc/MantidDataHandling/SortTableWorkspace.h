@@ -34,6 +34,9 @@ class DLLExport SortTableWorkspace : public API::ParallelAlgorithm {
 public:
   const std::string name() const override { return "SortTableWorkspace"; }
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateEmptyTableWorkspace"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

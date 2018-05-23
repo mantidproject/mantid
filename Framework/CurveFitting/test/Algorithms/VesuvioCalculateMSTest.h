@@ -57,7 +57,8 @@ createTestWorkspace(const bool detShape = true,
   const double x0(50.0), x1(562.0), dx(1.0);
   const bool singleMassSpec(false), foilChanger(true);
   auto ws2d = ComptonProfileTestHelpers::createTestWorkspace(
-      nhist, x0, x1, dx, singleMassSpec, foilChanger);
+      nhist, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None,
+      singleMassSpec, foilChanger);
 
   if (detShape) {
     // replace instrument with one that has a detector with a shape
@@ -78,7 +79,8 @@ createTestWorkspace(const bool detShape = true,
     if (groupedDets) {
       // Add another detector in the same position as the first
       auto shape = ShapeFactory().createShape(shapeXML);
-      Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
+      Mantid::Geometry::Detector *det2 =
+          new Detector("det1", 2, shape, nullptr);
       // Setting detectors should normally go via DetectorInfo, but here we need
       // to set a position as we are adding a new detector. In general getPos
       // should not be called as this tries to set the position of the base
@@ -133,13 +135,7 @@ void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg,
                                  const double expectedMS) {
   using Mantid::API::MatrixWorkspace_sptr;
   const size_t checkIdx = 100;
-// OS X and GCC>=5 seems to do a terrible job with keeping the same precision
-// here.
-#if defined(__clang__) || (__GNUC__ >= 5)
-  const double tolerance(1e-4);
-#else
-  const double tolerance(1e-8);
-#endif
+  const double tolerance(1e-6);
 
   // Values for total scattering
   MatrixWorkspace_sptr totScatter = alg->getProperty("TotalScatteringWS");
@@ -180,28 +176,17 @@ public:
     auto alg = createTestAlgorithm(createFlatPlateSampleWS());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-// seed has different effect in boost version 1.56 and newer
-#if (BOOST_VERSION / 100000) == 1 && (BOOST_VERSION / 100 % 1000) >= 56
-    checkOutputValuesAsExpected(alg, 0.0111204555, 0.0019484356);
-#else
-    checkOutputValuesAsExpected(alg, 0.0099824991, 0.0020558473);
-#endif
+    checkOutputValuesAsExpected(alg, 0.0089444492, 0.0004539721);
   }
 
   void test_exec_with_flat_plate_sample_with_grouped_detectors() {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS(true, true));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-// seed has different effect in boost version 1.56 and newer
-#if (BOOST_VERSION / 100000) == 1 && (BOOST_VERSION / 100 % 1000) >= 56
-    checkOutputValuesAsExpected(alg, 0.0111204555, 0.0019484356);
-#else
-    checkOutputValuesAsExpected(alg, 0.0099824991, 0.0020558473);
-#endif
+    checkOutputValuesAsExpected(alg, 0.0089444492, 0.0004539721);
   }
 
-  //   ------------------------ Failure Cases
-  //   -----------------------------------------
+  // --------------------- Failure Cases --------------------------------
 
   void test_setting_input_workspace_not_in_tof_throws_invalid_argument() {
     VesuvioCalculateMS alg;

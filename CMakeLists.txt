@@ -12,6 +12,10 @@ if (POLICY CMP0022)
   cmake_policy (SET CMP0022 NEW)
 endif ()
 
+if (POLICY CMP0072)
+  cmake_policy (SET CMP0072 OLD)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
@@ -153,11 +157,12 @@ include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/HistogramData/inc )
 include_directories ( Framework/Indexing/inc )
 include_directories ( Framework/Parallel/inc )
+include_directories ( Framework/Beamline/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 include_directories ( Framework/Types/inc )
 
-set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
+set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types )
 
 if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 

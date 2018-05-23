@@ -40,7 +40,7 @@ namespace {
  */
 template <typename MDE, size_t nd>
 void MDEventWorkspaceExportImpl(const char *className) {
-  typedef MDEventWorkspace<MDE, nd> ExportType;
+  using ExportType = MDEventWorkspace<MDE, nd>;
 
   class_<ExportType, bases<IMDEventWorkspace>, boost::noncopyable>(className,
                                                                    no_init);

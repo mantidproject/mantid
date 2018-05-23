@@ -79,6 +79,22 @@ class DirectILLReductionTest(unittest.TestCase):
         groupIds = groupedWS.getDetector(0).getDetectorIDs()
         self.assertEqual(collections.Counter(detectorIds), collections.Counter(groupIds))
 
+    def testOutputIsDistribution(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'OutputSofThetaEnergyWorkspace': 'SofThetaE',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertTrue(ws.isDistribution())
+        self.assertTrue(mtd.doesExist('SofThetaE'))
+        ws = mtd['SofThetaE']
+        self.assertTrue(ws.isDistribution())
+
     def testERebinning(self):
         outWSName = 'outWS'
         E0 = -2.

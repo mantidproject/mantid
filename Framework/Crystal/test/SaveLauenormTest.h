@@ -2,12 +2,14 @@
 #define MANTID_CRYSTAL_SAVELauenormTEST_H_
 
 #include "MantidCrystal/SaveLauenorm.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <Poco/File.h>
@@ -127,6 +129,43 @@ public:
     TS_ASSERT(!Poco::File(outfile3).exists());
     remove(outfile.c_str());
     remove(outfile2.c_str());
+    remove(outfile3.c_str());
+
+    // Now try with lscale format
+    std::string outfile4 = "./LSCALE";
+    LoadIsawPeaks loadPeaks;
+    loadPeaks.initialize();
+    loadPeaks.setPropertyValue("FileName", "Peaks5637.integrate");
+    loadPeaks.setPropertyValue("OutputWorkspace", "abc");
+    loadPeaks.execute();
+    PeaksWorkspace_sptr ows = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve("abc"));
+    SaveLauenorm alg4;
+    TS_ASSERT_THROWS_NOTHING(alg4.initialize())
+    TS_ASSERT(alg4.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg4.setProperty("InputWorkspace", ows));
+    TS_ASSERT_THROWS_NOTHING(alg4.setPropertyValue("Filename", outfile4));
+    TS_ASSERT_THROWS_NOTHING(alg4.setProperty("LaueScaleFormat", true));
+    TS_ASSERT_THROWS_NOTHING(alg4.setProperty("CrystalSystem", "RHOMBOHEDRAL"));
+    TS_ASSERT_THROWS_NOTHING(alg4.setProperty("Centering", "R"));
+    TS_ASSERT_THROWS_NOTHING(alg4.execute(););
+    TS_ASSERT(alg4.isExecuted());
+    // Get the file
+    outfile4 = alg4.getPropertyValue("Filename") + "001.geasc";
+    TS_ASSERT(Poco::File(outfile4).exists());
+
+    std::ifstream in4(outfile4.c_str());
+    std::string line;
+    if (numPeaksPerBank > 0) {
+      for (int i = 0; i < 7; i++)
+        getline(in4, line);
+      in4 >> line >> d1 >> d2 >> d3 >> d4;
+      TS_ASSERT_EQUALS(d1, 6);
+      TS_ASSERT_EQUALS(d2, 7);
+      TS_ASSERT_EQUALS(d3, 1);
+      TS_ASSERT_EQUALS(d4, 3);
+    }
+    // remove(outfile4.c_str());
   }
 
   /// Test with a few peaks

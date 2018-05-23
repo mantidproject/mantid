@@ -40,7 +40,7 @@ class ImplClusterRegister;
 class DLLExport ClusterRegister {
 public:
   /// Cluster map
-  typedef std::map<size_t, boost::shared_ptr<ICluster>> MapCluster;
+  using MapCluster = std::map<size_t, boost::shared_ptr<ICluster>>;
 
   /// Constructor
   ClusterRegister();

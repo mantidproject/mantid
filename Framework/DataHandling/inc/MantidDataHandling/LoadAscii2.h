@@ -60,6 +60,9 @@ public:
 
   /// The version number
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveAscii"};
+  }
   /// The category
   const std::string category() const override { return "DataHandling\\Text"; }
   /// Returns a confidence value that this algorithm can load a file

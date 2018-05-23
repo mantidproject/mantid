@@ -43,7 +43,9 @@ public:
   const std::string summary() const override {
     return "Runs a simulation of a model with a selected resolution function";
   }
-
+  const std::vector<std::string> seeAlso() const override {
+    return {"FitResolutionConvolvedModel"};
+  }
   int version() const override;
 
 private:
@@ -66,8 +68,8 @@ private:
   /// The input domain
   boost::shared_ptr<API::FunctionValues> m_calculatedValues;
   /// The output workspace type
-  typedef DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>
-      QOmegaWorkspace;
+  using QOmegaWorkspace =
+      DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>;
 
   /// The output workspace
   boost::shared_ptr<QOmegaWorkspace> m_outputWS;

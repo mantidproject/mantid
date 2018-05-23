@@ -54,7 +54,7 @@ class SaveReflectionsTest(unittest.TestCase):
     def _create_indexed_workspace(self, fractional_peaks, ndim, hklm):
         # Create table with the number of columns we need
         types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
-                 'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D']
+                 'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D', 'int']
         indexed = CreateEmptyTableWorkspace()
         names = fractional_peaks.getColumnNames()
 

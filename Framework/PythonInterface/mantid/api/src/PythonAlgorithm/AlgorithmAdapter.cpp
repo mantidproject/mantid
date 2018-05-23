@@ -3,6 +3,7 @@
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/ParallelAlgorithm.h"
@@ -90,6 +91,24 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
            "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
   }
   return category;
+}
+
+/**
+* Returns seeAlso related algorithms. If not overridden
+* it returns an empty vector of strings
+*/
+template <typename BaseAlgorithm>
+const std::vector<std::string>
+AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
+  try {
+    // The GIL is required so that the the reference count of the
+    // list object can be decremented safely
+    Environment::GlobalInterpreterLock gil;
+    return Converters::PySequenceToVector<std::string>(
+        callMethod<list>(getSelf(), "seeAlso"))();
+  } catch (UndefinedAttributeError &) {
+    return {};
+  }
 }
 
 /**

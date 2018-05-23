@@ -3,7 +3,6 @@
 #include "MantidDataHandling/ProcessBankData.h"
 
 using namespace Mantid::DataObjects;
-using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace DataHandling {

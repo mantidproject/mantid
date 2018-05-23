@@ -4,10 +4,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin2D.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidDataObjects/RebinnedOutput.h"
-#include <list>
 #include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid {
@@ -59,7 +55,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport SofQWNormalisedPolygon : public Rebin2D {
 public:
   /// Default constructor
-  SofQWNormalisedPolygon();
+  SofQWNormalisedPolygon() = default;
   /// Algorithm's name for identification
   const std::string name() const override;
   const std::string alias() const override { return "SofQW3"; }
@@ -71,6 +67,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SofQW", "SofQWPolygon", "Rebin2D"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override;
 
@@ -80,29 +79,15 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  /// Calculate the Q value for given conditions.
-  double calculateQ(const double efixed, const int emode, const double deltaE,
-                    const double twoTheta, const double azimuthal) const;
-  /// Init variables cache base on the given workspace
-  void initCachedValues(const API::MatrixWorkspace_const_sptr &workspace);
   /// Init the theta index
   void
   initAngularCachesNonPSD(const API::MatrixWorkspace_const_sptr &workspace);
   /// Get angles and calculate angular widths.
   void initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace);
 
-  /// Create the output workspace
-  DataObjects::RebinnedOutput_sptr
-  setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace,
-                       const std::vector<double> &qbinParams,
-                       std::vector<double> &qAxis,
-                       const std::vector<double> &ebinParams);
-
   SofQCommon m_EmodeProperties;
   /// Output Q axis
   std::vector<double> m_Qout;
-  /// Single value theta width
-  double m_thetaWidth;
   /// Array for the two theta angles
   std::vector<double> m_theta;
   /// Array for the azimuthal angles
@@ -112,7 +97,7 @@ private:
   /// Array for the azimuthal widths
   std::vector<double> m_phiWidths;
   /// Offset for finding neighbor in nearest tube
-  int m_detNeighbourOffset;
+  int m_detNeighbourOffset{-1};
 };
 
 } // namespace Algorithms

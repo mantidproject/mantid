@@ -100,7 +100,7 @@ struct MandatoryFirst {
 
 //----------------------- Property ordering ------------------------------
 /// Vector of property pointers
-typedef std::vector<Property *> PropertyVector;
+using PropertyVector = std::vector<Property *>;
 
 /**
  * Returns the vector of properties ordered by the criteria defined in
@@ -372,7 +372,11 @@ void export_ialgorithm() {
       .def("category", &IAlgorithm::category, arg("self"),
            "Returns the category containing the algorithm")
       .def("categories", &IAlgorithm::categories, arg("self"),
+           return_value_policy<VectorToNumpy>(),
            "Returns the list of categories this algorithm belongs to")
+      .def("seeAlso", &IAlgorithm::seeAlso, arg("self"),
+           return_value_policy<VectorToNumpy>(),
+           "Returns the list of similar algorithms")
       .def("summary", &IAlgorithm::summary, arg("self"),
            "Returns a summary message describing the algorithm")
       .def("helpURL", &IAlgorithm::helpURL, arg("self"),

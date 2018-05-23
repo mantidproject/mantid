@@ -321,6 +321,45 @@ void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace) {
   }
 }
 
+/**
+ * Add the process information to the NXcanSAS file. This information
+ * about the run number, the Mantid version and the user file (if available)
+ * @param group: the sasEntry
+ * @param workspace: the workspace which is being stored
+ */
+void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
+                Mantid::API::MatrixWorkspace_sptr canWorkspace) {
+  // Setup process
+  const std::string sasProcessNameForGroup = sasProcessGroupName;
+  auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
+
+  // Add name
+  Mantid::DataHandling::H5Util::write(process, sasProcessName,
+                                      sasProcessNameValue);
+
+  // Add creation date of the file
+  auto date = getDate();
+  Mantid::DataHandling::H5Util::write(process, sasProcessDate, date);
+
+  // Add Mantid version
+  const auto version = std::string(MantidVersion::version());
+  Mantid::DataHandling::H5Util::write(process, sasProcessTermSvn, version);
+
+  const auto run = workspace->run();
+  if (run.hasProperty(sasProcessUserFileInLogs)) {
+    auto userFileProperty = run.getProperty(sasProcessUserFileInLogs);
+    auto userFileString = userFileProperty->value();
+    Mantid::DataHandling::H5Util::write(process, sasProcessTermUserFile,
+                                        userFileString);
+  }
+
+  // Add can run number
+  const auto canRun = canWorkspace->getRunNumber();
+  Mantid::DataHandling::H5Util::write(process, sasProcessTermCan,
+                                      std::to_string(canRun));
+}
+
 WorkspaceDimensionality
 getWorkspaceDimensionality(Mantid::API::MatrixWorkspace_sptr workspace) {
   auto numberOfHistograms = workspace->getNumberHistograms();
@@ -814,7 +853,11 @@ void SaveNXcanSAS::exec() {
 
   // Add the process information
   progress.report("Adding process information.");
-  addProcess(sasEntry, workspace);
+  if (transmissionCan) {
+    addProcess(sasEntry, workspace, transmissionCan);
+  } else {
+    addProcess(sasEntry, workspace);
+  }
 
   // Add the transmissions for sample
   if (transmissionSample) {
