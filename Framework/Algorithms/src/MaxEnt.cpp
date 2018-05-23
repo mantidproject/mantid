@@ -279,7 +279,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
     result["DataConstAdj"] = "The number of histograms in the constant "
     "adjustments workspace must be even, because they are complex data";
   else if (nAHistograms > 0 && nAHistograms < nHistograms)
-    result["DataConstAdj"] = "The number of histograms in the linear "
+    result["DataConstAdj"] = "The number of histograms in the constant "
     "adjustments workspace is insufficient for the input workspace";
 
   return result;
