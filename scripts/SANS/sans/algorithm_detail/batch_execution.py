@@ -825,18 +825,16 @@ def add_to_group(workspace, name_of_group_workspace):
             group_options = {"InputWorkspaces": [name_of_workspace],
                              "OutputWorkspace": name_of_group_workspace}
             group_alg = create_unmanaged_algorithm(group_name, **group_options)
-            # At this point we are dealing with the ADS, hence we need to make sure that this is not called as
-            # a child algorithm
-            group_alg.setChild(False)
+
+            group_alg.setAlwaysStoreInADS(True)
             group_alg.execute()
     else:
         group_name = "GroupWorkspaces"
         group_options = {"InputWorkspaces": [name_of_workspace],
                          "OutputWorkspace": name_of_group_workspace}
         group_alg = create_unmanaged_algorithm(group_name, **group_options)
-        # At this point we are dealing with the ADS, hence we need to make sure that this is not called as
-        # a child algorithm
-        group_alg.setChild(False)
+        
+        group_alg.setAlwaysStoreInADS(True)
         group_alg.execute()
 
 
@@ -897,7 +895,7 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors):
         for key, workspace_list in workspaces.items():
             for workspace in workspace_list:
                 if workspace and workspace.name():
-                    _workspace_names_to_delete += [workspace.name()]
+                    _workspace_names_to_delete.append(workspace.name())
 
         for _workspace_name_to_delete in _workspace_names_to_delete:
             if _workspace_name_to_delete and AnalysisDataService.doesExist(_workspace_name_to_delete):
