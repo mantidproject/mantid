@@ -417,6 +417,13 @@ void IndirectFittingModel::removeWorkspace(std::size_t index) {
     m_fitOutput->removeOutput(m_fittingData[index].get());
   m_fittingData.erase(m_fittingData.begin() + index);
   m_defaultParameters.erase(m_defaultParameters.begin() + index);
+
+  if (index > 0 && m_fittingData.size() > index &&
+      m_fittingData[index]->workspace() ==
+          m_fittingData[index - 1]->workspace()) {
+    m_fittingData[index - 1]->combine(*m_fittingData[index]);
+    m_fittingData.erase(m_fittingData.begin() + index);
+  }
 }
 
 void IndirectFittingModel::clearWorkspaces() {
