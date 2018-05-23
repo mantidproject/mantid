@@ -1,10 +1,10 @@
-.. _FindRootNodes:
+.. _FindSubtreeRoots:
 
-===============
-Find Root Nodes
-===============
+==================
+Find Subtree Roots
+==================
 
-The :code:`FindRootNodes` component filters an unordered set of row locations down to a
+The :code:`FindSubtreeRoots` component filters an unordered set of row locations down to a
 lexicographically ordered set of row locations where each location corresponds to the root
 of a subtree.
 

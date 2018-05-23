@@ -24,7 +24,7 @@ Internals Documentation
    :maxdepth: 1
 
    Internals/ExtractSubtrees
-   Internals/FindRootNodes
+   Internals/FindSubtreeRoots
    Internals/StrictModelIndexing
    Internals/QtStandardItemTreeModelAdapter
    Internals/CellBasedViewProperties
