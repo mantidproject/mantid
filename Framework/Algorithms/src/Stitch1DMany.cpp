@@ -153,7 +153,6 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
              ++i) { // columns
           if (i->size() != m_inputWSMatrix.front().size()) {
             issues["InputWorkspaces"] = "Size mismatch of group workspaces";
-            break;
           } else {
             RunCombinationHelper combHelper;
             combHelper.setReferenceProperties(i->front());
