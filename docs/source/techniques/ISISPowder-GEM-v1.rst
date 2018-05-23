@@ -709,7 +709,7 @@ save_maud
 
 If set to **True**, this saves the focus output to the Maud
 three-column format (``.gem`` file extension). If
-:ref:`texture_mode_gem_isis-powder-diffraction-ref` is set to **True**
+:ref:`texture_mode_isis-powder-diffraction-ref` is set to **True**
 this is enabled, and disabled if it is set to **False**.
 
 .. _spline_coefficient_gem_isis-powder-diffraction-ref:
