@@ -63,10 +63,10 @@ class BeamCentreModelTest(unittest.TestCase):
 
     def test_that_correct_values_are_set_for_LOQ(self):
         facility = SANSFacility.ISIS
-        file_information = SANSFileInformationMock(run_number=48127, instrument=SANSInstrument.LOQ)
+        file_information = SANSFileInformationMock(run_number=74044, instrument=SANSInstrument.LOQ)
 
         data_builder = get_data_builder(facility, file_information)
-        data_builder.set_sample_scatter("LOQ48127")
+        data_builder.set_sample_scatter("LOQ74044")
         data_state = data_builder.build()
 
         self.beam_centre_model.reset_to_defaults_for_instrument(data_state)
@@ -86,7 +86,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                                    tolerance=self.beam_centre_model.tolerance,
                                                                    find_direction=FindDirectionEnum.All,
                                                                    reduction_method=True,
-                                                                   verbose=False)
+                                                                   verbose=False, component=DetectorType.LAB)
 
         self.assertEqual(state.convert_to_q.q_min, self.beam_centre_model.q_min)
         self.assertEqual(state.convert_to_q.q_max, self.beam_centre_model.q_max)
@@ -107,7 +107,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                               tolerance=self.beam_centre_model.tolerance,
                                                               find_direction=FindDirectionEnum.All,
                                                               reduction_method=True,
-                                                              verbose=False)
+                                                              verbose=False, component=DetectorType.LAB)
 
         self.SANSCentreFinder.return_value.assert_any_call(state, r_min=self.beam_centre_model.r_min,
                                                            r_max=self.beam_centre_model.r_max,
@@ -116,7 +116,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                            y_start=self.beam_centre_model.lab_pos_2,
                                                            tolerance=self.beam_centre_model.tolerance,
                                                            find_direction=FindDirectionEnum.All,
-                                                           reduction_method=False)
+                                                           reduction_method=False, component=DetectorType.LAB)
 
 
 if __name__ == '__main__':
