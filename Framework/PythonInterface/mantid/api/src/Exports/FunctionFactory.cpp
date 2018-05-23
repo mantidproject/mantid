@@ -27,9 +27,13 @@ GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
 namespace Mantid {
 namespace PythonInterface {
 
-/// Specialization for IFunction. It needs to pass a bool to the created
-/// instance indicating that
-/// it is created by the factory.
+/// Specialization for IFunction. Fit functions defined in
+/// python need to be wrapped in FunctionWrapper without
+/// asking the user to do additional actions.
+/// The instantiator lets the fit function class object know
+/// that an instance will be created by the FunctionFactory
+/// and it needs to be a subclass of IFunction and not a
+/// FunctionWrapper.
 template <>
 boost::shared_ptr<IFunction>
 PythonObjectInstantiator<IFunction>::createInstance() const {

@@ -47,7 +47,7 @@ public:
   using Base = API::IPeakFunction;
 
   /// A constructor that looks like a Python __init__ method
-  IPeakFunctionAdapter(PyObject *self, bool isCreatedByFactory = false);
+  IPeakFunctionAdapter(PyObject *self);
 
   /// Disable copy operator - The PyObject must be supplied to construct the
   /// object

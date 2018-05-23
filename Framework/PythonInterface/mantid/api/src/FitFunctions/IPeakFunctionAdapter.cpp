@@ -12,10 +12,8 @@ using namespace boost::python;
 /**
  * Construct the "wrapper" and stores the reference to the PyObject
  * @param self A reference to the calling Python object
- * @param isCreatedByFactory FunctionFactory should set this agument to true
- *  when creatting the function.
  */
-IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self, bool)
+IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
     : IFunctionAdapter(self, "functionLocal", "functionDerivLocal") {}
 
 /**

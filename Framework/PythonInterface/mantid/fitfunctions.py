@@ -740,6 +740,8 @@ _name_to_constructor_map = {
     'MultiDomainFunction': MultiDomainFunctionWrapper,
     }
 
+# Some functions need to be excluded from wrapping, eg
+# if there is an algorithm with the same name.
 _do_not_wrap = ['VesuvioResolution']
 
 
@@ -762,6 +764,7 @@ def _create_wrapper_function(name):
 
 def _attach_wrappers(source_module):
     for name in FunctionFactory.getFunctionNames():
+        # Wrap all registered functions which are not in the black list
         if name not in _do_not_wrap:
             setattr(source_module, name, _create_wrapper_function(name))
 
@@ -772,6 +775,15 @@ _ExportedIFunction1D = IFunction1D
 class _IFunction1DWrapperCreator(_ExportedIFunction1D):
     """Overriden IFunction1D class that allows creation of
     FunctionWrappers for newly defined fit functions.
+
+    User defined function inherit from this class.
+    When the user calls the constructor to create an instance
+    of the new function it returns a FunctionWrapper that
+    wraps the actual fit function.
+
+    Class field _used_by_factory is set by FunctionFactory
+    to indicate that an unwrapped instance of the fit function
+    must be returned by the constructor.
     """
     _used_by_factory = False
 
