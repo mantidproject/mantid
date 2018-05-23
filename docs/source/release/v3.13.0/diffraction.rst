@@ -32,7 +32,7 @@ Engineering Diffraction
     using :ref:`EnggSaveSinglePeakFitResultsToHDF5
     <algm-EnggSaveSinglePeakFitResultsToHDF5>`. The algorithm
     previously used for saving to CSV, **SaveDiffFittingAscii**, has
-    been removed from Mantid
+    been deprecated
   - Fit results and parameters are saved to HDF5 from the **GSAS
     Refinement** tab
 
