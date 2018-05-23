@@ -25,7 +25,7 @@ class MaxEntPresenter(object):
 
     @property
     def widget(self):
-	    return self.view
+        return self.view
 
     # functions
     def getWorkspaceNames(self):

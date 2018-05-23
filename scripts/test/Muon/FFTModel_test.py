@@ -1,6 +1,6 @@
 import sys
 
-from  Muon import fft_model
+from  Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 
 import unittest
 

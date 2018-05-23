@@ -2,11 +2,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import sys
 
-from  Muon import load_utils
-from  Muon import maxent_presenter
-from  Muon import maxent_view
-from  Muon import maxent_model
-from  Muon import thread_model
+from  Muon.GUI.Common import load_utils
+from  Muon.GUI.Common import thread_model
+from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
+from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 import unittest
 if sys.version_info.major == 3:

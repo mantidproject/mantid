@@ -6,16 +6,17 @@ from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_model import FFTModel, FFTWrapper
 
 from PyQt4 import QtGui
 
+
 class FFTWidget(QtGui.QWidget):
-    def __init__(self,load,parent=None):
-        super(FFTWidget,self).__init__(parent)
+
+    def __init__(self, load, parent=None):
+        super(FFTWidget, self).__init__(parent)
         view = FFTView(parent)
 
         fft = FFTModel()
         model = FFTWrapper(fft)
 
-        self.pres = FFTPresenter(view=view,alg=model,load=load)
-
+        self.pres = FFTPresenter(view=view, alg=model, load=load)
 
     @property
     def presenter(self):
@@ -25,7 +26,5 @@ class FFTWidget(QtGui.QWidget):
     def widget(self):
         return self.presenter.widget
 
-    def closeEvent(self,event):
+    def closeEvent(self, event):
         self.pres.cancel()
-
-

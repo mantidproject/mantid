@@ -7,12 +7,13 @@ from PyQt4 import QtGui
 
 
 class TransformSelectionWidget(QtGui.QWidget):
-    def __init__(self,parent=None):
-        super(TransformSelectionWidget,self).__init__(parent)
+
+    def __init__(self, parent=None):
+        super(TransformSelectionWidget, self).__init__(parent)
         view = TransformSelectionView(parent)
         self.pres = TransformSelectionPresenter(view)
 
-    def setSelectionConnection(self,slot):
+    def setSelectionConnection(self, slot):
         view = self.widget
         view.changeMethodSignal.connect(slot)
 
@@ -23,5 +24,3 @@ class TransformSelectionWidget(QtGui.QWidget):
     @property
     def widget(self):
         return self.presenter.widget
-
-

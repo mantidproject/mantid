@@ -20,7 +20,7 @@ class MaxEntView(QtGui.QWidget):
         super(MaxEntView, self).__init__(parent)
         self.grid = QtGui.QVBoxLayout(self)
 
-        #add splitter for resizing
+        # add splitter for resizing
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
         self.run = None
@@ -153,7 +153,7 @@ class MaxEntView(QtGui.QWidget):
         self.grid.addLayout(self.buttonLayout)
 
     def getLayout(self):
-         return self.grid
+        return self.grid
 
     # add data to view
     def addItems(self, options):

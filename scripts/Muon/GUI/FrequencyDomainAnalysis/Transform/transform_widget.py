@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformView
-from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_presenter import TransformPresenter
 
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
