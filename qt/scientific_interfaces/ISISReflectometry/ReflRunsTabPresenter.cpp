@@ -403,6 +403,12 @@ bool ReflRunsTabPresenter::autoreductionRunning() const {
   return m_autoreduction.running();
 }
 
+/** Check whether processing is in progress
+ */
+bool ReflRunsTabPresenter::processingInProgress(int group) const {
+  return m_mainPresenter->checkIfProcessing(group);
+}
+
 /** Check whether autoreduction is running for a specific group
  */
 bool ReflRunsTabPresenter::autoreductionRunning(int group) const {
@@ -698,13 +704,10 @@ void ReflRunsTabPresenter::pause(int group) {
   updateWidgetEnabledState(false);
   m_progressView->setAsPercentageIndicator();
 
-  // We get here in two scenarios: processing is still running, in which case
-  // do not confirm reduction has paused yet (confirmReductionPaused will be
-  // called when reduction is finished); and when processing is finished but
-  // autoreduction is in progress, in which case we need to confirm reduction
-  // has paused now because confirmReductionPaused will not be called.
-  if (!m_mainPresenter->checkIfProcessing(group))
-    m_mainPresenter->notifyReductionPaused(group);
+  // If processing has already finished, confirm reduction is paused; otherwise
+  // leave it to finish
+  if (!processingInProgress(group))
+    confirmReductionPaused(group);
 }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets

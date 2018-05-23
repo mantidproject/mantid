@@ -191,8 +191,9 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(true))
         .Times(Exactly(1));
-    EXPECT_CALL(*m_mockProgress, setAsPercentageIndicator())
+    EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_NUMBER))
         .Times(Exactly(1));
+    EXPECT_CALL(*m_mockProgress, setProgressRange(0, 100)).Times(Exactly(1));
 
     presenter.pause(GROUP_NUMBER);
 

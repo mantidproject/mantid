@@ -158,6 +158,8 @@ private:
       const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
+  /// Return true if processing is currently in progress for a group
+  bool processingInProgress(int group) const;
 };
 }
 }
