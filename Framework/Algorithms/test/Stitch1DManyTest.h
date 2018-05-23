@@ -1006,7 +1006,7 @@ public:
 
     // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
-    //TS_ASSERT_EQUALS(scales.size(), 4);
+    TS_ASSERT_EQUALS(scales.size(), 4);
     TS_ASSERT_DELTA(scales[0], 0.9375, 0.0001);
     TS_ASSERT_DELTA(scales[1], 0.6249, 0.0001);
     TS_ASSERT_DELTA(scales[2], 0.9375, 0.0001);
@@ -1038,10 +1038,10 @@ public:
 
     // Test the algorithm histories
     auto histNames = getHistory(stitched);
+    TS_ASSERT_EQUALS(histNames.size(), 3)
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
-    //TS_ASSERT_EQUALS(histNames[2], "Stitch1DMany");
-
+    TS_ASSERT_EQUALS(histNames[2], "Stitch1DMany");
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
@@ -1162,13 +1162,13 @@ public:
     ws2->initialize(1, histogram2);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-    //Stitch1DMany alg;
-    //alg.initialize();
-    //alg.setProperty("InputWorkspaces", "ws1, ws2");
-    //alg.setProperty("UseManualScaleFactors", "1");
-    //alg.setProperty("OutputWorkspace", "ws");
-    //alg.execute();
-    //TS_ASSERT(alg.isExecuted());
+    // Stitch1DMany alg;
+    // alg.initialize();
+    // alg.setProperty("InputWorkspaces", "ws1, ws2");
+    // alg.setProperty("UseManualScaleFactors", "1");
+    // alg.setProperty("OutputWorkspace", "ws");
+    // alg.execute();
+    // TS_ASSERT(alg.isExecuted());
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 };
