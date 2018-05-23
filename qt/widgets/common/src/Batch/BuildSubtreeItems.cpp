@@ -30,13 +30,13 @@ auto BuildSubtreeItems::buildRecursively(int index, RowLocation const &parent,
     auto currentDepth = currentRow.depth();
 
     if (depth < currentDepth) {
-      current = buildRecursively(currentRow.rowRelativeToParent(),
-                                 parent.child(insertedRow.row()), depth + 1,
-                                 current, end);
+        current = buildRecursively(currentRow.rowRelativeToParent(),
+                                   parent.child(insertedRow.row()), depth + 1,
+                                   current, end);
     } else if (depth > currentDepth) {
       return current;
     } else {
-      m_adaptedMainModel.appendChildRow(m_rowLocations.indexAt(parent),
+      insertedRow = m_adaptedMainModel.appendChildRow(m_rowLocations.indexAt(parent),
                                         (*current).cells());
       ++current;
     }
