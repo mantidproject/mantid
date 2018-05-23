@@ -83,7 +83,8 @@ class SANSCentreFinder(object):
         super(SANSCentreFinder, self).__init__()
 
     def __call__(self, state, r_min = 60, r_max = 280, max_iter = 20, x_start = 0.0, y_start = 0.0,
-                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False, component=DetectorType.LAB):
+                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False,
+                 component=DetectorType.LAB):
         """
         This is the start of the beam centre finder algorithm.
 
