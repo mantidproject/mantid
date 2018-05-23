@@ -1149,6 +1149,18 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_input_manualScaleFactors(){
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1", true);
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2", true);
+    Stitch1DMany alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("UseManualScaleFactors", "1");
+    alg.setProperty("OutputWorkspace", "ws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
   void test_two_point_data_workspaces() {
     const auto &x1 = Mantid::HistogramData::Points({0.2, 0.9, 1.6});
     const auto &y1 = Mantid::HistogramData::Counts({56., 77., 48.});
@@ -1162,13 +1174,14 @@ public:
     ws2->initialize(1, histogram2);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws2", ws2);
-    // Stitch1DMany alg;
-    // alg.initialize();
-    // alg.setProperty("InputWorkspaces", "ws1, ws2");
-    // alg.setProperty("UseManualScaleFactors", "1");
-    // alg.setProperty("OutputWorkspace", "ws");
-    // alg.execute();
-    // TS_ASSERT(alg.isExecuted());
+    Stitch1DMany alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("UseManualScaleFactors", "1");
+    alg.setProperty("ManualScaleFactors", "1");
+    alg.setProperty("OutputWorkspace", "ws");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 };

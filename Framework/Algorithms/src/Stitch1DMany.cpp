@@ -212,6 +212,9 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
                 "Must be a single value for all input workspaces or " +
                 expectedVal.str() + " values";
         }
+      } else { // if not a group, no period scaling possible
+        if (m_useManualScaleFactors && (m_inputWSMatrix.size() == 1))
+          issues["ManualScaleFactors"] = "Must contain scale factors";
       }
     } catch (const std::exception &e) {
       issues["InputWorkspaces"] = std::string(e.what());
