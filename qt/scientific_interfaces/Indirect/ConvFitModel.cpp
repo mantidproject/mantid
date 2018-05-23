@@ -466,9 +466,11 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                 const Spectra &spectra) {
   IndirectFittingModel::addWorkspace(workspace, spectra);
 
-  if (numberOfWorkspaces() > m_resolution.size())
+  const auto dataSize = numberOfWorkspaces();
+  if (m_resolution.size() < dataSize)
     m_resolution.emplace_back(MatrixWorkspace_sptr());
-  else if (numberOfWorkspaces() == m_resolution.size())
+  else if (m_resolution.size() == dataSize &&
+           m_extendedResolution.size() < dataSize)
     addExtendedResolution(numberOfWorkspaces() - 1);
 }
 
