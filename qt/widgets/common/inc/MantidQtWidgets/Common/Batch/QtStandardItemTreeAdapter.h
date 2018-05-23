@@ -61,7 +61,7 @@ public:
   appendEmptyChildRow(QModelIndexForMainModel const &parent);
 
   QModelIndexForMainModel insertChildRow(QModelIndexForMainModel const &parent,
-                                         int column, std::vector<Cell> const& cells);
+                                         int row, std::vector<Cell> const& cells);
   QModelIndexForMainModel
   insertEmptyChildRow(QModelIndexForMainModel const &parent, int column);
 
