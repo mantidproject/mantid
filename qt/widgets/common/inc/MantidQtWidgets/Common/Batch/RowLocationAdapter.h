@@ -20,6 +20,7 @@ public:
                                   int column = 0) const;
 
 private:
+  QModelIndex walkFromRootToParentIndexOf(RowLocation const &location) const;
   QStandardItemModel const &m_model;
 };
 }
