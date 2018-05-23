@@ -131,7 +131,7 @@ void ApplyMuonDetectorGrouping::exec() {
 
   WorkspaceGroup_sptr groupWS = getProperty("InputWorkspaceGroup");
   const Workspace_sptr inputWS = getProperty("InputWorkspace");
-  WorkspaceGroup_sptr muonWS = getUserInput(inputWS, groupWS, options);
+  WorkspaceGroup_sptr muonWS = getUserInput(inputWS, options);
   std::string groupedWSName = groupWS->getName();
 
   clipXRangeToWorkspace(*muonWS, options);
@@ -173,7 +173,6 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
 */
 WorkspaceGroup_sptr
 ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
-                                        const WorkspaceGroup_sptr &groupedWS,
                                         Muon::AnalysisOptions &options) {
 
   // Store all the options needed for MuonProcess

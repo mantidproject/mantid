@@ -70,7 +70,6 @@ private:
   ///  Store the input properties as private member variables
   API::WorkspaceGroup_sptr
   getUserInput(const API::Workspace_sptr &inputWS,
-               const API::WorkspaceGroup_sptr &groupedWS,
                Muon::AnalysisOptions &options);
   /// Clip Xmin/Xmax to the range in the input WS
   void clipXRangeToWorkspace(const API::WorkspaceGroup &ws,
