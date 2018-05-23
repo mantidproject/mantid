@@ -339,6 +339,12 @@ boost::optional<std::string> IndirectFittingModel::isInvalidFunction() const {
   return boost::none;
 }
 
+bool IndirectFittingModel::hasZeroSpectra(std::size_t dataIndex) const {
+  if (m_fittingData.size() > dataIndex)
+    return m_fittingData[dataIndex]->zeroSpectra();
+  return true;
+}
+
 std::size_t IndirectFittingModel::numberOfWorkspaces() const {
   return m_fittingData.size();
 }
