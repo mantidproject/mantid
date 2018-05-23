@@ -485,18 +485,9 @@ void ConvFitModel::removeWorkspace(std::size_t index) {
   }
 }
 
-void ConvFitModel::addResolution(const std::string &name) {
-  const auto resolution =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-
-  if (!resolution)
-    throw std::runtime_error("Resolution workspace must be a MatrixWorkspace.");
-  else if (m_resolution.empty() || m_resolution.back().lock())
-    m_resolution.emplace_back(MatrixWorkspace_sptr());
-  else if (m_extendedResolution.size() != m_resolution.size()) {
-    m_resolution.back() = resolution;
-    addExtendedResolution(m_resolution.size() - 1);
-  }
+void ConvFitModel::setResolution(const std::string &name, std::size_t index) {
+  setResolution(
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name), index);
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
