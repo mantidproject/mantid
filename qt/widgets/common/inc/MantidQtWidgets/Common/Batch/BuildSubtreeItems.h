@@ -16,12 +16,13 @@ public:
   using SubtreeConstIterator = typename Subtree::const_iterator;
   BuildSubtreeItems(QtStandardItemTreeModelAdapter &adaptedModel,
                     RowLocationAdapter const &rowLocationAdapter);
+  QModelIndexForMainModel modelIndexAt(RowLocation const &parent) const;
 
   void operator()(RowLocation const &parentOfSubtreeRoot, int index,
                   Subtree const &subtree);
 
   SubtreeConstIterator buildRecursively(int index, RowLocation const &parent,
-                                        int depth, SubtreeConstIterator current,
+                                        SubtreeConstIterator current,
                                         SubtreeConstIterator end);
 
 private:
