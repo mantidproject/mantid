@@ -833,7 +833,7 @@ def add_to_group(workspace, name_of_group_workspace):
         group_options = {"InputWorkspaces": [name_of_workspace],
                          "OutputWorkspace": name_of_group_workspace}
         group_alg = create_unmanaged_algorithm(group_name, **group_options)
-        
+
         group_alg.setAlwaysStoreInADS(True)
         group_alg.execute()
 
