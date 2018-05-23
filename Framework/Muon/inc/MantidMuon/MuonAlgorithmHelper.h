@@ -12,10 +12,10 @@
 namespace Mantid {
 namespace Muon {
 /// Types of entities we are dealing with
-enum ItemType { Pair, Group };
+const enum ItemType { Pair, Group };
 
 /// Possible plot types users might request
-enum PlotType { Asymmetry, Counts, Logarithm };
+const enum PlotType { Asymmetry, Counts, Logarithm };
 
 /// Parameters from parsed workspace name
 struct DatasetParams {

@@ -68,25 +68,26 @@ private:
   /// Execution code
   void exec() override;
   ///  Store the input properties as private member variables
-  API::WorkspaceGroup_sptr
-  getUserInput(const API::Workspace_sptr &inputWS,
-               Muon::AnalysisOptions &options);
+  void getUserInput(const API::Workspace_sptr &inputWS,
+                    Muon::AnalysisOptions &options);
   /// Clip Xmin/Xmax to the range in the input WS
   void clipXRangeToWorkspace(const API::WorkspaceGroup &ws,
                              Muon::AnalysisOptions &options);
-  /// Creates and analyses a workspace, if isRaw does not rebin.
+  /// Creates and analyses a workspace, if noRebin does not rebin.
   API::Workspace_sptr
   createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin,
                           Muon::AnalysisOptions &options);
   /// Sets algorithm properties according to options.
-  void setMuonProcessAlgorithmProperties(API::IAlgorithm_sptr alg,
+  void setMuonProcessAlgorithmProperties(API::IAlgorithm &alg,
                                          const AnalysisOptions &options) const;
-
+  /// Convert the input workspace into a workspace group if e.g. it has only a single period
+  /// otherwise leave it alone.
+  API::WorkspaceGroup_sptr convertInputWStoWSGroup(const API::Workspace_sptr inputWS);
   /// Set algorithm properties (input workspace, and period properties)
   /// according to the given options. For use with
   /// MuonProcess.
   void
-  setMuonProcessPeriodProperties(API::IAlgorithm_sptr alg,
+  setMuonProcessPeriodProperties(API::IAlgorithm &alg,
                                  const API::Workspace_sptr &inputWS,
                                  const Muon::AnalysisOptions &options) const;
   /// Generate the name of the new workspace

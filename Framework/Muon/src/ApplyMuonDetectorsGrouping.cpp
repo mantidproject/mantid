@@ -79,7 +79,7 @@ void ApplyMuonDetectorGrouping::init() {
       "The type of analysis to perform on the spectra.", Direction::Input);
 
   declareProperty(
-      "TimeMin", 0.0,
+      "TimeMin", 0.1,
       "Start time for the data in ms. Only used with the asymmetry analysis.",
       Direction::Input);
   setPropertySettings("TimeMin",
@@ -87,7 +87,7 @@ void ApplyMuonDetectorGrouping::init() {
                           "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
 
   declareProperty(
-      "TimeMax", 30.0,
+      "TimeMax", 32.0,
       "End time for the data in ms. Only used with the asymmetry analysis.",
       Direction::Input);
   setPropertySettings("TimeMax",
@@ -131,9 +131,11 @@ void ApplyMuonDetectorGrouping::exec() {
 
   WorkspaceGroup_sptr groupWS = getProperty("InputWorkspaceGroup");
   const Workspace_sptr inputWS = getProperty("InputWorkspace");
-  WorkspaceGroup_sptr muonWS = getUserInput(inputWS, options);
+
+  getUserInput(inputWS, options);
   std::string groupedWSName = groupWS->getName();
 
+  WorkspaceGroup_sptr muonWS = convertInputWStoWSGroup(inputWS);
   clipXRangeToWorkspace(*muonWS, options);
 
   auto ws = createAnalysisWorkspace(inputWS, false, options);
@@ -168,14 +170,11 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
 }
 
 /*
-* Store the input properties in options, returns inputWS cast to a
-* WorkspaceGroup.
+* Store the input properties in options
 */
-WorkspaceGroup_sptr
-ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
-                                        Muon::AnalysisOptions &options) {
+void ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
+                                             Muon::AnalysisOptions &options) {
 
-  // Store all the options needed for MuonProcess
   Grouping grouping;
   grouping.description = "no description";
   grouping.groupNames.emplace_back(this->getPropertyValue("groupName"));
@@ -189,19 +188,28 @@ ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
   options.timeLimits.first = this->getProperty("TimeMin");
   options.timeLimits.second = this->getProperty("TimeMax");
   options.rebinArgs = this->getPropertyValue("rebinArgs");
-  ;
   options.plotType = getPlotType(this->getPropertyValue("AnalysisType"));
   options.groupPairName = this->getPropertyValue("groupName");
-
-  // Cast input WS to a WorkspaceGroup
-  auto muonWS = boost::make_shared<WorkspaceGroup>();
-  if (auto test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-    muonWS->addWorkspace(inputWS);
-  } else {
-    muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
-  }
-  return muonWS;
 }
+
+/**
+* Convert the input workspace into a workspace group if e.g. it has only a single period
+* otherwise leave it alone.
+*/
+WorkspaceGroup_sptr ApplyMuonDetectorGrouping::convertInputWStoWSGroup(
+	const Workspace_sptr inputWS) {
+	
+	// Cast input WS to a WorkspaceGroup
+	auto muonWS = boost::make_shared<WorkspaceGroup>();
+	if (auto test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+		muonWS->addWorkspace(inputWS);
+	}
+	else {
+		muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+	}
+	return muonWS;
+}
+
 
 /**
 * Clip Xmin/Xmax to the range in the first histogram of the input WS group.
@@ -216,9 +224,13 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
   clipWS->getXMinMax(dataXMin, dataXMax);
 
   if (options.timeLimits.first < dataXMin) {
+	const std::string message("Requested TimeMin outside of data range.");
+	g_log.notice(message);
     options.timeLimits.first = dataXMin;
   }
   if (options.timeLimits.second > dataXMax) {
+	const std::string message("Requested TimeMax outside of data range.");
+	g_log.notice(message);
     options.timeLimits.second = dataXMax;
   }
 }
@@ -238,8 +250,8 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
 
   alg->initialize();
-  setMuonProcessPeriodProperties(alg, inputWS, options);
-  setMuonProcessAlgorithmProperties(alg, options);
+  setMuonProcessPeriodProperties(*alg, inputWS, options);
+  setMuonProcessAlgorithmProperties(*alg, options);
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
   alg->execute();
@@ -251,7 +263,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
  * to the given options. For use with MuonProcess.
  */
 void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
-    IAlgorithm_sptr alg, const Workspace_sptr &inputWS,
+    IAlgorithm &alg, const Workspace_sptr &inputWS,
     const Muon::AnalysisOptions &options) const {
 
   auto inputGroup = boost::make_shared<WorkspaceGroup>();
@@ -261,17 +273,17 @@ void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
       auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       inputGroup->addWorkspace(ws);
     }
-    alg->setProperty("SummedPeriodSet", options.summedPeriods);
-    alg->setProperty("SubtractedPeriodSet", options.subtractedPeriods);
+    alg.setProperty("SummedPeriodSet", options.summedPeriods);
+    alg.setProperty("SubtractedPeriodSet", options.subtractedPeriods);
   } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
-    alg->setProperty("SummedPeriodSet", "1");
+    alg.setProperty("SummedPeriodSet", "1");
   } else {
     throw std::runtime_error(
-        "Cannot create analysis workspace: unsupported workspace type");
+        "Cannot create workspace: unsupported workspace type");
   }
-  alg->setProperty("InputWorkspace", inputGroup);
+  alg.setProperty("InputWorkspace", inputGroup);
 }
 
 /**
@@ -279,20 +291,20 @@ void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
 * MuonProcess.
 */
 void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
-    IAlgorithm_sptr alg, const Muon::AnalysisOptions &options) const {
+    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
 
-  alg->setProperty("Mode", "Combined");
-  alg->setProperty("DetectorGroupingTable", options.grouping.toTable());
-  alg->setProperty("TimeZero", options.timeZero);             // user input
-  alg->setProperty("LoadedTimeZero", options.loadedTimeZero); // from file
-  alg->setProperty("CropWorkspace", false);
-  alg->setProperty("Xmin", options.timeLimits.first);
+  alg.setProperty("Mode", "Combined");
+  alg.setProperty("DetectorGroupingTable", options.grouping.toTable());
+  alg.setProperty("TimeZero", options.timeZero);             // user input
+  alg.setProperty("LoadedTimeZero", options.loadedTimeZero); // from file
+  alg.setProperty("CropWorkspace", false);
+  alg.setProperty("Xmin", options.timeLimits.first);
   double Xmax = options.timeLimits.second;
   if (Xmax != Mantid::EMPTY_DBL()) {
-    alg->setProperty("Xmax", Xmax);
+    alg.setProperty("Xmax", Xmax);
   }
   if (!options.rebinArgs.empty()) {
-    alg->setProperty("RebinParams", options.rebinArgs);
+    alg.setProperty("RebinParams", options.rebinArgs);
   }
 
   // Find index of a name in a collection
@@ -308,19 +320,17 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
     case Muon::PlotType::Counts:
     case Muon::PlotType::Logarithm:
       outputType = "GroupCounts";
-      break;
     case Muon::PlotType::Asymmetry:
       outputType = "GroupAsymmetry";
-      break;
     default:
       throw std::invalid_argument(
           "Cannot create analysis workspace: Unsupported plot type");
     }
-    alg->setProperty("OutputType", outputType);
+    alg.setProperty("OutputType", outputType);
 
     const auto groupNum =
         indexOf(options.groupPairName, options.grouping.groupNames);
-    alg->setProperty("GroupIndex", static_cast<int>(groupNum));
+    alg.setProperty("GroupIndex", static_cast<int>(groupNum));
   } else {
     throw std::invalid_argument("Cannot create analysis workspace: Group "
                                 "name not found in grouping");
