@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -42,7 +43,7 @@ public:
     m_wavelengthWS->getAxis(0)->setUnit("Wavelength");
   }
 
-  void test_execute() {
+ void test_execute() {
     CreateTransmissionWorkspace2 alg;
     alg.initialize();
     alg.setChild(true);
@@ -54,7 +55,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 
-  void test_trans_run_in_wavelength_throws() {
+ void test_trans_run_in_wavelength_throws() {
 
     CreateTransmissionWorkspace2 alg;
     alg.setChild(true);
@@ -65,7 +66,7 @@ public:
         alg.setProperty("SecondTransmissionRun", m_wavelengthWS));
   }
 
-  void test_wavelength_min_is_mandatory() {
+ void test_wavelength_min_is_mandatory() {
 
     CreateTransmissionWorkspace2 alg;
     alg.initialize();
@@ -77,7 +78,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_wavelength_max_is_mandatory() {
+ void test_wavelength_max_is_mandatory() {
 
     CreateTransmissionWorkspace2 alg;
     alg.initialize();
@@ -89,7 +90,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_processing_instructions_is_mandatory() {
+ void test_processing_instructions_is_mandatory() {
 
     CreateTransmissionWorkspace2 alg;
     alg.initialize();
@@ -101,7 +102,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_bad_wavelength_range() {
+ void test_bad_wavelength_range() {
 
     CreateTransmissionWorkspace2 alg;
     alg.initialize();
@@ -114,7 +115,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_bad_monitor_range() {
+ void test_bad_monitor_range() {
 
     CreateTransmissionWorkspace2 alg;
     alg.initialize();
@@ -129,7 +130,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_bad_monitor_integration_range() {
+ void test_bad_monitor_integration_range() {
 
     CreateTransmissionWorkspace2 alg;
     alg.initialize();
@@ -144,7 +145,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_one_tranmission_run() {
+ void test_one_tranmission_run() {
 
     CreateTransmissionWorkspace2 alg;
     alg.setChild(true);
@@ -167,7 +168,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
   }
 
-  void test_one_run_processing_instructions() {
+ void test_one_run_processing_instructions() {
 
     CreateTransmissionWorkspace2 alg;
     alg.setChild(true);
@@ -191,7 +192,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 4.0000, 0.0001);
   }
 
-  void test_one_run_monitor_normalization() {
+ void test_one_run_monitor_normalization() {
     // I0MonitorIndex: 0
     // MonitorBackgroundWavelengthMin : 0.5
     // MonitorBackgroundWavelengthMax : 3.0
@@ -227,7 +228,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.4996, 0.0001);
   }
 
-  void test_one_run_integrated_monitor_normalization() {
+ void test_one_run_integrated_monitor_normalization() {
     // I0MonitorIndex: 0
     // MonitorBackgroundWavelengthMin : 0.5
     // MonitorBackgroundWavelengthMax : 3.0
@@ -264,7 +265,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.1981, 0.0001);
   }
 
-  void test_two_transmission_runs() {
+ void test_two_transmission_runs() {
 
     CreateTransmissionWorkspace2 alg;
     alg.setChild(true);
@@ -286,7 +287,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
   }
 
-  void test_two_transmission_runs_stitch_params() {
+ void test_two_transmission_runs_stitch_params() {
 
     CreateTransmissionWorkspace2 alg;
     alg.setChild(true);
@@ -309,6 +310,59 @@ public:
     TS_ASSERT_DELTA(outLam->x(0)[1], 1.8924, 0.0001);
     TS_ASSERT_DELTA(outLam->x(0)[2], 1.9924, 0.0001);
     TS_ASSERT_DELTA(outLam->x(0)[3], 2.0924, 0.0001);
+  }
+
+ void test_one_run_store_in_ADS() {
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
+
+    CreateTransmissionWorkspace2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", inputWS);
+    alg.setProperty("WavelengthMin", 3.0);
+    alg.setProperty("WavelengthMax", 12.0);
+    alg.setPropertyValue("ProcessingInstructions", "1");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+    MatrixWorkspace_sptr firstLam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TRANS_LAM_1234");
+
+    TS_ASSERT(firstLam);
+    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
+    TS_ASSERT(firstLam->x(0).front() >= 3.0);
+    TS_ASSERT(firstLam->x(0).back() <= 12.0);
+    
+  }
+
+ void test_two_runs_store_in_ADS() {
+    auto inputWS1 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS1->mutableRun().addProperty<std::string>("run_number", "1234");
+    auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
+
+    CreateTransmissionWorkspace2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", inputWS1);
+    alg.setProperty("SecondTransmissionRun", inputWS2);
+    alg.setProperty("WavelengthMin", 3.0);
+    alg.setProperty("WavelengthMax", 12.0);
+    alg.setPropertyValue("ProcessingInstructions", "1");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+    MatrixWorkspace_sptr firstLam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TRANS_LAM_1234");
+    MatrixWorkspace_sptr secondLam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TRANS_LAM_4321");
+
+    TS_ASSERT(firstLam);
+    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
+    TS_ASSERT(firstLam->x(0).front() >= 3.0);
+    TS_ASSERT(firstLam->x(0).back() <= 12.0);
+
+    TS_ASSERT(secondLam);
+    TS_ASSERT_EQUALS(secondLam->getAxis(0)->unit()->unitID(), "Wavelength");
+    TS_ASSERT(secondLam->x(0).front() >= 3.0);
+    TS_ASSERT(secondLam->x(0).back() <= 12.0);
+    
   }
 };
 
