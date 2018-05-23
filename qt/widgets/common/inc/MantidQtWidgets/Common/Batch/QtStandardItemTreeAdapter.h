@@ -78,12 +78,16 @@ private:
   Cell m_emptyCellStyle;
 };
 
+/**
+ * Enumerates the first `columnCount` number of cells to the right of
+ * startAtCell, moving left to right.
+ */
 template <typename Action>
 void QtStandardItemTreeModelAdapter::enumerateCellsInRow(
-    QModelIndexForMainModel const &startIndex, int columns,
+    QModelIndexForMainModel const &startAtCell, int columnCount,
     Action const &action) const {
-  for (auto i = 0; i < columns; i++) {
-    auto cellIndex = startIndex.sibling(startIndex.row(), i);
+  for (auto i = 0; i < columnCount; i++) {
+    auto cellIndex = startAtCell.sibling(startAtCell.row(), i);
     action(cellIndex, i);
   }
 }
