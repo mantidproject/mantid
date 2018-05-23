@@ -414,6 +414,47 @@ public:
     TS_ASSERT_DELTA(image->y(1)[79], 0.448, 0.001);
   }
 
+  void test_adjustments() {
+
+    auto ws = createWorkspaceReal(20, 0.0);
+    auto linAdj = createWorkspaceAdjustments(1.0, 0.0);
+    auto constAdj = createWorkspaceAdjustments(0.0, 0.0);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("A", 0.01);
+    alg->setProperty("DataLinearAdj", linAdj);
+    alg->setProperty("DataConstAdj", constAdj);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+    TS_ASSERT(chi);
+    TS_ASSERT(angle);
+
+    // Test some values
+    TS_ASSERT_EQUALS(data->y(0).size(), 20);
+    TS_ASSERT_DELTA(data->y(0)[15], 0.270, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[16], -0.098, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[17], -0.649, 0.001);
+
+    // Test that the algorithm converged
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
+  }
+
   void test_output_label() {
     // Test the output label
 
@@ -708,6 +749,30 @@ public:
                             0.95, 0.71, 0.41, 0.32, -0.13, -0.53, -0.74, -0.82,
                             -0.91, -0.82, -0.60, -0.32},
                      ws->countStandardDeviations(0));
+
+    return ws;
+  }
+
+  MatrixWorkspace_sptr createWorkspaceAdjustments(double base, double magnitude) {
+
+    const size_t size = 20;
+
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
+
+    // Real
+    ws->setHistogram(
+      0,
+      ws->points(0),
+      Counts{ 1.07, 0.95, 0.84, 0.51, 0.04, 0.42, 0.47, 0.98, 0.96, 1.03,
+      0.71, 0.70, 0.13, 0.04, 0.59, 0.84, 0.91, 0.93, 1.03, 0.75 },
+      ws->countStandardDeviations(0));
+
+    // Imaginary
+    ws->setHistogram(1, ws->points(0),
+      Counts{ 0.07, 0.25, 0.82, 0.75, 1.08, 0.84, 0.82, 0.62, 0.33, 0.20,
+      0.58, 0.88, 0.85, 1.10, 0.77, 0.59, 0.36, 0.13, 0.39, 0.62 },
+      ws->countStandardDeviations(0));
 
     return ws;
   }
