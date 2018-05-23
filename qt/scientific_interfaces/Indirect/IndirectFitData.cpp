@@ -276,6 +276,7 @@ void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
 }
 
 IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {
+  m_workspace = fitData.m_workspace;
   m_spectra =
       boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra);
   m_excludeRegions.insert(std::begin(fitData.m_excludeRegions),
