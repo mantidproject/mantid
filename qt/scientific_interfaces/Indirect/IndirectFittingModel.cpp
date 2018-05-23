@@ -328,6 +328,12 @@ bool IndirectFittingModel::isPreviouslyFit(std::size_t dataIndex,
   return m_fitOutput->isSpectrumFit(fitData, spectrum);
 }
 
+bool IndirectFittingModel::hasZeroSpectra(std::size_t dataIndex) const {
+  if (m_fittingData.size() > dataIndex)
+    return m_fittingData[dataIndex]->zeroSpectra();
+  return true;
+}
+
 std::size_t IndirectFittingModel::numberOfWorkspaces() const {
   return m_fittingData.size();
 }

@@ -34,6 +34,7 @@ public:
                                std::size_t dataIndex) const;
   bool isMultiFit() const;
   bool isPreviouslyFit(std::size_t dataIndex, std::size_t spectrum) const;
+  bool hasZeroSpectra(std::size_t dataIndex) const;
   std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
