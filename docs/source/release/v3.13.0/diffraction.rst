@@ -28,7 +28,9 @@ Engineering Diffraction
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
 - Single peak fitting output is now saved as HDF5 instead of CSV,
   using :ref:`EnggSaveSinglePeakFitResultsToHDF5
-  <algm-EnggSaveSinglePeakFitResultsToHDF5>`.
+  <algm-EnggSaveSinglePeakFitResultsToHDF5>`. The algorithm previously
+  used, :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>`, has
+  been deprecated.
 
 
 :ref:`Release 3.13.0 <v3.13.0>`
