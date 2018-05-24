@@ -644,9 +644,19 @@ void GenericDataProcessorPresenter::endReduction(
 /**
 Handle reduction error
 */
-void GenericDataProcessorPresenter::reductionError(QString ex) {
+void GenericDataProcessorPresenter::reductionError(const QString &ex) {
   g_log.error(ex.toStdString());
-  // m_view->giveUserCritical(ex, "Error");
+  if (m_promptUser)
+    m_view->giveUserCritical(ex, "Error");
+}
+
+/**
+Handle reduction error
+*/
+void GenericDataProcessorPresenter::reductionError(const std::string &ex) {
+  g_log.error(ex);
+  if (m_promptUser)
+    m_view->giveUserCritical(QString::fromStdString(ex), "Error");
 }
 
 /**
@@ -1105,28 +1115,13 @@ IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
  */
 void GenericDataProcessorPresenter::reduceRow(RowData_sptr data) {
 
-  try {
-    // Perform any preprocessing on the input properties and cache the results
-    // in the row data
-    preprocessOptionValues(data);
-    // Run the algorithm
-    const auto alg = createAndRunAlgorithm(data->preprocessedOptions());
-    // Populate any missing values in the model with output from the algorithm
-    updateModelFromResults(alg, data);
-  } catch (std::runtime_error &e) {
-    // Set an error on the row if the algorithm failed
-    auto error = std::string("Row reduction failed: ") + e.what();
-    data->setError(error);
-    if (m_promptUser)
-      m_view->giveUserCritical(QString::fromStdString(error), "Error");
-  } catch (...) {
-    // Set an error on the row if the algorithm failed
-    auto error =
-        "Row reduction failed: Unexpected exception while reducing row";
-    data->setError(error);
-    if (m_promptUser)
-      m_view->giveUserCritical(QString::fromStdString(error), "Error");
-  }
+  // Perform any preprocessing on the input properties and cache the results
+  // in the row data
+  preprocessOptionValues(data);
+  // Run the algorithm
+  const auto alg = createAndRunAlgorithm(data->preprocessedOptions());
+  // Populate any missing values in the model with output from the algorithm
+  updateModelFromResults(alg, data);
 }
 
 /**

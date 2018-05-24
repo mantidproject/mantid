@@ -262,7 +262,8 @@ protected:
   void resume();
 
 protected slots:
-  void reductionError(QString ex);
+  void reductionError(const QString &ex);
+  void reductionError(const std::string &ex);
   virtual void threadFinished(const int exitCode);
   void groupThreadFinished(const int exitCode);
   void rowThreadFinished(const int exitCode);

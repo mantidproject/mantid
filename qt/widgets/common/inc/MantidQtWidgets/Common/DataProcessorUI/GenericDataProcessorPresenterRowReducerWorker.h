@@ -55,12 +55,9 @@ private slots:
       m_presenter->m_manager->setProcessed(true, m_rowIndex, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
-      m_presenter->m_manager->setProcessed(true, m_rowIndex, m_groupIndex);
-      m_presenter->m_manager->setError(std::string("Row reduction failed: ") +
-                                           ex.what(),
-                                       m_rowIndex, m_groupIndex);
-      emit reductionErrorSignal(QString(ex.what()));
-      emit finished(1);
+      handleError(ex.what());
+    } catch (...) {
+      handleError("Unexpected exception");
     }
   }
 
@@ -73,6 +70,15 @@ private:
   RowData_sptr m_rowData;
   int m_rowIndex;
   int m_groupIndex;
+
+  void handleError(const std::string &errorMessage) {
+    m_presenter->m_manager->setProcessed(true, m_rowIndex, m_groupIndex);
+    m_presenter->m_manager->setError(std::string("Row reduction failed: ") +
+                                     errorMessage,
+                                     m_rowIndex, m_groupIndex);
+    emit reductionErrorSignal(QString::fromStdString(errorMessage));
+    emit finished(1);
+  }
 };
 
 } // namespace DataProcessor

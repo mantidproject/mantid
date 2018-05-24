@@ -76,9 +76,11 @@ void PostprocessingStep::postProcessGroup(
     auto const inputWSName =
         row.second->preprocessedOptionValue(rowOutputWSPropertyName);
 
-    if (workspaceExists(inputWSName)) {
-      inputNames.append(inputWSName);
-    }
+    // Only postprocess if all workspaces exist
+    if (!workspaceExists(inputWSName))
+      throw std::runtime_error("Some workspaces in the group could not be found");
+    
+    inputNames.append(inputWSName);
   }
 
   auto const inputWSNames = inputNames.join(", ");
