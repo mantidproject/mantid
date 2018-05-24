@@ -144,7 +144,7 @@ public:
     TS_ASSERT_EQUALS(expectedRoots, roots.get());
   }
 
-  void testForDocumentationFailTree() {
+  void testFailsForShallowRoot() {
     auto findSubtreeRoots = FindSubtreeRoots();
     // clang-format off
     auto region = std::vector<RowLocation>({
@@ -162,7 +162,7 @@ public:
     TS_ASSERT(!roots.is_initialized())
   }
 
-  void testForAnnoyingFailureTree() {
+  void testFailsForDeepRoot() {
     auto findSubtreeRoots = FindSubtreeRoots();
     // clang-format off
     auto region = std::vector<RowLocation>({
@@ -179,6 +179,47 @@ public:
     auto roots = findSubtreeRoots(region);
     TS_ASSERT(!roots.is_initialized())
   }
+
+  void testFailsForDeepRootImmediatelyAfterFirstRoot() {
+    auto findSubtreeRoots = FindSubtreeRoots();
+    // clang-format off
+    auto region = std::vector<RowLocation>({
+      RowLocation({0}),
+      RowLocation({1, 0})
+    });
+    // clang-format on
+
+    auto roots = findSubtreeRoots(region);
+    TS_ASSERT(!roots.is_initialized())
+  }
+
+  void testFailsForShallowRootImmediatelyAfterFirstRoot() {
+    auto findSubtreeRoots = FindSubtreeRoots();
+    // clang-format off
+    auto region = std::vector<RowLocation>({
+      RowLocation({0, 0}),
+      RowLocation({1}),
+    });
+    // clang-format on
+
+    auto roots = findSubtreeRoots(region);
+    TS_ASSERT(!roots.is_initialized())
+  }
+
+  void testFailsForDisconnectedRoots() {
+    auto findSubtreeRoots = FindSubtreeRoots();
+    // clang-format off
+    auto region = std::vector<RowLocation>({
+      RowLocation({0, 0}),
+      RowLocation({1, 0}),
+    });
+    // clang-format on
+
+    auto roots = findSubtreeRoots(region);
+    TS_ASSERT(!roots.is_initialized())
+  }
+
+
 };
 
 #endif // MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H

@@ -9,8 +9,8 @@ auto FindSubtreeRoots::operator()(std::vector<RowLocation> region)
   std::sort(region.begin(), region.end());
   if (!region.empty()) {
     auto subtreeRootDepth = region[0].depth();
-    if (allRootsAtSameDepthAndNoDepthGaps(subtreeRootDepth, region.cbegin(),
-                                          region.cend())) {
+    if (allSubtreeRootsShareAParentAndAllSubtreeNodesAreConnected(
+            subtreeRootDepth, region.cbegin(), region.cend())) {
       removeIfDepthNotEqualTo(region, subtreeRootDepth);
       return region;
     } else {

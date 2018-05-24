@@ -31,7 +31,7 @@ namespace Batch {
 using Subtree = std::vector<Row>;
 
 template <typename RowLocationConstIterator>
-bool hasSubtreeRootHigherThanFirstRoot(
+bool hasSubtreeRootShallowerThanFirstRoot(
     RowLocationConstIterator sortedRegionBegin,
     RowLocationConstIterator sortedRegionEnd) {
   auto firstLocationAtMinimumDepth =
@@ -39,6 +39,17 @@ bool hasSubtreeRootHigherThanFirstRoot(
                        [](RowLocation const &lhs, RowLocation const &rhs)
                            -> bool { return lhs.depth() < rhs.depth(); });
   return firstLocationAtMinimumDepth != sortedRegionBegin;
+}
+
+template <typename RowLocationConstIterator>
+bool allNodesDescendedFromParentOfFirstRoot(
+    RowLocationConstIterator sortedRegionBegin,
+    RowLocationConstIterator sortedRegionEnd) {
+  auto firstRootParent = (*sortedRegionBegin).parent();
+  return std::all_of(std::next(sortedRegionBegin), sortedRegionEnd,
+                     [&firstRootParent](RowLocation const &location) -> bool {
+                       return location.isDescendantOf(firstRootParent);
+                     });
 }
 
 template <typename RowLocationConstIterator>
@@ -52,7 +63,7 @@ bool maximumIncreaseInDepthIsOne(RowLocationConstIterator sortedRegionBegin,
 }
 
 template <typename RowLocationConstIterator>
-bool hasSubtreeRootLowerThanFirstRoot(
+bool hasSubtreeRootDeeperThanFirstRoot(
     int firstSubtreeRootDepth, RowLocationConstIterator sortedRegionBegin,
     RowLocationConstIterator sortedRegionEnd) {
   return std::adjacent_find(
@@ -60,21 +71,20 @@ bool hasSubtreeRootLowerThanFirstRoot(
              [firstSubtreeRootDepth](RowLocation const &previous,
                                      RowLocation const &current) -> bool {
                return current.depth() > firstSubtreeRootDepth &&
-                      current.depth() <= previous.depth() &&
                       !pathsSameUntilDepth(firstSubtreeRootDepth, current,
                                            previous);
              }) != sortedRegionEnd;
 }
 
 template <typename RowLocationConstIterator>
-bool allRootsAtSameDepthAndNoDepthGaps(
+bool allSubtreeRootsShareAParentAndAllSubtreeNodesAreConnected(
     int subtreeRootDepth, RowLocationConstIterator sortedRegionBegin,
     RowLocationConstIterator sortedRegionEnd) {
-  return !hasSubtreeRootHigherThanFirstRoot(sortedRegionBegin,
-                                            sortedRegionEnd) &&
-         !hasSubtreeRootLowerThanFirstRoot(subtreeRootDepth, sortedRegionBegin,
-                                           sortedRegionEnd) &&
-         maximumIncreaseInDepthIsOne(sortedRegionBegin, sortedRegionEnd);
+  return allNodesDescendedFromParentOfFirstRoot(sortedRegionBegin,
+                                                sortedRegionEnd) &&
+         maximumIncreaseInDepthIsOne(sortedRegionBegin, sortedRegionEnd) &&
+         !hasSubtreeRootDeeperThanFirstRoot(subtreeRootDepth, sortedRegionBegin,
+                                            sortedRegionEnd);
 }
 }
 }

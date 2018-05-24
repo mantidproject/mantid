@@ -110,7 +110,7 @@ public:
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
-  void testFindsRootOfNonTrivialTree() {
+  void testExtractsOfNonTrivialTree() {
     auto extractSubtrees = ExtractSubtrees();
     // clang-format off
     auto region = std::vector<Row>({
@@ -214,7 +214,7 @@ public:
     TS_ASSERT_EQUALS(expectedSubtrees, roots);
   }
 
-  void testForDocumentationFailureTree() {
+  void testFailsForShallowRoot() {
     auto extractSubtrees = ExtractSubtrees();
     // clang-format off
     auto region = std::vector<Row>({
@@ -232,7 +232,7 @@ public:
     TS_ASSERT(!subtrees.is_initialized())
   }
 
-  void testForAnnoyingFailureTree() {
+  void testFailsForDeepRoot() {
     auto extractSubtrees = ExtractSubtrees();
     // clang-format off
     auto region = std::vector<Row>({
@@ -248,6 +248,32 @@ public:
 
     auto subtrees = extractSubtrees(region);
     TS_ASSERT(!subtrees.is_initialized())
+  }
+
+  void testFailsForDeepRootImmediatelyAfterFirstRoot() {
+    auto extractSubtrees = ExtractSubtrees();
+    // clang-format off
+    auto region = std::vector<Row>({
+      Row(RowLocation({0}), cells("Root  0")),
+      Row(RowLocation({1, 0}), cells("Deep Root"))
+    });
+    // clang-format on
+
+    auto roots = extractSubtrees(region);
+    TS_ASSERT(!roots.is_initialized())
+  }
+
+  void testFailsForShallowRootImmediatelyAfterFirstRoot() {
+    auto extractSubtrees = ExtractSubtrees();
+    // clang-format off
+    auto region = std::vector<Row>({
+      Row(RowLocation({0, 0}), cells("Root 0, 0")),
+      Row(RowLocation({1}), cells("Shallow Root"))
+    });
+    // clang-format on
+
+    auto roots = extractSubtrees(region);
+    TS_ASSERT(!roots.is_initialized())
   }
 };
 #endif

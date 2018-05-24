@@ -58,8 +58,8 @@ auto ExtractSubtrees::operator()(std::vector<Row> region) const
     auto rowLocationEnd =
         boost::make_transform_iterator(region.cend(), &rowToRowLocation);
 
-    if (allRootsAtSameDepthAndNoDepthGaps(subtreeRootDepth, rowLocationBegin,
-                                          rowLocationEnd))
+    if (allSubtreeRootsShareAParentAndAllSubtreeNodesAreConnected(
+            subtreeRootDepth, rowLocationBegin, rowLocationEnd))
       return makeSubtreesFromRows(region, subtreeRootDepth);
     else
       return boost::none;
