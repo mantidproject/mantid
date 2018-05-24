@@ -123,6 +123,7 @@ The following parameters may also be optionally set:
 - :ref:`suffix_gem_isis-powder-diffraction-ref`
 - :ref:`texture_mode_isis-powder-diffraction-ref`
 - :ref:`unit_to_keep_gem_isis-powder-diffraction-ref`
+- :ref:`save_angles_gem_isis-powder-diffraction-ref`
 
 If :ref:`sample_empty_gem_isis-powder-diffraction-ref` is
 set then the following parameter is also required:
@@ -701,6 +702,22 @@ On GEM this is set to the following:
 ..  code-block:: python
 
   raw_tof_cropping_values: (500, 20000)
+
+.. _save_angles_gem_isis-powder-diffraction-ref:
+
+save_angles
+^^^^^^^^^^^
+
+If set to **True**, this saves the scattering angles (theta and eta)
+of each focused bank to the 4-column MAUD format (the old
+``grouping.new`` format) using :ref:`SaveBankScatteringAngles
+<algm-SaveBankScatteringAngles>`.
+
+On GEM this is set to the following:
+
+.. code-block:: python
+
+   save_angles: False
 
 .. _save_maud_gem_isis-powder-diffraction-ref:
 
