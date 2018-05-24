@@ -11,13 +11,18 @@ Description
 
 Loads a shape into the sample of a workspace.
 
-One type of input file is supported
+The following types of input file are supported:
 
 * ``*.stl`` stereolithography `https://en.wikipedia.org/wiki/STL_(file_format) <https://en.wikipedia.org/wiki/STL_(file_format)>`_
   This is a file format consisting of a list of faces specified by their vertex coordinates.
   The file must is in ASCII for and all the faces must be triangular. The normals are ignored,
   but the vertices must be in the order required by the standard 
   (counter-clockwise when viewed from outside).
+* ``*.off`` Object File Format `https://en.wikipedia.org/wiki/OFF_(file_format) <https://en.wikipedia.org/wiki/OFF_(file_format)>`_
+  This is a file format consisting of a list of vertices and a list of faces specified by the position of 
+  each vertex in the list of vertices.
+  The file must is in ASCII for and all the faces must be triangular. There are no normals.
+  The vertices of a face must be ordered counter-clockwise when viewed from outside.
 
 .. categories::
 

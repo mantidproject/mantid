@@ -1503,6 +1503,24 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def q_resolution_moderator_file(self, value):
         self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", value=value)
 
+    @property
+    def r_cut(self):
+        return self.get_simple_line_edit_field(line_edit="r_cut_line_edit",
+                                               expected_type=float)
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="r_cut_line_edit", value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_line_edit_field(line_edit="w_cut_line_edit",
+                                               expected_type=float)
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="w_cut_line_edit", value=value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # MASK TAB
@@ -1611,6 +1629,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_1d_step_line_edit.setValidator(positive_double_validator)
         self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
         self.q_xy_step_line_edit.setValidator(positive_double_validator)
+
+        self.r_cut_line_edit.setValidator(positive_double_validator)
+        self.w_cut_line_edit.setValidator(positive_double_validator)
 
         self.gravity_extra_length_line_edit.setValidator(double_validator)
 

@@ -18,6 +18,7 @@ New features
 Improvements
 ############
 * The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
+* Added Radius Cutoff and Wavelength Cutoff boxes to the old and new GUI.
 
 Bug fixes
 #########
