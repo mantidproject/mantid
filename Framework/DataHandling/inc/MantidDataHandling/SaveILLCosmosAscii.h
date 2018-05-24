@@ -12,7 +12,7 @@ namespace Mantid {
 namespace DataHandling {
 /**
 Saves a file in ILL Cosmos format  from a 2D workspace
-(Workspace2D class). SaveILLCosmosAscii is an algorithm but inherits frrm the
+(Workspace2D class). SaveILLCosmosAscii is an algorithm but inherits from the
 AsciiPointBase class which provides the main implementation for the init() &
 exec() methods.
 Output is tab delimited Ascii point data with dq/q and extra header information.
@@ -44,7 +44,7 @@ public:
   const std::string name() const override { return "SaveILLCosmosAscii"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Saves a 2D workspace to a ascii file.";
+    return "Saves a 2D workspace to a ascii file of format mft.";
   }
 
   /// Algorithm's version for identification overriding a virtual method

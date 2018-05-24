@@ -3,11 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveILLCosmosAscii.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <fstream>
-#include <boost/algorithm/string.hpp>
 #include <Poco/File.h>
 
 using namespace Mantid::API;
@@ -37,12 +36,15 @@ public:
   }
   ~SaveILLCosmosAsciiTest() override {}
 
+  void testInit() {
+
+  }
+
   void testExec() {
     // create a new workspace and then delete it later on
     createWS();
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
+    SaveILLCosmosAscii alg;
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -63,11 +65,11 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(0), "");
+    TS_ASSERT_EQUALS(columns.at(1), 1.5);
+    TS_ASSERT_EQUALS(columns.at(2), 1);
+    TS_ASSERT_EQUALS(columns.at(3), 1);
+    TS_ASSERT_EQUALS(columns.at(4), 0.6);
     in.close();
 
     cleanupafterwards();
@@ -76,8 +78,7 @@ public:
     // create a new workspace and then delete it later on
     createWS(true);
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
+    SaveILLCosmosAscii alg;
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -97,10 +98,10 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_EQUALS(columns.at(0), "");
+    TS_ASSERT_EQUALS(columns.at(1), "0");
+    TS_ASSERT_EQUALS(columns.at(2), "1");
+    TS_ASSERT_EQUALS(columns.at(3), "1");
     TS_ASSERT((columns.at(4) == "nan") || (columns.at(4) == "inf"));
     in.close();
 
@@ -110,8 +111,7 @@ public:
     // create a new workspace and then delete it later on
     createWS(false, true);
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
+    SaveILLCosmosAscii alg;
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -131,11 +131,11 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns[0], "");
+    TS_ASSERT_EQUALS(columns[1], "1.5");
+    TS_ASSERT_EQUALS(columns[2], "0.0");
+    TS_ASSERT_EQUALS(columns[3], "1.0");
+    TS_ASSERT_EQUALS(columns[4], "0.6");
     in.close();
 
     cleanupafterwards();
@@ -144,8 +144,7 @@ public:
     // create a new workspace and then delete it later on
     createWS(false, false, true);
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
+    SaveILLCosmosAscii alg;
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -165,11 +164,11 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(0), "");
+    TS_ASSERT_EQUALS(columns.at(1), "1.5");
+    TS_ASSERT_EQUALS(columns.at(2), "1");
+    TS_ASSERT_EQUALS(columns.at(3), "0");
+    TS_ASSERT_EQUALS(columns.at(4), "0.6");
     in.close();
 
     cleanupafterwards();
@@ -178,13 +177,12 @@ public:
     // create a new workspace and then delete it later on
     createWS(false, false, false, true);
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
-    alg->setPropertyValue("InputWorkspace", m_name);
-    alg->setPropertyValue("Filename", m_filename);
-    alg->setPropertyValue("UserContact", "John Smith");
-    alg->setPropertyValue("Title", "Testing this algorithm");
-    alg->setPropertyValue("Separator", "comma");
+    SaveILLCosmosAscii alg;
+    alg->setProperty("InputWorkspace", m_name);
+    alg->setProperty("Filename", m_filename);
+    alg->setProperty("UserContact", "John Smith");
+    alg->setProperty("Title", "Testing this algorithm");
+    alg->setProperty("Separator", "comma");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     if (!alg->isExecuted()) {
@@ -203,18 +201,17 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(0), "");
+    TS_ASSERT_EQUALS(columns.at(1), "1.5");
+    TS_ASSERT_EQUALS(columns.at(2), "1");
+    TS_ASSERT_EQUALS(columns.at(3), "1");
+    TS_ASSERT_EQUALS(columns.at(4), "0.6");
     in.close();
 
     cleanupafterwards();
   }
   void test_fail_invalid_workspace() {
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
+    SaveILLCosmosAscii alg;
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
@@ -222,6 +219,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(
         alg->setPropertyValue("InputWorkspace", "NotARealWS"));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT(!alg->isExecuted());
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(m_long_filename).exists());
@@ -231,39 +229,39 @@ private:
   void headingsTests(std::ifstream &in, std::string &fullline,
                      bool propertiesLogs = false, std::string sep = "\t") {
     getline(in, fullline);
-    TS_ASSERT(fullline == "MFT");
+    TS_ASSERT_EQUALS(fullline, "MFT");
     getline(in, fullline);
-    TS_ASSERT(fullline == "Instrument: ");
+    TS_ASSERT_EQUALS(fullline, "Instrument: ");
     getline(in, fullline);
     if (propertiesLogs) {
-      TS_ASSERT(fullline == "User-local contact: John Smith");
+      TS_ASSERT_EQUALS(fullline, "User-local contact: John Smith");
       getline(in, fullline);
-      TS_ASSERT(fullline == "Title: Testing this algorithm");
+      TS_ASSERT_EQUALS(fullline, "Title: Testing this algorithm");
       getline(in, fullline);
-      TS_ASSERT(fullline == "Subtitle: ILL COSMOS save test");
+      TS_ASSERT_EQUALS(fullline, "Subtitle: ILL COSMOS save test");
       getline(in, fullline);
-      TS_ASSERT(fullline == "Start date + time: 2011-12-16T01:27:30");
+      TS_ASSERT_EQUALS(fullline, "Start date + time: 2011-12-16T01:27:30");
       getline(in, fullline);
-      TS_ASSERT(fullline == "End date + time: 2011-12-16T02:13:31");
+      TS_ASSERT_EQUALS(fullline, "End date + time: 2011-12-16T02:13:31");
     } else {
-      TS_ASSERT(fullline == "User-local contact: ");
+      TS_ASSERT_EQUALS(fullline, "User-local contact: ");
       getline(in, fullline);
-      TS_ASSERT(fullline == "Title: ");
+      TS_ASSERT_EQUALS(fullline, "Title: ");
       getline(in, fullline);
-      TS_ASSERT(fullline == "Subtitle: ");
+      TS_ASSERT_EQUALS(fullline, "Subtitle: ");
       getline(in, fullline);
-      TS_ASSERT(fullline == "Start date + time: ");
+      TS_ASSERT_EQUALS(fullline, "Start date + time: ");
       getline(in, fullline);
-      TS_ASSERT(fullline == "End date + time: ");
+      TS_ASSERT_EQUALS(fullline, "End date + time: ");
     }
     getline(in, fullline);
-    TS_ASSERT(fullline == "Number of file format: 2");
+    TS_ASSERT_EQUALS(fullline, "Number of file format: 2");
     getline(in, fullline);
     std::cout << sep;
-    TS_ASSERT(fullline == "Number of data points:" + sep + "9");
+    TS_ASSERT_EQUALS(fullline, "Number of data points:" + sep + "9");
     getline(in, fullline);
     getline(in, fullline);
-    TS_ASSERT(fullline ==
+    TS_ASSERT_EQUALS(fullline,
               sep + "q" + sep + "refl" + sep + "refl_err" + sep + "q_res");
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
@@ -282,23 +280,20 @@ private:
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
     // similiar
-    if (zeroX) {
-      ws->dataX(0) = m_data0;
-    } else {
-      ws->dataX(0) = m_dataX;
-    }
+    if (zeroX)
+      ws->x(0) = m_data0;
+    else
+      ws->x(0) = m_dataX;
 
-    if (zeroY) {
-      ws->dataY(0) = m_data0;
-    } else {
-      ws->dataY(0) = m_dataY;
-    }
+    if (zeroY)
+      ws->y(0) = m_data0;
+    else
+      ws->y(0) = m_dataY;
 
-    if (zeroE) {
-      ws->dataE(0) = m_data0;
-    } else {
-      ws->dataE(0) = m_dataE;
-    }
+    if (zeroE)
+      ws->e(0) = m_data0;
+    else
+      ws->e(0) = m_dataE;
   }
   void cleanupafterwards() {
     Poco::File(m_long_filename).remove();

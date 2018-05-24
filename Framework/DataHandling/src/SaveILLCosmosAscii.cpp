@@ -1,5 +1,4 @@
 #include "MantidDataHandling/SaveILLCosmosAscii.h"
-#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
@@ -36,9 +35,8 @@ void SaveILLCosmosAscii::extraHeaders(std::ofstream &file) {
   std::string startDT;
   std::string endDT;
   auto tempInst = m_ws->getInstrument();
-  if (tempInst) {
+  if (tempInst)
     instrument = tempInst->getName();
-  }
 
   try {
     subtitle = samp.getLogData("run_title")->value();
