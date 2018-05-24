@@ -49,7 +49,7 @@ bool allNodesDescendedFromParentOfFirstRoot(
     RowLocationConstIterator sortedRegionBegin,
     RowLocationConstIterator sortedRegionEnd) {
   auto firstRootParent = (*sortedRegionBegin).parent();
-  return std::all_of(std::next(sortedRegionBegin), sortedRegionEnd,
+  return std::all_of(sortedRegionBegin + 1, sortedRegionEnd,
                      [&firstRootParent](RowLocation const &location) -> bool {
                        return location.isDescendantOf(firstRootParent);
                      });
