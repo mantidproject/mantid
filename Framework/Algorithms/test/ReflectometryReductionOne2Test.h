@@ -687,9 +687,7 @@ public:
   }
 
   void test_debug_false() {
-
     ReflectometryReductionOne2 alg;
-
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
@@ -700,11 +698,66 @@ public:
     alg.setProperty("Debug", false);
     alg.setPropertyValue("ProcessingInstructions", "1+2");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    //alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_debug_false_no_OutputWorkspace() {
+    ReflectometryReductionOne2 alg;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("Debug", false);
+    alg.setPropertyValue("ProcessingInstructions", "1+2");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_debug_true_default_OutputWorkspace_no_run_number() {
+    ReflectometryReductionOne2 alg;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    setYValuesToWorkspace(*inputWS);
+
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("Debug", true);
+    alg.setPropertyValue("ProcessingInstructions", "1+2");
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_debug_true_default_OutputWorkspace_with_run_number() {
+    ReflectometryReductionOne2 alg;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
+    setYValuesToWorkspace(*inputWS);
+
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("Debug", true);
+    alg.setPropertyValue("ProcessingInstructions", "1+2");
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_1234"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_1234"));
 
     AnalysisDataService::Instance().clear();
   }

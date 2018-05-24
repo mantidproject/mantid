@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -29,6 +30,9 @@ namespace Algorithms {
 
 /*Anonomous namespace */
 namespace {
+
+std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
+std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
 
 /** Get the twoTheta angle for the centre of the detector associated with the
 * given spectrum
@@ -340,6 +344,17 @@ double getBoundingBoxExtent(const BoundingBox &boundingBox,
   }
   return result;
 }
+
+/** Retrieve the run number from the logs of the input workspace.
+ */
+std::string getRunNumber(MatrixWorkspace const& ws) {
+  auto const &run = ws.run();
+  if (run.hasProperty("run_number")) {
+    return "_" + run.getPropertyValueAsType<std::string>("run_number");
+  }
+  return "";
+}
+
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -400,7 +415,8 @@ void ReflectometryReductionOne2::init() {
   initDebugProperties();
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                   Direction::Output,
+                                                   PropertyMode::Optional),
                   "Output Workspace IvsQ.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
@@ -425,12 +441,47 @@ ReflectometryReductionOne2::validateInputs() {
   const auto transmission = validateTransmissionProperties();
   results.insert(transmission.begin(), transmission.end());
 
+  const auto output = validateOutputWorkspaces();
+  results.insert(output.begin(), output.end());
+
   return results;
 }
+
+/** Validate output workspaces.
+ */
+std::map<std::string, std::string>
+ReflectometryReductionOne2::validateOutputWorkspaces() const {
+  std::map<std::string, std::string> results;
+  bool const isDebug = getProperty("Debug");
+  if (!isDebug) {
+    if (isDefault("OutputWorkspace")) {
+      results["OutputWorkspace"] = "OutputWorkspace property must be set when Debug is not enabled.";
+    }
+  }
+  return results;
+}
+
+// Set default names for output workspaces
+void ReflectometryReductionOne2::setDefaultOutputWorkspaceNames() {
+  bool const isDebug = getProperty("Debug");
+  if (isDebug) {
+    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+    auto const runNumber = getRunNumber(*ws);
+    if (isDefault("OutputWorkspace")) {
+      setPropertyValue("OutputWorkspace", OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+    }
+    if (isDefault("OutputWorkspaceWavelength")) {
+      setPropertyValue("OutputWorkspaceWavelength", OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+    }
+  }
+}
+
 
 /** Execute the algorithm.
 */
 void ReflectometryReductionOne2::exec() {
+  setDefaultOutputWorkspaceNames();
+
   // Get input properties
   m_runWS = getProperty("InputWorkspace");
   const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
