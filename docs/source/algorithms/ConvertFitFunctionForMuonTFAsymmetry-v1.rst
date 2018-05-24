@@ -61,7 +61,7 @@ This example is for converting a function.
    if paramTable.column(1)[0] == paramTable.column(1)[2]:
        print("Constant tie has been preserved")
    else:
-       print("Constant tie has not been preserved"
+       print("Constant tie has not been preserved")
 
    if paramTable.column(1)[1] == 3.0:
       print("Fix has been preserved")
