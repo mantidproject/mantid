@@ -91,6 +91,10 @@ void IndirectSpectrumSelectionPresenter::enableView() {
   m_view->setEnabled(true);
 }
 
+void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
+  setActiveModelIndex(0);
+}
+
 void IndirectSpectrumSelectionPresenter::setActiveModelIndex(
     std::size_t index) {
   const auto workspace = m_model->getWorkspace(index);
