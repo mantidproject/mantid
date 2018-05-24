@@ -99,8 +99,8 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   for (size_t k = i0; k < iN; k++) {
     denominator += exp(-xData[k] / MUON_LIFETIME_MICROSECONDS);
   }
-  denominator -= 0.5*(exp(-xData[i0]/ MUON_LIFETIME_MICROSECONDS));
-  denominator -= 0.5*(exp(-xData[iN]/ MUON_LIFETIME_MICROSECONDS));
+  denominator -= 0.5 * (exp(-xData[i0] / MUON_LIFETIME_MICROSECONDS));
+  denominator -= 0.5 * (exp(-xData[iN] / MUON_LIFETIME_MICROSECONDS));
   return summation / (denominator * numGoodFrames);
 }
 /**
