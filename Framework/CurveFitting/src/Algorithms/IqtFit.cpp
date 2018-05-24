@@ -54,6 +54,10 @@ private:
   mutable std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr>
       m_converted;
 };
+
+std::string getPropertySuffix(std::size_t index) {
+  return index == 0 ? "" : "_" + std::to_string(index);
+}
 } // namespace
 
 namespace Mantid {
@@ -112,13 +116,18 @@ const std::vector<std::string> IqtFit<Base>::seeAlso() const {
   return {};
 }
 
-template <typename Base>
-std::map<std::string, std::string> IqtFit<Base>::validateInputs() {
-  auto errors = Base::validateInputs();
-  double startX = Base::getProperty("StartX");
+template <>
+std::map<std::string, std::string> IqtFit<QENSFitSequential>::validateInputs() {
+  auto errors = QENSFitSequential::validateInputs();
+  double startX = QENSFitSequential::getProperty("StartX");
   if (startX < 0)
     errors["StartX"] = "StartX must be greater than or equal to 0.";
   return errors;
+}
+
+template <typename Base>
+std::map<std::string, std::string> IqtFit<Base>::validateInputs() {
+  return Base::validateInputs();
 }
 
 template <typename Base>
@@ -146,7 +155,7 @@ std::vector<API::MatrixWorkspace_sptr> IqtFit<Base>::getWorkspaces() const {
 
 template <>
 double IqtFit<QENSFitSimultaneous>::getStartX(std::size_t index) const {
-  return QENSFitSimultaneous::getProperty("StartX_" + std::to_string(index));
+  return QENSFitSimultaneous::getProperty("StartX" + getPropertySuffix(index));
 }
 
 template <typename Base> double IqtFit<Base>::getStartX(std::size_t) const {
@@ -155,7 +164,7 @@ template <typename Base> double IqtFit<Base>::getStartX(std::size_t) const {
 
 template <>
 double IqtFit<QENSFitSimultaneous>::getEndX(std::size_t index) const {
-  return QENSFitSimultaneous::getProperty("EndX_" + std::to_string(index));
+  return QENSFitSimultaneous::getProperty("EndX" + getPropertySuffix(index));
 }
 
 template <typename Base> double IqtFit<Base>::getEndX(std::size_t) const {

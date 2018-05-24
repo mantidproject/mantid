@@ -1,7 +1,8 @@
-from __future__ import (absolute_import, division,print_function)
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import math
 from Muon.MaxentTools.multimaxalpha import MULTIMAX
+from Muon.MaxentTools.dead_detector_handler import removeDeadDetectors
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -36,7 +37,7 @@ class MuonMaxent(PythonAlgorithm):
         return "Muon;Arithmetic\\FFT"
 
     def seeAlso(self):
-        return [ "PhaseQuad","FFT" ]
+        return ["PhaseQuad", "FFT"]
 
     def PyInit(self):
         self.declareProperty(
@@ -137,7 +138,7 @@ class MuonMaxent(PythonAlgorithm):
                 optional=PropertyMode.Optional),
             doc="Convergence of phases (optional)")
 
-    def checkRValues(self,rg9,rg0,xv,mylog):
+    def checkRValues(self, rg9, rg0, xv, mylog):
         if(rg9 - rg0 < 4):
             raise ValueError("Data too short after trimming")
         if(rg0 > 0 or rg9 < len(xv)):
@@ -150,8 +151,8 @@ class MuonMaxent(PythonAlgorithm):
         else:
             return 1
 
-    def doGrouping(self,POINTS_nhists,nhisto):
-        GROUPING_group,POINTS_ngroups = None,None
+    def doGrouping(self, POINTS_nhists, nhisto):
+        GROUPING_group, POINTS_ngroups = None, None
         if(not self.getProperty("GroupWorkspace").isDefault):
             # group Workspace (LoadDetectorsGroupingFile format) provided, use
             # it
@@ -175,9 +176,15 @@ class MuonMaxent(PythonAlgorithm):
             for g, row in enumerate(self.getProperty("GroupTable").value):
                 for hh in map(int, row["Detectors"].split(",")):
                     GROUPING_group[hh - 1] = g
-        return GROUPING_group,POINTS_ngroups
+        return GROUPING_group, POINTS_ngroups
 
-    def doDeadTimes(self,POINTS_ngroups,GROUPING_group,ws,FLAGS_fitdead,mylog):
+    def doDeadTimes(
+          self,
+          POINTS_ngroups,
+          GROUPING_group,
+          ws,
+          FLAGS_fitdead,
+          mylog):
         RUNDATA_frames = None
         SENSE_taud = np.zeros([POINTS_ngroups])  # default zero if not provided
         tmpTaud = [[] for i in range(POINTS_ngroups)]
@@ -200,9 +207,9 @@ class MuonMaxent(PythonAlgorithm):
                 mylog.notice(
                     "No dead time fitting, assuming arbitrary number of frames")
                 RUNDATA_frames = 1000000
-        return SENSE_taud,RUNDATA_frames
+        return SENSE_taud, RUNDATA_frames
 
-    def getPhase(self,FLAGS_fixphase,POINTS_ngroups,POINTS_nhists,mylog):
+    def getPhase(self, FLAGS_fixphase, POINTS_ngroups, POINTS_nhists, mylog):
         filePHASE = None
         if(self.getProperty("InputPhaseTable").isDefault):
             if(FLAGS_fixphase and POINTS_ngroups > 2):
@@ -220,32 +227,69 @@ class MuonMaxent(PythonAlgorithm):
             names = pt.getColumnNames()
             phaseLabel = None
             IDLabel = None
+            asymmLabel = None
             for name in names:
-                if name.lower() == "phi" or name.lower() == "phase":
+                name_lower = name.lower()
+                if name_lower in {"phi", "phase"}:
                     phaseLabel = name
-                if name.lower() == "detid" or name.lower() == "spectrum number":
+                if name_lower in {"detid", "spectrum number"}:
                     IDLabel = name
+                if name_lower in{"asymmetry", "asymm",  "asym"}:
+                    asymmLabel = name
             if phaseLabel is None:
                 raise ValueError(
                     "Phase/phi are not labelled in the phase table")
             if IDLabel is None:
                 raise ValueError(
                     "Spectrum number/DetID are not labelled in the phase table")
+            if asymmLabel is None:
+                raise ValueError(
+                    "Asymmetry is not labelled in the phase table")
 
             if(len(pt) == POINTS_ngroups):  # phase table for grouped data, or when not grouping
-                for r in pt:
-                    filePHASE[r[IDLabel] - 1] = r[phaseLabel]
+                for row in pt:
+                    filePHASE[row[IDLabel] - 1] = row[phaseLabel]
                         # sign of phase now OK for Mantid 3.12 onwards
             elif (len(pt) == POINTS_nhists):  # phase table for ungrouped data. Pick a representative detector for each group (the last one)
-                for r in pt:
-                    filePHASE[GROUPING_group[r[IDLabel] - 1]] = r[phaseLabel]
+                for row in pt:
+                    filePHASE[GROUPING_group[row[IDLabel] - 1]] = row[
+                        phaseLabel]
+            else:  # muat be some dead Detectors
+                offset = 0
+                for row in pt:
+                    if row[asymmLabel] == 999:
+                        offset += 1
+                    else:
+                        filePHASE[row[IDLabel] - 1 - offset] = row[phaseLabel]
         return filePHASE
+
+    def phaseConvergenceTable(self,POINTS_ngroups,deadDetectors,OuterIter,filePHASE):
+        if not self.getProperty("PhaseConvergenceTable").isDefault:
+            phaseconvWS = WorkspaceFactory.create(
+                "Workspace2D",
+                NVectors=POINTS_ngroups + len(deadDetectors),
+                XLength=OuterIter + 1,
+                YLength=OuterIter + 1)
+            offset = 0
+            for i in range(POINTS_ngroups + len(deadDetectors)):
+                if i + 1 in deadDetectors:
+                    offset += 1
+                    phaseconvWS.dataX(i)[0] = 0.0
+                    phaseconvWS.dataY(i)[0] = 0.0
+                else:
+                    phaseconvWS.dataX(i)[0] = 0.0
+                    phaseconvWS.dataY(i)[0] = filePHASE[i - offset]
+        else:
+            phaseconvWS = None
+        return phaseconvWS
 
     def PyExec(self):
         # logging
         mylog = self.log()
         #
-        ws = self.getProperty("InputWorkspace").value
+        originalWS = self.getProperty("InputWorkspace").value
+        ws, deadDetectors = removeDeadDetectors(originalWS)
+
         # crop off odd sized bins at start and end (if present)
         xv = ws.readX(0)
         rg0 = 0
@@ -254,7 +298,7 @@ class MuonMaxent(PythonAlgorithm):
             rg9 = rg9 - 1
         while(rg9 > rg0 and abs((2 * xv[rg0 + 1] - xv[rg0] - xv[rg0 + 2]) / (xv[rg0 + 2] - xv[rg0])) > 0.001):
             rg0 = rg0 + 1
-        self.checkRValues(rg9,rg0,xv,mylog)
+        self.checkRValues(rg9, rg0, xv, mylog)
         RUNDATA_res = (ws.readX(0)[rg9 - 1] - ws.readX(0)[rg0]) / (
             rg9 - rg0 - 1.0)  # assume linear!
         mylog.notice("resolution {0} us".format(RUNDATA_res))
@@ -343,39 +387,34 @@ class MuonMaxent(PythonAlgorithm):
         # load grouping. Mantid group table is different: one row per group, 1
         # column "detectors" with list of values
         RUNDATA_hists = np.zeros(nhisto)  # not necessary?
-        GROUPING_group,POINTS_ngroups=self.doGrouping(POINTS_nhists,nhisto)
-#        # load dead times (note Maxent needs values per GROUP!)
-#        # standard dead time table is per detector. Take averages
+        GROUPING_group, POINTS_ngroups = self.doGrouping(POINTS_nhists, nhisto)
+# load dead times (note Maxent needs values per GROUP!)
+# standard dead time table is per detector. Take averages
 
-        SENSE_taud,RUNDATA_frames=self.doDeadTimes(POINTS_ngroups,GROUPING_group,ws,FLAGS_fitdead,mylog)
+        SENSE_taud, RUNDATA_frames = self.doDeadTimes(
+            POINTS_ngroups, GROUPING_group, ws, FLAGS_fitdead, mylog)
 
         # sum histograms for total counts (not necessary?)
         # load Phase Table (previously done in BACK.for)
         # default being to distribute phases uniformly over 2pi, will work for
         # 2 groups F,B
-        filePHASE=self.getPhase(FLAGS_fixphase,POINTS_ngroups,POINTS_nhists,mylog)
+        filePHASE = self.getPhase(
+            FLAGS_fixphase,
+            POINTS_ngroups,
+            POINTS_nhists,
+            mylog)
         #
         # debugging
-        if not self.getProperty("PhaseConvergenceTable").isDefault:
-            phaseconvWS = WorkspaceFactory.create(
-                "Workspace2D",
-                NVectors=POINTS_ngroups,
-                XLength=OuterIter + 1,
-                YLength=OuterIter + 1)
-            for i in range(POINTS_ngroups):
-                phaseconvWS.dataX(i)[0] = 0.0
-                phaseconvWS.dataY(i)[0] = filePHASE[i]
-        else:
-            phaseconvWS = None
+        phaseconvWS = self.phaseConvergenceTable(POINTS_ngroups,deadDetectors,OuterIter,filePHASE)
         # do the work! Lots to pass in and out
         (MISSCHANNELS_mm, RUNDATA_fnorm, RUNDATA_hists, MAXPAGE_f, FAC_factor, FAC_facfake, FAC_ratio,
          DETECT_a, DETECT_b, DETECT_c, DETECT_d, DETECT_e, PULSESHAPE_convol, SENSE_taud, FASE_phase, SAVETIME_ngo,
          AMPS_amp, SENSE_phi, OUTSPEC_test, OUTSPEC_guess) = MULTIMAX(
-                                        POINTS_nhists, POINTS_ngroups, POINTS_npts, CHANNELS_itzero, CHANNELS_i1stgood,
-                                        CHANNELS_itotal, RUNDATA_res, RUNDATA_frames, GROUPING_group, DATALL_rdata,
-                                        FAC_factor, SENSE_taud, MAXPAGE_n, filePHASE, PULSES_def, PULSES_npulse,
-                                        FLAGS_fitdead, FLAGS_fixphase, SAVETIME_i2,
-                                        OuterIter, InnerIter, mylog, prog, phaseconvWS, TZERO_fine)
+            POINTS_nhists, POINTS_ngroups, POINTS_npts, CHANNELS_itzero, CHANNELS_i1stgood,
+            CHANNELS_itotal, RUNDATA_res, RUNDATA_frames, GROUPING_group, DATALL_rdata,
+            FAC_factor, SENSE_taud, MAXPAGE_n, filePHASE, PULSES_def, PULSES_npulse,
+            FLAGS_fitdead, FLAGS_fixphase, SAVETIME_i2,
+            OuterIter, InnerIter, mylog, prog, phaseconvWS, TZERO_fine, deadDetectors)
         #
         fperchan = 1. / (RUNDATA_res * float(POINTS_npts) * 2.)
         fchan = np.linspace(
@@ -399,8 +438,13 @@ class MuonMaxent(PythonAlgorithm):
             outTaud = WorkspaceFactory.createTable()
             outTaud.addColumn("int", "spectrum", 1)
             outTaud.addColumn("double", "dead-time", 2)
-            for i in range(POINTS_ngroups):
-                outTaud.addRow([i + 1, SENSE_taud[i]])
+            offset = 0
+            for i in range(POINTS_ngroups + len(deadDetectors)):
+                if i + 1 in deadDetectors:
+                    outTaud.addRow([i + 1, 0.0])
+                    offset += 1
+                else:
+                    outTaud.addRow([i + 1, SENSE_taud[i - offset]])
             self.setProperty("OutputDeadTimeTable", outTaud)
         # revised phases (and amplitudes since they're in the table too)
         if(not self.getProperty("OutputPhaseTable").isDefault):
@@ -408,8 +452,16 @@ class MuonMaxent(PythonAlgorithm):
             outPhase.addColumn("int", "Spectrum number", 1)
             outPhase.addColumn("double", "Asymmetry", 2)
             outPhase.addColumn("double", "Phase", 2)
-            for i in range(POINTS_ngroups):
-                outPhase.addRow([i + 1, AMPS_amp[i], SENSE_phi[i]])
+            offset = 0
+            for i in range(POINTS_ngroups + len(deadDetectors)):
+                if i + 1 in deadDetectors:
+                    outPhase.addRow([i + 1, 999, 0.0])
+                    offset += 1
+                else:
+                    outPhase.addRow(
+                        [i + 1,
+                         AMPS_amp[i - offset],
+                            SENSE_phi[i - offset]])
                                 # sign of phase now OK for Mantid 3.12 onwards
             self.setProperty("OutputPhaseTable", outPhase)
         # reconstructed spectra passed back from OUTSPEC
@@ -429,12 +481,18 @@ class MuonMaxent(PythonAlgorithm):
                                                                             OUTSPEC_guess.shape[0]))
             recSpec = WorkspaceFactory.create(
                 ws,
-                NVectors=POINTS_ngroups,
+                NVectors=POINTS_ngroups + len(deadDetectors),
                 XLength=i2 - i1 + 1,
                 YLength=i2 - i1)
-            for j in range(POINTS_ngroups):
-                recSpec.dataX(j)[:] = ws.dataX(j)[k1:k2 + 1]
-                recSpec.dataY(j)[:] = OUTSPEC_guess[i1:i2, j]
+            offset = 0
+            for j in range(POINTS_ngroups + len(deadDetectors)):
+                if j + 1 in deadDetectors:
+                    offset += 1
+                    recSpec.dataX(j)[:] = originalWS.dataX(j)[k1:k2 + 1]
+                    recSpec.dataY(j)[:] = np.zeros(k2 - k1)
+                else:
+                    recSpec.dataX(j)[:] = originalWS.dataX(j)[k1:k2 + 1]
+                    recSpec.dataY(j)[:] = OUTSPEC_guess[i1:i2, j - offset]
             self.setProperty("ReconstructedSpectra", recSpec)
         if phaseconvWS:
             self.setProperty("PhaseConvergenceTable", phaseconvWS)

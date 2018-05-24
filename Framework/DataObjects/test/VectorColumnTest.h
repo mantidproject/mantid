@@ -108,6 +108,11 @@ public:
 
     TS_ASSERT_EQUALS(col.sizeOfData(), 10 * sizeof(int));
   }
+
+  void test_cannotBeConvertedToDouble() {
+    VectorColumnTestHelper<int> col;
+    TS_ASSERT(!col.isNumber());
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_VECTORCOLUMNTEST_H_ */

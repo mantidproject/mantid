@@ -2,6 +2,10 @@
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 #include <boost/make_shared.hpp>
 #include <boost/python.hpp>
+
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 #include <numpy/arrayscalars.h>
 
 using Mantid::Types::Core::DateAndTime;
