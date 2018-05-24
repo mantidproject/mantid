@@ -320,8 +320,10 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
     case Muon::PlotType::Counts:
     case Muon::PlotType::Logarithm:
       outputType = "GroupCounts";
+	  break;
     case Muon::PlotType::Asymmetry:
       outputType = "GroupAsymmetry";
+	  break;
     default:
       throw std::invalid_argument(
           "Cannot create analysis workspace: Unsupported plot type");
@@ -370,7 +372,7 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
 
   std::string groupName = getPropertyValue("groupName");
   if (!groupName.size()) {
-    errors["groupName"] = "The group should be named.";
+    errors["groupName"] = "The group must be named.";
   }
 
   if (!std::any_of(std::begin(groupName), std::end(groupName), ::isalnum)) {
