@@ -1,5 +1,7 @@
 #include "IndirectSpectrumSelectionView.h"
 
+#include "MantidQtWidgets/Common/SignalBlocker.h"
+
 #include <QRegExpValidator>
 
 #include <boost/numeric/conversion/cast.hpp>
@@ -115,24 +117,29 @@ void IndirectSpectrumSelectionView::setMaskBinsRegex(const std::string &regex) {
 }
 
 void IndirectSpectrumSelectionView::setMinimumSpectrum(std::size_t spectrum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_selector->spMinimumSpectrum);
   m_selector->spMinimumSpectrum->setValue(boost::numeric_cast<int>(spectrum));
 }
 
 void IndirectSpectrumSelectionView::setMaximumSpectrum(std::size_t spectrum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_selector->spMaximumSpectrum);
   m_selector->spMaximumSpectrum->setValue(boost::numeric_cast<int>(spectrum));
 }
 
 void IndirectSpectrumSelectionView::setMaskSpectrum(std::size_t spectrum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_selector->spMaskSpectrum);
   m_selector->spMaskSpectrum->setValue(boost::numeric_cast<int>(spectrum));
 }
 
 void IndirectSpectrumSelectionView::setSpectraString(
     const std::string &spectraString) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_selector->leSpectra);
   m_selector->leSpectra->setText(QString::fromStdString(spectraString));
 }
 
 void IndirectSpectrumSelectionView::setMaskString(
     const std::string &maskString) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_selector->leMaskBins);
   m_selector->leMaskBins->setText(QString::fromStdString(maskString));
 }
 
