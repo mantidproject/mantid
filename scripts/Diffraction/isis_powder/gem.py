@@ -60,11 +60,16 @@ class Gem(AbstractInst):
     def _generate_out_file_paths(self, run_details):
         out_file_names = super(Gem, self)._generate_out_file_paths(run_details)
 
+        nxs_filename = out_file_names["nxs_filename"]
+        filename_stub = ".".join(nxs_filename.split(".")[:-1])
+
         if self._inst_settings.save_maud:
-            nxs_filename = out_file_names["nxs_filename"]
-            filename_stub = nxs_filename.split(".")[:-1]
-            maud_filename = ".".join(filename_stub) + "_MAUD.gem"
+            maud_filename = filename_stub + "_MAUD.gem"
             out_file_names["maud_filename"] = maud_filename
+
+        if self._inst_settings.save_angles:
+            angles_filename = filename_stub + "_grouping.new"
+            out_file_names["angles_filename"] = angles_filename
 
         return out_file_names
 

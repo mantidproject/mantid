@@ -13,6 +13,7 @@ absorption_correction_params = {
 
 gem_adv_config_params = {
     "raw_tof_cropping_values": (500, 20000),
+    "save_angles": False,
     "spline_coefficient": 30
 }
 

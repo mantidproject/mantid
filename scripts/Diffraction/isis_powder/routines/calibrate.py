@@ -21,9 +21,18 @@ def create_van(instrument, run_details, absorb):
                                                                input_batching=INPUT_BATCHING.Summed)
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
 
-    corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws,
-                                                   empty_sample_ws_string=run_details.empty_runs,
-                                                   instrument=instrument)
+    print("hasattr(instrument._inst_settings, \"subtract_empty_inst\") = {}\n"
+          "instrument._inst_settings.subtract_empty_inst = {}".
+          format(hasattr(instrument._inst_settings, "subtract_empty_inst"),
+                 instrument._inst_settings.subtract_empty_inst))
+    if not hasattr(instrument._inst_settings, "subtract_empty_inst") or instrument._inst_settings.subtract_empty_inst:
+        print("subtracting")
+        corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws,
+                                                       empty_sample_ws_string=run_details.empty_runs,
+                                                       instrument=instrument)
+    else:
+        print("not subtracting")
+        corrected_van_ws = input_van_ws
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)

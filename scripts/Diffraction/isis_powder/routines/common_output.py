@@ -64,6 +64,13 @@ def save_focused_data(d_spacing_group, tof_group, output_paths, run_number_strin
     if "maud_filename" in output_paths:
         _save_maud(d_spacing_group, output_paths["maud_filename"])
 
+    if "angles_filename" in output_paths:
+        _save_angles(d_spacing_group, output_paths["angles_filename"])
+
+
+def _save_angles(d_spacing_group, output_path):
+    mantid.SaveBankScatteringAngles(InputWorkspace=d_spacing_group, Filename=output_path)
+
 
 def _save_maud(d_spacing_group, output_path):
     for i, ws in enumerate(d_spacing_group):
