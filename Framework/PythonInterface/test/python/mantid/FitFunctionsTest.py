@@ -699,6 +699,8 @@ class FitFunctionsTest(unittest.TestCase):
         fun = AFunction(C=3)
         self.assertEqual(fun.C, 3)
         self.assertEqual(fun(2), 6)
+        self.assertTrue((fun([2, 3, 4]) == np.array([6, 9, 12])).all())
+        self.assertTrue((fun(np.array([2, 3, 4])) == np.array([6, 9, 12])).all())
 
     def test_new_function_init(self):
         class BFunction(IFunction1D):
