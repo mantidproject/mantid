@@ -10,6 +10,7 @@
 #include <set>
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
 /**
@@ -44,12 +45,14 @@ protected:
   virtual std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const;
   virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
-  virtual API::ITableWorkspace_sptr performFit(const std::string &input,
-                                               const std::string &output);
+  virtual API::ITableWorkspace_sptr
+  processParameterTable(API::ITableWorkspace_sptr parameterTable);
 
 private:
   void init() override;
   void exec() override;
+  API::ITableWorkspace_sptr performFit(const std::string &input,
+                                       const std::string &output);
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
   void addAdditionalLogs(API::MatrixWorkspace_sptr result);
 
@@ -87,6 +90,7 @@ private:
 };
 
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid
 
 #endif

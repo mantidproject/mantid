@@ -10,13 +10,13 @@
 
 #include "MantidDataHandling/Load.h"
 
-#include "MantidWorkflowAlgorithms/QENSFitSequential.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::QENSFitSequential;
+using Mantid::CurveFitting::Algorithms::QENSFitSequential;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Kernel::make_cow;
@@ -36,7 +36,7 @@ public:
   QENSFitSequentialTest() { FrameworkManager::Instance(); }
 
   void test_set_valid_fit_function() {
-    Mantid::Algorithms::QENSFitSequential alg;
+    QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Function", "name=DeltaFunction,Height=1,Centre=0;name="
@@ -44,7 +44,7 @@ public:
   }
 
   void test_empty_function_is_not_allowed() {
-    Mantid::Algorithms::QENSFitSequential alg;
+    QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("Function", ""),
@@ -77,7 +77,7 @@ public:
 private:
   std::string runConvolutionFit(MatrixWorkspace_sptr inputWorkspace,
                                 MatrixWorkspace_sptr resolution) {
-    Mantid::Algorithms::QENSFitSequential alg;
+    QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setProperty("InputWorkspace", inputWorkspace);
@@ -101,7 +101,7 @@ private:
   std::string runMultipleFit(
       const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
       const std::string &function) {
-    Mantid::Algorithms::QENSFitSequential alg;
+    QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setProperty("Input", createMultipleFitInput(workspaces));

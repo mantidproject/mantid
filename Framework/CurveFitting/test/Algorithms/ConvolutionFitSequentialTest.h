@@ -10,7 +10,8 @@
 
 #include "MantidDataHandling/Load.h"
 
-#include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
+#include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -18,13 +19,16 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::ConvolutionFitSequential;
+using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Kernel::make_cow;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+
+using ConvolutionFitSequential =
+    Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 class ConvolutionFitSequentialTest : public CxxTest::TestSuite {
 public:
@@ -40,7 +44,7 @@ public:
   ConvolutionFitSequentialTest() { FrameworkManager::Instance(); }
 
   void test_fit_function_is_valid_for_convolution_fitting() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     createConvFitResWorkspace(1, 1);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
@@ -51,7 +55,7 @@ public:
 
   //-------------------------- Failure cases ----------------------------
   void test_empty_function_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("Function", ""),
@@ -59,21 +63,21 @@ public:
   }
 
   void test_empty_startX_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("StartX", ""), std::invalid_argument);
   }
 
   void test_empty_endX_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("EndX", ""), std::invalid_argument);
   }
 
   void test_empty_specMin_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("SpecMin", ""),
@@ -81,7 +85,7 @@ public:
   }
 
   void test_empty_specMax_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("SpecMax", ""),
@@ -89,7 +93,7 @@ public:
   }
 
   void test_empty_maxIterations_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("MaxIterations", ""),
@@ -97,7 +101,7 @@ public:
   }
 
   void test_spectra_min_or_max_number_can_not_be_negative() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setPropertyValue("SpecMin", "-1"),
                      std::invalid_argument);
@@ -106,14 +110,14 @@ public:
   }
 
   void test_max_iterations_can_not_be_a_negative_number() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setPropertyValue("MaxIterations", "-1"),
                      std::invalid_argument);
   }
 
   void test_fit_function_that_does_not_contain_resolution_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(
         alg.setProperty("Function", "function=test,name=Convolution"),
@@ -121,7 +125,7 @@ public:
   }
 
   void test_fit_function_that_does_not_contain_convolution_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(
         alg.setProperty("Function", "function=test,name=Resolution"),
@@ -136,7 +140,7 @@ public:
     createConvFitResWorkspace(5, totalBins);
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add("ReductionWs_", redWs);
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
     alg.setProperty("Function",
@@ -217,7 +221,7 @@ public:
     auto sqwWs = createGenericWorkspace("SqwWs_", true);
     auto resWs = createGenericWorkspace("ResolutionWs_", false);
     auto convFitRes = createGenericWorkspace("__ConvFit_Resolution", false);
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", sqwWs);
     alg.setProperty("Function",
@@ -271,7 +275,7 @@ public:
     auto outputName = runName + "_conv_1LFixF_s" + std::to_string(specMin) +
                       "_to_" + std::to_string(specMax) + "_Result";
 
-    Mantid::Algorithms::ConvolutionFitSequential alg;
+    ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
     alg.setProperty("Function",

@@ -1,4 +1,4 @@
-#include "MantidWorkflowAlgorithms/QENSFitSequential.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -253,6 +253,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
 } // namespace
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
 using namespace API;
@@ -375,14 +376,14 @@ void QENSFitSequential::init() {
 
   declareProperty(
       "ExtractMembers", false,
-      "If true, then each member of the convolution fit will be extracted"
+      "If true, then each member of the fit will be extracted"
       ", into their own workspace. These workspaces will have a histogram"
       " for each spectrum (Q-value) and will be grouped.",
       Direction::Input);
 
   declareProperty(
       make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
-      "If true and ExtractMembers is true members of any "
+      "If true and OutputCompositeMembers is true members of any "
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
@@ -437,8 +438,9 @@ void QENSFitSequential::exec() {
       (workspaces.size() > 1 && workspaces.size() != spectra.size()))
     throw std::invalid_argument("A malformed input string was provided.");
 
-  const auto outputWs = performFit(inputString, outputBaseName);
-  const auto resultWs = processIndirectFitParameters(outputWs);
+  const auto parameterWs =
+      processParameterTable(performFit(inputString, outputBaseName));
+  const auto resultWs = processIndirectFitParameters(parameterWs);
   const auto groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outputBaseName + "_Workspaces");
@@ -461,7 +463,7 @@ void QENSFitSequential::exec() {
   copyLogs(resultWs, groupWs);
 
   setProperty("OutputWorkspace", resultWs);
-  setProperty("OutputParameterWorkspace", outputWs);
+  setProperty("OutputParameterWorkspace", parameterWs);
   setProperty("OutputWorkspaceGroup", groupWs);
 }
 
@@ -567,6 +569,11 @@ MatrixWorkspace_sptr QENSFitSequential::processIndirectFitParameters(
   pifp->setProperty("OutputWorkspace", "__Result");
   pifp->executeAsChildAlg();
   return pifp->getProperty("OutputWorkspace");
+}
+
+ITableWorkspace_sptr
+QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
+  return parameterTable;
 }
 
 void QENSFitSequential::renameWorkspaces(
@@ -692,4 +699,5 @@ std::string QENSFitSequential::getTemporaryName() const {
 }
 
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid

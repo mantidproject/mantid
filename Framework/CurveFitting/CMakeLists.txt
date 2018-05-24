@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/Algorithms/CalculateCostFunction.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
+	src/Algorithms/ConvolutionFit.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
 	src/Algorithms/EstimateFitParameters.cpp
 	src/Algorithms/EstimatePeakErrors.cpp
@@ -10,11 +11,14 @@ set ( SRC_FILES
 	src/Algorithms/Fit.cpp
 	src/Algorithms/Fit1D.cpp
 	src/Algorithms/FitPowderDiffPeaks.cpp
+	src/Algorithms/IqtFit.cpp
 	src/Algorithms/LeBailFit.cpp
 	src/Algorithms/LeBailFunction.cpp
 	src/Algorithms/NormaliseByPeakArea.cpp
 	src/Algorithms/PawleyFit.cpp
 	src/Algorithms/PlotPeakByLogValue.cpp
+	src/Algorithms/QENSFitSimultaneous.cpp
+	src/Algorithms/QENSFitSequential.cpp
 	src/Algorithms/RefinePowderInstrumentParameters.cpp
 	src/Algorithms/RefinePowderInstrumentParameters3.cpp
 	src/Algorithms/SplineBackground.cpp
@@ -160,6 +164,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
 	inc/MantidCurveFitting/Algorithms/CalculateCostFunction.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
+	inc/MantidCurveFitting/Algorithms/ConvolutionFit.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
 	inc/MantidCurveFitting/Algorithms/EstimateFitParameters.h
@@ -168,11 +173,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/Fit.h
 	inc/MantidCurveFitting/Algorithms/Fit1D.h
 	inc/MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h
+	inc/MantidCurveFitting/Algorithms/IqtFit.h
 	inc/MantidCurveFitting/Algorithms/LeBailFit.h
 	inc/MantidCurveFitting/Algorithms/LeBailFunction.h
 	inc/MantidCurveFitting/Algorithms/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/Algorithms/PawleyFit.h
 	inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
+	inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
+	inc/MantidCurveFitting/Algorithms/QENSFitSequential.h
 	inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h
 	inc/MantidCurveFitting/Algorithms/SplineBackground.h
@@ -322,6 +330,7 @@ set ( TEST_FILES
 	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
+	Algorithms/ConvolutionFitSequentialTest.h
 	Algorithms/EstimateFitParametersTest.h
 	Algorithms/EstimatePeakErrorsTest.h
 	Algorithms/EvaluateFunctionTest.h
@@ -332,6 +341,8 @@ set ( TEST_FILES
 	Algorithms/NormaliseByPeakAreaTest.h
 	Algorithms/PawleyFitTest.h
 	Algorithms/PlotPeakByLogValueTest.h
+	Algorithms/QENSFitSequentialTest.h
+	Algorithms/QENSFitSimultaneousTest.h
 	Algorithms/RefinePowderInstrumentParameters3Test.h
 	Algorithms/RefinePowderInstrumentParametersTest.h
 	Algorithms/SeqDomainSpectrumCreatorTest.h

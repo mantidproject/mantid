@@ -1,5 +1,3 @@
-#include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -12,6 +10,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
+#include "MantidCurveFitting/Algorithms/QENSFitSimultaneous.h"
+
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -22,8 +24,6 @@
 #include <cmath>
 
 namespace {
-Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;
@@ -97,14 +97,14 @@ std::vector<T, Ts...> divideVectors(const std::vector<T, Ts...> &dividend,
 }
 
 template <typename T, typename... Ts>
-std::vector<double> addVectors(const std::vector<T, Ts...> &vec,
-                               const std::vector<T, Ts...> &vec2) {
+std::vector<T, Ts...> addVectors(const std::vector<T, Ts...> &vec,
+                                 const std::vector<T, Ts...> &vec2) {
   return combineVectors(vec, vec2, std::plus<T>());
 }
 
 template <typename T, typename... Ts>
-std::vector<double> multiplyVectors(const std::vector<T, Ts...> &vec,
-                                    const std::vector<T, Ts...> &vec2) {
+std::vector<T, Ts...> multiplyVectors(const std::vector<T, Ts...> &vec,
+                                      const std::vector<T, Ts...> &vec2) {
   return combineVectors(vec, vec2, std::multiplies<T>());
 }
 
@@ -198,42 +198,75 @@ calculateEISFAndError(const MantidVec &height, const MantidVec &heightError,
 } // namespace
 
 namespace Mantid {
+namespace CurveFitting {
 namespace Algorithms {
 
 using namespace API;
 using namespace Kernel;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvolutionFitSequential)
-
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ConvolutionFitSequential::name() const {
+template <> const std::string ConvolutionFit<QENSFitSequential>::name() const {
   return "ConvolutionFitSequential";
 }
 
+template <>
+const std::string ConvolutionFit<QENSFitSimultaneous>::name() const {
+  return "ConvolutionFitSimultaneous";
+}
+
+template <typename Base> const std::string ConvolutionFit<Base>::name() const {
+  return "ConvolutionFit";
+}
+
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvolutionFitSequential::version() const { return 1; }
+template <typename Base> int ConvolutionFit<Base>::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvolutionFitSequential::category() const {
+template <typename Base>
+const std::string ConvolutionFit<Base>::category() const {
   return "Workflow\\MIDAS";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ConvolutionFitSequential::summary() const {
+template <>
+const std::string ConvolutionFit<QENSFitSequential>::summary() const {
   return "Performs a sequential fit for a convolution workspace";
 }
 
+template <>
+const std::string ConvolutionFit<QENSFitSimultaneous>::summary() const {
+  return "Performs a simultaneous fit across convolution workspaces";
+}
+
+template <typename Base>
+const std::string ConvolutionFit<Base>::summary() const {
+  return "Performs a convolution fit";
+}
+
 /// Algorithm's see also for related algorithms. @see Algorithm::seeAlso
-const std::vector<std::string> ConvolutionFitSequential::seeAlso() const {
+template <>
+const std::vector<std::string>
+ConvolutionFit<QENSFitSequential>::seeAlso() const {
   return {"QENSFitSequential"};
 }
 
-std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
-  auto errors = QENSFitSequential::validateInputs();
-  IFunction_sptr function = getProperty("Function");
+template <>
+const std::vector<std::string>
+ConvolutionFit<QENSFitSimultaneous>::seeAlso() const {
+  return {"QENSSimultaneousFit"};
+}
+
+template <typename Base>
+const std::vector<std::string> ConvolutionFit<Base>::seeAlso() const {
+  return {};
+}
+
+template <typename Base>
+std::map<std::string, std::string> ConvolutionFit<Base>::validateInputs() {
+  auto errors = Base::validateInputs();
+  IFunction_sptr function = Base::getProperty("Function");
   if (!containsFunction(function, "Convolution") ||
       !containsFunction(function, "Resolution"))
     errors["Function"] = "Function provided does not contain convolution with "
@@ -241,40 +274,43 @@ std::map<std::string, std::string> ConvolutionFitSequential::validateInputs() {
   return errors;
 }
 
-bool ConvolutionFitSequential::throwIfElasticQConversionFails() const {
+template <typename Base>
+bool ConvolutionFit<Base>::throwIfElasticQConversionFails() const {
   return true;
 }
 
-bool ConvolutionFitSequential::isFitParameter(const std::string &name) const {
+template <typename Base>
+bool ConvolutionFit<Base>::isFitParameter(const std::string &name) const {
   bool isBackgroundParameter = name.rfind("A0") != std::string::npos ||
                                name.rfind("A1") != std::string::npos;
   return name.rfind("Centre") == std::string::npos && !isBackgroundParameter;
 }
 
-ITableWorkspace_sptr
-ConvolutionFitSequential::performFit(const std::string &input,
-                                     const std::string &output) {
-  auto parameterWorkspace = QENSFitSequential::performFit(input, output);
-  IFunction_sptr function = getProperty("Function");
+template <typename Base>
+ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
+    ITableWorkspace_sptr parameterTable) {
+  IFunction_sptr function = Base::getProperty("Function");
   m_deltaUsed = containsFunction(function, "DeltaFunction");
   if (m_deltaUsed)
-    calculateEISF(parameterWorkspace);
-  return parameterWorkspace;
+    calculateEISF(parameterTable);
+  return parameterTable;
 }
 
+template <typename Base>
 std::map<std::string, std::string>
-ConvolutionFitSequential::getAdditionalLogStrings() const {
-  IFunction_sptr function = getProperty("Function");
-  auto logs = QENSFitSequential::getAdditionalLogStrings();
+ConvolutionFit<Base>::getAdditionalLogStrings() const {
+  IFunction_sptr function = Base::getProperty("Function");
+  auto logs = Base::getAdditionalLogStrings();
   logs["delta_function"] = m_deltaUsed ? "true" : "false";
   logs["background"] = extractBackgroundType(function);
   return logs;
 }
 
+template <typename Base>
 std::map<std::string, std::string>
-ConvolutionFitSequential::getAdditionalLogNumbers() const {
-  auto logs = QENSFitSequential::getAdditionalLogNumbers();
-  IFunction_sptr function = getProperty("Function");
+ConvolutionFit<Base>::getAdditionalLogNumbers() const {
+  auto logs = Base::getAdditionalLogNumbers();
+  IFunction_sptr function = Base::getProperty("Function");
   logs["lorentzians"] = boost::lexical_cast<std::string>(
       numberOfFunctions(function, "Lorentzian"));
   return logs;
@@ -284,7 +320,8 @@ ConvolutionFitSequential::getAdditionalLogNumbers() const {
  * Calculates the EISF if the fit includes a Delta function
  * @param tableWs - The TableWorkspace to append the EISF calculation to
  */
-void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs) {
+template <typename Base>
+void ConvolutionFit<Base>::calculateEISF(ITableWorkspace_sptr &tableWs) const {
   // Get height data from parameter table
   const auto height = searchForFitParameters("Height", tableWs).at(0);
   const auto heightErr = searchForFitParameters("Height_Err", tableWs).at(0);
@@ -332,5 +369,16 @@ void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs) {
   }
 }
 
+// Register the algorithms into the AlgorithmFactory
+template class ConvolutionFit<QENSFitSequential>;
+template class ConvolutionFit<QENSFitSimultaneous>;
+
+using ConvolutionFitSequential = ConvolutionFit<QENSFitSequential>;
+using ConvolutionFitSimultaneous = ConvolutionFit<QENSFitSimultaneous>;
+
+DECLARE_ALGORITHM(ConvolutionFitSequential)
+DECLARE_ALGORITHM(ConvolutionFitSimultaneous)
+
 } // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid

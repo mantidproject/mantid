@@ -1,5 +1,5 @@
-digraph QENSFitSequential {
-  label="QENSFitSequential Flowchart"
+digraph QENSFitSimultaneous {
+  label="QENSFitSimultaneous Flowchart"
   $global_style
 
   subgraph params  {
@@ -20,6 +20,7 @@ digraph QENSFitSequential {
     MaxIterations
     PeakRadius
     EvaluationType
+    Exclude
     LogValue
     ParameterTable
     FitWorkspaces
@@ -34,7 +35,7 @@ digraph QENSFitSequential {
   subgraph algorithms  {
     $algorithm_style
     ConvertSpectrumAxis
-    PlotPeakByLogValue
+    Fit
     DeleteWorkspace
     ExtractQENSMembers
     ProcessIndirectFitParameters
@@ -60,21 +61,22 @@ digraph QENSFitSequential {
   SpecMax                        -> FitFunction
   InputWorkspace                 -> ConvertSpectrumAxis            [label="Attempt conversion to Elastic Q"]
   ConvertSpectrumAxis            -> PlotPeakByLogValue             [label="InputWorkspace"]
-  Input                          -> PlotPeakByLogValue
-  FitFunction                    -> PlotPeakByLogValue
-  StartX                         -> PlotPeakByLogValue
-  EndX                           -> PlotPeakByLogValue
-  ConvolveMembers                -> PlotPeakByLogValue
-  MaxIterations                  -> PlotPeakByLogValue
-  Minimizer                      -> PlotPeakByLogValue
-  CostFunction                   -> PlotPeakByLogValue
-  PeakRadius                     -> PlotPeakByLogValue
-  LogValue                       -> PlotPeakByLogValue
-  PassWSIndexToFunction          -> PlotPeakByLogValue
-  EvaluationType                 -> PlotPeakByLogValue
-  PlotPeakByLogValue             -> NormalisedCovarianceWorkspace
-  PlotPeakByLogValue             -> ParameterTable
-  PlotPeakByLogValue             -> FitWorkspaces
+  InputWorkspace                 -> Fit
+  FitFunction                    -> Fit
+  StartX                         -> Fit
+  EndX                           -> Fit
+  ConvolveMembers                -> Fit
+  MaxIterations                  -> Fit
+  Minimizer                      -> Fit
+  CostFunction                   -> Fit
+  PeakRadius                     -> Fit
+  LogValue                       -> Fit
+  PassWSIndexToFunction          -> Fit
+  EvaluationType                 -> Fit
+  Exclude                        -> Fit
+  Fit                            -> NormalisedCovarianceWorkspace
+  Fit                            -> ParameterTable
+  Fit                            -> FitWorkspaces
   NormalisedCovarianceWorkspace  -> DeleteWorkspace                [label="Unrequired product of PlotPeakByLogValue"]
   FitType                        -> ParameterNames                 [label="Desired parameters obtained from FitType"]
   ParameterTable                 -> ProcessIndirectFitParameters
