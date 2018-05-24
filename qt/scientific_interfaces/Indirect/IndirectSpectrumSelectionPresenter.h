@@ -57,6 +57,7 @@ signals:
 
 public slots:
   void setActiveModelIndex(std::size_t index);
+  void setActiveIndexToZero();
   void displayBinMask();
 
 private slots:
