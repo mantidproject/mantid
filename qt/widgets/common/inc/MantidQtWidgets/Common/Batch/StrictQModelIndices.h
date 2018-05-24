@@ -1,5 +1,8 @@
 /**
-Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+See the developer documentation for Batch Widget at
+developer.mantidproject.org/BatchWidget/index.html
+
+Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
