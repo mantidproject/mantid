@@ -104,12 +104,22 @@ class LoadWANDSCD(PythonAlgorithm):
         # The following logs should be the same for all runs
         RemoveLogs(_tmp_ws,
                    KeepLogs='HB2C:Mot:detz,HB2C:Mot:detz.RBV,HB2C:Mot:s2,HB2C:Mot:s2.RBV,'
+                   'HB2C:Mot:sgl,HB2C:Mot:sgl.RBV,HB2C:Mot:sgu,HB2C:Mot:sgu.RBV,'
                    'run_title,start_time,experiment_identifier,HB2C:CS:CrystalAlign:UBMatrix',
                    EnableLogging=False)
 
         try:
-            UB = np.array(re.findall(r'\d+\.*\d*', _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]),
+            ub = np.array(re.findall(r'-?\d+\.*\d*', _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]),
                           dtype=np.float).reshape(3,3)
+            sgl = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgl.RBV').value[0]) # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
+            sgu = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgu.RBV').value[0]) # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
+            sgl_a = np.array([[           1,            0,           0],
+                              [           0,  np.cos(sgl), np.sin(sgl)],
+                              [           0, -np.sin(sgl), np.cos(sgl)]])
+            sgu_a = np.array([[ np.cos(sgu),  np.sin(sgu),           0],
+                              [-np.sin(sgu),  np.cos(sgu),           0],
+                              [           0,            0,           1]])
+            UB = sgl_a.dot(sgu_a).dot(ub) # Apply the Goniometer tilts to the UB matrix
             SetUB(_tmp_ws, UB=UB, EnableLogging=False)
         except (RuntimeError, ValueError):
             SetUB(_tmp_ws, EnableLogging=False)
