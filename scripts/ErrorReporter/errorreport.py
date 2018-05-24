@@ -1,4 +1,3 @@
-import sys
 from PyQt4 import QtGui, QtCore
 import ui_errorreport
 from PyQt4.QtCore import pyqtSignal

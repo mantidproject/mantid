@@ -82,29 +82,31 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   }
 
   if (error && Mantid::Kernel::UsageService::Instance().isEnabled()) {
-    QString pythonCode("from ErrorReporter.error_report_presenter import ErrorReporterPresenter"
+    QString pythonCode("from ErrorReporter.error_report_presenter import "
+                       "ErrorReporterPresenter"
                        "\nfrom ErrorReporter.errorreport import CrashReportPage"
                        "\npage = CrashReportPage(show_continue_terminate=True)"
                        "\npresenter = ErrorReporterPresenter(page, '')");
 
     emit runAsPythonScript(pythonCode);
-  }
-  else if (error){
+  } else if (error) {
     QMessageBox ask;
     QAbstractButton *terminateButton =
         ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
     ask.addButton(tr("Continue"), QMessageBox::ActionRole);
-    if (known_exception){
-      ask.setText("Sorry, MantidPlot has caught an unexpected exception:\n\n" +
-                  QString::fromStdString(unexpected_exception) +
-                  "\n\nWould you like to terminate MantidPlot or try to continue "
-                  "working?\nIf you choose to continue it is advisable to save "
-                  "your data and restart the application.");
+    if (known_exception) {
+      ask.setText(
+          "Sorry, MantidPlot has caught an unexpected exception:\n\n" +
+          QString::fromStdString(unexpected_exception) +
+          "\n\nWould you like to terminate MantidPlot or try to continue "
+          "working?\nIf you choose to continue it is advisable to save "
+          "your data and restart the application.");
     } else {
-      ask.setText("Sorry, MantidPlot has caught an unknown exception"
-                  "\n\nWould you like to terminate MantidPlot or try to continue "
-                  "working?\nIf you choose to continue it is advisable to save "
-                  "your data and restart the application.");
+      ask.setText(
+          "Sorry, MantidPlot has caught an unknown exception"
+          "\n\nWould you like to terminate MantidPlot or try to continue "
+          "working?\nIf you choose to continue it is advisable to save "
+          "your data and restart the application.");
     }
     ask.setIcon(QMessageBox::Critical);
     ask.exec();
@@ -112,7 +114,7 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
       g_log.fatal("Terminated by user.");
       quit();
     } else
-    g_log.fatal("Continue working.");
+      g_log.fatal("Continue working.");
   }
 
   return res;
