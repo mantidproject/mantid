@@ -71,6 +71,8 @@ void RowData::setValue(const int i, const QString &value,
 
   if (isGenerated)
     m_generatedColumns.insert(i);
+  else
+    m_generatedColumns.erase(i);
 
   // Also update the value in any child slices
   if (m_slices.size() > 0) {

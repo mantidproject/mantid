@@ -867,7 +867,8 @@ void QTwoLevelTreeModel::updateGroupData(const int groupIdx, const int start,
     // Loop through all columns and update the value in the row data
     for (int col = 0; col < columnCount(); ++col) {
       auto value = data(index(row, col, index(groupIdx, 0))).toString();
-      rowData->setValue(col, value);
+      if (value != rowData->value(col))
+        rowData->setValue(col, value);
     }
   }
 }
