@@ -247,6 +247,8 @@ void ImportMDEventWorkspace::exec() {
       static_cast<int>(std::distance(m_posDimStart, m_posMDEventStart));
   m_nDimensions = (posDiffDims - 1) / 4;
 
+  g_log.warning() << "[DB...BAT] nDimensions = " << m_nDimensions << "\n";
+
   // Calculate the actual number of columns in the MDEvent data.
   int posDiffMDEvent =
       static_cast<int>(std::distance(m_posMDEventStart, m_file_data.end()));
@@ -262,6 +264,8 @@ void ImportMDEventWorkspace::exec() {
     m_nDataObjects = posDiffMDEvent / nActualColumns;
   }
 
+  g_log.warning() << "[DB...BAT] m_nDataObjects = " << m_nDataObjects << "\n";
+
   // Get the min and max extents in each dimension.
   std::vector<double> extentMins(m_nDimensions);
   std::vector<double> extentMaxs(m_nDimensions);
@@ -275,6 +279,8 @@ void ImportMDEventWorkspace::exec() {
       double coord = convert<double>(*(++mdEventEntriesIterator));
       extentMins[j] = coord < extentMins[j] ? coord : extentMins[j];
       extentMaxs[j] = coord > extentMaxs[j] ? coord : extentMaxs[j];
+      g_log.warning() << "data object: " << i << ", dimension: " << j
+                      << ", coordinate = " << coord << "\n";
     }
   }
 
@@ -290,6 +296,9 @@ void ImportMDEventWorkspace::exec() {
     std::string name = convert<std::string>(*(++dimEntriesIterator));
     std::string units = convert<std::string>(*(++dimEntriesIterator));
     int nbins = convert<int>(*(++dimEntriesIterator));
+
+    g_log.notice() << "Dim " << i << ": ID = " << id << ", Name = " << name
+                   << ", units = " << units << ", nbins = " << nbins << "\n";
 
     auto mdUnit = unitFactory->create(units);
     Mantid::Geometry::GeneralFrame frame(

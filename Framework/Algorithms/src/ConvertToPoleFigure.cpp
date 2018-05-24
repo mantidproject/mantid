@@ -1,16 +1,19 @@
-#include "MantidAlgorithms/CalculatePoleFigure.h"
+#include "MantidAlgorithms/ConvertToPoleFigure.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/ISpectrum.h"
 
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -32,48 +35,41 @@ using std::string;
 using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CalculatePoleFigure)
+DECLARE_ALGORITHM(ConvertToPoleFigure)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-const std::string CalculatePoleFigure::name() const {
-  return "CalculatePoleFigure";
+const std::string ConvertToPoleFigure::name() const {
+  return "ConvertToPoleFigure";
 }
 
-int CalculatePoleFigure::version() const { return 1; }
+int ConvertToPoleFigure::version() const { return 1; }
 
-const std::string CalculatePoleFigure::category() const {
+const std::string ConvertToPoleFigure::category() const {
   return "Diffraction\\Utility";
 }
 
+//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
 */
-void CalculatePoleFigure::init() {
+void ConvertToPoleFigure::init() {
   auto uv = boost::make_shared<API::WorkspaceUnitValidator>("dSpacing");
 
   declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                    Direction::Input, uv),
-                  "Name of input workspace to calculate Pole Figure from.");
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Result pole figure mapping Table");
+                  "Name of input workspace containing peak intensity and "
+                  "instrument information.");
+  declareProperty(
+      make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Name of the output IEventWorkspace containing pole figure information.");
 
   declareProperty("HROTName", "BL7:Mot:Parker:HROT.RBV",
                   "Log name of HROT in input workspace");
 
   declareProperty("OmegaName", "BL7:Mot:Sample:Omega.RBV",
                   "Log name of Omega for pole figure.");
-
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>("PoleFigure"),
-                  "Output 2D vector for calcualte pole figure.");
-
-  declareProperty(make_unique<API::FileProperty>(
-                      "PoleFigureFile", "", API::FileProperty::OptionalSave),
-                  "Name of optional output file for pole figure.");
-
-  declareProperty("MinD", EMPTY_DBL(), "Lower boundary of peak in dSpacing.");
-  declareProperty("MaxD", EMPTY_DBL(), "Upper boundary of peak in dSpacing.");
 
   std::vector<std::string> peakcaloptions;
   peakcaloptions.push_back("SimpleIntegration");
@@ -88,17 +84,17 @@ void CalculatePoleFigure::init() {
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("R_ND", Direction::Output),
       "Array for R_ND");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakIntensity",
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PoleFigure",
                                                              Direction::Output),
-                  "Array for peak intensities");
+                  "Output 2D vector for calcualted pole figure.");
 
-  // Set up input data type
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Process input properties
  */
-void CalculatePoleFigure::processInputs() {
+void ConvertToPoleFigure::processInputs() {
 
   // get inputs
   m_nameHROT = getPropertyValue("HROTName");
@@ -107,88 +103,35 @@ void CalculatePoleFigure::processInputs() {
   //
   m_inputWS = getProperty("InputWorkspace");
 
-  // check peak range
-  double dmin = getProperty("MinD");
-  double dmax = getProperty("MaxD");
-  if (isEmpty(dmin) || isEmpty(dmax))
-    throw std::invalid_argument("Peak range (dmin and dmax) must be given!");
-  else {
-    m_peakDRange.first = dmin;
-    m_peakDRange.second = dmax;
-  }
-
   // check whether the log exists
   auto hrot = m_inputWS->run().getProperty(m_nameHROT);
   if (!hrot) {
     throw std::invalid_argument("HROT does not exist in sample log.");
+  }
+  auto omega = m_inputWS->run().getProperty("m_nameOmega");
+  if (!omega) {
+    throw std::invalid_argument("Omega does not exist in sample log!");
   }
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
-void CalculatePoleFigure::exec() {
+void ConvertToPoleFigure::exec() {
   // get input data
   processInputs();
 
   // calcualte pole figure
-  calculatePoleFigure();
+  convertToPoleFigure();
 
   // construct output
   generateOutputs();
 }
 
 //----------------------------------------------------------------------------------------------
-/** Peak fitting
- */
-// TODO - Resume from here!
-void CalculatePoleFigure::calculatePeaksIntensities() {
-
-  // Calculate the peak intensity by add the neutron events within the D-range
-  std::vector<double> event_counts_vec(m_inputWS->getNumberHistograms(), 0.);
-  std::vector<double> estimated_bkgd_vec(m_inputWS->getNumberHistograms(), 0.);
-  integrateEventCounts(m_peakDRange.first, m_peakDRange.second,
-                       event_counts_vec, estiamted_bkgd_vec);
-
-  // Fit peaks
-  PeakFitResult fit_result = fitPeaks(m_peakDRange.first, m_peakDRange.second);
-
-  // Further process fitting result from simple integration and peak fitting
-}
-
-//----------------------------------------------------------------------------------------------
-/** Integate event counts within a range of D
- */
-void CalculatePoleFigure::integrateEventCounts(
-    double min_d, double max_d, std::vector<double> &events_counts_vec,
-    std::vector<double> &estimated_bkgd_vec) {
-
-  for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
-    double index_min_d = getXIndex(m_inputWS, iws, min_d);
-    double index_max_d = getXIndex(m_inputWS, iws, max_d);
-    double counts = 0.;
-    // estimate background
-    double y0 = m_inputWS->readY(iws)[index_min_d];
-    double yf = m_inputWS->histogram(iws).x()[index_max_d];
-    double bkgd_a, bkgd_b;
-    estimateLinearBackground(m_inputWS, iws, bkgd_a, bkgd_b);
-    //
-    for (size_t ix = index_min_d; ix < index_max_d; ++ix)
-      counts += m_inputWS->readX(iws)[ix];
-  }
-
-  return;
-}
-
-void CalculatePoleFigure::fitPeaks(const double d_min, const double d_max) {
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
 /** Calcualte pole figure
  */
-void CalculatePoleFigure::calculatePoleFigure() {
+void ConvertToPoleFigure::convertToPoleFigure() {
   // initialize output
   m_poleFigureRTDVector.resize(m_inputWS->getNumberHistograms());
   m_poleFigureRNDVector.resize(m_inputWS->getNumberHistograms());
@@ -226,8 +169,9 @@ void CalculatePoleFigure::calculatePoleFigure() {
     double r_td, r_nd;
     convertCoordinates(unit_q, hrot, omega, r_td, r_nd);
 
-    // calcualte peak intensity
-    double peak_intensity_i = calculatePeakIntensitySimple(iws, m_peakDRange);
+    // FIXME TODO - shall from input!
+    // get peak intensity
+    double peak_intensity_i = 100;
 
     // set up value
     m_poleFigureRTDVector[iws] = r_td;
@@ -239,72 +183,57 @@ void CalculatePoleFigure::calculatePoleFigure() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** calculate peak intensity by simple integration without concerning the
- * background
- */
-double CalculatePoleFigure::calculatePeakIntensitySimple(
-    size_t iws, const std::pair<double, double> &peak_range) {
-
-  // check
-  if (iws >= m_inputWS->getNumberHistograms())
-    throw std::runtime_error("Input workspace index exceeds input workspace's "
-                             "number of histograms.");
-  double d_min = peak_range.first;
-  double d_max = peak_range.second;
-
-  // integrate
-  double intensity(0);
-
-  // convert from dmin and dmax in double to index of X-axis
-  auto vecx = m_inputWS->histogram(iws).x();
-  auto vecy = m_inputWS->histogram(iws).y();
-  size_t dmin_index = static_cast<size_t>(
-      std::lower_bound(vecx.begin(), vecx.end(), d_min) - vecx.begin());
-  size_t dmax_index = static_cast<size_t>(
-      std::lower_bound(vecx.begin(), vecx.end(), d_max) - vecx.begin());
-
-  if (dmax_index <= dmin_index) {
-    g_log.error() << "DMin " << d_min << " is equal or larger than DMax "
-                  << d_max << " or both of them exceeds range of X."
-                  << vecx.front() << ", " << vecx.back() << std::endl;
-    throw std::runtime_error("dmin and dmax either not in order or exceeds the "
-                             "range of vector of X.");
-  }
-  if (dmax_index >= vecy.size())
-    dmax_index = vecy.size() - 1;
-
-  for (auto d_index = dmin_index; d_index < dmax_index; ++d_index) {
-    double y_i = vecy[d_index];
-    double d_x = vecx[d_index] - vecx[d_index - 1];
-    intensity += y_i * d_x;
-  }
-
-  return intensity;
-}
-
-//----------------------------------------------------------------------------------------------
 /** generate output workspaces
- * @brief CalculatePoleFigure::generateOutputs
+ * @brief ConvertToPoleFigure::generateOutputs
  */
-void CalculatePoleFigure::generateOutputs() {
-  // create output TableWorkspace
-  API::ITableWorkspace_sptr output_table =
-      boost::make_shared<DataObjects::TableWorkspace>();
-  output_table->addColumn("int", "WorkspaceIndex");
-  output_table->addColumn("double", "R_TD");
-  output_table->addColumn("double", "R_ND");
-  output_table->addColumn("double", "Intensity");
+void ConvertToPoleFigure::generateOutputs() {
+  // create MDEventWorkspace
+  // Create a target output workspace.
+  // 2D as (x, y) signal error
+  // NOTE: the template is from ImportMDEventWorkspace Line 271 and so on
+  API::IMDEventWorkspace_sptr out_event_ws =
+      DataObjects::MDEventFactory::CreateMDWorkspace(2, "MDEvent");
+  // x-value range and y-value range
+  std::vector<double> extentMins(2);
+  std::vector<double> extentMaxs(2);
 
-  // add values
-  for (size_t iws = 0; iws < m_poleFigurePeakIntensityVector.size(); ++iws) {
-    API::TableRow row_i = output_table->appendRow();
-    row_i << static_cast<int>(iws) << m_poleFigureRTDVector[iws]
-          << m_poleFigureRNDVector[iws] << m_poleFigurePeakIntensityVector[iws];
-  }
+  auto unitFactory = makeMDUnitFactoryChain();
+
+  // Set up X and Y dimension
+  // Extract Dimensions and add to the output workspace.
+  std::string id("x");
+  std::string name("X");
+  std::string units("U");
+  int nbins = 100; // FIXME - a better number
+  auto mdUnit = unitFactory->create(units);
+  Mantid::Geometry::GeneralFrame frame(
+      Mantid::Geometry::GeneralFrame::GeneralFrameName, std::move(mdUnit));
+  out_event_ws->addDimension(
+      Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+          id, name, frame, static_cast<coord_t>(extentMins[dim0]),
+          static_cast<coord_t>(extentMaxs[dim0]), nbins)));
+
+  throw std::runtime_error("To be continued");
+
+  //  auto dimEntriesIterator = m_posDimStart;
+  //  auto unitFactory = makeMDUnitFactoryChain();
+  //  for (size_t i = 0; i < m_nDimensions; ++i) {
+  //    std::string id = convert<std::string>(*(++dimEntriesIterator));
+  //    std::string name = convert<std::string>(*(++dimEntriesIterator));
+  //    std::string units = convert<std::string>(*(++dimEntriesIterator));
+  //    int nbins = convert<int>(*(++dimEntriesIterator));
+
+  //    auto mdUnit = unitFactory->create(units);
+  //    Mantid::Geometry::GeneralFrame frame(
+  //        Mantid::Geometry::GeneralFrame::GeneralFrameName,
+  //        std::move(mdUnit));
+  //    outWs->addDimension(MDHistoDimension_sptr(new MDHistoDimension(
+  //        id, name, frame, static_cast<coord_t>(extentMins[i]),
+  //        static_cast<coord_t>(extentMaxs[i]), nbins)));
+  //  }
 
   // set properties for output
-  setProperty("OutputWorkspace", output_table);
-
+  setProperty("OutputWorkspace", out_event_ws);
   setProperty("R_TD", m_poleFigureRTDVector);
   setProperty("R_ND", m_poleFigureRNDVector);
   setProperty("PeakIntensity", m_poleFigurePeakIntensityVector);
@@ -312,14 +241,14 @@ void CalculatePoleFigure::generateOutputs() {
 
 //----------------------------------------------------------------------------------------------
 /** convert from Q vector to R_TD and R_ND
- * @brief CalculatePoleFigure::convertCoordinates
+ * @brief ConvertToPoleFigure::convertCoordinates
  * @param unitQ
  * @param hrot
  * @param omega
  * @param r_td
  * @param r_nd
  */
-void CalculatePoleFigure::convertCoordinates(Kernel::V3D unitQ,
+void ConvertToPoleFigure::convertCoordinates(Kernel::V3D unitQ,
                                              const double &hrot,
                                              const double &omega, double &r_td,
                                              double &r_nd) {
@@ -359,9 +288,6 @@ void CalculatePoleFigure::convertCoordinates(Kernel::V3D unitQ,
 
   return;
 }
-
-// TODO/ISSUE/NOW - Implement HDF5 output by H5Util
-// ... ...
 
 } // namespace Mantid
 } // namespace Algorithms

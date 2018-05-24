@@ -1,18 +1,18 @@
-#ifndef MANTID_ALGORITHMS_CalculatePoleFigure_H_
-#define MANTID_ALGORITHMS_CalculatePoleFigure_H_
+#ifndef MANTID_ALGORITHMS_ConvertToPoleFigure_H_
+#define MANTID_ALGORITHMS_ConvertToPoleFigure_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** CalculatePoleFigure : Calcualte Pole Figure for engineering material
+/** ConvertToPoleFigure : Calcualte Pole Figure for engineering material
  */
-class DLLExport CalculatePoleFigure : public API::Algorithm {
+class DLLExport ConvertToPoleFigure : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;
@@ -36,10 +36,8 @@ private:
   void processInputs();
 
   /// calculate pole figure
-  void calculatePoleFigure();
-  double
-  calculatePeakIntensitySimple(size_t iws,
-                               const std::pair<double, double> &peak_range);
+  void convertToPoleFigure();
+
   void convertCoordinates(Kernel::V3D unitQ, const double &hrot,
                           const double &omega, double &r_td, double &r_nd);
 
@@ -56,6 +54,8 @@ private:
 
   /// fit peaks within given d range
   void fitPeaks(const double d_min, const double d_max);
+
+  void generateMDEventWS();
 
   /// input workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -80,4 +80,4 @@ private:
 } // namespace Mantid
 } // namespace Algorithms
 
-#endif /* MANTID_ALGORITHMS_CalculatePoleFigure_H_ */
+#endif /* MANTID_ALGORITHMS_ConvertToPoleFigure_H_ */
