@@ -63,10 +63,10 @@ This example is for converting a function.
    else:
        print("Constant tie has not been preserved"
 
-   if paramTable.column(1)[1] == 3:
-      print("Fix has been preseved")
+   if paramTable.column(1)[1] == 3.0:
+      print("Fix has been preserved")
    else:
-      print("Fix has not been preseved")
+      print("Fix has not been presreved")
 
 Output:
 
@@ -74,7 +74,7 @@ Output:
 
    Gradients:
    Constant tie has been preserved
-   Fix has been preseved
+   Fix has been preserved
 
 .. categories::
 
