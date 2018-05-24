@@ -68,11 +68,13 @@ public:
   MOCK_METHOD0(setRowCommandsProxy, void());
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
-               void(const std::vector<std::string> &, const std::string &));
+               void(const std::vector<std::string> &, int));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
   MOCK_METHOD1(setTransferButtonEnabled, void(bool));
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
+  MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter*));
+  MOCK_CONST_METHOD0(tableViews, std::vector<IBatchView*> const&());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};

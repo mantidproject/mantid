@@ -11,8 +11,13 @@ class BatchViewSubscriber
 public:
   virtual void notifyProcessRequested() = 0;
   virtual void notifyPauseRequested() = 0;
+  virtual void notifyInsertRowRequested() = 0;
+  virtual void notifyInsertGroupRequested() = 0;
+  virtual void notifyDeleteRowRequested() = 0;
+  virtual void notifyDeleteGroupRequested() = 0;
 
   virtual void notifyExpandAllRequested() = 0;
+  virtual void notifyCollapseAllRequested() = 0;
   virtual ~BatchViewSubscriber() = default;
 };
 
@@ -20,8 +25,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchView {
 public:
   virtual void subscribe(BatchViewSubscriber *notifyee) = 0;
   virtual void setProgress(int value) = 0;
-  virtual void expandAllGroups() = 0;
-  virtual MantidQt::MantidWidgets::Batch::IJobTreeView& jobs() = 0;
+  virtual MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() = 0;
 };
 }
 }

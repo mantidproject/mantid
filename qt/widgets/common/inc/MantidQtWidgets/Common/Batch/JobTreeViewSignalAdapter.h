@@ -19,6 +19,7 @@ public:
   void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) override;
   void notifyCopyRowsRequested() override;
+  void notifyCutRowsRequested() override;
   void notifyPasteRowsRequested() override;
   void notifyFilterReset() override;
 signals:
@@ -34,6 +35,7 @@ signals:
           locationsOfRowsToRemove);
   void copyRowsRequested();
   void pasteRowsRequested();
+  void cutRowsRequested();
 };
 }
 }

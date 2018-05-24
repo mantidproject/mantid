@@ -63,6 +63,10 @@ public:
   void setCellAt(RowLocation location, int column,
                  Cell const &cellText) override;
 
+  void clearSelection() override;
+  void expandAll() override;
+  void collapseAll() override;
+
   QModelIndex moveCursor(CursorAction cursorAction,
                          Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const override;
@@ -80,6 +84,7 @@ protected:
   void setHeaderLabels(QStringList const &columnHeadings);
   void removeSelectedRequested();
   void copySelectedRequested();
+  void cutSelectedRequested();
   void pasteSelectedRequested();
 
 protected slots:

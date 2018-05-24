@@ -25,6 +25,7 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
+  setContextMenuPolicy(Qt::ActionsContextMenu);
   enableFiltering();
 }
 
@@ -147,6 +148,10 @@ void JobTreeView::removeSelectedRequested() {
 
 void JobTreeView::copySelectedRequested() {
   m_notifyee->notifyCopyRowsRequested();
+}
+
+void JobTreeView::cutSelectedRequested() {
+  m_notifyee->notifyCutRowsRequested();
 }
 
 void JobTreeView::pasteSelectedRequested() {
@@ -358,10 +363,22 @@ void JobTreeView::appendChildRowOf(RowLocation const &parent,
 
 void JobTreeView::editAt(QModelIndexForFilteredModel const &index) {
   if (isEditable(index.untyped())) {
-    clearSelection();
+    QTreeView::clearSelection();
     setCurrentIndex(index.untyped());
     edit(index.untyped());
   }
+}
+
+void JobTreeView::clearSelection() {
+  QTreeView::clearSelection();
+}
+
+void JobTreeView::expandAll() {
+  QTreeView::expandAll();
+}
+
+void JobTreeView::collapseAll() {
+  QTreeView::collapseAll();
 }
 
 QModelIndexForFilteredModel
@@ -455,7 +472,10 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
     if (event->modifiers() & Qt::ControlModifier) {
       pasteSelectedRequested();
     }
-  } else {
+  } else if (event->key() == Qt::Key_X) {
+    if (event->modifiers() & Qt::ControlModifier) {
+      cutSelectedRequested();
+    }
     QTreeView::keyPressEvent(event);
   }
 }

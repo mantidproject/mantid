@@ -20,6 +20,7 @@ public:
   virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
   virtual void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
+  virtual void notifyCutRowsRequested() = 0;
   virtual void notifyCopyRowsRequested() = 0;
   virtual void notifyPasteRowsRequested() = 0;
   virtual void notifyFilterReset() = 0;
@@ -66,6 +67,10 @@ public:
   virtual Cell cellAt(RowLocation location, int column) const = 0;
   virtual void setCellAt(RowLocation location, int column,
                          Cell const &cellText) = 0;
+
+  virtual void clearSelection() = 0;
+  virtual void expandAll() = 0;
+  virtual void collapseAll() = 0;
 
   virtual std::vector<RowLocation> selectedRowLocations() const = 0;
   virtual boost::optional<std::vector<Subtree>> selectedSubtrees() const = 0;

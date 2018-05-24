@@ -18,14 +18,25 @@ public:
             int defaultInstrumentIndex);
   void subscribe(BatchViewSubscriber *notifyee) override;
   void setProgress(int value) override;
-  void expandAllGroups() override;
   MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() override;
 
 private slots:
   void onProcessPressed(bool);
+  void onPausePressed(bool);
   void onExpandAllGroupsPressed(bool);
+  void onCollapseAllGroupsPressed(bool);
+  void onInsertRowPressed(bool);
+  void onInsertGroupPressed(bool);
+  void onDeleteRowPressed(bool);
+  void onDeleteGroupPressed(bool);
+  void onCopyPressed(bool);
+  void onCutPressed(bool);
+  void onPastePressed(bool);
 
 private:
+  void addToolbarActions();
+  QAction *addToolbarItem(std::string const &iconPath,
+                          std::string const &description);
   Ui::BatchView m_ui;
   std::unique_ptr<MantidQt::MantidWidgets::Batch::JobTreeView> m_jobs;
   std::vector<std::string> m_instruments;
@@ -38,7 +49,8 @@ public:
   BatchView *operator()(int defaultInstrumentIndex) const;
   BatchView *operator()() const;
   int defaultInstrumentFromConfig() const;
-  int indexOfElseFirst(std::string const& instrument) const;
+  int indexOfElseFirst(std::string const &instrument) const;
+
 private:
   std::vector<std::string> m_instruments;
 };

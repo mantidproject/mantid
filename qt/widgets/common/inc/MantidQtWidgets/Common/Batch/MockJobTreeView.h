@@ -5,9 +5,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-class EXPORT_OPT_MANTIDQT_COMMON MockTreeView : public IJobTreeView {
+class EXPORT_OPT_MANTIDQT_COMMON MockJobTreeView : public IJobTreeView {
 public:
-  MOCK_METHOD1(filterRowsBy, void(std::unique_ptr<RowPredicate>));
+  virtual void filterRowsBy(std::unique_ptr<RowPredicate> predicate) {
+    filterRowsBy(predicate.get());
+  }
   MOCK_METHOD1(filterRowsBy, void(RowPredicate *));
 
   MOCK_METHOD0(resetFilter, void());
@@ -34,19 +36,21 @@ public:
   MOCK_METHOD2(appendSubtreeAt,
                void(RowLocation const &parent, Subtree const &subtree));
   MOCK_METHOD2(replaceSubtreeAt, void(RowLocation const&, Subtree const&));
-  MOCK_METHOD2(insertSubtreeAt, void(RowLocation const&, Subtree const&));
+  MOCK_METHOD3(insertSubtreeAt, void(RowLocation const&, int, Subtree const&));
 
+  MOCK_METHOD0(clearSelection, void());
+  MOCK_METHOD0(expandAll, void());
+  MOCK_METHOD0(collapseAll, void());
   MOCK_CONST_METHOD1(cellsAt, std::vector<Cell>(RowLocation const&));
   MOCK_METHOD2(setCellsAt, void(RowLocation const&, std::vector<Cell> const& rowText));
 
   MOCK_CONST_METHOD2(cellAt, Cell(RowLocation, int));
-  MOCK_METHOD2(setCellAt, void(RowLocation, int, Cell const&));
+  MOCK_METHOD3(setCellAt, void(RowLocation, int, Cell const&));
 
   MOCK_CONST_METHOD0(selectedRowLocations, std::vector<RowLocation>());
   MOCK_CONST_METHOD0(selectedSubtrees, boost::optional<std::vector<Subtree>>());
   MOCK_CONST_METHOD0(selectedSubtreeRoots, boost::optional<std::vector<RowLocation>>());
   MOCK_CONST_METHOD0(deadCell, Cell());
-  virtual ~IJobTreeView() = default;
 };
 
 }

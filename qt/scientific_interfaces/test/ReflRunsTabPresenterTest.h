@@ -31,7 +31,16 @@ public:
   }
   static void destroySuite(ReflRunsTabPresenterTest *suite) { delete suite; }
 
-  ReflRunsTabPresenterTest() {}
+  std::vector<std::string> m_instruments;
+  int m_defaultInstrument;
+
+  ReflRunsTabPresenterTest()
+      : m_instruments({"INTER", "POLREF", "OFFSPEC", "SURF", "CRISP"}),
+        m_defaultInstrument(0) {}
+
+  BatchPresenterFactory batchPresenterFactory() const {
+    return BatchPresenterFactory(m_instruments);
+  }
 
   void test_constructor_sets_possible_transfer_methods() {
     NiceMock<MockRunsTabView> mockRunsTabView;
@@ -47,7 +56,8 @@ public:
 
     // Constructor
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -74,7 +84,9 @@ public:
 
     // Constructor
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
+
     presenter.acceptMainPresenter(&mockMainWindowPresenter);
 
     // Verify expectations
@@ -92,7 +104,8 @@ public:
     tablePresenterVec.push_back(&mockTablePresenter);
 
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
 
     // Expect that the view clears the list of commands
     EXPECT_CALL(mockRunsTabView, clearCommands()).Times(Exactly(1));
@@ -114,8 +127,11 @@ public:
     MockMainWindowPresenter mockMainPresenter;
     std::vector<DataProcessorPresenter *> tablePresenterVec;
     tablePresenterVec.push_back(&mockTablePresenter);
+
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
+
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     int group = 199;
@@ -138,8 +154,11 @@ public:
     MockMainWindowPresenter mockMainPresenter;
     std::vector<DataProcessorPresenter *> tablePresenterVec;
     tablePresenterVec.push_back(&mockTablePresenter);
+
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
+
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     int group = 199;
@@ -162,8 +181,11 @@ public:
     MockMainWindowPresenter mockMainPresenter;
     std::vector<DataProcessorPresenter *> tablePresenterVec;
     tablePresenterVec.push_back(&mockTablePresenter);
+
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
+
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     int group = 199;
@@ -190,7 +212,8 @@ public:
     tablePresenterVec.push_back(&mockTablePresenter_2);
 
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockRunsTabView, getSelectedGroup())
@@ -217,12 +240,11 @@ public:
     tablePresenterVec.push_back(&mockTablePresenter);
 
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    std::vector<std::string> instruments = {"INTER", "POLREF", "OFFSPEC",
-                                            "SURF", "CRISP"};
-    for (const auto &instrument : instruments) {
+    for (const auto &instrument : m_instruments) {
       EXPECT_CALL(mockRunsTabView, getSearchInstrument())
           .Times(Exactly(1))
           .WillOnce(Return(instrument));
@@ -243,7 +265,8 @@ public:
     std::vector<DataProcessorPresenter *> tablePresenterVec;
     tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     std::stringstream pythonSrc;
@@ -276,7 +299,8 @@ public:
     tablePresenterVec.push_back(&mockTablePresenter);
 
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     // Expect that the view updates the menu with isProcessing=false
@@ -305,7 +329,8 @@ public:
     tablePresenterVec.push_back(&mockTablePresenter);
 
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     // Expect that the view updates the menu with isProcessing=true
@@ -333,7 +358,8 @@ public:
     std::vector<DataProcessorPresenter *> tablePresenterVec;
     tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     constexpr int GROUP_NUMBER = 0;
@@ -355,7 +381,8 @@ public:
     std::vector<DataProcessorPresenter *> tablePresenterVec;
     tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   tablePresenterVec);
+                                   batchPresenterFactory(), m_instruments,
+                                   m_defaultInstrument);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     auto GROUP_NUMBER = 0;

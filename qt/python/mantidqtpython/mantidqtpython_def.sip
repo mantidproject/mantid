@@ -1557,6 +1557,7 @@ public:
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
+  virtual void notifyCutRowsRequested() = 0;
   virtual void notifyPasteRowsRequested() = 0;
   virtual void notifyFilterReset() = 0;
 };
@@ -1667,6 +1668,7 @@ public:
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
+  virtual void notifyCutRowsRequested();
   virtual void notifyPasteRowsRequested();
   virtual void notifyFilterReset();
 signals:
@@ -1679,7 +1681,7 @@ signals:
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
-
+  void cutRowsRequested();
 };
 
 };

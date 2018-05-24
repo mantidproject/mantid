@@ -11,7 +11,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL MockBatchView : public IBatchView {
 public:
   MOCK_METHOD1(subscribe, void(BatchViewSubscriber*));
   MOCK_METHOD1(setProgress, void(int));
-  MOCK_METHOD0(jobs, IJobTreeView&());
+  MOCK_METHOD0(jobs, MantidQt::MantidWidgets::Batch::IJobTreeView&());
 };
 
 }

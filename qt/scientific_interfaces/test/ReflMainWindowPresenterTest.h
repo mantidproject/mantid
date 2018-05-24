@@ -31,13 +31,14 @@ public:
   void testGetTransmissionValues() {
     // Test getting transmission run values
     MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsTabPresenter;
+    auto mockRunsTabPresenter =
+        Mantid::Kernel::make_unique<MockRunsTabPresenter>();
     MockEventTabPresenter mockEventTabPresenter;
     MockSettingsTabPresenter mockSettingsTabPresenter;
     auto mockSaveTabPresenter =
         Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsTabPresenter, &mockEventTabPresenter,
+        &mockView, std::move(mockRunsTabPresenter), &mockEventTabPresenter,
         &mockSettingsTabPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the values
@@ -59,13 +60,14 @@ public:
     // Test getting options for the preprocessing algorithm that creates
     // the transmission workspace
     MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
+    auto mockRunsTabPresenter =
+        ::Mantid::Kernel::make_unique<MockRunsTabPresenter>();
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
         Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
+        &mockView, std::move(mockRunsTabPresenter), &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the options
@@ -85,13 +87,14 @@ public:
   void testGetReductionOptions() {
     // Test getting the options for the main reduction algorithm
     MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
+    auto mockRunsTabPresenter =
+        ::Mantid::Kernel::make_unique<MockRunsTabPresenter>();
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
         Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
+        &mockView, std::move(mockRunsTabPresenter), &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the options
@@ -112,13 +115,14 @@ public:
     // Test getting the options for the post-processing algorithm for
     // stitching workspaces
     MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
+    auto mockRunsTabPresenter =
+        ::Mantid::Kernel::make_unique<MockRunsTabPresenter>();
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
         Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
+        &mockView, std::move(mockRunsTabPresenter), &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     // Should call the settings tab to get the options
@@ -133,13 +137,14 @@ public:
 
   void testGiveUserCritical() {
     MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
+    auto mockRunsTabPresenter =
+        ::Mantid::Kernel::make_unique<MockRunsTabPresenter>();
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
         Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
+        &mockView, std::move(mockRunsTabPresenter), &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     EXPECT_CALL(mockView, giveUserCritical("Prompt", "Title"))
@@ -150,13 +155,14 @@ public:
 
   void testGiveUserInfo() {
     MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
+    auto mockRunsTabPresenter =
+        ::Mantid::Kernel::make_unique<MockRunsTabPresenter>();
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
         Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
+        &mockView, std::move(mockRunsTabPresenter), &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     EXPECT_CALL(mockView, giveUserInfo("Prompt", "Title")).Times(Exactly(1));
@@ -166,13 +172,14 @@ public:
 
   void testUserPythonCode() {
     MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
+    auto mockRunsTabPresenter =
+        ::Mantid::Kernel::make_unique<MockRunsTabPresenter>();
     MockEventTabPresenter mockEventPresenter;
     MockSettingsTabPresenter mockSettingsPresenter;
     auto mockSaveTabPresenter =
         Mantid::Kernel::make_unique<MockSaveTabPresenter>();
     ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
+        &mockView, std::move(mockRunsTabPresenter), &mockEventPresenter,
         &mockSettingsPresenter, std::move(mockSaveTabPresenter));
 
     EXPECT_CALL(mockView, runPythonAlgorithm("Python code to run"))

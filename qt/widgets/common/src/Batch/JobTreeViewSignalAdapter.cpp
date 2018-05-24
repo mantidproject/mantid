@@ -32,6 +32,10 @@ void JobTreeViewSignalAdapter::notifyCopyRowsRequested() {
   emit copyRowsRequested();
 }
 
+void JobTreeViewSignalAdapter::notifyCutRowsRequested() {
+  emit cutRowsRequested();
+}
+
 void JobTreeViewSignalAdapter::notifyPasteRowsRequested() {
   emit pasteRowsRequested();
 }

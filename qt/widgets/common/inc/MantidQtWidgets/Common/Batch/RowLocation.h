@@ -36,7 +36,7 @@ private:
   RowPath m_path;
 };
 
-std::ostream &operator<<(std::ostream &os, RowLocation const &location);
+EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os, RowLocation const &location);
 
 } // namespace Batch
 } // namespace MantidWidgets
