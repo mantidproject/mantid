@@ -56,8 +56,8 @@ Output:
 
 .. testoutput:: ExCounts
 
-   Asymmetry:  ['10.00', '1.42', '-9.60', '-4.14', '8.42', '6.53', '-6.57', '-8.39', '4.20', '9.58', '-1.48', '-10.00', '-1.35', '9.62', '4.08', '-8.46', '-6.48', '6.62', '8.36', '-4.25', '-9.56', '1.54']
-   Normalization constant: 5.00
+   Asymmetry:  ['5.49', '0.43', '-6.07', '-2.85', '4.56', '3.44', '-4.29', '-5.36', '2.07', '5.24', '-1.25', '-6.31', '-1.21', '5.26', '2.00', '-5.40', '-4.23', '3.50', '4.52', '-2.92', '-6.05', '0.50']
+   Normalization constant: 8.47
 
 **Example - Calculating Asymmetry From Estimated Asymmetry:**
 This example is for calculating the Asymmetry from an estimate of the asymmetry.
