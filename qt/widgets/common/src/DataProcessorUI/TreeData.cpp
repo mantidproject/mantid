@@ -166,7 +166,7 @@ QString RowData::optionValue(const QString &name,
  * doesn't exist
  */
 QString RowData::preprocessedOptionValue(const QString &name) const {
-  return hasOption(name) ? m_preprocessedOptions.at(name) : "";
+  return hasPreprocessedOption(name) ? m_preprocessedOptions.at(name) : "";
 }
 
 /** Set the value for the given property
