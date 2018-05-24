@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,7 +25,7 @@ Usage
    bin_zeroes = LoadRawBin0("IRS21360.raw")
    total = SumSpectra(bin_zeroes)
 
-   print "Bin0 contained %i counts." % total.readY(0)[0]
+   print("Bin0 contained {:.0f} counts.".format(total.readY(0)[0]))
 
 Output:
 

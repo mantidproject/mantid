@@ -183,8 +183,8 @@ public:
     speclist.push_back(6);
     speclist.push_back(7);
     speclist.push_back(8);
-    for (size_t iws = 0; iws < speclist.size(); ++iws) {
-      auto &yvec = WS->y(speclist[iws]);
+    for (int spectrum : speclist) {
+      auto &yvec = WS->y(spectrum);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {
         if (bin >= 4 && bin < 7) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);
@@ -271,11 +271,9 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, dataws);
 
-    // Find out mapping between spectra/workspace indexes and detectors IDs
-    for (size_t i = 0; i < 5; ++i) {
-      for (const auto &id : dataws->getSpectrum(i).getDetectorIDs())
-        cout << "WorkspaceIndex = " << i << ":  Detector ID = " << id << ".\n";
-    }
+    // Set up default detector IDs. Note there are no corresponding detectors.
+    for (int i = 0; i < 5; ++i)
+      dataws->getSpectrum(i).setDetectorID(i + 1);
 
     // Generate a TableWorksapce
     auto tablews = boost::make_shared<TableWorkspace>();

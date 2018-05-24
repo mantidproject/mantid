@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,8 +40,8 @@ Usage
                                 PeakRange='62500,65000',
                                 BackgroundRange='59000,61500')
 
-   print 'Calibration workspace has %d bin(s) and %d spectra.' % (
-          cal_ws.blocksize(), cal_ws.getNumberHistograms())
+   print('Calibration workspace has {:d} bin(s) and {:d} spectra.'.format(
+          cal_ws.blocksize(), cal_ws.getNumberHistograms()))
 
 Output:
 

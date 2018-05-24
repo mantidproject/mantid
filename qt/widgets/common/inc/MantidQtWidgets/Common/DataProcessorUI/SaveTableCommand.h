@@ -35,8 +35,7 @@ class SaveTableCommand : public CommandBase {
 public:
   SaveTableCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  SaveTableCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  SaveTableCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~SaveTableCommand(){};
 
   void execute() override {
@@ -49,6 +48,7 @@ public:
     return QString("Saves current table as a table workspace");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

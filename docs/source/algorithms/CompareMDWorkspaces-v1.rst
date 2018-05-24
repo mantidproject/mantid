@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -43,8 +43,8 @@ Usage
    comp_rez2=CompareMDWorkspaces(mdWs1,mdWs2)   
 
    # print comparison results
-   print "Workspaces mdWs1 and mdWs1a are equal? : {0}  : Comparison result: {1}".format(comp_rez1[0],comp_rez1[1])
-   print "Workspaces mdWs1 and mdWs2  are equal? : {0} : Comparison result: {1}".format(comp_rez2[0],comp_rez2[1])   
+   print("Workspaces mdWs1 and mdWs1a are equal? : {0}  : Comparison result: {1}".format(comp_rez1[0], comp_rez1[1]))
+   print("Workspaces mdWs1 and mdWs2  are equal? : {0} : Comparison result: {1}".format(comp_rez2[0], comp_rez2[1]))
 
 
 

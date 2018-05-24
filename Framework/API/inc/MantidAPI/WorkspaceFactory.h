@@ -14,9 +14,6 @@
                                0));                                            \
   }
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -27,9 +24,6 @@
 
 namespace Mantid {
 namespace API {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 class ITableWorkspace;
 class IPeaksWorkspace;
 class Workspace;
@@ -82,10 +76,6 @@ public:
                             MatrixWorkspace &child,
                             const bool differentSize) const;
 
-  void initializeFromParentWithoutLogs(const MatrixWorkspace &parent,
-                                       MatrixWorkspace &child,
-                                       const bool differentSize) const;
-
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>
   createTable(const std::string &className = "TableWorkspace") const;
@@ -105,7 +95,7 @@ private:
   using Kernel::DynamicFactory<Workspace>::create;
 };
 
-typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
+using WorkspaceFactory = Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 
 template <class T, class... InitArgs>
 boost::shared_ptr<T> createWorkspace(InitArgs... args) {

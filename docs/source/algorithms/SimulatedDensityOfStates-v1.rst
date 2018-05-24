@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -44,7 +44,7 @@ Usage
     castep_ws = SimulatedDensityOfStates(CASTEPFile='squaricn.castep')
     result = CompareWorkspaces(phonon_ws, castep_ws)
 
-    print result[0]
+    print(result[0])
 
 Output:
 
@@ -60,7 +60,7 @@ Output:
                                         Ions=['H', 'C', 'O'])
 
     for name in squaricn.getNames():
-      print name
+      print(name)
 
 Output:
 
@@ -79,7 +79,7 @@ Output:
                                       SumContributions=True)
     total_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon')
 
-    print CompareWorkspaces(total_ws, sum_ws, Tolerance=1e-12)[0]
+    print(CompareWorkspaces(total_ws, sum_ws, Tolerance=1e-12)[0])
 
 Output:
 
@@ -93,7 +93,7 @@ Output:
 
     ion_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon',
                                       SpectrumType='IonTable')
-    print ', '.join(ion_ws.column('Species'))
+    print(', '.join(ion_ws.column('Species')))
 
 Output:
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -70,7 +70,7 @@ Usage
             MakeMaskWorkspace=True,
             WorkspaceName="PG3")
       component="bank26"
-      print "Start position is",ws.getInstrument().getComponentByName(component).getPos()
+      print("Start position is {}".format(ws.getInstrument().getComponentByName(component).getPos()))
       AlignComponents(CalibrationTable="PG3_cal",
               Workspace=ws,
 	      MaskWorkspace="PG3_mask",
@@ -78,7 +78,7 @@ Usage
               ComponentList=component)
       ws=mtd['ws']
       final_pos = ws.getInstrument().getComponentByName(component).getPos()
-      print "Final position is [{:.2f}.{:.2f},{:.2f}]".format(final_pos[0],final_pos[1],final_pos[2])
+      print("Final position is [{:.2f}.{:.2f},{:.2f}]".format(final_pos[0],final_pos[1],final_pos[2]))
 
 Output:
 
@@ -101,8 +101,8 @@ Output:
       components="bank25,bank46"
       bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print "Start bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2])
-      print "Start bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
+      print("Start bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2]))
+      print("Start bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2]))
       AlignComponents(CalibrationTable="PG3_cal",
 	      Workspace=ws,
 	      MaskWorkspace="PG3_mask",
@@ -112,8 +112,8 @@ Output:
       ws=mtd['ws']
       bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print "Final bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2])
-      print "Final bank46 rotation is [{:.2f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
+      print("Final bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2]))
+      print("Final bank46 rotation is [{:.2f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2]))
 
 Output:
 
@@ -138,13 +138,13 @@ Output:
       # Mask banks that don't have calibration data
       MaskBTP(Workspace='PG3_mask', Instrument='POWGEN',
 	      Bank='22-25,42-45,62-66,82-86,102-105,123,124,143,144,164,184,204')
-      print "Start sample position is",ws.getInstrument().getSample().getPos().getZ()
+      print("Start sample position is {}".format(ws.getInstrument().getSample().getPos().getZ()))
       AlignComponents(CalibrationTable="PG3_cal",
             Workspace=ws,
             MaskWorkspace="PG3_mask",
             FitSamplePosition=True,
 	    Zposition=True)
-      print "Final sample position is {:.3f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
+      print("Final sample position is {:.3f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ()))
 
 Output:
 

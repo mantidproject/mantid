@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,26 +40,26 @@ Usage
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
 
-    print ("Without a StartTime or EndTime all of the values are included")
+    print("Without a StartTime or EndTime all of the values are included")
     (filtered_result,stat_result) = FilterLogByTime(ws,LogName="proton_charge")
-    print ("The default statistic is mean: %i" % stat_result)
-    print ("The filtered result is")
-    print (filtered_result)
+    print("The default statistic is mean: %i" % stat_result)
+    print("The filtered result is")
+    print(filtered_result)
 
     (filtered_result,stat_result) = FilterLogByTime(ws,LogName="proton_charge", Method="max")
-    print ("The max is: %i" % stat_result)
+    print("The max is: %i" % stat_result)
     (filtered_result,stat_result) = FilterLogByTime(ws,LogName="proton_charge", Method="min")
-    print ("The min is: %i" % stat_result)
+    print("The min is: %i" % stat_result)
     (filtered_result,stat_result) = FilterLogByTime(ws,LogName="proton_charge", Method="median")
-    print ("The median is: %i" % stat_result)
-    print 
+    print("The median is: %i" % stat_result)
+    print("") 
 
     print("Adding a start time and optionally an end time allows you to filter the values")
     (filtered_result,stat_result) = FilterLogByTime(ws,LogName="proton_charge",
         StartTime=580,EndTime = 1800)
-    print ("The filtered mean is: %i" % stat_result)
-    print ("The filtered result is")
-    print (filtered_result)
+    print("The filtered mean is: %i" % stat_result)
+    print("The filtered result is")
+    print(filtered_result)
  
 
 Output:

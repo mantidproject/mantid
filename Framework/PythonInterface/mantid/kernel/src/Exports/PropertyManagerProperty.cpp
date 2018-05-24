@@ -15,7 +15,6 @@
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyManagerProperty;
 using Mantid::Kernel::PropertyManager_sptr;
-using Mantid::Kernel::PropertyWithValue;
 using Mantid::PythonInterface::PropertyWithValueExporter;
 namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;
@@ -30,12 +29,12 @@ createPropertyManagerPropertyWithDict(const std::string &name,
 
 void export_PropertyManagerProperty() {
   // export base class
-  typedef PropertyManager_sptr BaseValueType;
+  using BaseValueType = PropertyManager_sptr;
   PropertyWithValueExporter<BaseValueType>::define(
       "PropertyManagerPropertyWithValue");
 
   // leaf class type
-  typedef PropertyManagerProperty::BaseClass BaseClassType;
+  using BaseClassType = PropertyManagerProperty::BaseClass;
   class_<PropertyManagerProperty, bases<BaseClassType>, boost::noncopyable>(
       "PropertyManagerProperty", no_init)
       .def(init<const std::string &, const unsigned int>(

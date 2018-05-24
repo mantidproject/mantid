@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -44,15 +44,15 @@ Usage
 
 .. testcode:: SetGoniometer
 
-    wg=CreateSingleValuedWorkspace()
-    AddSampleLog(wg,"Motor1","45.","Number")
-    SetGoniometer(wg,Axis0="Motor1,0,1,0,1",Axis1="5,0,1,0,1")
+    wg = CreateSingleValuedWorkspace()
+    AddSampleLog(wg, "Motor1", "45.", "Number")
+    SetGoniometer(wg, Axis0="Motor1,0,1,0,1", Axis1="5,0,1,0,1")
 
-    print "Log values:",wg.getRun().keys()
-    print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')
-    print "Clearing goniometer up"
+    print("Log values: {}".format(wg.getRun().keys()))
+    print("Goniometer angles:  {}".format(wg.getRun().getGoniometer().getEulerAngles('YZY')))
+    print("Clearing goniometer up")
     SetGoniometer(wg) 
-    print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')    
+    print("Goniometer angles:  {}".format(wg.getRun().getGoniometer().getEulerAngles('YZY')    ))
 
 .. testcleanup:: SetGoniometer
 

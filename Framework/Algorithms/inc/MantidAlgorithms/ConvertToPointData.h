@@ -46,7 +46,9 @@ public:
     return "Converts a workspace containing histogram data into one containing "
            "point data.";
   }
-
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToHistogram"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Axes"; }
 
@@ -55,8 +57,7 @@ private:
   bool
   isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const override;
   /// Returns the size of the new X vector
-  std::size_t
-  getNewXSize(const API::MatrixWorkspace_sptr inputWS) const override;
+  std::size_t getNewXSize(const std::size_t ySize) const override;
   /// Calculate the X point values. Implement in an inheriting class.
   Kernel::cow_ptr<HistogramData::HistogramX> calculateXPoints(
       Kernel::cow_ptr<HistogramData::HistogramX> inputX) const override;

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,6 +26,17 @@ Examples:
 
 If *DoIndividual* is checked, then each run number is reduced separately
 from the rest. The semicolon symbol is ignored.
+
+**ExcludeTimeSegment**:
+Events happening in a time segment with no proton charge are most likely
+noise. Those events can be filtered out of the reduction process.
+
+Example:
+
+- "71465:0-500;71466:900-2100;71467:4000-end" will filter out events
+  happening between the start of the run and 500 seconds for run 71465, then
+  between 900 and 2100 seconds for run 71466 and between 4000 seconds and the
+  end of the run for 71467. Only one time segment can be excluded per run number.
 
 **Momentum transfer binning scheme**: Three values are required, the
 center of the bin with the minimum momentum, the bin width, and the
@@ -90,6 +101,19 @@ range given by **NormWavelengthRange** to obtain
 :math:`S_v(i)` and then divide :math:`S_s(\lambda, i)/S_v(i)=S'_s(\lambda, i)`. From this
 point on, the reduction process continues using :math:`S'_s` in place of :math:`S_s`.
 
+Saving NXSPE files
+==================
+NXSPE files are suitable for intensity visualization in :math:`\vec{Q}` space with
+[MSLICE](http://mslice.isis.rl.ac.uk/Main_Page). When using this program, make
+sure you select the *inverse* geometry.
+
+.. image:: /images/BASISReduction_NXSPE.png
+   :width: 50%
+   :alt: Wavelength spectrum.
+
+Also, make sure that the sample rotation angle is stored in the logs of the run,
+since this is a required property of the algorithm.
+
 Dynamic Susceptibility
 ======================
 
@@ -119,4 +143,3 @@ Workflow
 --------
 
 .. diagram:: BASISReduction-v1_wkflw.dot
-

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,11 +26,11 @@ Usage
 
     #sort the table by column k
     peaks_ws = SortPeaksWorkspace(peaks_ws, ColumnNameToSortBy='k')
-    print "Column k in ascending order: " + str(peaks_ws.column('k'))
+    print("Column k in ascending order: " + str(peaks_ws.column('k')))
 
     #the algorithm can also sort in descending order
     peaks_ws = SortPeaksWorkspace(peaks_ws, ColumnNameToSortBy='k', SortAscending=False)
-    print "Column k in descending order: " + str(peaks_ws.column('k'))
+    print("Column k in descending order: " + str(peaks_ws.column('k')))
 
 Output:
 

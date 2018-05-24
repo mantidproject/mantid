@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,7 +25,7 @@ Usage
 .. testcode:: ExEmptyTable
 
     ws = CreatePeaksWorkspace()
-    print "Created a %s with %i rows" % (ws.id(), ws.rowCount())
+    print("Created a {} with {} rows".format(ws.id(), ws.rowCount()))
 
 Output:
 
@@ -39,7 +39,7 @@ Output:
 
     sampleWs = CreateSampleWorkspace()
     ws = CreatePeaksWorkspace(InstrumentWorkspace=sampleWs,NumberOfPeaks=3)
-    print "Created a %s with %i rows" % (ws.id(), ws.rowCount())
+    print("Created a {} with {} rows".format(ws.id(), ws.rowCount()))
 
 Output:
 

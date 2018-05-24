@@ -1,12 +1,10 @@
 #ifndef MANTID_ALGORITHMS_MASKBINS_H_
 #define MANTID_ALGORITHMS_MASKBINS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
 
 namespace Mantid {
 
@@ -55,10 +53,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MaskBins : public API::Algorithm {
+class DLLExport MaskBins : public API::DistributedAlgorithm {
 public:
-  /// Constructor
-  MaskBins();
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }
   /// Summary of algorithms purpose
@@ -68,6 +64,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"MaskBinsFromTable"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Masking"; }
 
@@ -82,10 +81,10 @@ private:
                    MantidVec::difference_type &startBin,
                    MantidVec::difference_type &endBin);
 
-  double m_startX; ///< The range start point
-  double m_endX;   ///< The range end point
-  std::vector<int>
-      spectra_list; ///<the list of Spectra (workspace index) to load
+  double m_startX{0.0}; ///< The range start point
+  double m_endX{0.0};   ///< The range end point
+  Indexing::SpectrumIndexSet
+      indexSet; ///<the list of Spectra (workspace index) to load
 };
 
 } // namespace Algorithms

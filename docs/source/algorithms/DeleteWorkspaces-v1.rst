@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -24,8 +24,8 @@ Usage
 
    DeleteWorkspaces([sample_ws,sample_ws2])
 
-   print "sample_ws exists in mantid:",("sample_ws" in mtd)
-   print "sample_ws2 exists in mantid:",("sample_ws2" in mtd)
+   print("sample_ws exists in mantid: {}".format("sample_ws" in mtd))
+   print("sample_ws2 exists in mantid: {}".format("sample_ws2" in mtd))
 
 Output:
 
@@ -44,8 +44,8 @@ Output:
 
    DeleteWorkspaces("single_value, single_value2")
 
-   print "single_value exists in mantid:",("single_value" in mtd)
-   print "single_value2 exists in mantid:",("single_value2" in mtd)
+   print("single_value exists in mantid: {}".format("single_value" in mtd))
+   print("single_value2 exists in mantid: {}".format("single_value2" in mtd))
 
 Output:
 

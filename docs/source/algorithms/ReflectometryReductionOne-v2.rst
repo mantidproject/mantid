@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -208,10 +208,10 @@ Usage
                                             MonitorIntegrationWavelengthMin=4.0,
                                             MonitorIntegrationWavelengthMax=10.0)
 
-   print "%.4f" % (IvsLam.readY(0)[533])
-   print "%.4f" % (IvsLam.readY(0)[534])
-   print "%.4f" % (IvsQ.readY(0)[327])
-   print "%.4f" % (IvsQ.readY(0)[328])
+   print("{:.4f}".format(IvsLam.readY(0)[533]))
+   print("{:.4f}".format(IvsLam.readY(0)[534]))
+   print("{:.4f}".format(IvsQ.readY(0)[327]))
+   print("{:.4f}".format(IvsQ.readY(0)[328]))
 
 
 Output:
@@ -244,20 +244,20 @@ Output:
 					    FirstTransmissionRun=trans1,
 					    SecondTransmissionRun=trans2)
 
-   print "%.4f" % (IvsLam.readY(0)[480])
-   print "%.4f" % (IvsLam.readY(0)[481])
-   print "%.4f" % (IvsQ.readY(0)[107])
-   print "%.4f" % (IvsQ.readY(0)[108])
+   print("{:.4f}".format(IvsLam.readY(0)[480]))
+   print("{:.4f}".format(IvsLam.readY(0)[481]))
+   print("{:.4f}".format(IvsQ.readY(0)[107]))
+   print("{:.4f}".format(IvsQ.readY(0)[108]))
 
 
 Output:
 
 .. testoutput:: ExReflRedOneTrans
 
-   0.4592
+   0.4597
    0.4654
-   0.7278
-   1.0305
+   0.7203
+   1.0512
 
 .. categories::
 

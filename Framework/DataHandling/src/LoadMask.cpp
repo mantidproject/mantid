@@ -18,7 +18,6 @@
 #include <sstream>
 #include <map>
 
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
@@ -29,8 +28,6 @@
 #include <boost/algorithm/string.hpp>
 
 using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
@@ -268,29 +265,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadMask)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""), m_sourceMapWS(), m_pDoc(nullptr),
-      m_pRootElem(nullptr), m_defaultToUse(true), m_IDF_provided(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMask::~LoadMask() {
-  // note Poco::XML::Document and Poco::XML::Element declare their constructors
-  // as protected
-  if (m_pDoc)
-    m_pDoc->release();
-  // note that m_pRootElem does not need a release(), and that can
-  // actually cause a double free corruption, as
-  // Poco::DOM::Document::documentElement() does not require a
-  // release(). So just to be explicit that they're gone:
-  m_pDoc = nullptr;
-  m_pRootElem = nullptr;
-}
-
 /// Initialise the properties
 void LoadMask::init() {
 
@@ -322,6 +296,8 @@ void LoadMask::init() {
 /** Main execution body of this algorithm
   */
 void LoadMask::exec() {
+  reset();
+
   // 1. Load Instrument and create output Mask workspace
   const std::string instrumentname = getProperty("Instrument");
   m_sourceMapWS = getProperty("RefWorkspace");
@@ -555,9 +531,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
   // 3. Set mask
   auto spec0 = maskedSpecID[0];
   auto prev_masks = spec0;
-  for (size_t i = 0; i < maskedSpecID.size(); i++) {
-
-    auto spec2mask = maskedSpecID[i];
+  for (int spec2mask : maskedSpecID) {
 
     s2iter = s2imap.find(spec2mask);
     if (s2iter == s2imap.end()) {
@@ -727,19 +701,18 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
       sourceWS.getDetectorIDToWorkspaceIndexMap(false);
 
   std::multimap<size_t, Mantid::detid_t> spectr2index_map;
-  for (auto it = sourceDetMap.begin(); it != sourceDetMap.end(); it++) {
+  for (auto &it : sourceDetMap) {
     spectr2index_map.insert(
-        std::pair<size_t, Mantid::detid_t>(it->second, it->first));
+        std::pair<size_t, Mantid::detid_t>(it.second, it.first));
   }
   spec2index_map new_map;
-  for (size_t i = 0; i < maskedSpecID.size(); i++) {
+  for (int i : maskedSpecID) {
     // find spectra number from spectra ID for the source workspace
-    const auto itSpec = s2imap.find(maskedSpecID[i]);
+    const auto itSpec = s2imap.find(i);
     if (itSpec == s2imap.end()) {
-      throw std::runtime_error(
-          "Can not find spectra with ID: " +
-          boost::lexical_cast<std::string>(maskedSpecID[i]) +
-          " in the workspace" + sourceWS.getName());
+      throw std::runtime_error("Can not find spectra with ID: " +
+                               boost::lexical_cast<std::string>(i) +
+                               " in the workspace" + sourceWS.getName());
     }
     size_t specN = itSpec->second;
 
@@ -810,22 +783,25 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
     boost::trim(InstrName);
     boost::algorithm::to_lower(InstrName);
     size_t len = InstrName.size();
+    /// input property contains name of instrument definition file rather than
+    /// instrument name itself
+    bool IDF_provided{false};
     // Check if the name ends up with .xml which means that idf file name
     // is provided rather then an instrument name.
     if (len > 4) {
       if (InstrName.compare(len - 4, len, ".xml") == 0) {
-        m_IDF_provided = true;
+        IDF_provided = true;
       } else {
-        m_IDF_provided = false;
+        IDF_provided = false;
       }
     } else {
-      m_IDF_provided = false;
+      IDF_provided = false;
     }
     try {
       auto inst = inputWS->getInstrument();
       std::string Name = inst->getName();
       boost::algorithm::to_lower(Name);
-      if (Name != InstrName && !m_IDF_provided) {
+      if (Name != InstrName && !IDF_provided) {
         result["RefWorkspace"] =
             "If both reference workspace and instrument name are defined, "
             "workspace has to have the instrument with the same name\n"
@@ -839,6 +815,15 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
   }
 
   return result;
+}
+
+void LoadMask::reset() {
+  // LoadMask instance may be reused, need to clear buffers.
+  m_maskDetID.clear();
+  m_unMaskDetID.clear();
+  m_maskSpecID.clear();
+  m_maskCompIdSingle.clear();
+  m_uMaskCompIdSingle.clear();
 }
 
 } // namespace Mantid

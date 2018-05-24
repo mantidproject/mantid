@@ -39,7 +39,7 @@ int LoadILLSANS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLSANS::category() const {
-  return "DataHandling\\Nexus";
+  return "DataHandling\\Nexus;ILL\\SANS";
 }
 
 //----------------------------------------------------------------------------------------------

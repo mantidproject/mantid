@@ -8,10 +8,15 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
+#include "MantidQtWidgets/Common/QStringUtils.h"
+
 #include <QApplication>
 #include <QObject>
 #include <QPalette>
 #include <QVariant>
+
+using MantidQt::API::toQStringInternal;
+
 // ----------   MantidMatrixModel   ------------------ //
 
 /**   MantidMatrixModel constructor.
@@ -39,33 +44,45 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
   m_colNumCorr = 1;
   m_endRow = m_rows - 1;
   m_startRow = start >= 0 ? start : 0;
-  m_mon_color =
-      QApplication::palette().color(QPalette::Active, QPalette::ToolTipBase);
+  m_mon_color = QColor(255, 253, 209);
   m_mask_color =
       QApplication::palette().color(QPalette::Disabled, QPalette::Background);
 
-  if (ws->blocksize() != 0)
-    m_colNumCorr = ws->isHistogramData() ? 1 : 0;
-  else
-    m_colNumCorr = 0;
+  m_colNumCorr = 0;
+  const size_t numHist = ws->getNumberHistograms();
+  for (size_t i = 0; i < numHist; ++i) {
+    // anything being non-empty means check it
+    // checking x-means EventWorkspaces aren't
+    // histogramed as part of the check
+    if (!ws->x(i).empty()) {
+      m_colNumCorr = ws->isHistogramData() ? 1 : 0;
+      break;
+    }
+  }
 }
 
 double MantidMatrixModel::data(int row, int col) const {
   Mantid::Kernel::ReadLock _lock(*m_workspace);
 
-  double val;
+  const size_t workspaceIndex = static_cast<size_t>(row + m_startRow);
+
+  double val = 0.; // default value
   switch (m_type) {
   case X:
-    val = m_workspace->x(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->x(workspaceIndex).size()))
+      val = m_workspace->x(workspaceIndex)[col];
     break;
   case Y:
-    val = m_workspace->y(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->y(workspaceIndex).size()))
+      val = m_workspace->y(workspaceIndex)[col];
     break;
   case E:
-    val = m_workspace->e(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->e(workspaceIndex).size()))
+      val = m_workspace->e(workspaceIndex)[col];
     break;
   default:
-    val = m_workspace->dx(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->dx(workspaceIndex).size()))
+      val = m_workspace->dx(workspaceIndex)[col];
     break;
   }
   return val;
@@ -119,7 +136,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       }
     }
 
-    QString unit = QString::fromStdWString(axis->unit()->label().utf8());
+    QString unit = toQStringInternal(axis->unit()->label().utf8());
 
     // Handle RefAxis for X axis
     Mantid::API::RefAxis *refAxis = dynamic_cast<Mantid::API::RefAxis *>(axis);
@@ -174,7 +191,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
     Mantid::API::BinEdgeAxis *binEdgeAxis =
         dynamic_cast<Mantid::API::BinEdgeAxis *>(axis);
     if (binEdgeAxis && axisIndex == 1) {
-      const Mantid::MantidVec axisBinEdges = binEdgeAxis->getValues();
+      const Mantid::MantidVec &axisBinEdges = binEdgeAxis->getValues();
       double binCentreValue =
           (axisBinEdges[section] + axisBinEdges[section + 1]) / 2.0;
 

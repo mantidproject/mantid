@@ -16,7 +16,7 @@ struct ScriptInfo {
   /// Identification of the author of the script.
   std::string author;
   /// Time of the last update of this file (remotelly)
-  Kernel::DateAndTime pub_date;
+  Types::Core::DateAndTime pub_date;
   /// Marked for auto update
   bool auto_update;
   /// Directory Flag to indicate if the entry is a directory.
@@ -605,7 +605,7 @@ public:
 };
 
 /// shared pointer to the function base class
-typedef boost::shared_ptr<ScriptRepository> ScriptRepository_sptr;
+using ScriptRepository_sptr = boost::shared_ptr<ScriptRepository>;
 }
 }
 

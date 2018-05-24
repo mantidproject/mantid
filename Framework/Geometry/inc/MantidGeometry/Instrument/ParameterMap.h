@@ -18,7 +18,6 @@ namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 }
 namespace Geometry {
-class BoundingBox;
 class ComponentInfo;
 class DetectorInfo;
 class Instrument;
@@ -55,23 +54,23 @@ class Instrument;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// Parameter map iterator typedef
-typedef tbb::concurrent_unordered_multimap<
-    ComponentID, boost::shared_ptr<Parameter>>::iterator component_map_it;
-typedef tbb::concurrent_unordered_multimap<
-    ComponentID, boost::shared_ptr<Parameter>>::const_iterator
-    component_map_cit;
+using component_map_it =
+    tbb::concurrent_unordered_multimap<ComponentID,
+                                       boost::shared_ptr<Parameter>>::iterator;
+using component_map_cit = tbb::concurrent_unordered_multimap<
+    ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
-  typedef tbb::concurrent_unordered_multimap<ComponentID,
-                                             boost::shared_ptr<Parameter>> pmap;
+  using pmap = tbb::concurrent_unordered_multimap<ComponentID,
+                                                  boost::shared_ptr<Parameter>>;
   /// Parameter map iterator typedef
-  typedef tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::iterator pmap_it;
+  using pmap_it = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::iterator;
   /// Parameter map iterator typedef
-  typedef tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::const_iterator pmap_cit;
+  using pmap_cit = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
   /// Default constructor
   ParameterMap();
   /// Const constructor
@@ -318,11 +317,6 @@ public:
                          const Kernel::Quat &rotation) const;
   /// Attempts to retrieve a rotation from the rotation cache
   bool getCachedRotation(const IComponent *comp, Kernel::Quat &rotation) const;
-  /// Sets a cached bounding box
-  void setCachedBoundingBox(const IComponent *comp,
-                            const BoundingBox &box) const;
-  /// Attempts to retrieve a bounding box from the cache
-  bool getCachedBoundingBox(const IComponent *comp, BoundingBox &box) const;
   /// Persist a representation of the Parameter map to the open Nexus file
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new
@@ -377,9 +371,6 @@ private:
   std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
   /// internal cache map instance for cached rotation values
   std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
-  /// internal cache map for cached bounding boxes
-  std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
-      m_boundingBoxMap;
 
   /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
@@ -397,9 +388,9 @@ private:
 };
 
 /// ParameterMap shared pointer typedef
-typedef boost::shared_ptr<ParameterMap> ParameterMap_sptr;
+using ParameterMap_sptr = boost::shared_ptr<ParameterMap>;
 /// ParameterMap constant shared pointer typedef
-typedef boost::shared_ptr<const ParameterMap> ParameterMap_const_sptr;
+using ParameterMap_const_sptr = boost::shared_ptr<const ParameterMap>;
 
 } // Namespace Geometry
 

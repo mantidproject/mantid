@@ -12,41 +12,18 @@ namespace NLLS {
 
 namespace {
 
-const double tenm3 = 1.0e-3;
-const double tenm5 = 1.0e-5;
-const double tenm8 = 1.0e-8;
-const double hundred = 100.0;
-const double ten = 10.0;
-const double point9 = 0.9;
-const double zero = 0.0;
-const double one = 1.0;
-const double two = 2.0;
-const double half = 0.5;
-const double sixteenth = 0.0625;
+const double TEN_M3 = 1.0e-3;
+const double TEN_M5 = 1.0e-5;
+const double TEN_M8 = 1.0e-8;
+const double HUNDRED = 100.0;
+const double TEN = 10.0;
+const double POINT9 = 0.9;
+const double ZERO = 0.0;
+const double ONE = 1.0;
+const double TWO = 2.0;
+const double HALF = 0.5;
+const double SIXTEENTH = 0.0625;
 }
-
-enum class NLLS_ERROR {
-  OK = 0,
-  MAXITS = -1,
-  EVALUATION = -2,
-  UNSUPPORTED_MODEL = -3,
-  FROM_EXTERNAL = -4,
-  UNSUPPORTED_METHOD = -5,
-  ALLOCATION = -6,
-  MAX_TR_REDUCTIONS = -7,
-  X_NO_PROGRESS = -8,
-  N_GT_M = -9,
-  BAD_TR_STRATEGY = -10,
-  FIND_BETA = -11,
-  BAD_SCALING = -12,
-  NAN_OR_INF = -13,
-  //     ! More-Sorensen errors
-  MS_MAXITS = -301,
-  MS_TOO_MANY_SHIFTS = -302,
-  MS_NO_PROGRESS = -303,
-  MS_NOT_PD = -304 // Matrix is not positive-definite
-  //     ! DTRS errors
-};
 
 struct nlls_options {
 
@@ -78,8 +55,8 @@ struct nlls_options {
   ///       MAX( .stop_g_absolute, .stop_g_relative * norm of the initial
   ///       gradient
   ///     or if the step is less than .stop_s
-  double stop_g_absolute = tenm5;
-  double stop_g_relative = tenm8;
+  double stop_g_absolute = TEN_M5;
+  double stop_g_relative = TEN_M8;
 
   ///   should we scale the initial trust region radius?
   int relative_tr_radius = 0;
@@ -92,7 +69,7 @@ struct nlls_options {
 
   ///   if relative_tr_radius /= 1, then set the
   ///   initial value for the trust-region radius (-ve => ||g_0||)
-  double initial_radius = hundred;
+  double initial_radius = HUNDRED;
 
   ///   maximum permitted trust-region radius
   double maximum_radius = 1.0e8; // ten ** 8
@@ -105,8 +82,8 @@ struct nlls_options {
   ///    but smaller than .eta_too_successful
   double eta_successful = 1.0e-8;         // ten ** ( - 8 )
   double eta_success_but_reduce = 1.0e-8; // ten ** ( - 8 )
-  double eta_very_successful = point9;
-  double eta_too_successful = two;
+  double eta_very_successful = POINT9;
+  double eta_too_successful = TWO;
 
   ///   on very successful iterations, the trust-region radius will be increased
   ///   by
@@ -114,9 +91,9 @@ struct nlls_options {
   ///    the
   ///    radius will be decreased by a factor .radius_reduce but no more than
   ///    .radius_reduce_max
-  double radius_increase = two;
-  double radius_reduce = half;
-  double radius_reduce_max = sixteenth;
+  double radius_increase = TWO;
+  double radius_reduce = HALF;
+  double radius_reduce_max = SIXTEENTH;
 
   /// Trust region update strategy
   ///    1 - usual step function
@@ -174,19 +151,6 @@ struct nlls_options {
 ///   inform derived type with component defaults
 struct nlls_inform {
 
-  ///  return status
-  ///  (see ERROR type for descriptions)
-  NLLS_ERROR status = NLLS_ERROR::OK;
-
-  /// error message
-  std::string error_message;
-
-  ///  the status of the last attempted allocation/deallocation
-  int alloc_status = 0;
-
-  ///  the name of the array for which an allocation/deallocation error ocurred
-  std::string bad_alloc;
-
   ///  the total number of iterations performed
   int iter;
 
@@ -219,20 +183,14 @@ struct nlls_inform {
 
   ///  the value of the objective function at the best estimate of the solution
   ///   determined by NLLS_solve
-  double obj = HUGE;
+  double obj = std::numeric_limits<float>::max();
 
   ///  the norm of the gradient of the objective function at the best estimate
   ///   of the solution determined by NLLS_solve
-  double norm_g = HUGE;
+  double norm_g = std::numeric_limits<float>::max();
 
   /// the norm of the gradient, scaled by the norm of the residual
-  double scaled_g = HUGE;
-
-  /// error returns from external subroutines
-  int external_return = 0;
-
-  /// name of external program that threw and error
-  std::string external_name;
+  double scaled_g = std::numeric_limits<float>::max();
 
 }; //  END TYPE nlls_inform
 
@@ -279,36 +237,6 @@ struct all_eig_symm_work {
   DoubleFortranVector work;
 };
 
-/// workspace for subrouine applyScaling
-struct apply_scaling_work {
-  DoubleFortranVector diag;
-  DoubleFortranMatrix ev;
-  DoubleFortranVector tempvec;
-  all_eig_symm_work all_eig_symm_ws;
-};
-
-/// workspace for subroutine dtrs_work
-struct solve_dtrs_work {
-  DoubleFortranMatrix A, ev;
-  DoubleFortranVector ew, v, v_trans, d_trans;
-  all_eig_symm_work all_eig_symm_ws;
-  apply_scaling_work apply_scaling_ws;
-};
-
-/// workspace for subroutine moreSorensen
-struct more_sorensen_work {
-  DoubleFortranMatrix A, LtL, AplusSigma;
-  DoubleFortranVector v, q, y1;
-  min_eig_symm_work min_eig_symm_ws;
-  apply_scaling_work apply_scaling_ws;
-};
-
-/// workspace for subroutine calculateStep
-struct calculate_step_work {
-  more_sorensen_work more_sorensen_ws;
-  solve_dtrs_work solve_dtrs_ws;
-};
-
 /// workspace for subroutine getSvdJ
 struct get_svd_J_work {
   DoubleFortranVector Jcopy, S, work;
@@ -337,7 +265,6 @@ struct NLLS_workspace {
   DoubleFortranVector resvec, gradvec;
   DoubleFortranVector largest_sv, smallest_sv;
   get_svd_J_work get_svd_J_ws;
-  calculate_step_work calculate_step_ws;
   evaluate_model_work evaluate_model_ws;
   NLLS_workspace();
   void initialize(int n, int m, const nlls_options &options);

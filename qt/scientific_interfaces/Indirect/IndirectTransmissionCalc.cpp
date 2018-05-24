@@ -28,7 +28,7 @@ IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent)
  * Run any tab setup code.
  */
 void IndirectTransmissionCalc::setup() {
-  QRegExp chemicalFormulaRegex("[A-Za-z0-9\\-\\(\\)]*");
+  QRegExp chemicalFormulaRegex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *chemicalFormulaValidator =
       new QRegExpValidator(chemicalFormulaRegex, this);
   m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);

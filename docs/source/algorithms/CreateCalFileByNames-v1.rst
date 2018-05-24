@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,7 +53,7 @@ Usage
 
 
    # Check the output file
-   print "File Exists:", os.path.exists(newFile)
+   print("File Exists: {}".format(os.path.exists(newFile)))
 
 Output:
 

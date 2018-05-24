@@ -326,13 +326,14 @@ public:
 
     // The "reverse" transform does NOT exist
     CoordTransform *transTo = alg->m_transformToOriginal;
-    TS_ASSERT(transTo == NULL);
+    TS_ASSERT(transTo == nullptr);
   }
 
   void test_aligned_ImplicitFunction() {
     SlicingAlgorithmImpl *alg = do_createAlignedTransform(
         "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(3, 4, 5)));
@@ -681,7 +682,8 @@ public:
     TS_ASSERT_EQUALS(VMD(3, in), VMD(3.0, 1.0, 2.6));
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -738,7 +740,8 @@ public:
     TS_ASSERT_EQUALS(VMD(3, in), VMD(3.0, -1.0, 2.6));
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, -1.5, 2)));
@@ -755,9 +758,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 234)));
@@ -776,9 +779,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 1.5, 1.5)));
@@ -795,9 +798,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
     TS_ASSERT(func->isPointContained(VMD(1.5, -1.5, 1.5, 1.5)));
@@ -813,9 +816,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 234, 456)));
@@ -834,9 +837,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 234)));
@@ -853,9 +856,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -872,9 +875,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5)));
@@ -932,7 +935,8 @@ public:
     TS_ASSERT_EQUALS(VMD(2, in), VMD(3., -11.));
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(-8.9, -18.9)));
@@ -997,7 +1001,8 @@ public:
     TS_ASSERT_EQUALS(VMD(2, in), VMD(3., -11.));
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(-18.9, -98.9)));
@@ -1025,9 +1030,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(2., 1.)));
@@ -1047,9 +1052,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(2., 1., 0.)));
@@ -1071,9 +1076,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
     TS_ASSERT(func->isPointContained(VMD(2., 1., 0., 0.)));
@@ -1092,9 +1097,9 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(
+        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(2., 1., 0., 0.)));
@@ -1112,7 +1117,8 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 345)));
@@ -1127,7 +1133,8 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -1142,7 +1149,8 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5)));
@@ -1159,7 +1167,8 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
-    MDImplicitFunction *func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    MDImplicitFunction *func =
+        alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 2);
     VMD point(1);

@@ -131,7 +131,7 @@ public:
   // Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram
   MultiLayer *plotGraph2D(GraphOptions::CurveType type);
 
-  void setBinGraph(MultiLayer *ml, Table *t = 0);
+  void setBinGraph(MultiLayer *ml, Table *t = nullptr);
 
   bool setSelectedRows();
   bool setSelectedColumns();
@@ -333,14 +333,14 @@ private:
 };
 
 /// Typedef for a shared pointer to a MantidMatrix
-typedef QSharedPointer<MantidMatrix> MantidMatrix_sptr;
+using MantidMatrix_sptr = QSharedPointer<MantidMatrix>;
 
 class ProjectData {
 public:
   ProjectData()
       : m_grayScale(0), m_intensityChanged(0), m_contourMode(0),
         m_contourLevels(0), m_customPen(0), m_contourLabels(0),
-        m_colormapPen(0), m_ContourLinesEditor(0) {}
+        m_colormapPen(0), m_ContourLinesEditor(nullptr) {}
   ~ProjectData() {}
   bool getGrayScale() const { return m_grayScale; }
   bool getIntensity() const { return m_intensityChanged; }

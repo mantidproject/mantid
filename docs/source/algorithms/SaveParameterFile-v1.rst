@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ Usage
 
   #Make sure the file was written successfully
   if os.path.isfile(filename):
-    print "Parameters written successfully."
+    print("Parameters written successfully.")
 
 .. testcleanup::
 

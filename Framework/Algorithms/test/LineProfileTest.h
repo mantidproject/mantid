@@ -58,7 +58,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -88,7 +88,7 @@ public:
     }
     const int start = 2;
     const int end = nBins - 2;
-    Workspace2D_sptr outputWS =
+    MatrixWorkspace_sptr outputWS =
         profileOverTwoSpectra(inputWS, start, end, "Sum");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
@@ -135,7 +135,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -153,6 +153,40 @@ public:
     const auto vertAxis = outputWS->getAxis(1);
     TS_ASSERT_EQUALS(vertAxis->getValue(0), 1.0)
     TS_ASSERT_EQUALS(vertAxis->getValue(1), 5.0)
+  }
+
+  void test_horizontal_profile_larger_than_workspace() {
+    const size_t nHist = 1;
+    const size_t nBins = 1;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
+    LineProfile alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("Centre", static_cast<double>(nHist) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 2.0 * nBins))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    const auto hist = outputWS->histogram(0);
+    TS_ASSERT_EQUALS(hist.xMode(), Histogram::XMode::Points)
+    TS_ASSERT_EQUALS(hist.size(), 1)
+    TS_ASSERT_EQUALS(hist.x().front(), 1.0)
+    TS_ASSERT_EQUALS(hist.y().front(), 5.0)
+    TS_ASSERT_EQUALS(hist.e().front(), 4.0)
+    const auto vertAxis = outputWS->getAxis(1);
+    TS_ASSERT_EQUALS(vertAxis->getValue(0), 1.0)
+    TS_ASSERT_EQUALS(vertAxis->getValue(1), 1.0)
   }
 
   void test_vertical_profile() {
@@ -181,7 +215,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -224,7 +258,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -332,7 +366,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -357,9 +391,9 @@ public:
   }
 
 private:
-  Workspace2D_sptr profileOverTwoSpectra(MatrixWorkspace_sptr inputWS,
-                                         const int start, const int end,
-                                         const std::string &mode) {
+  MatrixWorkspace_sptr profileOverTwoSpectra(MatrixWorkspace_sptr inputWS,
+                                             const int start, const int end,
+                                             const std::string &mode) {
     LineProfile alg;
     // Don't put output in ADS by default
     alg.setChild(true);
@@ -379,7 +413,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
-    Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     return outputWS;
   }
 };

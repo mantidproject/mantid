@@ -15,7 +15,6 @@ Kernel::Logger g_log("Detector");
 }
 
 using Kernel::V3D;
-using Kernel::Quat;
 
 /** Constructor for a parametrized Detector
  * @param base: the base (un-parametrized) IComponent
@@ -40,7 +39,7 @@ Detector::Detector(const std::string &name, int id, IComponent *parent)
  *  @param parent :: The parent component
  */
 Detector::Detector(const std::string &name, int id,
-                   boost::shared_ptr<Object> shape, IComponent *parent)
+                   boost::shared_ptr<IObject> shape, IComponent *parent)
     : IDetector(), ObjComponent(name, shape, parent), m_id(id) {}
 
 /** Gets the detector id

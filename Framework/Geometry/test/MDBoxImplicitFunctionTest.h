@@ -11,7 +11,7 @@ using namespace Mantid;
 using namespace Mantid::Geometry;
 
 namespace {
-typedef boost::tuple<Mantid::coord_t, Mantid::coord_t> Extent;
+using Extent = boost::tuple<Mantid::coord_t, Mantid::coord_t>;
 }
 
 class MDBoxImplicitFunctionTest : public CxxTest::TestSuite {

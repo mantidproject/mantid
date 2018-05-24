@@ -3,7 +3,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::API::WorkspaceGroup;
-using Mantid::API::WorkspaceProperty;
+using Mantid::API::WorkspaceProperty; // NOLINT
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<WorkspaceGroup>)
 

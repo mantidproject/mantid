@@ -75,7 +75,7 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceSelector : public QComboBox {
 
 public:
   /// Default Constructor
-  WorkspaceSelector(QWidget *parent = NULL, bool init = true);
+  WorkspaceSelector(QWidget *parent = nullptr, bool init = true);
   /// Destructor
   ~WorkspaceSelector() override;
 

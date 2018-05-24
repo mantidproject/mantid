@@ -40,10 +40,10 @@ namespace DataHandling {
 #undef LOADEVENTPRENEXUS_ALLOW_PARALLEL
 
 /// Make the code clearer by having this an explicit type
-typedef int PixelType;
+using PixelType = int;
 
 /// Type for the DAS time of flight (data file)
-typedef int DasTofType;
+using DasTofType = int;
 
 /// Structure that matches the form in the binary event list.
 #pragma pack(push, 4) // Make sure the structure is 8 bytes.
@@ -98,6 +98,9 @@ public:
   const std::string name() const override { return "LoadEventPreNexus"; }
   /// Algorithm's version
   int version() const override { return (2); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadPreNexus", "FilterEventsByLogValuePreNexus"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\PreNexus";
@@ -124,7 +127,7 @@ private:
   std::vector<int64_t> spectra_list;               ///<the list of Spectra
 
   /// The times for each pulse.
-  std::vector<Kernel::DateAndTime> pulsetimes;
+  std::vector<Types::Core::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
   /// The proton charge on a pulse by pulse basis.
@@ -153,7 +156,7 @@ private:
   /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<Kernel::DateAndTime>> wrongdetid_pulsetimes;
+  std::vector<std::vector<Types::Core::DateAndTime>> wrongdetid_pulsetimes;
   std::vector<std::vector<double>> wrongdetid_tofs;
 
   /// the number of events that were ignored (not loaded) because, e.g. of only
@@ -207,7 +210,7 @@ private:
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                        std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                        std::vector<Types::Event::TofEvent> **arrayOfVectors,
                         DasEvent *event_buffer,
                         size_t current_event_buffer_size, size_t fileOffset,
                         bool dbprint);

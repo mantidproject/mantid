@@ -48,8 +48,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_COMMON DataSelector
-    : public API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget {
   Q_OBJECT
 
   // These are properties of the file browser sub-widget
@@ -91,7 +90,7 @@ class EXPORT_OPT_MANTIDQT_COMMON DataSelector
   Q_PROPERTY(QString loadLabelText READ getLoadBtnText WRITE setLoadBtnText)
 
 public:
-  DataSelector(QWidget *parent = 0);
+  DataSelector(QWidget *parent = nullptr);
   ~DataSelector() override;
 
   /// Get the current file path in the MWRunFiles widget

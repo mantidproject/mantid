@@ -70,9 +70,9 @@ public:
   /// Function evaluation method to be implemented in the inherited classes
   virtual void functionLocal(double *out, const double *xValues,
                              const size_t nData) const = 0;
-  /// Derivative evaluation method to be implemented in the inherited classes
-  virtual void functionDerivLocal(Jacobian *out, const double *xValues,
-                                  const size_t nData) = 0;
+  /// Derivative evaluation method. Default is to calculate numerically
+  virtual void functionDerivLocal(Jacobian *jacobian, const double *xValues,
+                                  const size_t nData);
 
   /// Get name of parameter that is associated to centre.
   std::string getCentreParameterName() const;
@@ -103,8 +103,8 @@ private:
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
 };
 
-typedef boost::shared_ptr<IPeakFunction> IPeakFunction_sptr;
-typedef boost::shared_ptr<const IPeakFunction> IPeakFunction_const_sptr;
+using IPeakFunction_sptr = boost::shared_ptr<IPeakFunction>;
+using IPeakFunction_const_sptr = boost::shared_ptr<const IPeakFunction>;
 
 } // namespace API
 } // namespace Mantid

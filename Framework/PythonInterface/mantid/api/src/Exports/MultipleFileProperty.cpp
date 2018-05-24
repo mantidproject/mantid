@@ -17,7 +17,7 @@ using namespace boost::python;
 
 namespace {
 /// The PropertyWithValue type
-typedef std::vector<std::vector<std::string>> HeldType;
+using HeldType = std::vector<std::vector<std::string>>;
 
 /**
  * Converts the value from a MultipleFileProperty to a python object rather than
@@ -71,7 +71,7 @@ createMultipleFileProperty(const std::string &name,
 }
 
 void export_MultipleFileProperty() {
-  typedef PropertyWithValue<HeldType> BaseClass;
+  using BaseClass = PropertyWithValue<HeldType>;
   PropertyWithValueExporter<HeldType>::define(
       "VectorVectorStringPropertyWithValue");
 

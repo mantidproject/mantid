@@ -10,7 +10,8 @@
 using namespace Mantid;
 using Beamline::DetectorInfo;
 using PosVec = std::vector<Eigen::Vector3d>;
-using RotVec = std::vector<Eigen::Quaterniond>;
+using RotVec = std::vector<Eigen::Quaterniond,
+                           Eigen::aligned_allocator<Eigen::Quaterniond>>;
 
 class DetectorInfoTest : public CxxTest::TestSuite {
 public:
@@ -545,6 +546,7 @@ public:
     b.setScanInterval(0, interval2);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT(a.isScanning());
+    TS_ASSERT(!a.isSyncScan());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 3);
@@ -572,6 +574,7 @@ public:
     b.setScanInterval(interval2);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT(a.isScanning());
+    TS_ASSERT(a.isSyncScan());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 4);
@@ -632,6 +635,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT_THROWS_NOTHING(a.merge(c));
     TS_ASSERT(a.isScanning());
+    TS_ASSERT(!a.isSyncScan());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT(!a.isEquivalent(c));
     TS_ASSERT_EQUALS(a.size(), 2);
@@ -666,6 +670,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT_THROWS_NOTHING(a.merge(c));
     TS_ASSERT(a.isScanning());
+    TS_ASSERT(a.isSyncScan());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT(!a.isEquivalent(c));
     TS_ASSERT_EQUALS(a.size(), 2);

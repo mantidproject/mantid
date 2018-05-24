@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,10 +25,10 @@ Usage
     sampleLogs="Phase1,Phase3"
     result=CheckForSampleLogs(ws,sampleLogs)
     if len(result)==0:
-        print "We found logs for "+sampleLogs
+        print("We found logs for {}".format(sampleLogs))
     sampleLogs="DJIA"
     result=CheckForSampleLogs(ws,sampleLogs)
-    print result.strip()
+    print(result.strip())
 
 .. testcleanup:: CheckForSampleLogs
 

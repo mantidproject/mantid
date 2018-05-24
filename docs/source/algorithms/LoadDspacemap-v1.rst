@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,7 +26,7 @@ This algorithm is SNS specific in its use.
 
     ws = LoadDspacemap(InstrumentName="VULCAN", Filename="pid_offset_vulcan_new.dat",
                        FileType="VULCAN-ASCII")
-    print "Workspace type =", ws.id()
+    print("Workspace type = {}".format(ws.id()))
 
 Output:
 

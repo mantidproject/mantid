@@ -61,7 +61,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7210, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2052, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0)[8], 0.2355, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0)[8], 0.2356, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,8 +32,8 @@ Usage
     
     wsOut = CorrectKiKf(ws, EMode="Direct", EFixed=7.5)
 
-    print ("First five bins:")
-    print ("index  orig  corrected")
+    print("First five bins:")
+    print("index  orig  corrected")
     for i in range(5):
         print("  %i    %.2f  %.2f" % 
             (i,ws.readY(0)[i],wsOut.readY(0)[i]))

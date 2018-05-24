@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,7 +39,7 @@ Usage
 
   output_ws = MatchPeaks(InputWorkspace=ws)
 
-  print('Peak height at center: {}').format(output_ws.readY(0)[ws.blocksize() / 2])
+  print('Peak height at center: {:.11f}'.format(output_ws.readY(0)[ws.blocksize() // 2]))
 
 Output
 ######

@@ -68,9 +68,9 @@ void MultiPeakFit::init(int peaks) {
     d_fsimplex = lorentz_multi_peak_d;
   }
 
-  d_param_init = NULL;
-  covar = NULL;
-  d_results = NULL;
+  d_param_init = nullptr;
+  covar = nullptr;
+  d_results = nullptr;
 
   setNumPeaks(peaks);
 

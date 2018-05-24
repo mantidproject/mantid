@@ -163,8 +163,8 @@ public:
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), i);
 
     // Valid-from/to1951-01-01 00:00:01
-    Kernel::DateAndTime validFrom("1951-01-01T00:00:01");
-    Kernel::DateAndTime validTo("2100-01-31 23:59:59");
+    Types::Core::DateAndTime validFrom("1951-01-01T00:00:01");
+    Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
     TS_ASSERT_EQUALS(i->getValidFromDate(), validFrom);
     TS_ASSERT_EQUALS(i->getValidToDate(), validTo);
 
@@ -636,7 +636,7 @@ private:
     // IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
     Parameter_sptr param = paramMap.getRecursive(&(*comp), par, "fitting");
     TS_ASSERT(param);
-    if (param != 0) {
+    if (param != nullptr) {
       const FitParameter &fitParam4 = param->value<FitParameter>();
       TS_ASSERT(fitParam4.getTie().compare("") == 0);
       TS_ASSERT(fitParam4.getFunction().compare("BackToBackExponential") == 0);

@@ -11,7 +11,7 @@ class EXPORT_OPT_MANTIDQT_COMMON CatalogSelector : public QWidget {
 
 public:
   /// Default constructor
-  CatalogSelector(QWidget *parent = 0);
+  CatalogSelector(QWidget *parent = nullptr);
   /// Obtain the session information for the facilities selected.
   std::vector<std::string> getSelectedCatalogSessions();
   /// Populate the ListWidget with the facilities of the catalogs the user is

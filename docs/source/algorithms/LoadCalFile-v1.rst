@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,11 +33,11 @@ create the necessary workspaces.
     # WorkspaceName parameter is required inspite of docs not saying so.
     ws = LoadCalFile(InstrumentName="GEM", CalFilename="offsets_2006_cycle064.cal",
                      WorkspaceName="ws")
-    print "Total number of workspaces =", len(ws)
-    print "Workspace 1 type =", ws[0].id()
-    print "Workspace 2 type =", ws[1].id()
-    print "Workspace 3 type =", ws[2].id()
-    print "Workspace 4 type =", ws[3].id()
+    print("Total number of workspaces = {}".format(len(ws)))
+    print("Workspace 1 type = {}".format(ws[0].id()))
+    print("Workspace 2 type = {}".format(ws[1].id()))
+    print("Workspace 3 type = {}".format(ws[2].id()))
+    print("Workspace 4 type = {}".format(ws[3].id()))
 
 Output:
 

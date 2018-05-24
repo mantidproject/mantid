@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,8 +30,8 @@ Usage
    wsD = GeneralisedSecondDifference(ws,M=2,Z=2)
 
    # Show values around the peak
-   print "%.2f, %.2f, %.2f, %.2f, %.2f" % (wsD.readY(0)[8], wsD.readY(0)[9], wsD.readY(0)[10], wsD.readY(0)[11], wsD.readY(0)[12])
-   print "Peak at", wsD.readX(0)[10]
+   print("{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}".format(wsD.readY(0)[8], wsD.readY(0)[9], wsD.readY(0)[10], wsD.readY(0)[11], wsD.readY(0)[12]))
+   print("Peak at {}".format(wsD.readX(0)[10]))
 
 Output:
 

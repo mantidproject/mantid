@@ -78,7 +78,8 @@ public:
    *      The value of 'start of run' is 1 second
    *      for compatibility with the SNS live stream and ISIS Kafka live stream.
    */
-  virtual void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) = 0;
+  virtual void
+  start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) = 0;
 
   /** Get the data that's been buffered since the last call to this method
    *  (or since start() was called).
@@ -145,7 +146,7 @@ public:
 };
 
 /// Shared pointer to an ILiveListener
-typedef boost::shared_ptr<ILiveListener> ILiveListener_sptr;
+using ILiveListener_sptr = boost::shared_ptr<ILiveListener>;
 
 } // namespace API
 } // namespace Mantid

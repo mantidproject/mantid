@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -24,7 +24,7 @@ Usage
 
     poldi_data = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
 
-    print "Poldi sample 6904 has", poldi_data.getNumberHistograms(), "histograms."
+    print("Poldi sample 6904 has {} histograms.".format(poldi_data.getNumberHistograms()))
 
 Output:
 

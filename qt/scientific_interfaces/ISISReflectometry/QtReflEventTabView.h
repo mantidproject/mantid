@@ -39,7 +39,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflEventTabView : public QWidget {
   Q_OBJECT
 public:
   /// Constructor
-  QtReflEventTabView(QWidget *parent = 0);
+  QtReflEventTabView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflEventTabView() override;
   /// Returns the presenter managing this view

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -13,6 +13,16 @@ Takes a workspace as input and sums all of the spectra within it
 maintaining the existing bin structure and units. Any masked spectra are
 ignored. The result is stored as a new workspace containing a single
 spectra.
+
+If we define a the :math:`i^{th}` spectrum with bins :math:`i`. The unweighted sum is just
+
+.. math:: Signal[j] = \displaystyle\Sigma_{i \in spectra} Signal_i[j]
+
+The weighted sum (property ignored for event workspaces), the sum is defined, for :math:`Error_i[j] \neq 0`
+
+.. math:: Signal[j] = NSpectra \times \displaystyle\Sigma_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right) / \Sigma_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)
+
+If the weights contributing to the sum are equal, these result in the same value.
 
 The algorithm adds to the **OutputWorkspace** three additional
 properties (Log values). The properties (Log) names are:
@@ -45,10 +55,10 @@ Usage
 .. testcode:: ExSumSpectraSimple
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 
@@ -62,10 +72,10 @@ Output:
 .. testcode:: ExSumSpectraListOfIndicies
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws, ListOfWorkspaceIndices='0-3, 10-13')
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 
@@ -79,10 +89,10 @@ Output:
 .. testcode:: ExSumSpectraStartEnd
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=9)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 
@@ -96,10 +106,10 @@ Output:
 .. testcode:: ExSumSpectraWeighted
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws, WeightedSum=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 

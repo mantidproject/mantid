@@ -175,7 +175,7 @@ void SANSDiagnostics::displayTotalPeriods() {
   style += "</span></p></body></html>";
   std::string key = style.toStdString();
   m_SANSForm->total_perioids->setText(QApplication::translate(
-      "SANSRunWindow", key.c_str(), 0, QApplication::UnicodeUTF8));
+      "SANSRunWindow", key.c_str(), nullptr, QApplication::UnicodeUTF8));
 }
 /// This method disables the total periods controls
 void SANSDiagnostics::changePeriodsControls(bool bEnable) {
@@ -1450,6 +1450,10 @@ QString SANSDiagnostics::createOutputWorkspaceName(
   // Detector, Min value,  and Max values,
   QString appendix = "-" + detectorName + "-" + integrationType + min + "-" +
                      integrationType + max;
+  if (min == max) {
+    // special case which means that it is all of the range
+    appendix = "-" + detectorName + "-" + integrationType + "_ALL";
+  }
   outputWorkspaceName += appendix;
 
   outputWorkspaceName.replace("-", "_");

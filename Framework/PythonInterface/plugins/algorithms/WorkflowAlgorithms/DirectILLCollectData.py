@@ -9,10 +9,9 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, LoadILLTOF, MergeRuns, Minus,
-                              NormaliseToMonitor, Scale)
+                              CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Minus,
+                              NormaliseToMonitor, Scale, LoadAndMerge)
 import numpy
-import os.path
 
 
 def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
@@ -140,30 +139,6 @@ def _fitEPP(ws, wsType, wsNames, algorithmLogging):
     return eppWS
 
 
-def _loadFiles(inputFilenames, wsNames, wsCleanup, algorithmLogging):
-    """Load files specified by inputFilenames, merging them into a single workspace."""
-    filename = inputFilenames.pop(0)
-    runNumber = os.path.basename(filename).split('.')[0]
-    firstWSName = wsNames.withSuffix('raw-' + runNumber)
-    mergedWS = LoadILLTOF(Filename=filename,
-                          OutputWorkspace=firstWSName,
-                          EnableLogging=algorithmLogging)
-    mergedWSName = wsNames.withSuffix('merged')
-    for i, filename in enumerate(inputFilenames):
-        runNumber = os.path.basename(filename).split('.')[0]
-        rawWSName = wsNames.withSuffix('raw-' + runNumber)
-        rawWS = LoadILLTOF(Filename=filename,
-                           OutputWorkspace=rawWSName,
-                           EnableLogging=algorithmLogging)
-        mergedWS = MergeRuns(InputWorkspaces=[mergedWS, rawWS],
-                             OutputWorkspace=mergedWSName,
-                             EnableLogging=algorithmLogging)
-        if i == 0:
-            wsCleanup.cleanup(firstWSName)
-        wsCleanup.cleanup(rawWS)
-    return mergedWS
-
-
 def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd,
                         wsNames, wsCleanup, algorithmLogging):
     """Normalize to monitor counts."""
@@ -270,7 +245,10 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def category(self):
         """Return the algorithm's category."""
-        return 'Workflow\\Inelastic'
+        return common.CATEGORIES
+
+    def seeAlso(self):
+        return [ "DirectILLReduction" ]
 
     def name(self):
         """Return the algorithm's name."""
@@ -322,26 +300,18 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
         wsCleanup.cleanupLater(bkgWS)
 
-        # Find elastic peak positions.
-        progress.report('Calculating EPPs')
-        detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        wsCleanup.cleanupLater(detEPPWS, monEPPWS)
-
         # Calibrate incident energy, if requested.
         progress.report('Calibrating incident energy')
-        mainWS, monWS = self._calibrateEi(mainWS, detEPPWS, monWS, monEPPWS,
-                                          wsNames, wsCleanup, report,
-                                          subalgLogging)
-        wsCleanup.cleanupLater(monWS)
+        mainWS, monWS = self._calibrateEi(mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging)
+        wsCleanup.cleanup(monWS, monEPPWS)
 
         progress.report('Correcting TOF')
         mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
         self._outputRaw(mainWS, rawWS, subalgLogging)
 
         # Find elastic peak positions.
-        progress.report('Recalculating EPPs')
-        detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        wsCleanup.cleanupLater(detEPPWS, monEPPWS)
+        progress.report('Calculating EPPs')
+        self._outputDetEPPWS(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         self._finalize(mainWS, wsCleanup, report)
         progress.report('Done')
@@ -378,7 +348,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
-                             doc='The output of the algorithm.')
+                             doc='A flux normalized and background subtracted workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,
                              validator=StringListValidator([
@@ -394,13 +364,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
-        self.declareProperty(ITableWorkspaceProperty(
-            name=common.PROP_EPP_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Table workspace containing results from the FindEPP ' +
-                'algorithm.')
         self.declareProperty(name=common.PROP_EPP_METHOD,
                              defaultValue=common.EPP_METHOD_AUTO,
                              validator=StringListValidator([
@@ -408,8 +371,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.EPP_METHOD_FIT,
                                  common.EPP_METHOD_CALCULATE]),
                              direction=Direction.Input,
-                             doc='Method to create the EPP table for detectors (monitor is awlays fitted) if '
-                                 + common.PROP_EPP_WS + ' is not given.')
+                             doc='Method to create the EPP table for detectors (monitor is awlays fitted).')
         self.declareProperty(name=common.PROP_EPP_SIGMA,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
@@ -424,13 +386,13 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.ELASTIC_CHANNEL_SAMPLE_LOG,
                                  common.ELASTIC_CHANNEL_FIT]),
                              direction=Direction.Input,
-                             doc='How to acquire the elastic channel.')
+                             doc='How to acquire the nominal elastic channel.')
         self.declareProperty(MatrixWorkspaceProperty(
                              name=common.PROP_ELASTIC_CHANNEL_WS,
                              defaultValue='',
                              direction=Direction.Input,
                              optional=PropertyMode.Optional),
-                             doc='A single value workspace containing the elatic channel index. Overrides '
+                             doc='A single value workspace containing the nominal elastic channel index. Overrides '
                                  + common.PROP_ELASTIC_CHANNEL_MODE + '.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
@@ -451,7 +413,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='A single-valued workspace holding the calibrated ' +
+            doc='A single-valued workspace holding a previously determined ' +
                 'incident energy.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(name=common.PROP_FLAT_BKG,
@@ -467,7 +429,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue=1.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Flat background scaling constant')
+                             doc='Flat background multiplication factor.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_FLAT_BKG_WINDOW,
                              defaultValue=30,
@@ -481,7 +443,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Workspace from which to get flat background data.')
+            doc='Workspace with previously determined flat background data.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WS, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_NORMALISATION,
                              defaultValue=common.NORM_METHOD_MON,
@@ -505,7 +467,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
-            doc='Output the merged runs or ' + common.PROP_INPUT_WS + ' as is.')
+            doc='Non-normalized and non-background subtracted output workspace for DirectILLDiagnostics.')
         self.setPropertyGroup(common.PROP_OUTPUT_RAW_WS,
                               common.PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
@@ -553,15 +515,20 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 'Must give either an input file or an input workspace.'
         if not wsGiven and self.getProperty(common.PROP_INPUT_WS).value:
             issues[common.PROP_INPUT_WS] = 'Input workspace has to be in the ADS.'
+        if fileGiven and self.getPropertyValue(common.PROP_INPUT_FILE).count(',') > 0:
+            issues[common.PROP_INPUT_FILE] = \
+                'List of runs is given without summing. Consider giving summed runs (+) or summed ranges (-).'
         return issues
 
-    def _calibrateEi(self, mainWS, detEPPWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
+    def _calibrateEi(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
         if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
+                detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
                 monIndex = self._monitorIndex(monWS)
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, monIndex, wsNames,
                                                             self.log(), subalgLogging)
+                wsCleanup.cleanup(detEPPWS)
             else:
                 eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
                 wsCleanup.protect(eiCalibrationWS)
@@ -661,29 +628,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Create an EPP table for a detector workspace."""
-        eiCalibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
-        noEiCalibration = eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_OFF
-        yesInputEi = not self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault
-        noOutputEPP = self.getProperty(common.PROP_OUTPUT_DET_EPP_WS).isDefault
-        if (noEiCalibration or yesInputEi) and noOutputEPP:
-            # No epp table needed.
-            return None
-        detEPPInWS = self.getProperty(common.PROP_EPP_WS).value
-        if not detEPPInWS:
-            eppMethod = self._chooseEPPMethod(mainWS, report)
-            if eppMethod == common.EPP_METHOD_FIT:
-                detEPPWS = _fitEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
-            else:
-                sigma = self.getProperty(common.PROP_EPP_SIGMA).value
-                if sigma == Property.EMPTY_DBL:
-                    sigma = 10.0 * (mainWS.readX(0)[1] - mainWS.readX(0)[0])
-                detEPPWS = _calculateEPP(mainWS, sigma, wsNames, subalgLogging)
+        eppMethod = self._chooseEPPMethod(mainWS, report)
+        if eppMethod == common.EPP_METHOD_FIT:
+            detEPPWS = _fitEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
         else:
-            detEPPWS = detEPPInWS
-            wsCleanup.protect(detEPPWS)
-        if not self.getProperty(common.PROP_OUTPUT_DET_EPP_WS).isDefault:
-            self.setProperty(common.PROP_OUTPUT_DET_EPP_WS,
-                             detEPPWS)
+            sigma = self.getProperty(common.PROP_EPP_SIGMA).value
+            if sigma == Property.EMPTY_DBL:
+                sigma = 10.0 * (mainWS.readX(0)[1] - mainWS.readX(0)[0])
+            detEPPWS = _calculateEPP(mainWS, sigma, wsNames, subalgLogging)
         return detEPPWS
 
     def _createEPPWSMon(self, monWS, wsNames, wsCleanup, subalgLogging):
@@ -757,15 +709,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
         """Return the raw input workspace."""
-        inputFiles = self.getProperty(common.PROP_INPUT_FILE).value
-        if len(inputFiles) > 0:
-            flattened = list()
-            for i in inputFiles:
-                if isinstance(i, str):
-                    flattened.append(i)
-                else:
-                    flattened += i
-            mainWS = _loadFiles(flattened, wsNames, wsCleanup, subalgLogging)
+        inputFiles = self.getPropertyValue(common.PROP_INPUT_FILE)
+        if inputFiles:
+            mergedWSName = wsNames.withSuffix('merged')
+            mainWS = LoadAndMerge(Filename=inputFiles, OutputWorkspace=mergedWSName,
+                                  LoaderName='LoadILLTOF', EnableLogging=subalgLogging)
         else:
             mainWS = self.getProperty(common.PROP_INPUT_WS).value
             wsCleanup.protect(mainWS)
@@ -816,14 +764,23 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return normalizedWS
         return mainWS
 
+    def _outputDetEPPWS(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+        """Set the output epp workspace property, if needed."""
+        if not self.getProperty(common.PROP_OUTPUT_DET_EPP_WS).isDefault:
+            eppWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
+            self.setProperty(common.PROP_OUTPUT_DET_EPP_WS, eppWS)
+            wsCleanup.cleanup(eppWS)
+
     def _outputRaw(self, mainWS, rawWS, subalgLogging):
-        """Optionally sets mainWS as the raw output workspace."""
+        """Optionally set mainWS as the raw output workspace."""
         if not self.getProperty(common.PROP_OUTPUT_RAW_WS).isDefault:
             CorrectTOFAxis(InputWorkspace=rawWS,
                            OutputWorkspace=rawWS,
                            ReferenceWorkspace=mainWS,
                            EnableLogging=subalgLogging)
             self.setProperty(common.PROP_OUTPUT_RAW_WS, rawWS)
+            DeleteWorkspace(Workspace=rawWS,
+                            EnableLogging=subalgLogging)
 
     def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Extract monitors to a separate workspace."""

@@ -73,7 +73,7 @@ class MainWindow(QtGui.QMainWindow):
     def helpClicked(self):
         # Temporary import while method is in the wrong place
         from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("TOF_Converter")
+        showCustomInterfaceHelp("TOF Converter")
 
     def convert(self):
         #Always reset these values before conversion.

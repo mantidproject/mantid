@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -54,9 +54,9 @@ Usage
    log_w = run2.getLogData('w')
 
    # Print the log values
-   print "Before CopyLog"
-   print "1st workspace log values x =",log_x1.value,", y =", log_y.value,", z =", log_z.value 
-   print "2nd workspace log values x =",log_x2.value,", w =", log_w.value
+   print("Before CopyLog")
+   print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
+   print("2nd workspace log values x = {} , w = {}".format(log_x2.value, log_w.value ))
 
    # Copy logs of 1st workspace to 2nd workspace 
    CopyLogs( demo_ws1, demo_ws2)
@@ -73,9 +73,9 @@ Usage
    log_z2 = run2.getLogData('z')
 
    # Print the log values
-   print "After CopyLog"
-   print "1st workspace log values x =",log_x1.value,", y =", log_y.value,", z =", log_z.value 
-   print "2nd workspace log values x =",log_x2.value,", w =", log_w.value,", y =", log_y2.value,", z =", log_z2.value 
+   print("After CopyLog")
+   print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
+   print("2nd workspace log values x = {} , w = {} , y = {} , z = {}".format(log_x2.value, log_w.value, log_y2.value, log_z2.value))
 
 Output:
 
@@ -116,9 +116,9 @@ Output:
    log_w = run2.getLogData('w')
 
    # Print the log values
-   print "Before CopyLog"
-   print "1st workspace log values x =",log_x1.value,", y =", log_y.value,", z =", log_z.value 
-   print "2nd workspace log values x =",log_x2.value,", w =", log_w.value
+   print("Before CopyLog")
+   print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
+   print("2nd workspace log values x = {} , w = {}".format(log_x2.value, log_w.value))
 
    # Copy logs of 1st workspace to 2nd workspace 
    CopyLogs( demo_ws1, demo_ws2, MergeStrategy='MergeKeepExisting')
@@ -135,9 +135,9 @@ Output:
    log_z2 = run2.getLogData('z')
 
    # Print the log values
-   print "After CopyLog"
-   print "1st workspace log values x =",log_x1.value,", y =", log_y.value,", z =", log_z.value 
-   print "2nd workspace log values x =",log_x2.value,", w =", log_w.value,", y =", log_y2.value,", z =", log_z2.value 
+   print("After CopyLog")
+   print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
+   print("2nd workspace log values x = {} , w = {} , y = {} , z = {}".format(log_x2.value, log_w.value, log_y2.value, log_z2.value))
 
 Output:
 
@@ -178,9 +178,9 @@ Output:
    log_w = run2.getLogData('w')
 
    # Print the log values
-   print "Before CopyLog"
-   print "1st workspace log values x =",log_x1.value,", y =", log_y.value,", z =", log_z.value
-   print "2nd workspace log values x =",log_x2.value,", w =", log_w.value
+   print("Before CopyLog")
+   print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
+   print("2nd workspace log values x = {} , w = {}".format(log_x2.value, log_w.value))
 
    # Copy logs of 1st workspace to 2nd workspace
    CopyLogs( demo_ws1, demo_ws2, MergeStrategy='WipeExisting')
@@ -196,9 +196,9 @@ Output:
    log_z2 = run2.getLogData('z')
 
    # Print the log values
-   print "After CopyLog"
-   print "1st workspace log values x =",log_x1.value,", y =", log_y.value,", z =", log_z.value
-   print "2nd workspace log values x =",log_x2.value,", y =", log_y2.value,", z =", log_z2.value
+   print("After CopyLog")
+   print("1st workspace log values x = {} , y = {} , z = {}".format(log_x1.value, log_y.value, log_z.value))
+   print("2nd workspace log values x = {} , y = {} , z = {}".format(log_x2.value, log_y2.value, log_z2.value))
 
 
 Output:

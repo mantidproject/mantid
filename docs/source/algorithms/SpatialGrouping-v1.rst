@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,7 +40,7 @@ Usage
     group_file = os.path.join(config["default.savedirectory"], "mygroup.xml")
     # Want to get nine groups of 3x3
     SpatialGrouping(ws, group_file, SearchDistance=10)
-    print "File created:", os.path.exists(group_file)
+    print("File created: {}".format(os.path.exists(group_file)))
 
 Output:
 

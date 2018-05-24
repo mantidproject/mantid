@@ -42,7 +42,7 @@ class MANTID_MDALGORITHMS_DLL MDResolutionConvolutionFactoryImpl
     : public Kernel::DynamicFactory<MDResolutionConvolution> {
 private:
   /// Base-class type
-  typedef Kernel::DynamicFactory<MDResolutionConvolution> BaseClass;
+  using BaseClass = Kernel::DynamicFactory<MDResolutionConvolution>;
 
 public:
   /// A create method to ensure the type is initialized properly
@@ -70,8 +70,8 @@ private:
 };
 
 /// Typedef singleton instance to MDResolutionConvolutionFactory
-typedef Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>
-    MDResolutionConvolutionFactory;
+using MDResolutionConvolutionFactory =
+    Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>;
 }
 }
 

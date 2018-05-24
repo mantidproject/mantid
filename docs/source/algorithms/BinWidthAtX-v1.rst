@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
   
@@ -50,9 +50,9 @@ Usage
         return (first, last)
     
     first, last = firstAndLastBinWidths(ws)
-    print('Bin widths before rebinning, first: {0}, last: {1}'.format(first, last))
+    print('Bin widths before rebinning, first: {0:.4f}, last: {1:.4f}'.format(first, last))
     first, last = firstAndLastBinWidths(rebinned)
-    print('Bin widths after rebinning, first: {0}, last: {1}'.format(first, last))
+    print('Bin widths after rebinning, first: {0:.2f}, last: {1:.2f}'.format(first, last))
 
 
 Output:

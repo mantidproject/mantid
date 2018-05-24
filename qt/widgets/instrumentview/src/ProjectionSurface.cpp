@@ -1,15 +1,16 @@
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/Common/InputController.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Unit.h"
 
 #include <QRgb>
@@ -36,7 +37,7 @@ namespace MantidWidgets {
 * instrument
 */
 ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
-    : m_instrActor(rootActor), m_viewImage(NULL), m_pickImage(NULL),
+    : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr),
       m_viewRect(), m_selectRect(), m_interactionMode(MoveMode),
       m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false),
@@ -156,11 +157,11 @@ void ProjectionSurface::resetInstrumentActor(const InstrumentActor *rootActor) {
 void ProjectionSurface::clear() {
   if (m_viewImage) {
     delete m_viewImage;
-    m_viewImage = NULL;
+    m_viewImage = nullptr;
   }
   if (m_pickImage) {
     delete m_pickImage;
-    m_pickImage = NULL;
+    m_pickImage = nullptr;
   }
   m_viewChanged = true;
   m_redrawPicking = true;
@@ -441,10 +442,8 @@ int ProjectionSurface::getDetectorID(int x, int y) const {
 }
 
 //------------------------------------------------------------------------------
-const Mantid::Geometry::IDetector &ProjectionSurface::getDetector(int x,
-                                                                  int y) const {
-  size_t pickID = getPickID(x, y);
-  return m_instrActor->getDetectorByPickID(pickID);
+size_t ProjectionSurface::getDetector(int x, int y) const {
+  return getPickID(x, y);
 }
 
 /**
@@ -500,7 +499,7 @@ size_t ProjectionSurface::getPickID(int x, int y) const {
   if (!m_pickImage || !m_pickImage->valid(x, y))
     return -1;
   QRgb pixel = m_pickImage->pixel(x, y);
-  return GLActor::decodePickColor(pixel);
+  return InstrumentRenderer::decodePickColor(pixel);
 }
 
 /**
@@ -769,7 +768,7 @@ void ProjectionSurface::clearComparisonPeaks() {
 */
 void ProjectionSurface::setPeakLabelPrecision(int n) {
   if (n < 1) {
-    QMessageBox::critical(NULL, "MantidPlot - Error",
+    QMessageBox::critical(nullptr, "MantidPlot - Error",
                           "Precision must be a positive number");
     return;
   }

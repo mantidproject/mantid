@@ -36,6 +36,8 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl()
  *  If the workspace is the same size as its parent, then the X data, axes and
  * mask list are
  *  copied. If its a different size then they are not.
+ *
+ *  @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  *  @param  parent    A shared pointer to the parent workspace
  *  @param  NVectors  (Optional) The number of vectors/histograms/detectors in
  * the workspace
@@ -78,29 +80,21 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
 }
 
 /** Initialize a workspace from its parent
- * This sets values such as instrument, units, sample, spectramap.
+ * This sets values such as title, instrument, units, sample, spectramap.
  * This does NOT copy any data.
- * This does NOT copy any sample logs, i.e., Run object of the workspace won't
- * be copied
- * from its parent.
- * @brief WorkspaceFactoryImpl::initializeFromParentWithoutLogs
- * @param parent
- * @param child
- * @param differentSize
+ *
+ * @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
+ * @param parent :: the parent workspace
+ * @param child :: the child workspace
+ * @param differentSize :: A flag to indicate if the two workspace will be
+ *different sizes
  */
-void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
+void WorkspaceFactoryImpl::initializeFromParent(
     const MatrixWorkspace &parent, MatrixWorkspace &child,
     const bool differentSize) const {
   child.setTitle(parent.getTitle());
   child.setComment(parent.getComment());
-  child.setInstrument(parent.getInstrument()); // This call also copies the
-                                               // SHARED POINTER to the
-                                               // parameter map
-
-  // This call will (should) perform a COPY of the parameter map.
-  child.instrumentParameters();
-  child.m_sample = parent.m_sample;
-  child.m_run = boost::make_shared<API::Run>();
+  child.copyExperimentInfoFrom(&parent);
   child.setYUnit(parent.m_YUnit);
   child.setYUnitLabel(parent.m_YUnitLabel);
   child.setDistribution(parent.isDistribution());
@@ -114,8 +108,10 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
 
   // Same number of histograms = copy over the spectra data
   if (parent.getNumberHistograms() == child.getNumberHistograms()) {
+    child.m_isInitialized = false;
     for (size_t i = 0; i < parent.getNumberHistograms(); ++i)
       child.getSpectrum(i).copyInfoFrom(parent.getSpectrum(i));
+    child.m_isInitialized = true;
     // We use this variant without ISpectrum update to avoid costly rebuilds
     // triggered by setIndexInfo(). ISpectrum::copyInfoFrom sets invalid flags
     // for spectrum definitions, so it is important to call this *afterwards*,
@@ -144,24 +140,10 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
   }
 }
 
-/** Initialize a workspace from its parent
- * This sets values such as title, instrument, units, sample, spectramap.
- * This does NOT copy any data.
- *
- * @param parent :: the parent workspace
- * @param child :: the child workspace
- * @param differentSize :: A flag to indicate if the two workspace will be
- *different sizes
- */
-void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace &parent, MatrixWorkspace &child,
-    const bool differentSize) const {
-  initializeFromParentWithoutLogs(parent, child, differentSize);
-  child.m_run = parent.m_run;
-}
-
 /** Creates a new instance of the class with the given name, and allocates
  * memory for the arrays
+ *
+ *  @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  *  @param  className The name of the class you wish to create
  *  @param  NVectors  The number of vectors/histograms/detectors in the
  * workspace

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,7 +27,7 @@ Usage
     result = SwapWidths(InputWorkspace=ws, SwapPoint=5)
 
     # Print the result
-    print "The resulting workspace has %d bins and %d histograms." % (result.blocksize(), result.getNumberHistograms())
+    print("The resulting workspace has %d bins and %d histograms." % (result.blocksize(), result.getNumberHistograms()))
 
 
 Output:

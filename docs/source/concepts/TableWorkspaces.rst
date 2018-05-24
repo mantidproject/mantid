@@ -34,7 +34,7 @@ If you want to check if a variable points to something that is an Table Workspac
     tableWS = CreateEmptyTableWorkspace()
 
     if tableWS is ITableWorkspace:
-        print tableWS.getName() + " is a " + tableWS.id()
+        print(tableWS.getName() + " is a " + tableWS.id())
 
 Output:
 
@@ -98,8 +98,11 @@ Table Workspace Properties
     #setup as above
 
     # Rows
-    print "Row count:", tableWS.rowCount()
-    print tableWS.row(0) # row values as a dictionary
+    print("Row count: {}".format(tableWS.rowCount()))
+    print("Detector Position: {0}, Detector Name: {1}, Detector ID: {2}".format(
+                    tableWS.row(0)["Detector Position"],
+                    tableWS.row(0)["Detector Name"],
+                    tableWS.row(0)["Detector ID"])) # row values as a dictionary
     # Resize the table
     tableWS.setRowCount(4)
     # Add Rows
@@ -111,9 +114,14 @@ Table Workspace Properties
     tableWS.addRow ( nextRow )
 
     # Columns
-    print "Column count:", tableWS.columnCount()
-    print "Column names:", tableWS.getColumnNames()
+    print("Column count: {}".format(tableWS.columnCount()))
+    print("Column names: {}".format(tableWS.getColumnNames()))
     columnValuesList = tableWS.column(0)
+
+    # convert table to dictionary
+    data = tableWS.toDict()
+    print("Detector names: {}".format(data['Detector Name']))
+
     # To remove a column
     tableWS.removeColumn("Detector Name")
 
@@ -122,9 +130,39 @@ Table Workspace Properties
     :options: +NORMALIZE_WHITESPACE
 
     Row count: 3
-    {'Detector Position': [9,0,0], 'Detector Name': 'Detector 1', 'Detector ID': 1}
+    Detector Position: [9,0,0], Detector Name: Detector 1, Detector ID: 1
     Column count: 3
     Column names: ['Detector ID', 'Detector Name', 'Detector Position']
+    Detector names: ['Detector 1', 'Detector 2', 'Detector 3', '', 'new Detector 1', 'new Detector 2']
+
+
+Converting To Pandas DataFrames
+###############################
+
+Table workspaces can be easily converted to a pandas :class:`~pandas.DataFrame` using the following code snippet.
+
+.. code-block:: python
+
+    import pandas as pd
+    df = pd.DataFrame(table.toDict())
+
+If only a subset of the data from the table is required, or you're working with an existing :class:`~pandas.DataFrame` and want to append columns from the Table workspace this can be achieved as follows.
+
+.. code-block:: python
+
+    df = pd.DataFrame()
+    for col in tableWS.getColumnNames():
+        df[col] = tableWS.column(col)
+
+Pickling Workspaces
+###################
+
+A TableWorkspace may be `pickled <https://docs.python.org/2/library/pickle.html/>` and de-pickled in python. Users should prefer using cPickle over pickle, and make sure that the protocol option is set to the HIGHEST_PROTOCOL to ensure that the serialization/deserialization process is as fast as possible.
+
+.. code-block:: python   
+
+  import cPickle as pickle
+  pickled = pickle.dumps(ws2d, pickle.HIGHEST_PROTOCOL)
 
 Working with Table Workspaces in C++
 ------------------------------------
@@ -160,6 +198,10 @@ the second argument is the name of the column. The predefined types are:
 +-----------------+-------------------------+
 | long64          | int64\_t                |
 +-----------------+-------------------------+
+| vector_int      | std::vector<int>        |
++-----------------+-------------------------+
+| vector_double   | std::vector<double>     |
++-----------------+-------------------------+
 
 The data in the table can be accessed in a number of ways. The most
 simple way is to call templated method T& cell(row,col), where col is
@@ -182,23 +224,27 @@ Table rows
 Cells with the same index form a row. TableRow class represents a row.
 Use getRow(int) or getFirstRow() to access existing rows. For example:
 
-| ``std::string key;``
-| ``double value;``
-| ``TableRow row = table->getFirstRow();``
-| ``do``
-| ``{``
-| ``  row >> key >> value;``
-| ``  std::cout << "key=" << key << " value=" << value << std::endl;``
-| ``}``
-| ``while(row.next());``
+.. code-block:: c
+ 
+    std::string key;
+    double value;
+    TableRow row = table->getFirstRow();
+    do
+    {
+      row >> key >> value;
+      std::cout << "key=" << key << " value=" << value << std::endl;
+    }
+    while(row.next());
 
 TableRow can also be use for writing into a table:
 
-| ``for(int i=0; i < n; ++i)``
-| ``{``
-| ``  TableRow row = table->appendRow();``
-| ``  row << keys[i] << values[i];``
-| ``}``
+.. code-block:: c
+
+    for(int i=0; i < n; ++i)
+    {
+        TableRow row = table->appendRow();
+        row << keys[i] << values[i];
+    }
 
 Defining new column types
 #########################

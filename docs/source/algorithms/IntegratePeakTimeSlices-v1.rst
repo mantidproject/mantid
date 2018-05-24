@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -59,7 +59,7 @@ Usage
 
     # Run the Integration algorithm and print results
     peak0,int,sig = IntegratePeakTimeSlices(InputWorkspace='TOPAZ_3132_nxs', Peaks='peaks', Intensity=4580.8587719746683, SigmaIntensity=190.21154129339735)
-    print "Intensity and SigmaIntensity of peak 0  = ",int,sig
+    print("Intensity and SigmaIntensity of peak 0  = {} {}".format(int, sig))
 
 .. categories::
 

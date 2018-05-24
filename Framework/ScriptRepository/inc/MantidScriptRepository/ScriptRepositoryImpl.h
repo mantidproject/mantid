@@ -44,17 +44,17 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
     /// For the local files, get the DateAndTime reported by the operative
     /// system
     /// or defaultTime if not available.
-    Kernel::DateAndTime current_date;
+    Types::Core::DateAndTime current_date;
     /// For the files that were downloaded, get the DateAndTime reported when
     /// they
     /// were created.
-    Kernel::DateAndTime downloaded_date;
+    Types::Core::DateAndTime downloaded_date;
     /// For the remote files, get the DateAndTime of the last revision.
-    Kernel::DateAndTime pub_date;
+    Types::Core::DateAndTime pub_date;
     /// Description of the files.
     std::string description;
     /// The version downloaded of this file
-    Kernel::DateAndTime downloaded_pubdate;
+    Types::Core::DateAndTime downloaded_pubdate;
     /// Indicate if this file should be updated automatically.
     bool auto_update;
     /// Identify the author of this file.
@@ -64,14 +64,14 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
     /// provide a constructor, to set the default values.
     RepositoryEntry()
         : remote(false), local(false), directory(false),
-          current_date(Kernel::DateAndTime::defaultTime()),
-          downloaded_date(Kernel::DateAndTime::defaultTime()),
-          pub_date(Kernel::DateAndTime::defaultTime()), description(""),
-          downloaded_pubdate(Kernel::DateAndTime::defaultTime()),
+          current_date(Types::Core::DateAndTime::defaultTime()),
+          downloaded_date(Types::Core::DateAndTime::defaultTime()),
+          pub_date(Types::Core::DateAndTime::defaultTime()), description(""),
+          downloaded_pubdate(Types::Core::DateAndTime::defaultTime()),
           auto_update(false), author(""), status(BOTH_UNCHANGED){};
   };
 
-  typedef std::map<std::string, RepositoryEntry> Repository;
+  using Repository = std::map<std::string, RepositoryEntry>;
 
   Repository repo;
 

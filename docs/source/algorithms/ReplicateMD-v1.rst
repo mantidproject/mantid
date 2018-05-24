@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,8 +32,8 @@ Usage
 
    replicated = ReplicateMD(ShapeWorkspace=shape, DataWorkspace=data)
 
-   print 'Num dims:', replicated.getNumDims()
-   print 'Num points:', replicated.getNPoints()
+   print('Num dims: {}'.format(replicated.getNumDims()))
+   print('Num points: {}'.format(replicated.getNPoints()))
 
 Output:
 

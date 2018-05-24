@@ -89,7 +89,7 @@ bool ISISEnergyTransfer::validate() {
             "you wish to use logarithmic binning.\n"
             " Do you want to use Logarithmic Binning?";
         int result = QMessageBox::question(
-            NULL, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes,
+            nullptr, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes,
             QMessageBox::No, QMessageBox::NoButton);
         if (result == QMessageBox::Yes) {
           // Treat rebin width as a positive for validation

@@ -5,6 +5,7 @@
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -73,6 +74,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConjoinWorkspaces"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Merging"; }
   // Overriden MultiPeriodGroupAlgorithm method.
@@ -95,7 +99,7 @@ private:
   /// An addition table is a list of pairs: First int = workspace index in the
   /// EW being added, Second int = workspace index to which it will be added in
   /// the OUTPUT EW. -1 if it should add a new entry at the end.
-  typedef std::vector<std::pair<int, int>> AdditionTable;
+  using AdditionTable = std::vector<std::pair<int, int>>;
   /// Copy the history from the input workspaces to the output workspaces
   template <typename Container>
   void copyHistoryFromInputWorkspaces(const Container &workspaces) {
@@ -122,8 +126,6 @@ private:
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
-  std::list<API::MatrixWorkspace_sptr>
-  validateInputs(const std::vector<std::string> &inputWorkspaces);
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
@@ -155,6 +157,12 @@ private:
   std::vector<AdditionTable> m_tables;
   /// Total number of histograms in the output workspace
   size_t m_outputSize = 0;
+
+  std::vector<SpectrumDefinition>
+  buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                     const Geometry::DetectorInfo &addeeDetInfo,
+                     const Geometry::DetectorInfo &outDetInfo,
+                     const Geometry::DetectorInfo &newOutDetInfo);
 };
 
 } // namespace Algorithm

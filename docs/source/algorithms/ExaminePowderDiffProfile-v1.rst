@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -48,7 +48,7 @@ Usage
 
   # Output result
   ws = mtd['PG3_15035B3_Cal']
-  print 'Output workspace has %d spectra' % (ws.getNumberHistograms())
+  print('Output workspace has %d spectra' % (ws.getNumberHistograms()))
 
 .. testcleanup:: ExExaminePG3Profile
 

@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -152,6 +153,8 @@ private:
         ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
             dummy, dummy, dummy);
     inputWS->setInstrument(testInst);
+    inputWS->setIndexInfo(
+        Mantid::Indexing::IndexInfo(inputWS->getNumberHistograms()));
 
     // mask the detector
     inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
@@ -162,9 +165,9 @@ private:
     return inputWS;
   }
 
-  typedef boost::tuple<boost::shared_array<hsize_t>,
-                       boost::shared_array<double>,
-                       boost::shared_array<double>> DataHolder;
+  using DataHolder =
+      boost::tuple<boost::shared_array<hsize_t>, boost::shared_array<double>,
+                   boost::shared_array<double>>;
 
   DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr inputWS) {
     SaveNXSPE saver;

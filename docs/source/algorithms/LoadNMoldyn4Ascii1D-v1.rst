@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -60,7 +60,7 @@ resolution convolution**
                                Functions=['dos_total', 'vacf_total'])
     
     for ws in data:
-        print ws.name()
+        print(ws.name())
 
 Output:
 

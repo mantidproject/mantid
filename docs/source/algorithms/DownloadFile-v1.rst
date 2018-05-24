@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,7 +31,7 @@ Usage
 
     DownloadFile("http://www.mantidproject.org", savefile)
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 Output:
 
@@ -53,7 +53,7 @@ Output:
 
     DownloadFile("https://raw.githubusercontent.com/mantidproject/mantid/master/README.md", savefile)
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists:".format(os.path.exists(savefile)))
 
 Output:
 

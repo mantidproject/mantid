@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,6 +39,7 @@ Usage
    out_ws = CreateSimulationWorkspace(Instrument="IRIS", BinParams="0,500,2000")
    out_ws.setY(0, numpy.array([10.0, 50.0, 30.0, 60.0]))
    AddSampleLog(out_ws, 'Ei', LogText='321', LogType='Number')
+   out_ws.setDistribution(True)
    
    file_path = os.path.join(config["defaultsave.directory"], "NXSPEData.nxspe")
    
@@ -48,16 +49,16 @@ Usage
    # By desigghn, SaveMXSPE does not store detector's ID-s. LoadNXSPE sets detector's ID-s to defaults.
    # To compare loaded and saved workspaces here, one needs to set-up default detector's ID-s to the source workspace.
    nSpec = out_ws.getNumberHistograms()
-   for i in xrange(0,nSpec):
+   for i in range(0,nSpec):
        sp=out_ws.getSpectrum(i);
        sp.setDetectorID(i+1);
    in_ws = LoadNXSPE(file_path)
    
    ws_comparison_rez = CompareWorkspaces(out_ws,in_ws,1.e-9,CheckInstrument=False)
-   print "Contents of the first spectrum = " + str(in_ws.readY(0)) + "."
-   print "Initial and loaded workspaces comparison is:",str(ws_comparison_rez[0])
+   print("Contents of the first spectrum = {}.".format(in_ws.readY(0)))
+   print("Initial and loaded workspaces comparison is: {}".format(str(ws_comparison_rez[0])))
    run = in_ws.getRun();
-   print "Loaded workspace has attached incident energy Ei={0:5} and rotation angle Psi={1:5}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value)
+   print("Loaded workspace has attached incident energy Ei={0:.1f} and rotation angle Psi= {1:.1f}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value))
    
 
 .. testcleanup:: ExSimpleSavingRoundtrip
@@ -72,6 +73,12 @@ Output:
    Initial and loaded workspaces comparison is: True
    Loaded workspace has attached incident energy Ei=321.0 and rotation angle Psi= 32.0deg
    
+Note that :ref:`algm-LoadNXSPE` automatically applies the `distribution` flag to the loaded workspace.
+This is because all examples of workspaces saved to `NXSPE` format by the reduction algorithms
+are distributions (signal is count rate and should be multiplied by bin widths to get counts).
+`SaveNXSPE` does not require its input is a distribution, however, and the `NXSPE` format does
+not have a distribution flag.
+
 
 .. categories::
 

@@ -34,7 +34,7 @@ bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
   //  5. Close bracket
   std::string input =
       std::accumulate(codes.begin(), codes.end(), std::string(""));
-  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  std::string reg(R"(^[06][\w]+\([/ \w\^-]+\)$)");
   boost::regex baseRegex(reg);
   return boost::regex_match(input, baseRegex);
 }
@@ -329,6 +329,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
   if (colIsUnit) {
     MatrixWorkspace_sptr localworkspace = WorkspaceFactory::Instance().create(
         "Workspace2D", 1, pointsToRead, pointsToRead);
+    localworkspace->getSpectrum(0).setDetectorID(static_cast<detid_t>(1));
     localworkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create(firstColVal);
     localworkspace->setPoints(0, columnOne);
@@ -345,6 +346,8 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     for (int index = 0; index < pointsToRead; ++index) {
       localworkspace->getSpectrum(index)
           .setSpectrumNo(static_cast<int>(columnOne[index]));
+      localworkspace->getSpectrum(index)
+          .setDetectorID(static_cast<detid_t>(index + 1));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
@@ -464,6 +467,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   // we now have all the data we need to create the output workspace
   outWrksp = WorkspaceFactory::Instance().create(
       "Workspace2D", nAxis1Values, nAxis0Boundaries, nAxis0Values);
+  for (int i = 0; i < nAxis1Values; ++i) {
+    outWrksp->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
+  }
   outWrksp->getAxis(0)->unit() = UnitFactory::Instance().create(XUnit);
   outWrksp->setYUnitLabel(intensityUnit);
 

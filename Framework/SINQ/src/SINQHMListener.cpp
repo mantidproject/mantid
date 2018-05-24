@@ -123,7 +123,7 @@ void SINQHMListener::setSpectra(
    */
 }
 
-void SINQHMListener::start(Mantid::Kernel::DateAndTime /*startTime */) {
+void SINQHMListener::start(Mantid::Types::Core::DateAndTime /*startTime */) {
   // Nothing to do here
 }
 

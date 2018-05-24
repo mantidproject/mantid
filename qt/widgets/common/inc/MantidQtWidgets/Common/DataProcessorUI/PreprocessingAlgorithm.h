@@ -39,13 +39,12 @@ class EXPORT_OPT_MANTIDQT_COMMON PreprocessingAlgorithm
     : public ProcessingAlgorithmBase {
 public:
   // Constructor
-  PreprocessingAlgorithm(
-      const QString &name, const QString &prefix = "",
-      const std::set<QString> &blacklist = std::set<QString>());
+  PreprocessingAlgorithm(QString name, QString prefix = "",
+                         QString separator = "",
+                         std::set<QString> blacklist = std::set<QString>());
   // Delegating constructor
-  PreprocessingAlgorithm(const QString &name,
-                                      const QString &prefix,
-                                      const QString &blacklist);
+  PreprocessingAlgorithm(QString name, QString prefix, QString separator,
+                         const QString &blacklist);
   // Default constructor
   PreprocessingAlgorithm();
   // Destructor
@@ -59,10 +58,14 @@ public:
   QString outputProperty() const;
   // The prefix to add to the output property
   QString prefix() const;
+  // The separator to use between values in the output property
+  QString separator() const;
 
 private:
   // A prefix to the name of the pre-processed output ws
   QString m_prefix;
+  // A separator between values in the pre-processed output ws name
+  QString m_separator;
   // The name of the LHS input property
   QString m_lhs;
   // The name of the RHS input property

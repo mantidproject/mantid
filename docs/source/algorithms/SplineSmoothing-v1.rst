@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -58,7 +58,7 @@ Usage
         XMax=30, BinWidth=0.3)
     wsOut = SplineSmoothing(ws,Error=1)
 
-    print "This has created a spline for each spectra in the %s workspace" % wsOut
+    print("This has created a spline for each spectra in the %s workspace" % wsOut)
 
     try:
         plotSpectrum([ws,wsOut],0)

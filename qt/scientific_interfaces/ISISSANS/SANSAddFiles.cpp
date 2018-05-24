@@ -191,7 +191,7 @@ void SANSAddFiles::add2Runs2Add() {
   // split comma separated file names or run numbers into a list
   ArrayProperty<std::string> commaSep(
       "unusedName", m_SANSForm->new2Add_edit->text().toStdString());
-  const std::vector<std::string> nam = commaSep;
+  const std::vector<std::string> &nam = commaSep;
 
   for (std::vector<std::string>::const_iterator i = nam.begin(); i != nam.end();
        ++i) { // each comma separated item could be a range of run numbers

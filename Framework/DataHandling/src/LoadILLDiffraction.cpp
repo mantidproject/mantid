@@ -1,6 +1,4 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -8,18 +6,22 @@
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <numeric>
-
 #include <H5Cpp.h>
-#include <nexus/napi.h>
 #include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/round.hpp>
+#include <nexus/napi.h>
+#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -29,6 +31,7 @@ using namespace Geometry;
 using namespace H5;
 using namespace Kernel;
 using namespace NeXus;
+using Types::Core::DateAndTime;
 
 namespace {
 // This defines the number of physical pixels in D20 (low resolution mode)
@@ -41,7 +44,10 @@ constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 constexpr size_t NUMBER_MONITORS = 1;
 // This is the angular size of a pixel in degrees (in low resolution mode)
 constexpr double D20_PIXEL_SIZE = 0.1;
-constexpr double rad2deg = 180. / M_PI;
+// The conversion factor from radian to degree
+constexpr double RAD_TO_DEG = 180. / M_PI;
+// A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
+constexpr double WAVE_TO_E = 81.8;
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -92,6 +98,22 @@ void LoadILLDiffraction::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
+  std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
+  declareProperty("DataType", "Auto",
+                  boost::make_shared<StringListValidator>(calibrationOptions),
+                  "Select the type of data, with or without calibration "
+                  "already applied. If Auto then the calibrated data is "
+                  "loaded if available, otherwise the raw data is loaded.");
+}
+
+std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
+  std::map<std::string, std::string> issues;
+  if (getPropertyValue("DataType") == "Calibrated" &&
+      !containsCalibratedData(getPropertyValue("Filename"))) {
+    issues["DataType"] = "Calibrated data requested, but only raw data exists "
+                         "in this NeXus file.";
+  }
+  return issues;
 }
 
 /**
@@ -99,10 +121,11 @@ void LoadILLDiffraction::init() {
  */
 void LoadILLDiffraction::exec() {
 
-  Progress progress(this, 0, 1, 3);
+  Progress progress(this, 0, 1, 4);
 
-  m_fileName = getPropertyValue("Filename");
+  m_filename = getPropertyValue("Filename");
 
+  m_scanVar.clear();
   progress.report("Loading the scanned variables");
   loadScanVars();
 
@@ -111,6 +134,9 @@ void LoadILLDiffraction::exec() {
 
   progress.report("Loading the metadata");
   loadMetaData();
+
+  progress.report("Setting additional sample logs");
+  setSampleLogs();
 
   setProperty("OutputWorkspace", m_outWorkspace);
 }
@@ -121,7 +147,7 @@ void LoadILLDiffraction::exec() {
 void LoadILLDiffraction::loadDataScan() {
 
   // open the root entry
-  NXRoot dataRoot(m_fileName);
+  NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
   m_instName = firstEntry.getString("instrument/name");
@@ -130,8 +156,15 @@ void LoadILLDiffraction::loadDataScan() {
       m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
 
   // read the detector data
-  NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
-  NXUInt data = dataGroup.openUIntData();
+
+  std::string dataName;
+  if (getPropertyValue("DataType") == "Raw" &&
+      containsCalibratedData(m_filename))
+    dataName = "data_scan/detector_data/raw_data";
+  else
+    dataName = "data_scan/detector_data/data";
+  g_log.notice() << "Loading data from " + dataName;
+  NXUInt data = firstEntry.openNXDataSet<unsigned int>(dataName);
   data.load();
 
   // read the scan data
@@ -168,11 +201,14 @@ void LoadILLDiffraction::loadDataScan() {
   }
 
   resolveScanType();
-
   resolveInstrument();
+  computeThetaOffset();
+
+  std::string start_time = firstEntry.getString("start_time");
+  start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
 
   if (m_scanType == DetectorScan) {
-    initMovingWorkspace(scan);
+    initMovingWorkspace(scan, start_time);
     fillMovingInstrumentScan(data, scan);
   } else {
     initStaticWorkspace();
@@ -182,7 +218,6 @@ void LoadILLDiffraction::loadDataScan() {
   fillDataScanMetaData(scan);
 
   scanGroup.close();
-  dataGroup.close();
   firstEntry.close();
   dataRoot.close();
 }
@@ -192,16 +227,23 @@ void LoadILLDiffraction::loadDataScan() {
 */
 void LoadILLDiffraction::loadMetaData() {
 
-  m_outWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
+  auto &mutableRun = m_outWorkspace->mutableRun();
+  mutableRun.addProperty("Facility", std::string("ILL"));
 
   // Open NeXus file
   NXhandle nxHandle;
-  NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
+  NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     nxStat = NXclose(&nxHandle);
   }
+
+  if (mutableRun.hasProperty("Detector.calibration_file")) {
+    if (getPropertyValue("DataType") == "Raw")
+      mutableRun.getProperty("Detector.calibration_file")->setValue("none");
+  } else
+    mutableRun.addProperty("Detector.calibration_file", std::string("none"));
 }
 
 /**
@@ -226,14 +268,93 @@ void LoadILLDiffraction::initStaticWorkspace() {
  * Use the ScanningWorkspaceBuilder to create a time indexed workspace.
  *
  * @param scan : scan data
+ * @param start_time : start time in ISO format string
  */
-void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
+void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
+                                             const std::string &start_time) {
   const size_t nTimeIndexes = m_numberScanPoints;
   const size_t nBins = 1;
   const bool isPointData = true;
 
-  const auto instrumentWorkspace = loadEmptyInstrument();
+  const auto instrumentWorkspace = loadEmptyInstrument(start_time);
   const auto &instrument = instrumentWorkspace->getInstrument();
+  auto &params = instrumentWorkspace->instrumentParameters();
+
+  const auto &referenceComponentPosition =
+      getReferenceComponentPosition(instrumentWorkspace);
+
+  double refR, refTheta, refPhi;
+  referenceComponentPosition.getSpherical(refR, refTheta, refPhi);
+
+  if (m_instName == "D2B") {
+    auto &compInfo = instrumentWorkspace->mutableComponentInfo();
+
+    Geometry::IComponent_const_sptr detectors =
+        instrument->getComponentByName("detectors");
+    const auto detCompIndex = compInfo.indexOf(detectors->getComponentID());
+    const auto tubes = compInfo.children(detCompIndex);
+    const size_t nTubes = tubes.size();
+    Geometry::IComponent_const_sptr tube1 =
+        instrument->getComponentByName("tube_1");
+    const auto tube1CompIndex = compInfo.indexOf(tube1->getComponentID());
+    const auto pixels = compInfo.children(tube1CompIndex);
+    const size_t nPixels = pixels.size();
+
+    Geometry::IComponent_const_sptr pixel =
+        instrument->getComponentByName("standard_pixel");
+    Geometry::BoundingBox bb;
+    pixel->getBoundingBox(bb);
+    m_pixelHeight = bb.yMax() - bb.yMin();
+
+    const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
+    if (!tubeAnglesStr.empty()) {
+      std::vector<std::string> tubeAngles;
+      boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
+      const double ref = -refTheta;
+      for (size_t i = 1; i <= nTubes; ++i) {
+        const std::string compName = "tube_" + std::to_string(i);
+        Geometry::IComponent_const_sptr component =
+            instrument->getComponentByName(compName);
+        double r, theta, phi;
+        V3D oldPos = component->getPos();
+        oldPos.getSpherical(r, theta, phi);
+        V3D newPos;
+        const double angle = std::stod(tubeAngles[i - 1]);
+        const double finalAngle = fabs(ref - angle);
+        g_log.debug() << "Rotating " << compName << "to " << finalAngle
+                      << "rad\n";
+        newPos.spherical(r, finalAngle, phi);
+        const auto componentIndex =
+            compInfo.indexOf(component->getComponentID());
+        compInfo.setPosition(componentIndex, newPos);
+      }
+    }
+
+    const auto tubeCentersStr = params.getString("D2B", "tube_centers");
+    if (!tubeCentersStr.empty()) {
+      std::vector<std::string> tubeCenters;
+      double maxYOffset = 0.;
+      boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
+      for (size_t i = 1; i <= nTubes; ++i) {
+        const std::string compName = "tube_" + std::to_string(i);
+        Geometry::IComponent_const_sptr component =
+            instrument->getComponentByName(compName);
+        const double offset =
+            std::stod(tubeCenters[i - 1]) - (double(nPixels) / 2 - 0.5);
+        const double y = -offset * m_pixelHeight;
+        V3D translation(0, y, 0);
+        if (std::fabs(y) > maxYOffset) {
+          maxYOffset = std::fabs(y);
+        }
+        g_log.debug() << "Moving " << compName << " to " << y << "\n";
+        V3D pos = component->getPos() + translation;
+        const auto componentIndex =
+            compInfo.indexOf(component->getComponentID());
+        compInfo.setPosition(componentIndex, pos);
+      }
+      m_maxHeight = double(nPixels) * m_pixelHeight / 2 + maxYOffset;
+    }
+  }
 
   auto scanningWorkspaceBuilder = DataObjects::ScanningWorkspaceBuilder(
       instrument, nTimeIndexes, nBins, isPointData);
@@ -253,9 +374,6 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
       getScannedVaribleByPropertyName(scan, "Position");
-
-  const auto &referenceComponentPosition =
-      getReferenceComponentPosition(instrumentWorkspace);
 
   // Convert the tube positions to relative rotations for all detectors
   calculateRelativeRotations(tubeAngles, referenceComponentPosition);
@@ -306,10 +424,10 @@ void LoadILLDiffraction::calculateRelativeRotations(
   // tube. Here we get the angle of that tube as defined in the IDF.
 
   double firstTubeRotationAngle =
-      firstTubePosition.angle(V3D(0, 0, 1)) * rad2deg;
+      firstTubePosition.angle(V3D(0, 0, 1)) * RAD_TO_DEG;
 
   if (m_instName == "D20") {
-    firstTubeRotationAngle += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+    firstTubeRotationAngle += m_offsetTheta;
   } else if (m_instName == "D2B") {
     firstTubeRotationAngle = -firstTubeRotationAngle;
     std::transform(tubeRotations.begin(), tubeRotations.end(),
@@ -351,14 +469,11 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
     }
   }
 
-  // Dead pixel offset, should be zero except for D20
-  size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;
-
   // Then load the detector spectra
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
+      const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
       const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
@@ -393,12 +508,11 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                  [](double e) { return sqrt(e); });
 
   // Assign detector counts
-  size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - NUMBER_MONITORS + deadOffset) / m_sizeDim2;
+    const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
     const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
@@ -421,7 +535,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
  */
 void LoadILLDiffraction::loadScanVars() {
 
-  H5File h5file(m_fileName, H5F_ACC_RDONLY);
+  H5File h5file(m_filename, H5F_ACC_RDONLY);
 
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");
@@ -449,15 +563,20 @@ void LoadILLDiffraction::loadScanVars() {
  */
 void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
+  auto &mutableRun = m_outWorkspace->mutableRun();
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
-      auto property =
-          Kernel::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
+      const std::string scanVarName =
+          boost::algorithm::to_lower_copy(m_scanVar[i].name);
+      const std::string scanVarProp =
+          boost::algorithm::to_lower_copy(m_scanVar[i].property);
+      const std::string propName = scanVarName + "." + scanVarProp;
+      auto property = Kernel::make_unique<TimeSeriesProperty<double>>(propName);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
       }
-      m_outWorkspace->mutableRun().addLogData(std::move(property));
+      mutableRun.addLogData(std::move(property));
     }
   }
 }
@@ -477,7 +596,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
   std::vector<double> scannedVariable;
 
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (m_scanVar[i].property.compare(propertyName) == 0) {
+    if (m_scanVar[i].property == propertyName) {
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         scannedVariable.push_back(
             scan(static_cast<int>(i), static_cast<int>(j)));
@@ -603,37 +722,21 @@ void LoadILLDiffraction::resolveInstrument() {
       // Here we have to hardcode the numbers of pixels.
       // The only way is to read the size of the detectors read from the files
       // and based on it decide which of the 3 alternative IDFs to load.
-      // Some amount of pixels are dead on each end, these have to be
+      // Some amount of pixels are dead on at right end, these have to be
       // subtracted
       // correspondingly dependent on the resolution mode
       m_resolutionMode = m_numberDetectorsRead / D20_NUMBER_PIXELS;
       size_t activePixels = D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
       m_numberDetectorsActual = m_resolutionMode * activePixels;
-      // 1: low resolution, 2: nominal, 3: high resolution
-      switch (m_resolutionMode) {
-      case 1: {
-        // low resolution mode
-        m_instName += "_lr";
-        m_numberDetectorsActual =
-            D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
-        break;
-      }
-      case 2: {
-        // nominal resolution
-        m_numberDetectorsActual =
-            2 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
-        break;
-      }
-      case 3: {
-        // high resolution mode
-        m_instName += "_hr";
-        m_numberDetectorsActual =
-            3 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
-        break;
-      }
-      default:
+
+      if (m_resolutionMode > 3 || m_resolutionMode < 1) {
         throw std::runtime_error("Unknown resolution mode for instrument " +
                                  m_instName);
+      }
+      if (m_resolutionMode == 1) {
+        m_instName += "_lr";
+      } else if (m_resolutionMode == 3) {
+        m_instName += "_hr";
       }
     }
     g_log.debug() << "Instrument name is " << m_instName << " and has "
@@ -653,17 +756,22 @@ void LoadILLDiffraction::loadStaticInstrument() {
 }
 
 /**
- * Runs LoadEmptyInstrument and returns a workspace with the instrument, to be
+ * Runs LoadInstrument and returns a workspace with the instrument, to be
  *used in the ScanningWorkspaceBuilder.
- *
+ * @param start_time : start time in ISO formatted string
  * @return A MatrixWorkspace containing the correct instrument
  */
-MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument() {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadEmptyInstrument");
+MatrixWorkspace_sptr
+LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", m_instName);
+  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  auto &run = ws->mutableRun();
+  run.addProperty("run_start", start_time);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
-
-  return loadInst->getProperty("OutputWorkspace");
+  return loadInst->getProperty("Workspace");
 }
 
 /**
@@ -675,7 +783,7 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   IComponent_const_sptr component = instrument->getComponentByName("detector");
   double twoTheta0Actual = twoTheta0Read;
   if (m_instName == "D20") {
-    twoTheta0Actual += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+    twoTheta0Actual += m_offsetTheta;
   }
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
   g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
@@ -698,6 +806,69 @@ LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
   Poco::Path file(instName + "_Definition.xml");
   Poco::Path fullPath(directory, file);
   return fullPath.toString();
+}
+
+/** Adds some sample logs needed later by reduction
+*/
+void LoadILLDiffraction::setSampleLogs() {
+  Run &run = m_outWorkspace->mutableRun();
+  std::string scanTypeStr = "NoScan";
+  if (m_scanType == DetectorScan) {
+    scanTypeStr = "DetectorScan";
+  } else if (m_scanType == OtherScan) {
+    scanTypeStr = "OtherScan";
+  }
+  run.addLogData(
+      new PropertyWithValue<std::string>("ScanType", std::move(scanTypeStr)));
+  run.addLogData(new PropertyWithValue<double>(
+      "PixelSize", D20_PIXEL_SIZE / static_cast<double>(m_resolutionMode)));
+  std::string resModeStr = "Nominal";
+  if (m_resolutionMode == 1) {
+    resModeStr = "Low";
+  } else if (m_resolutionMode == 3) {
+    resModeStr = "High";
+  }
+  run.addLogData(new PropertyWithValue<std::string>("ResolutionMode",
+                                                    std::move(resModeStr)));
+  if (m_scanType != NoScan) {
+    run.addLogData(new PropertyWithValue<int>(
+        "ScanSteps", static_cast<int>(m_numberScanPoints)));
+  }
+  double lambda = run.getLogAsSingleValue("wavelength");
+  double eFixed = WAVE_TO_E / (lambda * lambda);
+  run.addLogData(new PropertyWithValue<double>("Ei", eFixed));
+  run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors",
+                                               m_numberDetectorsActual));
+
+  if (m_pixelHeight != 0.) {
+    run.addLogData(new PropertyWithValue<double>("PixelHeight", m_pixelHeight));
+  }
+  if (m_maxHeight != 0.) {
+    run.addLogData(new PropertyWithValue<double>("MaxHeight", m_maxHeight));
+  }
+}
+
+/**
+ * Returns true if the file contains calibrated data
+ *
+ * @param filename The filename to check
+ * @return True if the file contains calibrated data, false otherwise
+ */
+bool LoadILLDiffraction::containsCalibratedData(
+    const std::string &filename) const {
+  NexusDescriptor descriptor(filename);
+  // This is unintuitive, but if the file has calibrated data there are entries
+  // for 'data' and 'raw_data'. If there is no calibrated data only 'data' is
+  // present.
+  return descriptor.pathExists("/entry0/data_scan/detector_data/raw_data");
+}
+
+/**
+ * Computes the 2theta offset of the decoder for D20
+ */
+void LoadILLDiffraction::computeThetaOffset() {
+  m_offsetTheta = static_cast<double>(D20_NUMBER_DEAD_PIXELS) * D20_PIXEL_SIZE -
+                  D20_PIXEL_SIZE / (static_cast<double>(m_resolutionMode) * 2);
 }
 
 } // namespace DataHandling

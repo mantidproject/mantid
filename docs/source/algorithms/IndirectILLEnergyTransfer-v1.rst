@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -42,9 +42,9 @@ Usage
 .. testcode:: ExIndirectILLEnergyTransfer
 
     ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/090661.nxs')
-    print "Reduced workspace has %d wing" % ws.getNumberOfEntries()
-    print "which has %d spectra" % ws.getItem(0).getNumberHistograms()
-    print "and %d bins" % ws.getItem(0).blocksize()
+    print("Reduced workspace has {:d} wing".format(ws.getNumberOfEntries()))
+    print("which has {:d} spectra".format(ws.getItem(0).getNumberHistograms()))
+    print("and {:d} bins".format(ws.getItem(0).blocksize()))
 
 Output:
 
@@ -68,9 +68,9 @@ Output:
 .. testcode:: ExIndirectILLEnergyTransferMirrorSense
 
     ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/136553:136555.nxs', CropDeadMonitorChannels=True)
-    print "Reduced workspace has %d wings" % ws.getNumberOfEntries()
-    print "which have %d spectra" % ws.getItem(0).getNumberHistograms()
-    print "and %d bins" % ws.getItem(0).blocksize()
+    print("Reduced workspace has {:d} wings".format(ws.getNumberOfEntries()))
+    print("which have {:d} spectra".format(ws.getItem(0).getNumberHistograms()))
+    print("and {:d} bins".format(ws.getItem(0).blocksize()))
 
 Output:
 

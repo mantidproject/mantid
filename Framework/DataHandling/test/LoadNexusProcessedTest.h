@@ -280,8 +280,8 @@ public:
     TS_ASSERT_EQUALS(ws->getSpectrum(4).getNumberEvents(), 100);
 
     // Do the comparison algo to check that they really are the same
-    origWS->sortAll(TOF_SORT, NULL);
-    ws->sortAll(TOF_SORT, NULL);
+    origWS->sortAll(TOF_SORT, nullptr);
+    ws->sortAll(TOF_SORT, nullptr);
 
     IAlgorithm_sptr alg2 =
         AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
@@ -724,7 +724,7 @@ public:
         "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
-    auto instrument = parser.parseXML(NULL);
+    auto instrument = parser.parseXML(nullptr);
     peaksTestWS->populateInstrumentParameters();
     peaksTestWS->setInstrument(instrument);
 
@@ -769,7 +769,7 @@ public:
         "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
-    auto instrument = parser.parseXML(NULL);
+    auto instrument = parser.parseXML(nullptr);
     peaksTestWS->populateInstrumentParameters();
     peaksTestWS->setInstrument(instrument);
 
@@ -1076,7 +1076,8 @@ public:
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
     const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+    const size_t numBins = outWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
       TS_ASSERT_EQUALS(outWS->y(0)[i], i);
     }
@@ -1097,7 +1098,8 @@ public:
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
     const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+    const size_t numBins = outWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
       TS_ASSERT_EQUALS(outWS->y(0)[i], i);
     }

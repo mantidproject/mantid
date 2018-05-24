@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -82,15 +82,15 @@ Example 1: using defaults
 
   # Load a RAW file using all defaults
   ws = Load('HRP39180.RAW')
-  print 'Workspace has',ws.getNumberHistograms(),'spectra'
+  print('Workspace has {} spectra'.format(ws.getNumberHistograms()))
   # Get a detector in histogram 1024 of the workspace
   detid = ws.getSpectrum(1024).getDetectorIDs()[0]
-  print 'Is detector',detid,'a monitor?',ws.getInstrument().getDetector(detid).isMonitor()
+  print('Is detector {} a monitor? {}'.format(detid, ws.getInstrument().getDetector(detid).isMonitor()))
 
   # Get the Run object
   run = ws.run()
-  print 'Workspace contains',len(run.keys()),'logs'
-  print 'Workspace has property INT1:',run.hasProperty('INT1')
+  print('Workspace contains {} logs'.format(len(run.keys())))
+  print('Workspace has property INT1: {}'.format(run.hasProperty('INT1')))
 
 Output
 ^^^^^^
@@ -110,15 +110,15 @@ Example 2: load without the logs
 
   # Load a RAW file without the logs
   ws = Load('HRP39180.RAW',LoadLogFiles=False)
-  print 'Workspace has',ws.getNumberHistograms(),'spectra'
+  print('Workspace has {} spectra'.format(ws.getNumberHistograms()))
   # Get a detector in histogram 1024 of the workspace
   detid = ws.getSpectrum(1024).getDetectorIDs()[0]
-  print 'Is detector',detid,'a monitor?',ws.getInstrument().getDetector(detid).isMonitor()
+  print('Is detector {} a monitor? {}'.format(detid, ws.getInstrument().getDetector(detid).isMonitor()))
 
   # Get the Run object
   run = ws.run()
-  print 'Workspace contains',len(run.keys()),'logs'
-  print 'Workspace has property INT1:',run.hasProperty('INT1')
+  print('Workspace contains {} logs'.format(len(run.keys())))
+  print('Workspace has property INT1: {}'.format(run.hasProperty('INT1')))
 
 Output
 ^^^^^^
@@ -137,15 +137,15 @@ Example 3: exclude monitors
 
   # Load a RAW file without the monitors
   ws = Load('HRP39180.RAW',LoadMonitors='Exclude')
-  print 'Workspace has',ws.getNumberHistograms(),'spectra'
+  print('Workspace has {} spectra'.format(ws.getNumberHistograms()))
   # Get a detector in histogram 1024 of the workspace
   detid = ws.getSpectrum(1024).getDetectorIDs()[0]
-  print 'Is detector',detid,'a monitor?',ws.getInstrument().getDetector(detid).isMonitor()
+  print('Is detector {} a monitor? {}'.format(detid, ws.getInstrument().getDetector(detid).isMonitor()))
 
   # Get the Run object
   run = ws.run()
-  print 'Workspace contains',len(run.keys()),'logs'
-  print 'Workspace has property INT1:',run.hasProperty('INT1')
+  print('Workspace contains {} logs'.format(len(run.keys())))
+  print('Workspace has property INT1: {}'.format(run.hasProperty('INT1')))
 
 Output
 ^^^^^^
@@ -164,16 +164,16 @@ Example 4: load monitors separately
 
   # Load a RAW file, load the monitors into a separate workspace
   dataws,monitorws = Load('HRP39180.RAW',LoadMonitors='Separate')
-  print 'Data workspace has',dataws.getNumberHistograms(),'spectra'
+  print('Data workspace has {} spectra'.format(dataws.getNumberHistograms()))
 
-  print 'Monitor workspace has',monitorws.getNumberHistograms(),'spectra'
+  print('Monitor workspace has {} spectra'.format(monitorws.getNumberHistograms()))
   # Check that the detector in the first histogram of the monitor workspace is a monitor
   detid = monitorws.getSpectrum(0).getDetectorIDs()[0]
-  print 'Is detector',detid,'a monitor?',monitorws.getInstrument().getDetector(detid).isMonitor()
+  print('Is detector {} a monitor? {}'.format(detid, monitorws.getInstrument().getDetector(detid).isMonitor()))
 
   # Check that the detector in the second histogram of the monitor workspace is a monitor
   detid = monitorws.getSpectrum(1).getDetectorIDs()[0]
-  print 'Is detector',detid,'a monitor?',monitorws.getInstrument().getDetector(detid).isMonitor()
+  print('Is detector {} a monitor? {}'.format(detid, monitorws.getInstrument().getDetector(detid).isMonitor()))
 
 Output
 ^^^^^^

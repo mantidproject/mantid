@@ -11,11 +11,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Strings.h"
 
-using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::HistogramE;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::Points;
-
 namespace Mantid {
 namespace Algorithms {
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -81,10 +81,10 @@ Usage
     for f in datafiles:
         try:
             wname = splitext(f)[0]
-            #print "Processing ", wname  # uncomment if needed
+            #print("Processing {}".format(wname))  # uncomment if needed
             LoadDNSLegacy(Filename=join(mypath, f), OutputWorkspace=wname, CoilCurrentsTable=coilcurrents, Normalization='duration')
         except RuntimeError as err:
-            print err
+            print(err)
         else:
             wslist.append(wname)
 
@@ -95,19 +95,19 @@ Usage
 
     # print selected values from merged workspaces
     two_theta = merged.extractX()[0]
-    print "First 5 2Theta values: ", two_theta[:5]
+    print("First 5 2Theta values: {}".format(two_theta[:5]))
     q = mergedQ.extractX()[0]
-    print "First 5 |Q| values: ", np.round(q[:5], 3)
+    print("First 5 |Q| values: {}".format(np.round(q[:5], 3)))
     d = mergedD.extractX()[0]
-    print "First 5 d values: ", np.round(d[:5], 3)
+    print("First 5 d values: {}".format(np.round(d[:5], 3)))
 
 Output:
 
-   First 5 2Theta values:  [ 7.5  8.   8.5  9.   9.5]
+   First 5 2Theta values: [ 7.5  8.   8.5  9.   9.5]
    
-   First 5 Q values:  [ 0.249  0.266  0.282  0.299  0.315]
+   First 5 Q values: [ 0.249  0.266  0.282  0.299  0.315]
    
-   First 5 d values:  [ 1.844  1.848  1.852  1.856  1.86 ]
+   First 5 d values: [ 1.844  1.848  1.852  1.856  1.86 ]
 
 .. categories::
 

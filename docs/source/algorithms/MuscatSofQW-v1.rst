@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -44,9 +44,9 @@ Usage
                       ResolutionWorkspace=resolution,
                       ParameterWorkspace=parameters)
 
-    print 'S(Q, w) workspace is intensity as a function of {0} and {1}'.format(
+    print('S(Q, w) workspace is intensity as a function of {0} and {1}'.format(
           sqw.getAxis(0).getUnit().unitID(),
-          sqw.getAxis(1).getUnit().unitID())
+          sqw.getAxis(1).getUnit().unitID()))
 
 Output:
 

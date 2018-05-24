@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -45,11 +45,11 @@ Usage
    original_pulse_times = original_ws.getSpectrum(7).getPulseTimes()
    shifted_pulse_times = shifted_ws.getSpectrum(7).getPulseTimes()
 
-   print "Original proton_charge time: ", original_proton_charge.nthTime(0), ", ", original_proton_charge.nthTime(1), ", ..."
-   print "Shifted proton_charge time: ", shifted_proton_charge.nthTime(0), ", ", shifted_proton_charge.nthTime(1),  ", ..."
+   print("Original proton_charge time:  {} ,  {} , ...".format(original_proton_charge.nthTime(0), original_proton_charge.nthTime(1)))
+   print("Shifted proton_charge time:  {} ,  {} , ...".format(shifted_proton_charge.nthTime(0), shifted_proton_charge.nthTime(1)))
 
-   print "Original pulse times: ", original_pulse_times[0], ", ", original_pulse_times[1], ", ..."
-   print "Shifted pulse times: ", shifted_pulse_times[0], ", ", shifted_pulse_times[1], ", ..."
+   print("Original pulse times:  {} ,  {} , ...".format(original_pulse_times[0], original_pulse_times[1]))
+   print("Shifted pulse times:  {} ,  {} , ...".format(shifted_pulse_times[0], shifted_pulse_times[1]))
    
 .. testcleanup:: ExRelativeChangeTimeZero
 
@@ -86,11 +86,11 @@ Output:
    original_pulse_times = original_ws.getSpectrum(7).getPulseTimes()
    shifted_pulse_times = shifted_ws.getSpectrum(7).getPulseTimes()
 
-   print "Original proton_charge time: ", original_proton_charge.nthTime(0), ", ", original_proton_charge.nthTime(1), ", ..."
-   print "Shifted proton_charge time: ", shifted_proton_charge.nthTime(0), ", ", shifted_proton_charge.nthTime(1),  ", ..."
+   print("Original proton_charge time:  {} ,  {} , ...".format(original_proton_charge.nthTime(0), original_proton_charge.nthTime(1)))
+   print("Shifted proton_charge time:  {} ,  {} , ...".format(shifted_proton_charge.nthTime(0), shifted_proton_charge.nthTime(1)))
 
-   print "Original pulse times: ", original_pulse_times[0], ", ", original_pulse_times[1], ", ..."
-   print "Shifted pulse times: ", shifted_pulse_times[0], ", ", shifted_pulse_times[1], ", ..."
+   print("Original pulse times:  {} ,  {} , ...".format(original_pulse_times[0], original_pulse_times[1]))
+   print("Shifted pulse times:  {} ,  {} , ...".format(shifted_pulse_times[0], shifted_pulse_times[1]))
 
 .. testcleanup:: ExAbsoluteChangeTimeZero
 

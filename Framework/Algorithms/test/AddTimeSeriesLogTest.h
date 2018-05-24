@@ -153,7 +153,7 @@ private:
                                const std::string &logName,
                                const std::string &logTime, const T logValue,
                                const size_t position) {
-    using Mantid::Kernel::DateAndTime;
+    using Mantid::Types::Core::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
 
     const auto &run = testWS->run();

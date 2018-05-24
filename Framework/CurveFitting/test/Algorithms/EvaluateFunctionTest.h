@@ -149,7 +149,6 @@ public:
         TS_ASSERT_DELTA((signal - value) / value, 0.0, 1e-6);
       }
     } while (iter->next());
-    delete iter;
   }
 
   void test_set_workspace_twice() {

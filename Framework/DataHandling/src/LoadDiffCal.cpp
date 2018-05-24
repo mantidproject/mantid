@@ -21,7 +21,6 @@ namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Progress;
 using Mantid::API::ITableWorkspace;
@@ -401,7 +400,12 @@ void LoadDiffCal::exec() {
   try {
     calibrationGroup = file.openGroup("calibration");
   } catch (FileIException &e) {
-    e.printError();
+#if H5_VERSION_GE(1, 8, 13)
+    UNUSED_ARG(e);
+    H5::Exception::printErrorStack();
+#else
+    e.printError(stderr);
+#endif
     throw std::runtime_error("Did not find group \"/calibration\"");
   }
 
@@ -457,6 +461,16 @@ void LoadDiffCal::exec() {
   makeGroupingWorkspace(detids, groups);
   makeMaskWorkspace(detids, use);
   makeCalWorkspace(detids, difc, difa, tzero, dasids, offset, use);
+}
+
+Parallel::ExecutionMode LoadDiffCal::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  // There is an optional input workspace which may have
+  // StorageMode::Distributed but it is merely used for passing an instrument.
+  // Output should always have StorageMode::Cloned, so we run with
+  // ExecutionMode::Identical.
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Identical;
 }
 
 } // namespace DataHandling

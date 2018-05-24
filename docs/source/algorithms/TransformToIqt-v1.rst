@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -104,8 +104,8 @@ Usage
                                  EnergyMax=0.5,
                                  BinReductionFactor=10)
 
-    print 'Number of output bins: %d' % (params.cell('SampleOutputBins', 0))
-    print 'Resolution bins: %d' % (params.cell('ResolutionBins', 0))
+    print('Number of output bins: %d' % (params.cell('SampleOutputBins', 0)))
+    print('Resolution bins: %d' % (params.cell('ResolutionBins', 0)))
 
 Output:
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -65,7 +65,7 @@ Usage
     wsOut = CuboidGaugeVolumeAbsorption(ws, NumberOfWavelengthPoints=5, ElementSize=3,
         SampleHeight=1,SampleWidth=2,SampleThickness=3)
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print("The created workspace has one entry for each spectra: {}".format(wsOut.getNumberHistograms()))
 
 Output:
 

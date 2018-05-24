@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -69,12 +69,12 @@ Usage
         Dictionary=os.path.join(dictionary_path, 'amor.dic'))
 
     num_dims = wsOut.getNumDims()
-    print "This has loaded a MD Workspace with %i dimensions" % num_dims
-    print "Name   Bins   Min     Max"
+    print("This has loaded a MD Workspace with {} dimensions".format(num_dims))
+    print("Name   Bins   Min     Max")
     for dim_index in range(num_dims):
         dim = wsOut.getDimension(dim_index)
-        print "%s      %i    %.2f  %.2f" % (dim.name,
-             dim.getNBins(), dim.getMinimum(), dim.getMaximum())
+        print("{}      {}    {:.2f}  {:.2f}".format(dim.name,
+             dim.getNBins(), dim.getMinimum(), dim.getMaximum()))
 
 Output:
 

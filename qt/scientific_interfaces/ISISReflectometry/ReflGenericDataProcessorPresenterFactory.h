@@ -40,7 +40,7 @@ public:
   /**
   * Creates a Reflectometry Data Processor Presenter
   */
-  std::unique_ptr<ReflDataProcessorPresenter> create();
+  std::unique_ptr<ReflDataProcessorPresenter> create(int group);
 };
 }
 }

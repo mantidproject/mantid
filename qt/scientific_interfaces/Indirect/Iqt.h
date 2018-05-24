@@ -11,7 +11,7 @@ class DLLExport Iqt : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  Iqt(QWidget *parent = 0);
+  Iqt(QWidget *parent = nullptr);
 
 private:
   void setup() override;
@@ -25,17 +25,16 @@ private slots:
   void rsRangeChangedLazy(double min, double max);
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
-  void calculateBinning();
+  void updateDisplayedBinParameters();
   void saveClicked();
   void plotClicked();
-  void PlotTiled();
-  void plotCurrentPreview();
+  void plotTiled();
 
+private:
 private:
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
-  Mantid::API::MatrixWorkspace_sptr m_IqtInputWS;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

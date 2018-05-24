@@ -40,6 +40,7 @@
 #include <utility>
 
 namespace Mantid {
+using namespace Types::Core;
 namespace Kernel {
 
 using namespace Poco::Net;

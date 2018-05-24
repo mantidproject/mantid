@@ -31,7 +31,7 @@ const std::string typeFromName(const std::string &name) {
   // We should enter the critical section if the map has not been fully filled.
   // Be sure to keep the value tested against in sync with the number of inserts
   // below
-  if (TYPE_INDEX.size() != 17) {
+  if (TYPE_INDEX.size() != 18) {
     PARALLEL_CRITICAL(fill_column_index_map) {
       if (TYPE_INDEX.empty()) // check again inside the critical block
       {
@@ -53,6 +53,7 @@ const std::string typeFromName(const std::string &name) {
         TYPE_INDEX.emplace("Col", "double");
         TYPE_INDEX.emplace("QLab", "V3D");
         TYPE_INDEX.emplace("QSample", "V3D");
+        TYPE_INDEX.emplace("PeakNumber", "int");
         // If adding an entry, be sure to increment the size comparizon in the
         // first line
       }
@@ -152,6 +153,8 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
     s << std::fixed << std::setprecision(m_hklPrec) << peak.getK();
   } else if (m_name == "l") {
     s << std::fixed << std::setprecision(m_hklPrec) << peak.getL();
+  } else if (m_name == "PeakNumber") {
+    s << peak.getPeakNumber();
   } else
     s << peak.getValueByColName(m_name);
   s.flags(fflags);
@@ -210,6 +213,8 @@ bool PeakColumn::getReadOnly() const {
 //-------------------------------------------------------------------------------------
 /// Specialized type check
 bool PeakColumn::isBool() const { return false; }
+
+bool PeakColumn::isNumber() const { return false; }
 
 /// @returns overall memory size taken by the column.
 long int PeakColumn::sizeOfData() const {
@@ -290,6 +295,9 @@ const void *PeakColumn::void_pointer(size_t index) const {
         &value); // Given a pointer it will return a pointer
   } else if (m_name == "RunNumber") {
     value = peak.getRunNumber();
+    return boost::get<int>(&value);
+  } else if (m_name == "PeakNumber") {
+    value = peak.getPeakNumber();
     return boost::get<int>(&value);
   } else if (m_name == "DetID") {
     value = peak.getDetectorID();

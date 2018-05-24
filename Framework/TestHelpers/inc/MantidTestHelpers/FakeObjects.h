@@ -54,6 +54,10 @@ public:
     m_histogram.setCountStandardDeviations(0);
   }
 
+  void copyDataFrom(const ISpectrum &other) override {
+    other.copyDataInto(*this);
+  }
+
   void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X)
       override {
     m_histogram.setX(X);
@@ -93,6 +97,11 @@ protected:
   Mantid::HistogramData::Histogram m_histogram;
 
 private:
+  using ISpectrum::copyDataInto;
+  void copyDataInto(SpectrumTester &other) const override {
+    other.m_histogram = m_histogram;
+  }
+
   const Mantid::HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }
@@ -111,8 +120,24 @@ public:
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return m_spec; }
   const std::string id() const override { return "AxeslessWorkspaceTester"; }
-  size_t size() const override { return m_vec.size() * blocksize(); }
+  size_t size() const override {
+    size_t total_size = 0;
+    for (const auto &it : m_vec) {
+      total_size += it.dataY().size();
+    }
+    return total_size;
+  }
   size_t blocksize() const override {
+    if (m_vec.empty()) {
+      return 0;
+    } else {
+      size_t numY = m_vec[0].dataY().size();
+      for (const auto &it : m_vec) {
+        if (it.dataY().size() != numY)
+          throw std::logic_error("non-constant number of bins");
+      }
+      return numY;
+    }
     return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
   ISpectrum &getSpectrum(const size_t index) override {
@@ -144,9 +169,8 @@ protected:
       m_vec[i].setSpectrumNo(specnum_t(i + 1));
     }
   }
-  void init(const size_t &numspec,
-            const Mantid::HistogramData::Histogram &histogram) override {
-    m_spec = numspec;
+  void init(const Mantid::HistogramData::Histogram &histogram) override {
+    m_spec = numberOfDetectorGroups();
     m_vec.resize(m_spec, SpectrumTester(histogram.xMode(), histogram.yMode()));
     for (size_t i = 0; i < m_spec; i++) {
       m_vec[i].setHistogram(histogram);
@@ -192,16 +216,15 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
-  void init(const size_t &numspec,
-            const Mantid::HistogramData::Histogram &histogram) override {
-    AxeslessWorkspaceTester::init(numspec, histogram);
+  void init(const Mantid::HistogramData::Histogram &histogram) override {
+    AxeslessWorkspaceTester::init(histogram);
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
 
@@ -351,6 +374,10 @@ class ColumnTester : public Column {
     throw std::runtime_error("isBool not implemented");
   }
 
+  bool isNumber() const override {
+    throw std::runtime_error("isNumber not implemented");
+  }
+
   long int sizeOfData() const override {
     throw std::runtime_error("sizeOfData not implemented");
   }
@@ -382,6 +409,17 @@ protected:
   }
   const void *void_pointer(size_t) const override {
     throw std::runtime_error("void_pointer const not implemented");
+  }
+};
+
+class VariableBinThrowingTester : public AxeslessWorkspaceTester {
+  size_t blocksize() const override {
+    if (getSpectrum(0).dataY().size() == getSpectrum(1).dataY().size())
+      return getSpectrum(0).dataY().size();
+    else
+      throw std::length_error("Mismatched bins sizes");
+
+    return 0;
   }
 };
 #endif /* FAKEOBJECTS_H_ */

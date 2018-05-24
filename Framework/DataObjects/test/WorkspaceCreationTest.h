@@ -41,6 +41,33 @@ void run_create_partitioned(const Parallel::Communicator &comm) {
     }
   }
   TS_ASSERT_EQUALS(i.size(), expectedSize);
+  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
+}
+
+void run_create_partitioned_parent(const Parallel::Communicator &comm) {
+  IndexInfo indices(47, Parallel::StorageMode::Distributed, comm);
+  indices.setSpectrumDefinitions(
+      std::vector<SpectrumDefinition>(indices.size()));
+  const auto parent =
+      create<Workspace2D>(indices, Histogram(BinEdges{1, 2, 4}));
+  const auto ws = create<MatrixWorkspace>(*parent);
+  const auto &i = ws->indexInfo();
+  TS_ASSERT_EQUALS(i.globalSize(), 47);
+  size_t expectedSize = 0;
+  for (size_t globalIndex = 0; globalIndex < i.globalSize(); ++globalIndex) {
+    // Current default is RoundRobinPartitioner
+    if (static_cast<int>(globalIndex) % comm.size() == comm.rank()) {
+      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize),
+                       static_cast<int>(globalIndex) + 1);
+      ++expectedSize;
+    }
+  }
+  TS_ASSERT_EQUALS(parent->indexInfo().globalSize(),
+                   ws->indexInfo().globalSize());
+  TS_ASSERT_EQUALS(parent->indexInfo().size(), ws->indexInfo().size());
+  TS_ASSERT_EQUALS(parent->getNumberHistograms(), ws->getNumberHistograms());
+  TS_ASSERT_EQUALS(i.size(), expectedSize);
+  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
 }
 
 void run_create_partitioned_with_instrument(
@@ -134,10 +161,8 @@ public:
     check_size(ws);
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 2);
-    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
-                     (std::set<detid_t>{1}));
-    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
-                     (std::set<detid_t>{2}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(), (std::set<detid_t>{}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(), (std::set<detid_t>{}));
   }
 
   void check_indices(const MatrixWorkspace &ws) {
@@ -267,7 +292,9 @@ public:
     const std::string &name1 = "Log4";
     const std::string &value1 = "6.4a";
     parent->mutableRun().addProperty(name1, value1);
-    const auto ws = createWithoutLogs<Workspace2D>(*parent);
+    const auto ws = create<Workspace2D>(*parent);
+    TS_ASSERT_EQUALS(&parent->run(), &ws->run());
+    ws->setSharedRun(Kernel::make_cow<Run>());
     check_indices(*ws);
     check_zeroed_data(*ws);
     check_instrument(*ws);
@@ -334,12 +361,26 @@ public:
     check_zeroed_data(*ws);
   }
 
-  void test_create_parent_IndexInfo_same_size() {
+  void test_create_parent_same_size_does_not_ignore_IndexInfo_no_instrument() {
     const auto parent = create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4}));
     const auto ws = create<Workspace2D>(*parent, make_indices_no_detectors(),
                                         parent->histogram(0));
-    // If parent has same size, data in IndexInfo is ignored
-    check_default_indices(*ws);
+    // Even if parent has same size data in IndexInfo should not be ignored
+    // since it is given explicitly.
+    check_indices_no_detectors(*ws);
+    check_zeroed_data(*ws);
+  }
+
+  void test_create_parent_same_size_does_not_ignore_IndexInfo() {
+    auto parentIndices = make_indices();
+    parentIndices.setSpectrumNumbers({666, 1});
+    const auto parent = create<Workspace2D>(m_instrument, parentIndices,
+                                            Histogram(BinEdges{1, 2, 4}));
+    const auto ws =
+        create<Workspace2D>(*parent, make_indices(), parent->histogram(0));
+    // Even if parent has same size data in IndexInfo should not be ignored
+    // since it is given explicitly.
+    check_indices(*ws);
     check_zeroed_data(*ws);
   }
 
@@ -441,9 +482,10 @@ public:
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
   }
 
-  void test_create_partitioned() {
-    run_create_partitioned(Parallel::Communicator{});
-    runParallel(run_create_partitioned);
+  void test_create_partitioned() { runParallel(run_create_partitioned); }
+
+  void test_create_partitioned_parent() {
+    runParallel(run_create_partitioned_parent);
   }
 
   void test_create_partitioned_with_instrument() {

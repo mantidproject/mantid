@@ -1,10 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
 
+from contextlib import contextmanager
+
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_config, pearl_param_mapping
+from isis_powder.pearl_routines import pearl_advanced_config, pearl_algs, pearl_calibration_algs, pearl_output, \
+    pearl_param_mapping
+
+import copy
 
 
 class Pearl(AbstractInst):
@@ -13,6 +18,7 @@ class Pearl(AbstractInst):
         self._inst_settings = instrument_settings.InstrumentSettings(
            param_map=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.get_all_adv_variables(),
            kwargs=kwargs)
+        self._default_inst_settings = copy.deepcopy(self._inst_settings)
 
         super(Pearl, self).__init__(user_name=self._inst_settings.user_name,
                                     calibration_dir=self._inst_settings.calibration_dir,
@@ -21,25 +27,52 @@ class Pearl(AbstractInst):
         self._cached_run_details = {}
 
     def focus(self, **kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
-        # Pearl does not have absorption corrections for a sample
-        do_absorb_corrections = False
-        return self._focus(run_number_string=self._inst_settings.run_number,
-                           do_absorb_corrections=do_absorb_corrections,
-                           do_van_normalisation=self._inst_settings.van_norm)
+        with self._apply_temporary_inst_settings(kwargs):
+            return self._focus(run_number_string=self._inst_settings.run_number,
+                               do_absorb_corrections=self._inst_settings.absorb_corrections,
+                               do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
-        self._inst_settings.update_attributes(kwargs=kwargs)
 
-        if str(self._inst_settings.tt_mode).lower() == "all":
-            for new_tt_mode in ["tt35", "tt70", "tt88"]:
-                self._inst_settings.tt_mode = new_tt_mode
+        with self._apply_temporary_inst_settings(kwargs):
+            if str(self._inst_settings.tt_mode).lower() == "all":
+                for new_tt_mode in ["tt35", "tt70", "tt88"]:
+                    self._inst_settings.tt_mode = new_tt_mode
+                    self._run_create_vanadium()
+            else:
                 self._run_create_vanadium()
-        else:
-            self._run_create_vanadium()
+
+    def create_cal(self, **kwargs):
+        with self._apply_temporary_inst_settings(kwargs):
+            run_details = self._get_run_details(self._inst_settings.run_number)
+
+            cross_correlate_params = {"ReferenceSpectra": self._inst_settings.reference_spectra,
+                                      "WorkspaceIndexMin": self._inst_settings.cross_corr_ws_min,
+                                      "WorkspaceIndexMax": self._inst_settings.cross_corr_ws_max,
+                                      "XMin": self._inst_settings.cross_corr_x_min,
+                                      "XMax": self._inst_settings.cross_corr_x_max}
+            get_detector_offsets_params = {"DReference": self._inst_settings.d_reference,
+                                           "Step": self._inst_settings.get_det_offsets_step,
+                                           "XMin": self._inst_settings.get_det_offsets_x_min,
+                                           "XMax": self._inst_settings.get_det_offsets_x_max}
+
+            return pearl_calibration_algs.create_calibration(calibration_runs=self._inst_settings.run_number,
+                                                             instrument=self,
+                                                             offset_file_name=run_details.offset_file_path,
+                                                             grouping_file_name=run_details.grouping_file_path,
+                                                             calibration_dir=self._inst_settings.calibration_dir,
+                                                             rebin_1_params=self._inst_settings.cal_rebin_1,
+                                                             rebin_2_params=self._inst_settings.cal_rebin_2,
+                                                             cross_correlate_params=cross_correlate_params,
+                                                             get_det_offset_params=get_detector_offsets_params)
+
+    @contextmanager
+    def _apply_temporary_inst_settings(self, kwargs):
+        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        yield
+        self._inst_settings = copy.deepcopy(self._default_inst_settings)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
@@ -56,8 +89,6 @@ class Pearl(AbstractInst):
         self._cached_run_details[run_number_string_key] = pearl_algs.get_run_details(
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
         return self._cached_run_details[run_number_string_key]
-
-    # Params #
 
     def _generate_output_file_name(self, run_number_string):
         inst = self._inst_settings
@@ -125,18 +156,18 @@ class Pearl(AbstractInst):
         return cropped_ws
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
-        # TODO move generating absorption corrections to an instrument param
-        gen_absorb = False
-        if gen_absorb:
-            pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_correct)
+        if self._inst_settings.gen_absorb:
+            absorb_file_name = self._inst_settings.absorb_out_file
+            if not absorb_file_name:
+                raise RuntimeError("\"absorb_corrections_out_filename\" must be supplied when generating absorption "
+                                   "corrections")
+            absorb_corrections = pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_correct,
+                                                                                 output_filename=absorb_file_name)
+        else:
+            absorb_corrections = None
 
-        if not self._is_vanadium:
-            # This is sample absorption corrections which is not supported on Pearl.
-            # We should not get here as the absorption flag shouldn't do anything whilst focusing on Pearl
-            raise RuntimeError("Cannot run Absorption corrections for a sample on Pearl. Please contact development "
-                               "team.")
-
-        return pearl_algs.apply_vanadium_absorb_corrections(van_ws=ws_to_correct, run_details=run_details)
+        return pearl_algs.apply_vanadium_absorb_corrections(van_ws=ws_to_correct, run_details=run_details,
+                                                            absorb_ws=absorb_corrections)
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on),

@@ -1,8 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ABSORPTIONCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ABSORPTIONCORRECTIONS_H_
 
-#include "ui_AbsorptionCorrections.h"
 #include "CorrectionsTab.h"
+#include "ui_AbsorptionCorrections.h"
+
+#include "../General/UserInputValidator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -10,7 +12,10 @@ class DLLExport AbsorptionCorrections : public CorrectionsTab {
   Q_OBJECT
 
 public:
-  AbsorptionCorrections(QWidget *parent = 0);
+  AbsorptionCorrections(QWidget *parent = nullptr);
+  ~AbsorptionCorrections();
+
+  Mantid::API::MatrixWorkspace_sptr sampleWorkspace() const;
 
 private:
   void setup() override;
@@ -25,6 +30,7 @@ private slots:
   void getBeamDefaults(const QString &dataName);
   void changeSampleDensityUnit(int);
   void changeCanDensityUnit(int);
+  UserInputValidator doValidation();
 
 private:
   void addSaveWorkspace(QString wsName);

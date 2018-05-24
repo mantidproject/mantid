@@ -126,7 +126,7 @@ public:
   InstrumentWidgetTab *getTab(const Tab tab) const;
   /// Get a filename for saving
   QString getSaveFileName(const QString &title, const QString &filters,
-                          QString *selectedFilter = NULL);
+                          QString *selectedFilter = nullptr);
   /// Get a name for settings group
   QString getSettingsGroupName() const;
   /// Get a name for a instrument-specific settings group
@@ -172,7 +172,7 @@ protected:
 
 public slots:
   void tabChanged(int);
-  void componentSelected(Mantid::Geometry::ComponentID id);
+  void componentSelected(size_t componentIndex);
   void executeAlgorithm(const QString &, const QString &);
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,8 +31,8 @@ To load only one POLDI data file (in this case a run from a calibration measurem
     # calibration is a WorkspaceGroup, so we can use getNames() to query what's inside.
     workspaceNames = calibration.getNames()
     
-    print "Number of data files loaded:", len(workspaceNames)
-    print "Name of data workspace:", workspaceNames[0]
+    print("Number of data files loaded: {}".format(len(workspaceNames)))
+    print("Name of data workspace: {}".format(workspaceNames[0]))
 
 Since only one run number was supplied, only one workspace is loaded. The name corresponds to the scheme described above:
 
@@ -50,8 +50,8 @@ Actually, the silicon calibration measurement consists of more than one run, so 
     
     workspaceNames = calibration.getNames()
     
-    print "Number of data files loaded:", len(workspaceNames)
-    print "Names of data workspaces:", workspaceNames
+    print("Number of data files loaded: {}".format(len(workspaceNames)))
+    print("Names of data workspaces: {}".format(workspaceNames))
     
 Now all files from the specified range are in the `calibration` WorkspaceGroup:
     
@@ -69,8 +69,8 @@ But in fact, these data files should not be processed separately, they belong to
     
     workspaceNames = calibration.getNames()
     
-    print "Number of data files loaded:", len(workspaceNames)
-    print "Names of data workspaces:", workspaceNames
+    print("Number of data files loaded: {}".format(len(workspaceNames)))
+    print("Names of data workspaces: {}".format(workspaceNames))
     
 The merged files will receive the name of the last file in the merged range:
     
@@ -93,8 +93,8 @@ A situation that occurs often is that one sample consists of multiple ranges of 
     
     workspaceNames = calibration.getNames()
     
-    print "Number of data files loaded:", len(workspaceNames)
-    print "Names of data workspaces:", workspaceNames
+    print("Number of data files loaded: {}".format(len(workspaceNames)))
+    print("Names of data workspaces: {}".format(workspaceNames))
     
 The result is the same as in the example above, two files are in the WorkspaceGroup:
     
@@ -115,8 +115,8 @@ On the other hand it is also possible to overwrite an existing WorkspaceGroup, f
     
     workspaceNames = calibration.getNames()
     
-    print "Number of data files loaded:", len(workspaceNames)
-    print "Names of data workspaces:", workspaceNames
+    print("Number of data files loaded: {}".format(len(workspaceNames)))
+    print("Names of data workspaces: {}".format(workspaceNames))
     
 The data loaded in the first call to the algorithm have been overwritten with the merged data set:
     

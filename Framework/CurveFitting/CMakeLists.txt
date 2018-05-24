@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/Algorithms/CalculateCostFunction.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
+	src/Algorithms/ConvolutionFit.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
 	src/Algorithms/EstimateFitParameters.cpp
 	src/Algorithms/EstimatePeakErrors.cpp
@@ -10,11 +11,14 @@ set ( SRC_FILES
 	src/Algorithms/Fit.cpp
 	src/Algorithms/Fit1D.cpp
 	src/Algorithms/FitPowderDiffPeaks.cpp
+	src/Algorithms/IqtFit.cpp
 	src/Algorithms/LeBailFit.cpp
 	src/Algorithms/LeBailFunction.cpp
 	src/Algorithms/NormaliseByPeakArea.cpp
 	src/Algorithms/PawleyFit.cpp
 	src/Algorithms/PlotPeakByLogValue.cpp
+	src/Algorithms/QENSFitSimultaneous.cpp
+	src/Algorithms/QENSFitSequential.cpp
 	src/Algorithms/RefinePowderInstrumentParameters.cpp
 	src/Algorithms/RefinePowderInstrumentParameters3.cpp
 	src/Algorithms/SplineBackground.cpp
@@ -32,14 +36,12 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
-	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
-	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
@@ -58,6 +60,13 @@ set ( SRC_FILES
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
+	src/Functions/CrystalFieldControl.cpp
+	src/Functions/CrystalFieldFunction.cpp
+	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldPeaksBase.cpp
+	src/Functions/CrystalFieldMultiSpectrum.cpp
+	src/Functions/CrystalFieldPeakUtils.cpp
+	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CrystalFieldHeatCapacity.cpp
 	src/Functions/CrystalFieldMagnetisation.cpp
 	src/Functions/CrystalFieldMoment.cpp
@@ -155,6 +164,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
 	inc/MantidCurveFitting/Algorithms/CalculateCostFunction.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
+	inc/MantidCurveFitting/Algorithms/ConvolutionFit.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
 	inc/MantidCurveFitting/Algorithms/EstimateFitParameters.h
@@ -163,11 +173,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/Fit.h
 	inc/MantidCurveFitting/Algorithms/Fit1D.h
 	inc/MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h
+	inc/MantidCurveFitting/Algorithms/IqtFit.h
 	inc/MantidCurveFitting/Algorithms/LeBailFit.h
 	inc/MantidCurveFitting/Algorithms/LeBailFunction.h
 	inc/MantidCurveFitting/Algorithms/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/Algorithms/PawleyFit.h
 	inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
+	inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
+	inc/MantidCurveFitting/Algorithms/QENSFitSequential.h
 	inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h
 	inc/MantidCurveFitting/Algorithms/SplineBackground.h
@@ -189,14 +202,12 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
@@ -215,6 +226,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
+	inc/MantidCurveFitting/Functions/CrystalFieldControl.h
+	inc/MantidCurveFitting/Functions/CrystalFieldFunction.h
 	inc/MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMagnetisation.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMoment.h
@@ -317,6 +330,7 @@ set ( TEST_FILES
 	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
+	Algorithms/ConvolutionFitSequentialTest.h
 	Algorithms/EstimateFitParametersTest.h
 	Algorithms/EstimatePeakErrorsTest.h
 	Algorithms/EvaluateFunctionTest.h
@@ -327,6 +341,8 @@ set ( TEST_FILES
 	Algorithms/NormaliseByPeakAreaTest.h
 	Algorithms/PawleyFitTest.h
 	Algorithms/PlotPeakByLogValueTest.h
+	Algorithms/QENSFitSequentialTest.h
+	Algorithms/QENSFitSimultaneousTest.h
 	Algorithms/RefinePowderInstrumentParameters3Test.h
 	Algorithms/RefinePowderInstrumentParametersTest.h
 	Algorithms/SeqDomainSpectrumCreatorTest.h
@@ -355,6 +371,7 @@ set ( TEST_FILES
 	FuncMinimizers/LevenbergMarquardtTest.h
 	FuncMinimizers/PRConjugateGradientTest.h
 	FuncMinimizers/SimplexTest.h
+	FuncMinimizers/TrustRegionMinimizerTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h
@@ -369,7 +386,9 @@ set ( TEST_FILES
 	Functions/ComptonProfileTest.h
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
+	Functions/CrystalFieldControlTest.h
 	Functions/CrystalFieldEnergiesTest.h
+	Functions/CrystalFieldFunctionTest.h
 	Functions/CrystalFieldHeatCapacityTest.h
 	Functions/CrystalFieldMagnetisationTest.h
 	Functions/CrystalFieldMomentTest.h
@@ -467,12 +486,15 @@ enable_precompiled_headers( inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting 
-                                     COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING )
+set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting
+  COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
-endif () 
+  set_target_properties(CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(CurveFitting PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )

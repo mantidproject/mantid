@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
-#include <qpainter.h>
+#include <QPainter>
 #include <QRect>
 #include <QShowEvent>
 #include <qwt_scale_div.h>

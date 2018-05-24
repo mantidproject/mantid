@@ -14,7 +14,7 @@ This algorithm is frequently run after making a phase quadrature transformation 
 article by T.M. Riseman and J.H. Brewer [Hyp. Int., 65, (1990), 1107].
 
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -47,8 +47,8 @@ Usage
    input = CreateWorkspace(dataX=datax, dataY=datay,Nspec=2,UnitX="TOF")
    # Compute polarization in RRF
    output = RRFMuon(input,1.0,"MHz",0)
-   print("%.1f" % output.readY(0)[0])
-   print("%.1f" % output.readY(1)[0])
+   print("{:.1f}".format(output.readY(0)[0]))
+   print("{:.1f}".format(output.readY(1)[0]))
 
 Output:
 

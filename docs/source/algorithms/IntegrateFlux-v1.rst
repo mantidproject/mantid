@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,8 +29,8 @@ Usage
     wsOut = IntegrateFlux( ws )
     
     # Print the result
-    print "The input workspace has %i spectra" % ws.getNumberHistograms()
-    print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+    print("The input workspace has {} spectra".format(ws.getNumberHistograms()))
+    print("The output workspace has {} spectra".format(wsOut.getNumberHistograms()))
 
 Output:
 

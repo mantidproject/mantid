@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -60,7 +60,7 @@ Usage
   # Examine 
   partablews = mtd["PG3_Bank3_ParTable"]
   braggtablews = mtd["LaB6_HKL_Table"]
-  print "Number Bragg peaks from .hkl file is %d.  Number of peak profile parameters is %d." % (braggtablews.rowCount(), partablews.rowCount())
+  print("Number Bragg peaks from .hkl file is {}.  Number of peak profile parameters is {}.".format(braggtablews.rowCount(), partablews.rowCount()))
 
 
 .. testcleanup:: ExCreateLBInputs

@@ -24,7 +24,7 @@ public:
 
   void testContructorDefaults() {
     Poco::FilterChannel a;
-    TestChannel *empty = 0;
+    TestChannel *empty = nullptr;
     TS_ASSERT_EQUALS(a.getPriority(), 8);
     TS_ASSERT_EQUALS(a.getChannel(), empty);
   }
@@ -98,7 +98,7 @@ public:
   void testAddChannel() {
     boost::shared_ptr<TestChannel> tChannel = boost::make_shared<TestChannel>();
     Poco::FilterChannel a;
-    TestChannel *empty = 0;
+    TestChannel *empty = nullptr;
 
     TS_ASSERT_EQUALS(a.getChannel(), empty);
     a.addChannel(tChannel.get());
@@ -140,7 +140,7 @@ public:
     a.addChannel(tChannel.get());
 
     // create a priority map
-    typedef std::map<unsigned int, std::string> priorityMap;
+    using priorityMap = std::map<unsigned int, std::string>;
     priorityMap pMap;
     pMap.insert(priorityMap::value_type(1, "FATAL"));
     pMap.insert(priorityMap::value_type(2, "CRITICAL"));
@@ -192,7 +192,7 @@ public:
 
   void testAddChannelThroughProperty() {
     Poco::FilterChannel a;
-    TestChannel *empty = 0;
+    TestChannel *empty = nullptr;
     // initialise the test channel and put it into the registry
     TestChannel *tChannel = new TestChannel;
     Poco::LoggingRegistry::defaultRegistry().registerChannel("tChannel",
@@ -215,7 +215,7 @@ public:
     // FilterChannel into the factory
     ConfigService::Instance();
 
-    Poco::FilterChannel *empty = 0;
+    Poco::FilterChannel *empty = nullptr;
 
     Poco::Channel *createdChannel =
         Poco::LoggingFactory::defaultFactory().createChannel("FilterChannel");

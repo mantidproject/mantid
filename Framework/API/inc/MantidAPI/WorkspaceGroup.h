@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
+#include <iterator>
 #include <mutex>
 
 namespace Mantid {
@@ -52,7 +53,8 @@ class Algorithm;
 class MANTID_API_DLL WorkspaceGroup : public Workspace {
 public:
   /// Default constructor.
-  WorkspaceGroup();
+  WorkspaceGroup(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   /// Destructor
   ~WorkspaceGroup() override;
   /// Return a string ID of the class
@@ -74,6 +76,8 @@ public:
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
   Workspace_sptr getItem(const std::string wsName) const;
+  /// Return all workspaces in the group as one call for thread safety
+  std::vector<Workspace_sptr> getAllItems() const;
   /// Remove a workspace from the group
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
@@ -87,6 +91,19 @@ public:
   bool isInGroup(const Workspace &workspaceToCheck, size_t level = 0) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
+
+  /// Returns a non-const iterator pointing at the first element in the
+  /// workspace group
+  std::vector<Workspace_sptr>::iterator begin();
+  /// Returns a non-const iterator pointing at the last element in the workspace
+  /// group
+  std::vector<Workspace_sptr>::iterator end();
+  /// Returns a const iterator pointing at the first element in the workspace
+  /// group
+  std::vector<Workspace_sptr>::const_iterator begin() const;
+  /// Returns a const iterator pointing at the last element in the workspace
+  /// group
+  std::vector<Workspace_sptr>::const_iterator end() const;
 
   /// @name Wrapped ADS calls
   //@{
@@ -114,7 +131,6 @@ public:
   /// returns a copy as the internal vector can mutate while the vector is being
   /// iterated over.
   std::vector<std::string> getNames() const;
-
   //@}
 
   WorkspaceGroup(const WorkspaceGroup &ref) = delete;

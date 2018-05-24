@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -169,13 +169,13 @@ Usage
   
   # Examine
   mdws = mtd['QSampleMD']
-  print 'Output MDEventWorkspace has %d events.'%(mdws.getNEvents())
+  print('Output MDEventWorkspace has {} events.'.format(mdws.getNEvents()))
   peakws = mtd['PeakTable']
-  print  'There are %d peaks found in output MDWorkspace'%(peakws.getNumberPeaks())
+  print('There are {} peaks found in output MDWorkspace'.format(peakws.getNumberPeaks()))
   peak = peakws.getPeak(0)
   qsample = peak.getQSampleFrame()
-  print 'In Q-sample frame, center of peak 0 is at (%.5f, %.5f, %.5f) at detector with ID %d'%(
-      qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID())
+  print('In Q-sample frame, center of peak 0 is at ({:.5f}, {:.5f}, {:.5f}) at detector with ID {}'.
+      format(qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID()))
     
 .. testcleanup::  ExConvertHB3AToMDVirtualInstrument
 
@@ -213,13 +213,13 @@ Output:
   
   # Examine
   mdws = mtd['QSampleMD']
-  print 'Output MDEventWorkspace has %d events.'%(mdws.getNEvents())
+  print('Output MDEventWorkspace has {} events.'.format(mdws.getNEvents()))
   peakws = mtd['PeakTable']
-  print  'There are %d peaks found in output MDWorkspace'%(peakws.getNumberPeaks())
+  print('There are {} peaks found in output MDWorkspace'.format(peakws.getNumberPeaks()))
   peak = peakws.getPeak(0)
   qsample = peak.getQSampleFrame()
-  print 'In Q-sample frame, center of peak 0 is at (%.5f, %.5f, %.5f) at detector with ID %d'%(
-      qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID())
+  print('In Q-sample frame, center of peak 0 is at ({:.5f}, {:.5f}, {:.5f}) at detector with ID {}'.
+      format(qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID()))
     
 .. testcleanup::  ExConvertHB3AToMDCopyInstrument
 

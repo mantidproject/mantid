@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,15 +53,16 @@ Usage
   datatbws = mtd['HB2A_0231_0001_Data'] 
   infows = mtd['HB2A_0231_Info']
 
-  print "Number of measuring points = %d" % (datatbws.rowCount())
-  print "Number of columns in data workspace = %d" % (datatbws.columnCount())
+  print("Number of measuring points = {}".format(datatbws.rowCount()))
+  print("Number of columns in data workspace = {}".format(datatbws.columnCount()))
   propertylist = infows.getRun().getProperties()
-  print "Number of run information = %d" % (len(propertylist))
-  for i in xrange(len(propertylist)):
-      print "Property %d: Name = %-20s." % (i, propertylist[i].name)
-  print "Sum of Counts = %d" % (infows.getRun().getProperty("Sum of Counts").value)
-  print "Center of Mass = %.5f +/- %.5f" % (infows.getRun().getProperty("Center of Mass").value, 
-      infows.getRun().getProperty("Center of Mass.error").value)
+  print("Number of run information = {}".format(len(propertylist)))
+  for i in range(len(propertylist)):
+      print("Property {}: Name = {}".format(i, propertylist[i].name))
+  print("Sum of Counts = {}".format(infows.getRun().getProperty("Sum of Counts").value))
+  print("Center of Mass = {:.5f} +/- {:.5f}".format(
+         infows.getRun().getProperty("Center of Mass").value, 
+         infows.getRun().getProperty("Center of Mass.error").value))
 
 .. testcleanup:: ExLoadHB2AData
 
@@ -75,41 +76,41 @@ Output:
   Number of measuring points = 61
   Number of columns in data workspace = 70
   Number of run information = 35
-  Property 0: Name = Center of Mass      .
-  Property 1: Name = Center of Mass.error.
-  Property 2: Name = Full Width Half-Maximum.
-  Property 3: Name = Full Width Half-Maximum.error.
-  Property 4: Name = Sum of Counts       .
-  Property 5: Name = analyzer            .
-  Property 6: Name = builtin_command     .
-  Property 7: Name = col_headers         .
-  Property 8: Name = collimation         .
-  Property 9: Name = command             .
-  Property 10: Name = date                .
-  Property 11: Name = def_x               .
-  Property 12: Name = def_y               .
-  Property 13: Name = experiment          .
-  Property 14: Name = experiment_number   .
-  Property 15: Name = latticeconstants    .
-  Property 16: Name = local_contact       .
-  Property 17: Name = mode                .
-  Property 18: Name = monochromator       .
-  Property 19: Name = preset_channel      .
-  Property 20: Name = preset_type         .
-  Property 21: Name = preset_value        .
-  Property 22: Name = proposal            .
-  Property 23: Name = runend              .
-  Property 24: Name = samplemosaic        .
-  Property 25: Name = samplename          .
-  Property 26: Name = sampletype          .
-  Property 27: Name = scan                .
-  Property 28: Name = scan_title          .
-  Property 29: Name = sense               .
-  Property 30: Name = time                .
-  Property 31: Name = ubconf              .
-  Property 32: Name = ubmatrix            .
-  Property 33: Name = users               .
-  Property 34: Name = run_start           .
+  Property 0: Name = Center of Mass
+  Property 1: Name = Center of Mass.error
+  Property 2: Name = Full Width Half-Maximum
+  Property 3: Name = Full Width Half-Maximum.error
+  Property 4: Name = Sum of Counts
+  Property 5: Name = analyzer
+  Property 6: Name = builtin_command
+  Property 7: Name = col_headers
+  Property 8: Name = collimation
+  Property 9: Name = command
+  Property 10: Name = date
+  Property 11: Name = def_x
+  Property 12: Name = def_y
+  Property 13: Name = experiment
+  Property 14: Name = experiment_number
+  Property 15: Name = latticeconstants
+  Property 16: Name = local_contact
+  Property 17: Name = mode
+  Property 18: Name = monochromator
+  Property 19: Name = preset_channel
+  Property 20: Name = preset_type
+  Property 21: Name = preset_value
+  Property 22: Name = proposal
+  Property 23: Name = runend
+  Property 24: Name = samplemosaic
+  Property 25: Name = samplename
+  Property 26: Name = sampletype
+  Property 27: Name = scan
+  Property 28: Name = scan_title
+  Property 29: Name = sense
+  Property 30: Name = time
+  Property 31: Name = ubconf
+  Property 32: Name = ubmatrix
+  Property 33: Name = users
+  Property 34: Name = run_start
   Sum of Counts = 1944923
   Center of Mass = 9.00076 +/- 0.00921
 

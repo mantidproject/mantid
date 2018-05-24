@@ -7,18 +7,18 @@ Crystal Field Python Interface
   :local:
 
 The python facilities for Crystal Field calculations are available in Mantid from module `CrystalField`.
-There are two main classes the module provides: `CrystalFiled` that defines various properties of a crystal
-field and `CrystalFieldFit` that manages the fitting process.
+The module provides two main classes: `CrystalField` defines various properties of a crystal field and
+`CrystalFieldFit` manages the fitting process.
 
 
 Setting up crystal field parameters
 -----------------------------------
 
 A crystal field computation starts with creating an instance of the `CrystalField` class. The constructor
-has two mandatory arguments: `Ion` - a symbolic name of the ion, and `Symmetry` - a name of the symmetry group
-of the field. The rest of the parameters are optional.
+has two mandatory arguments: `Ion` - the symbolic name of the ion, and `Symmetry` - the name of the point symmetry
+group of the field. The rest of the parameters are optional.
 
-Possible values for the `Ion` argument::
+Possible values for the `Ion` argument are::
 
  Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb
 
@@ -30,7 +30,7 @@ or half-integer value, e.g. `Ion=S2` or `Ion=S1.5`. In these cases, the g-factor
 The prefix letter can also be `J` instead of `S`, and lower case letters are also supported. (e.g. `Ion=j1`,
 `Ion=s2.5` and `Ion=J0.5` are all valid).
  
-Allowed values for `Symmetry`::
+Allowed values for `Symmetry` are::
 
   C1, Ci, C2, Cs, C2h, C2v, D2, D2h, C4, S4, C4h, D4, C4v, D2d, D4h, C3,
   S6, D3, C3v, D3d, C6, C3h, C6h, D6, C6v, D3h, D6h, T, Td, Th, O, Oh
@@ -41,7 +41,7 @@ The minimum code to create a crystal field object is::
   cf = CrystalField('Ce', 'C2v')
   
 Names of the crystal field parameters have the form `Bnn` and `IBnn` where `nn` are two digits between 0 and 6.
-The `Bnn` is a real and the `IBnn` is an imaginary part of a complex parameter. If a parameter isn't set explicitly
+`Bnn` is the real and `IBnn` is the imaginary part of a complex parameter. If a parameter isn't set explicitly
 its default value is 0. To set a parameter pass it to the `CrystalField` constructor as a keyword argument, e.g.::
 
   cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770)
@@ -58,7 +58,7 @@ Which can also be used to query the value of a parameter::
 Calculating the Eigensystem
 ---------------------------
 
-`CrystalFiled` class has methods to calculate the Hamiltonian and its eigensystem::
+The `CrystalField` class has methods to calculate the Hamiltonian and its eigensystem::
 
   # Calculate and return the Hamiltonian matrix as a 2D numpy array.
   h = cf.getHamiltonian()
@@ -91,7 +91,7 @@ Knowing the temperature allows us to calculate a peak list: a list of transition
 
   print cf.getPeakList()
   
-The output is::
+Which produces the output::
 
  [[  0.00000000e+00   2.44006198e+01   4.24977124e+01   1.80970926e+01 -2.44006198e+01]
   [  2.16711565e+02   8.83098530e+01   5.04430056e+00   1.71153708e-01  1.41609425e-01]]
@@ -112,9 +112,9 @@ The new output::
  [[   0.           24.40061976   42.49771237]
   [ 216.71156467   88.30985303    5.04430056]]
   
-To calculate a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
+To calculate a spectrum we need to define the shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
-of Lorentzian is assumed. To set a different shape use the `PeakShape` property::
+of `Lorentzian` is assumed. To set a different shape use the `PeakShape` property::
 
   cf.PeakShape = 'Gaussian'
   cf.FWHM = 0.9
@@ -128,8 +128,9 @@ After the peak shape is defined a spectrum can be calculated::
   
 The output is a tuple of two 1d numpy arrays (x, y) that can be used with `matplotlib` to plot::
 
-  pyplot.plot(*sp)
-  pyplot.show()
+  import matplotlib.pyplot as plt
+  plt.plot(*sp)
+  plt.show()
   
 .. image:: /images/CrystalFieldSpectrum1.png
    :height: 300
@@ -170,7 +171,13 @@ Plotting in MantidPlot
 ----------------------
 
 To plot a spectrum using MantidPlot's graphing facilities `CrystalField` has method `plot`. It has the same arguments as `getSpectrum`
-and opens a window with a plot.
+and opens a window with a plot, e.g.::
+
+  cf.plot()
+
+In addition to plotting, the `plot` method creates a workspace named `CrystalField_<Ion>` with the plot data. Subsequent calls to `plot` 
+for the same `CrystalField` object will use the same plot window as created by the first call unless this window has been closed in the 
+mean time.
 
 
 Adding a Background
@@ -194,7 +201,7 @@ Setting Ties and Constraints
 ----------------------------
 
 Setting ties and constraints are done by calling the `ties` and `constraints` methods of the `CrystalField` class or its components.
-To `Bnn` parameters are tied by the `CrystalField` class directly specifying the tied parameter as a keyword argument::
+The `Bnn` parameters are tied by the `CrystalField` class directly specifying the tied parameter as a keyword argument::
 
   cf.ties(B20=1.0, B40='B20/2')
   
@@ -238,14 +245,16 @@ which is equivalent to::
 Setting Resolution Model
 ------------------------
 
-Resolution model here is a way to constrain widths of the peaks to realistic numbers which agree with a measured or
+A resolution model is a way to constrain the widths of the peaks to realistic numbers which agree with a measured or
 calculated instrument resolution function. A model is a function that returns a FWHM for a peak centre. The Crystal
-Field python interface defines helper class `ResolutionModel` to help define and set resolution models.
+Field python interface defines the helper class `ResolutionModel` to help define and set resolution models.
 
 To construct an instance of `ResolutionModel` one needs to provide up to four input parameters. The first parameter, `model`, is
-mandatory and can be either of the two
+mandatory and can be either of:
 
-1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function. The first element of the tuple is a list of increasing values for peak centres, and the second element is a list of corresponding widths. Values between the tabulated peak positions will be linearly interpolated.
+1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function. 
+   The first element of the tuple is a list of increasing values for peak centres, and the second element is a list of corresponding
+   widths. Values between the tabulated peak positions will be linearly interpolated.
 
 2. A python function that takes a :class:`numpy.ndarray` of peak positions and returns a numpy array of widths.
 
@@ -254,21 +263,38 @@ function. `xstart` and `xend` define the interval of interpolation which must in
 :math:`10^{-4}` and defines an approximate desired accuracy of the approximation. The interval will be split until the largest error of the interpolation
 is smaller than `accuracy`. Note that subdivision cannot go on to infinity as the number of points is limited by the class member `ResolutionModel.max_model_size`.
 
-Example of setting a resolution model::
+Example of setting a resolution model using a tuple of two arrays::
 
+    from CrystalField import CrystalField, ResolutionModel
     rm = ResolutionModel(([1, 2, 3, ...., 100], [0.1, 0.3, 0.35, ..., 2.1]))
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
 
-    ...
+Or using an arbitrary function `my_func`::
 
-    rm = ResolutionModel(my_func, xstart=0.0, xend=120.0, accuracy=0.01)
+    def my_func(en):
+        return (25-en)**(1.5) / 200 + 0.1
+
+    rm = ResolutionModel(my_func, xstart=0.0, xend=24.0, accuracy=0.01)
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
 
-When a resolution model is set the peak width will be constrained to have a value close to the model. The degree of deviation is controlled by the
-`FWHMVariation` parameter. It has the default of 0.1 and is an absolute maximum difference a width can have. If set to 0 the widths will be fixed
-to their calculated values (depending on the instant values of their peak centres). For example::
+Finally, the :ref:`PyChop` interface may be used to generate the resolution function for a particular spectrometer::
 
-    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, FWHMVariation=0.001)
+    from PyChop import PyChop2
+    marires = PyChop2('MARI')
+    marires.setChopper('S')
+    marires.setFrequency(250)
+    marires.setEi(30)
+    rm = ResolutionModel(marires.getResolution, xstart=0.0, xend=29.0, accuracy=0.01)
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
+
+When a resolution model is set, the peak width will be constrained to have a value close to the model. The degree of deviation is controlled by the
+`FWHMVariation` parameter. It has the default of 0.1 and is the maximum difference from the value given by the resolution model a width can have. 
+If set to 0 the widths will be fixed to their calculated values (depending on the instant values of their peak centres). For example::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, FWHMVariation=0.1)
+
+will allow the peak widths to vary between :math:`\Delta(E)-0.1` and :math:`\Delta(E)+0.1` where :math:`\Delta(E)` is the value of the 
+resolution model at the peak position :math:`E`.
 
 
 
@@ -311,22 +337,22 @@ The resolution model also needs to be initialised from a list::
     # or
 
     rm = ResolutionModel([func0, func1], 0, 100, accuracy = 0.01)
-
+    cf.ResolutionModel = rm
 
 To calculate a spectrum call the same method `getSpectrum` but pass the spectrum index as its first parameter::
 
-  # Calculate second spectrum, use the generated x-values
-  sp = cf.getSpectrum(1)
+    # Calculate second spectrum, use the generated x-values
+    sp = cf.getSpectrum(1)
 
-  # Calculate third spectrum, use a list for x-values
-  x = [0, 1, 2, 3, ...]
-  sp = cf.getSpectrum(2, x)
-  
-  # Calculate second spectrum, use the first spectrum of a workspace
-  sp = cf.getSpectrum(1, ws)
-  
-  # Calculate first spectrum, use the i-th spectrum of a workspace
-  sp = cf.getSpectrum(0, ws, i)
+    # Calculate third spectrum, use a list for x-values
+    x = [0, 1, 2, 3, ...]
+    sp = cf.getSpectrum(2, x)
+    
+    # Calculate second spectrum, use the first spectrum of a workspace
+    sp = cf.getSpectrum(1, ws)
+    
+    # Calculate first spectrum, use the i-th spectrum of a workspace
+    sp = cf.getSpectrum(0, ws, i)
 
 Note that the attributes `Temperature`, `FWHM`, `peaks` and `background` may be set separately from the constructor, e.g.::
 
@@ -339,24 +365,6 @@ was initially a scalar value but is then redefined to be a list or vice versa), 
 `FWHM` and `peaks` parameters are cleared. Any crystal field parameters previously defined will be retained, however.
 
 
-Multiple Ions
--------------
-
-If there are multiple ions define `CrystalField` objects for each ion separately then add them together::
-
-    params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-              'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
-    cf1 = CrystalField('Ce', 'C2v', **params)
-    cf2 = CrystalField('Pr', 'C2v', **params)
-    cf = cf1 + cf2
-
-The expression that combines the `CrystalField` objects also defines the contributions of each site into the overall intensity.
-The higher the coefficient of the object in the expression the higher its relative contribution. For example::
-
-    cf = 2*cf1 + cf2
-
-means that the intensity of `cf1` should be twice that of `cf2`.
-
 Fitting
 -------
 
@@ -366,15 +374,107 @@ instance (object) of the `CrystalFieldFit` class::
     from CrystalField import CrystalFieldFit
     # In case of a single spectrum (ws is a workspace)
     fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
-    
+
     # Or for multiple spectra
     fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
-    
+
 Then call `fit()` method::
 
     fit.fit()
-    
+
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
+
+
+Multiple Ions
+-------------
+
+If there are multiple ions you can define `CrystalField` objects for each ion separately then add them together to
+create a CrystalFieldMultiSite object::
+
+    params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
+              'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+    cf1 = CrystalField('Ce', 'C2v', **params)
+    cf2 = CrystalField('Pr', 'C2v', **params)
+    cfms = cf1 + cf2
+
+The expression that combines the `CrystalField` objects also defines the contributions of each site into the overall intensity.
+The higher the coefficient of the object in the expression the higher its relative contribution. For example::
+
+    cf = 2*cf1 + cf2
+
+means that the intensity of `cf1` should be twice that of `cf2`.
+
+Alternatively, you can create a `CrystalFieldMultiSite` object directly. This takes Ions, Symmetries, Temperatures and peak widths as lists::
+
+    from CrystalField import CrystalFieldMultiSite
+    cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1])
+
+Note that `Temperature` and `FWHM` (without plural) can also be used in place of the equivalent plural parameters.
+To access parameters of a CrystalFieldMultiSite object, prefix them with the ion index::
+
+    cfms['ion0.B40'] = -0.031
+    cfms['ion1.B20'] = 0.37737
+    b = cfms['ion0.B22']
+
+
+Parameters can be set when creating the object by passing in a dictionary using the `parameters` keyword::
+
+    cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1],
+                                 parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
+                                             'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
+
+A background can also be set this way, or using `cfms.background.` It can be passed as a string, a Function object(s), or a 
+CompositeFunction object::
+
+    cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
+                              Background='name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
+
+    cfms = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[50], FWHMs=[0.9],
+                                   Background=LinearBackground(A0=1.0), BackgroundPeak=Gaussian(Height=10, Sigma=0.3))
+
+    cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
+                                   Background= Gaussian(PeakCentre=1) + LinearBackground())
+
+Ties and constraints are set similarly to `CrystalField` objects. `f` prefixes have been changed to be more descriptive::
+
+    cfms = CrystalFieldMultiSite(Ions=['Ce','Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
+                                   Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
+                                   parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
+                                               'ion1.B42':-0.11611, 'ion1.B44':-0.12544})
+    cfms.ties({'sp0.bg.f0.Height': 10.1})
+    cfms.constraints('sp0.bg.f0.Sigma > 0.1')
+    cfms.constraints('ion0.sp0.pk1.FWHM < 2.2')
+    cfms.ties({'ion0.sp1.pk2.FWHM': '2*ion0.sp1.pk1.FWHM', 'ion1.sp1.pk3.FWHM': '2*ion1.sp1.pk2.FWHM'})
+
+Parameters which are not allowed by the specified symmetry will be fixed to be zero, but unlike for the single-site case,
+all other parameters are assumed to be free (in the single-site case, parameters which are unset are assumed to be fixed
+to be zero). For the multi-site case, parameters must be fixed explicitly. For example::
+
+    params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787, 'ion1.B42':-0.11611, 'ion1.B44':-0.12544}
+    cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0, 50.0],
+                                    FWHMs=[1.0, 1.0], ToleranceIntensity=6.0, ToleranceEnergy=1.0,  FixAllPeaks=True,
+                                   parameters=params)
+
+    cf.fix('ion0.BmolX', 'ion0.BmolY', 'ion0.BmolZ', 'ion0.BextX', 'ion0.BextY', 'ion0.BextZ', 'ion0.B40',
+           'ion0.B42', 'ion0.B44', 'ion0.B60', 'ion0.B62', 'ion0.B64', 'ion0.B66', 'ion0.IntensityScaling',
+           'ion1.BmolX', 'ion1.BmolY', 'ion1.BmolZ', 'ion1.BextX', 'ion1.BextY', 'ion1.BextZ', 'ion1.B40',
+           'ion1.B42', 'ion1.B44', 'ion1.B60', 'ion1.B62', 'ion1.B64', 'ion1.B66', 'ion1.IntensityScaling',
+           'sp0.IntensityScaling', 'sp1.IntensityScaling')
+
+    chi2 = CalculateChiSquared(str(cf.function), InputWorkspace=ws1, InputWorkspace_1=ws2)[1]
+
+    fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2], MaxIterations=10)
+    fit.fit()
+
+Calculating a spectrum can be done with `CrystalFieldMultiSite` in the same way as a `CrystalField` object.
+
+CrystalFieldMultiSite can also be used in the single-site case to use the `CrystalFieldFunction` fitting function. It
+can be used like a `CrystalField` object in this way, although `Temperatures` and `FWHMs` must still be passed as lists::
+
+    cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
+                                     BmolX=1.0, B40=-0.02)
+
+
 
 Finding Initial Parameters
 --------------------------
@@ -498,14 +598,14 @@ gives::
 
     {'O1': [0.125, 0.125, 0.375],
      'O2': [0.125, 0.375, 0.375],
-     'Yb1': [0.25, 0.25, 0.25],
-     'Yb2': [0.021, 0.0, 0.25],
-     'Yb3': [0.542, 0.0, 0.25]}
+     'Sm1': [0.25, 0.25, 0.25],
+     'Sm2': [0.021, 0.0, 0.25],
+     'Sm3': [0.542, 0.0, 0.25]}
 
 You can then define the charges for each site, the magnetic ion and the maximum distance, and calculate::
 
-    cif_pc_model.Charges = {'O1':-2, 'O2':-2, 'Yb1':3, 'Yb2':3, 'Yb3':3}
-    cif_pc_model.IonLabel = 'Yb2'
+    cif_pc_model.Charges = {'O1':-2, 'O2':-2, 'Sm1':3, 'Sm2':3, 'Sm3':3}
+    cif_pc_model.IonLabel = 'Sm2'
     cif_pc_model.Neighbour = 1
     cif_blm = cif_pc_model.calculate()
     print(cif_blm)
@@ -522,14 +622,14 @@ then the value for ``MaxDistance`` will be used regardless of where it appears i
 
 For ``Charges``, instead of listing the charges of each site, you can just give the charge for each element, e.g.::
 
-    cif_pc_model.Charges = {'O':-2, 'Yb':3}
+    cif_pc_model.Charges = {'O':-2, 'Sm':3}
     cif_blm = cif_pc_model.calculate()
 
 The result of the ``calculate()`` method can be put directly into a ``CrystalField`` object and used either
 to calculate a spectrum or as the starting parameters in a fit::
 
-    cf = CrystalField('Yb', 'C2', Temperature=5, FWHM=10, **cif_pc_model.calculate())
-    plot(**cf.getSpectrum())
+    cf = CrystalField('Sm', 'C2', Temperature=5, FWHM=10, **cif_pc_model.calculate())
+    plot(*cf.getSpectrum())
     fit = CrystalFieldFit(cf, InputWorkspace=ws)
     fit.fit()
 
@@ -551,12 +651,14 @@ susceptibility, and magnetisation. The calculated values can be invoked using th
 
 To calculate the heat capacity use::
 
+    import matplotlib.pyplot as plt
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44.0)
     Cv = cf.getHeatCapacity()       # Calculates Cv(T) for 1<T<300K in 1K steps  (default)
-    pyplot.plot(*Cv)                # Returns a tuple of (x, y) values
+    plt.plot(*Cv)                   # Returns a tuple of (x, y) values
 
     T = np.arange(1,900,5)
     Cv = cf.getHeatCapacity(T)      # Calculates Cv(T) for specified values of T (1 to 900K in 5K steps here)
-    pyplot.plot(T, Cv[1])
+    plt.plot(T, Cv[1])
 
     # Temperatures from a single spectrum workspace
     ws = CreateWorkspace(T, T, T)
@@ -641,22 +743,26 @@ class as the `PhysicalProperty` attribute of `CrystalField`, either as a keyword
 
 or separately after construction::
 
-    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    params = {'B20':0.37737, 'B22':3.9770, 'B40':-0.031787, 'B42':-0.11611, 'B44':-0.12544}
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('Cv')
     fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fitcv.fit()
 
     # Fits a susceptibility dataset. Data is the volume susceptibility in SI units
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder', Unit='SI')
     fit_chi = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_chi.fit()
 
     # Fits a magnetisation dataset. Data is in emu/mol, and was measured at 5K with the field || [111].
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('M(H)', Temperature=5, Hdir=[1, 1, 1], Unit='cgs')
     fit_mag = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_mag.fit()
 
     # Fits a magnetisation vs temperature dataset. Data is in Am^2/mol, measured with a 0.1T field || [110]
+    cf = CrystalField('Ce', 'C2v', **params)
     cf.PhysicalProperty = PhysicalProperties('M(T)', Hmag=0.1, Hdir=[1, 1, 0], Unit='SI')
     fit_moment = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_moment.fit()
@@ -685,9 +791,9 @@ properties should be a list. E.g.::
     fit.fit()
 
     # Fits two INS spectra (at 44K and 50K) and the heat capacity, susceptibility and magnetisation simultaneously.
-    PPCv = PhysicalProperty('Cv')
-    PPchi = PhysicalProperty('susc', 'powder', Unit='cgs')
-    PPMag = PhysicalProperty('M(H)', 5, [1, 1, 1], 'bohr')
+    PPCv = PhysicalProperties('Cv')
+    PPchi = PhysicalProperties('susc', 'powder', Unit='cgs')
+    PPMag = PhysicalProperties('M(H)', [1, 1, 1], 5, 'bohr')
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                       Temperature=[44.0, 50], FWHM=[1.1, 0.9], PhysicalProperty=[PPCv, PPchi, PPMag] )
     fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_44K, ws_ins_50K, ws_cp, ws_chi, ws_mag])
@@ -695,7 +801,7 @@ properties should be a list. E.g.::
 
 Note that `PhysicalProperty` requires the type of physical property (either `'Cv'` or `'Cp'` or `'heatcap'` for
 heat capacity; `'susc'` or `'chi'` for susceptibility; `'mag'` or `'M(H)'` for magnetic moment vs applied field;
-or `'mom'` or `'M(T)'` for moment vs temperature) as the first argument. subsequent arguments are optional, and
+or `'mom'` or `'M(T)'` for moment vs temperature) as the first argument. Subsequent arguments are optional, and
 are in the following order::
 
     PhysicalProperties('Cp')  # No further parameters required for heat capacity

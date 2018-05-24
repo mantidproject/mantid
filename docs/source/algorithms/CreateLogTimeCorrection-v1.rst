@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,24 +33,24 @@ Usage
   cfile.close()
 
   # Print out partial result
-  print "From output TableWorkspace:"
-  print "detector (ID: %d) correction = %-.6f" % (corrws.cell(0, 0), corrws.cell(0, 1))
-  print "detector (ID: %d) correction = %-.6f" % (corrws.cell(10, 0), corrws.cell(10, 1))
-  print "detector (ID: %d) correction = %-.6f" % (corrws.cell(100, 0), corrws.cell(100, 1))
-  print "detector (ID: %d) correction = %-.6f" % (corrws.cell(1000, 0), corrws.cell(1000, 1))
-  print "detector (ID: %d) correction = %-.6f" % (corrws.cell(10000, 0), corrws.cell(1000, 1))
+  print("From output TableWorkspace:")
+  print("detector (ID: {}) correction = {:.6f}".format(corrws.cell(0, 0), corrws.cell(0, 1)))
+  print("detector (ID: {}) correction = {:.6f}".format(corrws.cell(10, 0), corrws.cell(10, 1)))
+  print("detector (ID: {}) correction = {:.6f}".format(corrws.cell(100, 0), corrws.cell(100, 1)))
+  print("detector (ID: {}) correction = {:.6f}".format(corrws.cell(1000, 0), corrws.cell(1000, 1)))
+  print("detector (ID: {}) correction = {:.6f}".format(corrws.cell(10000, 0), corrws.cell(1000, 1)))
 
-  print "\nFrom output file:"
+  print("\nFrom output file:")
   terms = lines[0].split()
-  print "detector (ID: %s) correction = %s" % (terms[0], terms[1])
+  print("detector (ID: {}) correction = {}".format(terms[0], terms[1]))
   terms = lines[10].split()
-  print "detector (ID: %s) correction = %s" % (terms[0], terms[1])
+  print("detector (ID: {}) correction = {}".format(terms[0], terms[1]))
   terms = lines[100].split()
-  print "detector (ID: %s) correction = %s" % (terms[0], terms[1])
+  print("detector (ID: {}) correction = {}".format(terms[0], terms[1]))
   terms = lines[1000].split()
-  print "detector (ID: %s) correction = %s" % (terms[0], terms[1])
+  print("detector (ID: {}) correction = {}".format(terms[0], terms[1]))
   terms = lines[10000].split()
-  print "detector (ID: %s) correction = %s" % (terms[0], terms[1])
+  print("detector (ID: {}) correction = {}".format(terms[0], terms[1]))
 
 .. testcleanup:: ExHistSimple
 

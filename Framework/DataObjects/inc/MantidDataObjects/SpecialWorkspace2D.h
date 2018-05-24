@@ -74,8 +74,7 @@ protected:
 
   void init(const size_t &NVectors, const size_t &XLength,
             const size_t &YLength) override;
-  void init(const size_t &NVectors,
-            const HistogramData::Histogram &histogram) override;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// Return human-readable string
   const std::string toString() const override;
@@ -90,11 +89,11 @@ protected:
 };
 
 /// shared pointer to the SpecialWorkspace2D class
-typedef boost::shared_ptr<SpecialWorkspace2D> SpecialWorkspace2D_sptr;
+using SpecialWorkspace2D_sptr = boost::shared_ptr<SpecialWorkspace2D>;
 
 /// shared pointer to a const SpecialWorkspace2D
-typedef boost::shared_ptr<const SpecialWorkspace2D>
-    SpecialWorkspace2D_const_sptr;
+using SpecialWorkspace2D_const_sptr =
+    boost::shared_ptr<const SpecialWorkspace2D>;
 
 } // namespace Mantid
 } // namespace DataObjects

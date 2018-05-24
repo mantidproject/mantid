@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -76,17 +76,17 @@ Usage
    difa, difc, tzero = EnggFitDIFCFromPeaks(FittedPeaks=peaks_tbl, OutParametersTable=out_tbl_name)
 
    # Print the results
-   print "DIFA: %.1f" % difa
-   print "DIFC: %.0f" % round(difc,-1)
-   print "TZERO: %.0f" %round(tzero,-1)
+   print("DIFA: %.1f" % difa)
+   print("DIFC: %.0f" % round(difc,-1))
+   print("TZERO: %.0f" %round(tzero,-1))
    tbl = mtd[out_tbl_name]
-   print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, DIFA: %.1f, DIFC: %.0f, TZERO: %.0f" % (tbl.cell(0,0), round(tbl.cell(0,1),-1), round(tbl.cell(0,2),-1))
-   print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
-   print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
-   print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
-   print "Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1])
-   print "Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1))
+   print("The output table has %d row(s)" % tbl.rowCount())
+   print("Parameters from the table, DIFA: %.1f, DIFC: %.0f, TZERO: %.0f" % (tbl.cell(0,0), round(tbl.cell(0,1),-1), round(tbl.cell(0,2),-1)))
+   print("Number of peaks fitted: {0}".format(peaks_tbl.rowCount()))
+   print("First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0]))
+   print("First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0]))
+   print("Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1]))
+   print("Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1)))
 
 Output:
 

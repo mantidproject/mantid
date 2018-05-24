@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -14,11 +14,11 @@ defines new boundaries in intervals :math:`x_i-x_{i+1}\,`. Positive
 :math:`\Delta x_i\,` make constant width bins, whilst negative ones
 create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`
-
+ 
 This algorithms is useful both in data reduction, but also in remapping
 :ref:`ragged workspace <Ragged_Workspace>` to a regular set of bin
 boundaries.
-
+ 
 Unless the FullBinsOnly option is enabled, the bin immediately before
 the specified boundaries :math:`x_2`, :math:`x_3`, ... :math:`x_i` is
 likely to have a different width from its neighbours because there can
@@ -26,6 +26,15 @@ be no gaps between bins. Rebin ensures that any of these space filling
 bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
+In both cases, where a new bin only partially overlaps one or more input 
+bins, the new counts are calculated as the sum of the old bins weighted 
+by the fractional overlaping widths of the new bin over the old bin:
+
+.. math:: Y^{\mathrm{new}} = \sum_i Y^{\mathrm{old}}_i F_i
+.. math:: E^{\mathrm{new}} = \sqrt{\sum_i (E^{\mathrm{old}}_i)^2 F_i}
+
+where :math:`F_i = w^{\mathrm{overlap}}_i / w^{\mathrm{old}}_i` is the
+ratio of the overlap width of the new and old bin over the old bin width.
 
 .. _rebin-example-strings:
 
@@ -79,7 +88,6 @@ following will happen:
 Hence the actual *Param* string used is "0, 2, 4, 3, 10".
 
 
-
 .. _rebin-usage:
 
 Usage
@@ -97,8 +105,8 @@ Usage
    # rebin from min to max with size bin = 2
    ws = Rebin(ws, 2)
 
-   print "The rebinned X values are: " + str(ws.readX(0))
-   print "The rebinned Y values are: " + str(ws.readY(0))
+   print("The rebinned X values are: {}".format(ws.readX(0)))
+   print("The rebinned Y values are: {}".format(ws.readY(0)))
 
 Output:
 
@@ -119,7 +127,7 @@ Output:
    # rebin from min to max with logarithmic bins of 0.5
    ws = Rebin(ws, -0.5)
 
-   print "The 2nd and 3rd rebinned X values are: " + str(ws.readX(0)[1:3])
+   print("The 2nd and 3rd rebinned X values are: {}".format(ws.readX(0)[1:3]))
 
 Output:
 
@@ -128,7 +136,7 @@ Output:
    The 2nd and 3rd rebinned X values are: [ 1.5   2.25]
 
 **Example - custom two regions rebinning:**
-
+ 
 .. testcode:: ExHistCustom
 
    # create histogram workspace
@@ -139,7 +147,7 @@ Output:
    # rebin from 0 to 3 in steps of 2 and from 3 to 9 in steps of 3
    ws = Rebin(ws, "1,2,3,3,9")
 
-   print "The rebinned X values are: " + str(ws.readX(0))
+   print("The rebinned X values are: {}".format(ws.readX(0)))
 
 Output:
 
@@ -159,8 +167,8 @@ Output:
    # rebin from min to max with size bin = 2
    ws = Rebin(ws, 2, FullBinsOnly=True)
 
-   print "The rebinned X values are: " + str(ws.readX(0))
-   print "The rebinned Y values are: " + str(ws.readY(0))
+   print("The rebinned X values are: {}".format(ws.readX(0)))
+   print("The rebinned Y values are: {}".format(ws.readY(0)))
 
 Output:
 
@@ -176,13 +184,13 @@ Output:
    # create some event workspace
    ws = CreateSampleWorkspace(WorkspaceType="Event")
 
-   print "What type is the workspace before 1st rebin: " + ws.id()
+   print("What type is the workspace before 1st rebin: {}".format(ws.id()))
    # rebin from min to max with size bin = 2 preserving event workspace (default behaviour)
    ws = Rebin(ws, 2)
-   print "What type is the workspace after 1st rebin: " + ws.id()
+   print("What type is the workspace after 1st rebin: {}".format(ws.id()))
    ws = Rebin(ws, 2, PreserveEvents=False)
-   print "What type is the workspace after 2nd rebin: " + ws.id()
-   # note you can also check the type of a workspace using: print isinstance(ws, IEventWorkspace)
+   print("What type is the workspace after 2nd rebin: {}".format(ws.id()))
+   # note you can also check the type of a workspace using: print(isinstance(ws, IEventWorkspace))
 
 Output:
 

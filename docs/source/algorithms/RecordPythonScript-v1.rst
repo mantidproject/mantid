@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,9 +53,9 @@ Usage
     thread.join()
 
     #Load and print the resulting file
-    print "The result file has the following python recorded"
+    print("The result file has the following python recorded")
     with open(outputFile, "r") as file:
-        print file.read().rstrip()
+        print(file.read().rstrip())
 
     #cleanup
     os.remove(outputFile)

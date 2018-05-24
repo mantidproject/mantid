@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,7 +30,7 @@ Usage
                   Filename=filename)
    import os
    if os.path.isfile(filename):
-       print "File created: True"
+       print("File created: True")
 
 .. testcleanup:: ExportGeometry
 

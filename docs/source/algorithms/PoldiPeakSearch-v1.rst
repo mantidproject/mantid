@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -70,7 +70,7 @@ A typical peak search procedure would be performed on correlation data, so this 
     peaks_6904 = PoldiPeakSearch(correlated_6904)
     
     # The tableworkspace should contain 14 peaks.
-    print "The correlation spectrum of sample 6904 contains", peaks_6904.rowCount(), "peaks."
+    print("The correlation spectrum of sample 6904 contains {} peaks.".format(peaks_6904.rowCount()))
     
 Output:
 

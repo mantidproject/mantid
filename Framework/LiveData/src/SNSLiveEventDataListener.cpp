@@ -37,6 +37,8 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace { // anonymous namespace
 // Time we'll wait on a receive call (in seconds)
@@ -48,8 +50,13 @@ const std::string PAUSE_PROPERTY("pause");
 const std::string SCAN_PROPERTY("scan_index");
 const std::string PROTON_CHARGE_PROPERTY("proton_charge");
 
+// These are names for some string properties (not time series)
+const std::string RUN_TITLE_PROPERTY("run_title");
+const std::string EXPERIMENT_ID_PROPERTY("experiment_identifier");
+
 // Helper function to get a DateAndTime value from an ADARA packet header
-Mantid::Kernel::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
+Mantid::Types::Core::DateAndTime
+timeFromPacket(const ADARA::PacketHeader &hdr) {
   const uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
   const uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
@@ -63,9 +70,6 @@ Mantid::Kernel::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
 namespace Mantid {
 namespace LiveData {
 DECLARE_LISTENER(SNSLiveEventDataListener)
-// The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.
-// The semi-colon limits the complaints to one line.  It has no actual effect
-// on the code.
 
 namespace {
 /// static logger
@@ -180,11 +184,10 @@ bool SNSLiveEventDataListener::isConnected() { return m_isConnected; }
 /// @param startTime Specifies how much historical data the SMS should send
 /// before continuing the current 'live' data.  Use 0 to indicate no
 /// historical data.
-void SNSLiveEventDataListener::start(const Kernel::DateAndTime startTime) {
+void SNSLiveEventDataListener::start(const Types::Core::DateAndTime startTime) {
   // Save the startTime and kick off the background thread
   // (Can't really do anything else until we send the hello packet and the SMS
-  // sends us
-  // back the various metadata packets
+  // sends us back the various metadata packets
   m_startTime = startTime;
 
   if (m_startTime.totalNanoseconds() == 1000000000) {
@@ -379,8 +382,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
       // Might want to think about rate limiting this somehow...
 
       return false; // We still return false (ie: "no error") because there's no
-                    // reason to stop
-                    // parsing the data stream
+                    // reason to stop parsing the data stream
     }
   }
 
@@ -401,7 +403,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
     std::lock_guard<std::mutex> scopedLock(m_mutex);
 
     // Timestamp for the events
-    Mantid::Kernel::DateAndTime eventTime = timeFromPacket(pkt);
+    Mantid::Types::Core::DateAndTime eventTime = timeFromPacket(pkt);
 
     // Save the pulse charge in the logs (*10 because we want the units to be
     // picoCulombs, and ADARA sends them out in units of 10pC)
@@ -467,8 +469,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   }
 
   // We'll likely be modifying m_eventBuffer (specifically,
-  // m_eventBuffer->m_monitorWorkspace),
-  // so lock the mutex
+  // m_eventBuffer->m_monitorWorkspace), so lock the mutex
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   auto monitorBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
@@ -492,8 +493,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
           monitorID + 48); // The +48 converts to the ASCII character
       monName += "_counts";
       // Note: The monitor name must exactly match one of the entries in the
-      // ADDABLE
-      // list at the top of Run.cpp!
+      // ADDABLE list at the top of Run.cpp!
 
       int events = pkt.getSectionEventCount();
       if (m_eventBuffer->run().hasProperty(monName)) {
@@ -516,7 +516,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
           // Add the event. Note that they're in units of 100 ns in the packet,
           // need to change to microseconds.
           monitorBuffer->getSpectrum(it->second)
-              .addEventQuickly(DataObjects::TofEvent(tof / 10.0, pktTime));
+              .addEventQuickly(Types::Event::TofEvent(tof / 10.0, pktTime));
         }
       } else {
         g_log.error() << "Event from unknown monitor ID (" << monitorID
@@ -666,8 +666,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       // Pay close attention here - this gets complicated!
       //
       // Setting m_status to "Running" is something of a little white lie.  We
-      // are
-      // in fact at the beginning of a run.  However, since we haven't yet
+      // are in fact at the beginning of a run.  However, since we haven't yet
       // initialized the workspace, this must be one of the first packets we've
       // actually received.  (Probably, the user selected the option to replay
       // history starting from the start of the current run.) Normally, when
@@ -675,55 +674,41 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       // (see below).  That would cause us to halt reading packets until the
       // flag was reset down in runStatus().  Having m_status set to BeginRun
       // would also cause runStatus() to reset all the data we need to
-      // initialize
-      // the workspace in preparation for a new run.  In most cases, this is
-      // exactly
-      // what we want.
+      // initialize the workspace in preparation for a new run.  In most cases,
+      // this is exactly what we want.
       //
       // HOWEVER, in this particular case, we can't set m_pauseNetRead.  If we
-      // do, we
-      // will not read the Geometry and BeamMonitor packets that have the data
-      // we
-      // need to complete the workspace initialization. Until we complete the
-      // initialization, the extractData() function won't complete successfully
-      // and
-      // the runStatus() function will thus never be called.  Since
-      // m_pauseNetRead
-      // is reset down in runStatus(), the whole live listener subsystem
-      // basically
-      // deadlocks.
+      // do, we will not read the Geometry and BeamMonitor packets that have
+      // the data we need to complete the workspace initialization. Until we
+      // complete the initialization, the extractData() function won't complete
+      // successfully and the runStatus() function will thus never be called.
+      // Since m_pauseNetRead is reset down in runStatus(), the whole live
+      // listener subsystem basically deadlocks.
       //
       // So, we can't set m_pauseNetRead.  That's OK, because we don't actually
-      // have
-      // any data from a previous run that we need to keep separate from this
-      // run
-      // (which was the whole purpose of m_pauseNetRead).  However, when the
-      // runStatus() function sees m_status == BeginRun (or EndRun), it sets
-      // m_workspaceInitialized to false and clears all the old data we used to
-      // initialize the workspace.  It does this because it thinks a run
-      // transition
-      // has happened and new initialization data will be arriving shortly.  As
-      // such, it implicitly assumes that m_pauseNetRead was set and we stopped
-      // reading packets.  In this particular case, we can't set m_pauseNetRead,
-      // and we're guaranteed to have initialized the workspace before
-      // runStatus()
-      // would ever be called. (See the previous paragraph.)  As such, the
-      // initialization data that runStatus() would clear is actually the data
-      // that we need.
-
+      // have any data from a previous run that we need to keep separate from
+      // this run (which was the whole purpose of m_pauseNetRead).  However,
+      // when the runStatus() function sees m_status == BeginRun (or EndRun),
+      // it sets m_workspaceInitialized to false and clears all the old data we
+      // used to initialize the workspace.  It does this because it thinks a
+      // run transition has happened and new initialization data will be
+      // arriving shortly.  As such, it implicitly assumes that m_pauseNetRead
+      // was set and we stopped reading packets.  In this particular case, we
+      // can't set m_pauseNetRead, and we're guaranteed to have initialized the
+      // workspace before runStatus() would ever be called. (See the previous
+      // paragraph.)  As such, the initialization data that runStatus() would
+      // clear is actually the data that we need.
+      //
       // So, by setting m_status to Running, we avoid runStatus() wiping out our
       // workspace initialization.  We then call setRunDetails() (which would
       // normally happen down in runStatus(), except that we've just gone out
       // of our way to make sure that part of runStatus() *DOESN'T* get
       // executed) and everything runs as it should.
-
+      //
       // It's debatable whether runStatus() should retain that implicit
-      // asumption of
-      // m_pauseNetRead being true, or should explicitly check its state in
-      // addition
-      // to m_status.  Either way, you're still going to need several paragraphs
-      // of
-      // comments to explain what the heck is going on.
+      // asumption of m_pauseNetRead being true, or should explicitly check its
+      // state in addition to m_status.  Either way, you're still going to need
+      // several paragraphs of comments to explain what the heck is going on.
       m_status = Running;
       setRunDetails(pkt);
     }
@@ -738,17 +723,15 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
             "ignored.\n"
             "(This should never happen.  Talk to the Mantid developers.)");
       } else {
-        // Save a copy of the packet so we can call setRunDetails() later (after
-        // extractData() has been called to fetch any data remaining from before
-        // this run start.
-        // Note: need to actually copy the contents (not just a pointer) because
-        // pkt will go away when this function returns.  And since packets don't
-        // have
-        // default constructors, we can only keep a pointer as a member, and
-        // thus
-        // have to actually allocate our deferred packet with new.
-        // Fortunately, this doesn't happen to often, so performance isn't an
-        // issue.
+        // Save a copy of the packet so we can call setRunDetails() later
+        // (after extractData() has been called to fetch any data remaining
+        // from before this run start.
+        // Note: need to actually copy the contents (not just a pointer)
+        // because pkt will go away when this function returns.  And since
+        // packets don't have default constructors, we can only keep a pointer
+        // as a member, and thus have to actually allocate our deferred packet
+        // with new.  Fortunately, this doesn't happen to often, so performance
+        // isn't an issue.
         m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(
             new ADARA::RunStatusPkt(pkt));
       }
@@ -761,18 +744,20 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     }
 
   } else if (pkt.status() == ADARA::RunStatus::END_RUN) {
-    // Run has ended:  update m_status and set the flag to stop parsing network
-    // packets.
-    // (see comments below for why)
-
+    // Run has ended:  update m_status, set the end time and set the flag
+    // to stop parsing network packets.  (see comments below for why)
     if ((m_status != Running) && (m_status != BeginRun)) {
       // Previous status should have been Running or BeginRun.  Spit out a
-      // warning if it's not.  (If it's BeginRun, that's fine.  Itjust means
+      // warning if it's not.  (If it's BeginRun, that's fine.  It just means
       // that the run ended before extractData() was called.)
       g_log.warning() << "Unexpected end of run.  Run status should have been "
                       << Running << " (Running), but was " << m_status << '\n';
     }
     m_status = EndRun;
+
+    // Add the run_end property
+    m_eventBuffer->mutableRun().addProperty(
+        "run_end", timeFromPacket(pkt).toISO8601String());
 
     // Set the flag to make us stop reading from the network.
     // Stopping network reads solves a number of problems:
@@ -784,16 +769,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     // 3) We don't have to worry about the case where more than one run has
     // started and finished between calls to extractData()  (ie: 5 second runs
     // and a 10 second update interval.  Yes, that's an operator error, but I
-    // still
-    // don't want to worry about it.)
+    // still don't want to worry about it.)
     //
-    // Because of this, however, if extractData() isn't called at least once per
-    // run,
-    // the network packets may start to back up and SMS may eventually
+    // Because of this, however, if extractData() isn't called at least once
+    // per run, the network packets may start to back up and SMS may eventually
     // disconnect us.
     // This flag will be cleared down in runStatus(), which is guaranteed to be
-    // called
-    // after extractData().
+    // called after extractData().
     m_pauseNetRead = true;
 
     // Set the run number & start time if we don't already have it
@@ -801,7 +783,15 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       setRunDetails(pkt);
     }
   } else if (pkt.status() == ADARA::RunStatus::STATE && !haveRunNumber) {
-    setRunDetails(pkt);
+    // A packet status of STATE and no run number means we've just connected
+    // to the SMS.  Specifically, this is the RunStatus packet that SMS
+    // initially sends out when a client hasn't set the flag to request
+    // historical data.  We may or may not actually be in a run right now.
+    // If we are, then we need to set the run details.  If not, there's
+    // nothing we need to do with this packet.
+    if (pkt.runNumber() != 0) {
+      setRunDetails(pkt);
+    }
   }
 
   // Note: all other possibilities for pkt.status() can be ignored
@@ -816,8 +806,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
   return m_pauseNetRead;
   // If we've set m_pauseNetRead, it means we want to stop processing packets.
   // In that case, we need to return true so that we'll break out of the read()
-  // loop
-  // in the packet parser.
+  // loop in the packet parser.
 }
 
 void SNSLiveEventDataListener::setRunDetails(const ADARA::RunStatusPkt &pkt) {
@@ -1026,8 +1015,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
 
   // Find the process_variables element
   // Note: for now, I'm ignoring the 'device_name' & 'enumeration' elements
-  // because I don't
-  // think I need them
+  // because I don't think I need them
 
   const Poco::XML::Node *node = deviceNode->firstChild();
   while (node && node->nodeName() != "process_variables") {
@@ -1117,18 +1105,15 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
               prop->setUnits(pvUnits);
             }
             {
-              // Note: it's possible for us receive device descriptor packets in
-              // the middle
-              // of a run (after the call to initWorkspacePart2), so we really
-              // do need to
-              // the lock the mutex here.
+              // Note: it's possible for us receive device descriptor packets
+              // in the middle of a run (after the call to initWorkspacePart2),
+              // so we really do need to the lock the mutex here.
               std::lock_guard<std::mutex> scopedLock(m_mutex);
               m_eventBuffer->mutableRun().addLogData(prop);
             }
 
             // Add the pv id, device id and pv name to the name map so we can
-            // find the
-            // name when we process the variable value packets
+            // find the name when we process the variable value packets
             m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
           }
         }
@@ -1211,6 +1196,97 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   return false;
 }
 
+/// Parse a Run Information packet
+
+/// Overrides the default function defined in ADARA::Parser and processes
+/// data from ADARA::RunInfoPkt packets.  Specifically, it looks for the
+/// proposal id and run title and stores those values in properties in the
+/// workspace.
+/// @param pkt The packet to be parsed
+/// @return Returns false if there were no problems.  Returns true if there
+/// was an error and packet parsing should be interrupted
+bool SNSLiveEventDataListener::rxPacket(const ADARA::RunInfoPkt &pkt) {
+
+  // RunInfoPkts are mostly just blocks of XML.
+  Poco::XML::DOMParser parser;
+  Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString(pkt.info());
+  const Poco::XML::Node *runInfoNode = doc->firstChild();
+
+  // The root of the XML should be "runinfo".
+  while (runInfoNode && runInfoNode->nodeName() != "runinfo") {
+    runInfoNode = runInfoNode->nextSibling();
+  }
+
+  if (!runInfoNode) {
+    g_log.error("Run info packet did not contain a 'runinfo' element!!  "
+                "This should never happen!");
+    return false;
+  }
+
+  // The two elements we're looking for (proposal_id and run_title) should
+  // be children of the runInfoNode.  (Note that run_number is also in there,
+  // but we already get that from the RunStatusPkt.)
+  std::string proposalID;
+  std::string runTitle;
+  const Poco::XML::Node *node = runInfoNode->firstChild();
+  while (node) {
+    // iterate through each individual variable...
+    if (node->nodeName() == "proposal_id") {
+      const Poco::XML::Node *textElement = node->firstChild();
+      if (textElement) {
+        proposalID = textElement->nodeValue();
+      }
+    } else if (node->nodeName() == "run_title") {
+      const Poco::XML::Node *textElement = node->firstChild();
+      if (textElement) {
+        runTitle = textElement->nodeValue();
+      }
+    }
+
+    // If we've got everything we need, we can break out of the while loop
+    if (proposalID.length() && runTitle.length()) {
+      break;
+    }
+
+    node = node->nextSibling();
+  }
+
+  if (proposalID.length()) {
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(EXPERIMENT_ID_PROPERTY);
+
+    // Sanity check: We're likely to get multiple RunInfo packets in a
+    // run, but the values shouldn't change mid-run...
+    std::string prevPropVal = prop->value();
+    if (prevPropVal.length() && prevPropVal != proposalID) {
+      g_log.error("Proposal ID in the current run info packet has changed!  "
+                  "This shouldn't happen!  (Keeping new ID value.)");
+    }
+    prop->setValue(proposalID);
+  } else {
+    g_log.warning("Run info packet did not contain a proposal ID.  "
+                  "Property will be empty.");
+  }
+
+  if (runTitle.length()) {
+    Property *prop =
+        m_eventBuffer->mutableRun().getProperty(RUN_TITLE_PROPERTY);
+
+    // Sanity check
+    std::string prevPropVal = prop->value();
+    if (prevPropVal.length() && prevPropVal != runTitle) {
+      g_log.error("The run title in the current run info packet has changed!"
+                  "  This shouldn't happen!  (Keeping new title value.)");
+    }
+    prop->setValue(runTitle);
+  } else {
+    g_log.warning("Run info packet did not contain a run title.  "
+                  "Property will be empty.");
+  }
+
+  return false;
+}
+
 /// First part of the workspace initialization
 
 /// Performs various initialization steps that can (and, in some
@@ -1222,16 +1298,20 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   // down in initWorkspacePart2() when we load the instrument definition.
 
   // We also know we'll need 3 time series properties on the workspace.  Create
-  // them
-  // now. (We may end up adding values to the pause and scan properties before
-  // we
-  // can call initWorkspacePart2().)
+  // them now. (We may end up adding values to the pause and scan properties
+  // before we can call initWorkspacePart2().)
   Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
   prop->setUnits("picoCoulomb");
+  m_eventBuffer->mutableRun().addLogData(prop);
+
+  // Same for a couple of other properties (that are not time series)
+  prop = new PropertyWithValue<std::string>(RUN_TITLE_PROPERTY, "");
+  m_eventBuffer->mutableRun().addLogData(prop);
+  prop = new PropertyWithValue<std::string>(EXPERIMENT_ID_PROPERTY, "");
   m_eventBuffer->mutableRun().addLogData(prop);
 }
 
@@ -1254,8 +1334,8 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 
   loadInst->execute();
 
-  m_requiredLogs.clear(); // Clear the list.  If we have to initialize the
-                          // workspace again,
+  m_requiredLogs.clear();
+  // Clear the list.  If we have to initialize the workspace again,
   // (at the start of another run, for example), the list will be
   // repopulated when we receive the next geometry packet.
 
@@ -1276,10 +1356,9 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
       true /* bool throwIfMultipleDets */);
 
   // We always want to have at least one value for the the scan index time
-  // series.  We may have
-  // already gotten a scan start packet by the time we get here and therefor
-  // don't need to do
-  // anything.  If not, we need to put a 0 into the time series.
+  // series.  We may have already gotten a scan start packet by the time we
+  // get here and therefor don't need to do anything.  If not, we need to put
+  // a 0 into the time series.
   if (m_eventBuffer->mutableRun()
           .getTimeSeriesProperty<int>(SCAN_PROPERTY)
           ->size() == 0) {
@@ -1315,8 +1394,7 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
 // NOTE: This function does not lock the mutex!  The calling function must
 // ensure that m_eventBuffer won't change while the function runs (either by
 // locking the mutex, or by the simple fact of never calling it once the
-// workspace
-// has been initialized...)
+// workspace has been initialized...)
 bool SNSLiveEventDataListener::haveRequiredLogs() {
   bool allFound = true;
   Run &run = m_eventBuffer->mutableRun();
@@ -1337,7 +1415,7 @@ bool SNSLiveEventDataListener::haveRequiredLogs() {
 /// Adds an event to the workspace
 void SNSLiveEventDataListener::appendEvent(
     const uint32_t pixelId, const double tof,
-    const Mantid::Kernel::DateAndTime pulseTime)
+    const Mantid::Types::Core::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
@@ -1346,7 +1424,7 @@ void SNSLiveEventDataListener::appendEvent(
   const auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     const std::size_t workspaceIndex = it->second;
-    Mantid::DataObjects::TofEvent event(tof, pulseTime);
+    Types::Event::TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof
@@ -1428,7 +1506,7 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
 
 /// Check the status of the current run
 
-/// Called by the foreground thread check the status of the current run
+/// Called by the foreground thread to check the status of the current run
 /// @returns Returns an enum indicating beginning of a run, in the middle
 /// of a run, ending a run or not in a run.
 ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
@@ -1467,7 +1545,7 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
       // Don't clear this for BeginRun because it was set up in the parser
       // for the RunStatus packet that signaled the beginning of a new
       // run and is thus already set to the correct value.
-      m_dataStartTime = Kernel::DateAndTime();
+      m_dataStartTime = Types::Core::DateAndTime();
     }
 
     // NOTE: It's probably not necessary to clear the instrument name

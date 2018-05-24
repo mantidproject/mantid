@@ -91,13 +91,13 @@ public:
     /// Date-time of submission. No particular format can be assumed
     /// from the specific remote job managers, and some of them may
     /// not provide this info
-    Mantid::Kernel::DateAndTime submitDate;
+    Mantid::Types::Core::DateAndTime submitDate;
     /// Date-time the job actually started running.  No particular
     /// format can be assumed
-    Mantid::Kernel::DateAndTime startDate;
+    Mantid::Types::Core::DateAndTime startDate;
     /// Date-time the job finished. No particular format can be
     /// assumed
-    Mantid::Kernel::DateAndTime completionTime;
+    Mantid::Types::Core::DateAndTime completionTime;
     /// Command line for this job (when running a command ideally this
     /// would be provided by the underlying job scheduling
     /// mechanism). As examples, Platform LSF provides this. For the
@@ -290,7 +290,7 @@ public:
 };
 
 // shared pointer type for the IRemoteJobManager
-typedef boost::shared_ptr<IRemoteJobManager> IRemoteJobManager_sptr;
+using IRemoteJobManager_sptr = boost::shared_ptr<IRemoteJobManager>;
 
 } // namespace API
 } // namespace Mantid

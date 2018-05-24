@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
+  CalculateMonteCarloAbsorptionTest.py
   DetectorFloodWeightingTest.py
   DirectILLApplySelfShieldingTest.py
   DirectILLCollectDataTest.py
@@ -34,15 +35,18 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  LoadWANDTest.py
   MDNormSCDPreprocessIncoherentTest.py
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
+  PowderDiffILLReductionTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
   SANSStitchTest.py
   SavePlot1DTest.py
+  SaveVulcanGSSTest.py
   SimpleShapeMonteCarloAbsorptionTest.py
   SimulatedDensityOfStatesTest.py
   SofQWMomentsTest.py
@@ -52,6 +56,7 @@ set ( TEST_PY_FILES
   TOSCABankCorrectionTest.py
   TransformToIqtTest.py
   VesuvioDiffractionReductionTest.py
+  WANDPowderReductionTest.py
 )
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 

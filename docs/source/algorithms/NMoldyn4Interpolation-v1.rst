@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,9 +38,9 @@ set**
     osiris = Rebin(osiris, [-0.6, 0.02, 0.6])
     #interpolate the two workspaces
     interpolated_ws = NMoldyn4Interpolation(sim_ws, osiris)
-    print 'No. of Q-values in simulation = ' + str(sim_ws.getNumberHistograms())
-    print 'No. of Q-values in reference = ' + str(osiris.getNumberHistograms())
-    print 'No. of Q-values in interpolated set = '+ str(interpolated_ws.getNumberHistograms())
+    print('No. of Q-values in simulation = {}'.format(sim_ws.getNumberHistograms()))
+    print('No. of Q-values in reference = {}'.format(osiris.getNumberHistograms()))
+    print('No. of Q-values in interpolated set = {}'.format(interpolated_ws.getNumberHistograms()))
 
 Output:
 

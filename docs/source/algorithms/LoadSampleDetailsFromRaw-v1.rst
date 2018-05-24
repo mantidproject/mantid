@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,8 +39,8 @@ Usage
     LoadSampleDetailsFromRaw(ws,filename)
 
     s = ws.sample()
-    print "Geometry flag %.0f" % s.getGeometryFlag()
-    print "Dimensions H,W,D %.0f,%.0f,%.0f" % (s.getHeight(),s.getWidth(),s.getThickness())
+    print("Geometry flag {:.0f}".format(s.getGeometryFlag()))
+    print("Dimensions H,W,D {:.0f},{:.0f},{:.0f}".format(s.getHeight(),s.getWidth(),s.getThickness()))
 
 Output:
 

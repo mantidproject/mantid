@@ -9,9 +9,10 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
-class Object;
+class IObject;
 class SampleEnvironment;
 }
+
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
@@ -48,7 +49,8 @@ class IBeamProfile;
 class MANTID_ALGORITHMS_DLL MCInteractionVolume {
 public:
   MCInteractionVolume(const API::Sample &sample,
-                      const Geometry::BoundingBox &activeRegion);
+                      const Geometry::BoundingBox &activeRegion,
+                      const size_t maxScatterAttempts = 5000);
   // No creation from temporaries as we store a reference to the object in
   // the sample
   MCInteractionVolume(const API::Sample &&sample,
@@ -61,9 +63,10 @@ public:
                              double lambdaAfter) const;
 
 private:
-  const Geometry::Object &m_sample;
+  const boost::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
+  const size_t m_maxScatterAttempts;
 };
 
 } // namespace Algorithms

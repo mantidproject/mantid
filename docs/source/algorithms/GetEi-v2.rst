@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -64,10 +64,10 @@ Usage
 
     (ei, firstMonitorPeak, FirstMonitorIndex, tzero) = GetEi(ws,Monitor1Spec=1,Monitor2Spec=2,EnergyEstimate=15.0,FixEi=True)
 
-    print "ei: %.2f" % ei
-    print "firstMonitorPeak: %.2f" % firstMonitorPeak
-    print "FirstMonitorIndex: %i" % FirstMonitorIndex
-    print "tzero: %.2f" % tzero
+    print("ei: {:.2f}".format(ei))
+    print("firstMonitorPeak: {:.2f}".format(firstMonitorPeak))
+    print("FirstMonitorIndex: {}".format(FirstMonitorIndex))
+    print("tzero: {:.2f}".format(tzero))
 
 Output:
 
@@ -88,8 +88,8 @@ Output:
     vals = GetEi(ws, EnergyEstimate=12)
     # Output from algorithm is a tuple of the following values:
     # (IncidentEnergy, FirstMonitorPeak, FirstMonitorIndex, TZero)
-    print "Calculated Incident Energy =", vals[0], "meV"
-    print "First Monitor Peak =", vals[1], "microseconds"
+    print("Calculated Incident Energy = {:.10f} meV".format(vals[0]))
+    print("First Monitor Peak = {:.8f} microseconds".format(vals[1]))
 
 Output
 
@@ -111,8 +111,8 @@ use the negative of the TZero output value in further calculations.
     # Need monitor workspace, as main workspace does not.
     # Energy estimate not manditory for SNS instruments
     vals = GetEi(ws[1])
-    print "Calculated Incident Energy =", vals[0], "meV"
-    print "Time Zero =", -vals[3], "microseconds"
+    print("Calculated Incident Energy = {:.1f} meV".format(vals[0]))
+    print("Time Zero = {:.10f} microseconds".format(-vals[3]))
 
 Output:
 

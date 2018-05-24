@@ -70,7 +70,7 @@ public:
         dynamic_cast<MockImplicitFunctionParameterParserA *>(parser);
     TSM_ASSERT("The correct implicit implicit function parameter parser type "
                "has not been generated",
-               NULL != a);
+               nullptr != a);
     delete parser;
   }
 
@@ -82,7 +82,7 @@ public:
         dynamic_cast<MockImplicitFunctionParameterParserB *>(parser);
     TSM_ASSERT("The correct implicit function parameter parser type has not "
                "been generated",
-               NULL != b);
+               nullptr != b);
     delete parser;
   }
 

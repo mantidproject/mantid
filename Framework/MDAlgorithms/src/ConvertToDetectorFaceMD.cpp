@@ -16,6 +16,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace MDAlgorithms {

@@ -33,27 +33,27 @@
 #include <QMessageBox>
 
 PluginFit::PluginFit(ApplicationWindow *parent, Graph *g)
-    : Fit(parent, g), f_eval(NULL) {
+    : Fit(parent, g), f_eval(nullptr) {
   init();
 }
 
 PluginFit::PluginFit(ApplicationWindow *parent, Graph *g,
                      const QString &curveTitle)
-    : Fit(parent, g), f_eval(NULL) {
+    : Fit(parent, g), f_eval(nullptr) {
   init();
   setDataFromCurve(curveTitle);
 }
 
 PluginFit::PluginFit(ApplicationWindow *parent, Graph *g,
                      const QString &curveTitle, double start, double end)
-    : Fit(parent, g), f_eval(NULL) {
+    : Fit(parent, g), f_eval(nullptr) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
 PluginFit::PluginFit(ApplicationWindow *parent, Table *t, const QString &xCol,
                      const QString &yCol, int startRow, int endRow)
-    : Fit(parent, t), f_eval(NULL) {
+    : Fit(parent, t), f_eval(nullptr) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
 }
@@ -161,7 +161,7 @@ bool PluginFit::load(const QString &pluginName) {
   if (!f_eval)
     return false;
 
-  typedef char *(*fitFunc)();
+  using fitFunc = char *(*)();
   ff_union ff;
   ff.ptr = lib.resolve("parameters");
   fitFunc fitFunction = ff.func;

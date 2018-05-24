@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,11 +17,11 @@ The calculations apply only to elastic diffraction experiments. The
 conversion can be done either to Q-space in the lab or sample frame, or
 to HKL of the crystal.
 
-Version 3 of this algorithm will by default automatically calculate the extents 
-of the MD workspace using the :ref:`algm-ConvertToMDMinMaxLocal` algorithm. 
-Old version of this algorithm (version 2) also still exists which uses the fixed 
-bounds +/- 50. See the :ref:`algm-ConvertToDiffractionMDWorkspace-v2` for 
-details of the old implementation and :ref:`algm-ConvertToMDMinMaxLocal` for 
+Version 3 of this algorithm will by default automatically calculate the extents
+of the MD workspace using the :ref:`algm-ConvertToMDMinMaxLocal` algorithm.
+Old version of this algorithm (version 2) also still exists which uses the fixed
+bounds +/- 50. See the :ref:`algm-ConvertToDiffractionMDWorkspace-v2` for
+details of the old implementation and :ref:`algm-ConvertToMDMinMaxLocal` for
 information on how extents are now calculated.
 
 
@@ -34,7 +34,7 @@ Types of Conversion
    out, to give Q in the frame of the sample. See
    :ref:`algm-SetGoniometer` to specify the goniometer used in
    the experiment.
--  **HKL**: uses the UB matrix (see :ref:`algm-SetUB`,
+-  **HKL**: uses the :ref:`UB matrix <Lattice>` (see :ref:`algm-SetUB`,
    :ref:`algm-FindUBUsingFFT` and others) to calculate the HKL
    Miller indices of each event.
 
@@ -50,7 +50,7 @@ Where :math:`\theta` is *half* of the neutron scattering angle
 (conventionally called :math:`2\theta`). :math:`\lambda` is the neutron
 wavelength in *Angstroms*.
 
-This correction is also done by the :ref:`algm-AnvredCorrection` algorithm, and 
+This correction is also done by the :ref:`algm-AnvredCorrection` algorithm, and
 will be set to false if that algorithm has been run on the input workspace.
 
 Usage
@@ -65,14 +65,15 @@ Usage
    md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150)
 
    # A way to look at these results as a text:
-   print "Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims())
-   print "Workspace Type is: ",md.id()
+   print("Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims()))
+   print("Workspace Type is:  {}".format(md.id()))
 
 **Output:**
 
 .. testoutput:: ExConvertToDiffractionMDWorkspace
+   :options: +ELLIPSIS
 
-   Resulting MD workspace has 81058 events and 3 dimensions
+   Resulting MD workspace has 81... events and 3 dimensions
    Workspace Type is:  MDEventWorkspace<MDEvent,3>
 
 

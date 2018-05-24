@@ -76,7 +76,7 @@ int MantidMatrixDxExtensionHandler::getPrecision(
 void MantidMatrixDxExtensionHandler::setColumnWidth(
     MantidMatrixTabExtension &extension, int width, int numberOfColumns) {
   if (extension.type == m_type) {
-    auto table_view = extension.tableView;
+    auto &table_view = extension.tableView;
     table_view->horizontalHeader()->setDefaultSectionSize(width);
     for (int i = 0; i < numberOfColumns; i++) {
       table_view->setColumnWidth(i, width);
@@ -94,7 +94,7 @@ void MantidMatrixDxExtensionHandler::setColumnWidth(
 int MantidMatrixDxExtensionHandler::getColumnWidth(
     MantidMatrixTabExtension &extension) {
   if (extension.type == m_type) {
-    auto table_view = extension.tableView;
+    auto &table_view = extension.tableView;
     return table_view->columnWidth(0);
   } else {
     return m_successor->getColumnWidth(extension);
@@ -109,7 +109,7 @@ int MantidMatrixDxExtensionHandler::getColumnWidth(
 QTableView *MantidMatrixDxExtensionHandler::getTableView(
     MantidMatrixTabExtension &extension) {
   if (extension.type == m_type) {
-    return extension.tableView;
+    return extension.tableView.get();
   } else {
     return m_successor->getTableView(extension);
   }

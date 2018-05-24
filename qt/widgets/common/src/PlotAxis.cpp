@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -72,7 +73,7 @@ void PlotAxis::titleFromDimension(const Mantid::Geometry::IMDDimension &dim) {
   if (!m_title.isEmpty()) {
     auto unitLbl = dim.getUnits();
     if (!unitLbl.utf8().empty()) {
-      m_title += " (" + QString::fromStdWString(unitLbl.utf8()) + ")";
+      m_title += " (" + toQStringInternal(unitLbl.utf8()) + ")";
     } else if (!unitLbl.ascii().empty()) {
       m_title += " (" + QString::fromStdString(unitLbl.ascii()) + ")";
     }
@@ -103,8 +104,8 @@ void PlotAxis::titleFromYData(const Mantid::API::MatrixWorkspace &workspace,
       const auto xunit = workspace.getAxis(0)->unit();
       const auto lbl = xunit->label();
       if (!lbl.utf8().empty()) {
-        m_title += " (" + QString::fromStdWString(lbl.utf8()) + ")" +
-                   QString::fromWCharArray(L"\u207b\u00b9");
+        m_title += " (" + toQStringInternal(lbl.utf8()) + ")" +
+                   toQStringInternal(L"\u207b\u00b9");
       }
     }
   } else {

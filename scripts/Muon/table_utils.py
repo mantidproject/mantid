@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
+import os
+
 
 """
 This module contains the methods for
@@ -36,3 +38,43 @@ def addCheckBoxToTable(table,state,row):
 
     table.setItem(row,1, box)
     return box
+
+
+def addSpinBoxToTable(table,default,row):
+    box = QtGui.QSpinBox()
+    if default > 99:
+        box.setMaximum(default*10)
+    box.setValue(default)
+    table.setCellWidget(row,1,box)
+    return box
+
+
+# This is a work around a Windows 10
+# bug that stops tables having underlines for
+# the headers.
+def setTableHeaders(table):
+        # is it not windows
+        if os.name != "nt":
+            return
+        version=QtCore.QSysInfo.WindowsVersion
+        WINDOWS_10=160
+        if(version==WINDOWS_10):
+            styleSheet= \
+                "QHeaderView::section{"\
+                +"border-top:0px solid #D8D8D8;"\
+                +"border-left:0px solid #D8D8D8;"\
+                +"border-right:1px solid #D8D8D8;"\
+                +"border-bottom: 1px solid #D8D8D8;"\
+                +"background-color:white;"\
+                +"padding:4px;"\
+                +"}"\
+                +"QTableCornerButton::section{"\
+                +"border-top:0px solid #D8D8D8;"\
+                +"border-left:0px solid #D8D8D8;"\
+                +"border-right:1px solid #D8D8D8;"\
+                +"border-bottom: 1px solid #D8D8D8;"\
+                +"background-color:white;"\
+                +"}"
+            table.setStyleSheet(styleSheet)
+            return styleSheet
+        return

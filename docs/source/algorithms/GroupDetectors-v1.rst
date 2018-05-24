@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -108,30 +108,30 @@ Example 1: specifying spectrum numbers
   # The returned value is an index in ws wich contains the created group.
 
   # Check the result
-  print 'The workspace still has', ws.getNumberHistograms(),'spectra'
-  print 'The group is in the',group_index,'-th spectrum'
+  print('The workspace still has {} spectra'.format(ws.getNumberHistograms()))
+  print('The group is in the {} -th spectrum'.format(group_index))
 
   # Get detector IDs in the group
   grp_ids = ws.getSpectrum(0).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp_ids)
-  print 'Detector IDs:',  grp_ids
+  print('Number of grouped detectors is {}'.format(len(grp_ids)))
+  print('Detector IDs: {}'.format(grp_ids))
 
   # The other 2 spectra that were included in the group contain no data
   grp_ids = ws.getSpectrum(2).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(4).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print('Number of detectors is {}'.format(len(grp_ids)))
 
   # The rest of the spectra are unchanged
   grp_ids = ws.getSpectrum(1).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(3).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(5).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
-  print '...'
+  print('Number of detectors is {}'.format(len(grp_ids)))
+  print('...')
   grp_ids = ws.getSpectrum(199).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print('Number of detectors is {}'.format(len(grp_ids)))
 
 
 Output
@@ -165,30 +165,31 @@ Example 2: specifying detctor IDs
   # The returned value is an index in ws wich contains the created group.
 
   # Check the result
-  print 'The workspace still has', ws.getNumberHistograms(),'spectra'
-  print 'The group is in the',group_index,'-th spectrum'
+  print('The workspace still has {} spectra'.format(ws.getNumberHistograms()))
+  print('The group is in the {} -th spectrum'.format(group_index))
+
 
   # Get detector IDs in the group
   grp_ids = ws.getSpectrum(0).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp_ids)
-  print 'Detector IDs:',  grp_ids
+  print ('Number of grouped detectors is {}'.format(len(grp_ids)))
+  print ('Detector IDs: {}'.format(grp_ids))
 
   # The other 2 spectra that were included in the group contain no data
   grp_ids = ws.getSpectrum(2).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(4).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
 
   # The rest of the spectra are unchanged
   grp_ids = ws.getSpectrum(1).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(3).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(5).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
-  print '...'
+  print ('Number of detectors is {}'.format(len(grp_ids)))
+  print ('...')
   grp_ids = ws.getSpectrum(199).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
 
 Output
 ^^^^^^
@@ -221,30 +222,31 @@ Example 3: specifying workspace indices
   # The returned value is an index in ws wich contains the created group.
 
   # Check the result
-  print 'The workspace still has', ws.getNumberHistograms(),'spectra'
-  print 'The group is in the',group_index,'-th spectrum'
+  print('The workspace still has {} spectra'.format(ws.getNumberHistograms()))
+  print('The group is in the {} -th spectrum'.format(group_index))
+
 
   # Get detector IDs in the group
   grp_ids = ws.getSpectrum(0).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp_ids)
-  print 'Detector IDs:',  grp_ids
+  print ('Number of grouped detectors is {}'.format(len(grp_ids)))
+  print ('Detector IDs: {}'.format(grp_ids))
 
   # The other 2 spectra that were included in the group contain no data
   grp_ids = ws.getSpectrum(2).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(4).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
 
   # The rest of the spectra are unchanged
   grp_ids = ws.getSpectrum(1).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(3).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
   grp_ids = ws.getSpectrum(5).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
-  print '...'
+  print ('Number of detectors is {}'.format(len(grp_ids)))
+  print ('...')
   grp_ids = ws.getSpectrum(199).getDetectorIDs()
-  print 'Number of detectors is',len(grp_ids)
+  print ('Number of detectors is {}'.format(len(grp_ids)))
 
 Output
 ^^^^^^

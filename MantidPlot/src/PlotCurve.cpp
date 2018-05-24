@@ -32,9 +32,9 @@
 #include "Mantid/ErrorBarSettings.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceBinData.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceBinData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "PatternBox.h"
 #include "ScaleDraw.h"
 #include "SymbolBox.h"
@@ -365,7 +365,7 @@ DataCurve::DataCurve(Table *t, const QString &xColName, const QString &name,
       d_click_pos_y(0.0), d_labels_color(Qt::black), d_labels_font(QFont()),
       d_labels_angle(0.0), d_white_out_labels(false),
       d_labels_align(Qt::AlignHCenter), d_labels_x_offset(0),
-      d_labels_y_offset(50), d_selected_label(NULL) {
+      d_labels_y_offset(50), d_selected_label(nullptr) {
   if (t && d_end_row < 0)
     d_end_row = t->numRows() - 1;
 }
@@ -941,7 +941,7 @@ bool DataCurve::selectedLabels(const QPoint &pos) {
     return false;
 
   bool selected = false;
-  d_selected_label = NULL;
+  d_selected_label = nullptr;
   foreach (PlotMarker *m, d_labels_list) {
     int x = d_plot->transform(xAxis(), m->xValue());
     int y = d_plot->transform(yAxis(), m->yValue());

@@ -49,7 +49,8 @@ class IBeamProfile;
 class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy {
 public:
   MCAbsorptionStrategy(const IBeamProfile &beamProfile,
-                       const API::Sample &sample, size_t nevents);
+                       const API::Sample &sample, size_t nevents,
+                       size_t maxScatterPtAttempts);
   std::tuple<double, double> calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                        const Kernel::V3D &finalPos,
                                        double lambdaBefore,
@@ -59,6 +60,7 @@ private:
   const IBeamProfile &m_beamProfile;
   const MCInteractionVolume m_scatterVol;
   const size_t m_nevents;
+  const size_t m_maxScatterAttempts;
   const double m_error;
 };
 

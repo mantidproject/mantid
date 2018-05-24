@@ -14,7 +14,7 @@ class Points;
 }
 namespace Geometry {
 class IDetector;
-class Object;
+class IObject;
 class ParameterMap;
 }
 
@@ -76,6 +76,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"DetectorEfficiencyCor"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\EfficiencyCorrections";
@@ -100,7 +103,7 @@ private:
                            Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D start,
-                       const Geometry::Object *shape) const;
+                       const Geometry::IObject *shape) const;
   /// Calculate the detector efficiency
   double detectorEfficiency(const double alpha,
                             const double scale_factor = 1.0) const;
@@ -123,7 +126,7 @@ private:
   const Geometry::ParameterMap *m_paraMap;
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D>>
+  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>
       m_shapeCache;
   /// Sample position
   Kernel::V3D m_samplePos;

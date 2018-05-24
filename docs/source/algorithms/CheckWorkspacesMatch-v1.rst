@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ Usage
     #create a copy of the workspace
     ws2 = CloneWorkspace(ws1)
 
-    print CheckWorkspacesMatch(ws1, ws2)
+    print(CheckWorkspacesMatch(ws1, ws2))
 
 
 Output:
@@ -61,8 +61,8 @@ Output:
     dataY2 = np.sin(dataX) + 0.1*np.random.random_sample(len(dataX))
     ws2 = CreateWorkspace(dataX, dataY2)
 
-    print CheckWorkspacesMatch(ws1, ws2) #fails, they're not the same
-    print CheckWorkspacesMatch(ws1, ws2, Tolerance=0.1) #passes, they're close enough
+    print(CheckWorkspacesMatch(ws1, ws2)) #fails, they're not the same
+    print(CheckWorkspacesMatch(ws1, ws2, Tolerance=0.1)) #passes, they're close enough
 
 
 Output:

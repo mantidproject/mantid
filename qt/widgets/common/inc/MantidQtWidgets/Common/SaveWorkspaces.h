@@ -41,8 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON SaveWorkspaces
-    : public API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SaveWorkspaces : public API::MantidDialog {
   Q_OBJECT
 
 public:
@@ -77,7 +76,7 @@ private:
   QString m_sampleThickness;
 
   QHash<QCheckBox *const, QString> m_savFormats;
-  typedef QHash<QCheckBox *const, QString>::const_iterator SavFormatsConstIt;
+  using SavFormatsConstIt = QHash<QCheckBox *const, QString>::const_iterator;
 
   void setupLine1(QHBoxLayout *const lineOne);
   void setupLine2(QHBoxLayout *const lineTwo,

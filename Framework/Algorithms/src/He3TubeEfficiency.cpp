@@ -9,7 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -256,7 +256,7 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
 void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
                                             double &detRadius,
                                             Kernel::V3D &detAxis) {
-  boost::shared_ptr<const Geometry::Object> shape_sptr = det.shape();
+  boost::shared_ptr<const Geometry::IObject> shape_sptr = det.shape();
   if (!shape_sptr) {
     throw std::runtime_error(
         "Detector geometry error: detector with id: " +
@@ -322,7 +322,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
 * @returns The distance to the surface in metres
 */
 double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
-                                        const Geometry::Object *shape) const {
+                                        const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
   Kernel::V3D direction = Kernel::V3D(0.0, 0.0, 0.0) - start;
   // it needs to be a unit vector

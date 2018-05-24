@@ -1,3 +1,4 @@
+
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -8,10 +9,6 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
-
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,22 +38,26 @@ void MonitorEfficiencyCorUser::exec() {
 
   m_outputWS = this->getProperty("OutputWorkspace");
 
-  if (m_inputWS->getInstrument()->getName() != "TOFTOF") {
-    std::string message("The input workspace does not come from TOFTOF");
-    g_log.error(message);
-    throw std::invalid_argument(message);
-  }
-
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
     m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
   }
-  double val;
-  Strings::convert(m_inputWS->run().getProperty("Ei")->value(), val);
-  m_Ei = val;
-  Strings::convert(m_inputWS->run().getProperty("monitor_counts")->value(),
-                   m_monitorCounts);
+  m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
+
+  std::string mon_counts_log;
+
+  // get name of the monitor counts sample log from the instrument parameter
+  // file
+  try {
+    mon_counts_log = getValFromInstrumentDef("monitor_counts_log");
+  } catch (Kernel::Exception::InstrumentDefinitionError &) {
+    // the default value is monitor_counts
+    mon_counts_log = "monitor_counts";
+  }
+
+  m_monitorCounts =
+      m_inputWS->run().getPropertyValueAsType<double>(mon_counts_log);
 
   // get Efficiency formula from the IDF - Parameters file
   const std::string effFormula = getValFromInstrumentDef("formula_mon_eff");

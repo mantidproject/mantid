@@ -58,10 +58,12 @@ def writeElement(handle, element):
     if label in BANNED:
         return []
     labels = [label]
+    # Write the isotopic average first
     writeBegin(handle, label, element.symbol, element.number)
     writeMiddle(handle, 0., element)
     writeEnd(handle)
-    for key in element._isotopes.keys():
+    # Now all isotopes ordered by A
+    for key in sorted(element._isotopes.keys()):
         labels.append(writeIsotope(handle, element, key))
     return labels
 
@@ -90,7 +92,7 @@ if __name__ == "__main__":
     info = []
     info.append("Generate a source file (.cpp) with the supplied filename. The")
     info.append("source file will contain all of the information necessary for")
-    info.append("the atoms and thier isotopes.")
+    info.append("the atoms and their isotopes.")
     parser = optparse.OptionParser("usage: %prog [options] <filename>",
                                    None, optparse.Option, VERSION, 'error',
                                    " ".join(info))
@@ -121,7 +123,8 @@ if __name__ == "__main__":
     handle.write("\n")
 
     # write an array of all atoms and elements
-    handle.write("/// All of the atoms in a single array so it can be searched.\n")
+    handle.write("// All of the atoms in a single array so it can be searched.\n")
+    handle.write("// getAtom() expects them to be sorted first by Z number then by A number.\n")
     handle.write("static Atom ATOMS[] = {\n")
     numAtoms = len(atomNames)
     for i in range(0, numAtoms, 10):

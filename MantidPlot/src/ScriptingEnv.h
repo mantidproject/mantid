@@ -97,7 +97,7 @@ public:
   /// Create a code lexer for this environment, can be NULL. Ownership of a
   /// created object
   /// is transferred to the caller.
-  virtual QsciLexer *createCodeLexer() const { return NULL; }
+  virtual QsciLexer *createCodeLexer() const { return nullptr; }
 
   virtual void redirectStdOut(bool) {}
 
@@ -169,7 +169,7 @@ public:
   static int numLanguages();
 
 private:
-  typedef ScriptingEnv *(*ScriptingEnvConstructor)(ApplicationWindow *);
+  using ScriptingEnvConstructor = ScriptingEnv *(*)(ApplicationWindow *);
   typedef struct {
     const char *name;
     ScriptingEnvConstructor constructor;

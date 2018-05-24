@@ -4,11 +4,11 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -48,7 +48,7 @@ private:
                 outputWSSignedTheta));
 
     // Check the signed theta axes of the workspaces.
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = outputSignedTheta->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
 
@@ -74,7 +74,7 @@ private:
             outputWSTheta));
     // Workspaces should now have a numeric axes up the side, with units of
     // angle.
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
@@ -212,7 +212,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of Q
-    const Axis *qAxis = 0;
+    const Axis *qAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(qAxis = output->getAxis(1));
     TS_ASSERT(qAxis->isNumeric());
     TS_ASSERT_EQUALS(qAxis->unit()->unitID(), "MomentumTransfer");
@@ -254,7 +254,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of d
-    const Axis *qAxis = 0;
+    const Axis *qAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(qAxis = output->getAxis(1));
     TS_ASSERT(qAxis->isNumeric());
     TS_ASSERT_EQUALS(qAxis->unit()->unitID(), "dSpacing");
@@ -296,7 +296,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of Q^2
-    const Axis *q2Axis = 0;
+    const Axis *q2Axis = nullptr;
     TS_ASSERT_THROWS_NOTHING(q2Axis = output->getAxis(1));
     TS_ASSERT(q2Axis->isNumeric());
     TS_ASSERT_EQUALS(q2Axis->unit()->unitID(), "QSquared");
@@ -358,7 +358,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of Q
-    const Axis *qAxis = 0;
+    const Axis *qAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(qAxis = output->getAxis(1));
     TS_ASSERT(qAxis->isNumeric());
     TS_ASSERT_EQUALS(qAxis->unit()->unitID(), "MomentumTransfer");
@@ -412,7 +412,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of Q.
-    const Axis *qAxis = 0;
+    const Axis *qAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(qAxis = output->getAxis(1));
     TS_ASSERT(qAxis->isNumeric());
     TS_ASSERT_EQUALS(qAxis->unit()->unitID(), "MomentumTransfer");
@@ -447,12 +447,13 @@ public:
     Mantid::Algorithms::ConvertSpectrumAxis2 testee;
     testee.initialize();
     testee.setChild(true);
+    testee.setRethrows(true);
     const MatrixWorkspace_sptr ws = creator.getProperty("OutputWorkspace");
     testee.setProperty("InputWorkspace", ws);
     testee.setProperty("OrderAxis", false);
     testee.setProperty("Target", "Theta");
     testee.setProperty("OutputWorkspace", "__unused2");
-    TS_ASSERT_THROWS_NOTHING(testee.execute());
+    testee.execute();
     TS_ASSERT(testee.isExecuted());
     const MatrixWorkspace_sptr output = testee.getProperty("OutputWorkspace");
     TS_ASSERT(output);

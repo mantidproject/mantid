@@ -13,6 +13,7 @@ from PyQt4 import QtGui, QtCore
 
 from mantid.kernel import (Logger, config)
 from mantidqtpython import MantidQt
+
 try:
     from mantidplot import *
     canMantidPlot = True
@@ -22,8 +23,50 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
-from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
-                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
+from sans.common.file_information import SANSFileInformationFactory
+from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
+                                       get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,
+                                       get_instrument_from_gui_selection, get_string_for_gui_from_instrument)
+
+from sans.common.general_functions import get_instrument
+
+from sans.gui_logic.models.run_summation import RunSummation
+from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_finder import SummableRunFinder
+from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.models.binning_type import BinningType
+
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
+from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from ui.sans_isis.work_handler import WorkHandler
+
+DEFAULT_BIN_SETTINGS = \
+    '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
+
+class RunSelectorPresenterFactory(object):
+    def __init__(self, title, run_finder):
+        self._title = title
+        self._run_finder = run_finder
+
+    def __call__(self,
+                 run_selector_view,
+                 on_selection_change,
+                 parent_view):
+        return RunSelectorPresenter(self._title,
+                                    RunSelection(on_selection_change),
+                                    self._run_finder,
+                                    run_selector_view,
+                                    parent_view)
+
+
+def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
+    summation_settings = SummationSettings(BinningType.Custom)
+    summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
+    return SummationSettingsPresenter(summation_settings,
+                                      summation_settings_view,
+                                      parent_view)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -56,6 +99,22 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         @abstractmethod
         def on_processing_finished(self):
+            pass
+
+        @abstractmethod
+        def on_multi_period_selection(self):
+            pass
+
+        @abstractmethod
+        def on_data_changed(self):
+            pass
+
+        @abstractmethod
+        def on_manage_directories(self):
+            pass
+
+        @abstractmethod
+        def on_instrument_changed(self):
             pass
 
     def __init__(self, main_presenter):
@@ -97,7 +156,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                          SANSInstrument.to_string(SANSInstrument.NoInstrument),
                                          type=str)
         settings.endGroup()
-        self._instrument = SANSInstrument.from_string(instrument_name)
+
+        self.instrument = SANSInstrument.from_string(instrument_name)
 
         # Attach validators
         self._attach_validators()
@@ -116,6 +176,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def set_current_page(self, index):
         self.main_stacked_widget.setCurrentIndex(index)
+
+    def _setup_add_runs_page(self):
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler()),
+                                                       RunSelectorPresenterFactory('Runs To Sum',
+                                                                                   SummableRunFinder(SANSFileInformationFactory())),
+                                                       _make_run_summation_settings_presenter,
+                                                       self.add_runs_page, self)
 
     def setup_layout(self):
         """
@@ -140,32 +207,37 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
+        centre_icon_path = os.path.join(path, "icons", "centre.png")
+        centre_icon = QtGui.QIcon(centre_icon_path)
+        _ = QtGui.QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
+
+        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
+        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
+        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
+
+        diagnostic_icon_path = os.path.join(path, "icons", "diagnostic.png")
+        diagnostic_icon = QtGui.QIcon(diagnostic_icon_path)
+        _ = QtGui.QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
+
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Algorithm setup
-        # --------------------------------------------------------------------------------------------------------------
-        # Setup white list
-        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
-        for entry in self._white_list_entries:
-            # If there is a column name specified, then it is a white list entry.
-            if entry.column_name:
-                white_list.addElement(entry.column_name, entry.algorithm_property, entry.description,
-                                      entry.show_value, entry.prefix)
-
-        # Setup the black list, ie the properties which should not appear in the Options column
-
-        # Processing algorithm (mandatory)
-        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
-                                                                       'unused_', self._black_list)
+        self._setup_add_runs_page()
 
         # --------------------------------------------------------------------------------------------------------------
         # Main Tab
         # --------------------------------------------------------------------------------------------------------------
-        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
-        self.data_processor_table.setForcedReProcessing(True)
+        self.create_data_table(show_periods=False)
+
         self._setup_main_tab()
+
+        self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
+
+        self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
+
+        self.process_button.clicked.connect(self._on_python_process)
+
+        self.help_button.clicked.connect(self._on_help_button_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -183,6 +255,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Mask file input settings
         self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
         self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
+
+        self.manage_directories_button.clicked.connect(self._on_manage_directories)
 
         # Set the q step type settings
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
@@ -213,36 +287,75 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Q Resolution
         self.q_resolution_moderator_file_push_button.clicked.connect(self._on_load_moderator_file)
 
+        self.plot_results_checkbox.stateChanged.connect(self._on_plot_results_toggled)
+        self.use_optimizations_checkbox.stateChanged.connect(self._on_use_optimisations_changed)
+
+        self.output_mode_memory_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
+        self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
+
         return True
 
-    def _setup_main_tab(self):
-        # --------------------------------------------------------------------------------------------------------------
-        # Header setup
-        # --------------------------------------------------------------------------------------------------------------
-        self.user_file_button.clicked.connect(self._on_user_file_load)
-        self.batch_button.clicked.connect(self._on_batch_file_load)
+    def _on_output_mode_changed(self, state):
+        self.data_processor_table.settingsChanged()
 
-        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
-        self.user_file_line_edit.setDisabled(True)
-        self.batch_line_edit.setDisabled(True)
+    def _on_use_optimisations_changed(self, state):
+        self.data_processor_table.settingsChanged()
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Table setup
-        # --------------------------------------------------------------------------------------------------------------
+    def _on_plot_results_toggled(self, state):
+        self.data_processor_table.settingsChanged()
+
+    def create_data_table(self, show_periods):
+        # Delete an already existing table
+        if self.data_processor_table:
+            self.data_processor_table.setParent(None)
+
+        # Create the white list
+        self._white_list_entries = self._main_presenter.get_white_list(show_periods=show_periods)
+
+        # Setup white list
+        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
+        for entry in self._white_list_entries:
+            # If there is a column name specified, then it is a white list entry.
+            if entry.column_name:
+                white_list.addElement(entry.column_name, entry.algorithm_property, entry.description,
+                                      entry.show_value, entry.prefix)
+
+        # Processing algorithm (mandatory)
+        unused_postprocessing_index = 0
+        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
+                                                                       'unused_', unused_postprocessing_index, self._black_list)
+
+        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
+        self.data_processor_table.setForcedReProcessing(True)
+
         # Add the presenter to the data processor
         self.data_processor_table.accept(self._main_presenter)
 
         # Set the list of available instruments in the widget and the default instrument
-        instrument_name = SANSInstrument.to_string(self._instrument)
+        instrument_name = config.getString("default.instrument")
+        instrument_name_enum = get_instrument(instrument_name)
         self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
+
+        if instrument_name_enum:
+            self.set_instrument_settings(instrument_name_enum)
+            self._instrument_changed()
 
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
         self.data_processor_table.processingFinished.connect(self._processing_finished)
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
-
+        self.data_processor_table.dataChanged.connect(self._data_changed)
         self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
+
+    def _setup_main_tab(self):
+        self.user_file_button.clicked.connect(self._on_user_file_load)
+        self.batch_button.clicked.connect(self._on_batch_file_load)
+
+        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
+        self.user_file_line_edit.setDisabled(True)
+        self.batch_line_edit.setDisabled(True)
 
     def _processed_clicked(self):
         """
@@ -255,6 +368,15 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Clean up
         """
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
+
+    def _data_changed(self):
+        self._call_settings_listeners(lambda listener: listener.on_data_changed())
+
+    def _instrument_changed(self):
+        self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
+
+    def _on_help_button_clicked(self):
+        pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):
         """
@@ -288,7 +410,25 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _handle_instrument_change(self):
         instrument_string = str(self.data_processor_table.getCurrentInstrument())
-        self._set_mantid_instrument(instrument_string)
+        instrument = get_instrument_from_gui_selection(instrument_string)
+        self.instrument = instrument
+
+    def _on_python_process(self):
+        self.data_processor_table.processClicked()
+
+    def disable_buttons(self):
+        self.process_button.setEnabled(False)
+        self.instrument_combo_box.setEnabled(False)
+        self.batch_button.setEnabled(False)
+        self.user_file_button.setEnabled(False)
+        self.manage_directories_button.setEnabled(False)
+
+    def enable_buttons(self):
+        self.process_button.setEnabled(True)
+        self.instrument_combo_box.setEnabled(True)
+        self.batch_button.setEnabled(True)
+        self.user_file_button.setEnabled(True)
+        self.manage_directories_button.setEnabled(True)
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
@@ -458,26 +598,37 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
 
+    def show_directory_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+
     def _on_load_mask_file(self):
-        self._load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
-                        self.__mask_file_input_path_key,  self.get_mask_file)
+        load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
+                  self.__mask_file_input_path_key,  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
+    def _on_multi_period_selection(self):
+        # Check if multi-period should be enabled
+        show_periods = self.multi_period_check_box.isChecked()
+        self.create_data_table(show_periods=show_periods)
+        self._call_settings_listeners(lambda listener: listener.on_multi_period_selection())
+
+    def _on_manage_directories(self):
+        self._call_settings_listeners(lambda listener: listener.on_manage_directories())
+
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
     # ------------------------------------------------------------------------------------------------------------------
-    def handle_instrument_change(self):
-        # TODO need to read it and set it as the default instrument
-        pass
-
     def set_instrument_settings(self, instrument):
         if instrument:
-            self._instrument = instrument
+            self.instrument = instrument
             instrument_string = SANSInstrument.to_string(instrument)
-            self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_string)
             self._set_mantid_instrument(instrument_string)
+            reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
+            self.set_reduction_modes(reduction_mode_list)
+
+            self.data_processor_table.on_comboProcessInstrument_currentIndexChanged(self.instrument_combo_box.currentIndex())
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
@@ -505,6 +656,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         else:
             gui_element.addItem(element)
 
+    def halt_process_flag(self):
+        self.data_processor_table.skipProcessing()
+
     @staticmethod
     def _set_enum_as_element_in_combo_box(gui_element, element, expected_type):
         value_as_string = expected_type.to_string(element)
@@ -521,6 +675,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         if value:
             gui_element = getattr(self, line_edit)
             gui_element.setText(str(value))
+
+    def is_multi_period_view(self):
+        return self.multi_period_check_box.isChecked()
+
+    def set_multi_period_view_mode(self, mode):
+        self.multi_period_check_box.setChecked(mode)
 
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -582,6 +742,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.use_optimizations_checkbox.setChecked(value)
 
     @property
+    def plot_results(self):
+        return self.plot_results_checkbox.isChecked()
+
+    @plot_results.setter
+    def plot_results(self, value):
+        self.plot_results_checkbox.setChecked(value)
+
+    @property
     def output_mode(self):
         if self.output_mode_memory_radio_button.isChecked():
             return OutputMode.PublishToADS
@@ -609,6 +777,35 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
+
+    @property
+    def show_transmission(self):
+        return self.show_transmission_view.isChecked()
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.show_transmission_view.setChecked(value)
+
+    @property
+    def instrument(self):
+        instrument_as_string = self.instrument_combo_box.currentText()
+        return get_instrument_from_gui_selection(instrument_as_string)
+
+    @instrument.setter
+    def instrument(self, value):
+        instrument_as_string = get_string_for_gui_from_instrument(value)
+        if instrument_as_string:
+            index = self.instrument_combo_box.findText(instrument_as_string)
+            if index != -1:
+                self.instrument_combo_box.setCurrentIndex(index)
+
+    def set_instruments(self, instrument_list):
+        current_index = self.instrument_combo_box.currentIndex()
+        self.instrument_combo_box.clear()
+        for element in instrument_list:
+            self.instrument_combo_box.addItem(element)
+        if current_index != -1:
+            self.instrument_combo_box.setCurrentIndex(current_index)
 
     # ==================================================================================================================
     # ==================================================================================================================
@@ -639,9 +836,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def reduction_mode(self, value):
         # There are two types of values that can be passed:
         # String: we look for string and we set it
-
         # Convert the value to the correct GUI string
-        reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self._instrument)
+
+        # Set the correct selection of reduction modes which are available
+        reduction_mode_list = get_reduction_mode_strings_for_gui(self.instrument)
+        self.set_reduction_modes(reduction_mode_list)
+
+        reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self.instrument)
         if reduction_mode_as_string:
             index = self.reduction_mode_combo_box.findText(reduction_mode_as_string)
             if index != -1:
@@ -704,6 +905,32 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def merge_q_range_stop(self, value):
         if value is not None:
             self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", value=value)
+
+    @property
+    def merge_mask(self):
+        return self.merge_mask_check_box.isChecked()
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.merge_mask_check_box.setChecked(value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_line_edit_field(line_edit="merged_max_line_edit", expected_type=float)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_max_line_edit", value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_line_edit_field(line_edit="merged_min_line_edit", expected_type=float)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_min_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event slices group
@@ -1276,6 +1503,24 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def q_resolution_moderator_file(self, value):
         self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", value=value)
 
+    @property
+    def r_cut(self):
+        return self.get_simple_line_edit_field(line_edit="r_cut_line_edit",
+                                               expected_type=float)
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="r_cut_line_edit", value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_line_edit_field(line_edit="w_cut_line_edit",
+                                               expected_type=float)
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="w_cut_line_edit", value=value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # MASK TAB
@@ -1349,6 +1594,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.merged_scale_line_edit.setValidator(double_validator)
         self.merged_q_range_start_line_edit.setValidator(double_validator)
         self.merged_q_range_stop_line_edit.setValidator(double_validator)
+        self.merged_max_line_edit.setValidator(double_validator)
+        self.merged_min_line_edit.setValidator(double_validator)
 
         self.wavelength_min_line_edit.setValidator(positive_double_validator)
         self.wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -1383,6 +1630,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
         self.q_xy_step_line_edit.setValidator(positive_double_validator)
 
+        self.r_cut_line_edit.setValidator(positive_double_validator)
+        self.w_cut_line_edit.setValidator(positive_double_validator)
+
         self.gravity_extra_length_line_edit.setValidator(double_validator)
 
         self.q_resolution_source_a_line_edit.setValidator(positive_double_validator)
@@ -1403,6 +1653,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.merged_q_range_start_line_edit.setText("")
         self.merged_q_range_stop_line_edit.setText("")
+        self.merged_max_line_edit.setText("")
+        self.merged_min_line_edit.setText("")
         self.merged_scale_line_edit.setText("")
         self.merged_shift_line_edit.setText("")
         self.merged_shift_use_fit_check_box.setChecked(False)

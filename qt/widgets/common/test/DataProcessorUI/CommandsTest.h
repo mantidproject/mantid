@@ -47,16 +47,15 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CommandsTest *createSuite() {
-    return new CommandsTest();
-  }
+  static CommandsTest *createSuite() { return new CommandsTest(); }
   static void destroySuite(CommandsTest *suite) { delete suite; }
 
   void test_open_table_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
     OpenTableCommand command(&mockPresenter);
 
-    // The presenter should be notified with the OpenTableFlag
+    // The presenter should not be notified with the OpenTableFlag because
+    // this is a submenu rather than an action
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OpenTableFlag))
         .Times(Exactly(0));
     // Execute the command

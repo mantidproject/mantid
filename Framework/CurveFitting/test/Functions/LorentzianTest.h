@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Lorentzian.h"
-#include "MantidCurveFitting/Jacobian.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 #include <boost/make_shared.hpp>
 using Mantid::CurveFitting::Functions::Lorentzian;

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -14,14 +14,15 @@ peaks (both in detector position/TOF and Q-space) and create an output
 :ref:`PeaksWorkspace <PeaksWorkspace>` containing the result.
 
 This algorithm uses the InputWorkspace to determine the instrument in
-use, as well as the UB Matrix and Unit Cell of the sample used. You can
-use the :ref:`algm-CopySample` algorithm (with CopyLattice=1) to
-copy a UB matrix from a PeaksWorkspace to another workspace.
+use, as well as the :ref:`UB matrix <Lattice>` and Unit Cell of the
+sample used. You can use the :ref:`algm-CopySample` algorithm (with
+``CopyLattice=1``) to copy a :ref:`UB matrix <Lattice>` from a
+PeaksWorkspace to another workspace.
 
 The algorithm operates by calculating the scattering direction (given
-the UB matrix) for a particular HKL, and determining whether that hits a
-detector. The Max/MinDSpacing parameters are used to determine what
-HKL's to try.
+the :ref:`UB matrix <Lattice>`) for a particular HKL, and determining
+whether that hits a detector. The Max/MinDSpacing parameters are used
+to determine what HKL's to try.
 
 The parameters of WavelengthMin/WavelengthMax also limit the peaks
 attempted to those that can be detected/produced by your instrument.
@@ -56,18 +57,18 @@ which can currently be achieved as in the following example:
                              MinDSpacing=0.5,
                              WavelengthMin=0.9, WavelengthMax=6.0)
 
-    print 'There are', predicted.getNumberPeaks(), 'detectable peaks.'
+    print('There are {} detectable peaks.'.format(predicted.getNumberPeaks()))
 
     intensities = np.array(predicted.column('Intens'))
     maxIntensity = np.max(intensities)
     relativeIntensities = intensities / maxIntensity
 
-    print 'Maximum intensity: {0:.2f}'.format(maxIntensity)
-    print 'Peaks with relative intensity < 1%:', len([x for x in relativeIntensities if x < 0.01])
+    print('Maximum intensity: {0:.2f}'.format(maxIntensity))
+    print('Peaks with relative intensity < 1%: {}'.format(len([x for x in relativeIntensities if x < 0.01])))
 
     absences = [i for i, x in enumerate(intensities) if x < 1e-9]
-    print 'Number of absences:', len(absences)
-    print 'Absent HKLs:', [predicted.getPeak(i).getHKL() for i in absences]
+    print('Number of absences: {}'.format(len(absences)))
+    print('Absent HKLs: {}'.format([predicted.getPeak(i).getHKL() for i in absences]))
 
 The script provides some information about the predicted peaks and
 their structure factors. Additionally it prints out the HKL of peaks

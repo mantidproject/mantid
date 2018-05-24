@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -21,9 +21,9 @@ Usage
 
    def print_workspace_history(ws):
       history = ws.getHistory()
-      print "Workspace %s has %i algorithms in it's history" %(ws,history.size())
+      print("Workspace {} has {} algorithms in it's history".format(ws,history.size()))
       for alg in history.getAlgorithmHistories():
-         print "  " + alg.name()
+         print("  " + alg.name())
 
    # create histogram workspace
    ws = CreateSampleWorkspace(NumBanks=1,BankPixelWidth=1)
@@ -38,7 +38,7 @@ Usage
 
    RemoveWorkspaceHistory(ws)
 
-   print "After RemoveWorkspaceHistory"
+   print("After RemoveWorkspaceHistory")
    print_workspace_history(ws)
 
              

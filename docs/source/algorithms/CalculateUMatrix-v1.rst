@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -160,6 +160,8 @@ Then the sum in equation :eq:`quatsum` is maximized for :math:`\epsilon_0 =1, \e
 Therefore U is the rotation represented by the quaternion :math:`u`,
 which is the eigenvector corresponding to the largest eigenvalue of
 :math:`HS`.
+
+For more information see the documentation for :ref:`UB matrix <Lattice>`.
 
 .. categories::
 

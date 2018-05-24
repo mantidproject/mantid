@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -72,7 +72,7 @@ Usage in autoreduction
     div = SavePlot1D(InputWorkspace='w1', OutputType='plotly')
     from postprocessing.publish_plot import publish_plot
     request = publish_plot('TESTINSTRUMENT', 12345, files={'file':div})
-    print "post returned %d" % request.status_code
+    print("post returned {}".format(request.status_code))
 
 To see what the result looks like on your local system, add the
 ``Filename`` argument (``.html`` extension) and change to

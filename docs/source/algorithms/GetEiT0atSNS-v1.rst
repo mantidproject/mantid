@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,8 +39,8 @@ Usage
     AddSampleLog(Workspace=w,LogName='EnergyRequest',LogText='20',LogType='Number Series')
     res=GetEiT0atSNS(w)    
     
-    print "Incident energy: %2.2f meV"%res[0]
-    print "T0: %2.2f microseconds"%res[1]
+    print("Incident energy: {:2.2f} meV".format(res[0]))
+    print("T0: {:2.2f} microseconds".format(res[1]))
 
 
 .. testcleanup:: GetEiT0atSNS

@@ -64,9 +64,9 @@ Point groups are represented in Mantid by the ``PointGroup``-class, which is con
 
     pg = PointGroupFactory.createPointGroup("-1")
 
-    print "Name:", pg.getName()
-    print "Hermann-Mauguin symbol:", pg.getHMSymbol()
-    print "Crystal system:", pg.getCrystalSystem()
+    print("Name: {}".format(pg.getName()))
+    print("Hermann-Mauguin symbol: {}".format(pg.getHMSymbol()))
+    print("Crystal system: {}".format(pg.getCrystalSystem()))
 
 When this code is executed, some information about the point group is printed:
 
@@ -82,9 +82,9 @@ It's possible to query the factory about available point groups. One option retu
 
     from mantid.geometry import PointGroupFactory, PointGroup
 
-    print "All point groups:", PointGroupFactory.getAllPointGroupSymbols()
-    print "Cubic point groups:", PointGroupFactory.getPointGroupSymbols(PointGroup.CrystalSystem.Cubic)
-    print "Tetragonal point groups:", PointGroupFactory.getPointGroupSymbols(PointGroup.CrystalSystem.Tetragonal)
+    print("All point groups: {}".format(PointGroupFactory.getAllPointGroupSymbols()))
+    print("Cubic point groups: {}".format(PointGroupFactory.getPointGroupSymbols(PointGroup.CrystalSystem.Cubic)))
+    print("Tetragonal point groups: {}".format(PointGroupFactory.getPointGroupSymbols(PointGroup.CrystalSystem.Tetragonal)))
 
 Which results in the following output:
 
@@ -108,8 +108,8 @@ After having obtained a ``PointGroup``-object, it can be used for working with r
     hkl2 = [0, 0, -2]
     hkl3 = [0, 1, 2]
 
-    print "Are [2,0,0] and [0,0,-2] equivalent?", pg.isEquivalent(hkl1, hkl2)
-    print "Are [2,0,0] and [0,1,2] equivalent?", pg.isEquivalent(hkl1, hkl3)
+    print("Are [2,0,0] and [0,0,-2] equivalent? {}".format(pg.isEquivalent(hkl1, hkl2)))
+    print("Are [2,0,0] and [0,1,2] equivalent? {}".format(pg.isEquivalent(hkl1, hkl3)))
 
 .. testoutput :: ExIsEquivalent
 
@@ -127,15 +127,15 @@ Another common task is to find all symmetry equivalents of a reflection, for exa
     hkl1 = [2, 0, 0]
     equivalents1 = pg.getEquivalents(hkl1)
 
-    print "Number of reflections equivalent to [2,0,0]:", len(equivalents1)
-    print "Equivalents:", equivalents1
-    print
+    print("Number of reflections equivalent to [2,0,0]: {}".format(len(equivalents1)))
+    print("Equivalents: {}".format(equivalents1))
+
 
     hkl2 = [1, 1, 1]
     equivalents2 = pg.getEquivalents(hkl2)
 
-    print "Number of reflections equivalent to [1,1,1]:", len(equivalents2)
-    print "Equivalents:", equivalents2
+    print("Number of reflections equivalent to [1,1,1]: {}".format(len(equivalents2)))
+    print("Equivalents: {}".format(equivalents2))
 
 Executing this code results in the following output:
 
@@ -143,7 +143,6 @@ Executing this code results in the following output:
 
     Number of reflections equivalent to [2,0,0]: 6
     Equivalents: [[2,0,0], [0,2,0], [0,0,2], [0,0,-2], [0,-2,0], [-2,0,0]]
-
     Number of reflections equivalent to [1,1,1]: 8
     Equivalents: [[1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1], [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]]
 
@@ -151,28 +150,29 @@ Sometimes, a list of reflections needs to be reduced to a set of symmetry indepe
 
 .. testcode :: ExIndependentReflections
 
-    from mantid.geometry import PointGroupFactory
+   from mantid.geometry import PointGroupFactory
 
-    pg = PointGroupFactory.createPointGroup("m-3m")
+   pg = PointGroupFactory.createPointGroup("m-3m")
 
-    hklList = [[1, 0, 0], [0, 1, 0], [-1, 0, 0],    # Equivalent to [1,0,0]
-               [1, 1, 1], [-1, 1, 1],               # Equivalent to [1,1,1]
-               [-3, 1, 1], [1, -3, 1], [-1, 1, 3]]  # Equivalent to [3,1,1]
+   hklList = [[1, 0, 0], [0, 1, 0], [-1, 0, 0],    # Equivalent to [1,0,0]
+              [1, 1, 1], [-1, 1, 1],               # Equivalent to [1,1,1]
+              [-3, 1, 1], [1, -3, 1], [-1, 1, 3]]  # Equivalent to [3,1,1]
 
-    independent = set()
+   independent = set()
 
-    for hkl in hklList:
-        independent.add(pg.getReflectionFamily(hkl)) # getReflectionFamily returns the same hkl for all symmetry equivalents
+   for hkl in hklList:
+       independent.add(pg.getReflectionFamily(hkl)) # getReflectionFamily returns the same hkl for all symmetry equivalents
 
-    print "Number of independent reflections:", len(independent)
-    print "Reflections:", list(independent)
+   print("Number of independent reflections: {}".format(len(independent)))
+   print("Reflections: {}".format(list(independent)))
 
 This example code produces the output below upon execution:
 
 .. testoutput:: ExIndependentReflections
+   :options: +ELLIPSIS
 
-    Number of independent reflections: 3
-    Reflections: [[1,1,1], [1,0,0], [3,1,1]]
+   Number of independent reflections: 3
+   Reflections: [...]
 
 Symmetry imposes restrictions on the metric of the unit cell. Cubic symmetry for example implies that all cell edges have the same length and all angles are 90 degrees. The ``Group``-class (and thus, by inheritance also ``PointGroup``) provides a method that checks is a metric tensor is compatible with the symmetry operations of the group:
 
@@ -183,10 +183,10 @@ Symmetry imposes restrictions on the metric of the unit cell. Cubic symmetry for
     cell = UnitCell(3, 3, 5)
 
     pgCubic = PointGroupFactory.createPointGroup("m-3m")
-    print "Is the cell compatible with cubic symmetry?", pgCubic.isInvariant(cell.getG())
+    print("Is the cell compatible with cubic symmetry? {}".format(pgCubic.isInvariant(cell.getG())))
 
     pgTetragonal = PointGroupFactory.createPointGroup("4/mmm")
-    print "Is the cell compatible with tetragonal symmetry?", pgTetragonal.isInvariant(cell.getG())
+    print("Is the cell compatible with tetragonal symmetry? {}".format(pgTetragonal.isInvariant(cell.getG())))
 
 Executing the code above will produce the following output that reveals that the cell is only compatible with tetragonal, but not with cubic symmetry:
 
@@ -211,8 +211,8 @@ Exactly like point groups, space groups are also created using a factory:
     from mantid.geometry import SpaceGroupFactory
 
     sg = SpaceGroupFactory.createSpaceGroup("P -1")
-    print "Hermann-Mauguin symbol:", sg.getHMSymbol()
-    print "ITA number:", sg.getNumber()
+    print("Hermann-Mauguin symbol: {}".format(sg.getHMSymbol()))
+    print("ITA number: {}".format(sg.getNumber()))
 
 Executing this code shows the Hermann-Mauguin symbol of the space group as well as the number defined in ITA:
 
@@ -227,8 +227,8 @@ For some space group types there is more than one setting, so the factory suppor
 
     from mantid.geometry import SpaceGroupFactory
 
-    print "Space group no. 26:", SpaceGroupFactory.subscribedSpaceGroupSymbols(26)
-    print "Total subscribed space group types:", len(SpaceGroupFactory.getAllSpaceGroupNumbers())
+    print("Space group no. 26: {}".format(SpaceGroupFactory.subscribedSpaceGroupSymbols(26)))
+    print("Total subscribed space group types: {}".format(len(SpaceGroupFactory.getAllSpaceGroupNumbers())))
 
 This shows all 6 permutations of the orthorhombic space group no. 26, and that there are 230 space group types:
 
@@ -248,10 +248,10 @@ Besides containing some very basic information, the most important functionality
     position = [1./3., 2./3., 0.25]
     equivalents = sg.getEquivalentPositions(position)
 
-    print "There are", len(equivalents), "equivalent coordinates."
-    print "Coordinates:"
+    print("There are {} equivalent coordinates.".format(len(equivalents)))
+    print("Coordinates:")
     for i, pos in enumerate(equivalents):
-        print str(i + 1) + ":", pos
+        print("{0}: {1}".format(str(i + 1), pos))
 
 Please note that for hexagonal and trigonal space groups, where translations of :math:`1/3`, :math:`2/3`, :math:`1/6` and so on are common, these coordinates must be supplied either as ``1./3.`` or with a precision of 5 digits, e.g. ``0.66667``.
 
@@ -290,11 +290,11 @@ Closely related to the generation of equivalent coordinates is the site symmetry
     position = [1./3., 2./3., 0.25]
     siteSymmetryGroup = sg.getSiteSymmetryGroup(position)
 
-    print "Order of the site symmetry group:", siteSymmetryGroup.getOrder()
-    print "Group elements:"
+    print("Order of the site symmetry group: {}".format(siteSymmetryGroup.getOrder()))
+    print("Group elements:")
     for i, op in enumerate(siteSymmetryGroup.getSymmetryOperations()):
         element = SymmetryElementFactory.createSymElement(op)
-        print str(i + 1) + ":", op.getIdentifier(), "(" + getFullElementSymbol(element) + ")"
+        print("{0}: {1} ({2})".format(str(i + 1), op.getIdentifier(), getFullElementSymbol(element)))
 
 The group contains three symmetry operations:
 
@@ -318,13 +318,13 @@ Furthermore, it is possible to create a PointGroup-object from a SpaceGroup obje
     sg_diamond = SpaceGroupFactory.createSpaceGroup("F d -3 m")
     pg_diamond = PointGroupFactory.createPointGroupFromSpaceGroup(sg_diamond)
 
-    print "Space group no.", sg_diamond.getNumber(), "has point group:", pg_diamond.getHMSymbol()
+    print("Space group no. {0} has point group: {1}".format(sg_diamond.getNumber(), pg_diamond.getHMSymbol()))
 
     # Related space group F-43m (sphalerite)
     sg_zincblende = SpaceGroupFactory.createSpaceGroup("F -4 3 m")
     pg_zincblende = sg_zincblende.getPointGroup()
 
-    print "Space group no.", sg_zincblende.getNumber(), "has point group:", pg_zincblende.getHMSymbol()
+    print("Space group no. {0} has point group: {1}".format(sg_zincblende.getNumber(), pg_zincblende.getHMSymbol()))
 
 The script prints the point group of the space group in question:
 
@@ -341,7 +341,7 @@ Sometimes it's useful to reverse the above process - which is not exactly possib
 
     pg = PointGroupFactory.createPointGroup("m-3")
 
-    print "Space groups with point group m-3:", SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)
+    print("Space groups with point group m-3: {}".format(SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)))
 
 The example produces the following output:
 
@@ -361,7 +361,7 @@ While PointGroup offers useful methods to handle reflections, some information c
     hkls = [V3D(0, 0, 2), V3D(0, 0, 4), V3D(0, 0, 6), V3D(0, 0, 8)]
 
     for hkl in hkls:
-        print hkl, "is allowed:", sg.isAllowedReflection(hkl)
+        print("{0} is allowed: {1}".format(hkl, sg.isAllowedReflection(hkl)))
 
 Because space group :math:`Fddd` contains diamond glide planes, only :math:`00l` reflections with :math:`l=4n` are allowed. The script gives the correct answer for these reflections:
 
@@ -384,10 +384,10 @@ As mentioned above, ``SpaceGroup`` provides a function that verifies whether the
     cell = UnitCell(4.402, 4.402, 10.0, 90, 90, 120)
 
     sgR3mRh = SpaceGroupFactory.createSpaceGroup("R -3 m :r")
-    print "Is the cell allowed in R-3m (rhombohedral setting)?", sgR3mRh.isAllowedUnitCell(cell)
+    print("Is the cell allowed in R-3m (rhombohedral setting)? {}".format(sgR3mRh.isAllowedUnitCell(cell)))
 
     sgR3mHex = SpaceGroupFactory.createSpaceGroup("R -3 m")
-    print "Is the cell allowed in R-3m (hexagonal setting)?", sgR3mHex.isAllowedUnitCell(cell)
+    print("Is the cell allowed in R-3m (hexagonal setting)? {}".format(sgR3mHex.isAllowedUnitCell(cell)))
 
 The code above shows that the defined cell is only compatible with space group :math:`R\bar{3}m` in hexagonal setting:
 
@@ -415,8 +415,8 @@ The previous two sections demonstrated how to perform common tasks using point a
     sg = SpaceGroupFactory.createSpaceGroup("P 6/m")
     symOpStrings = sorted(sg.getSymmetryOperationStrings())
 
-    print "There are", len(symOpStrings), "symmetry operations in space group", sg.getHMSymbol() + "."
-    print "Symmetry operations:", symOpStrings
+    print("There are {0} symmetry operations in space group {1}.".format(len(symOpStrings), sg.getHMSymbol()))
+    print("Symmetry operations: {}".format(symOpStrings))
 
 Which prints the symmetry operation information:
 
@@ -441,8 +441,9 @@ While this can be interesting for informational purposes, it's more useful to ob
     symOpMax1 = getMaximumOrderOperation(sg1)
     symOpMax2 = getMaximumOrderOperation(sg2)
 
-    print "The symmetry operation with highest order in space group no.", sg1.getNumber(), "is:", symOpMax1.getIdentifier(), "(k=" + str(symOpMax1.getOrder()) + ")"
-    print "The symmetry operation with highest order in space group no.", sg2.getNumber(), "is:", symOpMax2.getIdentifier(), "(k=" + str(symOpMax2.getOrder()) + ")"
+    print("The symmetry operation with highest order in space group no. {0} is: {1} (k={2})".format(sg1.getNumber(),symOpMax1.getIdentifier(),symOpMax1.getOrder()))
+    print("The symmetry operation with highest order in space group no. {0} is: {1} (k={2})".format(sg2.getNumber(),symOpMax2.getIdentifier(),symOpMax2.getOrder()))
+
 
 Which produces the following output:
 
@@ -484,15 +485,15 @@ Another way to extract more information about the symmetry in a space group is t
                 symElementsByAxis[axis] = [symElem]
 
     noAxisSymbols = [x.getHMSymbol() for x in symElementsNoAxis]
-    print "There are", len(symElementsNoAxis), "element(s) with no characteristic axis."
-    print "Are there translations?", "Yes" if 't' in noAxisSymbols else "No"
+    print("There are {} element(s) with no characteristic axis.".format(len(symElementsNoAxis)))
+    print("Are there translations? {}".format("Yes" if 't' in noAxisSymbols else "No"))
 
     axes = symElementsByAxis.keys()
-    print "There is a total of", len(axes), "different characteristic axes."
-    print "Symmetry in each direction:"
+    print("There is a total of {} different characteristic axes.".format(len(axes)))
+    print("Symmetry in each direction:")
 
     for axis in sorted(axes):
-        print str(axis) + ": ", sorted([x.getHMSymbol() for x in symElementsByAxis[axis]])
+        print("{0}:  {1}".format(axis, sorted([x.getHMSymbol() for x in symElementsByAxis[axis]])))
 
 This prints the following information:
 
@@ -547,10 +548,10 @@ With the space group information it's also possible to derive information about 
 
     siteSymmGroup = getSiteSymmetryGroup(sg, point)
 
-    print "Site symmetry group fulfills group axioms:", siteSymmGroup.isGroup()
-    print "Order of site symmetry group:", siteSymmGroup.getOrder()
-    print "Order of space group:", sg.getOrder()
-    print "Site multiplicity:", sg.getOrder() / siteSymmGroup.getOrder()
+    print("Site symmetry group fulfills group axioms: {}".format(siteSymmGroup.isGroup()))
+    print("Order of site symmetry group: {}".format(siteSymmGroup.getOrder()))
+    print("Order of space group: {}".format(sg.getOrder()))
+    print("Site multiplicity: {}".format(sg.getOrder() // siteSymmGroup.getOrder()))
 
 The script produces the following output:
 
@@ -610,7 +611,7 @@ Building on the example above which showed how to check whether a reflection is 
                 ([6,1,1], False), ([6,2,0], True), ([6,2,1], False), ([6,2,2], False), ([6,3,0], False), ([6,3,1], False)]
 
     reflectionCount = len(reflections)
-    print "There are", reflectionCount, "reflections to consider."
+    print("There are {} reflections to consider.".format(reflectionCount))
 
     # Check space groups and store results in a list
     spaceGroupMatchList = []
@@ -635,13 +636,13 @@ Building on the example above which showed how to check whether a reflection is 
     finalSpaceGroupMatchList = [x for x in spaceGroupMatchList if not ':2' in x[0]]
 
     # Print some information about the most likely matches
-    print "5 best matching space groups:"
+    print("5 best matching space groups:")
 
     for sgPair in finalSpaceGroupMatchList[:5]:
         sgStatus = sgPair[1]
-        print "    {0}: {1} absence violations, {2: >2} additional absences, {3: >2} matches".format(sgPair[0], sgStatus.get(1, 0), sgStatus.get(-1, 0), sgStatus.get(0, 0))
+        print("    {0}: {1} absence violations, {2: >2} additional absences, {3: >2} matches".format(sgPair[0], sgStatus.get(1, 0), sgStatus.get(-1, 0), sgStatus.get(0, 0)))
 
-    print "The best matching space group is:", finalSpaceGroupMatchList[0][0]
+    print("The best matching space group is: {}".format(finalSpaceGroupMatchList[0][0]))
 
 The script should produce the following output:
 

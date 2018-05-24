@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -49,8 +49,8 @@ This example is for calculating the Asymmetry from counts.
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
    output,norm=CalculateMuonAsymmetry   (InputWorkspace=input,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="counts",Minimizer="Levenberg-MarquardtMD",MaxIterations=500 )
-   print  "Asymmetry: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
-   print "Normalization constant: {0:.2f}".format(norm[0])
+   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
+   print("Normalization constant: {0:.2f}".format(norm[0]))
 
 Output:
 
@@ -76,8 +76,8 @@ This example is for calculating the Asymmetry from an estimate of the asymmetry.
    run.addProperty("goodfrm","10","None",True)
    estAsymm,estNorm=CalculateMuonAsymmetry(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
    output,norm=CalculateMuonAsymmetry(InputWorkspace=estAsymm,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="asymmetry",Minimizer="Levenberg-MarquardtMD",MaxIterations=500,PreviousNormalizationConstant=estNorm )
-   print  "Asymmetry: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
-   print "Normalization constant: {0:.2f}".format(norm[0])
+   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
+   print("Normalization constant: {0:.2f}".format(norm[0]))
 
 Output:
 

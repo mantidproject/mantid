@@ -15,11 +15,15 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+namespace {
+int PHASE_ROW = 2;
+double ASYMM_ERROR = 999.0;
+}
+
 namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalMuonDetectorPhases)
@@ -162,30 +166,53 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   const static std::string success = "success";
   for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
     reportProgress(wsIndex, nhist);
-    auto fit = createChildAlgorithm("Fit");
-    fit->initialize();
-    fit->setPropertyValue("Function", funcStr);
-    fit->setProperty("InputWorkspace", ws);
-    fit->setProperty("WorkspaceIndex", wsIndex);
-    fit->setProperty("CreateOutput", true);
-    fit->setPropertyValue("Output", groupName);
-    fit->execute();
+    auto yValues = ws->y(wsIndex);
+    auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(),
+                                     [](double value) { return value == 0.; });
+    if (emptySpectrum) {
+      g_log.warning("Spectrum " + std::to_string(wsIndex) + " is empty");
+      auto tab =
+          API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      tab->addColumn("str", "Name");
+      tab->addColumn("double", "Value");
+      tab->addColumn("double", "Error");
+      for (int j = 0; j < 4; j++) {
+        API::TableRow row = tab->appendRow();
+        if (j == PHASE_ROW) {
+          row << "dummy" << 0.0 << 0.0;
+        } else {
+          row << "dummy" << ASYMM_ERROR << 0.0;
+        }
+      }
 
-    std::string status = fit->getProperty("OutputStatus");
-    if (!fit->isExecuted() || status != success) {
-      std::ostringstream error;
-      error << "Fit failed for spectrum at workspace index " << wsIndex;
-      error << ": " << status;
-      throw std::runtime_error(error.str());
+      extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
+
+    } else {
+      auto fit = createChildAlgorithm("Fit");
+      fit->initialize();
+      fit->setPropertyValue("Function", funcStr);
+      fit->setProperty("InputWorkspace", ws);
+      fit->setProperty("WorkspaceIndex", wsIndex);
+      fit->setProperty("CreateOutput", true);
+      fit->setPropertyValue("Output", groupName);
+      fit->execute();
+
+      std::string status = fit->getProperty("OutputStatus");
+      if (!fit->isExecuted() || status != success) {
+        std::ostringstream error;
+        error << "Fit failed for spectrum at workspace index " << wsIndex;
+        error << ": " << status;
+        throw std::runtime_error(error.str());
+      }
+
+      API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
+      resGroup->addWorkspace(fitOut);
+      API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
+      // Now we have our fitting results stored in tab
+      // but we need to extract the relevant information, i.e.
+      // the detector phases (parameter 'p') and asymmetries ('A')
+      extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
     }
-
-    API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
-    resGroup->addWorkspace(fitOut);
-    API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
-    // Now we have our fitting results stored in tab
-    // but we need to extract the relevant information, i.e.
-    // the detector phases (parameter 'p') and asymmetries ('A')
-    extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
   }
 }
 
@@ -203,22 +230,22 @@ void CalMuonDetectorPhases::extractDetectorInfo(
   double asym = paramTab->Double(0, 1);
   double phase = paramTab->Double(2, 1);
   // If asym<0, take the absolute value and add \pi to phase
-  // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
+  // f(x) = A * cos( w * x - p) = -A * cos( w * x - p - PI)
   if (asym < 0) {
     asym = -asym;
-    phase = phase + M_PI;
+    phase = phase - M_PI;
   }
   // Now convert phases to interval [0, 2PI)
-  int factor = static_cast<int>(floor(phase / 2 / M_PI));
+  int factor = static_cast<int>(floor(phase / (2. * M_PI)));
   if (factor) {
-    phase = phase - factor * 2 * M_PI;
+    phase = phase - factor * 2. * M_PI;
   }
   // Copy parameters to new row in results table
   API::TableRow row = resultsTab->appendRow();
   row << static_cast<int>(spectrumNumber) << asym << phase;
 }
 
-/** Creates the fitting function f(x) = A * sin( w*x + p) + B as string
+/** Creates the fitting function f(x) = A * cos( w*x - p) + B as string
 * Two modes:
 * 1) Fixed frequency, no background - for main sequential fit
 * 2) Varying frequency, flat background - for finding frequency from asymmetry
@@ -230,15 +257,15 @@ void CalMuonDetectorPhases::extractDetectorInfo(
 std::string CalMuonDetectorPhases::createFittingFunction(double freq,
                                                          bool fixFreq) {
   // The fitting function is:
-  // f(x) = A * sin ( w * x + p ) [+ B]
+  // f(x) = A * sin ( w * x - p ) [+ B]
   std::ostringstream ss;
   ss << "name=UserFunction,";
   if (fixFreq) {
     // no background
-    ss << "Formula=A*sin(w*x+p),";
+    ss << "Formula=A*cos(w*x-p),";
   } else {
     // flat background
-    ss << "Formula=A*sin(w*x+p)+B,";
+    ss << "Formula=A*cos(w*x-p)+B,";
     ss << "B=0.5,";
   }
   ss << "A=0.5,";

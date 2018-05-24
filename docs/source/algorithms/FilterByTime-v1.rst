@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,17 +53,18 @@ Usage
         AbsoluteStartTime="2010-01-01T00:10:00",
         AbsoluteStopTime="2010-01-01T00:20:00")
 
-    print ("The number of events within the relative Filter: %i" % wsFiltered.getNumberEvents())
-    print ("The number of events within the Aboslute Filter: %i" % wsFilteredAbs.getNumberEvents())
-    print ("Compared to the number in the unfiltered workspace: %i" % ws.getNumberEvents())
+    print("The number of events within the relative Filter: %i" % wsFiltered.getNumberEvents())
+    print("The number of events within the Aboslute Filter: %i" % wsFilteredAbs.getNumberEvents())
+    print("Compared to the number in the unfiltered workspace: %i" % ws.getNumberEvents())
 
 Output:
 
 .. testoutput:: ExFilter
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-    The number of events within the relative Filter: 950
-    The number of events within the Aboslute Filter: 315
-    Compared to the number in the unfiltered workspace: 1900
+    The number of events within the relative Filter: 95...
+    The number of events within the Aboslute Filter: 3...
+    Compared to the number in the unfiltered workspace: 190...
 
 
 .. categories::

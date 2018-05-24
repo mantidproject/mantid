@@ -72,7 +72,7 @@ public:
       work_in->getSpectrum(i).setSpectrumNo(i);
 
       Mantid::Geometry::Detector *det =
-          new Mantid::Geometry::Detector("", i, NULL);
+          new Mantid::Geometry::Detector("", i, nullptr);
       instr->add(det);
       instr->markAsDetector(det);
       work_in->getSpectrum(i).setDetectorID(i);

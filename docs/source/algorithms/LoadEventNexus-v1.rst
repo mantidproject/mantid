@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -131,7 +131,7 @@ Usage
    # Load SNS HYS event dataset
    ws = LoadEventNexus('HYS_11092_event.nxs')
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 
@@ -146,7 +146,7 @@ Output:
    # Load SNS CNCS event dataset between 10 and 20 minutes
    ws = LoadEventNexus('CNCS_7860_event.nxs', FilterByTimeStart=600, FilterByTimeStop=1200)
 
-   print "The number of events: " + str(ws.getNumberEvents())
+   print("The number of events: {}".format(ws.getNumberEvents()))
 
 Output:
 

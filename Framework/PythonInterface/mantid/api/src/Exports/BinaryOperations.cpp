@@ -18,35 +18,35 @@ void export_BinaryOperations() {
   using namespace boost::python;
 
   // Typedefs the various function types
-  typedef IMDWorkspace_sptr (*binary_fn_md_md)(
-      const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_md_gp)(
-      const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_md)(
-      const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_gp)(
-      const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string &,
-      const std::string &, bool, bool);
+  using binary_fn_md_md = IMDWorkspace_sptr (
+      *)(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
+         const std::string &, bool, bool);
+  using binary_fn_md_gp = WorkspaceGroup_sptr (
+      *)(const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
+         const std::string &, const std::string &, bool, bool);
+  using binary_fn_gp_md = WorkspaceGroup_sptr (
+      *)(const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
+         const std::string &, const std::string &, bool, bool);
+  using binary_fn_gp_gp = WorkspaceGroup_sptr (
+      *)(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
+         const std::string &, const std::string &, bool, bool);
 
-  typedef IMDHistoWorkspace_sptr (*binary_fn_mh_mh)(
-      const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
-      const std::string &, const std::string &, bool, bool);
+  using binary_fn_mh_mh = IMDHistoWorkspace_sptr (
+      *)(const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
+         const std::string &, const std::string &, bool, bool);
 
-  typedef IMDWorkspace_sptr (*binary_fn_md_db)(const IMDWorkspace_sptr, double,
-                                               const std::string &,
-                                               const std::string &, bool, bool);
-  typedef IMDHistoWorkspace_sptr (*binary_fn_mh_db)(
-      const IMDHistoWorkspace_sptr, double, const std::string &,
-      const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_db)(
-      const WorkspaceGroup_sptr, double, const std::string &,
-      const std::string &, bool, bool);
+  using binary_fn_md_db = IMDWorkspace_sptr (
+      *)(const IMDWorkspace_sptr, double, const std::string &,
+         const std::string &, bool, bool);
+  using binary_fn_mh_db = IMDHistoWorkspace_sptr (
+      *)(const IMDHistoWorkspace_sptr, double, const std::string &,
+         const std::string &, bool, bool);
+  using binary_fn_gp_db = WorkspaceGroup_sptr (
+      *)(const WorkspaceGroup_sptr, double, const std::string &,
+         const std::string &, bool, bool);
 
   // Always a return a Workspace_sptr
-  typedef return_value_policy<AsType<Workspace_sptr>> ReturnWorkspaceSptr;
+  using ReturnWorkspaceSptr = return_value_policy<AsType<Workspace_sptr>>;
 
   // Binary operations that return a workspace
   using boost::python::def;
@@ -156,7 +156,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
                                      const std::string &op,
                                      const std::string &name, bool inplace,
                                      bool reverse) {
-  std::string algoName = op;
+  const std::string &algoName = op;
 
   // Create the single valued workspace first so that it is run as a top-level
   // algorithm
@@ -164,17 +164,15 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   API::Algorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged(
       "CreateSingleValuedWorkspace");
   alg->setChild(false);
+  alg->setAlwaysStoreInADS(false);
   alg->initialize();
   alg->setProperty<double>("DataValue", value);
-  const std::string tmp_name("__tmp_binary_operation_double");
+  const std::string tmp_name("not_applicable");
   alg->setPropertyValue("OutputWorkspace", tmp_name);
   alg->execute();
   MatrixWorkspace_sptr singleValue;
-  API::AnalysisDataServiceImpl &data_store =
-      API::AnalysisDataService::Instance();
   if (alg->isExecuted()) {
-    singleValue = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-        data_store.retrieve(tmp_name));
+    singleValue = alg->getProperty("OutputWorkspace");
   } else {
     throw std::runtime_error(
         "performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
@@ -183,8 +181,6 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   ResultType result =
       performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(
           inputWS, singleValue, algoName, name, inplace, reverse);
-  // Delete the temporary
-  data_store.remove(tmp_name);
   return result;
 }
 

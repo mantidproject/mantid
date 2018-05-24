@@ -73,7 +73,7 @@ public:
     Property *p = new ConcreteProperty();
     TS_ASSERT_THROWS_NOTHING(runInfo.addProperty(p));
 
-    Property *pp = NULL;
+    Property *pp = nullptr;
     TS_ASSERT_THROWS_NOTHING(pp = runInfo.getProperty("Test"));
     TS_ASSERT_EQUALS(p, pp);
     TS_ASSERT(!pp->name().compare("Test"));
@@ -142,7 +142,7 @@ public:
     const double value = 10.9;
     addTimeSeriesEntry(runInfo, name, value);
 
-    TimeSeriesProperty<double> *tsp(NULL);
+    TimeSeriesProperty<double> *tsp(nullptr);
     TS_ASSERT_THROWS_NOTHING(tsp = runInfo.getTimeSeriesProperty<double>(name));
     TS_ASSERT_DELTA(tsp->firstValue(), value, 1e-12);
   }

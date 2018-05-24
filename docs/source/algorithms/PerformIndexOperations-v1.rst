@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,9 +40,9 @@ Usage
    ws2 = PerformIndexOperations( ws, "0+1,3,4")
 
    #print result
-   print ws2.readY(0)
-   print ws2.readY(1)
-   print ws2.readY(2)
+   print(ws2.readY(0))
+   print(ws2.readY(1))
+   print(ws2.readY(2))
    
 Output:
 

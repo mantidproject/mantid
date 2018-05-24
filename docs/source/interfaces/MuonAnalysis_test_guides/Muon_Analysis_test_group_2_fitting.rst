@@ -114,7 +114,7 @@ Test 8: TF Asymmetry fit
 - Run a fit
 - Look at the fitting parameters and notice that the "Flat Background" is non-zero (larger than the error)
 - Remove the fitting functions
-- Add a "GausOsc" function with "Frequency" set to 1.3 and set "Sigma" to 0.0
+- Add a "GausOsc" function with "Frequency" set to 1.3
 - Go to the fit menu and select *TF Asymmetry Fit*
 - Clear the fit functions
 - Add a "GausOsc" function and set "Frequency" to 1.3

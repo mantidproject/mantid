@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,8 +36,8 @@ Usage
     ws = CreateSampleWorkspace()
     wsOut = SolidAngle(ws)
 
-    print "Solid angle of Spectra 1 in Bank 1: %.2e" % wsOut.readY(0)[0]
-    print "Solid angle of Spectra 101 in Bank 2: %.2e" % wsOut.readY(100)[0]
+    print("Solid angle of Spectra 1 in Bank 1: %.2e" % wsOut.readY(0)[0])
+    print("Solid angle of Spectra 101 in Bank 2: %.2e" % wsOut.readY(100)[0])
 
 
 Output:

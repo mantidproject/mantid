@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -60,8 +60,8 @@ Usage
    # rebin from min to max with size bin = 0.5
    ws = InterpolatingRebin(ws, 0.5)
 
-   print "First 5 rebinned X values are:", ws.readX(0)[0:5]
-   print "First 5 rebinned Y values are:", ws.readY(0)[0:5]
+   print("First 5 rebinned X values are: {}".format(ws.readX(0)[0:5]))
+   print("First 5 rebinned Y values are: {}".format(ws.readY(0)[0:5]))
 
 Output:
 

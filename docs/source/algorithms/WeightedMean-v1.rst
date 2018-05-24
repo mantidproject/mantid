@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,9 +33,9 @@ Usage
     # perform the algorithm
     ws = WeightedMean(ws1, ws2)
 
-    print "The X values are: " + str(ws.readX(0))
-    print "The Y values are: " + str(ws.readY(0))
-    print "The E values are: " + str(ws.readE(0))
+    print("The X values are: " + str(ws.readX(0)))
+    print("The Y values are: " + str(ws.readY(0)))
+    print("The E values are: " + str(ws.readE(0)))
 
 Output:
 

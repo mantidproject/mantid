@@ -20,11 +20,11 @@ public:
   /// Default constructor
   SplittingInterval();
 
-  SplittingInterval(const DateAndTime &start, const DateAndTime &stop,
-                    const int index = 0);
+  SplittingInterval(const Types::Core::DateAndTime &start,
+                    const Types::Core::DateAndTime &stop, const int index = 0);
 
-  DateAndTime start() const;
-  DateAndTime stop() const;
+  Types::Core::DateAndTime start() const;
+  Types::Core::DateAndTime stop() const;
 
   double duration() const;
 
@@ -41,9 +41,9 @@ public:
 
 private:
   /// begin
-  DateAndTime m_start;
+  Types::Core::DateAndTime m_start;
   /// end
-  DateAndTime m_stop;
+  Types::Core::DateAndTime m_stop;
   /// Index of the destination
   int m_index;
 };
@@ -53,7 +53,7 @@ private:
  * It is a vector of SplittingInterval classes.
  *
  */
-typedef std::vector<SplittingInterval> TimeSplitterType;
+using TimeSplitterType = std::vector<SplittingInterval>;
 
 // -------------- Operators ---------------------
 MANTID_KERNEL_DLL TimeSplitterType

@@ -272,6 +272,7 @@ void GSLVector::sort(const std::vector<size_t> &indices) {
     data[i] = m_data[indices[i]];
   }
   std::swap(m_data, data);
+  m_view = gsl_vector_view_array(m_data.data(), m_data.size());
 }
 
 /// Create a new GSLVector and move all data to it. Destroys this vector.

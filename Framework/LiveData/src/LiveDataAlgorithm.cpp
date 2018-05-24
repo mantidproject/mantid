@@ -14,6 +14,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace LiveData {
@@ -257,7 +258,7 @@ void LiveDataAlgorithm::setLiveListener(
 
 //----------------------------------------------------------------------------------------------
 /** @return the value of the StartTime property */
-Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
+Mantid::Types::Core::DateAndTime LiveDataAlgorithm::getStartTime() const {
   std::string date = getPropertyValue("StartTime");
   if (date.empty())
     return DateAndTime();

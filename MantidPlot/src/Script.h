@@ -62,7 +62,7 @@ public:
 
   /// Constructor
   Script(ScriptingEnv *env, const QString &name, const InteractionType interact,
-         QObject *context = NULL);
+         QObject *context = nullptr);
   /// Destructor
   ~Script() override;
   /// Returns the envirnoment this script is tied to

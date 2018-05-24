@@ -337,22 +337,23 @@ Fitting
 
 The Fitting tab provides a graphical interface which fits an expected
 diffraction pattern and visualises them. The pattern is specified by
-providing a list of dSpacing values where Bragg peaks are expected.
+providing a list of peak centre values where Bragg peaks are expected.
+These values can have units of either TOF of dSpacing but **not** both.
 The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
 To use the Fitting tab, user is required to follow these steps:
 
-1. A focused file as Focus Run input by browsing or entering single/multi
-   run number, *User may click Load button to load the focused file to the
+1. Load run(s) to perform fitting on by browsing for focused nexus
+   files *User may click Load button to load the focused file to the
    canvas*
 2. List of expected peaks which can be either by browsing a (*CSV*) file,
    manually selecting peaks from the canvas using peak picker tool after
    loading the focused file or by entering the peaks list within the text-field
 3. Next click on the *Fit* button if you would like to fit single focused
    file or you can click *Fit All* button which will enable user to
-   batch-process all the runs and banks when a range of run number is given,
-   *Fit All* process may also be used when when a single run number is given
+   batch-process all the runs and banks when several files are loaded.
+   *Fit All* process may also be used when a single run number is given
    or a file is browsed
 
 .. _ExpectedPeaks-Engineering_Diffraction-ref:
@@ -362,44 +363,25 @@ Parameters
 
 These parameters are required to process Fitting successfully:
 
-Focused Run #:
-  Focused workspace directory or selected using the browse button.
-  Users may also select the file/s by simply entering the file run number
-  or a range of consecutive run number separated by dash (`-`), for
-  example: "194547-194550" or "241391-241399". 
-  
-  It is  compulsory for these file/s to be located within the focused output directory.
-  Focused workspace can be generated with the help of
-  :ref:`focus-Engineering_Diffraction-ref` tab, the output folder
-  directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
-  tab under the *Focusing settings* section.
-  
-  When a valid range of consecutive run numbers is given, the interface will
-  automatically import and add the run number/s to the list on the right side
-  of the graph, from where each run number can be selected from by click on it.
-  The interface will then automatically update the Plot Bank combo-box
-  according to the bank files found for each entered/selected run-number.
+Focused Run files:
+  .nxs files containing focused diffraction data. These should be the result
+  of focusing data with the :ref:`focus-Engineering_Diffraction-ref` tab.
 
 Peaks:
   A list of dSpacing values to be translated into TOF to find expected
   peaks. These peaks can be manually written or imported by selecting a
   (*CSV*) file.
 
-Plot Bank/Bank List:
-  These GUI widgets will only be enabled when multiple focused bank
-  files are found within the working directory or focused output directory.
-  This would enable user to select the desired bank which they would like to
-  plot with the help of Plot Bank combo-box or Bank List.
 
 Output
 ^^^^^^
 
 Once the Fit button has been clicked Mantid will process the data. Please wait
 until the Fitting process has completed. Upon completion you should be able to
-view on the Fitting tab which will contain:
+view the Fitting tab which will contain:
 
 - The focused workspace plotted in the background in gray crosses.
-- The expected peaks plotted in various colours over lapping the
+- The expected peaks plotted in various colours overlapping the
   focused workspace peaks.
 
 Within the :ref:`Preview-Engineering_Diffraction-ref` section a user is
@@ -443,6 +425,11 @@ Peak* button should also be enabled. If the user choose to load the focus
 workspace or if fitting fails with the given peaks then the focused
 workspace will be plotted so that the user can select the peaks manually.
 
+If you've run a fit but you can't see the reconstructed peaks, make sure
+the checkbox **Plot fitted peaks** is checked - if the fit was successful,
+then clicking this should show the results. Equally, if you want to hide
+fitted peaks, just uncheck this box and they will disappear.
+
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph
 near the peak's center.
@@ -463,6 +450,81 @@ by clicking Save button.
 User may plot single peak fitting workspace in separate window by using
 Plot To Separate Window button, if the *engggui_fitting_single_peaks*
 is available.
+
+.. _gsas-Engineering_Diffraction-ref:
+
+GSAS Fitting
+------------
+
+.. warning:: This is a new capability that is currently in a very
+             early stage of definition and implementation. Not all
+	     options may be supported and/or consistent at the moment.
+
+The GSAS tab provides a graphical interface to the Mantid algorithm
+:ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>`. This allows
+users to perform GSAS-style fitting on their data from Mantid.
+
+The user must input the following files:
+
+- **Focused run file(s)** - these must have been generated either by
+  the **Fitting** tab or :ref:`EnggFocus <algm-EnggFocus>`.
+- **Instrument Parameter File** - contains DIFA and DIFC GSAS
+  constants, will probably be of ``.prm`` format
+- **Phase file(s)** - contain crystallographic information about the
+  sample in question. Currently only ``.cif`` files are supported
+
+The following parameters are also required:
+
+- **New GSAS-II Project** - GSASIIRefineFitPeaks creates a new
+  ``.gpx`` project here, which can be opened and inspected from the
+  GSAS-II GUI
+
+  - Note, if running **Refine All** on more than one run, the run
+    number and bank ID will be appended to the filename
+- **GSAS-II Installation Directory**
+
+  - This is the directory containing the GSAS-II executables and
+    Python libraries. In particular, it must contain
+    ``GSASIIscriptable.py``. This directory will normally be called
+    `GSASII`, if GSAS-II was installed normally
+  - You must have a version of GSAS-II from at least **February 2018**
+    to use the GUI. See :ref:`Installing_GSASII` for how to install a
+    compatible version
+- **Refinement method** - can either be **Pawley** or
+  **Rietveld**. Pawley refinement is currently under development, so
+  Rietveld is recommended.
+
+Optionally, you may also supply:
+
+- **XMin** and **XMax** - the limits (in TOF) to perform fitting
+  within
+- **DMin** - the minimum dSpacing to use for refinement when
+  performing Pawley refinement
+- **Negative weight** - The weight for a penalty function applied
+  during a Pawley refinement on resulting negative intensities.
+
+To do a refinement, take the following steps:
+
+1. Load a run by selecting the focused NeXuS file using the
+   corresponding **Browse** button, then clicking **Load**. The run
+   number and bank ID (for example ``123456_1``) should appear in the
+   **Run Number** list in the **Preview** section. Click the label,
+   and the run willl be plotted
+2. Select your input files, and input any additional parameters in the
+   **GSASIIRefineFitPeaks Controls** section
+3. Click **Run Refinement**. Once complete, fitted peaks for the run
+   should be overplotted in the fitting area. In addition, Rwp
+   (goodness of fit index), Sigma and Gamma (peak broadening
+   coefficients) and lattice parameters should be displayed in the
+   **Fit Results** section.
+
+   - You can also click **Refine All** to run refinement on all runs
+     loaded into GSAS tab
+
+You can toggle the fitted peaks on and off with the **Plot Fitted
+Peaks** checkbox, remove runs from the list with the **Remove Run**
+button, and plot the run and fitted peaks to a larger, separate plot
+using **Plot to separate window**.
 
 .. _setting-Engineering_Diffraction-ref:
 

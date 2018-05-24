@@ -63,14 +63,14 @@ private:
       SelectionNotificationServiceImpl>;
 };
 
-typedef Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>
-    SelectionNotificationService;
+using SelectionNotificationService =
+    Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;
 }
 }
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON Mantid::Kernel::
-    SingletonHolder<MantidQt::API::SelectionNotificationServiceImpl>;
+EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON Mantid::
+    Kernel::SingletonHolder<MantidQt::API::SelectionNotificationServiceImpl>;
 }
 }
 

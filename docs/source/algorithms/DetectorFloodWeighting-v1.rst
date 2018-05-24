@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,8 +27,8 @@ Usage
    
    out_ws = DetectorFloodWeighting(InputWorkspace=ws, Bands=[0,10], SolidAngleCorrection=False)
    
-   print 'Number Histograms',out_ws.getNumberHistograms()
-   print 'Min X:', out_ws.readX(0)[0], 'Max X:', out_ws.readX(0)[1]  
+   print('Number Histograms {}'.format(out_ws.getNumberHistograms()))
+   print('Min X: {} Max X: {}'.format(out_ws.readX(0)[0], out_ws.readX(0)[1]))
 
 Output:
 
@@ -44,9 +44,9 @@ Output:
    ws = CreateSimulationWorkspace(Instrument='LOQ', BinParams=[1,1,10], UnitX="Wavelength")
    out_ws = DetectorFloodWeighting(InputWorkspace=ws, Bands=[0,10], SolidAngleCorrection=True)
 
-   print 'Number Histograms',out_ws.getNumberHistograms()
-   print 'Number of Bins', out_ws.blocksize()
-   print 'X units', out_ws.getAxis(0).getUnit().unitID()
+   print('Number Histograms {}'.format(out_ws.getNumberHistograms()))
+   print('Number of Bins {}'.format(out_ws.blocksize()))
+   print('X units {}'.format(out_ws.getAxis(0).getUnit().unitID()))
 
 Output:
 

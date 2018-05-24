@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,7 +53,7 @@ Usage
     #restrict the number of wavelength points to speed up the example
     wsOut = AbsorptionCorrection(ws, NumberOfWavelengthPoints=5, ElementSize=2)
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print("The created workspace has one entry for each spectra: {}".format(wsOut.getNumberHistograms()))
 
 Output:
 

@@ -1,28 +1,29 @@
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 import io
+import six
 import numpy as np
 from mantid.kernel import Atom
 
 
-class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
+class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading GAUSSIAN DFT vibrational data.
+    Class for loading GAUSSIAN ab initio vibrational data.
     """
-    def __init__(self, input_dft_filename):
+    def __init__(self, input_ab_initio_filename):
         """
-        :param input_dft_filename: name of file with phonon data (foo.log)
+        :param input_ab_initio_filename: name of file with vibrational data (foo.log or foo.LOG)
         """
-        super(LoadGAUSSIAN, self).__init__(input_dft_filename=input_dft_filename)
-        self._dft_program = "GAUSSIAN"
-        self._parser = AbinsModules.GeneralDFTParser()
+        super(LoadGAUSSIAN, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        self._ab_initio_program = "GAUSSIAN"
+        self._parser = AbinsModules.GeneralAbInitioParser()
         self._num_atoms = None
         self._num_read_freq = 0
 
-    def read_phonon_file(self):
+    def read_vibrational_or_phonon_data(self):
         """
-        Reads phonon data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
-        calculations), hash of the phonon  file (hash) to <>.hdf5.
+        Reads vibrational data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
+        calculations), hash of file with vibrational data to <>.hdf5.
         :returns: object of type AbinsData.
         """
 
@@ -33,9 +34,10 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
             # create dummy lattice vectors
             self._generates_lattice_vectors(data=data)
 
+            masses = self._read_masses_from_file(file_obj=gaussian_file)
             # move file pointer to the last optimized atomic positions
             self._parser.find_last(file_obj=gaussian_file, msg="Input orientation:")
-            self._read_atomic_coordinates(file_obj=gaussian_file, data=data)
+            self._read_atomic_coordinates(file_obj=gaussian_file, data=data, masses_from_file=masses)
 
             # read frequencies, corresponding atomic displacements for a molecule
             self._parser.find_first(file_obj=gaussian_file,
@@ -43,16 +45,18 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
             self._read_modes(file_obj=gaussian_file, data=data)
 
             # save data to hdf file
-            self.save_dft_data(data=data)
+            self.save_ab_initio_data(data=data)
 
             # return AbinsData object
             return self._rearrange_data(data=data)
 
-    def _read_atomic_coordinates(self, file_obj=None, data=None):
+    def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
         """
         Reads atomic coordinates from .log GAUSSIAN file.
+
         :param file_obj: file object from which we read
         :param data: Python dictionary to which atoms data should be added
+        :param masses_from_file:  masses read from an ab initio output file
         """
         atoms = {}
         atom_indx = 0
@@ -78,6 +82,8 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
                                                   "coord": coord}
 
             atom_indx += 1
+        self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file, approximate=True)
+
         self._num_atoms = len(atoms)
         data["atoms"] = atoms
 
@@ -160,11 +166,12 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         :param file_obj: file object from which we read
         :param disp: list with x coordinates which we update [num_freq, num_atoms, dim]
         """
-        sub_block_start = "Atom AN      X      Y      Z        X      Y      Z        X      Y      Z"
+        sub_block_start = "X      Y      Z        X      Y      Z        X      Y      Z"
         self._parser.find_first(file_obj=file_obj, msg=sub_block_start)
 
         num_atom = 0
-        line_size = len(sub_block_start.split())
+        #   Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z
+        line_size = len(sub_block_start.split()) + 2
         freq_per_line = sub_block_start.count("X")
 
         l = file_obj.readline().split()
@@ -176,3 +183,24 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
             l = file_obj.readline().split()
             num_atom += 1
         self._num_read_freq += freq_per_line
+
+    def _read_masses_from_file(self, file_obj=None):
+        masses = []
+        pos = file_obj.tell()
+        self._parser.find_first(file_obj=file_obj, msg="Thermochemistry")
+
+        end_msg = "Molecular mass:"
+        key = "Atom"
+        if not six.PY2:
+            end_msg = bytes(end_msg, "utf8")
+            key = bytes(key, "utf8")
+
+        while not self._parser.file_end(file_obj=file_obj):
+
+            line = file_obj.readline()
+            if end_msg in line:
+                break
+            if key in line:
+                masses.append(float(line.split()[-1]))
+        file_obj.seek(pos)
+        return masses

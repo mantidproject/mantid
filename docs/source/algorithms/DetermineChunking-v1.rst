@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -20,11 +20,11 @@ Usage
 .. testcode:: ExDeterminChuncking
 
     ws=DetermineChunking("CNCS_7860_event.nxs",MaxChunkSize=0.0005)
-    print "A max chunck size of 0.0005 created %i chunks." % ws.rowCount()
+    print("A max chunck size of 0.0005 created {} chunks.".format(ws.rowCount()))
 
     #The algorithm can also use the SNS runinfo.xml file
     ws2=DetermineChunking("CNCS_7860_runinfo.xml",MaxChunkSize=0.0010)
-    print "A max chunck size of 0.0010 created %i chunks." % ws2.rowCount()
+    print("A max chunck size of 0.0010 created {} chunks.".format(ws2.rowCount()))
 
 
 Output:

@@ -2,21 +2,21 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-This algorithm preprocesses data for the other algorithms in :ref:`ILL's time-of-flight data reduction suite <DirectILL>`. Thus, it is usually the first algorithm to call in the reduction process. The algorithm (optionally) loads data from disk, performs some common basic data reduction steps to the raw data, and provides other workspaces, such as flat background information, which can be used in subsequent reduction steps. The workflow of the algorithm is shown in the diagram below:
+An initial step of the reduction workflow for the direct geometry TOF spectrometers at ILL. It reads and merges NeXus files, normalizes data to monitor, subtracts a flat background, and adjusts the TOF scale to conform to Mantid standards. More information on how this algorithm interacts with the rest of the ILL's TOF reduction suite can be found :ref:`here <DirectILL>`. The workflow of this algorithm is shown in the diagram below:
 
 .. diagram:: DirectILLCollectData-v1_wkflw.dot
 
 Input data
 ##########
 
-Either *Run* or *InputWorkspace* has to be specified. *Run* can take multiple run numbers. In this case the files will be merged using the :ref:`MergeRuns <algm-MergeRuns>` algorihtm. For example, `'/data/0100:0103,0200:0202'` would merge runs 100, 101, 102, 103, 200, 201 and 202 from directory `/data/`.
+Either *Run* or *InputWorkspace* has to be specified. *Run* can take multiple run numbers. In this case the files will be merged using the :ref:`LoadAndMerge <algm-LoadAndMerge>` algorithm. For example, :literal:`'/data/0100-0103+0200-0202'` would merge runs 100, 101, 102, 103, 200, 201 and 202 from directory :literal:`/data/`.
 
 Basic reduction steps
 #####################
@@ -39,14 +39,19 @@ More detailed description of some of these steps is given below.
 Normalisation to monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-If *Normalisation* is set to 'Normalisation Monitor', the monitor spectrum specified by the 'default-incident-monitor-spectrum' instrument parameter is used for normalisation. If the parameter is not present, the *Monitor* property is used. A flat background is subtracted from the spectrum (no scaling applied), and it is integrated over the range specified by *ElasticPeakWidthInSigmas*. The monitor peak is found using :ref:`FindEPP <algm-FindEPP>`. If :ref:`FindEPP <algm-FindEPP>` fails to find a peak in the monitor spectrum, the entire monitor range is integrated.
+If *Normalisation* is set to :literal:`'Normalisation Monitor'`, the data is divided by the monitor counts. The monitor spectrum is specified by the 'default-incident-monitor-spectrum' instrument parameter or, if not present, by the *Monitor* property. A flat background is subtracted from the spectrum as described below except no background scaling is applied.  The monitor peak is found using :ref:`FindEPP <algm-FindEPP>`. If this fails, the entire monitor range is integrated. Otherwise the spectrum is integrated over a range :math:`\pm` *MonitorPeakWidthInSigmas* :math:`\cdot \sigma` around the position of the monitor peak.
 
-Afterwards, the counts are scaled by a factor defined by the 'scaling_after_monitor_normalisation' entry in instrument parameters, if present.
+Afterwards, the intensities are multiplied by a factor defined by the 'scaling_after_monitor_normalisation' entry in instrument parameters, if present.
+
+Normalisation to time
+^^^^^^^^^^^^^^^^^^^^^
+
+When *Normalisation* is set to :literal:`'Normalisation Time'`, the data is divided by the duration of the experiment, in seconds. By default, the `duration` sample log is used except for ILL's IN4 instrument where the `actual_time` log is used instead.
 
 Flat background subtraction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A flat time-independent background for subtraction can be given by *FlatBkgWorkspace*. If this input property is not specified, flat background will be calculated from the detector spectra by (:ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`) using the 'Moving Average' mode. The *FlatBkgAveragingWindow* property is passed directly to (:ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`) as *AveragingWindowWidth*.
+A flat time-independent background for subtraction can be given by *FlatBkgWorkspace*. If this input property is not specified, flat background will be calculated from the detector spectra by :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` using the :literal:`Moving Average` mode. The *FlatBkgAveragingWindow* property is passed directly to :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` as *AveragingWindowWidth*.
 
 Before subtraction, the background workspace is multiplied by *FlatBkgScaling*.
 
@@ -55,41 +60,58 @@ The background used for the subtraction can be retrieved using the *OutputFlatBk
 Elastic peak positions (EPP)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Information on the elastic peaks (position, peak width) is needed for incident energy calibration, as well as for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` algorithms. This data comes in the form of a EPP workspace which is a TableWorkspace containing columns specified by the :ref:`FindEPP <algm-FindEPP>` algorithm.
+Information on the elastic peaks (position, peak width) is needed for incident energy calibration, as well as for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` algorithms. This data comes in the form of an EPP workspace which is a TableWorkspace containing columns specified by the :ref:`FindEPP <algm-FindEPP>` algorithm.
 
-If no external EPP table is given by the *EPPWorkspace* property, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. The default ('EPP Method AUTO') is to calculate the positions for the IN5 instrument, and to fit for any other instrument.
+If an EPP table is needed, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. The default (:literal:`'EPP Method AUTO'`) is to calculate the positions for the IN5 instrument, and to fit for any other instrument.
 
-In the calculation case, a nominal peak width can be given using the *Sigma* property.  The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
+In the calculation case, a nominal peak width can be given using the *Sigma* property. The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
 
-Incident energy calibration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Incident energy
+^^^^^^^^^^^^^^^
 
-This step applies to IN4 and IN6 only. Incident energy calibration is disabled for IN5 by default.
+The incident energy and the nominal TOF channel are needed to adjust the TOF axis to conform to the standard Mantid notation.
 
-Incident energy is calibrated either by giving a new energy as a single-value workspace in *IncidentEnergyWorkspace* or calculating it from the elastic peak positions. The elastic peak position can be given by *EPPWorkspace*. If this parameter not specified, :ref:`FindEPP <algm-FindEPP>` is used.
+The incident energy written in the data files of IN4 and IN6 and accessible via the `Ei` sample log may be inaccurate. To ensure a correct value is used for the TOF axis adjustment, the value can be calibrated using :ref:`GetEiMonDet <algm-GetEiMonDet>`. The operation is controlled by *IncidentEnergyCalibration*. Elastic peak positions are needed for the calculation which can be supplied by *EPPWorkspace*, otherwise :ref:`FindEPP <algm-FindEPP>` is used.
 
-The calibrated energy can be retrieved as a single-value workspace using the *OutputIncidentEnergyWorkspace* property.
+The calibrated energy can be retrieved as a single-value workspace using the *OutputIncidentEnergyWorkspace* property. This workspace can be passed to further calls to :ref:`DirectILLCollectData <algm-DirectILLCollectData>` to force a common `Ei` and thus a common TOF axis between the datasets. This is needed for, e.g., empty container subtraction.
 
 TOF axis adjustment
 ^^^^^^^^^^^^^^^^^^^
 
-The TOF axis is adjusted according to the elastic channel number found in the 'Detector.elasticpeak' sample log.
+The TOF axis is adjusted such that the nominal elastic channel corresponds to the L1 + L2 distance. For this, incident energy and elastic channel number are needed. The energy is read from the :literal:`Ei` sample log while the elastic channel from `Detector.elasticpeak`. Alternatively, the elastic channel can be determined by fitting, as done with IN5. Whether to use the sample logs or fitting is determined by the *ElasticChannel* property. The channel can be given also directly as a single valued workspace in *ElasticChannelWorkspace*.
 
 Optional inputs and outputs
 ###########################
 
 The algorithm has some optional input and output workspaces. Their purpose is to extract some common information from a single data set and use it as input for other algorithms or data sets. An example would be backgrounds extracted from a low temperature measurement which can be used when reducing data taken at higher temperatures.
 
-The optional input and output workspaces come in pairs. If the input workspace is specified, it will be used in the reduction and returned as the corresponding output workspace. If the input workspace is not specified, the needed information is calculated from the current spectra, and returned in the output workspace.
+Some optional input and output workspaces come in pairs. If the input workspace is specified, it will be used in the reduction and returned as the corresponding output workspace. If the input workspace is not specified, the needed information is calculated from the current data, and returned in the output workspace.
 
-* *EPPWorkspace* --- *OutputEPPWorkspace*: elastic peak position table, used for incident energy calibration, but also in :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>`.
 * *IncidentEnergyWorkspace* --- *OutputIncidentEnergyWorkspace*: single-valued workspace containing calibrated incident energy, used for incident energy calibration.
 * *FlatBkgWorkspace* --- *OutputFlatBkgWorkspace*: a MatrixWorkspace containing the flat backgrounds. Used for flat background subtraction. Note that *FlatBkgScaling* is not applied to *OutputFlatBkgWorkspace*.
+* *ElasticChannelWorkspace* --- *OutputElasticChannelWorkspace*: a single-valued workspace containing the index of the nominal elastic channel. Used for the TOF axis adjustment.
 
 Raw output workspace
 ^^^^^^^^^^^^^^^^^^^^
 
 The *OutputRawWorkspace* property provides an access to a 'raw' data workspace in the sense that no normalisation or background subtraction is applied to this workspace. The raw workspace is useful as an input workspace for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` algorithm.
+
+ILL's instrument specific defaults
+----------------------------------
+
+The following settings are used when the :literal:`AUTO` keyword is encountered:
+
++---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
+| Property                  | IN4                     | IN5                    | IN6                     | Others                  |
++===========================+=========================+========================+=========================+=========================+
+| EPPCreationMethod         | Fit EPP                 | Calculate EPP          | Fit EPP                 | Fit EPP                 |
++---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
+| ElasticChannel            | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Default Elastic Channel |
++---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
+| IncidentEnergyCalibration | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration ON   |
++---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
+| FlatBkg                   | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             | Flat Bkg ON             |
++---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
 
 Usage
 -----

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,7 +28,7 @@ Usage
 
    pg3 = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
    ws = CreateChunkingFromInstrument(InputWorkspace=pg3, ChunkBy="Group")
-   print "Created %i Chunks" % ws.rowCount()
+   print("Created {} Chunks".format(ws.rowCount()))
 
 Output:
 
@@ -40,8 +40,8 @@ Output:
 
 .. testcode:: ExSnap
 
-   ws = CreateChunkingFromInstrument(InstrumentName="snap", ChunkNames="East,West", MaxBankNumber=20)
-   print "Created %i Chunks" % ws.rowCount()
+   ws = CreateChunkingFromInstrument(InstrumentName="snap", ChunkNames="East,West", MaxBankNumber=64)
+   print("Created {} Chunks".format(ws.rowCount()))
 
 Output:
 

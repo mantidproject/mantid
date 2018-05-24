@@ -1,12 +1,12 @@
 #include "MantidQtWidgets/InstrumentView/OneCurvePlot.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
+#include <MantidQtWidgets/LegacyQwt/qwt_compat.h>
 #include <qwt_plot_curve.h>
 #include <qwt_scale_div.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_draw.h>
 #include <qwt_plot_canvas.h>
-#include <MantidQtWidgets/Common/qwt_compat.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_scale_widget.h>
 
@@ -22,8 +22,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 OneCurvePlot::OneCurvePlot(QWidget *parent)
-    : QwtPlot(parent), m_curve(NULL), m_xUnits("") {
-  QFont font = parent->font();
+    : QwtPlot(parent), m_curve(nullptr), m_xUnits("") {
+  const QFont &font = parent->font();
   setAxisFont(QwtPlot::xBottom, font);
   setAxisFont(QwtPlot::yLeft, font);
   QwtText dummyText;
@@ -161,13 +161,13 @@ void OneCurvePlot::setYScale(double from, double to) {
     } else {
       double yPositiveMin = to;
       QMap<QString, QwtPlotCurve *>::const_iterator cv = m_stored.begin();
-      QwtPlotCurve *curve = NULL;
+      QwtPlotCurve *curve = nullptr;
       do {
         if (cv != m_stored.end()) {
           curve = cv.value();
           ++cv;
         } else if (curve == m_curve) {
-          curve = NULL;
+          curve = nullptr;
           break;
         } else {
           curve = m_curve;
@@ -230,8 +230,8 @@ void OneCurvePlot::setLabel(const QString &label) { m_label = label; }
 void OneCurvePlot::clearCurve() {
   // remove the curve
   if (m_curve) {
-    m_curve->attach(0);
-    m_curve = NULL;
+    m_curve->attach(nullptr);
+    m_curve = nullptr;
   }
   clearPeakLabels();
   // if there are stored curves rescale axes to make them fully visible
@@ -373,7 +373,7 @@ void OneCurvePlot::clearPeakLabels() {
 /**
 * Returns true if the current curve isn't NULL
 */
-bool OneCurvePlot::hasCurve() const { return m_curve != NULL; }
+bool OneCurvePlot::hasCurve() const { return m_curve != nullptr; }
 
 /**
 * Store current curve.
@@ -385,7 +385,7 @@ void OneCurvePlot::store() {
     m_curve->setPen(QPen(m_colors[m_colorIndex]));
     ++m_colorIndex;
     m_colorIndex %= m_colors.size();
-    m_curve = NULL;
+    m_curve = nullptr;
     m_label = "";
   }
 }
@@ -433,7 +433,7 @@ void OneCurvePlot::removeCurve(const QString &label) {
 */
 bool OneCurvePlot::isYLogScale() const {
   const QwtScaleEngine *engine = axisScaleEngine(yLeft);
-  return dynamic_cast<const QwtLog10ScaleEngine *>(engine) != NULL;
+  return dynamic_cast<const QwtLog10ScaleEngine *>(engine) != nullptr;
 }
 
 /**

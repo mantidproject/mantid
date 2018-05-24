@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -111,7 +111,7 @@ Usage
                            CurvesWorkspace = curves_ws)
 
    # Should have one spectrum only
-   print "No. of spectra:", sample_ws.getNumberHistograms()
+   print("No. of spectra: {}".format(sample_ws.getNumberHistograms()))
 
    # Print a few arbitrary integrated spectra
    ws_idx = 400
@@ -120,7 +120,7 @@ Usage
                           EndWorkspaceIndex=ws_idx+idx_count)
    fmt = "For workspace index {0:d} the spectrum integration is {1:.3f}"
    for i in range(idx_count):
-      print fmt.format(ws_idx+i, integ_ws.readY(i)[0])
+      print(fmt.format(ws_idx+i, integ_ws.readY(i)[0]))
 
 .. testcleanup:: ExVanadiumCorr
 

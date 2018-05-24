@@ -8,7 +8,6 @@
 #include <sstream>
 
 using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 
 namespace {

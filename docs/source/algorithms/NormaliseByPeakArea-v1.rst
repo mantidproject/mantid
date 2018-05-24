@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -55,10 +55,10 @@ Usage
     normalised, yspace, fitted, symmetrised = \
       NormaliseByPeakArea(InputWorkspace=tof_ws, Mass=1.0079,Sum=False)
 
-    print "Number of normalised spectra is: %d" % normalised.getNumberHistograms()
-    print "Number of Y-space spectra is: %d" % yspace.getNumberHistograms()
-    print "Number of fitted spectra is: %d" % fitted.getNumberHistograms()
-    print "Number of symmetrised spectra is: %d" % symmetrised.getNumberHistograms()
+    print("Number of normalised spectra is: {}".format(normalised.getNumberHistograms()))
+    print("Number of Y-space spectra is: {}".format(yspace.getNumberHistograms()))
+    print("Number of fitted spectra is: {}".format(fitted.getNumberHistograms()))
+    print("Number of symmetrised spectra is: {}".format(symmetrised.getNumberHistograms()))
 
 .. testoutput:: NormaliseNoSumOutput
 
@@ -87,10 +87,10 @@ Usage
     normalised, yspace, fitted, symmetrised = \
       NormaliseByPeakArea(InputWorkspace=tof_ws, Mass=1.0079,Sum=True)
 
-    print "Number of normalised spectra is: %d" % normalised.getNumberHistograms()
-    print "Number of Y-space spectra is: %d" % yspace.getNumberHistograms()
-    print "Number of fitted spectra is: %d" % fitted.getNumberHistograms()
-    print "Number of symmetrised spectra is: %d" % symmetrised.getNumberHistograms()
+    print("Number of normalised spectra is: {}".format(normalised.getNumberHistograms()))
+    print("Number of Y-space spectra is: {}".format(yspace.getNumberHistograms()))
+    print("Number of fitted spectra is: {}".format(fitted.getNumberHistograms()))
+    print("Number of symmetrised spectra is: {}".format(symmetrised.getNumberHistograms()))
 
 .. testoutput:: NormaliseWithSummedOutput
 

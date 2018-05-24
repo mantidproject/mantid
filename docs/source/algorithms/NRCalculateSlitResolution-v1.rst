@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,7 +17,7 @@ using the theta log name provided.
 The effective inverse of this algorithm is :ref:`algm-CalculateSlits`.
 
 Beam Divergence
-***************
+###############
 
 .. figure:: ../images/collimation_diagram.png
    :scale: 50 %
@@ -50,7 +50,7 @@ Usage
 
   ws = Load('INTER00013460')
   res = NRCalculateSlitResolution(Workspace = ws, TwoTheta = 0.7 * 2)
-  print("Resolution: %.4f" % res)
+  print("Resolution: {:.4f}".format(res))
 
 .. testoutput::
 

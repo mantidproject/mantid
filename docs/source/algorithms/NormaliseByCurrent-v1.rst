@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -55,16 +55,16 @@ Usage
    log_p = run1.getLogData('gd_prtn_chrg')
 
    # Print the log value
-   print "Good Proton Charge =",log_p.value
+   print("Good Proton Charge = {}".format(log_p.value))
 
    #Run the Algorithm
    wsN = NormaliseByCurrent(ws)
    norm_factor = wsN.getRun().getLogData('NormalizationFactor').value
 
    #Print results
-   print "Before normalisation", ws.readY(0);
-   print "After normalisation ", wsN.readY(0);
-   print "Normalisation factor", norm_factor;
+   print("Before normalisation {}".format(ws.readY(0)))
+   print("After normalisation  {}".format(wsN.readY(0)))
+   print("Normalisation factor {}".format(norm_factor))
 
 
 Output:

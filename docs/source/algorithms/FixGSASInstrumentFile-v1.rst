@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,7 +41,7 @@ Usage
         numlinefewer80b += 1
 
   # Print out result
-  print "Corrected File: Number of lines that are not equal to 80 characters = ", numlinefewer80b
+  print("Corrected File: Number of lines that are not equal to 80 characters =  {}".format(numlinefewer80b))
 
 .. testcleanup:: ExHistSimple
 

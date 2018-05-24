@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -78,21 +78,21 @@ the logs.
 
     ws = LoadEventPreNexus("CNCS_7860_neutron_event.dat")
     # Five logs are already present
-    print "Number of original logs =", len(ws.getRun().keys())
+    print("Number of original logs = {}".format(len(ws.getRun().keys())))
     phase_log = "Phase1"
     # Try to get a log that doesn't exist yet
     try:
         log = ws.getRun().getLogData(phase_log)
     except RuntimeError:
-        print phase_log, "log does not exist!"
+        print("{} log does not exist!".format(phase_log))
     LoadNexusLogs(ws, "CNCS_7860_event.nxs")
-    print "Number of final logs =", len(ws.getRun().keys())
+    print("Number of final logs = {}".format(len(ws.getRun().keys())))
     # Try getting the log again
     try:
         log = ws.getRun().getLogData(phase_log)
-        print phase_log, "log size =", log.size()
+        print("{} log size = {}".format(phase_log, log.size()))
     except RuntimeError:
-        print phase_log, "log does not exist!"
+        print("{} log does not exist!".format(phase_log))
 
 Output:
 

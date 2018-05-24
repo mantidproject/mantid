@@ -49,8 +49,8 @@ void XDataConverter::exec() {
   }
 
   const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
-  const size_t numYValues = inputWS->blocksize();
-  const size_t numXValues = getNewXSize(inputWS);
+  const size_t numYValues = getNewYSize(inputWS);
+  const size_t numXValues = getNewXSize(numYValues);
   m_sharedX = API::WorkspaceHelpers::sharedXData(*inputWS);
   // Create the new workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
@@ -69,6 +69,9 @@ void XDataConverter::exec() {
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
     setXData(outputWS, inputWS, i);
+    if (inputWS->hasDx(i)) {
+      outputWS->setSharedDx(i, inputWS->sharedDx(i));
+    }
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
@@ -77,6 +80,12 @@ void XDataConverter::exec() {
 
   // Store the output
   setProperty("OutputWorkspace", outputWS);
+}
+
+std::size_t
+XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr inputWS) {
+  // this is the old behavior of MatrixWorkspace::blocksize()
+  return inputWS->y(0).size();
 }
 
 /**

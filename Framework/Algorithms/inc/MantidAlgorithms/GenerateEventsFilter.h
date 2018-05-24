@@ -73,6 +73,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FilterEvents", "FilterByTime", "FilterByLogValue"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Events\\EventFiltering";
@@ -101,50 +104,51 @@ private:
   void makeFilterBySingleValue(double min, double max, double TimeTolerance,
                                bool centre, bool filterIncrease,
                                bool filterDecrease,
-                               Kernel::DateAndTime startTime,
-                               Kernel::DateAndTime stopTime, int wsindex);
+                               Types::Core::DateAndTime startTime,
+                               Types::Core::DateAndTime stopTime, int wsindex);
 
   /// Make multiple-log-value filters in serial
   void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap,
                                    std::vector<double> logvalueranges,
                                    bool centre, bool filterIncrease,
                                    bool filterDecrease,
-                                   Kernel::DateAndTime startTime,
-                                   Kernel::DateAndTime stopTime);
+                                   Types::Core::DateAndTime startTime,
+                                   Types::Core::DateAndTime stopTime);
 
   /// Make multiple-log-value filters in serial in parallel
   void makeMultipleFiltersByValuesParallel(
       std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
       bool centre, bool filterIncrease, bool filterDecrease,
-      Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
+      Types::Core::DateAndTime startTime, Types::Core::DateAndTime stopTime);
 
   /// Generate event splitters for partial sample log (serial)
   void makeMultipleFiltersByValuesPartialLog(
-      int istart, int iend, std::vector<Kernel::DateAndTime> &vecSplitTime,
+      int istart, int iend, std::vector<Types::Core::DateAndTime> &vecSplitTime,
       std::vector<int> &vecSplitGroup, std::map<size_t, int> indexwsindexmap,
-      const std::vector<double> &logvalueranges, Kernel::time_duration tol,
-      bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime,
-      Kernel::DateAndTime stopTime);
+      const std::vector<double> &logvalueranges, Types::Core::time_duration tol,
+      bool filterIncrease, bool filterDecrease,
+      Types::Core::DateAndTime startTime, Types::Core::DateAndTime stopTime);
 
   /// Generate event filters for integer sample log
   void processIntegerValueFilter(int minvalue, int maxvalue,
                                  bool filterIncrease, bool filterDecrease,
-                                 Kernel::DateAndTime runend);
+                                 Types::Core::DateAndTime runend);
 
   /// Search a value in a sorted vector
   size_t searchValue(const std::vector<double> &sorteddata, double value);
 
   /// Add a splitter
-  void addNewTimeFilterSplitter(Kernel::DateAndTime starttime,
-                                Kernel::DateAndTime stoptime, int wsindex,
+  void addNewTimeFilterSplitter(Types::Core::DateAndTime starttime,
+                                Types::Core::DateAndTime stoptime, int wsindex,
                                 std::string info);
 
   /// Create a splitter and add to the vector of time splitters
-  Kernel::DateAndTime
-  makeSplitterInVector(std::vector<Kernel::DateAndTime> &vecSplitTime,
+  Types::Core::DateAndTime
+  makeSplitterInVector(std::vector<Types::Core::DateAndTime> &vecSplitTime,
                        std::vector<int> &vecGroupIndex,
-                       Kernel::DateAndTime start, Kernel::DateAndTime stop,
-                       int group, int64_t tol_ns, Kernel::DateAndTime lasttime);
+                       Types::Core::DateAndTime start,
+                       Types::Core::DateAndTime stop, int group, int64_t tol_ns,
+                       Types::Core::DateAndTime lasttime);
 
   /// Generate a matrix workspace containing splitters
   void generateSplittersInMatrixWorkspace();
@@ -156,18 +160,18 @@ private:
   void generateSplittersInSplitterWS();
 
   /// Identify the a sample log entry is within intended value and time region
-  bool identifyLogEntry(const int &index, const Kernel::DateAndTime &currT,
+  bool identifyLogEntry(const int &index, const Types::Core::DateAndTime &currT,
                         const bool &lastgood, const double &minvalue,
                         const double &maxvalue,
-                        const Kernel::DateAndTime &startT,
-                        const Kernel::DateAndTime &stopT,
+                        const Types::Core::DateAndTime &startT,
+                        const Types::Core::DateAndTime &stopT,
                         const bool &filterIncrease, const bool &filterDecrease);
 
   /// Determine the chaning direction of log value
   int determineChangingDirection(int startindex);
 
   /// Find the end of the run
-  Kernel::DateAndTime findRunEnd();
+  Types::Core::DateAndTime findRunEnd();
 
   DataObjects::EventWorkspace_const_sptr m_dataWS;
 
@@ -178,11 +182,11 @@ private:
 
   API::ITableWorkspace_sptr m_filterInfoWS;
 
-  Kernel::DateAndTime m_startTime;
-  Kernel::DateAndTime m_stopTime;
+  Types::Core::DateAndTime m_startTime;
+  Types::Core::DateAndTime m_stopTime;
 
   /// Run end time
-  Kernel::DateAndTime m_runEndTime;
+  Types::Core::DateAndTime m_runEndTime;
 
   double m_timeUnitConvertFactorToNS;
 
@@ -198,13 +202,13 @@ private:
   /// SplitterType
   Kernel::TimeSplitterType m_splitters;
   /// Vector as date and time
-  std::vector<Kernel::DateAndTime> m_vecSplitterTime;
+  std::vector<Types::Core::DateAndTime> m_vecSplitterTime;
   std::vector<int> m_vecSplitterGroup;
 
   /// Processing algorithm type
   bool m_useParallel;
 
-  std::vector<std::vector<Kernel::DateAndTime>> m_vecSplitterTimeSet;
+  std::vector<std::vector<Types::Core::DateAndTime>> m_vecSplitterTimeSet;
   std::vector<std::vector<int>> m_vecGroupIndexSet;
 };
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,9 +46,9 @@ Usage
     #CalMuonDeadTime outputs two workspaces so catch them both
     (wsOut,wsFitted) = CalMuonDeadTime('ws_1')
 
-    print ("First five dead times:")
+    print("First five dead times:")
     for i in range(5):
-        print ("  Spectrum %i -> %.4f" % (wsOut.column(0)[i],wsOut.column(1)[i]))
+        print("  Spectrum {} -> {:.4f}".format(wsOut.column(0)[i], wsOut.column(1)[i]))
 
 Output:
 

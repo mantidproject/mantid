@@ -1,9 +1,6 @@
 #ifndef MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
 #define MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
@@ -31,7 +28,6 @@
 #include <numeric>
 
 namespace Mantid {
-
 namespace DataHandling {
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
@@ -71,7 +67,6 @@ class DLLExport LoadEventNexus
 
 public:
   LoadEventNexus();
-  ~LoadEventNexus() override;
 
   const std::string name() const override { return "LoadEventNexus"; };
 
@@ -84,16 +79,15 @@ public:
 
   /// Version
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadISISNexus", "LoadEventAndCompress"};
+  }
 
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
-
-  /** Sets whether the pixel counts will be pre-counted.
-   * @param value :: true if you want to precount. */
-  void setPrecount(bool value) { precount = value; }
 
   template <typename T>
   static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(
@@ -142,25 +136,15 @@ public:
   /// Filter by a maximum time-of-flight
   double filter_tof_max;
 
-  /// Spectra list to load
-  std::vector<int32_t> m_specList;
   /// Minimum spectrum to load
   int32_t m_specMin;
   /// Maximum spectrum to load
   int32_t m_specMax;
 
   /// Filter by start time
-  Kernel::DateAndTime filter_time_start;
+  Mantid::Types::Core::DateAndTime filter_time_start;
   /// Filter by stop time
-  Kernel::DateAndTime filter_time_stop;
-  /// chunk number
-  int chunk;
-  /// number of chunks
-  int totalChunks;
-  /// for multiple chunks per bank
-  int firstChunkForBank;
-  /// number of chunks per bank
-  size_t eventsPerChunk;
+  Mantid::Types::Core::DateAndTime filter_time_stop;
 
   /// Mutex protecting tof limits
   std::mutex m_tofMutex;
@@ -176,55 +160,20 @@ public:
   /// the IDF
   size_t discarded_events;
 
-  /// Do we pre-count the # of events in each pixel ID?
-  bool precount;
-
   /// Tolerance for CompressEvents; use -1 to mean don't compress.
   double compressTolerance;
-
-  /// Pointer to the vector of events
-  typedef std::vector<Mantid::DataObjects::TofEvent> *EventVector_pt;
-
-  /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
-  /// event list.
-  std::vector<std::vector<EventVector_pt>> eventVectors;
-
-  /// Mutex to protect eventVectors from each task
-  std::recursive_mutex m_eventVectorMutex;
-
-  /// Maximum (inclusive) event ID possible for this instrument
-  int32_t eventid_max;
-
-  /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
-  /// index)
-  std::vector<size_t> pixelID_to_wi_vector;
-
-  /// Offset in the pixelID_to_wi_vector to use.
-  detid_t pixelID_to_wi_offset;
-
-  /// One entry of pulse times for each preprocessor
-  std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
 
   /// Pulse times for ALL banks, taken from proton_charge log.
   boost::shared_ptr<BankPulseTimes> m_allBanksPulseTimes;
 
   /// name of top level NXentry to use
   std::string m_top_entry_name;
-  ::NeXus::File *m_file;
+  std::unique_ptr<::NeXus::File> m_file;
 
-  /// whether or not to launch multiple ProcessBankData jobs per bank
-  bool splitProcessing;
-
-  /// Flag for dealing with a simulated file
-  bool m_haveWeights;
-
-  /// Pointer to the vector of weighted events
-  typedef std::vector<Mantid::DataObjects::WeightedEvent> *
-      WeightedEventVector_pt;
-
-  /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
-  /// in the event list.
-  std::vector<std::vector<WeightedEventVector_pt>> weightedEventVectors;
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// Intialisation code
@@ -233,14 +182,12 @@ private:
   /// Execution code
   void exec() override;
 
+  bool canUseParallelLoader(const bool haveWeights,
+                            const bool oldNeXusFileNames,
+                            const std::string &classType) const;
+
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
-  /// Map detector IDs to event lists.
-  template <class T>
-  void makeMapToEventLists(std::vector<std::vector<T>> &vectors);
-
-  void createWorkspaceIndexMaps(const bool monitors,
-                                const std::vector<std::string> &bankNames);
   void loadEvents(API::Progress *const prog, const bool monitors);
   void createSpectraMapping(
       const std::string &nxsfile, const bool monitorsOnly,
@@ -254,8 +201,8 @@ private:
   void setTimeFilters(const bool monitors);
 
   /// Load a spectra mapping from the given file
-  bool loadSpectraMapping(const std::string &filename, const bool monitorsOnly,
-                          const std::string &entry_name);
+  std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
+  loadISISVMSSpectraMapping(const std::string &entry_name);
 
   /// ISIS specific methods for dealing with wide events
   void loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
@@ -267,9 +214,6 @@ private:
                             const std::string &binsName, size_t start_wi = 0,
                             size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
-
-  // Validate the optional spectra input properties and initialize m_specList
-  void createSpectraList(int32_t min, int32_t max);
 
   /// Set the top entry field name
   void setTopEntryName();

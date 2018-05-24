@@ -2,10 +2,13 @@ from __future__ import (absolute_import)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
+from ui.sans_isis.beam_centre import BeamCentre
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode)
+from sans.common.enums import (RangeStepType, OutputMode, SANSFacility)
 from sans.test_helper.test_director import TestDirector
+from functools import (partial)
 
 import sys
 if sys.version_info.major == 3:
@@ -26,7 +29,17 @@ def create_mock_masking_table():
     return view
 
 
-def get_cell_mock(row, column, convert_to=None):
+def create_mock_beam_centre_tab():
+    view = mock.create_autospec(BeamCentre, spec_set=False)
+    return view
+
+
+def create_mock_diagnostics_tab():
+    view = mock.create_autospec(DiagnosticsPage, spec_set=False)
+    return view
+
+
+def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
     _ = convert_to  # noqa
     if row == 0:
         # For the first row we return the
@@ -37,6 +50,13 @@ def get_cell_mock(row, column, convert_to=None):
             return "SANS2D00022048"
         elif column == 4:
             return "SANS2D00022048"
+        else:
+            return ""
+    elif row == 1:
+        if column == 0:
+            return "SANS2D00022024"
+        if column == 13:
+            return user_file_path
         else:
             return ""
     else:
@@ -64,10 +84,12 @@ def add_listener_mock(listener):
     mock_listener_list.append(listener)
 
 
-def create_mock_view(user_file_path, batch_file_path=None):
+def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = ""):
+    get_cell_mock_with_path = partial(get_cell_mock, user_file_path = row_user_file_path)
+
     view = mock.create_autospec(SANSDataProcessorGui, spec_set=False)
     view.get_user_file_path = mock.Mock(return_value=user_file_path)
-    view.get_cell = mock.MagicMock(side_effect=get_cell_mock)
+    view.get_cell = mock.MagicMock(side_effect=get_cell_mock_with_path)
     view.get_batch_file_path = mock.MagicMock(return_value=batch_file_path)
     view.get_number_of_rows = mock.MagicMock(return_value=2)
 
@@ -78,6 +100,16 @@ def create_mock_view(user_file_path, batch_file_path=None):
     # Add the masking table view
     masking_table = create_mock_masking_table()
     view.masking_table = masking_table
+
+    # Add the beam centre view
+    beam_centre = create_mock_beam_centre_tab()
+    view.beam_centre = beam_centre
+
+    # Add the data diagnostic tab
+    diagnostic_page = create_mock_diagnostics_tab()
+    view.diagnostic_page = diagnostic_page
+
+    view.halt_process_flag = mock.MagicMock()
 
     # ---------------------
     # Mocking properties
@@ -99,6 +131,12 @@ def create_mock_view(user_file_path, batch_file_path=None):
 
     _merge_q_range_stop = mock.PropertyMock(return_value=None)
     type(view).merge_q_range_stop = _merge_q_range_stop
+
+    _merge_min = mock.PropertyMock(return_value=None)
+    type(view).merge_min = _merge_min
+
+    _merge_max = mock.PropertyMock(return_value=None)
+    type(view).merge_max = _merge_max
 
     _sample_height = mock.PropertyMock(return_value=None)
     type(view).sample_height = _sample_height
@@ -154,6 +192,9 @@ def create_mock_view(user_file_path, batch_file_path=None):
     _q_1d_step_type = mock.PropertyMock(return_value=RangeStepType.Lin)
     type(view)._q_1d_step_type = _q_1d_step_type
 
+    _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
+    type(view).output_mode = _output_mode
+
     return view, settings_diagnostic_tab, masking_table
 
 
@@ -196,6 +237,7 @@ def get_state_for_row_mock_with_real_state(row_index):
 def create_run_tab_presenter_mock(use_fake_state=True):
     presenter = mock.create_autospec(RunTabPresenter, spec_set=False)
     presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 3])
+    presenter._facility = SANSFacility.ISIS
     if use_fake_state:
         presenter.get_state_for_row = mock.MagicMock(side_effect=get_state_for_row_mock)
     else:

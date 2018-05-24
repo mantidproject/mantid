@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -71,7 +71,7 @@ Usage
     corrected_reduction, peak_position, scale_factor_1, scale_factor_2 = \
       TOSCABankCorrection(InputWorkspace=original_reduction)
 
-    print 'Target peak centre: %.f' % peak_position
+    print('Target peak centre: %.f' % peak_position)
 
 Output:
 
@@ -89,7 +89,7 @@ Output:
       TOSCABankCorrection(InputWorkspace=original_reduction,
                           PeakPosition='715')
 
-    print 'Target peak centre: %.f' % peak_position
+    print('Target peak centre: %.f' % peak_position)
 
 Output:
 

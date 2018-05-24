@@ -14,13 +14,13 @@
 #include <string>
 
 namespace Mantid {
+using namespace Types::Core;
 namespace Kernel {
 
 // Forward declare
 class ProxyInfo;
 
 using namespace Poco::Net;
-using std::map;
 using std::string;
 
 namespace {

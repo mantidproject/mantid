@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,15 +26,15 @@ Usage
 
     ws = CreateSampleWorkspace()
 
-    print "The first Y value before correction is: " + str(ws.dataY(0)[1])
+    print("The first Y value before correction is: {}".format((ws.dataY(0)[1])))
 
     # By default, the Divide operation is used to correct the data.
     # The result is saved into another workspace, which can also be itself.
     ws_divide = ExponentialCorrection(InputWorkspace=ws,C0=2.0,C1=1.0,Operation="Divide")
     ws_multiply = ExponentialCorrection(InputWorkspace=ws,C0=2.0,C1=1.0,Operation="Multiply")
 
-    print "The first Y value after divide correction is: " + str(ws_divide.dataY(0)[1])
-    print "The first Y value after multiply correction is: " + str(ws_multiply.dataY(0)[1])
+    print("The first Y value after divide correction is: {:.11e}".format(ws_divide.dataY(0)[1]))
+    print("The first Y value after multiply correction is: {:.11e}".format(ws_multiply.dataY(0)[1]))
 
 Output:
 

@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
       ApplicationWindow::about();
       exit(0);
     } else if (str == "-h" || str == "--help") {
-      QString s = "\nUsage: ";
+      std::string s = "\nUsage: ";
       s += "MantidPlot [options] [filename]\n\n";
       s += "Valid options are:\n";
       s += "-a or --about: show about dialog and exit\n";
@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
            "and then exit MantidPlot\n\n";
       s += "'filename' can be any of .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py "
            "or ASCII file\n\n";
-      std::wcout << s.toStdWString();
+      std::cout << s;
 
       exit(0);
     }
@@ -224,6 +224,9 @@ int main(int argc, char **argv) {
     ApplicationWindow *mw = new ApplicationWindow(factorySettings, args);
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
+    QObject::connect(&app, SIGNAL(runAsPythonScript(const QString &)), mw,
+                     SLOT(runPythonScript(const QString &)),
+                     Qt::DirectConnection);
     app.processEvents();
 
     // register a couple of fonts
@@ -239,13 +242,14 @@ int main(int argc, char **argv) {
     return app.exec();
   } catch (std::exception &e) {
     QMessageBox::critical(
-        0, "Mantid - Error",
+        nullptr, "Mantid - Error",
         QString("An unhandled exception has been caught. MantidPlot will have "
                 "to close. Details:\n\n") +
             e.what());
   } catch (...) {
-    QMessageBox::critical(0, "Mantid - Error", "An unhandled exception has "
-                                               "been caught. MantidPlot will "
-                                               "have to close.");
+    QMessageBox::critical(nullptr, "Mantid - Error",
+                          "An unhandled exception has "
+                          "been caught. MantidPlot will "
+                          "have to close.");
   }
 }

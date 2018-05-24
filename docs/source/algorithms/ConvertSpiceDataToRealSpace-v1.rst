@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -191,7 +191,7 @@ Usage
 
   # output
   datamdws = mtd["Exp0231DataMD"]
-  print "Number of events = %d" % (datamdws.getNEvents())
+  print("Number of events = {}".format(datamdws.getNEvents()))
 
 .. testcleanup:: ExLoadHB2ADataToMD
 

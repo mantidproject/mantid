@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -48,8 +48,8 @@ Usage
     in_y = ws_sample.dataY(0)
     out_y = out_ws.dataY(0)
 
-    print "The first bin of the first spectrum of the input was " + str(in_y[0])
-    print "After the dark run correction it is " + str(out_y[0])
+    print("The first bin of the first spectrum of the input was {:.1f}".format(in_y[0]))
+    print("After the dark run correction it is {:.2f}".format(out_y[0]))
 
 Output:
 

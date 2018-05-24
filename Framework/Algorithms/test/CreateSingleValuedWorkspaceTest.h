@@ -40,7 +40,7 @@ public:
         boost::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
             ws);
 
-    TS_ASSERT(ws.get() != 0);
+    TS_ASSERT(ws.get() != nullptr);
 
     // Test the data
     TS_ASSERT_DELTA(single->x(0)[0], 0.0, 1e-08);
@@ -82,7 +82,7 @@ public:
         boost::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
             ws);
 
-    TS_ASSERT(ws.get() != 0);
+    TS_ASSERT(ws.get() != nullptr);
 
     // Test the data
     TS_ASSERT_DELTA(single->x(0)[0], 0.0, 1e-08);

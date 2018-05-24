@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -57,7 +57,7 @@ Usage
 
     wsOut = HRPDSlabCanAbsorption (ws,Thickness='0.2',ElementSize=3)
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print('The created workspace has one entry for each spectra: {:d}'.format(wsOut.getNumberHistograms()))
 
 Output:
 

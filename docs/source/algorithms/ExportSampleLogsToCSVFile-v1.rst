@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -15,7 +15,7 @@ The header for the sample log csv file can also
 be created by this algorithm in a seperate *header* file. 
 
 CSV File format
-===============
+###############
 
 Sample logs are written to a csv file.   
 A tab separates any two adjacent values. 
@@ -35,7 +35,7 @@ Here is the definition for the columns.
    *SampleLogNames*
 
 Header file
-===========
+###########
 
 A sample log header file can be generated optionally.  
 It contains theree lines described as below. 
@@ -46,7 +46,7 @@ It contains theree lines described as below.
    Usually it is the column names in the .csv file
 
 Time Zone
-=========
+#########
 
 The time stamps of sample logs are recorded as UTC time in SNS.
 Some users wants to see the exported sample log as the neutron facility's local time.
@@ -100,8 +100,8 @@ Usage
 
    headerfilename = os.path.join(defaultdir, "testphase4_header.txt")
 
-   print "File is created = ", os.path.exists(savefile)
-   print "Header file is created = ", os.path.exists(headerfilename)
+   print("File is created =  {}".format(os.path.exists(savefile)))
+   print("Header file is created =  {}".format(os.path.exists(headerfilename)))
 
    # Get the lines of both files
    sfile = open(savefile, 'r')
@@ -111,8 +111,8 @@ Usage
    hlines = hfile.readlines()
    hfile.close()
 
-   print "Number of lines in File =", len(slines)
-   print "Number of lines in Header file =", len(hlines)
+   print("Number of lines in File = {}".format(len(slines)))
+   print("Number of lines in Header file = {}".format(len(hlines)))
    
 .. testcleanup:: ExExportSampleToTSV
 

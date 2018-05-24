@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -43,7 +43,7 @@ The rest of the input properties are not inferred from the parameter file, and m
 property that allows users to specify a region of direct beam that will be used to normalize
 the detector signal. The region of direct beam is specified by workspace indices. For instance, :literal:`RegionOfDirectBeam='2-3'`
 means that spectra with workspace indices :literal:`2` and :literal:`3` will be summed and the resulting
-workspace will be used as the direct beam workspace. 
+workspace will be used as the direct beam workspace.
 
 Transmission corrections can be optionally applied by providing either one or
 two transmission runs or polynomial corrections. Polynomial correction is enabled by setting the
@@ -134,12 +134,12 @@ Usage
     run = Load(Filename='INTER00013460.nxs')
     IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
 
-    print "%.5f" % (IvsLam.readY(0)[175])
-    print "%.5f" % (IvsLam.readY(0)[176])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[106])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[13])
-    print "%.5f" % (IvsQ.readY(0)[14])
+    print("{:.5f}".format(IvsLam.readY(0)[175]))
+    print("{:.5f}".format(IvsLam.readY(0)[176]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
+    print("{:.5f}".format(IvsQ.readY(0)[13]))
+    print("{:.5f}".format(IvsQ.readY(0)[14]))
 
 Output:
 
@@ -160,12 +160,12 @@ Output:
     trans = Load(Filename='INTER00013463.nxs')
     IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
 
-    print "%.5f" % (IvsLam.readY(0)[164])
-    print "%.5f" % (IvsLam.readY(0)[164])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[96])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[97])
-    print "%.5f" % (IvsQ.readY(0)[5])
-    print "%.5f" % (IvsQ.readY(0)[6])
+    print("{:.5f}".format(IvsLam.readY(0)[164]))
+    print("{:.5f}".format(IvsLam.readY(0)[164]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[96]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[97]))
+    print("{:.5f}".format(IvsQ.readY(0)[5]))
+    print("{:.5f}".format(IvsQ.readY(0)[6]))
 
 Output:
 
@@ -185,12 +185,12 @@ Output:
     run = Load(Filename='INTER00013460.nxs')
     IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print "%.5f" % (IvsLam.readY(0)[175])
-    print "%.5f" % (IvsLam.readY(0)[176])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[106])
-    print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[5])
-    print "%.5f" % (IvsQ.readY(0)[6])
+    print("{:.5f}".format(IvsLam.readY(0)[175]))
+    print("{:.5f}".format(IvsLam.readY(0)[176]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
+    print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
+    print("{:.5f}".format(IvsQ.readY(0)[5]))
+    print("{:.5f}".format(IvsQ.readY(0)[6]))
 
 Output:
 
@@ -198,10 +198,10 @@ Output:
 
     0.00441
     0.00462
-    0.64241
-    0.41453
+    0.64231
+    0.41456
     0.51029
-    0.52240
+    0.52241
 
 .. categories::
 

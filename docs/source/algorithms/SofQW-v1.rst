@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -47,13 +47,13 @@ Usage
    # convert workspace into MD workspace
    ws=SofQW(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
 
-   print "The converted X values are:"
-   print ws.readX(59)[0:10]
-   print ws.readX(59)[10:21]
+   print("The converted X values are:")
+   print(ws.readX(59)[0:10])
+   print(ws.readX(59)[10:21])
 
-   print "The converted Y values are:"
-   print ws.readY(59)[0:10]
-   print ws.readY(59)[10:21]
+   print("The converted Y values are:")
+   print(ws.readY(59)[0:10])
+   print(ws.readY(59)[10:21])
 
 
 .. testcleanup:: SofQW

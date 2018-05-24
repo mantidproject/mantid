@@ -22,7 +22,7 @@
 #include "MantidKernel/ConfigService.h"
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using namespace std;
 using Mantid::API::ScriptRepositoryImpl;
 using Mantid::API::ScriptRepoException;
@@ -363,8 +363,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(list_files = repo->listFiles());
     TS_ASSERT(list_files.size() == 5);
     // check that all the files at the central repository are inside
-    for (int i = 0; i < 5; i++)
-      TSM_ASSERT_THROWS_NOTHING(test_entries[i], repo->info(test_entries[i]));
+    for (auto &test_entry : test_entries)
+      TSM_ASSERT_THROWS_NOTHING(test_entry, repo->info(test_entry));
   }
 
   /**
@@ -478,9 +478,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
 
     std::cout << "After update, the files are: ";
-    for (std::vector<string>::iterator it = list_of_files.begin();
-         it != list_of_files.end(); it++) {
-      std::cout << *it << ", ";
+    for (auto &list_of_file : list_of_files) {
+      std::cout << list_of_file << ", ";
     }
     std::cout << '\n';
     TS_ASSERT(list_of_files.size() == 1);

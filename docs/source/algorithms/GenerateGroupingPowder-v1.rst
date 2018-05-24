@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,11 +39,11 @@ Usage
     #check that it works
     import os.path
     if(os.path.isfile(outputFilename)):
-        print "Found file powder.xml"
+        print("Found file powder.xml")
     if(os.path.isfile(mantid.config.getString("defaultsave.directory")+"powder.par")):
-        print "Found file powder.par"
+        print("Found file powder.par")
     wsg=GroupDetectors(ws,outputFilename)
-    print "The grouped workspace has ",wsg.getNumberHistograms(), " histograms"
+    print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
 
 .. testcleanup:: GenerateGroupingPowder
 
@@ -61,7 +61,7 @@ Output:
 
     Found file powder.xml
     Found file powder.par
-    The grouped workspace has  14  histograms
+    The grouped workspace has 14 histograms
 
 If one would use LoadDetectorsGroupingFile on powder.xml one would get a workspace that looks like
 

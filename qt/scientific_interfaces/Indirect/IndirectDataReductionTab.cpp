@@ -10,6 +10,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
@@ -83,7 +84,7 @@ IndirectDataReductionTab::loadInstrumentIfNotExist(std::string instrumentName,
  *
  * @return Map of information ID to value
  */
-QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() {
+QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() const {
   return m_idrUI->getInstrumentDetails();
 }
 
@@ -93,7 +94,7 @@ QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() {
  * @return Instrument config widget
  */
 MantidWidgets::IndirectInstrumentConfig *
-IndirectDataReductionTab::getInstrumentConfiguration() {
+IndirectDataReductionTab::getInstrumentConfiguration() const {
   return m_idrUI->m_uiForm.iicInstrumentConfiguration;
 }
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,11 +23,11 @@ Usage
 
     def outputMDDimensions(ws):
         num_dims = ws.getNumDims()
-        print "Name   Bins   Min     Max"
+        print("Name   Bins   Min     Max")
         for dim_index in range(num_dims):
             dim = ws.getDimension(dim_index)
-            print "%s      %i      %.2f   %.2f" % (dim.name,
-                 dim.getNBins(), dim.getMinimum(), dim.getMaximum())    
+            print("{}      {}      {:.2f}   {:.2f}".format(
+                  dim.name, dim.getNBins(), dim.getMinimum(), dim.getMaximum()))
 
     #create a test MD event workspace
     mdew = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-5,5,-9,10], 
@@ -39,12 +39,12 @@ Usage
         AlignedDim1='B,-5,5,5',
         AlignedDim2='C,-9,10,9')
 
-    print "The original workspace"
+    print("The original workspace")
     outputMDDimensions(wsHisto)
 
     wsInverted = InvertMDDim(wsHisto)
 
-    print "\nInvertMDDim reverses the order of the dimensions"
+    print("\nInvertMDDim reverses the order of the dimensions")
     outputMDDimensions(wsInverted)
 
 .. testoutput:: InvertMDExample

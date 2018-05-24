@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -88,23 +88,23 @@ Usage
                                            difc=[difc1, difc2], tzero=[tzero1, tzero2])
 
    import math
-   print "DIFA1: {0}".format(difa1)
+   print("DIFA1: {0}".format(difa1))
    delta = 2
    approx_difc1 = 18267
    difc1_ok = abs(difc1 - approx_difc1) <= delta
-   print "DIFC1 is approximately (+/- {0}) {1}: {2}".format(delta, approx_difc1, difc1_ok)
+   print("DIFC1 is approximately (+/- {0}) {1}: {2}".format(delta, approx_difc1, difc1_ok))
    approx_tzero1 = 277
    tzero1_ok = abs(tzero1 - approx_tzero1) <= delta
-   print "TZERO1 is approximately (+/- {0}) {1}: {2}".format(delta, approx_tzero1, tzero1_ok)
+   print("TZERO1 is approximately (+/- {0}) {1}: {2}".format(delta, approx_tzero1, tzero1_ok))
    tbl = mtd[out_tbl_name]
 
    tbl_values_ok = (abs(tbl.cell(0,1) - approx_difc1) <= delta) and (abs(tbl.cell(0,2) - approx_tzero1) <= delta)
-   print "The output table has {0} row(s) and its values are as expected: {1}".format(tbl.rowCount(),
-                                                                                      tbl_values_ok)
+   print("The output table has {0} row(s) and its values are as expected: {1}".format(tbl.rowCount(),
+                                                                                      tbl_values_ok))
 
    import os
-   print "Output GSAS iparam file was written? {0}".format(os.path.exists(GSAS_iparm_fname))
-   print "Number of lines of the GSAS iparam file: {0}".format(sum(1 for line in open(GSAS_iparm_fname)))
+   print("Output GSAS iparam file was written? {0}".format(os.path.exists(GSAS_iparm_fname)))
+   print("Number of lines of the GSAS iparam file: {0}".format(sum(1 for line in open(GSAS_iparm_fname))))
 
 .. testcleanup:: ExampleCalib
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,9 +26,9 @@ Usage
 .. testcode:: ExFilterTofByMax
 
     ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
-    print "%i events before filtering" % ws.getNumberEvents()
+    print("%i events before filtering" % ws.getNumberEvents())
     wsOut = FilterByXValue(ws,XMax=15000)
-    print "%i events after filtering" % wsOut.getNumberEvents()
+    print("%i events after filtering" % wsOut.getNumberEvents())
 
 
 Output:
@@ -44,17 +44,18 @@ Output:
 
     ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
-    print "%i events before filtering" % ws.getNumberEvents()
+    print("%i events before filtering" % ws.getNumberEvents())
     wsOut = FilterByXValue(ws,XMin=1,XMax=3)
-    print "%i events after filtering" % wsOut.getNumberEvents()
+    print("%i events after filtering" % wsOut.getNumberEvents())
 
 
 Output:
 
 .. testoutput:: ExFilterWavelengthByMinMax
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
     1900 events before filtering
-    1118 events after filtering
+    11... events after filtering
 
 
 .. categories::

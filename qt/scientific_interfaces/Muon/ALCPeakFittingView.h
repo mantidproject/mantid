@@ -5,7 +5,7 @@
 
 #include "DllConfig.h"
 #include "IALCPeakFittingView.h"
-#include "MantidQtWidgets/Common/PeakPicker.h"
+#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include "ui_ALCPeakFittingView.h"
 

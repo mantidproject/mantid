@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -149,7 +149,7 @@ Usage
 
    corrected_data = SANSWideAngleCorrection(sample, transmission)
 
-   print "%f was corrected to %f." % (sample.readY(19)[0], corrected_data.readY(19)[0])
+   print("{:.6f} was corrected to {:.6f}.".format(sample.readY(19)[0], corrected_data.readY(19)[0]))
 
 Output:
 

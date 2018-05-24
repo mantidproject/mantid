@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,6 +29,7 @@ Usage
 
     import os
     import numpy as np
+    from sys import stdout
 
     # create x and y data
     dataX = np.arange(12).reshape(3, 4)
@@ -38,7 +39,7 @@ Usage
     ws = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=np.sqrt(dataY), NSpec=3, UnitX="DeltaE")
 
     # add Instrument
-    LoadInstrument(ws,False,InstrumentName="TOFTOF")
+    LoadInstrument(ws,True,InstrumentName="TOFTOF")
 
     #add sample Logs
     AddSampleLog(ws,"proposal_number","3")
@@ -53,10 +54,9 @@ Usage
     # save file
     SaveYDA(ws, filename)
 
-
     with open(filename,'r') as f:
         for i in range(12):
-            print f.readline(),
+            stdout.write(f.readline())
 
 **Output:**
 

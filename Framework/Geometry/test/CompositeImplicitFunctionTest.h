@@ -91,7 +91,7 @@ public:
   void testCannotAddNullDimension() {
     CompositeImplicitFunction function;
 
-    MockImplicitFunction *nullFunction = NULL;
+    MockImplicitFunction *nullFunction = nullptr;
     TSM_ASSERT("A null function cannot be added to a function of type "
                "CompositeFunction",
                !function.addFunction(

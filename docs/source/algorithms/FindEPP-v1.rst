@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,9 +31,9 @@ Usage
     table = FindEPP(ws, Version=1)
 
     # print some results
-    print "The fit status is", table.row(0)['FitStatus']
-    print "The peak centre is at", round(table.row(0)['PeakCentre'], 2), "microseconds"
-    print "The peak height is", round(table.row(0)['Height'],2)
+    print("The fit status is {}".format(table.row(0)['FitStatus']))
+    print("The peak centre is at {} microseconds".format(round(table.row(0)['PeakCentre'], 2)))
+    print("The peak height is {}".format(round(table.row(0)['Height'],2)))
 
 Output:
 

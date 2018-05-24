@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -144,17 +144,17 @@ Output:
     sumCutWS = LineProfile(wsInTheta, centre, width, Mode='Sum')
 
     # When no NaNs are present both modes give the same result.
-    iElastic = sumCutWS.blocksize() / 2
+    iElastic = sumCutWS.blocksize() // 2
     y = sumCutWS.readY(0)[iElastic]
     e = sumCutWS.readE(0)[iElastic]
-    print('Sum profile at elastic peak: {} +/- {}'.format(y, e))
+    print('Sum profile at elastic peak: {:.8f} +/- {:.10f}'.format(y, e))
 
     # The weighting is apparent when the profile crosses some
     # special values.
-    iEdge = sumCutWS.blocksize() / 6
+    iEdge = sumCutWS.blocksize() // 6
     y = sumCutWS.readY(0)[iEdge]
     e = sumCutWS.readE(0)[iEdge]
-    print('Sum profile near NaNs: {} +/- {}'.format(y, e))
+    print('Sum profile near NaNs: {:.11f} +/- {:.11f}'.format(y, e))
 
 .. testoutput:: SumMode
 

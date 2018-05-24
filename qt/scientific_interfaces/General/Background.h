@@ -19,7 +19,7 @@ class Background : public API::MantidDialog {
   Q_OBJECT
 
 public:
-  explicit Background(QWidget *parent = NULL);
+  explicit Background(QWidget *parent = nullptr);
 
   bool removeBackground() const;
   void removeBackground(bool remove);

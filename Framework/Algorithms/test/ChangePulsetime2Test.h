@@ -5,6 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAlgorithms/ChangePulsetime2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -13,6 +14,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 EventWorkspace_sptr

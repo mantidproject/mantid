@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -49,7 +49,7 @@ Usage
    grouping = result[0]
    inst1 = grouping.getInstrument()
    comp1 = inst1.getComponentByName("MUSR")
-   print "Instrument name =", comp1.getName()
+   print("Instrument name = {}".format(comp1.getName()))
 
 Output:
 
@@ -73,7 +73,7 @@ Output:
    grouping = result[0]
    inst1 = grouping.getInstrument()
    comp1 = inst1.getComponentByName("MUSR")
-   print "Instrument name =", comp1.getName() 
+   print("Instrument name = {}".format(comp1.getName()))
 
 Output:
 
@@ -92,7 +92,7 @@ Output:
    grouping = result[0]
    inst1 = grouping.getInstrument()
    comp1 = inst1.getComponentByName("GEM")
-   print "Instrument name =", comp1.getName()
+   print("Instrument name = {}".format(comp1.getName()))
 
 Output:
 
@@ -106,8 +106,8 @@ Output:
 
    grouping_ws, spectra_count, group_count = CreateGroupingWorkspace(InstrumentName='IRIS', ComponentName='graphite', FixedGroupCount=5)
   
-   print "Number of grouped spectra:",spectra_count
-   print "Number of groups:",group_count
+   print("Number of grouped spectra: {}".format(spectra_count))
+   print("Number of groups: {}".format(group_count))
 
 Output:
 

@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,7 +34,7 @@ Finally, ChiSquaredWeightedDividedByDOF is
 :math:`\chi_{4}^{2} = \chi_{3}^{2} / DOF`
 
 Parameter errors
-================
+################
 
 Setting the Output property to a non-empty string makes the algorithm explore the surface of the :math:`\chi^{2}`
 around its minimum and estimate the standard deviations for the parameters. The value of the property is a base name
@@ -82,13 +82,12 @@ Usage
     # Calculate the chi squared
     chi2,chi2dof,chi2ndata,chi2W,chi2Wdof,chi2Wndata = CalculateChiSquared(func,ws)
 
-    print 'Chi squared is %s' % chi2
-    print 'Chi squared / DOF is %s' % chi2dof
-    print 'Chi squared / NDATA is %s' % chi2ndata
-    print 'Chi squared weighted is %s' % chi2W
-    print 'Chi squared weighted / DOF is %s' % chi2Wdof
-    print 'Chi squared weighted / NDATA is %s' % chi2Wndata
-    print
+    print('Chi squared is {:.13f}'.format(chi2))
+    print('Chi squared / DOF is {:.14f}'.format(chi2dof))
+    print('Chi squared / NDATA is {:.14f}'.format(chi2ndata))
+    print('Chi squared weighted is {:.11f}'.format(chi2W))
+    print('Chi squared weighted / DOF is {:.14f}'.format(chi2Wdof))
+    print('Chi squared weighted / NDATA is {:.12f}'.format(chi2Wndata))
 
     # Define a function that models the data exactly
     func = 'name=LinearBackground,A0=1.0,A1=2.0'
@@ -96,12 +95,12 @@ Usage
     # Calculate the chi squared
     chi2,chi2dof,chi2ndata,chi2W,chi2Wdof,chi2Wndata = CalculateChiSquared(func,ws)
 
-    print 'Chi squared is %s' % chi2
-    print 'Chi squared / DOF is %s' % chi2dof
-    print 'Chi squared / NDATA is %s' % chi2ndata
-    print 'Chi squared weighted is %s' % chi2W
-    print 'Chi squared weighted / DOF is %s' % chi2Wdof
-    print 'Chi squared weighted / NDATA is %s' % chi2Wndata
+    print('Chi squared is {:.1f}'.format(chi2))
+    print('Chi squared / DOF is {:.1f}'.format(chi2dof))
+    print('Chi squared / NDATA is {:.1f}'.format(chi2ndata))
+    print('Chi squared weighted is {:.1f}'.format(chi2W))
+    print('Chi squared weighted / DOF is {:.1f}'.format(chi2Wdof))
+    print('Chi squared weighted / NDATA is {:.1f}'.format(chi2Wndata))
 
 Output:
 
@@ -110,10 +109,9 @@ Output:
     Chi squared is 0.0351851851852
     Chi squared / DOF is 0.00439814814815
     Chi squared / NDATA is 0.00351851851852
-    Chi squared weighted is 0.0266028783977
+    Chi squared weighted is 0.02660287840
     Chi squared weighted / DOF is 0.00332535979971
-    Chi squared weighted / NDATA is 0.00266028783977
-
+    Chi squared weighted / NDATA is 0.002660287840
     Chi squared is 0.0
     Chi squared / DOF is 0.0
     Chi squared / NDATA is 0.0

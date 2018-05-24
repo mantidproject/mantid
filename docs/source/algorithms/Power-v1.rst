@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,8 +37,8 @@ Usage
    data_ws = CreateWorkspace(dataX, dataY, NSpec=2)
    result_ws = Power(data_ws, 2)
 
-   print "Squared values of first spectrum:", result_ws.readY(0)
-   print "Squared values of second spectrum:", result_ws.readY(1)
+   print("Squared values of first spectrum: {}".format(result_ws.readY(0)))
+   print("Squared values of second spectrum: {}".format(result_ws.readY(1)))
 
 Output:
 

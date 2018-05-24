@@ -274,7 +274,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
     setupSampleLogFromSpiceTable(outws, spicetablews, m_ptNumber4Log);
   }
 
-  Kernel::DateAndTime anytime(1000);
+  Types::Core::DateAndTime anytime(1000);
 
   // Process 2theta
   bool return_true = true;
@@ -669,20 +669,17 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
   }     // END-FOR (xml nodes)
 
   // Add the property to output workspace
-  for (std::map<std::string, std::string>::iterator miter = str_log_map.begin();
-       miter != str_log_map.end(); ++miter) {
+  for (auto &log_entry : str_log_map) {
     outws->mutableRun().addProperty(
-        new PropertyWithValue<std::string>(miter->first, miter->second));
+        new PropertyWithValue<std::string>(log_entry.first, log_entry.second));
   }
-  for (std::map<std::string, int>::iterator miter = int_log_map.begin();
-       miter != int_log_map.end(); ++miter) {
+  for (auto &log_entry : int_log_map) {
     outws->mutableRun().addProperty(
-        new PropertyWithValue<int>(miter->first, miter->second));
+        new PropertyWithValue<int>(log_entry.first, log_entry.second));
   }
-  for (std::map<std::string, double>::iterator miter = dbl_log_map.begin();
-       miter != dbl_log_map.end(); ++miter) {
+  for (auto &log_entry : dbl_log_map) {
     outws->mutableRun().addProperty(
-        new PropertyWithValue<double>(miter->first, miter->second));
+        new PropertyWithValue<double>(log_entry.first, log_entry.second));
   }
 
   // Raise exception if no detector node is found
@@ -713,10 +710,10 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
   // file records data in column major)
   size_t num_empty_line = 0;
   size_t num_weird_line = 0;
-  for (size_t iline = 0; iline < vecLines.size(); ++iline) {
-    if (vecLines[iline].empty())
+  for (auto &vecLine : vecLines) {
+    if (vecLine.empty())
       ++num_empty_line;
-    else if (vecLines[iline].size() < 100)
+    else if (vecLine.size() < 100)
       ++num_weird_line;
   }
   size_t num_pixel_x = vecLines.size() - num_empty_line - num_weird_line;
@@ -833,7 +830,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
   size_t numrows = spicetablews->rowCount();
   std::vector<std::string> colnames = spicetablews->getColumnNames();
   // FIXME - Shouldn't give a better value?
-  Kernel::DateAndTime anytime(1000);
+  Types::Core::DateAndTime anytime(1000);
 
   bool foundlog = false;
   for (size_t ir = 0; ir < numrows; ++ir) {

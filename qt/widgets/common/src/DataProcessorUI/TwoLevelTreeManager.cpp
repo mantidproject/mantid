@@ -59,35 +59,32 @@ TwoLevelTreeManager::TwoLevelTreeManager(
 * @param presenter :: [input] The DataProcessor presenter
 * @param whitelist :: [input] A whitelist containing the number of columns
 */
-TwoLevelTreeManager::TwoLevelTreeManager(
-    DataProcessorPresenter *presenter, const WhiteList &whitelist)
-    : TwoLevelTreeManager(
-          presenter, createDefaultWorkspace(whitelist), whitelist) {}
+TwoLevelTreeManager::TwoLevelTreeManager(DataProcessorPresenter *presenter,
+                                         const WhiteList &whitelist)
+    : TwoLevelTreeManager(presenter, createDefaultWorkspace(whitelist),
+                          whitelist) {}
 
 /**
 * Destructor
 */
 TwoLevelTreeManager::~TwoLevelTreeManager() {}
 
+bool TwoLevelTreeManager::isMultiLevel() const { return true; }
 /**
 * Publishes a list of available commands
 * @return : The list of available commands
 */
-std::vector<Command_uptr>
-TwoLevelTreeManager::publishCommands() {
+std::vector<Command_uptr> TwoLevelTreeManager::publishCommands() {
 
   std::vector<Command_uptr> commands;
 
   addCommand(commands, make_unique<OpenTableCommand>(m_presenter));
   addCommand(commands, make_unique<NewTableCommand>(m_presenter));
   addCommand(commands, make_unique<SaveTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<SaveTableAsCommand>(m_presenter));
+  addCommand(commands, make_unique<SaveTableAsCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<ImportTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<ExportTableCommand>(m_presenter));
+  addCommand(commands, make_unique<ImportTableCommand>(m_presenter));
+  addCommand(commands, make_unique<ExportTableCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<OptionsCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
@@ -95,32 +92,31 @@ TwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<PauseCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<ExpandCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<ExpandGroupsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<CollapseGroupsCommand>(m_presenter));
+  addCommand(commands, make_unique<ExpandGroupsCommand>(m_presenter));
+  addCommand(commands, make_unique<CollapseGroupsCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<PlotRowCommand>(m_presenter));
   addCommand(commands, make_unique<PlotGroupCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<AppendRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<AppendGroupCommand>(m_presenter));
+  addCommand(commands, make_unique<AppendGroupCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<GroupRowsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<CopySelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<CutSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<PasteSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<ClearSelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<CopySelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<CutSelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<PasteSelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<ClearSelectedCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DeleteRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DeleteGroupCommand>(m_presenter));
+  addCommand(commands, make_unique<DeleteGroupCommand>(m_presenter));
   return commands;
+}
+
+void TwoLevelTreeManager::invalidateAllProcessed() {
+  forEachGroup(*m_model,
+               [this](int group) -> void { setProcessed(false, group); });
+  forEachRow(*m_model, [this](int group, int row)
+                           -> void { setProcessed(false, row, group); });
 }
 
 /**
@@ -336,12 +332,17 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
     // Add as many new rows as required
     for (auto i = 0; i < lines.size(); ++i) {
       auto values = lines[i].split("\t");
+      auto const valuesSizeLessOne = static_cast<int>(values.size()) - 1;
+
+      if (valuesSizeLessOne < 1)
+        continue;
 
       auto groupId = parseDenaryInteger(values.front());
       int rowId = numRowsInGroup(groupId);
       if (!m_model->insertRow(rowId, m_model->index(groupId, 0)))
         return;
-      for (int col = 0; col < m_model->columnCount(); col++) {
+      for (int col = 0; col < m_model->columnCount() && col < valuesSizeLessOne;
+           col++) {
         m_model->setData(m_model->index(rowId, col, m_model->index(groupId, 0)),
                          values[col + 1]);
       }
@@ -357,11 +358,11 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
       auto rowIt = rows.begin();
       for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
         auto values = (*lineIt).split("\t");
+        auto const valuesSizeLessOne = static_cast<int>(values.size()) - 1;
 
         // Paste as many columns as we can from this line
-        for (int col = 0; col < m_model->columnCount() &&
-                              col < static_cast<int>(values.size());
-             ++col)
+        for (int col = 0;
+             col < m_model->columnCount() && col < valuesSizeLessOne; ++col)
           m_model->setData(
               m_model->index(*rowIt, col, m_model->index(groupId, 0)),
               values[col + 1]);
@@ -373,19 +374,18 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
 /** Opens a blank table
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void TwoLevelTreeManager::newTable(
-    const WhiteList &whitelist) {
+void TwoLevelTreeManager::newTable(const WhiteList &whitelist) {
 
-  m_model.reset(new QTwoLevelTreeModel(
-      createDefaultWorkspace(whitelist), whitelist));
+  m_model.reset(
+      new QTwoLevelTreeModel(createDefaultWorkspace(whitelist), whitelist));
 }
 
 /** Opens a given table
 * @param table :: A table to open
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void TwoLevelTreeManager::newTable(
-    ITableWorkspace_sptr table, const WhiteList &whitelist) {
+void TwoLevelTreeManager::newTable(ITableWorkspace_sptr table,
+                                   const WhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
     m_model.reset(new QTwoLevelTreeModel(table, whitelist));
@@ -395,7 +395,7 @@ void TwoLevelTreeManager::newTable(
 }
 
 /**
-Inserts a new row to the specified group in the specified location
+Inserts a new empty row to the specified group in the specified location
 @param groupIndex :: The index to insert the new row after
 @param rowIndex :: The index to insert the new row after
 */
@@ -420,6 +420,28 @@ void TwoLevelTreeManager::insertGroup(int groupIndex) {
 int TwoLevelTreeManager::numRowsInGroup(int group) const {
 
   return m_model->rowCount(m_model->index(group, 0));
+}
+
+/**
+* Returns given row data in a format that the presenter can understand and use
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
+*/
+TreeData TwoLevelTreeManager::constructTreeData(ChildItems rows) {
+  TreeData tree;
+  const int columnNotUsed = 0; // dummy value required to create index
+  // Return row data in the format: map<int, set<vector<string>>>, where:
+  // int -> group index
+  // set<vector<string>> -> set of vectors storing the data. Each set is a row
+  // and each element in the vector is a column
+  for (const auto &item : rows) {
+    int group = item.first;
+    for (const auto &row : item.second) {
+      tree[group][row] = m_model->rowData(
+          m_model->index(row, columnNotUsed, m_model->index(group, 0)));
+    }
+  }
+  return tree;
 }
 
 /**
@@ -501,72 +523,15 @@ TreeData TwoLevelTreeManager::selectedData(bool prompt) {
     }
   }
 
-  // Return selected data in the format: map<int, set<vector<string>>>, where:
-  // int -> group index
-  // set<vector<string>> -> set of vectors storing the data. Each set is a row
-  // and each element in the vector is a column
-  for (const auto &item : rows) {
-
-    int group = item.first;
-
-    for (const auto &row : item.second) {
-      QStringList data;
-      for (int i = 0; i < m_model->columnCount(); i++)
-        data.append(
-            m_model->data(m_model->index(row, i, m_model->index(group, 0)))
-                .toString());
-      selectedData[group][row] = data;
-    }
-  }
-  return selectedData;
+  return constructTreeData(rows);
 }
 
 /** Transfer data to the model
 * @param runs :: [input] Data to transfer as a vector of maps
-* @param whitelist :: [input] Whitelist containing number of columns
 */
 void TwoLevelTreeManager::transfer(
-    const std::vector<std::map<QString, QString>> &runs,
-    const WhiteList &whitelist) {
-
-  ITableWorkspace_sptr ws = m_model->getTableWorkspace();
-
-  if (ws->rowCount() == 1) {
-    // If the table only has one row, check if it is empty and if so, remove it.
-    // This is to make things nicer when transferring, as the default table has
-    // one empty row
-    auto cols = ws->columnCount();
-    bool emptyTable = true;
-    for (auto i = 0u; i < cols; i++) {
-      if (!ws->String(0, i).empty())
-        emptyTable = false;
-    }
-    if (emptyTable)
-      ws->removeRow(0);
-  }
-
-  // Loop over the rows (vector elements)
-  for (const auto &row : runs) {
-
-    TableRow newRow = ws->appendRow();
-    try {
-      newRow << (row.at("Group")).toStdString();
-    } catch (std::out_of_range &) {
-      throw std::invalid_argument("Data cannot be transferred to the "
-                                  "processing table. Group information is "
-                                  "missing.");
-    }
-
-    try {
-      for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
-        newRow << (row.at(whitelist.colNameFromColIndex(i))).toStdString();
-    } catch (std::out_of_range &) {
-      // OK, this column will not be populated
-      continue;
-    }
-  }
-
-  m_model.reset(new QTwoLevelTreeModel(ws, whitelist));
+    const std::vector<std::map<QString, QString>> &runs) {
+  m_model->transfer(runs);
 }
 
 /** Updates a row with new data
@@ -575,7 +540,7 @@ void TwoLevelTreeManager::transfer(
 * @param data :: the data
 */
 void TwoLevelTreeManager::update(int parent, int child,
-                                              const QStringList &data) {
+                                 const QStringList &data) {
 
   if (static_cast<int>(data.size()) != m_model->columnCount())
     throw std::invalid_argument("Can't update tree with given data");
@@ -588,9 +553,7 @@ void TwoLevelTreeManager::update(int parent, int child,
 /** Gets the number of groups in the table
 * @return : Number of groups
 */
-int TwoLevelTreeManager::rowCount() const {
-  return m_model->rowCount();
-}
+int TwoLevelTreeManager::rowCount() const { return m_model->rowCount(); }
 
 /** Gets the number of rows of a parent group in the table
 * @param parent : Index of the parent group
@@ -613,8 +576,7 @@ bool TwoLevelTreeManager::isProcessed(int position) const {
 * @param parent : The parent of the row
 * @return : 'process' status
 */
-bool TwoLevelTreeManager::isProcessed(int position,
-                                                   int parent) const {
+bool TwoLevelTreeManager::isProcessed(int position, int parent) const {
   return m_model->isProcessed(position, m_model->index(parent, 0));
 }
 
@@ -622,8 +584,7 @@ bool TwoLevelTreeManager::isProcessed(int position,
 * @param processed : True to set group as processed, false to set unprocessed
 * @param position : The index of the group to be set
 */
-void TwoLevelTreeManager::setProcessed(bool processed,
-                                                    int position) {
+void TwoLevelTreeManager::setProcessed(bool processed, int position) {
   m_model->setProcessed(processed, position);
 }
 
@@ -632,16 +593,15 @@ void TwoLevelTreeManager::setProcessed(bool processed,
 * @param position : The index of the row to be set
 * @param parent : The parent of the row
 */
-void TwoLevelTreeManager::setProcessed(bool processed,
-                                                    int position, int parent) {
+void TwoLevelTreeManager::setProcessed(bool processed, int position,
+                                       int parent) {
   m_model->setProcessed(processed, position, m_model->index(parent, 0));
 }
 
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<AbstractTreeModel>
-TwoLevelTreeManager::getModel() {
+boost::shared_ptr<AbstractTreeModel> TwoLevelTreeManager::getModel() {
   return m_model;
 }
 
@@ -658,8 +618,8 @@ ITableWorkspace_sptr TwoLevelTreeManager::getTableWorkspace() {
 * @param whitelist :: The whitelist that will be used to create a new table
 * @return : A default table
 */
-ITableWorkspace_sptr TwoLevelTreeManager::createDefaultWorkspace(
-    const WhiteList &whitelist) {
+ITableWorkspace_sptr
+TwoLevelTreeManager::createDefaultWorkspace(const WhiteList &whitelist) {
   ITableWorkspace_sptr ws =
       Mantid::API::WorkspaceFactory::Instance().createTable();
 
@@ -667,10 +627,8 @@ ITableWorkspace_sptr TwoLevelTreeManager::createDefaultWorkspace(
   auto column = ws->addColumn("str", "Group");
   column->setPlotType(0);
 
-  for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
-    // The columns provided to this presenter
-    auto column =
-        ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
+  for (const auto &columnName : whitelist.names()) {
+    auto column = ws->addColumn("str", columnName.toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();
@@ -681,8 +639,8 @@ ITableWorkspace_sptr TwoLevelTreeManager::createDefaultWorkspace(
 * @param ws :: the table workspace
 * @param whitelistColumns :: the number of columns as specified in a whitelist
 */
-void TwoLevelTreeManager::validateModel(
-    ITableWorkspace_sptr ws, size_t whitelistColumns) const {
+void TwoLevelTreeManager::validateModel(ITableWorkspace_sptr ws,
+                                        size_t whitelistColumns) const {
 
   if (!ws)
     throw std::runtime_error("Null pointer");
@@ -709,8 +667,8 @@ void TwoLevelTreeManager::validateModel(
 * @param whitelistColumns : [input] The number of columns in the whitelist
 * @throws std::runtime_error if the number of columns in the table is incorrect
 */
-bool TwoLevelTreeManager::isValidModel(
-    Workspace_sptr ws, size_t whitelistColumns) const {
+bool TwoLevelTreeManager::isValidModel(Workspace_sptr ws,
+                                       size_t whitelistColumns) const {
 
   try {
     validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(ws),
@@ -729,9 +687,8 @@ bool TwoLevelTreeManager::isValidModel(
  * @param parentColumn : the column index of the parent item
  * @param value : the new value to populate the cell with
 */
-void TwoLevelTreeManager::setCell(int row, int column,
-                                               int parentRow, int parentColumn,
-                                               const std::string &value) {
+void TwoLevelTreeManager::setCell(int row, int column, int parentRow,
+                                  int parentColumn, const std::string &value) {
 
   m_model->setData(
       m_model->index(row, column, m_model->index(parentRow, parentColumn)),
@@ -746,9 +703,8 @@ void TwoLevelTreeManager::setCell(int row, int column,
  * @param parentColumn : the column index of the parent item (unused)
  * @return : the value in the cell as a string
 */
-std::string TwoLevelTreeManager::getCell(int row, int column,
-                                                      int parentRow,
-                                                      int parentColumn) {
+std::string TwoLevelTreeManager::getCell(int row, int column, int parentRow,
+                                         int parentColumn) const {
 
   return m_model->data(m_model->index(row, column,
                                       m_model->index(parentRow, parentColumn)))
@@ -760,9 +716,7 @@ std::string TwoLevelTreeManager::getCell(int row, int column,
  * Get number of rows.
  * @return the number of rows.
  */
-int TwoLevelTreeManager::getNumberOfRows() {
-  return m_model->rowCount();
-}
+int TwoLevelTreeManager::getNumberOfRows() { return m_model->rowCount(); }
 }
 }
 }

@@ -22,6 +22,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 #if 0
 // Port numbers
@@ -121,7 +122,7 @@ typedef struct neutron_event_struct NEUTRON_EVENT, *NEUTRON_EVENT_PTR;
  ****************************************************************************/
 
 // Helper function to get a DateAndTime value from a pulse_id_struct
-Mantid::Kernel::DateAndTime timeFromPulse(const pulse_id_struct *p) {
+Mantid::Types::Core::DateAndTime timeFromPulse(const pulse_id_struct *p) {
   uint32_t seconds = p->pulseIDhigh;
   uint32_t nanoseconds = p->pulseIDlow;
 
@@ -264,7 +265,7 @@ bool TOPAZLiveEventDataListener::isConnected() { return m_isConnected; }
 /// it and stores the resulting events in a temporary workspace.
 /// @param startTime Ignored.  This class doesn't have the capability to
 /// replay historical data.
-void TOPAZLiveEventDataListener::start(Kernel::DateAndTime startTime) {
+void TOPAZLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
   (void)startTime; // Keep the compiler from complaining about unsed variable
 
   // Initialize the workspace
@@ -299,6 +300,7 @@ void TOPAZLiveEventDataListener::run() {
     // loop until the foreground thread tells us to stop
     while (!m_stopThread) {
       // it's possible that a stop request came in while we were sleeping...
+      // cppcheck-suppress oppositeInnerCondition
       if (m_stopThread) {
         break;
       }
@@ -372,7 +374,7 @@ void TOPAZLiveEventDataListener::run() {
         }
 
         // Timestamp for the events
-        Mantid::Kernel::DateAndTime eventTime = timeFromPulse(&pid[i]);
+        Mantid::Types::Core::DateAndTime eventTime = timeFromPulse(&pid[i]);
 
         std::lock_guard<std::mutex> scopedLock(m_mutex);
         // Save the pulse charge in the logs
@@ -519,7 +521,8 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
 
 /// Adds an event to the workspace
 void TOPAZLiveEventDataListener::appendEvent(
-    uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime)
+    uint32_t pixelId, double tof,
+    const Mantid::Types::Core::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
@@ -528,7 +531,7 @@ void TOPAZLiveEventDataListener::appendEvent(
   auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
-    Mantid::DataObjects::TofEvent event(tof, pulseTime);
+    Mantid::Types::Event::TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     // TODO: do we want to disable this warning?  Most of the time, we

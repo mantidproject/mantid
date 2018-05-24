@@ -86,7 +86,7 @@
               <number>3</number>
              </property>
              <property name="minimum">
-              <double>-99.989999999999995</double>
+              <double>0.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>0.100000000000000</double>
@@ -106,7 +106,7 @@
               <number>3</number>
              </property>
              <property name="minimum">
-              <double>-99.989999999999995</double>
+              <double>0.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>0.100000000000000</double>
@@ -126,7 +126,7 @@
               <number>3</number>
              </property>
              <property name="minimum">
-              <double>-99.989999999999995</double>
+              <double>0.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>0.100000000000000</double>
@@ -352,7 +352,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/PreviewPlot.h</header>
+   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

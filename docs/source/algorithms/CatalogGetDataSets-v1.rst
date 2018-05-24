@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,7 +23,7 @@ Usage
     datasets = CatalogGetDataSets(InvestigationId = '1193002', Session = session.getPropertyValue("Session"))
 
     # Verify that we have any datafiles in the returned workspace.
-    print "The number of datasets for this investigation is: " + str(len(datasets))
+    print("The number of datasets for this investigation is: {}".format(len(datasets)))
 
 Output:
 

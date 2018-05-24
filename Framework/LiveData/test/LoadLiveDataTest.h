@@ -3,6 +3,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
@@ -115,6 +116,25 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
+  void test_replace_keeps_original_instrument() {
+    auto ws1 = doExec<EventWorkspace>("Replace");
+    auto &ws1CompInfo = ws1->mutableComponentInfo();
+    // Put the sample somewhere else prior to the next replace
+    const Kernel::V3D newSamplePosition =
+        ws1CompInfo.position(ws1CompInfo.sample()) + V3D(1, 1, 1);
+    ws1CompInfo.setPosition(ws1CompInfo.sample(), newSamplePosition);
+
+    // Second Run of replace
+    auto ws2 = doExec<EventWorkspace>("Replace");
+    const auto &ws2CompInfo = ws2->componentInfo();
+    // Check the sample is where I put it. i.e. Instrument should NOT be
+    // overwritten.
+    TSM_ASSERT_EQUALS("Instrument should NOT have been overwritten",
+                      newSamplePosition,
+                      ws2CompInfo.position(ws2CompInfo.sample()));
+  }
+
+  //--------------------------------------------------------------------------------------------
   void test_append() {
     EventWorkspace_sptr ws1, ws2;
 
@@ -160,8 +180,8 @@ public:
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     double total;
     total = 0;
-    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
-      total += *it;
+    for (double yValue : ws1->readY(0))
+      total += yValue;
     TS_ASSERT_DELTA(total, 100.0, 1e-4);
 
     // Next one adds the histograms together
@@ -171,8 +191,8 @@ public:
 
     // The new total signal is 200.0
     total = 0;
-    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
-      total += *it;
+    for (double yValue : ws1->readY(0))
+      total += yValue;
     TS_ASSERT_DELTA(total, 200.0, 1e-4);
 
     TSM_ASSERT("Workspace being added stayed the same pointer", ws1 == ws2);

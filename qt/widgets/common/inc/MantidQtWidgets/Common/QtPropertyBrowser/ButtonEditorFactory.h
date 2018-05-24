@@ -5,68 +5,60 @@
 #include "qtpropertymanager.h"
 #include <QPushButton>
 
-class EXPORT_OPT_MANTIDQT_COMMON ButtonEditor: public QPushButton
-{
+class EXPORT_OPT_MANTIDQT_COMMON ButtonEditor : public QPushButton {
   Q_OBJECT
 public:
-  ButtonEditor(QtProperty *property, QWidget *parent):
-    QPushButton("...",parent), m_property(property)
-  {
-    connect(this,SIGNAL(clicked()),this,SLOT(sendClickedSignal()));
+  ButtonEditor(QtProperty *property, QWidget *parent)
+      : QPushButton("...", parent), m_property(property) {
+    connect(this, SIGNAL(clicked()), this, SLOT(sendClickedSignal()));
   }
 Q_SIGNALS:
   void buttonClicked(QtProperty *);
 private Q_SLOTS:
-  void sendClickedSignal()
-  {
-    emit buttonClicked(m_property);
-  }
+  void sendClickedSignal() { emit buttonClicked(m_property); }
 
 private:
-  QtProperty* m_property;
+  QtProperty *m_property;
 };
 
 template <class ManagerType>
-class ButtonEditorFactory : public QtAbstractEditorFactory<ManagerType>
-{
-//  Q_OBJECT
+class ButtonEditorFactory : public QtAbstractEditorFactory<ManagerType> {
+  //  Q_OBJECT
 public:
   ButtonEditorFactory(QObject *parent)
-    : QtAbstractEditorFactory<ManagerType>(parent)
-  {
-  }
+      : QtAbstractEditorFactory<ManagerType>(parent) {}
 
 protected:
   void connectPropertyManager(ManagerType *manager) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
     // Do nothing
   }
 
   void disconnectPropertyManager(ManagerType *manager) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
     // Do nothing
   }
 
   QWidget *createEditorForManager(ManagerType *manager, QtProperty *property,
                                   QWidget *parent) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
     auto button = new ButtonEditor(property, parent);
-    this->connect(button,SIGNAL(buttonClicked(QtProperty *)),this,SIGNAL(buttonClicked(QtProperty *)));
+    this->connect(button, SIGNAL(buttonClicked(QtProperty *)), this,
+                  SIGNAL(buttonClicked(QtProperty *)));
     return button;
   }
 };
 
-class EXPORT_OPT_MANTIDQT_COMMON DoubleButtonEditorFactory: public ButtonEditorFactory<ParameterPropertyManager>
-{
+class EXPORT_OPT_MANTIDQT_COMMON DoubleButtonEditorFactory
+    : public ButtonEditorFactory<ParameterPropertyManager> {
   Q_OBJECT
 
 public:
-  DoubleButtonEditorFactory(QObject *parent):ButtonEditorFactory<ParameterPropertyManager>(parent){}
+  DoubleButtonEditorFactory(QObject *parent)
+      : ButtonEditorFactory<ParameterPropertyManager>(parent) {}
 
 Q_SIGNALS:
   void buttonClicked(QtProperty *);
-
 };
-
 
 #endif // BUTTONEDITORFACTORY_H

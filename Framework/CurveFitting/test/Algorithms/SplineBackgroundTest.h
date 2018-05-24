@@ -50,7 +50,7 @@ public:
     const auto &X = outWS->x(0);
     const auto &Y = outWS->y(0);
 
-    for (size_t i = 0; i < outWS->blocksize(); i++) {
+    for (size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_DELTA(Y[i], std::sin(X[i]), 0.2);
     }
     TS_ASSERT(outWS->getAxis(0)->unit() == ws->getAxis(0)->unit());

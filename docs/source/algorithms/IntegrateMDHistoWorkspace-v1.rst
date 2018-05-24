@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -13,12 +13,12 @@ Description
 Provides limited integration of a :ref:`MDHistoWorkspace <MDHistoWorkspace>` in n-dimensions. Integration is always axis-aligned. Dimensions can only be integrated out, but no finer rebinning is permitted. Dimensions that do not require further rebinning will be left intact provided that the the binning parameters for those dimensions are not specified. For dimensions that are integrated, limits should be provided to give the range of the data to keep.
 
 Binning
-~~~~~~~
+#######
 
 The *P1Bin* corresponds to the first dimension of the MDHistoWorkspace, *P2Bin* to the second and so on. *P1Bin=[-1, 1]* indicates that we will integrate this dimension between -1 and 1. *P1Bins=[]* indicates that the shape of this dimension should be unchanged from the input. *P1Bins=[-1,0,1]* is a special case, the zero indicates that the same bin width as the input dimension would be used, but the minimum and maximum will also be used to crop the dimension. In this latter form, the limits may be expanded to ensure that there is no partial bins in the non-integrated dimension (see warning messages).
 
 Weights 
-~~~~~~~
+#######
 
 The algorithm works by creating the *OutputWorkspace* in the correct shape. Each bin in the OutputWorkspace is treated in turn. For each bin in the OutputWorkspace, we find those bins in the *InputWorkspace* that overlap and therefore could contribute to the OutputBin. For any contributing bin, we calculate the fraction overlap and treat this a weighting factor. For each contributing bin *Signal*, and :math:`Error^{2}`, and *Number of Events* values are extracted and multiplied by the  weight. These values are summed for all contributing input bins before being assigned to the corresponding output bin. For plotting the *OutputWorkspace*, it is important to select the Number of Events normalization option to correctly account for the weights.
 
@@ -54,10 +54,10 @@ Usage
    low_d_cut =IntegrateMDHistoWorkspace(InputWorkspace=high_d_cut, P1Bin=[], P2Bin=[-2,2], P3Bin=[-5,5])
 
    non_integrated_dims = low_d_cut.getNonIntegratedDimensions()
-   print 'Number of non integrated dimensions after integration are %i'  % len(non_integrated_dims)
+   print('Number of non integrated dimensions after integration are {}'.format(len(non_integrated_dims)))
    for dim in non_integrated_dims:
-       print 'Non integrated dimension is %s' % dim.name
-       print 'Limits are from %0.2f to %0.2f' % (dim.getMinimum(), dim.getMaximum())
+       print('Non integrated dimension is {}'.format(dim.name))
+       print('Limits are from {:.2f} to {:.2f}'.format(dim.getMinimum(), dim.getMaximum()))
 
 Output:
 
@@ -86,14 +86,14 @@ maximum and minimum limits may need to be adjusted to ensure no partial binning 
    low_d_cut=IntegrateMDHistoWorkspace(InputWorkspace=high_d_cut,P1Bin=[-9.48,copy_key,9.01], P2Bin=[-2,2], P3Bin=[-5,5])
 
    dim = high_d_cut.getDimension(0)
-   print 'Input bin width is %0.2f' % float((dim.getMaximum() - dim.getMinimum())/dim.getNBins())
+   print('Input bin width is {:.2f}'.format(float((dim.getMaximum() - dim.getMinimum())/dim.getNBins())))
 
    non_integrated_dims = low_d_cut.getNonIntegratedDimensions()
-   print 'Number of non integrated dimensions after integration are %i'  % len(non_integrated_dims)
+   print('Number of non integrated dimensions after integration are {}'.format(len(non_integrated_dims)))
    for dim in non_integrated_dims:
-       print 'Non integrated dimension is %s' % dim.name
-       print 'Limits are from %0.2f to %0.2f' % (dim.getMinimum(), dim.getMaximum())
-       print 'Output bin width is %0.2f' % float((dim.getMaximum() - dim.getMinimum() )/dim.getNBins())  
+       print('Non integrated dimension is {}'.format(dim.name))
+       print('Limits are from {:.2f} to {:.2f}'.format(dim.getMinimum(), dim.getMaximum()))
+       print('Output bin width is {:.2f}'.format(float((dim.getMaximum() - dim.getMinimum() )/dim.getNBins())))
 
 Output:
 

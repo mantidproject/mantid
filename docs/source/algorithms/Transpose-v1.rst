@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,17 +33,18 @@ Usage
     # Create a workspace with 2 banks and 4 pixels per bank (8 spectra)
     # and X axis with 100 bins
     ws = CreateSampleWorkspace(BankPixelWidth=2)
-    print "Rank before = (", ws.getNumberHistograms(), ",", ws.blocksize(), ")"
+    print("Rank before = ( {0}, {1} )".format(ws.getNumberHistograms(),ws.blocksize()))
     ws = Transpose(ws)
-    print "Rank after = (", ws.getNumberHistograms(), ",", ws.blocksize(), ")"
+    print("Rank after = ( {0}, {1} )".format(ws.getNumberHistograms(),ws.blocksize()))
 
 Output:
 
 .. testoutput:: Ex
 
-    Rank before = ( 8 , 100 )
-    Rank after = ( 100 , 8 )
+    Rank before = ( 8, 100 )
+    Rank after = ( 100, 8 )
 
 .. categories::
 
 .. sourcelink::
+      :h: Framework/Algorithms/inc/MantidAlgorithms/Transpose.h

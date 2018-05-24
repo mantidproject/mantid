@@ -51,13 +51,11 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
+using Types::Core::DateAndTime;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using DataObjects::TofEvent;
-using std::cout;
+using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -909,7 +907,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
   std::vector<DasEvent *> buffers;
 
   /// Pointer to the vector of events
-  typedef std::vector<TofEvent> *EventVector_pt;
+  using EventVector_pt = std::vector<TofEvent> *;
   /// Bare array of arrays of pointers to the EventVectors
   EventVector_pt **eventVectors;
 
@@ -1146,7 +1144,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
   // Local data structure for loaded events
   std::map<PixelType, size_t> local_pidindexmap;
-  std::vector<std::vector<Kernel::DateAndTime>> local_pulsetimes;
+  std::vector<std::vector<Types::Core::DateAndTime>> local_pulsetimes;
   std::vector<std::vector<double>> local_tofs;
 
   std::set<PixelType> local_wrongdetids;
@@ -1290,7 +1288,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
           size_t newindex = local_pulsetimes.size();
           local_pidindexmap[pixelid] = newindex;
 
-          std::vector<Kernel::DateAndTime> tempvectime;
+          std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
           local_pulsetimes.push_back(tempvectime);
           local_tofs.push_back(temptofs);
@@ -1336,7 +1334,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         size_t newindex = this->wrongdetid_pulsetimes.size();
         this->wrongdetidmap[tmpid] = newindex;
 
-        std::vector<Kernel::DateAndTime> vec_pulsetimes;
+        std::vector<Types::Core::DateAndTime> vec_pulsetimes;
         std::vector<double> vec_tofs;
         this->wrongdetid_pulsetimes.push_back(vec_pulsetimes);
         this->wrongdetid_tofs.push_back(vec_tofs);
@@ -1514,7 +1512,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
   std::vector<DasEvent *> buffers;
 
   /// Pointer to the vector of events
-  typedef std::vector<TofEvent> *EventVector_pt;
+  using EventVector_pt = std::vector<TofEvent> *;
   /// Bare array of arrays of pointers to the EventVectors
   EventVector_pt **eventVectors;
 
@@ -1749,7 +1747,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
     // NOT CALLED AT ALL
     // Local data structure for loaded events
     std::map<PixelType, size_t> local_pidindexmap;
-    std::vector<std::vector<Kernel::DateAndTime> > local_pulsetimes;
+    std::vector<std::vector<Types::Core::DateAndTime> > local_pulsetimes;
     std::vector<std::vector<double> > local_tofs;
 #endif
 
@@ -2065,7 +2063,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
           size_t newindex = local_pulsetimes.size();
           local_pidindexmap[pixelid] = newindex;
 
-          std::vector<Kernel::DateAndTime> tempvectime;
+          std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
           local_pulsetimes.push_back(tempvectime);
           local_tofs.push_back(temptofs);

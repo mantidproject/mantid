@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -48,8 +48,8 @@ Usage
    wsOut = mtd[wsName]
 
    # Print the result
-   print "%s is a %s and the Y values are:" % (wsOut, wsOut.id())
-   print wsOut.readY(0)
+   print("{} is a {} and the Y values are:".format(wsOut, wsOut.id()))
+   print(wsOut.readY(0))
    
 Output:
 

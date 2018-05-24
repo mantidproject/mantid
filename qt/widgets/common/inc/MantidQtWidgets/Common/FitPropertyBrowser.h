@@ -1,22 +1,22 @@
 #ifndef FITPROPERTYBROWSER_H_
 #define FITPROPERTYBROWSER_H_
 
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/AlgorithmObserver.h"
 #include "DllOption.h"
+#include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <QDockWidget>
 #include <QHash>
 #include <QList>
 #include <QMap>
 
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 /* Forward declarations */
 
@@ -60,7 +60,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FitPropertyBrowser
   Q_OBJECT
 public:
   /// Constructor
-  FitPropertyBrowser(QWidget *parent = NULL, QObject *mantidui = NULL);
+  FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
   /// Destructor
   ~FitPropertyBrowser() override;
   /// Get handler to the root composite function
@@ -99,6 +99,9 @@ public:
 
   /// Create a new function
   PropertyHandler *addFunction(const std::string &fnName);
+
+  /// Removes the function held by the property handler
+  virtual void removeFunction(PropertyHandler *handler);
 
   /// Get Composite Function
   boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
@@ -208,7 +211,7 @@ public:
 
   /// Creates and adds the autobackground
   void addAutoBackground();
-  bool isAutoBack() const { return m_autoBackground != NULL; }
+  bool isAutoBack() const { return m_autoBackground != nullptr; }
   void setAutoBackgroundName(const QString &aName);
   void refitAutoBackground();
   QString getAutoBackgroundString() const {
@@ -249,7 +252,7 @@ public slots:
   virtual void fit();
   virtual void sequentialFit();
   void undoFit();
-  void clear();
+  virtual void clear();
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
@@ -301,10 +304,12 @@ protected slots:
   virtual void boolChanged(QtProperty *prop);
 
   virtual void enumChanged(QtProperty *prop);
-private slots:
 
-  void intChanged(QtProperty *prop);
+  virtual void intChanged(QtProperty *prop);
+
   virtual void doubleChanged(QtProperty *prop);
+
+private slots:
   /// Called when one of the parameter values gets changed
   void parameterChanged(QtProperty *prop);
   void stringChanged(QtProperty *prop);
@@ -389,10 +394,13 @@ protected:
   void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
+  /// Adds the workspace index property to the browser.
+  virtual void addWorkspaceIndexToBrowser();
 
   /// Create a double property and set some settings
-  QtProperty *addDoubleProperty(const QString &name,
-                                QtDoublePropertyManager *manager = NULL) const;
+  QtProperty *
+  addDoubleProperty(const QString &name,
+                    QtDoublePropertyManager *manager = nullptr) const;
   /// Called when the minimizer changes. Creates minimizes's properties.
   void minimizerChanged();
   /// Do the fitting
@@ -613,7 +621,7 @@ private:
   friend class SequentialFitDialog;
 };
 
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*FITPROPERTYBROWSER_H_*/

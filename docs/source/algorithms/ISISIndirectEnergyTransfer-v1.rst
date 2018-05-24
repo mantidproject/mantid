@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,7 +36,7 @@ Usage
    reduction_workspace_names = mtd['IndirectReductions'].getNames()
 
    for workspace_name in reduction_workspace_names:
-      print workspace_name
+      print(workspace_name)
 
 Output:
 

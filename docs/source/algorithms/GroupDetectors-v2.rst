@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -116,6 +116,16 @@ workspace indices. This can be achieved with the following operators:
 One could combine these operations, for example :literal:`10+12,13:89` would
 list the sum of 10 and 12 followed by 13 to 89.
 
+Vertical Axis on Output
+#######################
+
+The OutputWorkspace of this algorithm will always have spectrum numbers as the
+vertical axis, independent of the vertical axis units in InputWorkspace. This
+is because after grouping, the vertical axis can have meaningless values and
+generally, there is not enough information available to rebuild the axis. The
+vertical axis can be manually restored afterwards by e.g.
+:ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.
+
 Previous Versions
 -----------------
 
@@ -176,21 +186,21 @@ Usage
   grouped = GroupDetectors( ws, MapFile = groupingFilePath )
 
   # Check the result
-  print 'Number of groups is', grouped.getNumberHistograms()
-  print 'First grouped spectrum is a sum 64 input spectra:'
-  print  grouped.readY(0)[0],'== 64 * 0.3 ==', 64 * 0.3
-  print 'Second grouped spectrum is a sum 60 input spectra:'
-  print  grouped.readY(1)[0],'== 60 * 0.3 ==', 60 * 0.3
+  print('Number of groups is {}'.format(grouped.getNumberHistograms()))
+  print('First grouped spectrum is a sum 64 input spectra:')
+  print('{:.1f} == 64 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 64 * 0.3))
+  print('Second grouped spectrum is a sum 60 input spectra:')
+  print('{:.1f} == 60 * 0.3 == {:.1f}'.format(grouped.readY(1)[0], 60 * 0.3))
   # Get detector IDs of the first group
   grp0_ids = grouped.getSpectrum(0).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp0_ids)
-  print '5 first detectors in group:', [ grp0_ids[i] for i in range(5) ]
-  print '5 last  detectors in group:', [ grp0_ids[i] for i in range(59,64) ]
+  print('Number of grouped detectors is {}'.format(len(grp0_ids)))
+  print('5 first detectors in group: {}'.format([ grp0_ids[i] for i in range(5) ]))
+  print('5 last  detectors in group: {}'.format([ grp0_ids[i] for i in range(59,64)]))
   # Get detector IDs of the second group
   grp1_ids = grouped.getSpectrum(1).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp1_ids)
-  print '5 first detectors in group:', [ grp1_ids[i] for i in range(5) ]
-  print '5 last  detectors in group:', [ grp1_ids[i] for i in range(55,60) ]
+  print('Number of grouped detectors is {}'.format(len(grp1_ids)))
+  print('5 first detectors in group: {}'.format([ grp1_ids[i] for i in range(5)]))
+  print('5 last  detectors in group: {}'.format([ grp1_ids[i] for i in range(55,60)]))
 
 Output
 #######
@@ -223,14 +233,14 @@ Output
   grouped = GroupDetectors(ws,SpectraList=[1,3,5])
 
   # Check the result
-  print 'Number of groups is', grouped.getNumberHistograms()
-  print 'The grouped spectrum is a sum 3 input spectra:'
-  print  grouped.readY(0)[0],'== 3 * 0.3 ==',3 * 0.3
+  print('Number of groups is {}'.format(grouped.getNumberHistograms()))
+  print('The grouped spectrum is a sum 3 input spectra:')
+  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 3 * 0.3))
 
   # Get detector IDs in the group
   grp_ids = grouped.getSpectrum(0).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp_ids)
-  print 'Detector IDs:',  grp_ids
+  print ('Number of grouped detectors is {}'.format(len(grp_ids)))
+  print ('Detector IDs: {}'.format(grp_ids))
 
 Output
 #######
@@ -254,14 +264,14 @@ Output
   grouped = GroupDetectors(ws,DetectorList=[100,102,104])
 
   # Check the result
-  print 'Number of groups is', grouped.getNumberHistograms()
-  print 'The grouped spectrum is a sum 3 input spectra:'
-  print  grouped.readY(0)[0],'== 3 * 0.3 ==',3 * 0.3
+  print('Number of groups is {}'.format(grouped.getNumberHistograms()))
+  print('The grouped spectrum is a sum 3 input spectra:')
+  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 3 * 0.3))
 
   # Get detector IDs in the group
   grp_ids = grouped.getSpectrum(0).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp_ids)
-  print 'Detector IDs:',  grp_ids
+  print ('Number of grouped detectors is {}'.format(len(grp_ids)))
+  print ('Detector IDs: {}'.format(grp_ids))
 
 Output
 #######
@@ -284,14 +294,14 @@ Output
   grouped = GroupDetectors(ws,WorkspaceIndexList=[0,2,4])
 
   # Check the result
-  print 'Number of groups is', grouped.getNumberHistograms()
-  print 'The grouped spectrum is a sum 3 input spectra:'
-  print  grouped.readY(0)[0],'== 3 * 0.3 ==',3 * 0.3
+  print('Number of groups is {}'.format(grouped.getNumberHistograms()))
+  print('The grouped spectrum is a sum 3 input spectra:')
+  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 3 * 0.3))
 
   # Get detector IDs in the group
   grp_ids = grouped.getSpectrum(0).getDetectorIDs()
-  print 'Number of grouped detectors is',len(grp_ids)
-  print 'Detector IDs:',  grp_ids
+  print ('Number of grouped detectors is {}'.format(len(grp_ids)))
+  print ('Detector IDs: {}'.format(grp_ids))
 
 Output
 #######
@@ -345,15 +355,15 @@ Output
   grouped = GroupDetectors( ws, MapFile=groupingFilePath, KeepUngroupedSpectra=True )
 
   # Check the result
-  print 'Number of spectra in grouped workspace is', grouped.getNumberHistograms()
-  print 'It includes 2 groups + ',ws.getNumberHistograms() - (64 + 60),'remaining ungrouped spectra'
+  print('Number of spectra in grouped workspace is {}'.format(grouped.getNumberHistograms()))
+  print ('It includes 2 groups + {} remaining ungrouped spectra'.format(ws.getNumberHistograms() - (64 + 60)))
 
-  print 'First  spectrum is grouped, it has',len(grouped.getSpectrum(0).getDetectorIDs()),'detectors'
-  print 'Second spectrum is grouped, it has',len(grouped.getSpectrum(1).getDetectorIDs()),'detectors'
-  print 'Spectrum   2  is ungrouped, it has ',len(grouped.getSpectrum(2).getDetectorIDs()),'detector'
-  print 'Spectrum   3  is ungrouped, it has ',len(grouped.getSpectrum(3).getDetectorIDs()),'detector'
-  print '...'
-  print 'Spectrum  77  is ungrouped, it has ',len(grouped.getSpectrum(77).getDetectorIDs()),'detector'
+  print('First  spectrum is grouped, it has {} detectors'.format(len(grouped.getSpectrum(0).getDetectorIDs())))
+  print('Second spectrum is grouped, it has {} detectors'.format(len(grouped.getSpectrum(1).getDetectorIDs())))
+  print('Spectrum   2  is ungrouped, it has  {} detector'.format(len(grouped.getSpectrum(2).getDetectorIDs())))
+  print('Spectrum   3  is ungrouped, it has  {} detector'.format(len(grouped.getSpectrum(3).getDetectorIDs())))
+  print('...')
+  print('Spectrum  77  is ungrouped, it has  {} detector'.format(len(grouped.getSpectrum(77).getDetectorIDs())))
 
 Output
 #######
@@ -361,7 +371,7 @@ Output
 .. testoutput:: ExKeep
 
   Number of spectra in grouped workspace is 78
-  It includes 2 groups +  76 remaining ungrouped spectra
+  It includes 2 groups + 76 remaining ungrouped spectra
   First  spectrum is grouped, it has 64 detectors
   Second spectrum is grouped, it has 60 detectors
   Spectrum   2  is ungrouped, it has  1 detector
@@ -380,37 +390,37 @@ Output
 
 
    # Create test input
-   xx=range(0,10)*10;
+   xx= range(0, 100, 10)
    # create spectra with signal equal to spectra number
    yy=[]
-   for i in xrange(1,11):
-       yy=yy+[i]*10  
+   for i in range(1,11):
+       yy=yy+[i for _ in range(10)] 
        
    ws=CreateWorkspace(DataX=xx,DataY=yy,NSpec=10);  
    # Group detectors
    wsg0 = GroupDetectors(ws,SpectraList=[1,2,3],KeepUngroupedSpectra=True,Behaviour='Sum')
-   print "Grouped first 3 spectra results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg0.getNumberHistograms())
-   print wsg0.dataY(0);
-   print "First unaffected spectrum is now spectrum 1, former spectrum 4:"   
-   print wsg0.dataY(1); 
-   print "*********************************************************"
+   print("Grouped first 3 spectra results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg0.getNumberHistograms()))
+   print(wsg0.dataY(0))
+   print("First unaffected spectrum is now spectrum 1, former spectrum 4:")
+   print(wsg0.dataY(1) )
+   print("*********************************************************")
    
    # Group detectors differently   
    wsg1 = GroupDetectors(ws,SpectraList=[2,3,4],KeepUngroupedSpectra=True,Behaviour='Sum')
-   print "Grouped 3 spectra starting with second results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg1.getNumberHistograms())
-   print wsg1.dataY(0);
-   print "First unaffected spectrum is now spectrum 1, former spectrum 0:"   
-   print wsg1.dataY(1); 
-   print "*********************************************************"   
+   print("Grouped 3 spectra starting with second results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg1.getNumberHistograms()))
+   print(wsg1.dataY(0))
+   print("First unaffected spectrum is now spectrum 1, former spectrum 0:")
+   print(wsg1.dataY(1))
+   print("*********************************************************")
    
    # Group detectors in a chain:
    wsg2 = GroupDetectors(wsg0,SpectraList=[4,5,6],KeepUngroupedSpectra=True,Behaviour='Sum')   
-   print "Grouped 6 spectra 3x3 twice results in workspace with {0} spectra and the grouped spectra is spectrum 0 and 1:".format(wsg2.getNumberHistograms())
-   print wsg2.dataY(0);
-   print wsg2.dataY(1);   
-   print "First unaffected spectrum is now spectrum 3, former spectrum 7:" 
-   print wsg2.dataY(2);
-   print "*********************************************************"   
+   print("Grouped 6 spectra 3x3 twice results in workspace with {0} spectra and the grouped spectra is spectrum 0 and 1:".format(wsg2.getNumberHistograms()))
+   print(wsg2.dataY(0))
+   print(wsg2.dataY(1))
+   print("First unaffected spectrum is now spectrum 3, former spectrum 7:")
+   print(wsg2.dataY(2))
+   print("*********************************************************")
 
 Output:
 
@@ -439,11 +449,11 @@ Output:
 
    import os
    # Create test input
-   xx=range(0,10)*10;
-   # create spectra with signal equal to spectrum number
+   xx= range(0, 100, 10)
+   # create spectra with signal equal to spectra number
    yy=[]
-   for i in xrange(1,11):
-       yy=yy+[i]*10  
+   for i in range(1,11):
+       yy=yy+[i for _ in range(10)] 
        
    ws=CreateWorkspace(DataX=xx,DataY=yy,NSpec=10);  
    
@@ -464,11 +474,11 @@ Output:
    # Group detectors
    wsg = GroupDetectors(ws,MapFile=file_name,KeepUngroupedSpectra=True,Behaviour='Sum')
   
-   print "Grouped workspace has {0} spectra".format(wsg.getNumberHistograms())
-   print "spectrum 1 (sum of spectra 1-3):",wsg.dataY(0)
-   print "spectrum 2 (sum of spectra 4-6):",wsg.dataY(1)   
-   print "spectrum 3 (sum of spectra 7-8):",wsg.dataY(2)      
-   print "spectrum 4 (sum of spectra 9-10):",wsg.dataY(3)
+   print("Grouped workspace has {0} spectra".format(wsg.getNumberHistograms()))
+   print("spectrum 1 (sum of spectra 1-3): {}".format(wsg.dataY(0)))
+   print("spectrum 2 (sum of spectra 4-6): {}".format(wsg.dataY(1)))
+   print("spectrum 3 (sum of spectra 7-8): {}".format(wsg.dataY(2)))    
+   print("spectrum 4 (sum of spectra 9-10): {}".format(wsg.dataY(3)))
    
 .. testcleanup:: ExGroupDetectorsWithMap
 
@@ -495,12 +505,12 @@ Output:
    ws2 = GroupDetectors(ws, GroupingPattern="0+1,3,4-6,7:9")
 
    #print result
-   print ws2.readY(0)
-   print ws2.readY(1)
-   print ws2.readY(2)
-   print ws2.readY(3)
-   print ws2.readY(4)
-   print ws2.readY(5)
+   print(ws2.readY(0))
+   print(ws2.readY(1))
+   print(ws2.readY(2))
+   print(ws2.readY(3))
+   print(ws2.readY(4))
+   print(ws2.readY(5))
 
 Output:
 

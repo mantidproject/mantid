@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,7 +27,7 @@ Usage
     #restrict the number of wavelength points to speed up the example
     wsOut = ConvolveWorkspaces(ws,ws)
     
-    print "Output: ", wsOut.readY(0)
+    print("Output:  {}".format(wsOut.readY(0)))
 
 Output:
 

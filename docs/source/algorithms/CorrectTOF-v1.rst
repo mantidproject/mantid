@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -63,9 +63,9 @@ Usage
     # apply correction
     wscorr = CorrectTOF(ws, table)
 
-    print "Correction term dt = t_el - t_table = ", round(8190.02 - 8128.59, 2)
+    print("Correction term dt = t_el - t_table =  {:.2f}".format(8190.02 - 8128.59, 2))
     difference = wscorr.readX(0) - ws.readX(0)
-    print "Difference between input and corrected workspaces: ", round(difference[10],2)
+    print("Difference between input and corrected workspaces:  {}".format(round(difference[10],2)))
 
 Output:
 
@@ -94,9 +94,9 @@ Output:
     ws_dE = ConvertUnits(ws_tof_corr, Target='DeltaE', EMode='Direct', EFixed=2.27)
     ConvertToDistribution(ws_dE)
 
-    print "5 X values of raw data: ", numpy.round(ws_tof.readX(200)[580:585],2)
-    print "5 X values corrected data: ", numpy.round(ws_tof_corr.readX(200)[580:585],2)
-    print "5 X values after units conversion: ", numpy.round(ws_dE.readX(200)[580:585], 2)
+    print("5 X values of raw data:  {}".format(numpy.round(ws_tof.readX(200)[580:585],2)))
+    print("5 X values corrected data:  {}".format(numpy.round(ws_tof_corr.readX(200)[580:585],2)))
+    print("5 X values after units conversion:  {}".format(numpy.round(ws_dE.readX(200)[580:585], 2)))
 
 Output:
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -89,11 +89,11 @@ Usage
     # ws.maskDetectors(MaskedWorkspace=mask)
 
     # Check some pixels
-    print "Is detector 0 masked:", ws.getDetector(0).isMasked()
-    print "Is detector 6245 masked:", ws.getDetector(6245).isMasked()
-    print "Is detector 11464 masked:", ws.getDetector(11464).isMasked()
-    print "Is detector 17578 masked:", ws.getDetector(17578).isMasked()
-    print "Is detector 20475 masked:", ws.getDetector(20475).isMasked()
+    print("Is detector 0 masked: {}".format(ws.getDetector(0).isMasked()))
+    print("Is detector 6245 masked: {}".format(ws.getDetector(6245).isMasked()))
+    print("Is detector 11464 masked: {}".format(ws.getDetector(11464).isMasked()))
+    print("Is detector 17578 masked: {}".format(ws.getDetector(17578).isMasked()))
+    print("Is detector 20475 masked: {}".format(ws.getDetector(20475).isMasked()))
 
 Output:
 
@@ -142,7 +142,7 @@ Output:
     MaskedDet1to1= []
     MaskedSp_R  = []
     MaskedDet_R= []
-    for ind in xrange(0,nhist):
+    for ind in range(0,nhist):
         try:
             det = rws.getDetector(ind)
             if det.isMasked():
@@ -160,25 +160,25 @@ Output:
                 MaskedDet_R.append(det.getID())
         except:
             pass
-    print "*** ************************************ **********************************************"
-    print ("*** Masked Spec. Id(s):  {0}".format(masked_list))
-    print "*** Initial workspace masking parameters **********************************************"
-    print "Masked Spectra Numbers: ",Sig0Masked
-    print "Masked Detector IDs   : ",Det0Masked
-    print "*** One to one mask workspace has masked the same spectra numbers but different detectors"
-    print "ws 1to1 Masked spectra: ",MaskedSp1to1
-    print "ws 1to1 Masked DedIDs : ",MaskedDet1to1
-    print "*** Real spectra-det-map workspace has masked different spectra numbers but the same detectors"
-    print "ws RSDM Masked spectra: ",MaskedSp_R
-    print "ws RSDM Masked DedIDs : ",MaskedDet_R
-    print "*** indeed the same:"
+    print("*** ************************************ **********************************************")
+    print("*** Masked Spec. Id(s):  {0}".format(masked_list))
+    print( "*** Initial workspace masking parameters **********************************************")
+    print("Masked Spectra Numbers:  {}".format(Sig0Masked))
+    print("Masked Detector IDs   :  {}".format(Det0Masked))
+    print("*** One to one mask workspace has masked the same spectra numbers but different detectors")
+    print("ws 1to1 Masked spectra:  {}".format(MaskedSp1to1))
+    print("ws 1to1 Masked DedIDs :  {}".format(MaskedDet1to1))
+    print("*** Real spectra-det-map workspace has masked different spectra numbers but the same detectors")
+    print("ws RSDM Masked spectra:  {}".format(MaskedSp_R))
+    print("ws RSDM Masked DedIDs :  {}".format(MaskedDet_R))
+    print("*** indeed the same:")
     Det0Masked.sort()
     MaskedDet_R.sort()
-    print "sorted initial DetIDs : ",Det0Masked
-    print "sorted RSDM    DedIDs : ",MaskedDet_R
-    print "*** ************************************ **********************************************"
-    print "*** note spectra with id 4 is a monitor, not present in the masking workspaces"
-    print "*** ************************************ **********************************************"
+    print("sorted initial DetIDs :  {}".format(Det0Masked))
+    print("sorted RSDM    DedIDs :  {}".format(MaskedDet_R))
+    print("*** ************************************ **********************************************")
+    print("*** note spectra with id 4 is a monitor, not present in the masking workspaces")
+    print("*** ************************************ **********************************************")
 
 Output:
 

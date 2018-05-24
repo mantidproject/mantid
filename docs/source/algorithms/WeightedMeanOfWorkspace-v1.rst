@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,8 +30,8 @@ Usage
     dataE = range(1,12)
     ws = CreateWorkspace(dataX, dataY, dataE)
     ws1 = WeightedMeanOfWorkspace(ws)
-    print "Weighted Mean of Workspace:", str(ws1.readY(0))
-    print "Weighted Mean Error of Workspace:", str(ws1.readE(0))
+    print("Weighted Mean of Workspace: {}".format(str(ws1.readY(0))))
+    print("Weighted Mean Error of Workspace: {}".format(str(ws1.readE(0))))
 
 Output:
 

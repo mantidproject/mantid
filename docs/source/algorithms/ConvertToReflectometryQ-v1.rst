@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -122,9 +122,9 @@ Normalised Polygon Transformation
     
     pipf, vertexes_pipf = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
 
-    print qxqy.getDimension(0).name, qxqy.getDimension(1).name
-    print kikf.getDimension(0).name, kikf.getDimension(1).name
-    print pipf.getDimension(0).name, pipf.getDimension(1).name
+    print("{} {}".format(qxqy.getDimension(0).name, qxqy.getDimension(1).name))
+    print("{} {}".format(kikf.getDimension(0).name, kikf.getDimension(1).name))
+    print("{} {}".format(pipf.getDimension(0).name, pipf.getDimension(1).name))
 
 
 Output:

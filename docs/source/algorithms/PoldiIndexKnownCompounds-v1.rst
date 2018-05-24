@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -57,8 +57,8 @@ The following example extracts peaks from the correlation spectrum of a Silicon 
                                     ScatteringContributions="1.0",
                                     OutputWorkspace="Indexed")
 
-    print "Indexed_Si contains", mtd['peaks_refined_6904_indexed_Si'].rowCount(), "indexed peaks."
-    print "Number of unindexed peaks:", mtd['peaks_refined_6904_unindexed'].rowCount()
+    print("Indexed_Si contains {} indexed peaks.".format(mtd['peaks_refined_6904_indexed_Si'].rowCount()))
+    print("Number of unindexed peaks: {}".format(mtd['peaks_refined_6904_unindexed'].rowCount()))
 
 Output:
 

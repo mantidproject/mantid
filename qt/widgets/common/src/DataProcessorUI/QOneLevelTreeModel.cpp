@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -12,9 +13,8 @@ using namespace Mantid::API;
 @param tableWorkspace : The table workspace to wrap
 @param whitelist : A WhiteList containing the columns
 */
-QOneLevelTreeModel::QOneLevelTreeModel(
-    ITableWorkspace_sptr tableWorkspace,
-    const WhiteList &whitelist)
+QOneLevelTreeModel::QOneLevelTreeModel(ITableWorkspace_sptr tableWorkspace,
+                                       const WhiteList &whitelist)
     : AbstractTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size())
@@ -22,7 +22,17 @@ QOneLevelTreeModel::QOneLevelTreeModel(
         "Invalid table workspace. Table workspace must "
         "have the same number of columns as the white list");
 
-  m_rows = std::vector<bool>(tableWorkspace->rowCount(), false);
+  // Create vector for caching row data
+  for (size_t i = 0; i < tableWorkspace->rowCount(); ++i)
+    m_rows.emplace_back(std::make_shared<RowData>(columnCount()));
+
+  // Update cached row data from the table
+  updateAllRowData();
+
+  // This ensures the cached row data is updated when the table changes
+  connect(this, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+          this,
+          SLOT(tableDataUpdated(const QModelIndex &, const QModelIndex &)));
 }
 
 QOneLevelTreeModel::~QOneLevelTreeModel() {}
@@ -30,10 +40,9 @@ QOneLevelTreeModel::~QOneLevelTreeModel() {}
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
-* @return : The data associated with the given index
+* @return : The data associated with the given index as a list of strings
 */
-QVariant QOneLevelTreeModel::data(const QModelIndex &index,
-                                               int role) const {
+QVariant QOneLevelTreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
@@ -44,7 +53,7 @@ QVariant QOneLevelTreeModel::data(const QModelIndex &index,
     return QString::fromStdString(m_tWS->String(index.row(), index.column()));
   } else if (role == Qt::BackgroundRole) {
     // Highlight if the process status for this row is set
-    if (m_rows.at(index.row()))
+    if (m_rows.at(index.row())->isProcessed())
       return QColor("#00b300");
   }
 
@@ -57,13 +66,32 @@ QVariant QOneLevelTreeModel::data(const QModelIndex &index,
 * @param role : The role
 * @return : The column name
 */
-QVariant QOneLevelTreeModel::headerData(
-    int section, Qt::Orientation orientation, int role) const {
+QVariant QOneLevelTreeModel::headerData(int section,
+                                        Qt::Orientation orientation,
+                                        int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    return m_whitelist.colNameFromColIndex(section);
+    return m_whitelist.name(section);
 
   return QVariant();
+}
+
+/** Returns row data struct (which includes metadata about the row)
+ * for specified index
+* @param index : The index
+* @return : The data associated with the given index as a RowData class
+*/
+RowData_sptr QOneLevelTreeModel::rowData(const QModelIndex &index) {
+  RowData_sptr result;
+
+  // Return a null ptr if the index is invalid
+  if (!index.isValid())
+    return result;
+
+  if (parent(index).isValid())
+    return result;
+
+  return m_rows.at(index.row());
 }
 
 /** Returns the index of an element specified by its row, column and parent
@@ -72,9 +100,8 @@ QVariant QOneLevelTreeModel::headerData(
 * @param parent : The parent element
 * @return : The index of the element
 */
-QModelIndex
-QOneLevelTreeModel::index(int row, int column,
-                                       const QModelIndex &parent) const {
+QModelIndex QOneLevelTreeModel::index(int row, int column,
+                                      const QModelIndex &parent) const {
 
   UNUSED_ARG(parent);
   return createIndex(row, column);
@@ -85,8 +112,8 @@ QOneLevelTreeModel::index(int row, int column,
 * @param parent : The parent of this item
 * @return : The 'processed' status
 */
-bool QOneLevelTreeModel::isProcessed(
-    int position, const QModelIndex &parent) const {
+bool QOneLevelTreeModel::isProcessed(int position,
+                                     const QModelIndex &parent) const {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
@@ -99,15 +126,14 @@ bool QOneLevelTreeModel::isProcessed(
                                 "within the range of the number of rows in "
                                 "this model");
 
-  return m_rows[position];
+  return m_rows[position]->isProcessed();
 }
 
 /** Returns the parent of a given index
 * @param index : The index
 * @return : Its parent
 */
-QModelIndex
-QOneLevelTreeModel::parent(const QModelIndex &index) const {
+QModelIndex QOneLevelTreeModel::parent(const QModelIndex &index) const {
 
   UNUSED_ARG(index);
   return QModelIndex();
@@ -120,7 +146,7 @@ QOneLevelTreeModel::parent(const QModelIndex &index) const {
 * @return : Boolean indicating whether the insertion was successful or not
 */
 bool QOneLevelTreeModel::insertRows(int position, int count,
-                                                 const QModelIndex &parent) {
+                                    const QModelIndex &parent) {
   if (parent.isValid())
     return false;
 
@@ -137,7 +163,8 @@ bool QOneLevelTreeModel::insertRows(int position, int count,
   // Update the table workspace and row process status vector
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->insertRow(position);
-    m_rows.insert(m_rows.begin() + position, false);
+    m_rows.insert(m_rows.begin() + position,
+                  std::make_shared<RowData>(columnCount()));
   }
 
   endInsertRows();
@@ -153,7 +180,7 @@ bool QOneLevelTreeModel::insertRows(int position, int count,
 * not
 */
 bool QOneLevelTreeModel::removeRows(int position, int count,
-                                                 const QModelIndex &parent) {
+                                    const QModelIndex &parent) {
 
   if (parent.isValid())
     return false;
@@ -197,7 +224,7 @@ int QOneLevelTreeModel::rowCount(const QModelIndex &parent) const {
 * @param role : the role
 */
 bool QOneLevelTreeModel::setData(const QModelIndex &index,
-                                              const QVariant &value, int role) {
+                                 const QVariant &value, int role) {
 
   if (role != Qt::EditRole)
     return false;
@@ -223,7 +250,7 @@ bool QOneLevelTreeModel::setData(const QModelIndex &index,
 * @return : Boolean indicating whether process status was set successfully
 */
 bool QOneLevelTreeModel::setProcessed(bool processed, int position,
-                                                   const QModelIndex &parent) {
+                                      const QModelIndex &parent) {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
@@ -233,7 +260,7 @@ bool QOneLevelTreeModel::setProcessed(bool processed, int position,
   if (position < 0 || position >= rowCount())
     return false;
 
-  m_rows[position] = processed;
+  m_rows[position]->setProcessed(processed);
 
   return true;
 }
@@ -243,11 +270,90 @@ bool QOneLevelTreeModel::setProcessed(bool processed, int position,
 *
 * @return :: the underlying table workspace
 */
-ITableWorkspace_sptr
-QOneLevelTreeModel::getTableWorkspace() const {
+ITableWorkspace_sptr QOneLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
+/** Update all cached row data from the table data
+ */
+void QOneLevelTreeModel::updateAllRowData() {
+  // Loop through all rows
+  for (int row = 0; row < rowCount(); ++row) {
+    auto rowData = m_rows[row];
+    // Loop through all columns and update the value in the row data
+    for (int col = 0; col < columnCount(); ++col) {
+      auto value = data(index(row, col)).toString();
+      rowData->setValue(col, value);
+    }
+  }
+}
+
+/** Called when the data in the table has changed. Updates the
+ * table values in the cached RowData
+ */
+void QOneLevelTreeModel::tableDataUpdated(const QModelIndex &,
+                                          const QModelIndex &) {
+  updateAllRowData();
+}
+
+/** Checks whether the existing row is empty
+ * @return : true if all of the values in the row are empty
+ */
+bool QOneLevelTreeModel::rowIsEmpty(int row) const {
+  // Loop through all columns and return false if any are not empty
+  for (int columnIndex = 0; columnIndex < columnCount(); ++columnIndex) {
+    auto value = data(index(row, columnIndex)).toString().toStdString();
+    if (!value.empty())
+      return false;
+  }
+
+  // All cells in the row were empty
+  return true;
+}
+
+/**
+Inserts a new row with given values to the specified group in the specified
+location
+@param rowIndex :: The index to insert the new row after
+@param rowValues :: the values to set in the row cells
+*/
+void QOneLevelTreeModel::insertRowWithValues(
+    int rowIndex, const std::map<QString, QString> &rowValues) {
+
+  insertRow(rowIndex);
+
+  // Loop through all columns and update the value in the row
+  int colIndex = 0;
+  for (auto const &columnName : m_whitelist.names()) {
+    if (rowValues.count(columnName)) {
+      const auto value = rowValues.at(columnName).toStdString();
+      m_tWS->String(rowIndex, colIndex) = value;
+    }
+    ++colIndex;
+  }
+
+  updateAllRowData();
+}
+
+/** Transfer data to the table
+* @param runs :: [input] Data to transfer as a vector of maps
+*/
+void QOneLevelTreeModel::transfer(
+    const std::vector<std::map<QString, QString>> &runs) {
+
+  // If the table only has one row, check if it is empty and if so, remove it.
+  // This is to make things nicer when transferring, as the default table has
+  // one empty row
+  if (rowCount() == 1 && rowIsEmpty(0))
+    removeRows(0, 1);
+
+  // Loop over the rows (vector elements)
+  for (const auto &row : runs) {
+    // Add a new row to the model at the end of the current list
+    const int rowIndex = rowCount();
+    insertRowWithValues(rowIndex, row);
+  }
+}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

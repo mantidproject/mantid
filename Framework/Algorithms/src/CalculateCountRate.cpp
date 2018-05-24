@@ -263,12 +263,12 @@ void CalculateCountRate::calcRateLog(
   }
 
   // generate target log timing
-  std::vector<Kernel::DateAndTime> times(m_numLogSteps);
+  std::vector<Types::Core::DateAndTime> times(m_numLogSteps);
   double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
   for (auto i = 0; i < m_numLogSteps; i++) {
-    times[i] =
-        Kernel::DateAndTime(t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
+    times[i] = Types::Core::DateAndTime(
+        t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
   }
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
@@ -285,7 +285,7 @@ void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
     return;
 
   auto events = el.getEvents();
-  for (const DataObjects::TofEvent &ev : events) {
+  for (const Types::Event::TofEvent &ev : events) {
     double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
     double tof = ev.tof();
     if (pulsetime < m_visT0 || pulsetime >= m_visTmax)
@@ -389,11 +389,11 @@ void CalculateCountRate::setOutLogParameters(
   } //---------------------------------------------------------------------
   // find target log ranges and identify what normalization should be used
 
-  Kernel::DateAndTime runTMin, runTMax;
+  Types::Core::DateAndTime runTMin, runTMax;
   InputWorkspace->getPulseTimeMinMax(runTMin, runTMax);
   //
   if (useLogAccuracy) { // extract log times located inside the run time
-    Kernel::DateAndTime tLogMin, tLogMax;
+    Types::Core::DateAndTime tLogMin, tLogMax;
     if (m_useLogDerivative) { // derivative moves events to the bin centre,
                               // but we need initial range
       auto pSource =
@@ -478,7 +478,7 @@ void CalculateCountRate::setOutLogParameters(
         m_numLogSteps++;
         iTMax1 = iTMin + provDT * m_numLogSteps;
       }
-      m_TRangeMax = Kernel::DateAndTime(iTMax1);
+      m_TRangeMax = Types::Core::DateAndTime(iTMax1);
     }
   }
 

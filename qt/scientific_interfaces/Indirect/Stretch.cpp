@@ -62,6 +62,7 @@ Stretch::Stretch(QWidget *parent)
   // Connect preview spectrum spinner to handler
   connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(previewSpecChanged(int)));
+  m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   // Connect the plot and save push buttons
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
@@ -111,7 +112,7 @@ void Stretch::run() {
         " If run, the algorithm will default to saving files "
         "to the current working directory."
         " Would you still like to run the algorithm?";
-    int result = QMessageBox::question(NULL, tr("Save Directory"),
+    int result = QMessageBox::question(nullptr, tr("Save Directory"),
                                        tr(textMessage), QMessageBox::Yes,
                                        QMessageBox::No, QMessageBox::NoButton);
     if (result == QMessageBox::No) {
@@ -276,7 +277,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
-  m_uiForm.spPreviewSpectrum->setMaximum(spectra);
+  m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }
 
 /**

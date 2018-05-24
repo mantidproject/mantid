@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -71,8 +71,8 @@ Usage
     offset = GetDetectorOffsets(InputWorkspace='wsD', DReference=2.5, XMin=2, XMax=3)
     wsA = AlignDetectors(InputWorkspace='ws', OutputWorkspace='wsA', OffsetsWorkspace='offset')
     maxA = Max(wsA)
-    print "Peak in dSpace", maxD.readX(0)[0]
-    print "Peak from calibration", maxA.readX(0)[0]
+    print("Peak in dSpace {:.11f}".format(maxD.readX(0)[0]))
+    print("Peak from calibration {:.10f}".format(maxA.readX(0)[0]))
 
 Output:
 

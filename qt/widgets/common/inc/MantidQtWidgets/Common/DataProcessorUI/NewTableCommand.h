@@ -35,8 +35,7 @@ class NewTableCommand : public CommandBase {
 public:
   NewTableCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  NewTableCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  NewTableCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~NewTableCommand(){};
 
   void execute() override {

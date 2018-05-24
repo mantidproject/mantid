@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,11 +23,11 @@ Usage
 
     mdws = LoadMD('MAPS_MDEW.nxs')
     dim = mdws.getXDimension()
-    print "X range of Q ",dim.getX(0),dim.getX(1)
+    print("X range of Q  {} {}".format(dim.getX(0), dim.getX(1)))
     ChangeQConvention(mdws)
     mdws = mtd['mdws']
     dim = mdws.getXDimension()
-    print "X range of Q after ChangeQConvention ",dim.getX(0),dim.getX(1)
+    print("X range of Q after ChangeQConvention  {} {}".format(dim.getX(0), dim.getX(1)))
 
 Output:
 

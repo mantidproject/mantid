@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -162,19 +162,18 @@ Usage
     ws=LoadDetectorsGroupingFile("test.xml")
 
     #check some values
+    format_string = "Detector {}, with ID {}, in spectrum {} belongs to group {:.0f}"
+	      
     sid=0
-    print "Detector "+ws.getDetector(sid).getName()+", with ID "+\
-        str(ws.getDetector(sid).getID())+ ", in spectrum "+str(sid)+\
-        " belongs to group "+str(int(ws.dataY(sid)[0]))
+    print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
+	  sid, ws.dataY(sid)[0]))
     sid=2500
-    print "Detector "+ws.getDetector(sid).getName()+", with ID "+\
-	    str(ws.getDetector(sid).getID())+ ", in spectrum "+str(sid)+\
-	    " belongs to group "+str(int(ws.dataY(sid)[0]))
+    print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
+	  sid, ws.dataY(sid)[0]))
     sid=5000
-    print "Detector "+ws.getDetector(sid).getName()+", with ID "+\
-	    str(ws.getDetector(sid).getID())+ ", in spectrum "+str(sid)+\
-	    " belongs to group "+str(int(ws.dataY(sid)[0]))
-
+    print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
+	  sid, ws.dataY(sid)[0]))
+    
 .. testcleanup:: LoadDetectorsGroupingFile
 
    DeleteWorkspace(ws)
@@ -214,9 +213,9 @@ Output:
     ws=LoadDetectorsGroupingFile("test.map")
 
     #check some values
-    print "Spectrum 0 belongs to group", ws.readY(0)[0]
-    print "Spectrum 65 belongs to group", ws.readY(65)[0]
-    print "Spectrum 125 belongs to group", ws.readY(125)[0]
+    print("Spectrum 0 belongs to group {}".format(ws.readY(0)[0]))
+    print("Spectrum 65 belongs to group {}".format(ws.readY(65)[0]))
+    print("Spectrum 125 belongs to group {}".format(ws.readY(125)[0]))
 
 .. testcleanup:: LoadDetectorsGroupingFileMap
 

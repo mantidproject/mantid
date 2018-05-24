@@ -61,7 +61,7 @@ here is the Bragg scattering angle (e.g. half of the
 Mantid z-axis)
 
 **Note on Wavelength**: If the emode property in
-:ref: `ConvertUnits <algm-ConvertUnits>`
+:ref:`ConvertUnits <algm-ConvertUnits>`
 is specified as inelastic Direct/Indirect (inelastic) then the
 conversion to wavelength will take into account the fixed initial/final
 energy respectively. Units conversion into elastic momentum transfer
@@ -87,14 +87,14 @@ Units on MatrixWorkspaces are accessed via the Axis.
   ws = CreateSampleWorkspace()
   for i in range(ws.axes()):
       axis = ws.getAxis(i)
-      print "Axis {0} is a {1}{2}{3}".format(i,
+      print("Axis {0} is a {1}{2}{3}".format(i,
                                              "Spectrum Axis" if axis.isSpectra() else "",
                                              "Text Axis" if axis.isText() else "",
-                                             "Numeric Axis" if axis.isNumeric() else "")
+                                             "Numeric Axis" if axis.isNumeric() else ""))
 
       unit = axis.getUnit()
-      print "\t caption:{0}".format(unit.caption())
-      print "\t symbol:{0}".format(unit.symbol())
+      print("\t caption:{0}".format(unit.caption()))
+      print("\t symbol:{0}".format(unit.symbol()))
 
 Output:
 
@@ -121,8 +121,8 @@ Setting the axisLabel to a Label of your choice
   axis.setUnit("Label").setLabel('Temperature', 'K')
 
   unit = axis.getUnit()
-  print "New caption:{0}".format(unit.caption())
-  print "New symbol:{0}".format(unit.symbol())
+  print("New caption:{0}".format(unit.caption()))
+  print("New symbol:{0}".format(unit.symbol()))
 
 Output:
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -200,10 +200,10 @@ Usage
   #Now we are ready to run the correction
   wsCorrected = NormaliseByDetector(ws)
 
-  print ("The correction will divide the data by an increasing linear function.")
-  print ("f(x) = 2x + 1")
+  print("The correction will divide the data by an increasing linear function.")
+  print("f(x) = 2x + 1")
   for i in range(0,wsCorrected.blocksize(),10):
-    print ("The correct value in bin %i is %.2f compared to %.2f" % (i,wsCorrected.readY(0)[i],ws.readY(0)[i]))
+    print("The correct value in bin {} is {:.2f} compared to {:.2f}".format(i,wsCorrected.readY(0)[i],ws.readY(0)[i]))
 
   #clean up the file
   if os.path.exists(param_file_path):

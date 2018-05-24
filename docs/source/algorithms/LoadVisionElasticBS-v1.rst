@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -21,7 +21,7 @@ Usage
 
    w1 = LoadVisionElasticBS("VIS_19351.nxs.h5")
 
-   print "Number of spectra:", w1.getNumberHistograms()
+   print("Number of spectra: {}".format(w1.getNumberHistograms()))
 
 .. testoutput::
 
@@ -33,7 +33,7 @@ Usage
 
    w1 = LoadVisionElasticBS("VIS_19351.nxs.h5",Banks="bank20")
 
-   print "Number of spectra:", w1.getNumberHistograms()
+   print("Number of spectra: {}".format(w1.getNumberHistograms()))
 
 .. testoutput::
 

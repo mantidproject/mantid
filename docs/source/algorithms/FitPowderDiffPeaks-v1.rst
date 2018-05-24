@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -139,9 +139,9 @@ Usage
 
   # Print result
   resultws = mtd["BraggPeakParameterTable2_P"]
-  for i in xrange(10):
-      print "Peak @ d = %.5f, TOF_0 = %.5f, A = %.5f, B = %.5f, Sigma = %.5f" % (resultws.readX(0)[i], 
-          resultws.readY(0)[i], resultws.readY(1)[i], resultws.readY(2)[i], resultws.readY(3)[i])
+  for i in range(10):
+      print("Peak @ d = {:.5f}, TOF_0 = {:.5f}, A = {:.5f}, B = {:.5f}, Sigma = {:.5f}".
+            format(resultws.readX(0)[i], resultws.readY(0)[i], resultws.readY(1)[i], resultws.readY(2)[i], resultws.readY(3)[i]))
 
 .. testcleanup:: ExFitSingleDiffPeaks
 

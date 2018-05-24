@@ -36,8 +36,7 @@ class DeleteRowCommand : public CommandBase {
 public:
   DeleteRowCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  DeleteRowCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  DeleteRowCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~DeleteRowCommand(){};
 
   void execute() override {

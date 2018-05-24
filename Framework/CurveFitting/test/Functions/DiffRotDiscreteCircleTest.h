@@ -12,11 +12,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cmath>
+#include <random>
 
 #include <cxxtest/TestSuite.h>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
@@ -417,9 +415,8 @@ private:
 
   /// returns a real value from a uniform distribution
   double random_value(const double &a, const double &b) {
-    boost::mt19937 rng;
-    boost::uniform_real<double> distribution(a, b);
-    return distribution(rng);
+    std::mt19937 rng;
+    return std::uniform_real_distribution<double>(a, b)(rng);
   }
 
   /// save the domain and the values of a function to a nexus file
@@ -567,7 +564,7 @@ private:
     inst->markAsSamplePos(sample);
 
     // Add a detector
-    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+    auto pixelShape = ComponentCreationHelper::createCappedCylinder(
         0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
     Detector *det =
         new Detector("pixel-1", 1, pixelShape,

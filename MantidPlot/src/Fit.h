@@ -45,11 +45,11 @@ class Fit : public Filter {
   Q_OBJECT
 
 public:
-  typedef double (*fit_function_simplex)(const gsl_vector *, void *);
-  typedef int (*fit_function)(const gsl_vector *, void *, gsl_vector *);
-  typedef int (*fit_function_df)(const gsl_vector *, void *, gsl_matrix *);
-  typedef int (*fit_function_fdf)(const gsl_vector *, void *, gsl_vector *,
-                                  gsl_matrix *);
+  using fit_function_simplex = double (*)(const gsl_vector *, void *);
+  using fit_function = int (*)(const gsl_vector *, void *, gsl_vector *);
+  using fit_function_df = int (*)(const gsl_vector *, void *, gsl_matrix *);
+  using fit_function_fdf = int (*)(const gsl_vector *, void *, gsl_vector *,
+                                   gsl_matrix *);
 
   enum Algorithm {
     ScaledLevenbergMarquardt,
@@ -59,7 +59,8 @@ public:
   enum WeightingMethod { NoWeighting, Instrumental, Statistical, Dataset };
   enum FitType { BuiltIn = 0, Plugin = 1, User = 2 };
 
-  Fit(ApplicationWindow *parent, Graph *g = 0, const QString &name = QString());
+  Fit(ApplicationWindow *parent, Graph *g = nullptr,
+      const QString &name = QString());
   Fit(ApplicationWindow *parent, Table *t, const QString &name = QString());
   ~Fit() override;
 

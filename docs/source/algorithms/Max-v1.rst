@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,17 +23,17 @@ Usage
   max_ws = Max(ws)
 
   # Check the returned values
-  print 'Maximum found at bin [',max_ws.readX(0)[0],',',max_ws.readX(0)[1],'], value',max_ws.readY(0)[0]
-  print 'In original workspace'
-  print 'Bounds of bin 30     [',ws.readX(0)[30],',',ws.readX(0)[31],'], value',ws.readY(0)[30]
+  print('Maximum found at bin [ {} , {} ], value {}'.format(max_ws.readX(0)[0], max_ws.readX(0)[1], max_ws.readY(0)[0]))
+  print('In original workspace')
+  print('Bounds of bin 30     [ {} , {} ], value {}'.format(ws.readX(0)[30], ws.readX(0)[31], ws.readY(0)[30]))
 
   # Find another peak
   max_ws = Max(ws,RangeLower = 7000)
 
   # Check the returned values
-  print 'Maximum found at bin [',max_ws.readX(0)[0],',',max_ws.readX(0)[1],'], value',max_ws.readY(0)[0]
-  print 'In original workspace'
-  print 'Bounds of bin 60     [',ws.readX(0)[60],',',ws.readX(0)[61],'], value',ws.readY(0)[60]
+  print('Maximum found at bin [ {} , {} ], value {}'.format(max_ws.readX(0)[0], max_ws.readX(0)[1], max_ws.readY(0)[0]))
+  print('In original workspace')
+  print('Bounds of bin 60     [ {} , {} ], value {}'.format(ws.readX(0)[60], ws.readX(0)[61], ws.readY(0)[60]))
 
 Output
 ######

@@ -62,6 +62,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadSpiceAscii", "LoadSpiceXML2DDet"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "DataHandling\\Text;SANS\\DataHandling";
@@ -120,8 +123,8 @@ private:
   double m_wavelength{0.0};
   double m_dwavelength{0.0};
   double m_sansSpiceXmlFormatVersion{0.0};
-  Mantid::Kernel::DateAndTime m_startTime;
-  Mantid::Kernel::DateAndTime m_endTime;
+  Mantid::Types::Core::DateAndTime m_startTime;
+  Mantid::Types::Core::DateAndTime m_endTime;
 };
 } // namespace DataHandling
 } // namespace Mantid

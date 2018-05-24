@@ -39,7 +39,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_ISISSANS_DLL SANSBackgroundCorrectionWidget : public QWidget {
   Q_OBJECT
 public:
-  SANSBackgroundCorrectionWidget(QWidget *parent = 0);
+  SANSBackgroundCorrectionWidget(QWidget *parent = nullptr);
 
   void
   setDarkRunSettingForTimeDetectors(SANSBackgroundCorrectionSettings setting);

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,31 +29,27 @@ Usage
 .. testcode:: ExQueryMDWorkspace
 
    # create sample inelastic workspace for MARI instrument containing 1 at all spectra 
-   ws1=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10',UnitX='DeltaE')
-   AddSampleLog(ws1,'Ei','12.','Number')
-   ws2=ws1*2;
+   ws1 = CreateSimulationWorkspace(Instrument='MAR', BinParams='-10,1,10', UnitX='DeltaE')
+   AddSampleLog(ws1, 'Ei', '12.', 'Number')
+   ws2 = ws1 * 2;
    # Convert to MD
-   mdWs1 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',SplitInto='10,10',MaxRecursionDepth='1')
+   mdWs1 = ConvertToMD(InputWorkspace=ws1, QDimensions='|Q|', QConversionScales='Q in A^-1', SplitInto='10,10', MaxRecursionDepth='1')
 
    # get the query
    table = QueryMDWorkspace(InputWorkspace=mdWs1)
    
    # look at the output:
-   col_names=table.keys();
-   name0=col_names[0];
+   col_names = table.keys();
+   name0 = col_names[0];
    nRows = len(table.column(name0));
-   print "Table contains {0} rows".format(nRows)
-   print "first 11 of them are:"
-   print '{0}'.format("--------------------------------------------------------------------------------------------------------------")
-   for name in col_names:
-      print '| {0:19}'.format(name),
-   print '|'
-   print '{0}'.format("--------------------------------------------------------------------------------------------------------------")
-   for i in xrange(0,11):
-     for name in col_names:
-        col = table.column(name);
-        print '| {0:>19.4f}'.format(col[i]),
-     print '|'
+   print("Table contains {0} rows".format(nRows))
+   print("first 11 of them are:")
+   print("--------------------------------------------------------------------------------------------------------------")
+   print(' '.join('| {0:19}'.format(name) for name in col_names) + ' |')
+	      
+   print("--------------------------------------------------------------------------------------------------------------")
+   for i in range(0,11):
+      print(' '.join('| {0:>19.4f}'.format(table.column(name)[i]) for name in col_names) + ' |')
     
     
 **Output:**

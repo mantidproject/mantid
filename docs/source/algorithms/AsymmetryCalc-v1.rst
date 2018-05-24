@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,8 +46,8 @@ Usage
 
    asymmetry = AsymmetryCalc(input, Alpha=0.5)
 
-   print 'Asymmetry:', asymmetry.readY(0)
-   print 'Errors:', asymmetry.readE(0)
+   print('Asymmetry: {}'.format(asymmetry.readY(0)))
+   print('Errors: {}'.format(asymmetry.readE(0)))
 
 Output:
 

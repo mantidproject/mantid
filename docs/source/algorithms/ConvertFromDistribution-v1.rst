@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,12 +31,12 @@ Usage
     # If your data is already distributed then this is not required.
     ConvertToDistribution(ws_multi)
 
-    print "Is the workspace a distribution? " + str(ws_multi.isDistribution())
+    print("Is the workspace a distribution? {}".format(ws_multi.isDistribution()))
 
     # Convert back to the initial workspace state.
     ConvertFromDistribution(ws_multi)
 
-    print "Is the workspace a distribution? " + str(ws_multi.isDistribution())
+    print("Is the workspace a distribution? {}".format(ws_multi.isDistribution()))
 
 Output:
 

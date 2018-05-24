@@ -55,8 +55,9 @@ class AxisDetails : public QWidget {
   Q_OBJECT
   // details for each axis in the Axis tab
 public:
-  AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
-              QWidget *parent = 0); // populate and fill in with existing data
+  AxisDetails(
+      ApplicationWindow *app, Graph *graph, int mappedaxis,
+      QWidget *parent = nullptr); // populate and fill in with existing data
   ~AxisDetails() override;
   void initWidgets();
   bool modified() { return m_modified; }

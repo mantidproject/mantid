@@ -65,60 +65,60 @@ bool BoundingBox::doesLineIntersect(const V3D &startPoint,
   if (startPoint.X() > xMax()) {
     if (lineDir.X() < -tol) {
       lambda = (xMax() - startPoint.X()) / lineDir.X();
-      if (yMin() < startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() > startPoint.Y() + lambda * lineDir.Y())
-        if (zMin() < startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() > startPoint.Z() + lambda * lineDir.Z())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
+          yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
+            zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.X() < xMin()) {
     if (lineDir.X() > tol) {
       lambda = (xMin() - startPoint.X()) / lineDir.X();
-      if (yMin() < startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() > startPoint.Y() + lambda * lineDir.Y())
-        if (zMin() < startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() > startPoint.Z() + lambda * lineDir.Z())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
+          yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
+            zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.Y() > yMax()) {
     if (lineDir.Y() < -tol) {
       lambda = (yMax() - startPoint.Y()) / lineDir.Y();
-      if (xMin() < startPoint.X() + lambda * lineDir.X() &&
-          xMax() > startPoint.X() + lambda * lineDir.X())
-        if (zMin() < startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() > startPoint.Z() + lambda * lineDir.Z())
+      if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
+          xMax() >= startPoint.X() + lambda * lineDir.X())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
+            zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.Y() < yMin()) {
     if (lineDir.Y() > tol) {
       lambda = (yMin() - startPoint.Y()) / lineDir.Y();
-      if (xMin() < startPoint.X() + lambda * lineDir.X() &&
-          xMax() > startPoint.X() + lambda * lineDir.X())
-        if (zMin() < startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() > startPoint.Z() + lambda * lineDir.Z())
+      if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
+          xMax() >= startPoint.X() + lambda * lineDir.X())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
+            zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.Z() > zMax()) {
     if (lineDir.Z() < -tol) {
       lambda = (zMax() - startPoint.Z()) / lineDir.Z();
-      if (yMin() < startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() > startPoint.Y() + lambda * lineDir.Y())
-        if (xMin() < startPoint.X() + lambda * lineDir.X() &&
-            xMax() > startPoint.X() + lambda * lineDir.X())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
+          yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
+            xMax() >= startPoint.X() + lambda * lineDir.X())
           return true;
     }
   }
   if (startPoint.Z() < zMin()) {
     if (lineDir.Z() > tol) {
       lambda = (zMin() - startPoint.Z()) / lineDir.Z();
-      if (yMin() < startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() > startPoint.Y() + lambda * lineDir.Y())
-        if (xMin() < startPoint.X() + lambda * lineDir.X() &&
-            xMax() > startPoint.X() + lambda * lineDir.X())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
+          yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
+            xMax() >= startPoint.X() + lambda * lineDir.X())
           return true;
     }
   }
@@ -246,7 +246,7 @@ void BoundingBox::realign(std::vector<Kernel::V3D> const *const pCS) {
  * @param other :: The bounding box that should be encompassed
  */
 void BoundingBox::grow(const BoundingBox &other) {
-  m_null = false;
+  m_null &= other.isNull();
   // If the current box is empty then we definitely need to grow
   if (minPoint() == V3D() && maxPoint() == V3D()) {
     m_minPoint = other.minPoint();

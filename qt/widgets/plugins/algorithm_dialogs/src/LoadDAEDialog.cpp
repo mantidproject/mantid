@@ -4,9 +4,10 @@
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDAEDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
+#include <QFileDialog>
+#include <QLabel>
+#include <QLineEdit>
 #include <QValidator>
-#include <QtGui>
-#include <qfiledialog.h>
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -23,9 +24,9 @@ public:
 };
 
 LoadDAEDialog::LoadDAEDialog(QWidget *parent)
-    : MantidQt::API::AlgorithmDialog(parent), lineHost(NULL), lineName(NULL),
-      minSpLineEdit(NULL), maxSpLineEdit(NULL), listSpLineEdit(NULL),
-      updateLineEdit(NULL) {}
+    : MantidQt::API::AlgorithmDialog(parent), lineHost(nullptr),
+      lineName(nullptr), minSpLineEdit(nullptr), maxSpLineEdit(nullptr),
+      listSpLineEdit(nullptr), updateLineEdit(nullptr) {}
 
 LoadDAEDialog::~LoadDAEDialog() {}
 

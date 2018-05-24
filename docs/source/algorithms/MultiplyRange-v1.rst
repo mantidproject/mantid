@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,9 +27,9 @@ Usage
   yres = res.readY(0)
 
   # Print out the ratios yres[i] / y[i] for bins with indices 20 to 30
-  print yres[20:30] / y[20:30]
+  print(yres[20:30] / y[20:30])
   # Print out the ratios yres[i] / y[i] for bins with indices 70 to 80
-  print yres[70:80] / y[70:80]
+  print(yres[70:80] / y[70:80])
 
 Output
 ######

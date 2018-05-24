@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -100,9 +100,9 @@ Usage
   # Access output workspace and print out some result
   ws = mtd["s0001_0522"]
 
-  print "Number of spectrum = %d." % (ws.getNumberHistograms())
+  print("Number of spectrum = {}.".format(ws.getNumberHistograms()))
   for i, j in [(0, 0), (255, 255), (136, 140), (143, 140)]:
-      print "Y[%-3d, %-3d] = %.5f" % (i, j, ws.readY(i)[j])
+      print("Y[{:<3}, {:<3}] = {:.5f}".format(i, j, ws.readY(i)[j]))
 
 .. testcleanup:: ExLoadHB3AXMLData
 

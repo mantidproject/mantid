@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -57,7 +57,7 @@ Usage
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
     SaveHKL(peaks, path)
 
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 Output:
 
@@ -86,13 +86,13 @@ Output:
 
     #load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
-    print "Number of peaks in table %d" % peaks.rowCount()
+    print("Number of peaks in table {}".format(peaks.rowCount()))
     
     path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
     SaveHKL(peaks, path, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortBy='Bank')
 
     peaks = LoadHKL(path)
-    print "Number of peaks in table %d" % peaks.rowCount()
+    print("Number of peaks in table {}".format(peaks.rowCount()))
 
 Output:
 

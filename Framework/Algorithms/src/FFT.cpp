@@ -105,6 +105,8 @@ void FFT::exec() {
   }
 
   m_outWS = WorkspaceFactory::Instance().create(m_inWS, nOut, nPoints, nPoints);
+  for (int i = 0; i < nOut; ++i)
+    m_outWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
 
   const double dx = xPoints[1] - xPoints[0];
   double df = 1.0 / (dx * nPoints);

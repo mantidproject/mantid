@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -52,7 +52,7 @@ Usage
 
     (wsOut, numFailures) = DetectorEfficiencyVariation(WhiteBeamBase='wsBase', WhiteBeamCompare='ws')
 
-    print "%i spectra has been masked in wsOut" % numFailures
+    print("{} spectra has been masked in wsOut".format(numFailures))
 
 Output:
 

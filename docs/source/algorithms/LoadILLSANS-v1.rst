@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,7 +25,7 @@ Usage
    # Load ILL D33 data file into a workspace 2D.
    ws = Load('ILLD33_sample_001425.nxs')
 
-   print "This workspace has", ws.getNumDims(), "dimensions and has", ws.getNumberHistograms(), "histograms."
+   print("This workspace has {} dimensions and has {} histograms.".format(ws.getNumDims(), ws.getNumberHistograms()))
 
 Output:
 	

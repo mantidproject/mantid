@@ -5,6 +5,7 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -17,6 +18,14 @@
 using namespace Mantid::Kernel;
 
 namespace {
+class MockNonSerializableProperty : public PropertyWithValue<int> {
+public:
+  MockNonSerializableProperty(const std::string &name, const int defaultValue)
+      : PropertyWithValue<int>(name, defaultValue, Direction::InOut) {}
+  bool isValueSerializable() const override { return false; }
+  using PropertyWithValue<int>::operator=;
+};
+
 /// Create the test source property
 std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>
 createTestSeries(const std::string &name) {
@@ -81,12 +90,12 @@ public:
     TS_ASSERT_EQUALS(manager.propertyCount(), 3);
 
     const std::vector<Property *> &props = manager.getProperties();
-    for (auto iter = props.begin(); iter != props.end(); ++iter) {
-      Property *prop = *iter;
+    for (auto iter : props) {
+      Property *prop = iter;
       std::string msg = "Property " + prop->name() +
                         " has not been changed to a FilteredTimeSeries";
       auto filteredProp =
-          dynamic_cast<FilteredTimeSeriesProperty<double> *>(*iter);
+          dynamic_cast<FilteredTimeSeriesProperty<double> *>(iter);
       TSM_ASSERT(msg, filteredProp);
     }
 
@@ -191,7 +200,7 @@ public:
         "myProp", "theValue",
         boost::make_shared<MandatoryValidator<std::string>>(), "hello"));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("myProp"), "theValue");
-    Property *p = NULL;
+    Property *p = nullptr;
     TS_ASSERT_THROWS_NOTHING(p = mgr.getProperty("myProp"));
     TS_ASSERT_EQUALS(p->documentation(), "hello");
 
@@ -239,7 +248,7 @@ public:
     mgr.declareProperty(
         Mantid::Kernel::make_unique<ArrayProperty<double>>("ArrayProp"));
 
-    std::string jsonString = "{\"ArrayProp\":\"10,12,23\"}";
+    std::string jsonString = R"({"ArrayProp":"10,12,23"})";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("ArrayProp"), "10,12,23");
   }
@@ -389,6 +398,22 @@ public:
     TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
   }
 
+  void test_asStringWithNotEnabledProperty() {
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Semaphor", true));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Crossing", 42));
+    mgr.setPropertySettings(
+        "Crossing",
+        make_unique<EnabledWhenProperty>(
+            "Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
+
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
+                      "{\"Crossing\":\"42\",\"Semaphor\":\"1\"}\n");
+    mgr.setProperty("Semaphor", false);
+    TSM_ASSERT_EQUALS("Hide not enabled", mgr.asString(true),
+                      "{\"Semaphor\":\"0\"}\n");
+  }
+
   void test_asString() {
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 10));
@@ -397,8 +422,6 @@ public:
     ::Json::Reader reader;
     ::Json::Value value;
 
-    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
-    /// "");
     TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
@@ -429,8 +452,6 @@ public:
     ::Json::Reader reader;
     ::Json::Value value;
 
-    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
-    /// "");
     TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
@@ -448,6 +469,19 @@ public:
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(false), value));
+  }
+
+  void test_asStringWithNonSerializableProperty() {
+    using namespace Mantid::Kernel;
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
+        make_unique<MockNonSerializableProperty>("PropertyName", 0)));
+    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
+    // Set to non-default value.
+    mgr.setProperty("PropertyName", 1);
+    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
   }
 
   //-----------------------------------------------------------------------------------------------------------
@@ -547,13 +581,13 @@ public:
     TS_ASSERT_EQUALS(d, 23.4);
     TS_ASSERT_EQUALS(i, 22);
 
-    mgr.setPropertiesWithString("{\"double\": 14.0, \"int\":33}");
+    mgr.setPropertiesWithString(R"({"double": 14.0, "int":33})");
     d = mgr.getProperty("double");
     i = mgr.getProperty("int");
     TS_ASSERT_EQUALS(d, 14.0);
     TS_ASSERT_EQUALS(i, 33);
 
-    mgr.setPropertiesWithString("{\"double\": 12.3 ,\"int\":11}", {"int"});
+    mgr.setPropertiesWithString(R"({"double": 12.3 ,"int":11})", {"int"});
     d = mgr.getProperty("double");
     i = mgr.getProperty("int");
     TS_ASSERT_EQUALS(d, 12.3);

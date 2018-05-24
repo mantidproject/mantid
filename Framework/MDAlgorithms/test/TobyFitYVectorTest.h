@@ -22,8 +22,8 @@ public:
   void test_object_construction_does_not_throw() {
     using namespace Mantid::MDAlgorithms;
 
-    TobyFitYVector *yVector(NULL); // TS_ macro doesn't work with stack
-                                   // construction & no default constructor
+    TobyFitYVector *yVector(nullptr); // TS_ macro doesn't work with stack
+                                      // construction & no default constructor
     TS_ASSERT_THROWS_NOTHING(yVector = new TobyFitYVector);
 
     delete yVector;
@@ -45,8 +45,8 @@ public:
                             "DetectorArea",  "DetectionTime"};
 
     TobyFitYVector yVector;
-    for (unsigned int i = 0; i < 8; ++i) {
-      yVector.setAttribute(attrs[i], IFunction::Attribute(false));
+    for (auto &attr : attrs) {
+      yVector.setAttribute(attr, IFunction::Attribute(false));
     }
 
     std::vector<double> randNums(yVector.requiredRandomNums(), 0.5);
@@ -108,9 +108,8 @@ private:
     expt->setModeratorModel(sourceDescr);
 
     // Sample size
-    Mantid::Geometry::Object_sptr sampleShape =
-        ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
-    expt->mutableSample().setShape(*sampleShape);
+    auto sampleShape = ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
+    expt->mutableSample().setShape(sampleShape);
 
     // OrientedLattice
     OrientedLattice *latticeRotation = new OrientedLattice;
@@ -139,8 +138,7 @@ private:
 
     ObjComponent *aperture = new ObjComponent("aperture");
     aperture->setPos(V3D(0.0, 0.0, -10.01));
-    Object_sptr shape =
-        ComponentCreationHelper::createCuboid(0.047, 0.047, 0.001);
+    auto shape = ComponentCreationHelper::createCuboid(0.047, 0.047, 0.001);
     aperture->setShape(shape);
     instrument->add(aperture);
 

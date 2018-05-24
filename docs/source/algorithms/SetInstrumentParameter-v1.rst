@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -50,19 +50,19 @@ Usage
   bank1=instrument.getComponentByName("bank1")
   bank2=instrument.getComponentByName("bank2")
 
-  print ("The whole instrument parameter can be read from anywhere.")
-  print ("  The instrument: " + instrument.getStringParameter("TestParam")[0])
-  print ("  bank 1: " + bank1.getStringParameter("TestParam")[0])
-  print ("  bank 2: " + bank2.getStringParameter("TestParam")[0])
+  print("The whole instrument parameter can be read from anywhere.")
+  print("  The instrument: " + instrument.getStringParameter("TestParam")[0])
+  print("  bank 1: " + bank1.getStringParameter("TestParam")[0])
+  print("  bank 2: " + bank2.getStringParameter("TestParam")[0])
 
-  print ("The parameters  on the Bank 1 can be read from the bank or below.")
+  print("The parameters  on the Bank 1 can be read from the bank or below.")
   #For this one call getIntParameter as the number was an int
-  print ("  bank 1: " + str(bank1.getIntParameter("NumberParam")[0]))
+  print("  bank 1: " + str(bank1.getIntParameter("NumberParam")[0]))
   #For this one call getNumberParameter as the number was a float
-  print ("  bank 2: " + str(bank2.getNumberParameter("NumberParam")[0]))
+  print("  bank 2: " + str(bank2.getNumberParameter("NumberParam")[0]))
   #if you are not sure of the type of a parameter you can call getParameterType
-  print ("  The type of NumberParam in bank 1: " + bank1.getParameterType("NumberParam"))  
-  print ("  The type of NumberParam in bank 2: " + bank2.getParameterType("NumberParam"))
+  print("  The type of NumberParam in bank 1: " + bank1.getParameterType("NumberParam"))  
+  print("  The type of NumberParam in bank 2: " + bank2.getParameterType("NumberParam"))
 
 
 Output:
@@ -92,11 +92,11 @@ Output:
   instrument=ws.getInstrument()
   bank1=instrument.getComponentByName("bank1")
   
-  print ("The SetInstrumentParameter overwrites previous values where the ParameterName and Component match.")
-  print ("  The test param for the instrument is: " + instrument.getStringParameter("TestParam")[0])
-  print ("Different Components can have the same Parameter Name with different values.") 
-  print ("You will receive the closest value to the component you ask from.")
-  print ("  The test param for bank 1 is: " + bank1.getStringParameter("TestParam")[0])
+  print("The SetInstrumentParameter overwrites previous values where the ParameterName and Component match.")
+  print("  The test param for the instrument is: " + instrument.getStringParameter("TestParam")[0])
+  print("Different Components can have the same Parameter Name with different values.") 
+  print("You will receive the closest value to the component you ask from.")
+  print("  The test param for bank 1 is: " + bank1.getStringParameter("TestParam")[0])
 
 Output:
 

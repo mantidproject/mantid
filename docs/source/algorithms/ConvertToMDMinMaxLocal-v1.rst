@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -49,9 +49,9 @@ Usage
     # evaluate |Q| transformation limits
     minn,maxx = ConvertToMDMinMaxLocal(InputWorkspace=detWS,QDimensions='|Q|',dEAnalysisMode='Direct')
     # Look at sample results:    
-    print 'MD workspace limits:'
-    print '|Q|_min: {0:10f}, dE_min: {1:10f}'.format(minn[0],minn[1])
-    print '|Q|_max: {0:10f}, dE_max: {1:10f}'.format(maxx[0],maxx[1])
+    print('MD workspace limits:')
+    print('|Q|_min: {0:10f}, dE_min: {1:10f}'.format(minn[0],minn[1]))
+    print('|Q|_max: {0:10f}, dE_max: {1:10f}'.format(maxx[0],maxx[1]))
     
 .. testcleanup:: ExConvertToMDMinMaxLocalQ
 
@@ -76,8 +76,8 @@ Usage
     
     # evaluate Q3D transformation limits, which includes converting units    
     minn,maxx = ConvertToMDMinMaxLocal(InputWorkspace=detWS,QDimensions='Q3D',dEAnalysisMode='Direct')
-    print 'Min values::  Qx: {0:10f}, Qy: {1:10f}, Qz: {2:10f},  dE:{3:10f}'.format(minn[0],minn[1],minn[2],minn[3]);
-    print 'Max values::  Qx: {0:10f}, Qy: {1:10f}, Qz: {2:10f},  dE:{3:10f}'.format(maxx[0],maxx[1],maxx[2],maxx[3]);    
+    print('Min values::  Qx: {0:10f}, Qy: {1:10f}, Qz: {2:10f},  dE:{3:10f}'.format(minn[0],minn[1],minn[2],minn[3]))
+    print('Max values::  Qx: {0:10f}, Qy: {1:10f}, Qz: {2:10f},  dE:{3:10f}'.format(maxx[0],maxx[1],maxx[2],maxx[3]))    
        
 .. testcleanup:: ExConvertToMDMinMaxLocalQ3D
 
@@ -100,9 +100,9 @@ Usage
    AddSampleLog(detWS,LogName='Ei',LogText='52.',LogType='Number');
    minn,maxx = ConvertToMDMinMaxLocal(InputWorkspace=detWS,QDimensions='CopyToMD',dEAnalysisMode='Direct',OtherDimensions='Ei')
    # Look at sample results:    
-   print 'MD workspace limits:'
-   print 'TOF_min: {0:10f}, Ei_min: {1:10f}'.format(minn[0],minn[1])
-   print 'TOF_max: {0:10f}, Ei_max: {1:10f}'.format(maxx[0],maxx[1])
+   print('MD workspace limits:')
+   print('TOF_min: {0:10f}, Ei_min: {1:10f}'.format(minn[0],minn[1]))
+   print('TOF_max: {0:10f}, Ei_max: {1:10f}'.format(maxx[0],maxx[1]))
 
 .. testcleanup:: ExConvertToMDMinMaxLocalCopyToMD
 

@@ -26,8 +26,8 @@ using Mantid::Geometry::MDBoxImplicitFunction;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite {
 public:
-  typedef MDGridBox<MDLeanEvent<1>, 1> gbox_t;
-  typedef MDBoxBase<MDLeanEvent<1>, 1> ibox_t;
+  using gbox_t = MDGridBox<MDLeanEvent<1>, 1>;
+  using ibox_t = MDBoxBase<MDLeanEvent<1>, 1>;
 
   //--------------------------------------------------------------------------------------
   /** Make a gridded box with this structure:
@@ -82,8 +82,8 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_ctor_with_null_box_fails() {
-    typedef MDBoxIterator<MDLeanEvent<1>, 1> boxit_t;
-    TS_ASSERT_THROWS_ANYTHING(new boxit_t(NULL, 10, false););
+    using boxit_t = MDBoxIterator<MDLeanEvent<1>, 1>;
+    TS_ASSERT_THROWS_ANYTHING(new boxit_t(nullptr, 10, false););
   }
 
   //--------------------------------------------------------------------------------------
@@ -645,9 +645,9 @@ public:
   void do_test_iterator(bool leafOnly, bool ImplicitFunction, size_t expected) {
     // Count the top level box.
     size_t counter = 1;
-    MDBoxBase<MDLeanEvent<3>, 3> *box = NULL;
+    MDBoxBase<MDLeanEvent<3>, 3> *box = nullptr;
 
-    MDBoxImplicitFunction *function = NULL;
+    MDBoxImplicitFunction *function = nullptr;
     if (ImplicitFunction) {
       std::vector<coord_t> min(3, 2.001f);
       std::vector<coord_t> max(3, 2.999f);
@@ -720,7 +720,7 @@ public:
   void do_test_getBoxes(bool leafOnly, int ImplicitFunction, size_t expected) {
     std::vector<API::IMDNode *> boxes;
 
-    MDImplicitFunction *function = NULL;
+    MDImplicitFunction *function = nullptr;
     if (ImplicitFunction == 1) {
       // Box in 3D where 2 < (x,y,z) < 3
       std::vector<coord_t> min(3, 2.001f);

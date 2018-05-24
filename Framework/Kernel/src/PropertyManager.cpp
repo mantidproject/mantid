@@ -4,6 +4,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/IPropertySettings.h"
 
 #include <json/json.h>
 
@@ -97,8 +98,8 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void PropertyManager::filterByTime(const Kernel::DateAndTime &start,
-                                   const Kernel::DateAndTime &stop) {
+void PropertyManager::filterByTime(const Types::Core::DateAndTime &start,
+                                   const Types::Core::DateAndTime &stop) {
   // Iterate through all properties
   PropertyMap::const_iterator it;
   for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
@@ -346,7 +347,7 @@ void PropertyManager::setPropertiesWithSimpleString(
     const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
 
   boost::char_separator<char> sep(";");
   tokenizer propPairs(propertiesString, ";",
@@ -488,18 +489,24 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
 
 //-----------------------------------------------------------------------------------------------
 /** Return the property manager serialized as a json object.
- * * @param withDefaultValues :: If true then the value of default parameters
- will
- *be included
-
+ * Note that this method does not serialize WorkspacePropertys with workspaces
+ * not
+ * in the ADS.
+ * @param withDefaultValues :: If true then the value of default parameters
+ * will be included
  * @returns A serialized version of the manager
  */
 ::Json::Value PropertyManager::asJson(bool withDefaultValues) const {
   ::Json::Value jsonMap;
-  const size_t count = propertyCount();
-  for (size_t i = 0; i < count; ++i) {
-    Property *p = getPointerToPropertyOrdinal(static_cast<int>(i));
-    if (withDefaultValues || !(p->isDefault())) {
+  const int count = static_cast<int>(propertyCount());
+  for (int i = 0; i < count; ++i) {
+    Property *p = getPointerToPropertyOrdinal(i);
+    bool is_enabled = true;
+    if (p->getSettings()) {
+      is_enabled = p->getSettings()->isEnabled(this);
+    }
+    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) &&
+        is_enabled) {
       jsonMap[p->name()] = p->value();
     }
   }

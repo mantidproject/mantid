@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -173,7 +173,7 @@ Usage
 
    # Load MUSR dataset
    ws = LoadMuonNexus(Filename="MUSR00015189.nxs",EntryNumber=1)
-   print "Workspace has ",  ws[0].getNumberHistograms(), " spectra"
+   print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
 
@@ -187,7 +187,7 @@ Output:
 
    # Load some spectra
    ws = LoadMuonNexus(Filename="MUSR00015189.nxs",SpectrumMin=5,SpectrumMax=10,EntryNumber=1)
-   print "Workspace has ",  ws[0].getNumberHistograms(), " spectra"
+   print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
 
@@ -203,18 +203,18 @@ Output:
    ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
    tab = mtd['deadTimeTable']
    for i in range(0,tab.rowCount()):
-       print tab.cell(i,0), tab.cell(i,1)
+       print("{} {:.12f}".format(tab.cell(i,0), tab.cell(i,1)))
 
 Output:
 
 .. testoutput:: ExLoadDeadTimeTable
 
-   5 0.00161112251226
-   6 0.00215016817674
-   7 0.0102171599865
-   8 0.00431686220691
-   9 0.00743605662137
-   10 0.00421147653833
+   5 0.001611122512
+   6 0.002150168177
+   7 0.010217159986
+   8 0.004316862207
+   9 0.007436056621
+   10 0.004211476538
 
 **Example - Load detector grouping into table:**
 
@@ -224,7 +224,7 @@ Output:
    ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumList="1,16,17,32",DetectorGroupingTable="detectorTable")
    tab = mtd['detectorTable']
    for i in range(0,tab.rowCount()):
-       print tab.cell(i,0)
+       print(tab.cell(i,0))
 
 Output:
 

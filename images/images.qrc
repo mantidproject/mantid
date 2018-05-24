@@ -19,6 +19,8 @@
         <file>invalid.png</file>
         <file>replace.png</file>
         <file>mantid.png</file>
+        <file>mantid_smaller.png</file>
+        <file>crying_mantid.png</file>
     </qresource>
     <qresource prefix="/win">
         <file>folder-remote.png</file>

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,8 +34,8 @@ Usage
 
     ws=ConvertTableToMatrixWorkspace(t,"A","B","BError")
 
-    print "%s is a %s and the Y values are:" % (ws,ws.id())
-    print ws.readY(0)
+    print("{} is a {} and the Y values are:".format(ws,ws.id()))
+    print(ws.readY(0))
 
 Output:
 

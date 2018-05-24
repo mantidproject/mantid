@@ -1,5 +1,5 @@
 #include "MantidDataHandling/FindDetectorsInShape.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -9,10 +9,6 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
 
 namespace Mantid {
 namespace DataHandling {

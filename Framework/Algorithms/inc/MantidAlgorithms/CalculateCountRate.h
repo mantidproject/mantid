@@ -47,6 +47,9 @@ class DLLExport CalculateCountRate : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ChangePulsetime"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
   /// Helper function: true if count rate should be normalized and false
@@ -79,7 +82,7 @@ protected: // for testing, actually private
   /// spurion search ranges (TOF or other units requested)
   double m_XRangeMin{0}, m_XRangeMax{0};
   /// experiment time ranges:
-  Kernel::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
+  Types::Core::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
   /// temporary workspace used to keep intermediate results
   DataObjects::EventWorkspace_sptr m_workingWS;
 

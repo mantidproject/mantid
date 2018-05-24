@@ -15,8 +15,8 @@ size_t MAXIMUM_DEPTH = 100;
 Kernel::Logger g_log("WorkspaceGroup");
 }
 
-WorkspaceGroup::WorkspaceGroup()
-    : Workspace(),
+WorkspaceGroup::WorkspaceGroup(const Parallel::StorageMode storageMode)
+    : Workspace(storageMode),
       m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
       m_beforeReplaceObserver(*this,
                               &WorkspaceGroup::workspaceBeforeReplaceHandle),
@@ -195,6 +195,13 @@ Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
                           " not contained in the group");
 }
 
+/** Return all workspaces in the group as one call for thread safety
+ */
+std::vector<Workspace_sptr> WorkspaceGroup::getAllItems() const {
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+  return m_workspaces;
+}
+
 /// Empty all the entries out of the workspace group. Does not remove the
 /// workspaces from the ADS.
 void WorkspaceGroup::removeAll() { m_workspaces.clear(); }
@@ -225,8 +232,47 @@ void WorkspaceGroup::print() const {
 }
 
 /**
+ * Returns an iterator pointing to the first element in the group.
+ *
+ * @return  A non-const iterator pointing to the first workspace in this
+ *          workspace group.
+ */
+std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() {
+  return m_workspaces.begin();
+}
+
+/**
+ * Returns a const iterator pointing to the first element in the group.
+ *
+ * @return  A const iterator pointing to the first workspace in this
+ *          workspace group.
+ */
+std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::begin() const {
+  return m_workspaces.begin();
+}
+
+/**
+ * Returns an iterator pointing to the past-the-end element in the group.
+ *
+ * @return  A non-const iterator pointing to the last workspace in this
+ *          workspace group.
+ */
+std::vector<Workspace_sptr>::iterator WorkspaceGroup::end() {
+  return m_workspaces.end();
+}
+
+/** Returns a const iterator pointing to the past-the-end element in the group.
+ *
+ * @return  A const iterator pointing to the last workspace in this
+ *          workspace group.
+ */
+std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::end() const {
+  return m_workspaces.end();
+}
+
+/**
  * Remove a workspace pointed to by an index. The workspace remains in the ADS
- *if it was there
+ * if it was there
  *
  * @param index :: Index of a workspace to delete.
  */

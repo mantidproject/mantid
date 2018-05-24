@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,8 +33,8 @@ Usage
     AddSampleLog(ws,"gd_prtn_chrg", "1e6", "Number")
     wsFiltered = FilterBadPulses(ws)
 
-    print ("The number of events that remain: %i" % wsFiltered.getNumberEvents())
-    print ("compared to the number in the unfiltered workspace: %i" % ws.getNumberEvents())
+    print("The number of events that remain: %i" % wsFiltered.getNumberEvents())
+    print("compared to the number in the unfiltered workspace: %i" % ws.getNumberEvents())
 
 Output:
 

@@ -237,7 +237,7 @@ void AnvredCorrection::exec() {
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
-    run.addProperty<bool>("LorentzCorrection", 1, true);
+    run.addProperty<bool>("LorentzCorrection", true, true);
   setProperty("OutputWorkspace", correctionFactors);
 }
 
@@ -330,7 +330,7 @@ void AnvredCorrection::execEvent() {
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
-    run.addProperty<bool>("LorentzCorrection", 1, true);
+    run.addProperty<bool>("LorentzCorrection", true, true);
   setProperty("OutputWorkspace", std::move(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -359,8 +359,9 @@ void AnvredCorrection::retrieveBaseProperties() {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                         static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
                         m_amu);
-    Object shape = m_inputWS->sample().getShape(); // copy
-    shape.setMaterial(Material("SetInAnvredCorrection", neutron, 1.0));
+    auto shape = boost::shared_ptr<IObject>(
+        m_inputWS->sample().getShape().cloneWithMaterial(
+            Material("SetInAnvredCorrection", neutron, 1.0)));
     m_inputWS->mutableSample().setShape(shape);
   }
   if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())

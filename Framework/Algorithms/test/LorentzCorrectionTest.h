@@ -56,7 +56,7 @@ private:
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
-    Detector *det = new Detector("my-detector", 1, NULL);
+    Detector *det = new Detector("my-detector", 1, nullptr);
     det->setPos(20, (20 - sample->getPos().X()), 0);
     instrument->add(det);
     instrument->markAsDetector(det);
@@ -126,7 +126,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "temp");
     alg.execute();
     MatrixWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out_ws != NULL);
+    TS_ASSERT(out_ws != nullptr);
 
     const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "Wavelength");

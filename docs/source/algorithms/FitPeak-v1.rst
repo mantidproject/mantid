@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -147,7 +147,7 @@ Usage
   peakheight = tbws.cell(2, 1)
   peakcentre = tbws.cell(3, 1)
   sigma = tbws.cell(4, 1)
-  print "Chi-square = %.5f: Peak centre = %.5f, Height = %.2f, Sigma = %.5f" % (chi2, peakcentre, peakheight, sigma)
+  print("Chi-square = {:.5f}: Peak centre = {:.5f}, Height = {:.2f}, Sigma = {:.5f}".format(chi2, peakcentre, peakheight, sigma))
 
 
 .. testcleanup:: ExFitPeak

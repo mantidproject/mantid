@@ -8,9 +8,9 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <sstream>
 
-using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;
 
 namespace Mantid {
@@ -21,14 +21,12 @@ DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
 Workspace2D::Workspace2D(const Parallel::StorageMode storageMode)
-    : HistoWorkspace(storageMode), m_noVectors(0) {}
+    : HistoWorkspace(storageMode) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
-    : HistoWorkspace(other), m_noVectors(other.m_noVectors),
-      m_monitorList(other.m_monitorList) {
-  data.resize(m_noVectors);
-
-  for (size_t i = 0; i < m_noVectors; ++i) {
+    : HistoWorkspace(other), m_monitorList(other.m_monitorList) {
+  data.resize(other.data.size());
+  for (size_t i = 0; i < data.size(); ++i) {
     data[i] = new Histogram1D(*(other.data[i]));
   }
 }
@@ -46,9 +44,9 @@ Workspace2D::~Workspace2D() {
 
 #ifdef _MSC_VER
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
-  for (int64_t i = 0; i < static_cast<int64_t>(m_noVectors); i++) {
+  for (int64_t i = 0; i < static_cast<int64_t>(data.size()); i++) {
 #else
-  for (size_t i = 0; i < m_noVectors; ++i) {
+  for (size_t i = 0; i < data.size(); ++i) {
 #endif
     // Clear out the memory
     delete data[i];
@@ -69,8 +67,7 @@ Workspace2D::~Workspace2D() {
 */
 void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
                        const std::size_t &YLength) {
-  m_noVectors = NVectors;
-  data.resize(m_noVectors);
+  data.resize(NVectors);
 
   auto x = Kernel::make_cow<HistogramData::HistogramX>(
       XLength, HistogramData::LinearGenerator(1.0, 1.0));
@@ -81,23 +78,20 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   spec.setX(x);
   spec.setCounts(y);
   spec.setCountStandardDeviations(e);
-  for (size_t i = 0; i < m_noVectors; i++) {
+  for (size_t i = 0; i < data.size(); i++) {
     data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
     data[i]->setSpectrumNo(specnum_t(i + 1));
-    data[i]->setDetectorID(detid_t(i + 1));
   }
 
   // Add axes that reference the data
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(XLength, this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
-void Workspace2D::init(const std::size_t &NVectors,
-                       const HistogramData::Histogram &histogram) {
-  m_noVectors = NVectors;
-  data.resize(m_noVectors);
+void Workspace2D::init(const HistogramData::Histogram &histogram) {
+  data.resize(numberOfDetectorGroups());
 
   HistogramData::Histogram initializedHistogram(histogram);
   if (!histogram.sharedY()) {
@@ -113,16 +107,13 @@ void Workspace2D::init(const std::size_t &NVectors,
 
   Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
   spec.setHistogram(initializedHistogram);
-  for (size_t i = 0; i < m_noVectors; i++) {
-    data[i] = new Histogram1D(spec);
-    // Default spectrum number = starts at 1, for workspace index 0.
-    data[i]->setSpectrumNo(specnum_t(i + 1));
-    data[i]->setDetectorID(detid_t(i + 1));
+  for (auto &i : data) {
+    i = new Histogram1D(spec);
   }
 
   // Add axes that reference the data
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(initializedHistogram.x().size(), this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
@@ -134,13 +125,25 @@ size_t Workspace2D::getNumberHistograms() const {
 }
 
 /// get pseudo size
-size_t Workspace2D::size() const { return data.size() * blocksize(); }
+size_t Workspace2D::size() const {
+  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
+                         [](const size_t value, const Histogram1D *histo) {
+                           return value + histo->size();
+                         });
+}
 
 /// get the size of each vector
 size_t Workspace2D::blocksize() const {
-  return (!data.empty())
-             ? static_cast<ISpectrum const *>(data[0])->dataY().size()
-             : 0;
+  if (data.empty()) {
+    return 0;
+  } else {
+    size_t numBins = data[0]->size();
+    for (const auto *iter : data)
+      if (numBins != iter->size())
+        throw std::length_error(
+            "blocksize undefined because size of histograms is not equal");
+    return numBins;
+  }
 }
 
 /**
@@ -196,7 +199,8 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   if (imageE.empty() && imageY[0].empty())
     return;
 
-  if (!loadAsRectImg && blocksize() != 1) {
+  const size_t numBins = blocksize();
+  if (!loadAsRectImg && numBins != 1) {
     throw std::runtime_error(
         "Cannot set image in workspace: a single bin workspace is "
         "required when initializing a workspace from an "
@@ -214,7 +218,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   }
   size_t dataSize = width * height;
 
-  if (start + dataSize > getNumberHistograms() * blocksize()) {
+  if (start + dataSize > getNumberHistograms() * numBins) {
     throw std::runtime_error(
         "Cannot set image: image is bigger than workspace.");
   }
@@ -244,11 +248,11 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
           ") needs to be equal to the height (rows) of the image (" +
           std::to_string(height) + ")");
 
-    if (width != blocksize())
+    if (width != numBins)
       throw std::runtime_error(
           std::string("To load an image into a workspace with one spectrum per "
                       "row, then number of bins (") +
-          std::to_string(blocksize()) +
+          std::to_string(numBins) +
           ") needs to be equal to the width (columns) of the image (" +
           std::to_string(width) + ")");
 
@@ -285,10 +289,10 @@ Histogram1D &Workspace2D::getSpectrum(const size_t index) {
 
 /// Return const reference to Histogram1D at the given workspace index.
 const Histogram1D &Workspace2D::getSpectrum(const size_t index) const {
-  if (index >= m_noVectors) {
+  if (index >= data.size()) {
     std::ostringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
-       << " out of range " << m_noVectors;
+       << " out of range " << data.size();
     throw std::range_error(ss.str());
   }
   return *data[index];
@@ -318,7 +322,7 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
                                     MantidVec &Y, MantidVec &E,
                                     bool skipError) const {
   UNUSED_ARG(skipError);
-  if (index >= this->m_noVectors)
+  if (index >= data.size())
     throw std::range_error(
         "Workspace2D::generateHistogram, histogram number out of range");
   // output data arrays are implicitly filled by function

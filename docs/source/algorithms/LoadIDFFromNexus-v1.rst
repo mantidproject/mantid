@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -52,12 +52,12 @@ Usage
    # This workspace had the IDF loaded into it, so getting component renamed to "the rings".
    inst1 = ws_1.getInstrument()
    comp1 = inst1.getComponentByName("the rings")
-   print "Modified component name =", comp1.getName()
+   print("Modified component name = {}".format(comp1.getName()))
 
    # This workspace had no IDF loaded into it, so still has component named to "both rings".
    inst2 = ws_2.getInstrument()
    comp2 = inst2.getComponentByName("both rings")
-   print "Unmodified component name =", comp2.getName()
+   print("Unmodified component name = {}".format(comp2.getName()))
    
 Output:
 

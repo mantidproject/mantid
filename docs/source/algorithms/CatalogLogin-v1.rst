@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -24,7 +24,7 @@ Usage
     session = CatalogLogin(username='SECRET',password='SECRET',Facility="ISIS")
 
     # View the session ID for this catalog session.
-    print "The session ID is: " + session.getPropertyValue("Session")
+    print("The session ID is: {}".format(session.getPropertyValue("Session")))
 
 Output:
 

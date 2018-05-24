@@ -35,8 +35,7 @@ class PlotRowCommand : public CommandBase {
 public:
   PlotRowCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  PlotRowCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  PlotRowCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~PlotRowCommand(){};
 
   void execute() override {
@@ -50,6 +49,7 @@ public:
                    "the selected runs");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

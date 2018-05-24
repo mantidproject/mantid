@@ -25,7 +25,6 @@ DECLARE_ALGORITHM(UpdateInstrumentFromFile)
 
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument;
 using Geometry::Instrument_sptr;
 using Geometry::IDetector_sptr;
 using Kernel::V3D;

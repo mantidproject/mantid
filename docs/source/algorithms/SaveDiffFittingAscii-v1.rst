@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -103,7 +103,7 @@ Usage
     SaveDiffFittingAscii(InputWorkspace = ws, Filename=savefile, RunNumber="21344", Bank = "1",
     OutMode = "AppendToExistingFile")
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 Output:
 

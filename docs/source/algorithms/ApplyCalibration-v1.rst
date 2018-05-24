@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,8 +37,8 @@ Usage
    # Show positions before calibration
    for i in spectra:
         det = ws.getDetector(i)
-        print "Position of Detector ID=%i before ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+        print("Position of Detector ID=%i before ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
 
 
    # Create PositionTable - This would be done by the calibration functions
@@ -60,8 +60,8 @@ Usage
    # Show positions after calibration
    for i in spectra:
         det = ws.getDetector(i)
-        print "Position of Detector ID=%i after ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+        print("Position of Detector ID=%i after ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
 
 Output:
 

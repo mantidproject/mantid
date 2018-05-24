@@ -51,9 +51,10 @@ namespace FileDialogHandler {
  * @param options :: The options argument holds various options about how
  * to run the dialog
   */
-DLLExport QString getSaveFileName(QWidget *parent = 0,
-                                  const Mantid::Kernel::Property *baseProp = 0,
-                                  QFileDialog::Options options = 0);
+DLLExport QString
+getSaveFileName(QWidget *parent = nullptr,
+                const Mantid::Kernel::Property *baseProp = nullptr,
+                QFileDialog::Options options = nullptr);
 
 /**
  * For file dialogs. This will add the selected extension if an extension

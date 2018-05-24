@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ important set Random to false or uncheck the box.
   values should be set to a range symmetrical around x=0.
 
 Instrument
-~~~~~~~~~~
+##########
 
 The instrument created by CreateSample workspace is very simple and looks like
 this.
@@ -48,7 +48,7 @@ this.
 
 The sample is placed at the origin.  The source is seperated from the sample in
 the negative direction by the value you specify in "SourceDistanceFromSample".
-The instrument has "NumBanks" detector banks, each bank is moved down the X axis
+The instrument has "NumBanks" detector banks, each bank is moved down the Z axis
 by "BankDistanceFromSample" from the sample or the previous bank.
 
 Each bank is a square rectangular bank comprising of "BankPixelWidth" pixels in
@@ -73,10 +73,9 @@ Usage
    # create histogram workspace
    ws = CreateSampleWorkspace()
 
-   print "Number of spectra: " +  str(ws.getNumberHistograms())
-   print "Number of bins: " +  str(ws.blocksize())
-   print "Each spectra has a level backgound of " + str(ws.readY(0)[0]) + \
-    " counts and a peak in the centre of " + str(ws.readY(0)[50]) + " counts."
+   print("Number of spectra: {}".format(ws.getNumberHistograms()))
+   print("Number of bins: {}".format(ws.blocksize()))
+   print("Each spectra has a level backgound of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
 
 Output:
 
@@ -93,13 +92,12 @@ Output:
    # create event workspace
    ws = CreateSampleWorkspace("Event")
 
-   print "Number of spectra: " +  str(ws.getNumberHistograms())
-   print "Number of bins: " +  str(ws.blocksize())
-   print "Number of events: " +  str(ws.getNumberEvents())
-   print "Event Workspaces come with bins set by default to a bin width of " + str(ws.readX(0)[1]-ws.readX(0)[0])
+   print("Number of spectra: {}".format(ws.getNumberHistograms()))
+   print("Number of bins: {}".format(ws.blocksize()))
+   print("Number of events: {}".format(ws.getNumberEvents()))
+   print("Event Workspaces come with bins set by default to a bin width of {}".format(ws.readX(0)[1]-ws.readX(0)[0]))
    #The data itensity of an EventWorkspce is scaled by the number of events used, so the values differ from the histogram above.
-   print "Each spectra has a level backgound of " + str(ws.readY(0)[0]) + \
-   	" counts and a peak in the centre of " + str(ws.readY(0)[50]) + " counts."
+   print("Each spectra has a level backgound of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
 
 Output:
 
@@ -117,16 +115,16 @@ Output:
 
    # create a workspace with Flat Background
    wsFlat = CreateSampleWorkspace("Histogram","Flat background")
-   print "Flat background has a constant value of " + str(wsFlat.readY(0)[0]) + " counts."
+   print("Flat background has a constant value of {} counts.".format(wsFlat.readY(0)[0]))
 
    # create a workspace with multiple peaks
    wsMulti = CreateSampleWorkspace("Histogram","Multiple Peaks")
-   print "Multiple Peaks has a level backgound of " + str(wsMulti.readY(0)[0]),
-   print "counts and two gaussian peaks, the largest of which is " + str(wsMulti.readY(0)[60]) + " counts."
+   print("Multiple Peaks has a level backgound of {} counts and two gaussian peaks, the largest of which is {} counts.".
+         format(wsMulti.readY(0)[0], wsMulti.readY(0)[60]))
 
    # create a workspace with Exponential Decay
    wsExp = CreateSampleWorkspace("Histogram","Exp Decay")
-   print ("Exp Decay starts high and drops rapidly to %.2f counts at 8,000 us (with the default binning)." % wsExp.readY(0)[40])
+   print("Exp Decay starts high and drops rapidly to {:.2f} counts at 8,000 us (with the default binning).".format(wsExp.readY(0)[40]))
 
 Output:
 
@@ -145,9 +143,9 @@ Output:
 
    ws = CreateSampleWorkspace("Histogram","User Defined",myFunc)
 
-   print "My function defined a background of "+ str(ws.readY(0)[0]) + " counts."
-   print "With a peak reaching "+ str(ws.readY(0)[5]) + " counts at 1,000 us,"
-   print "and another reaching "+ str(ws.readY(0)[50]) + " counts at 10,000 us."
+   print("My function defined a background of {} counts.".format(ws.readY(0)[0]))
+   print("With a peak reaching {} counts at 1,000 us,".format(ws.readY(0)[5]))
+   print("and another reaching {} counts at 10,000 us.".format(ws.readY(0)[50]))
 
 Output:
 
@@ -167,8 +165,8 @@ Output:
                             XMax=0.5,
                             BinWidth=0.01)
 
-   print "Number of spectra: " +  str(ws.getNumberHistograms())
-   print "Number of bins: " +  str(ws.blocksize())
+   print("Number of spectra: {}".format(ws.getNumberHistograms()))
+   print("Number of bins: {}".format(ws.blocksize()))
 
 Output:
 
@@ -184,8 +182,8 @@ Output:
    #Random adds a little random noise to the data function
    ws=CreateSampleWorkspace(WorkspaceType="Event",Function="One Peak",NumBanks=4,NumMonitors=3,BankPixelWidth=5,NumEvents=500,Random=True,XUnit="tof",XMin=0, XMax=8000, BinWidth=100)
 
-   print "Number of spectra: " +  str(ws.getNumberHistograms())
-   print "Number of bins: " +  str(ws.blocksize())
+   print("Number of spectra: {}".format(ws.getNumberHistograms()))
+   print("Number of bins: {}".format(ws.blocksize()))
 
 Output:
 

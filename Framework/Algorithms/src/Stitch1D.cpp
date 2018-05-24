@@ -20,13 +20,12 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::HistogramE;
 
 namespace {
 
-typedef boost::tuple<double, double> MinMaxTuple;
+using MinMaxTuple = boost::tuple<double, double>;
 MinMaxTuple calculateXIntersection(MatrixWorkspace_sptr lhsWS,
                                    MatrixWorkspace_sptr rhsWS) {
   return MinMaxTuple(rhsWS->x(0).front(), lhsWS->x(0).back());

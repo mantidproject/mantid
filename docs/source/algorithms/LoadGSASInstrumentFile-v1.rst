@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,7 +30,7 @@ Usage
    #Print first four rows
    for i in [0,1,2,3]:
       row = tws.row(i)
-      print "{'Name': '%s','Value_1': %.2f, 'Value_2': %.2f}" % ( row["Name"], row["Value_1"],  row["Value_2"] )
+      print("{{'Name': '{}','Value_1': {:.2f}, 'Value_2': {:.2f}}}".format(row["Name"], row["Value_1"],  row["Value_2"] ))
 
 Output:
 
@@ -56,19 +56,19 @@ Output:
 
    # ...and check they do not exist
    instrument = groupWs.getItem(0).getInstrument()
-   print "Alpha0 parameter exists: ",  instrument.hasParameter("Alpha0")
-   print "Beta0 parameter exists: ", instrument.hasParameter("Beta0")
-   print "SigmaSquared parameter exists: " , instrument.hasParameter("SigmaSquared")
+   print("Alpha0 parameter exists:  {}".format(instrument.hasParameter("Alpha0")))
+   print("Beta0 parameter exists:  {}".format(instrument.hasParameter("Beta0")))
+   print("SigmaSquared parameter exists:  {}".format(instrument.hasParameter("SigmaSquared")))
 
    # Now we load a GSAS Instrument file with 2 Banks into the workspace...
-   print "\nLoading parameters from GSAS\n"
+   print("\nLoading parameters from GSAS\n")
    tws = LoadGSASInstrumentFile(Filename="GSAS_2bank.prm",UseBankIDsInFile=True,Workspace=groupWs,Banks=[1,2])
 
    # ...and check parameters are there again
    instrument = groupWs.getItem(0).getInstrument()
-   print "Alpha0 parameter exists: ",  instrument.hasParameter("Alpha0")
-   print "Beta0 parameter exists: ", instrument.hasParameter("Beta0")
-   print "SigmaSquared parameter exists: " , instrument.hasParameter("SigmaSquared")
+   print("Alpha0 parameter exists:  {}".format(instrument.hasParameter("Alpha0")))
+   print("Beta0 parameter exists:  {}".format(instrument.hasParameter("Beta0")))
+   print("SigmaSquared parameter exists:  {}".format(instrument.hasParameter("SigmaSquared")))
 
 Output:
 

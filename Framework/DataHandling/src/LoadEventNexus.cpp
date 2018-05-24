@@ -1,38 +1,38 @@
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
-#include "MantidDataHandling/ProcessBankData.h"
-
+#include "MantidDataHandling/DefaultEventLoader.h"
+#include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <boost/function.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <functional>
+#include <random>
 
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 using std::map;
 using std::string;
 using std::vector;
-
 using namespace ::NeXus;
 
 namespace Mantid {
@@ -41,9 +41,12 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
+using namespace DateAndTimeHelpers;
 using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 namespace {
 
@@ -68,583 +71,14 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
 }
 }
 
-//==============================================================================================
-// Class LoadBankFromDiskTask
-//==============================================================================================
-/** This task does the disk IO from loading the NXS file,
-* and so will be on a disk IO mutex */
-class LoadBankFromDiskTask : public Task {
-
-public:
-  //---------------------------------------------------------------------------------------------------
-  /** Constructor
-  *
-  * @param alg :: Handle to the main algorithm
-  * @param entry_name :: The pathname of the bank to load
-  * @param entry_type :: The classtype of the entry to load
-  * @param numEvents :: The number of events in the bank.
-  * @param oldNeXusFileNames :: Identify if file is of old variety.
-  * @param prog :: an optional Progress object
-  * @param ioMutex :: a mutex shared for all Disk I-O tasks
-  * @param scheduler :: the ThreadScheduler that runs this task.
-  * @param framePeriodNumbers :: Period numbers corresponding to each frame
-  */
-  LoadBankFromDiskTask(LoadEventNexus *alg, const std::string &entry_name,
-                       const std::string &entry_type,
-                       const std::size_t numEvents,
-                       const bool oldNeXusFileNames, Progress *prog,
-                       boost::shared_ptr<std::mutex> ioMutex,
-                       ThreadScheduler *scheduler,
-                       const std::vector<int> &framePeriodNumbers)
-      : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
-        // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
-        // m_loadError(false),
-        prog(prog), scheduler(scheduler), m_loadError(false),
-        m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
-        m_event_id(nullptr), m_event_time_of_flight(nullptr),
-        m_have_weight(false), m_event_weight(nullptr),
-        m_framePeriodNumbers(framePeriodNumbers) {
-    setMutex(ioMutex);
-    m_cost = static_cast<double>(numEvents);
-    m_min_id = std::numeric_limits<uint32_t>::max();
-    m_max_id = 0;
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Load the pulse times, if needed. This sets
-  * thisBankPulseTimes to the right pointer.
-  * */
-  void loadPulseTimes(::NeXus::File &file) {
-    try {
-      // First, get info about the event_time_zero field in this bank
-      file.openData("event_time_zero");
-    } catch (::NeXus::Exception &) {
-      // Field not found error is most likely.
-      // Use the "proton_charge" das logs.
-      thisBankPulseTimes = alg->m_allBanksPulseTimes;
-      return;
-    }
-    std::string thisStartTime;
-    size_t thisNumPulses = 0;
-    file.getAttr("offset", thisStartTime);
-    if (!file.getInfo().dims.empty())
-      thisNumPulses = file.getInfo().dims[0];
-    file.closeData();
-
-    // Now, we look through existing ones to see if it is already loaded
-    // thisBankPulseTimes = NULL;
-    for (auto &bankPulseTime : alg->m_bankPulseTimes) {
-      if (bankPulseTime->equals(thisNumPulses, thisStartTime)) {
-        thisBankPulseTimes = bankPulseTime;
-        return;
-      }
-    }
-
-    // Not found? Need to load and add it
-    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(
-        boost::ref(file), m_framePeriodNumbers);
-    alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Load the event_index field
-  (a list of size of # of pulses giving the index in the event list for that
-  pulse)
-
-  * @param file :: File handle for the NeXus file
-  * @param event_index :: ref to the vector
-  */
-  void loadEventIndex(::NeXus::File &file, std::vector<uint64_t> &event_index) {
-    // Get the event_index (a list of size of # of pulses giving the index in
-    // the event list for that pulse)
-    file.openData("event_index");
-    // Must be uint64
-    if (file.getInfo().type == ::NeXus::UINT64)
-      file.getData(event_index);
-    else {
-      alg->getLogger().warning()
-          << "Entry " << entry_name
-          << "'s event_index field is not UINT64! It will be skipped.\n";
-      m_loadError = true;
-    }
-    file.closeData();
-
-    // Look for the sign that the bank is empty
-    if (event_index.size() == 1) {
-      if (event_index[0] == 0) {
-        // One entry, only zero. This means NO events in this bank.
-        m_loadError = true;
-        alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
-      }
-    }
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Open the event_id field and validate the contents
-  *
-  * @param file :: File handle for the NeXus file
-  * @param start_event :: set to the index of the first event
-  * @param stop_event :: set to the index of the last event + 1
-  * @param event_index ::  (a list of size of # of pulses giving the index in
-  *the event list for that pulse)
-  */
-  void prepareEventId(::NeXus::File &file, size_t &start_event,
-                      size_t &stop_event, std::vector<uint64_t> &event_index) {
-    // Get the list of pixel ID's
-    if (m_oldNexusFileNames)
-      file.openData("event_pixel_id");
-    else
-      file.openData("event_id");
-
-    // By default, use all available indices
-    start_event = 0;
-    ::NeXus::Info id_info = file.getInfo();
-    // dims[0] can be negative in ISIS meaning 2^32 + dims[0]. Take that into
-    // account
-    int64_t dim0 = recalculateDataSize(id_info.dims[0]);
-    stop_event = static_cast<size_t>(dim0);
-
-    // Handle the time filtering by changing the start/end offsets.
-    for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
-      if (thisBankPulseTimes->pulseTimes[i] >= alg->filter_time_start) {
-        start_event = event_index[i];
-        break; // stop looking
-      }
-    }
-
-    if (start_event > static_cast<size_t>(dim0)) {
-      // If the frame indexes are bad then we can't construct the times of the
-      // events properly and filtering by time
-      // will not work on this data
-      alg->getLogger().warning()
-          << this->entry_name
-          << "'s field 'event_index' seems to be invalid (start_index > than "
-             "the number of events in the bank)."
-          << "All events will appear in the same frame and filtering by time "
-             "will not be possible on this data.\n";
-      start_event = 0;
-      stop_event = static_cast<size_t>(dim0);
-    } else {
-      for (size_t i = 0; i < thisBankPulseTimes->numPulses; i++) {
-        if (thisBankPulseTimes->pulseTimes[i] > alg->filter_time_stop) {
-          stop_event = event_index[i];
-          break;
-        }
-      }
-    }
-    // We are loading part - work out the event number range
-    if (alg->chunk != EMPTY_INT()) {
-      start_event = (alg->chunk - alg->firstChunkForBank) * alg->eventsPerChunk;
-      // Don't change stop_event for the final chunk
-      if (start_event + alg->eventsPerChunk < stop_event)
-        stop_event = start_event + alg->eventsPerChunk;
-    }
-
-    // Make sure it is within range
-    if (stop_event > static_cast<size_t>(dim0))
-      stop_event = dim0;
-
-    alg->getLogger().debug() << entry_name << ": start_event " << start_event
-                             << " stop_event " << stop_event << "\n";
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Load the event_id field, which has been open
-  */
-  void loadEventId(::NeXus::File &file) {
-    // This is the data size
-    ::NeXus::Info id_info = file.getInfo();
-    int64_t dim0 = recalculateDataSize(id_info.dims[0]);
-
-    // Now we allocate the required arrays
-    m_event_id = new uint32_t[m_loadSize[0]];
-
-    // Check that the required space is there in the file.
-    if (dim0 < m_loadSize[0] + m_loadStart[0]) {
-      alg->getLogger().warning() << "Entry " << entry_name
-                                 << "'s event_id field is too small (" << dim0
-                                 << ") to load the desired data size ("
-                                 << m_loadSize[0] + m_loadStart[0] << ").\n";
-      m_loadError = true;
-    }
-
-    if (alg->getCancel())
-      m_loadError = true; // To allow cancelling the algorithm
-
-    if (!m_loadError) {
-      // Must be uint32
-      if (id_info.type == ::NeXus::UINT32)
-        file.getSlab(m_event_id, m_loadStart, m_loadSize);
-      else {
-        alg->getLogger().warning()
-            << "Entry " << entry_name
-            << "'s event_id field is not UINT32! It will be skipped.\n";
-        m_loadError = true;
-      }
-      file.closeData();
-
-      // determine the range of pixel ids
-      for (auto i = 0; i < m_loadSize[0]; ++i) {
-        uint32_t temp = m_event_id[i];
-        if (temp < m_min_id)
-          m_min_id = temp;
-        if (temp > m_max_id)
-          m_max_id = temp;
-      }
-
-      if (m_min_id > static_cast<uint32_t>(alg->eventid_max)) {
-        // All the detector IDs in the bank are higher than the highest 'known'
-        // (from the IDF)
-        // ID. Setting this will abort the loading of the bank.
-        m_loadError = true;
-      }
-      // fixup the minimum pixel id in the case that it's lower than the lowest
-      // 'known' id. We test this by checking that when we add the offset we
-      // would not get a negative index into the vector. Note that m_min_id is
-      // a uint so we have to be cautious about adding it to an int which may be
-      // negative.
-      if (static_cast<int32_t>(m_min_id) + alg->pixelID_to_wi_offset < 0) {
-        m_min_id = static_cast<uint32_t>(abs(alg->pixelID_to_wi_offset));
-      }
-      // fixup the maximum pixel id in the case that it's higher than the
-      // highest 'known' id
-      if (m_max_id > static_cast<uint32_t>(alg->eventid_max))
-        m_max_id = static_cast<uint32_t>(alg->eventid_max);
-    }
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Open and load the times-of-flight data
-  */
-  void loadTof(::NeXus::File &file) {
-    // Allocate the array
-    auto temp = new float[m_loadSize[0]];
-    delete[] m_event_time_of_flight;
-    m_event_time_of_flight = temp;
-
-    // Get the list of event_time_of_flight's
-    if (!m_oldNexusFileNames)
-      file.openData("event_time_offset");
-    else
-      file.openData("event_time_of_flight");
-
-    // Check that the required space is there in the file.
-    ::NeXus::Info tof_info = file.getInfo();
-    int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
-    if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
-      alg->getLogger().warning() << "Entry " << entry_name
-                                 << "'s event_time_offset field is too small "
-                                    "to load the desired data.\n";
-      m_loadError = true;
-    }
-
-    // Check that the type is what it is supposed to be
-    if (tof_info.type == ::NeXus::FLOAT32)
-      file.getSlab(m_event_time_of_flight, m_loadStart, m_loadSize);
-    else {
-      alg->getLogger().warning()
-          << "Entry " << entry_name
-          << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
-      m_loadError = true;
-    }
-
-    if (!m_loadError) {
-      std::string units;
-      file.getAttr("units", units);
-      if (units != "microsecond") {
-        alg->getLogger().warning() << "Entry " << entry_name
-                                   << "'s event_time_offset field's units are "
-                                      "not microsecond. It will be skipped.\n";
-        m_loadError = true;
-      }
-      file.closeData();
-    } // no error
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Load weight of weigthed events
-  */
-  void loadEventWeights(::NeXus::File &file) {
-    try {
-      // First, get info about the event_weight field in this bank
-      file.openData("event_weight");
-    } catch (::NeXus::Exception &) {
-      // Field not found error is most likely.
-      m_have_weight = false;
-      return;
-    }
-    // OK, we've got them
-    m_have_weight = true;
-
-    // Allocate the array
-    auto temp = new float[m_loadSize[0]];
-    delete[] m_event_weight;
-    m_event_weight = temp;
-
-    ::NeXus::Info weight_info = file.getInfo();
-    int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
-    if (weight_dim0 < m_loadSize[0] + m_loadStart[0]) {
-      alg->getLogger().warning()
-          << "Entry " << entry_name
-          << "'s event_weight field is too small to load the desired data.\n";
-      m_loadError = true;
-    }
-
-    // Check that the type is what it is supposed to be
-    if (weight_info.type == ::NeXus::FLOAT32)
-      file.getSlab(m_event_weight, m_loadStart, m_loadSize);
-    else {
-      alg->getLogger().warning()
-          << "Entry " << entry_name
-          << "'s event_weight field is not FLOAT32! It will be skipped.\n";
-      m_loadError = true;
-    }
-
-    if (!m_loadError) {
-      file.closeData();
-    }
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  void run() override {
-    // The vectors we will be filling
-    auto event_index_ptr = new std::vector<uint64_t>();
-    std::vector<uint64_t> &event_index = *event_index_ptr;
-
-    // These give the limits in each file as to which events we actually load
-    // (when filtering by time).
-    m_loadStart.resize(1, 0);
-    m_loadSize.resize(1, 0);
-
-    // Data arrays
-    m_event_id = nullptr;
-    m_event_time_of_flight = nullptr;
-    m_event_weight = nullptr;
-
-    m_loadError = false;
-    m_have_weight = alg->m_haveWeights;
-
-    prog->report(entry_name + ": load from disk");
-
-    // Open the file
-    ::NeXus::File file(alg->m_filename);
-    try {
-      // Navigate into the file
-      file.openGroup(alg->m_top_entry_name, "NXentry");
-      // Open the bankN_event group
-      file.openGroup(entry_name, entry_type);
-
-      // Load the event_index field.
-      this->loadEventIndex(file, event_index);
-
-      if (!m_loadError) {
-        // Load and validate the pulse times
-        this->loadPulseTimes(file);
-
-        // The event_index should be the same length as the pulse times from DAS
-        // logs.
-        if (event_index.size() != thisBankPulseTimes->numPulses)
-          alg->getLogger().warning()
-              << "Bank " << entry_name
-              << " has a mismatch between the number of event_index entries "
-                 "and the number of pulse times in event_time_zero.\n";
-
-        // Open and validate event_id field.
-        size_t start_event = 0;
-        size_t stop_event = 0;
-        this->prepareEventId(file, start_event, stop_event, event_index);
-
-        // These are the arguments to getSlab()
-        m_loadStart[0] = static_cast<int>(start_event);
-        m_loadSize[0] = static_cast<int>(stop_event - start_event);
-
-        if ((m_loadSize[0] > 0) && (m_loadStart[0] >= 0)) {
-          // Load pixel IDs
-          this->loadEventId(file);
-          if (alg->getCancel())
-            m_loadError = true; // To allow cancelling the algorithm
-
-          // And TOF.
-          if (!m_loadError) {
-            this->loadTof(file);
-            if (m_have_weight) {
-              this->loadEventWeights(file);
-            }
-          }
-        } // Size is at least 1
-        else {
-          // Found a size that was 0 or less; stop processing
-          m_loadError = true;
-        }
-
-      } // no error
-
-    } // try block
-    catch (std::exception &e) {
-      alg->getLogger().error() << "Error while loading bank " << entry_name
-                               << ":\n";
-      alg->getLogger().error() << e.what() << '\n';
-      m_loadError = true;
-    } catch (...) {
-      alg->getLogger().error() << "Unspecified error while loading bank "
-                               << entry_name << '\n';
-      m_loadError = true;
-    }
-
-    // Close up the file even if errors occured.
-    file.closeGroup();
-    file.close();
-
-    // Abort if anything failed
-    if (m_loadError) {
-      delete[] m_event_id;
-      delete[] m_event_time_of_flight;
-      if (m_have_weight) {
-        delete[] m_event_weight;
-      }
-      delete event_index_ptr;
-
-      return;
-    }
-
-    const auto bank_size = m_max_id - m_min_id;
-    const uint32_t minSpectraToLoad = static_cast<uint32_t>(alg->m_specMin);
-    const uint32_t maxSpectraToLoad = static_cast<uint32_t>(alg->m_specMax);
-    const uint32_t emptyInt = static_cast<uint32_t>(EMPTY_INT());
-    // check that if a range of spectra were requested that these fit within
-    // this bank
-    if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
-      if (minSpectraToLoad > m_max_id) { // the minimum spectra to load is more
-                                         // than the max of this bank
-        return;
-      }
-      // the min spectra to load is higher than the min for this bank
-      m_min_id = minSpectraToLoad;
-    }
-    if (maxSpectraToLoad != emptyInt && m_max_id > maxSpectraToLoad) {
-      if (maxSpectraToLoad < m_min_id) {
-        // the maximum spectra to load is less than the minimum of this bank
-        return;
-      }
-      // the max spectra to load is lower than the max for this bank
-      m_max_id = maxSpectraToLoad;
-    }
-    if (m_min_id > m_max_id) {
-      // the min is now larger than the max, this means the entire block of
-      // spectra to load is outside this bank
-      return;
-    }
-
-    // schedule the job to generate the event lists
-    auto mid_id = m_max_id;
-    if (alg->splitProcessing && m_max_id > (m_min_id + (bank_size / 4)))
-      // only split if told to and the section to load is at least 1/4 the size
-      // of the whole bank
-      mid_id = (m_max_id + m_min_id) / 2;
-
-    // No error? Launch a new task to process that data.
-    size_t numEvents = m_loadSize[0];
-    size_t startAt = m_loadStart[0];
-
-    // convert things to shared_arrays
-    boost::shared_array<uint32_t> event_id_shrd(m_event_id);
-    boost::shared_array<float> event_time_of_flight_shrd(
-        m_event_time_of_flight);
-    boost::shared_array<float> event_weight_shrd(m_event_weight);
-    boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
-
-    ProcessBankData *newTask1 = new ProcessBankData(
-        alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
-        numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
-        event_weight_shrd, m_min_id, mid_id);
-    scheduler->push(newTask1);
-    if (alg->splitProcessing && (mid_id < m_max_id)) {
-      ProcessBankData *newTask2 = new ProcessBankData(
-          alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
-          numEvents, startAt, event_index_shrd, thisBankPulseTimes,
-          m_have_weight, event_weight_shrd, (mid_id + 1), m_max_id);
-      scheduler->push(newTask2);
-    }
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /**
-  * Interpret the value describing the number of events. If the number is
-  * positive return it unchanged.
-  * If the value is negative (can happen at ISIS) add 2^32 to it.
-  * @param size :: The size of events value.
-  */
-  int64_t recalculateDataSize(const int64_t &size) {
-    if (size < 0) {
-      const int64_t shift = int64_t(1) << 32;
-      return shift + size;
-    }
-    return size;
-  }
-
-private:
-  /// Algorithm being run
-  LoadEventNexus *alg;
-  /// NXS path to bank
-  std::string entry_name;
-  /// NXS type
-  std::string entry_type;
-  /// Progress reporting
-  Progress *prog;
-  /// ThreadScheduler running this task
-  ThreadScheduler *scheduler;
-  /// Object with the pulse times for this bank
-  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
-  /// Did we get an error in loading
-  bool m_loadError;
-  /// Old names in the file?
-  bool m_oldNexusFileNames;
-  /// Index to load start at in the file
-  std::vector<int> m_loadStart;
-  /// How much to load in the file
-  std::vector<int> m_loadSize;
-  /// Event pixel ID data
-  uint32_t *m_event_id;
-  /// Minimum pixel ID in this data
-  uint32_t m_min_id;
-  /// Maximum pixel ID in this data
-  uint32_t m_max_id;
-  /// TOF data
-  float *m_event_time_of_flight;
-  /// Flag for simulated data
-  bool m_have_weight;
-  /// Event weights
-  float *m_event_weight;
-  /// Frame period numbers
-  const std::vector<int> m_framePeriodNumbers;
-}; // END-DEF-CLASS LoadBankFromDiskTask
-
-//===============================================================================================
-// LoadEventNexus
-//===============================================================================================
-
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
 */
 LoadEventNexus::LoadEventNexus()
-    : IFileLoader<Kernel::NexusDescriptor>(), m_filename(), filter_tof_min(0),
-      filter_tof_max(0), m_specList(), m_specMin(0), m_specMax(0),
-      filter_time_start(), filter_time_stop(), chunk(0), totalChunks(0),
-      firstChunkForBank(0), eventsPerChunk(0), m_tofMutex(), longest_tof(0),
-      shortest_tof(0), bad_tofs(0), discarded_events(0), precount(0),
-      compressTolerance(0), eventVectors(), m_eventVectorMutex(),
-      eventid_max(0), pixelID_to_wi_vector(), pixelID_to_wi_offset(),
-      m_bankPulseTimes(), m_allBanksPulseTimes(), m_top_entry_name(),
-      m_file(nullptr), splitProcessing(false), m_haveWeights(false),
-      weightedEventVectors(), m_instrument_loaded_correctly(false),
+    : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0),
+      longest_tof(0), shortest_tof(0), bad_tofs(0), discarded_events(0),
+      compressTolerance(0), m_instrument_loaded_correctly(false),
       loadlogs(false), m_logs_loaded_correctly(false), event_id_is_spec(false) {
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor */
-LoadEventNexus::~LoadEventNexus() {
-  if (m_file)
-    delete m_file;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -866,6 +300,12 @@ void LoadEventNexus::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
+
+#ifdef MPI_EXPERIMENTAL
+  declareProperty(make_unique<PropertyWithValue<bool>>("UseParallelLoader",
+                                                       true, Direction::Input),
+                  "Use experimental parallel loader for loading event data.");
+#endif
 }
 
 //----------------------------------------------------------------------------------------------
@@ -877,7 +317,7 @@ void LoadEventNexus::setTopEntryName() {
     m_top_entry_name = nxentryProperty;
     return;
   }
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   try {
     string_map_t::const_iterator it;
     // assume we're at the top, otherwise: m_file->openPath("/");
@@ -942,7 +382,6 @@ void LoadEventNexus::exec() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  precount = getProperty("Precount");
   compressTolerance = getProperty("CompressTolerance");
 
   loadlogs = getProperty("LoadLogs");
@@ -1007,67 +446,7 @@ void LoadEventNexus::exec() {
       this->runLoadMonitors();
     }
   }
-}
-
-//-----------------------------------------------------------------------------
-/** Generate a look-up table where the index = the pixel ID of an event
-* and the value = a pointer to the EventList in the workspace
-* @param vectors :: the array to create the map on
-*/
-template <class T>
-void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
-  vectors.resize(m_ws->nPeriods());
-  if (this->event_id_is_spec) {
-    // Find max spectrum no
-    Axis *ax1 = m_ws->getAxis(1);
-    specnum_t maxSpecNo =
-        -std::numeric_limits<specnum_t>::max(); // So that any number will be
-                                                // greater than this
-    for (size_t i = 0; i < ax1->length(); i++) {
-      specnum_t spec = ax1->spectraNo(i);
-      if (spec > maxSpecNo)
-        maxSpecNo = spec;
-    }
-
-    // These are used by the bank loader to figure out where to put the events
-    // The index of eventVectors is a spectrum number so it is simply resized to
-    // the maximum
-    // possible spectrum number
-    eventid_max = maxSpecNo;
-    for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(maxSpecNo + 1, nullptr);
-    }
-    for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
-      for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
-        const auto &spec = m_ws->getSpectrum(i);
-        getEventsFrom(m_ws->getSpectrum(i, period),
-                      vectors[period][spec.getSpectrumNo()]);
-      }
-    }
-  } else {
-    // To avoid going out of range in the vector, this is the MAX index that can
-    // go into it
-    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) +
-                  pixelID_to_wi_offset;
-
-    // Make an array where index = pixel ID
-    // Set the value to NULL by default
-    for (size_t i = 0; i < vectors.size(); ++i) {
-      vectors[i].resize(eventid_max + 1, nullptr);
-    }
-
-    for (size_t j = size_t(pixelID_to_wi_offset);
-         j < pixelID_to_wi_vector.size(); j++) {
-      size_t wi = pixelID_to_wi_vector[j];
-      // Save a POINTER to the vector
-      if (wi < m_ws->getNumberHistograms()) {
-        for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
-          getEventsFrom(m_ws->getSpectrum(wi, period),
-                        vectors[period][j - pixelID_to_wi_offset]);
-        }
-      }
-    }
-  }
+  m_file->close();
 }
 
 /**
@@ -1114,21 +493,6 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
   size_t numEvents = static_cast<std::size_t>(file.getInfo().dims[0]);
   file.closeData();
   return numEvents;
-}
-
-void LoadEventNexus::createWorkspaceIndexMaps(
-    const bool monitors, const std::vector<std::string> &bankNames) {
-  // Create the required spectra mapping so that the workspace knows what to pad
-  // to
-  createSpectraMapping(m_filename, monitors, bankNames);
-
-  // This map will be used to find the workspace index
-  if (this->event_id_is_spec)
-    pixelID_to_wi_vector =
-        m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);
-  else
-    pixelID_to_wi_vector =
-        m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_offset, true);
 }
 
 /** Load the instrument from the nexus file
@@ -1185,7 +549,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     Kernel::TimeSeriesProperty<double> *log =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             localWorkspace->mutableRun().getProperty("proton_charge"));
-    std::vector<Kernel::DateAndTime> temp;
+    std::vector<Types::Core::DateAndTime> temp;
     if (log)
       temp = log->timesAsVector();
     // if (returnpulsetimes) out = new BankPulseTimes(temp);
@@ -1194,11 +558,11 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
 
     // Use the first pulse as the run_start time.
     if (!temp.empty()) {
-      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
+      if (temp[0] < Types::Core::DateAndTime("1991-01-01T00:00:00"))
         alg.getLogger().warning() << "Found entries in the proton_charge "
                                      "sample log with invalid pulse time!\n";
 
-      Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
+      Types::Core::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start =
       // first non-zero time.
       // (this is used in LoadInstrument to find the right instrument file to
@@ -1295,7 +659,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       std::string tmp;
       m_file->readData("start_time", tmp);
       m_file->closeGroup();
-      run_start = DateAndTime(tmp);
+      run_start = createFromSanitizedISO8601(tmp);
       m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
                                      true);
     }
@@ -1306,7 +670,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == nullptr) {
     std::vector<DateAndTime> temp;
-    // m_allBanksPulseTimes = new BankPulseTimes(temp);
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
@@ -1329,14 +692,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Now we want to go through all the bankN_event entries
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
-  size_t total_events = 0;
   map<string, string> entries = m_file->getEntries();
   map<string, string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
-  m_haveWeights = false;
+  bool haveWeights = false;
   for (; it != entries.end(); ++it) {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
@@ -1348,12 +710,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
       bankNames.push_back(entry_name);
       bankNumEvents.push_back(num);
-      total_events += num;
 
       // Look for weights in simulated file
       try {
         m_file->openData("event_weight");
-        m_haveWeights = true;
+        haveWeights = true;
         m_file->closeData();
       } catch (::NeXus::Exception &) {
         // Swallow exception since flag is already false;
@@ -1389,13 +750,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   double filter_time_start_sec, filter_time_stop_sec;
   filter_time_start_sec = getProperty("FilterByTimeStart");
   filter_time_stop_sec = getProperty("FilterByTimeStop");
-  chunk = getProperty("ChunkNumber");
-  totalChunks = getProperty("TotalChunks");
 
   // Default to ALL pulse times
   bool is_time_filtered = false;
-  filter_time_start = Kernel::DateAndTime::minimum();
-  filter_time_stop = Kernel::DateAndTime::maximum();
+  filter_time_start = Types::Core::DateAndTime::minimum();
+  filter_time_stop = Types::Core::DateAndTime::maximum();
 
   if (m_allBanksPulseTimes->numPulses > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from
@@ -1432,7 +791,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // Set the binning axis using this.
     m_ws->setAllX(axis);
 
-    createWorkspaceIndexMaps(monitors, std::vector<std::string>());
+    createSpectraMapping(m_filename, monitors, std::vector<std::string>());
     return;
   }
 
@@ -1484,18 +843,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   //----------------- Pad Empty Pixels -------------------------------
-  createWorkspaceIndexMaps(monitors, someBanks);
-
-  // Cache a map for speed.
-  if (!m_haveWeights) {
-    this->makeMapToEventLists<EventVector_pt>(eventVectors);
-  } else {
-    // Convert to weighted events
-    for (size_t i = 0; i < m_ws->getNumberHistograms(); i++) {
-      m_ws->getSpectrum(i).switchTo(API::WEIGHTED);
-    }
-    this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
-  }
+  createSpectraMapping(m_filename, monitors, someBanks);
 
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
@@ -1507,96 +855,32 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  // Make the thread pool
-  ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
-  ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<std::mutex>();
-  size_t bank0 = 0;
-  size_t bankn = bankNames.size();
-
-  if (chunk !=
-      EMPTY_INT()) // We are loading part - work out the bank number range
-  {
-    eventsPerChunk = total_events / totalChunks;
-    // Sort banks by size
-    size_t tmp;
-    string stmp;
-    for (size_t i = 0; i < bankn; i++)
-      for (size_t j = 0; j < bankn - 1; j++)
-        if (bankNumEvents[j] < bankNumEvents[j + 1]) {
-          tmp = bankNumEvents[j];
-          bankNumEvents[j] = bankNumEvents[j + 1];
-          bankNumEvents[j + 1] = tmp;
-          stmp = bankNames[j];
-          bankNames[j] = bankNames[j + 1];
-          bankNames[j + 1] = stmp;
-        }
-    int bigBanks = 0;
-    for (size_t i = 0; i < bankn; i++)
-      if (bankNumEvents[i] > eventsPerChunk)
-        bigBanks++;
-    // Each chunk is part of bank or multiple whole banks
-    // 0.5 for last chunk of a bank with multiple chunks
-    // 0.1 for multiple whole banks not completely filled
-    eventsPerChunk +=
-        static_cast<size_t>((static_cast<double>(bigBanks) /
-                                 static_cast<double>(totalChunks) * 0.5 +
-                             0.05) *
-                            static_cast<double>(eventsPerChunk));
-    double partialChunk = 0.;
-    firstChunkForBank = 1;
-    for (int chunki = 1; chunki <= chunk; chunki++) {
-      if (partialChunk > 1.) {
-        partialChunk = 0.;
-        firstChunkForBank = chunki;
-        bank0 = bankn;
-      }
-      if (bankNumEvents[bank0] > 1) {
-        partialChunk += static_cast<double>(eventsPerChunk) /
-                        static_cast<double>(bankNumEvents[bank0]);
-      }
-      if (chunki < totalChunks)
-        bankn = bank0 + 1;
-      else
-        bankn = bankNames.size();
-      if (chunki == firstChunkForBank && partialChunk > 1.0)
-        bankn += static_cast<size_t>(partialChunk) - 1;
-      if (bankn > bankNames.size())
-        bankn = bankNames.size();
+  bool loaded{false};
+  if (canUseParallelLoader(haveWeights, oldNeXusFileNames, classType)) {
+    auto ws = m_ws->getSingleHeldWorkspace();
+    m_file->close();
+    try {
+      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames,
+                                event_id_is_spec);
+      g_log.information() << "Used ParallelEventLoader.\n";
+      loaded = true;
+      shortest_tof = 0.0;
+      longest_tof = 1e10;
+    } catch (const std::runtime_error &) {
+      g_log.warning()
+          << "ParallelEventLoader failed, falling back to default loader.\n";
     }
-    for (size_t i = bank0; i < bankn; i++) {
-      size_t start_event = (chunk - firstChunkForBank) * eventsPerChunk;
-      size_t stop_event = bankNumEvents[i];
-      // Don't change stop_event for the final chunk
-      if (start_event + eventsPerChunk < stop_event)
-        stop_event = start_event + eventsPerChunk;
-      bankNumEvents[i] = stop_event - start_event;
-    }
+    safeOpenFile(m_filename);
   }
-
-  // split banks up if the number of cores is more than twice the number of
-  // banks
-  splitProcessing =
-      bool(bankNames.size() * 2 < ThreadPool::getNumPhysicalCores());
-
-  // set up progress bar for the rest of the (multi-threaded) process
-  size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task
-  if (splitProcessing)
-    numProg += bankNames.size() * 3; // 3 = second proc task
-  auto prog2 = make_unique<Progress>(this, 0.3, 1.0, numProg);
-
-  const std::vector<int> periodLogVec = periodLog->valuesAsVector();
-
-  for (size_t i = bank0; i < bankn; i++) {
-    // We make tasks for loading
-    if (bankNumEvents[i] > 0)
-      pool.schedule(new LoadBankFromDiskTask(
-          this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2.get(), diskIOMutex, scheduler, periodLogVec));
+  if (!loaded) {
+    bool precount = getProperty("Precount");
+    int chunk = getProperty("ChunkNumber");
+    int totalChunks = getProperty("TotalChunks");
+    DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
+                             bankNames, periodLog->valuesAsVector(), classType,
+                             bankNumEvents, oldNeXusFileNames, precount, chunk,
+                             totalChunks);
   }
-  // Start and end all threads
-  pool.joinAll();
-  diskIOMutex.reset();
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();
@@ -1821,56 +1105,30 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
 void LoadEventNexus::createSpectraMapping(
     const std::string &nxsfile, const bool monitorsOnly,
     const std::vector<std::string> &bankNames) {
-  bool spectramap = false;
-  m_specMin = getProperty("SpectrumMin");
-  m_specMax = getProperty("SpectrumMax");
-  m_specList = getProperty("SpectrumList");
-
-  // set up the
+  LoadEventNexusIndexSetup indexSetup(
+      m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
+      getProperty("SpectrumMax"), getProperty("SpectrumList"), communicator());
   if (!monitorsOnly && !bankNames.empty()) {
-    std::vector<IDetector_const_sptr> allDets;
-
-    for (const auto &bankName : bankNames) {
-      // Only build the map for the single bank
-      std::vector<IDetector_const_sptr> dets;
-      m_ws->getInstrument()->getDetectorsInBank(dets, bankName);
-      if (dets.empty())
-        throw std::runtime_error("Could not find the bank named '" + bankName +
-                                 "' as a component assembly in the instrument "
-                                 "tree; or it did not contain any detectors."
-                                 " Try unchecking SingleBankPixelsOnly.");
-      allDets.insert(allDets.end(), dets.begin(), dets.end());
+    if (!isDefault("SpectrumMin") || !isDefault("SpectrumMax") ||
+        !isDefault("SpectrumList"))
+      g_log.warning() << "Spectrum min/max/list selection ignored when "
+                         "`SingleBankPixelsOnly` is enabled\n";
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo(bankNames));
+    g_log.debug() << "Populated spectra map for select banks\n";
+  } else if (auto mapping = loadISISVMSSpectraMapping(m_top_entry_name)) {
+    if (monitorsOnly) {
+      g_log.debug() << "Loading only monitor spectra from " << nxsfile << "\n";
+    } else {
+      g_log.debug() << "Loading only detector spectra from " << nxsfile << "\n";
     }
-    if (!allDets.empty()) {
-      m_ws->resizeTo(allDets.size());
-      // Make an event list for each.
-      for (size_t wi = 0; wi < allDets.size(); wi++) {
-        const detid_t detID = allDets[wi]->getID();
-        m_ws->setDetectorIdsForAllPeriods(wi, detID);
-      }
-      spectramap = true;
-      g_log.debug() << "Populated spectra map for select banks\n";
-    }
-
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo(*mapping, monitorsOnly));
   } else {
-    spectramap = loadSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name);
-    // Did we load one? If so then the event ID is the spectrum number and not
-    // det ID
-    if (spectramap)
-      this->event_id_is_spec = true;
-  }
-
-  if (!spectramap) {
     g_log.debug() << "No custom spectra mapping found, continuing with default "
                      "1:1 mapping of spectrum:detectorID\n";
-    auto specList = m_ws->getInstrument()->getDetectorIDs(true);
-    createSpectraList(*std::min_element(specList.begin(), specList.end()),
-                      *std::max_element(specList.begin(), specList.end()));
-    // The default 1:1 will suffice but exclude the monitors as they are always
-    // in a separate workspace
-    m_ws->padSpectra(m_specList);
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo());
     g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
   }
+  std::tie(m_specMin, m_specMax) = indexSetup.eventIDLimits();
 }
 
 //-----------------------------------------------------------------------------
@@ -1884,7 +1142,7 @@ bool LoadEventNexus::hasEventMonitors() {
   try {
     m_file->openPath("/" + m_top_entry_name);
     // Start with the base entry
-    typedef std::map<std::string, std::string> string_map_t;
+    using string_map_t = std::map<std::string, std::string>;
     // Now we want to go through and find the monitors
     string_map_t entries = m_file->getEntries();
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
@@ -1894,9 +1152,10 @@ bool LoadEventNexus::hasEventMonitors() {
         break;
       }
     }
-    m_file->openData("event_id");
+    bool hasTotalCounts = false;
+    bool oldNeXusFileNames = false;
+    result = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames) > 0;
     m_file->closeGroup();
-    result = true;
   } catch (::NeXus::Exception &) {
     result = false;
   }
@@ -2050,21 +1309,18 @@ void LoadEventNexus::runLoadMonitors() {
 * existence of
 * an isis_vms_compat block in the file, if it exists it pulls out the spectra
 * mapping listed there
-* @param filename :: A filename
-* @param monitorsOnly :: If true then only the monitor spectra are loaded
 * @param entry_name :: name of the NXentry to open.
 * @returns True if the mapping was loaded or false if the block does not exist
 */
-bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
-                                        const bool monitorsOnly,
-                                        const std::string &entry_name) {
+std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
+LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '"
                   << entry_name << vms_str << "'.\n";
     m_file->openPath("/" + entry_name + vms_str);
   } catch (::NeXus::Exception &) {
-    return false; // Doesn't exist
+    return nullptr; // Doesn't exist
   }
 
   // The ISIS spectrum mapping is defined by 2 arrays in isis_vms_compat block:
@@ -2108,57 +1364,11 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
        << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
-  // Monitor filtering/selection
-  const std::vector<detid_t> monitors = m_ws->getInstrument()->getMonitors();
-  const size_t nmons(monitors.size());
-  if (monitorsOnly) {
-    g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
-    // Find the det_ids in the udet array.
-    m_ws->resizeTo(nmons);
-    for (size_t i = 0; i < nmons; ++i) {
-      // Find the index in the udet array
-      const detid_t &id = monitors[i];
-      std::vector<int32_t>::const_iterator it =
-          std::find(udet.begin(), udet.end(), id);
-      if (it != udet.end()) {
-        const specnum_t &specNo = spec[it - udet.begin()];
-        m_ws->setSpectrumNumberForAllPeriods(i, specNo);
-        m_ws->setDetectorIdsForAllPeriods(i, id);
-      }
-    }
-  } else {
-    g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-
-    // If optional spectra are provided, if so, m_specList is initialized. spec
-    // is used if necessary
-    createSpectraList(*std::min_element(spec.begin(), spec.end()),
-                      *std::max_element(spec.begin(), spec.end()));
-
-    if (!m_specList.empty()) {
-      int i = 0;
-      std::vector<int32_t> spec_temp, udet_temp;
-      for (auto &element : spec) {
-        if (find(m_specList.begin(), m_specList.end(), element) !=
-            m_specList.end()) // spec element *it is not in spec_list
-        {
-          spec_temp.push_back(element);
-          udet_temp.push_back(udet.at(i));
-        }
-        i++;
-      }
-      spec = spec_temp;
-      udet = udet_temp;
-    }
-
-    SpectrumDetectorMapping mapping(spec, udet, monitors);
-    m_ws->resizeTo(mapping.getMapping().size());
-    // Make sure spectrum numbers are correct
-    auto uniqueSpectra = mapping.getSpectrumNumbers();
-    m_ws->setSpectrumNumbersFromUniqueSpectra(uniqueSpectra);
-    // Fill detectors based on this mapping
-    m_ws->updateSpectraUsing(mapping);
-  }
-  return true;
+  // If mapping loaded the event ID is the spectrum number and not det ID
+  this->event_id_is_spec = true;
+  return Kernel::make_unique<
+      std::pair<std::vector<int32_t>, std::vector<int32_t>>>(std::move(spec),
+                                                             std::move(udet));
 }
 
 /**
@@ -2207,7 +1417,7 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
   m_file->openPath("/");
   m_file->openGroup(entry_name, "NXentry");
 
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = m_file->getEntries();
 
   if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
@@ -2340,7 +1550,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
   }
 
   // random number generator
-  boost::mt19937 rand_gen;
+  std::mt19937 rng;
 
   // loop over spectra
   for (size_t wi = start_wi; wi < end_wi; ++wi) {
@@ -2370,10 +1580,10 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
       if (m > 0) { // m events in this bin
         double left = double(tof[i - 1]);
         // spread the events uniformly inside the bin
-        boost::uniform_real<> distribution(left, right);
+        std::uniform_real_distribution<double> flat(left, right);
         std::vector<double> random_numbers(m);
         for (double &random_number : random_numbers) {
-          random_number = distribution(rand_gen);
+          random_number = flat(rng);
         }
         std::sort(random_numbers.begin(), random_numbers.end());
         auto it = random_numbers.begin();
@@ -2435,80 +1645,6 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
 }
 
 /**
-* Check the validity of the optional spectrum range/list provided and identify
-*if partial data should be loaded.
-*
-* @param min :: The minimum spectrum number read from file
-* @param max :: The maximum spectrum number read from file
-*/
-
-void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
-
-  // check if range [SpectrumMin, SpectrumMax] was supplied
-  if (m_specMin != EMPTY_INT() || m_specMax != EMPTY_INT()) {
-    if (m_specMax == EMPTY_INT()) {
-      m_specMax = max;
-    }
-    if (m_specMin == EMPTY_INT()) {
-      m_specMin = min;
-    }
-
-    if (m_specMax > max) {
-      throw std::invalid_argument("Inconsistent range property: SpectrumMax is "
-                                  "larger than maximum spectrum found in "
-                                  "file.");
-    }
-
-    // Sanity checks for min/max
-    if (m_specMin > m_specMax) {
-      throw std::invalid_argument("Inconsistent range property: SpectrumMin is "
-                                  "larger than SpectrumMax.");
-    }
-
-    // Populate spec_list
-    for (int32_t i = m_specMin; i <= m_specMax; i++)
-      m_specList.push_back(i);
-  } else {
-    // Check if SpectrumList was supplied
-
-    if (!m_specList.empty()) {
-      // Check no negative/zero numbers have been passed
-      auto itr = std::find_if(m_specList.begin(), m_specList.end(),
-                              std::bind2nd(std::less<int32_t>(), 1));
-      if (itr != m_specList.end()) {
-        throw std::invalid_argument(
-            "Negative/Zero SpectraList property encountered.");
-      }
-
-      // Check range and set m_specMax to maximum value in m_specList
-      if ((m_specMax =
-               *std::max_element(m_specList.begin(), m_specList.end())) >
-          *std::max_element(m_specList.begin(), m_specList.end())) {
-        throw std::invalid_argument("Inconsistent range property: SpectrumMax "
-                                    "is larger than number of spectra.");
-      }
-
-      // Set m_specMin to minimum value in m_specList
-      m_specMin = *std::min_element(m_specList.begin(), m_specList.end());
-    }
-  }
-
-  if (!m_specList.empty()) {
-
-    // Check that spectra supplied by user do not correspond to monitors
-    auto nmonitors = m_ws->getInstrument()->getMonitors().size();
-
-    for (size_t i = 0; i < nmonitors; ++i) {
-      if (std::find(m_specList.begin(), m_specList.end(), i + 1) !=
-          m_specList.end()) {
-        throw std::invalid_argument("Inconsistent range property: some of the "
-                                    "selected spectra correspond to monitors.");
-      }
-    }
-  }
-}
-
-/**
  * Makes sure that m_file is a valid and open NeXus::File object.
  * Throws if there is an exception opening the file.
  *
@@ -2516,7 +1652,7 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
  */
 void LoadEventNexus::safeOpenFile(const std::string fname) {
   try {
-    m_file = new ::NeXus::File(m_filename, NXACC_READ);
+    m_file = Kernel::make_unique<::NeXus::File>(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Severe failure when trying to open NeXus file: " +
                              std::string(e.what()));
@@ -2528,6 +1664,47 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
                              "file: " +
                              fname);
   }
+}
+
+/// The parallel loader currently has no support for a series of special cases,
+/// as indicated by the return value of this method.
+bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
+                                          const bool oldNeXusFileNames,
+                                          const std::string &classType) const {
+#ifndef MPI_EXPERIMENTAL
+  // Actually the parallel loader would work also in non-MPI builds but it is
+  // likely to be slower than the default loader and may also exhibit unusual
+  // behavior for non-standard Nexus files.
+  return false;
+#else
+  bool useParallelLoader = getProperty("UseParallelLoader");
+  if (!useParallelLoader)
+    return false;
+#endif
+  if (m_ws->nPeriods() != 1)
+    return false;
+  if (haveWeights)
+    return false;
+  if (oldNeXusFileNames)
+    return false;
+  if (filter_tof_min != -1e20 || filter_tof_max != 1e20)
+    return false;
+  if (filter_time_start != Types::Core::DateAndTime::minimum() ||
+      filter_time_stop != Types::Core::DateAndTime::maximum())
+    return false;
+  if (!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+      !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
+      !isDefault("ChunkNumber"))
+    return false;
+  if (classType != "NXevent_data")
+    return false;
+  return true;
+}
+
+Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Distributed;
 }
 
 } // namespace DataHandling

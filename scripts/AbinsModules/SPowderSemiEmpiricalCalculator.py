@@ -34,7 +34,8 @@ class SPowderSemiEmpiricalCalculator(object):
     Class for calculating S(Q, omega)
     """
 
-    def __init__(self, filename=None, temperature=None, abins_data=None, instrument=None, quantum_order_num=None):
+    def __init__(self, filename=None, temperature=None, abins_data=None, instrument=None, quantum_order_num=None,
+                 bin_width=1.0):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
         :param temperature: temperature in K for which calculation of S should be done
@@ -42,6 +43,7 @@ class SPowderSemiEmpiricalCalculator(object):
         :param abins_data: object of type AbinsData with data from phonon file
         :param instrument: name of instrument (str)
         :param quantum_order_num: number of quantum order events taken into account during the simulation
+        :param bin_width: bin width used in rebining in wavenumber
         """
         if not isinstance(temperature, (int, float)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
@@ -96,7 +98,8 @@ class SPowderSemiEmpiricalCalculator(object):
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        step = AbinsModules.AbinsParameters.bin_width
+        step = bin_width
+        self._bin_width = bin_width
         start = AbinsModules.AbinsParameters.min_wavenumber + step
         stop = AbinsModules.AbinsParameters.max_wavenumber + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
@@ -281,6 +284,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         # put data to SData object
         s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data.set_bin_width(width=self._bin_width)
         s_data.set(items=data)
 
         return s_data
@@ -341,7 +345,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         # load dft data for one k point
         clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
-                                      group_name=AbinsModules.AbinsParameters.dft_group)
+                                      group_name=AbinsModules.AbinsParameters.ab_initio_group)
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
 
         frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
@@ -505,7 +509,8 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight and scaling constant
-        factor = self._weight / AbinsModules.AbinsParameters.bin_width
+        # factor = self._weight / self._bin_width
+        factor = self._weight
         rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
@@ -633,14 +638,13 @@ class SPowderSemiEmpiricalCalculator(object):
         Rebins S data so that all quantum events have the same x-axis. The size of rebined data is equal to _bins.size.
         :param array_x: numpy array with frequencies
         :param array_y: numpy array with S
-        :returns: rebined frequencies, rebined S
+        :returns: rebined frequencies
         """
-        inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
-        output_array_y = np.asarray(
-            a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-            dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-
-        return output_array_y
+        indices = array_x != self._bins[-1]
+        array_x = array_x[indices]
+        array_y = array_y[indices]
+        maximum_index = min(len(array_x), len(array_y))
+        return np.histogram(array_x[:maximum_index], bins=self._bins, weights=array_y[:maximum_index])[0]
 
     def _rebin_data_opt(self, array_x=None, array_y=None):
         """
@@ -650,16 +654,10 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: rebined frequencies, rebined S
         """
         if self._bins.size > array_x.size:
-            output_array_x = array_x
-            output_array_y = array_y
+            return array_x, array_y
         else:
-            inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
-            output_array_x = self._frequencies
-            output_array_y = np.asarray(
-                a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE) / AbinsModules.AbinsParameters.bin_width
-
-        return output_array_x, output_array_y
+            output_array_y = self._rebin_data_full(array_x, array_y)
+            return self._frequencies, output_array_y
 
     def _fix_empty_array(self, array_y=None):
         """
@@ -725,6 +723,7 @@ class SPowderSemiEmpiricalCalculator(object):
             data["datasets"]["data"] = temp_data
 
         s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data.set_bin_width(width=self._bin_width)
         s_data.set(items=data["datasets"]["data"])
 
         return s_data

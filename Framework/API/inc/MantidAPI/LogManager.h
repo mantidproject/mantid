@@ -13,12 +13,16 @@ class File;
 }
 
 namespace Mantid {
+namespace Types {
+namespace Core {
+class DateAndTime;
+}
+} // namespace Types
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
-typedef std::vector<SplittingInterval> TimeSplitterType;
-class DateAndTime;
+using TimeSplitterType = std::vector<SplittingInterval>;
 class PropertyManager;
 }
 
@@ -63,17 +67,17 @@ public:
 
   //-------------------------------------------------------------
   /// Set the run start and end
-  void setStartAndEndTime(const Kernel::DateAndTime &start,
-                          const Kernel::DateAndTime &end);
+  void setStartAndEndTime(const Types::Core::DateAndTime &start,
+                          const Types::Core::DateAndTime &end);
   /// Return the run start time
-  const Kernel::DateAndTime startTime() const;
+  const Types::Core::DateAndTime startTime() const;
   /// Return the run end time
-  const Kernel::DateAndTime endTime() const;
+  const Types::Core::DateAndTime endTime() const;
   //-------------------------------------------------------------
 
   /// Filter the logs by time
-  virtual void filterByTime(const Kernel::DateAndTime start,
-                            const Kernel::DateAndTime stop);
+  virtual void filterByTime(const Types::Core::DateAndTime start,
+                            const Types::Core::DateAndTime stop);
   /// Split the logs based on the given intervals
   virtual void splitByTime(Kernel::TimeSplitterType &splitter,
                            std::vector<LogManager *> outputs) const;
@@ -205,9 +209,9 @@ private:
       m_singleValueCache;
 };
 /// shared pointer to the logManager base class
-typedef boost::shared_ptr<LogManager> LogManager_sptr;
+using LogManager_sptr = boost::shared_ptr<LogManager>;
 /// shared pointer to the logManager base class (const version)
-typedef boost::shared_ptr<const LogManager> LogManager_const_sptr;
+using LogManager_const_sptr = boost::shared_ptr<const LogManager>;
 
 /**
  * Add a property of a specified type (Simply creates a Kernel::Property of that

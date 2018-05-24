@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,7 +30,7 @@ Usage
     ws = Load("PG3_733.nxs")
     wsOut = StripVanadiumPeaks(ws,BackgroundType="Linear",WorkspaceIndex=2)
     i = 1529
-    print "This peak at %.4f Angstroms has been reduced from %.0f to a background level of %.0f" % (wsOut.readX(2)[i],ws.readY(2)[i], wsOut.readY(2)[i])
+    print("This peak at %.4f Angstroms has been reduced from %.0f to a background level of %.0f" % (wsOut.readX(2)[i],ws.readY(2)[i], wsOut.readY(2)[i]))
 
 
 Output:

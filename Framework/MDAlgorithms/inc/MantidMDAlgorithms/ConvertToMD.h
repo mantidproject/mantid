@@ -64,6 +64,11 @@ public:
 
   /// Algorithm's version for identification
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToDiffractionMDWorkspace", "ConvertToMDMinMaxGlobal",
+            "ConvertToMDMinMaxLocal", "CreateMDWorkspace",
+            "SetSpecialCoordinates"};
+  }
 
 private:
   std::map<std::string, std::string> validateInputs() override;

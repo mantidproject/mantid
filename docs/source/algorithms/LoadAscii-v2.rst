@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -67,7 +67,7 @@ Usage
     #Load it again - Load would work just as well as LoadAscii
     wsOutput = LoadAscii(savefile,Unit="Label")
 
-    print CompareWorkspaces(ws1,wsOutput)[0]
+    print(CompareWorkspaces(ws1,wsOutput)[0])
 
     #clean up the file I saved
     os.remove(savefile)

@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,16 +36,16 @@ Usage
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', 
                                         Names='A,B,C', Units='U,U,U', 
                                         Frames='QSample, QSample, QSample')
-    print "The first MDFrame is of type " + mdws.getDimension(0).getMDFrame().name()
-    print "The second MDFrame is of type " + mdws.getDimension(1).getMDFrame().name()
-    print "The third MDFrame is of type " + mdws.getDimension(2).getMDFrame().name()
+    print("The first MDFrame is of type " + mdws.getDimension(0).getMDFrame().name())
+    print("The second MDFrame is of type " + mdws.getDimension(1).getMDFrame().name())
+    print("The third MDFrame is of type " + mdws.getDimension(2).getMDFrame().name())
 
     # Set the 0th and 2nd frame to QLab
     SetMDFrame(mdws,MDFrame='QLab', Axes=[0,2])
 
-    print "The new first MDFrame is of type " + mdws.getDimension(0).getMDFrame().name()
-    print "The second MDFrame is of type " + mdws.getDimension(1).getMDFrame().name()
-    print "The new third MDFrame is of type " + mdws.getDimension(2).getMDFrame().name()
+    print("The new first MDFrame is of type " + mdws.getDimension(0).getMDFrame().name())
+    print("The second MDFrame is of type " + mdws.getDimension(1).getMDFrame().name())
+    print("The new third MDFrame is of type " + mdws.getDimension(2).getMDFrame().name())
 
 Output:
 

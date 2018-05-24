@@ -35,8 +35,7 @@ class PlotGroupCommand : public CommandBase {
 public:
   PlotGroupCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  PlotGroupCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  PlotGroupCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~PlotGroupCommand(){};
 
   void execute() override {
@@ -50,6 +49,7 @@ public:
                    "produced by any groups any selected runs are in");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

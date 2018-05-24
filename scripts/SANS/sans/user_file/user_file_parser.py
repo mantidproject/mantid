@@ -12,7 +12,7 @@ from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
                                           mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                           position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                          fit_general, MonId, monitor_length, monitor_file, GravityId,
+                                          fit_general, MonId, monitor_length, monitor_file, GravityId, OtherId,
                                           monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
 
 
@@ -271,6 +271,7 @@ class DetParser(UserFileComponentParser):
             DET/SHIFT shift
             DET/RESCALE/FIT [Q1 Q2]
             DET/SHIFT/FIT [Q1 Q2]
+            DET/OVERLAP [Q1 Q2]
     """
     Type = "DET"
 
@@ -321,11 +322,12 @@ class DetParser(UserFileComponentParser):
         self._rescale_fit_pattern = re.compile(start_string + self._rescale_fit + self._q_range + end_string)
         self._shift_fit = "\\s*SHIFT\\s*/\\s*FIT\\s*"
         self._shift_fit_pattern = re.compile(start_string + self._shift_fit + self._q_range + end_string)
+        self._merge_range = "\\s*OVERLAP\\s*"
+        self._merge_range_pattern = re.compile(start_string + self._merge_range + self._q_range + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
         setting = UserFileComponentParser.get_settings(line, DetParser.get_type_pattern())
-
         # Determine the qualifier and extract the user setting
         if self._is_reduction_mode_setting(setting):
             output = self._extract_reduction_mode(setting)
@@ -349,7 +351,8 @@ class DetParser(UserFileComponentParser):
         return does_pattern_match(self._rescale_pattern, line) or \
                does_pattern_match(self._shift_pattern, line) or \
                does_pattern_match(self._rescale_fit_pattern, line) or \
-               does_pattern_match(self._shift_fit_pattern, line)
+               does_pattern_match(self._shift_fit_pattern, line) or \
+               does_pattern_match(self._merge_range_pattern, line)
 
     def _extract_reduction_mode(self, line):
         line_capital = line.upper()
@@ -434,6 +437,14 @@ class DetParser(UserFileComponentParser):
             else:
                 value = det_fit_range(start=None, stop=None, use_fit=True)
             return {DetectorId.shift_fit: value}
+        elif self._merge_range_pattern.match(line) is not None:
+            merge_range_string = re.sub(self._merge_range, "", line)
+            if merge_range_string:
+                merge_range = extract_float_range(merge_range_string)
+                value = det_fit_range(start=merge_range[0], stop=merge_range[1], use_fit=True)
+            else:
+                raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
+            return {DetectorId.merge_range: value}
         else:
             raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
 
@@ -828,9 +839,10 @@ class MaskParser(UserFileComponentParser):
 
         # Time Mask
         self._time_or_t = "\\s*(TIME|T)\\s*"
-        self._detector_time = "\\s*((" + self._hab + "|" + self._lab + ")"+"\\s*/\\s*)?\\s*"
-        self._time_pattern = re.compile(start_string + self._detector_time + self._time_or_t + space_string +
-                                        self._two_floats + end_string)
+        self._detector_time = "\\s*((" + self._hab + "|" + self._lab + ")"+"\\s*)?\\s*"
+        self._time_pattern = re.compile(start_string + self._detector_time + "/?" + self._time_or_t + space_string +
+                                        self._two_floats + end_string + "|" + start_string + self._time_or_t +
+                                        "/?" + self._detector_time + space_string + self._two_floats + end_string)
 
         # Block mask
         self._v_plus_h = "\\s*" + self._v + integer_number + "\\s*\\+\\s*" + self._h + integer_number
@@ -848,7 +860,6 @@ class MaskParser(UserFileComponentParser):
     def parse_line(self, line):
         # Get the settings, ie remove command
         setting = UserFileComponentParser.get_settings(line, MaskParser.get_type_pattern())
-
         # Determine the qualifier and extract the user setting
         if self._is_block_mask(setting):
             output = self._extract_block_mask(setting)
@@ -972,12 +983,13 @@ class MaskParser(UserFileComponentParser):
         if has_hab is not None or has_lab is not None:
             key = MaskId.time_detector
             detector_type = DetectorType.HAB if has_hab is not None else DetectorType.LAB
-            regex_string = "\s*(" + self._hab + ")\s*/\s*" if has_hab else "\s*(" + self._lab + ")\s*/\s*"
+            regex_string = "\s*(" + self._hab + ")\s*" if has_hab else "\s*(" + self._lab + ")\s*"
             min_and_max_time_range = re.sub(regex_string, "", line)
         else:
             key = MaskId.time
             detector_type = None
             min_and_max_time_range = line
+        min_and_max_time_range = re.sub("\s*/\s*", "", min_and_max_time_range)
         min_and_max_time_range = re.sub(self._time_or_t, "", min_and_max_time_range)
         min_and_max_time = extract_float_range(min_and_max_time_range)
         return {key: range_entry_with_detector(start=min_and_max_time[0], stop=min_and_max_time[1],
@@ -1788,6 +1800,50 @@ class GravityParser(UserFileComponentParser):
         return "\\s*" + GravityParser.get_type() + "(\\s*/\\s*|\\s+)"
 
 
+class CompatibilityParser(UserFileComponentParser):
+    """
+    The CompatibilityParser handles the following structure for
+        Compatibility ON
+        Compatibility OFF
+    """
+    Type = "COMPATIBILITY"
+
+    def __init__(self):
+        super(CompatibilityParser, self).__init__()
+
+        # On Off
+        self._on = "ON"
+        self._on_off = "\\s*(OFF|" + self._on + ")"
+        self._on_off_pattern = re.compile(start_string + self._on_off + end_string)
+
+    def parse_line(self, line):
+        # Get the settings, ie remove command
+        setting = UserFileComponentParser.get_settings(line, CompatibilityParser.get_type_pattern())
+
+        # Determine the qualifier and extract the user setting
+        if self._is_on_off(setting):
+            output = self._extract_on_off(setting)
+        else:
+            raise RuntimeError("CompatibilityParserParser: Unknown command for COMPATIBILITY: {0}".format(line))
+        return output
+
+    def _is_on_off(self, line):
+        return does_pattern_match(self._on_off_pattern, line)
+
+    def _extract_on_off(self, line):
+        value = re.sub(self._on, "", line).strip() == ""
+        return {OtherId.use_compatibility_mode: value}
+
+    @staticmethod
+    def get_type():
+        return CompatibilityParser.Type
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_type_pattern():
+        return "\\s*" + CompatibilityParser.get_type() + "(\\s*/\\s*|\\s+)"
+
+
 class MaskFileParser(UserFileComponentParser):
     """
     The MaskFileParser handles the following structure for
@@ -2024,17 +2080,18 @@ class PrintParser(UserFileComponentParser):
     def __init__(self):
         super(PrintParser, self).__init__()
 
-        # Print
-        self._print = "\\s*PRINT\\s+"
-        self._print_pattern = re.compile(start_string + self._print + "\\s*.*\\s*" + end_string)
-
     def parse_line(self, line):
         # Get the settings, ie remove command
-        setting = UserFileComponentParser.get_settings(line, PrintParser.get_type_pattern())
 
-        # Determine the qualifier and extract the user setting
-        original_setting = re.search(setting.strip(), line, re.IGNORECASE).group(0)
-        return {PrintId.print_line: original_setting}
+        setting = line.strip()
+
+        if setting.upper().startswith(PrintParser.Type):
+            setting = setting[len(PrintParser.Type):]
+            setting = setting.strip()
+        else:
+            raise RuntimeError("PrintParser: Failed to extract line {} it does not start with {}".format(line, PrintParser.Type))
+
+        return {PrintId.print_line: setting}
 
     @staticmethod
     def get_type():
@@ -2219,7 +2276,8 @@ class UserFileParser(object):
                          SANS2DParser.get_type(): SANS2DParser(),
                          LOQParser.get_type(): LOQParser(),
                          LARMORParser.get_type(): LARMORParser(),
-                         ZOOMParser.get_type(): ZOOMParser()}
+                         ZOOMParser.get_type(): ZOOMParser(),
+                         CompatibilityParser.get_type(): CompatibilityParser()}
         self._ignored_parser = IgnoredParser()
 
     def _get_correct_parser(self, line):

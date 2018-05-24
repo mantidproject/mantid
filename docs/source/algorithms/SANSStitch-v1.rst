@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -73,8 +73,8 @@ Usage
        LABNormSample=lab_norm, 
        Mode='ShiftOnly', ScaleFactor=1.0 )
 
-   print scale
-   print shift
+   print("{:.1f}".format(scale))
+   print("{:.1f}".format(shift))
 
 Output:
    

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,7 +34,7 @@ Usage
     ws = RenameWorkspace(ws, OutputWorkspace="MyTestWorkspace")
 
     script_text = GeneratePythonScript(ws)
-    print script_text.strip()
+    print(script_text.strip())
 
 Output:
 
@@ -81,7 +81,7 @@ Output:
 
     # Generate a script with a given start time
     script_text = GeneratePythonScript(ws, StartTimestamp=str(from_time))
-    print script_text.strip()
+    print(script_text.strip())
 
 Output:
 
@@ -123,7 +123,7 @@ Output:
     GeneratePythonScript(ws, Filename=path)
 
     with open (path, 'r') as script:
-      print script.read().strip()
+      print(script.read().strip())
 
 Output:
 

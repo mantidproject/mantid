@@ -7,21 +7,14 @@
 #include <Poco/Exception.h>
 #include <Poco/DOM/Element.h>
 
-using Poco::XML::DOMParser;
-using Poco::XML::InputSource;
-using Poco::XML::Document;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-using Poco::XML::Node;
-using Poco::XML::AutoPtr;
-using Poco::Exception;
-using Poco::XML::Element;
-
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
+
+using Poco::XML::DOMParser;
+using Poco::XML::Element;
 
 namespace Mantid {
 namespace Geometry {
@@ -63,7 +56,7 @@ void vtkGeometryCacheReader::Init() {
 /**
  * Set the geometry for the object
  */
-void vtkGeometryCacheReader::readCacheForObject(Object *obj) {
+void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
   // Get the element corresponding to the name of the object
   std::stringstream objName;
   objName << obj->getName();
@@ -75,8 +68,8 @@ void vtkGeometryCacheReader::readCacheForObject(Object *obj) {
   }
   // Read the cache from the element
   int noOfTriangles = 0, noOfPoints = 0;
-  double *Points;
-  int *Faces;
+  std::vector<double> Points;
+  std::vector<uint32_t> Faces;
   std::stringstream buff;
   // Read number of points
   buff << pEle->getAttribute("NumberOfPoints");
@@ -89,15 +82,16 @@ void vtkGeometryCacheReader::readCacheForObject(Object *obj) {
 
   // Read Points
   Element *pPts = pEle->getChildElement("Points")->getChildElement("DataArray");
-  readPoints(pPts, &noOfPoints, &Points);
+  readPoints(pPts, noOfPoints, Points);
 
   // Read Triangles
   Element *pTris = pEle->getChildElement("Polys")->getChildElement("DataArray");
-  readTriangles(pTris, &noOfTriangles, &Faces);
+  readTriangles(pTris, noOfTriangles, Faces);
 
   // First check whether Object can be written to the file
   boost::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
-  handle->setGeometryCache(noOfPoints, noOfTriangles, Points, Faces);
+  handle->setGeometryCache(noOfPoints, noOfTriangles, std::move(Points),
+                           std::move(Faces));
 }
 
 /**
@@ -118,14 +112,15 @@ vtkGeometryCacheReader::getElementByObjectName(std::string name) {
  * Read the points from the element
  */
 void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
-                                        int *noOfPoints, double **points) {
+                                        int noOfPoints,
+                                        std::vector<double> &points) {
   if (pEle == nullptr) {
-    *noOfPoints = 0;
+    noOfPoints = 0;
     return;
   }
   // Allocate memory
-  *points = new double[(*noOfPoints) * 3];
-  if (*points == nullptr) // Out of memory
+  points.resize(noOfPoints * 3);
+  if (points.size() != static_cast<size_t>(noOfPoints * 3)) // Out of memory
   {
     g_log.error("Cannot allocate memory for triangle cache of Object ");
     return;
@@ -133,25 +128,26 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
   if (pEle->getAttribute("format") == "ascii") { // Read from Ascii
     std::stringstream buf;
     buf << pEle->innerText();
-    for (int i = 0; i < (*noOfPoints) * 3; i++) {
-      buf >> (*points)[i];
+    for (double &point : points) {
+      buf >> point;
     }
-  } else { // Read from binary
   }
+  // Read from binary otherwise
 }
 
 /**
  * Read triangle face indexs
  */
 void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
-                                           int *noOfTriangles, int **faces) {
+                                           int noOfTriangles,
+                                           std::vector<uint32_t> &faces) {
   if (pEle == nullptr) {
-    *noOfTriangles = 0;
+    noOfTriangles = 0;
     return;
   }
   // Allocate memory
-  *faces = new int[(*noOfTriangles) * 3];
-  if (*faces == nullptr) // Out of memory
+  faces.resize(noOfTriangles * 3);
+  if (faces.size() != static_cast<size_t>(noOfTriangles * 3)) // Out of memory
   {
     g_log.error("Cannot allocate memory for triangle cache of Object ");
     return;
@@ -159,11 +155,11 @@ void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
   if (pEle->getAttribute("format") == "ascii") { // Read from Ascii
     std::stringstream buf;
     buf << pEle->innerText();
-    for (int i = 0; i < (*noOfTriangles) * 3; i++) {
-      buf >> (*faces)[i];
+    for (unsigned int &face : faces) {
+      buf >> face;
     }
-  } else { // Read from binary
   }
+  // Read from binary otherwise
 }
 }
 }

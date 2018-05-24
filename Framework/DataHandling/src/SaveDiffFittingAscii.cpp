@@ -39,12 +39,12 @@ void SaveDiffFittingAscii::init() {
                   "The filename to use for the saved data");
 
   declareProperty(
-      "RunNumber", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "RunNumber", "",
       "Run number list of the focused files, which is used to generate the "
       "parameters table workspace");
 
   declareProperty(
-      "Bank", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Bank", "",
       "Bank number list of the focused files, which is used to generate "
       "the parameters table workspace");
 
@@ -151,7 +151,9 @@ void SaveDiffFittingAscii::processAll(
 
     std::string runNum = splitRunNum[m_counter];
     std::string bank = splitBank[m_counter];
-    writeInfo(runNum, bank, file);
+
+    if (!runNum.empty() || !bank.empty())
+      writeInfo(runNum, bank, file);
 
     // write header
     std::vector<std::string> columnHeadings = input_ws[i]->getColumnNames();
@@ -189,8 +191,8 @@ void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
 void SaveDiffFittingAscii::writeHeader(
     const std::vector<std::string> &columnHeadings, std::ofstream &file) {
   for (const auto &heading : columnHeadings) {
-    // Chi being the last header in the table workspace
-    if (heading == "Chi") {
+    // if last header in the table workspace, put eol
+    if (&heading == &columnHeadings.back()) {
       writeVal(heading, file, true);
     } else {
       writeVal(heading, file, false);
@@ -274,11 +276,11 @@ std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
   std::string bankNumber = getPropertyValue("Bank");
   std::vector<std::string> splitBank = splitList(bankNumber);
 
-  if (runNumber.empty()) {
-    errors["Bank"] = "Please provide a valid bank list";
-  }
-  if (splitBank.empty()) {
-    errors["Bank"] = "Please provide a valid bank list";
+  if (bankNumber.empty()) {
+    if (!runNumber.empty())
+      errors["Bank"] = "Please provide a valid bank list";
+  } else if (runNumber.empty()) {
+    errors["RunNumber"] = "Please provide a valid run number list";
   } else if (!is_grp) {
     if (splitRunNum.size() > 1) {
       errors["RunNumber"] = "One run number should be provided when a Table"

@@ -39,15 +39,15 @@ QwtHistogram::QwtHistogram(Table *t, const QString &xColName,
     : QwtBarCurve(QwtBarCurve::Vertical, t, xColName, name, startRow, endRow),
       d_autoBin(false), d_bin_size(0.0), d_begin(0.0), d_end(0.0), d_mean(0.0),
       d_standard_deviation(0.0), d_min(0.0), d_max(0.0) {
-  d_matrix = 0;
+  d_matrix = nullptr;
   setType(GraphOptions::Histogram);
   setStyle(QwtPlotCurve::UserCurve);
 }
 
 QwtHistogram::QwtHistogram(Matrix *m)
-    : QwtBarCurve(QwtBarCurve::Vertical, NULL, "matrix",
-                  (m != NULL ? m->objectName() : QString()), 0, 0),
-      d_matrix(NULL), d_autoBin(false), d_bin_size(0.0), d_begin(0.0),
+    : QwtBarCurve(QwtBarCurve::Vertical, nullptr, "matrix",
+                  (m != nullptr ? m->objectName() : QString()), 0, 0),
+      d_matrix(nullptr), d_autoBin(false), d_bin_size(0.0), d_begin(0.0),
       d_end(0.0), d_mean(0.0), d_standard_deviation(0.0), d_min(0.0),
       d_max(0.0) {
   if (m) {

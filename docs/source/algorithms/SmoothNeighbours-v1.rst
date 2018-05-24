@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -208,9 +208,9 @@ Usage
    output = SmoothNeighbours(ws, Radius = 1.0,
                              RadiusUnits = 'NumberOfPixels')
 
-   print 'Number of histograms:', output.getNumberHistograms()
-   print 'Smoothed values:'
-   print output.extractY()
+   print('Number of histograms: {0}'.format(output.getNumberHistograms()))
+   print('Smoothed values:')
+   print(output.extractY())
 
 Output:
 
@@ -251,9 +251,9 @@ Output:
    # Run the algorithm
    output = SmoothNeighbours(ws, AdjX=1, AdjY=3)
 
-   print 'Number of histograms:', output.getNumberHistograms()
-   print 'Smoothed values:'
-   print output.extractY()
+   print('Number of histograms: {}'.format(output.getNumberHistograms()))
+   print('Smoothed values:')
+   print(output.extractY())
 
 Output:
 
@@ -294,9 +294,9 @@ Output:
    # Run the algorithm
    output = SmoothNeighbours(ws, SumPixelsX=3, SumPixelsY=1)
 
-   print 'Number of histograms:', output.getNumberHistograms()
-   print 'Smoothed values:'
-   print output.extractY()
+   print('Number of histograms: {}'.format(output.getNumberHistograms()))
+   print('Smoothed values:')
+   print(output.extractY())
 
 Output:
 

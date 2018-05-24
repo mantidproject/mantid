@@ -774,6 +774,16 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   }
 }
 
+/// Check if a string attribute is empty
+bool IFunction::Attribute::isEmpty() const {
+  try {
+    return boost::get<std::string>(m_data).empty();
+  } catch (...) {
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute as string");
+  }
+}
+
 namespace {
 /**
  * Attribute visitor setting new value to an attribute
@@ -896,27 +906,31 @@ std::string IFunction::descriptionOfActive(size_t i) const {
  */
 void IFunction::calNumericalDeriv(const FunctionDomain &domain,
                                   Jacobian &jacobian) {
-  const double minDouble = std::numeric_limits<double>::min();
-  const double epsilon = std::numeric_limits<double>::epsilon() * 100;
-  double stepPercentage = 0.001; // step percentage
-  double step;                   // real step
-  double cutoff = 100.0 * minDouble / stepPercentage;
-  size_t nParam = nParams();
+  /*
+   * There is a similar more specialized method for 1D functions in IFunction1D
+   * but the method takes different parameters and uses slightly different
+   * function calls in places making it difficult to share code. Please also
+   * consider that method when updating this.
+   */
+
+  constexpr double epsilon = std::numeric_limits<double>::epsilon() * 100;
+  constexpr double stepPercentage = 0.001;
+  constexpr double cutoff =
+      100.0 * std::numeric_limits<double>::min() / stepPercentage;
+  const size_t nParam = nParams();
   size_t nData = getValuesSize(domain);
 
   FunctionValues minusStep(nData);
   FunctionValues plusStep(nData);
 
-  // PARALLEL_CRITICAL(numeric_deriv)
-  {
-    applyTies(); // just in case
-    function(domain, minusStep);
-  }
+  applyTies(); // just in case
+  function(domain, minusStep);
 
   if (nData == 0) {
     nData = minusStep.size();
   }
 
+  double step;
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
@@ -926,15 +940,12 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
         step = val * stepPercentage;
       }
 
-      double paramPstep = val + step;
-
-      // PARALLEL_CRITICAL(numeric_deriv)
-      {
-        setActiveParameter(iP, paramPstep);
-        applyTies();
-        function(domain, plusStep);
-        setActiveParameter(iP, val);
-      }
+      const double paramPstep = val + step;
+      setActiveParameter(iP, paramPstep);
+      applyTies();
+      function(domain, plusStep);
+      setActiveParameter(iP, val);
+      applyTies();
 
       step = paramPstep - val;
       for (size_t i = 0; i < nData; i++) {
@@ -1107,7 +1118,7 @@ void IFunction::setMatrixWorkspace(
 
             // add tie if specified for this parameter in instrument definition
             // file
-            if (fitParam.getTie().compare("")) {
+            if (!fitParam.getTie().empty()) {
               std::ostringstream str;
               str << getParameter(i);
               tie(parameterName(i), str.str());
@@ -1115,11 +1126,11 @@ void IFunction::setMatrixWorkspace(
 
             // add constraint if specified for this parameter in instrument
             // definition file
-            if (fitParam.getConstraint().compare("")) {
+            if (!fitParam.getConstraint().empty()) {
               IConstraint *constraint =
                   ConstraintFactory::Instance().createInitialized(
                       this, fitParam.getConstraint());
-              if (fitParam.getConstraintPenaltyFactor().compare("")) {
+              if (!fitParam.getConstraintPenaltyFactor().empty()) {
                 try {
                   double penalty =
                       std::stod(fitParam.getConstraintPenaltyFactor());
@@ -1387,14 +1398,18 @@ void IFunction::unfixParameter(const std::string &name) {
 /// @param isDefault :: If true fix them by default
 void IFunction::fixAll(bool isDefault) {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i, isDefault);
+    if (isActive(i)) {
+      fix(i, isDefault);
+    }
   }
 }
 
 /// Free all parameters
 void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
-    unfix(i);
+    if (isFixed(i)) {
+      unfix(i);
+    }
   }
 }
 

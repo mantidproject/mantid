@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -69,8 +69,8 @@ Usage
    OutputWorkspace = RemoveBins( ws, 20, 35)
 
    # Show workspaces
-   print "Before RemoveBins",ws.readY(0)
-   print "After RemoveBins",OutputWorkspace.readY(0)
+   print("Before RemoveBins {}".format(ws.readY(0)))
+   print("After RemoveBins {}".format(OutputWorkspace.readY(0)))
    
 Output:
 

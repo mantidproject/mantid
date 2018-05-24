@@ -4,7 +4,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ErrorCurve.h"
+#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
 #include <boost/scoped_array.hpp>
 
@@ -22,8 +22,8 @@ namespace CustomInterfaces {
 ALCBaselineModellingView::ALCBaselineModellingView(QWidget *widget)
     : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
       m_fitCurve(new QwtPlotCurve()), m_correctedCurve(new QwtPlotCurve()),
-      m_dataErrorCurve(NULL), m_correctedErrorCurve(NULL), m_rangeSelectors(),
-      m_selectorModifiedMapper(new QSignalMapper(this)) {}
+      m_dataErrorCurve(nullptr), m_correctedErrorCurve(nullptr),
+      m_rangeSelectors(), m_selectorModifiedMapper(new QSignalMapper(this)) {}
 
 ALCBaselineModellingView::~ALCBaselineModellingView() {
   m_dataCurve->detach();
@@ -200,6 +200,7 @@ void ALCBaselineModellingView::addSectionSelector(
   m_rangeSelectors[index] = newSelector;
 
   // Set initial values
+  newSelector->setRange(values.first, values.second);
   setSelectorValues(newSelector, values);
 
   m_ui.dataPlot->replot();
@@ -248,16 +249,18 @@ void ALCBaselineModellingView::sectionsContextMenu(const QPoint &widgetPoint) {
 void ALCBaselineModellingView::setSelectorValues(
     RangeSelector *selector,
     IALCBaselineModellingView::SectionSelector values) {
-  // TODO: range sould be set to something meaningful
-  selector->setRange(std::numeric_limits<double>::min(),
-                     std::numeric_limits<double>::max());
-
+  // if the values are not increasing then reverse them
+  if (values.first > values.second) {
+    const double tempSwapValue = values.first;
+    values.first = values.second;
+    values.second = tempSwapValue;
+  }
   selector->setMinimum(values.first);
   selector->setMaximum(values.second);
 }
 
 void ALCBaselineModellingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
 }
 
 void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }

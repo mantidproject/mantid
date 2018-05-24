@@ -33,7 +33,7 @@ class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
 
 public:
   /// Constructor
-  GetNegMuMuonicXRDDialog(QWidget *parent = 0);
+  GetNegMuMuonicXRDDialog(QWidget *parent = nullptr);
 
 private:
   /// Periodic Table widget used for selection of elements property

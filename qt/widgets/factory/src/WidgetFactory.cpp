@@ -9,7 +9,7 @@ namespace MantidQt {
 namespace Factory {
 
 /// Initialize the instance to NULL
-WidgetFactory *WidgetFactory::m_pInstance = NULL;
+WidgetFactory *WidgetFactory::m_pInstance = nullptr;
 
 //----------------------------------------------------------------------------------------------
 /** Private constructor. This is not accessible,

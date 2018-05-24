@@ -36,6 +36,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace NeXus;
+using Mantid::Types::Core::DateAndTime;
 
 class FakeChopper : public Mantid::API::ChopperModel {
 public:
@@ -104,7 +105,7 @@ public:
   void test_Setting_A_New_Source_With_NULL_Ptr_Throws() {
     ExperimentInfo ws;
 
-    TS_ASSERT_THROWS(ws.setModeratorModel(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(ws.setModeratorModel(nullptr), std::invalid_argument);
   }
 
   void test_Retrieving_Source_Properties_Before_Set_Throws() {
@@ -128,7 +129,7 @@ public:
   void test_Setting_A_New_Chopper_With_NULL_Ptr_Throws() {
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
-    TS_ASSERT_THROWS(ws->setChopperModel(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(ws->setChopperModel(nullptr), std::invalid_argument);
   }
 
   void test_Setting_A_New_Chopper_To_Point_Lower_Point_Succeeds() {
@@ -191,9 +192,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    Property *log(NULL);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(instPar));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void test_GetLog_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name() {
@@ -203,9 +205,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, actualLogName, "some  value");
 
-    Property *log(NULL);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(actualLogName));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void
@@ -523,9 +526,8 @@ public:
     std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
               std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
 
-    for (auto setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
-         setIt++) {
-      ret = idfFiles.equal_range(*setIt);
+    for (const auto &idfIdentifier : idfIdentifiers) {
+      ret = idfFiles.equal_range(idfIdentifier);
       for (it1 = ret.first; it1 != ret.second; ++it1) {
         for (it2 = ret.first; it2 != ret.second; ++it2) {
           if (it1 != it2) {
@@ -726,10 +728,10 @@ public:
     ExperimentInfo_sptr eiNonConst;
     TS_ASSERT_THROWS_NOTHING(
         eiConst = manager.getValue<ExperimentInfo_const_sptr>(eiName));
-    TS_ASSERT(eiConst != NULL);
+    TS_ASSERT(eiConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiNonConst =
                                  manager.getValue<ExperimentInfo_sptr>(eiName));
-    TS_ASSERT(eiNonConst != NULL);
+    TS_ASSERT(eiNonConst != nullptr);
     TS_ASSERT_EQUALS(eiConst, eiNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -737,9 +739,9 @@ public:
     ExperimentInfo_const_sptr eiCastConst;
     ExperimentInfo_sptr eiCastNonConst;
     TS_ASSERT_THROWS_NOTHING(eiCastConst = (ExperimentInfo_const_sptr)val);
-    TS_ASSERT(eiCastConst != NULL);
+    TS_ASSERT(eiCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
-    TS_ASSERT(eiCastNonConst != NULL);
+    TS_ASSERT(eiCastNonConst != nullptr);
     TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
   }
 
@@ -876,37 +878,6 @@ public:
     TSM_ASSERT_EQUALS(
         "Source should not report any nested detector indexes",
         compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
-  }
-
-  void test_component_info_stripped_of_invalid_detectors() {
-    using namespace Mantid::Geometry;
-
-    auto instrument = boost::make_shared<Mantid::Geometry::Instrument>();
-    int id = 1;
-    Detector *det1 =
-        new Detector("pixel1", id /*detector id*/, instrument.get());
-    Detector *det2 =
-        new Detector("pixel2", id /*same detector id*/, instrument.get());
-    // Add detector to the instrument
-    instrument->add(det1);
-    // Add other detector to the instrument
-    instrument->add(det2);
-    instrument->markAsDetector(det1);
-    // The following should fail. Same id is reused!
-    instrument->markAsDetector(det2);
-
-    // A source
-    ObjComponent *source = new ObjComponent("source");
-    instrument->add(source);
-    instrument->markAsSource(source);
-
-    // A sample
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
-    instrument->add(sample);
-    instrument->markAsSamplePos(sample);
-
-    ExperimentInfo expInfo;
-    TS_ASSERT_THROWS_NOTHING(expInfo.setInstrument(instrument));
   }
 
   void test_component_info_source_sample_l1() {
@@ -1063,6 +1034,16 @@ public:
      */
     ExperimentInfo expInfo;
     expInfo.setInstrument(m_provisionedInstrument);
+  }
+
+  void test_getBoundingBox_once() {
+    BoundingBox box;
+    m_provisionedInstrument->getBoundingBox(box);
+  }
+
+  void test_getBoundingBox_twice() {
+    BoundingBox box;
+    m_provisionedInstrument->getBoundingBox(box);
   }
 };
 #endif /* MANTID_API_EXPERIMENTINFOTEST_H_ */

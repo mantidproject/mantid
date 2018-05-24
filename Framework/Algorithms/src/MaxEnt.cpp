@@ -14,18 +14,14 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include <gsl/gsl_linalg.h>
+#include <algorithm>
 #include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
 
 using namespace API;
 using namespace Kernel;
@@ -52,6 +48,41 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"MHz", "microsecond"},
                                                    {"Angstrom", "Angstrom^-1"},
                                                    {"Angstrom^-1", "Angstrom"}};
+// A threshold for small singular values
+const double THRESHOLD = 1E-6;
+
+/** removes zeros from converged results
+* @param ws :: [input] The input workspace with zeros
+* @param itCount [input] The number of iterations this alg used for each
+* spectrum
+* @param yLabel :: [input] y-label to use for returned ws
+* @return : ws cut down in lenght to maxIt
+*/
+MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
+                                 const std::vector<size_t> &itCount,
+                                 const std::string &yLabel) {
+
+  ws->setYUnitLabel(yLabel);
+  ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+  Unit_sptr unit = ws->getAxis(0)->unit();
+  boost::shared_ptr<Units::Label> label =
+      boost::dynamic_pointer_cast<Units::Label>(unit);
+  label->setLabel("Number of Iterations", "");
+
+  const size_t nspec = ws->getNumberHistograms();
+  if (itCount.empty()) {
+    return ws; // In case, we don't have any spectra
+  }
+  for (size_t spec = 0; spec < nspec; spec++) {
+    auto &dataX = ws->dataX(spec);
+    dataX.resize(itCount[spec]);
+    auto &dataY = ws->dataY(spec);
+    dataY.resize(itCount[spec]);
+    auto &dataE = ws->dataE(spec);
+    dataE.resize(itCount[spec]);
+  }
+  return ws;
+}
 }
 
 //----------------------------------------------------------------------------------------------
@@ -122,13 +153,27 @@ void MaxEnt::init() {
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "A", 0.4, mustBeNonNegative, Direction::Input),
-                  "A maximum entropy constant");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
+                                             Direction::Input),
+      "A maximum entropy constant. This algorithm was first developed for the "
+      "ISIS muon group where the default 0.4 was found to give good "
+      "reconstructions. "
+      "In general the user will need to experiment with this value. Choosing a "
+      "small value may lead to unphysical spiky reconstructions and choosing "
+      "an increasingly large "
+      "value the reconstruction will start to resamble that of a direct "
+      "fourier "
+      "transform reconstruction. However, where the data contain a "
+      "zero Fourier data point with a small error the "
+      "reconstruction will be insensitive to the choice "
+      "of this property (and increasing so the more well determined "
+      "this data point is).");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ChiTarget", 100.0, mustBeNonNegative, Direction::Input),
-                  "Target value of Chi-square");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "ChiTargetOverN", 1.0, mustBeNonNegative, Direction::Input),
+      "Target value of Chi-square divided by the number of data points (N)");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
@@ -139,9 +184,15 @@ void MaxEnt::init() {
           "DistancePenalty", 0.1, mustBeNonNegative, Direction::Input),
       "Distance penalty applied to the current image at each iteration.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
-                  "Maximum degree of non-parallelism between S and C.");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
+      "Maximum degree of non-parallelism between S (the entropy) and C "
+      "(chi-squared). These needs to be parallel. Chosing a smaller "
+      "shouldn't change the output. However, if you find this is the "
+      "case please let the Mantid team know since this indicates that "
+      "the default value of this proporty may need changing or "
+      "other changes to this implementation are required.");
 
   mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(1);
@@ -199,38 +250,52 @@ void MaxEnt::exec() {
 
   // MaxEnt parameters
   // Complex data?
-  bool complexData = getProperty("ComplexData");
+  const bool complexData = getProperty("ComplexData");
   // Complex image?
-  bool complexImage = getProperty("ComplexImage");
+  const bool complexImage = getProperty("ComplexImage");
   // Image must be positive?
-  bool positiveImage = getProperty("PositiveImage");
+  const bool positiveImage = getProperty("PositiveImage");
   // Autoshift
-  bool autoShift = getProperty("AutoShift");
+  const bool autoShift = getProperty("AutoShift");
   // Increase the number of points in the image by this factor
-  size_t resolutionFactor = getProperty("ResolutionFactor");
+  const size_t resolutionFactor = getProperty("ResolutionFactor");
   // Background (default level, sky background, etc)
-  double background = getProperty("A");
+  const double background = getProperty("A");
   // Chi target
-  double chiTarget = getProperty("ChiTarget");
+  const double ChiTargetOverN = getProperty("ChiTargetOverN");
   // Required precision for Chi arget
-  double chiEps = getProperty("ChiEps");
+  const double chiEps = getProperty("ChiEps");
   // Maximum degree of non-parallelism between S and C
-  double angle = getProperty("MaxAngle");
+  const double angle = getProperty("MaxAngle");
   // Distance penalty for current image
-  double distEps = getProperty("DistancePenalty");
+  const double distEps = getProperty("DistancePenalty");
   // Maximum number of iterations
-  size_t niter = getProperty("MaxIterations");
+  const size_t nIter = getProperty("MaxIterations");
   // Maximum number of iterations in alpha chop
-  size_t alphaIter = getProperty("AlphaChopIterations");
+  const size_t alphaIter = getProperty("AlphaChopIterations");
   // Number of spectra and datapoints
   // Read input workspace
-  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
-  size_t nspec = inWS->getNumberHistograms();
-  // Number of data points
+  size_t nSpec = inWS->getNumberHistograms();
+  // Number of data points - assumed to be constant between spectra or
+  // this will throw an exception
   size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
-  size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+  const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+
+  // For now have the requirement that data must have non-zero
+  // (and positive!) errors
+  for (size_t s = 0; s < nSpec; s++) {
+    auto errors = inWS->e(s).rawData();
+
+    size_t npoints = errors.size();
+    for (size_t i = 0; i < npoints; i++) {
+      if (errors[i] <= 0.0) {
+        throw std::invalid_argument("Input data must have non-zero errors.");
+      }
+    }
+  }
 
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
@@ -268,18 +333,24 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  nspec = complexData ? nspec / 2 : nspec;
+  nSpec = complexData ? nSpec / 2 : nSpec;
   outImageWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npoints, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npoints, npoints);
+  for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
+    outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outDataWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
-  outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
-  outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
+      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npointsX, npoints);
+  for (size_t i = 0; i < outDataWS->getNumberHistograms(); ++i)
+    outDataWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
+  outEvolChi = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
+  outEvolTest = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
 
   npoints = complexImage ? npoints * 2 : npoints;
+  std::vector<size_t> iterationCounts;
+  iterationCounts.reserve(nSpec);
+  outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
 
-  outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
-  for (size_t s = 0; s < nspec; s++) {
+  for (size_t spec = 0; spec < nSpec; spec++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
@@ -287,22 +358,22 @@ void MaxEnt::exec() {
     std::vector<double> data;
     std::vector<double> errors;
     if (complexData) {
-      data = toComplex(inWS, s, false);  // false -> data
-      errors = toComplex(inWS, s, true); // true -> errors
+      data = toComplex(inWS, spec, false);  // false -> data
+      errors = toComplex(inWS, spec, true); // true -> errors
     } else {
-      data = inWS->y(s).rawData();
-      errors = inWS->e(s).rawData();
+      data = inWS->y(spec).rawData();
+      errors = inWS->e(spec).rawData();
     }
 
     // To record the algorithm's progress
-    std::vector<double> evolChi(niter, 0.);
-    std::vector<double> evolTest(niter, 0.);
+    std::vector<double> evolChi(nIter, 0.);
+    std::vector<double> evolTest(nIter, 0.);
 
     // Progress
-    Progress progress(this, 0.0, 1.0, niter);
+    Progress progress(this, 0.0, 1.0, nIter);
 
     // Run maxent algorithm
-    for (size_t it = 0; it < niter; it++) {
+    for (size_t it = 0; it < nIter; it++) {
 
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
@@ -311,7 +382,7 @@ void MaxEnt::exec() {
       // Calculate delta to construct new image (SB eq. 25)
       double currChisq = maxentCalculator.getChisq();
       auto coeffs = maxentCalculator.getQuadraticCoefficients();
-      auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
+      auto delta = move(coeffs, ChiTargetOverN / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
       delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
@@ -326,8 +397,13 @@ void MaxEnt::exec() {
       evolTest[it] = currAngle;
 
       // Stop condition, solution found
-      if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
+      if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
+
+        // it + 1 iterations have been done because we count from zero
+        g_log.information() << "Stopped after " << it + 1 << " iterations"
+                            << std::endl;
+        iterationCounts.push_back(it + 1);
         break;
       }
 
@@ -338,31 +414,32 @@ void MaxEnt::exec() {
 
       progress.report();
 
-    } // iterations
+    } // Next Iteration
 
     // Get calculated data
     auto solData = maxentCalculator.getReconstructedData();
     auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, s, nspec, solData, complexData, outDataWS);
-    populateImageWS(inWS, s, nspec, solImage, complexImage, outImageWS,
+    populateDataWS(inWS, spec, nSpec, solData, complexData, outDataWS);
+    populateImageWS(inWS, spec, nSpec, solImage, complexImage, outImageWS,
                     autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
-    outEvolChi->setSharedX(s, outEvolChi->sharedX(0));
-    outEvolTest->setSharedX(s, outEvolChi->sharedX(0));
+    outEvolChi->setSharedX(spec, outEvolChi->sharedX(0));
+    outEvolTest->setSharedX(spec, outEvolChi->sharedX(0));
 
     // Y values
-    outEvolChi->setCounts(s, std::move(evolChi));
-    outEvolTest->setCounts(s, std::move(evolTest));
+    outEvolChi->setCounts(spec, std::move(evolChi));
+    outEvolTest->setCounts(spec, std::move(evolTest));
     // No errors
 
   } // Next spectrum
-
-  setProperty("EvolChi", outEvolChi);
-  setProperty("EvolAngle", outEvolTest);
+  setProperty("EvolChi",
+              removeZeros(outEvolChi, iterationCounts, "Chi squared"));
+  setProperty("EvolAngle",
+              removeZeros(outEvolTest, iterationCounts, "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }
@@ -376,10 +453,10 @@ void MaxEnt::exec() {
 * counts
 * @return : Spectrum 'spec' as a complex vector
 */
-std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
+std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
                                       size_t spec, bool errors) {
-
-  std::vector<double> result(inWS->blocksize() * 2);
+  const size_t numBins = inWS->y(0).size();
+  std::vector<double> result(numBins * 2);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
@@ -388,12 +465,12 @@ std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
   size_t nspec = inWS->getNumberHistograms() / 2;
 
   if (!errors) {
-    for (size_t i = 0; i < inWS->blocksize(); i++) {
+    for (size_t i = 0; i < numBins; i++) {
       result[2 * i] = inWS->y(spec)[i];
       result[2 * i + 1] = inWS->y(spec + nspec)[i];
     }
   } else {
-    for (size_t i = 0; i < inWS->blocksize(); i++) {
+    for (size_t i = 0; i < numBins; i++) {
       result[2 * i] = inWS->e(spec)[i];
       result[2 * i + 1] = inWS->e(spec + nspec)[i];
     }
@@ -403,14 +480,15 @@ std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
 
 /** Bisection method to move delta one step closer towards the solution
 * @param coeffs :: [input] The current quadratic coefficients
-* @param chiTarget :: [input] The requested Chi target
+* @param ChiTargetOverN :: [input] The requested Chi target over N
+* (data points)
 * @param chiEps :: [input] Precision required for Chi target
 * @param alphaIter :: [input] Maximum number of iterations in the bisection
 * method (alpha chop)
 * @return : The increment length to be added to the current image
 */
 std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
-                                 double chiTarget, double chiEps,
+                                 double ChiTargetOverN, double chiEps,
                                  size_t alphaIter) {
 
   double aMin = 0.; // Minimum alpha
@@ -425,11 +503,11 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   double chiMin = calculateChi(coeffs, aMin, deltaMin); // Chi at alpha min
   double chiMax = calculateChi(coeffs, aMax, deltaMax); // Chi at alpha max
 
-  double dchiMin = chiMin - chiTarget; // max - target
-  double dchiMax = chiMax - chiTarget; // min - target
+  double dchiMin = chiMin - ChiTargetOverN; // max - target
+  double dchiMax = chiMax - ChiTargetOverN; // min - target
 
   if (dchiMin * dchiMax > 0) {
-    // ChiTarget could be outside the range [chiMin, chiMax]
+    // ChiTargetOverN could be outside the range [chiMin, chiMax]
 
     if (fabs(dchiMin) < fabs(dchiMax)) {
       return deltaMin;
@@ -447,12 +525,12 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 
   std::vector<double> delta(dim, 0); // delta at current alpha
 
-  while ((fabs(eps) > chiEps) && (iter < alphaIter)) {
+  while ((fabs(eps / ChiTargetOverN) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
     double chiMid = calculateChi(coeffs, aMid, delta);
 
-    eps = chiMid - chiTarget;
+    eps = chiMid - ChiTargetOverN;
 
     if (dchiMin * eps > 0) {
       aMin = aMid;
@@ -468,8 +546,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   }
 
   // Check if move was successful
-  if ((fabs(eps) > chiEps) || (iter > alphaIter)) {
-
+  if ((fabs(eps / ChiTargetOverN) > chiEps) || (iter > alphaIter)) {
     throw std::runtime_error("Error encountered when calculating solution "
                              "image. No convergence in alpha chop.\n");
   }
@@ -530,64 +607,37 @@ double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
 * @param B :: [input] The vector B
 * @return :: The solution x
 */
-std::vector<double> MaxEnt::solveSVD(const DblMatrix &A, const DblMatrix &B) {
+std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 
   size_t dim = A.size().first;
 
-  gsl_matrix *a = gsl_matrix_alloc(dim, dim);
-  gsl_matrix *v = gsl_matrix_alloc(dim, dim);
-  gsl_vector *s = gsl_vector_alloc(dim);
-  gsl_vector *w = gsl_vector_alloc(dim);
-  gsl_vector *x = gsl_vector_alloc(dim);
-  gsl_vector *b = gsl_vector_alloc(dim);
+  auto a = gsl_matrix_view_array(A[0], dim, dim);
+  auto b = gsl_vector_const_view_array(B[0], dim);
 
-  // Need to copy from DblMatrix to gsl matrix
+  std::vector<double> vVec(dim * dim), sVec(dim), wVec(dim), delta(dim);
 
-  for (size_t k = 0; k < dim; k++)
-    for (size_t l = 0; l < dim; l++)
-      gsl_matrix_set(a, k, l, A[k][l]);
-  for (size_t k = 0; k < dim; k++)
-    gsl_vector_set(b, k, B[k][0]);
+  auto v = gsl_matrix_view_array(vVec.data(), dim, dim);
+  auto s = gsl_vector_view_array(sVec.data(), dim);
+  auto w = gsl_vector_view_array(wVec.data(), dim);
+  auto x = gsl_vector_view_array(delta.data(), dim);
 
   // Singular value decomposition
-  gsl_linalg_SV_decomp(a, v, s, w);
+  gsl_linalg_SV_decomp(&a.matrix, &v.matrix, &s.vector, &w.vector);
 
   // A could be singular or ill-conditioned. We can use SVD to obtain a least
-  // squares
-  // solution by setting the small (compared to the maximum) singular values to
-  // zero
+  // squares solution by setting the small (compared to the maximum) singular
+  // values to zero
 
   // Find largest sing value
-  double max = gsl_vector_get(s, 0);
-  for (size_t i = 0; i < dim; i++) {
-    if (max < gsl_vector_get(s, i))
-      max = gsl_vector_get(s, i);
-  }
+  double max = *std::max_element(sVec.begin(), sVec.end());
 
   // Apply a threshold to small singular values
-  const double THRESHOLD = 1E-6;
   double threshold = THRESHOLD * max;
-
-  for (size_t i = 0; i < dim; i++)
-    if (gsl_vector_get(s, i) > threshold)
-      gsl_vector_set(s, i, gsl_vector_get(s, i));
-    else
-      gsl_vector_set(s, i, 0);
+  std::transform(sVec.begin(), sVec.end(), sVec.begin(),
+                 [&threshold](double el) { return el > threshold ? el : 0.0; });
 
   // Solve A*x = B
-  gsl_linalg_SV_solve(a, v, s, b, x);
-
-  // From gsl_vector to vector
-  std::vector<double> delta(dim);
-  for (size_t k = 0; k < dim; k++)
-    delta[k] = gsl_vector_get(x, k);
-
-  gsl_matrix_free(a);
-  gsl_matrix_free(v);
-  gsl_vector_free(s);
-  gsl_vector_free(w);
-  gsl_vector_free(x);
-  gsl_vector_free(b);
+  gsl_linalg_SV_solve(&a.matrix, &v.matrix, &s.vector, &b.vector, &x.vector);
 
   return delta;
 }
@@ -619,13 +669,14 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     dist += delta[k] * sum;
   }
 
-  auto newDelta = delta;
   if (dist > distEps * sum / background) {
+    auto newDelta = delta;
     for (size_t k = 0; k < delta.size(); k++) {
-      newDelta[k] *= sqrt(sum / dist / background);
+      newDelta[k] *= sqrt(distEps * sum / dist / background);
     }
+    return newDelta;
   }
-  return newDelta;
+  return delta;
 }
 
 /**
@@ -641,16 +692,16 @@ MaxEnt::updateImage(const std::vector<double> &image,
                     const std::vector<double> &delta,
                     const std::vector<std::vector<double>> dirs) {
 
-  std::vector<double> newImage = image;
-
   if (image.empty() || dirs.empty() || (delta.size() != dirs.size())) {
     throw std::runtime_error("Cannot calculate new image");
   }
 
+  std::vector<double> newImage = image;
+
   // Calculate the new image
   for (size_t i = 0; i < image.size(); i++) {
     for (size_t k = 0; k < delta.size(); k++) {
-      newImage[i] = newImage[i] + delta[k] * dirs[k][i];
+      newImage[i] += delta[k] * dirs[k][i];
     }
   }
   return newImage;
@@ -667,7 +718,7 @@ MaxEnt::updateImage(const std::vector<double> &image,
 * @param outWS :: [input] The output workspace to populate
 * @param autoShift :: [input] Whether or not to correct the phase shift
 */
-void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                              size_t nspec, const std::vector<double> &result,
                              bool complex, MatrixWorkspace_sptr &outWS,
                              bool autoShift) {
@@ -687,11 +738,11 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   double dx = dataPoints[1] - x0;
 
   double delta = 1. / dx / npoints;
-  int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
+  const int isOdd = (inWS->y(0).size() % 2) ? 1 : 0;
 
-  double shift = x0 * 2 * M_PI;
+  double shift = x0 * 2. * M_PI;
   if (!autoShift)
-    shift = 0;
+    shift = 0.;
 
   // X values
   for (int i = 0; i < npoints; i++) {
@@ -755,7 +806,7 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 * @param complex :: [input] True if result is a complex vector, false otherwise
 * @param outWS :: [input] The output workspace to populate
 */
-void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                             size_t nspec, const std::vector<double> &result,
                             bool complex, MatrixWorkspace_sptr &outWS) {
 

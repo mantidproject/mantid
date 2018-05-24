@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,7 +41,7 @@ Usage
                                    SpectraRange=[3, 53],
                                    PeakRange=[62500, 65000])
 
-    print time_slice_results.getNames()
+    print(time_slice_results.getNames())
 
 Output:
 

@@ -10,6 +10,7 @@ namespace Mantid {
 namespace API {
 
 using namespace Kernel;
+using namespace Types::Core;
 
 namespace {
 /// static logger
@@ -120,8 +121,8 @@ LogManager &LogManager::operator=(const LogManager &other) {
 * @param start :: The run start
 * @param end :: The run end
 */
-void LogManager::setStartAndEndTime(const Kernel::DateAndTime &start,
-                                    const Kernel::DateAndTime &end) {
+void LogManager::setStartAndEndTime(const Types::Core::DateAndTime &start,
+                                    const Types::Core::DateAndTime &end) {
   this->addProperty<std::string>("start_time", start.toISO8601String(), true);
   this->addProperty<std::string>("end_time", end.toISO8601String(), true);
 }
@@ -133,12 +134,12 @@ void LogManager::setStartAndEndTime(const Kernel::DateAndTime &start,
  *  @returns The start time of the run
  *  @throws std::runtime_error if neither property is defined
  */
-const Kernel::DateAndTime LogManager::startTime() const {
+const Types::Core::DateAndTime LogManager::startTime() const {
   const std::string start_prop("start_time");
   if (hasProperty(start_prop)) {
     try {
       DateAndTime start_time(getProperty(start_prop)->value());
-      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
+      if (start_time != DateAndTime::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/
@@ -149,7 +150,7 @@ const Kernel::DateAndTime LogManager::startTime() const {
   if (hasProperty(run_start_prop)) {
     try {
       DateAndTime start_time(getProperty(run_start_prop)->value());
-      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
+      if (start_time != DateAndTime::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/
@@ -165,7 +166,7 @@ const Kernel::DateAndTime LogManager::startTime() const {
  *  @returns The end time of the run
  *  @throws std::runtime_error if neither property is defined
  */
-const Kernel::DateAndTime LogManager::endTime() const {
+const Types::Core::DateAndTime LogManager::endTime() const {
   const std::string end_prop("end_time");
   if (hasProperty(end_prop)) {
     try {
@@ -196,8 +197,8 @@ const Kernel::DateAndTime LogManager::endTime() const {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void LogManager::filterByTime(const Kernel::DateAndTime start,
-                              const Kernel::DateAndTime stop) {
+void LogManager::filterByTime(const Types::Core::DateAndTime start,
+                              const Types::Core::DateAndTime stop) {
   // The propery manager operator will make all timeseriesproperties filter.
   m_manager->filterByTime(start, stop);
 }
@@ -462,7 +463,7 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
  */
 void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
                            bool keepOpen) const {
-  file->makeGroup(group, "NXgroup", 1);
+  file->makeGroup(group, "NXgroup", true);
   file->putAttr("version", 1);
 
   // Save all the properties as NXlog

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ Usage
   # Use numpy array calculation to apply an exponential to all elements of array y
   yexp = np.exp(y)
   # Use numpy to check that all elements in two arrays are equal
-  print np.all( yexp == yres )
+  print(np.all( yexp == yres ))
 
 Output
 ######

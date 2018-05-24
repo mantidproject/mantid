@@ -7,13 +7,16 @@ namespace DataProcessor {
 /** Constructor
  * @param name : The name of the pre-processing algorithm
  * @param prefix : A prefix that will added to the output workspace name
+ * @param separator : A separator that will added between values in the output
+ * workspace name
  * @param blacklist : The list of properties we don't want to show
  * algorithm in the processed workspace's name
  */
-PreprocessingAlgorithm::PreprocessingAlgorithm(
-    const QString &name, const QString &prefix,
-    const std::set<QString> &blacklist)
-    : ProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
+PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
+                                               QString separator,
+                                               std::set<QString> blacklist)
+    : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)),
+      m_prefix(std::move(prefix)), m_separator(std::move(separator)) {
 
   auto inputWsProperties = getInputWsProperties();
 
@@ -39,39 +42,40 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(
 *
 * @param name : The name of the pre-processing algorithm
 * @param prefix : A prefix that will added to the output workspace name
+* @param separator : A separator that will used between values in the output
+* workspace name
 * @param blacklist : The list of properties we don't want to show, as a string
 * algorithm in the processed workspace's name
 */
-PreprocessingAlgorithm::PreprocessingAlgorithm(
-    const QString &name, const QString &prefix, const QString &blacklist)
-    : PreprocessingAlgorithm(name, prefix,
-                                          convertStringToSet(blacklist)) {}
+PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
+                                               QString separator,
+                                               const QString &blacklist)
+    : PreprocessingAlgorithm(std::move(name), std::move(prefix),
+                             std::move(separator),
+                             convertStringToSet(blacklist)) {}
 
 /** Default constructor: do nothing
 */
 PreprocessingAlgorithm::PreprocessingAlgorithm()
-    : m_prefix(), m_lhs(), m_rhs(), m_outProperty() {}
+    : m_prefix(), m_separator(), m_lhs(), m_rhs(), m_outProperty() {}
 
 // Destructor
 PreprocessingAlgorithm::~PreprocessingAlgorithm() {}
 
 // Returns the name of the lhs input property
-QString PreprocessingAlgorithm::lhsProperty() const {
-  return m_lhs;
-}
+QString PreprocessingAlgorithm::lhsProperty() const { return m_lhs; }
 
 // Returns the name of the rhs input property
-QString PreprocessingAlgorithm::rhsProperty() const {
-  return m_rhs;
-}
+QString PreprocessingAlgorithm::rhsProperty() const { return m_rhs; }
 
 // Returns the name of the output property
-QString PreprocessingAlgorithm::outputProperty() const {
-  return m_outProperty;
-}
+QString PreprocessingAlgorithm::outputProperty() const { return m_outProperty; }
 
 // Returns the prefix to add to the output property
 QString PreprocessingAlgorithm::prefix() const { return m_prefix; }
+
+// Returns the separator to separate multiple values in the output property
+QString PreprocessingAlgorithm::separator() const { return m_separator; }
 }
 }
 }

@@ -1,9 +1,9 @@
 #ifndef LINEPLOTOPTIONS_H
 #define LINEPLOTOPTIONS_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "ui_LinePlotOptions.h"
-#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "DllOption.h"
 
@@ -11,7 +11,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LinePlotOptions : public QWidget {
   Q_OBJECT
 
 public:
-  LinePlotOptions(QWidget *parent = 0, bool logScaleOption = false);
+  LinePlotOptions(QWidget *parent = nullptr, bool logScaleOption = false);
   ~LinePlotOptions() override;
 
   void setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws);

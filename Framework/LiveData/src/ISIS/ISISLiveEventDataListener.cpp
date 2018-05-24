@@ -150,7 +150,7 @@ bool ISISLiveEventDataListener::connect(
 }
 
 // start event collection
-void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime) {
+void ISISLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
   (void)startTime;
   m_thread.start(*this);
 }
@@ -235,6 +235,8 @@ void ISISLiveEventDataListener::run() {
       // get the header with the type of the packet
       Receive(events.head, "Events header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       if (!(events.head.type == TCPStreamEventHeader::Neutron)) {
         // don't know what to do with it - stop
         throw std::runtime_error("Unknown packet type.");
@@ -244,10 +246,12 @@ void ISISLiveEventDataListener::run() {
       // get the header with the sream size
       Receive(events.head_n, "Neutrons header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       CollectJunk(events.head_n);
 
       // absolute pulse (frame) time
-      Mantid::Kernel::DateAndTime pulseTime =
+      Mantid::Types::Core::DateAndTime pulseTime =
           m_startTime + static_cast<double>(events.head_n.frame_time_zero);
       // Save the pulse charge in the logs
       double protons = static_cast<double>(events.head_n.protons);
@@ -282,8 +286,7 @@ void ISISLiveEventDataListener::run() {
       saveEvents(events.data, pulseTime, events.head_n.period);
     }
 
-  } catch (std::runtime_error &
-               e) { // exception handler for generic runtime exceptions
+  } catch (std::runtime_error &e) {
 
     g_log.error() << "Caught a runtime exception.\nException message: "
                   << e.what() << '\n';
@@ -291,8 +294,8 @@ void ISISLiveEventDataListener::run() {
 
     m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
-  } catch (std::invalid_argument &
-               e) { // TimeSeriesProperty (and possibly some other things) can
+  } catch (std::invalid_argument &e) {
+    // TimeSeriesProperty (and possibly some other things) can
     // can throw these errors
     g_log.error()
         << "Caught an invalid argument exception.\nException message: "
@@ -303,7 +306,7 @@ void ISISLiveEventDataListener::run() {
     newMsg += e.what();
     m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
 
-  } catch (...) { // Default exception handler
+  } catch (...) {
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "
                      "read thread.\n";
     m_isConnected = false;
@@ -375,7 +378,7 @@ void ISISLiveEventDataListener::initEventBuffer(
  */
 void ISISLiveEventDataListener::saveEvents(
     const std::vector<TCPStreamEventNeutron> &data,
-    const Kernel::DateAndTime &pulseTime, size_t period) {
+    const Types::Core::DateAndTime &pulseTime, size_t period) {
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   if (period >= static_cast<size_t>(m_numberOfPeriods)) {
@@ -388,7 +391,7 @@ void ISISLiveEventDataListener::saveEvents(
   }
 
   for (const auto &streamEvent : data) {
-    Mantid::DataObjects::TofEvent event(streamEvent.time_of_flight, pulseTime);
+    Types::Event::TofEvent event(streamEvent.time_of_flight, pulseTime);
     m_eventBuffer[period]
         ->getSpectrum(streamEvent.spectrum)
         .addEventQuickly(event);

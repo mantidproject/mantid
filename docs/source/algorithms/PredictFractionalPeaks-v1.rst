@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,7 +34,7 @@ Usage
    IndexPeaks(peaks)
 
    fractional_peaks = PredictFractionalPeaks(peaks, HOffset=[-0.5,0,0.5],KOffset=0,LOffset=0.2)
-   print "Number of fractional peaks:",fractional_peaks.getNumberPeaks()
+   print("Number of fractional peaks: {}".format(fractional_peaks.getNumberPeaks()))
 
 .. testoutput:: TopazExample
 

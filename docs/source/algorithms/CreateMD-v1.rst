@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,7 +17,7 @@ Note that this will significantly increase the execution time of the algorithm.
 Setting the UB matrix
 ######################################
 
-*u* and *v* are required. *u* and *v* are both 3-element vectors. These specify how the crystal's axes were oriented relative to the spectrometer in the setup for which you define psi to be zero. *u* specifies the lattice vector that is parallel to the incident neutron beam, whilst *v* is a vector perpendicular to this in the horizontal plane. In UB matrix notation, *u* and *v* provide the U matrix. See :ref:`algm-SetUB`. *Alatt* and *Angdeg* are the lattice parameters in Angstroms and lattice angles in degrees respectively. Both are 3-element vectors. These form the B-matrix.
+*u* and *v* are required. *u* and *v* are both 3-element vectors. These specify how the crystal's axes were oriented relative to the spectrometer in the setup for which you define psi to be zero. *u* specifies the lattice vector that is parallel to the incident neutron beam, whilst *v* is a vector perpendicular to this in the horizontal plane. In :ref:`UB matrix <Lattice>` notation, *u* and *v* provide the U matrix. See :ref:`algm-SetUB`. *Alatt* and *Angdeg* are the lattice parameters in Angstroms and lattice angles in degrees respectively. Both are 3-element vectors. These form the B-matrix.
 
 Goniometer Settings
 #####################
@@ -58,10 +58,10 @@ Workflow
    # Create arrays of run numbers and corresponding values of psi
    run_numbers = range(15052, 15098)
    psi_array = np.arange(0.0, 92.0, 2)
-   
+
    # Create list of file names from run numbers
    input_runs = ['/path/to/data/instr_'+str(run_number)+'.nxspe' for run_number in run_numbers]
-   
+
    md_ws = CreateMD(input_runs, Emode='Direct', Alatt=[2.87, 2.87, 2.87], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0, 1, 0], Psi=psi_array, EFix=400.0)
 
 **Conversion Of A Single Input Workspace Example**
@@ -80,8 +80,8 @@ Workflow
    ndims = new_mdew.getNumDims()
    for i in range(ndims):
        dim = new_mdew.getDimension(i)
-       print dim.getName()
-  
+       print(dim.getName())
+
 Output
 ^^^^^^
 
@@ -97,7 +97,7 @@ Output
 
 .. code-block:: python
 
-   # Create multiple runs 
+   # Create multiple runs
    input_runs = list()
    psi = list()
    gs = list()
@@ -108,7 +108,7 @@ Output
        psi.append(float(5 * i))
        gl.append(0.0)
        gs.append(0.0)
-    
+
    # Convert and merge
    new_merged = CreateMD(input_runs, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=psi, Gl=gl, Gs=gs, EFix=3.0)
 
@@ -116,7 +116,7 @@ Output
    ndims = new_merged.getNumDims()
    for i in range(ndims):
        dim = new_merged.getDimension(i)
-       print dim.getName()
+       print(dim.getName())
 
 Output
 ^^^^^^
@@ -133,7 +133,7 @@ Output
 
 .. code-block:: python
 
-   # Create multiple runs 
+   # Create multiple runs
    input_runs = list()
    psi = list()
    gs = list()
@@ -144,7 +144,7 @@ Output
        psi.append(float(5 * i))
        gl.append(0.0)
        gs.append(0.0)
-    
+
    # Convert and merge. ConversionToMD done in place.
    new_merged = CreateMD(input_runs, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=psi, Gl=gl, Gs=gs, EFix=3.0, InPlace=False)
 
@@ -152,7 +152,7 @@ Output
    ndims = new_merged.getNumDims()
    for i in range(ndims):
        dim = new_merged.getDimension(i)
-       print dim.getName()
+       print(dim.getName())
 
 Output
 ^^^^^^

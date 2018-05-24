@@ -28,16 +28,11 @@ using namespace API;
 using namespace DataObjects;
 using Geometry::Instrument_const_sptr;
 
-typedef NeXus::NexusFileIO::optional_size_t optional_size_t;
+using optional_size_t = NeXus::NexusFileIO::optional_size_t;
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexusProcessed)
 
-/// Empty default constructor
-SaveNexusProcessed::SaveNexusProcessed()
-    : Algorithm(), m_timeProgInit(0.0), m_progress() {}
-
-//-----------------------------------------------------------------------------------------------
 /** Initialisation method.
  *
  */
@@ -287,7 +282,7 @@ void SaveNexusProcessed::doExec(
   // Switch to the Cpp API for the algorithm history
   if (trackingHistory()) {
     m_history->fillAlgorithmHistory(
-        this, Mantid::Kernel::DateAndTime::getCurrentTime(), 0,
+        this, Mantid::Types::Core::DateAndTime::getCurrentTime(), 0,
         Algorithm::g_execCount);
     if (!isChild()) {
       inputWorkspace->history().addHistory(m_history);
@@ -327,7 +322,7 @@ void SaveNexusProcessed::exec() {
  *        or NULL if they are not meant to be written to.
  */
 template <class T>
-void SaveNexusProcessed::appendEventListData(std::vector<T> events,
+void SaveNexusProcessed::appendEventListData(const std::vector<T> &events,
                                              size_t offset, double *tofs,
                                              float *weights,
                                              float *errorSquareds,
@@ -336,21 +331,29 @@ void SaveNexusProcessed::appendEventListData(std::vector<T> events,
   if (events.empty())
     return;
 
-  typename std::vector<T>::const_iterator it;
-  typename std::vector<T>::const_iterator it_end = events.end();
-  size_t i = offset;
+  const auto it = events.cbegin();
+  const auto it_end = events.cend();
 
   // Fill the C-arrays with the fields from all the events, as requested.
-  for (it = events.begin(); it != it_end; it++) {
-    if (tofs)
-      tofs[i] = it->tof();
-    if (weights)
-      weights[i] = static_cast<float>(it->weight());
-    if (errorSquareds)
-      errorSquareds[i] = static_cast<float>(it->errorSquared());
-    if (pulsetimes)
-      pulsetimes[i] = it->pulseTime().totalNanoseconds();
-    i++;
+  if (tofs) {
+    std::transform(it, it_end, std::next(tofs, offset),
+                   [](const T &event) { return event.tof(); });
+  }
+  if (weights) {
+    std::transform(it, it_end, std::next(weights, offset), [](const T &event) {
+      return static_cast<float>(event.weight());
+    });
+  }
+  if (errorSquareds) {
+    std::transform(it, it_end, std::next(errorSquareds, offset),
+                   [](const T &event) {
+                     return static_cast<float>(event.errorSquared());
+                   });
+  }
+  if (pulsetimes) {
+    std::transform(
+        it, it_end, std::next(pulsetimes, offset),
+        [](const T &event) { return event.pulseTime().totalNanoseconds(); });
   }
 }
 
@@ -360,7 +363,7 @@ void SaveNexusProcessed::appendEventListData(std::vector<T> events,
  * */
 void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                                    const bool uniformSpectra,
-                                   const std::vector<int> spec) {
+                                   const std::vector<int> &spec) {
   m_progress = make_unique<Progress>(this, m_timeProgInit, 1.0,
                                      m_eventWorkspace->getNumberEvents() * 2);
 
@@ -477,7 +480,7 @@ void SaveNexusProcessed::setOtherProperties(IAlgorithm *alg,
                                             const std::string &propertyName,
                                             const std::string &propertyValue,
                                             int perioidNum) {
-  if (!propertyName.compare("Append")) {
+  if (propertyName == "Append") {
     if (perioidNum != 1) {
       alg->setPropertyValue(propertyName, "1");
     } else
@@ -547,7 +550,7 @@ void SaveNexusProcessed::saveSpectraMapNexus(
   }
 
   // Start the detector group
-  file->makeGroup("detector", "NXdetector", 1);
+  file->makeGroup("detector", "NXdetector", true);
   file->putAttr("version", 1);
 
   int numberSpec = int(spec.size());

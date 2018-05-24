@@ -1,10 +1,11 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
@@ -18,8 +19,6 @@ namespace Mantid {
 namespace Geometry {
 
 using Kernel::V3D;
-using Kernel::Quat;
-using Kernel::Matrix;
 
 /** Empty constructor
 */
@@ -71,7 +70,7 @@ void StructuredDetector::init() {
   m_idStepByRow = 0;
   m_idStep = 0;
 
-  setGeometryHandler(new StructuredGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Clone method
@@ -290,8 +289,8 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 *
 */
 void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
-                                    const std::vector<double> &x,
-                                    const std::vector<double> &y, bool isZBeam,
+                                    std::vector<double> &&x,
+                                    std::vector<double> &&y, bool isZBeam,
                                     detid_t idStart, bool idFillByFirstY,
                                     int idStepByRow, int idStep) {
   if (m_map)
@@ -329,8 +328,8 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                 "z-axis aligned beams.");
 
   // Store vertices
-  m_xvalues = x;
-  m_yvalues = y;
+  m_xvalues = std::move(x);
+  m_yvalues = std::move(y);
 
   createDetectors();
 }
@@ -399,15 +398,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrb = m_yvalues[(y * w) + x + 1];
 
   // calculate midpoint of trapeziod
-  auto a = std::fabs(xrf - xlf);
-  auto b = std::fabs(xrb - xlb);
-  auto h = std::fabs(ylb - ylf);
-  auto cx = ((a + b) / 4);
-  auto cy = h / 2;
-
-  // store detector position before translating to origin
-  auto xpos = xlb + cx;
-  auto ypos = ylb + cy;
+  // calculate midpoint of trapeziod
+  auto xpos = (xlb + xlf + xrf + xrb) / 4;
+  auto ypos = (ylb + ylf + yrf + yrb) / 4;
 
   // Translate detector shape to origin
   xlf -= xpos;
@@ -420,7 +413,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   ylb -= ypos;
 
   ShapeFactory factory;
-  boost::shared_ptr<Mantid::Geometry::Object> shape =
+  boost::shared_ptr<Mantid::Geometry::IObject> shape =
       factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
@@ -518,6 +511,10 @@ int StructuredDetector::getPointInObject(V3D &) const {
 * @param assemblyBox :: A BoundingBox object that will be overwritten
 */
 void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
+  if (hasComponentInfo()) {
+    assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
+    return;
+  }
   if (!m_cachedBoundingBox) {
     m_cachedBoundingBox = new BoundingBox();
     // Get all the corners
@@ -548,7 +545,7 @@ void StructuredDetector::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
@@ -564,11 +561,11 @@ void StructuredDetector::initDraw() const {
   if (Handle() == nullptr)
     return;
 
-  Handle()->Initialize();
+  Handle()->initialize();
 }
 
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> StructuredDetector::shape() const {
+const boost::shared_ptr<const IObject> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
   auto w = this->xPixels() + 1;
   auto xlb = m_xvalues[0];
@@ -641,6 +638,11 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
+}
+
+size_t StructuredDetector::registerContents(
+    class ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerStructuredBank(*this);
 }
 
 } // namespace Geometry

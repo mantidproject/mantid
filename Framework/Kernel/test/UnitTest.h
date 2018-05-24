@@ -140,7 +140,7 @@ public:
   void testLabel_label() { TS_ASSERT_EQUALS(label.label().ascii(), ""); }
 
   void testLabel_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&label));
     TS_ASSERT_EQUALS(u->unitID(), "Label");
   }
@@ -277,7 +277,7 @@ public:
   }
 
   void testTOF_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&tof));
     TS_ASSERT_EQUALS(u->unitID(), "TOF");
   }
@@ -329,7 +329,7 @@ public:
   }
 
   void testWavelength_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&lambda));
     TS_ASSERT_EQUALS(u->unitID(), "Wavelength");
   }
@@ -404,7 +404,7 @@ public:
   }
 
   void testEnergy_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&energy));
     TS_ASSERT_EQUALS(u->unitID(), "Energy");
   }
@@ -479,7 +479,7 @@ public:
   }
 
   void testEnergy_inWavenumber_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&energyk));
     TS_ASSERT_EQUALS(u->unitID(), "Energy_inWavenumber");
   }
@@ -534,7 +534,7 @@ public:
   }
 
   void testdSpacing_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&d));
     TS_ASSERT_EQUALS(u->unitID(), "dSpacing");
   }
@@ -613,7 +613,7 @@ public:
   }
 
   void testdSpacingPerpendicular_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dp));
     TS_ASSERT_EQUALS(u->unitID(), "dSpacingPerpendicular");
   }
@@ -671,7 +671,7 @@ public:
   }
 
   void testQTransfer_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&q));
     TS_ASSERT_EQUALS(u->unitID(), "MomentumTransfer");
   }
@@ -746,7 +746,7 @@ public:
   }
 
   void testQ2_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&q2));
     TS_ASSERT_EQUALS(u->unitID(), "QSquared");
   }
@@ -825,7 +825,7 @@ public:
   }
 
   void testDeltaE_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dE));
     TS_ASSERT_EQUALS(u->unitID(), "DeltaE");
   }
@@ -923,7 +923,7 @@ public:
   }
 
   void testDeltaEk_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dEk));
     TS_ASSERT_EQUALS(u->unitID(), "DeltaE_inWavenumber");
   }
@@ -1020,7 +1020,7 @@ public:
   }
 
   void testDeltaEf_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dEf));
     TS_ASSERT_EQUALS(u->unitID(), "DeltaE_inFrequency");
   }
@@ -1116,7 +1116,7 @@ public:
   }
 
   void testMomentum_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&k_i));
     TS_ASSERT_EQUALS(u->unitID(), "Momentum");
   }
@@ -1245,7 +1245,7 @@ public:
   }
 
   void testSpinEchoLength_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&delta));
     TS_ASSERT_EQUALS(u->unitID(), "SpinEchoLength");
   }
@@ -1323,7 +1323,7 @@ public:
   }
 
   void testSpinEchoTime_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&tau));
     TS_ASSERT_EQUALS(u->unitID(), "SpinEchoTime");
   }

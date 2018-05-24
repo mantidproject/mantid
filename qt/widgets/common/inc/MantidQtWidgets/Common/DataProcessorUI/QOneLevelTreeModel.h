@@ -12,6 +12,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+class RowData;
+using RowData_sptr = std::shared_ptr<RowData>;
+
 /** QOneLevelTreeModel : Provides a QAbstractItemModel for a
 DataProcessorUI with no post-processing defined. The first argument to the
 constructor is a Mantid ITableWorkspace containing the values to use in the
@@ -41,13 +44,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel
-    : public AbstractTreeModel {
+class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QOneLevelTreeModel(
-      Mantid::API::ITableWorkspace_sptr tableWorkspace,
-      const WhiteList &whitelist);
+  QOneLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                     const WhiteList &whitelist);
   ~QOneLevelTreeModel() override;
 
   // Functions to read data from the model
@@ -58,6 +59,8 @@ public:
   // Get header data for the table
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
+  // Get row metadata
+  RowData_sptr rowData(const QModelIndex &index) override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
@@ -86,15 +89,25 @@ public:
   // Set the 'processed' status of a row
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Transfer rows into the table
+  void transfer(const std::vector<std::map<QString, QString>> &runs) override;
+private slots:
+  void tableDataUpdated(const QModelIndex &, const QModelIndex &);
 
 private:
+  /// Update all cached row data from the table data
+  void updateAllRowData();
+  /// Insert a row with given values into the table
+  void insertRowWithValues(int rowIndex,
+                           const std::map<QString, QString> &rowValues);
+  /// Check whether a row's cell values are all empty
+  bool rowIsEmpty(int row) const;
   /// Vector containing process status for each row
-  std::vector<bool> m_rows;
+  std::vector<RowData_sptr> m_rows;
 };
 
 /// Typedef for a shared pointer to \c QOneLevelTreeModel
-using QOneLevelTreeModel_sptr =
-    boost::shared_ptr<QOneLevelTreeModel>;
+using QOneLevelTreeModel_sptr = boost::shared_ptr<QOneLevelTreeModel>;
 
 } // namespace DataProcessor
 } // namespace MantidWidgets

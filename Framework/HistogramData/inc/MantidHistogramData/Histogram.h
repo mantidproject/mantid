@@ -1,12 +1,11 @@
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAM_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAM_H_
 
-#include "MantidHistogramData/DllConfig.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
-#include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
 #include "MantidHistogramData/CountVariances.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Frequencies.h"
 #include "MantidHistogramData/FrequencyStandardDeviations.h"
 #include "MantidHistogramData/FrequencyVariances.h"
@@ -14,14 +13,17 @@
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/PointStandardDeviations.h"
 #include "MantidHistogramData/PointVariances.h"
+#include "MantidHistogramData/Points.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <vector>
 
 namespace Mantid {
 namespace HistogramData {
+
+class HistogramIterator;
 
 /** Histogram
 
@@ -139,7 +141,7 @@ public:
 
   /// Returns the size of the histogram, i.e., the number of Y data points.
   size_t size() const {
-    if (xMode() == XMode::BinEdges)
+    if (!m_x->empty() && xMode() == XMode::BinEdges)
       return m_x->size() - 1;
     return m_x->size();
   }
@@ -190,6 +192,9 @@ public:
   void convertToCounts();
   void convertToFrequencies();
 
+  HistogramIterator begin() const;
+  HistogramIterator end() const;
+
 private:
   template <class TX> void initX(const TX &x);
   template <class TY> void initY(const TY &y);
@@ -234,7 +239,7 @@ Histogram::setUncertainties(const FrequencyStandardDeviations &e);
   @param y Optional Y data for the Histogram. Can be Counts or Frequencies.
   @param e Optional E data for the Histogram. Can be Variances or
   StandardDeviations for Counts or Frequencies. If not specified or null, the
-  standard deviations will be set as the suare root of the Y data.
+  standard deviations will be set as the square root of the Y data.
   */
 template <class TX, class TY, class TE>
 Histogram::Histogram(const TX &x, const TY &y, const TE &e) {

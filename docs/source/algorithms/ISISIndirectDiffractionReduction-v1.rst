@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,9 +32,9 @@ Usage
 
     ws = mtd['DiffractionReductions'].getItem(0)
 
-    print 'Workspace name: %s' % ws.name()
-    print 'Number of spectra: %d' % ws.getNumberHistograms()
-    print 'Number of bins: %s' % ws.blocksize()
+    print('Workspace name: {}'.format(ws.name()))
+    print('Number of spectra: {:d}'.format(ws.getNumberHistograms()))
+    print('Number of bins: {}'.format(ws.blocksize()))
 
 Output:
 

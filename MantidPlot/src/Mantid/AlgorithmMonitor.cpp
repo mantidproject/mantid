@@ -129,7 +129,7 @@ void AlgorithmMonitor::showDialog() {
 //-----------------------------------------------------------------------------
 /** Cancel the given algorithm's execution */
 void AlgorithmMonitor::cancel(Mantid::API::AlgorithmID id,
-                              QPushButton *cancelBtn = NULL) {
+                              QPushButton *cancelBtn = nullptr) {
   if ((cancelBtn) && (cancelBtn->text() == "Cancel")) {
     cancelBtn->setText("Cancelling");
     cancelBtn->setEnabled(false);
@@ -151,7 +151,7 @@ void AlgorithmMonitor::cancelAll() {
 //-----------------------------------------------------------------------------------------------//
 MonitorDlg::MonitorDlg(QWidget *parent, AlgorithmMonitor *algMonitor)
     : QDialog(parent), m_algMonitor(algMonitor) {
-  m_tree = 0;
+  m_tree = nullptr;
   update();
   connect(algMonitor, SIGNAL(countChanged()), this, SLOT(update()),
           Qt::QueuedConnection);

@@ -5,7 +5,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -29,7 +29,8 @@ SlitCalculator::~SlitCalculator() {}
 void SlitCalculator::setInstrument(std::string instrumentName) {
   // we want to get the most up-to-date definition, so we use the current
   // date/time
-  auto date = Mantid::Kernel::DateAndTime::getCurrentTime().toISO8601String();
+  auto date =
+      Mantid::Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   // find the full path to the definition file
   auto filename =
       Mantid::API::ExperimentInfo::getInstrumentFilename(instrumentName, date);
@@ -61,8 +62,8 @@ void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
   auto slit2Component = instrument->getComponentByName("slit2");
   auto sampleComponent = instrument->getComponentByName("some-surface-holder");
   // check that they have been fetched from the IDF
-  if (slit1Component.get() != NULL && slit2Component.get() != NULL &&
-      sampleComponent.get() != NULL) {
+  if (slit1Component.get() != nullptr && slit2Component.get() != nullptr &&
+      sampleComponent.get() != nullptr) {
     // convert from meters to millimeters
     const double s1s2 = 1e3 * (slit1Component->getDistance(*slit2Component));
     // set value in field of slitCalculator

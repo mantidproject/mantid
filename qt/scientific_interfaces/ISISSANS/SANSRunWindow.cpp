@@ -61,7 +61,7 @@ Logger g_log("SANSRunWindow");
 /// static logger for centre finding
 Logger g_centreFinderLog("CentreFinder");
 
-typedef boost::shared_ptr<Kernel::PropertyManager> ReductionSettings_sptr;
+using ReductionSettings_sptr = boost::shared_ptr<Kernel::PropertyManager>;
 
 /**
  * Returns the PropertyManager object that is used to store the settings
@@ -224,17 +224,17 @@ bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
 //----------------------------------------------
 /// Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent)
-    : UserSubWindow(parent), m_addFilesTab(NULL), m_displayTab(NULL),
-      m_diagnosticsTab(NULL), m_saveWorkspaces(NULL), m_ins_defdir(""),
+    : UserSubWindow(parent), m_addFilesTab(nullptr), m_displayTab(nullptr),
+      m_diagnosticsTab(nullptr), m_saveWorkspaces(nullptr), m_ins_defdir(""),
       m_last_dir(""), m_cfg_loaded(true), m_userFname(false), m_sample_file(),
-      m_reducemapper(NULL), m_warnings_issued(false), m_force_reload(false),
+      m_reducemapper(nullptr), m_warnings_issued(false), m_force_reload(false),
       m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
       m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
       m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
       m_have_reducemodule(false), m_dirty_batch_grid(false),
-      m_tmp_batchfile(""), m_batch_paste(NULL), m_batch_clear(NULL),
-      m_mustBeDouble(NULL), m_doubleValidatorZeroToMax(NULL),
-      m_intValidatorZeroToMax(NULL), slicingWindow(NULL) {
+      m_tmp_batchfile(""), m_batch_paste(nullptr), m_batch_clear(nullptr),
+      m_mustBeDouble(nullptr), m_doubleValidatorZeroToMax(nullptr),
+      m_intValidatorZeroToMax(nullptr), slicingWindow(nullptr) {
   ConfigService::Instance().addObserver(m_newInDir);
 }
 
@@ -546,7 +546,7 @@ void SANSRunWindow::saveWorkspacesDialog() {
 */
 void SANSRunWindow::saveWorkspacesClosed() {
   m_uiForm.saveSel_btn->setEnabled(true);
-  m_saveWorkspaces = NULL;
+  m_saveWorkspaces = nullptr;
 }
 /** Connection the buttons to their signals
 */
@@ -609,6 +609,10 @@ void SANSRunWindow::connectAnalysDetSignals() {
   connect(m_uiForm.frontDetQrangeOnOff, SIGNAL(stateChanged(int)), this,
           SLOT(updateFrontDetQrange(int)));
   updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->checkState());
+
+  connect(m_uiForm.mergeQRangeOnOff, SIGNAL(stateChanged(int)), this,
+          SLOT(updateMergeQRange(int)));
+  updateMergeQRange(m_uiForm.mergeQRangeOnOff->checkState());
 
   connect(m_uiForm.enableRearFlood_ck, SIGNAL(stateChanged(int)), this,
           SLOT(prepareFlood(int)));
@@ -908,6 +912,15 @@ bool SANSRunWindow::loadUserFile() {
           "print(i.ReductionSingleton().to_wavelen.wav_step)").trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
+  // RCut WCut
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().to_Q.r_cut)").toDouble();
+  m_uiForm.r_cut_line_edit->setText(QString::number(dbl_param * unit_conv));
+
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().to_Q.w_cut)").toDouble();
+  m_uiForm.w_cut_line_edit->setText(QString::number(dbl_param));
+
   // Q
   QString text =
       runReduceScriptFunction("print(i.ReductionSingleton().to_Q.binning)");
@@ -979,6 +992,23 @@ bool SANSRunWindow::loadUserFile() {
                                 "'FRONT').rescaleAndShift.qMax)").trimmed());
   } else
     m_uiForm.frontDetQrangeOnOff->setChecked(false);
+
+  QString qMergeRangeUserSelected =
+      runReduceScriptFunction("print("
+                              "i.ReductionSingleton().instrument.getDetector('"
+                              "FRONT').mergeRange.q_merge_range)").trimmed();
+  if (qMergeRangeUserSelected == "True") {
+    m_uiForm.mergeQRangeOnOff->setChecked(true);
+    m_uiForm.mergeQMin->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_min)").trimmed());
+    m_uiForm.mergeQMax->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_max)").trimmed());
+  } else
+    m_uiForm.mergeQRangeOnOff->setChecked(false);
 
   // Monitor spectra
   m_uiForm.monitor_spec->setText(
@@ -1841,7 +1871,7 @@ void SANSRunWindow::setSANS2DGeometry(
   const double distance = workspace->spectrumInfo().l1() * unitconv;
 
   // Moderator-sample
-  QLabel *dist_label(NULL);
+  QLabel *dist_label(nullptr);
   if (wscode == 0) {
     dist_label = m_uiForm.dist_sample_ms_s2d;
   } else if (wscode == 1) {
@@ -2124,8 +2154,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
       m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
 
       using namespace boost;
-      typedef tuple<QLineEdit *, function<double(const Sample *)>, std::string>
-          GeomSampleInfo;
+      using GeomSampleInfo =
+          tuple<QLineEdit *, function<double(const Sample *)>, std::string>;
 
       std::vector<GeomSampleInfo> sampleInfoList;
       sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,
@@ -2228,6 +2258,14 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
       // to give the correct number of characters
       m_uiForm.rad_min->text() + " '+'" + m_uiForm.rad_max->text() +
       " '+'1', i.ReductionSingleton())\n";
+
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/RCut '+'" +
+      m_uiForm.r_cut_line_edit->text() + "', i.ReductionSingleton())\n";
+
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/WCut '+'" +
+      m_uiForm.w_cut_line_edit->text() + "', i.ReductionSingleton())\n";
 
   setStringSetting("events.binning", m_uiForm.l_events_binning->text());
 
@@ -2347,6 +2385,17 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
 
   exec_reduce += "i.SetFrontDetRescaleShift(" + fdArguments + ")\n";
 
+  // Set the merge q range
+  QString mergeArguments = "";
+  if (m_uiForm.mergeQRangeOnOff->isChecked() &&
+      !m_uiForm.mergeQMin->text().isEmpty() &&
+      !m_uiForm.mergeQMax->text().isEmpty()) {
+    mergeArguments += "q_min=" + m_uiForm.mergeQMin->text().trimmed();
+    mergeArguments += ", q_max=" + m_uiForm.mergeQMax->text().trimmed();
+  }
+
+  exec_reduce += "i.SetMergeQRange(" + mergeArguments + ")\n";
+
   // Gravity correction
   exec_reduce += "i.Gravity(";
   if (m_uiForm.gravity_check->isChecked()) {
@@ -2431,7 +2480,6 @@ QString SANSRunWindow::readSampleObjectGUIChanges() {
  */
 void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   const States type = typeStr == "1D" ? OneD : TwoD;
-
   // Make sure that all settings are valid
   if (!areSettingsValid(type)) {
     return;
@@ -3352,6 +3400,23 @@ void SANSRunWindow::updateFrontDetQrange(int state) {
   }
 }
 
+/**Respond to the Merge Q range check box.
+ * @param state :: equal to Qt::Checked or not
+ */
+void SANSRunWindow::updateMergeQRange(int state) {
+  if (state == Qt::Checked) {
+    m_uiForm.mergeQMax->setEnabled(true);
+    m_uiForm.mergeQMin->setEnabled(true);
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
+                            "FRONT').mergeRange.merge_range=True");
+  } else {
+    m_uiForm.mergeQMax->setEnabled(false);
+    m_uiForm.mergeQMin->setEnabled(false);
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
+                            "FRONT').mergeRange.merge_range=False");
+  }
+}
+
 /**Respond to the "Use default transmission" check box being clicked. If
  * the box is checked the transmission fit wavelength maximum and minimum
  * boxs with be set to the defaults for the instrument and disabled.
@@ -4000,6 +4065,9 @@ void SANSRunWindow::setValidators() {
   m_uiForm.wav_min->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.wav_max->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.wav_dw->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.r_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.w_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
 
   m_uiForm.q_min->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.q_max->setValidator(m_doubleValidatorZeroToMax);

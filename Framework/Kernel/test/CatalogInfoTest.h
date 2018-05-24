@@ -36,7 +36,7 @@ public:
         "</facility>"
         "</facilities>";
 
-    CatalogInfo *catalogInfo = NULL;
+    CatalogInfo *catalogInfo = nullptr;
     TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
     TS_ASSERT_EQUALS(catalogInfo->catalogName(), "ICat3Catalog");
@@ -77,7 +77,7 @@ public:
         "</facility>"
         "</facilities>";
 
-    CatalogInfo *catalogInfo = NULL;
+    CatalogInfo *catalogInfo = nullptr;
     TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
     // Set the paths to test against.
@@ -86,7 +86,7 @@ public:
     std::string macPrefixPath =
         "/archive/NDXSANDALS/Instrument/data/cycle_05_3/ALF06716.LOG";
     std::string winPrefixPath =
-        "\\NDXSANDALS\\Instrument\\data\\cycle_05_3\\ALF06716.LOG";
+        R"(\NDXSANDALS\Instrument\data\cycle_05_3\ALF06716.LOG)";
     std::string winDefaultPath = "\\\\isis\\inst$\\Instruments$"
                                  "\\NDXSANDALS\\Instrument\\data\\cycle_05_"
                                  "3\\ALF06716.LOG";

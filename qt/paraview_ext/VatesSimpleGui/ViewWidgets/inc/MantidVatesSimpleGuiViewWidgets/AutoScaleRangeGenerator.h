@@ -33,7 +33,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
-#include <qlist.h>
+#include <QList>
 
 class pqPipelineSource;
 class pqDataRepresentation;

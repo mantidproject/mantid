@@ -6,11 +6,13 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
 namespace Geometry {
+
+class ComponentVisitor;
 /**
  *  RectangularDetector is a type of CompAssembly, an assembly of components.
  *  It is designed to be an easy way to specify a rectangular (XY) array of
@@ -63,7 +65,7 @@ public:
   static bool compareName(const std::string &proposedMatch);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(boost::shared_ptr<Object> shape, int xpixels, double xstart,
+  void initialize(boost::shared_ptr<IObject> shape, int xpixels, double xstart,
                   double xstep, int ypixels, double ystart, double ystep,
                   int idstart, bool idfillbyfirst_y, int idstepbyrow,
                   int idstep = 1);
@@ -149,9 +151,12 @@ public:
   void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const override;
+  const boost::shared_ptr<const IObject> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
+
+  virtual size_t
+  registerContents(class ComponentVisitor &componentVisitor) const override;
 
   // ------------ End of IObjComponent methods ----------------
 
@@ -187,7 +192,7 @@ private:
   unsigned int m_textureID;
 
   /// Pointer to the shape of the pixels in this detector array.
-  boost::shared_ptr<Object> mShape;
+  boost::shared_ptr<IObject> mShape;
   /// minimum detector id
   int m_minDetId;
   /// maximum detector id
@@ -206,9 +211,9 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const RectangularDetector &);
 
-typedef boost::shared_ptr<RectangularDetector> RectangularDetector_sptr;
-typedef boost::shared_ptr<const RectangularDetector>
-    RectangularDetector_const_sptr;
+using RectangularDetector_sptr = boost::shared_ptr<RectangularDetector>;
+using RectangularDetector_const_sptr =
+    boost::shared_ptr<const RectangularDetector>;
 
 } // Namespace Geometry
 } // Namespace Mantid

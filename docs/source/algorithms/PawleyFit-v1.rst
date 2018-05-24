@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,7 +36,7 @@ For the usage example there is a calculated, theoretical diffraction pattern (in
                                   Atoms='Si 0 0 0 1.0 0.05',
                                   a=5.43, LatticeSpacingMin=0.7)
 
-    print "Silicon has", Si.rowCount(), "unique reflections with d > 0.7."
+    print("Silicon has {} unique reflections with d > 0.7.".format(Si.rowCount()))
 
     # Find peaks in the spectrum
     si_peaks = PoldiPeakSearch(si_spectrum)
@@ -47,7 +47,7 @@ For the usage example there is a calculated, theoretical diffraction pattern (in
     si_peaks_indexed = AnalysisDataService.retrieve('si_peaks_indexed_Si')
 
     # 3 peaks have two possibilities for indexing, because their d-values are identical
-    print "The number of peaks that were indexed:", si_peaks_indexed.rowCount()
+    print("The number of peaks that were indexed: {}".format(si_peaks_indexed.rowCount()))
 
     # Run the actual fit with lattice parameters that are slightly off
     si_fitted, si_cell, si_params, chi_square = PawleyFit(si_spectrum,
@@ -61,10 +61,10 @@ For the usage example there is a calculated, theoretical diffraction pattern (in
     a_err = np.round(si_cell.cell(0, 2), 6)
     a_diff = np.round(np.fabs(a - 5.4311946), 6)
 
-    print "The lattice parameter was refined to a =", a, "+/-", a_err
-    print "The deviation from the actual parameter (a=5.4311946) is:", a_diff
-    print "This difference corresponds to", np.round(a_diff / a_err, 2), "standard deviations."
-    print "The reduced chi square of the fit is:", np.round(chi_square, 3)
+    print("The lattice parameter was refined to a = {} +/- {}".format(a, a_err))
+    print("The deviation from the actual parameter (a=5.4311946) is: {}".format(a_diff))
+    print("This difference corresponds to {:.2f} standard deviations.".format(np.round(a_diff / a_err, 2)))
+    print("The reduced chi square of the fit is: {:.2f}".format(np.round(chi_square, 3)))
 
 Running this script will generate a bit of output about the results of the different steps. At the end the lattice parameter differs less than one standard deviation from the actual value.
 

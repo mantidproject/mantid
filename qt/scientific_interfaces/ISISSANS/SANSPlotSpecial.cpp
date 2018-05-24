@@ -5,7 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "qwt_plot_curve.h"
 #include <QLineEdit>
@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 SANSPlotSpecial::SANSPlotSpecial(QWidget *parent)
-    : QFrame(parent), m_rangeSelector(NULL), m_transforms(), m_current(""),
+    : QFrame(parent), m_rangeSelector(nullptr), m_transforms(), m_current(""),
       m_dataCurve(new QwtPlotCurve()), m_linearCurve(new QwtPlotCurve()),
       m_rearrangingTable(false) {
   m_uiForm.setupUi(this);
@@ -423,16 +423,16 @@ void SANSPlotSpecial::setupTable() {
 
   m_derivatives["Rg"] = new QTableWidgetItem();
   m_derivatives["Rg"]->setToolTip("Radius of gyration");
-  m_units["Rg"] = QString::fromUtf8("\xc3\x85");
+  m_units["Rg"] = QString::fromUtf8(R"(Å)");
   m_derivatives["Rg,xs"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["Rg,xs"]->setToolTip("Cross-sectional radius of gyration");
-  m_units["Rg,xs"] = QString::fromUtf8("\xc3\x85");
+  m_units["Rg,xs"] = QString::fromUtf8(R"(Å)");
   m_derivatives["R"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["R"]->setToolTip("Equivalent spherical radius");
-  m_units["R"] = QString::fromUtf8("\xc3\x85");
+  m_units["R"] = QString::fromUtf8(R"(Å)");
   m_derivatives["T"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["T"]->setToolTip("Thickness");
-  m_units["T"] = QString::fromUtf8("\xc3\x85");
+  m_units["T"] = QString::fromUtf8(R"(Å)");
   m_derivatives["C"] = new QTableWidgetItem();
   m_derivatives["C"]->setToolTip("Concentration");
   m_units["C"] = "g/cm^3";
@@ -460,7 +460,7 @@ void SANSPlotSpecial::setupTable() {
   m_units["V"] = "(unitless)";
   m_derivatives["Zeta"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["Zeta"]->setToolTip("Characteristic length");
-  m_units["Zeta"] = QString::fromUtf8("\xc3\x85");
+  m_units["Zeta"] = QString::fromUtf8(R"(Å)");
   m_derivatives["(S/V)"] = new QTableWidgetItem();
   m_derivatives["(S/V)"]->setToolTip("Surface area-to-volume ratio");
   m_units["(S/V)"] = "cm^-1";
@@ -472,10 +472,10 @@ QwtPlotCurve *SANSPlotSpecial::plotMiniplot(
     size_t workspaceIndex) {
   bool data = (curve == m_dataCurve);
 
-  if (curve != NULL) {
-    curve->attach(0);
+  if (curve != nullptr) {
+    curve->attach(nullptr);
     delete curve;
-    curve = 0;
+    curve = nullptr;
   }
 
   curve = new QwtPlotCurve();

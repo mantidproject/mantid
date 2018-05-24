@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -35,10 +35,10 @@ Usage
 
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C', Units='U,U,U')
     
-    print "mdws is a " + mdws.id()
-    print "with {0} dimensions:".format(mdws.getNumDims())
+    print("mdws is a " + mdws.id())
+    print("with {0} dimensions:".format(mdws.getNumDims()))
     for i in range (mdws.getNumDims()):
-        print mdws.getDimension(i).name
+        print(mdws.getDimension(i).name)
 
 Output:
 

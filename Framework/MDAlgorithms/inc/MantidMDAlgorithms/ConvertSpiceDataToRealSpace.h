@@ -61,7 +61,7 @@ public:
 
 private:
   /// Typdef for the white-space separated file data type.
-  typedef std::deque<std::string> DataCollectionType;
+  using DataCollectionType = std::deque<std::string>;
 
   /// Initialisation code
   void init() override;
@@ -76,9 +76,10 @@ private:
   /// Parse data table workspace to a vector of matrix workspaces
   std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(
       DataObjects::TableWorkspace_sptr tablews,
-      API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
+      API::MatrixWorkspace_const_sptr parentws,
+      Types::Core::DateAndTime runstart,
       std::map<std::string, std::vector<double>> &logvecmap,
-      std::vector<Kernel::DateAndTime> &vectimes);
+      std::vector<Types::Core::DateAndTime> &vectimes);
 
   /// Create an MDEventWorspace by converting vector of matrix workspace data
   API::IMDEventWorkspace_sptr
@@ -101,11 +102,13 @@ private:
                        std::map<std::string, std::vector<double>> &logvecmap);
 
   /// Load one run (one pt.) to a matrix workspace
-  API::MatrixWorkspace_sptr loadRunToMatrixWS(
-      DataObjects::TableWorkspace_sptr tablews, size_t irow,
-      API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
-      size_t ipt, size_t irotangle, size_t itime,
-      const std::vector<std::pair<size_t, size_t>> anodelist, double &duration);
+  API::MatrixWorkspace_sptr
+  loadRunToMatrixWS(DataObjects::TableWorkspace_sptr tablews, size_t irow,
+                    API::MatrixWorkspace_const_sptr parentws,
+                    Types::Core::DateAndTime runstart, size_t ipt,
+                    size_t irotangle, size_t itime,
+                    const std::vector<std::pair<size_t, size_t>> anodelist,
+                    double &duration);
 
   /// Append Experiment Info
   void
@@ -116,7 +119,7 @@ private:
   void
   appendSampleLogs(API::IMDEventWorkspace_sptr mdws,
                    const std::map<std::string, std::vector<double>> &logvecmap,
-                   const std::vector<Kernel::DateAndTime> &vectimes);
+                   const std::vector<Types::Core::DateAndTime> &vectimes);
 
   /// Parse detector efficiency table workspace to map
   std::map<detid_t, double>

@@ -13,6 +13,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class PropertyNexusTest : public CxxTest::TestSuite {
 public:

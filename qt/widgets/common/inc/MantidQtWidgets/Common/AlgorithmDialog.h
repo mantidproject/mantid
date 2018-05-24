@@ -90,14 +90,15 @@ class InterfaceManager;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialog : public QDialog,
-                                                Mantid::API::AlgorithmObserver {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialog
+    : public QDialog,
+      Mantid::API::AlgorithmObserver {
 
   Q_OBJECT
 
 public:
   /// DefaultConstructor
-  AlgorithmDialog(QWidget *parent = 0);
+  AlgorithmDialog(QWidget *parent = nullptr);
   /// Destructor
   ~AlgorithmDialog() override;
 
@@ -183,7 +184,7 @@ protected:
   //@{
   /// Tie a widget to a property
   QWidget *tie(QWidget *widget, const QString &property,
-               QLayout *parent_layout = NULL, bool readHistory = true);
+               QLayout *parent_layout = nullptr, bool readHistory = true);
 
   /// Untie a widget to a property
   void untie(const QString &property);

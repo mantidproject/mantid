@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -24,7 +24,7 @@ Usage
     qvalues = GetQsInQENSData(workspace)
     # print the first three values
     vals = ' '.join(['{0:6.3f}'.format(Q) for Q in qvalues[0:3]])
-    print "'{0}'".format(vals)
+    print("'{}'".format(vals))
 
 .. testcleanup:: ExtractQvalues
 
@@ -40,7 +40,7 @@ Usage
     qvalues = GetQsInQENSData(workspace)
     # print the first three values
     vals = ' '.join(['{0:6.3f}'.format(Q) for Q in qvalues[0:3]])
-    print "'{0}'".format(vals)
+    print("'{}'".format(vals))
 
 .. testcleanup:: ComputeQvalues
 

@@ -9,8 +9,6 @@
 #include <set>
 #include <string>
 
-class AbstractTreeModel;
-
 namespace MantidQt {
 namespace MantidWidgets {
 class HintStrategy;
@@ -18,6 +16,7 @@ namespace DataProcessor {
 // Forward dec
 class Command;
 class DataProcessorPresenter;
+class AbstractTreeModel;
 
 /** @class DataProcessorView
 
@@ -53,8 +52,7 @@ public:
   virtual ~DataProcessorView(){};
 
   // Add actions to the toolbar
-  virtual void
-  addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
+  virtual void addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
 
   // Connect the model
   virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
@@ -84,12 +82,14 @@ public:
   // Select all rows/groups
   virtual void selectAll() = 0;
 
-  // Handle pause/resume of data reduction
-  virtual void pause() = 0;
-  virtual void resume() = 0;
+  // Update enabled/disabled state of menu items and widgets
+  virtual void updateMenuEnabledState(const bool isProcessing) = 0;
+  virtual void setProcessButtonEnabled(const bool enabled) = 0;
+  virtual void setInstrumentComboEnabled(const bool enabled) = 0;
+  virtual void setTreeEnabled(const bool enabled) = 0;
+  virtual void setOutputNotebookEnabled(const bool enabled) = 0;
 
   // Setter methods
-  virtual void setTableList(const QSet<QString> &tables) = 0;
   virtual void setInstrumentList(const QString &instruments,
                                  const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
@@ -113,6 +113,11 @@ public:
   // Methods to emit signals
   virtual void emitProcessClicked() = 0;
   virtual void emitProcessingFinished() = 0;
+
+  //
+  virtual void skipProcessing() = 0;
+  virtual void enableGrouping() = 0;
+  virtual void disableGrouping() = 0;
 };
 }
 }

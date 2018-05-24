@@ -31,6 +31,7 @@ DECLARE_ALGORITHM(AddSampleLog)
 
 using namespace Kernel;
 using namespace API;
+using Types::Core::DateAndTime;
 
 void AddSampleLog::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
@@ -260,7 +261,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
 
   // create workspace
   // get run start
-  Kernel::DateAndTime startTime = getRunStart(run_obj);
+  Types::Core::DateAndTime startTime = getRunStart(run_obj);
 
   // initialze the TimeSeriesProperty and add unit
   if (is_int_series) {
@@ -348,7 +349,7 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
  * @param run_obj
  * @return
  */
-std::vector<Kernel::DateAndTime>
+std::vector<Types::Core::DateAndTime>
 AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
                        int workspace_index, bool is_epoch, bool is_second,
                        API::Run &run_obj) {
@@ -356,19 +357,19 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
   int64_t timeshift(0);
   if (!is_epoch) {
     // get the run start time
-    Kernel::DateAndTime run_start_time = getRunStart(run_obj);
+    Types::Core::DateAndTime run_start_time = getRunStart(run_obj);
     timeshift = run_start_time.totalNanoseconds();
   }
 
   // set up the time vector
-  std::vector<Kernel::DateAndTime> timevec;
+  std::vector<Types::Core::DateAndTime> timevec;
   size_t vecsize = dataws->readX(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i) {
     double timedbl = dataws->readX(workspace_index)[i];
     if (is_second)
       timedbl *= 1.E9;
     int64_t entry_i64 = static_cast<int64_t>(timedbl);
-    Kernel::DateAndTime entry(timeshift + entry_i64);
+    Types::Core::DateAndTime entry(timeshift + entry_i64);
     timevec.push_back(entry);
   }
 
@@ -380,10 +381,10 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
  * @param run_obj
  * @return
  */
-Kernel::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
+Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   // TODO/ISSUE/NOW - data ws should be the target workspace with run_start or
   // proton_charge property!
-  Kernel::DateAndTime runstart(0);
+  Types::Core::DateAndTime runstart(0);
   try {
     runstart = run_obj.startTime();
   } catch (std::runtime_error &) {

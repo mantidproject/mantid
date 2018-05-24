@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -8,14 +5,12 @@ namespace Mantid {
 namespace API {
 
 /** Constructor
- *  @param length :: The length of this axis
  *  @param parentWorkspace :: A pointer to the workspace that holds this axis
  */
 // NumericAxis is set to length 0 since we do not need its internal storage. We
 // override public functions of NumericAxis that would access it.
-RefAxis::RefAxis(const std::size_t &length,
-                 const MatrixWorkspace *const parentWorkspace)
-    : NumericAxis(0), m_parentWS(parentWorkspace), m_size(length) {}
+RefAxis::RefAxis(const MatrixWorkspace *const parentWorkspace)
+    : NumericAxis(0), m_parentWS(parentWorkspace) {}
 
 /** Private, specialised copy constructor. Needed because it's necessary to pass
  * in
@@ -27,7 +22,7 @@ RefAxis::RefAxis(const std::size_t &length,
  */
 RefAxis::RefAxis(const RefAxis &right,
                  const MatrixWorkspace *const parentWorkspace)
-    : NumericAxis(right), m_parentWS(parentWorkspace), m_size(right.m_size) {}
+    : NumericAxis(right), m_parentWS(parentWorkspace) {}
 
 /** Virtual constructor
  *  @param parentWorkspace :: A pointer to the workspace that will hold the new
@@ -40,10 +35,11 @@ Axis *RefAxis::clone(const MatrixWorkspace *const parentWorkspace) {
 
 Axis *RefAxis::clone(const std::size_t length,
                      const MatrixWorkspace *const parentWorkspace) {
-  auto newAxis = new RefAxis(*this, parentWorkspace);
-  newAxis->m_size = length;
-  return newAxis;
+  static_cast<void>(length);
+  return clone(parentWorkspace);
 }
+
+std::size_t RefAxis::length() const { return m_parentWS->x(0).size(); }
 
 /** Get the axis value at the position given. In this case, the values are held
  * in the
@@ -57,12 +53,12 @@ Axis *RefAxis::clone(const std::size_t length,
  */
 double RefAxis::operator()(const std::size_t &index,
                            const std::size_t &verticalIndex) const {
-  if (index >= m_size) {
-    throw Kernel::Exception::IndexError(index, m_size - 1,
+  const auto &x = m_parentWS->x(verticalIndex);
+  if (index >= x.size()) {
+    throw Kernel::Exception::IndexError(index, x.size() - 1,
                                         "Axis: Index out of range.");
   }
-
-  return m_parentWS->dataX(verticalIndex)[index];
+  return x[index];
 }
 
 /** Method not available for RefAxis. Will always throw.

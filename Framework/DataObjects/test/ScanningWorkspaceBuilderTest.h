@@ -21,6 +21,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::ScanningWorkspaceBuilder;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Instrument_const_sptr createSimpleInstrument(size_t nDetectors, size_t nBins) {
@@ -393,8 +394,8 @@ public:
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
     initalisePositions(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setPositions(std::move(positions)))
-    TS_ASSERT_THROWS_EQUALS(builder.setPositions(std::move(positions)),
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
+    TS_ASSERT_THROWS_EQUALS(builder.setPositions(positions),
                             const std::logic_error &e, std::string(e.what()),
                             "Can not set positions, as positions "
                             "or instrument angles have already been set.")
@@ -406,8 +407,8 @@ public:
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
     initaliseRotations(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setRotations(std::move(rotations)))
-    TS_ASSERT_THROWS_EQUALS(builder.setRotations(std::move(rotations)),
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations))
+    TS_ASSERT_THROWS_EQUALS(builder.setRotations(rotations),
                             const std::logic_error &e, std::string(e.what()),
                             "Can not set rotations, as rotations "
                             "or instrument angles have already been set.")
@@ -451,11 +452,12 @@ public:
     initalisePositions(nDetectors, nTimeIndexes);
     TS_ASSERT_THROWS_NOTHING(builder.setPositions(std::move(positions)))
     initialiseRelativeRotations(nTimeIndexes);
-    TS_ASSERT_THROWS_EQUALS(builder.setRelativeRotationsForScans(
-                                relativeRotations, V3D(0, 0, 0), V3D(0, 1, 0)),
-                            const std::logic_error &e, std::string(e.what()),
-                            "Can not set instrument angles, as positions "
-                            "and/or rotations have already been set.")
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setRelativeRotationsForScans(std::move(relativeRotations),
+                                             V3D(0, 0, 0), V3D(0, 1, 0)),
+        const std::logic_error &e, std::string(e.what()),
+        "Can not set instrument angles, as positions "
+        "and/or rotations have already been set.")
   }
 
   void
@@ -466,11 +468,12 @@ public:
     initaliseRotations(nDetectors, nTimeIndexes);
     TS_ASSERT_THROWS_NOTHING(builder.setRotations(std::move(rotations)))
     initialiseRelativeRotations(nTimeIndexes);
-    TS_ASSERT_THROWS_EQUALS(builder.setRelativeRotationsForScans(
-                                relativeRotations, V3D(0, 0, 0), V3D(0, 1, 0)),
-                            const std::logic_error &e, std::string(e.what()),
-                            "Can not set instrument angles, as positions "
-                            "and/or rotations have already been set.")
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setRelativeRotationsForScans(std::move(relativeRotations),
+                                             V3D(0, 0, 0), V3D(0, 1, 0)),
+        const std::logic_error &e, std::string(e.what()),
+        "Can not set instrument angles, as positions "
+        "and/or rotations have already been set.")
   }
 
   void test_creating_workspace_with_time_oriented_index_info() {

@@ -26,9 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IndexingUtils;
-using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_const_sptr;
-using Mantid::Geometry::ParameterMap;
 using namespace Mantid::Geometry;
 
 namespace Mantid {

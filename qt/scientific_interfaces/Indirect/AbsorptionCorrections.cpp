@@ -1,7 +1,8 @@
 #include "AbsorptionCorrections.h"
-#include "../General/UserInputValidator.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
@@ -12,7 +13,49 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
+
+MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
+                                  const std::string &target) {
+  auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
+  convertAlg->initialize();
+  convertAlg->setChild(true);
+  convertAlg->setProperty("InputWorkspace", workspace);
+  convertAlg->setProperty("OutputWorkspace", "__converted");
+  convertAlg->setProperty(
+      "EMode", Mantid::Kernel::DeltaEMode::asString(workspace->getEMode()));
+  convertAlg->setProperty("EFixed",
+                          workspace->getEFixed(workspace->getDetector(0)));
+  convertAlg->setProperty("Target", target);
+  convertAlg->execute();
+  return convertAlg->getProperty("OutputWorkspace");
 }
+
+WorkspaceGroup_sptr
+groupWorkspaces(const std::vector<std::string> &workspaceNames) {
+  auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setChild(true);
+  groupAlg->setProperty("InputWorkspaces", workspaceNames);
+  groupAlg->setProperty("OutputWorkspace", "__grouped");
+  groupAlg->execute();
+  return groupAlg->getProperty("OutputWorkspace");
+}
+
+WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
+                                 const std::string &target) {
+  std::vector<std::string> convertedNames;
+  convertedNames.reserve(workspaceGroup->size());
+
+  for (const auto &workspace : *workspaceGroup) {
+    const auto name = "__" + workspace->getName() + "_" + target;
+    const auto wavelengthWorkspace = convertUnits(
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), target);
+    AnalysisDataService::Instance().addOrReplace(name, wavelengthWorkspace);
+    convertedNames.emplace_back(name);
+  }
+  return groupWorkspaces(convertedNames);
+}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,7 +63,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
     : CorrectionsTab(parent) {
   m_uiForm.setupUi(parent);
 
-  QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
+  QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
@@ -41,91 +84,84 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(changeSampleDensityUnit(int)));
   connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changeCanDensityUnit(int)));
+
+  connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this,
+          SLOT(doValidation()));
+  connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
+          SLOT(doValidation()));
+  connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this,
+          SLOT(doValidation()));
 }
 
-void AbsorptionCorrections::setup() {}
+AbsorptionCorrections::~AbsorptionCorrections() {
+  if (AnalysisDataService::Instance().doesExist("__mc_corrections_wavelength"))
+    AnalysisDataService::Instance().remove("__mc_corrections_wavelength");
+}
+
+MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
+  const auto sampleWSName =
+      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+
+  if (AnalysisDataService::Instance().doesExist(sampleWSName))
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        sampleWSName);
+  return nullptr;
+}
+
+void AbsorptionCorrections::setup() { doValidation(); }
 
 void AbsorptionCorrections::run() {
   // Get correct corrections algorithm
   QString sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
-  QString algorithmName = "Indirect" + sampleShape + "Absorption";
 
-  IAlgorithm_sptr absCorAlgo =
-      AlgorithmManager::Instance().create(algorithmName.toStdString());
-  absCorAlgo->initialize();
+  IAlgorithm_sptr monteCarloAbsCor =
+      AlgorithmManager::Instance().create("CalculateMonteCarloAbsorption");
+  monteCarloAbsCor->initialize();
+
+  monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
+
+  addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
 
   // Sample details
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
+  monteCarloAbsCor->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
-  absCorAlgo->setProperty(
+  monteCarloAbsCor->setProperty(
       "SampleDensityType",
       m_uiForm.cbSampleDensity->currentText().toStdString());
-  absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
+  monteCarloAbsCor->setProperty("SampleDensity",
+                                m_uiForm.spSampleDensity->value());
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
-  absCorAlgo->setProperty("SampleChemicalFormula",
-                          sampleChemicalFormula.toStdString());
-
-  addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
+  monteCarloAbsCor->setProperty("SampleChemicalFormula",
+                                sampleChemicalFormula.toStdString());
 
   // General details
-  absCorAlgo->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
-  absCorAlgo->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
+  monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
+  monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
   long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
-  absCorAlgo->setProperty("NumberWavelengths", wave);
+  monteCarloAbsCor->setProperty("NumberOfWavelengthPoints", wave);
   long events = static_cast<long>(m_uiForm.spNumberEvents->value());
-  absCorAlgo->setProperty("Events", events);
+  monteCarloAbsCor->setProperty("EventsPerPoint", events);
 
   // Can details
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
     std::string canWsName =
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    std::string shiftedCanName = canWsName + "_shifted";
-    IAlgorithm_sptr clone =
-        AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->initialize();
-    clone->setProperty("InputWorkspace", canWsName);
-    clone->setProperty("OutputWorkspace", shiftedCanName);
-    clone->execute();
+    monteCarloAbsCor->setProperty("ContainerWorkspace", canWsName);
 
-    MatrixWorkspace_sptr shiftedCan =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            shiftedCanName);
-    if (m_uiForm.ckShiftCan->isChecked()) {
-      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-      scaleX->initialize();
-      scaleX->setProperty("InputWorkspace", shiftedCan);
-      scaleX->setProperty("OutputWorkspace", shiftedCanName);
-      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-      scaleX->setProperty("Operation", "Add");
-      scaleX->execute();
-      IAlgorithm_sptr rebin =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
-      rebin->initialize();
-      rebin->setProperty("WorkspaceToRebin", shiftedCan);
-      rebin->setProperty("WorkspaceToMatch", sampleWsName.toStdString());
-      rebin->setProperty("OutputWorkspace", shiftedCanName);
-      rebin->execute();
-    }
-    absCorAlgo->setProperty("CanWorkspace", shiftedCanName);
+    monteCarloAbsCor->setProperty(
+        "ContainerDensityType",
+        m_uiForm.cbCanDensity->currentText().toStdString());
+    monteCarloAbsCor->setProperty("ContainerDensity",
+                                  m_uiForm.spCanDensity->value());
 
-    bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
-    absCorAlgo->setProperty("UseCanCorrections", useCanCorrections);
+    const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+    monteCarloAbsCor->setProperty("ContainerChemicalFormula",
+                                  canChemicalFormula.toStdString());
 
-    if (useCanCorrections) {
-
-      absCorAlgo->setProperty(
-          "CanDensityType", m_uiForm.cbCanDensity->currentText().toStdString());
-      absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
-
-      QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
-      absCorAlgo->setProperty("CanChemicalFormula",
-                              canChemicalFormula.toStdString());
-    }
-
-    addShapeSpecificCanOptions(absCorAlgo, sampleShape);
+    addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
   }
 
   // Generate workspace names
@@ -133,22 +169,17 @@ void AbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  QString outputBaseName = sampleWsName.left(nameCutIndex);
+  const auto outputWsName =
+      sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_MC_Corrections";
 
-  QString outputWsName = outputBaseName + "_" + sampleShape + "_red";
-  absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
-
-  // Set the correction workspace to keep the factors if desired
-  bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
-  QString outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
-  if (keepCorrectionFactors)
-    absCorAlgo->setProperty("CorrectionsWorkspace",
-                            outputFactorsWsName.toStdString());
+  monteCarloAbsCor->setProperty("CorrectionsWorkspace",
+                                outputWsName.toStdString());
 
   // Add correction algorithm to batch
-  m_batchAlgoRunner->addAlgorithm(absCorAlgo);
+  m_batchAlgoRunner->addAlgorithm(monteCarloAbsCor);
 
-  m_absCorAlgo = absCorAlgo;
+  m_absCorAlgo = monteCarloAbsCor;
+
   // Run algorithm batch
   m_batchAlgoRunner->executeBatchAsync();
 
@@ -164,9 +195,10 @@ void AbsorptionCorrections::run() {
  */
 void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
                                                           QString shape) {
+
   if (shape == "FlatPlate") {
     double sampleHeight = m_uiForm.spFlatSampleHeight->value();
-    alg->setProperty("SampleHeight", sampleHeight);
+    alg->setProperty("Height", sampleHeight);
 
     double sampleWidth = m_uiForm.spFlatSampleWidth->value();
     alg->setProperty("SampleWidth", sampleWidth);
@@ -178,24 +210,21 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     alg->setProperty("SampleAngle", sampleAngle);
 
   } else if (shape == "Annulus") {
+    double sampleHeight = m_uiForm.spAnnSampleHeight->value();
+    alg->setProperty("Height", sampleHeight);
+
     double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     alg->setProperty("SampleInnerRadius", sampleInnerRadius);
 
     double sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
     alg->setProperty("SampleOuterRadius", sampleOuterRadius);
 
-    double canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
-    alg->setProperty("CanInnerRadius", canInnerRadius);
-
-    double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
-    alg->setProperty("CanOuterRadius", canOuterRadius);
-
   } else if (shape == "Cylinder") {
     double sampleRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("SampleRadius", sampleRadius);
 
     double sampleHeight = m_uiForm.spCylSampleHeight->value();
-    alg->setProperty("SampleHeight", sampleHeight);
+    alg->setProperty("Height", sampleHeight);
   }
 }
 
@@ -211,54 +240,28 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
                                                        QString shape) {
   if (shape == "FlatPlate") {
     double canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
-    alg->setProperty("CanFrontThickness", canFrontThickness);
+    alg->setProperty("ContainerFrontThickness", canFrontThickness);
 
     double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
-    alg->setProperty("CanBackThickness", canBackThickness);
+    alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double canRadius = m_uiForm.spCylCanRadius->value();
-    alg->setProperty("CanRadius", canRadius);
+    double canInnerRadius = m_uiForm.spCylSampleRadius->value();
+    alg->setProperty("ContainerInnerRadius", canInnerRadius);
+
+    double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
+    alg->setProperty("ContainerOuterRadius", canOuterRadius);
+
+  } else if (shape == "Annulus") {
+    double canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
+    alg->setProperty("ContainerInnerRadius", canInnerRadius);
+
+    double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
+    alg->setProperty("ContainerOuterRadius", canOuterRadius);
   }
 }
 
 bool AbsorptionCorrections::validate() {
-  UserInputValidator uiv;
-
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
-
-  if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
-                               m_uiForm.leSampleChemicalFormula))
-    uiv.checkFieldIsValid("Sample Chemical Formula",
-                          m_uiForm.leSampleChemicalFormula);
-  const auto sampleChem =
-      m_uiForm.leSampleChemicalFormula->text().toStdString();
-  const auto containerChem =
-      m_uiForm.leCanChemicalFormula->text().toStdString();
-  try {
-    Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-  } catch (std::runtime_error &ex) {
-    UNUSED_ARG(ex);
-    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-  }
-  try {
-    Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-  } catch (std::runtime_error &ex) {
-    UNUSED_ARG(ex);
-    uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-  }
-
-  bool useCan = m_uiForm.ckUseCan->isChecked();
-  if (useCan) {
-    uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
-
-    bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
-    if (useCanCorrections) {
-      if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
-                                   m_uiForm.leCanChemicalFormula))
-        uiv.checkFieldIsValid("Container Chemical Formula",
-                              m_uiForm.leCanChemicalFormula);
-    }
-  }
+  UserInputValidator uiv = doValidation();
 
   // Give error for failed validation
   if (!uiv.isAllInputValid()) {
@@ -267,6 +270,68 @@ bool AbsorptionCorrections::validate() {
   }
 
   return uiv.isAllInputValid();
+}
+
+UserInputValidator AbsorptionCorrections::doValidation() {
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
+
+  if (!sampleWorkspace())
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+
+  if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
+                               m_uiForm.leSampleChemicalFormula,
+                               m_uiForm.valSampleChemicalFormula))
+    uiv.checkFieldIsValid("Sample Chemical Formula",
+                          m_uiForm.leSampleChemicalFormula,
+                          m_uiForm.valSampleChemicalFormula);
+  const auto sampleChem =
+      m_uiForm.leSampleChemicalFormula->text().toStdString();
+  try {
+    Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+  } catch (std::runtime_error &ex) {
+    UNUSED_ARG(ex);
+    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
+    uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+  }
+
+  bool useCan = m_uiForm.ckUseCan->isChecked();
+  if (useCan) {
+    const auto containerChem =
+        m_uiForm.leCanChemicalFormula->text().toStdString();
+    uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
+
+    const auto containerWsName =
+        m_uiForm.dsCanInput->getCurrentDataName().toStdString();
+    bool containerExists =
+        AnalysisDataService::Instance().doesExist(containerWsName);
+    if (containerExists &&
+        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsName)) {
+      uiv.addErrorMessage(
+          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
+
+    if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
+                                 m_uiForm.leCanChemicalFormula,
+                                 m_uiForm.valCanChemicalFormula)) {
+      uiv.checkFieldIsValid("Container Chemical Formula",
+                            m_uiForm.leCanChemicalFormula,
+                            m_uiForm.valCanChemicalFormula);
+    }
+
+    try {
+      Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+    } catch (std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+      uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+    }
+  } else
+    uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, true);
+
+  return uiv;
 }
 
 void AbsorptionCorrections::loadSettings(const QSettings &settings) {
@@ -283,21 +348,23 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
   if (error) {
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
+    return;
   }
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    IAlgorithm_sptr shiftLog =
-        AlgorithmManager::Instance().create("AddSampleLog");
-    shiftLog->initialize();
-    shiftLog->setProperty("Workspace", m_pythonExportWsName);
-    shiftLog->setProperty("LogName", "container_shift");
-    shiftLog->setProperty("logType", "Number");
-    shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
-                                         m_uiForm.spCanShift->value()));
-    shiftLog->execute();
+
+  auto correctionsWorkspace =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          m_pythonExportWsName);
+
+  if (correctionsWorkspace) {
+    auto wavelengthWorkspace = convertUnits(correctionsWorkspace, "Wavelength");
+    AnalysisDataService::Instance().addOrReplace("__mc_corrections_wavelength",
+                                                 wavelengthWorkspace);
+
+    // Enable plot and save
+    m_uiForm.pbPlot->setEnabled(true);
+    m_uiForm.cbPlotOutput->setEnabled(true);
+    m_uiForm.pbSave->setEnabled(true);
   }
-  // Enable plot and save
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
 }
 
 void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
@@ -305,8 +372,8 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
       dataName.toStdString());
 
   if (!sampleWs) {
-    g_log.warning() << "Failed to find workspace " << dataName.toStdString()
-                    << "\n";
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
+    return;
   }
 
   auto instrument = sampleWs->getInstrument();
@@ -336,12 +403,11 @@ void AbsorptionCorrections::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
-  if (m_uiForm.ckKeepFactors->isChecked()) {
-    std::string factorsWs =
-        m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
-    if (checkADSForPlotSaveWorkspace(factorsWs, false))
-      addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
-  }
+  std::string factorsWs =
+      m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+  if (checkADSForPlotSaveWorkspace(factorsWs, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
+
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -349,23 +415,15 @@ void AbsorptionCorrections::saveClicked() {
  * Handle mantid plotting
  */
 void AbsorptionCorrections::plotClicked() {
+  const auto plotType = m_uiForm.cbPlotOutput->currentText();
 
-  QStringList plotData = {QString::fromStdString(m_pythonExportWsName),
-                          m_uiForm.dsSampleInput->getCurrentDataName()};
-  auto outputFactorsWsName =
-      m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
-  if (m_uiForm.ckKeepFactors->isChecked()) {
-    QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) +
-                            "_ass"};
-    if (m_uiForm.ckUseCanCorrections->isChecked()) {
-      plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
-      QString shiftedWs = QString::fromStdString(
-          m_absCorAlgo->getPropertyValue("CanWorkspace"));
-      plotData.push_back(shiftedWs);
-    }
-    plotSpectrum(plotCorr, 0);
+  if (checkADSForPlotSaveWorkspace("__mc_corrections_wavelength", false)) {
+    if (plotType == "Both" || plotType == "Wavelength")
+      plotSpectrum(QString::fromStdString("__mc_corrections_wavelength"));
+
+    if (plotType == "Both" || plotType == "Angle")
+      plotTimeBin(QString::fromStdString("__mc_corrections_wavelength"));
   }
-  plotSpectrum(plotData, 0);
 }
 
 /**
@@ -381,8 +439,8 @@ void AbsorptionCorrections::changeSampleDensityUnit(int index) {
 }
 
 /**
-* Handle changing of the container density unit
-*/
+ * Handle changing of the container density unit
+ */
 void AbsorptionCorrections::changeCanDensityUnit(int index) {
 
   if (index == 0) {

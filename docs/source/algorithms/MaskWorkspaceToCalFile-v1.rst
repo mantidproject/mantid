@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,7 +40,7 @@ Usage
 
   # Print out first 10 lines of the file
   for line in calFile[:10]:
-    print line
+    print(line)
 
 Output
 ######

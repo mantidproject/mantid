@@ -20,9 +20,10 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Types::Core::DateAndTime;
 using namespace std;
 
-typedef Mantid::Kernel::StringTokenizer tokenizer;
+using tokenizer = Mantid::Kernel::StringTokenizer;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateChunkingFromInstrument)

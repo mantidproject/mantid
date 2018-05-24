@@ -4,7 +4,7 @@
 #include <boost/python/enum.hpp>
 
 using Mantid::API::Workspace;
-using Mantid::API::WorkspaceProperty;
+using Mantid::API::WorkspaceProperty; // NOLINT
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<Workspace>)
 

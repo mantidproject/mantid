@@ -59,7 +59,7 @@ public:
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
-  void init(const size_t &, const HistogramData::Histogram &) override {}
+  void init(const HistogramData::Histogram &) override {}
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const override {}
 
@@ -779,6 +779,19 @@ public:
     TS_ASSERT(!mfun->isFixed(7));
 
     delete mfun;
+  }
+
+  void test_removeFunction_removes_tie() {
+    CompositeFunction mfun;
+    IFunction_sptr g1 = IFunction_sptr(new Gauss());
+    IFunction_sptr g2 = IFunction_sptr(new Gauss());
+
+    mfun.addFunction(g1);
+    mfun.addFunction(g2);
+
+    mfun.tie("f0.h", "1-f1.h");
+    mfun.removeFunction(0);
+    TS_ASSERT_EQUALS(mfun.writeTies(), "");
   }
 
   // replacing function has fewer parameters

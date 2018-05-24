@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -72,8 +72,8 @@ Usage
 .. testcode:: ExMdLeanEvents
 
     ws = ImportMDEventWorkspace("demo_mdew_mdleanevents.txt")
-    print "Number of Events =", ws.getNEvents()
-    print "Workspace type =", ws.id()
+    print("Number of Events = {}".format(ws.getNEvents()))
+    print("Workspace type = {}".format(ws.id()))
 
 Output:
 
@@ -87,8 +87,8 @@ Output:
 .. testcode:: ExMdEvents
 
     ws = ImportMDEventWorkspace("demo_mdew_mdevents.txt")
-    print "Number of Events =", ws.getNEvents()
-    print "Workspace type =", ws.id()
+    print("Number of Events = {}".format(ws.getNEvents()))
+    print("Workspace type = {}".format(ws.id()))
 
 Output:
 

@@ -1,10 +1,35 @@
 #include "MantidAlgorithms/PhaseQuadMuon.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+
+namespace {
+const std::array<std::string, 2> phaseNames = {{"phase", "phi"}};
+const std::array<std::string, 3> asymmNames = {{"asymmetry", "asymm", "asym"}};
+
+template <typename T1, typename T2>
+int findName(const T1 &patterns, const T2 &names) {
+  for (const std::string &pattern : patterns) {
+    auto it = std::find_if(names.begin(), names.end(),
+                           [pattern](const std::string &s) {
+                             if (s == pattern) {
+                               return true;
+                             } else {
+                               return false;
+                             }
+                           });
+    if (it != names.end()) {
+      return static_cast<int>(std::distance(names.begin(), it));
+    }
+  }
+  return -1;
+}
+double ASYMM_ERROR = 999.0;
+}
 
 namespace Mantid {
 namespace Algorithms {
@@ -51,11 +76,6 @@ void PhaseQuadMuon::exec() {
   // Compute squashograms
   API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
 
-  // Copy X axis to output workspace
-  ows->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
-  // New Y axis label
-  ows->setYUnit("Asymmetry");
-
   setProperty("OutputWorkspace", ows);
 }
 
@@ -92,7 +112,38 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   if (tabWS->columnCount() != 3) {
     result["PhaseTable"] = "PhaseTable must have three columns";
   }
-
+  auto names = tabWS->getColumnNames();
+  for (auto &name : names) {
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  }
+  int phaseCount = 0;
+  int asymmetryCount = 0;
+  for (const std::string &name : names) {
+    for (const std::string &goodName : phaseNames) {
+      if (name == goodName) {
+        phaseCount += 1;
+      }
+    }
+    for (const std::string &goodName : asymmNames) {
+      if (name == goodName) {
+        asymmetryCount += 1;
+      }
+    }
+  }
+  if (phaseCount == 0) {
+    result["PhaseTable"] = "PhaseTable needs phases column";
+  }
+  if (asymmetryCount == 0) {
+    result["PhaseTable"] = "PhaseTable needs a asymmetry/asymm/asym column";
+  }
+  if (phaseCount > 1) {
+    result["PhaseTable"] =
+        "PhaseTable has " + std::to_string(phaseCount) + " phase columns";
+  }
+  if (asymmetryCount > 1) {
+    result["PhaseTable"] = "PhaseTable has " + std::to_string(asymmetryCount) +
+                           " asymmetry/asymm/asym columns";
+  }
   // Check units, should be microseconds
   Unit_const_sptr unit = inputWS->getAxis(0)->unit();
   if ((unit->caption() != "Time") || (unit->label().ascii() != "microsecond")) {
@@ -101,6 +152,7 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 
   return result;
 }
+
 //----------------------------------------------------------------------------------------------
 /** Calculates the normalization constant for the exponential decay
 * @param ws :: [input] Workspace containing the spectra to remove exponential
@@ -111,11 +163,10 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 std::vector<double>
 PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
-  size_t nspec = ws->getNumberHistograms();
-  size_t npoints = ws->blocksize();
+  const size_t nspec = ws->getNumberHistograms();
 
   // Muon life time in microseconds
-  double muLife = PhysicalConstants::MuonLifetime * 1e6;
+  constexpr double muLife = PhysicalConstants::MuonLifetime * 1e6;
 
   std::vector<double> n0(nspec, 0.);
 
@@ -126,8 +177,8 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
     const auto &E = ws->getSpectrum(h).e();
 
     double s, sx, sy;
-    s = sx = sy = 0;
-    for (size_t i = 0; i < npoints; i++) {
+    s = sx = sy = 0.;
+    for (size_t i = 0; i < Y.size(); i++) {
 
       if (Y[i] > 0) {
         double sig = E[i] * E[i] / Y[i] / Y[i];
@@ -158,67 +209,83 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // statistics
   // to apply sqrt(N). This is an arbitrary number used in the original code
   // provided by scientists
-  double poissonLimit = 30.;
-
-  size_t nspec = ws->getNumberHistograms();
-  size_t npoints = ws->blocksize();
+  const double poissonLimit = 30.;
 
   // Muon life time in microseconds
-  double muLife = PhysicalConstants::MuonLifetime * 1e6;
+  const double muLife = PhysicalConstants::MuonLifetime * 1e6;
+
+  const size_t nspec = ws->getNumberHistograms();
 
   if (n0.size() != nspec) {
     throw std::invalid_argument("Invalid normalization constants");
   }
 
+  auto names = phase->getColumnNames();
+  for (auto &name : names) {
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  }
+  auto phaseIndex = findName(phaseNames, names);
+  auto asymmetryIndex = findName(asymmNames, names);
+
   // Get the maximum asymmetry
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
-    if (phase->Double(h, 1) > maxAsym) {
-      maxAsym = phase->Double(h, 1);
+    if (phase->Double(h, asymmetryIndex) > maxAsym &&
+        phase->Double(h, asymmetryIndex) != ASYMM_ERROR) {
+      maxAsym = phase->Double(h, asymmetryIndex);
     }
   }
+
   if (maxAsym == 0.0) {
     throw std::invalid_argument("Invalid detector asymmetries");
   }
-
+  std::vector<bool> emptySpectrum;
+  emptySpectrum.reserve(nspec);
   std::vector<double> aj, bj;
   {
     // Calculate coefficients aj, bj
 
-    double sxx = 0;
-    double syy = 0;
-    double sxy = 0;
-
+    double sxx = 0.;
+    double syy = 0.;
+    double sxy = 0.;
     for (size_t h = 0; h < nspec; h++) {
-      double asym = phase->Double(h, 1) / maxAsym;
-      double phi = phase->Double(h, 2);
-      double X = n0[h] * asym * cos(phi);
-      double Y = n0[h] * asym * sin(phi);
-      sxx += X * X;
-      syy += Y * Y;
-      sxy += X * Y;
+      emptySpectrum.push_back(
+          std::all_of(ws->y(h).begin(), ws->y(h).end(),
+                      [](double value) { return value == 0.; }));
+      if (!emptySpectrum[h]) {
+        const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+        const double phi = phase->Double(h, phaseIndex);
+        const double X = n0[h] * asym * cos(phi);
+        const double Y = n0[h] * asym * sin(phi);
+        sxx += X * X;
+        syy += Y * Y;
+        sxy += X * Y;
+      }
     }
 
-    double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
-    double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
-    double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
-    double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
+    const double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
+    const double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
+    const double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
+    const double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
-      double asym = phase->Double(h, 1) / maxAsym;
-      double phi = phase->Double(h, 2);
-      double X = n0[h] * asym * cos(phi);
-      double Y = n0[h] * asym * sin(phi);
-      aj.push_back((lam1 * X + mu1 * Y) * 0.5);
-      bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+      if (emptySpectrum[h]) {
+        aj.push_back(0.0);
+        bj.push_back(0.0);
+      } else {
+        const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+        const double phi = phase->Double(h, phaseIndex);
+        const double X = n0[h] * asym * cos(phi);
+        const double Y = n0[h] * asym * sin(phi);
+        aj.push_back((lam1 * X + mu1 * Y) * 0.5);
+        bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+      }
     }
   }
 
-  // First X value
-  double X0 = ws->x(0).front();
-
+  const size_t npoints = ws->blocksize();
   // Create and populate output workspace
-  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 2, npoints + 1, npoints);
+  API::MatrixWorkspace_sptr ows =
+      API::WorkspaceFactory::Instance().create(ws, 2, npoints + 1, npoints);
 
   // X
   ows->setSharedX(0, ws->sharedX(0));
@@ -230,32 +297,43 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   auto &realE = ows->mutableE(0);
   auto &imagE = ows->mutableE(1);
 
+  const auto xPointData = ws->histogram(0).points();
+  // First X value
+  const double X0 = xPointData.front();
+
+  // calculate exponential decay outside of the loop
+  std::vector<double> expDecay = xPointData.rawData();
+  std::transform(expDecay.begin(), expDecay.end(), expDecay.begin(),
+                 [X0, muLife](double x) { return exp(-(x - X0) / muLife); });
+
   for (size_t i = 0; i < npoints; i++) {
     for (size_t h = 0; h < nspec; h++) {
+      if (!emptySpectrum[h]) {
+        // (X,Y,E) with exponential decay removed
+        const double X = ws->x(h)[i];
+        const double exponential = n0[h] * exp(-(X - X0) / muLife);
+        const double Y = ws->y(h)[i] - exponential;
+        const double E =
+            (ws->y(h)[i] > poissonLimit) ? ws->e(h)[i] : sqrt(exponential);
 
-      // (X,Y,E) with exponential decay removed
-      const double X = ws->x(h)[i];
-      const double Y = ws->y(h)[i] - n0[h] * exp(-(X - X0) / muLife);
-      const double E = (ws->y(h)[i] > poissonLimit)
-                           ? ws->e(h)[i]
-                           : sqrt(n0[h] * exp(-(X - X0) / muLife));
-
-      realY[i] += aj[h] * Y;
-      imagY[i] += bj[h] * Y;
-      realE[i] += aj[h] * aj[h] * E * E;
-      imagE[i] += bj[h] * bj[h] * E * E;
+        realY[i] += aj[h] * Y;
+        imagY[i] += bj[h] * Y;
+        realE[i] += aj[h] * aj[h] * E * E;
+        imagE[i] += bj[h] * bj[h] * E * E;
+      }
     }
     realE[i] = sqrt(realE[i]);
     imagE[i] = sqrt(imagE[i]);
 
     // Regain exponential decay
-    const double X = ws->getSpectrum(0).x()[i];
-    const double e = exp(-(X - X0) / muLife);
-    realY[i] /= e;
-    imagY[i] /= e;
-    realE[i] /= e;
-    imagE[i] /= e;
+    realY[i] /= expDecay[i];
+    imagY[i] /= expDecay[i];
+    realE[i] /= expDecay[i];
+    imagE[i] /= expDecay[i];
   }
+
+  // New Y axis label
+  ows->setYUnit("Asymmetry");
 
   return ows;
 }

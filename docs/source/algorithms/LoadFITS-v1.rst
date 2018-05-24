@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -89,19 +89,19 @@ Example 1: loading one spectrum per image row
     bpp_log = 'BITPIX'
     try:
         log = ws.getRun().getLogData(bpp_log).value
-        print "Bits per pixel: %s" % int(log)
+        print("Bits per pixel: {}".format(log))
     except RuntimeError:
-        print "Could not find the keyword '%s' in this FITS file" % bpp_log
+        print("Could not find the keyword '{}' in this FITS file".format(bpp_log))
 
     axis1_log = 'NAXIS1'
     axis2_log = 'NAXIS2'
     try:
         log1 = ws.getRun().getLogData(axis1_log).value
         log2 = ws.getRun().getLogData(axis2_log).value
-        print "FITS image size: %s x %s pixels" % (int(log1), int(log2))
-        print "Number of spectra in the output workspace: %d" % ws.getNumberHistograms()
+        print("FITS image size: {} x {} pixels".format(log1, log2))
+        print("Number of spectra in the output workspace: {}".format(ws.getNumberHistograms()))
     except RuntimeError:
-        print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
+        print("Could not find the keywords '{}' and '{}' in this FITS file".format(axis1_log, axis2_log))
 
 .. testcleanup:: LoadFITS1SpectrumPerRow
 
@@ -128,19 +128,19 @@ Example 2: loading one spectrum per pixel
     bpp_log = 'BITPIX'
     try:
         log = ws.getRun().getLogData(bpp_log).value
-        print "Bits per pixel: %s" % int(log)
+        print("Bits per pixel: {}".format(int(log)))
     except RuntimeError:
-        print "Could not find the keyword '%s' in this FITS file" % bpp_log
+        print("Could not find the keyword '{}' in this FITS file".format(bpp_log))
 
     axis1_log = 'NAXIS1'
     axis2_log = 'NAXIS2'
     try:
         log1 = ws.getRun().getLogData(axis1_log).value
         log2 = ws.getRun().getLogData(axis2_log).value
-        print "FITS image size: %s x %s pixels" % (int(log1), int(log2))
-        print "Number of spectra in the output workspace: %d" % ws.getNumberHistograms()
+        print("FITS image size: {} x {} pixels".format(log1, log2))
+        print("Number of spectra in the output workspace: {}".format(ws.getNumberHistograms()))
     except RuntimeError:
-        print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
+        print("Could not find the keywords '{}' and '{}' in this FITS file".format(axis1_log, axis2_log))
 
 .. testcleanup:: LoadFITSManySpectra
 

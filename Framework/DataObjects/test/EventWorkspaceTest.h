@@ -41,6 +41,8 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class EventWorkspaceTest : public CxxTest::TestSuite {
 private:
@@ -112,10 +114,10 @@ public:
    * 2 events per bin
    */
   EventWorkspace_sptr createFlatEventWorkspace() {
-    return createEventWorkspace(1, 1, true);
+    return createEventWorkspace(true, true, true);
   }
 
-  void setUp() override { ew = createEventWorkspace(1, 1); }
+  void setUp() override { ew = createEventWorkspace(true, true); }
 
   void test_constructor() {
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
@@ -140,6 +142,20 @@ public:
     TS_ASSERT_LESS_THAN_EQUALS(min_memory, ew->getMemorySize());
   }
 
+  void testUnequalBins() {
+    ew = createEventWorkspace(true, false);
+    // normal behavior
+    TS_ASSERT_EQUALS(ew->blocksize(), 1);
+    TS_ASSERT(ew->isCommonBins());
+    TS_ASSERT_EQUALS(ew->size(), 500);
+
+    // set the first histogram to have 2 bins
+    ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
+    TS_ASSERT_THROWS(ew->blocksize(), std::logic_error);
+    TS_ASSERT(!(ew->isCommonBins()));
+    TS_ASSERT_EQUALS(ew->size(), 501);
+  }
+
   void test_destructor() {
     EventWorkspace *ew2 = new EventWorkspace();
     delete ew2;
@@ -147,7 +163,7 @@ public:
 
   void test_constructor_setting_default_x() {
     // Do the workspace, but don't set x explicity
-    ew = createEventWorkspace(1, 0);
+    ew = createEventWorkspace(true, false);
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS(ew->blocksize(), 1);
     TS_ASSERT_EQUALS(ew->size(), 500);
@@ -415,12 +431,10 @@ public:
   }
 
   void test_histogram_pulse_time() {
-    const size_t nHistos = 1;
-    const bool setXAxis = false;
     EventWorkspace_sptr ws =
-        createEventWorkspace(nHistos, setXAxis); // Creates TOF events with
-                                                 // pulse_time intervals of
-                                                 // BIN_DELTA/2
+        createEventWorkspace(true, false); // Creates TOF events with
+                                           // pulse_time intervals of
+                                           // BIN_DELTA/2
 
     // Create bin steps = 4*BIN_DELTA.
     BinEdges axis1(NUMBINS / 4, LinearGenerator(0.0, 4.0 * BIN_DELTA));
@@ -536,9 +550,8 @@ public:
   void test_sortAll_TOF() {
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    Progress *prog = NULL;
 
-    test_in->sortAll(TOF_SORT, prog);
+    test_in->sortAll(TOF_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {
@@ -556,9 +569,8 @@ public:
     int numEvents = 30;
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
-    Progress *prog = NULL;
 
-    test_in->sortAll(TOF_SORT, prog);
+    test_in->sortAll(TOF_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
@@ -574,9 +586,8 @@ public:
     int numEvents = 30;
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
-    Progress *prog = NULL;
 
-    test_in->sortAll(PULSETIME_SORT, prog);
+    test_in->sortAll(PULSETIME_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
@@ -588,9 +599,8 @@ public:
   void test_sortAll_ByTime() {
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    Progress *prog = NULL;
 
-    test_in->sortAll(PULSETIME_SORT, prog);
+    test_in->sortAll(PULSETIME_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {
@@ -681,10 +691,10 @@ public:
     EventWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<EventWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<EventWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -692,9 +702,9 @@ public:
     EventWorkspace_const_sptr wsCastConst;
     EventWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (EventWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (EventWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
@@ -712,10 +722,10 @@ public:
     IEventWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IEventWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IEventWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -723,9 +733,9 @@ public:
     IEventWorkspace_const_sptr wsCastConst;
     IEventWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IEventWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IEventWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 

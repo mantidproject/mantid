@@ -56,6 +56,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
@@ -94,7 +97,7 @@ protected:
                 const detid2index_map &id_to_wi);
 
   /// List of the absolute time of each pulse
-  std::vector<Kernel::DateAndTime> pulseTimes;
+  std::vector<Types::Core::DateAndTime> pulseTimes;
 
   /// Number of bins
   size_t m_numBins;

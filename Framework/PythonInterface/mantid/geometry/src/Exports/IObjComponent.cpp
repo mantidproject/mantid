@@ -1,6 +1,5 @@
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Objects/Object.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -18,8 +17,8 @@ namespace {
  * @param self A reference to the calling object to emulate method on Python
  * object
  */
-boost::shared_ptr<Mantid::Geometry::Object> getShape(IObjComponent &self) {
-  return boost::const_pointer_cast<Mantid::Geometry::Object>(self.shape());
+boost::shared_ptr<Mantid::Geometry::IObject> getShape(IObjComponent &self) {
+  return boost::const_pointer_cast<Mantid::Geometry::IObject>(self.shape());
 }
 }
 

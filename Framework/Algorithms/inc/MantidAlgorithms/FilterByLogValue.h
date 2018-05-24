@@ -1,11 +1,8 @@
 #ifndef MANTID_ALGORITHMS_FILTERBYLOGVALUE_H_
 #define MANTID_ALGORITHMS_FILTERBYLOGVALUE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -33,7 +30,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FilterByLogValue : public API::Algorithm {
+class DLLExport FilterByLogValue : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByLogValue"; };
@@ -45,6 +42,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"FilterByXValue", "FilterEvents", "FilterLogByTime",
+            "FilterBadPulses", "FilterByTime"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Events\\EventFiltering";

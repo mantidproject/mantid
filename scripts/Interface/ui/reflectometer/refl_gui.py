@@ -21,6 +21,7 @@ from isis_reflectometry.combineMulti import *
 import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 from mantid import UsageService
+from mantid import logger
 
 from ui.reflectometer.ui_refl_window import Ui_windowRefl
 from ui.reflectometer.refl_save import Ui_SaveWindow
@@ -43,12 +44,19 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
     labelStatus = None
     accMethod = None
 
+    def show_deprecation_warning(self):
+        logger.warning("""
+The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in March 2019
+We recommend you use ISIS Reflectometry instead, If this is not possible contact the development team using the "Help->Ask For Help" menu.
+""")
+
     def __init__(self):
         """
         Initialise the interface
         """
         super(QtGui.QMainWindow, self).__init__()
         self.setupUi(self)
+        self.show_deprecation_warning()
         self.loading = False
         self.clip = QtGui.QApplication.clipboard()
         self.shown_cols = {}
@@ -693,7 +701,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
     def __checked_row_stiched(self, row):
         return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
 
-    def _process(self):
+    def _process(self):  # noqa: C901
         """
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
         """
@@ -758,7 +766,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
                                     thetaRun = thetaRun[0]
                                 if not theta_in:
                                     theta_in = getLogValue(thetaRun, "Theta")
-                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2*theta_in)
+                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2 * theta_in)
 
                                 # Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
@@ -969,7 +977,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
                 name += '_' + str(t)
         return name
 
-    def _do_run(self, runno, row, which):
+    def _do_run(self, runno, row, which):  # noqa: C901
         """
         Run quick on the given run and row
         """

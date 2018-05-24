@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,7 +34,7 @@ Usage
 
    tof, ysp = VesuvioResolution(Workspace=tof_ws, Mass=1.0079)
 
-   print 'Resolution in %s and %s.' % (tof.getAxis(0).getUnit().symbol(), ysp.getAxis(0).getUnit().symbol())
+   print('Resolution in %s and %s.' % (tof.getAxis(0).getUnit().symbol(), ysp.getAxis(0).getUnit().symbol()))
 
 Output:
 

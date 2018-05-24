@@ -10,6 +10,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -58,12 +59,12 @@ createTestInstrument(const Mantid::detid_t id,
   inst->markAsSamplePos(sampleHolder);
 
   // Just give it a single detector
-  Detector *det0(NULL);
+  Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
-    det0 = new Detector("det0", id, shape, NULL);
+    det0 = new Detector("det0", id, shape, nullptr);
   } else {
-    det0 = new Detector("det0", id, NULL);
+    det0 = new Detector("det0", id, nullptr);
   }
   det0->setPos(detPos);
   inst->add(det0);
@@ -116,7 +117,7 @@ void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                   unsigned int length) {
   auto timeSeries =
       new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
-  Mantid::Kernel::DateAndTime startTime("2010-01-01T00:10:00");
+  Mantid::Types::Core::DateAndTime startTime("2010-01-01T00:10:00");
   timeSeries->setUnits("mm");
   for (unsigned int i = 0; i < length; i++) {
     timeSeries->addValue(startTime + static_cast<double>(i), value);

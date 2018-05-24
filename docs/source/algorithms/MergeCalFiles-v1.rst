@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -57,9 +57,9 @@ Usage
         MergeGroups = True)
 
     #Load and print the resulting file
-    print "The result file has been updated with 0 for group, select and offset\nwhere the detector id's match"
+    print("The result file has been updated with 0 for group, select and offset\nwhere the detector id's match")
     with open(output_file, "r") as file:
-        print file.read().rstrip()
+        print(file.read().rstrip())
 
     #cleanup
     os.remove(calFile_master)
@@ -119,9 +119,9 @@ Output:
         MergeGroups = False)
 
     #Load and print the resulting file
-    print "Any additional rows in the update file will be added,\nset the Merge options to False if you don't want to affect existing values"
+    print("Any additional rows in the update file will be added,\nset the Merge options to False if you don't want to affect existing values")
     with open(output_file, "r") as file:
-        print file.read().rstrip()
+        print(file.read().rstrip())
 
     #cleanup
     os.remove(calFile_master)

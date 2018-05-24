@@ -48,7 +48,7 @@ public:
 
 private:
   void init();
-  typedef double (*fitFunctionEval)(double, double *);
+  using fitFunctionEval = double (*)(double, double *);
   void calculateFitCurveData(double *X, double *Y) override;
   fitFunctionEval f_eval;
 };

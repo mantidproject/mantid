@@ -46,7 +46,7 @@ class EXPORT_OPT_MANTIDQT_COMMON CatalogSearch : public QWidget {
 
 public:
   /// Default constructor
-  CatalogSearch(QWidget *parent = 0);
+  CatalogSearch(QWidget *parent = nullptr);
   /// Destructor
   ~CatalogSearch() override;
 

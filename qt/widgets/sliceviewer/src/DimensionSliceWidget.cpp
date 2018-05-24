@@ -1,9 +1,11 @@
 #include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidKernel/UnitLabel.h"
 #include <iosfwd>
-#include <qlayout.h>
+#include <QLayout>
 
 namespace MantidQt {
+using API::toQStringInternal;
 namespace SliceViewer {
 
 DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
@@ -104,15 +106,15 @@ void DimensionSliceWidget::setShownDim(int dim) {
 
   // Make the spacer expand to keep the buttons in the same spot
   if (slicing) {
-    if (ui.horizontalSpacer != NULL) {
+    if (ui.horizontalSpacer != nullptr) {
       // Remove the 3rd item (if it's not gone already) = the spacer
       ui.horizontalLayout->removeItem(ui.horizontalLayout->itemAt(3));
       delete ui.horizontalSpacer;
-      ui.horizontalSpacer = NULL;
+      ui.horizontalSpacer = nullptr;
     }
   } else {
     // Put the spacer back, if needed
-    if (ui.horizontalSpacer == NULL) {
+    if (ui.horizontalSpacer == nullptr) {
       ui.horizontalSpacer =
           new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
       ui.horizontalLayout->insertSpacerItem(3, ui.horizontalSpacer);
@@ -151,7 +153,7 @@ void DimensionSliceWidget::setMinMax(double min, double max) {
   if (!m_dim)
     return;
   ui.lblName->setText(QString::fromStdString(m_dim->getName()));
-  ui.lblUnits->setText(QString::fromStdWString(m_dim->getUnits().utf8()));
+  ui.lblUnits->setText(toQStringInternal(m_dim->getUnits().utf8()));
 
   ui.horizontalSlider->setRange(min, max, m_dim->getBinWidth());
 

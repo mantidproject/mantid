@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -45,10 +45,10 @@ Usage
 
    grouped = MuonGroupDetectors('ws', 'grouping')
 
-   print 'No. of spectra in grouped workspace:', grouped.getNumberHistograms()
-   print 'Detectors grouped in spectra 0:', list(grouped.getSpectrum(0).getDetectorIDs())
-   print 'Detectors grouped in spectra 1:', list(grouped.getSpectrum(1).getDetectorIDs())
-   print 'Detectors grouped in spectra 2:', list(grouped.getSpectrum(2).getDetectorIDs())
+   print('No. of spectra in grouped workspace: {}'.format(grouped.getNumberHistograms()))
+   print('Detectors grouped in spectra 0: {}'.format(list(grouped.getSpectrum(0).getDetectorIDs())))
+   print('Detectors grouped in spectra 1: {}'.format(list(grouped.getSpectrum(1).getDetectorIDs())))
+   print('Detectors grouped in spectra 2: {}'.format(list(grouped.getSpectrum(2).getDetectorIDs())))
 
 Output:
 
@@ -73,9 +73,9 @@ Output:
    # Use grouping from one file to group data from different file
    grouped = MuonGroupDetectors('ws', 'grouping')
 
-   print 'No. of periods loaded:', grouped.size()
-   print 'No. of grouped spectra in first period:', grouped.getItem(0).getNumberHistograms()
-   print 'No. of grouped spectra in second period:', grouped.getItem(1).getNumberHistograms()
+   print('No. of periods loaded: {}'.format(grouped.size()))
+   print('No. of grouped spectra in first period: {}'.format(grouped.getItem(0).getNumberHistograms()))
+   print('No. of grouped spectra in second period: {}'.format(grouped.getItem(1).getNumberHistograms()))
 
 Output:
 

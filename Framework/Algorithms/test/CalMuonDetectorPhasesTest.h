@@ -211,10 +211,10 @@ private:
     TS_ASSERT_DELTA(tab->Double(2, 1), 0.100, 0.001);
     TS_ASSERT_DELTA(tab->Double(3, 1), 0.100, 0.001);
     // Test phases
-    TS_ASSERT_DELTA(tab->Double(0, 2), 6.278, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1, 2), 0.781, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2, 2), 1.566, 0.001);
-    TS_ASSERT_DELTA(tab->Double(3, 2), 2.350, 0.001);
+    TS_ASSERT_DELTA(tab->Double(0, 2), 1.576, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 2), 0.789, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 2), 0.005, 0.001);
+    TS_ASSERT_DELTA(tab->Double(3, 2), 5.504, 0.001);
   }
 };
 

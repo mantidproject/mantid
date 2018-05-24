@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -67,7 +67,7 @@ Usage
     vanadium = [os.path.join(os.path.expanduser("~"), van  + ".nxs") for van in vanadium]
     ws = OSIRISDiffractionReduction(Sample=','.join(samples), Vanadium=','.join(vanadium), CalFile="osiris_041_RES10.cal")
 
-    print "Number of Spectra: %d, Number of bins: %d" % (ws.getNumberHistograms(), ws.blocksize())
+    print("Number of Spectra: {}, Number of bins: {}".format(ws.getNumberHistograms(), ws.blocksize()))
 
 Output:
 

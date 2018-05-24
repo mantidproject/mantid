@@ -14,7 +14,7 @@ using Mantid::Kernel::Quat;
 class DetectorTest : public CxxTest::TestSuite {
 public:
   void testNameConstructor() {
-    Detector det("det1", 0, 0);
+    Detector det("det1", 0, nullptr);
     TS_ASSERT_EQUALS(det.getName(), "det1");
     TS_ASSERT(!det.getParent());
     TS_ASSERT_EQUALS(det.getID(), 0);
@@ -22,7 +22,7 @@ public:
   }
   void testDetTopology() {
     V3D center;
-    Detector det("det1", 0, 0);
+    Detector det("det1", 0, nullptr);
     TSM_ASSERT_EQUALS("single detector should have rectangular topology", rect,
                       det.getTopology(center));
   }
@@ -37,32 +37,32 @@ public:
 
   void testId() {
     int id1 = 41;
-    Detector det("det1", id1, 0);
+    Detector det("det1", id1, nullptr);
     TS_ASSERT_EQUALS(det.getID(), id1);
   }
 
   void testType() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     TS_ASSERT_EQUALS(det.type(), "DetectorComponent");
   }
 
   void testGetNumberParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     TS_ASSERT_EQUALS(det.getNumberParameter("testparam").size(), 0);
   }
 
   void testGetPositionParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     TS_ASSERT_EQUALS(det.getPositionParameter("testparam").size(), 0);
   }
 
   void testGetRotationParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     TS_ASSERT_EQUALS(det.getRotationParameter("testparam").size(), 0);
   }
 
   void testCalculateSignedTwoTheta() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     V3D observer(0, 1, 0);
     V3D axis(1, 0, 0);
     double theta = det.getTwoTheta(observer, axis);
@@ -70,7 +70,7 @@ public:
   }
 
   void testCalculateTwoTheta() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     V3D observer(0, 0, 0); // sample
     V3D axis(1, 0, 0);
     V3D up(0, 0, 1);
@@ -95,7 +95,7 @@ public:
   }
 
   void testCalculateTwoThetaBoundaries() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     V3D observer(0, 0, 0); // sample
     V3D axis(1, 0, 0);
     V3D up(0, 0, 1);
@@ -119,7 +119,7 @@ public:
   }
 
   void test_calculate_phi() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     V3D aboveOrigin(1, 0, 0); // phi = 0
     det.setPos(aboveOrigin);
@@ -140,7 +140,7 @@ public:
 
   // Compare results with phi
   void test_calculate_phi_with_zero_offset() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     const double offset = 0;
 
     V3D aboveOrigin(1, 0, 0); // phi = 0
@@ -166,7 +166,7 @@ public:
   }
 
   void test_phi_offset_with_phi_greater_than_zero() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     const double offset = M_PI;
 
     V3D leftOfOrigin(0, 1, 0); // phi = pi/2
@@ -175,7 +175,7 @@ public:
   }
 
   void test_phi_offset_with_phi_less_than_zero() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
     const double offset = M_PI;
 
     V3D rightOfOrigin(0, -1, 0); // phi = -pi/2

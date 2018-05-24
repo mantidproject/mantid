@@ -696,18 +696,6 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
   }
 }
 
-namespace {
-/// Compare two spectra blocks for ordering
-bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock &block1,
-                          const LoadISISNexus2::SpectraBlock &block2) {
-  bool res = block1.last < block2.first;
-  if (!res) {
-    assert(block2.last < block1.first);
-  }
-  return res;
-}
-}
-
 /**
 * Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor
 * must be
@@ -738,7 +726,11 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   // sort and check for overlapping
   if (m_spectraBlocks.size() > 1) {
     std::sort(m_spectraBlocks.begin(), m_spectraBlocks.end(),
-              compareSpectraBlocks);
+              [](const LoadISISNexus2::SpectraBlock &block1,
+                 const LoadISISNexus2::SpectraBlock &block2) {
+                return block1.last < block2.first;
+              });
+    checkOverlappingSpectraRange();
   }
 
   // Remove monitors that have been used.
@@ -765,14 +757,34 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
 }
 
 /**
-* Load a given period into the workspace
-* @param period :: The period number to load (starting from 1)
-* @param entry :: The opened root entry node for accessing the monitor and data
-* nodes
-* @param local_workspace :: The workspace to place the data in
-* @param update_spectra2det_mapping :: reset spectra-detector map to the one
-* calculated earlier. (Warning! -- this map has to be calculated correctly!)
-*/
+ * Check if any spectra block ranges overlap.
+ *
+ * Iterate over the sorted list of spectra blocks and check
+ * if the last element of the preceeding block is less than
+ * the first element of the next block.
+ */
+void LoadISISNexus2::checkOverlappingSpectraRange() {
+  for (size_t i = 1; i < m_spectraBlocks.size(); ++i) {
+    const auto &block1 = m_spectraBlocks[i - 1];
+    const auto &block2 = m_spectraBlocks[i];
+    if (block1.first > block1.last && block2.first > block2.last)
+      throw std::runtime_error("LoadISISNexus2: inconsistent spectra ranges");
+    if (block1.last >= block2.first) {
+      throw std::runtime_error(
+          "LoadISISNexus2: the range of SpectraBlocks must not overlap");
+    }
+  }
+}
+
+/**
+ * Load a given period into the workspace
+ * @param period :: The period number to load (starting from 1)
+ * @param entry :: The opened root entry node for accessing the monitor and data
+ * nodes
+ * @param local_workspace :: The workspace to place the data in
+ * @param update_spectra2det_mapping :: reset spectra-detector map to the one
+ * calculated earlier. (Warning! -- this map has to be calculated correctly!)
+ */
 void LoadISISNexus2::loadPeriodData(
     int64_t period, NXEntry &entry,
     DataObjects::Workspace2D_sptr &local_workspace,
@@ -1078,8 +1090,8 @@ void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
     time = Poco::DateTimeFormatter::format(datetime_output, "%H:%M:%S",
                                            timezone_diff);
   } catch (Poco::SyntaxException &) {
-    date = "\?\?-\?\?-\?\?\?\?";
-    time = "\?\?:\?\?:\?\?";
+    date = R"(??-??-????)";
+    time = R"(??:??:??)";
     g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
   }
 }

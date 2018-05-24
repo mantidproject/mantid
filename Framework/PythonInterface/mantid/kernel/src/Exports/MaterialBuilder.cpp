@@ -30,7 +30,7 @@ void export_MaterialBuilder() {
            "Set the mass number of the material")
       .def("setNumberDensity", &MaterialBuilder::setNumberDensity,
            return_self<>(), (arg("self"), arg("rho")),
-           "Set the number density of the material in atoms / Angstrom^3")
+           "Set the number density of the material in atoms per Angstrom^3")
       .def("setZParameter", &MaterialBuilder::setZParameter, return_self<>(),
            (arg("self"), arg("zparam")),
            "Set the number of formula units in a unit cell")
@@ -42,16 +42,16 @@ void export_MaterialBuilder() {
            "Set the mass density of the material in g / cc")
       .def("setTotalScatterXSection", &MaterialBuilder::setTotalScatterXSection,
            return_self<>(), (arg("self"), arg("xsec")),
-           "Set the total scattering cross section of the material")
+           "Set the total scattering cross section of the material in barns")
       .def("setCoherentXSection", &MaterialBuilder::setCoherentXSection,
            return_self<>(), (arg("self"), arg("xsec")),
-           "Set the coherent cross section of the material")
+           "Set the coherent cross section of the material in barns")
       .def("setIncoherentXSection", &MaterialBuilder::setIncoherentXSection,
            return_self<>(), (arg("self"), arg("xsec")),
-           "Set the incoherent cross section of the material")
+           "Set the incoherent cross section of the material in barns")
       .def("setAbsorptionXSection", &MaterialBuilder::setAbsorptionXSection,
            return_self<>(), (arg("self"), arg("xsec")),
-           "Set the absorption cross section of the material")
+           "Set the absorption cross section of the material in barns")
       .def("build", &MaterialBuilder::build,
            return_value_policy<return_by_value>(), (arg("self")),
            "Build the new mantid.kernel.Material object from the current set "

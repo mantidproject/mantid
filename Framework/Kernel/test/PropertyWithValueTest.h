@@ -107,8 +107,8 @@ public:
   the size of the property is 2.
   */
   void testSizeOfVectorOfVectorProperty() {
-    typedef std::vector<int> VecInt;
-    typedef std::vector<VecInt> VecVecInt;
+    using VecInt = std::vector<int>;
+    using VecVecInt = std::vector<VecInt>;
     // Test vector value property.
     VecVecInt v;
     v.push_back(VecInt(1, 0));
@@ -394,7 +394,7 @@ public:
 
   void testCasting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int> i("Prop1", 5);
     Property *p = dynamic_cast<Property *>(&i);
     TS_ASSERT(!p->name().compare("Prop1"));
@@ -404,7 +404,7 @@ public:
     TS_ASSERT_EQUALS(i, 10);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<double> d("Prop2", 5.5);
     Property *pp = dynamic_cast<Property *>(&d);
     TS_ASSERT(!pp->name().compare("Prop2"));
@@ -419,7 +419,7 @@ public:
     TS_ASSERT_EQUALS(d, 7.777);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<std::string> s("Prop3", "testing");
     Property *ppp = dynamic_cast<Property *>(&s);
     TS_ASSERT(!ppp->name().compare("Prop3"));
@@ -429,7 +429,7 @@ public:
     TS_ASSERT_EQUALS(s.operator()(), "newValue");
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(lProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int64_t> l("Prop4", 789789789789LL);
     Property *pppp = dynamic_cast<Property *>(&l);
     TS_ASSERT(!pppp->name().compare("Prop4"));
@@ -690,9 +690,9 @@ public:
     auto values = property.allowedValues();
     auto possibilities = OptionalBool::strToEmumMap();
     TSM_ASSERT_EQUALS("3 states allowed", possibilities.size(), values.size());
-    for (auto it = values.begin(); it != values.end(); ++it) {
+    for (auto &value : values) {
       TSM_ASSERT("value not a known state",
-                 possibilities.find(*it) != possibilities.end());
+                 possibilities.find(value) != possibilities.end());
     }
   }
 

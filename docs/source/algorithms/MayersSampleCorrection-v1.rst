@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -81,8 +81,8 @@ Usage
                                              MultipleScattering=True)
 
    # Print a bin
-   print "Uncorrected signal: {0:.4f}".format(sample_ws.readY(0)[25])
-   print "Corrected signal: {0:.4f}".format(corrected_sample.readY(0)[25])
+   print("Uncorrected signal: {0:.4f}".format(sample_ws.readY(0)[25]))
+   print("Corrected signal: {0:.4f}".format(corrected_sample.readY(0)[25]))
 
 Output:
 
@@ -96,8 +96,6 @@ References
 
 .. [1] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 
-
-.. seealso :: Algorithm :ref:`algm-MultipleScatteringCylinderAbsorption`
 
 .. categories::
 

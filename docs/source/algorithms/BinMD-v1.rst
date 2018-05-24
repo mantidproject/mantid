@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -116,7 +116,7 @@ Usage
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C', Units='U,U,U')
     FakeMDEventData(InputWorkspace=mdws, PeakParams='500000,0,0,0,3')
     binned_ws = BinMD(InputWorkspace=mdws, AlignedDim0='A,0,10,100', AlignedDim1='B,-10,10,100', AlignedDim2='C,-10,10,100')
-    print "Number of events =", binned_ws.getNEvents()
+    print("Number of events = {}".format(binned_ws.getNEvents()))
 
 Output:
 
@@ -139,7 +139,7 @@ The output looks like the following in the `SliceViewer <http://www.mantidprojec
     FakeMDEventData(InputWorkspace=mdws, PeakParams='100000,0,0,0,1')
     FakeMDEventData(InputWorkspace=mdws, PeakParams='100000,5,5,0,1')
     binned_ws = BinMD(InputWorkspace=mdws, AxisAligned=False, BasisVector0='a,unit,1,1,0',BasisVector1='b,unit,-1,1,0',BasisVector2='c,unit,0,0,1',NormalizeBasisVectors=True,Translation=[-10,-10,0], OutputExtents=[0,math.sqrt(2*20*20),-2,2,-10,10], OutputBins=[100, 100, 1] )
-    print "Number of events =", binned_ws.getNEvents()
+    print("Number of events = {}".format(binned_ws.getNEvents()))
 
 Output:
 
@@ -161,7 +161,7 @@ The output looks like the following in the `SliceViewer <http://www.mantidprojec
         mdws = CreateMDWorkspace(Dimensions=2, Extents='-10,10,-10,10', Names='A,B', Units='U,U')
         FakeMDEventData(InputWorkspace=mdws, PeakParams='500000,'+str(x)+',0,3')
         binned_ws = BinMD(InputWorkspace=mdws, AlignedDim0='A,-10,10,100', AlignedDim1='B,-10,10,100', TemporaryDataWorkspace=binned_ws)
-    print "Number of events =", binned_ws.getNEvents()
+    print("Number of events = {}".format(binned_ws.getNEvents()))
 
 Output:
 

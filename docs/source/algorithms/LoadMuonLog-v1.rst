@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -48,8 +48,8 @@ Usage
    # Extract a property from the log.
    time_series_prop = fake_musr_ws.run().getLogData("BEAMLOG_FREQ")
 
-   print "BEAMLOG_FREQ is a TimeSeriesProperty with %i entries." % time_series_prop.size()
-   print "The first entry is %f." % time_series_prop.firstValue()
+   print("BEAMLOG_FREQ is a TimeSeriesProperty with {} entries.".format(time_series_prop.size()))
+   print("The first entry is {:.6f}.".format(time_series_prop.firstValue()))
 
 Output:
 

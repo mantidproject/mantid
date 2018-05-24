@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -118,7 +118,7 @@ Usage
     ref = np.empty(len(peak_centres))
     ref.fill(10098.6)
 
-    print np.allclose(ref, peak_centres, 1e-3)
+    print(np.allclose(ref, peak_centres, 1e-3))
 
 Output:
 

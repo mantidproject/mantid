@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -97,19 +97,19 @@ Usage
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
 
-   print "The unfiltered workspace %s has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50])
+   print("The unfiltered workspace {} has {} events and a peak value of {:.2f}".format(ws, ws.getNumberEvents(),ws.readY(0)[50]))
 
    wsOut = FilterByLogValue(ws,"proton_charge",MinimumValue=75, MaximumValue=150)
 
-   print "The filtered workspace %s has %i events and a peak value of %.2f" % (wsOut, wsOut.getNumberEvents(),wsOut.readY(0)[50])
+   print("The filtered workspace {} has {} events and a peak value of {:.2f}".format(wsOut, wsOut.getNumberEvents(),wsOut.readY(0)[50]))
 
 
 Output:
 
 .. testoutput:: FilterByLogValue
 
-   The unfiltered workspace ws has 1900 events and a peak value of 257.00
-   The filtered workspace wsOut has 950 events and a peak value of 131.00
+   The unfiltered workspace ws has 1900 events and a peak value of 2...
+   The filtered workspace wsOut has 950 events and a peak value of 1...
 
 
 .. categories::

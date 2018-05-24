@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ProcessingAlgoWidget : public QWidget {
 
 public:
   /// Default Constructor
-  ProcessingAlgoWidget(QWidget *parent = 0);
+  ProcessingAlgoWidget(QWidget *parent = nullptr);
   ~ProcessingAlgoWidget() override;
 
   /// @return the info string displayed at the top

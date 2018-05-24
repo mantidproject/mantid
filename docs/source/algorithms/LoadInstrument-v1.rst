@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,14 +37,14 @@ Usage
    ws=CreateSampleWorkspace();
    inst0=ws.getInstrument();
 
-   print "Default workspace has instrument: {0} with {1} parameters".format(inst0.getName(),len(inst0.getParameterNames()));
+   print("Default workspace has instrument: {0} with {1} parameters".format(inst0.getName(),len(inst0.getParameterNames())))
 
    # load MARI
    det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=True)
    inst1=ws.getInstrument();
 
-   print "Modified workspace has instrument: {0} with {1} parameters".format(inst1.getName(),len(inst1.getParameterNames()));
-   print "Instrument {0} has the following detectors: ".format(inst1.getName()),det
+   print("Modified workspace has instrument: {0} with {1} parameters".format(inst1.getName(),len(inst1.getParameterNames())))
+   print("Instrument {0} has the following detectors:  {1}".format(inst1.getName(), det))
 
 
 **Output:**

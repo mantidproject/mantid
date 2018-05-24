@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -108,9 +108,8 @@ Mantid for different testing tasks.
    
    # Look at sample results:   
    # A way to look at these results as a text:
-   print "Resulting MD workspace has {0} events and {1} dimensions".format(ws.getNEvents(),ws.getNumDims())
-   #print "MD workspace ID is:\n",ws.id
-   print "--------------------------------------------"
+   print("Resulting MD workspace has {0} events and {1} dimensions".format(ws.getNEvents(),ws.getNumDims()))
+   print("--------------------------------------------")
 
     
 .. testcleanup:: ExConvertToMDNoQ
@@ -158,12 +157,12 @@ obtained in an experiment and stored in nxspe files are provided to it.
    pars['OverwriteExisting']=0  # Change this to false, if the files should/can be added in memory
    #
    #---> Start loop over contributing files 
-   for n in xrange(0,5,1):
+   for n in range(0,5,1):
         source_file = 'MER19566_22.0meV_one2one125.nxspe'; # redefine source files list as function of loop number
         target  = 'MDMAP_T1'+str(n)+'.nxs';
         # check if the file already been converted to MD and is there
         if not(os.path.exists(target )): 
-            print 'Converting ',source_file
+            print('Converting  {}'.format(source_file))
             #current_ws=LoadNXSPE(Filename=source)
             #### For the sample script, simulate load operation above 
             current_ws = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-3,1,3],UnitX='DeltaE',OutputWorkspace=source_file)
@@ -198,9 +197,8 @@ obtained in an experiment and stored in nxspe files are provided to it.
    # plot results using sliceviewer
    #plotSlice(md_ws)
    # produce some test output
-   print "Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims())
-   #print "MD workspace ID is:\n",md_ws.id
-   print "--------------------------------------------"   
+   print("Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims()))
+   print("--------------------------------------------")
 
     
 .. testcleanup:: ExConvertToMDQ3D
@@ -232,7 +230,7 @@ This example produces 3-dimensional dataset, with a temperature axis.
    try:
         DeleteWorkspace(RezWS)
    except ValueError:
-        print "Target ws ",RezWS," not found in analysis data service\n"
+        print("Target ws  {}  not found in analysis data service\n".format(RezWS))
    
    # define convert to MD parameters
    pars = dict();
@@ -249,7 +247,7 @@ This example produces 3-dimensional dataset, with a temperature axis.
    # let's assume this is the temperature range obtained in experiments and 
    # each data file is obtained for particular temperature. 
    T = [1.0,2.0,3.0,3.5,4.0,5.0,6.0,7.0,8.0,9.0,9.5,10.0]   
-   for i in xrange(0,len(T),1):
+   for i in range(0,len(T),1):
         # source = sorurce_file_name[i];
         #current_ws=LoadNXSPE(Filename=source)   
         # EMULATE LOAD OF DIFFERENT results obtained for different temperatures. ------>      
@@ -267,11 +265,8 @@ This example produces 3-dimensional dataset, with a temperature axis.
         DeleteWorkspace(current_ws)
     # end loop
    
-   #plotSlice(RezWS)
    # produce some test output
-   print "Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims())
-   #print "MD workspace ID is:\n",md_ws.id    
-   print "--------------------------------------------"
+   print("Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims()))
     
 .. testcleanup:: ExConvertToMD|Q|T
 
@@ -285,7 +280,6 @@ This example produces 3-dimensional dataset, with a temperature axis.
    Target ws  WS_3D  not found in analysis data service
 
    Resulting MD workspace contains 605880 events and 3 dimensions
-   --------------------------------------------
 
 .. categories::
 

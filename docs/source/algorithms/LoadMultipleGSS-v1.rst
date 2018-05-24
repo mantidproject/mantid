@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,10 +22,10 @@ Usage
     LoadMultipleGSS(FilePrefix="PG3",RunNumbers="11485,11486",Directory="")
     
     #quick test:
-    print "Found workspace PG3_11485",mtd.doesExist("PG3_11485")
-    print "It has",mtd["PG3_11485"].getNumberHistograms(),"histogram, with",mtd["PG3_11485"].blocksize(),"bins"
-    print "Found workspace PG3_11486",mtd.doesExist("PG3_11486")
-    print "It has",mtd["PG3_11486"].getNumberHistograms(),"histogram, with",mtd["PG3_11486"].blocksize(),"bins"
+    print("Found workspace PG3_11485 {}".format(mtd.doesExist("PG3_11485")))
+    print("It has {} histogram, with {} bins".format(mtd["PG3_11485"].getNumberHistograms(), mtd["PG3_11485"].blocksize()))
+    print("Found workspace PG3_11486 {}".format(mtd.doesExist("PG3_11486")))
+    print("It has {} histogram, with {} bins".format(mtd["PG3_11486"].getNumberHistograms(), mtd["PG3_11486"].blocksize()))
    
 .. testcleanup:: LoadMultipleGSS
 

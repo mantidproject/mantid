@@ -25,7 +25,7 @@ FilePropertyWidget::FilePropertyWidget(Mantid::Kernel::Property *prop,
   m_widgets.push_back(m_browseButton);
 
   // Add to the 2nd column
-  m_gridLayout->addWidget(m_browseButton, m_row, 2, 0);
+  m_gridLayout->addWidget(m_browseButton, m_row, 2, nullptr);
 }
 
 //----------------------------------------------------------------------------------------------

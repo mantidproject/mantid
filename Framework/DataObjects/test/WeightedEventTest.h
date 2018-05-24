@@ -13,6 +13,7 @@ using namespace Mantid::DataObjects;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
+using Mantid::Types::Event::TofEvent;
 
 //==========================================================================================
 class WeightedEventTest : public CxxTest::TestSuite {

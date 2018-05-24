@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,7 +26,7 @@ Note, that this algorithm requires `h5py <https://pypi.python.org/pypi/h5py>`_ p
 
     res = SelectNexusFilesByMetadata(FileList='INTER00013460,13463,13464.nxs',
                                      NexusCriteria='$raw_data_1/duration$ > 1000 or $raw_data_1/good_frames$ > 10000')
-    print("res is now a string containing comma separated paths of %i file names that satisfy the criteria" % len(res.split(',')))
+    print("res is now a string containing comma separated paths of {} file names that satisfy the criteria".format(len(res.split(','))))
 
 Output:
 

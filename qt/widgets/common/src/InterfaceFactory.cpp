@@ -36,7 +36,7 @@ UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     g_log.debug() << "\"" << name
                   << "\" not registered as a real name, trying an alias.\n";
-    window = NULL;
+    window = nullptr;
   }
   if (!window) {
     window = createFromAlias(name);
@@ -97,12 +97,12 @@ UserSubWindowFactoryImpl::createFromAlias(const std::string &name) const {
       }
     }
     g_log.error() << error + "\n";
-    return NULL;
+    return nullptr;
   }
 
   if (m_aliasLookup.contains(alias)) {
     return this->createUnwrapped(m_aliasLookup.value(alias));
   } else {
-    return NULL;
+    return nullptr;
   }
 }

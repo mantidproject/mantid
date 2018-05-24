@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -51,7 +51,7 @@ The following example shows how to calculate the residuals following a fit perfo
 
     residual_data = residuals_Si.readY(0)
 
-    print "Residuals are in the range: [", round(min(residual_data), 2), ", ", round(max(residual_data), 2), "]"
+    print("Residuals are in the range: [ {:.2f} ,  {:.2f} ]".format(round(min(residual_data), 2), round(max(residual_data), 2)))
 
 The output contains the range in which residuals are found:
     

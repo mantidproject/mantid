@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,10 +25,10 @@ Usage
 .. testcode:: ExSumNeighbours
 
     ws = CreateSampleWorkspace(BankPixelWidth=10,NumBanks=2)
-    print "ws has %i spectra to begin with" % ws.getNumberHistograms()
+    print("ws has %i spectra to begin with" % ws.getNumberHistograms())
     wsOut = SumNeighbours(ws,5,5)
 
-    print "wsOut has only %i spectra after beimng summed into 5x5 blocks" % wsOut.getNumberHistograms()
+    print("wsOut has only %i spectra after beimng summed into 5x5 blocks" % wsOut.getNumberHistograms())
 
 Output:
 

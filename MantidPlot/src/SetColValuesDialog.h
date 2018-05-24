@@ -53,7 +53,7 @@ class SetColValuesDialog : public QDialog, public Scripted {
   Q_OBJECT
 
 public:
-  SetColValuesDialog(ScriptingEnv *env, Table *t, Qt::WFlags fl = 0);
+  SetColValuesDialog(ScriptingEnv *env, Table *t, Qt::WFlags fl = nullptr);
 
 private slots:
   bool apply();

@@ -1,10 +1,7 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUS_H_
 #define MANTID_DATAHANDLING_SAVENEXUS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include <climits>
 
 namespace Mantid {
@@ -46,10 +43,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveNexus : public API::Algorithm {
+class DLLExport SaveNexus : public API::SerialAlgorithm {
 public:
-  /// Default constructor
-  SaveNexus();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveNexus"; };
   /// Summary of algorithms purpose
@@ -60,6 +55,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveISISNexus", "SaveNexusPD", "SaveNexusProcessed", "LoadNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

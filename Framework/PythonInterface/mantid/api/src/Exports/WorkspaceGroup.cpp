@@ -4,13 +4,37 @@
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/iterator.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(WorkspaceGroup)
+
+/**
+ * Returns an iterator pointing to the first element in the group.
+ *
+ * @param self :: handle to the workspace group.
+ * @return A non-const iterator pointing at start of workspace group,
+ *         for use in python.
+ */
+std::vector<Workspace_sptr>::iterator group_begin(WorkspaceGroup &self) {
+  return self.begin();
+}
+
+/**
+ * Returns an iterator pointing to the past-the-end element in the group.
+ *
+ * @param self :: handle to the workspace group.
+ * @return A non-const iterator pointing at end of workspace group,
+ *         for use in python.
+ */
+std::vector<Workspace_sptr>::iterator group_end(WorkspaceGroup &self) {
+  return self.end();
+}
 
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
@@ -51,7 +75,9 @@ void export_WorkspaceGroup() {
            (Workspace_sptr (WorkspaceGroup::*)(const size_t) const) &
                WorkspaceGroup::getItem,
            (arg("self"), arg("index")),
-           return_value_policy<Policies::ToWeakPtr>());
+           return_value_policy<Policies::ToWeakPtr>())
+      .def("__iter__", range<return_value_policy<copy_non_const_reference>>(
+                           &group_begin, &group_end));
 
   Registry::RegisterWorkspacePtrToPython<WorkspaceGroup>();
 }

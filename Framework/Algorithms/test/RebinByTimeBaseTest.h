@@ -24,6 +24,8 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 /**
@@ -97,8 +99,7 @@ public:
   MOCK_CONST_METHOD1(getSpectrum,
                      const Mantid::API::IEventList &(const std::size_t));
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
-  MOCK_METHOD2(init,
-               void(const size_t &, const Mantid::HistogramData::Histogram &));
+  MOCK_METHOD1(init, void(const Mantid::HistogramData::Histogram &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
 
@@ -525,7 +526,7 @@ public:
     // Simple tests. Functionality tests cover this much better.
     MatrixWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
-    TS_ASSERT(outWS != NULL);
+    TS_ASSERT(outWS != nullptr);
   }
 };
 

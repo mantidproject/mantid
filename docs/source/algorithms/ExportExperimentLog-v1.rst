@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -114,14 +114,14 @@ Usage
       FileFormat = "tab",
       TimeZone = "America/New_York")
 
-  print "File is created = ", os.path.exists(savefile)
+  print("File is created =  {}".format(os.path.exists(savefile)))
   
   # Get lines of file
   sfile = open(savefile, 'r')
   slines = sfile.readlines()
   sfile.close()
 
-  print "Number of lines in File =", len(slines)
+  print("Number of lines in File = {}".format(len(slines)))
 
 .. testcleanup:: ExExportExpLogs
 

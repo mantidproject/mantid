@@ -36,10 +36,10 @@ PostprocessingAlgorithm::PostprocessingAlgorithm(
 * @param prefix : The prefix that will be added to the output workspace name
 * @param blacklist : The list of properties we don't want to show, as a string
 */
-PostprocessingAlgorithm::PostprocessingAlgorithm(
-    const QString &name, const QString &prefix, const QString &blacklist)
-    : PostprocessingAlgorithm(name, prefix,
-                                           convertStringToSet(blacklist)) {}
+PostprocessingAlgorithm::PostprocessingAlgorithm(const QString &name,
+                                                 const QString &prefix,
+                                                 const QString &blacklist)
+    : PostprocessingAlgorithm(name, prefix, convertStringToSet(blacklist)) {}
 
 /** Default constructor: no algorithm defined */
 PostprocessingAlgorithm::PostprocessingAlgorithm()
@@ -49,24 +49,16 @@ PostprocessingAlgorithm::PostprocessingAlgorithm()
 PostprocessingAlgorithm::~PostprocessingAlgorithm() {}
 
 // Returns the name of the input workspace property
-QString PostprocessingAlgorithm::inputProperty() const {
-  return m_inputProp;
-}
+QString PostprocessingAlgorithm::inputProperty() const { return m_inputProp; }
 
 // Returns the name of the output workspace property
-QString PostprocessingAlgorithm::outputProperty() const {
-  return m_outputProp;
-}
+QString PostprocessingAlgorithm::outputProperty() const { return m_outputProp; }
 
 // Returns the number of output workspace properties (currently only 1)
-size_t PostprocessingAlgorithm::numberOfOutputProperties() const {
-  return 1;
-}
+size_t PostprocessingAlgorithm::numberOfOutputProperties() const { return 1; }
 
 // Returns the prefix that will be added to the output ws
-QString PostprocessingAlgorithm::prefix() const {
-  return m_prefix;
-}
+QString PostprocessingAlgorithm::prefix() const { return m_prefix; }
 }
 }
 }

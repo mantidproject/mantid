@@ -1,8 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CALCULATEPAALMANPINGS_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CALCULATEPAALMANPINGS_H_
 
-#include "ui_CalculatePaalmanPings.h"
 #include "CorrectionsTab.h"
+#include "ui_CalculatePaalmanPings.h"
+
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -10,7 +12,7 @@ class DLLExport CalculatePaalmanPings : public CorrectionsTab {
   Q_OBJECT
 
 public:
-  CalculatePaalmanPings(QWidget *parent = 0);
+  CalculatePaalmanPings(QWidget *parent = nullptr);
 
 private:
   void setup() override;
@@ -36,6 +38,9 @@ private:
                                      QString shape);
   void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
                                   QString shape);
+  boost::optional<double>
+  getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
+                         const std::string &parameterName);
 
   Ui::CalculatePaalmanPings m_uiForm;
 };

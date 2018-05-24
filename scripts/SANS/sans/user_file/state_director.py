@@ -160,7 +160,7 @@ def set_single_entry(builder, method_name, tag, all_entries, apply_to_value=None
 
 
 class StateDirectorISIS(object):
-    def __init__(self, data_info):
+    def __init__(self, data_info, file_information):
         super(StateDirectorISIS, self).__init__()
         data_info.validate()
         self._data = data_info
@@ -174,7 +174,7 @@ class StateDirectorISIS(object):
         self._slice_event_builder = get_slice_event_builder(self._data)
         self._wavelength_builder = get_wavelength_builder(self._data)
         self._save_builder = get_save_builder(self._data)
-        self._scale_builder = get_scale_builder(self._data)
+        self._scale_builder = get_scale_builder(self._data, file_information)
 
         self._adjustment_builder = get_adjustment_builder(self._data)
         self._normalize_to_monitor_builder = get_normalize_to_monitor_builder(self._data)
@@ -256,6 +256,7 @@ class StateDirectorISIS(object):
         self._set_up_normalize_to_monitor_state(user_file_items)
         self._set_up_calculate_transmission(user_file_items)
         self._set_up_wavelength_and_pixel_adjustment(user_file_items)
+        self._set_up_show_transmission(user_file_items)
 
         # Convert to Q state
         self._set_up_convert_to_q_state(user_file_items)
@@ -511,6 +512,25 @@ class StateDirectorISIS(object):
         set_single_entry(self._reduction_builder, "set_merge_shift", DetectorId.shift, user_file_items)
 
         # -------------------------------
+        # User masking
+        # -------------------------------
+        merge_min = None
+        merge_max = None
+        merge_mask = False
+        if DetectorId.merge_range in user_file_items:
+            merge_range = user_file_items[DetectorId.merge_range]
+            # Should the user have chosen several values, then the last element is selected
+            check_if_contains_only_one_element(merge_range, DetectorId.rescale_fit)
+            merge_range = merge_range[-1]
+            merge_min = merge_range.start
+            merge_max = merge_range.stop
+            merge_mask = merge_range.use_fit
+
+        self._reduction_builder.set_merge_mask(merge_mask)
+        self._reduction_builder.set_merge_min(merge_min)
+        self._reduction_builder.set_merge_max(merge_max)
+
+        # -------------------------------
         # Fitting merged
         # -------------------------------
         q_range_min_scale = None
@@ -646,8 +666,8 @@ class StateDirectorISIS(object):
                     start_times_hab.append(times.start)
                     stop_times_hab.append(times.stop)
                 elif times.detector_type is DetectorType.LAB:
-                    start_times_hab.append(times.start)
-                    stop_times_hab.append(times.stop)
+                    start_times_lab.append(times.start)
+                    stop_times_lab.append(times.stop)
                 else:
                     RuntimeError("UserFileStateDirector: The specified detector {0} is not "
                                  "known".format(times.detector_type))
@@ -1056,11 +1076,16 @@ class StateDirectorISIS(object):
         if MonId.spectrum in user_file_items:
             mon_spectrum = user_file_items[MonId.spectrum]
             mon_spec = [spec for spec in mon_spectrum if not spec.is_trans]
-            mon_spec = mon_spec[-1]
+
             if mon_spec:
+                mon_spec = mon_spec[-1]
                 rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
                 self._normalize_to_monitor_builder.set_rebin_type(rebin_type)
-                self._normalize_to_monitor_builder.set_incident_monitor(mon_spec.spectrum)
+
+                #  We have to check if the spectrum is None, this can be the case when the user wants to use the
+                # default incident monitor spectrum
+                if mon_spec.spectrum:
+                    self._normalize_to_monitor_builder.set_incident_monitor(mon_spec.spectrum)
 
         # The prompt peak correction values
         set_prompt_peak_correction(self._normalize_to_monitor_builder, user_file_items)
@@ -1104,11 +1129,15 @@ class StateDirectorISIS(object):
         if MonId.spectrum in user_file_items:
             mon_spectrum = user_file_items[MonId.spectrum]
             mon_spec = [spec for spec in mon_spectrum if spec.is_trans]
-            mon_spec = mon_spec[-1]
             if mon_spec:
+                mon_spec = mon_spec[-1]
                 rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
                 self._calculate_transmission_builder.set_rebin_type(rebin_type)
-                self._calculate_transmission_builder.set_incident_monitor(mon_spec.spectrum)
+
+                # We have to check if the spectrum is None, this can be the case when the user wants to use the
+                # default incident monitor spectrum
+                if mon_spec.spectrum:
+                    self._calculate_transmission_builder.set_incident_monitor(mon_spec.spectrum)
 
         # The general background settings
         set_background_tof_general(self._calculate_transmission_builder, user_file_items)
@@ -1250,6 +1279,13 @@ class StateDirectorISIS(object):
             check_if_contains_only_one_element(use_compatibility_mode, OtherId.use_compatibility_mode)
             use_compatibility_mode = use_compatibility_mode[-1]
             self._compatibility_builder.set_use_compatibility_mode(use_compatibility_mode)
+
+    def _set_up_show_transmission(self, user_file_items):
+        if OtherId.show_transmission in user_file_items:
+            show_transmission = user_file_items[OtherId.show_transmission]
+            check_if_contains_only_one_element(show_transmission, OtherId.show_transmission)
+            show_transmission = show_transmission[-1]
+            self._adjustment_builder.set_show_transmission(show_transmission)
 
     def _set_up_save(self, user_file_items):
         if OtherId.save_types in user_file_items:

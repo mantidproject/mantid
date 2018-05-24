@@ -9,6 +9,10 @@ class MergeCalFiles(PythonAlgorithm):
     def category(self):
         return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles"
 
+    def seeAlso(self):
+        return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames",
+                 "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile" ]
+
     def name(self):
         return "MergeCalFiles"
 
@@ -96,7 +100,7 @@ class MergeCalFiles(PythonAlgorithm):
 
     #add any lines at the end
         for UDET in updateDict.keys():
-            (offset,select,group)=updateDict.pop(UDET)
+            (offset,select,group)=updateDict[UDET]
             lastNumber += 1
             outputFile.write(self.FormatLine(lastNumber,UDET,offset,select,group))
             linesAdded += 1

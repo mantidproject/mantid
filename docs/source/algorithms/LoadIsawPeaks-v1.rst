@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,7 +27,7 @@ Usage
 .. testcode:: LoadIsawPeaksEx
 
     peaks = LoadIsawPeaks('TOPAZ_1204.peaks')
-    print "Number of peaks entries", peaks.getNumberPeaks()
+    print("Number of peaks entries {}".format(peaks.getNumberPeaks()))
 
 Output:
 

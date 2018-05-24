@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,7 +17,7 @@ By this algorithm, Vulcan's calibration file can be converted to
 the standard calibration file for SNSPowderReduction.
 
 Detector offset file
-====================
+####################
 
 There are :math:`62500` (:math:`50\times 1250`) rows in the offset file.
 In each row, the first value is the pixel ID; and the second is inner-module offset.
@@ -35,14 +35,14 @@ from 0.
 - Line :math:`1250\times M_i + 1249`: pixel ID, inter bank correction
 
 Bad pixel file
-==============
+##############
 
 In bad pixel file, each line contains one and only one integer
 corresponding to the detector ID of a bad pixel.
 The bad pixels will be masked in the output MaskWorkspace.
 
 Conversion from offset in TOF to d-spacing
-==========================================
+##########################################
 
 With VULCAN's offsets in TOF, the calibration is done as the following.
 
@@ -90,9 +90,9 @@ Usage
   offsetws = mtd["Vulcan_idl_offsets"]
   groupws = mtd["Vulcan_idl_group"]
   for iws in [0, 100, 1000, 3500, 7000]:
-    print "Spectrum %-5d Offset = %.5f of Group %d" % (iws, offsetws.readY(iws)[0], groupws.readY(iws)[0])
+    print("Spectrum {:<5} Offset = {:.5f} of Group {:.0f}".format(iws, offsetws.readY(iws)[0], groupws.readY(iws)[0]))
   maskws = mtd["Vulcan_idl_mask"]
-  print "Size of mask workspace = %d" % (maskws.getNumberHistograms())
+  print("Size of mask workspace = {}".format(maskws.getNumberHistograms()))
 
 .. testcleanup::
 

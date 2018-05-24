@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -50,11 +50,11 @@ Usage
 .. testcode:: ExFixedWindowScans
 
     ws = IndirectILLReductionFWS(Run='ILL/IN16B/083072:083077.nxs')
-    print "Result is now a WorkspaceGroup, which has %d workspaces, one per each energy value" % ws.getNumberOfEntries()
-    print "first item, called %s corresponds to energy value of %s" % \
-    (ws.getItem(0).getName(),ws.getItem(0).getName().split('_')[1])
-    print "it has %d histograms and %d bins, one per each temperature" % \
-    (ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize())
+    print("Result is now a WorkspaceGroup, which has {:d} workspaces, one per each energy value".format( ws.getNumberOfEntries()))
+    print("first item, called {} corresponds to energy value of {}".format(
+    ws.getItem(0).getName(),ws.getItem(0).getName().split('_')[1]))
+    print("it has {:d} histograms and {:d} bins, one per each temperature".format(
+    ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize()))
 
 Output:
 

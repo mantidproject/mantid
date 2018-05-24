@@ -215,18 +215,17 @@ public:
       TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
     }
 
-    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++)
-      for (size_t x = 0; x < out->blocksize(); x++) {
-        if (AllSpectra) {
-          TS_ASSERT_DELTA(out->y(wi)[x], static_cast<double>(wi) * 1.0,
-                          0.02); // Because the spectra are flat, the smoothing
-                                 // won't do much
-        } else {
-          TS_ASSERT_DELTA(out->y(wi)[x], WorkspaceIndex * 1.0,
-                          0.02); // Because the spectra are flat, the smoothing
-                                 // won't do much
-        }
+    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
+      const auto &y = out->y(wi);
+      double value = static_cast<double>(WorkspaceIndex);
+      if (AllSpectra)
+        value = static_cast<double>(wi);
+
+      for (size_t j = 0; j < y.size(); ++j) {
+        // Because the spectra are flat, the smoothing won't do much
+        TS_ASSERT_DELTA(y[j], value, 0.02);
       }
+    }
   }
 
   //-------------------------------------------------------------------------------------------------

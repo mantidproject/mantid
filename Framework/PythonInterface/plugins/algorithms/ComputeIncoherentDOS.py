@@ -9,11 +9,23 @@ from mantid.simpleapi import *
 
 
 def evaluateEbin(Emin, Emax, Ei, strn):
-    return [eval(estr) for estr in strn.split(',')]
+    if strn.count(',') != 2:
+        raise ValueError('EnergyBinning must be a comma separated string with three values.')
+    try:
+        out = [eval(estr, None, {'Emax':Emax, 'Emin':Emin, 'Ei':Ei}) for estr in strn.split(',')]
+    except NameError:
+        raise ValueError('Only the variables ''Emin'', ''Emax'' or ''Ei'' are allowed in EnergyBinning.')
+    return out
 
 
 def evaluateQRange(Qmin, Qmax, strn):
-    return [eval(qstr) for qstr in strn.split(',')]
+    if strn.count(',') != 1:
+        raise ValueError('QSumRange must be a comma separated string with two values.')
+    try:
+        out = [eval(qstr, None, {'Qmin':Qmin, 'Qmax':Qmax}) for qstr in strn.split(',')]
+    except NameError:
+        raise ValueError('Only the variables ''Qmin'' and ''Qmax'' is allowed in QSumRange.')
+    return out
 
 
 class ComputeIncoherentDOS(PythonAlgorithm):
@@ -97,14 +109,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         qq = (qq[1:len(qq)]+qq[0:len(qq)-1])/2
         en = (en[1:len(en)]+en[0:len(en)-1])/2
 
-        # Checks qrange is valid
-        if QSumRange.count(',') != 1:
-            raise ValueError('QSumRange must be a comma separated string with two values.')
-        try:
-            # Do this in a member function to make sure no other variables can be evaluated other than Qmin and Qmax.
-            dq = evaluateQRange(min(qq), max(qq), QSumRange)
-        except NameError:
-            raise ValueError('Only the variables ''Qmin'' and ''Qmax'' is allowed in QSumRange.')
+        # Checks qrange is valid. Do it in a member function so no variables can be evaluated other than Qmin and Qmax.
+        dq = evaluateQRange(min(qq), max(qq), QSumRange)
 
         # Gets meV to cm^-1 conversion
         mev2cm = (constants.elementary_charge / 1000) / (constants.h * constants.c * 100)
@@ -118,21 +124,16 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             en = en / mev2cm
             input_en_in_meV = 0
 
-        # Checks energy bins are ok.
-        if EnergyBinning.count(',') != 2:
-            raise ValueError('EnergyBinning must be a comma separated string with three values.')
+        # Gets the incident energy from the workspace - either if it is set as an attribute or from the energy axis.
         try:
             ei = inws.getEFixed(1)
         except RuntimeError:
             ei = max(en)
-        try:
-            # Do this in a function to make sure no other variables can be evaluated other than Emin, Emax and Ei.
-            if not input_en_in_meV:
-                dosebin = evaluateEbin(min(en*mev2cm), max(en*mev2cm), ei*mev2cm, EnergyBinning)
-            else:
-                dosebin = evaluateEbin(min(en), max(en), ei, EnergyBinning)
-        except NameError:
-            raise ValueError('Only the variables ''Emin'', ''Emax'' or ''Ei'' are allowed in EnergyBinning.')
+        # Checks energy bins are ok. Do it in a function so no variables can be evaluated except Emin, Emax and Ei.
+        if not input_en_in_meV:
+            dosebin = evaluateEbin(min(en*mev2cm), max(en*mev2cm), ei*mev2cm, EnergyBinning)
+        else:
+            dosebin = evaluateEbin(min(en), max(en), ei, EnergyBinning)
 
         # Extracts the intensity (y) and errors (e) from inws.
         y = inws.extractY()

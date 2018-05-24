@@ -48,8 +48,6 @@ public:
   virtual bool isOptional() const = 0;
   /// Will the workspace be locked when starting an algorithm?
   virtual bool isLocking() const = 0;
-  /// Returns the direction of the workspace property
-  //-virtual const unsigned int direction() const = 0;
   /// Virtual destructor
   virtual ~IWorkspaceProperty() = default;
   /// Sets a flag indicating whether this is the master rank in MPI builds.

@@ -245,7 +245,7 @@ public:
         .WillOnce(Return(img));
 
     TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg));
-    TS_ASSERT_EQUALS(calculator.getChisq(), 2);
+    TS_ASSERT_DELTA(calculator.getChisq(), 1, 1e-8);
     TS_ASSERT_DELTA(calculator.getAngle(), 0.7071, 1e-4);
 
     Mock::VerifyAndClearExpectations(entropy);

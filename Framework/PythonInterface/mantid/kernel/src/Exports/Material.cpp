@@ -10,7 +10,6 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::Material;
-using Mantid::PhysicalConstants::Atom;
 using Mantid::PhysicalConstants::NeutronAtom;
 using namespace boost::python;
 
@@ -53,7 +52,7 @@ void export_Material() {
       .def("name", &Material::name, arg("self"),
            return_value_policy<copy_const_reference>(), "Name of the material")
       .add_property("numberDensity", make_function(&Material::numberDensity),
-                    "Number density")
+                    "Number density in atoms per A^-3")
       .add_property("temperature", make_function(&Material::temperature),
                     "Temperature")
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
@@ -61,65 +60,85 @@ void export_Material() {
            (double (Material::*)(double) const)(&Material::cohScatterXSection),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Coherent Scattering Cross-Section")
+           "Coherent Scattering Cross-Section for the given wavelength in "
+           "barns")
       .def("incohScatterXSection", (double (Material::*)(double)
                                         const)(&Material::incohScatterXSection),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Incoherent Scattering Cross-Section")
+           "Incoherent Scattering Cross-Section for the given wavelength in "
+           "barns")
       .def("totalScatterXSection", (double (Material::*)(double)
                                         const)(&Material::totalScatterXSection),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Total Scattering Cross-Section")
+           "Total Scattering Cross-Section for the given wavelength in barns")
       .def("absorbXSection",
            (double (Material::*)(double) const)(&Material::absorbXSection),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Absorption Cross-Section")
+           "Absorption Cross-Section for the given wavelength in barns")
 
       .def("cohScatterLength",
            (double (Material::*)(double) const)(&Material::cohScatterLength),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Coherent Scattering Length")
+           "Coherent Scattering Length for the given wavelength in fm")
       .def("incohScatterLength",
            (double (Material::*)(double) const)(&Material::incohScatterLength),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Incoherent Scattering Length")
+           "Incoherent Scattering Length for the given wavelength in fm")
       .def("totalScatterLength",
            (double (Material::*)(double) const)(&Material::totalScatterLength),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Total Scattering Length")
+           "Total Scattering Length for the given wavelength in fm")
 
       .def("cohScatterLengthReal", (double (Material::*)(double)
                                         const)(&Material::cohScatterLengthReal),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Real part of Coherent Scattering Length")
+           "Real part of Coherent Scattering Length for the given wavelength "
+           "in fm")
+      .def("cohScatterLengthImg",
+           (double (Material::*)(double) const)(&Material::cohScatterLengthImg),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+           "Imaginary part of Coherent Scattering Length for the given "
+           "wavelength "
+           "in fm")
       .def("incohScatterLengthReal", (double (Material::*)(double) const)(
                                          &Material::incohScatterLengthReal),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Real part of Incoherent Scattering Length")
-
+           "Real part of Incoherent Scattering Length for the given wavelength "
+           "in fm")
+      .def("incohScatterLengthImg", (double (Material::*)(double) const)(
+                                        &Material::incohScatterLengthImg),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+           "Imaginary part of Incoherent Scattering Length for the given "
+           "wavelength "
+           "in fm")
       .def("cohScatterLengthSqrd", (double (Material::*)(double)
                                         const)(&Material::cohScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Coherent Scattering Length <b^2>")
+           "Coherent Scattering Length Squared <b>^2 for the given wavelength "
+           "in fm^2")
       .def("incohScatterLengthSqrd", (double (Material::*)(double) const)(
                                          &Material::incohScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Incoherent Scattering Length <b^2>")
+           "Incoherent Scattering Length Squared <b>^2 for the given "
+           "wavelength in fm^2")
       .def("totalScatterLengthSqrd", (double (Material::*)(double) const)(
                                          &Material::totalScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Total Scattering Length <b^2>")
+           "Total Scattering Length Squared <b^2> for the given wavelength in "
+           "fm^2")
 
       .def("chemicalFormula", &chemicalFormula, arg("self"), "Chemical Formula")
       .def("relativeMolecularMass", &relativeMolecularMass, arg("self"),

@@ -85,6 +85,19 @@
        <widget class="QLineEdit" name="lineEdit_RBNumber"/>
       </item>
       <item>
+       <widget class="QLabel" name="label_invalidRBNumber">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>An experiment reference number (or &quot;RB number&quot; at ISIS) is required for this interface. The output calibration, focusing and fitting results will be saved in directories named using the RB number entered</string>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;* Please enter a valid RB Number&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

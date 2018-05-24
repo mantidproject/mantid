@@ -22,6 +22,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class LoadRaw3Test : public CxxTest::TestSuite {
 public:
@@ -434,7 +435,7 @@ public:
     TS_ASSERT_EQUALS(detector.getID(), 60);
 
     const auto &pmap = output2D->constInstrumentParameters();
-    TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 160);
+    TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 161);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
 
@@ -1156,7 +1157,7 @@ private:
     Property *prop = run.getLogData("current_period");
     PropertyWithValue<int> *current_period_property =
         dynamic_cast<PropertyWithValue<int> *>(prop);
-    TS_ASSERT(current_period_property != NULL);
+    TS_ASSERT(current_period_property != nullptr);
     int actual_period =
         boost::lexical_cast<int>(current_period_property->value());
     TS_ASSERT_EQUALS(expected_period, actual_period);

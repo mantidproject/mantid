@@ -32,7 +32,7 @@
 </parameter>
 
 <parameter name="analyser" type="string">
-  <value val="fmica" />
+  <value val="mica" />
 </parameter>
 
 <parameter name="reflection" type="string">

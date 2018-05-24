@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -35,10 +35,10 @@ Usage
    my_table.addRow(["IRIS", 8465])
    my_table.addRow(["SANS2D", 20462])
 
-   print "The run number for IRIS is " + str(my_table.cell("Run Number", 1)) + "."
-   print "The number of rows is " + str(my_table.rowCount()) + "."
-   print "The title of the table is " + my_table.getTitle() + "."
-   print "Remember, the table is a workspace.  It's name is \"" + my_table.name() + "\"."
+   print("The run number for IRIS is {}.".format(my_table.cell("Run Number", 1)))
+   print("The number of rows is {}.".format(my_table.rowCount()))
+   print("The title of the table is {}.".format(my_table.getTitle()))
+   print("Remember, the table is a workspace.  It's name is \"{}\".".format(my_table.name()))
 
 Output:
 

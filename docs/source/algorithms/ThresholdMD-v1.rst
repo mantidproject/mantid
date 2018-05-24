@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -66,8 +66,8 @@ Usage
    threshold_output = ThresholdMD(InputWorkspace='threshold_input', Condition='Greater Than', ReferenceValue=4)
 
    # Print selection before and after
-   print "selected bins before threshold greater than 4",threshold_input.getSignalArray()[1,1]
-   print "same bins after threshold greater than 4",threshold_output.getSignalArray()[1,1]
+   print("selected bins before threshold greater than 4 {}".format(threshold_input.getSignalArray()[1,1]))
+   print("same bins after threshold greater than 4 {}".format(threshold_output.getSignalArray()[1,1]))
 
 Output:
 

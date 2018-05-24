@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,11 +32,11 @@ Usage
 
     # Calculate the chi squared by default
     value = CalculateCostFunction(func, ws)
-    print 'Value of least squares is %s' % value
+    print('Value of least squares is {:.13f}'.format(value))
 
     # Calculate the unweighted least squares
     value = CalculateCostFunction(func, ws, CostFunction='Unweighted least squares')
-    print 'Value of unweighted least squares is %s' % value
+    print('Value of unweighted least squares is {:.13f}'.format(value))
 
 
 Output:

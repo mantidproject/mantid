@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,9 +23,9 @@ Usage
     wsOrder2 = FFTDerivative(wsOriginal,Order=2)
     wsOrder3 = FFTDerivative(wsOriginal,Order=3)
 
-    print "bin Orig  1st    2nd   3rd"
+    print("bin Orig  1st    2nd   3rd")
     for i in range (41,67,5):
-        print "%i  %.2f  %.2f  %.2f  %.2f" % (i, wsOriginal.readY(0)[i], wsOrder1.readY(0)[i], wsOrder2.readY(0)[i], wsOrder3.readY(0)[i])
+        print("{}  {:.2f}  {:.2f}  {:.2f}  {:.2f}".format(i, wsOriginal.readY(0)[i], wsOrder1.readY(0)[i], wsOrder2.readY(0)[i], wsOrder3.readY(0)[i]))
 
 .. figure:: /images/FFTDerivativeExample.png
     :align: right
@@ -54,8 +54,8 @@ Output:
 
     wsOrder2Test = FFTDerivative(wsOrder1,Order=1)
 
-    print "The direct 2nd order derivative and the derivative of a derivative should match"
-    print CompareWorkspaces(wsOrder2,wsOrder2Test,CheckAllData=True,Tolerance=1e10)[0]
+    print("The direct 2nd order derivative and the derivative of a derivative should match")
+    print(CompareWorkspaces(wsOrder2,wsOrder2Test,CheckAllData=True,Tolerance=1e10)[0])
 
 Output:
 

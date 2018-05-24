@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -45,9 +45,9 @@ Usage
    # attempt the fit
    fitResult = FitGaussian(wspace,0)
    if (0.0,0.0) == fitResult:
-      print "the fit was not successful"
+      print("the fit was not successful")
    else:
-      print "the fitted peak: centre=%.2f, sigma=%.2f" % fitResult
+      print("the fitted peak: centre={:.2f}, sigma={:.2f}".format(fitResult[0], fitResult[1]))
 
 .. testcleanup:: ExFitPeak
 

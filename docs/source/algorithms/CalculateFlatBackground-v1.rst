@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -42,7 +42,7 @@ Usage
                                     Mode='Linear Fit',
                                     OutputMode='Subtract Background')
 
-   print 'Values with subtracted background:', np.around(output.readY(0))
+   print('Values with subtracted background: {}'.format(np.around(output.readY(0))))
 
 Output:
 
@@ -70,9 +70,9 @@ Output:
    # 3 (even negative!). By default, NullifyNegativeValues will be set
    # to true, and subtracting the output from the input workspace will
    # set these bins to zero.
-   print 'Calculated Mean background:', np.around(output.readY(0))
+   print('Calculated Mean background: {}'.format(np.around(output.readY(0))))
    subtracted = input - output
-   print 'Background subtracted:', np.around(subtracted.readY(0))
+   print('Background subtracted: {}'.format(np.around(subtracted.readY(0))))
 
 Output:
 

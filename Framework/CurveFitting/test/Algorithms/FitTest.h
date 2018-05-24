@@ -16,6 +16,7 @@
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 #include "MantidTestHelpers/FunctionCreationHelper.h"
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
@@ -32,7 +33,6 @@ using namespace Mantid::DataObjects;
 
 using Mantid::TestHelpers::MultiDomainFunctionTest_Function;
 
-namespace {
 class TestMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor setting a value for the relative error acceptance
@@ -75,7 +75,6 @@ private:
 };
 
 DECLARE_FUNCMINIMIZER(TestMinimizer, TestMinimizer)
-}
 
 class FitTest : public CxxTest::TestSuite {
 public:
@@ -2128,6 +2127,34 @@ public:
       TS_ASSERT_EQUALS(status, "success");
     }
 
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_exclude_ranges_with_unweighted_least_squares() {
+    HistogramData::Points points{-2, -1, 0, 1, 2};
+    HistogramData::Counts counts(points.size(), 0.0);
+    // This value should be excluded.
+    counts.mutableData()[2] = 10.0;
+    MatrixWorkspace_sptr ws(
+        DataObjects::create<Workspace2D>(
+            1, HistogramData::Histogram(points, counts)).release());
+    Fit fit;
+    fit.initialize();
+    fit.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("Function", "name=FlatBackground,A0=0.1"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(fit.setPropertyValue("Exclude", "-0.5, 0.5"))
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("Minimizer", "Levenberg-MarquardtMD"))
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Output", "fit_test_output"))
+    TS_ASSERT_THROWS_NOTHING(fit.execute())
+    const std::string status = fit.getProperty("OutputStatus");
+    TS_ASSERT_EQUALS(status, "success")
+    API::IFunction_sptr function = fit.getProperty("Function");
+    TS_ASSERT_DELTA(function->getParameter(0), 0.0, 1e-12)
     AnalysisDataService::Instance().clear();
   }
 

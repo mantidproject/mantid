@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -58,7 +58,7 @@ Usage
    # Check that workspace matches expected peak
    expected = CreateWorkspace(dataX, peak)
    result, messages = CompareWorkspaces(peakWS, expected)
-   print "Workspaces match:", result
+   print("Workspaces match: {}".format(result))
 
 
 Output:

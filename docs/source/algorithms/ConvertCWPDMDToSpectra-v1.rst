@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -198,7 +198,7 @@ Usage
   vece = ws.readE(0)
 
   for i in [100, 100, 1101, 1228]:
-    print "2theta = %-5f, Y = %-5f, E = %-5f" % (vecx[i], vecy[i], vece[i])
+    print("2theta = {:.6f}, Y = {:.6f}, E = {:.6f}".format(vecx[i], vecy[i], vece[i]))
 
 .. testcleanup::  ExReduceHB2AToFullprof
 

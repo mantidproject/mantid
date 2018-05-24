@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,7 +30,7 @@ Usage
 
     wsOut = LoadEmptyInstrument(inesPath)
 
-    print "The workspace contains %i spectra" % wsOut.getNumberHistograms()
+    print("The workspace contains {} spectra".format(wsOut.getNumberHistograms()))
 
 Output:
 

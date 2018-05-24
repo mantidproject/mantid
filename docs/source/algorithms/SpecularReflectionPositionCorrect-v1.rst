@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -48,7 +48,7 @@ Usage
    # Get the detector position post correction. We expect that the vertical offset of the point detector == 1.0
    inst = corrected_ws.getInstrument()
    det_pos = inst.getComponentByName('point-detector').getPos()
-   print det_pos
+   print(det_pos)
    
 Output:
 

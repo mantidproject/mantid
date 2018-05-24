@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -54,8 +54,8 @@ Usage
 
    wsOut = ConvertUnitsUsingDetectorTable(ws,Target="Wavelength",DetectorParameters=detpars)
 
-   print "Input",  ws.readX(0)[ws.blocksize()-1]
-   print "Output",  wsOut.readX(0)[wsOut.blocksize()-1]
+   print("Input {}".format(ws.readX(0)[ws.blocksize()-1]))
+   print("Output {:.11f}".format(wsOut.readX(0)[wsOut.blocksize()-1]))
 
 Output:
 

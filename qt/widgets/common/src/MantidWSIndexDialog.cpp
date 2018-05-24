@@ -5,14 +5,14 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
+#include <QMessageBox>
 #include <QPalette>
 #include <QPushButton>
 #include <QRegExp>
 #include <QtAlgorithms>
-#include <QMessageBox>
 #include <boost/lexical_cast.hpp>
+#include <cstdlib>
 #include <exception>
-#include <stdlib.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -41,7 +41,7 @@ const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
  * @param showTiledOption :: true if tiled plot enabled
  * @param isAdvanced :: true if advanced plotting has been selected
  */
-MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
+MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WindowFlags flags,
                                          const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showTiledOption,
@@ -122,7 +122,7 @@ int MantidWSIndexWidget::getPlotIndex() const {
   if (!userInput.empty()) {
     const auto indexList = userInput.values();
     if (!indexList.empty()) {
-      const auto spectrumIndexes = indexList.at(0);
+      const auto &spectrumIndexes = indexList.at(0);
       if (!spectrumIndexes.empty()) {
         spectrumIndex = *spectrumIndexes.begin();
       }
@@ -207,7 +207,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
           boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
                   m_wsNames[i].toStdString()));
-      if (NULL == ws)
+      if (nullptr == ws)
         continue;
 
       const Mantid::spec2index_map spec2index =
@@ -457,7 +457,7 @@ void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox = new QVBoxLayout;
   const QString wsIndices = m_wsIndexIntervals.toQString();
   const QString label = "Enter Workspace Indices: " + wsIndices;
-  m_wsMessage = new QLabel(tr(label.toAscii().constData()));
+  m_wsMessage = new QLabel(tr(qPrintable(label)));
   m_wsField = new QLineEditWithErrorMark();
 
   m_wsField->lineEdit()->setValidator(
@@ -481,7 +481,7 @@ void MantidWSIndexWidget::initSpectraBox() {
   m_spectraBox = new QVBoxLayout;
   const QString spectraNumbers = m_spectraNumIntervals.toQString();
   const QString label = "Enter Spectra Numbers: " + spectraNumbers;
-  m_spectraMessage = new QLabel(tr(label.toAscii().constData()));
+  m_spectraMessage = new QLabel(tr(qPrintable(label)));
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
@@ -634,7 +634,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
         // If this is a single-value numeric log, add it to the list of counts
         if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
             dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
-          const std::string name = log->name();
+          const std::string &name = log->name();
           if (logCounts.find(name) != logCounts.end()) {
             logCounts[name]++;
           } else {
@@ -690,7 +690,7 @@ void MantidWSIndexWidget::checkForSpectraAxes() {
         boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
-    if (NULL == ws)
+    if (nullptr == ws)
       continue;
     bool hasSpectra = false;
     for (int i = 0; i < ws->axes(); i++) {
@@ -718,7 +718,7 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
         boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 (*it).toStdString()));
-    if (NULL == ws)
+    if (nullptr == ws)
       continue;
 
     const int endWs = static_cast<int>(ws->getNumberHistograms() -
@@ -788,7 +788,7 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param showTiledOption :: If true the "Tiled" option is created
  * @param isAdvanced :: true if adanced plotting dialog is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
+MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WindowFlags flags,
                                          const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll,
@@ -1182,7 +1182,7 @@ void IntervalList::addIntervals(QString intervals) {
 }
 
 void IntervalList::addIntervalList(const IntervalList &intervals) {
-  const QList<Interval> list = intervals.getList();
+  const QList<Interval> &list = intervals.getList();
 
   QList<Interval>::const_iterator it = list.constBegin();
 

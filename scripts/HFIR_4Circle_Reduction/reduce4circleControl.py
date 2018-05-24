@@ -9,17 +9,28 @@
 #
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
+try:
+    # python3
+    from urllib.request import urlopen
+    from urllib.error import HTTPError
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2 import HTTPError
+    from urllib2 import URLError
 from six.moves import range
 import csv
 import random
 import os
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
+import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
 from HFIR_4Circle_Reduction import fputility
 from HFIR_4Circle_Reduction import project_manager
 from HFIR_4Circle_Reduction import peak_integration_utility
 from HFIR_4Circle_Reduction import absorption
+from HFIR_4Circle_Reduction import process_mask
 
 import mantid
 import mantid.simpleapi as mantidsimple
@@ -35,9 +46,42 @@ DebugMode = True
 MAX_SCAN_NUMBER = 100000
 
 
+def check_str_type(variable, var_name):
+    """
+
+    :param variable:
+    :param var_name:
+    :return:
+    """
+    assert isinstance(var_name, str), 'Variable name {0} must be an integer but not a {1}' \
+                                      ''.format(var_name, type(var_name))
+    assert isinstance(variable, str), '{0} {1} must be an string but not a {2}' \
+                                      ''.format(var_name, variable, type(variable))
+
+    return
+
+
+def check_int_type(variable, var_name):
+    """
+    check whether a variable is an integer
+    :except AssertionError:
+    :param variable:
+    :param var_name:
+    :return:
+    """
+    assert isinstance(var_name, str), 'Variable name {0} must be an integer but not a {1}' \
+                                      ''.format(var_name, type(var_name))
+    assert isinstance(variable, int), '{0} {1} must be an integer but not a {2}' \
+                                      ''.format(var_name, variable, type(variable))
+
+    return
+
+
 class CWSCDReductionControl(object):
     """ Controlling class for reactor-based single crystal diffraction reduction
     """
+
+    RESERVED_ROI_NAME = '__temp_roi__'
 
     def __init__(self, instrument_name=None):
         """ init
@@ -55,6 +99,9 @@ class CWSCDReductionControl(object):
 
         self._dataDir = None
         self._workDir = '/tmp'
+        self._preprocessedDir = None
+        # dictionary for pre-processed scans.  key = scan number, value = dictionary for all kinds of information
+        self._preprocessedInfoDict = None
 
         self._myServerURL = ''
 
@@ -77,6 +124,7 @@ class CWSCDReductionControl(object):
         self._mySpiceTableDict = {}
         # Container for loaded raw pt workspace
         self._myRawDataWSDict = dict()
+        self._myRawDataMasked = dict()
         # Container for PeakWorkspaces for calculating UB matrix
         # self._myUBPeakWSDict = dict()
         # Container for UB  matrix
@@ -98,9 +146,6 @@ class CWSCDReductionControl(object):
         # Record for merged scans
         self._mergedWSManager = list()
 
-        # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
-        self._roiDict = dict()
-
         # About K-shift for output of integrated peak
         self._kVectorIndex = 1
         self._kShiftDict = dict()
@@ -112,12 +157,52 @@ class CWSCDReductionControl(object):
 
         # detector geometry: initialized to unphysical value
         self._detectorSize = [-1, -1]
+        self._defaultPixelNumberX = None
+        self._defaultPixelNumberY = None
 
         # reference workspace for LoadMask
         self._refWorkspaceForMask = None
+        # Region of interest: key = (experiment, scan), value = RegionOfInterest instance
+        self._roiDict = dict()
 
         # register startup
-        mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
+        mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
+
+        # debug mode
+        self._debugPrintMode = True
+
+        return
+
+    @property
+    def pre_processed_dir(self):
+        """
+        get the pre-processed directory
+        :return:
+        """
+        return self._preprocessedDir
+
+    @pre_processed_dir.setter
+    def pre_processed_dir(self, dir_name):
+        """
+        setting pre-processed directory
+        :param dir_name:
+        :return:
+        """
+        # check
+        assert isinstance(dir_name, str) or dir_name is None, 'Directory {0} must be None or string.'.format(dir_name)
+
+        if os.path.exists(dir_name) is False:
+            raise RuntimeError('Pre-processed scans directory {0} does not exist!'.format(dir_name))
+
+        # set
+        self._preprocessedDir = dir_name
+
+        # load pre-processed scans' record file if possible
+        if self._expNumber is None:
+            raise RuntimeError('Experiment number {0} must be set up before pre-processesd scan directory is set.')
+        record_file_name = fourcircle_utility.pre_processed_record_file(self._expNumber, self._preprocessedDir)
+        if os.path.exists(record_file_name):
+            self._preprocessedInfoDict = fourcircle_utility.read_pre_process_record(record_file_name)
 
         return
 
@@ -164,10 +249,9 @@ class CWSCDReductionControl(object):
 
         return return_k_index
 
-    @staticmethod
-    def apply_mask(exp_number, scan_number, pt_number):
+    def apply_mask(self, exp_number, scan_number, pt_number, roi_name=None):
         """
-        Apply mask on a Pt./run.
+        Apply mask on a Pt./run. by using a standard non-tag-based mask workspace's name
         Requirements:
         1. exp number, scan number, and pt number are integers
         2. mask workspace for this can must exist!
@@ -176,25 +260,32 @@ class CWSCDReductionControl(object):
         :param exp_number:
         :param scan_number:
         :param pt_number:
+        :param roi_name: a string or a None
         :return:
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int)
+        assert isinstance(exp_number, int), 'Exp number {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(pt_number, int), 'Pt number {0} must be an integer but not a {1}' \
+                                           ''.format(pt_number, type(pt_number))
 
-        # get workspaces' names
+        # get raw workspace for counts
         raw_pt_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
-        mask_ws_name = get_mask_ws_name(exp_number, scan_number)
 
-        # check workspace existing
-        if AnalysisDataService.doesExist(raw_pt_ws_name) is False:
-            raise RuntimeError('Raw data workspace for exp %d scan %d pt %d does not exist.' % (
-                exp_number, scan_number, pt_number
-            ))
+        # an existing mask
+        if roi_name not in self._roiDict:
+            raise RuntimeError('ROI {0} is not in mask workspace dictionary.  Current keys are {1}'
+                               ''.format(roi_name, self._roiDict.keys()))
+        mask_ws_name = self._roiDict[roi_name].mask_workspace
+        if mask_ws_name is None:
+            raise RuntimeError('ROI {0} has no mask workspace set'.format(roi_name))
 
         # mask detectors
         mantidsimple.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
+        # record
+        self._myRawDataMasked[(exp_number, scan_number, pt_number)] = roi_name
 
         return
 
@@ -308,15 +399,27 @@ class CWSCDReductionControl(object):
 
         return True, ub_matrix
 
-    def does_raw_loaded(self, exp_no, scan_no, pt_no):
+    def does_raw_loaded(self, exp_no, scan_no, pt_no, roi_name):
         """
         Check whether the raw Workspace2D for a Pt. exists
         :param exp_no:
         :param scan_no:
         :param pt_no:
+        :param roi_name:
         :return:
         """
-        return (exp_no, scan_no, pt_no) in self._myRawDataWSDict
+        # check input
+        check_int_type(exp_no, 'Experiment number')
+        check_int_type(scan_no, 'Scan number')
+        check_int_type(pt_no, 'Pt number')
+
+        loaded = (exp_no, scan_no, pt_no) in self._myRawDataWSDict
+        if loaded:
+            curr_roi = self._myRawDataMasked[(exp_no, scan_no, pt_no)]
+            if roi_name != curr_roi:
+                loaded = False
+
+        return loaded
 
     def does_spice_loaded(self, exp_no, scan_no):
         """ Check whether a SPICE file has been loaded
@@ -451,17 +554,13 @@ class CWSCDReductionControl(object):
         A MaskWorkspace's name is exactly the same as the tag of the mask specified by user in
         reduction GUI.
 
-        :param exp_number:
-        :param scan_number:
+        :param exp_number: must be integer if not retrieve mask workspace
+        :param scan_number: must be integer if not retrieve mask workspace
         :param mask_tag: string as the tag of the mask.
         :param check_throw
         :return:
         """
         # Check
-        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
-                                            ''.format(exp_number, type(exp_number))
-        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
-                                             ''.format(scan_number, type(scan_number))
         assert isinstance(mask_tag, str), 'Mask tag {0} ({1}) must be a string.'.format(mask_tag, type(mask_tag))
 
         # MaskWorkspace's name is same as mask's tag
@@ -469,15 +568,25 @@ class CWSCDReductionControl(object):
 
         if AnalysisDataService.doesExist(mask_ws_name) is False:
             # if the workspace does not exist, create a new mask workspace
-            assert mask_tag in self._roiDict, 'Mask tag |%s| does not exist in ROI dictionary!' % mask_tag
+            if exp_number is None:
+                raise RuntimeError('Experiment number is not given with assumption that mask tag {0} shall '
+                                   'be a workspace.'.format(mask_tag))
+
+            # check for experiment and scan number
+            assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                                ''.format(exp_number, type(exp_number))
+            assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                                 ''.format(scan_number, type(scan_number))
+            if mask_tag not in self._roiDict:
+                raise RuntimeError('Mask tag |{0}| does not exist in ROI dictionary.'.format(mask_tag))
+
             region_of_interest = self._roiDict[mask_tag]
             ll = region_of_interest[0]
             ur = region_of_interest[1]
             self.generate_mask_workspace(exp_number, scan_number, ll, ur, mask_ws_name)
 
         if check_throw:
-            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
-                                                                 '' % mask_ws_name
+            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace {0} does not exist.'.format(mask_ws_name)
 
         return mask_ws_name
 
@@ -553,6 +662,20 @@ class CWSCDReductionControl(object):
 
         return self._myUBMatrixDict[exp_number]
 
+    def get_calibrated_wave_length(self, exp_number):
+        """ Get the user specified (i.e., calibrated) wave length for a specific experiment
+        :param exp_number:
+        :return:
+        """
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment numbe {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
+
+        if exp_number not in self._userWavelengthDict:
+            return None
+
+        return self._userWavelengthDict[exp_number]
+
     def get_wave_length(self, exp_number, scan_number_list):
         """
         Get the wavelength.
@@ -621,7 +744,7 @@ class CWSCDReductionControl(object):
         return move_tup[1]
 
     def export_to_fullprof(self, exp_number, scan_number_list, user_header,
-                           export_absorption, fullprof_file_name):
+                           export_absorption, fullprof_file_name, high_precision):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
@@ -629,7 +752,8 @@ class CWSCDReductionControl(object):
         :param user_header:
         :param export_absorption:
         :param fullprof_file_name:
-        :return: 2-tuples. status and return object (file content or error message)
+        :param high_precision: flag to write peak intensity as f18.5 if true; otherwise, output as f8.2
+        :return: 2-tuples. status and return object ((mixed) file content or error message)
         """
         # check
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
@@ -667,6 +791,7 @@ class CWSCDReductionControl(object):
         # get ub matrix
         ub_matrix = self.get_ub_matrix(exp_number)
 
+        mixed_content = None
         for algorithm_type in ['simple', 'mixed', 'gauss']:
             # set list of peaks for exporting
             peaks = list()
@@ -682,8 +807,9 @@ class CWSCDReductionControl(object):
 
                 if intensity < std_dev:
                     # error is huge, very likely bad gaussian fit
-                    print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} '
-                          'Excluded from exporting.'.format(algorithm_type, scan_number, intensity, std_dev))
+                    if self._debugPrintMode:
+                        print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} '
+                              'Excluded from exporting.'.format(algorithm_type, scan_number, intensity, std_dev))
                     continue
                 # END-IF
 
@@ -713,7 +839,10 @@ class CWSCDReductionControl(object):
                 file_content = fputility.write_scd_fullprof_kvector(
                     user_header=user_header, wave_length=exp_wave_length,
                     k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                    fp_file_name=this_file_name, with_absorption=export_absorption)
+                    fp_file_name=this_file_name, with_absorption=export_absorption,
+                    high_precision=high_precision)
+                if algorithm_type == 'mixed':
+                    mixed_content = file_content
             except AssertionError as error:
                 return False, 'AssertionError: %s.' % str(error)
             except RuntimeError as error:
@@ -722,7 +851,7 @@ class CWSCDReductionControl(object):
             continue
         # END-FOR
 
-        return True, file_content
+        return True, mixed_content
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """
@@ -826,32 +955,26 @@ class CWSCDReductionControl(object):
 
         return self._refinedUBTup[1], self._refinedUBTup[2], self._refinedUBTup[3]
 
-    def get_region_of_interest(self, exp_number, scan_number):
+    def get_region_of_interest(self, roi_name):
         """ Get region of interest
-        :param exp_number:
-        :param scan_number:
+        :param roi_name: name of the ROI
         :return: region of interest
         """
-        # check
-        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer.'.format(exp_number)
-        assert isinstance(scan_number, int) or scan_number is None, 'Scan number {0} must be either an integer or None.' \
-                                                                    ''.format(scan_number)
+        assert isinstance(roi_name, str),\
+            'ROI name {0} must be a string or None but not a {1}.'.format(roi_name, type(roi_name))
 
-        if (exp_number, scan_number) in self._roiDict:
-            # able to find region of interest for this scan
-            ret_status = True
-            ret_value = self._roiDict[(exp_number, scan_number)]
-        elif exp_number in self._roiDict:
-            # able to find region of interest for this experiment
-            ret_status = True
-            ret_value = self._roiDict[exp_number]
-        else:
-            # region of interest of experiment is not defined
-            ret_status = False
-            ret_value = 'Unable to find ROI for experiment %d. Existing includes %s.' % (exp_number,
-                                                                                         str(self._roiDict.keys()))
+        if roi_name not in self._roiDict:
+            # ROI: not saved
+            raise RuntimeError('ROI not here blabla')
 
-        return ret_status, ret_value
+        # check...
+        lower_left_corner = self._roiDict[roi_name].lower_left_corner
+        upper_right_corner = self._roiDict[roi_name].upper_right_corner
+
+        if lower_left_corner is None or upper_right_corner is None:
+            raise RuntimeError('ROI positions not set')
+
+        return lower_left_corner, upper_right_corner
 
     def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
         """
@@ -926,9 +1049,6 @@ class CWSCDReductionControl(object):
                                                                 'it is of type %s now.' % (str(pt_number),
                                                                                            type(pt_number))
 
-        # print('[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object. Current keys are {0}.' \
-        #       ''.format(exp_number, scan_number, self._myPeakInfoDict.keys()))
-
         # construct key
         if pt_number is None:
             p_key = (exp_number, scan_number)
@@ -938,8 +1058,6 @@ class CWSCDReductionControl(object):
         # Check for existence
         if p_key in self._myPeakInfoDict:
             ret_value = self._myPeakInfoDict[p_key]
-            # print('[DB...BAT] Retrieved: Exp {0} Scan {1} Peak Info Object {2}.'.format(exp_number, scan_number,
-            #                                                                             hex(id(ret_value))))
         else:
             ret_value = None
 
@@ -1007,7 +1125,13 @@ class CWSCDReductionControl(object):
                            ll_corner=roi_start,
                            ur_corner=roi_end)
 
-        # load the mask workspace
+        # check reference workspace for mask workspace
+        if self._refWorkspaceForMask is None:
+            return False, 'There is no reference workspace. Plot a Pt. first!'
+        elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
+            return False, 'Previous reference workspace has been deleted. Plot a Pt. first'
+
+        # get the name of the mask workspace to be loaded to
         if mask_tag is None:
             # use default name
             mask_ws_name = get_mask_ws_name(exp_number, scan_number)
@@ -1015,10 +1139,7 @@ class CWSCDReductionControl(object):
             # use given name
             mask_ws_name = str(mask_tag)
 
-        if self._refWorkspaceForMask is None:
-            return False, 'There is no reference workspace. Plot a Pt. first!'
-        elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
-            return False, 'Previous reference workspace has been deleted. Plot a Pt. first'
+        # load the mask workspace
         mantidsimple.LoadMask(Instrument='HB3A',
                               InputFile=mask_file_name,
                               OutputWorkspace=mask_ws_name,
@@ -1026,7 +1147,17 @@ class CWSCDReductionControl(object):
         mantidsimple.InvertMask(InputWorkspace=mask_ws_name,
                                 OutputWorkspace=mask_ws_name)
 
-        return True, mask_ws_name
+        # register
+        self._roiDict[mask_tag].set_mask_workspace_name(mask_ws_name)
+
+        return True, mask_tag
+
+    def get_working_directory(self):
+        """
+        get working directory
+        :return:
+        """
+        return self._workDir
 
     def group_workspaces(self, exp_number, group_name):
         """
@@ -1131,6 +1262,24 @@ class CWSCDReductionControl(object):
 
         return p_key in self._myPeakInfoDict
 
+    def has_roi_generated(self, roi_name):
+        """
+        check whether a MaskWorkspace has been generated for an ROI
+        :param roi_name:
+        :return:
+        """
+        # check input
+        assert isinstance(roi_name, str), 'ROI name {0} must be a string but not a {1}'.format(roi_name, type(roi_name))
+
+        # check whether it is in the dicationary and has a mask workspace set
+        has = True
+        if roi_name not in self._roiDict:
+            has = False
+        elif self._roiDict[roi_name].mask_workspace is None:
+            has = False
+
+        return has
+
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
         :param ub_matrix: numpy.ndarray (3, 3)
@@ -1139,9 +1288,9 @@ class CWSCDReductionControl(object):
         :return: boolean, object (list of HKL or error message)
         """
         # Check
-        assert isinstance(ub_matrix, numpy.ndarray)
-        assert ub_matrix.shape == (3, 3)
-        assert isinstance(scan_number, int)
+        assert isinstance(ub_matrix, numpy.ndarray), 'UB matrix must be an ndarray'
+        assert ub_matrix.shape == (3, 3), 'UB matrix must be a 3x3 matrix.'
+        assert isinstance(scan_number, int), 'Scan number must be in integer.'
 
         # Find out the PeakInfo
         exp_number = self._expNumber
@@ -1225,7 +1374,6 @@ class CWSCDReductionControl(object):
         assert isinstance(scale_factor, float) or isinstance(scale_factor, int),\
             'Scale factor {0} must be a float or integer but not a {1}.'.format(scale_factor, type(scale_factor))
         assert len(peak_centre) == 3, 'Peak center {0} must have 3 elements for (Qx, Qy, Qz).'.format(peak_centre)
-        # print('[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple)))
         assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
 
         # get input MDEventWorkspace name for merged scan
@@ -1401,7 +1549,14 @@ class CWSCDReductionControl(object):
 
             # Download SPICE file if necessary
             if os.path.exists(spice_file_name) is False:
-                self.download_spice_file(exp_no, scan_no, over_write=True)
+                file_available, download_result = self.download_spice_file(exp_no, scan_no, over_write=True)
+            else:
+                file_available = True
+                download_result = None
+
+            if not file_available:
+                raise IOError('SPICE file for Exp {0} Scan {1} cannot be found at {2} or downloaded ({3})'
+                              ''.format(exp_no, scan_no, spice_file_name, download_result))
 
             try:
                 spice_table_ws, info_matrix_ws = mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
@@ -1465,6 +1620,8 @@ class CWSCDReductionControl(object):
         assert AnalysisDataService.doesExist(pt_ws_name), 'Unable to locate workspace {0}.'.format(pt_ws_name)
         raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
+        # clear the mask/ROI information
+        self._myRawDataMasked[(exp_no, scan_no, pt_no)] = None
 
         return True, pt_ws_name
 
@@ -1591,26 +1748,139 @@ class CWSCDReductionControl(object):
 
         return binning_script
 
-    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list):
+    def is_calibration_match(self, exp_number, scan_number):
         """
-        Merge Pts in Scan
-        All the workspaces generated as internal results will be grouped
-        Requirements:
-          1. target_frame must be either 'q-sample' or 'hkl'
-          2. pt_list must be a list.  an empty list means to merge all Pts. in the scan
-        Guarantees: An MDEventWorkspace is created containing merged Pts.
+        check whether the pre-processed data has a set of matching calibrated parameters comparing to
+        the current one
+        :param exp_number:
+        :param scan_number:
+        :return:
+        """
+        # no record is found. it should not happen!
+        if self._preprocessedInfoDict is None:
+            return False
+        if scan_number not in self._preprocessedInfoDict:
+            return False
+
+        # check others
+        unmatch_score = 0
+
+        # center
+        center_x, center_y = self.get_calibrated_det_center(exp_number)
+        if (center_x, center_y) != self._preprocessedInfoDict[scan_number]['Center']:
+            unmatch_score += 2
+
+        # wave length
+        wavelength = self.get_calibrated_wave_length(exp_number)
+        record_lambda = self._preprocessedInfoDict[scan_number]['WaveLength']
+        if type(record_lambda) != type(wavelength):
+            unmatch_score += 20
+        elif wavelength is not None and abs(wavelength - record_lambda) > 1.E-5:
+            unmatch_score += 40
+
+        # detector distance
+        det_sample_distance = self.get_calibrated_det_sample_distance(exp_number)
+        record_distance = self._preprocessedInfoDict[scan_number]['DetSampleDistance']
+        if type(det_sample_distance) != type(record_distance):
+            unmatch_score += 200
+        elif det_sample_distance is not None and abs(det_sample_distance - record_distance) > 1.E-5:
+            unmatch_score += 400
+
+        if unmatch_score > 0:
+            if self._debugPrintMode:
+                print('[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}'
+                      ''.format(exp_number, scan_number, unmatch_score))
+            return False
+
+        if self._debugPrintMode:
+            print('[INFO] Exp {0} Scan {1} has a matched calibrated record from pre-processed data.')
+
+        return True
+
+    def load_mask_file(self, mask_file_name, mask_tag):
+        """
+        load an XML mask file to a workspace and parse to ROI that can be mapped pixels in 2D notion
+        :param mask_file_name:
+        :param mask_tag
+        :return: 2-tuple (lower left corner (size = 2), upper right corner (size = 2))
+                both of them are in order of row and column number (y and x respectively)
+        """
+        # load mask file
+        assert isinstance(mask_file_name, str), 'Mask file {0} shall be a string but not a {1}.' \
+                                                ''.format(mask_file_name, type(mask_file_name))
+        assert isinstance(mask_tag, str), 'Mask tag {0} shall be a string but not a {1}.' \
+                                          ''.format(mask_tag, type(mask_tag))
+        if os.path.exists(mask_file_name) is False:
+            raise RuntimeError('Mask file name {0} cannot be found.'.format(mask_tag))
+
+        # load
+        mantidsimple.LoadMask(Instrument='HB3A',
+                              InputFile=mask_file_name,
+                              OutputWorkspace=mask_tag)
+        # record
+        self.set_roi_workspace(roi_name=mask_tag, mask_ws_name=mask_tag)
+
+        # find out the range of the ROI in (Low left, upper right) mode
+        roi_range = process_mask.get_region_of_interest(mask_tag)
+        self.set_roi(mask_tag, roi_range[0], roi_range[1])
+
+        return roi_range
+
+    def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
+        """ load preprocessed scan from hard disk
+        :return: (bool, str): loaded, message
+        """
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment number {0} ({1}) must be an integer' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(md_dir, str), 'MD file directory {0} ({1}) must be a string.' \
+                                        ''.format(md_dir, type(md_dir))
+        assert isinstance(output_ws_name, str), 'Output workspace name {0} ({1}) must be a string.' \
+                                                ''.format(output_ws_name, type(output_ws_name))
+
+        if os.path.exists(md_dir) is False:
+            raise RuntimeError('Pre-processed directory {0} does not exist.'.format(md_dir))
+
+        # ws_name = 'Exp{0}_Scan{1}_MD'.format(exp_number, scan_number)
+        # md_file_path = os.path.join(md_dir, ws_name + '.nxs')
+
+        # 2-ways to get file name
+        if self._preprocessedInfoDict is None or scan_number not in self._preprocessedInfoDict:
+            md_file_path = fourcircle_utility.pre_processed_file_name(exp_number, scan_number, md_dir)
+        else:
+            md_file_path = self._preprocessedInfoDict[scan_number]['MD']
+
+        # check
+        if os.path.exists(md_file_path) is False:
+            message = 'Pre-processed MD file {0} does not exist.'.format(md_file_path)
+            return False, message
+
+        # load and check
+        status = False
+        try:
+            # load
+            mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=output_ws_name)
+            # check
+            status = AnalysisDataService.doesExist(output_ws_name)
+            message = '{0} is loaded from {1} with status {2}'.format(output_ws_name, md_file_path, status)
+        except RuntimeError as run_err:
+            message = 'Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err)
+        except OSError as run_err:
+            message = 'Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err)
+        except IOError as run_err:
+            message = 'Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err)
+
+        return status, message
+
+    def _process_pt_list(self, exp_no, scan_no, pt_num_list):
+        """
+        convert list of Pt (in int) to a string like a list of integer
         :param exp_no:
         :param scan_no:
-        :param pt_num_list: If empty, then merge all Pt. in the scan
-        :return: (boolean, error message) # (merged workspace name, workspace group name)
+        :return:
         """
-        # Check
-        if exp_no is None:
-            exp_no = self._expNumber
-        assert isinstance(exp_no, int) and isinstance(scan_no, int)
-        assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
-
-        # Get list of Pt.
         if len(pt_num_list) > 0:
             # user specified
             pt_num_list = pt_num_list
@@ -1637,9 +1907,64 @@ class CWSCDReductionControl(object):
         if pt_list_str == '-1':
             return False, err_msg
 
+        return True, (pt_num_list, pt_list_str)
+
+    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, rewrite, preprocessed_dir):
+        """
+        Merge Pts in Scan
+        All the workspaces generated as internal results will be grouped
+        Requirements:
+          1. target_frame must be either 'q-sample' or 'hkl'
+          2. pt_list must be a list.  an empty list means to merge all Pts. in the scan
+        Guarantees: An MDEventWorkspace is created containing merged Pts.
+        :param exp_no:
+        :param scan_no:
+        :param pt_num_list: If empty, then merge all Pt. in the scan
+        :param rewrite: if True, then the data will be re-merged regardless workspace exists or not
+        :param preprocessed_dir: If None, then merge Pts. Otherwise, try to search and load preprocessed data first
+        :return: (boolean, error message) # (merged workspace name, workspace group name)
+        """
+        # Check
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int) and isinstance(scan_no, int)
+        assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
+
+        # Get list of Pt.
+        status, ret_obj = self._process_pt_list(exp_no, scan_no, pt_num_list)
+        if not status:
+            error_msg = ret_obj
+            return False, error_msg
+        pt_num_list, pt_list_str = ret_obj
+
         # create output workspace's name
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
-        if AnalysisDataService.doesExist(out_q_name) is False:
+
+        # find out the cases that rewriting is True
+        if not rewrite:
+            if AnalysisDataService.doesExist(out_q_name):
+                # not re-write, target workspace exists
+                pass
+            elif preprocessed_dir is not None:
+                # not re-write, target workspace does not exist, attempt to load from preprocessed
+                if self.is_calibration_match(exp_no, scan_no):
+                    data_loaded, message = self.load_preprocessed_scan(exp_number=exp_no,
+                                                                       scan_number=scan_no,
+                                                                       md_dir=preprocessed_dir,
+                                                                       output_ws_name=out_q_name)
+                    rewrite = not data_loaded
+                else:
+                    rewrite = True
+            else:
+                print ('[WARNING] Target MDWorkspace does not exist. And preprocessed directory is not given '
+                       '. Why re-write flag is turned off in the first place?')
+                rewrite = True
+            # END-IF (ADS)
+        # END-IF (rewrite)
+
+        # now to load the data
+        # check whether it is an option load preprocessed (merged) data
+        if rewrite:
             # collect HB3A Exp/Scan information
             # - construct a configuration with 1 scan and multiple Pts.
             scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)
@@ -1674,8 +1999,8 @@ class CWSCDReductionControl(object):
                 # Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
                 # calculate the sample-detector distance shift if it is defined
                 if exp_no in self._detSampleDistanceDict:
-                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[exp_no] - \
-                                                              self._defaultDetectorSampleDistance
+                    alg_args['DetectorSampleDistanceShift'] \
+                        = self._detSampleDistanceDict[exp_no] - self._defaultDetectorSampleDistance
                 # calculate the shift of detector center
                 if exp_no in self._detCenterDict:
                     user_center_row, user_center_col = self._detCenterDict[exp_no]
@@ -1745,19 +2070,85 @@ class CWSCDReductionControl(object):
 
         return True, out_hkl_name
 
-    def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
+    def save_merged_scan(self, exp_number, scan_number, pt_number_list, merged_ws_name, output):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_number_list:
+        :param merged_ws_name:
+        :param output: output file path
+        :return:
+        """
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(scan_number, type(scan_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(exp_number, type(exp_number))
+        assert isinstance(output, str), 'Output file name {0} must be give as a string but not {1}.' \
+                                        ''.format(output, type(output))
+
+        # get input workspace
+
+        if merged_ws_name is None:
+            merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number,
+                                                pt_list=pt_number_list)
+        mantidsimple.SaveMD(InputWorkspace=merged_ws_name, Filename=output)
+
+        return
+
+    def set_roi(self, roi_name, lower_left_corner, upper_right_corner):
         """
         Purpose: Set region of interest and record it by the combination of experiment number
                  and scan number
-        :param exp_number:
-        :param scan_number:
+        :param roi_name
         :param lower_left_corner:
         :param upper_right_corner:
         :return:
         """
         # Check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        check_str_type(roi_name, 'ROI')
+        if len(lower_left_corner) != 2:
+            raise RuntimeError('Size of ROI[0] must be 2 but not {0}'
+                               ''.format(len(lower_left_corner[0])))
+        if len(upper_right_corner) != 2:
+            raise RuntimeError('Size of ROI[1] must be 2 but not {0}'
+                               ''.format(len(upper_right_corner)))
+
+        if roi_name not in self._roiDict:
+            self._roiDict[roi_name] = process_mask.RegionOfInterest(roi_name)
+
+        self._roiDict[roi_name].set_roi_positions(lower_left_corner, upper_right_corner)
+
+        return
+
+    def set_roi_workspace(self, roi_name, mask_ws_name):
+        """ set region of interest (mask) workspace's name to RegionOfInterest
+        instance
+        :param roi_name:
+        :return:
+        """
+        # check input
+        check_str_type(roi_name, 'ROI')
+        check_str_type(mask_ws_name, 'Mask workspace name')
+
+        # add new RegionOfInterest if needed
+        if roi_name not in self._roiDict:
+            self._roiDict[roi_name] = process_mask.RegionOfInterest(roi_name)
+
+        self._roiDict[roi_name].set_mask_workspace_name(mask_ws_name)
+
+        return
+
+    def set_roi_by_name(self, roi_name, lower_left_corner, upper_right_corner):
+        """
+        Set region of interest and record it by user-specified ROI name
+        :param roi_name:
+        :param lower_left_corner:
+        :param upper_right_corner:
+        :return:
+        """
+        assert isinstance(roi_name, str), 'ROI name {0} must be an integer but not a {1}' \
+                                          ''.format(roi_name, type(roi_name))
         assert not isinstance(lower_left_corner, str) and len(lower_left_corner) == 2
         assert not isinstance(upper_right_corner, str) and len(upper_right_corner) == 2
 
@@ -1765,16 +2156,32 @@ class CWSCDReductionControl(object):
         ll_y = int(lower_left_corner[1])
         ur_x = int(upper_right_corner[0])
         ur_y = int(upper_right_corner[1])
-        assert ll_x < ur_x and ll_y < ur_y, 'Lower left corner (%.5f, %.5f) vs. upper right corner ' \
-                                            '(%.5f, %.5f) ' % (ll_x, ll_y, ur_x, ur_y)
+        if ll_x >= ur_x or ll_y >= ur_y:
+            err_msg = 'Lower left corner ({0}, {1}) and upper right corner are in a line ({2}, {3})' \
+                      ''.format(ll_x, ll_y, ur_x, ur_y)
+            raise RuntimeError(err_msg)
 
         # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
         # then it is better and easier to support client to search this ROI by experiment number
         # and only the latest is saved by this key
-        self._roiDict[(exp_number, scan_number)] = ((ll_x, ll_y), (ur_x, ur_y))
-        self._roiDict[exp_number] = ((ll_x, ll_y), (ur_x, ur_y))
+        self._roiDict[roi_name] = ((ll_x, ll_y), (ur_x, ur_y))
 
         return
+
+    def get_calibrated_det_center(self, exp_number):
+        """
+        get calibrated/user-specified detector center or the default center
+        :param exp_number:
+        :return: 2-tuple (int, int) as pixel ID in X and Y directory
+        """
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment number {0} ({1}) must be an integer.' \
+                                            ''.format(exp_number, type(exp_number))
+
+        if exp_number not in self._detCenterDict:
+            return self._defaultDetectorCenter
+
+        return self._detCenterDict[exp_number]
 
     def set_detector_center(self, exp_number, center_row, center_col, default=False):
         """
@@ -1788,14 +2195,16 @@ class CWSCDReductionControl(object):
         # check
         assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
         assert center_row is None or (isinstance(center_row, int) and center_row >= 0), \
-            'Center row number must either None or non-negative integer.'
+            'Center row number {0} of type {1} must either None or non-negative integer.' \
+            ''.format(center_row, type(center_row))
         assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
-            'Center column number must be either Noe or non-negative integer.'
+            'Center column number {0} of type {1} must be either Noe or non-negative integer.' \
+            ''.format(center_col, type(center_col))
 
         if default:
-            self._defaultDetectorCenter = (center_row, center_col)
+            self._defaultDetectorCenter = center_row, center_col
         else:
-            self._detCenterDict[exp_number] = (center_row, center_col)
+            self._detCenterDict[exp_number] = center_row, center_col
 
         return
 
@@ -1817,6 +2226,20 @@ class CWSCDReductionControl(object):
 
         return
 
+    def get_calibrated_det_sample_distance(self, exp_number):
+        """
+
+        :param exp_number:
+        :return:
+        """
+        # check inputs
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+
+        if exp_number not in self._detSampleDistanceDict:
+            return None
+
+        return self._detSampleDistanceDict[exp_number]
+
     def set_detector_sample_distance(self, exp_number, sample_det_distance):
         """
         set instrument's detector - sample distance
@@ -1835,8 +2258,7 @@ class CWSCDReductionControl(object):
         return
 
     def set_default_detector_sample_distance(self, default_det_sample_distance):
-        """
-        set default detector-sample distance
+        """set default detector-sample distance
         :param default_det_sample_distance:
         :return:
         """
@@ -1848,8 +2270,7 @@ class CWSCDReductionControl(object):
         return
 
     def set_default_pixel_size(self, pixel_x_size, pixel_y_size):
-        """
-        set default pixel size
+        """set default pixel size, i.e., physical dimension of a pixel
         :param pixel_x_size:
         :param pixel_y_size:
         :return:
@@ -1859,6 +2280,21 @@ class CWSCDReductionControl(object):
 
         self._defaultPixelSizeX = pixel_x_size
         self._defaultPixelSizeY = pixel_y_size
+
+        return
+
+    def set_default_pixel_number(self, num_pixel_x, num_pixel_y):
+        """
+        set the default number of pixels on the detector
+        :param num_pixel_x:
+        :param num_pixel_y:
+        :return:
+        """
+        assert isinstance(num_pixel_x, int) and num_pixel_x > 0, 'Wrong input'
+        assert isinstance(num_pixel_y, int) and num_pixel_y > 0, 'Wrong input'
+
+        self._defaultPixelNumberX = num_pixel_x
+        self._defaultPixelNumberY = num_pixel_y
 
         return
 
@@ -1878,10 +2314,10 @@ class CWSCDReductionControl(object):
             is_url_good = False
             error_message = None
             try:
-                result = urllib2.urlopen(self._myServerURL)
-            except urllib2.HTTPError as err:
+                result = urlopen(self._myServerURL)
+            except HTTPError as err:
                 error_message = str(err.code)
-            except urllib2.URLError as err:
+            except URLError as err:
                 error_message = str(err.args)
             else:
                 is_url_good = True
@@ -2225,15 +2661,16 @@ class CWSCDReductionControl(object):
             file_name = '%s.csv' % file_name
 
         # Write file
-        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q']
-        with open(file_name, 'w') as csvfile:
-            csv_writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q', 'Sample T']
+        with open(file_name, 'w') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(titles)
 
-            for scan_summary in self._scanSummaryList:
+            for sum_index, scan_summary in enumerate(self._scanSummaryList):
                 # check type
-                assert isinstance(scan_summary, list)
-                assert len(scan_summary) == len(titles)
+                assert isinstance(scan_summary, list), 'TODO'
+                assert len(scan_summary) == len(titles), '{0}-th scan summary {1} must have same items as title {2}' \
+                                                         ''.format(sum_index, scan_summary, titles)
                 # write to csv
                 csv_writer.writerow(scan_summary)
             # END-FOR
@@ -2241,21 +2678,59 @@ class CWSCDReductionControl(object):
 
         return
 
-    def save_roi(self, tag, region_of_interest):
+    # def save_roi(self, roi_name, region_of_interest):
+    #     """
+    #     Save region of interest to controller for future use
+    #     :param roi_name:
+    #     :param region_of_interest: a 2-tuple for 2-tuple as lower-left and upper-right corners of the region
+    #     :return:
+    #     """
+    #     # check
+    #     assert isinstance(roi_name, str), 'Tag {0} must be a string {1}'.format(roi_name, type(roi_name))
+    #
+    #
+    #     # save ROI to ROI dictionary
+    #     self._roiDict[roi_name] = region_of_interest
+    #
+    #     # if ROI already been used to mask detectors, then need to change mask workspace dictionary
+    #     if self.RESERVED_ROI_NAME in self._maskWorkspaceDict:
+    #         self._maskWorkspaceDict[roi_name] = self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
+    #         del self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
+    #     # END-IF
+    #
+    #     return
+
+    def save_roi_to_file(self, exp_number, scan_number, tag, file_name):
         """
-        Save region of interest to controller for future use
+        save ROI to file
+        Notice: the saved file is a mask file which masks the detectors out of ROI
+        :param exp_number:
+        :param scan_number:
         :param tag:
-        :param region_of_interest: a 2-tuple for 2-tuple as lower-left and upper-right corners of the region
+        :param file_name:
         :return:
         """
-        # check
-        assert isinstance(tag, str)
-        assert len(region_of_interest) == 2
-        assert len(region_of_interest[0]) == 2
-        assert len(region_of_interest[1]) == 2
+        # check input
+        # assert isinstance(exp_number, int), 'Experiment number {0} shall be an integer but not a {1}' \
+        #                                     ''.format(exp_number, type(exp_number))
+        # assert isinstance(scan_number, int), 'Scan number {0} shall be an integer but not a {1}' \
+        #                                      ''.format(scan_number, type(scan_number))
+        assert isinstance(tag, str), 'Tag {0} shall be a string but not a {1}'.format(tag, type(tag))
+        assert isinstance(file_name, str), 'File name {0} shall be a string but not a {1}' \
+                                           ''.format(file_name, type(file_name))
 
-        # example:  ret_value = self._roiDict[exp_number]
-        self._roiDict[tag] = region_of_interest
+        # get mask workspace name
+        if tag in self._roiDict:
+            mask_ws_name = self._roiDict[tag].mask_workspace
+            if mask_ws_name is None or AnalysisDataService.doesExist(mask_ws_name) is False:
+                raise RuntimeError('Mask workspace {0} of tag {1} does not exist in ADS.'
+                                   ''.format(mask_ws_name, tag))
+        else:
+            mask_ws_name = self.check_generate_mask_workspace(exp_number=exp_number, scan_number=scan_number,
+                                                              mask_tag=tag, check_throw=True)
+
+        # save
+        mantidsimple.SaveMask(InputWorkspace=mask_ws_name, OutputFile=file_name)
 
         return
 
@@ -2347,12 +2822,13 @@ class CWSCDReductionControl(object):
         # check whether there is a redundant creation of PeakProcessRecord for the same (exp, scan) combination
         if (exp_number, scan_number) in self._myPeakInfoDict:
             peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
-            print('[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not '
-                  'be created twice!'.format(exp_number, scan_number))
-            print('[CONTINUE] New PeaksWorkspace = {0} vs Existing '
-                  'PeaksWorkspace = {1}.'.format(peak_ws_name, peak_info.peaks_workspace))
-            print('[CONTINUE] New MDEventWorkspace = {0} vs Existing '
-                  'MDEventWorkspace = {1}.'.format(md_ws_name, peak_info.md_workspace))
+            if self._debugPrintMode:
+                print('[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not '
+                      'be created twice!'.format(exp_number, scan_number))
+                print('[CONTINUE] New PeaksWorkspace = {0} vs Existing '
+                      'PeaksWorkspace = {1}.'.format(peak_ws_name, peak_info.peaks_workspace))
+                print('[CONTINUE] New MDEventWorkspace = {0} vs Existing '
+                      'MDEventWorkspace = {1}.'.format(md_ws_name, peak_info.md_workspace))
             return False, peak_info
         # END-IF
 
@@ -2362,7 +2838,9 @@ class CWSCDReductionControl(object):
 
         # set the other information
         peak_info.set_data_ws_name(md_ws_name)
-        peak_info.calculate_peak_center()
+        err_msg = peak_info.calculate_peak_center()
+        if self._debugPrintMode and len(err_msg) > 0:
+            print ('[Error] during calculating peak center:{0}'.format(err_msg))
 
         return True, peak_info
 
@@ -2497,9 +2975,9 @@ class CWSCDReductionControl(object):
                 try:
                     mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print('[ERROR] Unable to download scan %d from %s due to %s.' % (scan_number,spice_file_url,
-                                                                                     str(download_error)))
-                    break
+                    error_message += 'Unable to access/download scan {0} from {1} due to {2}.\n' \
+                                     ''.format(scan_number, spice_file_url, download_error)
+                    continue
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
                 spice_file_name = os.path.join(self._dataDir, spice_file_name)
@@ -2524,6 +3002,8 @@ class CWSCDReductionControl(object):
                 l_col_index = col_name_list.index('l')
                 col_2theta_index = col_name_list.index('2theta')
                 m1_col_index = col_name_list.index('m1')
+                time_col_index = col_name_list.index('time')
+                det_count_col_index = col_name_list.index('detector')
                 # optional as T-Sample
                 if 'tsample' in col_name_list:
                     tsample_col_index = col_name_list.index('tsample')
@@ -2538,7 +3018,10 @@ class CWSCDReductionControl(object):
                 two_theta = m1 = -1
 
                 for i_row in range(num_rows):
-                    det_count = spice_table_ws.cell(i_row, 5)
+                    det_count = spice_table_ws.cell(i_row, det_count_col_index)
+                    count_time = spice_table_ws.cell(i_row, time_col_index)
+                    # normalize max count to count time
+                    det_count = float(det_count)/count_time
                     if det_count > max_count:
                         max_count = det_count
                         max_row = i_row
@@ -2558,7 +3041,7 @@ class CWSCDReductionControl(object):
                 wavelength = get_hb3a_wavelength(m1)
                 if wavelength is None:
                     q_range = 0.
-                    print('[ERROR] Scan number {0} has invalid m1 for wavelength.'.format(scan_number))
+                    error_message += 'Scan number {0} has invalid m1 for wavelength.\n'.format(scan_number)
                 else:
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
 
@@ -2597,9 +3080,11 @@ class CWSCDReductionControl(object):
         project.set('data dir', self._dataDir)
         project.set('gui parameters', ui_dict)
 
-        project.export(overwrite=False)
+        err_msg = project.save_to_disk(overwrite=False)
+        if len(err_msg) == 0:
+            err_msg = None
 
-        return
+        return err_msg
 
     def load_project(self, project_file_name):
         """
@@ -2615,7 +3100,9 @@ class CWSCDReductionControl(object):
 
         # instantiate a project manager instance and load the project
         saved_project = project_manager.ProjectManager(mode='import', project_file_path=project_file_name)
-        saved_project.load()
+        err_msg = saved_project.load_from_disk()
+        if len(err_msg) == 0:
+            err_msg = None
 
         # set current value
         try:
@@ -2628,7 +3115,7 @@ class CWSCDReductionControl(object):
         except KeyError:
             ui_dict = dict()
 
-        return ui_dict
+        return ui_dict, err_msg
 
 
 def convert_spice_ub_to_mantid(spice_ub):

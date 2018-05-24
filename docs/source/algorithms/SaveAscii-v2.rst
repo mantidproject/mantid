@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -44,7 +44,7 @@ Usage
     # perform the algorithm
     SaveAscii(InputWorkspace=ws1,Filename=savefile)
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExSaveASCIISimple
 
@@ -77,7 +77,7 @@ Output:
     # perform the algorithm
     SaveAscii(InputWorkspace=ws1,Filename=savefile,Separator="Space")
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExSaveASCIIDelimiter
 
@@ -112,7 +112,7 @@ Output:
     # CommentIndicator can be changed, but when read back in must be specified
     SaveAscii(InputWorkspace=ws1,Filename=savefile,CommentIndicator="!")
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExSaveASCIIComment
 

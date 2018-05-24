@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -51,12 +51,12 @@ Usage
   import mantid.kernel as mk
   testprop = mk.FloatTimeSeriesProperty("Temp")
 
-  import random
+  from numpy import random
   random.seed(10)
-  for i in xrange(60):
+  for i in range(60):
       randsec = random.randint(0, 59)
       randval = random.random()*100.
-      timetemp = mk.DateAndTime("2012-01-01T00:%d:%d"%(i, randsec))
+      timetemp = mk.DateAndTime("2012-01-01T00:{:02}:{:02}".format(i, randsec))
       testprop.addValue(timetemp, randval)
   dataws.run().addProperty("Temp", testprop, True)
 
@@ -64,10 +64,10 @@ Usage
   propws = ExportTimeSeriesLog(InputWorkspace=dataws, LogName="Temp", IsEventWorkspace=False)
 
   # Check
-  print "Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0)))
-  print "X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0])
-  print "X[20] = %.1f, Y[20] = %.5f" % (propws.readX(0)[20], propws.readY(0)[20])
-  print "X[40] = %.1f, Y[40] = %.5f" % (propws.readX(0)[40], propws.readY(0)[40])
+  print("Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0))))
+  print("X[0]  = {:.1f}, Y[0]  = {:.5f}".format(propws.readX(0)[0], propws.readY(0)[0]))
+  print("X[20] = {:.1f}, Y[20] = {:.5f}".format(propws.readX(0)[20], propws.readY(0)[20]))
+  print("X[40] = {:.1f}, Y[40] = {:.5f}".format(propws.readX(0)[40], propws.readY(0)[40]))
 
 .. testcleanup:: ExExpTempWS2D
 
@@ -79,10 +79,9 @@ Output:
 .. testoutput:: ExExpTempWS2D
 
   Length of X = 60, Length of Y = 60.
-  X[0]  = 26089826.0, Y[0]  = 42.88891
-  X[20] = 26091001.0, Y[20] = 22.42990
-  X[40] = 26092226.0, Y[40] = 39.05869
-
+  X[0]  = 26089801.0, Y[0]  = 29.87612
+  X[20] = 26091048.0, Y[20] = 61.19433
+  X[40] = 26092225.0, Y[40] = 63.79516
 
 **Example - export a float series to a EventWorkspace:**
 
@@ -95,12 +94,12 @@ Output:
   # Create a new log
   testprop = mk.FloatTimeSeriesProperty("Temp")
 
-  import random
+  from numpy import random
   random.seed(10)
-  for i in xrange(60):
+  for i in range(60):
       randsec = random.randint(0, 59)
       randval = random.random()*100.
-      timetemp = mk.DateAndTime("2012-01-01T00:%d:%d"%(i, randsec))
+      timetemp = mk.DateAndTime("2012-01-01T00:{:02}:{:02}".format(i, randsec))
       testprop.addValue(timetemp, randval)
   dataws.run().addProperty("Temp", testprop, True)
 
@@ -108,9 +107,9 @@ Output:
   propws = ExportTimeSeriesLog(InputWorkspace=dataws, LogName="Temp", NumberEntriesExport=40, IsEventWorkspace=True)
 
   # Check
-  print "Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0)))
-  print "X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0])
-  print "Number of events = %d" % (propws.getNumberEvents())
+  print("Length of X = {}, Length of Y = {}.".format(len(propws.readX(0)), len(propws.readY(0))))
+  print("X[0]  = {:.1f}, Y[0]  = {:.5f}".format(propws.readX(0)[0], propws.readY(0)[0]))
+  print("Number of events = {}".format(propws.getNumberEvents()))
 
 .. testcleanup:: ExExpTempEvent
 
@@ -122,7 +121,7 @@ Output:
 .. testoutput:: ExExpTempEvent
 
   Length of X = 2, Length of Y = 1.
-  X[0]  = 26089826000000.0, Y[0]  = 1702.58055
+  X[0]  = 26089801000000.0, Y[0]  = 1958.93574
   Number of events = 40
 
 .. categories::

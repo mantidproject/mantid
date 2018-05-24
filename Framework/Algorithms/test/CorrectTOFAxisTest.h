@@ -334,7 +334,8 @@ private:
     TS_ASSERT_DELTA(shiftedWs->run().getPropertyAsSingleValue("wavelength"),
                     wavelength, 1e-8)
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      for (size_t j = 0; j < ws->blocksize(); ++j) {
+      const size_t numBins = ws->blocksize();
+      for (size_t j = 0; j < numBins; ++j) {
         TS_ASSERT_DELTA(shiftedWs->x(i)[j], ws->x(i)[j] + shift, 1e-6)
         TS_ASSERT_EQUALS(shiftedWs->y(i)[j], ws->y(i)[j])
         TS_ASSERT_EQUALS(shiftedWs->e(i)[j], ws->e(i)[j])

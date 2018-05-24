@@ -135,7 +135,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
     boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
@@ -156,7 +156,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
     boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
@@ -186,7 +186,7 @@ public:
     } catch (Poco::FileNotFoundException &) {
     }
 
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
     try {
       Poco::File vtpFile(vtpFilename);
       vtpFile.remove();
@@ -480,7 +480,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing2", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     boost::shared_ptr<const IDetector> ptrDetShape = i->getDetector(1100);
     TS_ASSERT_EQUALS(ptrDetShape->getID(), 1100);
@@ -542,7 +542,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "RectangularUnitTest", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Now the XY detector in bank1
     boost::shared_ptr<const RectangularDetector> bank1 =
@@ -595,7 +595,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "AdjustTest", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // None rotated cuboid
     boost::shared_ptr<const IDetector> ptrNoneRot = i->getDetector(1400);
@@ -708,7 +708,7 @@ public:
     InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
                                       instrumentEnv._xmlText);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::ReadFallBack,
                      parser.getAppliedCachingOption()); // Check that the
@@ -755,7 +755,7 @@ public:
                                       instrumentEnv._xmlText);
     RemoveFallbackVTPFile(parser);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteGeomCache,
                      parser.getAppliedCachingOption()); // Check that the
@@ -798,7 +798,7 @@ public:
     InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
                                       instrumentEnv._xmlText);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteCacheTemp,
                      parser.getAppliedCachingOption()); // Check that the TEMP
@@ -852,7 +852,7 @@ public:
 
     std::string errorMsg("");
     try {
-      parser.parseXML(NULL);
+      parser.parseXML(nullptr);
       errorMsg = "Exception not thrown";
     } catch (Kernel::Exception::InstrumentDefinitionError &e) {
       errorMsg = e.what();
@@ -880,9 +880,9 @@ public:
     Instrument_sptr instr;
 
     if (rethrow)
-      instr = parser.parseXML(NULL);
+      instr = parser.parseXML(nullptr);
     else
-      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
 
@@ -891,7 +891,7 @@ public:
 
   void testLocationsNaming() {
     std::string locations =
-        "<locations n-elements=\" 5\" name-count-start=\" 10\" name=\"det\" />";
+        R"(<locations n-elements=" 5" name-count-start=" 10" name="det" />)";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -903,7 +903,7 @@ public:
 
   void testLocationsStaticValues() {
     std::string locations =
-        "<locations n-elements=\"5\" x=\" 1.0\" y=\" 2.0\" z=\" 3.0\" />";
+        R"(<locations n-elements="5" x=" 1.0" y=" 2.0" z=" 3.0" />)";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -986,13 +986,13 @@ public:
 
   void testLocationsInvalidNoElements() {
     std::string locations =
-        "<locations n-elements=\"0\" t=\"0.0\" t-end=\"180.0\" />";
+        R"(<locations n-elements="0" t="0.0" t-end="180.0" />)";
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
                      Exception::InstrumentDefinitionError);
 
-    locations = "<locations n-elements=\"-1\" t=\"0.0\" t-end=\"180.0\" />";
+    locations = R"(<locations n-elements="-1" t="0.0" t-end="180.0" />)";
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
                      Exception::InstrumentDefinitionError);
@@ -1000,28 +1000,28 @@ public:
 
   void testLocationsNotANumber() {
     std::string locations =
-        "<locations n-elements=\"2\" t=\"0.0\" t-end=\"180.x\" />";
+        R"(<locations n-elements="2" t="0.0" t-end="180.x" />)";
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
 
-    locations = "<locations n-elements=\"2\" t=\"0.x\" t-end=\"180.0\" />";
+    locations = R"(<locations n-elements="2" t="0.x" t-end="180.0" />)";
 
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
 
-    locations = "<locations n-elements=\"x\" t=\"0.0\" t-end=\"180.0\" />";
+    locations = R"(<locations n-elements="x" t="0.0" t-end="180.0" />)";
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
 
-    locations = "<locations n-elements=\"2\" name-count-start=\"x\"/>";
+    locations = R"(<locations n-elements="2" name-count-start="x"/>)";
     TS_ASSERT_THROWS_ANYTHING(
         loadInstrLocations(locations, numDetectors, true));
   }
 
   void testLocationsNoCorrespondingStartAttr() {
-    std::string locations = "<locations n-elements=\"2\" t-end=\"180.0\" />";
+    std::string locations = R"(<locations n-elements="2" t-end="180.0" />)";
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
@@ -1039,7 +1039,7 @@ public:
 
     boost::shared_ptr<const Instrument> instrument;
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(nullptr));
 
     // Clean up VTP file
     const std::string vtpFilename = parser.createVTPFileName();

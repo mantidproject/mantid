@@ -50,6 +50,12 @@ public:
 
   void wait();
 
+  bool hasBackend() const { return m_threadingBackend; }
+
+#ifdef MPI_EXPERIMENTAL
+  operator boost::mpi::request &() { return m_request; }
+#endif
+
 private:
   template <class Function> explicit Request(Function &&f);
 #ifdef MPI_EXPERIMENTAL

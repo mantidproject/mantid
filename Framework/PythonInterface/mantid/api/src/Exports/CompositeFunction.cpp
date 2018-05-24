@@ -1,5 +1,6 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -12,19 +13,21 @@ GET_POINTER_SPECIALIZATION(CompositeFunction)
 
 namespace {
 
-typedef double (CompositeFunction::*getParameterType1)(size_t) const;
-typedef double (CompositeFunction::*getParameterType2)(
-    const std::string &) const;
+using getParameterType1 = double (CompositeFunction::*)(size_t) const;
+using getParameterType2 =
+    double (CompositeFunction::*)(const std::string &) const;
 
-typedef void (CompositeFunction::*setParameterType2)(const std::string &,
-                                                     const double &, bool);
+using setParameterType2 = void (CompositeFunction::*)(const std::string &,
+                                                      const double &, bool);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

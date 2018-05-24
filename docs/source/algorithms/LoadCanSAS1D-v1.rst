@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,7 +40,7 @@ Usage
    SaveCanSAS1D(out_ws, file_path, Version=1)
    in_ws = LoadCanSAS1D(file_path, Version=1)
 
-   print "Contents of the file = " + str(in_ws.readY(0)) + "."
+   print("Contents of the file = {}.".format(in_ws.readY(0)))
 
 .. testcleanup:: ExSimpleSavingRoundtrip
 

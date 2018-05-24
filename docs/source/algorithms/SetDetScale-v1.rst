@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,15 +28,15 @@ Usage
 
     w=LoadIsawPeaks("TOPAZ_3007.peaks")
 
-    print "Before SetDetScale:"
-    print '{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale17")[0])
-    print '{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale49")[0])
+    print("Before SetDetScale:")
+    print('{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale17")[0]))
+    print('{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale49")[0]))
 
     #This SetDetScale will change the parameters set in parameter file
     SetDetScale(Workspace=w, DetScaleList='17:1.0,49:2.0')
-    print "After SetDetScale:"
-    print '{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale17")[0])
-    print '{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale49")[0])
+    print("After SetDetScale:")
+    print('{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale17")[0]))
+    print('{0:.5f}'.format(w.getInstrument().getNumberParameter("detScale49")[0]))
 
 
 Output:

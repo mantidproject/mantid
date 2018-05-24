@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,10 +25,10 @@ Usage
   group = GroupWorkspaces( [ws1,ws2] )
 
   # Check the result
-  print "Workspace's type is",type(group)
-  print 'It has',group.getNumberOfEntries(),'entries'
-  print 'Its first  item is',group.getItem(0)
-  print 'Its second item is',group.getItem(1)
+  print("Workspace's type is {}".format(type(group)))
+  print('It has {} entries'.format(group.getNumberOfEntries()))
+  print('Its first  item is {}'.format(group.getItem(0)))
+  print('Its second item is {}'.format(group.getItem(1)))
 
 Output
 ######

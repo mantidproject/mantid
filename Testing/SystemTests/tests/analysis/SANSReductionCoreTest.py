@@ -13,6 +13,7 @@ from sans.common.enums import (DetectorType, DataType, SANSFacility)
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------
@@ -131,7 +132,9 @@ class SANSReductionCoreTest(unittest.TestCase):
     def test_that_reduction_core_evaluates_LAB(self):
         # Arrange
         # Build the data information
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00034484")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_sample_transmission("SANS2D00034505")
         data_builder.set_sample_direct("SANS2D00034461")
@@ -139,7 +142,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_state)
+        user_file_director = StateDirectorISIS(data_state, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

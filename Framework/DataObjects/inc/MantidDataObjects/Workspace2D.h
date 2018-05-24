@@ -102,11 +102,7 @@ protected:
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
-  void init(const std::size_t &NVectors,
-            const HistogramData::Histogram &histogram) override;
-
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// a vector holding workspace index of monitors in the workspace
   std::vector<specnum_t> m_monitorList;
@@ -122,9 +118,9 @@ private:
 };
 
 /// shared pointer to the Workspace2D class
-typedef boost::shared_ptr<Workspace2D> Workspace2D_sptr;
+using Workspace2D_sptr = boost::shared_ptr<Workspace2D>;
 /// shared pointer to a const Workspace2D
-typedef boost::shared_ptr<const Workspace2D> Workspace2D_const_sptr;
+using Workspace2D_const_sptr = boost::shared_ptr<const Workspace2D>;
 
 } // namespace DataObjects
 } // Namespace Mantid

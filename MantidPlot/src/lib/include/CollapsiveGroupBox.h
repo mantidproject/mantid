@@ -44,7 +44,8 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  CollapsiveGroupBox(const QString &title = QString(), QWidget *parent = 0);
+  CollapsiveGroupBox(const QString &title = QString(),
+                     QWidget *parent = nullptr);
 
 public slots:
   void setCollapsed(bool collapsed = true);

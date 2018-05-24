@@ -6,9 +6,9 @@
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
-#include <math.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -286,19 +286,6 @@ std::string VMDBase<TYPE>::toString(const std::string &separator) const {
   for (size_t d = 0; d < nd; d++)
     mess << (d > 0 ? separator : "") << data[d];
   return mess.str();
-}
-
-/** Get the vector as a vector
- * @tparam T :: type to convert to (double/float)
- * @return the vector as a std::vector
- */
-template <typename TYPE>
-template <class T>
-std::vector<T> VMDBase<TYPE>::toVector() const {
-  typename std::vector<T> out;
-  for (size_t d = 0; d < nd; d++)
-    out.push_back(T(data[d]));
-  return out;
 }
 
 /** Equals operator with tolerance factor

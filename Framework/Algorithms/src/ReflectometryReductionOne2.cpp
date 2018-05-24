@@ -10,6 +10,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -94,7 +95,7 @@ void translateAdd(const std::string &instructions,
 
   std::vector<size_t> outSpectra;
   outSpectra.reserve(spectra.count());
-  for (auto spectrum : spectra) {
+  for (const auto &spectrum : spectra) {
     // add this spectrum to the group we're about to add
     outSpectra.push_back(boost::lexical_cast<size_t>(spectrum));
   }
@@ -383,9 +384,6 @@ void ReflectometryReductionOne2::init() {
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
-  // Properties for direct beam normalization
-  initDirectBeamProperties();
-
   // Init properties for monitors
   initMonitorProperties();
   // Normalization by integrated monitors
@@ -423,9 +421,6 @@ ReflectometryReductionOne2::validateInputs() {
 
   const auto wavelength = validateWavelengthRanges();
   results.insert(wavelength.begin(), wavelength.end());
-
-  const auto directBeam = validateDirectBeamProperties();
-  results.insert(directBeam.begin(), directBeam.end());
 
   const auto transmission = validateTransmissionProperties();
   results.insert(transmission.begin(), transmission.end());
@@ -591,8 +586,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising input workspace by monitors\n");
-      result = directBeamCorrection(result);
-      outputDebugWorkspace(result, wsName, "_norm_db", debug, step);
       result = monitorCorrection(result);
       outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
@@ -620,9 +613,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising output workspace by monitors\n");
-      result = directBeamCorrection(result);
-      outputDebugWorkspace(result, wsName, "_norm_db", debug, step);
-
       result = monitorCorrection(result);
       outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
@@ -668,62 +658,6 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   }
 
   return IvsLam;
-}
-
-/** Creates a direct beam workspace in wavelength from an input workspace in
-* TOF. This method should only be called if RegionOfDirectBeam is provided.
-*
-* @param inputWS :: the input workspace in TOF
-* @return :: the direct beam workspace in wavelength
-*/
-MatrixWorkspace_sptr
-ReflectometryReductionOne2::makeDirectBeamWS(MatrixWorkspace_sptr inputWS) {
-
-  std::vector<int> directBeamRegion = getProperty("RegionOfDirectBeam");
-  // Sum over the direct beam.
-  const std::string processingCommands = std::to_string(directBeamRegion[0]) +
-                                         "-" +
-                                         std::to_string(directBeamRegion[1]);
-
-  auto groupDirectBeamAlg = this->createChildAlgorithm("GroupDetectors");
-  groupDirectBeamAlg->initialize();
-  groupDirectBeamAlg->setProperty("GroupingPattern", processingCommands);
-  groupDirectBeamAlg->setProperty("InputWorkspace", inputWS);
-  groupDirectBeamAlg->execute();
-  MatrixWorkspace_sptr directBeamWS =
-      groupDirectBeamAlg->getProperty("OutputWorkspace");
-
-  directBeamWS = convertToWavelength(directBeamWS);
-
-  return directBeamWS;
-}
-
-/**
-* Normalize the workspace by the direct beam (optional)
-*
-* @param detectorWS : workspace in wavelength which is to be normalized
-* @return : corrected workspace
-*/
-MatrixWorkspace_sptr ReflectometryReductionOne2::directBeamCorrection(
-    MatrixWorkspace_sptr detectorWS) {
-
-  MatrixWorkspace_sptr normalized = detectorWS;
-  Property *directBeamProperty = getProperty("RegionOfDirectBeam");
-  if (!directBeamProperty->isDefault()) {
-    auto directBeam = makeDirectBeamWS(m_runWS);
-
-    // Rebin the direct beam workspace to be the same as the input.
-    auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
-    rebinToWorkspaceAlg->initialize();
-    rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
-    rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", directBeam);
-    rebinToWorkspaceAlg->execute();
-    directBeam = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-
-    normalized = divide(detectorWS, directBeam);
-  }
-
-  return normalized;
 }
 
 /**
@@ -856,24 +790,48 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
   return corrAlg->getProperty("OutputWorkspace");
 }
 
-/**
-* The input workspace (in wavelength) to convert to Q
-* @param inputWS : the input workspace to convert
+/** Convert a workspace to Q
+*
+* @param inputWS : The input workspace (in wavelength) to convert to Q
 * @return : output workspace in Q
 */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
-
-  // Convert to Q
-  auto convertUnits = this->createChildAlgorithm("ConvertUnits");
-  convertUnits->initialize();
-  convertUnits->setProperty("InputWorkspace", inputWS);
-  convertUnits->setProperty("Target", "MomentumTransfer");
-  convertUnits->setProperty("AlignBins", false);
-  convertUnits->execute();
-  MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
-
-  return IvsQ;
+  bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
+  bool const shouldCorrectAngle =
+      !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
+  if (shouldCorrectAngle && moreThanOneDetector) {
+    if (inputWS->getNumberHistograms() > 1) {
+      throw std::invalid_argument(
+          "Expected a single group in "
+          "ProcessingInstructions to be able to "
+          "perform angle correction, found " +
+          std::to_string(inputWS->getNumberHistograms()));
+    }
+    MatrixWorkspace_sptr IvsQ = inputWS->clone();
+    auto &XOut0 = IvsQ->mutableX(0);
+    const auto &XIn0 = inputWS->x(0);
+    double const theta = getProperty("ThetaIn");
+    double const factor = 4.0 * M_PI * sin(theta * M_PI / 180.0);
+    std::transform(XIn0.rbegin(), XIn0.rend(), XOut0.begin(),
+                   [factor](double x) { return factor / x; });
+    auto &Y0 = IvsQ->mutableY(0);
+    auto &E0 = IvsQ->mutableE(0);
+    std::reverse(Y0.begin(), Y0.end());
+    std::reverse(E0.begin(), E0.end());
+    IvsQ->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+    return IvsQ;
+  } else {
+    auto convertUnits = this->createChildAlgorithm("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setProperty("InputWorkspace", inputWS);
+    convertUnits->setProperty("Target", "MomentumTransfer");
+    convertUnits->setProperty("AlignBins", false);
+    convertUnits->execute();
+    MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
+    return IvsQ;
+  }
 }
 
 /**
@@ -1401,5 +1359,6 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
     }
   }
 }
+
 } // namespace Algorithms
 } // namespace Mantid

@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -77,9 +77,9 @@ Usage
     findEPPWS = FindEPP(InputWorkspace='exWS')
     
     epp1 = createEPPWS.cell('PeakCentre', 0)
-    print('CreateEPP gives {0} as the first elastic peak position.'.format(epp1))
+    print('CreateEPP gives {0:.8f} as the first elastic peak position.'.format(epp1))
     epp2 = findEPPWS.cell('PeakCentre', 0)
-    print('FindEPP gives {0}.'.format(epp2))
+    print('FindEPP gives {0:.8f}.'.format(epp2))
 
 Output:
 

@@ -82,7 +82,8 @@ class UserProperties(object):
         self._rb_exist[recent_date_id] = rb_exist
 
         # a data which define the cycle ID e.g 2014_3 or something
-        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]), str(cycle[9:10]))
+        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]), str(cycle[9:]))
+
         self._instrument[recent_date_id] = str(instrument).upper()
         self._rb_dirs[recent_date_id] = rb_folder_or_id
         if self._recent_dateID:
@@ -243,29 +244,11 @@ class UserProperties(object):
     # pylint: disable=R0912
     def check_input(self, instrument, start_date, cycle, rb_folder_or_id):
         """Verify that input is correct"""
-        if instrument not in INELASTIC_INSTRUMENTS:
-            raise RuntimeError("Instrument {0} has to be one of "
-                               "ISIS inelastic instruments".format(instrument))
-        if isinstance(start_date, str):
-            # the date of express -- let's make it long in the past
-            if start_date.lower() == 'none':
-                start_date = '19800101'
-                error = False
-            else:
-                start_date = start_date.replace('-', '')
-                if len(start_date) != 8:
-                    start_date = '20' + start_date
-                if len(start_date) == 8:
-                    error = False
-                else:
-                    error = True
-        else:
-            error = True
-        if error:
-            raise RuntimeError("Experiment start date should be defined as"
-                               " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+        # Checks if instrument is inelastic and raises RuntimeError if not
+        self.validate_instrument(instrument)
 
-        #
+        # Checks if the date is valid and raises a RuntimeError if not
+        start_date = self.validate_date(start_date)
 
         def convert_cycle_int(cycle_int):
             if cycle_int > 999:  # Full cycle format 20151
@@ -277,7 +260,15 @@ class UserProperties(object):
         if isinstance(cycle, int):
             cycle = convert_cycle_int(cycle)
         if isinstance(cycle, str):
-            if len(cycle) != 10:
+            if len(cycle) == 11:
+                last_letter = cycle[-1]
+                if not last_letter.upper() in {'A','B','C','D','E'}:
+                    raise  RuntimeError("Cycle should be a string in the form CYCLEYYYYN[A,B,C,D "
+                                        "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "
+                                        "but it is {0}".format(cycle))
+                else:
+                    cycle = cycle.upper()
+            elif len(cycle) < 10:
                 cycle = cycle.replace('_', '')
                 try:
                     cycle = int(cycle)
@@ -311,6 +302,34 @@ class UserProperties(object):
             rb_exist = False
 
         return instrument, start_date, cycle, rb_folder_or_id, rb_exist
+
+#-----------------------------------------------------------------------------------------------
+
+    def validate_instrument(self, instrument):
+        if instrument not in INELASTIC_INSTRUMENTS:
+            raise RuntimeError("Instrument {0} has to be one of "
+                               "ISIS inelastic instruments".format(instrument))
+
+    def validate_date(self, start_date):
+        if isinstance(start_date, str):
+            # the date of express -- let's make it long in the past
+            if start_date.lower() == 'none':
+                start_date = '19800101'
+                error = False
+            else:
+                start_date = start_date.replace('-', '')
+                if len(start_date) != 8:
+                    start_date = '20' + start_date
+                if len(start_date) == 8:
+                    error = False
+                else:
+                    error = True
+        else:
+            error = True
+        if error:
+            raise RuntimeError("Experiment start date should be defined as"
+                               " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+        return start_date
 
     def get_all_instruments(self):
         """ Return list of all instruments, user is working on during this cycle"""
@@ -374,7 +393,7 @@ class MantidConfigDirectInelastic(object):
         # instrument and cycle number.
         # the common part of all strings, generated dynamically as function of input class parameters.
         self._dynamic_options_base = ['default.facility=ISIS']
-        # Path to python scripts, defined and used by mantid wrt to Mantid Root (this path may be version specific)
+        # Path to python scripts, defined and used by Mantid wrt to Mantid Root (this path may be version specific)
         self._python_mantid_path = ['scripts/Calibration/', 'scripts/Examples/', 'scripts/Interface/', 'scripts/Vates/']
         # Static paths to user scripts, defined wrt script repository root
         self._python_user_scripts = set(['direct_inelastic/ISIS/qtiGenie/'])
@@ -643,7 +662,7 @@ class MantidConfigDirectInelastic(object):
         # does not work if user is not defined
         if self._user is None:
             return None
-        # parse job description file, fail down on default behavior if
+        # parse job description file, fail down on default behaviour if
         # user files description is not there
         try:
             domObj = minidom.parse(job_description_file)
@@ -682,11 +701,13 @@ class MantidConfigDirectInelastic(object):
            (cycle ID)
            The agreement on the naming as currently in ISIS:
            e.g: /archive/NDXMERLIN/Instrument/data/cycle_08_1
+
+            Note: will fail if cycle numbers ever become a 2-digit numbers e.g. cycle_22_10
         """
         # cycle folder have short form without leading numbers
         cycle_fold_n = int(cycle_ID[0]) - 2000
         folder = os.path.join(self._root_data_folder, 'NDX' + instr.upper(),
-                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n, str(cycle_ID[1])))
+                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n, str(cycle_ID[1][0])))
         return folder
 
     def is_inelastic(self, instr_name):

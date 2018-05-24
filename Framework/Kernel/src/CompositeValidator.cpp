@@ -82,7 +82,7 @@ std::string CompositeValidator::check(const boost::any &value) const {
 }
 
 std::string CompositeValidator::checkAll(const boost::any &value) const {
-  for (const auto validator : m_children) {
+  for (const auto &validator : m_children) {
     const auto error = validator->check(value);
     // exit on the first error, to avoid passing doing more tests on invalid
     // objects that could fail

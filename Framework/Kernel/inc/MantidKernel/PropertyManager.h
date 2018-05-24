@@ -62,8 +62,8 @@ public:
   PropertyManager &operator=(const PropertyManager &);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
-  void filterByTime(const Kernel::DateAndTime &start,
-                    const Kernel::DateAndTime &stop) override;
+  void filterByTime(const Types::Core::DateAndTime &start,
+                    const Types::Core::DateAndTime &stop) override;
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<PropertyManager *> outputs) const override;
   void filterByProperty(const TimeSeriesProperty<bool> &filter) override;
@@ -135,7 +135,7 @@ private:
       const std::unordered_set<std::string> &ignoreProperties);
 
   /// typedef for the map holding the properties
-  typedef std::map<std::string, std::unique_ptr<Property>> PropertyMap;
+  using PropertyMap = std::map<std::string, std::unique_ptr<Property>>;
   /// The properties under management
   PropertyMap m_properties;
   /// Stores the order in which the properties were declared.
@@ -143,7 +143,7 @@ private:
 };
 
 /// Typedef for a shared pointer to a PropertyManager
-typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
+using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
 
 } // namespace Kernel
 } // namespace Mantid

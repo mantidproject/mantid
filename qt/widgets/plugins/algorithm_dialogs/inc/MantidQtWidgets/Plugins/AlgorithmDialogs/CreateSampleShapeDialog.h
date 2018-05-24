@@ -62,7 +62,7 @@ class CreateSampleShapeDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Default constructor
-  CreateSampleShapeDialog(QWidget *parent = 0);
+  CreateSampleShapeDialog(QWidget *parent = nullptr);
 
   /// Destructor
   ~CreateSampleShapeDialog() override;
@@ -151,7 +151,7 @@ class BinaryTreeWidget : public QTreeWidget {
 
 public:
   /// Default constructor
-  BinaryTreeWidget(QWidget *parent = 0);
+  BinaryTreeWidget(QWidget *parent = nullptr);
 
   // Return the root of the binary tree
   BinaryTreeWidgetItem *root() const;
@@ -160,9 +160,14 @@ public:
   void traverseInPostOrder(BinaryTreeWidgetItem *node,
                            QList<BinaryTreeWidgetItem *> &expression);
 
-  /// Called when the data in the model is changed
+/// Called when the data in the model is changed
+#if QT_VERSION < 0x050000
   void dataChanged(const QModelIndex &topLeft,
                    const QModelIndex &bottomRight) override;
+#else
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                   const QVector<int> &roles = QVector<int>()) override;
+#endif
 
 signals:
   /// Emitted when data has changed
@@ -177,7 +182,7 @@ class ComboBoxDelegate : public QItemDelegate {
 
 public:
   /// Default constructor
-  ComboBoxDelegate(QWidget *parent = 0);
+  ComboBoxDelegate(QWidget *parent = nullptr);
   /// Create an editor for the item
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override;

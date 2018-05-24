@@ -12,7 +12,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories : public QDialog {
   Q_OBJECT
 
 public:
-  ManageUserDirectories(QWidget *parent = 0);
+  ManageUserDirectories(QWidget *parent = nullptr);
   ~ManageUserDirectories() override;
   static void openUserDirsDialog(QWidget *parent);
 

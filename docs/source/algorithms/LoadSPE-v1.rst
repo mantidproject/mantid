@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,8 +27,8 @@ Usage
    #If it's in your managed user directories there's no need for an absolute path
    ws1 = LoadSPE("Example.spe")
 
-   print "Number of Spectra:", ws1.getNumberHistograms()
-   print "Number of Bins:", ws1.blocksize()
+   print("Number of Spectra: {}".format(ws1.getNumberHistograms()))
+   print("Number of Bins: {}".format(ws1.blocksize()))
 
 Output:
 

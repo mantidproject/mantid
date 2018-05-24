@@ -360,7 +360,7 @@ void FitControl::saveBuiltInModels() {
                             "Quadratic,A0=0,A1=0,A2=0;name=Gaussian,Height=0,"
                             "PeakCentre=0,Sigma=0);name=LinearBackground,A0=0,"
                             "A1=0";
-  for (auto modelName : models.keys()) {
+  for (const auto &modelName : models.keys()) {
     settings.setValue(modelName, models[modelName]);
   }
 }

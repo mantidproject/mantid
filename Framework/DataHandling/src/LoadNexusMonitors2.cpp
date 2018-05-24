@@ -8,7 +8,8 @@
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
@@ -20,13 +21,13 @@
 #include <map>
 #include <vector>
 
-using Mantid::DataObjects::EventWorkspace;
-using Mantid::DataObjects::EventWorkspace_sptr;
+using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 
 namespace Mantid {
@@ -127,7 +128,7 @@ void LoadNexusMonitors2::exec() {
   ::NeXus::File file(m_filename);
 
   // Start with the base entry
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   string_map_t::const_iterator it;
   string_map_t entries = file.getEntries();
   for (it = entries.begin(); it != entries.end(); ++it) {
@@ -327,7 +328,7 @@ void LoadNexusMonitors2::exec() {
   // Old SNS files don't have this
   try {
     // The run_start will be loaded from the pulse times.
-    Kernel::DateAndTime run_start(0, 0);
+    Types::Core::DateAndTime run_start(0, 0);
     run_start = m_workspace->getFirstPulseTime();
     m_workspace->mutableRun().addProperty("run_start",
                                           run_start.toISO8601String(), true);
@@ -544,12 +545,50 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   this->setProperty("OutputWorkspace", wsGroup);
 }
 
+std::size_t
+LoadNexusMonitors2::sizeOfUnopenedEntry(::NeXus::File &file,
+                                        const std::string &entryName) const {
+  file.openData(entryName);
+  auto size = static_cast<std::size_t>(file.getInfo().dims[0]);
+  file.closeData();
+  return size;
+}
+
+bool LoadNexusMonitors2::keyExists(
+    std::string const &key,
+    std::map<std::string, std::string> const &entries) const {
+  return entries.find(key) != entries.cend();
+}
+
+bool LoadNexusMonitors2::eventIdNotEmptyIfExists(
+    ::NeXus::File &monitorFileHandle,
+    std::map<std::string, std::string> const &entries) const {
+  if (keyExists("event_id", entries))
+    return sizeOfUnopenedEntry(monitorFileHandle, "event_id") > 1;
+  else
+    return true;
+}
+
+bool LoadNexusMonitors2::hasAllEventLikeAttributes(
+    std::map<std::string, std::string> const &entries) const {
+  return keyExists("event_index", entries) &&
+         keyExists("event_time_offset", entries) &&
+         keyExists("event_time_zero", entries);
+}
+
+bool LoadNexusMonitors2::isEventMonitor(
+    ::NeXus::File &monitorFileHandle) const {
+  auto entries = monitorFileHandle.getEntries();
+  return hasAllEventLikeAttributes(entries) &&
+         eventIdNotEmptyIfExists(monitorFileHandle, entries);
+}
+
 size_t LoadNexusMonitors2::getMonitorInfo(
     ::NeXus::File &file, std::vector<std::string> &monitorNames,
     size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
     std::map<int, std::string> &monitorNumber2Name,
     std::vector<bool> &isEventMonitors) {
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
 
   // Now we want to go through and find the monitors
   string_map_t entries = file.getEntries();
@@ -574,24 +613,9 @@ size_t LoadNexusMonitors2::getMonitorInfo(
       // -> This will prefer event monitors over histogram
       //    if they are found in the same group.
       file.openGroup(entry_name, "NXmonitor");
-      int numEventThings =
-          0; // number of things that are eventish - should be 3
       string_map_t inner_entries = file.getEntries(); // get list of entries
-      for (auto &entry : inner_entries) {
-        if (entry.first == "event_index") {
-          numEventThings += 1;
-          continue;
-        } else if (entry.first == "event_time_offset") {
-          numEventThings += 1;
-          continue;
-        } else if (entry.first == "event_time_zero") {
-          numEventThings += 1;
-          continue;
-        }
-      }
 
-      if (numEventThings == 3) {
-        // it is an event monitor
+      if (isEventMonitor(file)) {
         numEventMon += 1;
         isEventMonitors.push_back(true);
       } else {
@@ -794,19 +818,19 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   file.closeData();
   file.openData("event_time_zero");
   file.getDataCoerce(seconds);
-  Mantid::Kernel::DateAndTime pulsetime_offset;
+  Mantid::Types::Core::DateAndTime pulsetime_offset;
   {
     std::string startTime;
     file.getAttr("offset", startTime);
-    pulsetime_offset = Mantid::Kernel::DateAndTime(startTime);
+    pulsetime_offset = createFromSanitizedISO8601(startTime);
   }
   file.closeData();
 
   // load up the event list
   DataObjects::EventList &event_list = eventWS->getSpectrum(i);
 
-  Mantid::Kernel::DateAndTime pulsetime(0);
-  Mantid::Kernel::DateAndTime lastpulsetime(0);
+  Mantid::Types::Core::DateAndTime pulsetime(0);
+  Mantid::Types::Core::DateAndTime lastpulsetime(0);
   std::size_t numEvents = time_of_flight.size();
   bool pulsetimesincreasing = true;
   size_t pulse_index(0);
@@ -825,7 +849,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
       pulsetimesincreasing = false;
     lastpulsetime = pulsetime;
     event_list.addEventQuickly(
-        DataObjects::TofEvent(time_of_flight[j], pulsetime));
+        Types::Event::TofEvent(time_of_flight[j], pulsetime));
   }
   if (pulsetimesincreasing)
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);
@@ -854,5 +878,5 @@ void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i,
   }
 }
 
-} // end DataHandling
-} // end Mantid
+} // namespace DataHandling
+} // namespace Mantid

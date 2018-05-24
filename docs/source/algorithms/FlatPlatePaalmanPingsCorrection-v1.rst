@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -68,7 +68,7 @@ Usage
                                            Emode='Indirect',
                                            Efixed=1.845)
 
-    print 'Correction workspaces: %s' % (', '.join(corr.getNames()))
+    print('Correction workspaces: %s' % (', '.join(corr.getNames())))
 
 Output:
 

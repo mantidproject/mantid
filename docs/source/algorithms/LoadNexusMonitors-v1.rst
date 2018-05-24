@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,7 +33,7 @@ Usage
 
     ws = LoadNexusMonitors("CNCS_7860_event.nxs")
     # CNCS has 3 monitors
-    print "Number of monitors =", ws.getNumberHistograms()
+    print("Number of monitors = {}".format(ws.getNumberHistograms()))
 
 Output:
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,7 @@ Usage
   out_ws = NormaliseSpectra(InputWorkspace=ws)
   
   # Print resulting y values
-  print out_ws.readY(0)
+  print(out_ws.readY(0))
 
 Output:  
   

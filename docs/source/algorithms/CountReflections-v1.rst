@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -62,12 +62,12 @@ data, because some intensities in the input file are 0, so these reflections are
                                                                   LatticeCentering='Robv', MinDSpacing=0.205,
                                                                   MaxDSpacing=2.08, MissingReflectionsWorkspace='')
 
-    print 'Data set statistics:'
-    print '             Peaks: {0}'.format(peaks.getNumberPeaks())
-    print '            Unique: {0}'.format(unique)
-    print '      Completeness: {0}%'.format(round(completeness * 100, 2))
-    print '        Redundancy: {0}'.format(round(redundancy, 2))
-    print ' Multiply observed: {0}%'.format(round(multiple*100, 2))
+    print('Data set statistics:')
+    print('             Peaks: {0}'.format(peaks.getNumberPeaks()))
+    print('            Unique: {0}'.format(unique))
+    print('      Completeness: {0}%'.format(round(completeness * 100, 2)))
+    print('        Redundancy: {0}'.format(round(redundancy, 2)))
+    print(' Multiply observed: {0}%'.format(round(multiple*100, 2)))
 
 Output:
 

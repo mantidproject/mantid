@@ -66,16 +66,16 @@ void Filter::init() {
   d_tolerance = 1e-4;
   d_points = 100;
   d_max_iterations = 1000;
-  d_curve = 0;
+  d_curve = nullptr;
   d_prec = app->fit_output_precision;
   d_init_err = false;
   d_sort_data = true;
   d_min_points = 2;
   d_explanation = objectName();
-  d_graph = 0;
-  d_table = 0;
-  d_result_table = 0;
-  d_output_graph = 0;
+  d_graph = nullptr;
+  d_table = nullptr;
+  d_result_table = nullptr;
+  d_output_graph = nullptr;
   d_graphics_display = true;
   d_y_col_name = QString::null;
 }
@@ -350,7 +350,7 @@ QwtPlotCurve *Filter::addResultCurve(double *x, double *y) {
                             locale.toString(y[i], 'e', app->d_decimal_digits));
   }
 
-  DataCurve *c = 0;
+  DataCurve *c = nullptr;
   if (d_graphics_display) {
     c = new DataCurve(d_result_table, tableName + "_1", tableName + "_2");
     c->setData(x, y, d_points);
@@ -447,8 +447,8 @@ bool Filter::setDataFromTable(Table *t, const QString &xColName,
     delete[] d_y;
   }
 
-  d_graph = 0;
-  d_curve = 0;
+  d_graph = nullptr;
+  d_curve = nullptr;
   d_n = size;
   d_init_err = false;
   d_table = t;

@@ -1,16 +1,16 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
-
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidCrystal/SortHKL.h"
-
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-
+#include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Utils.h"
 
@@ -45,15 +45,25 @@ void SortHKL::init() {
   /* TODO: These two properties with string lists keep appearing -
    * Probably there should be a dedicated Property type or validator. */
   std::vector<std::string> pgOptions;
-  pgOptions.reserve(m_pointGroups.size());
+  pgOptions.reserve(2 * m_pointGroups.size() + 5);
+  for (auto &pointGroup : m_pointGroups)
+    pgOptions.push_back(pointGroup->getSymbol());
   for (auto &pointGroup : m_pointGroups)
     pgOptions.push_back(pointGroup->getName());
+  // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
+  pgOptions.push_back("222 (Orthorombic)");
+  pgOptions.push_back("mm2 (Orthorombic)");
+  pgOptions.push_back("2mm (Orthorombic)");
+  pgOptions.push_back("m2m (Orthorombic)");
+  pgOptions.push_back("mmm (Orthorombic)");
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
-  centeringOptions.reserve(m_refConds.size());
+  centeringOptions.reserve(2 * m_refConds.size());
+  for (auto &refCond : m_refConds)
+    centeringOptions.push_back(refCond->getSymbol());
   for (auto &refCond : m_refConds)
     centeringOptions.push_back(refCond->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
@@ -74,6 +84,22 @@ void SortHKL::init() {
   declareProperty("Append", false,
                   "Append to output table workspace if true.\n"
                   "If false, new output table workspace (default).");
+  std::vector<std::string> equivTypes{"Mean", "Median"};
+  declareProperty("EquivalentIntensities", equivTypes[0],
+                  boost::make_shared<StringListValidator>(equivTypes),
+                  "Replace intensities by mean(default), "
+                  "or median.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+                      "SigmaCritical", 3.0, Direction::Input),
+                  "Removes peaks whose intensity deviates more than "
+                  "SigmaCritical from the mean (or median).");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
+      "Output Equivalent Intensities");
+  declareProperty("WeightedZScore", false,
+                  "Use weighted ZScore if true.\n"
+                  "If false, standard ZScore (default).");
 }
 
 void SortHKL::exec() {
@@ -91,8 +117,112 @@ void SortHKL::exec() {
 
   UniqueReflectionCollection uniqueReflections =
       getUniqueReflections(peaks, cell);
+  std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
+  double sigmaCritical = getProperty("SigmaCritical");
+  bool weightedZ = getProperty("WeightedZScore");
 
-  PeaksStatistics peaksStatistics(uniqueReflections);
+  MatrixWorkspace_sptr UniqWksp =
+      Mantid::API::WorkspaceFactory::Instance().create(
+          "Workspace2D", uniqueReflections.getReflections().size(), 20, 20);
+  int counter = 0;
+  size_t maxPeaks = 0;
+  auto taxis = new TextAxis(uniqueReflections.getReflections().size());
+  UniqWksp->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  for (const auto &unique : uniqueReflections.getReflections()) {
+    /* Since all possible unique reflections are explored
+     * there may be 0 observations for some of them.
+     * In that case, nothing can be done.*/
+
+    if (unique.second.count() > 2) {
+      taxis->setLabel(counter, "   " + unique.second.getHKL().toString());
+      auto &UniqX = UniqWksp->mutableX(counter);
+      auto &UniqY = UniqWksp->mutableY(counter);
+      auto &UniqE = UniqWksp->mutableE(counter);
+      counter++;
+      auto wavelengths = unique.second.getWavelengths();
+      auto intensities = unique.second.getIntensities();
+      g_log.debug() << "HKL " << unique.second.getHKL() << "\n";
+      g_log.debug() << "Intensities ";
+      for (const auto &e : intensities)
+        g_log.debug() << e << "  ";
+      g_log.debug() << "\n";
+      std::vector<double> zScores;
+      if (!weightedZ) {
+        zScores = Kernel::getZscore(intensities);
+      } else {
+        auto sigmas = unique.second.getSigmas();
+        zScores = Kernel::getWeightedZscore(intensities, sigmas);
+      }
+
+      if (zScores.size() > maxPeaks)
+        maxPeaks = zScores.size();
+      // Possibly remove outliers.
+      auto outliersRemoved =
+          unique.second.removeOutliers(sigmaCritical, weightedZ);
+
+      auto intensityStatistics =
+          Kernel::getStatistics(outliersRemoved.getIntensities(),
+                                StatOptions::Mean | StatOptions::Median);
+
+      g_log.debug() << "Mean = " << intensityStatistics.mean
+                    << "  Median = " << intensityStatistics.median << "\n";
+      // sort wavelengths & intensities
+      for (size_t i = 0; i < wavelengths.size(); i++) {
+        size_t i0 = i;
+        for (size_t j = i + 1; j < wavelengths.size(); j++) {
+          if (wavelengths[j] < wavelengths[i0]) // Change was here!
+          {
+            i0 = j;
+          }
+        }
+        double temp = wavelengths[i0];
+        wavelengths[i0] = wavelengths[i];
+        wavelengths[i] = temp;
+        temp = intensities[i0];
+        intensities[i0] = intensities[i];
+        intensities[i] = temp;
+      }
+      g_log.debug() << "Zscores ";
+      for (size_t i = 0; i < std::min(zScores.size(), static_cast<size_t>(20));
+           ++i) {
+        UniqX[i] = wavelengths[i];
+        UniqY[i] = intensities[i];
+        if (zScores[i] > sigmaCritical)
+          UniqE[i] = intensities[i];
+        else if (equivalentIntensities == "Mean")
+          UniqE[i] = intensityStatistics.mean - intensities[i];
+        else
+          UniqE[i] = intensityStatistics.median - intensities[i];
+        g_log.debug() << zScores[i] << "  ";
+      }
+      for (size_t i = zScores.size(); i < 20; ++i) {
+        UniqX[i] = wavelengths[zScores.size() - 1];
+        UniqY[i] = intensities[zScores.size() - 1];
+        UniqE[i] = 0.0;
+      }
+      g_log.debug() << "\n";
+    }
+  }
+
+  if (counter > 0) {
+    MatrixWorkspace_sptr UniqWksp2 =
+        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", counter,
+                                                         maxPeaks, maxPeaks);
+    for (int64_t i = 0; i < counter; ++i) {
+      auto &outSpec = UniqWksp2->getSpectrum(i);
+      const auto &inSpec = UniqWksp->getSpectrum(i);
+      outSpec.setHistogram(inSpec.histogram());
+      // Copy the spectrum number/detector IDs
+      outSpec.copyInfoFrom(inSpec);
+    }
+    UniqWksp2->replaceAxis(1, taxis);
+    setProperty("EquivalentsWorkspace", UniqWksp2);
+  } else {
+    setProperty("EquivalentsWorkspace", UniqWksp);
+  }
+
+  PeaksStatistics peaksStatistics(uniqueReflections, equivalentIntensities,
+                                  sigmaCritical, weightedZ);
 
   // Store the statistics for output.
   const std::string tableName = getProperty("StatisticsTable");
@@ -177,6 +307,12 @@ PointGroup_sptr SortHKL::getPointgroup() const {
       PointGroupFactory::Instance().createPointGroup("-1");
 
   std::string pointGroupName = getPropertyValue("PointGroup");
+  size_t pos = pointGroupName.find("Orthorombic");
+  if (pos != std::string::npos) {
+    g_log.warning() << "Orthorhomic is misspelled in your script.\n";
+    pointGroupName.replace(pos, 11, "Orthorhombic");
+    g_log.warning() << "Please correct to " << pointGroupName << ".\n";
+  }
   for (const auto &m_pointGroup : m_pointGroups)
     if (m_pointGroup->getName() == pointGroupName)
       pointGroup = m_pointGroup;

@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,7 +29,7 @@ Usage
    Comment(ws,"The next algorithm is doing 1/ws")
 
    # Print the result
-   print ws.getHistory().lastAlgorithm().getPropertyValue("Text")
+   print(ws.getHistory().lastAlgorithm().getPropertyValue("Text"))
 
 Output:
 

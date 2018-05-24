@@ -209,6 +209,10 @@ public:
                               const char *value) {
     setLocalAttribute(i, attName, Attribute(std::string(value)));
   }
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -216,10 +220,6 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
-  /// Change status of parameter
-  void setParameterStatus(size_t i, ParameterStatus status) override;
-  /// Get status of parameter
-  ParameterStatus getParameterStatus(size_t i) const override;
   /// Writes itself into a string
   std::string writeToString(
       const std::string &parentLocalAttributesStr = "") const override;
@@ -247,9 +247,9 @@ private:
 };
 
 /// shared pointer to the composite function base class
-typedef boost::shared_ptr<CompositeFunction> CompositeFunction_sptr;
+using CompositeFunction_sptr = boost::shared_ptr<CompositeFunction>;
 /// shared pointer to the composite function base class (const version)
-typedef boost::shared_ptr<const CompositeFunction> CompositeFunction_const_sptr;
+using CompositeFunction_const_sptr = boost::shared_ptr<const CompositeFunction>;
 
 /** A Jacobian for individual functions
  */

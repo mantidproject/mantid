@@ -16,7 +16,7 @@ namespace API {
 
 /// Structure uniquely describing an algorithm with its name, category and
 /// version.
-struct Algorithm_descriptor {
+struct AlgorithmDescriptor {
   std::string name;     ///< name
   std::string alias;    ///< alias
   std::string category; ///< category
@@ -134,7 +134,7 @@ public:
   const std::map<std::string, bool> getCategoriesWithState() const;
 
   /// Returns algorithm descriptors.
-  std::vector<Algorithm_descriptor>
+  std::vector<AlgorithmDescriptor>
   getDescriptors(bool includeHidden = false) const;
 
   /// unmangles the names used as keys into the name and version
@@ -163,18 +163,18 @@ private:
   void fillHiddenCategories(std::unordered_set<std::string> *categorySet) const;
 
   /// A typedef for the map of algorithm versions
-  typedef std::map<std::string, int> VersionMap;
+  using VersionMap = std::map<std::string, int>;
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
+using AlgorithmFactory = Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-typedef Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification
-    AlgorithmFactoryUpdateNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DynamicFactory<
-    Algorithm>::UpdateNotification> &AlgorithmFactoryUpdateNotification_ptr;
+using AlgorithmFactoryUpdateNotification =
+    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification;
+using AlgorithmFactoryUpdateNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification> &;
 
 } // namespace API
 } // namespace Mantid

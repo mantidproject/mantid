@@ -33,6 +33,8 @@ using namespace Mantid::Kernel::Exception;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::HistogramX;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 using std::runtime_error;
 using std::size_t;
@@ -130,11 +132,11 @@ public:
     std::map<DateAndTime, double> logMap = log->valueAsMap();
     std::map<DateAndTime, double>::iterator it, it2;
     it = logMap.begin();
-    Kernel::DateAndTime start = it->first;
+    Types::Core::DateAndTime start = it->first;
 
     std::vector<TofEvent> events1 = ew->getSpectrum(1000).getEvents();
-    for (size_t i = 0; i < events1.size(); i++) {
-      std::cout << (events1[i].pulseTime() - start) << " sec \n";
+    for (auto &event : events1) {
+      std::cout << (event.pulseTime() - start) << " sec \n";
     }
   }
 
@@ -211,7 +213,7 @@ public:
     static_cast<void>(outputWS->y(0));
 
     // Check the run_start property exists and is right.
-    Property *p = NULL;
+    Property *p = nullptr;
     TS_ASSERT(outputWS->mutableRun().hasProperty("run_start"));
     TS_ASSERT_THROWS_NOTHING(
         p = outputWS->mutableRun().getProperty("run_start");)

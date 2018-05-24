@@ -82,7 +82,7 @@ RenameWindowDialog::RenameWindowDialog(QWidget *parent, Qt::WFlags fl)
   mainLayout->addWidget(groupBox1);
   mainLayout->addLayout(rightLayout);
 
-  window = NULL;
+  window = nullptr;
 
   // signals and slots connections
   connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));

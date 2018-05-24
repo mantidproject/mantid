@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -123,20 +123,22 @@ Usage
     def captureLive():
         ConfigService.setFacility("TEST_LIVE")
 
-        # start a Live data listener updating every second, that rebins the data
-        # and replaces the results each time with those of the last second.
-        StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
-                      ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1',
-                      AccumulationMethod='Add', PreserveEvents=True)
+        try:
+            # start a Live data listener updating every second, that rebins the data
+            # and replaces the results each time with those of the last second.
+            StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
+                          ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1',
+                          AccumulationMethod='Add', PreserveEvents=True)
 
-        # give it a couple of seconds before stopping it
-        time.sleep(2)
-
-        # This will cancel both algorithms
-        # you can do the same in the GUI
-        # by clicking on the details button on the bottom right
-        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-        AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+            # give it a couple of seconds before stopping it
+            time.sleep(2)
+        finally:
+            # This will cancel both algorithms
+            # you can do the same in the GUI
+            # by clicking on the details button on the bottom right
+            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+            AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+            time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 
     oldFacility = ConfigService.getFacility().name()
@@ -148,8 +150,8 @@ Usage
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except Exception:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 
@@ -158,7 +160,7 @@ Usage
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i events" % wsOut.getNumberEvents()
+    print("The workspace contains %i events" % wsOut.getNumberEvents())
 
 Output:
 
@@ -187,20 +189,22 @@ Output:
     def captureLive():
         ConfigService.setFacility("TEST_LIVE")
 
-        # Start a Live data listener updating every second,
-        # that replaces the results each time with those of the last second.
-        # Load only spectra 2,4, and 6 from periods 1 and 3
-        StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
-                            AccumulationMethod='Replace', PeriodList=[1,3],SpectraList=[2,4,6])
+        try:
+            # Start a Live data listener updating every second,
+            # that replaces the results each time with those of the last second.
+            # Load only spectra 2,4, and 6 from periods 1 and 3
+            StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
+                          AccumulationMethod='Replace', PeriodList=[1,3],SpectraList=[2,4,6])
 
-        # give it a couple of seconds before stopping it
-        time.sleep(2)
-
-        # This will cancel both algorithms
-        # you can do the same in the GUI
-        # by clicking on the details button on the bottom right
-        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-        AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
+            # give it a couple of seconds before stopping it
+            time.sleep(2)
+        finally:
+            # This will cancel both algorithms
+            # you can do the same in the GUI
+            # by clicking on the details button on the bottom right
+            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+            AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
+            time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 
     oldFacility = ConfigService.getFacility().name()
@@ -212,8 +216,8 @@ Output:
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except Exception:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 
@@ -222,8 +226,8 @@ Output:
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i periods" % wsOut.getNumberOfEntries()
-    print "Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms()
+    print("The workspace contains %i periods" % wsOut.getNumberOfEntries())
+    print("Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms())
     time.sleep(1)
 
 Output:

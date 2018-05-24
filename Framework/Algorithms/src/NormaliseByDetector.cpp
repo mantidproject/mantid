@@ -105,10 +105,10 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
   const Geometry::FitParameter &foundFittingParam =
       tryParseFunctionParameter(foundParam, det);
 
-  std::string fitFunctionName = foundFittingParam.getFunction();
+  const std::string &fitFunctionName = foundFittingParam.getFunction();
   IFunction_sptr function =
       FunctionFactory::Instance().createFunction(fitFunctionName);
-  typedef std::vector<std::string> ParamNames;
+  using ParamNames = std::vector<std::string>;
   ParamNames allParamNames = function->getParameterNames();
 
   // Lookup each parameter name.
@@ -122,7 +122,7 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
       throw std::runtime_error(
           "A Forumla has not been provided for a fit function");
     } else {
-      std::string resultUnitStr = fitParam.getResultUnit();
+      const std::string &resultUnitStr = fitParam.getResultUnit();
       if (!resultUnitStr.empty() && resultUnitStr != "Wavelength") {
         throw std::runtime_error(
             "Units for function parameters must be in Wavelength");

@@ -45,9 +45,9 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL ObjCompAssembly : public virtual ICompAssembly,
                                             public virtual ObjComponent {
-  typedef std::vector<ObjComponent *>::iterator comp_it; ///< Iterator type
-  typedef std::vector<ObjComponent *>::const_iterator
-      const_comp_it; ///< Const iterator type
+  using comp_it = std::vector<ObjComponent *>::iterator; ///< Iterator type
+  using const_comp_it =
+      std::vector<ObjComponent *>::const_iterator; ///< Const iterator type
 public:
   /// String description of the type of component
   std::string type() const override { return "ObjCompAssembly"; }
@@ -93,8 +93,8 @@ public:
   Kernel::V3D getPos() const override;
 
   //! Set the outline of the assembly
-  boost::shared_ptr<Object> createOutline();
-  void setOutline(boost::shared_ptr<const Object> obj);
+  boost::shared_ptr<IObject> createOutline();
+  void setOutline(boost::shared_ptr<const IObject> obj);
 
   /** Test the intersection of the ray with the children of the component
    * assembly  */
@@ -114,9 +114,9 @@ private:
 };
 
 /// Shared pointer to ObjCompAssembly
-typedef boost::shared_ptr<ObjCompAssembly> ObjCompAssembly_sptr;
+using ObjCompAssembly_sptr = boost::shared_ptr<ObjCompAssembly>;
 /// Shared pointer to ObjCompAssembly (const version)
-typedef boost::shared_ptr<const ObjCompAssembly> ObjCompAssembly_const_sptr;
+using ObjCompAssembly_const_sptr = boost::shared_ptr<const ObjCompAssembly>;
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const ObjCompAssembly &);

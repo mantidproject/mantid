@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 
@@ -153,7 +153,7 @@ modelHistogram(const API::MatrixWorkspace &modelWS,
 /** Creates a rectangular cuboid shape.
  *  @return A cube shape.
  */
-Geometry::Object_sptr makeCubeShape() {
+Geometry::IObject_sptr makeCubeShape() {
   using namespace Poco::XML;
   const double dimension = 0.05;
   AutoPtr<Document> shapeDescription = new Document;
@@ -286,8 +286,8 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
     }
     const auto e = modelWS.getEFixed(detIDs[0]);
     const auto &sparseDetIDs = ws->detectorInfo().detectorIDs();
-    for (size_t i = 0; i < sparseDetIDs.size(); ++i) {
-      ws->setEFixed(sparseDetIDs[i], e);
+    for (int sparseDetID : sparseDetIDs) {
+      ws->setEFixed(sparseDetID, e);
     }
   }
   return API::MatrixWorkspace_uptr(ws.release());

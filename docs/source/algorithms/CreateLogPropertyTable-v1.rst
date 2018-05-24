@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -76,8 +76,8 @@ Usage
     tab=CreateLogPropertyTable(InputWorkspaces='a,b,c',LogPropertyNames='run_title,ImportantParameter')
 
     #do some tests
-    print "Column names are: ",tab.getColumnNames()
-    print "The values of the ImportantParameter are:",tab.column(1)
+    print("Column names are:  {}".format(tab.getColumnNames()))
+    print("The values of the ImportantParameter are: {}".format(tab.column(1)))
 
 .. testcleanup:: CreateLogPropertyTable
 

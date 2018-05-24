@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -65,12 +65,12 @@ Usage
                            Bank='1')
 
    # Should have one spectrum only
-   print "No. of spectra:", focussed_ws.getNumberHistograms()
+   print("No. of spectra: {}".format(focussed_ws.getNumberHistograms()))
 
    # Print a few arbitrary bins where higher intensities are expected
    fmt = "For TOF of {0:.3f} normalized intensity is {1:.3f}"
    for bin in [3169, 6037, 7124]:
-     print fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin])
+     print(fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin]))
 
 .. testcleanup:: ExSimpleFocussing
 

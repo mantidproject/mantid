@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,11 +26,11 @@ Usage
     ws = CreateSampleWorkspace()
     # Mask some detectors
     MaskDetectors(ws,SpectraList=[10,20,30,40,50])
-    print 'Input workspace has %s spectra' % ws.getNumberHistograms()
+    print('Input workspace has {} spectra'.format(ws.getNumberHistograms()))
 
     # Removed the 5 masked spectra
     removed = RemoveMaskedSpectra(ws)
-    print 'Output workspace has %s spectra' % removed.getNumberHistograms()
+    print('Output workspace has {} spectra'.format(removed.getNumberHistograms()))
 
 Output:
 

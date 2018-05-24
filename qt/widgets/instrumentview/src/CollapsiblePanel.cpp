@@ -62,7 +62,7 @@ void CaptionLabel::expand() {
 }
 
 CollapsiblePanel::CollapsiblePanel(const QString &caption, QWidget *parent)
-    : QWidget(parent), m_widget(NULL) {
+    : QWidget(parent), m_widget(nullptr) {
   m_layout = new QVBoxLayout(this);
   m_label = new CaptionLabel(caption, this);
   m_layout->addWidget(m_label);

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -57,17 +57,17 @@ This algorithm only supports DNS instrument in its configuration with one detect
 Usage
 -----
 
-**Example - Load a DNS legacy .d_dat file:**
+**Example - Load DNS legacy .d_dat files:**
 
 .. code-block:: python
 
    # data file.
-   datafile = 'dn134011vana.d_dat'
+   datafiles = 'dn134011vana.d_dat,dnstof.d_dat'
 
    # Load dataset
-   ws = LoadDNSLegacy(datafile, Normalization='monitor')
+   ws = LoadDNSLegacy(datafiles, Normalization='monitor')
 
-   print "This workspace has", ws.getNumDims(), "dimensions and has", ws.getNumberHistograms(), "histograms."
+   print("This workspace has {} dimensions and has {} histograms.".format(ws.getNumDims(), ws.getNumberHistograms()))
 
 Output:
 

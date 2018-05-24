@@ -469,7 +469,7 @@ public:
         // Shun use of Poco, which is slower.
         FILE *pFile;
         pFile = fopen(cstr, "w");
-        if (pFile != NULL) {
+        if (pFile != nullptr) {
           fclose(pFile);
         }
       }

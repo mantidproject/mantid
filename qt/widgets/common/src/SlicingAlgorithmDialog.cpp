@@ -142,7 +142,7 @@ void SlicingAlgorithmDialog::cleanLayoutOfDimensions(QLayout *layout) {
   for (int i = 0; i < itemCount; ++i) {
     QLayoutItem *pLayoutItem = layout->itemAt(i);
     QWidget *pWidget = pLayoutItem->widget();
-    if (pWidget != NULL) {
+    if (pWidget != nullptr) {
       // The label text contains the property name.
       QLabel *propertyLabel =
           dynamic_cast<QLabel *>(pWidget->layout()->itemAt(0)->widget());

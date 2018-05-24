@@ -231,7 +231,7 @@ void EQSANSLoad::readModeratorPosition(const std::string &line) {
 void EQSANSLoad::readSourceSlitSize(const std::string &line) {
   boost::regex re_key("wheel", boost::regex::icase);
   if (boost::regex_search(line, re_key)) {
-    boost::regex re_sig("([1-8]) wheel[ ]*([1-3])[ \\t]*=[ \\t]*(\\w+)");
+    boost::regex re_sig(R"(([1-8]) wheel[ ]*([1-3])[ \t]*=[ \t]*(\w+))");
     boost::smatch posVec;
     if (boost::regex_search(line, posVec, re_sig)) {
       if (posVec.size() == 4) {

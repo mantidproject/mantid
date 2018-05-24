@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -89,8 +89,8 @@ Output:
    ws = DiffractionFocussing(InputWorkspace='ws', GroupingFileName="4detector_cal_example_file.cal" \
         , PreserveEvents=False)
 
-   print "Number of focussed spectra: " + str(ws.getNumberHistograms())
-   print "What type is the workspace after focussing: " + ws.id()
+   print("Number of focussed spectra: " + str(ws.getNumberHistograms()))
+   print("What type is the workspace after focussing: " + ws.id())
 
 Output:
 

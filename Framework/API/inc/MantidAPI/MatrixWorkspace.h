@@ -17,8 +17,10 @@ namespace Indexing {
 class IndexInfo;
 }
 
-namespace Kernel {
+namespace Types {
+namespace Core {
 class DateAndTime;
+}
 }
 
 namespace Geometry {
@@ -30,11 +32,11 @@ class Axis;
 class SpectrumDetectorMapping;
 
 /// typedef for the image type
-typedef std::vector<std::vector<double>> MantidImage;
+using MantidImage = std::vector<std::vector<double>>;
 /// shared pointer to MantidImage
-typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
+using MantidImage_sptr = boost::shared_ptr<MantidImage>;
 /// shared pointer to const MantidImage
-typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
+using MantidImage_const_sptr = boost::shared_ptr<const MantidImage>;
 
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
@@ -141,7 +143,9 @@ public:
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
   virtual std::size_t size() const = 0;
-  /// Returns the size of each block of data returned by the dataY accessors
+  /// Returns the size of each block of data returned by the dataY accessors.
+  /// This throws an exception if the lengths are not identical across the
+  /// spectra.
   virtual std::size_t blocksize() const = 0;
   /// Returns the number of histograms in the workspace
   virtual std::size_t getNumberHistograms() const = 0;
@@ -151,8 +155,8 @@ public:
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
 
-  virtual Kernel::DateAndTime getFirstPulseTime() const;
-  Kernel::DateAndTime getLastPulseTime() const;
+  virtual Types::Core::DateAndTime getFirstPulseTime() const;
+  Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the bin index for a given X value of a given workspace index
   size_t binIndexOf(const double xValue, const std::size_t = 0) const;
@@ -445,8 +449,9 @@ public:
   bool hasMaskedBins(const size_t &workspaceIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
-  typedef std::map<size_t, double> MaskList;
+  using MaskList = std::map<size_t, double>;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -494,7 +499,7 @@ public:
       const Mantid::API::MDNormalization &normalization) const override;
   /// Create iterators. Partitions the iterators according to the number of
   /// cores.
-  std::vector<IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
@@ -507,6 +512,9 @@ public:
   /// @return the special coordinate system used if any.
   Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const override;
+
+  // Check if this class has an oriented lattice on a sample object
+  virtual bool hasOrientedLattice() const override;
 
   //=====================================================================================
   // End IMDWorkspace methods
@@ -554,8 +562,7 @@ protected:
   /// be overloaded.
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength) = 0;
-  virtual void init(const std::size_t &NVectors,
-                    const HistogramData::Histogram &histogram) = 0;
+  virtual void init(const HistogramData::Histogram &histogram) = 0;
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
@@ -615,9 +622,9 @@ protected:
 };
 
 /// shared pointer to the matrix workspace base class
-typedef boost::shared_ptr<MatrixWorkspace> MatrixWorkspace_sptr;
+using MatrixWorkspace_sptr = boost::shared_ptr<MatrixWorkspace>;
 /// shared pointer to the matrix workspace base class (const version)
-typedef boost::shared_ptr<const MatrixWorkspace> MatrixWorkspace_const_sptr;
+using MatrixWorkspace_const_sptr = boost::shared_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid

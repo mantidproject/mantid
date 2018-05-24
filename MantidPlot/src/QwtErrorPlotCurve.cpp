@@ -36,14 +36,16 @@
 
 QwtErrorPlotCurve::QwtErrorPlotCurve(int orientation, Table *t,
                                      const QString &name)
-    : DataCurve(t, QString(), name), ErrorBarSettings(), d_master_curve(NULL) {
+    : DataCurve(t, QString(), name), ErrorBarSettings(),
+      d_master_curve(nullptr) {
   type = orientation;
   setType(GraphOptions::ErrorBars);
   setStyle(QwtPlotCurve::UserCurve);
 }
 
 QwtErrorPlotCurve::QwtErrorPlotCurve(Table *t, const QString &name)
-    : DataCurve(t, QString(), name), ErrorBarSettings(), d_master_curve(NULL) {
+    : DataCurve(t, QString(), name), ErrorBarSettings(),
+      d_master_curve(nullptr) {
   type = Vertical;
   setType(GraphOptions::ErrorBars);
   setStyle(QwtPlotCurve::UserCurve);

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -72,7 +72,7 @@ Usage
     ws.setY(50,noisyY)
     (wsOut, numFailures) = CreatePSDBleedMask(ws,MaxTubeFramerate=10, NIgnoredCentralPixels=2)
 
-    print "%i spectra have been masked in wsOut" % numFailures
+    print("{} spectra have been masked in wsOut".format(numFailures))
 
 
 Output:

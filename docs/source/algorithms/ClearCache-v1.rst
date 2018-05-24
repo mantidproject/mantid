@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -20,20 +20,19 @@ Usage
 
 **Example - ClearCache**
 
-.. testcode:: ClearCacheExample
+.. code-block:: python
 
    filesRemoved = ClearCache(DownloadedInstrumentFileCache=True)
 
    # Print the result
-   print "%i files were removed" % filesRemoved
+   print("{} files were removed".format(filesRemoved))
 
    # This will repopulate the cache you have just cleared
    DownloadInstrument()
 
 Output:
 
-.. testoutput:: ClearCacheExample
-   :options: +ELLIPSIS
+.. code-block:: python
 
    ... files were removed
 

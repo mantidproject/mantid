@@ -18,7 +18,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
@@ -400,8 +400,9 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
     const MantidVec Y = inputWs->readY(nHistoIndex);
     const MantidVec E = inputWs->readE(nHistoIndex);
 
-    for (size_t nBinIndex = 0; nBinIndex < inputWs->blocksize(); ++nBinIndex) {
-      auto value_index = outWs->getLinearIndex(nBinIndex, nHistoIndex);
+    const size_t numBins = Y.size();
+    for (size_t nBinIndex = 0; nBinIndex < numBins; ++nBinIndex) {
+      const auto value_index = outWs->getLinearIndex(nBinIndex, nHistoIndex);
       outWs->setSignalAt(value_index, Y[nBinIndex]);
       outWs->setErrorSquaredAt(value_index, E[nBinIndex] * E[nBinIndex]);
     }
@@ -418,7 +419,7 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
  * @param outputDimensions : used for the column headings for Dump Vertexes
  */
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
-    MatrixWorkspace_const_sptr inputWS,
+    const MatrixWorkspace_const_sptr &inputWS,
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
     bool dumpVertexes, std::string outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
@@ -483,8 +484,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
       auto inputQ =
           m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
-      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
-                                                   zBinsVec);
+      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
+                                                   *outWS, zBinsVec);
       // Find which qy bin this point lies in
       const auto qIndex =
           std::upper_bound(zBinsVec.begin(), zBinsVec.end(), inputQ[0].Y()) -

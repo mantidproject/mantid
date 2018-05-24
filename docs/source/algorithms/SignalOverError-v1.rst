@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,10 +23,10 @@ Usage
     ws = CreateSampleWorkspace("Event")
     wsOut = SignalOverError(ws)
 
-    print "Values from every 10th bin"
-    print "bin\tY\tE\tY_New"
+    print("Values from every 10th bin")
+    print("bin\tY\tE\tY_New")
     for i in range (0,ws.blocksize(),10):
-        print "%i\t%.2f\t%.2f\t%.2f" % (i,ws.readY(0)[i],ws.readE(0)[i],wsOut.readY(0)[i])
+        print("{}\t{:.2f}\t{:.2f}\t{:.2f}".format(i,ws.readY(0)[i],ws.readE(0)[i],wsOut.readY(0)[i]))
 
 
 Output:

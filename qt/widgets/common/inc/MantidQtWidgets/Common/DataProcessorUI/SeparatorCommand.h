@@ -37,8 +37,7 @@ class SeparatorCommand : public CommandBase {
 public:
   SeparatorCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  SeparatorCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  SeparatorCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~SeparatorCommand(){};
 
   void execute() override{};
@@ -47,6 +46,7 @@ public:
   QString tooltip() override { return QString(); }
   QString whatsthis() override { return QString(); }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

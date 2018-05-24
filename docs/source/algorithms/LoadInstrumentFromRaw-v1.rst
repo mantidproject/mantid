@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,17 +34,17 @@ Usage
 
    inst = ws.getInstrument()
 
-   print "The name of the instrument is \"%s\"." % inst.getName().strip()
-   print "The position of the source is %s." % str(inst.getSource().getPos())
-   print "The position of detector 5 is %s." % str(inst.getDetector(5).getPos())
-   print "Is detector 1 a monitor? " + str(inst.getDetector(1).isMonitor())
-   print "Is detector 8 a monitor? " + str(inst.getDetector(8).isMonitor())
+   print("The name of the instrument is '{}'.".format(inst.getName().strip()))
+   print("The position of the source is {}.".format(inst.getSource().getPos()))
+   print("The position of detector 5 is {}.".format(inst.getDetector(5).getPos()))
+   print("Is detector 1 a monitor? {}".format(inst.getDetector(1).isMonitor()))
+   print("Is detector 8 a monitor? {}".format(inst.getDetector(8).isMonitor()))
 
 Output:
 
 .. testoutput:: Ex
 
-   The name of the instrument is "LOQ".
+   The name of the instrument is 'LOQ'.
    The position of the source is [0,0,-11].
    The position of detector 5 is [0,0,-11.15].
    Is detector 1 a monitor? True

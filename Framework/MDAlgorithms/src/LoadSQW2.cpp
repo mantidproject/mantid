@@ -23,14 +23,12 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 using API::ExperimentInfo;
-using Geometry::MDHistoDimension;
 using Geometry::MDHistoDimensionBuilder;
 using Geometry::Goniometer;
 using Geometry::OrientedLattice;
 using Kernel::BinaryStreamReader;
 using Kernel::Logger;
 using Kernel::DblMatrix;
-using Kernel::Matrix;
 using Kernel::V3D;
 
 namespace {
@@ -93,7 +91,7 @@ void LoadSQW2::init() {
   using namespace API;
   using Kernel::PropertyWithValue;
   using Kernel::StringListValidator;
-  typedef std::initializer_list<std::string> StringInitializerList;
+  using StringInitializerList = std::initializer_list<std::string>;
 
   // Inputs
   declareProperty(

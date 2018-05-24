@@ -9,6 +9,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "IndirectMoments.h"
@@ -75,7 +76,7 @@ IndirectDataReduction::~IndirectDataReduction() {
  */
 void IndirectDataReduction::helpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect_DataReduction"));
+      nullptr, QString("Indirect Data Reduction"));
 }
 
 /**
@@ -143,9 +144,8 @@ void IndirectDataReduction::initLayout() {
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 
-  std::string facility =
-      Mantid::Kernel::ConfigService::Instance().getString("default.facility");
-  filterUiForFacility(QString::fromStdString(facility));
+  auto facility = Mantid::Kernel::ConfigService::Instance().getFacility();
+  filterUiForFacility(QString::fromStdString(facility.name()));
   emit newInstrumentConfiguration();
 }
 
@@ -177,9 +177,9 @@ void IndirectDataReduction::instrumentSetupChanged(
   m_instWorkspace = loadInstrumentIfNotExist(instrumentName.toStdString(),
                                              analyser.toStdString(),
                                              reflection.toStdString());
-  instrumentLoadingDone(m_instWorkspace == NULL);
+  instrumentLoadingDone(m_instWorkspace == nullptr);
 
-  if (m_instWorkspace != NULL)
+  if (m_instWorkspace != nullptr)
     emit newInstrumentConfiguration();
 }
 
@@ -270,14 +270,14 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   if (instrumentName == "IRIS" && analyser == "fmica")
     analyser = "mica";
 
-  if (m_instWorkspace == NULL) {
+  if (m_instWorkspace == nullptr) {
     g_log.warning("Instrument workspace not loaded");
     return instDetails;
   }
 
   // Get the instrument
   auto instrument = m_instWorkspace->getInstrument();
-  if (instrument == NULL) {
+  if (instrument == nullptr) {
     g_log.warning("Instrument workspace has no instrument");
     return instDetails;
   }
@@ -292,7 +292,7 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
 
       QString value = getInstrumentParameterFrom(instrument, key);
 
-      if (value.isEmpty() && component != NULL)
+      if (value.isEmpty() && component != nullptr)
         value = getInstrumentParameterFrom(component, key);
 
       instDetails[QString::fromStdString(key)] = value;
@@ -463,7 +463,6 @@ void IndirectDataReduction::saveSettings() {
 void IndirectDataReduction::filterUiForFacility(QString facility) {
   g_log.information() << "Facility selected: " << facility.toStdString()
                       << '\n';
-
   QStringList enabledTabs;
   QStringList disabledInstruments;
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -180,8 +180,8 @@ Usage
    mdws = LoadSQW('test_horace_reader.sqw');
    
    # Check results
-   print "Workspace type is: ",mdws.id()
-   print "Workspace has:{0:2} dimensions and contains: {1:4} MD events".format(mdws.getNumDims(),mdws.getNEvents())
+   print("Workspace type is:  {}".format(mdws.id()))
+   print("Workspace has:{0:2} dimensions and contains: {1:4} MD events".format(mdws.getNumDims(),mdws.getNEvents()))
    
 Output:
 

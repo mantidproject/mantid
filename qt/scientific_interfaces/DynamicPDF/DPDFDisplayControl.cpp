@@ -4,7 +4,7 @@
 // Mantid Headers from the same project
 #include "DPDFInputDataControl.h"
 // Mantid headers from other projects
-#include "MantidQtWidgets/Common/DisplayCurveFit.h"
+#include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

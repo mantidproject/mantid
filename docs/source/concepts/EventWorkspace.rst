@@ -59,7 +59,7 @@ If you want to check if a variable points to something that is an Event Workspac
     eventWS = CreateSampleWorkspace(WorkspaceType="Event")
 
     if isinstance(eventWS, IEventWorkspace):
-        print eventWS.name() + " is an " + eventWS.id()
+        print(eventWS.name() + " is an " + eventWS.id())
 
 Output:
 
@@ -78,8 +78,8 @@ In addition to the Properties of the :ref:`MatrixWorkspace <MatrixWorkspace>`, t
 
    eventWS = CreateSampleWorkspace(WorkspaceType="Event")
 
-   print "Number of events:", eventWS.getNumberEvents()
-   print "Maximum time of flight:", eventWS.getTofMax()
+   print("Number of events: {}".format(eventWS.getNumberEvents()))
+   print("Maximum time of flight: {}".format(eventWS.getTofMax()))
 
 .. testoutput:: EventWorkspaceProperties
    :hide:
@@ -104,11 +104,11 @@ Event Workspaces store their data in event lists, one per spectrum.  You can acc
    evList = eventWS.getSpectrum(0)
 
    # Get some basic information
-   print "Number of events in event List 0:", evList.getNumberEvents()
-   print "Minimum time of flight in event List 0:", evList.getTofMax()
-   print "Maximum time of flight in event List 0:", evList.getTofMax()
-   print "Memory used:", evList.getMemorySize()
-   print "Type of Events:", evList.getEventType()
+   print("Number of events in event List 0: {}".format(evList.getNumberEvents()))
+   print("Minimum time of flight in event List 0: {}".format(evList.getTofMax()))
+   print("Maximum time of flight in event List 0: {}".format(evList.getTofMax()))
+   print("Memory used: {}".format(evList.getMemorySize()))
+   print("Type of Events: {}".format(evList.getEventType()))
 
    # Get a vector of the pulse times of the events
    pulseTimes = evList.getPulseTimes()
@@ -123,10 +123,10 @@ Event Workspaces store their data in event lists, one per spectrum.  You can acc
    weightErrors = evList.getWeightErrors()
 
    # Integrate the events between  a range of X values
-   print "Events between 1000 and 5000:", evList.integrate(1000,5000,False)
+   print("Events between 1000 and 5000: {}".format(evList.integrate(1000,5000,False)))
 
    #Check if the list is sorted in TOF
-   print "Is sorted by TOF:", evList.isSortedByTof()
+   print("Is sorted by TOF: {}".format(evList.isSortedByTof()))
 
 .. testoutput:: EventWorkspaceEventLists
    :hide:
@@ -154,56 +154,52 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
    evList = eventWS.getSpectrum(0)
 
    # Add an offset to the pulsetime (wall-clock time) of each event in the list.
-   print "First pulse time before addPulsetime:", evList.getPulseTimes()[0]
+   print("First pulse time before addPulsetime: {}".format(evList.getPulseTimes()[0]))
    seconds = 200.0
    evList.addPulsetime(seconds)
-   print "First pulse time after addPulsetime:", evList.getPulseTimes()[0]
+   print("First pulse time after addPulsetime: {}".format(evList.getPulseTimes()[0]))
 
    # Add an offset to the TOF of each event in the list.
-   print "First tof before addTof:", evList.getTofs()[0]
+   print("First tof before addTof: {}".format(evList.getTofs()[0]))
    microseconds = 2.7
    evList.addTof(microseconds)
-   print "First tof after addTof:", evList.getTofs()[0]
+   print("First tof after addTof: {}".format(evList.getTofs()[0]))
 
    # Convert the tof units by scaling by a multiplier.
-   print "First tof before scaleTof:", evList.getTofs()[0]
+   print("First tof before scaleTof: {}".format(evList.getTofs()[0]))
    factor = 1.5
    evList.scaleTof(factor)
-   print "First tof after scaleTof:", evList.getTofs()[0]
+   print("First tof after scaleTof: {}".format(evList.getTofs()[0]))
 
    # Multiply the weights in this event list by a scalar with an error.
-   print "First event weight before multiply:", evList.getWeights()[0], \
-         "+/-", math.sqrt(evList.getWeightErrors()[0])
+   print("First event weight before multiply: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
    factor = 10.0
    error = 5.0
    evList.multiply(factor,error)
-   print "First event weight after multiply:", evList.getWeights()[0], \
-         "+/-", math.sqrt(evList.getWeightErrors()[0])
+   print("First event weight after multiply: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
 
    # Divide the weights in this event list by a scalar with an error.
-   print "First event weight before divide:", evList.getWeights()[0], \
-         "+/-", math.sqrt(evList.getWeightErrors()[0])
+   print("First event weight before divide: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
    factor = 1.5
    error = 0.0
    evList.divide(factor,error)
-   print "First event weight after divide:", evList.getWeights()[0], \
-         "+/-", math.sqrt(evList.getWeightErrors()[0])
+   print("First event weight after divide: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
 
    # Mask out events that have a tof between tofMin and tofMax (inclusively)
-   print "Number of events before masking:", evList.getNumberEvents()
+   print("Number of events before masking: {}".format(evList.getNumberEvents()))
    evList.maskTof(1000,5000)
-   print "Number of events after masking:", evList.getNumberEvents()
+   print("Number of events after masking: {}".format(evList.getNumberEvents()))
 
 .. testoutput:: ChangingEventLists
    :hide:
    :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
 
-   First pulse time before addPulsetime: 2010-01-01T00:32:55...
-   First pulse time after addPulsetime: 2010-01-01T00:36:15...
-   First tof before addTof: 118...
-   First tof after addTof: 121...
-   First tof before scaleTof: 121...
-   First tof after scaleTof: 181...
+   First pulse time before addPulsetime: 2010-01-01T00:3...
+   First pulse time after addPulsetime: 2010-01-01T00:3...
+   First tof before addTof: 1...
+   First tof after addTof: 1...
+   First tof before scaleTof: 1...
+   First tof after scaleTof: 2...
    First event weight before multiply: 1.0... +/- 1.0...
    First event weight after multiply: 10.0 +/- 3.34...
    First event weight before divide: 10.0 +/- 3.34...

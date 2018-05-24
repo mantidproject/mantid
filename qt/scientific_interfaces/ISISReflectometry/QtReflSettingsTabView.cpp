@@ -26,10 +26,10 @@ Initialise the interface
 void QtReflSettingsTabView::initLayout() {
   m_ui.setupUi(this);
 
-  QtReflSettingsView *settings_1 = new QtReflSettingsView(this);
+  QtReflSettingsView *settings_1 = new QtReflSettingsView(0, this);
   m_ui.toolbox->addItem(settings_1, "Group 1");
 
-  QtReflSettingsView *settings_2 = new QtReflSettingsView(this);
+  QtReflSettingsView *settings_2 = new QtReflSettingsView(1, this);
   m_ui.toolbox->addItem(settings_2, "Group 2");
 
   std::vector<IReflSettingsPresenter *> presenters;

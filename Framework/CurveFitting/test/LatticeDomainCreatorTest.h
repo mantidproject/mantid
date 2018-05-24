@@ -215,7 +215,7 @@ private:
     friend class LatticeDomainCreatorTest;
 
   public:
-    TestableLatticeDomainCreator() : LatticeDomainCreator(NULL, "") {}
+    TestableLatticeDomainCreator() : LatticeDomainCreator(nullptr, "") {}
 
     void setWorkspace(const Workspace_sptr &ws) { m_workspace = ws; }
   };

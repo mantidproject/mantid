@@ -80,6 +80,9 @@ public:
   const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadEventNexus", "SaveISISNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Summary of algorithms purpose
@@ -146,6 +149,9 @@ private:
   // build the list of spectra numbers to load and include in the spectra list
   void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
                                      DataBlockComposite &dataBlockComposite);
+
+  /// Check if any of the spectra block ranges overlap
+  void checkOverlappingSpectraRange();
 
   /// The name and path of the input file
   std::string m_filename;

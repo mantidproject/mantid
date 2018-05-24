@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -24,11 +24,11 @@ Usage
     norm=NormaliseByThickness(raw,SampleThickness=10)
 
     #do a quick check
-    print norm[1]
-    print "Min(raw)=",raw.dataY(0).min()
-    print "Min(norm)=",norm[0].dataY(0).min()
-    print "Max(raw)=",raw.dataY(0).max()
-    print "Max(norm)=",norm[0].dataY(0).max()   
+    print(norm[1])
+    print("Min(raw)= {}".format(raw.dataY(0).min()))
+    print("Min(norm)= {}".format(norm[0].dataY(0).min()))
+    print("Max(raw)= {}".format(raw.dataY(0).max()))
+    print("Max(norm)= {}".format(norm[0].dataY(0).max()))
     
     
 .. testcleanup:: NormaliseByThicness

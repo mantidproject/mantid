@@ -20,8 +20,8 @@ else()
 
   # Download and unpack googletest at configure time
   configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/GoogleTest.in
-                 ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                 ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt @ONLY)
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} .
                   RESULT_VARIABLE result
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
   if(result)

@@ -52,18 +52,15 @@ void ProcessingAlgorithmBase::countWsProperties() {
 }
 
 // Returns the input workspaces properties defined for this algorithm
-std::vector<QString>
-ProcessingAlgorithmBase::getInputWsProperties() {
+std::vector<QString> ProcessingAlgorithmBase::getInputWsProperties() {
   return m_inputWsProperties;
 }
 // Returns the input str list properties defined for this algorithm
-std::vector<QString>
-ProcessingAlgorithmBase::getInputStrListProperties() {
+std::vector<QString> ProcessingAlgorithmBase::getInputStrListProperties() {
   return m_inputStrListProperties;
 }
 // Returns the output workspaces properties defined for this algorithm
-std::vector<QString>
-ProcessingAlgorithmBase::getOutputWsProperties() {
+std::vector<QString> ProcessingAlgorithmBase::getOutputWsProperties() {
   return m_OutputWsProperties;
 }
 
@@ -73,8 +70,7 @@ ProcessingAlgorithmBase::getOutputWsProperties() {
 * @return :: the string as a vector
 */
 std::vector<QString>
-ProcessingAlgorithmBase::convertStringToVector(
-    const QString &text) {
+ProcessingAlgorithmBase::convertStringToVector(const QString &text) {
 
   if (text.isEmpty())
     return std::vector<QString>();

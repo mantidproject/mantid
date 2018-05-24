@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,14 +22,14 @@ Usage
     instruments = CatalogListInstruments()
 
     # How many instruments are at ISIS?
-    print "The number of instruments at ISIS is:" + str(len(instruments))
+    print("The number of instruments at ISIS is: {}".format(len(instruments)))
 
     for instrument in instruments:
-        print "Instrument name is: " + instrument
+        print("Instrument name is: {}".format(instrument))
 
     # Verify that the instrument belongs to ISIS.
     instrument = instruments[0]
-    print "The facility of instrument " + instrument + " is: " + str(ConfigService.getInstrument(instrument).facility())
+    print("The facility of instrument {} is: {}".format(instrument, ConfigService.getInstrument(instrument).facility()))
 
 Output:
 

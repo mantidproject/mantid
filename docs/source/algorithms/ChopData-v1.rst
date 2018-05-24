@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -62,10 +62,10 @@ Usage
    # Chop the workspace roughly in two.
    result = ChopData(ws, NChops=2, Step=time_diff/2)
 
-   print "The time range of the original workspace was %i." % time_diff
-   print "The number of bins in the orginal workspace was %i." % ws.blocksize()
-   print "The number of bins in the 1st chop is %i." % result[0][0].blocksize()
-   print "The number of bins in the 2nd chop is %i." % result[0][1].blocksize()
+   print("The time range of the original workspace was {:.0f}.".format(time_diff))
+   print("The number of bins in the orginal workspace was {}.".format(ws.blocksize()))
+   print("The number of bins in the 1st chop is {}.".format(result[0][0].blocksize()))
+   print("The number of bins in the 2nd chop is {}.".format(result[0][1].blocksize()))
 
 Output:
 

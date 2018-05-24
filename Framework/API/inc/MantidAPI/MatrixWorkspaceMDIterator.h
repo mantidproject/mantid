@@ -60,10 +60,12 @@ public:
 
   signal_t getError() const override;
 
-  coord_t *getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
 
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 
@@ -127,8 +129,8 @@ private:
   /// The Y (vertical, e.g. spectra) dimension
   Mantid::Geometry::IMDDimension_const_sptr m_dimY;
 
-  /// Blocksize of workspace
-  size_t m_blockSize;
+  /// vector of starting index of the unraveled data array
+  std::vector<size_t> m_startIndices;
 
   /// Workspace index at which the iterator begins
   size_t m_beginWI;

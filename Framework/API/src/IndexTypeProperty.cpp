@@ -18,9 +18,9 @@ IndexTypeProperty::IndexTypeProperty(const std::string &name,
 
 IndexType IndexTypeProperty::selectedType() const {
   auto val = this->value();
-  if (val.compare("SpectrumNumber") == 0)
+  if (val == "SpectrumNumber")
     return IndexType::SpectrumNum;
-  else if (val.compare("WorkspaceIndex") == 0)
+  else if (val == "WorkspaceIndex")
     return IndexType::WorkspaceIndex;
   else if (val.empty())
     throw std::runtime_error("This value cannot be used until initialised");
@@ -30,8 +30,8 @@ IndexType IndexTypeProperty::selectedType() const {
 
 int IndexTypeProperty::allowedTypes() const {
   int types(0);
-  auto beg = m_allowedValues.cbegin();
-  auto end = m_allowedValues.cend();
+  const auto beg = m_allowedValues.cbegin();
+  const auto end = m_allowedValues.cend();
 
   if (std::find(beg, end, "SpectrumNumber") != end) {
     types |= IndexType::SpectrumNum;
@@ -50,7 +50,7 @@ std::vector<std::string> IndexTypeProperty::allowedValues() const {
 
 bool IndexTypeProperty::isMultipleSelectionAllowed() { return false; }
 
-std::string &IndexTypeProperty::operator=(API::IndexType type) {
+IndexTypeProperty &IndexTypeProperty::operator=(API::IndexType type) {
   std::string val;
 
   switch (type) {
@@ -62,7 +62,8 @@ std::string &IndexTypeProperty::operator=(API::IndexType type) {
     break;
   }
 
-  return *this = val;
+  *this = val;
+  return *this;
 }
 
 std::string IndexTypeProperty::generatePropertyName(const std::string &name) {

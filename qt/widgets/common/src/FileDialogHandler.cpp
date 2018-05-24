@@ -6,7 +6,7 @@
 #include <sstream>
 
 namespace { // anonymous namespace
-const boost::regex FILE_EXT_REG_EXP{"^.+\\s+\\((\\S+)\\)$"};
+const boost::regex FILE_EXT_REG_EXP{R"(^.+\s+\((\S+)\)$)"};
 const QString ALL_FILES("All Files (*)");
 
 QString getExtensionFromFilter(const QString &selectedFilter) {
@@ -156,7 +156,7 @@ QString getCaption(const std::string &dialogName,
   // generate the dialog title
   auto dialogTitle = QString::fromStdString(dialogName);
   if (bool(prop)) {
-    const auto name = prop->name();
+    const auto &name = prop->name();
     if (name != "Filename" && prop->name() != "Directory" &&
         prop->name() != "Dir") {
       dialogTitle.append(" - ");

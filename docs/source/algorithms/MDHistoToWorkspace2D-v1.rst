@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -35,8 +35,8 @@ Usage
    output = MDHistoToWorkspace2D(InputWorkspace='input')
 
    # print 6th group of 4 bins in both input and output workspaces
-   print "part of MD workspace",input.getSignalArray()[1,1]
-   print "corresponding part of 2D workspace",output.dataY(5) 
+   print("part of MD workspace {}".format(input.getSignalArray()[1,1]))
+   print("corresponding part of 2D workspace {}".format(output.dataY(5) ))
 
 Output:
 

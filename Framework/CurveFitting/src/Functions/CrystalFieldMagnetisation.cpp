@@ -75,11 +75,8 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 }
 }
 
-DECLARE_FUNCTION(CrystalFieldMagnetisation)
-
-CrystalFieldMagnetisation::CrystalFieldMagnetisation()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), m_nre(0),
-      m_setDirect(false) {
+CrystalFieldMagnetisationBase::CrystalFieldMagnetisationBase()
+    : API::IFunction1D(), m_nre(0) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
@@ -87,16 +84,9 @@ CrystalFieldMagnetisation::CrystalFieldMagnetisation()
   declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
 }
 
-// Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMagnetisation::setHamiltonian(const ComplexFortranMatrix &ham,
-                                               const int nre) {
-  m_setDirect = true;
-  m_ham = ham;
-  m_nre = nre;
-}
-
-void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
-                                           const size_t nData) const {
+void CrystalFieldMagnetisationBase::function1D(double *out,
+                                               const double *xValues,
+                                               const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
   if (Hdir.size() != 3) {
@@ -122,28 +112,11 @@ void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
                         ? NAMUB
                         : (boost::iequals(unit, "cgs") ? NAMUB * 1000. : 1.);
   const bool iscgs = boost::iequals(unit, "cgs");
-  if (!m_setDirect) {
-    // Because this method is const, we can't change the stored en / wf
-    // Use temporary variables instead.
-    DoubleFortranVector en;
-    ComplexFortranMatrix wf;
-    ComplexFortranMatrix ham;
-    ComplexFortranMatrix hz;
-    int nre = 0;
-    calculateEigenSystem(en, wf, ham, hz, nre);
-    ham += hz;
-    if (powder) {
-      calculate_powder(out, xValues, nData, ham, nre, T, convfact, iscgs);
-    } else {
-      calculate(out, xValues, nData, ham, nre, H, T, convfact, iscgs);
-    }
+  // Use stored values
+  if (powder) {
+    calculate_powder(out, xValues, nData, m_ham, m_nre, T, convfact, iscgs);
   } else {
-    // Use stored values
-    if (powder) {
-      calculate_powder(out, xValues, nData, m_ham, m_nre, T, convfact, iscgs);
-    } else {
-      calculate(out, xValues, nData, m_ham, m_nre, H, T, convfact, iscgs);
-    }
+    calculate(out, xValues, nData, m_ham, m_nre, H, T, convfact, iscgs);
   }
   auto fact = getAttribute("ScaleFactor").asDouble();
   if (fact != 1.0) {
@@ -151,6 +124,42 @@ void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
       out[i] *= fact;
     }
   }
+}
+
+DECLARE_FUNCTION(CrystalFieldMagnetisation)
+
+CrystalFieldMagnetisation::CrystalFieldMagnetisation()
+    : CrystalFieldPeaksBase(), CrystalFieldMagnetisationBase(),
+      m_setDirect(false) {}
+
+// Sets the base crystal field Hamiltonian matrix
+void CrystalFieldMagnetisation::setHamiltonian(const ComplexFortranMatrix &ham,
+                                               const int nre) {
+  m_setDirect = true;
+  m_ham = ham;
+  m_nre = nre;
+}
+
+void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
+                                           const size_t nData) const {
+  if (!m_setDirect) {
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    ComplexFortranMatrix hz;
+    calculateEigenSystem(en, wf, m_ham, hz, m_nre);
+    m_ham += hz;
+  }
+  CrystalFieldMagnetisationBase::function1D(out, xValues, nData);
+}
+
+CrystalFieldMagnetisationCalculation::CrystalFieldMagnetisationCalculation()
+    : API::ParamFunction(), CrystalFieldMagnetisationBase() {}
+
+// Sets the base crystal field Hamiltonian matrix
+void CrystalFieldMagnetisationCalculation::setHamiltonian(
+    const ComplexFortranMatrix &ham, const int nre) {
+  m_ham = ham;
+  m_nre = nre;
 }
 
 } // namespace Functions

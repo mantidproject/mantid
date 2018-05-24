@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,7 +27,7 @@ Usage
    # Load the MIBEMOL dataset into a workspace2D.
    ws = Load('LLB_d22418.nxs')
 
-   print "This workspace has", ws.getNumDims(), "dimensions and its title is:", ws.getTitle()
+   print("This workspace has {} dimensions and its title is: ".format(ws.getNumDims(), ws.getTitle()))
 
 Output:
 

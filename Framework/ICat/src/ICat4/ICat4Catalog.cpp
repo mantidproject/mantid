@@ -14,6 +14,7 @@ namespace Mantid {
 namespace ICat {
 using namespace Kernel;
 using namespace ICat4;
+using Types::Core::DateAndTime;
 
 namespace {
 /// static logger

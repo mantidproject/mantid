@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -21,7 +21,7 @@ Usage
 
    w1 = LoadVisionInelastic("VIS_19351.nxs.h5")
 
-   print "Number of spectra:", w1.getNumberHistograms()
+   print("Number of spectra: {}".format(w1.getNumberHistograms()))
 
 .. testoutput:: 
 
@@ -33,7 +33,7 @@ Usage
 
    w1 = LoadVisionInelastic("VIS_19351.nxs.h5",Banks="forward")
 
-   print "Number of spectra:", w1.getNumberHistograms()
+   print("Number of spectra: {}".format(w1.getNumberHistograms()))
 
 .. testoutput::
 
@@ -45,7 +45,7 @@ Usage
 
    w1 = LoadVisionInelastic("VIS_19351.nxs.h5",Banks="backward,bank3")
 
-   print "Number of spectra:", w1.getNumberHistograms()
+   print("Number of spectra: {}".format(w1.getNumberHistograms()))
 
 .. testoutput::
 

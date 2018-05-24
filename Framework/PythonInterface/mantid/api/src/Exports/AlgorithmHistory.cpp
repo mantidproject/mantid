@@ -12,11 +12,7 @@
 #include <boost/python/self.hpp>
 
 using Mantid::API::AlgorithmHistory;
-using Mantid::Kernel::PropertyHistory;
-using Mantid::API::IAlgorithm;
 using namespace boost::python;
-
-namespace Policies = Mantid::PythonInterface::Policies;
 
 /**
  * Return a Python list of child history objects from the history as this is
@@ -42,7 +38,7 @@ getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
  */
 boost::python::object getPropertiesAsList(AlgorithmHistory &self) {
   boost::python::list names;
-  const auto histories = self.getProperties();
+  const auto &histories = self.getProperties();
   for (const auto &historie : histories) {
     names.append(historie);
   }

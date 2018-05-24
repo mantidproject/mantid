@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,15 +26,15 @@ Usage
    
    # Find peaks in region when the Peak sits in the centre of a box
    in_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=0.1, Extents=[-1.0,1.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
-   print in_box_table.row(0)
+   print("{{'Distance': {Distance}, 'PeakIndex': {PeakIndex}, 'Intersecting': {Intersecting}}}".format(**in_box_table.row(0)))
    
    # Find peaks in region when the peak is just outside the box (by radius)
    just_outside_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=0.999, Extents=[1.0,2.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
-   print just_outside_box_table.row(0)
+   print("{{'Distance': {Distance}, 'PeakIndex': {PeakIndex}, 'Intersecting': {Intersecting}}}".format(**just_outside_box_table.row(0)))
    
    # Find peaks in region when the peak is just inside the box (by radius)
-   just_intesecting_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=1.00, Extents=[1.0,2.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
-   print just_intesecting_box_table.row(0)
+   just_intersecting_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=1.00, Extents=[1.0,2.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
+   print("{{'Distance': {Distance}, 'PeakIndex': {PeakIndex}, 'Intersecting': {Intersecting}}}".format(**just_intersecting_box_table.row(0)))
    
 Output:
 

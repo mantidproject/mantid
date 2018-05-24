@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,11 +23,11 @@ Usage
     datafiles = CatalogGetDataFiles(InvestigationId = '1390028', Session = session.getPropertyValue("Session"))
 
     # Verify that we have any datafiles in the returned workspace.
-    print "The number of datafiles in this investigation is: " + str(len(datafiles))
+    print("The number of datafiles in this investigation is: {}".format(len(datafiles)))
 
     # Output the ID of the datafiles related to the given investigation.
     for row in datafiles:
-        print "A datafile with id '" + row['Id'] + "' exists."
+        print("A datafile with id '{}' exists.".format(row['Id']))
 
 Output:
 

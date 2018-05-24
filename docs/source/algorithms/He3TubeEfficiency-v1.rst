@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,8 +53,8 @@ for a histogram workspace will be given.
     ws1 = He3TubeEfficiency(ws, TubePressure='10',TubeThickness='0.0008',TubeTemperature='290')
 
     # show the before and after for the first detector for the first 5 bins
-    print "Original counts:", str(ws.readY(0)[:5])
-    print "Corrected counts:", str(ws1.readY(0)[:5])
+    print('Original counts: {}'.format(ws.readY(0)[:5]))
+    print('Corrected counts: {}'.format(ws1.readY(0)[:5]))
 
 Output:
 

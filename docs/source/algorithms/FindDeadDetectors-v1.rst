@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -43,17 +43,17 @@ Usage
     str_data=[0.4,5.0,0.001,0.0,0.0,0.0,0.0,0.0,1.0,1.0]
     ws.setY(20,np.array(str_data))
 
-    print "With no range will find very dead"
+    print("With no range will find very dead")
     (wsOut,detList) = FindDeadDetectors(ws)
-    print str(detList)
+    print(detList)
 
-    print "\nwith a lower range will find very dead and drop off"
+    print("\nwith a lower range will find very dead and drop off")
     (wsOut,detList) = FindDeadDetectors(ws,RangeLower=8e3)
-    print str(detList)
+    print(detList)
 
-    print "\nwith a lower range and upper range will find all three"
+    print("\nwith a lower range and upper range will find all three")
     (wsOut,detList) = FindDeadDetectors(ws,RangeLower=8e3, rangeUpper=1.6e4)
-    print str(detList)
+    print(detList)
 
 Output:
 

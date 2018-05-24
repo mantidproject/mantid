@@ -1,10 +1,9 @@
 #include <sstream>
 #include <cfloat>
 
-#include <QtGui>
 #include <QVector>
 #include <QString>
-#include <qimage.h>
+#include <QImage>
 #include <qwt_scale_engine.h>
 
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
@@ -43,7 +42,7 @@ SpectrumDisplay::SpectrumDisplay(QwtPlot *spectrumPlot,
       m_rangeHandler(rangeHander), m_hGraphDisplay(hGraph),
       m_vGraphDisplay(vGraph), m_pointedAtX(0.0), m_pointedAtY(0.0),
       m_imageTable(tableWidget), m_totalXMin(0.0), m_totalXMax(0.0),
-      m_totalYMin(0.0), m_totalYMax(0.0), m_imagePicker(NULL) {
+      m_totalYMin(0.0), m_totalYMax(0.0), m_imagePicker(nullptr) {
   m_positiveColorTable = ColorMaps::GetColorMap(ColorMaps::HEAT, 256);
   m_negativeColorTable = ColorMaps::GetColorMap(ColorMaps::GRAY, 256);
 
@@ -137,7 +136,7 @@ void SpectrumDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
  *  other threads.
  */
 void SpectrumDisplay::updateRange() {
-  if (m_dataSource == 0)
+  if (m_dataSource == nullptr)
     return; // No image data to update
 
   if (dataSourceRangeChanged())
@@ -181,7 +180,7 @@ void SpectrumDisplay::handleResize() {
  *  other threads.
  */
 void SpectrumDisplay::updateImage() {
-  if (m_dataSource == 0) {
+  if (m_dataSource == nullptr) {
     return; // no image data to update
   }
 
@@ -367,7 +366,7 @@ QPair<double, double> SpectrumDisplay::getPlotInvTransform(QPoint point) {
 QPair<double, double>
 SpectrumDisplay::setPointedAtPoint(QPoint point, int mouseClick, bool isFront) {
   UNUSED_ARG(mouseClick);
-  if (m_dataSource == 0 || m_dataArray == 0)
+  if (m_dataSource == nullptr || m_dataArray == nullptr)
     return qMakePair(0.0, 0.0);
 
   QPair<double, double> transPoints = getPlotInvTransform(point);

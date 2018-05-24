@@ -37,9 +37,20 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+class CrystalFieldMagnetisationBase : public API::IFunction1D {
+public:
+  CrystalFieldMagnetisationBase();
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+
+protected:
+  mutable ComplexFortranMatrix m_ham;
+  mutable int m_nre;
+};
+
 class MANTID_CURVEFITTING_DLL CrystalFieldMagnetisation
     : public CrystalFieldPeaksBase,
-      public API::IFunction1D {
+      public CrystalFieldMagnetisationBase {
 public:
   CrystalFieldMagnetisation();
   std::string name() const override { return "CrystalFieldMagnetisation"; }
@@ -49,9 +60,17 @@ public:
                   const size_t nData) const override;
 
 private:
-  ComplexFortranMatrix m_ham;
-  int m_nre;
   bool m_setDirect;
+};
+
+class MANTID_CURVEFITTING_DLL CrystalFieldMagnetisationCalculation
+    : public API::ParamFunction,
+      public CrystalFieldMagnetisationBase {
+public:
+  CrystalFieldMagnetisationCalculation();
+  std::string name() const override { return "mh"; }
+  const std::string category() const override { return "General"; }
+  void setHamiltonian(const ComplexFortranMatrix &ham, const int nre);
 };
 
 } // namespace Functions

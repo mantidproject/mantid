@@ -30,7 +30,7 @@ double UserFunction2D::operator()(double x, double y) {
     parser.SetExpr((const std::string)d_formula.toAscii().constData());
     result = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, "MantidPlot - Input function error",
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
                           QString::fromStdString(e.GetMsg()));
   }
   return result;

@@ -11,7 +11,7 @@ from mantid.api import (FileFinder)
 from mantid.simpleapi import RenameWorkspace
 from sans.command_interface.ISISCommandInterface import (BatchReduce, SANS2D, MaskFile, AssignSample, AssignCan,
                                                          TransmissionSample, TransmissionCan, WavRangeReduction,
-                                                         UseCompatibilityMode)
+                                                         UseCompatibilityMode, FindBeamCentre)
 
 MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
@@ -60,3 +60,30 @@ class SANS2DMinimalSingleReductionTest_V2(stresstesting.MantidStressTest):
     def validate(self):
         self.disableChecking.append('Instrument')
         return "trans_test_rear", "SANSReductionGUI.nxs"
+
+
+class SANS2DSearchCentreGUI_V2(stresstesting.MantidStressTest):
+    """Minimal script to perform FindBeamCentre"""
+
+    def __init__(self):
+        super(SANS2DSearchCentreGUI_V2, self).__init__()
+        config['default.instrument'] = 'SANS2D'
+        self.tolerance_is_reller = True
+        self.tolerance = 1.0e-2
+
+    def runTest(self):
+        UseCompatibilityMode()
+        SANS2D()
+        MaskFile(MASKFILE)
+        AssignSample('22048')
+        AssignCan('22023')
+        TransmissionSample('22041', '22024')
+        TransmissionCan('22024', '22024')
+        centre = FindBeamCentre(rlow=41.0, rupp=280.0, xstart=float(150)/1000., ystart=float(-160)/1000.,
+                                tolerance=0.0001251, MaxIter=3, reduction_method=True)
+        self.assertDelta(centre['pos2'], -0.145, 0.0001)
+        self.assertDelta(centre['pos1'], 0.15, 0.0001)
+
+    def validate(self):
+        # there is no workspace to be checked against
+        return True

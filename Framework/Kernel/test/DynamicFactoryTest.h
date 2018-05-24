@@ -20,7 +20,7 @@ class CaseSensitiveIntFactory
     : public DynamicFactory<int, CaseSensitiveStringComparator> {};
 
 class DynamicFactoryTest : public CxxTest::TestSuite {
-  typedef boost::shared_ptr<int> int_ptr;
+  using int_ptr = boost::shared_ptr<int>;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -63,11 +63,11 @@ public:
     TS_ASSERT_THROWS(factory.createUnwrapped("testUnrappedEntry"),
                      std::runtime_error)
     factory.subscribe<int>("testUnwrappedEntry");
-    int *i = NULL;
+    int *i = nullptr;
     TS_ASSERT_THROWS_NOTHING(i = factory.createUnwrapped("testUnwrappedEntry"));
     delete i;
 
-    int *j = NULL;
+    int *j = nullptr;
     TS_ASSERT_THROWS_NOTHING(j = factory.createUnwrapped("TESTUnwrappedEntry"));
     delete j;
     factory.unsubscribe("testUnwrappedEntry");
@@ -78,7 +78,7 @@ public:
         caseSensitiveFactory.create("testUnrappedEntryCaseSensitive"),
         std::runtime_error)
     caseSensitiveFactory.subscribe<int>("testUnrappedEntryCaseSensitive");
-    int *i = NULL;
+    int *i = nullptr;
     TS_ASSERT_THROWS(
         i = caseSensitiveFactory.createUnwrapped(
             "testUnrappedentrycaseSENSITIVE"),

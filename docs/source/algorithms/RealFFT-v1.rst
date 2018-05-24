@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,14 +46,17 @@ Usage
   # Check the outputs
 
   # Check the sizes
-  print 'Number of bins in the input workspace   ',ws.blocksize()
-  print 'Number of bins in the forward transform ',transform.blocksize()
-  print 'Number of bins in the backward transform',ws_back.blocksize()
+  print('Number of bins in the input workspace    {}'.format(ws.blocksize()))
+  print('Number of bins in the forward transform  {}'.format(transform.blocksize()))
+  print('Number of bins in the backward transform {}'.format(ws_back.blocksize()))
 
   # Check the X axes
-  print 'Input starts at',ws.readX(10)[0],', ends at',ws.readX(10)[-1],', the width is',ws.readX(10)[-1] - ws.readX(10)[0]
-  print 'Forward starts at ',transform.readX(0)[0],', ends at',transform.readX(0)[-1],', the width is',transform.readX(0)[-1] - transform.readX(0)[0]
-  print 'Backward starts at',ws_back.readX(0)[0],', ends at',ws_back.readX(0)[-1],', the width is',ws_back.readX(0)[-1] - ws_back.readX(0)[0]
+  print('Input starts at {:.1f} , ends at {:.1f} , the width is {:.1f}'.format(
+        ws.readX(10)[0], ws.readX(10)[-1], ws.readX(10)[-1] - ws.readX(10)[0]))
+  print('Forward starts at  {:.1f} , ends at {:.2f} , the width is {:.2f}'.format(
+        transform.readX(0)[0], transform.readX(0)[-1], transform.readX(0)[-1] - transform.readX(0)[0]))
+  print('Backward starts at {:.1f} , ends at {:.1f} , the width is {:.1f}'.format(
+        ws_back.readX(0)[0], ws_back.readX(0)[-1], ws_back.readX(0)[-1] - ws_back.readX(0)[0]))
 
   # Check that the backward transform restores the original data.
   # The input spetrum values
@@ -62,9 +65,9 @@ Usage
   y_back = ws_back.readY(0)
   # Check that they are almost equal.
   # Using numpy array calculations show that all elements of arrays y_back and y10 are very close
-  print np.all( np.abs(y_back - y10) < 1e-15 )
+  print(np.all(np.abs(y_back - y10) < 1e-15))
   # but not equal
-  print np.all( y_back == y10 )
+  print(np.all(y_back == y10))
 
 
 Output

@@ -44,7 +44,7 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::Geometry::InstrumentDefinitionParser;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 namespace Strings = Mantid::Kernel::Strings;
 
 /** Set of helper methods for testing MDEventWorkspace things
@@ -81,8 +81,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
 
   for (int pix = 0; pix < numPixels; pix++) {
     for (int i = 0; i < numEvents; i++) {
-      retVal->getSpectrum(pix) += Mantid::DataObjects::TofEvent(
-          (i + 0.5) * binDelta, run_start + double(i));
+      retVal->getSpectrum(pix) +=
+          Types::Event::TofEvent((i + 0.5) * binDelta, run_start + double(i));
     }
     retVal->getSpectrum(pix).addDetectorID(pix);
   }

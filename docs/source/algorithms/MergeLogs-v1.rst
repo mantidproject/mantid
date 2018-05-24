@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,13 +32,13 @@ Usage
   prop1 = ws.run().getProperty("Phase1")
   prop2 = ws.run().getProperty("Phase2")
   
-  print "Phase 1's size = %d, Phase 2's size = %d, Merged size = %d." % (prop1.size(), prop2.size(), newprop.size())
-  for i in xrange(5):
-      print "Phase1              Time[%d] = %s." % (i, prop1.nthTime(i))
-  for i in xrange(5):
-      print "Phase2              Time[%d] = %s." % (i, prop2.nthTime(i))
-  for i in xrange(5):
-      print "Mixed Phase 1 and 2 Time[%d] = %s." % (i, newprop.nthTime(i))
+  print("Phase 1's size = {}, Phase 2's size = {}, Merged size = {}.".format(prop1.size(), prop2.size(), newprop.size()))
+  for i in range(5):
+      print("Phase1              Time[{}] = {}.".format(i, prop1.nthTime(i)))
+  for i in range(5):
+      print("Phase2              Time[{}] = {}.".format(i, prop2.nthTime(i)))
+  for i in range(5):
+      print("Mixed Phase 1 and 2 Time[{}] = {}.".format(i, newprop.nthTime(i)))
 
 .. testcleanup:: ExMerge2Logs
 

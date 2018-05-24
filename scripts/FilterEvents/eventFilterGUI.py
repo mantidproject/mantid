@@ -707,17 +707,13 @@ class MainWindow(QtGui.QMainWindow):
 
         #Convert absolute time to relative time in seconds
         t0 = self._dataWS.getRun().getProperty("proton_charge").times[0]
-        t0ns = t0.totalNanoseconds()
 
         # append 1 more log if original log only has 1 value
         tf = self._dataWS.getRun().getProperty("proton_charge").times[-1]
         vectimes.append(tf)
         vecvalue = numpy.append(vecvalue, vecvalue[-1])
 
-        vecreltimes = []
-        for t in vectimes:
-            rt = float(t.totalNanoseconds() - t0ns) * 1.0E-9
-            vecreltimes.append(rt)
+        vecreltimes = [float(t - t0) / numpy.timedelta64(1, 's') for t in vectimes]
 
         # Set to plot
         xlim = [min(vecreltimes), max(vecreltimes)]
@@ -1187,7 +1183,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def helpClicked(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("FilterEventUI")
+        showCustomInterfaceHelp("Filter Events")
 
     def _resetGUI(self, resetfilerun=False):
         """ Reset GUI including all text edits and etc.

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,7 +27,7 @@ Usage
     iw = LoadEmptyInstrument(Filename="IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml",)
     LoadIsawDetCal(InputWorkspace=iw,FileName=filename)
     bank = iw.getInstrument().getComponentByName("bank1")
-    print "Position after LoadDetCal :",bank.getPos()
+    print("Position after LoadDetCal : {}".format(bank.getPos()))
     
 .. testcleanup:: LoadIsawDetCal
     

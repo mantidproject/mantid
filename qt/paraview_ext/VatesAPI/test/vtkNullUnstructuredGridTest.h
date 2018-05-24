@@ -17,7 +17,7 @@ public:
   void testCorrectVtkDataSetIsReturned() {
     vtkNullUnstructuredGrid grid;
 
-    vtkUnstructuredGrid *ugrid = NULL;
+    vtkUnstructuredGrid *ugrid = nullptr;
 
     TSM_ASSERT_THROWS_NOTHING(
         "Should create the unstructured grid without problems.",

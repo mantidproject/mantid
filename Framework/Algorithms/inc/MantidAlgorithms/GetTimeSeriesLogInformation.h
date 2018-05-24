@@ -50,6 +50,9 @@ public:
   }
 
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AddSampleLogMultiple"};
+  }
   const std::string category() const override {
     return "Diffraction\\Utility;Events\\EventFiltering";
   }
@@ -57,19 +60,19 @@ public:
 private:
   API::MatrixWorkspace_sptr m_dataWS;
 
-  Kernel::DateAndTime mRunStartTime;
-  Kernel::DateAndTime mFilterT0;
-  Kernel::DateAndTime mFilterTf;
+  Types::Core::DateAndTime mRunStartTime;
+  Types::Core::DateAndTime mFilterT0;
+  Types::Core::DateAndTime mFilterTf;
 
   std::map<std::string, std::size_t> m_intInfoMap;
   std::map<std::string, double> m_dblInfoMap;
 
   Kernel::TimeSeriesProperty<double> *m_log;
-  std::vector<Kernel::DateAndTime> m_timeVec;
+  std::vector<Types::Core::DateAndTime> m_timeVec;
   std::vector<double> m_valueVec;
 
-  Kernel::DateAndTime m_starttime;
-  Kernel::DateAndTime m_endtime;
+  Types::Core::DateAndTime m_starttime;
+  Types::Core::DateAndTime m_endtime;
 
   bool m_ignoreNegativeTime;
 
@@ -85,24 +88,27 @@ private:
 
   /// Calcualte the distribution of delta T in time stamps
   DataObjects::Workspace2D_sptr
-  calDistributions(std::vector<Kernel::DateAndTime> timevec, double stepsize);
+  calDistributions(std::vector<Types::Core::DateAndTime> timevec,
+                   double stepsize);
 
   void exportLog(API::MatrixWorkspace_sptr ws,
-                 std::vector<Kernel::DateAndTime> abstimevec, double dts);
+                 std::vector<Types::Core::DateAndTime> abstimevec, double dts);
 
   void setupEventWorkspace(int numentries,
-                           std::vector<Kernel::DateAndTime> &times,
+                           std::vector<Types::Core::DateAndTime> &times,
                            std::vector<double> values);
 
-  void setupWorkspace2D(int numentries, std::vector<Kernel::DateAndTime> &times,
+  void setupWorkspace2D(int numentries,
+                        std::vector<Types::Core::DateAndTime> &times,
                         std::vector<double> values);
 
   void execQuickStatistics();
 
   void exportErrorLog(API::MatrixWorkspace_sptr ws,
-                      std::vector<Kernel::DateAndTime> abstimevec, double dts);
+                      std::vector<Types::Core::DateAndTime> abstimevec,
+                      double dts);
 
-  void checkLogValueChanging(std::vector<Kernel::DateAndTime> timevec,
+  void checkLogValueChanging(std::vector<Types::Core::DateAndTime> timevec,
                              std::vector<double> values, double delta);
 
   void checkLogBasicInforamtion();
@@ -110,9 +116,9 @@ private:
   /// Generate statistic information table workspace
   DataObjects::TableWorkspace_sptr generateStatisticTable();
 
-  Kernel::DateAndTime getAbsoluteTime(double abstimens);
+  Types::Core::DateAndTime getAbsoluteTime(double abstimens);
 
-  Kernel::DateAndTime calculateRelativeTime(double deltatime);
+  Types::Core::DateAndTime calculateRelativeTime(double deltatime);
 };
 
 } // namespace Algorithms

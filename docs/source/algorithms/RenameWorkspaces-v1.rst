@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -50,13 +50,13 @@ Usage
 
    ws_before_rename = mtd.getObjectNames()
    ws_before_rename.sort()
-   print 'Workspaces in the ADS _before_ renaming:', ws_before_rename
+   print('Workspaces in the ADS _before_ renaming: {}'.format(ws_before_rename))
 
    RenameWorkspaces(names, WorkspaceNames=['new_ws1', 'new_ws2', 'new_ws3'])
 
    ws_after_rename = mtd.getObjectNames()
    ws_after_rename.sort()
-   print 'Workspaces in the ADS _after_ renaming:', ws_after_rename
+   print('Workspaces in the ADS _after_ renaming: {}'.format(ws_after_rename))
 
 Output:
 
@@ -80,13 +80,13 @@ Output:
 
    ws_before_rename = mtd.getObjectNames()
    ws_before_rename.sort()
-   print 'Workspaces in the ADS _before_ renaming:', ws_before_rename
+   print('Workspaces in the ADS _before_ renaming: {}'.format(ws_before_rename))
 
    RenameWorkspaces(names, Prefix='new_', Suffix='_name')
 
    ws_after_rename = mtd.getObjectNames()
    ws_after_rename.sort()
-   print 'Workspaces in the ADS _after_ renaming:', ws_after_rename
+   print('Workspaces in the ADS _after_ renaming: {}'.format(ws_after_rename))
 
 Output:
 
@@ -112,16 +112,16 @@ Output:
        CreateWorkspace([0], [0], OutputWorkspace=name)
        
    #This will fail telling us that 'new_ws1' already exists
-   print 'Trying to rename with OverwriteExisting set to false.'
+   print('Trying to rename with OverwriteExisting set to false.')
    try:
        RenameWorkspaces(names, Prefix='new_', OverwriteExisting=False)
    except RuntimeError:
-       print 'RuntimeError: A workspace called new_ws1 already exists'
+       print('RuntimeError: A workspace called new_ws1 already exists')
    
    #This will succeed in renaming and 'new_ws1' will be replaced with 'ws1'
-   print 'Trying to rename with OverwriteExisting set to true.'
+   print('Trying to rename with OverwriteExisting set to true.')
    RenameWorkspaces(names, Prefix='new_', OverwriteExisting=True)   
-   print 'Succeeded'
+   print('Succeeded')
    
 Output:
 

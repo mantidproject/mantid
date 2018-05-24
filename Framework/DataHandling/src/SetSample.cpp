@@ -26,8 +26,6 @@ using Geometry::Goniometer;
 using Geometry::ReferenceFrame;
 using Geometry::SampleEnvironment;
 using Kernel::Logger;
-using Kernel::PropertyWithValue;
-using Kernel::Quat;
 using Kernel::V3D;
 
 namespace {
@@ -113,11 +111,11 @@ V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
 std::string axisXML(unsigned axisIdx) {
   switch (axisIdx) {
   case 0:
-    return "<axis x=\"1\" y=\"0\" z=\"0\" />";
+    return R"(<axis x="1" y="0" z="0" />)";
   case 1:
-    return "<axis x=\"0\" y=\"1\" z=\"0\" />";
+    return R"(<axis x="0" y="1" z="0" />)";
   case 2:
-    return "<axis x=\"0\" y=\"0\" z=\"1\" />";
+    return R"(<axis x="0" y="0" z="1" />)";
   default:
     return "";
   }
@@ -346,11 +344,15 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
         }
       }
       auto shapeObject = can->createSampleShape(shapeArgs);
-      // Set the object directly on the sample ensuring we preserve the
-      // material
+      // Given that the object is a CSG object, set the object
+      // directly on the sample ensuring we preserve the
+      // material.
       const auto mat = workspace->sample().getMaterial();
-      shapeObject->setMaterial(mat);
-      workspace->mutableSample().setShape(*shapeObject);
+      if (auto csgObj =
+              boost::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
+        csgObj->setMaterial(mat);
+      }
+      workspace->mutableSample().setShape(shapeObject);
     } else {
       throw std::runtime_error("The can does not define the sample shape. "
                                "Please either provide a 'Shape' argument "

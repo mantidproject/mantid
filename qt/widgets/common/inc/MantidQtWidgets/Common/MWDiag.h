@@ -32,8 +32,8 @@ class EXPORT_OPT_MANTIDQT_COMMON MWDiag : public API::MantidWidget {
 public:
   /// there has to be a default constructor but you can call it with a pointer
   /// to the thing that will take ownership of it
-  MWDiag(QWidget *parent = NULL, QString prevSettingsGr = "",
-         const QComboBox *const instru = NULL);
+  MWDiag(QWidget *parent = nullptr, QString prevSettingsGr = "",
+         const QComboBox *const instru = nullptr);
   QString run(const QString &outWS = "", const bool saveSettings = true);
   void loadSettings();
 
@@ -92,7 +92,7 @@ private slots:
   void updateTOFs(const double &start, const double &end);
   void specifyRuns(const QStringList &runFileNames);
   void TOFUpd();
-  void noDispDialog() { m_dispDialog = NULL; }
+  void noDispDialog() { m_dispDialog = nullptr; }
 };
 }
 }

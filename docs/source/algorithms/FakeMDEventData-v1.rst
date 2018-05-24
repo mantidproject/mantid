@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,7 +28,7 @@ using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
     ws = CreateMDWorkspace(Dimensions='2', EventType='MDEvent', Extents='-10,10,-10,10',
                            Names='Q_lab_x,Q_lab_y', Units='A,B')
     FakeMDEventData(ws, UniformParams="1000000")
-    print "Number of events =", ws.getNEvents()
+    print("Number of events = {}".format(ws.getNEvents()))
 
 Output:
 
@@ -54,7 +54,7 @@ Creates 3 peaks in (H,K,L) at (0,0,0), (1,1,0) and (1,1,1).
     FakeMDEventData(ws, PeakParams='10000,1,1,1,0.1', RandomSeed='63759', RandomizeSignal='1')
     FakeMDEventData(ws, PeakParams='100000,0,0,0,0.1', RandomSeed='63759', RandomizeSignal='1')
     FakeMDEventData(ws, PeakParams='40000,1,1,0,0.1', RandomSeed='63759', RandomizeSignal='1')
-    print "Number of events =", ws.getNEvents()
+    print("Number of events = {}".format(ws.getNEvents()))
 
 Output:
 
@@ -85,7 +85,7 @@ Creates a peak at (H,K,L) of (0,0,0) around T=5K.
     ws = CreateMDWorkspace(Dimensions='4', Extents='-1,1,-1,1,-1,1,0,10', Names='H,K,L,T', Units='rlu,rlu,rlu,K',
                            SplitInto='2', SplitThreshold='50')
     FakeMDEventData(ws, PeakParams='1e+06,0,0,0,5,0.2', RandomSeed='3873875')
-    print "Number of events =", ws.getNEvents()
+    print("Number of events = {}".format(ws.getNEvents()))
 
 Output:
 

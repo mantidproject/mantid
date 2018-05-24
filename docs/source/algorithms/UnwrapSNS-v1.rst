@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -54,8 +54,8 @@ Usage
     ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
     wsOut = UnwrapSNS(ws,LRef=10)
 
-    print "Input",  ws.readY(0)[ws.blocksize()-1]
-    print "Output",  wsOut.readY(0)[wsOut.blocksize()-1]
+    print("Input {}".format(ws.readY(0)[ws.blocksize()-1]))
+    print("Output {}".format(wsOut.readY(0)[wsOut.blocksize()-1]))
 
 Output:
 

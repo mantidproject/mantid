@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,7 +25,7 @@ Usage
 
    for i in [0,5,6,7,8]:
       row = result[1].row(i)
-      print row['Name'],  " %.3f" % row['Value']
+      print("{Name}  {Value:.3f}".format(**row))
 
 Output:
 

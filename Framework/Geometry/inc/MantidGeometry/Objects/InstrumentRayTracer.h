@@ -4,18 +4,22 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include <boost/unordered_map.hpp>
 #include <deque>
 #include <list>
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
 class V3D;
 }
 namespace Geometry {
+class IComponent;
 struct Link;
 class Track;
 /// Typedef for object intersections
-typedef Track::LType Links;
+using Links = Track::LType;
 
 /**
 This class is responsible for tracking rays and accumulating a list of objects
@@ -71,6 +75,10 @@ private:
   /// Accumulate results in this Track object, aids performance. This is cleared
   /// when getResults is called.
   mutable Track m_resultsTrack;
+  /// Map of component id -> bounding box.
+  mutable boost::unordered_map<IComponent *, BoundingBox> m_boxCache;
+  /// Mutex to lock box cache
+  mutable std::mutex m_mutex;
 };
 }
 }

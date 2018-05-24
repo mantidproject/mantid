@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,15 +31,15 @@ Usage
    inst = ws.getInstrument()
    source = inst.getSource()
 
-   print "The name of the instrument is \"%s\"." % inst.getName().strip()
-   print ("The source postion is at:  %s." % str(source.getPos()) )
+   print("The name of the instrument is '{}'.".format(inst.getName().strip()))
+   print("The source postion is at:  {}.".format(source.getPos()))
 
 
 Output:
 
 .. testoutput:: ExLoadMUSR
 
-   The name of the instrument is "MUSR".
+   The name of the instrument is 'MUSR'.
    The source postion is at:  [0,-10,0].
 
 .. categories::

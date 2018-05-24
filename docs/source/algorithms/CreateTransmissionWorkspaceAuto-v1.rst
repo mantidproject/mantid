@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,9 +33,9 @@ Usage
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 
 Output:
@@ -57,9 +57,9 @@ Output:
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
@@ -81,9 +81,9 @@ Output:
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, Params=[1.5,0.02,17], StartOverlap=10.0, EndOverlap=12.0, Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 

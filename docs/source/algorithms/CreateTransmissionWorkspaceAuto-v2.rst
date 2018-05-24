@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -49,10 +49,10 @@ Usage
     trans = Load(Filename='INTER00013463.nxs')
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans)
 
-    print "%.4f" % (transWS.readY(0)[26])
-    print "%.4f" % (transWS.readY(0)[27])
-    print "%.4f" % (transWS.readY(0)[28])
-    print "%.4f" % (transWS.readY(0)[29])
+    print("{:.4f}".format(transWS.readY(0)[26]))
+    print("{:.4f}".format(transWS.readY(0)[27]))
+    print("{:.4f}".format(transWS.readY(0)[28]))
+    print("{:.4f}".format(transWS.readY(0)[29]))
 
 Output:
 
@@ -72,10 +72,10 @@ Output:
     trans = Load(Filename='INTER00013463.nxs')
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print "%.3f" % (transWS.readY(0)[26])
-    print "%.3f" % (transWS.readY(0)[27])
-    print "%.3f" % (transWS.readY(0)[28])
-    print "%.3f" % (transWS.readY(0)[29])
+    print("{:.3f}".format(transWS.readY(0)[26]))
+    print("{:.3f}".format(transWS.readY(0)[27]))
+    print("{:.3f}".format(transWS.readY(0)[28]))
+    print("{:.3f}".format(transWS.readY(0)[29]))
 
 Output:
 
@@ -95,10 +95,10 @@ Output:
     trans2 = Load(Filename='INTER00013464.nxs')
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, Params=[1.5,0.02,17], StartOverlap=10.0, EndOverlap=12.0)
 
-    print "%.4f" % (transWS.readY(0)[26])
-    print "%.4f" % (transWS.readY(0)[27])
-    print "%.4f" % (transWS.readY(0)[28])
-    print "%.4f" % (transWS.readY(0)[29])
+    print("{:.4f}".format(transWS.readY(0)[26]))
+    print("{:.4f}".format(transWS.readY(0)[27]))
+    print("{:.4f}".format(transWS.readY(0)[28]))
+    print("{:.4f}".format(transWS.readY(0)[29]))
 
 Output:
 

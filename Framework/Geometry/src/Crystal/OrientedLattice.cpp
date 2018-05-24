@@ -220,7 +220,7 @@ const DblMatrix &OrientedLattice::setUFromVectors(const V3D &u, const V3D &v) {
  */
 void OrientedLattice::saveNexus(::NeXus::File *file,
                                 const std::string &group) const {
-  file->makeGroup(group, "NXcrystal", 1);
+  file->makeGroup(group, "NXcrystal", true);
   file->writeData("unit_cell_a", this->a());
   file->writeData("unit_cell_b", this->b());
   file->writeData("unit_cell_c", this->c());

@@ -49,8 +49,8 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void
-  start(const Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(const Types::Core::DateAndTime startTime =
+                 Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
@@ -79,7 +79,7 @@ protected:
   bool rxPacket(const ADARA::VariableStringPkt &pkt) override;
   bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt) override;
   bool rxPacket(const ADARA::AnnotationPkt &pkt) override;
-  // virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
+  bool rxPacket(const ADARA::RunInfoPkt &pkt) override;
 
 private:
   // Workspace initialization needs to happen in 2 steps.  Part 1 must happen
@@ -104,7 +104,7 @@ private:
       return false;
     if (m_instrumentName.empty())
       return false;
-    if (m_dataStartTime == Kernel::DateAndTime())
+    if (m_dataStartTime == Types::Core::DateAndTime())
       return false;
 
     return haveRequiredLogs();
@@ -114,7 +114,7 @@ private:
   bool haveRequiredLogs();
 
   void appendEvent(const uint32_t pixelId, const double tof,
-                   const Mantid::Kernel::DateAndTime pulseTime);
+                   const Mantid::Types::Core::DateAndTime pulseTime);
   // tof is "Time Of Flight" and is in units of microsecondss relative to the
   // start of the pulse
   // (There's some documentation that says nanoseconds, but Russell Taylor
@@ -154,14 +154,14 @@ private:
   bool m_stopThread{false}; // background thread checks this periodically.
                             // If true, the thread exits
 
-  Kernel::DateAndTime m_startTime; // The requested start time for the data
-                                   // stream (needed by the run() function)
+  Types::Core::DateAndTime m_startTime; // The requested start time for the data
+                                        // stream (needed by the run() function)
 
   // Used to initialize the scan_index property if we haven't received a packet
   // with the 'real' value by the time we call initWorkspacePart2.  (We can't
   // delay the call to initWorkspacePart2 because we might never receive a
   // 'real' value for that property.
-  Kernel::DateAndTime m_dataStartTime;
+  Types::Core::DateAndTime m_dataStartTime;
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.
@@ -180,7 +180,8 @@ private:
 
   // maps <device id, variable id> to variable name
   // (variable names are unique, so we don't need to worry about device names.)
-  typedef std::map<std::pair<unsigned, unsigned>, std::string> NameMapType;
+  using NameMapType =
+      std::map<std::pair<unsigned int, unsigned int>, std::string>;
   NameMapType m_nameMap;
 
   // ---------------------------------------------------------------------------
@@ -195,8 +196,8 @@ private:
 
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
-  typedef std::map<std::pair<unsigned, unsigned>,
-                   boost::shared_ptr<ADARA::Packet>> VariableMapType;
+  using VariableMapType = std::map<std::pair<unsigned int, unsigned int>,
+                                   boost::shared_ptr<ADARA::Packet>>;
   VariableMapType m_variableMap;
 
   // Process all the variable value packets stored in m_variableMap

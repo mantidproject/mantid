@@ -70,7 +70,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       throw std::logic_error(std::string("No Instrument for Peaks file"));
 
     // Date: use the current date/time if not found
-    Kernel::DateAndTime C_experimentDate;
+    Types::Core::DateAndTime C_experimentDate;
     tag = getWord(in, false);
     if (tag == "Date:")
       getWord(in, false);
@@ -147,11 +147,11 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     throw std::logic_error(std::string("No Instrument for Peaks file"));
 
   // Date: use the current date/time if not found
-  Kernel::DateAndTime C_experimentDate;
+  Types::Core::DateAndTime C_experimentDate;
   std::string date;
   tag = getWord(in, false);
   if (tag.empty())
-    date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+    date = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   else if (tag == "Date:")
     date = getWord(in, false);
   readToEndOfLine(in, true);
@@ -202,7 +202,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (instr->getName().compare("WISH") == 0)
+  if (instr->getName() == "WISH")
     bankPart = "WISHpanel";
   // Get all children
   std::vector<IComponent_const_sptr> comps;
@@ -213,8 +213,8 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     boost::erase_all(bankName, bankPart);
     int bank = 0;
     Strings::convert(bankName, bank);
-    for (size_t j = 0; j < det.size(); j++) {
-      if (bank == det[j]) {
+    for (int j : det) {
+      if (bank == j) {
         bank = 0;
         continue;
       }
@@ -267,8 +267,6 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   double IPK;
   double Inti;
   double SigI;
-
-  seqNum = -1;
 
   std::string s = lastStr;
 
@@ -334,6 +332,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
   peak.setBinCount(IPK);
+  peak.setPeakNumber(seqNum);
   // Return the peak
   return peak;
 }
@@ -488,7 +487,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
     oss << bankString << bankNum;
     std::string bankName = oss.str();
 
-    int seqNum = -1;
+    int seqNum;
 
     try {
       // Read the peak

@@ -54,7 +54,7 @@ set ( TEST_FILES
 	StartLiveDataTest.h
 )
 
-find_package ( LibRDKafka )
+find_package ( LibRDKafka 0.11 )
 if ( LIBRDKAFKA_FOUND )
   set ( SRC_FILES
     ${SRC_FILES}
@@ -72,9 +72,12 @@ if ( LIBRDKAFKA_FOUND )
     inc/MantidLiveData/Kafka/KafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
     src/Kafka/private/Schema/flatbuffers/flatbuffers.h
-    src/Kafka/private/Schema/det_spec_mapping_schema_generated.h
-    src/Kafka/private/Schema/event_schema_generated.h
-    src/Kafka/private/Schema/run_info_schema_generated.h
+    src/Kafka/private/Schema/df12_det_spec_map_generated.h
+    src/Kafka/private/Schema/ev42_events_generated.h
+    src/Kafka/private/Schema/f142_logdata_generated.h
+    src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
+    src/Kafka/private/Schema/is84_isis_events_generated.h
+    src/Kafka/private/Schema/ba57_run_info_generated.h
   )
   set ( TEST_FILES
     ${TEST_FILES}
@@ -99,10 +102,13 @@ enable_precompiled_headers( inc/MantidLiveData/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( LiveData ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( LiveData PROPERTIES OUTPUT_NAME MantidLiveData )
+set_target_properties ( LiveData PROPERTIES OUTPUT_NAME MantidLiveData
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( LiveData PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties(LiveData PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(LiveData PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS

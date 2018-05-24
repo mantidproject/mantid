@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include <nexus/napi.h>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <map>
 //----------------------------------------------------------------------
 // Forward declaration
@@ -471,17 +471,17 @@ private:
 };
 
 /// The integer dataset type
-typedef NXDataSetTyped<int> NXInt;
+using NXInt = NXDataSetTyped<int>;
 /// The float dataset type
-typedef NXDataSetTyped<float> NXFloat;
+using NXFloat = NXDataSetTyped<float>;
 /// The double dataset type
-typedef NXDataSetTyped<double> NXDouble;
+using NXDouble = NXDataSetTyped<double>;
 /// The char dataset type
-typedef NXDataSetTyped<char> NXChar;
+using NXChar = NXDataSetTyped<char>;
 /// The size_t dataset type
-typedef NXDataSetTyped<std::size_t> NXSize;
+using NXSize = NXDataSetTyped<std::size_t>;
 /// The size_t dataset type
-typedef NXDataSetTyped<unsigned int> NXUInt;
+using NXUInt = NXDataSetTyped<unsigned int>;
 
 //-------------------- classes --------------------------//
 
@@ -682,7 +682,8 @@ private:
     if (start_time.empty()) {
       start_time = "2000-01-01T00:00:00";
     }
-    Kernel::DateAndTime start_t = Kernel::DateAndTime(start_time);
+    auto start_t =
+        Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
     NXInfo vinfo = getDataSetInfo("value");
     if (!vinfo)
       return nullptr;
@@ -696,8 +697,7 @@ private:
       value.openLocal();
       value.load();
       for (int i = 0; i < value.dim0(); i++) {
-        Kernel::DateAndTime t =
-            start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
         for (int j = 0; j < value.dim1(); j++) {
           char *c = &value(i, j);
           if (!isprint(*c))
@@ -715,8 +715,7 @@ private:
         value.openLocal();
         value.load();
         for (int i = 0; i < value.dim0(); i++) {
-          Kernel::DateAndTime t =
-              start_t + boost::posix_time::seconds(int(times[i]));
+          auto t = start_t + boost::posix_time::seconds(int(times[i]));
           logv->addValue(t, (value[i] == 0 ? false : true));
         }
         return logv;
@@ -741,15 +740,14 @@ private:
   ///@returns a property pointer
   template <class NX_TYPE, class TIME_TYPE>
   Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value,
-                               Kernel::DateAndTime start_t,
+                               Types::Core::DateAndTime start_t,
                                const TIME_TYPE &times) {
     value.openLocal();
     auto logv = new Kernel::TimeSeriesProperty<double>(logName);
     value.load();
     for (int i = 0; i < value.dim0(); i++) {
       if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
-        Kernel::DateAndTime t =
-            start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
         logv->addValue(t, value[i]);
       }
     }

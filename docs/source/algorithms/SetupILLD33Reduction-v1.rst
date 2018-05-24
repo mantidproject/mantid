@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -82,7 +82,7 @@ Usage
 
 	# Get the OutputWorkspace as a python workspace
 	iq = mtd['IQ_curve']
-	print "This workspace has", iq.getNumDims(), "dimensions and has", iq.getNumberHistograms(), "histograms."
+	print("This workspace has {} dimensions and has {} histograms.".format(iq.getNumDims(), iq.getNumberHistograms()))
 
 Output:
 

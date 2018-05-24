@@ -19,6 +19,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS,

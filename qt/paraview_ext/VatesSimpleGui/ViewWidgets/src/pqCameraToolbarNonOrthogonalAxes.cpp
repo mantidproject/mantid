@@ -63,7 +63,7 @@ void pqCameraToolbarNonOrthogonalAxes::constructor() {
       ui.actionRotate90degCCW,
       pqCameraReactionNonOrthogonalAxes::ROTATE_CAMERA_CW);
 
-  new pqRenderViewSelectionReaction(ui.actionZoomToBox, NULL,
+  new pqRenderViewSelectionReaction(ui.actionZoomToBox, nullptr,
                                     pqRenderViewSelectionReaction::ZOOM_TO_BOX);
 
   this->ZoomToDataAction = ui.actionZoomToData;

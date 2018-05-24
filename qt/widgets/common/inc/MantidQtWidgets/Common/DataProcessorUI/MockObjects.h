@@ -3,9 +3,13 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 
 #include <gmock/gmock.h>
 
@@ -51,22 +55,30 @@ public:
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(selectAll, void());
-  MOCK_METHOD0(pause, void());
-  MOCK_METHOD0(resume, void());
+  MOCK_METHOD1(updateMenuEnabledState, void(const bool));
+  MOCK_METHOD1(setProcessButtonEnabled, void(const bool));
+  MOCK_METHOD1(setInstrumentComboEnabled, void(const bool));
+  MOCK_METHOD1(setTreeEnabled, void(const bool));
+  MOCK_METHOD1(setOutputNotebookEnabled, void(const bool));
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const QString &text));
 
   MOCK_METHOD1(setModel, void(const QString &));
-  MOCK_METHOD1(setTableList, void(const QSet<QString> &));
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));
+  MOCK_METHOD0(settingsChanged, void());
 
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
+  MOCK_METHOD0(skipProcessing, void());
+
+  // Grouping options
+  MOCK_METHOD0(enableGrouping, void());
+  MOCK_METHOD0(disableGrouping, void());
 
   // Accessor
   MOCK_CONST_METHOD0(getCurrentInstrument, QString());
@@ -74,9 +86,7 @@ public:
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addActions() via a proxy method
-  void addActions(std::vector<Command_uptr>) override {
-    addActionsProxy();
-  }
+  void addActions(std::vector<Command_uptr>) override { addActionsProxy(); }
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
@@ -106,12 +116,11 @@ public:
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
-  MOCK_CONST_METHOD0(getPreprocessingProperties, QString());
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
-  MOCK_CONST_METHOD0(getProcessingOptions, QString());
-  MOCK_CONST_METHOD0(getPostprocessingOptions, QString());
+  MOCK_CONST_METHOD0(getPreprocessingOptions, ColumnOptionsQMap());
+  MOCK_CONST_METHOD0(getProcessingOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
 
   // Event handling
@@ -123,8 +132,8 @@ public:
   MOCK_CONST_METHOD0(resume, void());
 
   // Calls we don't care about
-  void confirmReductionPaused() const override{};
-  void confirmReductionResumed() const override{};
+  MOCK_METHOD1(confirmReductionPaused, void(int));
+  MOCK_METHOD1(confirmReductionResumed, void(int));
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -144,7 +153,9 @@ public:
   MOCK_CONST_METHOD2(giveUserWarning,
                      void(const QString &prompt, const QString &title));
   MOCK_METHOD0(publishCommandsMocked, void());
+  MOCK_METHOD0(skipProcessing, void());
   MOCK_METHOD1(setForcedReProcessing, void(bool));
+  MOCK_METHOD0(settingsChanged, void());
 
 private:
   // Calls we don't care about
@@ -155,8 +166,7 @@ private:
   std::vector<Command_uptr> publishCommands() override {
     std::vector<Command_uptr> commands;
     for (size_t i = 0; i < 31; i++)
-      commands.push_back(
-          Mantid::Kernel::make_unique<AppendRowCommand>(this));
+      commands.push_back(Mantid::Kernel::make_unique<AppendRowCommand>(this));
     publishCommandsMocked();
     return commands;
   };
@@ -175,6 +185,53 @@ private:
   void clearTable() override {}
 
   std::map<QString, QVariant> m_options;
+};
+
+class MockTreeManager : public TreeManager {
+public:
+  MockTreeManager(){};
+  ~MockTreeManager() override{};
+  MOCK_METHOD1(selectedData, TreeData(bool));
+  // Calls we don't care about
+  std::vector<std::unique_ptr<Command>> publishCommands() override {
+    return std::vector<std::unique_ptr<Command>>();
+  };
+  bool isMultiLevel() const override { return false; }
+  void appendRow() override{};
+  void appendGroup() override{};
+  void deleteRow() override{};
+  void deleteGroup() override{};
+  void groupRows() override{};
+  std::set<int> expandSelection() override { return std::set<int>(); };
+  void clearSelected() override{};
+  QString copySelected() override { return QString(); };
+  void pasteSelected(const QString &) override{};
+  void newTable(const WhiteList &) override{};
+  void newTable(Mantid::API::ITableWorkspace_sptr,
+                const WhiteList &) override{};
+  void transfer(const std::vector<std::map<QString, QString>> &) override{};
+  void update(int, int, const QStringList &) override{};
+  int rowCount() const override { return 0; };
+  int rowCount(int) const override { return 0; };
+  bool isProcessed(int) const override { return false; };
+  bool isProcessed(int, int) const override { return false; };
+  void setProcessed(bool, int) override{};
+  void setProcessed(bool, int, int) override{};
+  void invalidateAllProcessed() override{};
+  void setCell(int, int, int, int, const std::string &) override{};
+  std::string getCell(int, int, int, int) const override {
+    return std::string();
+  };
+  int getNumberOfRows() override { return 0; };
+  bool isValidModel(Mantid::API::Workspace_sptr, size_t) const override {
+    return false;
+  };
+  boost::shared_ptr<AbstractTreeModel> getModel() override {
+    return boost::shared_ptr<QTwoLevelTreeModel>();
+  };
+  Mantid::API::ITableWorkspace_sptr getTableWorkspace() override {
+    return Mantid::API::ITableWorkspace_sptr();
+  };
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

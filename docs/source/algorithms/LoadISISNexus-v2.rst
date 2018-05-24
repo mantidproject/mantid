@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -152,7 +152,7 @@ Usage
    # Load LOQ histogram dataset
    ws = LoadISISNexus('LOQ49886.nxs')
 
-   print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
+   print("The 1st x-value of the first spectrum is: {}".format(ws.readX(0)[0]))
 
 Output:
 
@@ -167,7 +167,7 @@ Output:
    # Load from LOQ data file spectrum 2 to 3.
    ws = LoadISISNexus('LOQ49886.nxs',SpectrumMin=2,SpectrumMax=3)
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 
@@ -182,7 +182,7 @@ Output:
    # Load first period of multiperiod POLREF data file
    ws = LoadISISNexus('POLREF00004699.nxs', EntryNumber=1)
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 

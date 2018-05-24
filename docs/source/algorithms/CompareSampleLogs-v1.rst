@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,7 +34,7 @@ Usage
     # compare sample logs
     result = CompareSampleLogs('ws1,ws2', 'omega,wavelength,polarisation,flipper' , 0.01)
     if result == '':
-        print "All sample logs match!"
+        print("All sample logs match!")
 
 .. testcleanup:: ExCompareSampleLogs
 
@@ -64,13 +64,13 @@ Output:
 
     # compare sample logs
     result = CompareSampleLogs('ws1,ws2', lognames , 0.01)
-    print "Following sample logs do not match: ", result
+    print("Following sample logs do not match:  {}".format(result))
 
     # create a table
     table = CreateLogPropertyTable('ws1,ws2', result, GroupPolicy='All')
-    print "Column names are: ", table.getColumnNames()
-    print "The omega values are:", table.column(1)
-    print "The flipper values are:", table.column(2)
+    print("Column names are:  {}".format(table.getColumnNames()))
+    print("The omega values are: {}".format(table.column(1)))
+    print("The flipper values are: {}".format(table.column(2)))
 
 .. testcleanup:: ExCompareSampleLogs2
 

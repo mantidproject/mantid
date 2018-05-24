@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,7 +31,7 @@ Usage
     import os
     savefile = os.path.join(config["default.savedirectory"], "mdhws.nxs")
     SaveMD(ws, Filename=savefile, Version=1)
-    print "File created:", os.path.exists(savefile)
+    print("File created: {}".format(os.path.exists(savefile)))
 
 Output:
 

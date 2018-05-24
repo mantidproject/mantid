@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,7 +38,7 @@ Usage
    SaveRKH(out_ws, file_path)
    in_ws = LoadRKH(file_path)
 
-   print "Contents of the file  = " + str(in_ws.readY(0))
+   print("Contents of the file  = {}".format(in_ws.readY(0)))
 
 .. testcleanup:: ExSimpleSavingRoundtrip
 

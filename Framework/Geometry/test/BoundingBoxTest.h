@@ -19,7 +19,7 @@ using Mantid::Kernel::V3D;
 class BoundingBoxTest : public CxxTest::TestSuite {
 public:
   void test_That_Construction_With_Six_Valid_Points_Gives_A_BoundingBox() {
-    BoundingBox *bbox = NULL;
+    BoundingBox *bbox = nullptr;
     TS_ASSERT_THROWS_NOTHING(bbox =
                                  new BoundingBox(1.0, 4.0, 5.0, 0.0, 2.0, 3.0));
     if (!bbox) {
@@ -117,6 +117,9 @@ public:
     TS_ASSERT_EQUALS(
         bbox.doesLineIntersect(V3D(10.0, 10.0, 0.0), V3D(-1.0, -0.4, 0.0)),
         false);
+    TS_ASSERT_EQUALS(
+        bbox.doesLineIntersect(V3D(-10.0, -10.0, 0.0), V3D(1.0, 1.0, 0.0)),
+        true); // Hits box at edge
   }
 
   void
@@ -154,6 +157,9 @@ public:
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(
                          Track(V3D(10.0, 10.0, 0.0), V3D(-1.0, -0.4, 0.0))),
                      false);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
+                         Track(V3D(-10.0, -10.0, 0.0), V3D(1.0, 1.0, 0.0))),
+                     true); // Hits box at edge
   }
 
   void test_That_Angular_Width_From_Point_Outside_Bounding_Box_Is_Valid() {
@@ -316,6 +322,23 @@ public:
                       bbox.minPoint() == V3D(0, 0, -0.5 * M_SQRT2), true);
     TSM_ASSERT_EQUALS("max point should be (1,sqrt(2),sqrt(2)/2)",
                       bbox.maxPoint() == V3D(1, M_SQRT2, 0.5 * M_SQRT2), true);
+  }
+
+  void test_grow_by_null() {
+
+    BoundingBox a{};
+    TS_ASSERT(a.isNull());
+    BoundingBox b{};
+    a.grow(b);
+    TSM_ASSERT("Null grown by Null is Null", a.isNull());
+
+    a = BoundingBox(2, 2, 2, 1, 1, 1);
+    TS_ASSERT(!a.isNull());
+    a.grow(b);
+    TSM_ASSERT("Grow by Null (default constructed) is not Null", !a.isNull());
+
+    b.grow(a);
+    TSM_ASSERT("Grow Null by not Null is not Null", !b.isNull());
   }
 
 private:

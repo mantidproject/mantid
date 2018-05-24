@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,7 @@ Usage
 
   # Check source mask workspace
   nummasked = 0
-  for i in xrange(maskws.getNumberHistograms()):
+  for i in range(maskws.getNumberHistograms()):
     if maskws.readY(i)[0] > 0.5:
       nummasked += 1
 
@@ -41,14 +41,14 @@ Usage
 
   # Check target mask workspace
   nummasked2 = 0
-  for i in xrange(invmaskws.getNumberHistograms()):
+  for i in range(invmaskws.getNumberHistograms()):
     if invmaskws.readY(i)[0] > 0.5:
       nummasked2 += 1
 
   # Print out
-  print "Number of histogram: ", maskws.getNumberHistograms()
-  print "Source Mask workspace # Detectors masked = ", nummasked
-  print "Source Mask workspace # Detectors masked = ", nummasked2
+  print("Number of histogram:  {}".format(maskws.getNumberHistograms()))
+  print("Source Mask workspace # Detectors masked =  {}".format(nummasked))
+  print("Source Mask workspace # Detectors masked =  {}".format(nummasked2))
 
 Output:
 

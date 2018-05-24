@@ -49,6 +49,10 @@ public:
   const std::string name() const override { return "MonteCarloAbsorption"; }
   /// Algorithm's version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"MayersSampleCorrection", "CarpenterSampleCorrection",
+            "PearlMCAbsorption", "VesuvioCalculateMS"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";
@@ -64,11 +68,10 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
 
-  API::MatrixWorkspace_uptr
-  doSimulation(const API::MatrixWorkspace &inputWS, const size_t nevents,
-               int nlambda, const int seed,
-               const InterpolationOption &interpolateOpt,
-               const bool useSparseInstrument);
+  API::MatrixWorkspace_uptr doSimulation(
+      const API::MatrixWorkspace &inputWS, const size_t nevents, int nlambda,
+      const int seed, const InterpolationOption &interpolateOpt,
+      const bool useSparseInstrument, const size_t maxScatterPtAttempts);
   API::MatrixWorkspace_uptr
   createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::unique_ptr<IBeamProfile>

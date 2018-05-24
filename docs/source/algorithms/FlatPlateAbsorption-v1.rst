@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -44,7 +44,7 @@ Usage
 
     wsOut = FlatPlateAbsorption(ws, SampleHeight=1, SampleWidth=0.5, SampleThickness=0.5)
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print("The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms())
 
 Output:
 

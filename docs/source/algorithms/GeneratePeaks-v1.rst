@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -110,8 +110,8 @@ Generate peaks from a TableWorkspace
   outws = mtd["GaussianPeak"]
   vecx3 = outws.readX(3)
   vecy3 = outws.readY(3)
-  for i in xrange(4277, 4283):
-    print "X = %f, Y = %f" % (vecx3[i], vecy3[i])
+  for i in range(4277, 4283):
+    print("X = {:.6f}, Y = {:.6f}".format(vecx3[i], vecy3[i]))
 
 .. testcleanup:: GeneratePeakFromTable
 
@@ -143,7 +143,7 @@ Generate peaks from arrays
 
   outws = mtd["GaussianPeak"]
   for i in [92,93,94,95]:
-      print "X = %f, Y = %f" % (outws.readX(0)[i], outws.readY(0)[i])
+      print("X = {:.6f}, Y = {:.6f}".format(outws.readX(0)[i], outws.readY(0)[i]))
 
 
 .. testcleanup:: GeneratePeakFromArray

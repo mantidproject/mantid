@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,7 @@ Usage
     for idx in range(stats.rowCount()):
         stat_name = stats.column('statistic')[idx]
         stat_value = stats.column('a')[idx]
-        print '%s of column \'a\' is %.3f' % (stat_name, stat_value)
+        print('%s of column \'a\' is %.3f' % (stat_name, stat_value))
 
 Output:
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,7 +30,7 @@ Usage
                                      Functions=['Fqt-total', 'Sqw-total'])
 
     for ws_name in out_ws_group.getNames():
-      print ws_name
+      print(ws_name)
 
 Output:
 

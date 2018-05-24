@@ -33,7 +33,6 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
   m_center = VMD(2);
   m_isBinnedData = m_ws->isHistogramData();
   m_dimY = m_ws->getDimension(1);
-  m_blockSize = m_ws->blocksize();
 
   m_beginWI = beginWI;
   if (m_beginWI >= m_ws->getNumberHistograms())
@@ -48,7 +47,14 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
     throw std::runtime_error(
         "MatrixWorkspaceMDIterator: End point is before the start point.");
 
-  m_max = (m_endWI - m_beginWI) * m_blockSize;
+  // calculate the indices and the largest index we accept
+  m_max = 0;
+  m_startIndices.reserve(m_endWI - m_beginWI);
+  for (size_t i = m_beginWI; i < m_endWI; ++i) {
+    m_startIndices.push_back(m_max);
+    m_max += m_ws->readY(i).size();
+  }
+
   m_xIndex = 0;
   // Trigger the calculation for the first index
   m_workspaceIndex = size_t(-1); // This makes sure calcWorkspacePos() updates
@@ -66,9 +72,11 @@ size_t MatrixWorkspaceMDIterator::getDataSize() const { return size_t(m_max); }
  * @param index :: point to jump to. Must be 0 <= index < getDataSize().
  */
 void MatrixWorkspaceMDIterator::jumpTo(size_t index) {
-  m_pos = uint64_t(index);
-  m_xIndex = m_pos % m_blockSize;
-  size_t newWI = m_beginWI + (m_pos / m_blockSize);
+  m_pos = static_cast<uint64_t>(index); // index into the unraveled workspace
+  const auto lower =
+      std::lower_bound(m_startIndices.begin(), m_startIndices.end(), index);
+  m_xIndex = m_pos - (*lower); // index into the Y[] array of the spectrum
+  size_t newWI = m_beginWI + std::distance(m_startIndices.begin(), lower);
   calcWorkspacePos(newWI);
 }
 
@@ -120,7 +128,7 @@ bool MatrixWorkspaceMDIterator::next() {
     do {
       m_pos++;
       m_xIndex++;
-      if (m_xIndex >= m_blockSize) {
+      if (m_xIndex >= m_Y.size()) {
         m_xIndex = 0;
         this->calcWorkspacePos(m_workspaceIndex + 1);
       }
@@ -133,7 +141,7 @@ bool MatrixWorkspaceMDIterator::next() {
     // Go through every point;
     m_pos++;
     m_xIndex++;
-    if (m_xIndex >= m_blockSize) {
+    if (m_xIndex >= m_Y.size()) {
       m_xIndex = 0;
       this->calcWorkspacePos(m_workspaceIndex + 1);
     }
@@ -196,13 +204,13 @@ signal_t MatrixWorkspaceMDIterator::getError() const {
 
 //----------------------------------------------------------------------------------------------
 /// Return a list of vertexes defining the volume pointed to
-coord_t *
+std::unique_ptr<coord_t[]>
 MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/) const {
   throw std::runtime_error(
       "MatrixWorkspaceMDIterator::getVertexesArray() not implemented yet");
 }
 
-coord_t *
+std::unique_ptr<coord_t[]>
 MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/,
                                             const size_t /*outDimensions*/,
                                             const bool * /*maskDim*/) const {

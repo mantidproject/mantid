@@ -129,7 +129,7 @@ public:
     ITableWorkspace_sptr resultTable;
     TS_ASSERT_THROWS_NOTHING(resultTable = creator.createTable());
     TS_ASSERT(resultTable);
-    const auto &expected = getExpectedOutputSingle();
+    const auto &expected = getExpectedOutputSingle(workspaces);
     // compare workspaces
     TS_ASSERT(compareTables(resultTable, expected));
   }
@@ -190,7 +190,7 @@ public:
     ITableWorkspace_sptr resultTable;
     TS_ASSERT_THROWS_NOTHING(resultTable = creator.createTable());
     TS_ASSERT(resultTable);
-    const auto &expected = getExpectedOutputSingle();
+    const auto &expected = getExpectedOutputSingle(workspaces);
     // compare workspaces
     TS_ASSERT(compareTables(resultTable, expected));
   }
@@ -226,7 +226,7 @@ public:
     ITableWorkspace_sptr resultTable;
     TS_ASSERT_THROWS_NOTHING(resultTable = creator.createTable());
     TS_ASSERT(resultTable);
-    const auto &expected = getExpectedOutputSingle();
+    const auto &expected = getExpectedOutputSingle(workspaces);
     // compare workspaces
     TS_ASSERT(compareTables(resultTable, expected));
   }
@@ -462,16 +462,16 @@ private:
   }
 
   /// Expected output table
-  ITableWorkspace_sptr getExpectedOutputSingle() {
+  ITableWorkspace_sptr getExpectedOutputSingle(const QStringList workspaces) {
     auto table = WorkspaceFactory::Instance().createTable();
-
+    table->addColumn("str", "workspace_Name");
     const std::vector<std::string> titles = {
         "f0.A0",    "f0.A0Error",  "f1.A",               "f1.AError",
         "f1.Omega", // no omega error as param is fixed
         "f1.Phi",   "f1.PhiError", "f1.Sigma",           "f1.SigmaError",
         "f1.Tau",   "f1.TauError", "Cost function value"};
     for (const auto &log : m_logs) {
-      table->addColumn("str", log.toStdString());
+      table->addColumn("double", log.toStdString());
     }
     for (const auto &title : titles) {
       table->addColumn("double", title);
@@ -481,14 +481,14 @@ private:
     TableRow firstRow = table->appendRow();
     TableRow secondRow = table->appendRow();
 
-    firstRow << "20918"
-             << "0"
-             << "100"
-             << "200" << 0.1 << err << 0.2 << err << 0.3 << 0.4 << err << 0.5
-             << err << 0.6 << err << 0.03;
-    secondRow << "20919" << std::to_string(m_startDiff_sec) << "100"
-              << "190" << 1.1 << err << 1.2 << err << 1.3 << 1.4 << err << 1.5
-              << err << 1.6 << err << 0.03;
+    firstRow << workspaces[0].toStdString() << std::stod("20918")
+             << std::stod("0") << std::stod("100") << std::stod("200") << 0.1
+             << err << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6
+             << err << 0.03;
+    secondRow << workspaces[1].toStdString() << std::stod("20919")
+              << std::stod(std::to_string(m_startDiff_sec)) << std::stod("100")
+              << std::stod("190") << 1.1 << err << 1.2 << err << 1.3 << 1.4
+              << err << 1.5 << err << 1.6 << err << 0.03;
     return table;
   }
 
@@ -504,8 +504,15 @@ private:
         "f1.SigmaError", "f0.f1.Tau",      "f0.f1.TauError",
         "f1.f1.Tau",     "f1.f1.TauError", "Cost function value"};
     table->addColumn("str", "Label");
+    int k = 0;
     for (const auto &log : m_logs) {
-      table->addColumn("str", log.toStdString());
+      if (k == 2) {
+
+        table->addColumn("double", log.toStdString());
+      } else {
+        table->addColumn("str", log.toStdString());
+      }
+      k++;
     }
     for (const auto &title : titles) {
       table->addColumn("double", title);
@@ -516,16 +523,14 @@ private:
 
     firstRow << "Label"
              << "20918-20919"
-             << "0-1310"
-             << "100"
-             << "190-200" << 0.1 << err << 1.1 << err << 0.2 << err << 0.3
-             << 0.4 << err << 0.5 << err << 0.6 << err << 1.6 << err << 0.03;
+             << "0-1310" << 100.0 << "190-200" << 0.1 << err << 1.1 << err
+             << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6 << err
+             << 1.6 << err << 0.03;
     secondRow << "Label#2"
               << "20920-20921"
-              << "2620-3930"
-              << "100"
-              << "170-180" << 0.1 << err << 1.1 << err << 0.2 << err << 0.3
-              << 0.4 << err << 0.5 << err << 0.6 << err << 1.6 << err << 0.03;
+              << "2620-3930" << 100.0 << "170-180" << 0.1 << err << 1.1 << err
+              << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6 << err
+              << 1.6 << err << 0.03;
 
     return table;
   }

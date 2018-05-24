@@ -49,6 +49,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadTBL"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Text"; }
 
@@ -59,8 +62,10 @@ private:
   void exec() override;
   /// Writes a value to the file
   template <class T>
-  void writeVal(T &val, std::ofstream &file, bool endsep = true,
+  void writeVal(const T &val, std::ofstream &file, bool endsep = true,
                 bool endline = false);
+  void writeColumnNames(std::ofstream &file,
+                        std::vector<std::string> const &columnHeadings);
   /// the separator
   const char m_sep;
   // populates the map and vector containing grouping information

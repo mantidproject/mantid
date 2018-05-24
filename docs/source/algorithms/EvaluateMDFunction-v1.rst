@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,10 +37,10 @@ Usage
     out = EvaluateMDFunction(ws,function)
 
     # Check the result workspace
-    print out.getNumDims()
-    print out.getXDimension().name
-    print out.getYDimension().name
-    print out.getZDimension().name
+    print(out.getNumDims())
+    print(out.getXDimension().name)
+    print(out.getYDimension().name)
+    print(out.getZDimension().name)
     
     
 Output

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -58,7 +58,7 @@ Usage
     path = os.path.join(os.path.expanduser("~"), file_name)
     SaveNexusProcessed(ws, path)
 
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 Output:
 
@@ -91,10 +91,10 @@ Output:
     path = os.path.join(os.path.expanduser("~"), file_name)
     SaveNexusProcessed(ws, path, Title="MyWorkspace", WorkspaceIndexMin=0, WorkspaceIndexMax=9)
 
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
     ws = Load(path)
-    print "Saved workspace has %d spectra" % ws.getNumberHistograms()
+    print("Saved workspace has {} spectra".format(ws.getNumberHistograms()))
 
 Output:
 
@@ -127,10 +127,10 @@ Output:
     path = os.path.join(os.path.expanduser("~"), file_name)
     SaveNexusProcessed(ws, path, CompressNexus=True, PreserveEvents=True)
 
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
     ws = Load(path)
-    print "Saved workspace has %d spectra" % ws.getNumberHistograms()
+    print("Saved workspace has {} spectra".format(ws.getNumberHistograms()))
     
 Output:
 

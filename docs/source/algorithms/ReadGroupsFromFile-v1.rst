@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,8 +36,8 @@ Usage
    ws2 = ReadGroupsFromFile( ws1, "INES_example.cal")
 
    # Print the value of selected sprectra. Each corresponds to the group of the corresponding detector.
-   for i in [0,1,2,3,4,5,6,7,8]:
-      print ws2.readY(16*i), ws2.readY(16*i+5), ws2.readY(16*i+10), ws2.readY(16*i+15)
+   for i in range(9):
+       print(" ".join(str(ws2.readY(16 * i + j)) for j in range(0, 20, 5)))
 
 Output:
 

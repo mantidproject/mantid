@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,11 +29,11 @@ Usage
 
     ws=LoadIsawPeaks("TOPAZ_3007.peaks")
     FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
-    print "Before Optimization:"
-    print ws.sample().getOrientedLattice().getUB()
+    print("Before Optimization:")
+    print(ws.sample().getOrientedLattice().getUB())
     OptimizeLatticeForCellType(ws,CellType="Monoclinic")
-    print "\nAfter Optimization:"
-    print ws.sample().getOrientedLattice().getUB()
+    print("\nAfter Optimization:")
+    print(ws.sample().getOrientedLattice().getUB())
 
 
 Output:

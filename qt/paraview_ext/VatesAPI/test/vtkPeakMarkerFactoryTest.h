@@ -43,6 +43,8 @@ public:
 };
 
 class MockPeaksWorkspace : public PeaksWorkspace {
+  using Mantid::DataObjects::PeaksWorkspace::addPeak;
+
 public:
   MOCK_METHOD1(setInstrument,
                void(const Mantid::Geometry::Instrument_const_sptr &inst));
@@ -147,7 +149,7 @@ public:
     using namespace Mantid::VATES;
     using namespace Mantid::API;
 
-    IMDWorkspace *nullWorkspace = NULL;
+    IMDWorkspace *nullWorkspace = nullptr;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
     vtkPeakMarkerFactory factory("signal");

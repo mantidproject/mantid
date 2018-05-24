@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -71,13 +71,13 @@ dominated by the Bragg peaks and will just be a 3D-PDF instead.
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft',
               RemoveReflections=False,Convolution=False)
-   print "The value at [1,0,0] is " + str(mtd['fft'].signalAt(1866))
-   print "The value at [0,1,0] is " + str(mtd['fft'].signalAt(2226))
+   print("The value at [1,0,0] is {:.4f}".format(mtd['fft'].signalAt(1866)))
+   print("The value at [0,1,0] is {:.4f}".format(mtd['fft'].signalAt(2226)))
 
 .. testoutput:: fft1
 
-   The value at [1,0,0] is 3456.56897081
-   The value at [0,1,0] is 4903.71129384
+   The value at [1,0,0] is 3456.5690
+   The value at [0,1,0] is 4903.7113
 
 The results 3D-ΔPDF workspace looks like
 
@@ -103,13 +103,13 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft2',IntermediateWorkspace='int2',
               RemoveReflections=True,Size=0.3,Convolution=False)
-   print "The value at [1,0,0] is " + str(mtd['fft2'].signalAt(1866))
-   print "The value at [0,1,0] is " + str(mtd['fft2'].signalAt(2226))
+   print("The value at [1,0,0] is {:.4f}".format(mtd['fft2'].signalAt(1866)))
+   print("The value at [0,1,0] is {:.4f}".format(mtd['fft2'].signalAt(2226)))
 
 .. testoutput:: fft2
 
-   The value at [1,0,0] is -738.959448904
-   The value at [0,1,0] is 769.002661571
+   The value at [1,0,0] is -738.9594
+   The value at [0,1,0] is 769.0027
 
 +--------------------------------------------------+--------------------------------------------------+
 | Intermediate workspace after reflections removed | Resulting 3D-ΔPDF                                |
@@ -128,13 +128,13 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
               RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=False)
-   print "The value at [1,0,0] is " + str(mtd['fft3'].signalAt(1866))
-   print "The value at [0,1,0] is " + str(mtd['fft3'].signalAt(2226))
+   print("The value at [1,0,0] is {:.4f}".format(mtd['fft3'].signalAt(1866)))
+   print("The value at [0,1,0] is {:.4f}".format(mtd['fft3'].signalAt(2226)))
 
 .. testoutput:: fft3
 
-   The value at [1,0,0] is -477.173658361
-   The value at [0,1,0] is 501.081754175
+   The value at [1,0,0] is -477.1737
+   The value at [0,1,0] is 501.0818
 
 +---------------------------------------------------------------------+---------------------------------------------------------------------+
 | Intermediate workspace after reflections removed and crop to sphere | Resulting 3D-ΔPDF                                                   |
@@ -154,13 +154,13 @@ The fill value should be about the background level
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
               RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=False)
-   print "The value at [1,0,0] is " + str(mtd['fft3'].signalAt(1866))
-   print "The value at [0,1,0] is " + str(mtd['fft3'].signalAt(2226))
+   print("The value at [1,0,0] is {:.4f}".format(mtd['fft3'].signalAt(1866)))
+   print("The value at [0,1,0] is {:.4f}".format(mtd['fft3'].signalAt(2226)))
 
 .. testoutput:: fft3_2
 
-   The value at [1,0,0] is -477.173658361
-   The value at [0,1,0] is 501.081754175
+   The value at [1,0,0] is -477.1737
+   The value at [0,1,0] is 501.0818
 
 +---------------------------------------------------------------------+---------------------------------------------------------------------+
 | Intermediate workspace after reflections removed and crop to sphere | Resulting 3D-ΔPDF                                                   |
@@ -179,13 +179,13 @@ The fill value should be about the background level
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4'
               RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=True)
-   print "The value at [1,0,0] is " + str(mtd['fft4'].signalAt(1866))
-   print "The value at [0,1,0] is " + str(mtd['fft4'].signalAt(2226))
+   print("The value at [1,0,0] is {:.4f}".format(mtd['fft4'].signalAt(1866)))
+   print("The value at [0,1,0] is {:.4f}".format(mtd['fft4'].signalAt(2226)))
 
 .. code-block:: none
 
-   The value at [1,0,0] is -47.1984414304
-   The value at [0,1,0] is 44.3406303436
+   The value at [1,0,0] is -47.1984
+   The value at [0,1,0] is 44.3406
 
 +-----------------------------------------------------+-----------------------------------------------------+
 | Intermediate workspace after convolution is applied | Resulting 3D-ΔPDF                                   |
@@ -204,13 +204,13 @@ The fill value should be about the background level
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft5',IntermediateWorkspace='int5'
               RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=True,Deconvolution=True)
-   print "The value at [1,0,0] is " + str(mtd['fft5'].signalAt(1866))
-   print "The value at [0,1,0] is " + str(mtd['fft5'].signalAt(2226))
+   print("The value at [1,0,0] is {:.4f}".format(mtd['fft5'].signalAt(1866)))
+   print("The value at [0,1,0] is {:.4f}".format(mtd['fft5'].signalAt(2226)))
 
 .. code-block:: none
 
-   The value at [1,0,0] is -95.0767841089
-   The value at [0,1,0] is 99.3534883663
+   The value at [1,0,0] is -95.0768
+   The value at [0,1,0] is 99.3535
 
 +--------------------------------------------------------------+--------------------------------------------------------------+
 | The deconvolution array, workspace signal is divided by this | Resulting 3D-ΔPDF                                            |

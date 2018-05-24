@@ -7,16 +7,27 @@ cmake_minimum_required ( VERSION 3.5 )
 # Define the project name.
 project ( Mantid )
 
+# Policy settings
+if (POLICY CMP0022)
+  cmake_policy (SET CMP0022 NEW)
+endif ()
+
+if (POLICY CMP0072)
+  cmake_policy (SET CMP0072 OLD)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
-set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the gui components")
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the Qt4-based gui & components")
+# TODO: Switch this on by default when the builders all have Qt5 installed
+set ( ENABLE_WORKBENCH OFF CACHE BOOL "Switch for compiling the Qt5-based gui & components")
 
-SET (CPACK_INSTALL_CMAKE_PROJECTS
-     "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+set ( CPACK_INSTALL_CMAKE_PROJECTS
+      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
 ###########################################################################
 # Quick exit if we only want data targets
@@ -28,7 +39,10 @@ if( DATA_TARGETS_ONLY )
   return()
 endif()
 
-set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
+###########################################################################
+# Packaging configuration
+###########################################################################
+set ( CPACK_PACKAGE_SUFFIX "unstable" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 
 #Set package name here
@@ -43,7 +57,6 @@ include ( Eigen )
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
-
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
@@ -74,13 +87,6 @@ endif ()
 include ( CommonSetup )
 
 ###########################################################################
-# Check for Qt (DarwinSetup below needs a variable from this)
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
-endif ()
-
-###########################################################################
 # Find OpenGL
 ###########################################################################
 find_package ( OpenGL REQUIRED )
@@ -100,23 +106,31 @@ if (COVERALLS)
 endif()
 
 ###########################################################################
-# Find qwt. Needs to be version 5
+# Qt/Qwt/PyQt/sip
 ###########################################################################
 if (ENABLE_MANTIDPLOT)
-  find_package ( Qwt REQUIRED )
-  if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
-      QWT_VERSION VERSION_GREATER 6.0 )
-    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
-  endif()
-endif()
+  set ( QT_USE_IMPORTED_TARGETS ON )
+  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
 
-###########################################################################
-# Find PyQt & sip
-###########################################################################
-if (ENABLE_MANTIDPLOT)
+  find_package ( Qwt5 REQUIRED )
+  if( QWT5_VERSION VERSION_LESS 5.0 OR QWT5_VERSION VERSION_EQUAL 6.0 OR
+      QWT5_VERSION VERSION_GREATER 6.0 )
+    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}" )
+  endif()
+
   find_package ( PyQt4 REQUIRED )
   find_package ( SIP REQUIRED )
   separate_arguments ( PYQT4_SIP_FLAGS )
+endif()
+
+if ( ENABLE_WORKBENCH )
+  find_package ( Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED )
+  if ( Qt5_FOUND )
+    message ( STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}" )
+  endif()
+  find_package ( PyQt5 REQUIRED )
+  find_package ( SIP REQUIRED )
+  separate_arguments ( PYQT5_SIP_FLAGS )
 endif()
 
 ###########################################################################
@@ -143,21 +157,12 @@ include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/HistogramData/inc )
 include_directories ( Framework/Indexing/inc )
 include_directories ( Framework/Parallel/inc )
+include_directories ( Framework/Beamline/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 include_directories ( Framework/Types/inc )
 
-set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
-
-if (ENABLE_MANTIDPLOT)
-  # Add a target for all GUI tests
-  add_custom_target ( GUITests )
-  add_dependencies ( GUITests MantidQtCommonTest)
-  add_dependencies ( check GUITests )
-  # Collect all tests together
-  add_custom_target ( AllTests )
-  add_dependencies ( AllTests FrameworkTests GUITests )
-endif()
+set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types )
 
 if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
@@ -187,17 +192,42 @@ if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
-if (ENABLE_MANTIDPLOT)
+if ( ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH )
+  add_custom_target ( GUITests )
+  add_dependencies ( check GUITests )
+  # Collect all tests together
+  add_custom_target ( AllTests )
+  add_dependencies ( AllTests FrameworkTests GUITests )
   add_subdirectory ( qt )
+endif()
 
+if ( ENABLE_MANTIDPLOT )
   add_subdirectory ( MantidPlot )
 endif()
 
 add_subdirectory ( scripts )
 
-if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( docs )
-endif()
+# Docs requirements
+find_package ( Sphinx 1.2 )
+if ( SPHINX_FOUND )
+  # run python to see if the theme is installed
+  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import sphinx_bootstrap_theme"
+                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_STRIP_TRAILING_WHITESPACE )
+  if (SPHINX_BOOTSTRAP_THEME_ERR)
+    message (ERROR " Did not find sphinx_bootstrap_theme")
+    message (STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+    message (STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+    message (FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
+  endif ()
+
+  add_subdirectory ( dev-docs )
+  if ( ENABLE_MANTIDPLOT )
+    add_subdirectory ( docs )
+  endif()
+endif ()
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
@@ -263,13 +293,14 @@ if ( ENABLE_CPACK )
     elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
       # let people know what is coming out the other end
-      message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
+      message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},sip >= 4.18" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML" )
       # scipy
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )
@@ -282,7 +313,7 @@ if ( ENABLE_CPACK )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
       else()
         # Require matplotlib >= 1.5 to fix bug in latex rendering
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python2-matplotlib-qt4 >= 1.5.2,boost >= 1.53.0" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python2-matplotlib-qt4 >= 1.5.2,python2-QtAwesome,boost >= 1.53.0" )
       endif()
 
       # Add software collections for RHEL
@@ -297,8 +328,8 @@ if ( ENABLE_CPACK )
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-                           "libnexus0 (>= 4.3),"
-                           "libgsl0ldbl,"
+                           "libnexus0v5 (>= 4.3),"
+                           "libgsl2,"
                            "libqtcore4 (>= 4.2),"
                            "libqtgui4 (>= 4.2),"
                            "libqt4-opengl (>= 4.2),"
@@ -307,17 +338,18 @@ if ( ENABLE_CPACK )
                            "libqt4-qt3support (>= 4.2),"
                            "qt4-dev-tools,"
                            "libqwt5-qt4,"
-                           "libqwtplot3d-qt4-0,"
+                           "libqwtplot3d-qt4-0v5,"
+                           "libqtwebkit4,"
                            "python-h5py,"
                            "python-numpy,"
                            "python-sip,"
                            "python-qt4,"
                            "python-nxs (>= 4.3),"
                            "python-six,"
-                           "libjsoncpp0 (>=0.7.0),"
-                           "libqscintilla2-11,"
-                           "liboce-foundation8,liboce-modeling8,"
-                           "libmuparser2,"
+                           "libjsoncpp1 (>=0.7.0),"
+                           "libqscintilla2-12v5,"
+                           "liboce-foundation10,liboce-modeling10,"
+                           "libmuparser2v5,"
                            "ipython-qtconsole (>= 1.1),"
                            "ipython-notebook,"
                            "python-matplotlib,"
@@ -326,16 +358,18 @@ if ( ENABLE_CPACK )
                            "librdkafka1,"
                            "librdkafka++1,"
                            "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
+                           "libhdf5-cpp-11,"
                            "python-pycifrw (>= 4.2.1),"
-                           "python-yaml")
+                           "python-yaml,"
+                           "python-qtawesome")
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
-        if( "${UNIX_CODENAME}" STREQUAL "xenial")
-            list ( APPEND DEPENDS_LIST ", libhdf5-cpp-11,libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
-            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0," "libgsl0ldbl," "liboce-foundation8,liboce-modeling8,")
+        if( "${UNIX_CODENAME}" STREQUAL "bionic")
+            list ( APPEND DEPENDS_LIST ",libgsl23,liboce-foundation11,liboce-modeling11,libqscintilla2-qt4-13,jupyter-notebook,libhdf5-cpp-100")
+            list (REMOVE_ITEM DEPENDS_LIST "libgsl2," "liboce-foundation10,liboce-modeling10," "libqscintilla2-12v5," "ipython-notebook," "libhdf5-cpp-11,")
         endif()
         # Change DEPENDS_LIST for python 3
         if ( PYTHON_VERSION_MAJOR EQUAL 3 )
-          list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3)," "python-pycifrw (>= 4.2.1),")
+          list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3),")
           string ( REPLACE "python-" "python3-" DEPENDS_LIST ${DEPENDS_LIST} )
           string ( REPLACE "python3-qt4" "python3-pyqt4" DEPENDS_LIST ${DEPENDS_LIST} )
         endif ()
@@ -344,7 +378,7 @@ if ( ENABLE_CPACK )
       endif()
       # soft requirement of tcmalloc if selected
       IF ( USE_TCMALLOC )
-        message ( STATUS " Adding gperftools to the package requirements" )
+        message ( STATUS "Adding gperftools to the package requirements" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )
       ENDIF ( )

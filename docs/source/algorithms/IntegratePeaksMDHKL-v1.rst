@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -80,25 +80,25 @@ Usage
    pws =IntegratePeaksMDHKL(InputWorkspace=mdws,PeaksWorkspace=pws,DeltaHKL=1.5,GridPoints=21)
    for i in range(3):
        p = pws.getPeak(i)
-       print p.getIntensity(),p.getSigmaIntensity()
+       print('{:.7f} {:.9f}'.format(p.getIntensity(),p.getSigmaIntensity()))
    #Test with MDHistoWorkspace
    mdws = BinMD(InputWorkspace=mdws,AlignedDim0="[H,0,0],-10,10,101",AlignedDim1="[0,K,0],-10,10,101",AlignedDim2="[0,0,L],-10,10,101")
    pws =IntegratePeaksMDHKL(InputWorkspace=mdws,PeaksWorkspace=pws,DeltaHKL=1.5,GridPoints=21)
    for i in range(3):
        p = pws.getPeak(i)
-       print p.getIntensity(),p.getSigmaIntensity()
+       print('{:.7f} {:.9f}'.format(p.getIntensity(),p.getSigmaIntensity()))
 
 
 Output:
 
 .. testoutput:: IntegratePeaksMDHKLExample
 
-   99913.3212993 316.123352485
-   99913.3212993 316.123352485
-   99913.3212993 316.123352485
-   99945.2374619 316.157736186
-   99951.6716018 316.164910575
-   99926.3456269 316.133414893
+   99913.3212993 316.123352485 
+   99913.3212993 316.123352485 
+   99913.3212993 316.123352485 
+   99945.2374619 316.157736186 
+   99951.6716018 316.164910575 
+   99926.3456269 316.133414893 
 
 .. categories::
 
