@@ -40,7 +40,7 @@ class Prop:
 
 
 class BkgMethod:
-    CONSTANT = ' Background Constant Fit'
+    CONSTANT = 'Background Constant Fit'
     LINEAR = 'Background Linear Fit'
     OFF = 'Background OFF'
 

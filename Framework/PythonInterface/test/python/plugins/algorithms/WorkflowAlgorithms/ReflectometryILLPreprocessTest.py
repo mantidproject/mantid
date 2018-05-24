@@ -51,6 +51,63 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             else:
                 numpy.testing.assert_almost_equal(ys, 10.)
 
+    def _backgroundSubtraction(self, subtractionType):
+        inWSName = 'ReflectometryILLPreprocess_test_ws'
+        self.create_sample_workspace(inWSName)
+        # Add a peak to the sample workspace.
+        ws = mtd[inWSName]
+        ys = ws.dataY(49)
+        ys += 10.0
+        args = {
+            'InputWorkspace': inWSName,
+            'OutputWorkspace': 'unused_for_child',
+            'BeamCentre': 49,
+            'FluxNormalisation': 'Normalisation OFF',
+            'FlatBackground': subtractionType,
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getNumberHistograms(), 100)
+        for i in range(outWS.getNumberHistograms()):
+            ys = outWS.readY(i)
+            if i != 49:
+                numpy.testing.assert_almost_equal(ys, 0)
+            else:
+                numpy.testing.assert_almost_equal(ys, 10.)
+
+    def testLinearFlatBackgroundSubtraction(self):
+        self._backgroundSubtraction('Background Linear Fit')
+
+    def testConstantFlatBackgroundSubtraction(self):
+        self._backgroundSubtraction('Background Constant Fit')
+
+    def testDisableFlatBackgroundSubtraction(self):
+        inWSName = 'ReflectometryILLPreprocess_test_ws'
+        self.create_sample_workspace(inWSName)
+        # Add a peak to the sample workspace.
+        ws = mtd[inWSName]
+        bkgLevel = ws.readY(0)[0]
+        self.assertGreater(bkgLevel, 0.1)
+        args = {
+            'InputWorkspace': inWSName,
+            'OutputWorkspace': 'unused_for_child',
+            'BeamCentre': 49,
+            'FluxNormalisation': 'Normalisation OFF',
+            'FlatBackground': 'Background OFF',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getNumberHistograms(), 100)
+        for i in range(outWS.getNumberHistograms()):
+            ys = outWS.readY(i)
+            numpy.testing.assert_equal(ys, bkgLevel)
+
     def testForegroundBackgroundRanges(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
         self.create_sample_workspace(inWSName)
