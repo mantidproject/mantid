@@ -19,10 +19,27 @@ The algorithm used to perform this conversion makes a simplifying assumption tha
 subtrees in the result share a common parent. If this assumption is untrue then the input set
 is unsuitable and the algorithm will return an empty optional.
 
-.. image::  ../../images/subtree_fail.svg
+.. image::  ../../images/subtree_fail_shallow.svg
    :align: center
    :width: 800px
 
+The above example fails due to a *shallow* root, a root which has a depth *smaller* than the first
+root we encounter.
+
+.. image::  ../../images/subtree_fail_deep.svg
+   :align: center
+   :width: 800px
+
+This example fails due to a *deep* root, a root which has a depth *larger* than the first
+root we encounter.
+
+.. image::  ../../images/subtree_fail_parent.svg
+   :align: center
+   :width: 800px
+
+This example fails due to the fact that the parents of the subtree roots are not the same.
+
+These conditions are checked using the functions defined in :code:`Subtree.h`.
 
 This algorithm is used by :doc:`../API/JobTreeView` in the :code:`selectedSubtrees` method which is
 required to implement non-trivial copy and paste.

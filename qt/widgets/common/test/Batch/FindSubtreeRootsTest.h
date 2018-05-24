@@ -218,8 +218,6 @@ public:
     auto roots = findSubtreeRoots(region);
     TS_ASSERT(!roots.is_initialized())
   }
-
-
 };
 
 #endif // MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H

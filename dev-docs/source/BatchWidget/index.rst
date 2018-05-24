@@ -23,8 +23,8 @@ Internals Documentation
 .. toctree::
    :maxdepth: 1
 
-   Internals/ExtractSubtrees
    Internals/FindSubtreeRoots
+   Internals/ExtractSubtrees
    Internals/StrictModelIndexing
    Internals/QtStandardItemTreeModelAdapter
    Internals/CellBasedViewProperties
