@@ -246,17 +246,17 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.4059, 0.001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0702, 0.001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 0.8981, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[0],-0.6105, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[1],-0.2982, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.2446, 0.001);
 
       TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0594, 0.01);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1070, 0.01);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1898, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0390, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0718, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1245, 0.01);
     }
   }
 
@@ -287,13 +287,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0231, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0152, 0.0001);
       TS_ASSERT_DELTA(ws->readY(0)[1], 0.0000, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0575, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2],-0.0377, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0856, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1513, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.2643, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0562, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0992, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1734, 0.0001);
     }
   }
 
@@ -324,13 +324,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.4255, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0702, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 0.9467, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0],-0.6233,0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1],-0.2982, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.2765, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0421, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0776, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1403, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0276, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0509, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0921, 0.0001);
     }
   }
 
@@ -367,13 +367,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.4282, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0702, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 0.9536, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0],-0.6251, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1],-0.2982, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.2810, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0338, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0629, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1144, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0222, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0413, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0750, 0.0001);
     }
   }
 
@@ -410,13 +410,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0087, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0057, 0.0001);
       TS_ASSERT_DELTA(ws->readY(0)[1], 0.0000, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0216, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2],-0.0142, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0705, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1322, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.2417, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0462, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0867, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1585, 0.0001);
     }
   }
 

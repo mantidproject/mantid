@@ -91,9 +91,16 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   auto iyN = std::next(yData.rawData().begin(), iN);
   double summation = std::accumulate(iy0, iyN, 0.0);
   double denominator = 0.0;
+  /* this replaces (from doc):
+        delta_t/tau(exp(-t_N/tau) - exp(-t_0/tau))
+     with trapezium rule (convert it to integral first):
+        1/(sum_{j=0}{N} exp(-t_j/tau)) - 0.5*(exp(-t_0/tau)+exp(-t_N/tau))
+  */
   for (size_t k = i0; k < iN; k++) {
     denominator += exp(-xData[k] / MUON_LIFETIME_MICROSECONDS);
   }
+  denominator -= 0.5*(exp(-xData[i0]/ MUON_LIFETIME_MICROSECONDS));
+  denominator -= 0.5*(exp(-xData[iN]/ MUON_LIFETIME_MICROSECONDS));
   return summation / (denominator * numGoodFrames);
 }
 /**
