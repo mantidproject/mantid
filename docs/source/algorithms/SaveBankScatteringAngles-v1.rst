@@ -41,8 +41,7 @@ Usage
    with open(output_file) as f:
        contents = f.read().split("\n")
 
-   print("File contents (there is only one line as we only bothered"
-	 " saving one spectra):")
+   print("File contents (there is only one line as we only bothered saving one spectra):")
    print(contents[0])
 
 .. testcleanup:: SaveBankScatteringAngles
