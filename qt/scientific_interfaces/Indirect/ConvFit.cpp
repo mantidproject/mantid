@@ -354,7 +354,6 @@ IAlgorithm_sptr ConvFit::sequentialFit(const int &specMin,
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
   cfs->setProperty("PassWSIndexToFunction", true);
-  cfs->setProperty("BackgroundType", backgroundType().toStdString());
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("ExtractMembers", boolSettingValue("ExtractMembers"));

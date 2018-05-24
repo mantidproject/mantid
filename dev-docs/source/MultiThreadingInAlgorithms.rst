@@ -51,9 +51,9 @@ workspace data. Here's an example:
 
 .. code:: cpp
 
-   // Get references to the x data
-   const auto& xIn = inputWS->x(i);
-   auto& xOut = outputWS->mutableX(i);
+   // Get references to the x data
+   const auto& xIn = inputWS->x(i);
+   auto& xOut = outputWS->mutableX(i);
 
 This can cause problems in the case where the input and output
 workspaces are the same. Although the call to ``outputWS->x()`` to get a

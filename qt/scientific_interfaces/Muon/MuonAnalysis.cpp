@@ -1116,7 +1116,6 @@ void MuonAnalysis::updatePairTable() {
 void MuonAnalysis::inputFileChanged_MWRunFiles() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
-  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
   allowLoading(true);
 }
 
@@ -1388,6 +1387,13 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   size_t numPeriods =
       MuonAnalysisHelper::numPeriods(loadResult->loadedWorkspace);
   if (instrumentChanged || numPeriods != m_numPeriods) {
+    // if some data has been loaded, update the run number
+    // before updating the periods (stops errors)
+    if (m_currentDataName != NOT_AVAILABLE) {
+      const boost::optional<QString> filePath =
+          m_uiForm.mwRunFiles->getUserInput().toString();
+      m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
+    }
     updatePeriodWidgets(numPeriods);
   }
 
@@ -1639,6 +1645,7 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
 
   // cache number of periods
   m_numPeriods = numPeriods;
+  m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 }
 
 /**

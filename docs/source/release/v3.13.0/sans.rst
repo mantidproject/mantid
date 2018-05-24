@@ -18,6 +18,7 @@ New features
 
 Improvements
 ############
+* Added Radius Cutoff and Wavelength Cutoff boxes to the old and new GUI.
 
 Bug fixes
 #########

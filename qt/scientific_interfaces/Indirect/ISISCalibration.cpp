@@ -3,9 +3,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
-
+#include <QDebug>
 #include <QFileInfo>
-
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -312,11 +311,10 @@ void ISISCalibration::run() {
  * @param error If the algorithms failed.
  */
 void ISISCalibration::algorithmComplete(bool error) {
-  if (error)
-    return;
-
-  m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
+  if (!error) {
+    m_uiForm.pbSave->setEnabled(true);
+    m_uiForm.pbPlot->setEnabled(true);
+  }
 }
 
 bool ISISCalibration::validate() {
@@ -391,11 +389,6 @@ void ISISCalibration::calPlotRaw() {
 
   m_lastCalPlotFilename = filename;
 
-  if (filename.isEmpty()) {
-    emit showMessageBox("Cannot plot raw data without filename");
-    return;
-  }
-
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
 
@@ -433,10 +426,6 @@ void ISISCalibration::calPlotRaw() {
  * Replots the energy mini plot
  */
 void ISISCalibration::calPlotEnergy() {
-  if (!m_uiForm.leRunNo->isValid()) {
-    emit showMessageBox("Run number not valid.");
-    return;
-  }
 
   const auto files = m_uiForm.leRunNo->getFilenames().join(",");
   auto reductionAlg = energyTransferReductionAlgorithm(files);
@@ -450,7 +439,7 @@ void ISISCalibration::calPlotEnergy() {
   WorkspaceGroup_sptr reductionOutputGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           "__IndirectCalibration_reduction");
-  if (reductionOutputGroup->size() == 0) {
+  if (reductionOutputGroup->isEmpty()) {
     g_log.warning("No result workspaces, cannot plot energy preview.");
     return;
   }
@@ -762,6 +751,7 @@ IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(
       "Reflection",
       getInstrumentConfiguration()->getReflectionName().toStdString());
   reductionAlg->setProperty("InputFiles", inputFiles.toStdString());
+  reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   reductionAlg->setProperty("OutputWorkspace",
                             "__IndirectCalibration_reduction");
   reductionAlg->setProperty("SpectraRange",
