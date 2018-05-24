@@ -57,11 +57,11 @@ signals:
 
 public slots:
   void setActiveModelIndex(std::size_t index);
+  void displayBinMask();
 
 private slots:
   void setBinMask(const std::string &maskString);
   void setMaskSpectraList(const std::string &spectraList);
-  void displayBinMask();
   void updateSpectraList(const std::string &spectraList);
   void updateSpectraRange(std::size_t minimum, std::size_t maximum);
   void setMaskIndex(int index);
