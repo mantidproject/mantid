@@ -20,7 +20,7 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 #. crop to given wavelength range (in TOF)
 #. converts to wavelength
 
-The algorithm can be tought as an 'advanced loader', and should be used to load both direct beam and reflected beam measurements.
+The algorithm can be thought as an 'advanced loader', and should be used to load both direct beam and reflected beam measurements.
 
 The *OutputWorkspace* can be further fed to :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>`.
 
