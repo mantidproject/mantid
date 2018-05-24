@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1211</width>
-    <height>775</height>
+    <height>832</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -438,7 +438,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>3</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -1571,6 +1571,12 @@ QGroupBox::title {
                 </item>
                 <item alignment="Qt::AlignTop">
                  <widget class="QGroupBox" name="groupBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when dat a is transformed from time-of-flight to wavlength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -1580,6 +1586,12 @@ QGroupBox::title {
                   <layout class="QHBoxLayout" name="horizontalLayout_10">
                    <item>
                     <widget class="QStackedWidget" name="wavelength_stacked_widget">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
@@ -1637,6 +1649,12 @@ QGroupBox::title {
                    </item>
                    <item>
                     <widget class="QWidget" name="widget" native="true">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
