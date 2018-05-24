@@ -39,16 +39,15 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  // --------------------------------- Success cases
-  // -----------------------------------
+  // -------------------------- Success cases ----------------------------------
 
   void test_exec_with_TOF_input_gives_correct_X_values() {
     using namespace Mantid::API;
 
     auto alg = createAlgorithm();
     double x0(50.0), x1(300.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx,
-                                                                 true, true);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
     alg->setProperty("InputWorkspace", testWS);
     alg->setProperty("Mass", 1.0097);
     alg->setProperty("QWorkspace", "ConvertToYSpace_Test_qSpace");
@@ -79,9 +78,9 @@ public:
     TS_ASSERT_DELTA(-1.670937938, ySpOutX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(17.99449408, ySpOutX.back(), 1e-08);
     // Y
-    TS_ASSERT_DELTA(-0.01152733, ySpOutY.front(), 1e-08);
-    TS_ASSERT_DELTA(5.56667697, ySpOutY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.35141703, ySpOutY.back(), 1e-08);
+    TS_ASSERT_DELTA(0.0, ySpOutY.front(), 1e-08);
+    TS_ASSERT_DELTA(5.84236492, ySpOutY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(0.0, ySpOutY.back(), 1e-08);
     // E
     TS_ASSERT_DELTA(25.14204252, ySpOutE.front(), 1e-08);
     TS_ASSERT_DELTA(36.99940026, ySpOutE[npts / 2], 1e-08);
@@ -164,7 +163,8 @@ public:
     convertToYSpaceAlg = createAlgorithm();
     double x0(50.0), x1(300.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1000, x0, x1, dx, true, true);
+        1000, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true,
+        true);
     convertToYSpaceAlg->setChild(false);
     convertToYSpaceAlg->setProperty("InputWorkspace", testWS);
     convertToYSpaceAlg->setProperty("Mass", 1.0097);

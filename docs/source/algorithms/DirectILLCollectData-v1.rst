@@ -9,7 +9,7 @@
 Description
 -----------
 
-An initial step of the reduction workflow for the direct geometry TOF spectrometers at ILL. It reads and merges NeXus data files, normalizes data to monitor, subtracts a flat background, and adjusts the TOF scale to conform to Mantid standards. More information on how this algorithm interacts with the rest of the ILL's TOF reduction suite can be found :ref:`here <DirectILL>`. The workflow of this algorithm is shown in the diagram below:
+An initial step of the reduction workflow for the direct geometry TOF spectrometers at ILL. It reads and merges NeXus files, normalizes data to monitor, subtracts a flat background, and adjusts the TOF scale to conform to Mantid standards. More information on how this algorithm interacts with the rest of the ILL's TOF reduction suite can be found :ref:`here <DirectILL>`. The workflow of this algorithm is shown in the diagram below:
 
 .. diagram:: DirectILLCollectData-v1_wkflw.dot
 
@@ -62,9 +62,9 @@ Elastic peak positions (EPP)
 
 Information on the elastic peaks (position, peak width) is needed for incident energy calibration, as well as for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` algorithms. This data comes in the form of an EPP workspace which is a TableWorkspace containing columns specified by the :ref:`FindEPP <algm-FindEPP>` algorithm.
 
-If no external EPP table is given by the *EPPWorkspace* property, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. The default (:literal:`'EPP Method AUTO'`) is to calculate the positions for the IN5 instrument, and to fit for any other instrument.
+If an EPP table is needed, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. The default (:literal:`'EPP Method AUTO'`) is to calculate the positions for the IN5 instrument, and to fit for any other instrument.
 
-In the calculation case, a nominal peak width can be given using the *Sigma* property.  The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
+In the calculation case, a nominal peak width can be given using the *Sigma* property. The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
 
 Incident energy
 ^^^^^^^^^^^^^^^
@@ -85,9 +85,8 @@ Optional inputs and outputs
 
 The algorithm has some optional input and output workspaces. Their purpose is to extract some common information from a single data set and use it as input for other algorithms or data sets. An example would be backgrounds extracted from a low temperature measurement which can be used when reducing data taken at higher temperatures.
 
-The optional input and output workspaces come in pairs. If the input workspace is specified, it will be used in the reduction and returned as the corresponding output workspace. If the input workspace is not specified, the needed information is calculated from the current spectra, and returned in the output workspace.
+Some optional input and output workspaces come in pairs. If the input workspace is specified, it will be used in the reduction and returned as the corresponding output workspace. If the input workspace is not specified, the needed information is calculated from the current data, and returned in the output workspace.
 
-* *EPPWorkspace* --- *OutputEPPWorkspace*: elastic peak position table, used for incident energy calibration, but also in :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>`. The peak positions in the output workspace are for the adjusted TOF axis. This is fine for the incident energy calibration as only relative TOF values are used.
 * *IncidentEnergyWorkspace* --- *OutputIncidentEnergyWorkspace*: single-valued workspace containing calibrated incident energy, used for incident energy calibration.
 * *FlatBkgWorkspace* --- *OutputFlatBkgWorkspace*: a MatrixWorkspace containing the flat backgrounds. Used for flat background subtraction. Note that *FlatBkgScaling* is not applied to *OutputFlatBkgWorkspace*.
 * *ElasticChannelWorkspace* --- *OutputElasticChannelWorkspace*: a single-valued workspace containing the index of the nominal elastic channel. Used for the TOF axis adjustment.
@@ -107,7 +106,7 @@ The following settings are used when the :literal:`AUTO` keyword is encountered:
 +===========================+=========================+========================+=========================+=========================+
 | EPPCreationMethod         | Fit EPP                 | Calculate EPP          | Fit EPP                 | Fit EPP                 |
 +---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
-| ElasticChannel            | Default Elastic Channel | Fit Elastic Channel    | Default Elastic Channel | Default Elastic Channel |
+| ElasticChannel            | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Default Elastic Channel |
 +---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
 | IncidentEnergyCalibration | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration ON   |
 +---------------------------+-------------------------+------------------------+-------------------------+-------------------------+

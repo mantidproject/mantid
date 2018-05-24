@@ -29,7 +29,7 @@ class ReflTestHarness:
         clickButton(waitForObject(":tableMain.Yes_QPushButton"))
         
     def __teardown(self):
-        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry (Old)_ReflGui"))
+        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry (Old) - DEPRECATED_ReflGui"))
         dont_save_name = ":Don't Save_QPushButton"
         if(object.exists(dont_save_name)):
             clickButton(waitForObject(dont_save_name))

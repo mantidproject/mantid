@@ -19,13 +19,16 @@ class EnggDiffGSASFittingWorker : public QObject {
   Q_OBJECT
 
 public:
-  EnggDiffGSASFittingWorker(EnggDiffGSASFittingModel *model,
-                            const GSASIIRefineFitPeaksParameters &params);
+  EnggDiffGSASFittingWorker(
+      EnggDiffGSASFittingModel *model,
+      const std::vector<GSASIIRefineFitPeaksParameters> &params);
 
 public slots:
-  void doRefinement();
+  void doRefinements();
 
 signals:
+  void refinementsComplete();
+
   void refinementSuccessful(GSASIIRefineFitPeaksOutputProperties);
 
   void refinementFailed(std::string);
@@ -35,7 +38,7 @@ signals:
 private:
   EnggDiffGSASFittingModel *m_model;
 
-  const GSASIIRefineFitPeaksParameters m_refinementParams;
+  const std::vector<GSASIIRefineFitPeaksParameters> m_refinementParams;
 };
 
 } // namespace CustomInterfaces

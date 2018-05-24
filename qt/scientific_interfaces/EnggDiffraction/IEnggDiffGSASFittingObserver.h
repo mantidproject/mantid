@@ -11,11 +11,17 @@ class IEnggDiffGSASFittingObserver {
 public:
   virtual ~IEnggDiffGSASFittingObserver() = default;
 
+  /// Notify the observer that all refinements have terminated successfully
+  virtual void notifyRefinementsComplete() = 0;
+
+  /// Notify the observer that a single refinement has terminated successfully
   virtual void notifyRefinementSuccessful(
       const GSASIIRefineFitPeaksOutputProperties &refinementResults) = 0;
 
+  /// Notify the observer that a refinement has failed
   virtual void notifyRefinementFailed(const std::string &failureMessage) = 0;
 
+  /// Notify the observer that a single refinement was cancelled
   virtual void notifyRefinementCancelled() = 0;
 };
 
