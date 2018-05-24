@@ -78,8 +78,9 @@ void PostprocessingStep::postProcessGroup(
 
     // Only postprocess if all workspaces exist
     if (!workspaceExists(inputWSName))
-      throw std::runtime_error("Some workspaces in the group could not be found");
-    
+      throw std::runtime_error(
+          "Some workspaces in the group could not be found");
+
     inputNames.append(inputWSName);
   }
 

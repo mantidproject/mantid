@@ -72,13 +72,13 @@ private:
   int m_groupIndex;
 
   void handleError(const std::string &errorMessage) {
-      m_presenter->m_manager->setError(
-          std::string("Group processing failed: ") + errorMessage, m_groupIndex);
-      if (m_presenter->m_manager->rowCount(m_groupIndex) ==
-          static_cast<int>(m_groupData.size()))
-        m_presenter->m_manager->setProcessed(true, m_groupIndex);
-      emit reductionErrorSignal(QString::fromStdString(errorMessage));
-      emit finished(1);
+    m_presenter->m_manager->setError(
+        std::string("Group processing failed: ") + errorMessage, m_groupIndex);
+    if (m_presenter->m_manager->rowCount(m_groupIndex) ==
+        static_cast<int>(m_groupData.size()))
+      m_presenter->m_manager->setProcessed(true, m_groupIndex);
+    emit reductionErrorSignal(QString::fromStdString(errorMessage));
+    emit finished(1);
   }
 };
 } // namespace DataProcessor

@@ -74,7 +74,7 @@ private:
   void handleError(const std::string &errorMessage) {
     m_presenter->m_manager->setProcessed(true, m_rowIndex, m_groupIndex);
     m_presenter->m_manager->setError(std::string("Row reduction failed: ") +
-                                     errorMessage,
+                                         errorMessage,
                                      m_rowIndex, m_groupIndex);
     emit reductionErrorSignal(QString::fromStdString(errorMessage));
     emit finished(1);
