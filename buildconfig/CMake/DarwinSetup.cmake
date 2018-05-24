@@ -102,10 +102,6 @@ set ( INBUNDLE MantidPlot.app/ )
 # Copy the launcher script to the correct location
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher 
                  ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/Mantid_osx_launcher COPYONLY )
-# Copy the error dialog script to the correct location
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/error_dialog_app.py.in 
-                 ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/error_dialog_app.py COPYONLY )
-
 
 # We know exactly where this has to be on Darwin, but separate whether we have
 # kit build or a regular build.
