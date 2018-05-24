@@ -5,12 +5,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 
 namespace Mantid {
 namespace DataHandling {
 /**
+This algorithm is deprecated. Please use SaveMFT instead.
+
 Saves a file in ILL Cosmos format  from a 2D workspace
 (Workspace2D class). SaveILLCosmosAscii is an algorithm but inherits from the
 AsciiPointBase class which provides the main implementation for the init() &
@@ -38,7 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveILLCosmosAscii : public DataHandling::AsciiPointBase {
+class DLLExport SaveILLCosmosAscii : public DataHandling::AsciiPointBase,
+                                     public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveILLCosmosAscii"; }
