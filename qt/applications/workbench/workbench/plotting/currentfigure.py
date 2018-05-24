@@ -138,6 +138,16 @@ class CurrentFigure(object):
                 manager.hold()
 
     @classmethod
+    def bring_to_front_by_name(cls, figure_title):
+        """
+        Make the figure corresponding to figure_title come to the top.
+        """
+        for figure_manager in cls.figs.values():
+            if figure_manager.get_window_title() == figure_title:
+                figure_manager.show()
+                break
+
+    @classmethod
     def draw_all(cls, force=False):
         """
         Redraw all figures registered with the pyplot

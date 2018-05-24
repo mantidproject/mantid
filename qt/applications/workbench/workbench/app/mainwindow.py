@@ -125,6 +125,7 @@ class MainWindow(QMainWindow):
         self.workspacewidget = None
         self.editor = None
         self.algorithm_selector = None
+        self.plot_selector = None
         self.widgets = []
 
         # Widget layout map: required for use in Qt.connection
@@ -162,6 +163,13 @@ class MainWindow(QMainWindow):
         self.algorithm_selector = AlgorithmSelector(self)
         self.algorithm_selector.register_plugin()
         self.widgets.append(self.algorithm_selector)
+
+        self.set_splash("Loading Plot Selector")
+        from workbench.plugins.plotselectorwidget import PlotSelector
+        self.plot_selector = PlotSelector(self)
+        self.plot_selector.register_plugin()
+        self.widgets.append(self.plot_selector)
+
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
@@ -278,10 +286,11 @@ class MainWindow(QMainWindow):
         workspacewidget = self.workspacewidget
         editor = self.editor
         algorithm_selector = self.algorithm_selector
+        plot_selector = self.plot_selector
         default_layout = {
             'widgets': [
                 # column 0
-                [[workspacewidget], [algorithm_selector]],
+                [[workspacewidget], [algorithm_selector], [plot_selector]],
                 # column 1
                 [[editor, ipython]],
                 # column 2
@@ -290,7 +299,7 @@ class MainWindow(QMainWindow):
             'width-fraction': [0.25,            # column 0 width
                                0.50,            # column 1 width
                                0.25],           # column 2 width
-            'height-fraction': [[0.5, 0.5],     # column 0 row heights
+            'height-fraction': [[0.34, 0.33, 0.33],     # column 0 row heights
                                 [1.0],          # column 1 row heights
                                 [1.0]]          # column 2 row heights
         }
