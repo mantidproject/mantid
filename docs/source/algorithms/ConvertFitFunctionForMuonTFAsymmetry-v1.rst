@@ -72,7 +72,6 @@ Output:
 
 .. testoutput:: example
 
-   Gradients:
    Constant tie has been preserved
    Fix has been preserved
 
