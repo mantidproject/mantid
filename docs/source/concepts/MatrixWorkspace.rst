@@ -14,7 +14,7 @@ A Matrix Workspace is a generic name for a family which contains measured (or de
 -  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.            
 
 What information is in a Matrix Workspace
-----------------------------------------
+------------------------------------------
 
 All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :ref:`Units <Unit Factory>`.  
 

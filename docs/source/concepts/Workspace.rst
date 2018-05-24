@@ -41,7 +41,7 @@ Workspaces Types
 
 The workspace type id identifies the type of a Workspace instance.  
 
-.. tip:: For C++ or Python development, these values are needed in such functions as the :ref:`Analysis Data Service's <AnalysisDataService>` createWorkspace.
+.. tip:: For C++ or Python development, these values are needed in such functions as the :ref:`Analysis Data Service's <Analysis Data Service>` createWorkspace.
 
 +-------------------------------+-------------------------------------------+
 | ID                            | Workspace Type                            |
