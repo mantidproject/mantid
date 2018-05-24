@@ -135,39 +135,41 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
                                    : inputWorkspacesStr.size();
 
       if (m_inputWSMatrix.empty()) { // no group workspaces
+        // A column of matrix workspaces will be stitched
         RunCombinationHelper combHelper;
         combHelper.setReferenceProperties(column.front());
         for (const auto &ws : column) {
-          // check if all the others are compatible with the first one
+          // check if all the others are compatible with the reference
           std::string compatible = combHelper.checkCompatibility(ws, true);
-          if (!compatible.empty()) {
+          if (!compatible.empty())
             issues["InputWorkspaces"] = "Workspace " + ws->getName() +
                                         " is not compatible: " + compatible +
                                         "\n";
-          }
         }
         m_inputWSMatrix.emplace_back(column);
-      } else if (m_inputWSMatrix.size() ==
-                 inputWorkspacesStr.size()) { // only group workspaces
-        for (auto i = m_inputWSMatrix.cbegin(); i != m_inputWSMatrix.cend();
-             ++i) { // columns
-          if (i->size() != m_inputWSMatrix.front().size()) {
-            issues["InputWorkspaces"] = "Size mismatch of group workspaces";
-          } else {
-            RunCombinationHelper combHelper;
-            combHelper.setReferenceProperties(i->front());
-            for (const auto ws : *i) { // rows
+      } else if (m_inputWSMatrix.size() !=
+                 inputWorkspacesStr.size()) { // not only group workspaces
+        issues["InputWorkspaces"] = "All input workspaces must be groups";
+      } else { // only group workspaces
+        // Each row of matrix workspaces will be stitched
+        for (size_t spec = 1; spec < m_inputWSMatrix.front().size(); ++spec) {
+          for (const auto &ws : m_inputWSMatrix) {
+            if (ws.size() != m_inputWSMatrix.front().size()) {
+              issues["InputWorkspaces"] = "Size mismatch of group workspaces";
+            } else {
+              RunCombinationHelper combHelper;
+              combHelper.setReferenceProperties(ws[0]);
               // check if all the others are compatible with the reference
-              std::string compatible = combHelper.checkCompatibility(ws, true);
+              std::string compatible =
+                  combHelper.checkCompatibility(ws[spec], true);
               if (!compatible.empty())
-                issues["InputWorkspaces"] = "Workspace " + ws->getName() +
+                issues["InputWorkspaces"] = "Workspace " + ws[spec]->getName() +
                                             " is not compatible: " +
                                             compatible + "\n";
             }
           }
         }
-      } else
-        issues["InputWorkspaces"] = "All input workspaces must be groups";
+      }
 
       int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
       m_scaleFactorFromPeriod = static_cast<size_t>(scaleFactorFromPeriod);
