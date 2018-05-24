@@ -8,12 +8,13 @@ command_line_args = parser.parse_args()
 
 sys.path.insert(0, command_line_args.directory)
 
-from PyQt4 import QtGui
-import mantid
+from PyQt4 import QtGui # noqa
 
-from mantid.kernel import UsageService
-from ErrorReporter.error_report_presenter import ErrorReporterPresenter
-from ErrorReporter.errorreport import CrashReportPage
+import mantid # noqa
+from ErrorReporter import resources # noqa
+from mantid.kernel import UsageService # noqa
+from ErrorReporter.error_report_presenter import ErrorReporterPresenter # noqa
+from ErrorReporter.errorreport import CrashReportPage # noqa
 
 
 def main():

@@ -21,6 +21,7 @@ New Features
 ############
 
 - A list of Related Algorithms has been added to each algorithm, and is displayed in the documentation page of each algorithm as part of it's summary.
+- The error reporter now catches hard crashes to desktop.
 
 New Algorithms
 ##############
