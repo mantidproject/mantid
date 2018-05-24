@@ -17,6 +17,7 @@ New features
 
 Improvements
 ############
+* The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
 
 Bug fixes
 #########
