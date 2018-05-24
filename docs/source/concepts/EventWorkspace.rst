@@ -1,4 +1,4 @@
-.. _Event Workspace:
+.. _EventWorkspace:
 
 ===============
 Event Workspace
