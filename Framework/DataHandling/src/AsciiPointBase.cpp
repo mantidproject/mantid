@@ -66,17 +66,12 @@ void AsciiPointBase::exec() {
  *  @returns std::vector<double> of point data for the X column
  */
 std::vector<double> AsciiPointBase::header(std::ofstream &file) {
-  auto title = '#' + m_ws->getTitle();
   const auto &xTemp = m_ws->x(0);
   m_xlength = xTemp.size() - 1;
   std::vector<double> XData(m_xlength, 0);
   for (size_t i = 0; i < m_xlength; ++i) {
     XData[i] = (xTemp[i] + xTemp[i + 1]) / 2.0;
   }
-
-  m_qres = (XData[1] - XData[0]) / XData[1];
-  g_log.information("Constant dq/q from file: " +
-                    boost::lexical_cast<std::string>(m_qres));
   file << std::scientific;
   return XData;
 }
@@ -89,16 +84,17 @@ std::vector<double> AsciiPointBase::header(std::ofstream &file) {
  */
 void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
                           bool exportDeltaQ) {
-
   const auto &yData = m_ws->y(0);
   const auto &eData = m_ws->e(0);
   if (exportDeltaQ) {
     for (size_t i = 0; i < m_xlength; ++i) {
-      double dq = XData[i] * m_qres;
       outputval(XData[i], file, leadingSep());
       outputval(yData[i], file);
       outputval(eData[i], file);
-      outputval(dq, file);
+      if (m_ws->hasDx(0))
+        outputval(m_ws->dx(0)[i], file);
+      else
+        outputval(0., file);
       file << '\n';
     }
   } else {

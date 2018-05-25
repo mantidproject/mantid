@@ -61,7 +61,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -92,7 +92,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT((columns.at(3) == "nan") || (columns.at(3) == "inf"));
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -123,7 +123,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -154,7 +154,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -186,7 +186,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000e+00");
     in.close();
 
     cleanupafterwards();

@@ -1,11 +1,7 @@
 #ifndef MANTID_DATAHANDLING_ASCIIPOINTBASE_H_
 #define MANTID_DATAHANDLING_ASCIIPOINTBASE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -75,7 +71,6 @@ protected:
   virtual void appendSeparatorProperty();
   /// The separator character
   char m_sep;
-  double m_qres = 0.0;
   size_t m_xlength = 0;
 
   API::MatrixWorkspace_const_sptr m_ws;
@@ -84,4 +79,4 @@ protected:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*  MANTID_DATAHANDLING_SAVEANSTO_H_  */
+#endif /*  MANTID_DATAHANDLING_ASCIIPOINTBASE_H_  */
