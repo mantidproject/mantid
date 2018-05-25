@@ -283,12 +283,18 @@ std::vector<std::string> LoadMcStas::readEventData(
       {eventWS, eventDataTotalName}};
 
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
-  auto eventWSIndex = 1; // Starts at the first non-sum workspace
+
+  // All entries of allEventWS except the first are eventWS entries for individual
+  // event data in the nexus file except for the first entry.
+  // Loop over McStas components that stores event data
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
+
+    // if numEventEntries > 1 also create separate event workspaces
     if (numEventEntries > 1) {
-      // partial event data container + the name for it the user will see
+      // create container to hold partial event data 
+      // plus the name users will see for it
       const auto ws_name = dataName + std::string("_") + nameOfGroupWS;
       allEventWS.emplace_back(eventWS->clone(), ws_name);
     }
@@ -401,11 +407,10 @@ std::vector<std::string> LoadMcStas::readEventData(
         }
         allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
         if (numEventEntries > 1) {
-          allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) +=
+          allEventWS.back().first->getSpectrum(workspaceIndex) +=
               weightedEvent;
         }
       }
-      eventWSIndex++;
     } // end reading over number of blocks of an event dataset
 
     nxFile.closeData();
@@ -423,12 +428,10 @@ std::vector<std::string> LoadMcStas::readEventData(
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
   for (auto eventWS : allEventWS) {
-    if (eventWS.second != "partial_event_data_workspace") {
       auto ws = eventWS.first;
       ws->setAllX(axis);
       AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
       scatteringWSNames.emplace_back(eventWS.second);
-    }
   }
   return scatteringWSNames;
 }
