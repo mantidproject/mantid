@@ -90,6 +90,15 @@ private:
   setMuonProcessPeriodProperties(API::IAlgorithm &alg,
                                  const API::Workspace_sptr &inputWS,
                                  const Muon::AnalysisOptions &options) const;
+
+  void setMuonProcessAlgorithmOutputTypeProperty(
+	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+  /// Set grouping properies of MuonProcess
+  void setMuonProcessAlgorithmGroupingProperties(
+	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+
+  void setMuonProcessAlgorithmTimeProperties(
+	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName(const Muon::AnalysisOptions &options,
                                         const std::string &groupWSName);
