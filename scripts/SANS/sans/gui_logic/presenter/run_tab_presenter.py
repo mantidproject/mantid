@@ -219,8 +219,8 @@ class RunTabPresenter(object):
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
         except Exception as e:
-            self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
-                                   "to the Mantid search directories! See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
+            self._view.display_message_box('Warning', 'Loading of the user file failed.', str(e))
 
     def on_batch_file_load(self):
         """
@@ -253,8 +253,8 @@ class RunTabPresenter(object):
             self._beam_centre_presenter.on_update_rows()
 
         except RuntimeError as e:
-            self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
-                                   " to the Mantid search directories! See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
+            self._view.display_message_box('Warning', 'Loading of the batch file failed', str(e))
 
     def on_data_changed(self):
         # 1. Perform calls on child presenters
@@ -306,6 +306,8 @@ class RunTabPresenter(object):
             self._view.halt_process_flag()
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
+            self._view.display_message_box('Warning', 'Process halted', str(e))
+
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
@@ -960,9 +962,7 @@ class RunTabPresenter(object):
             state = director.create_state(row)
             states.update({row: state})
         except (ValueError, RuntimeError) as e:
-            raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
-                               "been added to the Mantid search directories! See here for more "
-                               "details: {}".format(row, str(e)))
+            raise RuntimeError("There was a bad entry for row {}. {}".format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """

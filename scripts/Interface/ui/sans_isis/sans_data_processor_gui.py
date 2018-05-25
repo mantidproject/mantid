@@ -430,6 +430,16 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.user_file_button.setEnabled(True)
         self.manage_directories_button.setEnabled(True)
 
+    def display_message_box(self, title, message, details):
+        msg = QtGui.QMessageBox()
+        msg.setIcon(QtGui.QMessageBox.Warning)
+
+        msg.setText(message)
+        msg.setWindowTitle(title)
+        msg.setDetailedText(details)
+        msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.exec_()
+
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
 
