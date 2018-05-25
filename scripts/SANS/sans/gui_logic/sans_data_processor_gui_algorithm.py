@@ -46,7 +46,7 @@ def create_option_column_properties():
              algorithm_list_entry(column_name="",
                                   algorithm_property="EventSlices",
                                   description='The event slices to reduce. The format is the same as for the event slices'
-                                              ' box in settings however if a comma separated list is given '
+                                              ' box in settings, however if a comma separated list is given '
                                               'it must be enclosed in quotes',
                                   show_value=True,
                                   default='',
