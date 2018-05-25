@@ -37,6 +37,12 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
+  declareProperty("OutputUnNormData", false, "If to output the unnormalised and unshifted data");
+
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+	  "OutputUnNormWorkspace", "unNormalisedData", Direction::Output, API::PropertyMode::Optional),
+	  "The name of the output 2D unnormalised workspace.");
+
   std::vector<int> empty;
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
@@ -50,8 +56,11 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty("NormalizationIn", 0.0, "If this value is non-zero then this "
                                           "is used for the normalization, "
                                           "instead of being estimated.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-      "NormalizationConstant", Direction::Output));
+  
+  declareProperty(
+	  make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+		  "NormalisationTable", "", Direction::InOut),
+	  "Name of the table containing the normalisations for the asymmetries.");
 }
 
 /*
@@ -85,7 +94,8 @@ EstimateMuonAsymmetryFromCounts::validateInputs() {
  */
 void EstimateMuonAsymmetryFromCounts::exec() {
   std::vector<int> spectra = getProperty("Spectra");
-
+  std::vector<std::string> methods;
+  std::vector<std::string> wsNames;
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   auto numSpectra = inputWS->getNumberHistograms();
@@ -94,6 +104,8 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   if (inputWS != outputWS) {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
+  bool extraData = getProperty("OutputUnNormData");
+  API::MatrixWorkspace_sptr unnormWS = API::WorkspaceFactory::Instance().create(outputWS);
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
   const Mantid::API::Run &run = inputWS->run();
@@ -149,10 +161,26 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     if (normConst == 0.0) {
       normConst = estimateNormalisationConst(inputWS->histogram(specNum),
                                              numGoodFrames, startX, endX);
-    }
+	  methods.push_back("Estimate");
+	}
+	else {
+		methods.push_back("Fixed");
+	}
+	if (numSpectra > 1) {
+		wsNames.push_back(inputWS->getName() + "_spec" + std::to_string(i));
+	}
+	else {
+		wsNames.push_back(inputWS->getName());
+	}
+
     // Calculate the asymmetry
     outputWS->setHistogram(
         specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+	if (extraData) {
+		unnormWS->mutableX(specNum) = outputWS->x(specNum);
+		unnormWS->mutableY(specNum) = outputWS->y(specNum);
+		unnormWS->mutableE(specNum) = outputWS->e(specNum);
+	}
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
@@ -161,8 +189,15 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  setProperty("NormalizationConstant", norm);
+	  if (extraData) {
+		  unnormWS->setYUnit("Asymmetry");
+		  setProperty("OutputUnNormWorkspace", unnormWS);
+		  
+	  }
+  //update table
+  std::string tableName = getPropertyValue("NormalisationTable");
+  Mantid::API::ITableWorkspace_sptr table = updateNormalizationTable(tableName, wsNames, norm, methods);
+  setProperty("NormalisationTable", table);
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 

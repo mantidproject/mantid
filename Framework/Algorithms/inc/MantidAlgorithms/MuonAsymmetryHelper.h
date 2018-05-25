@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidHistogramData/Histogram.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -50,6 +51,9 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX);
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX);
+
+Mantid::API::ITableWorkspace_sptr updateNormalizationTable(const std::string &tableName,const std::vector<std::string> &wsNamse,const std::vector<double> &norms,const std::vector<std::string> &methods);
+
 } // namespace Mantid
 
 #endif /*MANTID_MUONASYMMETRYHELPER_H_*/
