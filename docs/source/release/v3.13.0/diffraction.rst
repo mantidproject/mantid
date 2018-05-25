@@ -54,6 +54,8 @@ Single Crystal Diffraction
 
 - :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
 
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
+
 Improvements
 ############
 
