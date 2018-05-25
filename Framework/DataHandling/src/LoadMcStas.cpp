@@ -288,12 +288,9 @@ std::vector<std::string> LoadMcStas::readEventData(
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
     if (numEventEntries > 1) {
-      for (auto i = 1u; i <= numEventEntries; i++) {
-        allEventWS.emplace_back(eventWS->clone(),
-                                "partial_event_data_workspace");
-      }
-      allEventWS[eventWSIndex].second =
-          dataName + std::string("_") + nameOfGroupWS;
+      // partial event data container + the name for it the user will see
+      const auto ws_name = dataName + std::string("_") + nameOfGroupWS;
+      allEventWS.emplace_back(eventWS->clone(), ws_name);
     }
 
     // open second level entry
