@@ -1,3 +1,19 @@
+#  This file is part of the mantid workbench.
+#
+#  Copyright (C) 2018 mantidproject
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
 from qtpy.QtCore import Qt
@@ -17,18 +33,18 @@ class PlotSelectorWidget(QWidget):
         :param parent: A parent QWidget
         :param include_hidden: If True the widget must include all hidden algorithms
         """
-        self.new_button = None
+        self.close_button = None
         self.list_view = None
         self.plot_list = None
         QWidget.__init__(self, parent)
         self.presenter = PlotSelectorPresenter(self)
 
-    def _make_refresh_button(self):
+    def _make_close_button(self):
         """
         Make the button that starts the algorithm.
         :return: A QPushButton
         """
-        button = QPushButton('Refresh')
+        button = QPushButton('Close')
         button.clicked.connect(self._on_refresh_button_click)
         return button
 
@@ -45,17 +61,17 @@ class PlotSelectorWidget(QWidget):
         return list_view, plot_list
 
     def _on_refresh_button_click(self):
-        self.refresh_plot_list()
+        self.close_selected_plots()
 
     def init_ui(self):
         """
         Create and layout the GUI elements.
         """
-        self.new_button = self._make_refresh_button()
+        self.close_button = self._make_close_button()
         self.list_view, self.plot_list = self._make_plot_list()
 
         top_layout = QHBoxLayout()
-        top_layout.addWidget(self.new_button)
+        top_layout.addWidget(self.close_button)
         top_layout.setStretch(1, 1)
 
         layout = QVBoxLayout()
@@ -77,11 +93,12 @@ class PlotSelectorWidget(QWidget):
             item.setEditable(False)
             self.plot_list.appendRow(item)
 
-    def refresh_plot_list(self):
-        self.presenter.update_plot_list()
+    def close_selected_plots(self):
+        selected = self.list_view.selectedIndexes()
+        for item in selected:
+            self.presenter.close_plot(item.data(Qt.DisplayRole))
 
     def double_clicked_item(self):
         index = self.list_view.currentIndex()
         plot_title = index.data(Qt.DisplayRole)
-        print("Double clicked on " + index.data(Qt.DisplayRole))
         self.presenter.make_plot_active(plot_title)

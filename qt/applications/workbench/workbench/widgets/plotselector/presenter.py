@@ -1,24 +1,22 @@
+#  This file is part of the mantid workbench.
+#
+#  Copyright (C) 2018 mantidproject
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
 from .model import PlotSelectorModel
-
-
-# class IPlotSelectorView(object):
-#     """
-#     The interface to the actual plot selector view.
-#     Presenter interacts with the view through this interface only.
-#     """
-#     def __init__(self):
-#         # Actual view creates its ui elements
-#         self.init_ui()
-#         # The view will have a reference to the Presenter
-#         self.presenter = PlotSelectorPresenter(self)
-#
-#     def init_ui(self):
-#         raise NotImplementedError('Method has to be implemented in a subclass')
-#
-#     def populate_ui(self, data):
-#         raise NotImplementedError('Method has to be implemented in a subclass')
 
 
 class PlotSelectorPresenter(object):
@@ -32,6 +30,7 @@ class PlotSelectorPresenter(object):
         self.view.init_ui()
         plot_list = self.model.get_plot_list()
         self.view.set_plot_list(plot_list)
+        self.model.register_observer(self)
 
     def update_plot_list(self):
         plot_list = self.model.get_plot_list()
@@ -39,3 +38,9 @@ class PlotSelectorPresenter(object):
 
     def make_plot_active(self, plot_name):
         self.model.make_plot_active(plot_name)
+
+    def notify(self):
+        self.update_plot_list()
+
+    def close_plot(self, plot_name):
+        self.model.close_plot(plot_name)
