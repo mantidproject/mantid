@@ -180,12 +180,16 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
 
     # extracts the instrument parameters
     dist, nslot, slots_ang_pos, slot_width, guide_width, radius, numDisk = tuple(instrumentpars[:7])
-    samp_det, chop_samp, source_rep, tmod, frac_ei, ph_ind = tuple(instrumentpars[7:])
+    samp_det, chop_samp, source_rep, tmod, frac_ei, ph_ind_v = tuple(instrumentpars[7:])
 
     chop_times = []             # empty list to hold each chopper opening period
 
     # first we optimise on the main Ei
     for i in range(len(dist)):
+        if hasattr(ph_ind_v, '__len__') and len(ph_ind_v) == len(dist):
+            ph_ind = ph_ind_v[i]
+        else:
+            ph_ind = ph_ind_v if not hasattr(ph_ind_v, '__len__') else ph_ind_v[-1]
         # loop over each chopper
         # chopper2 is a special case
         if isinstance(ph_ind, string_types) and i == int(ph_ind) and chop2Phase is not None:

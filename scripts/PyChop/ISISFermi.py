@@ -292,7 +292,7 @@ class ISISFermi:
         x2 = self.__Instruments[self.instname][3]
         tbin = self.__Instruments[self.instname][9]
         res_el = np.real(2.35482 * 8.747832e-4 * np.sqrt(Ei**3) * (np.sqrt(v_van[0] + (tbin**2/12.00)) * 1.0e6) / x2)
-        return {"Moderator":tmod*1.e6, "Chopper":tchp*1.e6, "Energy":res_el}
+        return {"Moderator":tmod*2.35482e6, "Chopper":tchp*2.35482e6, "Energy":res_el}
 
     def __van_calc(self, v_mod, v_ch, v_jit, v_x, v_y, v_xy, v_dd, Ei, eps, phi, omega):
         """
@@ -307,8 +307,8 @@ class ISISFermi:
         tanthm = np.tan(thetam)
         am = -(x1+rat*x2) / x0
         ach = (1.00 + (x1+rat*x2)/x0)
-        g1 = (1.00 - (omega*(x0+x1)*tanthm/veli)) # wrong (in original CHOP!) - should be (xa+x1), not (x0+x1)
-        #g1 = (1.00 - (omega*(xa+x1)*tanthm/veli))
+        #g1 = (1.00 - (omega*(x0+x1)*tanthm/veli)) # wrong (in original CHOP!) - should be (xa+x1), not (x0+x1)
+        g1 = (1.00 - (omega*(xa+x1)*tanthm/veli))
         g2 = (1.00 - (omega*(x0-xa)*tanthm/veli))
         f1 = 1.00 + ((x1/x0)*g1)
         f2 = 1.00 + ((x1/x0)*g2)
