@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 import re
 import numpy as np
-from .PyChop2 import PyChop2
+from .Instruments import Instrument
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -26,7 +26,7 @@ class PyChopGui(QtGui.QMainWindow):
     at spallation sources by calculating the resolution and flux at a given neutron energies.
     """
 
-    instruments = ['MAPS', 'MARI', 'MERLIN', 'LET']
+    instruments = {'MAPS': 'maps.yaml', 'MARI': 'mari.yaml', 'MERLIN': 'merlin.yaml', 'LET': 'let.yaml'}
     choppers = {
         'MAPS':['A', 'B', 'S'],
         'MARI':['A', 'B', 'R', 'G', 'S'],
@@ -95,7 +95,7 @@ class PyChopGui(QtGui.QMainWindow):
         else:
             self.widgets['MultiRepCheck'].setEnabled(False)
             self.widgets['MultiRepCheck'].setChecked(False)
-        self.engine.setInstrument(str(instname))
+        self.engine.setInstrument(self.folder + self.instruments[str(instname)])
         self.engine.setChopper(str(self.widgets['ChopperCombo']['Combo'].currentText()))
         self.engine.setFrequency(float(self.widgets['FrequencyCombo']['Combo'].currentText()))
         val = self.flxslder.val * self.maxE[self.engine.instname] / 100
@@ -134,17 +134,17 @@ class PyChopGui(QtGui.QMainWindow):
         if 'LET' in str(self.engine.instname):
             freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
             chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 1e5
-            self.engine.setFrequency([freq_in, freqpr], Chopper2Phase=chop2phase)
+            self.engine.setFrequency([freq_in, freqpr], phase=chop2phase)
         elif 'MERLIN' in str(self.engine.instname) and 'G' in self.engine.getChopper():
             chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 2e4
-            self.engine.setFrequency(freq_in, Chopper2Phase=chop2phase)
+            self.engine.setFrequency(freq_in, phase=chop2phase)
         elif 'MAPS' in str(self.engine.instname): 
             freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
-            chop2phase = int(self.widgets['Chopper2Phase']['Edit'].text())
-            self.engine.setFrequency([freq_in, freqpr], Chopper2Phase=chop2phase)
+            chop2phase = str(self.widgets['Chopper2Phase']['Edit'].text())
+            self.engine.setFrequency([freq_in, freqpr], phase=chop2phase)
         elif 'MARI' in str(self.engine.instname):
-            chop2phase = int(self.widgets['Chopper2Phase']['Edit'].text())
-            self.engine.setFrequency(freq_in, Chopper2Phase=chop2phase)
+            chop2phase = str(self.widgets['Chopper2Phase']['Edit'].text())
+            self.engine.setFrequency(freq_in, phase=chop2phase)
         else:
             self.engine.setFrequency(freq_in)
 
@@ -772,7 +772,9 @@ class PyChopGui(QtGui.QMainWindow):
 
     def __init__(self):
         super(PyChopGui, self).__init__()
-        self.engine = PyChop2('MAPS', 'A', 50)
+        import sys, os
+        self.folder = os.path.dirname(sys.modules[self.__module__].__file__) + '/'
+        self.engine = Instrument(self.folder+self.instruments['MAPS'], 'A', 50)
         self.drawLayout()
         self.setInstrument('MAPS')
         self.xlim = 0

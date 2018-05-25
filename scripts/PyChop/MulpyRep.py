@@ -184,19 +184,24 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
 
     chop_times = []             # empty list to hold each chopper opening period
 
+    # figures out phase information
+    if not (hasattr(ph_ind_v, '__len__') and len(ph_ind_v) == len(dist)):
+        ph_ind = [i==(ph_ind_v[-1] if hasattr(ph_ind_v, '__len__') else ph_ind_v) for i in range(len(dist))]
+    chop2Phase = phase = chop2Phase if hasattr(chop2Phase, '__len__') else [chop2Phase]
+    if len(chop2Phase) != len(dist):
+        if len(chop2Phase) == len(ph_ind_v):
+            phase = [False] * len(dist)
+            for i in range(len(ph_ind_v)):
+                phase[ph_ind_v[i]] = chop2Phase[i]
+        else:
+            phase = [chop2Phase[-1] if ph_ind[i] else False for i in range(len(dist))]
+
     # first we optimise on the main Ei
     for i in range(len(dist)):
-        if hasattr(ph_ind_v, '__len__') and len(ph_ind_v) == len(dist):
-            ph_ind = ph_ind_v[i]
-        else:
-            ph_ind = ph_ind_v if not hasattr(ph_ind_v, '__len__') else ph_ind_v[-1]
         # loop over each chopper
-        # chopper2 is a special case
-        if isinstance(ph_ind, string_types) and i == int(ph_ind) and chop2Phase is not None:
-            islt = int(chop2Phase)
-        else:
-            islt = 0
-        if i == ph_ind and chop2Phase is not None:
+        # checks whether this chopper should have an independently set phase / delay
+        islt = int(phase[i]) if (ph_ind[i] and isinstance(phase[i], string_types)) else 0
+        if ph_ind[i] and not isinstance(phase[i], string_types):
             # effective chopper velocity (if 2 disks effective velocity is double)
             chopVel = 2*np.pi*radius[i] * numDisk[i] * freq[i]
             # full opening time

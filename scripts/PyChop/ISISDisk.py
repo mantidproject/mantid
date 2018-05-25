@@ -20,7 +20,7 @@ class ISISDisk:
 
     def __init__(self, instname=None, variant=None, freq=None):
         warnings.warn("The ISISDisk class is deprecated and will be removed in the next Mantid version. "
-                      "Please use the Instrument class or the official PyChop2 CLI interface.", DeprecationWarning)
+                      "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
         if instname:
             self.setInstrument(instname, variant)
             self.freq = 0
@@ -465,6 +465,7 @@ class ISISDisk:
         dist, samDist, DetDist, fracEi = tuple([self.dist, self.chop_samp, self.samp_det, self.frac_ei])
         modSamDist = dist[-1] + samDist
         totDist = modSamDist + DetDist
+        print(chop_times)
         for i in range(len(dist)):
             plt.plot([-20000, 120000], [dist[i], dist[i]], c='k', linewidth=1.)
             for j in range(len(chop_times[i][:])):

@@ -85,7 +85,7 @@ class ISISFermi:
 
     def __init__(self, instname=None, choppername='', freq=0):
         warnings.warn("The ISISFermi class is deprecated and will be removed in the next Mantid version. "
-                      "Please use the Instrument class or the official PyChop2 CLI interface.", DeprecationWarning)
+                      "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
         if instname:
             self.setInstrument(instname, choppername, freq)
             self.diskchopper_phase = self.__DiskChopperMode[instname]
