@@ -294,7 +294,7 @@ std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
 Mantid::API::IFunction_sptr
 ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     const Mantid::API::IFunction_sptr &original,
-    const std::vector<double> norms) {
+    const std::vector<double> &norms) {
   auto multi = boost::make_shared<MultiDomainFunction>();
   auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
   size_t numDomains = original->getNumberDomains();
