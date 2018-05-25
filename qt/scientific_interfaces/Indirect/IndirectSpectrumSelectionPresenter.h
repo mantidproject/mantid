@@ -52,6 +52,7 @@ public:
 
 signals:
   void spectraChanged(std::size_t);
+  void maskChanged(const std::string &);
   void invalidSpectraString(const QString &errorMessage);
   void invalidMaskBinsString(const QString &errorMessage);
 
