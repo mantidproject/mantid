@@ -211,7 +211,6 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
 For Developers/Writing Algorithms
 ---------------------------------
 
-See the Event Workspace Development documentation
-
+See the Event Workspace section in development `documentation <http://developer.mantidproject.org/>`_
 
 .. categories:: Concepts
