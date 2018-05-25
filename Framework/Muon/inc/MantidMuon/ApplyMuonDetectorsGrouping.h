@@ -93,6 +93,12 @@ private:
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName(const Muon::AnalysisOptions &options,
                                         const std::string &groupWSName);
+
+  void addCountsToMuonAnalysisGrouped(const API::Workspace_sptr &inputWS, const Muon::AnalysisOptions options);
+
+  std::vector<std::string> getMuonAnalysisGroupedWorkspaceNames();
+
+  void deleteWorkspaceIfExists(const std::string &name);
 };
 
 } // namespace Muon
