@@ -1,28 +1,13 @@
 set ( SRC_FILES
 	src/ConvertFitFunctionForMuonTFAsymmetry.cpp
-
-	#src/ApplyMuonDetectorsGrouping.cpp
-	#src/MuonAlgorithmHelper.cpp
 )
 
 set ( INC_FILES
 	inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
-
-	#inc/MantidMuon/ApplyMuonDetectorsGrouping.h
-	#inc/MantidMuon/MuonAlgorithmHelper.h
 )
-
-# set(SRC_UNITY_IGNORE_FILES)
-
-#if(UNITY_BUILD)
-#  include(UnityBuild)
-#  enable_unity_build(Muon SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-#endif(UNITY_BUILD)
 
  set ( TEST_FILES 
         ConvertFitFunctionForMuonTFAsymmetryTest.h)
-
-# set ( TEST_PY_FILES )
 
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})

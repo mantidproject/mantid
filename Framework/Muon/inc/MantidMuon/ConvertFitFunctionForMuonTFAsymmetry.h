@@ -77,7 +77,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   Mantid::API::IFunction_sptr
   getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original,
-                        const std::vector<double> norms);
+                        const std::vector<double> &norms);
   Mantid::API::IFunction_sptr
   extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original);
   Mantid::API::IFunction_sptr
