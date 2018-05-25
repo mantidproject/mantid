@@ -56,6 +56,11 @@ void LoadMcStas::init() {
       "When this property is set to false errors are set equal to data values, "
       "and when set to true all errors are set equal to one. This property "
       "defaults to false");
+
+  declareProperty("OutputOnlySummedEventWorkspace", true,
+    "When true the algorithm only outputs the sum of all event data into one eventworkspace "
+    "EventData + _ + name of the OutputWorkspace. If false eventworkspaces are also "
+    "returned for each individual McStas components storing event data");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -174,6 +179,8 @@ std::vector<std::string> LoadMcStas::readEventData(
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
   bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
+  bool outputOnlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
+
   // will assume that each top level entry contain one mcstas
   // generated IDF and any event data entries within this top level
   // entry are data collected for that instrument
