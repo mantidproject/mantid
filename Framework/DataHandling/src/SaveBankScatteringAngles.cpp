@@ -73,7 +73,6 @@ void SaveBankScatteringAngles::exec() {
   outFile << std::fixed << std::setprecision(10);
 
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
-  //  for (const auto &ws : *inputWS) {
   for (int i = 0; i < inputWS->getNumberOfEntries(); ++i) {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
