@@ -106,7 +106,7 @@ The following settings are used when the :literal:`AUTO` keyword is encountered:
 +===========================+=========================+========================+=========================+=========================+
 | EPPCreationMethod         | Fit EPP                 | Calculate EPP          | Fit EPP                 | Fit EPP                 |
 +---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
-| ElasticChannel            | Default Elastic Channel | Fit Elastic Channel    | Default Elastic Channel | Default Elastic Channel |
+| ElasticChannel            | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Default Elastic Channel |
 +---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
 | IncidentEnergyCalibration | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration ON   |
 +---------------------------+-------------------------+------------------------+-------------------------+-------------------------+

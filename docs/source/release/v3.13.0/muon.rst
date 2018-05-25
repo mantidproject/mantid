@@ -16,6 +16,8 @@ Bug fixes
 
 - Results table can now detect sequential fits.
 - Fit options are not disabled after changing tabs.
+- The run number is now updated before the periods, preventing irrelevant warningsfrom being produced.
+- In single fit the workspace can be changed.
 
 Algorithms
 ----------

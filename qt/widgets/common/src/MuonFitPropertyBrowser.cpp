@@ -406,10 +406,11 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     }
     updatePeriodDisplay();
   } else if (prop == m_workspace) {
-    // make sure the output is updated
-    FitPropertyBrowser::enumChanged(prop);
     int j = m_enumManager->value(m_workspace);
     std::string option = m_workspaceNames[j].toStdString();
+    // update plot
+    emit workspaceNameChanged(QString::fromStdString(option));
+
     setOutputName(option);
     // only do this if in single fit mode
     if (m_periodBoxes.size() > 1 &&
@@ -429,6 +430,27 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
         m_boolManager->setValue(iter.value(), selectedPeriod == iter.key());
       }
     }
+    if (!m_browser->isItemVisible(m_multiFitSettingsGroup)) {
+      size_t end = 0;
+      // assumed structure of name
+      // isolate the group/pair
+      for (int k = 0; k < 2; k++) {
+        end = option.find_first_of(";");
+        option = option.substr(end + 1, option.size());
+      }
+      end = option.find_first_of(";");
+
+      boost::erase_all(option, " ");
+
+      auto tmp = option.substr(0, end - 1);
+      QString selectedGroup = QString::fromStdString(tmp);
+      // turn on only the relevant box
+      for (auto iter = m_groupBoxes.constBegin();
+           iter != m_groupBoxes.constEnd(); ++iter) {
+        m_boolManager->setValue(iter.value(), selectedGroup == iter.key());
+      }
+    }
+
   } else {
     FitPropertyBrowser::enumChanged(prop);
   }

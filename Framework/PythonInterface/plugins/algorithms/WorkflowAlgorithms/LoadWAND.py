@@ -44,9 +44,11 @@ class LoadWAND(DataProcessorAlgorithm):
         outWS = self.getPropertyValue("OutputWorkspace")
         group_names = []
 
-        for run in runs:
-            LoadEventNexus(Filename=run, OutputWorkspace='__tmp_load', LoadMonitors=True, EnableLogging=False)
-            Integration(InputWorkspace='__tmp_load', OutputWorkspace='__tmp_load', EnableLogging=False)
+        for i, run in enumerate(runs):
+            LoadEventNexus(Filename=run, OutputWorkspace='__tmp_load', LoadMonitors=True, EnableLogging=False,
+                           startProgress=i/len(runs), endProgress=(i+0.8)/len(runs))
+            Integration(InputWorkspace='__tmp_load', OutputWorkspace='__tmp_load', EnableLogging=False,
+                        startProgress=(i+0.8)/len(runs), endProgress=(i+1)/len(runs))
 
             if self.getProperty("ApplyMask").value:
                 MaskBTP('__tmp_load', Pixel='1,2,511,512', EnableLogging=False)

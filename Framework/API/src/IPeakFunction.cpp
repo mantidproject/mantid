@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IFunction1D.tcc"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
@@ -263,6 +264,23 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
   left = findBound(-w);
   right = findBound(w);
   return std::make_pair(left, right);
+}
+
+/**
+ * Computes the function derivative numerically
+ * @param jacobian An output Jacobian to receive the calculated values
+ * @param xValues An input array of X data
+ * @param nData The number of X values provided
+ */
+void IPeakFunction::functionDerivLocal(Jacobian *jacobian,
+                                       const double *xValues,
+                                       const size_t nData) {
+  auto evalMethod =
+      [this](double *out, const double *xValues, const size_t nData) {
+        this->functionLocal(out, xValues, nData);
+      };
+  this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues,
+                                  nData);
 }
 
 } // namespace API

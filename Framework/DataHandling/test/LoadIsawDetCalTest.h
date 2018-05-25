@@ -47,18 +47,26 @@ class LoadIsawDetCalTest : public CxxTest::TestSuite {
 public:
   void checkPosition(IComponent_const_sptr det, const double x, const double y,
                      const double z) {
-    const auto detPos = det->getPos();
-    const V3D testPos(x, y, z);
-    std::cout << detPos << " " << testPos << std::endl;
-    TS_ASSERT_EQUALS(detPos, testPos);
+    if (det != nullptr) {
+      const auto detPos = det->getPos();
+      const V3D testPos(x, y, z);
+      std::cout << detPos << " " << testPos << std::endl;
+      TS_ASSERT_EQUALS(detPos, testPos);
+    } else {
+      throw std::runtime_error("In checkPosition IComponent is nullptr");
+    }
   }
 
   void checkRotation(IComponent_const_sptr det, const double w, const double a,
                      const double b, const double c) {
-    const auto detRot = det->getRotation();
-    const Quat testRot(w, a, b, c);
-    std::cout << detRot << " " << testRot << std::endl;
-    TS_ASSERT_EQUALS(detRot, testRot);
+    if (det != nullptr) {
+      const auto detRot = det->getRotation();
+      const Quat testRot(w, a, b, c);
+      std::cout << detRot << " " << testRot << std::endl;
+      TS_ASSERT_EQUALS(detRot, testRot);
+    } else {
+      throw std::runtime_error("In checkRotation IComponent is nullptr");
+    }
   }
 
   void testMINITOPAZ() {
@@ -91,6 +99,7 @@ public:
     Instrument_const_sptr ins = output->getInstrument();
 
     IComponent_const_sptr det = ins->getComponentByName("bank1");
+    TS_ASSERT(det != nullptr);
     checkPosition(det, 0.500000, 0.167548, -0.167548);
     checkRotation(det, 0.707146, -8.47033e-22, -0.707068, -7.53079e-13);
 
@@ -108,17 +117,19 @@ public:
     Instrument_const_sptr ins = output->getInstrument();
 
     IComponent_const_sptr det1 = ins->getComponentByName("bank1");
+    TS_ASSERT(det1 != nullptr);
     checkPosition(det1, 0.532001, 0.167548, -0.167546);
     checkRotation(det1, 0.707107, 0., -0.707107, 0.);
 
     IComponent_const_sptr det10 = ins->getComponentByName("bank10");
+    TS_ASSERT(det10 != nullptr);
     checkPosition(det10, 0.167548, 0.167548, 0.);
     checkRotation(det10, 1., 0., 0., 0.);
   }
 
   void testSNAP() {
     const std::string wsName("testSNAP");
-    loadEmptyInstrument("SNAP_Definition.xml", wsName);
+    loadEmptyInstrument("SNAP_Definition_2011-09-07.xml", wsName);
 
     // run the actual algorithm - filenames are together
     LoadIsawDetCal testerCAL;
@@ -138,7 +149,7 @@ public:
 
   void testSNAP2() {
     const std::string wsName("testSNAP2");
-    loadEmptyInstrument("SNAP_Definition.xml", wsName);
+    loadEmptyInstrument("SNAP_Definition_2011-09-07.xml", wsName);
 
     // run the actual algorithm - filenames are separated
     LoadIsawDetCal testerCAL;
@@ -167,7 +178,7 @@ public:
   }
 
   void setUp() override {
-    loadEmptyInstrument("SNAP_Definition.xml", wsName);
+    loadEmptyInstrument("SNAP_Definition_2011-09-07.xml", wsName);
 
     testerCAL.initialize();
     testerCAL.setPropertyValue("InputWorkspace", wsName);
