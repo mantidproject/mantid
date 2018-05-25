@@ -97,8 +97,19 @@ void JumpFitModel::findWidths(MatrixWorkspace_sptr workspace) {
   m_widthSpectra = found.second;
 }
 
+void JumpFitModel::findEISF(MatrixWorkspace_sptr workspace) {
+  auto found =
+    findAxisLabels(workspace, ContainsOneOrMore({ ".EISF" }));
+  m_eisf = found.first;
+  m_eisfSpectra = found.second;
+}
+
 void JumpFitModel::setActiveWidth(std::size_t widthIndex) {
   setSpectra(createSpectra(m_widthSpectra[widthIndex]), 0);
+}
+
+void JumpFitModel::setActiveEISF(std::size_t eisfIndex) {
+  setSpectra(createSpectra(m_eisfSpectra[eisfIndex]), 0);
 }
 
 void JumpFitModel::setFitType(const std::string &fitType) {
@@ -109,8 +120,16 @@ const std::vector<std::string> &JumpFitModel::getWidths() const {
   return m_widths;
 }
 
+const std::vector<std::string> &JumpFitModel::getEISF() const {
+  return m_eisf;
+}
+
 std::size_t JumpFitModel::getWidthSpectrum(std::size_t widthIndex) const {
   return m_widthSpectra[widthIndex];
+}
+
+std::size_t JumpFitModel::getEISFSpectrum(std::size_t eisfIndex) const {
+  return m_eisfSpectra[eisfIndex];
 }
 
 std::string JumpFitModel::sequentialFitOutputName() const {
