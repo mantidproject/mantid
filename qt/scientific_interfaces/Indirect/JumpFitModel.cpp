@@ -80,8 +80,8 @@ namespace IDA {
 
 void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                                 const Spectra &) {
-  IndirectFittingModel::clearWorkspaces();
   findWidths(workspace);
+  findEISF(workspace);
 
   if (!m_widths.empty()) {
     const auto name = getHWHMName(workspace->getName());
