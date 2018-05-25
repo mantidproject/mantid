@@ -14,6 +14,7 @@ ISIS SANS Interface
 
 New features
 ############
+* A string of wavelength ranges can now be specified. A reduction is then done for each wavelength range.
 
 Improvements
 ############

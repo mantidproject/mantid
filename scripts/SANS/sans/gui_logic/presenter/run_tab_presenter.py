@@ -130,7 +130,9 @@ class RunTabPresenter(object):
 
         # Set the step type options for wavelength
         range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
-                            RangeStepType.to_string(RangeStepType.Log)]
+                            RangeStepType.to_string(RangeStepType.Log),
+                            RangeStepType.to_string(RangeStepType.RangeLog),
+                            RangeStepType.to_string(RangeStepType.RangeLin)]
         self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
@@ -724,6 +726,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("wavelength_min", state_model)
         self._set_on_state_model("wavelength_max", state_model)
         self._set_on_state_model("wavelength_step", state_model)
+        self._set_on_state_model("wavelength_range", state_model)
 
         self._set_on_state_model("absolute_scale", state_model)
         self._set_on_state_model("sample_shape", state_model)
