@@ -388,7 +388,9 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
   if (!options.rebinArgs.empty()) {
     alg->setProperty("RebinParams", options.rebinArgs);
   }
-
+  if (options.wsName != "") {
+	  alg->setProperty("WorkspaceName", options.wsName);
+  }
   // ---- Analysis ----
 
   // Find index of a name in a collection

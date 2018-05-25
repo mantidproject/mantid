@@ -118,6 +118,8 @@ void MuonProcess::init() {
 
   declareProperty("CropWorkspace", true,
                   "Determines if the input workspace should be cropped");
+
+  declareProperty("WorkspaceName", "", "The name of the input workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -185,7 +187,7 @@ void MuonProcess::exec() {
     } else if (outputType == "GroupAsymmetry") {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,
-          getProperty("Xmin"), getProperty("Xmax"));
+          getProperty("Xmin"), getProperty("Xmax"),getProperty("WorkspaceName"));
     } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");

@@ -173,19 +173,21 @@ Mantid::API::ITableWorkspace_sptr updateNormalizationTable(const std::string &ta
 	
 	for (size_t j = 0; j < wsNames.size(); j++) {
 		bool updated = false;
+		std::string tmp = wsNames[j];
+		std::replace(tmp.begin(), tmp.end(), ' ', ';');
 		for (size_t row = 0; row < table->rowCount(); row++) {
 
-			if (table->String(row, 1) == wsNames[j]) {
+			if (table->String(row, 1) ==tmp) {
 				table->removeRow(row);
 				table->insertRow(row);
 				Mantid::API::TableRow tableRow = table->getRow(row);
-				tableRow << static_cast<double>(norms[j]) << wsNames[j] << methods[j];
+				tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
 				updated = true;
 			}
 		}
 		if (!updated) {
 			Mantid::API::TableRow tableRow = table->appendRow();
-			tableRow << static_cast<double>(norms[j]) << wsNames[j] << methods[j];
+			tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
 		}
 	}
 	return table;

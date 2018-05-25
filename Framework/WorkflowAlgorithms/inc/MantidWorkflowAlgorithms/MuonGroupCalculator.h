@@ -36,12 +36,13 @@ public:
                       const std::vector<int> subtractedPeriods,
                       const int groupIndex);
   void setStartEnd(const double start, const double end);
-
+  void setWSName(const std::string wsName);
 protected:
   /// Workspace index of the group to analyse
   const int m_groupIndex;
   double m_startX;
   double m_endX;
+  std::string m_wsName;
 };
 
 } // namespace WorkflowAlgorithms

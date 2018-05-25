@@ -235,6 +235,11 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
         AnalysisDataService::Instance().add(name, ws);
         if (!groupLabel.empty()) {
           MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
+		  if(Mantid::API::AnalysisDataService::Instance().doesExist("tmp_unNorm")) {
+			  const std::string unnorm = "_unNorm";
+			  Mantid::API::AnalysisDataService::Instance().rename("tmp_unNorm", name + unnorm);
+			  MuonAnalysisHelper::groupWorkspaces(groupLabel, { name+unnorm });
+		  }
         }
       }
     }
@@ -381,60 +386,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 
   return workspaceNames;
 }
-/**
-* Stores the normalization into the table WS
-* If the workspace is already in the table
-* do nothing.
-* @param name :: the name of the workspace to add.
-* @param addToTable :: if to add the normalization data
-* to the MuonAnalysisTFNormalizations table
-*/
-void MuonAnalysisFitDataPresenter::storeNormalization(std::string name,
-                                                      bool addToTable) const {
-  if (addToTable) {
-    if (!Mantid::API::AnalysisDataService::Instance().doesExist(
-            "MuonAnalysisTFNormalizations")) {
-      Mantid::API::ITableWorkspace_sptr table =
-          Mantid::API::WorkspaceFactory::Instance().createTable();
-      AnalysisDataService::Instance().addOrReplace(
-          "MuonAnalysisTFNormalizations", table);
-      table->addColumn("double", "norm");
-      table->addColumn("str", "name");
-      table->addColumn("str", "method");
-    }
 
-    Mantid::API::ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "MuonAnalysisTFNormalizations"));
-    auto colName = table->getColumn("name");
-    if (table->rowCount() > 1) {
-      std::string tmp = name;
-      // stored with ; instead of spaces
-      std::replace(tmp.begin(), tmp.end(), ' ', ';');
-      for (size_t j = 0; j < table->rowCount(); j++) {
-        if (colName->cell<std::string>(j) == tmp) { // already exists
-          return;
-        }
-      }
-    }
-
-    Mantid::API::TableRow row = table->appendRow();
-    std::string tmp = name;
-    // spaces stop the string being written
-    std::replace(tmp.begin(), tmp.end(), ' ', ';');
-    // get data
-    if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
-      Mantid::API::ITableWorkspace_sptr tmpNorm =
-          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-              Mantid::API::AnalysisDataService::Instance().retrieve(
-                  "__norm__"));
-      auto colNorm = tmpNorm->getColumn("norm");
-      // saves data
-      row << (*colNorm)[0] << tmp << "Estimate";
-    }
-  }
-}
 /**
  * Create an analysis workspace given the required name.
  * @param name :: [input] Name of workspace to create (in format INST0001234;
@@ -494,6 +446,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     analysisOptions.timeLimits.second = m_dataSelector->getEndTime();
     analysisOptions.groupPairName = params.itemName;
     analysisOptions.plotType = params.plotType;
+	analysisOptions.wsName = name;
     outputWS =
         m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
 
@@ -501,13 +454,6 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     std::ostringstream err;
     err << "Failed to create analysis workspace " << name << ": " << ex.what();
     g_log.error(err.str());
-  }
-  const auto grouping = m_grouping;
-  auto groupName = params.itemName;
-  if (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
-                groupName) != grouping.groupNames.end()) {
-
-    storeNormalization(name, true);
   }
 
   return outputWS;

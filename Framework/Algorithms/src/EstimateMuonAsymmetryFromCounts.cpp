@@ -34,6 +34,9 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
+  declareProperty("WorkspaceName", "",
+	  "The name used in the normalisation table. If this is blank the InputWorkspace's name will be used.");
+
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
@@ -98,6 +101,10 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   std::vector<std::string> wsNames;
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  std::string wsName = getProperty("WorkspaceName");
+  if (wsName == "") {
+	  wsName = inputWS->getName();
+  }
   auto numSpectra = inputWS->getNumberHistograms();
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -166,11 +173,11 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 	else {
 		methods.push_back("Fixed");
 	}
-	if (numSpectra > 1) {
-		wsNames.push_back(inputWS->getName() + "_spec" + std::to_string(i));
+	if (spectra.size() > 1) {
+		wsNames.push_back(wsName+ "_spec" + std::to_string(i));
 	}
 	else {
-		wsNames.push_back(inputWS->getName());
+		wsNames.push_back(wsName);
 	}
 
     // Calculate the asymmetry
