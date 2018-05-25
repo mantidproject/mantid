@@ -211,7 +211,7 @@ void ReflectometryWorkflowBase2::initDebugProperties() {
   declareProperty("Diagnostics", false, "Whether to enable the output of "
                                         "interim workspaces for debugging "
                                         "purposes.");
-  declareProperty("Debug", true, "Whether to enable the output of extra workspaces.");
+  declareProperty("Debug", false, "Whether to enable the output of extra workspaces.");
 }
 
 /** Validate reduction properties, if given
@@ -655,5 +655,21 @@ ReflectometryWorkflowBase2::getThetaFromLogs(MatrixWorkspace_sptr inputWs,
   }
   return theta;
 }
+
+/**
+* Retrieve the run number from the logs of the input workspace.
+*
+* @param ws :: A workspace to get the run number from.
+* @return :: A string containing the run number prefixed with the underscore "_".
+*   if the workspace doesn't have the run number an empty string is returned.
+*/
+std::string ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const& ws) const {
+  auto const &run = ws.run();
+  if (run.hasProperty("run_number")) {
+    return "_" + run.getPropertyValueAsType<std::string>("run_number");
+  }
+  return "";
+}
+
 } // namespace Algorithms
 } // namespace Mantid

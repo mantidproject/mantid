@@ -19,6 +19,14 @@ using namespace Mantid::Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOneAuto2)
 
+namespace {
+
+std::string const OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX("IvsQ_binned");
+std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
+std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
+
+}
+
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
@@ -49,6 +57,9 @@ std::map<std::string, std::string>
 ReflectometryReductionOneAuto2::validateInputs() {
 
   std::map<std::string, std::string> results;
+
+  const auto output = validateOutputWorkspaces();
+  results.insert(output.begin(), output.end());
 
   // Validate transmission runs only if our input workspace is a group
   if (!checkGroups())
@@ -101,6 +112,39 @@ ReflectometryReductionOneAuto2::validateInputs() {
   }
 
   return results;
+}
+
+/** Validate output workspaces.
+ */
+std::map<std::string, std::string>
+ReflectometryReductionOneAuto2::validateOutputWorkspaces() const {
+  std::map<std::string, std::string> results;
+  bool const isDebug = getProperty("Debug");
+  if (!isDebug && !isChild()) {
+    if (isDefault("OutputWorkspaceBinned")) {
+      results["OutputWorkspaceBinned"] =
+          "OutputWorkspace property must be set when Debug is not enabled.";
+    }
+  }
+  return results;
+}
+
+// Set default names for output workspaces
+void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
+  bool const isDebug = getProperty("Debug");
+  if (isDebug) {
+    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+    auto const runNumber = getRunNumber(*ws);
+    if (isDefault("OutputWorkspaceBinned")) {
+      setPropertyValue("OutputWorkspaceBinned", OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
+    }
+    if (isDefault("OutputWorkspace")) {
+      setPropertyValue("OutputWorkspace", OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+    }
+    if (isDefault("OutputWorkspaceWavelength")) {
+      setPropertyValue("OutputWorkspaceWavelength", OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+    }
+  }
 }
 
 /** Initialize the algorithm's properties.
@@ -220,7 +264,7 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Output workspace in Q
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceBinned", "", Direction::Output),
+                      "OutputWorkspaceBinned", "", Direction::Output, PropertyMode::Optional),
                   "Output workspace in Q (rebinned workspace)");
 
   // Output workspace in Q (unbinned)
@@ -237,6 +281,8 @@ void ReflectometryReductionOneAuto2::init() {
 /** Execute the algorithm.
 */
 void ReflectometryReductionOneAuto2::exec() {
+
+  setDefaultOutputWorkspaceNames();
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
@@ -300,10 +346,12 @@ void ReflectometryReductionOneAuto2::exec() {
 
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
 
-  bool const isDebug = getProperty("Debug");
-  if (isDebug) {
+  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
     setProperty("OutputWorkspaceWavelength", IvsLam);
+  }
+
+  if (!isDefault("OutputWorkspace") || isChild()) {
     setProperty("OutputWorkspace", IvsQ);
   }
 

@@ -345,16 +345,6 @@ double getBoundingBoxExtent(const BoundingBox &boundingBox,
   return result;
 }
 
-/** Retrieve the run number from the logs of the input workspace.
- */
-std::string getRunNumber(MatrixWorkspace const& ws) {
-  auto const &run = ws.run();
-  if (run.hasProperty("run_number")) {
-    return "_" + run.getPropertyValueAsType<std::string>("run_number");
-  }
-  return "";
-}
-
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -453,7 +443,7 @@ std::map<std::string, std::string>
 ReflectometryReductionOne2::validateOutputWorkspaces() const {
   std::map<std::string, std::string> results;
   bool const isDebug = getProperty("Debug");
-  if (!isDebug) {
+  if (!isDebug && !isChild()) {
     if (isDefault("OutputWorkspace")) {
       results["OutputWorkspace"] = "OutputWorkspace property must be set when Debug is not enabled.";
     }
@@ -519,8 +509,7 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
-  bool const isDebug = getProperty("Debug");
-  if (isDebug) {
+  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
   setProperty("OutputWorkspace", IvsQ);

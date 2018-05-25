@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidGeometry/Instrument.h"
@@ -246,7 +247,7 @@ public:
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
     alg.setProperty("ProcessingInstructions", "3");
     alg.execute();
-    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspaceBinned");
 
     // Check default rebin params
     const double qStep = alg.getProperty("MomentumTransferStep");
@@ -565,7 +566,6 @@ public:
     TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
   }
 
-
   void test_optional_outputs() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
@@ -583,6 +583,75 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
+
+    AnalysisDataService::Instance().clear();
+
+  }
+
+  void test_optional_outputs_set() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    // Use the default correction type, which is a vertical shift
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setProperty("OutputWorkspace", "IvsQ");
+    alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
+
+    AnalysisDataService::Instance().clear();
+
+  }
+
+  void test_default_outputs() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    // Use the default correction type, which is a vertical shift
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("Debug", true);
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460"));
+
+    AnalysisDataService::Instance().clear();
+
+  }
+
+  void test_default_outputs_no_run_number() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+    inter->mutableRun().removeProperty("run_number");
+
+    // Use the default correction type, which is a vertical shift
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("Debug", true);
+    alg.execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();
 
