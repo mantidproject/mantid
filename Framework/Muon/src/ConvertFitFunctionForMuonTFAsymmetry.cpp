@@ -46,8 +46,7 @@ std::string rmInsertFunction(const std::string &originalTie) {
   return LHName + RHName;
 }
 
-template <typename T1>
-int findName(const std::vector<std::string> &colNames, const T1 &name) {
+int findName(const std::vector<std::string> &colNames, std::string &name) {
   for (size_t j = 0; j < colNames.size(); j++) {
     if (colNames[j] == name) {
       return static_cast<int>(j);
@@ -271,8 +270,8 @@ std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
 
   std::vector<double> norms(wsNames.size(), 0);
   auto colNames = table->getColumnNames();
-  auto wsNamesIndex = findName(colNames, "name");
-  auto normIndex = findName(colNames, "norm");
+  auto wsNamesIndex = findName(colNames, std::string("name"));
+  auto normIndex = findName(colNames, std::string("norm"));
 
   for (size_t row = 0; row < table->rowCount(); row++) {
     for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
