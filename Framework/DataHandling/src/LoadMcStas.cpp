@@ -393,13 +393,6 @@ std::vector<std::string> LoadMcStas::readEventData(
             detIDtoWSindex_map.find(detectorID)->second;
 
         int64_t pulse_time = 0;
-        // eventWS->getSpectrum(workspaceIndex) +=
-        // TofEvent(detector_time,pulse_time);
-        // eventWS->getSpectrum(workspaceIndex) += TofEvent(detector_time);
-        // The following line puts the events into the weighted event instance
-        // Originally this was coded so the error squared is 1 it should be
-        // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
-        // introduced flag to allow old usage
         auto weightedEvent = WeightedEvent();
         if (errorBarsSetTo1) {
           weightedEvent = WeightedEvent(detector_time, pulse_time,
@@ -418,7 +411,6 @@ std::vector<std::string> LoadMcStas::readEventData(
       eventWSIndex++;
     } // end reading over number of blocks of an event dataset
 
-    // nxFile.getData(data);
     nxFile.closeData();
     nxFile.closeGroup();
 
