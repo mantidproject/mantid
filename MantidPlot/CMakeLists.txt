@@ -807,7 +807,8 @@ target_link_libraries ( MantidPlot LINK_PRIVATE
   Qt4::Qscintilla
   ${PYTHON_LIBRARIES}
   ${ZLIB_LIBRARIES}
-  ${OPENGL_LIBRARIES}
+  ${OPENGL_glu_LIBRARY}
+  ${OPENGL_gl_LIBRARY}
 )
 
 if(MAKE_VATES)

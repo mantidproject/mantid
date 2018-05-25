@@ -14,17 +14,17 @@ methods for new Algorithms, using the "--alg" option.
 
 ::
 
-    usage: class_maker.py [-h] [--force] [--test] [--alg] SUBPROJECT CLASSNAME
-    Utility to create Mantid class files: header, source and test.
-    positional arguments:
-     SUBPROJECT  The subproject under Framework/; e.g. Kernel
-     CLASSNAME   Name of the class to create
-    optional arguments:
-     -h, --help  show this help message and exit
-     --force     Force overwriting existing files. Use with caution!
-     --test      Create only the test file.
-     --alg       Create an Algorithm stub. This adds some methods common to
-                 algorithms.
+    usage: class_maker.py [-h] [--force] [--test] [--alg] SUBPROJECT CLASSNAME
+    Utility to create Mantid class files: header, source and test.
+    positional arguments:
+     SUBPROJECT  The subproject under Framework/; e.g. Kernel
+     CLASSNAME   Name of the class to create
+    optional arguments:
+     -h, --help  show this help message and exit
+     --force     Force overwriting existing files. Use with caution!
+     --test      Create only the test file.
+     --alg       Create an Algorithm stub. This adds some methods common to
+                 algorithms.
 
 Moving/Renaming classes: move_class.py
 --------------------------------------
@@ -33,7 +33,7 @@ This python script is located in in /buidconfig/. It will move a class
 from one subproject to another and/or rename the class. Namespaces and
 cmakelists are adjusted. For details, run:
 
-``buildconfig/move_class.py --help``
+``buildconfig/move_class.py --help``
 
 Deleting a class: delete_class.py
 ---------------------------------
@@ -41,7 +41,7 @@ Deleting a class: delete_class.py
 This python script is located in in /buildconfig/. It will delete a
 class from one subproject. CMakeList.txt is adjusted. For details, run:
 
-``buildconfig/delete_class.py --help``
+``buildconfig/delete_class.py --help``
 
 Leak checking etc
 -----------------
@@ -55,7 +55,7 @@ Linux
 -  Slow but thorough
 -  Useful options to run with
 
-``valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000 ``\ \ `` [args...]``
+``valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000 ``\ \ `` [args...]``
 
 Windows
 ~~~~~~~
@@ -67,7 +67,7 @@ Windows
    Detector\vld.ini" to output to both File and debugger by changing the
    ``ReportTo`` to
 
-``ReportTo = both``
+``ReportTo = both``
 
 #. Add #include <vld.h> to the system.h file in Kernel
 #. Compile everything in debug

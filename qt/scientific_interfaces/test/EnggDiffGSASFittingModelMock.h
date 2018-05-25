@@ -13,8 +13,8 @@ using namespace MantidQt::CustomInterfaces;
 class MockEnggDiffGSASFittingModel : public IEnggDiffGSASFittingModel {
 
 public:
-  MOCK_METHOD1(doRefinement,
-               void(const GSASIIRefineFitPeaksParameters &params));
+  MOCK_METHOD1(doRefinements,
+               void(const std::vector<GSASIIRefineFitPeaksParameters> &params));
 
   MOCK_CONST_METHOD1(getGamma,
                      boost::optional<double>(const RunLabel &runLabel));

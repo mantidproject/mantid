@@ -101,8 +101,11 @@ template <typename BaseAlgorithm>
 const std::vector<std::string>
 AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
   try {
-    auto seeAlsoPyList = callMethod<object>(getSelf(), "seeAlso");
-    return Converters::PySequenceToVector<std::string>(seeAlsoPyList)();
+    // The GIL is required so that the the reference count of the
+    // list object can be decremented safely
+    Environment::GlobalInterpreterLock gil;
+    return Converters::PySequenceToVector<std::string>(
+        callMethod<list>(getSelf(), "seeAlso"))();
   } catch (UndefinedAttributeError &) {
     return {};
   }

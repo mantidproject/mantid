@@ -23,10 +23,11 @@ public:
   virtual ~IEnggDiffGSASFittingModel() = default;
 
   /**
-   Perform a refinement on a run
-   @param params Parameters to be passed to GSASIIRefineFitPeaks
+   Perform refinements on a number of runs
+   @param params Parameters for each run to be passed to GSASIIRefineFitPeaks
    */
-  virtual void doRefinement(const GSASIIRefineFitPeaksParameters &params) = 0;
+  virtual void
+  doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params) = 0;
 
   /**
    Get refined lattice parameters for a run

@@ -20,6 +20,8 @@ public:
 
   MOCK_METHOD1(addFocusedRun, void(const Mantid::API::MatrixWorkspace_sptr ws));
 
+  MOCK_CONST_METHOD0(getAllRunLabels, std::vector<RunLabel>());
+
   MOCK_CONST_METHOD1(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
                          const RunLabel &runLabel));

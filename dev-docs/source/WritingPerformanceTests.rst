@@ -34,27 +34,27 @@ example, in MyAlgorithmTest.h:
 
 .. code-block:: c++
 
-   class MyAlgorithmTest : public CxxTest::TestSuite {
-      // Put in your usual, quick unit tests here
+   class MyAlgorithmTest : public CxxTest::TestSuite {
+      // Put in your usual, quick unit tests here
    };
-   
-   class MyAlgorithmTestPerformance : public CxxTest::TestSuite {
+
+   class MyAlgorithmTestPerformance : public CxxTest::TestSuite {
    public:
-      MatrixWorkspace_sptr WS;
-      int numpixels;
-       
-      void setUp() {
-         // Put in any code needed to set up your test,
-         // but that should NOT be counted in the execution time.
-      }
-       
-      void tearDown() {
-         // Clean-up code, also NOT counted in execution time.
-      }
-       
-      void test_slow_performance() {
-         // Put in a unit test that will be slow.
-      }
+      MatrixWorkspace_sptr WS;
+      int numpixels;
+
+      void setUp() {
+         // Put in any code needed to set up your test,
+         // but that should NOT be counted in the execution time.
+      }
+
+      void tearDown() {
+         // Clean-up code, also NOT counted in execution time.
+      }
+
+      void test_slow_performance() {
+         // Put in a unit test that will be slow.
+      }
    };
 
 Only the presence/absence of the word Performance is used to determine

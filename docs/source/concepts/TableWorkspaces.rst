@@ -198,6 +198,10 @@ the second argument is the name of the column. The predefined types are:
 +-----------------+-------------------------+
 | long64          | int64\_t                |
 +-----------------+-------------------------+
+| vector_int      | std::vector<int>        |
++-----------------+-------------------------+
+| vector_double   | std::vector<double>     |
++-----------------+-------------------------+
 
 The data in the table can be accessed in a number of ways. The most
 simple way is to call templated method T& cell(row,col), where col is

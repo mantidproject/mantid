@@ -30,7 +30,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 
 class FitPeaksTest : public CxxTest::TestSuite {
 private:
-  std::string m_inputWorkspaceName;
+  std::string m_inputWorkspaceName{"FitPeaksTest_workspace"};
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -42,11 +42,6 @@ public:
   static void destroySuite(FitPeaksTest *suite) { delete suite; }
 
   void test_Init() {
-    // Generate input workspace
-    // m_inputWorkspaceName = loadVulcanHighAngleData();
-    m_inputWorkspaceName = "temp_workspace";
-    createTestData(m_inputWorkspaceName);
-
     // Initialize FitPeak
     FitPeaks fitpeaks;
 
@@ -62,7 +57,10 @@ public:
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    createTestParameters(peakparnames, peakparvalues);
+    createGuassParameters(peakparnames, peakparvalues);
+
+    // Generate input workspace
+    createTestData(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -78,6 +76,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterNames", peakparnames));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakParameterValues", peakparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
@@ -115,12 +115,12 @@ public:
 
     // check values: fitted peak positions
     // spectrum 1
-    auto fitted_positions_0 = main_out_ws->histogram(0).y();
+    const auto &fitted_positions_0 = main_out_ws->histogram(0).y();
     TS_ASSERT_EQUALS(fitted_positions_0.size(), 2); // with 2 peaks to fit
     TS_ASSERT_DELTA(fitted_positions_0[0], 5.0, 1.E-6);
     TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-6);
     // spectrum 3
-    auto fitted_positions_2 = main_out_ws->histogram(2).y();
+    const auto &fitted_positions_2 = main_out_ws->histogram(2).y();
     TS_ASSERT_EQUALS(fitted_positions_2.size(), 2); // with 2 peaks to fit
     TS_ASSERT_DELTA(fitted_positions_2[0], 5.03, 1.E-6);
     TS_ASSERT_DELTA(fitted_positions_2[1], 10.02, 1.E-6);
@@ -150,6 +150,7 @@ public:
                     data_ws->histogram(0).x().back(), 1E-10);
 
     // clean up
+    AnalysisDataService::Instance().remove(m_inputWorkspaceName);
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
@@ -286,10 +287,6 @@ public:
     loader->execute();
     TS_ASSERT(loader->isExecuted());
 
-    // create an EventNumberWorkspace
-    std::string event_number_ws_name("PG3_733_EventNumbers");
-    createEventNumberWorkspace(event_number_ws_name, 4, 3);
-
     // Initialize FitPeak
     FitPeaks fit_peaks_alg;
 
@@ -311,8 +308,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
         "PeakWidthPercent", 0.016)); // typical powgen's
-    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("EventNumberWorkspace",
-                                                       event_number_ws_name));
 
     std::string peak_pos_ws_name("PG3_733_peak_positions");
     std::string peak_param_ws_name("PG3_733_peak_params");
@@ -583,28 +578,6 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------------------------
-  /** create a multiple spectra workspace containing counts
-   * @brief createEventNumberWorkspace
-   * @param event_number_ws_name
-   * @param num_spec
-   * @param empty_ws_index
-   */
-  void createEventNumberWorkspace(const std::string &event_number_ws_name,
-                                  size_t num_spec, size_t empty_ws_index) {
-    // create a MatrixWorkspace
-    MatrixWorkspace_sptr matrix_ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            static_cast<int>(num_spec), 1);
-
-    // set spectrum without counts
-    matrix_ws->mutableY(empty_ws_index) = 0.;
-
-    // add to ADS
-    AnalysisDataService::Instance().addOrReplace(event_number_ws_name,
-                                                 matrix_ws);
-  }
-
-  //--------------------------------------------------------------------------------------------------------------
   /** create basic testing data set containing some Gaussian peaks
    * @brief createTestData
    * @param workspacename
@@ -668,18 +641,18 @@ public:
     return;
   }
 
-  void createTestParameters(vector<string> &parnames,
-                            vector<double> &parvalues) {
+  void createGuassParameters(vector<string> &parnames,
+                             vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
 
-    parnames.emplace_back("I");
+    parnames.emplace_back("Height");
     parvalues.push_back(2.5e+06);
 
-    parnames.emplace_back("S");
+    parnames.emplace_back("Sigma");
     parvalues.push_back(0.1);
 
-    parnames.emplace_back("X0");
+    parnames.emplace_back("PeakCentre");
     parvalues.push_back(10.0);
 
     return;

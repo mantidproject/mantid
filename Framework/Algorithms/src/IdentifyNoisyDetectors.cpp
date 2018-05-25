@@ -5,11 +5,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
 using namespace Kernel;
 using namespace API;
+using namespace HistogramData;
 
 DECLARE_ALGORITHM(IdentifyNoisyDetectors)
 
@@ -115,11 +117,9 @@ void IdentifyNoisyDetectors::exec() {
   int2 = divide->getProperty("OutputWorkspace");
 
   for (int i = 0; i < nHist; i++) {
-    stdDevWs->dataX(i)[0] = 0.0;
-    stdDevWs->dataY(i)[0] =
-        sqrt(int2->readY(i)[0] - std::pow(int1->readY(i)[0], 2));
-    outputWs->dataX(i)[0] = 0.0;
-    outputWs->dataY(i)[0] = 1.0;
+    outputWs->setHistogram(i, Points{0.0}, Counts{1.0});
+    stdDevWs->setSharedX(i, outputWs->sharedX(i));
+    stdDevWs->mutableY(i)[0] = sqrt(int2->y(i)[0] - std::pow(int1->y(i)[0], 2));
 
     progress.report();
   }
@@ -149,9 +149,9 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double mean2 = 0.0;
 
   for (int i = 0; i < nhist; i++) {
-    if (valid->readY(i)[0] > 0) {
-      mean += values->readY(i)[0];
-      mean2 += std::pow(values->readY(i)[0], 2);
+    if (valid->y(i)[0] > 0) {
+      mean += values->y(i)[0];
+      mean2 += std::pow(values->y(i)[0], 2);
       count++;
     }
 
@@ -170,14 +170,15 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double lower = mean - 3 * stddev;
   double min = mean * 0.0001;
 
+  Counts counts{0.0};
   for (int i = 0; i < nhist; i++) {
-    double value = values->readY(i)[0];
+    double value = values->y(i)[0];
     if (value > upper) {
-      valid->dataY(i)[0] = 0.0;
+      valid->setCounts(i, counts);
     } else if (value < lower) {
-      valid->dataY(i)[0] = 0.0;
+      valid->setCounts(i, counts);
     } else if (value < min) {
-      valid->dataY(i)[0] = 0.0;
+      valid->setCounts(i, counts);
     }
 
     progress.report("Calculating StdDev...");

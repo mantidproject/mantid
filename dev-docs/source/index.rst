@@ -192,3 +192,4 @@ Component Overviews
    RemoteJobSubmissionAPI
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation
+   BatchWidget/index

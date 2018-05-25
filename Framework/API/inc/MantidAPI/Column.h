@@ -100,6 +100,9 @@ public:
   /// Specialized type check
   virtual bool isBool() const = 0;
 
+  /// Are elements of the column interpretable as a number?
+  virtual bool isNumber() const = 0;
+
   /// Must return overall memory size taken by the column.
   virtual long int sizeOfData() const = 0;
 
