@@ -39,6 +39,8 @@ New features
 Improvements
 ############
 
+- Added a boolean property ``Debug`` to the reflectometry algorithms that controls output of additional and/or intermediate workspaces.
+
 Bug fixes
 #########
 
