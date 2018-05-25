@@ -596,7 +596,7 @@ IndirectFittingModel::createDefaultParameters(std::size_t) const {
 boost::optional<ResultLocation>
 IndirectFittingModel::getResultLocation(std::size_t index,
                                         std::size_t spectrum) const {
-  if (m_previousModelSelected)
+  if (m_previousModelSelected && m_fitOutput)
     return m_fitOutput->getResultLocation(m_fittingData[index].get(), spectrum);
   return boost::none;
 }
