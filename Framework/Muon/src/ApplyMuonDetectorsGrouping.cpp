@@ -110,6 +110,17 @@ void ApplyMuonDetectorGrouping::init() {
                   "A list of periods to subtract in multiperiod data.",
                   Direction::Input);
 
+  declareProperty(
+	  "ApplyDeadTimeCorrection", false,
+	  "Whether dead time correction should be applied to input workspace");
+  declareProperty(
+	  make_unique<WorkspaceProperty<TableWorkspace>>(
+		  "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
+	  "Table with dead time information. Must be specified if ApplyDeadTimeCorrection is set true.");
+  setPropertySettings("DeadTimeTable",
+	  make_unique<Kernel::EnabledWhenProperty>(
+		  "ApplyDeadTimeCorrection", Kernel::IS_NOT_DEFAULT, ""));
+
   // Perform Group Associations.
 
   std::string workspaceGrp("Workspaces");
@@ -124,6 +135,10 @@ void ApplyMuonDetectorGrouping::init() {
   setPropertyGroup("AnalysisType", analysisGrp);
   setPropertyGroup("TimeMin", analysisGrp);
   setPropertyGroup("TimeMax", analysisGrp);
+
+  std::string dtcGrp("Dead Time Correction");
+  setPropertyGroup("ApplyDeadTimeCorrection", dtcGrp);
+  setPropertyGroup("DeadTimeTable", dtcGrp);
 }
 
 void ApplyMuonDetectorGrouping::exec() {
@@ -336,6 +351,12 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
   } else {
     throw std::invalid_argument("Cannot create analysis workspace: Group "
                                 "name not found in grouping");
+  }
+
+  bool applyDTC = getProperty("ApplyDeadTimeCorrection");
+  TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
+  if (applyDTC) {
+	  alg.setProperty("DeadTimeTable", DTC);
   }
 }
 
