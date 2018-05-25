@@ -24,7 +24,6 @@ namespace {
 std::string const OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX("IvsQ_binned");
 std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
 std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -136,13 +135,16 @@ void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
     MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
     auto const runNumber = getRunNumber(*ws);
     if (isDefault("OutputWorkspaceBinned")) {
-      setPropertyValue("OutputWorkspaceBinned", OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
+      setPropertyValue("OutputWorkspaceBinned",
+                       OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
     }
     if (isDefault("OutputWorkspace")) {
-      setPropertyValue("OutputWorkspace", OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+      setPropertyValue("OutputWorkspace",
+                       OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
     }
     if (isDefault("OutputWorkspaceWavelength")) {
-      setPropertyValue("OutputWorkspaceWavelength", OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+      setPropertyValue("OutputWorkspaceWavelength",
+                       OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
     }
   }
 }
@@ -264,17 +266,20 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Output workspace in Q
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceBinned", "", Direction::Output, PropertyMode::Optional),
+                      "OutputWorkspaceBinned", "", Direction::Output,
+                      PropertyMode::Optional),
                   "Output workspace in Q (rebinned workspace)");
 
   // Output workspace in Q (unbinned)
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
-                  "Output workspace in Q (native binning)");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Output workspace in Q (native binning)");
 
   // Output workspace in wavelength
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceWavelength", "", Direction::Output, PropertyMode::Optional),
+                      "OutputWorkspaceWavelength", "", Direction::Output,
+                      PropertyMode::Optional),
                   "Output workspace in wavelength");
 }
 

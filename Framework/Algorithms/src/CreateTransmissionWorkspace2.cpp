@@ -187,12 +187,14 @@ void CreateTransmissionWorkspace2::getRunNumbers() {
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
   auto const &run = firstTransWS->run();
   if (run.hasProperty("run_number")) {
-    m_firstTransmissionRunNumber = run.getPropertyValueAsType<std::string>("run_number");
+    m_firstTransmissionRunNumber =
+        run.getPropertyValueAsType<std::string>("run_number");
   }
 
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS && secondTransWS->run().hasProperty("run_number")) {
-    m_secondTransmissionRunNumber = secondTransWS->run().getPropertyValueAsType<std::string>("run_number");
+    m_secondTransmissionRunNumber =
+        secondTransWS->run().getPropertyValueAsType<std::string>("run_number");
   }
 }
 
@@ -200,11 +202,13 @@ void CreateTransmissionWorkspace2::getRunNumbers() {
  * @param which Which of the runs to store: 1 - first, 2 - second.
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::storeTransitionRun(int which, MatrixWorkspace_sptr ws) {
+void CreateTransmissionWorkspace2::storeTransitionRun(int which,
+                                                      MatrixWorkspace_sptr ws) {
   if (which < 1 || which > 2) {
     throw std::logic_error("There are only two runs: 1 and 2.");
   }
-  auto const &runNumber = which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
+  auto const &runNumber =
+      which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
 
   if (!runNumber.empty()) {
     auto const name = TRANS_LAM_PREFIX + runNumber;

@@ -585,7 +585,6 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();
-
   }
 
   void test_optional_outputs_set() {
@@ -609,7 +608,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();
-
   }
 
   void test_default_outputs() {
@@ -631,7 +629,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460"));
 
     AnalysisDataService::Instance().clear();
-
   }
 
   void test_default_outputs_no_run_number() {
@@ -654,9 +651,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
 
     AnalysisDataService::Instance().clear();
-
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_ */

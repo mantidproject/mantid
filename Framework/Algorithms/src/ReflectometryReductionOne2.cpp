@@ -344,7 +344,6 @@ double getBoundingBoxExtent(const BoundingBox &boundingBox,
   }
   return result;
 }
-
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -445,7 +444,8 @@ ReflectometryReductionOne2::validateOutputWorkspaces() const {
   bool const isDebug = getProperty("Debug");
   if (!isDebug && !isChild()) {
     if (isDefault("OutputWorkspace")) {
-      results["OutputWorkspace"] = "OutputWorkspace property must be set when Debug is not enabled.";
+      results["OutputWorkspace"] =
+          "OutputWorkspace property must be set when Debug is not enabled.";
     }
   }
   return results;
@@ -458,14 +458,15 @@ void ReflectometryReductionOne2::setDefaultOutputWorkspaceNames() {
     MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
     auto const runNumber = getRunNumber(*ws);
     if (isDefault("OutputWorkspace")) {
-      setPropertyValue("OutputWorkspace", OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+      setPropertyValue("OutputWorkspace",
+                       OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
     }
     if (isDefault("OutputWorkspaceWavelength")) {
-      setPropertyValue("OutputWorkspaceWavelength", OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+      setPropertyValue("OutputWorkspaceWavelength",
+                       OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
     }
   }
 }
-
 
 /** Execute the algorithm.
 */
