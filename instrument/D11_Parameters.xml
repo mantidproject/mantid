@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "D11" valid-from = "25th May 2018">
+
+    <component-link name="D11">
+
+		<parameter name="detector-name" type="string">
+		  <value val="detector1"/>
+		</parameter>
+
+		<parameter name="number-of-x-pixels">
+		  <value val="256"/>
+		</parameter>
+
+		<parameter name="number-of-y-pixels">
+		  <value val="256"/>
+		</parameter>
+
+		<parameter name="x-pixel-size">
+		  <value val="3.75"/>
+		</parameter>
+
+		<parameter name="y-pixel-size">
+		  <value val="3.75"/>
+		</parameter>
+
+    </component-link>
+</parameter-file>
