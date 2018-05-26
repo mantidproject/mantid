@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CALCULATEPOLEFIGURE_H_
-#define MANTID_ALGORITHMS_CALCULATEPOLEFIGURE_H_
+#ifndef MANTID_ALGORITHMS_ConvertToPoleFigure_H_
+#define MANTID_ALGORITHMS_ConvertToPoleFigure_H_
 
 // #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -22,8 +22,9 @@
 #include <cxxtest/TestSuite.h>
 #include <numeric>
 
-#include "MantidAlgorithms/CalculatePoleFigure.h"
+#include "MantidAlgorithms/ConvertToPoleFigure.h"
 
+using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -141,10 +142,10 @@ createBraggWorkspace(const std::string &name) {
 }
 }
 
-class CalculatePoleFigureTest : public CxxTest::TestSuite {
+class ConvertToPoleFigureTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
-    CalculatePoleFigure alg;
+    ConvertToPoleFigure alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -157,7 +158,7 @@ public:
 
     API::Workspace_sptr ws = createBraggWorkspace("TwoSpecPoleFigure");
 
-    CalculatePoleFigure pfcalculator;
+    Mantid::Algorithms::ConvertToPoleFigure pfcalculator;
     pfcalculator.initialize();
 
     // set properties
@@ -202,4 +203,4 @@ public:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_CALCULATEPOLEFIGURE_H_ */
+#endif /* MANTID_ALGORITHMS_ConvertToPoleFigure_H_ */

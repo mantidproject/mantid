@@ -198,39 +198,32 @@ void ConvertToPoleFigure::generateOutputs() {
   std::vector<double> extentMaxs(2);
 
   auto unitFactory = makeMDUnitFactoryChain();
+  std::string units("U");
+  auto mdUnit = unitFactory->create(units);
 
   // Set up X and Y dimension
   // Extract Dimensions and add to the output workspace.
-  std::string id("x");
-  std::string name("X");
-  std::string units("U");
-  int nbins = 100; // FIXME - a better number
-  auto mdUnit = unitFactory->create(units);
-  Mantid::Geometry::GeneralFrame frame(
+  std::string xid("x");
+  std::string xname("X");
+  int xnbins = 100; // FIXME - a better number
+  size_t dimx = 0;
+  Mantid::Geometry::GeneralFrame xframe(
       Mantid::Geometry::GeneralFrame::GeneralFrameName, std::move(mdUnit));
   out_event_ws->addDimension(
       Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-          id, name, frame, static_cast<coord_t>(extentMins[dim0]),
-          static_cast<coord_t>(extentMaxs[dim0]), nbins)));
+          xid, xname, xframe, static_cast<coord_t>(extentMins[dimx]),
+          static_cast<coord_t>(extentMaxs[dimx]), xnbins)));
 
-  throw std::runtime_error("To be continued");
-
-  //  auto dimEntriesIterator = m_posDimStart;
-  //  auto unitFactory = makeMDUnitFactoryChain();
-  //  for (size_t i = 0; i < m_nDimensions; ++i) {
-  //    std::string id = convert<std::string>(*(++dimEntriesIterator));
-  //    std::string name = convert<std::string>(*(++dimEntriesIterator));
-  //    std::string units = convert<std::string>(*(++dimEntriesIterator));
-  //    int nbins = convert<int>(*(++dimEntriesIterator));
-
-  //    auto mdUnit = unitFactory->create(units);
-  //    Mantid::Geometry::GeneralFrame frame(
-  //        Mantid::Geometry::GeneralFrame::GeneralFrameName,
-  //        std::move(mdUnit));
-  //    outWs->addDimension(MDHistoDimension_sptr(new MDHistoDimension(
-  //        id, name, frame, static_cast<coord_t>(extentMins[i]),
-  //        static_cast<coord_t>(extentMaxs[i]), nbins)));
-  //  }
+  std::string yid("y");
+  std::string yname("Y");
+  int ynbins = 100; // FIXME - a better number
+  size_t dimy = 1;
+  Mantid::Geometry::GeneralFrame yframe(
+      Mantid::Geometry::GeneralFrame::GeneralFrameName, std::move(mdUnit));
+  out_event_ws->addDimension(
+      Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+          yid, yname, yframe, static_cast<coord_t>(extentMins[dimy]),
+          static_cast<coord_t>(extentMaxs[dimy]), ynbins)));
 
   // set properties for output
   setProperty("OutputWorkspace", out_event_ws);
