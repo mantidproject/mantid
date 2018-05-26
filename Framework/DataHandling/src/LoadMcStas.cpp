@@ -181,7 +181,7 @@ std::vector<std::string> LoadMcStas::readEventData(
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
   bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
-  bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
+  //bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
 
   // will assume that each top level entry contain one mcstas
   // generated IDF and any event data entries within this top level
