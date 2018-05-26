@@ -50,7 +50,7 @@ void LoadMcStas::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  // added to allow control of errorbars
+
   declareProperty(
       "ErrorBarsSetTo1", false,
       "When this property is set to false errors are set equal to data values, "
@@ -58,9 +58,10 @@ void LoadMcStas::init() {
       "defaults to false");
 
   declareProperty("OutputOnlySummedEventWorkspace", true,
-    "When true the algorithm only outputs the sum of all event data into one eventworkspace "
-    "EventData + _ + name of the OutputWorkspace. If false eventworkspaces are also "
-    "returned for each individual McStas components storing event data");
+      "When true the algorithm only outputs the sum of all event data into "
+      "one eventworkspace EventData + _ + name of the OutputWorkspace. "
+      "If false eventworkspaces are also returned for each individual "
+      "McStas components storing event data");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -179,7 +180,7 @@ std::vector<std::string> LoadMcStas::readEventData(
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
   bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
-  bool outputOnlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
+  bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
 
   // will assume that each top level entry contain one mcstas
   // generated IDF and any event data entries within this top level
@@ -284,8 +285,8 @@ std::vector<std::string> LoadMcStas::readEventData(
 
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
 
-  // All entries of allEventWS except the first are eventWS entries for individual
-  // event data in the nexus file except for the first entry.
+  // All entries of allEventWS except the first are eventWS entries for
+  // individual event data in the nexus file except for the first entry.
   // Loop over McStas components that stores event data
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
@@ -293,7 +294,7 @@ std::vector<std::string> LoadMcStas::readEventData(
 
     // if numEventEntries > 1 also create separate event workspaces
     if (numEventEntries > 1) {
-      // create container to hold partial event data 
+      // create container to hold partial event data
       // plus the name users will see for it
       const auto ws_name = dataName + std::string("_") + nameOfGroupWS;
       allEventWS.emplace_back(eventWS->clone(), ws_name);
@@ -407,8 +408,7 @@ std::vector<std::string> LoadMcStas::readEventData(
         }
         allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
         if (numEventEntries > 1) {
-          allEventWS.back().first->getSpectrum(workspaceIndex) +=
-              weightedEvent;
+          allEventWS.back().first->getSpectrum(workspaceIndex) += weightedEvent;
         }
       }
     } // end reading over number of blocks of an event dataset
@@ -428,10 +428,10 @@ std::vector<std::string> LoadMcStas::readEventData(
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
   for (auto eventWS : allEventWS) {
-      auto ws = eventWS.first;
-      ws->setAllX(axis);
-      AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
-      scatteringWSNames.emplace_back(eventWS.second);
+    auto ws = eventWS.first;
+    ws->setAllX(axis);
+    AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
+    scatteringWSNames.emplace_back(eventWS.second);
   }
   return scatteringWSNames;
 }
