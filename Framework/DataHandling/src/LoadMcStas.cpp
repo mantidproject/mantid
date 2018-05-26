@@ -57,7 +57,8 @@ void LoadMcStas::init() {
       "and when set to true all errors are set equal to one. This property "
       "defaults to false");
 
-  declareProperty("OutputOnlySummedEventWorkspace", true,
+  declareProperty(
+      "OutputOnlySummedEventWorkspace", true,
       "When true the algorithm only outputs the sum of all event data into "
       "one eventworkspace EventData + _ + name of the OutputWorkspace. "
       "If false eventworkspaces are also returned for each individual "
