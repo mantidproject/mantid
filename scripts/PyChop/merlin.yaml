@@ -1,0 +1,103 @@
+name: MERLIN
+# Input file for PyChop2 for the MAPS spectrometer at ISIS.
+
+chopper_system:
+  name: MERLIN chopper system
+  chop_sam: 1.82                # Distance (x1) from final chopper to sample (m)
+  sam_det: 2.5                  # Distance (x2) from sample to detector (m)
+  aperture_width: 0.06667       # Width of aperture at moderator face (m)
+  aperture_height: 0.06667      # Height of aperture at moderator face (m)
+  choppers:
+    -                           # Each entry must have a dash on an otherwise empty line!
+      name: MERLIN Disk
+      distance: 9.3             # Distance from moderator to this chopper in metres
+      slot_width: 950           # Slot width in mm
+      guide_width: 64           # Width of guide after chopper in mm
+      nslot: 1                  # Number of slots. If slot_ang_pos is specified can ommit this entry
+                                # Next line has the angular position of the slots in degrees
+                                #   Must be monotonically increasing. Can omit if nslot is specifed,
+                                #   in which case it will be assumed that the slits are equally spaced.
+      radius: 250               # Disk radius
+      isDouble: False           # Is this a double disk system?
+      isPhaseIndependent: True  # Is this disk to be phased independently?
+      defaultPhase: 1500        # What is the default phase for this disk (either a time in microseconds
+                                #   or a slot index [as a string] for the desired rep to go through)
+    -
+      name: MERLIN Fermi
+      distance: 10.0            # Distance from moderator to this chopper in metres
+      aperture_distance: 7.19   # Distance from aperture (moderator face) to this chopper (only for Fermi)
+      packages:                 # A hash of chopper packages
+        G:
+          name: MERLIN G (Gadolinium)
+          pslit: 0.2            # Neutron transparent slit width (mm)
+          pslat: 0.020          # Neutron absorbing slat width (mm)
+          radius: 5.0           # Chopper package radius (mm)
+          rho: 1000000          # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.          # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: True            # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        S:
+          name: MERLIN S (Sloppy)
+          pslit: 2.280          # Neutron transparent slit width (mm)
+          pslat: 0.550          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 1300.0           # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 2.5         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+  # Now define how the frequencies of the choppers should be related
+  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
+  frequency_matrix:
+    [[0],                       # Only the Fermi frequency should be variable
+     [1]]
+  constant_frequencies:         # Disk should always run at 50Hz
+    [50., 0.]
+  max_frequencies:
+    [600]                       # Maximum frequencies (Hz)
+  default_frequencies:
+    [400]
+
+sample: 
+  name: MERLIN Sample Can
+  isam: 0                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
+  sx: 2.0                       # Thickness (mm) 
+  sy: 40.0                      # Width (mm)
+  sz: 40.0                      # Height (mm)
+  gamma: 0.0                    # Angle of x-axis to ki (degrees)
+
+detector:
+  name: He3 PSD tubes
+  idet: 2                       # Detector type: 1==He tube binned together, 2==He tube
+  dd: 0.025                     # Detector depth (diameter for tube) in metres
+  tbin: 0.0                     # Detector time bins (microseconds)
+  phi: 0.0                      # Detector scattering angle (degrees)
+
+moderator:
+  name: AP                      # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
+                                # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
+  imod: 2                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2
+  mod_pars: [80.0, 0.5226]      # Parameters for time profile
+  theta: 26.7                   # Angle beamline makes with moderator face (degrees)
+  source_rep: 50                # Frequency of source (Hz)
+  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
+    wavelength: [1.5000e-01, 2.5000e-01, 3.5000e-01, 4.5000e-01, 5.5000e-01, 6.5000e-01, 7.5000e-01, 8.5000e-01, 9.5000e-01, 1.0500e+00,
+                 1.1500e+00, 1.2500e+00, 1.3500e+00, 1.4500e+00, 1.5500e+00, 1.6500e+00, 1.7500e+00, 1.8500e+00, 1.9500e+00, 2.0500e+00,
+                 2.1500e+00, 2.2500e+00, 2.3500e+00, 2.4500e+00, 2.5500e+00, 2.6500e+00, 2.7500e+00, 2.8500e+00, 2.9500e+00, 3.0500e+00,
+                 3.1500e+00, 3.2500e+00, 3.3500e+00, 3.4500e+00, 3.5500e+00, 3.6500e+00, 3.7500e+00, 3.8500e+00, 3.9500e+00, 4.0500e+00,
+                 4.1500e+00, 4.2500e+00, 4.3500e+00, 4.4500e+00, 4.5500e+00, 4.6500e+00, 4.7500e+00, 4.8500e+00, 4.9500e+00, 5.0500e+00,
+                 5.1500e+00, 5.2500e+00, 5.3500e+00, 5.4500e+00, 5.5500e+00, 5.6500e+00, 5.7500e+00, 5.8500e+00, 5.9500e+00, 6.0500e+00,
+                 6.1500e+00, 6.2500e+00, 6.3500e+00, 6.4500e+00, 6.5500e+00, 6.6500e+00, 6.7500e+00, 6.8500e+00, 6.9500e+00, 7.0500e+00,
+                 7.1500e+00, 7.2500e+00, 7.3500e+00, 7.4500e+00, 7.5500e+00, 7.6500e+00, 7.7500e+00, 7.8500e+00, 7.9500e+00, 8.0500e+00,
+                 8.1500e+00, 8.2500e+00, 8.3500e+00, 8.4500e+00, 8.5500e+00, 8.6500e+00, 8.7500e+00, 8.8500e+00, 8.9500e+00, 9.0500e+00,
+                 9.1500e+00, 9.2500e+00, 9.3500e+00, 9.4500e+00, 9.5500e+00, 9.6500e+00, 9.7500e+00, 9.8500e+00, 9.9500e+00, 1.0050e+01]
+    flux: [ 3.4827e+07, 1.9455e+07, 1.3618e+07, 1.0922e+07, 9.1074e+06, 8.9949e+06, 1.0717e+07, 1.4113e+07, 1.7890e+07, 2.0977e+07,
+            2.2164e+07, 2.1097e+07, 1.9449e+07, 1.7522e+07, 1.5395e+07, 1.3518e+07, 1.1794e+07, 1.0664e+07, 9.4134e+06, 7.8688e+06,
+            6.7881e+06, 5.9428e+06, 4.9238e+06, 4.2219e+06, 3.8432e+06, 3.3606e+06, 2.9299e+06, 2.6110e+06, 2.3335e+06, 2.0563e+06,
+            1.8005e+06, 1.6002e+06, 1.4490e+06, 1.3368e+06, 1.2599e+06, 1.1239e+06, 1.0524e+06, 9.7266e+05, 8.6218e+05, 7.6681e+05,
+            7.0049e+05, 6.7822e+05, 6.2993e+05, 6.2571e+05, 5.8608e+05, 5.3686e+05, 5.5309e+05, 5.2245e+05, 4.8365e+05, 4.4384e+05,
+            3.9445e+05, 3.7199e+05, 3.2812e+05, 3.1162e+05, 2.9301e+05, 2.6704e+05, 2.6396e+05, 2.4635e+05, 2.1940e+05, 2.1146e+05,
+            2.0127e+05, 1.9412e+05, 1.7908e+05, 1.7902e+05, 1.6332e+05, 1.1746e+05, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+            0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+            0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+            0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00]

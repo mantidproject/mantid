@@ -1,0 +1,140 @@
+name: MARI
+# Input file for PyChop2 for the MAPS spectrometer at ISIS.
+
+chopper_system:
+  name: MARI chopper system
+  chop_sam: 1.689               # Distance (x1) from final chopper to sample (m)
+  sam_det: 4.022                # Distance (x2) from sample to detector (m)
+  aperture_width: 0.06667       # Width of aperture at moderator face (m)
+  aperture_height: 0.06667      # Height of aperture at moderator face (m)
+  choppers:
+    -                           # Each entry must have a dash on an otherwise empty line!
+      name: MARI Disk
+      distance: 7.85            # Distance from moderator to this chopper in metres
+      slot_width: 65            # Slot width in mm
+      guide_width: 60           # Width of guide after chopper in mm
+      nslot: 4                  # Number of slots. If slot_ang_pos is specified can ommit this entry
+                                # Next line has the angular position of the slots in degrees
+                                #   Must be monotonically increasing. Can omit if nslot is specifed,
+                                #   in which case it will be assumed that the slits are equally spaced.
+      slot_ang_pos: [0, 36.48, 72.76, 145.52]
+      radius: 367               # Disk radius
+      isDouble: True            # Is this a double disk system?
+      isPhaseIndependent: True  # Is this disk to be phased independently?
+      defaultPhase: "0"         # What is the default phase for this disk (either a time in microseconds
+                                #   or a slot index [as a string] for the desired rep to go through)
+    -
+      name: MARI Fermi
+      distance: 10.05           # Distance from moderator to this chopper in metres
+      aperture_distance: 7.19   # Distance from aperture (moderator face) to this chopper (only for Fermi)
+      packages:                 # A hash of chopper packages
+        A:
+          name: MARI A (500meV)
+          pslit: 0.760          # Neutron transparent slit width (mm)
+          pslat: 0.550          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 1300.0           # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        B:
+          name: MARI B (200meV)
+          pslit: 1.140          # Neutron transparent slit width (mm)
+          pslat: 0.550          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 820.0            # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        C:
+          name: MARI C (100meV)
+          pslit: 1.520          # Neutron transparent slit width (mm)
+          pslat: 0.550          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 580.0            # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        G:
+          name: MARI G (Gadolinium)
+          pslit: 0.380          # Neutron transparent slit width (mm)
+          pslat: 0.020          # Neutron absorbing slat width (mm)
+          radius: 10.0          # Chopper package radius (mm)
+          rho: 800.0            # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.2         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: True            # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        R:
+          name: MARI R (500meV)
+          pslit: 1.143          # Neutron transparent slit width (mm)
+          pslat: 0.550          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 1300.0           # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        S:
+          name: MARI S (Sloppy)
+          pslit: 2.280          # Neutron transparent slit width (mm)
+          pslat: 0.550          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 1300.0           # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 2.7         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+  # Now define how the frequencies of the choppers should be related
+  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
+  frequency_matrix:
+    [[0],                       # Only the Fermi frequency should be variable
+     [1]]
+  constant_frequencies:         # Disk should always run at 50Hz
+    [50., 0.]
+  max_frequencies:
+    [600]                       # Maximum frequencies (Hz)
+  default_frequencies:
+    [400]
+
+sample: 
+  name: MARI Sample Can
+  isam: 2                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
+  sx: 20.0                      # Thickness (mm) 
+  sy: 19.0                      # Width (mm)
+  sz: 50.0                      # Height (mm)
+  gamma: 0.0                    # Angle of x-axis to ki (degrees)
+
+detector:
+  name: He3 PSD tubes
+  idet: 2                       # Detector type: 1==He tube binned together, 2==He tube
+  dd: 0.025                     # Detector depth (diameter for tube) in metres
+  tbin: 0.0                     # Detector time bins (microseconds)
+  phi: 0.0                      # Detector scattering angle (degrees)
+
+moderator:
+  name: CH4                     # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
+                                # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
+  imod: 2                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2
+  mod_pars: [38.6, 0.5226]      # Parameters for time profile
+  theta: 13.0                   # Angle beamline makes with moderator face (degrees)
+  source_rep: 50                # Frequency of source (Hz)
+  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
+    wavelength: [1.5000e-01, 2.5000e-01, 3.5000e-01, 4.5000e-01, 5.5000e-01, 6.5000e-01, 7.5000e-01, 8.5000e-01, 9.5000e-01, 1.0500e+00,
+                 1.1500e+00, 1.2500e+00, 1.3500e+00, 1.4500e+00, 1.5500e+00, 1.6500e+00, 1.7500e+00, 1.8500e+00, 1.9500e+00, 2.0500e+00,
+                 2.1500e+00, 2.2500e+00, 2.3500e+00, 2.4500e+00, 2.5500e+00, 2.6500e+00, 2.7500e+00, 2.8500e+00, 2.9500e+00, 3.0500e+00,
+                 3.1500e+00, 3.2500e+00, 3.3500e+00, 3.4500e+00, 3.5500e+00, 3.6500e+00, 3.7500e+00, 3.8500e+00, 3.9500e+00, 4.0500e+00,
+                 4.1500e+00, 4.2500e+00, 4.3500e+00, 4.4500e+00, 4.5500e+00, 4.6500e+00, 4.7500e+00, 4.8500e+00, 4.9500e+00, 5.0500e+00,
+                 5.1500e+00, 5.2500e+00, 5.3500e+00, 5.4500e+00, 5.5500e+00, 5.6500e+00, 5.7500e+00, 5.8500e+00, 5.9500e+00, 6.0500e+00,
+                 6.1500e+00, 6.2500e+00, 6.3500e+00, 6.4500e+00, 6.5500e+00, 6.6500e+00, 6.7500e+00, 6.8500e+00, 6.9500e+00, 7.0500e+00,
+                 7.1500e+00, 7.2500e+00, 7.3500e+00, 7.4500e+00, 7.5500e+00, 7.6500e+00, 7.7500e+00, 7.8500e+00, 7.9500e+00, 8.0500e+00,
+                 8.1500e+00, 8.2500e+00, 8.3500e+00, 8.4500e+00, 8.5500e+00, 8.6500e+00, 8.7500e+00, 8.8500e+00, 8.9500e+00, 9.0500e+00,
+                 9.1500e+00, 9.2500e+00, 9.3500e+00, 9.4500e+00, 9.5500e+00, 9.6500e+00, 9.7500e+00, 9.8500e+00, 9.9500e+00, 1.0050e+01]
+    flux: [ 4.2938e+06, 5.7061e+06, 5.7984e+06, 4.9964e+06, 3.8796e+06, 3.1474e+06, 2.4375e+06, 1.9361e+06, 1.6104e+06, 1.4590e+06,
+            1.3767e+06, 1.3706e+06, 1.4005e+06, 1.4263e+06, 1.4117e+06, 1.3879e+06, 1.3323e+06, 1.2699e+06, 1.1757e+06, 1.0680e+06,
+            9.5587e+05, 8.5549e+05, 7.4173e+05, 6.9001e+05, 6.2889e+05, 5.4829e+05, 4.8420e+05, 4.2834e+05, 3.8604e+05, 3.4006e+05,
+            2.9744e+05, 2.6364e+05, 2.2980e+05, 2.0105e+05, 1.7640e+05, 1.5583e+05, 1.3732e+05, 1.2105e+05, 1.0599e+05, 9.6490e+04,
+            8.8906e+04, 7.9308e+04, 7.1857e+04, 6.5562e+04, 5.9023e+04, 5.0767e+04, 5.0665e+04, 4.5641e+04, 4.1721e+04, 3.6969e+04,
+            3.3218e+04, 3.0231e+04, 2.7621e+04, 2.5398e+04, 2.1588e+04, 1.2268e+04, 3.5855e+03, 2.0985e+02, 3.1064e+02, 4.0448e+02,
+            4.8934e+02, 4.8558e+02, 1.1776e+03, 2.9689e+01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+            0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+            0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+            0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00]

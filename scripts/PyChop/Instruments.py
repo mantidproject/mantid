@@ -68,7 +68,7 @@ class FermiChopper(object):
     Class which represents a Fermi chopper package
     """
 
-    __allowed_var_names = ['name', 'pslit', 'pslat', 'radius', 'rho', 'tjit', 'fluxcorr']
+    __allowed_var_names = ['name', 'pslit', 'pslat', 'radius', 'rho', 'tjit', 'fluxcorr', 'isPi']
 
     def __init__(self, inval=None):
         wrap_attributes(self, inval, self.__allowed_var_names)
@@ -411,6 +411,9 @@ class ChopperSystem(object):
             raise ValueError('Fermi package ''%s'' not recognised. Allowed values are: %s' 
                              % (value, ', '.join(self.packages.keys())))
         self._package = value
+        # Sets whether to allow pi pulse or not
+        idx = [i for i in range(len(self.choppers)) if 'packages' in self.choppers[i]][0]
+        self._instpar[1][idx] = 2 if self.packages[value].isPi else 1
 
     @property
     def variant(self):

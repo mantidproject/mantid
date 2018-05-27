@@ -217,7 +217,7 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
             # set the chopper phase to be as close to zero as possible
             realTimeOp = np.array([(t_open-t_full_op/2.), (t_open+t_full_op/2.)])
         chop_times.append([])
-        if slots_ang_pos and nslot[i] > 1:
+        if slots_ang_pos and nslot[i] > 1 and slots_ang_pos[i]:
             tslots = [(uSec * slots_ang_pos[i][j] / 360. / freq[i]) for j in range(nslot[i])]
             tslots = [[(t + r * (uSec / freq[i])) - tslots[0] for r in range(int(freq[i] / source_rep))] for t in tslots]
             realTimeOp -= np.max(tslots[islt % nslot[i]])
