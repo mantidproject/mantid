@@ -23,62 +23,20 @@ from qtpy.QtWidgets import (QAbstractItemView, QListView, QWidget, QPushButton, 
 
 class PlotSelectorWidget(QWidget):
     """
-    An algorithm selector view implemented with qtpy.
+    The view to the plot selector, a PyQt widget.
     """
     def __init__(self, presenter, parent=None):
         """
-        Initialise a new instance of AlgorithmSelectorWidget
+        Initialise a new instance of PlotSelectorWidget
+        :param presenter: The presenter that created this class
         :param parent: A parent QWidget
         """
-        self.close_button = None
-        self.list_view = None
-        self.filter_box = None
-        self.plot_list = None
         QWidget.__init__(self, parent)
         self.presenter = presenter
 
-    def _make_close_button(self):
-        """
-        Make the button that starts the algorithm.
-        :return: A QPushButton
-        """
-        button = QPushButton('Close')
-        button.clicked.connect(self._on_close_button_click)
-        return button
-
-    def _make_filter_box(self):
-        """
-        Make the filter by name box
-        :return:
-        """
-        text_box = QLineEdit()
-        text_box.setPlaceholderText("Filter Plots")
-        text_box.setClearButtonEnabled(True)
-        text_box.textChanged.connect(self.filter_box_updated)
-        return text_box
-
-    def _make_plot_list(self):
-        """
-        TODO:
-        :return:
-        """
-        list_view = QListView(self)
-        list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        plot_list = QStandardItemModel(self.list_view)
-        list_view.setModel(plot_list)
-        list_view.doubleClicked.connect(self.double_clicked_item)
-        return list_view, plot_list
-
-    def _on_close_button_click(self):
-        self.close_selected_plots()
-
-    def init_ui(self):
-        """
-        Create and layout the GUI elements.
-        """
-        self.close_button = self._make_close_button()
-        self.list_view, self.plot_list = self._make_plot_list()
+        self.close_button = QPushButton('Close')
         self.filter_box = self._make_filter_box()
+        self.list_view, self.plot_list = self._make_plot_list()
 
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.close_button)
@@ -96,31 +54,49 @@ class PlotSelectorWidget(QWidget):
         layout.sizeHint()
         self.setLayout(layout)
 
+    def _make_filter_box(self):
+        """
+        Make the filter by plot name box
+        :return: A QLineEdit object with text and a clear button
+        """
+        text_box = QLineEdit(self)
+        text_box.setPlaceholderText("Filter Plots")
+        text_box.setClearButtonEnabled(True)
+        return text_box
+
+    def _make_plot_list(self):
+        """
+        Make a list showing the names of the plots
+        :return: A QListView object which will contain plot names
+        """
+        list_view = QListView(self)
+        list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        plot_list = QStandardItemModel(list_view)
+        list_view.setModel(plot_list)
+        return list_view, plot_list
+
+    def get_all_selected_plot_names(self):
+        selected = self.list_view.selectedIndexes()
+        selected_plots = []
+        for item in selected:
+            selected_plots.append(item.data(Qt.DisplayRole))
+        return selected_plots
+
+    def get_currently_selected_plot_name(self):
+        index = self.list_view.currentIndex()
+        return index.data(Qt.DisplayRole)
+
     def set_plot_list(self, plot_list):
         """
-        Populate the GUI elements with the data that comes from Presenter.
-        :param data: a list of algorithm descriptors.
+        Populate the plot list from the Presenter
+        :param plot_list: the list of plot names (list of strings)
         """
         self.plot_list.clear()
-        for plot in plot_list:
-            item = QStandardItem(plot)
+        for plot_name in plot_list:
+            item = QStandardItem(plot_name)
             item.setEditable(False)
             self.plot_list.appendRow(item)
 
-    def close_selected_plots(self):
-        selected = self.list_view.selectedIndexes()
-        plots_to_close = []
-        for item in selected:
-            plots_to_close.append(item.data(Qt.DisplayRole))
-        self.presenter.close_plots(plots_to_close)
-
-    def double_clicked_item(self):
-        index = self.list_view.currentIndex()
-        plot_title = index.data(Qt.DisplayRole)
-        self.presenter.make_plot_active(plot_title)
-
-    def get_filter_string(self):
+    def get_filter_text(self):
         return self.filter_box.text()
 
-    def filter_box_updated(self):
-        self.presenter.filter_list_by_string(self.filter_box.text())

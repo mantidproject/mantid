@@ -18,9 +18,8 @@ from __future__ import absolute_import, print_function
 
 class PlotSelectorModel(object):
     """
-    This is a model for the plot selector widget. Currently
-    this avoids storing any data directly, instead relying
-    on the CurrentFigure singleton.
+    This is the model for the plot selector widget. Essentially this
+    is just a thin wrapper to the true model - CurrentFigure.
     """
 
     def __init__(self, presenter, current_figure_class):
@@ -31,10 +30,10 @@ class PlotSelectorModel(object):
         self.CurrentFigure = current_figure_class
         self.presenter = presenter
         self.plot_list = []
-        self.filtered_plot_list = []
 
-    def get_plot_list(self):
-        return self.plot_list
+        # Register with CurrentFigure that we want to know of any
+        # changes to the list of plots
+        self.CurrentFigure.add_observer(self)
 
     def update_plot_list(self):
         self.plot_list = []
@@ -42,19 +41,12 @@ class PlotSelectorModel(object):
         for figure in figures:
             self.plot_list.append(figure.get_window_title())
 
+    def notify(self):
+        self.presenter.update_plot_list()
+
     def make_plot_active(self, plot_name):
         self.CurrentFigure.bring_to_front_by_name(plot_name)
-
-    def register_observer(self, observer):
-        self.CurrentFigure.add_observer(observer)
 
     def close_plot(self, plot_name):
         figure_number_to_close = self.CurrentFigure.get_figure_number_from_name(plot_name)
         self.CurrentFigure.destroy(figure_number_to_close)
-
-    def filter_list_by_string(self, filter_text):
-        self.filtered_plot_list = []
-        for plot_name in self.plot_list:
-            if filter_text in plot_name:
-                self.filtered_plot_list.append(plot_name)
-        return self.filtered_plot_list
