@@ -112,8 +112,10 @@ class PlotSelectorWidget(QWidget):
 
     def close_selected_plots(self):
         selected = self.list_view.selectedIndexes()
+        plots_to_close = []
         for item in selected:
-            self.presenter.close_plot(item.data(Qt.DisplayRole))
+            plots_to_close.append(item.data(Qt.DisplayRole))
+        self.presenter.close_plots(plots_to_close)
 
     def double_clicked_item(self):
         index = self.list_view.currentIndex()

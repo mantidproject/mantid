@@ -64,6 +64,11 @@ class CurrentFigure(object):
         manager = cls.figs[num]
         manager.canvas.mpl_disconnect(manager._cidgcf)
 
+        if cls._active is None:
+            print("Error: can not destroy figures while there are no active figures. "
+                  "This should be fixed once the hold/active functionality is removed.")
+            return
+
         if cls._active.num == num:
             cls._active = None
         del cls.figs[num]

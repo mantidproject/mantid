@@ -50,6 +50,10 @@ class PlotSelectorPresenter(object):
     def close_plot(self, plot_name):
         self.model.close_plot(plot_name)
 
+    def close_plots(self, list_of_plots):
+        for plot_name in list_of_plots:
+            self.close_plot(plot_name)
+
     def filter_list_by_string(self, filter_text):
         if not filter_text:
             self.view.set_plot_list(self.model.get_plot_list())
