@@ -56,6 +56,10 @@ public:
   const std::vector<std::string> seeAlso() const override {
     return {"SaveAscii"};
   }
+  SaveILLCosmosAscii() {
+    this->useAlgorithm("SaveMFT");
+    this->deprecatedDate("2018-06-29");
+  }
 
 private:
   /// Return the file extension this algorthm should output.

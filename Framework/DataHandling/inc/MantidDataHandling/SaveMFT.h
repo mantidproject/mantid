@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace DataHandling {
 /**
-Saves a file in ILL Cosmos MFT format  from a 2D workspace
+Saves a file in MFT format used for Motofit from a 2D workspace
 (Workspace2D class). SaveMFT is an algorithm but inherits from the
 AsciiPointBase class which provides the main implementation for the init() &
 exec() methods.

@@ -14,14 +14,10 @@ ReflAsciiSaver::algorithmForFormat(NamedFormat format) {
         return Mantid::API::AlgorithmManager::Instance().create(algorithmName);
       };
   switch (format) {
-  case NamedFormat::Custom:
-    return create("SaveReflCustomAscii");
-  case NamedFormat::ThreeColumn:
-    return create("SaveReflThreeColumnAscii");
+  case NamedFormat::MFT:
+    return create("SaveMFT");
   case NamedFormat::ANSTO:
     return create("SaveANSTOAscii");
-  case NamedFormat::ILLCosmos:
-    return create("SaveILLCosmosAscii");
   default:
     throw std::runtime_error("Unknown save format.");
   }
@@ -29,14 +25,10 @@ ReflAsciiSaver::algorithmForFormat(NamedFormat format) {
 
 std::string ReflAsciiSaver::extensionForFormat(NamedFormat format) {
   switch (format) {
-  case NamedFormat::Custom:
-    return ".dat";
-  case NamedFormat::ThreeColumn:
-    return ".dat";
+  case NamedFormat::MFT:
+    return ".mft";
   case NamedFormat::ANSTO:
     return ".txt";
-  case NamedFormat::ILLCosmos:
-    return ".mft";
   default:
     throw std::runtime_error("Unknown save format.");
   }

@@ -1,0 +1,67 @@
+.. algorithm::
+
+.. summary::
+
+.. relatedalgorithms::
+
+.. properties::
+
+Description
+-----------
+
+This algorithm saves a workspace in ASCII format with .mft file name extension for being used by other software like Motofit.
+It is especially useful for saving reflectometry reduction data and is used by the ISIS custom interface.
+A file can be loaded back into Mantid by SaveAscii, which will not have an instrument defined.
+
+Usage
+-----
+
+**Example - Save a workspace in MFT ASCII**
+
+.. testcode:: MotofitFile_general_usages
+
+    # import the os path libraries for directory functions
+    import os
+
+    # create histogram workspace
+    x = range(0,10)
+    y = range(0,9)
+    e = [1]*9
+    dx = [9.5]*9
+
+    ws = CreateWorkspace(x, y, e, dx)
+
+    # Create an absolute path by joining the proposed filename to a directory
+    # os.path.expanduser("~") used in this case returns the home directory of the current user
+    file = os.path.join(os.path.expanduser("~"), "ws.mft")
+
+    # Save to file with mft extension
+    SaveMFT(InputWorkspace=ws1, Filename=file)
+
+    print("File Exists: {}".format(os.path.exists(file)))
+
+    # Delete file
+    os.remove(file)
+
+.. testcode:: MotofitFile_SampleLogs
+
+    # create histogram workspace
+    x = range(0,10)
+    y = range(0,9)
+    dx = [9.5]*9
+
+    ws = CreateWorkspace(x, y, e, dx)
+
+    # The workspace ws has already an entry run_title
+    AddSampleLog(Workspace=ws, LogName='Title', LogText='MyTest', LogType='String')
+    AddSampleLog(Workspace=ws, LogName='d', LogText='0.3', LogType='Number', LogUnit='mm', NumberType='Double')
+
+    # Save with mft extension
+    SaveMFT(InputWorkspace=ws1, Filename=file)
+
+    # Delete file
+    os.remove(file)
+
+.. categories::
+
+.. sourcelink::
