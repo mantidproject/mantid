@@ -1,14 +1,20 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
+#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
 
+#define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
+
 namespace Mantid {
 namespace PythonInterface {
 using API::IFunction;
-using PythonInterface::Environment::callMethod;
 using PythonInterface::Environment::UndefinedAttributeError;
+using PythonInterface::Environment::callMethod;
+using PythonInterface::Environment::callMethodNoCheck;
 using namespace boost::python;
 
 namespace {
@@ -50,10 +56,10 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
       vec.push_back(v);
     }
     attr = IFunction::Attribute(vec);
-  } else
-    throw std::invalid_argument(
-        "Invalid attribute type. Allowed types=float,int,str,bool,list(float)");
-
+  } else {
+    throw std::invalid_argument("Invalid attribute type. Allowed "
+                                "types=float,int,str,bool,list(float)");
+  }
   return attr;
 }
 
@@ -62,14 +68,27 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
 /**
  * Construct the wrapper and stores the reference to the PyObject
  * @param self A reference to the calling Python object
+ * @param functionMethod The name of the function method that must be present
+ * @param derivMethod The name of the derivative method that may be overridden
  */
-IFunctionAdapter::IFunctionAdapter(PyObject *self)
-    : IFunction(), m_name(self->ob_type->tp_name), m_self(self) {}
+IFunctionAdapter::IFunctionAdapter(PyObject *self, std::string functionMethod,
+                                   std::string derivMethod)
+    : m_self(self), m_functionName(std::move(functionMethod)),
+      m_derivName(derivMethod), m_derivOveridden(Environment::typeHasAttribute(
+                                    self, m_derivName.c_str())) {
+  if (!Environment::typeHasAttribute(self, "init"))
+    throw std::runtime_error("Function does not define an init method.");
+  if (!Environment::typeHasAttribute(self, m_functionName.c_str()))
+    throw std::runtime_error("Function does not define a " + m_functionName +
+                             " method.");
+}
 
 /**
  * @returns The class name of the function. This cannot be overridden in Python.
  */
-std::string IFunctionAdapter::name() const { return m_name; }
+std::string IFunctionAdapter::name() const {
+  return getSelf()->ob_type->tp_name;
+}
 
 /**
  * Specify a category for the function
@@ -84,7 +103,7 @@ const std::string IFunctionAdapter::category() const {
 
 /**
  */
-void IFunctionAdapter::init() { callMethod<void>(getSelf(), "init"); }
+void IFunctionAdapter::init() { callMethodNoCheck<void>(getSelf(), "init"); }
 
 /**
  * Declare an attribute on the given function from a python object
@@ -99,6 +118,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name,
                                           defaultValue);
   } catch (UndefinedAttributeError &) {
+    // nothing to do
   }
 }
 
@@ -151,8 +171,7 @@ IFunctionAdapter::getAttributeValue(IFunction &self,
 void IFunctionAdapter::setAttributePythonValue(IFunction &self,
                                                const std::string &name,
                                                const object &value) {
-  auto attr = createAttributeFromPythonValue(value);
-  self.setAttribute(name, attr);
+  self.setAttribute(name, createAttributeFromPythonValue(value));
 }
 
 /**
@@ -217,5 +236,93 @@ void IFunctionAdapter::setActiveParameter(size_t i, double value) {
     IFunction::setActiveParameter(i, value);
   }
 }
+
+/**
+ * The result is copied from the numpy array that is returned into the
+ * provided output array
+ * @param out A pre-sized array to accept the result values
+ * @param xValues The input domain
+ * @param nData The size of the input and output arrays
+ */
+void IFunctionAdapter::evaluateFunction(double *out, const double *xValues,
+                                        const size_t nData) const {
+  using namespace Converters;
+  // GIL must be held while numpy wrappers are destroyed as they access Python
+  // state information
+  Environment::GlobalInterpreterLock gil;
+
+  Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
+  PyObject *xvals =
+      WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
+
+  // Deliberately avoids using the CallMethod wrappers. They lock the GIL again
+  // and
+  // will check for each function call whether the wrapped method exists. It
+  // also avoid unnecessary construction of
+  // boost::python::objects whn using boost::python::call_method
+
+  PyObject *result =
+      PyObject_CallMethod(getSelf(), const_cast<char *>(m_functionName.c_str()),
+                          const_cast<char *>("(O)"), xvals);
+  Py_DECREF(xvals);
+  if (PyErr_Occurred()) {
+    Py_XDECREF(result);
+    throw Environment::PythonException();
+  }
+  if (PyArray_Check(result)) {
+    auto nparray = reinterpret_cast<PyArrayObject *>(result);
+    // dtype matches so use memcpy for speed
+    if (PyArray_TYPE(nparray) == NPY_DOUBLE) {
+      std::memcpy(static_cast<void *>(out), PyArray_DATA(nparray),
+                  nData * sizeof(npy_double));
+      Py_DECREF(result);
+    } else {
+      Py_DECREF(result);
+      PyArray_Descr *dtype = PyArray_DESCR(nparray);
+      std::string err("Unsupported numpy data type: '");
+      err.append(dtype->typeobj->tp_name)
+          .append("'. Currently only numpy.float64 is supported.");
+      throw std::runtime_error(err);
+    }
+  } else {
+    std::string err("Expected ");
+    err.append(m_functionName)
+        .append(" to return a numpy array, however an ")
+        .append(result->ob_type->tp_name)
+        .append(" was returned.");
+    throw std::runtime_error(err);
+  }
 }
+
+/**
+ * If the method does not exist on the derived type then then base
+ * implementation is called
+ * @param out Am output Jacobian accept the result values
+ * @param xValues The input domain
+ * @param nData The size of the input and output arrays
+ */
+void IFunctionAdapter::evaluateDerivative(API::Jacobian *out,
+                                          const double *xValues,
+                                          const size_t nData) const {
+  using namespace Converters;
+  // GIL must be held while numpy wrappers are destroyed as they access Python
+  // state information
+  Environment::GlobalInterpreterLock gil;
+
+  Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
+  PyObject *xvals =
+      WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
+  PyObject *jacobian = boost::python::to_python_value<API::Jacobian *>()(out);
+
+  // Deliberately avoids using the CallMethod wrappers. They lock the GIL
+  // again and
+  // will check for each function call whether the wrapped method exists. It
+  // also avoid unnecessary construction of
+  // boost::python::objects when using boost::python::call_method
+  PyObject_CallMethod(getSelf(), const_cast<char *>(m_derivName.c_str()),
+                      const_cast<char *>("(OO)"), xvals, jacobian);
+  if (PyErr_Occurred())
+    throw Environment::PythonRuntimeError();
 }
+} // namespace PythonInterface
+} // namespace Mantid
