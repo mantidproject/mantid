@@ -18,7 +18,7 @@ from __future__ import absolute_import, print_function
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import (QStandardItem, QStandardItemModel)
-from qtpy.QtWidgets import (QAbstractItemView, QListView, QWidget, QPushButton, QVBoxLayout, QHBoxLayout)
+from qtpy.QtWidgets import (QAbstractItemView, QListView, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit)
 
 from .presenter import PlotSelectorPresenter
 
@@ -35,6 +35,7 @@ class PlotSelectorWidget(QWidget):
         """
         self.close_button = None
         self.list_view = None
+        self.filter_box = None
         self.plot_list = None
         QWidget.__init__(self, parent)
         self.presenter = PlotSelectorPresenter(self)
@@ -47,6 +48,17 @@ class PlotSelectorWidget(QWidget):
         button = QPushButton('Close')
         button.clicked.connect(self._on_refresh_button_click)
         return button
+
+    def _make_filter_box(self):
+        """
+        Make the filter by name box
+        :return:
+        """
+        text_box = QLineEdit()
+        text_box.setPlaceholderText("Filter Plots")
+        text_box.setClearButtonEnabled(True)
+        text_box.textChanged.connect(self.filter_box_updated)
+        return text_box
 
     def _make_plot_list(self):
         """
@@ -69,13 +81,18 @@ class PlotSelectorWidget(QWidget):
         """
         self.close_button = self._make_close_button()
         self.list_view, self.plot_list = self._make_plot_list()
+        self.filter_box = self._make_filter_box()
 
-        top_layout = QHBoxLayout()
-        top_layout.addWidget(self.close_button)
-        top_layout.setStretch(1, 1)
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(self.close_button)
+        buttons_layout.setStretch(1, 1)
+
+        filter_layout = QHBoxLayout()
+        filter_layout.addWidget(self.filter_box)
 
         layout = QVBoxLayout()
-        layout.addLayout(top_layout)
+        layout.addLayout(buttons_layout)
+        layout.addLayout(filter_layout)
         layout.addWidget(self.list_view)
         # todo: Without the sizeHint() call the minimum size is not set correctly
         #       This needs some investigation as to why this is.
@@ -102,3 +119,10 @@ class PlotSelectorWidget(QWidget):
         index = self.list_view.currentIndex()
         plot_title = index.data(Qt.DisplayRole)
         self.presenter.make_plot_active(plot_title)
+
+    def get_filter_string(self):
+        return self.filter_box.text()
+
+    def filter_box_updated(self):
+        print("Filtering:" + self.filter_box.text())
+        self.presenter.filter_list_by_string(self.filter_box.text())

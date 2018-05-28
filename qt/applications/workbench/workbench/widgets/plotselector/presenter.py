@@ -33,8 +33,13 @@ class PlotSelectorPresenter(object):
         self.model.register_observer(self)
 
     def update_plot_list(self):
-        plot_list = self.model.get_plot_list()
-        self.view.set_plot_list(plot_list)
+        self.model.update_plot_list()
+        filter_text = self.view.get_filter_string()
+        if not filter_text:
+            self.view.set_plot_list(self.model.plot_list)
+        else:
+            filtered_plot_list = self.model.filter_list_by_string(filter_text)
+            self.view.set_plot_list(filtered_plot_list)
 
     def make_plot_active(self, plot_name):
         self.model.make_plot_active(plot_name)
@@ -44,3 +49,11 @@ class PlotSelectorPresenter(object):
 
     def close_plot(self, plot_name):
         self.model.close_plot(plot_name)
+
+    def filter_list_by_string(self, filter_text):
+        if not filter_text:
+            self.view.set_plot_list(self.model.get_plot_list())
+        else:
+            filtered_plot_list = self.model.filter_list_by_string(filter_text)
+            self.view.set_plot_list(filtered_plot_list)
+

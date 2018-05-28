@@ -32,13 +32,16 @@ class PlotSelectorModel(object):
         """
         self.presenter = presenter
         self.plot_list = []
+        self.filtered_plot_list = []
 
     def get_plot_list(self):
-        plot_names = []
+        return self.plot_list
+
+    def update_plot_list(self):
+        self.plot_list = []
         figures = CurrentFigure.get_all_fig_managers()
         for figure in figures:
-            plot_names.append(figure.get_window_title())
-        return plot_names
+            self.plot_list.append(figure.get_window_title())
 
     def make_plot_active(self, plot_name):
         CurrentFigure.bring_to_front_by_name(plot_name)
@@ -49,3 +52,10 @@ class PlotSelectorModel(object):
     def close_plot(self, plot_name):
         figure_number_to_close = CurrentFigure.get_figure_number_from_name(plot_name)
         CurrentFigure.destroy(figure_number_to_close)
+
+    def filter_list_by_string(self, filter_text):
+        self.filtered_plot_list = []
+        for plot_name in self.plot_list:
+            if filter_text in plot_name:
+                self.filtered_plot_list.append(plot_name)
+        return self.filtered_plot_list
