@@ -46,7 +46,7 @@ class PlotSelectorWidget(QWidget):
         :return: A QPushButton
         """
         button = QPushButton('Close')
-        button.clicked.connect(self._on_refresh_button_click)
+        button.clicked.connect(self._on_close_button_click)
         return button
 
     def _make_filter_box(self):
@@ -72,7 +72,7 @@ class PlotSelectorWidget(QWidget):
         list_view.doubleClicked.connect(self.double_clicked_item)
         return list_view, plot_list
 
-    def _on_refresh_button_click(self):
+    def _on_close_button_click(self):
         self.close_selected_plots()
 
     def init_ui(self):
@@ -126,5 +126,4 @@ class PlotSelectorWidget(QWidget):
         return self.filter_box.text()
 
     def filter_box_updated(self):
-        print("Filtering:" + self.filter_box.text())
         self.presenter.filter_list_by_string(self.filter_box.text())
