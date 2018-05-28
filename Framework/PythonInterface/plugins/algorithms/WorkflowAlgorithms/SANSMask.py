@@ -65,11 +65,9 @@ class SANSMask(PythonAlgorithm):
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc="Output message")
 
-        self.declareProperty(MatrixWorkspaceProperty(
-            "MaskedWorkspace",
-            "",
-            direction=Direction.Input, optional=PropertyMode.Optional),
-        "Workspace to copy the mask from; is passed straight to MaskDetectors")
+        self.declareProperty(MatrixWorkspaceProperty("MaskedWorkspace", "",
+                             direction=Direction.Input, optional=PropertyMode.Optional),
+                             doc="Workspace to copy the mask from; is passed straight to MaskDetectors")
 
     def PyExec(self):
         workspace = self.getProperty("Workspace").value
