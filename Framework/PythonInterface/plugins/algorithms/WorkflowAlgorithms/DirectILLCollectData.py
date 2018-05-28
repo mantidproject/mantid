@@ -237,92 +237,6 @@ def _sumDetectorsAtDistance(ws, distance, tolerance):
     return ySums
 
 
-def _wsWidePolynomialBkg(ws, peakStarts, peakEnds, wsNames, wsCleanup, algorithmLogging):
-    """Calculate a 2nd degree polynomial background over all histograms."""
-    def integrate(wsName, **kwargs):
-        """Integrate a workspace."""
-        bkgWSName = wsNames.withSuffix(wsName)
-        bkgWS = Integration(
-            InputWorkspace=ws,
-            OutputWorkspace=bkgWSName,
-            EnableLogging=algorithmLogging,
-            **kwargs)
-        return bkgWS
-    leftBkgWSName = wsNames.withSuffix('left_bkg_integrated')
-    leftBkgWS = integrate(leftBkgWSName, **{'RangeUpperList': peakStarts})
-    rightBkgWSName = wsNames.withSuffix('right_bkg_integrated')
-    rightBkgWS = integrate(rightBkgWSName, **{'RangeLowerList': peakEnds})
-    X = ws.extractX()
-    n = X.shape[0]
-    lenLeftBkg = numpy.empty(n)
-    lenRightBkg = numpy.empty(n)
-    for i in range(n):
-        lenLeftBkg[i] = numpy.searchsorted(X[i], peakStarts[i]) - 1
-        lenRightBkg[i] = X.shape[1] - numpy.searchsorted(X[i], peakEnds[i]) - 1
-    def average(ws, binCountWSName, averageWSName, binCounts):
-        """Average a workspace by number of bins."""
-        dummyPoints = numpy.zeros(n)
-        dummyErrors = numpy.ones(n)
-        binCountWS = CreateWorkspace(
-            OutputWorkspace=binCountWSName,
-            DataX=dummyPoints,
-            DataY=binCounts,
-            DataE=dummyErrors,
-            NSpec=n,
-            EnableLogging=algorithmLogging)
-        averageWS = Divide(
-            LHSWorkspace=ws,
-            RHSWorkspace=binCountWS,
-            OutputWorkspace=averageWSName,
-            EnableLogging=algorithmLogging)
-        wsCleanup.cleanup(binCountWS)
-        return averageWS
-    leftBkgBinCountWSName = wsNames.withSuffix('left_bkg_bin_count')
-    averageLeftBkgWSName = wsNames.withSuffix('left_bkg_average')
-    averageLeftBkgWS = average(leftBkgWS, leftBkgBinCountWSName, averageLeftBkgWSName, lenLeftBkg)
-    wsCleanup.cleanup(leftBkgWS)
-    rightBkgBinCountWSName = wsNames.withSuffix('righ_bkg_bin_count')
-    averageRightBkgWSName = wsNames.withSuffix('right_bkg_average')
-    averageRightBkgWS = average(rightBkgWS, rightBkgBinCountWSName, averageRightBkgWSName, lenRightBkg)
-    wsCleanup.cleanup(rightBkgWS)
-    bkgWSName = wsNames.withSuffix('bkg_average')
-    bkgWS = Plus(
-        LHSWorkspace=averageLeftBkgWS,
-        RHSWorkspace=averageRightBkgWS,
-        OutputWorkspace=bkgWSName,
-        EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(averageLeftBkgWS)
-    wsCleanup.cleanup(averageRightBkgWS)
-    twoWSName = wsNames.withSuffix('single_value_two')
-    twoWS = CreateSingleValuedWorkspace(
-        OutputWorkspace=twoWSName,
-        DataValue=2.,
-        ErrorValue=0.,
-        EnableLogging=algorithmLogging)
-    bkgWS = Divide(
-        LHSWorkspace=bkgWS,
-        RHSWorkspace=twoWS,
-        OutputWorkspace=bkgWSName,
-        EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(twoWS)
-    bkgWS = Transpose(
-        InputWorkspace=bkgWS,
-        OutputWorkspace=bkgWSName,
-        EnableLogging=algorithmLogging)
-    fittedBkgWSName = wsNames.withSuffix('bkg_fitted')
-    fittedBkgWS = CalculatePolynomialBackground(
-        InputWorkspace=bkgWS,
-        OutputWorkspace=fittedBkgWSName,
-        Degree=2,
-        EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(bkgWS)
-    fittedBkgWS = Transpose(
-        InputWorkspace=fittedBkgWS,
-        OutputWorkspace=fittedBkgWSName,
-        EnableLogging=algorithmLogging)
-    return fittedBkgWS
-
-
 class DirectILLCollectData(DataProcessorAlgorithm):
     """A workflow algorithm for the initial sample, vanadium and empty container reductions."""
 
@@ -335,7 +249,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLReduction" ]
+        return ['DirectILLReduction']
 
     def name(self):
         """Return the algorithm's name."""
@@ -350,7 +264,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         return 1
 
     def PyExec(self):
-        """Executes the data reduction workflow."""
+        """Execute the data collection workflow."""
         progress = Progress(self, 0.0, 1.0, 9)
         report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
@@ -384,7 +298,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Time-independent background.
         progress.report('Calculating backgrounds')
-        mainWS, potentialEPPWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        mainWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Calibrate incident energy, if requested.
         progress.report('Calibrating incident energy')
@@ -397,7 +311,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Find elastic peak positions.
         progress.report('Calculating EPPs')
-        self._outputDetEPPWS(mainWS, potentialEPPWS, wsNames, wsCleanup, report, subalgLogging)
+        self._outputDetEPPWS(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         self._finalize(mainWS, wsCleanup, report)
         progress.report('Done')
@@ -507,7 +421,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              validator=StringListValidator([
                                  common.BKG_AUTO,
                                  common.BKG_ON,
-                                 common.BKG_PER_COMPONENT,
                                  common.BKG_OFF]),
                              direction=Direction.Input,
                              doc='Control flat background subtraction.')
@@ -525,13 +438,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              doc="Running average window width (in bins) " +
                                  "for flat background, unused in 'Flat Bkg Over Tubes'.")
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, PROPGROUP_FLAT_BKG)
-        self.declareProperty(name=common.PROP_BKG_SIGMA_MULTIPLIER,
-                             defaultValue=12.,
-                             validator=positiveFloat,
-                             direction=Direction.Input,
-                             doc="Width of the range excluded from background around " +
-                                 "the elastic peaks in multiplies of 'Sigma' in the EPP table, only for 'Flat Bkg Over Tubes'.")
-        self.setPropertyGroup(common.PROP_BKG_SIGMA_MULTIPLIER, PROPGROUP_FLAT_BKG)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_FLAT_BKG_WS,
             defaultValue='',
@@ -681,52 +587,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 return common.EPP_METHOD_FIT
         return eppMethod
 
-    def _componentWideBkg(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
-        """Subtract a polynomial background fitted over individual components."""
-        bkgScaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
-        eppWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        centres = numpy.array(eppWS.column('PeakCentre'))
-        sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
-        centreHalfWidth = sigmaMultiplier * numpy.array(eppWS.column('Sigma'))
-        fitStatuses = eppWS.column('FitStatus')
-        peakStarts = numpy.array(centres - centreHalfWidth)
-        peakEnds = numpy.array(centres + centreHalfWidth)
-        nPixels = mainWS.getNumberHistograms()
-        instrument = mainWS.getInstrument()
-        if not instrument.hasParameter('pixels-per-component'):
-            raise RuntimeError("Instrument parameter 'pixels-per-component' has to be set for background over tubes.")
-        componentSize = mainWS.getInstrument().getIntParameter('pixels-per-component')[0]
-        if nPixels % componentSize != 0:
-            raise RuntimeError('Number of pixels does not match component size.')
-        nComponent = nPixels // componentSize
-        bkgWSName = wsNames.withSuffix('flat_bkg_for_detectors_scaled')
-        bkgWS = CloneWorkspace(InputWorkspace=mainWS,
-                               OutputWorkspace=bkgWSName,
-                               EnableLogging=subalgLogging)
-        for i in range(nComponent):
-            pixelStart = componentSize * i
-            pixelEnd = pixelStart + componentSize
-            componentWSName = wsNames.withSuffix('cropped_to_components')
-            componentWS = CropWorkspace(
-                InputWorkspace=mainWS,
-                OutputWorkspace=componentWSName,
-                StartWorkspaceIndex=pixelStart,
-                EndWorkspaceIndex=pixelEnd - 1,
-                EnableLogging=subalgLogging
-            )
-            componentPeakStarts = peakStarts[pixelStart:pixelEnd]
-            componentPeakEnds = peakEnds[pixelStart:pixelEnd]
-            componentBkgWS = _wsWidePolynomialBkg(componentWS, componentPeakStarts, componentPeakEnds, wsNames, wsCleanup, subalgLogging)
-            wsCleanup.cleanup(componentWS)
-            if (bkgScaling != 1.):
-                componentBkgWS *= bkgScaling
-            for j in range(componentSize):
-                index = pixelStart + j
-                bkgWS.dataY(index).fill(componentBkgWS.readY(j)[0])
-                bkgWS.dataE(index).fill(componentBkgWS.readE(j)[0])
-            wsCleanup.cleanup(componentBkgWS)
-        return bkgWS, eppWS
-
     def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Adjust the TOF axis to get the elastic channel correct."""
         try:
@@ -808,17 +668,13 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def _flatBkgDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Subtract flat background from a detector workspace."""
         if not self._flatBgkEnabled(mainWS, report):
-            return mainWS, None
+            return mainWS
         if not self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
             bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
             wsCleanup.protect(bkgWS)
-            eppWS = None
-        elif self.getProperty(common.PROP_FLAT_BKG).value == common.BKG_PER_COMPONENT:
-            bkgWS, eppWS = self._componentWideBkg(mainWS, wsNames, wsCleanup, report, subalgLogging)
         else:
             windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
             bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, wsNames, subalgLogging)
-            eppWS = None
         if not self.getProperty(common.PROP_OUTPUT_FLAT_BKG_WS).isDefault:
             self.setProperty(common.PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
         bkgScaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
@@ -826,7 +682,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                            wsCleanup, subalgLogging)
         wsCleanup.cleanup(mainWS)
         wsCleanup.cleanup(bkgWS)
-        return bkgSubtractedWS, eppWS
+        return bkgSubtractedWS
 
     def _flatBgkEnabled(self, mainWS, report):
         """Returns true if flat background subtraction is enabled, false otherwise."""
@@ -910,12 +766,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return normalizedWS
         return mainWS
 
-    def _outputDetEPPWS(self, mainWS, eppWS, wsNames, wsCleanup, report, subalgLogging):
+    def _outputDetEPPWS(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Set the output epp workspace property, if needed."""
         if not self.getProperty(common.PROP_OUTPUT_DET_EPP_WS).isDefault:
-            if eppWS is None:
-                eppWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
+            eppWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
             self.setProperty(common.PROP_OUTPUT_DET_EPP_WS, eppWS)
+            wsCleanup.cleanup(eppWS)
 
     def _outputRaw(self, mainWS, rawWS, subalgLogging):
         """Optionally set mainWS as the raw output workspace."""

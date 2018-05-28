@@ -457,7 +457,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              defaultValue=3.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc="Integration width of the elastic peak in multiples " +
+                             doc="Integration half width of the elastic peak in multiples " +
                                  " of 'Sigma' in the EPP table.")
         self.setPropertyGroup(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                               PROPGROUP_PEAK_DIAGNOSTICS)
