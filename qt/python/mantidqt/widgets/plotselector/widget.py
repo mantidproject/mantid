@@ -20,25 +20,22 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import (QStandardItem, QStandardItemModel)
 from qtpy.QtWidgets import (QAbstractItemView, QListView, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit)
 
-from .presenter import PlotSelectorPresenter
-
 
 class PlotSelectorWidget(QWidget):
     """
     An algorithm selector view implemented with qtpy.
     """
-    def __init__(self, parent=None, include_hidden=False):
+    def __init__(self, presenter, parent=None):
         """
         Initialise a new instance of AlgorithmSelectorWidget
         :param parent: A parent QWidget
-        :param include_hidden: If True the widget must include all hidden algorithms
         """
         self.close_button = None
         self.list_view = None
         self.filter_box = None
         self.plot_list = None
         QWidget.__init__(self, parent)
-        self.presenter = PlotSelectorPresenter(self)
+        self.presenter = presenter
 
     def _make_close_button(self):
         """

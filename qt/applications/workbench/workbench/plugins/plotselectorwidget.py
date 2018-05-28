@@ -23,8 +23,8 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.widgets.plotselector import PlotSelectorWidget
-
+from workbench.plotting.currentfigure import CurrentFigure
+from mantidqt.widgets.plotselector.presenter import PlotSelectorPresenter
 
 class PlotSelector(PluginWidget):
     """Provides an algorithm selector widget for selecting algorithms to run"""
@@ -32,8 +32,10 @@ class PlotSelector(PluginWidget):
     def __init__(self, parent):
         super(PlotSelector, self).__init__(parent)
 
+        plot_selector_presenter = PlotSelectorPresenter(CurrentFigure)
+
         # layout
-        self.plot_selector = PlotSelectorWidget()
+        self.plot_selector = plot_selector_presenter.get_widget()
         layout = QVBoxLayout()
         layout.addWidget(self.plot_selector)
         self.setLayout(layout)

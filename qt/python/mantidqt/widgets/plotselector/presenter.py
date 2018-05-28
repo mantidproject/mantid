@@ -17,6 +17,7 @@
 from __future__ import absolute_import, print_function
 
 from .model import PlotSelectorModel
+from .widget import PlotSelectorWidget
 
 
 class PlotSelectorPresenter(object):
@@ -24,13 +25,16 @@ class PlotSelectorPresenter(object):
     Presents (controls) a plot selector view. This UI element allows the user
     to select and make active a plot.
     """
-    def __init__(self, view):
-        self.view = view
-        self.model = PlotSelectorModel(self)
+    def __init__(self, current_figure_class):
+        self.view = PlotSelectorWidget(self)
+        self.model = PlotSelectorModel(self, current_figure_class)
         self.view.init_ui()
         plot_list = self.model.get_plot_list()
         self.view.set_plot_list(plot_list)
         self.model.register_observer(self)
+
+    def get_widget(self):
+        return self.view
 
     def update_plot_list(self):
         self.model.update_plot_list()
