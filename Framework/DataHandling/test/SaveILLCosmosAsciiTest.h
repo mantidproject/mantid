@@ -1,9 +1,9 @@
-#ifndef SAVEILLCOSMOSASCIITEST_H_
-#define SAVEILLCOSMOSASCIITEST_H_
+#ifndef MANTID_DATAHANDLING_SAVEILLCOSMOSASCIITEST_H_
+#define MANTID_DATAHANDLING_SAVEILLCOSMOSASCIITEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveILLCosmosAscii.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <fstream>
@@ -25,19 +25,16 @@ public:
     m_filename = "SaveILLCosmosAsciiTestFile.txt";
     m_name = "SaveILLCosmosAsciiWS";
     for (int i = 1; i < 11; ++i) {
-      // X, Y and E get [1,2,3,4,5,6,7,8,9,10]
-      // 0 gets [0,0,0,0,0,0,0,0,0,0] and is used to make sure there is no
-      // problem with divide by zero
-      m_dataX.push_back(i);
-      m_dataY.push_back(i);
-      m_dataE.push_back(i);
-      m_data0.push_back(0);
+      m_data.push_back(i);
+      m_zeros.push_back(0);
     }
   }
   ~SaveILLCosmosAsciiTest() override {}
 
   void testInit() {
-
+    SaveILLCosmosAscii alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
   }
 
   void testExec() {
@@ -45,14 +42,13 @@ public:
     createWS();
 
     SaveILLCosmosAscii alg;
-    alg->setPropertyValue("InputWorkspace", m_name);
-    alg->setPropertyValue("Filename", m_filename);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    if (!alg->isExecuted()) {
-      TS_FAIL("Could not run SaveILLCosmosAscii");
-    }
-    m_long_filename = alg->getPropertyValue("Filename");
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", m_filename));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    m_long_filename = alg.getPropertyValue("Filename");
     // has the algorithm written a file to disk?
     TS_ASSERT(Poco::File(m_long_filename).exists());
     std::ifstream in(m_long_filename.c_str());
@@ -65,11 +61,11 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT_EQUALS(columns.at(0), "");
-    TS_ASSERT_EQUALS(columns.at(1), 1.5);
-    TS_ASSERT_EQUALS(columns.at(2), 1);
-    TS_ASSERT_EQUALS(columns.at(3), 1);
-    TS_ASSERT_EQUALS(columns.at(4), 0.6);
+    TS_ASSERT_EQUALS(columns[0], "");
+    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -79,47 +75,13 @@ public:
     createWS(true);
 
     SaveILLCosmosAscii alg;
-    alg->setPropertyValue("InputWorkspace", m_name);
-    alg->setPropertyValue("Filename", m_filename);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    if (!alg->isExecuted()) {
-      TS_FAIL("Could not run SaveILLCosmosAscii");
-    }
-    m_long_filename = alg->getPropertyValue("Filename");
-    // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(m_long_filename).exists());
-    std::ifstream in(m_long_filename.c_str());
-    std::string fullline;
-    headingsTests(in, fullline);
-    getline(in, fullline);
-    std::vector<std::string> columns;
-    boost::split(columns, fullline, boost::is_any_of("\t"),
-                 boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(), 5);
-    // the first is black due to the leading separator
-    TS_ASSERT_EQUALS(columns.at(0), "");
-    TS_ASSERT_EQUALS(columns.at(1), "0");
-    TS_ASSERT_EQUALS(columns.at(2), "1");
-    TS_ASSERT_EQUALS(columns.at(3), "1");
-    TS_ASSERT((columns.at(4) == "nan") || (columns.at(4) == "inf"));
-    in.close();
-
-    cleanupafterwards();
-  }
-  void testNoY() {
-    // create a new workspace and then delete it later on
-    createWS(false, true);
-
-    SaveILLCosmosAscii alg;
-    alg->setPropertyValue("InputWorkspace", m_name);
-    alg->setPropertyValue("Filename", m_filename);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    if (!alg->isExecuted()) {
-      TS_FAIL("Could not run SaveILLCosmosAscii");
-    }
-    m_long_filename = alg->getPropertyValue("Filename");
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", m_filename));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    m_long_filename = alg.getPropertyValue("Filename");
     // has the algorithm written a file to disk?
     TS_ASSERT(Poco::File(m_long_filename).exists());
     std::ifstream in(m_long_filename.c_str());
@@ -132,27 +94,26 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
     TS_ASSERT_EQUALS(columns[0], "");
-    TS_ASSERT_EQUALS(columns[1], "1.5");
-    TS_ASSERT_EQUALS(columns[2], "0.0");
-    TS_ASSERT_EQUALS(columns[3], "1.0");
-    TS_ASSERT_EQUALS(columns[4], "0.6");
+    TS_ASSERT_EQUALS(columns[1], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
     in.close();
 
     cleanupafterwards();
   }
-  void testNoE() {
+  void testNoY() {
     // create a new workspace and then delete it later on
-    createWS(false, false, true);
+    createWS(false, true);
 
     SaveILLCosmosAscii alg;
-    alg->setPropertyValue("InputWorkspace", m_name);
-    alg->setPropertyValue("Filename", m_filename);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    if (!alg->isExecuted()) {
-      TS_FAIL("Could not run SaveILLCosmosAscii");
-    }
-    m_long_filename = alg->getPropertyValue("Filename");
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", m_filename));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    m_long_filename = alg.getPropertyValue("Filename");
     // has the algorithm written a file to disk?
     TS_ASSERT(Poco::File(m_long_filename).exists());
     std::ifstream in(m_long_filename.c_str());
@@ -164,11 +125,44 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT_EQUALS(columns.at(0), "");
-    TS_ASSERT_EQUALS(columns.at(1), "1.5");
-    TS_ASSERT_EQUALS(columns.at(2), "1");
-    TS_ASSERT_EQUALS(columns.at(3), "0");
-    TS_ASSERT_EQUALS(columns.at(4), "0.6");
+    TS_ASSERT_EQUALS(columns[0], "");
+    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
+    TS_ASSERT_EQUALS(columns[2], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
+    in.close();
+
+    cleanupafterwards();
+  }
+  void testNoE() {
+    // create a new workspace and then delete it later on
+    createWS(false, false, true);
+
+    SaveILLCosmosAscii alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", m_filename));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    m_long_filename = alg.getPropertyValue("Filename");
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(m_long_filename).exists());
+    std::ifstream in(m_long_filename.c_str());
+    std::string fullline;
+    headingsTests(in, fullline);
+    getline(in, fullline);
+    std::vector<std::string> columns;
+    boost::split(columns, fullline, boost::is_any_of("\t"),
+                 boost::token_compress_on);
+    TS_ASSERT_EQUALS(columns.size(), 5);
+    // the first is black due to the leading separator
+    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_EQUALS(columns[0], "");
+    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "0.000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -178,17 +172,17 @@ public:
     createWS(false, false, false, true);
 
     SaveILLCosmosAscii alg;
-    alg->setProperty("InputWorkspace", m_name);
-    alg->setProperty("Filename", m_filename);
-    alg->setProperty("UserContact", "John Smith");
-    alg->setProperty("Title", "Testing this algorithm");
-    alg->setProperty("Separator", "comma");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-
-    if (!alg->isExecuted()) {
-      TS_FAIL("Could not run SaveILLCosmosAscii");
-    }
-    m_long_filename = alg->getPropertyValue("Filename");
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", m_filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserContact", "John Smith"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("Title", "Testing this algorithm"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Separator", "comma"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    m_long_filename = alg.getPropertyValue("Filename");
     // has the algorithm written a file to disk?
     TS_ASSERT(Poco::File(m_long_filename).exists());
     std::ifstream in(m_long_filename.c_str());
@@ -201,25 +195,26 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading separator
-    TS_ASSERT_EQUALS(columns.at(0), "");
-    TS_ASSERT_EQUALS(columns.at(1), "1.5");
-    TS_ASSERT_EQUALS(columns.at(2), "1");
-    TS_ASSERT_EQUALS(columns.at(3), "1");
-    TS_ASSERT_EQUALS(columns.at(4), "0.6");
+    TS_ASSERT_EQUALS(columns[0], "");
+    TS_ASSERT_EQUALS(columns[1], "1.500000e+00");
+    TS_ASSERT_EQUALS(columns[2], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[3], "1.000000e+00");
+    TS_ASSERT_EQUALS(columns[4], "0.000000e+00");
     in.close();
 
     cleanupafterwards();
   }
   void test_fail_invalid_workspace() {
     SaveILLCosmosAscii alg;
-    alg->setRethrows(true);
-    TS_ASSERT(alg->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
-    m_long_filename = alg->getPropertyValue("Filename"); // Get absolute path
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_filename));
+    m_long_filename = alg.getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_ANYTHING(
-        alg->setPropertyValue("InputWorkspace", "NotARealWS"));
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
-    TS_ASSERT(!alg->isExecuted());
+        alg.setPropertyValue("InputWorkspace", "NotARealWS"));
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
 
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(m_long_filename).exists());
@@ -258,11 +253,11 @@ private:
     TS_ASSERT_EQUALS(fullline, "Number of file format: 2");
     getline(in, fullline);
     std::cout << sep;
-    TS_ASSERT_EQUALS(fullline, "Number of data points:" + sep + "9");
+    TS_ASSERT_EQUALS(fullline, "Number of data points:" + sep + "10");
     getline(in, fullline);
     getline(in, fullline);
-    TS_ASSERT_EQUALS(fullline,
-              sep + "q" + sep + "refl" + sep + "refl_err" + sep + "q_res");
+    TS_ASSERT_EQUALS(fullline, sep + "q" + sep + "refl" + sep + "refl_err" +
+                                   sep + "q_res");
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
                 bool createLogs = false) {
@@ -281,25 +276,25 @@ private:
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
     // similiar
     if (zeroX)
-      ws->x(0) = m_data0;
+      std::copy(m_zeros.begin(), m_zeros.end(), ws->mutableX(0).begin());
     else
-      ws->x(0) = m_dataX;
+      std::copy(m_data.begin(), m_data.end(), ws->mutableX(0).begin());
 
     if (zeroY)
-      ws->y(0) = m_data0;
+      std::copy(m_zeros.begin(), m_zeros.end(), ws->mutableY(0).begin());
     else
-      ws->y(0) = m_dataY;
+      std::copy(m_data.begin(), m_data.end(), ws->mutableY(0).begin());
 
     if (zeroE)
-      ws->e(0) = m_data0;
+      std::copy(m_zeros.begin(), m_zeros.end(), ws->mutableE(0).begin());
     else
-      ws->e(0) = m_dataE;
+      std::copy(m_data.begin(), m_data.end(), ws->mutableE(0).begin());
   }
   void cleanupafterwards() {
     Poco::File(m_long_filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
   std::string m_filename, m_name, m_long_filename;
-  std::vector<double> m_dataX, m_dataY, m_dataE, m_data0;
+  std::vector<double> m_data, m_zeros;
 };
-#endif /*SAVEILLCOSMOSASCIITEST_H_*/
+#endif /*MANTID_DATAHANDLING_SAVEILLCOSMOSASCIITEST_H_*/
