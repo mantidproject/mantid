@@ -216,8 +216,7 @@ Adding New Data & References Files
 ----------------------------------
 
 The data is managed by CMake's external data system that is described by
-`Data_Files_in_Mantid <Data_Files_in_Mantid>`__. Please see `Adding a
-new file <Data_Files_in_Mantid#Adding_A_New_File>`__ for how to add new
+:ref:`DataFilesForTesting`. Please see :ref:`DataFilesForTesting_AddingANewFile` for how to add new
 files.
 
 Best Practice

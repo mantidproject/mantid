@@ -24,6 +24,43 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
 
+namespace Mantid {
+namespace PythonInterface {
+
+/// Specialization for IFunction. Fit functions defined in
+/// python need to be wrapped in FunctionWrapper without
+/// asking the user to do additional actions.
+/// The instantiator lets the fit function class object know
+/// that an instance will be created by the FunctionFactory
+/// and it needs to be a subclass of IFunction and not a
+/// FunctionWrapper.
+template <>
+boost::shared_ptr<IFunction>
+PythonObjectInstantiator<IFunction>::createInstance() const {
+  using namespace boost::python;
+  Environment::GlobalInterpreterLock gil;
+
+  // The class may instantiate different objects depending on whether
+  // it is being created by the function factory or not
+  bool const isClassFactoryAware =
+      PyObject_HasAttrString(m_classObject.ptr(), "_factory_use");
+
+  if (isClassFactoryAware) {
+    m_classObject.attr("_factory_use")();
+  }
+  object instance = m_classObject();
+  if (isClassFactoryAware) {
+    m_classObject.attr("_factory_free")();
+  }
+  auto instancePtr = extract<boost::shared_ptr<IFunction>>(instance)();
+  auto *deleter =
+      boost::get_deleter<converter::shared_ptr_deleter, IFunction>(instancePtr);
+  instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
+  return instancePtr;
+}
+}
+}
+
 namespace {
 ///@cond
 
@@ -69,42 +106,44 @@ createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
   throw std::invalid_argument(error_message);
 }
 
-//--------------------------------------------- Function registration
-//------------------------------------------------
+//----- Function registration -----
 
 /// Python algorithm registration mutex in anonymous namespace (aka static)
 std::recursive_mutex FUNCTION_REGISTER_MUTEX;
 
 /**
  * A free function to register a fit function from Python
- * @param obj :: A Python object that should either be a class type derived from
- * IFunction
- *              or an instance of a class type derived from IFunction
+ * @param classObject A Python class derived from IFunction
  */
-void subscribe(FunctionFactoryImpl &self, const boost::python::object &obj) {
+void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   std::lock_guard<std::recursive_mutex> lock(FUNCTION_REGISTER_MUTEX);
   static PyTypeObject *baseClass = const_cast<PyTypeObject *>(
       converter::registered<IFunction>::converters.to_python_target_type());
+  // object mantidapi(handle<>(PyImport_ImportModule("mantid.api")));
+  // object ifunction = mantidapi.attr("IFunction");
 
-  // obj could be or instance/class, check instance first
-  PyObject *classObject(nullptr);
-  if (PyObject_IsInstance(obj.ptr(), reinterpret_cast<PyObject *>(baseClass))) {
-    classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
-  } else if (PyObject_IsSubclass(obj.ptr(),
-                                 reinterpret_cast<PyObject *>(baseClass))) {
-    classObject = obj.ptr(); // We need to ensure the type of lifetime
-                             // management so grab the raw pointer
-  } else {
-    throw std::invalid_argument(
-        "Cannot register a function that does not derive from IFunction.");
+  // obj should be a class deriving from IFunction
+  // PyObject_IsSubclass can set the error handler if classObject
+  // is not a class so this needs to be checked in two stages
+  const bool isSubClass =
+      (PyObject_IsSubclass(classObject,
+                           reinterpret_cast<PyObject *>(baseClass)) == 1);
+  if (PyErr_Occurred() || !isSubClass) {
+    throw std::invalid_argument(std::string("subscribe(): Unexpected type. "
+                                            "Expected a class derived from "
+                                            "IFunction1D or IPeakFunction, "
+                                            "found: ") +
+                                classObject->ob_type->tp_name);
   }
   // Instantiator will store a reference to the class object, so increase
   // reference count with borrowed template
-  auto classHandle = handle<>(borrowed(classObject));
-  auto *creator = new PythonObjectInstantiator<IFunction>(object(classHandle));
+  auto *creator = new PythonObjectInstantiator<IFunction>(
+      object(handle<>(borrowed(classObject))));
 
-  // Find the function name
+  // Can the function be created and initialized? It really shouldn't go in
+  // to the factory if not
   auto func = creator->createInstance();
+  func->initialize();
 
   // Takes ownership of instantiator
   self.subscribe(func->name(), creator, FunctionFactoryImpl::OverwriteCurrent);

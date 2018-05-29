@@ -34,11 +34,19 @@ Algorithms
 New features
 ############
 
+- Algorithms for reflectometry reduction at ILL have been added. These handle the basic reduction in SumInLambda mode. Included algorithms:
+    - :ref:`algm-ReflectometryILLPreprocess`
+    - :ref:`algm-ReflectometryILLSumForeground`
+    - :ref:`algm-ReflectometryILLPolarizationCor`
+    - :ref:`algm-ReflectometryILLConvertToQ`
+- A new algorithm :ref:`algm-ReflectometryMomentumTransfer` provides conversion to momentum transfer and :math:`Q_{z}` resolution calculation for relfectivity workspaces.
 
 Improvements
 ############
 
 Bug fixes
 #########
+
+* Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 
 :ref:`Release 3.13.0 <v3.13.0>`

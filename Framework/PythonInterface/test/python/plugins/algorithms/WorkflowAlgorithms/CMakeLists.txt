@@ -41,6 +41,10 @@ set ( TEST_PY_FILES
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
   PowderDiffILLReductionTest.py
+  ReflectometryILLConvertToQTest.py
+  ReflectometryILLPolarizationCorTest.py
+  ReflectometryILLPreprocessTest.py
+  ReflectometryILLSumForegroundTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
@@ -56,6 +60,7 @@ set ( TEST_PY_FILES
   TOSCABankCorrectionTest.py
   TransformToIqtTest.py
   VesuvioDiffractionReductionTest.py
+  WANDPowderReductionTest.py
 )
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
