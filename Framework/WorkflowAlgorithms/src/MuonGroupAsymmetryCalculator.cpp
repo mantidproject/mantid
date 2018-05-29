@@ -151,7 +151,7 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
     asym->setProperty("NormalizationIn", getStoredNorm());
 	asym->setProperty("OutputUnNormData", true);
 	asym->setProperty("OutputUnNormWorkspace", "tmp_unNorm");
-	asym->setProperty("NormalisationTable", normTableName);
+	asym->setProperty("NormalizationTable", normTableName);
     asym->execute();
 
 	API::MatrixWorkspace_sptr unnorm = asym->getProperty("OutputUnNormWorkspace");
