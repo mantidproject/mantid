@@ -282,23 +282,28 @@ std::vector<std::string> LoadMcStas::readEventData(
   const auto eventDataTotalName = std::string("EventData_") + nameOfGroupWS;
   std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
       {eventWS, eventDataTotalName}};
+  // if numEventEntries > 1 also create separate event workspaces
+  if (numEventEntries > 1) {
+    for (const auto &eventEntry : eventEntries) {
+      const std::string &dataName = eventEntry.first;
+      const std::string &dataType = eventEntry.second;
+      // create container to hold partial event data
+      // plus the name users will see for it
+      const auto ws_name = dataName + std::string("_") + nameOfGroupWS;
+      allEventWS.emplace_back(eventWS->clone(), ws_name);
+    }
+  }
 
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
 
+  // Refer to entry in allEventWS. The first non-summed workspace index is 1
+  auto eventWSIndex = 1u;
   // All entries of allEventWS except the first are eventWS entries for
   // individual event data in the nexus file except for the first entry.
   // Loop over McStas components that stores event data
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
-
-    // if numEventEntries > 1 also create separate event workspaces
-    if (numEventEntries > 1) {
-      // create container to hold partial event data
-      // plus the name users will see for it
-      const auto ws_name = dataName + std::string("_") + nameOfGroupWS;
-      allEventWS.emplace_back(eventWS->clone(), ws_name);
-    }
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -408,9 +413,10 @@ std::vector<std::string> LoadMcStas::readEventData(
         }
         allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
         if (numEventEntries > 1) {
-          allEventWS.back().first->getSpectrum(workspaceIndex) += weightedEvent;
+          allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) += weightedEvent;
         }
       }
+      eventWSIndex++;
     } // end reading over number of blocks of an event dataset
 
     nxFile.closeData();
