@@ -20,7 +20,7 @@ The formula for estimating the asymmetry is given by:
 .. math:: \textrm{NewData} = (\textrm{OldData}\times e^\frac{t}{\tau})/(F N_0) - 1.0,
 
 where :math:`\tau` is the muon lifetime (2.1969811e-6 seconds), :math:`F` is the number of good frames and :math:`N_0` is a
-fitted normalisation constant. The normalisation is given by
+fitted normalization constant. The normalization is given by
 
 .. math:: N_0= \frac{\Delta t\sum_j(\textrm{OldData}_j)}{\tau F \left( \exp(-\frac{t_0}{\tau})-\exp(-\frac{t_N}{\tau})\right)  },
 
@@ -46,9 +46,9 @@ Usage
    input = CreateWorkspace(x,y)
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
-   output,unnorm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalisationTable=tab,StartX=1,EndX=5,OutputUnNormData=True)
+   output,unnorm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalizationTable=tab,StartX=1,EndX=5,OutputUnNormData=True)
    print("Asymmetry   :  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
-   print("Unnormalised:  {}".format(['{0:.2f}'.format(value) for value in unnorm.readY(0)]))
+   print("Unnormalized:  {}".format(['{0:.2f}'.format(value) for value in unnorm.readY(0)]))
    print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))
    
 Output:
@@ -56,7 +56,7 @@ Output:
 .. testoutput:: ExSimple
 
    Asymmetry   :  ['-0.57', '0.01', '-0.47', '-0.83', '-0.87']
-   Unnormalised:  ['15.76', '37.28', '19.59', '6.18', '4.87']
+   Unnormalized:  ['15.76', '37.28', '19.59', '6.18', '4.87']
    Normalization constant: 37.04
 
 **Example - Setting the normalization:**
@@ -77,7 +77,7 @@ Output:
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
 
-   output=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalisationTable=tab,StartX=1,EndX=5,NormalizationIn=20.0)
+   output=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalizationTable=tab,StartX=1,EndX=5,NormalizationIn=20.0)
 
    print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
    print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))

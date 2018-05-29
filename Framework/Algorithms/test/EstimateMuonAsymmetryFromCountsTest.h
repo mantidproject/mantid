@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
@@ -41,17 +42,27 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
           (1.0 / static_cast<double>(maxt)), true, eData());
   // Add  number of good frames
   ws->mutableRun().addProperty("goodfrm", 10);
+ // AnalysisDataService::Instance().addOrReplace("ws",ws);
   return ws;
 }
 
-IAlgorithm_sptr setUpAlg() {
+std::pair<IAlgorithm_sptr,  ITableWorkspace_sptr> setUpAlg() {
   IAlgorithm_sptr asymmAlg =
       AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
+
+  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
+  table -> addColumn("double","norm"); 
+  table -> addColumn("str","name"); 
+  table -> addColumn("str","method");
+  
+
   asymmAlg->initialize();
   asymmAlg->setChild(true);
+  asymmAlg->setProperty("NormalizationTable",table);
+  asymmAlg->setProperty("WorkspaceName","ws");
   asymmAlg->setProperty("StartX", 0.1);
   asymmAlg->setProperty("EndX", 0.9);
-  return asymmAlg;
+  return std::make_pair(asymmAlg,table);
 }
 }
 
@@ -69,7 +80,8 @@ public:
   EstimateMuonAsymmetryFromCountsTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    IAlgorithm_sptr alg = setUpAlg();
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
     TS_ASSERT(alg->isInitialized())
   }
 
@@ -77,7 +89,8 @@ public:
 
     auto ws = createWorkspace(1, 50);
 
-    IAlgorithm_sptr alg = setUpAlg();
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -88,8 +101,9 @@ public:
   void test_EmptySpectrumList() {
 
     auto ws = createWorkspace(2, 50);
-
-    IAlgorithm_sptr alg = setUpAlg();
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
+    
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -119,8 +133,9 @@ public:
     workspaces.push_back(createWorkspace(2, 50));
 
     // First, run the algorithm without specifying any spectrum
-
-    IAlgorithm_sptr alg1 = setUpAlg();
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg1 = setup.first;
+    
     alg1->setProperty("InputWorkspace", workspaces[0]);
     alg1->setPropertyValue("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg1->execute());
@@ -129,7 +144,11 @@ public:
     workspaces.push_back(alg1->getProperty("OutputWorkspace"));
 
     // Then run the algorithm on the second spectrum only
-    IAlgorithm_sptr alg2 = setUpAlg();
+    auto setup2 = setUpAlg();
+    IAlgorithm_sptr alg2 = setup2.first;
+  
+    alg2->setProperty("NormalizationTable",setup.second);
+ 
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->setPropertyValue("OutputWorkspace", outputName);
     alg2->setPropertyValue("Spectra", "1");
@@ -156,9 +175,9 @@ public:
 
     auto ws = createWorkspace(1, 50);
 
-    IAlgorithm_sptr alg = setUpAlg();
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -168,7 +187,9 @@ public:
   }
   void test_NoRange() {
     auto ws = createWorkspace(1, 50);
-    IAlgorithm_sptr alg = setUpAlg();
+ 
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.1);
     alg->setProperty("EndX", 0.1);
@@ -177,7 +198,9 @@ public:
   }
   void test_BackwardsRange() {
     auto ws = createWorkspace(1, 50);
-    IAlgorithm_sptr alg = setUpAlg();
+  
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.9);
     alg->setProperty("EndX", 0.1);
@@ -194,15 +217,19 @@ public:
         yData(), 1, dx, 1.0 + dx, 3.0 * dx, true, eData());
 
     coarseWS->mutableRun().addProperty("goodfrm", 10);
-
-    IAlgorithm_sptr fineAlg = setUpAlg();
+ 
+    auto setup = setUpAlg();
+    IAlgorithm_sptr fineAlg = setup.first;
+    
     fineAlg->setProperty("InputWorkspace", fineWS);
     fineAlg->setPropertyValue("OutputWorkspace", "fineOutWS");
     TS_ASSERT_THROWS_NOTHING(fineAlg->execute());
     TS_ASSERT(fineAlg->isExecuted());
     MatrixWorkspace_sptr fineOutWS = fineAlg->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr coarseAlg = setUpAlg();
+    auto setup2 = setUpAlg();
+    IAlgorithm_sptr coarseAlg = setup2.first;
+    coarseAlg->setProperty("NormalizationTable",setup.second);
     coarseAlg->setProperty("InputWorkspace", coarseWS);
     coarseAlg->setPropertyValue("OutputWorkspace", "coarseOutWS");
     TS_ASSERT_THROWS_NOTHING(coarseAlg->execute());
@@ -224,7 +251,9 @@ public:
 
     auto ws = createWorkspace(1, 50);
     double userNorm = 10.2;
-    IAlgorithm_sptr alg = setUpAlg();
+ 
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("NormalizationIn", userNorm);
@@ -232,12 +261,11 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    auto normFromAlg =
-        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
-            alg->getPropertyValue("NormalizationConstant"));
+    auto col = setup.second->getColumn(0);
+    double normFromAlg = setup.second->Double(0,0);
 
     double Delta = 0.0001;
-    TS_ASSERT_DELTA(normFromAlg[0], userNorm, Delta);
+    TS_ASSERT_DELTA(normFromAlg, userNorm, Delta);
     // Test some X values
     TS_ASSERT_DELTA(outWS->x(0)[10], 0.2000, Delta);
     TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
@@ -247,6 +275,32 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[19], -0.8233, Delta);
     TS_ASSERT_DELTA(outWS->y(0)[49], -0.7875, Delta);
   }
+  void test_unNorm() {
+
+    auto ws = createWorkspace(1, 50);
+ 
+    auto setup = setUpAlg();
+    IAlgorithm_sptr alg = setup.first;
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    alg->setProperty("OutputUnNormData", true);
+    alg->setProperty("OutputUnNormWorkspace", "out");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputUnNormWorkspace");
+
+    double Delta = 0.0001;
+    // Test some X values
+    TS_ASSERT_DELTA(outWS->x(0)[10], 0.2000, Delta);
+    TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
+    TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, Delta);
+    // Test some Y values
+    TS_ASSERT_DELTA(outWS->y(0)[10],  2.0662, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[19],  1.8016, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[49],  2.1670, Delta);
+  }
+
 };
 // turn clang off, otherwise this does not compile
 // clang-format off
@@ -279,6 +333,12 @@ public:
     alg.setProperty("StartX", 0.1);
     alg.setProperty("EndX", 0.9);
 
+    Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
+    table -> addColumn("double","norm"); 
+    table -> addColumn("str","name"); 
+    table -> addColumn("str","method");
+    alg.setProperty("NormalizationTable",table);
+ 
     alg.execute();
   }
 

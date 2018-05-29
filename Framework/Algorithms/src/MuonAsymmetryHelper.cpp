@@ -137,39 +137,7 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
 /*****
  The following functions are for manipulating the normalisation table
 ******/
-/**
-* Updates the normalization in the table WS
-* assumes that the change is due to a calculation
-* @param norms :: map of updated normalization values
-*/
-/*void updateNormalizationTable(std::map<std::string, double> &norms) {
-	auto oldNorm = readMultipleNormalization();
-	Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
-	Mantid::API::AnalysisDataService::Instance().addOrReplace("MuonAnalysisTFNormalizations",
-		table);
-	table->addColumn("double", "norm");
-	table->addColumn("str", "name");
-	table->addColumn("str", "method");
-
-	for (auto norm : oldNorm) {
-		Mantid::API::TableRow row = table->appendRow();
-		auto it = norms.find(std::get<0>(norm));
-		if (it != norms.end() && it->second != std::get<1>(norm)) {
-			// write new norm
-			row << it->second << std::get<0>(norm) << "Calculated";
-		}
-		else {
-			// write old norm
-			row << std::get<1>(norm) << std::get<0>(norm) << "Estimated";
-		}
-	}
-}*/
-
-Mantid::API::ITableWorkspace_sptr updateNormalizationTable(const std::string &tableName, const std::vector<std::string> &wsNames, const std::vector<double> &norms, const std::vector<std::string> &methods){
-//check if table exists, if not make it
-	Mantid::API::ITableWorkspace_sptr table =boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-			Mantid::API::AnalysisDataService::Instance().retrieve(
-				tableName));
+void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table, const std::vector<std::string> &wsNames, const std::vector<double> &norms, const std::vector<std::string> &methods){
 	
 	for (size_t j = 0; j < wsNames.size(); j++) {
 		bool updated = false;
@@ -190,30 +158,6 @@ Mantid::API::ITableWorkspace_sptr updateNormalizationTable(const std::string &ta
 			tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
 		}
 	}
-	return table;
-}
-
-
-
-/** Reads the normalization constants and which WS
-* they belong to
-* @returns :: A map of normalization constants and WS names
-*/
-std::map<std::string, double> readMultipleNormalization() {
-	std::map<std::string, double> norm;
-	if (Mantid::API::AnalysisDataService::Instance().doesExist(
-		"MuonAnalysisTFNormalizations")) {
-		Mantid::API::ITableWorkspace_sptr table =
-			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve(
-					"MuonAnalysisTFNormalizations"));
-		auto colNorm = table->getColumn("norm");
-		auto colName = table->getColumn("name");
-		for (size_t j = 0; j < table->rowCount(); j++) {
-			norm[colName->cell<std::string>(j)] = ((*colNorm)[j]); // read norm
-		}
-	}
-	return norm;
 }
 
 } // namespace Mantid

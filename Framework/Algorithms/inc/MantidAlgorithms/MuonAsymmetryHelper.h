@@ -52,7 +52,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX);
 
-Mantid::API::ITableWorkspace_sptr updateNormalizationTable(const std::string &tableName,const std::vector<std::string> &wsNamse,const std::vector<double> &norms,const std::vector<std::string> &methods);
+void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table,const std::vector<std::string> &wsNamse,const std::vector<double> &norms,const std::vector<std::string> &methods);
 
 } // namespace Mantid
 

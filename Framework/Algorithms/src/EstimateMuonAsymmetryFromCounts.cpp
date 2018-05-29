@@ -35,7 +35,7 @@ void EstimateMuonAsymmetryFromCounts::init() {
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
   declareProperty("WorkspaceName", "",
-	  "The name used in the normalisation table. If this is blank the InputWorkspace's name will be used.");
+	  "The name used in the normalization table. If this is blank the InputWorkspace's name will be used.");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -44,7 +44,7 @@ void EstimateMuonAsymmetryFromCounts::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
 	  "OutputUnNormWorkspace", "unNormalisedData", Direction::Output, API::PropertyMode::Optional),
-	  "The name of the output unnormalised workspace.");
+	  "The name of the output unnormalized workspace.");
 
   std::vector<int> empty;
   declareProperty(
@@ -62,8 +62,8 @@ void EstimateMuonAsymmetryFromCounts::init() {
   
   declareProperty(
 	  make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-		  "NormalisationTable", "", Direction::InOut),
-	  "Name of the table containing the normalisations for the asymmetries.");
+		  "NormalizationTable", "", Direction::InOut),
+	  "Name of the table containing the normalizations for the asymmetries.");
 }
 
 /*
@@ -202,9 +202,9 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 		  
 	  }
   //update table
-  std::string tableName = getPropertyValue("NormalisationTable");
-  Mantid::API::ITableWorkspace_sptr table = updateNormalizationTable(tableName, wsNames, norm, methods);
-  setProperty("NormalisationTable", table);
+  Mantid::API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
+  updateNormalizationTable(table, wsNames, norm, methods);
+  setProperty("NormalizationTable", table);
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 

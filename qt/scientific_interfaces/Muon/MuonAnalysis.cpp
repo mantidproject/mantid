@@ -1806,7 +1806,6 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Plot data in the given window with given options
   s << "def plot_data(ws_name,errors, connect, window_to_use):";
-  bool addToTable = false;
   if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -1817,7 +1816,6 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
          "window = window_to_use)";
     // clang-format on
     // set if TFAsymm is on or off
-    addToTable = getIfTFAsymmStore();
   } else {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -3081,7 +3079,6 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
     groupAlg->execute();
-    bool addToTable = getIfTFAsymmStore();
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
