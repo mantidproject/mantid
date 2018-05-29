@@ -53,7 +53,6 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   // Extract the run numbers
   std::vector<int> runNumbers;
   runNumbers.reserve(wsList.size());
-  int numWorkspaces = static_cast<int>(wsList.size());
   for (auto &&workspace : wsList) {
     int runNumber = firstPeriod(workspace)->getRunNumber();
     runNumbers.push_back(runNumber);
@@ -92,16 +91,15 @@ std::string getRunLabel(const std::string &instrument,
     zeroPadding = 3;
   }
 
-  // Begin string output with full label of first run
   std::ostringstream label;
   label << instrument;
-  label << std::setw(zeroPadding) << std::setfill('0') << std::right;
-
   for (auto range : ranges) {
-    label << createStringFromRange(range);
-    if (range != ranges.back()) {
-      label << ", ";
-    }
+	  label << createStringFromRange(range, zeroPadding);
+	  // Only pad the first set
+	  zeroPadding = 0;
+	  if (range != ranges.back()) {
+		  label << ", ";
+	  }
   }
 
   return label.str();
@@ -111,27 +109,45 @@ std::string getRunLabel(const std::string &instrument,
  * Create a string from a range
  * @param range :: [input] a pair of integers representing the ends of the range
  * (may be the same)
+ * @param zeroPadding :: [input] pad the lower element of range with zeros up to
+ * length zeroPadding.
  * @return :: range in the form "1234-45" removing common digits from the upper
  * end of the range.
  */
-std::string createStringFromRange(const std::pair<int, int> &range) {
+std::string createStringFromRange(const std::pair<int, int> &range,
+                                  const int &zeroPadding) {
+  std::string firstRun;
+  std::string lastRun;
+  if (range.second > range.first) {
+    firstRun = std::to_string(range.first);
+    lastRun = std::to_string(range.second);
+  } else {
+    firstRun = std::to_string(range.second);
+    lastRun = std::to_string(range.first);
+  }
 
-  std::string firstRun = std::to_string(range.first);
-  std::string lastRun = std::to_string(range.second);
-  std::string label = firstRun;
+  // Begin string output with full label of first run
+  std::ostringstream paddedLabel;
+  paddedLabel << std::setw(zeroPadding) << std::setfill('0') << std::right;
+  paddedLabel << firstRun;
+
   if (range.second != range.first) {
     // Remove the common part of the first and last run, so we get e.g.
     // "12345-56" instead of "12345-12356"
     size_t sharedDigits = 0;
-    for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
-      if (firstRun[i] == lastRun[i]) {
-        sharedDigits = i;
-      }
-      lastRun.erase(0, i + 1);
-    }
-    label += "-" + lastRun;
+	for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
+		if (firstRun[i] != lastRun[i]) {
+			lastRun.erase(0, i);
+			break;
+		}
+	}
+	if (sharedDigits > 0) {
+		lastRun.erase(0, sharedDigits);
+	}
+    paddedLabel << "-" << lastRun;
   }
-  return label;
+
+  return paddedLabel.str();
 }
 
 /**
@@ -169,10 +185,9 @@ findConsecutiveRuns(const std::vector<int> &runs) {
 
 /**
  * Makes sure the specified workspaces are in specified group. If group exists
- * already - missing
- * workspaces are added to it, otherwise new group is created. If ws exists in
- * ADS under groupName,
- * and it is not a group - it's overwritten.
+ * already - missing workspaces are added to it, otherwise new group is created.
+ * If ws exists in ADS under groupName, and it is not a group - it's
+ * overwritten.
  * @param groupName :: Name of the group workspaces should be in
  * @param inputWorkspaces :: Names of the workspaces to group
  */

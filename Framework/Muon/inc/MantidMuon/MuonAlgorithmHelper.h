@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace Muon {
+
 /// Types of entities we are dealing with
 const enum class ItemType { Pair, Group };
 
@@ -36,45 +37,45 @@ struct AnalysisOptions {
   double timeZero = 0;                  /// Value to use for t0 correction
   double loadedTimeZero = 0;            /// Time zero from data file
   std::pair<double, double> timeLimits; /// Min, max X values
-  std::string rebinArgs;          /// Arguments for rebin (empty to not rebin)
-  std::string groupPairName;      /// Name of group or pair to use
-  Mantid::API::Grouping grouping; /// Grouping to use
-  PlotType plotType = {};         /// Type of analysis to perform
+  std::string rebinArgs;                /// Arguments for rebin (empty to not rebin)
+  std::string groupPairName;            /// Name of group or pair to use
+  Mantid::API::Grouping grouping;       /// Grouping to use
+  PlotType plotType = {};               /// Type of analysis to perform
   explicit AnalysisOptions() {}
 };
 
-/// Whether multiple fitting is enabled or disabled
-enum class MultiFitState { Enabled, Disabled };
 } // namespace Muon
 
 namespace MuonAlgorithmHelper {
 
 /// Returns a first period MatrixWorkspace in a run workspace
-Mantid::API::MatrixWorkspace_sptr firstPeriod(API::Workspace_sptr ws);
+DLLExport Mantid::API::MatrixWorkspace_sptr firstPeriod(API::Workspace_sptr ws);
 
 /// Get a run label for the workspace
-std::string getRunLabel(const API::Workspace_sptr &ws);
-
-/// Create a string from a range "first-last", removing common digits from last.
-std::string createStringFromRange(const std::pair<int, int> &range);
+DLLExport std::string getRunLabel(const API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
-std::string getRunLabel(const std::vector<API::Workspace_sptr> &wsList);
+DLLExport std::string getRunLabel(const std::vector<API::Workspace_sptr> &wsList);
 
 /// Get a run label given instrument and run numbers
-std::string getRunLabel(const std::string &instrument,
+DLLExport std::string getRunLabel(const std::string &instrument,
                         const std::vector<int> &runNumbers);
 
+/// Create a string from a range "first-last", removing common digits from last.
+/// Also pads with zeros up to zeroPadding digits.
+DLLExport std::string createStringFromRange(const std::pair<int, int> &range,
+                                            const int &zeroPadding);
+
 /// Makes sure the specified workspaces are in specified group
-void groupWorkspaces(const std::string &groupName,
+DLLExport void groupWorkspaces(const std::string &groupName,
                      const std::vector<std::string> &inputWorkspaces);
 
 /// Finds runs of consecutive numbers
-std::vector<std::pair<int, int>>
+DLLExport std::vector<std::pair<int, int>>
 findConsecutiveRuns(const std::vector<int> &runs);
 
 /// Generate new analysis workspace name
-std::string generateWorkspaceName(const Muon::DatasetParams &params);
+DLLExport std::string generateWorkspaceName(const Muon::DatasetParams &params);
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid
 
