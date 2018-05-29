@@ -95,10 +95,9 @@ void ApplyMuonDetectorGrouping::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("GroupName", emptyString,
-                  "The name of the group. Must "
-                  "contain at least one alphanumeric "
-                  "character.",
+  declareProperty("GroupName", emptyString, "The name of the group. Must "
+                                            "contain at least one alphanumeric "
+                                            "character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "

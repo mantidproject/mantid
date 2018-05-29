@@ -98,7 +98,7 @@ std::string getRunLabel(const std::string &instrument,
   label << std::setw(zeroPadding) << std::setfill('0') << std::right;
 
   for (auto range : ranges) {
-	label << createStringFromRange(range);
+    label << createStringFromRange(range);
     if (range != ranges.back()) {
       label << ", ";
     }
@@ -122,12 +122,12 @@ std::string createStringFromRange(const std::pair<int, int> &range) {
   if (range.second != range.first) {
     // Remove the common part of the first and last run, so we get e.g.
     // "12345-56" instead of "12345-12356"
-	size_t sharedDigits = 0;
+    size_t sharedDigits = 0;
     for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
       if (firstRun[i] == lastRun[i]) {
-		sharedDigits = i;
+        sharedDigits = i;
       }
-	  lastRun.erase(0, i+1);
+      lastRun.erase(0, i + 1);
     }
     label += "-" + lastRun;
   }
@@ -163,7 +163,7 @@ findConsecutiveRuns(const std::vector<int> &runs) {
     }
   }
   // Reached end of last consecutive group
-  ranges.emplace_back(*start,runNumbers.back());
+  ranges.emplace_back(*start, runNumbers.back());
   return ranges;
 }
 
