@@ -67,11 +67,14 @@ void AsciiPointBase::exec() {
  */
 std::vector<double> AsciiPointBase::header(std::ofstream &file) {
   const auto &xTemp = m_ws->x(0);
-  m_xlength = xTemp.size() - 1;
-  std::vector<double> XData(m_xlength, 0);
-  for (size_t i = 0; i < m_xlength; ++i) {
-    XData[i] = (xTemp[i] + xTemp[i + 1]) / 2.0;
-  }
+  m_xlength = m_ws->y(0).size();
+  std::vector<double> XData(xTemp.size());
+  if (m_ws->isHistogramData()) {
+    for (size_t i = 0; i < xTemp.size() - 1; ++i) {
+      XData[i] = (xTemp[i] + xTemp[i + 1]) / 2.0;
+    }
+  } else
+    XData = m_ws->x(0).rawData();
   file << std::scientific;
   return XData;
 }
