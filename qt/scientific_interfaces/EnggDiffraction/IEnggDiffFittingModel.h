@@ -46,7 +46,7 @@ public:
   virtual void enggFitPeaks(const RunLabel &runLabel,
                             const std::string &expectedPeaks) = 0;
 
-  virtual void saveDiffFittingAscii(const RunLabel &runLabel,
+  virtual void saveFitResultsToHDF5(const std::vector<RunLabel> &runLabel,
                                     const std::string &filename) const = 0;
 
   virtual void createFittedPeaksWS(const RunLabel &runLabel) = 0;

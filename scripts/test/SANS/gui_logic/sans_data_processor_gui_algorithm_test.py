@@ -13,11 +13,11 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
         self.assertTrue(len(options) == 3)
         self.assertTrue(options[0].algorithm_property == "WavelengthMin")
         self.assertTrue(options[1].algorithm_property == "WavelengthMax")
-        self.assertTrue(options[2].algorithm_property == "Thickness")
+        self.assertTrue(options[2].algorithm_property == "EventSlices")
 
     def test_that_the_properties_with_periods_can_be_provided(self):
         props = create_properties()
-        self.assertEqual(len(props), 19)
+        self.assertEqual(len(props), 20)
 
         expected = [{"algorithm_property": "SampleScatter", "column_name": "SampleScatter"},
                     {"algorithm_property": "SampleScatterPeriod", "column_name": "ssp"},
@@ -35,6 +35,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
                     {"algorithm_property": "PlotResults", "column_name": ""},
                     {"algorithm_property": "OutputName", "column_name": "OutputName"},
                     {"algorithm_property": "UserFile", "column_name": "User File"},
+                    {"algorithm_property": "SampleThickness", "column_name": "Sample Thickness"},
                     {"algorithm_property": "RowIndex", "column_name": ""},
                     {"algorithm_property": "OutputMode", "column_name": ""},
                     {"algorithm_property": "OutputGraph", "column_name": ""}]
@@ -45,7 +46,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_the_properties_without_periods_can_be_provided(self):
         props = create_properties(show_periods=False)
-        self.assertEqual(len(props), 13)
+        self.assertEqual(len(props), 14)
 
         expected = [{"algorithm_property": "SampleScatter", "column_name": "SampleScatter"},
                     {"algorithm_property": "SampleTransmission", "column_name": "SampleTrans"},
@@ -57,6 +58,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
                     {"algorithm_property": "PlotResults", "column_name": ""},
                     {"algorithm_property": "OutputName", "column_name": "OutputName"},
                     {"algorithm_property": "UserFile", "column_name": "User File"},
+                    {"algorithm_property": "SampleThickness", "column_name": "Sample Thickness"},
                     {"algorithm_property": "RowIndex", "column_name": ""},
                     {"algorithm_property": "OutputMode", "column_name": ""},
                     {"algorithm_property": "OutputGraph", "column_name": ""}]
@@ -75,7 +77,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_white_list_contains_all_properties(self):
         white_list = get_white_list()
-        self.assertEqual(len(white_list), 19)
+        self.assertEqual(len(white_list), 20)
 
     def test_that_black_list_contains_input_and_output_ws(self):
         black_list = get_black_list()

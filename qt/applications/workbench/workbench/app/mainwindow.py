@@ -43,7 +43,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QTimer)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QTimer, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -65,6 +65,7 @@ def qapplication():
     """
     app = QApplication.instance()
     if app is None:
+        QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         app = QApplication(['Mantid Workbench'])
     return app
 

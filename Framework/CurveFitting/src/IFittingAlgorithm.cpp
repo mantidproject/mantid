@@ -249,7 +249,6 @@ void IFittingAlgorithm::addWorkspaces() {
       const size_t index =
           suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
       creator->declareDatasetProperties(suffix, false);
-      m_workspacePropertyNames.push_back(workspacePropertyName);
       if (!m_domainCreator) {
         m_domainCreator.reset(creator);
       }

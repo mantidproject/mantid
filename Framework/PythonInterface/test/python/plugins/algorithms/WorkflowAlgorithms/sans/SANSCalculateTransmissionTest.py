@@ -124,9 +124,9 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         if rebin_type:
             calculate_transmission_builder.set_rebin_type(rebin_type)
         if wavelength_low:
-            calculate_transmission_builder.set_wavelength_low(wavelength_low)
+            calculate_transmission_builder.set_wavelength_low([wavelength_low])
         if wavelength_high:
-            calculate_transmission_builder.set_wavelength_high(wavelength_high)
+            calculate_transmission_builder.set_wavelength_high([wavelength_high])
         if wavelength_step:
             calculate_transmission_builder.set_wavelength_step(wavelength_step)
         if wavelength_step_type:

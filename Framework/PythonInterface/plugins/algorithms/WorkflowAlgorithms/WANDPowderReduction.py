@@ -6,7 +6,7 @@ from mantid.simpleapi import (ConvertSpectrumAxis, Transpose,
                               Divide, DeleteWorkspace, Scale,
                               MaskAngle, ExtractMask, Minus,
                               RemoveMaskedSpectra, mtd)
-from mantid.kernel import StringListValidator, Direction, Property
+from mantid.kernel import StringListValidator, Direction, Property, FloatBoundedValidator
 
 
 class WANDPowderReduction(DataProcessorAlgorithm):
@@ -43,6 +43,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc='The background workspace to be subtracted.')
+
+        self.declareProperty("BackgroundScale", 1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc="The background will be scaled by this number before being subtracted.")
 
         self.copyProperties('ConvertSpectrumAxis', ['Target', 'EFixed'])
 
@@ -118,6 +122,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             elif normaliseBy == "Time":
                 bkg_scale = bkg.run().getLogData('duration').value
             Scale(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', Factor=cal_scale/bkg_scale, EnableLogging=False)
+            Scale(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp',
+                  Factor=self.getProperty('BackgroundScale').value, EnableLogging=False)
             Minus(LHSWorkspace=outWS, RHSWorkspace='__bkg_tmp', OutputWorkspace=outWS, EnableLogging=False)
 
         self.setProperty("OutputWorkspace", outWS)

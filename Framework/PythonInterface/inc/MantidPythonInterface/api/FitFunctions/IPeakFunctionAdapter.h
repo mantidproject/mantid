@@ -26,7 +26,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
+#include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 
 #include <boost/python/object.hpp>
 
@@ -41,8 +41,11 @@ namespace PythonInterface {
  *into Python.
  */
 class IPeakFunctionAdapter : public API::IPeakFunction,
-                             public IFunction1DAdapter {
+                             public IFunctionAdapter {
 public:
+  // Convenience typedef
+  using Base = API::IPeakFunction;
+
   /// A constructor that looks like a Python __init__ method
   IPeakFunctionAdapter(PyObject *self);
 
@@ -86,7 +89,7 @@ public:
   /// Python-type signature for above method
   boost::python::object functionLocal(const boost::python::object &xvals) const;
   /// Implemented base-class method
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+  void functionDerivLocal(API::Jacobian *jacobian, const double *xValues,
                           const size_t nData) override;
   /// Python signature
   void functionDerivLocal(const boost::python::object &xvals,
