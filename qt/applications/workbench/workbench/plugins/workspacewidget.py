@@ -30,7 +30,6 @@ from qtpy.QtWidgets import QVBoxLayout
 from workbench.plugins.base import PluginWidget
 from workbench.plotting.functions import pcolormesh, plot
 
-
 LOGGER = Logger(b"workspacewidget")
 
 
@@ -78,9 +77,13 @@ class WorkspaceWidget(PluginWidget):
 
         # behaviour
         self.workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                           errors=False))
+                                                                           errors=False, overplot=False))
+        self.workspacewidget.overplotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                               errors=False, overplot=True))
         self.workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                     errors=True))
+                                                                                     errors=True, overplot=False))
+        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                                         errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
 
     # ----------------- Plugin API --------------------
@@ -96,19 +99,21 @@ class WorkspaceWidget(PluginWidget):
 
     # ----------------- Behaviour --------------------
 
-    def _do_plot_spectrum(self, names, errors):
+    def _do_plot_spectrum(self, names, errors, overplot):
         """
         Plot spectra from the selected workspaces
 
         :param names: A list of workspace names
         :param errors: If true then error bars will be plotted on the points
+        :param overplot: If true then the add to the current figure if one
+                         exists
         """
         try:
             selection = get_plot_selection(_workspaces_from_names(names), self)
             if selection is not None:
                 plot(selection.workspaces, spectrum_nums=selection.spectra,
                      wksp_indices=selection.wksp_indices,
-                     errors=errors)
+                     errors=errors, overplot=overplot)
         except BaseException:
             import traceback
             traceback.print_exc()
