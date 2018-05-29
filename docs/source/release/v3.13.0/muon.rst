@@ -10,6 +10,7 @@ Interface
 
 Improvements
 ############
+- The updated :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` is used in Muon Analysis.
 
 Bug fixes
 #########
@@ -27,6 +28,7 @@ New
 
 Improvements
 ############
+- :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` now updates a normalization table and produces unnormalized data.
 
 Bug fixes
 #########
