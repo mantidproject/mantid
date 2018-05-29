@@ -7,7 +7,7 @@ import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
                                    PositiveFloatParameter, ClassTypeParameter, FloatParameter, DictParameter,
-                                   StringListParameter, PositiveFloatWithNoneParameter)
+                                   StringListParameter, PositiveFloatWithNoneParameter, PositiveFloatListParameter)
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.common.configurations import Configurations
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message,
@@ -84,8 +84,8 @@ class StateCalculateTransmission(StateBase):
     # Wavelength rebin
     # ----------------
     rebin_type = ClassTypeParameter(RebinType)
-    wavelength_low = PositiveFloatParameter()
-    wavelength_high = PositiveFloatParameter()
+    wavelength_low = PositiveFloatListParameter()
+    wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
     wavelength_step_type = ClassTypeParameter(RangeStepType)
 

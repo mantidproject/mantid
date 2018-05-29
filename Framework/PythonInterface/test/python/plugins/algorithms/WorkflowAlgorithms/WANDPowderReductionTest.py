@@ -130,6 +130,24 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y.max(), 19.9948756)
         self.assertAlmostEqual(x[0,y.argmax()], 2.9122841)
 
+        # data, cal and background, scale background
+        pd_out4=WANDPowderReduction(InputWorkspace=data,
+                                    CalibrationWorkspace=cal,
+                                    BackgroundWorkspace=bkg,
+                                    BackgroundScale=0.5,
+                                    Target='Theta',
+                                    NumberBins=1000,
+                                    NormaliseBy='Time')
+
+        x = pd_out4.extractX()
+        y = pd_out4.extractY()
+
+        self.assertAlmostEqual(x.min(), 8.07086781)
+        self.assertAlmostEqual(x.max(), 50.82973519)
+        self.assertAlmostEqual(y.min(),  0.75)
+        self.assertAlmostEqual(y.max(), 20.72968357)
+        self.assertAlmostEqual(x[0,y.argmax()], 45.008708196)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -62,8 +62,8 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         data_state = state.data
         normalize_to_monitor_builder = get_normalize_to_monitor_builder(data_state)
         normalize_to_monitor_builder.set_rebin_type(RebinType.Rebin)
-        normalize_to_monitor_builder.set_wavelength_low(2.)
-        normalize_to_monitor_builder.set_wavelength_high(8.)
+        normalize_to_monitor_builder.set_wavelength_low([2.])
+        normalize_to_monitor_builder.set_wavelength_high([8.])
         normalize_to_monitor_builder.set_wavelength_step(2.)
         normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.Lin)
         if background_TOF_general_start:
