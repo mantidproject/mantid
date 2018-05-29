@@ -388,24 +388,29 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
 
 /// Create a 2D workspace with one detector and one monitor based around a
 /// virtual reflectometry instrument.
-Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
-    double startX = 0.0,
-    Mantid::Kernel::V3D slit1Pos = Mantid::Kernel::V3D(0, 0, 0),
-    Mantid::Kernel::V3D slit2Pos = Mantid::Kernel::V3D(0, 0, 1),
-    double vg1 = 0.5, double vg2 = 1.0,
-    Mantid::Kernel::V3D sourcePos = Mantid::Kernel::V3D(0, 0, 0),
-    Mantid::Kernel::V3D monitorPos = Mantid::Kernel::V3D(14, 0, 0),
-    Mantid::Kernel::V3D samplePos = Mantid::Kernel::V3D(15, 0, 0),
-    Mantid::Kernel::V3D detectorPos = Mantid::Kernel::V3D(20, (20 - 15), 0),
-    const int nSpectra = 2, const int nBins = 100,
-    const double deltaX = 2000.0);
+Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(const double startX = 0.0,
+    const Mantid::Kernel::V3D &slit1Pos = Mantid::Kernel::V3D(0, 0, 0),
+    const Mantid::Kernel::V3D &slit2Pos = Mantid::Kernel::V3D(0, 0, 1),
+    const double vg1 = 0.5, const double vg2 = 1.0,
+    const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0, 0, 0),
+    const Mantid::Kernel::V3D &monitorPos = Mantid::Kernel::V3D(14, 0, 0),
+    const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(15, 0, 0),
+    const Mantid::Kernel::V3D &detectorPos = Mantid::Kernel::V3D(20, (20 - 15), 0),
+    const int nBins = 100, const double deltaX = 2000.0);
 
 /// Create a 2D workspace with one monitor and three detectors based around
 /// a virtual reflectometry instrument.
 Mantid::API::MatrixWorkspace_sptr
 create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     const double startX = 0.0, const double detSize = 0.0,
-    const int nSpectra = 4, const int nBins = 20, const double deltaX = 5000.0);
+        const Mantid::Kernel::V3D &slit1Pos = Mantid::Kernel::V3D(0, 0, 0),
+        const Mantid::Kernel::V3D &slit2Pos = Mantid::Kernel::V3D(0, 0, 1),
+        const double vg1 = 0.5, const double vg2 = 1.0,
+        const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0, 0, 0),
+        const Mantid::Kernel::V3D &monitorPos = Mantid::Kernel::V3D(14, 0, 0),
+        const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(15, 0, 0),
+        const Mantid::Kernel::V3D &detectorCenterPos = Mantid::Kernel::V3D(20, (20 - 15), 0),
+        const int nSpectra = 4, const int nBins = 20, const double deltaX = 5000.0);
 
 void createInstrumentForWorkspaceWithDistances(
     Mantid::API::MatrixWorkspace_sptr workspace,

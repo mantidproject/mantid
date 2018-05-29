@@ -105,9 +105,8 @@ twoThetaWidth(const size_t wsIndex,
   const double twoTheta = spectrumInfo.twoTheta(wsIndex);
   Mantid::Algorithms::ReflectometrySumInQ::MinMax range;
   if (wsIndex == 0) {
-    if (spectrumInfo.size() == 1) {
-      throw std::runtime_error(
-          "Cannot calculate the two theta range from a single detector only.");
+    if (spectrumInfo.size() <= 1) {
+      throw std::runtime_error("Cannot calculate pixel widths from a workspace containing a single histogram.");
     }
     const auto nextTwoTheta = spectrumInfo.twoTheta(1);
     const auto d = std::abs(nextTwoTheta - twoTheta) / 2.;
@@ -232,7 +231,6 @@ void ReflectometrySumInQ::exec() {
   Indexing::SpectrumIndexSet indices;
   std::tie(inWS, indices) =
       getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
-  checkBeamCentreIn(indices);
   auto outWS = sumInQ(*inWS, indices);
   setProperty(Prop::OUTPUT_WS, outWS);
 }
@@ -246,19 +244,28 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
     issues[Prop::WAVELENGTH_MIN] =
         "Mininum wavelength cannot be greater or equal to maximum wavelength";
   }
-  return issues;
-}
-
-/// Throw if beam centre index is not in the given index set.
-void ReflectometrySumInQ::checkBeamCentreIn(
-    const Indexing::SpectrumIndexSet &indices) {
+  API::MatrixWorkspace_sptr inWS;
+  Indexing::SpectrumIndexSet indices;
+  std::tie(inWS, indices) =
+      getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
+  const auto &spectrumInfo = inWS->spectrumInfo();
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
   const auto iter = std::find(indices.begin(), indices.end(),
                               static_cast<size_t>(beamCentre));
   if (iter == indices.end()) {
-    throw std::runtime_error(Prop::BEAM_CENTRE +
-                             " is not included in InputWorkspaceIndexSet.");
+    issues[Prop::BEAM_CENTRE] = "Beam centre is not included in InputWorkspaceIndexSet.";
   }
+  for (const auto i : indices) {
+    if (spectrumInfo.isMonitor(i)) {
+      issues["InputWorkspaceIndexSet"] = "Index set cannot include monitors.";
+      break;
+    }
+    else if ((i > 0 && spectrumInfo.isMonitor(i - 1)) || (i < spectrumInfo.size() - 1 && spectrumInfo.isMonitor(i + 1))) {
+      issues["InputWorkspaceIndexSet"] = "A neighbour to any detector in the index set cannot be a monitor";
+      break;
+    }
+  }
+  return issues;
 }
 
 /**
@@ -495,19 +502,15 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
   auto &outputE = IvsLam->dataE(0);
   // Loop through each spectrum in the detector group
   for (auto spIdx : indices) {
+    if (spectrumInfo.isMasked(spIdx) || spectrumInfo.isMonitor(spIdx)) {
+      continue;
+    }
     // Get the size of this detector in twoTheta
     const auto twoThetaRange = twoThetaWidth(spIdx, spectrumInfo);
     // Check X length is Y length + 1
     const auto &inputX = detectorWS.x(spIdx);
     const auto &inputY = detectorWS.y(spIdx);
     const auto &inputE = detectorWS.e(spIdx);
-    if (inputX.size() != inputY.size() + 1) {
-      // TODO Is this check necessary?
-      throw std::runtime_error(
-          "Expected input workspace to be histogram data (got X len=" +
-          std::to_string(inputX.size()) + ", Y len=" +
-          std::to_string(inputY.size()) + ")");
-    }
     // Create a vector for the projected errors for this spectrum.
     // (Output Y values can simply be accumulated directly into the output
     // workspace, but for error values we need to create a separate error
