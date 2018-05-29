@@ -91,7 +91,6 @@ class EditorIO(object):
 
 
 class PythonFileInterpreter(QWidget):
-
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
 
@@ -233,7 +232,10 @@ class PythonFileInterpreterPresenter(QObject):
         else:
             code_str = editor.text()
             line_from = 0
-        return code_str, line_from
+        # Pad code out with empty lines so that reported line numbers
+        # do not have to be adjusted
+        padded = '\n'*line_from + code_str
+        return padded, line_from
 
     def _on_exec_success(self, task_result):
         self.view.editor.updateCompletionAPI(self.model.generate_calltips())
