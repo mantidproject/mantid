@@ -134,15 +134,11 @@ std::string createStringFromRange(const std::pair<int, int> &range,
   if (range.second != range.first) {
     // Remove the common part of the first and last run, so we get e.g.
     // "12345-56" instead of "12345-12356"
-    size_t sharedDigits = 0;
     for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
       if (firstRun[i] != lastRun[i]) {
         lastRun.erase(0, i);
         break;
       }
-    }
-    if (sharedDigits > 0) {
-      lastRun.erase(0, sharedDigits);
     }
     paddedLabel << "-" << lastRun;
   }
