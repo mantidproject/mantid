@@ -117,12 +117,12 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
 size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
-      std::upper_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-  return std::distance(xData.rawData().begin(), upper);
+      std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
+  return std::distance(xData.rawData().begin(), upper+1);
 }
 /**
 * find the first index in bin edges that is after
-* the endtime.
+* the endtim e.
 * @param xData :: [input] HistogramData as bin edges
 * @param endX :: [input] the end time
 * @returns :: The last index to  include in calculations

@@ -35,20 +35,28 @@ Usage
 
    import math
    import numpy as np
+   
+   tab = CreateEmptyTableWorkspace()
+   tab.addColumn('double', 'norm')
+   tab.addColumn('str', 'name')
+   tab.addColumn('str', 'method')
+
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
-   output,norm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
-   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
-   print("Normalization constant: {0:.2f}".format(norm[0]))
+   output,unnorm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalisationTable=tab,StartX=1,EndX=5,OutputUnNormData=True)
+   print("Asymmetry   :  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
+   print("Unnormalised:  {}".format(['{0:.2f}'.format(value) for value in unnorm.readY(0)]))
+   print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))
    
 Output:
 
 .. testoutput:: ExSimple
 
-   Asymmetry:  ['-0.57', '0.01', '-0.47', '-0.83', '-0.87']   
+   Asymmetry   :  ['-0.57', '0.01', '-0.47', '-0.83', '-0.87']
+   Unnormalised:  ['15.76', '37.28', '19.59', '6.18', '4.87']
    Normalization constant: 37.04
 
 **Example - Setting the normalization:**
@@ -57,22 +65,29 @@ Output:
 
    import math
    import numpy as np
+   
+   tab = CreateEmptyTableWorkspace()
+   tab.addColumn('double', 'norm')
+   tab.addColumn('str', 'name')
+   tab.addColumn('str', 'method')
+
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
-   output,norm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5,NormalizationIn=20.0)
-   print("Asymmetry:  {}".format(['{0:.2f}'.format(value)  for value in output.readY(0)]))
-   print("Normalization constant: {0:.2f}".format(norm[0]))
+
+   output=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalisationTable=tab,StartX=1,EndX=5,NormalizationIn=20.0)
+
+   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
+   print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))
    
 Output:
 
 .. testoutput:: ExNorm
 
-   Asymmetry:  ['-0.21', '0.86', '-0.02', '-0.69', '-0.76']   
+   Asymmetry:  ['-0.21', '0.86', '-0.02', '-0.69', '-0.76']
    Normalization constant: 20.00
-
 
 .. categories::
 

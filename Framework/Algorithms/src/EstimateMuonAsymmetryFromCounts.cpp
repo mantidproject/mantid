@@ -40,11 +40,11 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
-  declareProperty("OutputUnNormData", false, "If to output the unnormalised and unshifted data");
+  declareProperty("OutputUnNormData", false, "If to output the data with just the exponential decay removed.");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
 	  "OutputUnNormWorkspace", "unNormalisedData", Direction::Output, API::PropertyMode::Optional),
-	  "The name of the output 2D unnormalised workspace.");
+	  "The name of the output unnormalised workspace.");
 
   std::vector<int> empty;
   declareProperty(
