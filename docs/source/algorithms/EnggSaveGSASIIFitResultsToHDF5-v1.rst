@@ -11,9 +11,11 @@ Description
 
 Exports the results of a :ref:`GSASIIRefineFitPeaks
 <algm-GSASIIRefineFitPeaks-v1>` refinement, as well as the refinement
-parameters used, to an HDF5 file indexed by bank ID. The results go in
-a sub-group of the **Bank** group called **GSAS-II Fitting**. The
-subgroups of this are the following:
+parameters used, to an HDF5 file indexed by bank ID. If multiple sets
+of fit results are provided, then the file is divided into sub-groups
+for each run number, with the **Run Number** groups indexed further by
+bank ID.The results go in a sub-group of the **Bank** group called
+**GSAS-II Fitting**. The subgroups of this are the following:
 
 Refinement Parameters
 #####################
@@ -61,6 +63,20 @@ Rwp (weighted-profile R-factor)
 ###############################
 
 A measure of 'goodness of fit', as a percentage
+
+File Structure
+##############
+
+Obtaining fit results for banks 1 and 2 of run 123456 and then saving
+them with algorithm would yield the following file structure:
+
+.. diagram:: EnggSaveGSASIIFitResultsToHDF5SingleRunHierarchy.dot
+
+Obtaining fit results for banks 1 and 2 of run 123456 and bank 1 of
+123457 and then saving them with the algorithm would yield the
+following file structure:
+
+.. diagram:: EnggSaveGSASIIFitResultsToHDF5MultiRunHierarchy.dot
 
 Usage
 -----
