@@ -34,7 +34,7 @@ Flipper configurations
 *InputWorkspaces* is a list containing one to four workspace names (X unit: wavelength) corresponding to the instrument configurations given as *Flippers*. Supported configurations are:
 
 :literal:`'00, 01, 10, 11'`
-   Full polarization corrections. Four input workspaces are required. They should be in the input group in the following order: both flippers off, polarizer flipper on, analyzer flipper on, both flippers on.
+   Full polarization corrections. Four input workspaces are required. They should be in the input group in the following order: both flippers off, analyzer flipper on, polarizer flipper on, both flippers on.
 
 :literal:`'00, 01, 11'` and :literal:`'00, 10, 11'`
    Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+}`. In this case the intensity of the missing flipper configuration (01 or 10) can be solved from the other intensities. Workspaces in the input group should be in the following order: both flippers off, one flipper on, both flippers on.
