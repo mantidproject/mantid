@@ -270,8 +270,10 @@ std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
 
   std::vector<double> norms(wsNames.size(), 0);
   auto colNames = table->getColumnNames();
-  auto wsNamesIndex = findName(colNames, "name");
-  auto normIndex = findName(colNames, "norm");
+  std::string colName = "name";
+  auto wsNamesIndex = findName(colNames, colName);
+  colName = "norm";
+  auto normIndex = findName(colNames, colName);
 
   for (size_t row = 0; row < table->rowCount(); row++) {
     for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
