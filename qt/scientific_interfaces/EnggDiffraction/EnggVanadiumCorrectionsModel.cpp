@@ -62,7 +62,7 @@ EnggVanadiumCorrectionsModel::fetchCorrectionWorkspaces(
 
   if (cachedCurvesWorkspace && cachedIntegratedWorkspace &&
       !m_calibSettings.m_forceRecalcOverwrite) {
-    return std::make_pair(*cachedIntegratedWorkspace, *cachedCurvesWorkspace);
+    return std::make_pair(cachedIntegratedWorkspace, cachedCurvesWorkspace);
   } else {
     const auto correctionWorkspaces =
         calculateCorrectionWorkspaces(vanadiumRunNumber);
@@ -72,7 +72,7 @@ EnggVanadiumCorrectionsModel::fetchCorrectionWorkspaces(
   }
 }
 
-boost::optional<Mantid::API::MatrixWorkspace_sptr>
+Mantid::API::MatrixWorkspace_sptr
 EnggVanadiumCorrectionsModel::fetchCachedCurvesWorkspace(
     const std::string &vanadiumRunNumber) const {
   const auto filename = generateCurvesFilename(vanadiumRunNumber);
@@ -81,10 +81,10 @@ EnggVanadiumCorrectionsModel::fetchCachedCurvesWorkspace(
     return loadMatrixWorkspace(filename, CURVES_WORKSPACE_NAME);
   }
 
-  return boost::none;
+  return nullptr;
 }
 
-boost::optional<Mantid::API::ITableWorkspace_sptr>
+Mantid::API::ITableWorkspace_sptr
 EnggVanadiumCorrectionsModel::fetchCachedIntegratedWorkspace(
     const std::string &vanadiumRunNumber) const {
   const auto filename = generateIntegratedFilename(vanadiumRunNumber);
@@ -93,7 +93,7 @@ EnggVanadiumCorrectionsModel::fetchCachedIntegratedWorkspace(
     return loadTableWorkspace(filename, INTEGRATED_WORKSPACE_NAME);
   }
 
-  return boost::none;
+  return nullptr;
 }
 
 std::string EnggVanadiumCorrectionsModel::generateCurvesFilename(
