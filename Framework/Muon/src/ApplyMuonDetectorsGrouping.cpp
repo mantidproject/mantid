@@ -29,13 +29,6 @@ bool isWorkspaceGroup(std::string &name) {
   return false;
 }
 
-// Find if name is in group/pair collection
-static bool isContainedIn(const std::string &name,
-                          const std::vector<std::string> &collection) {
-  return std::find(collection.begin(), collection.end(), name) !=
-         collection.end();
-}
-
 // Convert input string plot type to PlotType.
 Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
   if (plotType == "Counts") {
