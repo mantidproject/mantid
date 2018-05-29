@@ -413,7 +413,8 @@ std::vector<std::string> LoadMcStas::readEventData(
         }
         allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
         if (numEventEntries > 1) {
-          allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) += weightedEvent;
+          allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) +=
+              weightedEvent;
         }
       }
       eventWSIndex++;
