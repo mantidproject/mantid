@@ -44,14 +44,13 @@ public:
 
   void test_load() {
     ScopedFile f1(m_data1, "Efficiency1.txt");
-    ScopedFile f2(m_data1, "Efficiency2.txt");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("P1", f1.getFileName());
-    alg.setProperty("P2", f2.getFileName());
+    alg.setProperty("P2", f1.getFileName());
     alg.setProperty("OutputWorkspace", "dummy");
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -90,15 +89,14 @@ public:
   }
 
   void test_load_diff_sizes() {
-    ScopedFile f1(m_data1, "Efficiency4.txt");
-    ScopedFile f2(m_data2, "Efficiency5.txt");
+    ScopedFile f1(m_data1, "Efficiency2.txt");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("P1", f1.getFileName());
-    alg.setProperty("P2", f2.getFileName());
+    alg.setProperty("P2", f1.getFileName());
     alg.setProperty("OutputWorkspace", "dummy");
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -137,15 +135,14 @@ public:
   }
 
   void test_diff_methods() {
-    ScopedFile f1(m_data1, "Efficiency6.txt");
-    ScopedFile f2(m_data1, "Efficiency7.txt");
+    ScopedFile f1(m_data1, "Efficiency3.txt");
 
     LoadISISPolarizationEfficiencies alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("P1", f1.getFileName());
-    alg.setProperty("Pp", f2.getFileName());
+    alg.setProperty("Pp", f1.getFileName());
     alg.setProperty("OutputWorkspace", "dummy");
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
