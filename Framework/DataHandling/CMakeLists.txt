@@ -495,6 +495,7 @@ set ( TEST_FILES
 	SaveFITSTest.h
 	SaveFocusedXYETest.h
 	SaveFullprofResolutionTest.h
+	SaveGDATest.h
 	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h
 	SaveILLCosmosAsciiTest.h
