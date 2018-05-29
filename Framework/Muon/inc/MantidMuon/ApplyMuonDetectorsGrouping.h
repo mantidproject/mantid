@@ -71,29 +71,24 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  ///  Store the input properties as private member variables
-  void getUserInput(const API::Workspace_sptr &inputWS,
-                    Muon::AnalysisOptions &options);
+  /// Return the algorithm properties in a struct
+  Muon::AnalysisOptions getUserInput();
   /// Clip Xmin/Xmax to the range in the input WS
   void clipXRangeToWorkspace(const API::WorkspaceGroup &ws,
                              Muon::AnalysisOptions &options);
   /// Creates and analyses a workspace, if noRebin does not rebin.
-  API::Workspace_sptr
-  createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin,
-                          Muon::AnalysisOptions &options);
+  API::Workspace_sptr createAnalysisWorkspace(API::Workspace_sptr inputWS,
+                                              bool noRebin,
+                                              Muon::AnalysisOptions &options);
   /// Sets algorithm properties according to options.
   void setMuonProcessAlgorithmProperties(API::IAlgorithm &alg,
                                          const AnalysisOptions &options) const;
-  /// Convert the input workspace into a workspace group if e.g. it has only a
-  /// single period otherwise leave it alone.
-  API::WorkspaceGroup_sptr
-  convertInputWStoWSGroup(const API::Workspace_sptr inputWS);
   /// Set algorithm properties (input workspace, and period properties)
   /// according to the given options. For use with
   /// MuonProcess.
   void
   setMuonProcessPeriodProperties(API::IAlgorithm &alg,
-                                 const API::Workspace_sptr &inputWS,
+                                 API::Workspace_sptr inputWS,
                                  const Muon::AnalysisOptions &options) const;
 
   void setMuonProcessAlgorithmOutputTypeProperty(
@@ -109,7 +104,7 @@ private:
                                         const std::string &groupWSName);
   /// Add the grouped counts to a workspace named "MuonAanalysisGrouped" if its
   /// in the ADS
-  void addCountsToMuonAnalysisGrouped(const API::Workspace_sptr &inputWS,
+  void addCountsToMuonAnalysisGrouped(API::Workspace_sptr inputWS,
                                       const Muon::AnalysisOptions options);
   /// If "MuonAnalysisGrouped" in ADS and a grouped workspace return the
   /// workspace names it contains, else return "MuonAnalysisGrouped"

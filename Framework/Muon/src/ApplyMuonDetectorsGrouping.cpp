@@ -47,6 +47,25 @@ Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
     return Mantid::Muon::PlotType::Counts;
   }
 }
+
+/**
+ * Convert the input workspace into a workspace group if e.g. it has only a
+ * single period otherwise leave it alone.
+ */
+Mantid::API::WorkspaceGroup_sptr
+convertInputWStoWSGroup(Mantid::API::Workspace_sptr inputWS) {
+
+  // Cast input WS to a WorkspaceGroup
+  auto muonWS = boost::make_shared<Mantid::API::WorkspaceGroup>();
+  if (auto test =
+          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(inputWS)) {
+    muonWS->addWorkspace(test);
+  } else {
+    muonWS = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(inputWS);
+  }
+  return muonWS;
+}
+
 } // namespace
 
 using namespace Mantid::API;
@@ -156,12 +175,11 @@ void ApplyMuonDetectorGrouping::init() {
 }
 
 void ApplyMuonDetectorGrouping::exec() {
-  Muon::AnalysisOptions options;
 
   WorkspaceGroup_sptr groupWS = getProperty("InputWorkspaceGroup");
-  const Workspace_sptr inputWS = getProperty("InputWorkspace");
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
 
-  getUserInput(inputWS, options);
+  auto options = getUserInput();
   std::string groupedWSName = groupWS->getName();
 
   WorkspaceGroup_sptr muonWS = convertInputWStoWSGroup(inputWS);
@@ -188,7 +206,7 @@ void ApplyMuonDetectorGrouping::exec() {
  * is a WorkspaceGroup
  */
 void ApplyMuonDetectorGrouping::addCountsToMuonAnalysisGrouped(
-    const Workspace_sptr &inputWS, Muon::AnalysisOptions options) {
+    Workspace_sptr inputWS, Muon::AnalysisOptions options) {
 
   options.plotType = Mantid::Muon::PlotType::Counts;
   options.rebinArgs = "";
@@ -290,8 +308,8 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
 /*
  * Store the input properties in options
  */
-void ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
-                                             Muon::AnalysisOptions &options) {
+Muon::AnalysisOptions ApplyMuonDetectorGrouping::getUserInput() {
+  Muon::AnalysisOptions options;
 
   Grouping grouping;
   grouping.description = "no description";
@@ -308,23 +326,8 @@ void ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
   options.rebinArgs = this->getPropertyValue("rebinArgs");
   options.plotType = getPlotType(this->getPropertyValue("AnalysisType"));
   options.groupPairName = this->getPropertyValue("GroupName");
-}
 
-/**
- * Convert the input workspace into a workspace group if e.g. it has only a
- * single period otherwise leave it alone.
- */
-WorkspaceGroup_sptr ApplyMuonDetectorGrouping::convertInputWStoWSGroup(
-    const Workspace_sptr inputWS) {
-
-  // Cast input WS to a WorkspaceGroup
-  auto muonWS = boost::make_shared<WorkspaceGroup>();
-  if (auto test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-    muonWS->addWorkspace(inputWS);
-  } else {
-    muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
-  }
-  return muonWS;
+  return options;
 }
 
 /**
@@ -355,12 +358,7 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
  * Creates workspace, processing the data using the MuonProcess algorithm.
  */
 Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
-    const Workspace_sptr &inputWS, bool noRebin,
-    Muon::AnalysisOptions &options) {
-
-  if (noRebin) {
-    options.rebinArgs = "";
-  }
+    Workspace_sptr inputWS, bool noRebin, Muon::AnalysisOptions &options) {
 
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
@@ -370,6 +368,11 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
   setMuonProcessAlgorithmProperties(*alg, options);
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
+
+  if (noRebin) {
+    options.rebinArgs = "";
+  }
+
   alg->execute();
   return alg->getProperty("OutputWorkspace");
 }
@@ -379,7 +382,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
  * to the given options. For use with MuonProcess.
  */
 void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
-    IAlgorithm &alg, const Workspace_sptr &inputWS,
+    IAlgorithm &alg, Workspace_sptr inputWS,
     const Muon::AnalysisOptions &options) const {
 
   auto inputGroup = boost::make_shared<WorkspaceGroup>();

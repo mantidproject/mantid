@@ -144,28 +144,27 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   return wsGroup;
 }
 
+ITableWorkspace_sptr createDeadTimeTable(const int &nspec,
+                                         std::vector<double> &deadTimes) {
 
-ITableWorkspace_sptr createDeadTimeTable(const int& nspec, std::vector<double>& deadTimes) {
+  auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+      WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
-	auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
-		WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  deadTimeTable->addColumn("int", "Spectrum Number");
+  deadTimeTable->addColumn("double", "Dead Time");
 
-	deadTimeTable->addColumn("int", "Spectrum Number");
-	deadTimeTable->addColumn("double", "Dead Time");
+  if (deadTimes.size() != nspec) {
+    // g_log.notice("deadTimes length is not equal to nspec");
+    return deadTimeTable;
+  }
 
-	if (deadTimes.size() != nspec) {
-		//g_log.notice("deadTimes length is not equal to nspec");
-		return deadTimeTable;
-	}
+  for (int spec = 0; spec < deadTimes.size(); spec++) {
+    TableRow newRow = deadTimeTable->appendRow();
+    newRow << spec + 1;
+    newRow << deadTimes[spec];
+  }
 
-	for (int spec = 0; spec < deadTimes.size() ; spec++) {
-		TableRow newRow = deadTimeTable->appendRow();
-		newRow << spec+1;
-		newRow << deadTimes[spec];
-	}
-
-	return deadTimeTable;
-
+  return deadTimeTable;
 }
 
 } // namespace
@@ -719,64 +718,63 @@ public:
   }
 
   void test_deadTimeCorrection() {
-	  std::string emptyString("");
+    std::string emptyString("");
 
-	  std::vector<double> deadTimes = {0.0025};
-	  ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(1, deadTimes);
+    std::vector<double> deadTimes = {0.0025};
+    ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(1, deadTimes);
 
-	  auto ws = createAsymmetryWorkspace(1, 10);
-	  auto wsGroup = boost::make_shared<WorkspaceGroup>();
-	  AnalysisDataService::Instance().addOrReplace("inputData", ws);
-	  AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
+    auto ws = createAsymmetryWorkspace(1, 10);
+    auto wsGroup = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().addOrReplace("inputData", ws);
+    AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
 
-	  TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 0);
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 0);
 
-	  ApplyMuonDetectorGrouping alg;
-	  TS_ASSERT_THROWS_NOTHING(alg.initialize());
-	  TS_ASSERT(alg.isInitialized());
+    ApplyMuonDetectorGrouping alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
-	  TS_ASSERT_THROWS_NOTHING(
-		  alg.setProperty("InputWorkspaceGroup", wsGroup->getName()));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("groupName", "test2"));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("Grouping", "1"));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("AnalysisType", "Counts"));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", emptyString));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriods", "1"));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
-	  TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeadTimeTable", deadTimeTable));
-	  TS_ASSERT_THROWS_NOTHING(alg.execute());
-	  TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspaceGroup", wsGroup->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("groupName", "test2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Grouping", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AnalysisType", "Counts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", emptyString));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriods", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeadTimeTable", deadTimeTable));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
-	  TS_ASSERT(wsGroup);
-	  if (wsGroup) {
-		  TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
-	  }
+    TS_ASSERT(wsGroup);
+    if (wsGroup) {
+      TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
+    }
 
-	  TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1"));
-	  TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1"));
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
 
-	  auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		  wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
 
-	  // Check values against calculation by hand.
-	  TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    // Check values against calculation by hand.
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-	  TS_ASSERT_DELTA(wsOut->readY(0)[0], 488.9, 0.1);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[4], 350.1, 0.1);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[9], 247.2, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 488.9, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 350.1, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 247.2, 0.1);
 
-	  TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0050, 0.0001);
-	  TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0050, 0.0001);
-	  TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0050, 0.0001);
   }
-
 };
 
 #endif /* MANTID_MUON_APPLYMUONDETECTORSGROUPINGTEST_H_ */
