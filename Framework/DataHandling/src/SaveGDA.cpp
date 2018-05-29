@@ -22,6 +22,8 @@ using namespace API;
 
 namespace { // helper functions
 
+const int POINTS_PER_LINE = 4;
+
 double mean(const std::vector<double> &values) {
   return std::accumulate(values.begin(), values.end(), 0.0) /
          static_cast<double>(values.size());
@@ -44,8 +46,10 @@ double computeAverageDeltaTByT(const HistogramData::HistogramX &tValues) {
 std::string generateBankHeader(int bank, int minT, size_t numberBins,
                                double deltaTByT) {
   std::stringstream stream;
+  const auto numberLines = numberBins / POINTS_PER_LINE;
+
   stream << std::setprecision(2) << "BANK " << bank << " " << numberBins << "  "
-         << numberBins / 4 << " RALF  " << minT << "  96  " << minT << " "
+         << numberLines << " RALF  " << minT << "  96  " << minT << " "
          << deltaTByT << " ALT";
   return stream.str();
 }
@@ -123,12 +127,13 @@ void SaveGDA::exec() {
       outFile << std::setw(8) << tofScaled[j] << std::setw(7)
               << intensity[j] * 1000 << std::setw(5) << error[j] * 1000;
 
-      if (j % 4 == 3) {
+      if (j % POINTS_PER_LINE == POINTS_PER_LINE - 1) {
         // new line every 4 points
         outFile << '\n';
-      }  else if (j == numPoints - 1) {
+      } else if (j == numPoints - 1) {
         // make sure line is 80 characters long
-        outFile << std::string(80 - (i % 4 + 1) * 20, ' ') << '\n';
+        outFile << std::string(80 - (i % POINTS_PER_LINE + 1) * 20, ' ')
+                << '\n';
       }
     }
   }
