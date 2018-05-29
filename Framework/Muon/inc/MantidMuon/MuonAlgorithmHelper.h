@@ -12,10 +12,10 @@
 namespace Mantid {
 namespace Muon {
 /// Types of entities we are dealing with
-const enum ItemType { Pair, Group };
+const enum class ItemType { Pair, Group };
 
 /// Possible plot types users might request
-const enum PlotType { Asymmetry, Counts, Logarithm };
+const enum class PlotType { Asymmetry, Counts, Logarithm };
 
 /// Parameters from parsed workspace name
 struct DatasetParams {
@@ -54,6 +54,9 @@ Mantid::API::MatrixWorkspace_sptr firstPeriod(API::Workspace_sptr ws);
 
 /// Get a run label for the workspace
 std::string getRunLabel(const API::Workspace_sptr &ws);
+
+/// Create a string from a range "first-last", removing common digits from last.
+std::string createStringFromRange(const std::pair<int, int> &range);
 
 /// Get a run label for a list of workspaces
 std::string getRunLabel(const std::vector<API::Workspace_sptr> &wsList);

@@ -52,9 +52,10 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
 
   // Extract the run numbers
   std::vector<int> runNumbers;
+  runNumbers.reserve(wsList.size());
   int numWorkspaces = static_cast<int>(wsList.size());
-  for (int i = 0; i < numWorkspaces; i++) {
-    int runNumber = firstPeriod(wsList[i])->getRunNumber();
+  for (auto &&workspace : wsList) {
+    int runNumber = firstPeriod(workspace)->getRunNumber();
     runNumbers.push_back(runNumber);
   }
 
@@ -97,26 +98,40 @@ std::string getRunLabel(const std::string &instrument,
   label << std::setw(zeroPadding) << std::setfill('0') << std::right;
 
   for (auto range : ranges) {
-    std::string firstRun = std::to_string(range.first);
-    std::string lastRun = std::to_string(range.second);
-    label << firstRun;
-    if (range.second != range.first) {
-      // Remove the common part of the first and last run, so we get e.g.
-      // "12345-56" instead of "12345-12356"
-      for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
-        if (firstRun[i] != lastRun[i]) {
-          lastRun.erase(0, i);
-          break;
-        }
-      }
-      label << "-" << lastRun;
-    }
+	label << createStringFromRange(range);
     if (range != ranges.back()) {
       label << ", ";
     }
   }
 
   return label.str();
+}
+
+/**
+ * Create a string from a range
+ * @param range :: [input] a pair of integers representing the ends of the range
+ * (may be the same)
+ * @return :: range in the form "1234-45" removing common digits from the upper
+ * end of the range.
+ */
+std::string createStringFromRange(const std::pair<int, int> &range) {
+
+  std::string firstRun = std::to_string(range.first);
+  std::string lastRun = std::to_string(range.second);
+  std::string label = firstRun;
+  if (range.second != range.first) {
+    // Remove the common part of the first and last run, so we get e.g.
+    // "12345-56" instead of "12345-12356"
+	size_t sharedDigits = 0;
+    for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
+      if (firstRun[i] == lastRun[i]) {
+		sharedDigits = i;
+      }
+	  lastRun.erase(0, i+1);
+    }
+    label += "-" + lastRun;
+  }
+  return label;
 }
 
 /**
@@ -148,7 +163,7 @@ findConsecutiveRuns(const std::vector<int> &runs) {
     }
   }
   // Reached end of last consecutive group
-  ranges.emplace_back(*start, *(runNumbers.end() - 1));
+  ranges.emplace_back(*start,runNumbers.back());
   return ranges;
 }
 

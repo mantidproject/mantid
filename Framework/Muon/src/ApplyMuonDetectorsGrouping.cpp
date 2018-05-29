@@ -430,8 +430,10 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmOutputTypeProperty(
   case Muon::PlotType::Counts:
   case Muon::PlotType::Logarithm:
     outputType = "GroupCounts";
+	break;
   case Muon::PlotType::Asymmetry:
     outputType = "GroupAsymmetry";
+	break;
   default:
     throw std::invalid_argument(
         "Cannot create analysis workspace: Unsupported plot type");
@@ -463,8 +465,6 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
   setMuonProcessAlgorithmGroupingProperties(alg, options);
   setMuonProcessAlgorithmOutputTypeProperty(alg, options);
   setMuonProcessAlgorithmTimeProperties(alg, options);
-
-  
 }
 
 /**

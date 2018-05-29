@@ -721,10 +721,10 @@ public:
   void test_deadTimeCorrection() {
 	  std::string emptyString("");
 
-	  std::vector<double> deadTimes = {0.0025,0.0050,0.0075,0.0100,0.0125};
-	  ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(5, deadTimes);
+	  std::vector<double> deadTimes = {0.0025};
+	  ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(1, deadTimes);
 
-	  auto ws = createAsymmetryWorkspace(5, 10);
+	  auto ws = createAsymmetryWorkspace(1, 10);
 	  auto wsGroup = boost::make_shared<WorkspaceGroup>();
 	  AnalysisDataService::Instance().addOrReplace("inputData", ws);
 	  AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
