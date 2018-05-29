@@ -164,7 +164,7 @@ void JumpFit::handleWidthChange(int widthIndex) {
 
   if (spectrum) {
     m_jumpFittingModel->setActiveWidth(index, 0);
-    setSelectedSpectrum(*spectrum);
+    setSelectedSpectrum(static_cast<int>(*spectrum));
   }
 }
 

@@ -53,17 +53,6 @@ Spectra createSpectra(std::size_t spectrum) {
   return std::make_pair(spectrum, spectrum);
 }
 
-MatrixWorkspace_sptr scaleWorkspace(MatrixWorkspace_sptr workspace,
-                                    const std::string &output, double factor) {
-  auto scaleAlg = AlgorithmManager::Instance().create("Scale");
-  scaleAlg->initialize();
-  scaleAlg->setProperty("InputWorkspace", workspace);
-  scaleAlg->setProperty("OutputWorkspace", output);
-  scaleAlg->setProperty("Factor", factor);
-  scaleAlg->execute();
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output);
-}
-
 std::string getHWHMName(const std::string &resultName) {
   auto position = resultName.rfind("_FWHM");
   if (position != std::string::npos)
@@ -84,6 +73,102 @@ JumpFitParameters createJumpFitParameters(MatrixWorkspace *workspace) {
   parameters.eisfSpectra = foundEISF.second;
   return parameters;
 }
+
+MatrixWorkspace_sptr scaleWorkspace(MatrixWorkspace_sptr workspace,
+                                    double factor) {
+  auto scaleAlg = AlgorithmManager::Instance().create("Scale");
+  scaleAlg->initialize();
+  scaleAlg->setLogging(false);
+  scaleAlg->setChild(true);
+  scaleAlg->setProperty("InputWorkspace", workspace);
+  scaleAlg->setProperty("OutputWorkspace", "__scaled");
+  scaleAlg->setProperty("Factor", factor);
+  scaleAlg->execute();
+  return scaleAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr extractSpectra(MatrixWorkspace_sptr workspace,
+                                    int startIndex, int endIndex) {
+  auto extractAlg = AlgorithmManager::Instance().create("Scale");
+  extractAlg->initialize();
+  extractAlg->setChild(true);
+  extractAlg->setLogging(false);
+  extractAlg->setProperty("InputWorkspace", workspace);
+  extractAlg->setProperty("StartWorkspaceIndex", startIndex);
+  extractAlg->setProperty("EndWorkspaceIndex", endIndex);
+  extractAlg->setProperty("OutputWorkspace", "__extracted");
+  return extractAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr workspace,
+                                     int index) {
+  return extractSpectra(workspace, index, index);
+}
+
+MatrixWorkspace_sptr extractHWHMSpectrum(MatrixWorkspace_sptr workspace,
+                                         int index) {
+  return scaleWorkspace(extractSpectrum(workspace, index), 0.5);
+}
+
+MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr lhs,
+                                     MatrixWorkspace_sptr rhs) {
+  auto appendAlg = AlgorithmManager::Instance().create("Scale");
+  appendAlg->initialize();
+  appendAlg->setChild(true);
+  appendAlg->setLogging(false);
+  appendAlg->setProperty("InputWorkspace1", lhs);
+  appendAlg->setProperty("InputWorkspace2", rhs);
+  appendAlg->setProperty("OutputWorkspace", "__appended");
+  return appendAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr
+appendAll(const std::vector<MatrixWorkspace_sptr> &workspaces) {
+  auto appended = workspaces.front();
+  for (auto i = 1u; i < workspaces.size(); ++i)
+    appended = appendWorkspace(appended, workspaces[i]);
+  return appended;
+}
+
+MatrixWorkspace_sptr addToADS(MatrixWorkspace_sptr workspace,
+                              const std::string &name) {
+  AnalysisDataService::Instance().addOrReplace(name, workspace);
+  return workspace;
+}
+
+MatrixWorkspace_sptr
+createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
+                    const std::vector<std::size_t> &widthSpectra) {
+  if (widthSpectra.empty())
+    return workspace;
+
+  std::vector<MatrixWorkspace_sptr> subworkspaces;
+  subworkspaces.reserve(1 + 2 * widthSpectra.size());
+
+  int start = 0;
+  for (auto i = 0u; i < widthSpectra.size(); ++i) {
+    const auto spectrum = static_cast<int>(widthSpectra[i]);
+    if (spectrum > start)
+      subworkspaces.emplace_back(
+          extractSpectra(workspace, start, spectrum - 1));
+    subworkspaces.emplace_back(extractHWHMSpectrum(workspace, spectrum));
+    start = spectrum + 1;
+  }
+
+  const int end = static_cast<int>(workspace->getNumberHistograms());
+  if (start < end)
+    subworkspaces.emplace_back(extractSpectra(workspace, start, end - 1));
+  return addToADS(appendAll(subworkspaces), hwhmName);
+}
+
+boost::optional<std::size_t>
+getFirstSpectrum(const JumpFitParameters &parameters) {
+  if (!parameters.widthSpectra.empty())
+    return parameters.widthSpectra.front();
+  else if (!parameters.eisfSpectra.empty())
+    return parameters.eisfSpectra.front();
+  return boost::none;
+}
 } // namespace
 
 namespace MantidQt {
@@ -92,34 +177,37 @@ namespace IDA {
 
 void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                                 const Spectra &) {
-  const auto &jumpParameters = addJumpFitParameters(workspace.get());
-  const auto noWidths = jumpParameters.widths.empty();
   const auto name = getHWHMName(workspace->getName());
-  const auto spectra =
-      noWidths ? jumpParameters.eisfSpectra[0] : jumpParameters.widthSpectra[0];
-  IndirectFittingModel::addWorkspace(scaleWorkspace(workspace, name, 0.5),
-                                     createSpectra(spectra));
+  const auto parameters = addJumpFitParameters(workspace.get(), name);
+
+  const auto spectrum = getFirstSpectrum(parameters);
+  if (!spectrum)
+    throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
+
+  const auto hwhmWorkspace =
+      createHWHMWorkspace(workspace, name, parameters.widthSpectra);
+  IndirectFittingModel::addWorkspace(hwhmWorkspace, createSpectra(*spectrum));
 }
 
 JumpFitParameters &
-JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace) {
-  const auto &foundParameters = m_jumpParameters.find(workspace);
+JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace,
+                                   const std::string &hwhmName) {
+  const auto &foundParameters = m_jumpParameters.find(hwhmName);
   if (foundParameters != m_jumpParameters.end())
     return foundParameters->second;
 
   const auto parameters = createJumpFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
-  return m_jumpParameters[workspace] = std::move(parameters);
+  return m_jumpParameters[hwhmName] = std::move(parameters);
 }
 
-std::unordered_map<Mantid::API::MatrixWorkspace *,
-                   JumpFitParameters>::const_iterator
+std::unordered_map<std::string, JumpFitParameters>::const_iterator
 JumpFitModel::findJumpFitParameters(std::size_t dataIndex) const {
-  const auto workspace = getWorkspace(dataIndex).get();
+  const auto workspace = getWorkspace(dataIndex);
   if (!workspace)
     return m_jumpParameters.end();
-  return m_jumpParameters.find(workspace);
+  return m_jumpParameters.find(workspace->getName());
 }
 
 void JumpFitModel::setActiveWidth(std::size_t widthIndex,

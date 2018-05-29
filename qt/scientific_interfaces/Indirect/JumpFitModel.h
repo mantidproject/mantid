@@ -17,7 +17,7 @@ struct JumpFitParameters {
 class DLLExport JumpFitModel : public IndirectFittingModel {
 public:
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra) override;
+                    const Spectra &) override;
   void setFitType(const std::string &fitType);
 
   std::vector<std::string> getWidths(std::size_t dataIndex) const;
@@ -36,14 +36,13 @@ public:
 
 private:
   JumpFitParameters &
-  addJumpFitParameters(Mantid::API::MatrixWorkspace * workspace);
-  std::unordered_map<Mantid::API::MatrixWorkspace *,
-                     JumpFitParameters>::const_iterator
+  addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
+                       const std::string &hwhmName);
+  std::unordered_map<std::string, JumpFitParameters>::const_iterator
   findJumpFitParameters(std::size_t dataIndex) const;
 
   std::string m_fitType;
-  std::unordered_map<Mantid::API::MatrixWorkspace *, JumpFitParameters>
-      m_jumpParameters;
+  std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;
 };
 
 } // namespace IDA
