@@ -46,23 +46,25 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
   return ws;
 }
 
-std::pair<IAlgorithm_sptr,  ITableWorkspace_sptr> setUpAlg() {
-  IAlgorithm_sptr asymmAlg =
-      AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
-
+ITableWorkspace_sptr genTable() {
   Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
   table -> addColumn("double","norm"); 
   table -> addColumn("str","name"); 
   table -> addColumn("str","method");
-  
+  return table;
+}
 
+
+IAlgorithm_sptr setUpAlg( ITableWorkspace_sptr &table) {
+  IAlgorithm_sptr asymmAlg =
+      AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("NormalizationTable",table);
   asymmAlg->setProperty("WorkspaceName","ws");
   asymmAlg->setProperty("StartX", 0.1);
   asymmAlg->setProperty("EndX", 0.9);
-  return std::make_pair(asymmAlg,table);
+  return asymmAlg;
 }
 }
 
@@ -80,17 +82,17 @@ public:
   EstimateMuonAsymmetryFromCountsTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
     TS_ASSERT(alg->isInitialized())
   }
 
   void test_Execute() {
 
     auto ws = createWorkspace(1, 50);
-
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
+ 
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -101,8 +103,8 @@ public:
   void test_EmptySpectrumList() {
 
     auto ws = createWorkspace(2, 50);
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
     
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
@@ -133,8 +135,8 @@ public:
     workspaces.push_back(createWorkspace(2, 50));
 
     // First, run the algorithm without specifying any spectrum
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg1 = setup.first;
+     auto table = genTable();
+    IAlgorithm_sptr alg1 = setUpAlg(table);
     
     alg1->setProperty("InputWorkspace", workspaces[0]);
     alg1->setPropertyValue("OutputWorkspace", outputName);
@@ -144,11 +146,8 @@ public:
     workspaces.push_back(alg1->getProperty("OutputWorkspace"));
 
     // Then run the algorithm on the second spectrum only
-    auto setup2 = setUpAlg();
-    IAlgorithm_sptr alg2 = setup2.first;
+    IAlgorithm_sptr alg2 = setUpAlg(table);
   
-    alg2->setProperty("NormalizationTable",setup.second);
- 
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->setPropertyValue("OutputWorkspace", outputName);
     alg2->setPropertyValue("Spectra", "1");
@@ -175,8 +174,8 @@ public:
 
     auto ws = createWorkspace(1, 50);
 
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -187,9 +186,9 @@ public:
   }
   void test_NoRange() {
     auto ws = createWorkspace(1, 50);
- 
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+    
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.1);
     alg->setProperty("EndX", 0.1);
@@ -198,9 +197,10 @@ public:
   }
   void test_BackwardsRange() {
     auto ws = createWorkspace(1, 50);
-  
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+   
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
+ 
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.9);
     alg->setProperty("EndX", 0.1);
@@ -218,24 +218,29 @@ public:
 
     coarseWS->mutableRun().addProperty("goodfrm", 10);
  
-    auto setup = setUpAlg();
-    IAlgorithm_sptr fineAlg = setup.first;
-    
+    auto table = genTable();
+    IAlgorithm_sptr fineAlg = setUpAlg(table);
+ 
+    fineAlg->setProperty("WorkspaceName","fine");
     fineAlg->setProperty("InputWorkspace", fineWS);
     fineAlg->setPropertyValue("OutputWorkspace", "fineOutWS");
     TS_ASSERT_THROWS_NOTHING(fineAlg->execute());
     TS_ASSERT(fineAlg->isExecuted());
     MatrixWorkspace_sptr fineOutWS = fineAlg->getProperty("OutputWorkspace");
 
-    auto setup2 = setUpAlg();
-    IAlgorithm_sptr coarseAlg = setup2.first;
-    coarseAlg->setProperty("NormalizationTable",setup.second);
+    IAlgorithm_sptr coarseAlg = setUpAlg(table);
     coarseAlg->setProperty("InputWorkspace", coarseWS);
+    coarseAlg->setProperty("WorkspaceName","coarse");
     coarseAlg->setPropertyValue("OutputWorkspace", "coarseOutWS");
     TS_ASSERT_THROWS_NOTHING(coarseAlg->execute());
     TS_ASSERT(coarseAlg->isExecuted());
     MatrixWorkspace_sptr coarseOutWS =
-        coarseAlg->getProperty("OutputWorkspace");
+    coarseAlg->getProperty("OutputWorkspace");
+
+    //check names in table
+
+    TS_ASSERT_EQUALS(table->String(0,1),"fine");
+ //   TS_ASSERT_EQUALS(table->String(1,1),"coarse");
 
     double Delta = 0.05; // only expect numbers to be similar
     for (int j = 0; j < 28; j++) {
@@ -252,8 +257,8 @@ public:
     auto ws = createWorkspace(1, 50);
     double userNorm = 10.2;
  
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("NormalizationIn", userNorm);
@@ -261,8 +266,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    auto col = setup.second->getColumn(0);
-    double normFromAlg = setup.second->Double(0,0);
+    double normFromAlg = table->Double(0,0);
 
     double Delta = 0.0001;
     TS_ASSERT_DELTA(normFromAlg, userNorm, Delta);
@@ -279,8 +283,8 @@ public:
 
     auto ws = createWorkspace(1, 50);
  
-    auto setup = setUpAlg();
-    IAlgorithm_sptr alg = setup.first;
+    auto table = genTable();
+    IAlgorithm_sptr alg = setUpAlg(table);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("OutputUnNormData", true);

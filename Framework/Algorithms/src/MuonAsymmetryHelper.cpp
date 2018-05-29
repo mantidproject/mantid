@@ -122,7 +122,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
 }
 /**
 * find the first index in bin edges that is after
-* the endtim e.
+* the end time.
 * @param xData :: [input] HistogramData as bin edges
 * @param endX :: [input] the end time
 * @returns :: The last index to  include in calculations

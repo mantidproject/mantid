@@ -151,6 +151,23 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   // Do the specified spectra only
   int specLength = static_cast<int>(spectra.size());
   std::vector<double> norm(specLength, 0.0);
+
+  double normConst = getProperty("NormalizationIn");
+  for(int j =0;j<specLength;j++){
+      if(normConst==0){
+        methods.push_back("Estimate"); }
+       else{
+        methods.push_back("Fixed");}
+
+      if(specLength > 1){
+           wsNames.push_back(wsName+"_spec_");
+      }else{
+      
+           wsNames.push_back(wsName);
+      }
+  }
+
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -164,20 +181,12 @@ void EstimateMuonAsymmetryFromCounts::exec() {
                                   " is greater than the number of spectra!");
     }
     // Calculate the normalised counts
-    double normConst = getProperty("NormalizationIn");
     if (normConst == 0.0) {
       normConst = estimateNormalisationConst(inputWS->histogram(specNum),
                                              numGoodFrames, startX, endX);
-	  methods.push_back("Estimate");
-	}
-	else {
-		methods.push_back("Fixed");
 	}
 	if (spectra.size() > 1) {
-		wsNames.push_back(wsName+ "_spec" + std::to_string(i));
-	}
-	else {
-		wsNames.push_back(wsName);
+	      wsNames[i] += std::to_string(spectra[i]);
 	}
 
     // Calculate the asymmetry
