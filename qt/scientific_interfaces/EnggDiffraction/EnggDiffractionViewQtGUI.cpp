@@ -234,6 +234,10 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 
   connect(m_uiTabSettings.pushButton_browse_dir_focusing, SIGNAL(released()),
           this, SLOT(browseDirFocusing()));
+
+  connect(m_uiTabSettings.checkBox_force_recalculate_overwrite,
+          SIGNAL(stateChanged(int)), this,
+          SLOT(forceRecalculateStateChanged()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
@@ -908,6 +912,11 @@ void EnggDiffractionViewQtGUI::browseDirFocusing() {
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   m_focusDir = dir.toStdString();
   m_uiTabSettings.lineEdit_dir_focusing->setText(dir);
+}
+
+void EnggDiffractionViewQtGUI::forceRecalculateStateChanged() {
+  m_calibSettings.m_forceRecalcOverwrite =
+      m_uiTabSettings.checkBox_force_recalculate_overwrite->isChecked();
 }
 
 void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
