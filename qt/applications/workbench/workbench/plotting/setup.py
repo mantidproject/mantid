@@ -23,7 +23,7 @@ import matplotlib as mpl
 import matplotlib._pylab_helpers as pylab_helpers
 
 # local imports
-from .currentfigure import CurrentFigure
+from .globalfiguremanager import GlobalFigureManager
 
 # Our backend. We keep this separate from the rc params as it can only be set once
 MPL_BACKEND = 'module://workbench.plotting.backend_workbench'
@@ -37,7 +37,7 @@ DEFAULT_RCPARAMS = {
 def setup_matplotlib():
     """Configures our defaults"""
     # Replace vanilla Gcf with our custom instance
-    setattr(pylab_helpers, 'Gcf', CurrentFigure)
+    setattr(pylab_helpers, 'Gcf', GlobalFigureManager)
     # Our backend
     mpl.use(MPL_BACKEND)
     # Set our defaults

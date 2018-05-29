@@ -24,12 +24,8 @@ import gc
 from six import itervalues
 
 
-class CurrentFigure(object):
+class GlobalFigureManager(object):
     """A singleton manager of all figures created through it. Analogous to _pylab_helpers.Gcf.
-
-    Each figure has a hold/active button attached to it:
-      - active toggled = next plot operation should replace this figure
-      - hold toggled = next plot operation should produce a new figure
 
     Attributes:
 
@@ -155,4 +151,5 @@ class CurrentFigure(object):
         if cls._active == manager:
             cls._active = None
 
-atexit.register(CurrentFigure.destroy_all)
+
+atexit.register(GlobalFigureManager.destroy_all)
