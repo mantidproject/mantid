@@ -17,15 +17,16 @@ const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
 
 namespace {
 
-bool isWorkspaceGroup(std::string& name) {
-	auto &ads = Mantid::API::AnalysisDataService::Instance();
-	if (ads.doesExist(name)) {
-		auto ws = ads.retrieve(name);
-		if (auto wscheck = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-			return true;
-		}
-	}
-	return false;
+bool isWorkspaceGroup(std::string &name) {
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  if (ads.doesExist(name)) {
+    auto ws = ads.retrieve(name);
+    if (auto wscheck =
+            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Find if name is in group/pair collection
@@ -46,7 +47,7 @@ Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
     return Mantid::Muon::PlotType::Counts;
   }
 }
-}
+} // namespace
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -75,9 +76,10 @@ void ApplyMuonDetectorGrouping::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("GroupName", emptyString, "The name of the group. Must "
-                                            "contain at least one alphanumeric "
-                                            "character.",
+  declareProperty("GroupName", emptyString,
+                  "The name of the group. Must "
+                  "contain at least one alphanumeric "
+                  "character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "
@@ -122,15 +124,16 @@ void ApplyMuonDetectorGrouping::init() {
                   Direction::Input);
 
   declareProperty(
-	  "ApplyDeadTimeCorrection", false,
-	  "Whether dead time correction should be applied to input workspace");
+      "ApplyDeadTimeCorrection", false,
+      "Whether dead time correction should be applied to input workspace");
   declareProperty(
-	  make_unique<WorkspaceProperty<TableWorkspace>>(
-		  "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
-	  "Table with dead time information. Must be specified if ApplyDeadTimeCorrection is set true.");
-  setPropertySettings("DeadTimeTable",
-	  make_unique<Kernel::EnabledWhenProperty>(
-		  "ApplyDeadTimeCorrection", Kernel::IS_NOT_DEFAULT, ""));
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
+      "Table with dead time information. Must be specified if "
+      "ApplyDeadTimeCorrection is set true.");
+  setPropertySettings("DeadTimeTable", make_unique<Kernel::EnabledWhenProperty>(
+                                           "ApplyDeadTimeCorrection",
+                                           Kernel::IS_NOT_DEFAULT, ""));
 
   // Perform Group Associations.
 
@@ -195,31 +198,32 @@ void ApplyMuonDetectorGrouping::addCountsToMuonAnalysisGrouped(
   setMuonProcessAlgorithmProperties(*alg, options);
   alg->execute();
   Workspace_sptr wsTemp = alg->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(wsTemp);
+  MatrixWorkspace_sptr wsOut =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(wsTemp);
   AnalysisDataService::Instance().addOrReplace("wsTemp", wsOut);
 
   std::vector<std::string> names = getMuonAnalysisGroupedWorkspaceNames();
 
-  for (auto& name : names) {
-	  IAlgorithm_sptr algAppend = Algorithm::createChildAlgorithm("AppendSpectra");
-	  //auto ws = AnalysisDataService::Instance().retrieve(name);
-	  //auto wsAppended = boost::make_shared<MatrixWorkspace>();
-	  algAppend->setPropertyValue("InputWorkspace1", name);
-	  algAppend->setPropertyValue("InputWorkspace2", wsOut->getName());
-	  //alg->setPropertyValue("OutputWorkspace", wsAppended->getName());
-	  
-	  algAppend->execute();
-	  MatrixWorkspace_sptr wsAppended = algAppend->getProperty("OutputWorkspace");
+  for (auto &name : names) {
+    IAlgorithm_sptr algAppend =
+        Algorithm::createChildAlgorithm("AppendSpectra");
+    // auto ws = AnalysisDataService::Instance().retrieve(name);
+    // auto wsAppended = boost::make_shared<MatrixWorkspace>();
+    algAppend->setPropertyValue("InputWorkspace1", name);
+    algAppend->setPropertyValue("InputWorkspace2", wsOut->getName());
+    // alg->setPropertyValue("OutputWorkspace", wsAppended->getName());
 
-	  if (AnalysisDataService::Instance().doesExist(name)) {
-		  IAlgorithm_sptr deleteAlg =
-			  AlgorithmManager::Instance().create("DeleteWorkspace");
-		  deleteAlg->setLogging(false);
-		  deleteAlg->setPropertyValue("Workspace", name);
-		  deleteAlg->execute();
-	  }
-	  AnalysisDataService::Instance().add(name, wsAppended);
+    algAppend->execute();
+    MatrixWorkspace_sptr wsAppended = algAppend->getProperty("OutputWorkspace");
 
+    if (AnalysisDataService::Instance().doesExist(name)) {
+      IAlgorithm_sptr deleteAlg =
+          AlgorithmManager::Instance().create("DeleteWorkspace");
+      deleteAlg->setLogging(false);
+      deleteAlg->setPropertyValue("Workspace", name);
+      deleteAlg->execute();
+    }
+    AnalysisDataService::Instance().add(name, wsAppended);
   }
 
   deleteWorkspaceIfExists(wsOut->getName());
@@ -227,47 +231,48 @@ void ApplyMuonDetectorGrouping::addCountsToMuonAnalysisGrouped(
   auto wsGroup = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace("MuonAnalysisGrouped", wsGroup);
   MuonAlgorithmHelper::groupWorkspaces("MuonAnalysisGrouped", names);
-
 }
 
-void ApplyMuonDetectorGrouping::deleteWorkspaceIfExists(const std::string &name) {
-	if (AnalysisDataService::Instance().doesExist(name)) {
-		IAlgorithm_sptr deleteAlg =
-			AlgorithmManager::Instance().create("DeleteWorkspace");
-		deleteAlg->setLogging(false);
-		deleteAlg->setPropertyValue("Workspace", name);
-		deleteAlg->execute();
-	}
+void ApplyMuonDetectorGrouping::deleteWorkspaceIfExists(
+    const std::string &name) {
+  if (AnalysisDataService::Instance().doesExist(name)) {
+    IAlgorithm_sptr deleteAlg =
+        AlgorithmManager::Instance().create("DeleteWorkspace");
+    deleteAlg->setLogging(false);
+    deleteAlg->setPropertyValue("Workspace", name);
+    deleteAlg->execute();
+  }
 }
 
-std::vector<std::string> ApplyMuonDetectorGrouping::getMuonAnalysisGroupedWorkspaceNames() {
+std::vector<std::string>
+ApplyMuonDetectorGrouping::getMuonAnalysisGroupedWorkspaceNames() {
 
-	std::vector<std::string> names;
-	names.clear();
+  std::vector<std::string> names;
+  names.clear();
 
-	auto &ads = AnalysisDataService::Instance();
-	
-	if (!ads.doesExist("MuonAnalysisGrouped")) {
-		g_log.notice("MuonAnalysisGrouped workspace not found in ADS.");
-		return names;
-	}
-	
-	auto muonGroupedWS = ads.retrieve("MuonAnalysisGrouped");
+  auto &ads = AnalysisDataService::Instance();
 
-	if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(muonGroupedWS)) {
-		names.emplace_back(ws->getName());
-		return names;
-	}
-	// if WorkspaceGroup
-	else {
-		auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(muonGroupedWS);
-		return wsGroup->getNames();
-	}
+  if (!ads.doesExist("MuonAnalysisGrouped")) {
+    g_log.notice("MuonAnalysisGrouped workspace not found in ADS.");
+    return names;
+  }
+
+  auto muonGroupedWS = ads.retrieve("MuonAnalysisGrouped");
+
+  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(muonGroupedWS)) {
+    names.emplace_back(ws->getName());
+    return names;
+  }
+  // if WorkspaceGroup
+  else {
+    auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(muonGroupedWS);
+    return wsGroup->getNames();
+  }
 }
 
 /*
-* Generate the name of the new workspace
-*/
+ * Generate the name of the new workspace
+ */
 const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
     const Muon::AnalysisOptions &options, const std::string &groupWSName) {
 
@@ -283,8 +288,8 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
 }
 
 /*
-* Store the input properties in options
-*/
+ * Store the input properties in options
+ */
 void ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
                                              Muon::AnalysisOptions &options) {
 
@@ -306,27 +311,25 @@ void ApplyMuonDetectorGrouping::getUserInput(const Workspace_sptr &inputWS,
 }
 
 /**
-* Convert the input workspace into a workspace group if e.g. it has only a single period
-* otherwise leave it alone.
-*/
+ * Convert the input workspace into a workspace group if e.g. it has only a
+ * single period otherwise leave it alone.
+ */
 WorkspaceGroup_sptr ApplyMuonDetectorGrouping::convertInputWStoWSGroup(
-	const Workspace_sptr inputWS) {
-	
-	// Cast input WS to a WorkspaceGroup
-	auto muonWS = boost::make_shared<WorkspaceGroup>();
-	if (auto test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-		muonWS->addWorkspace(inputWS);
-	}
-	else {
-		muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
-	}
-	return muonWS;
+    const Workspace_sptr inputWS) {
+
+  // Cast input WS to a WorkspaceGroup
+  auto muonWS = boost::make_shared<WorkspaceGroup>();
+  if (auto test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+    muonWS->addWorkspace(inputWS);
+  } else {
+    muonWS = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+  }
+  return muonWS;
 }
 
-
 /**
-* Clip Xmin/Xmax to the range in the first histogram of the input WS group.
-*/
+ * Clip Xmin/Xmax to the range in the first histogram of the input WS group.
+ */
 void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
     const WorkspaceGroup &ws, Muon::AnalysisOptions &options) {
 
@@ -337,20 +340,20 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
   clipWS->getXMinMax(dataXMin, dataXMax);
 
   if (options.timeLimits.first < dataXMin) {
-	const std::string message("Requested TimeMin outside of data range.");
-	g_log.notice(message);
+    const std::string message("Requested TimeMin outside of data range.");
+    g_log.notice(message);
     options.timeLimits.first = dataXMin;
   }
   if (options.timeLimits.second > dataXMax) {
-	const std::string message("Requested TimeMax outside of data range.");
-	g_log.notice(message);
+    const std::string message("Requested TimeMax outside of data range.");
+    g_log.notice(message);
     options.timeLimits.second = dataXMax;
   }
 }
 
 /**
-* Creates workspace, processing the data using the MuonProcess algorithm.
-*/
+ * Creates workspace, processing the data using the MuonProcess algorithm.
+ */
 Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
     const Workspace_sptr &inputWS, bool noRebin,
     Muon::AnalysisOptions &options) {
@@ -393,32 +396,32 @@ void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
     inputGroup->addWorkspace(ws);
     alg.setProperty("SummedPeriodSet", "1");
   } else {
-    throw std::runtime_error(
-        "Cannot create workspace: workspace must be MatrixWorkspace or WorkspaceGroup.");
+    throw std::runtime_error("Cannot create workspace: workspace must be "
+                             "MatrixWorkspace or WorkspaceGroup.");
   }
   alg.setProperty("InputWorkspace", inputGroup);
 }
 
 /**
-* Set time properties according to the given options. For use with
-* MuonProcess.
-*/
+ * Set time properties according to the given options. For use with
+ * MuonProcess.
+ */
 void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmTimeProperties(
-	IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
-	alg.setProperty("TimeZero", options.timeZero);             
-	alg.setProperty("LoadedTimeZero", options.loadedTimeZero); 
-	alg.setProperty("Xmin", options.timeLimits.first);
-	double Xmax = options.timeLimits.second;
-	if (Xmax != Mantid::EMPTY_DBL()) {
-		alg.setProperty("Xmax", Xmax);
-	}
+    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+  alg.setProperty("TimeZero", options.timeZero);
+  alg.setProperty("LoadedTimeZero", options.loadedTimeZero);
+  alg.setProperty("Xmin", options.timeLimits.first);
+  double Xmax = options.timeLimits.second;
+  if (Xmax != Mantid::EMPTY_DBL()) {
+    alg.setProperty("Xmax", Xmax);
+  }
 
-	bool applyDTC = getProperty("ApplyDeadTimeCorrection");
-	if (applyDTC) {
-		TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
-		alg.setProperty("ApplyDeadTimeCorrection", true);
-		alg.setProperty("DeadTimeTable", DTC);
-	}
+  bool applyDTC = getProperty("ApplyDeadTimeCorrection");
+  if (applyDTC) {
+    TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
+    alg.setProperty("ApplyDeadTimeCorrection", true);
+    alg.setProperty("DeadTimeTable", DTC);
+  }
 }
 
 // Set OutputType property of MuonProcess
@@ -430,10 +433,10 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmOutputTypeProperty(
   case Muon::PlotType::Counts:
   case Muon::PlotType::Logarithm:
     outputType = "GroupCounts";
-	break;
+    break;
   case Muon::PlotType::Asymmetry:
     outputType = "GroupAsymmetry";
-	break;
+    break;
   default:
     throw std::invalid_argument(
         "Cannot create analysis workspace: Unsupported plot type");
@@ -443,17 +446,16 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmOutputTypeProperty(
 
 // Set grouping properies of MuonProcess
 void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmGroupingProperties(
-	IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
 
-	alg.setProperty("DetectorGroupingTable", options.grouping.toTable());
-	alg.setProperty("GroupIndex", 0);
-
+  alg.setProperty("DetectorGroupingTable", options.grouping.toTable());
+  alg.setProperty("GroupIndex", 0);
 }
 
 /**
-* Set algorithm properties according to the given options. For use with
-* MuonProcess.
-*/
+ * Set algorithm properties according to the given options. For use with
+ * MuonProcess.
+ */
 void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
     IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
 
@@ -468,13 +470,13 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
 }
 
 /**
-* Performs validation of inputs to the algorithm.
-* - Checks the bounds on X axis are sensible
-* - Checks that the workspaceGroup is named differently to the workspace with
-* the data.
-* - Checks that a group name is entered.
-* @returns Map of parameter names to errors
-*/
+ * Performs validation of inputs to the algorithm.
+ * - Checks the bounds on X axis are sensible
+ * - Checks that the workspaceGroup is named differently to the workspace with
+ * the data.
+ * - Checks that a group name is entered.
+ * @returns Map of parameter names to errors
+ */
 std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
   std::map<std::string, std::string> errors;
 
@@ -513,5 +515,5 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
 // Allow WorkspaceGroup property to function correctly.
 bool ApplyMuonDetectorGrouping::checkGroups() { return false; }
 
-} // namespace DataHandling
+} // namespace Muon
 } // namespace Mantid

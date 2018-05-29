@@ -57,6 +57,10 @@ public:
     return "Group several muon detector IDs together and perform an analysis "
            "(either counts or asymmetry).";
   }
+  /// See also
+  const std::vector<std::string> seeAlso() const override {
+    return {"MuonProcess"};
+  }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
   /// Allow WorkspaceGroup property to function correctly.
@@ -80,9 +84,10 @@ private:
   /// Sets algorithm properties according to options.
   void setMuonProcessAlgorithmProperties(API::IAlgorithm &alg,
                                          const AnalysisOptions &options) const;
-  /// Convert the input workspace into a workspace group if e.g. it has only a single period
-  /// otherwise leave it alone.
-  API::WorkspaceGroup_sptr convertInputWStoWSGroup(const API::Workspace_sptr inputWS);
+  /// Convert the input workspace into a workspace group if e.g. it has only a
+  /// single period otherwise leave it alone.
+  API::WorkspaceGroup_sptr
+  convertInputWStoWSGroup(const API::Workspace_sptr inputWS);
   /// Set algorithm properties (input workspace, and period properties)
   /// according to the given options. For use with
   /// MuonProcess.
@@ -92,21 +97,24 @@ private:
                                  const Muon::AnalysisOptions &options) const;
 
   void setMuonProcessAlgorithmOutputTypeProperty(
-	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+      IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
   /// Set grouping properies of MuonProcess
   void setMuonProcessAlgorithmGroupingProperties(
-	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+      IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
   void setMuonProcessAlgorithmTimeProperties(
-	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+      IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName(const Muon::AnalysisOptions &options,
                                         const std::string &groupWSName);
-
-  void addCountsToMuonAnalysisGrouped(const API::Workspace_sptr &inputWS, const Muon::AnalysisOptions options);
-
+  /// Add the grouped counts to a workspace named "MuonAanalysisGrouped" if its
+  /// in the ADS
+  void addCountsToMuonAnalysisGrouped(const API::Workspace_sptr &inputWS,
+                                      const Muon::AnalysisOptions options);
+  /// If "MuonAnalysisGrouped" in ADS and a grouped workspace return the
+  /// workspace names it contains, else return "MuonAnalysisGrouped"
   std::vector<std::string> getMuonAnalysisGroupedWorkspaceNames();
-
+  /// Delete a workspace if it is in the ADS
   void deleteWorkspaceIfExists(const std::string &name);
 };
 
