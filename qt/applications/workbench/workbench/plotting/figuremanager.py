@@ -150,9 +150,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
-            if hasattr(Gcf, 'set_hold'):
-                self.toolbar.sig_hold_triggered.connect(functools.partial(Gcf.set_hold, self))
-                self.toolbar.sig_active_triggered.connect(functools.partial(Gcf.set_active, self))
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
