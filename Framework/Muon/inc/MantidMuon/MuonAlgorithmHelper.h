@@ -13,10 +13,10 @@ namespace Mantid {
 namespace Muon {
 
 /// Types of entities we are dealing with
-const enum class ItemType { Pair, Group };
+enum class ItemType { Pair, Group };
 
 /// Possible plot types users might request
-const enum class PlotType { Asymmetry, Counts, Logarithm };
+enum class PlotType { Asymmetry, Counts, Logarithm };
 
 /// Parameters from parsed workspace name
 struct DatasetParams {
@@ -51,8 +51,8 @@ namespace MuonAlgorithmHelper {
 /// Returns a first period MatrixWorkspace in a run workspace
 DLLExport Mantid::API::MatrixWorkspace_sptr firstPeriod(API::Workspace_sptr ws);
 
-/// Get a run label for the workspace
-DLLExport std::string getRunLabel(const API::Workspace_sptr &ws);
+/// Get a run label for a workspace
+DLLExport std::string getRunLabel(API::Workspace_sptr ws);
 
 /// Get a run label for a list of workspaces
 DLLExport std::string

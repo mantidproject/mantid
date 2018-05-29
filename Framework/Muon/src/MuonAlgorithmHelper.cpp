@@ -17,11 +17,11 @@ using Mantid::Types::Core::DateAndTime;
 
 /**
  * Return a first period MatrixWorkspace in a run workspace. If the run
- * workspace has one period
- * only - it is returned.
+ * workspace has one period only - it is returned.
  * @param ws :: Run workspace
  */
 MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
+
   if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
   } else {
@@ -29,7 +29,12 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
   }
 }
 
-std::string getRunLabel(const Mantid::API::Workspace_sptr &ws) {
+/**
+* Get a run label for a single workspace.
+* @param ws :: [input] workspace pointer
+* @return :: run label
+*/
+std::string getRunLabel(Mantid::API::Workspace_sptr ws) {
   const std::vector<Mantid::API::Workspace_sptr> wsList{ws};
   return getRunLabel(wsList);
 }
