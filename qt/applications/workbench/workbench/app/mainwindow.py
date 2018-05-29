@@ -385,8 +385,8 @@ def start_workbench(app):
     mpl = importlib.import_module('matplotlib')
     # Replace vanilla Gcf with our custom instance
     _pylab_helpers = importlib.import_module('matplotlib._pylab_helpers')
-    currentfigure = importlib.import_module('workbench.plotting.currentfigure')
-    setattr(_pylab_helpers, 'Gcf', getattr(currentfigure, 'CurrentFigure'))
+    currentfigure = importlib.import_module('workbench.plotting.globalfiguremanager')
+    setattr(_pylab_helpers, 'Gcf', getattr(currentfigure, 'GlobalFigureManager'))
     # Set up out custom matplotlib backend early. It must be done on
     # the main thread
     mpl.use(MPL_BACKEND)
