@@ -95,7 +95,7 @@ bool JumpFit::validate() {
   uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSample);
 
   // this workspace doesn't have any valid widths
-  if (m_jumpFittingModel->getWidths().empty())
+  if (m_jumpFittingModel->getWidths(0).empty())
     uiv.addErrorMessage(
         "Sample Input: Workspace doesn't appear to contain any width data");
 
@@ -125,7 +125,7 @@ void JumpFit::loadSettings(const QSettings &settings) {
  */
 void JumpFit::handleSampleInputReady(const QString &filename) {
   IndirectFitAnalysisTab::newInputDataLoaded(filename);
-  setAvailableWidths(m_jumpFittingModel->getWidths());
+  setAvailableWidths(m_jumpFittingModel->getWidths(0));
 
   QPair<double, double> res;
   QPair<double, double> range = m_uiForm->ppPlotTop->getCurveRange("Sample");
@@ -133,14 +133,13 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   auto qRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
   qRangeSelector->setMinimum(bounds.first);
   qRangeSelector->setMaximum(bounds.second);
+  const auto width = m_jumpFittingModel->getWidthSpectrum(0, 0);
 
-  if (m_jumpFittingModel->getWorkspace(0)) {
+  if (width) {
     m_uiForm->cbWidth->setEnabled(true);
-    const auto width =
-        static_cast<int>(m_jumpFittingModel->getWidthSpectrum(0));
-    setMinimumSpectrum(width);
-    setMaximumSpectrum(width);
-    setSelectedSpectrum(width);
+    setMinimumSpectrum(static_cast<int>(*width));
+    setMaximumSpectrum(static_cast<int>(*width));
+    setSelectedSpectrum(static_cast<int>(*width));
   } else {
     m_uiForm->cbWidth->setEnabled(false);
     emit showMessageBox("Workspace doesn't appear to contain any width data");
@@ -161,9 +160,12 @@ void JumpFit::setAvailableWidths(const std::vector<std::string> &widths) {
  */
 void JumpFit::handleWidthChange(int widthIndex) {
   auto index = static_cast<std::size_t>(widthIndex);
-  auto spectrum = static_cast<int>(m_jumpFittingModel->getWidthSpectrum(index));
-  m_jumpFittingModel->setActiveWidth(index);
-  setSelectedSpectrum(spectrum);
+  auto spectrum = m_jumpFittingModel->getWidthSpectrum(index, 0);
+
+  if (spectrum) {
+    m_jumpFittingModel->setActiveWidth(index, 0);
+    setSelectedSpectrum(*spectrum);
+  }
 }
 
 void JumpFit::startXChanged(double startX) {

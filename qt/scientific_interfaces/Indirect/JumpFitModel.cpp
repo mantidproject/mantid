@@ -42,8 +42,7 @@ findAxisLabels(TextAxis *axis, Predicate const &predicate) {
 
 template <typename Predicate>
 std::pair<std::vector<std::string>, std::vector<std::size_t>>
-findAxisLabels(MatrixWorkspace_const_sptr workspace,
-               Predicate const &predicate) {
+findAxisLabels(MatrixWorkspace const *workspace, Predicate const &predicate) {
   auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
   if (axis)
     return findAxisLabels(axis, predicate);
@@ -72,6 +71,19 @@ std::string getHWHMName(const std::string &resultName) {
            resultName.substr(position + 5, resultName.size());
   return resultName + "_HWHM";
 }
+
+JumpFitParameters createJumpFitParameters(MatrixWorkspace *workspace) {
+  auto foundWidths =
+      findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
+  auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
+
+  JumpFitParameters parameters;
+  parameters.widths = foundWidths.first;
+  parameters.widthSpectra = foundWidths.second;
+  parameters.eisf = foundEISF.first;
+  parameters.eisfSpectra = foundEISF.second;
+  return parameters;
+}
 } // namespace
 
 namespace MantidQt {
@@ -80,56 +92,91 @@ namespace IDA {
 
 void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                                 const Spectra &) {
-  findWidths(workspace);
-  findEISF(workspace);
+  const auto &jumpParameters = addJumpFitParameters(workspace.get());
+  const auto noWidths = jumpParameters.widths.empty();
+  const auto name = getHWHMName(workspace->getName());
+  const auto spectra =
+      noWidths ? jumpParameters.eisfSpectra[0] : jumpParameters.widthSpectra[0];
+  IndirectFittingModel::addWorkspace(scaleWorkspace(workspace, name, 0.5),
+                                     createSpectra(spectra));
+}
 
-  if (!m_widths.empty()) {
-    const auto name = getHWHMName(workspace->getName());
-    IndirectFittingModel::addWorkspace(scaleWorkspace(workspace, name, 0.5),
-                                       createSpectra(m_widthSpectra[0]));
+JumpFitParameters &
+JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace) {
+  const auto &foundParameters = m_jumpParameters.find(workspace);
+  if (foundParameters != m_jumpParameters.end())
+    return foundParameters->second;
+
+  const auto parameters = createJumpFitParameters(workspace);
+  if (parameters.widths.empty() && parameters.eisf.empty())
+    throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
+  return m_jumpParameters[workspace] = std::move(parameters);
+}
+
+std::unordered_map<Mantid::API::MatrixWorkspace *,
+                   JumpFitParameters>::const_iterator
+JumpFitModel::findJumpFitParameters(std::size_t dataIndex) const {
+  const auto workspace = getWorkspace(dataIndex).get();
+  if (!workspace)
+    return m_jumpParameters.end();
+  return m_jumpParameters.find(workspace);
+}
+
+void JumpFitModel::setActiveWidth(std::size_t widthIndex,
+                                  std::size_t dataIndex) {
+  const auto parametersIt = findJumpFitParameters(dataIndex);
+
+  if (parametersIt != m_jumpParameters.end()) {
+    const auto &widthSpectra = parametersIt->second.widthSpectra;
+    const auto spectra = createSpectra(widthSpectra[widthIndex]);
+    setSpectra(spectra, dataIndex);
   }
 }
 
-void JumpFitModel::findWidths(MatrixWorkspace_sptr workspace) {
-  auto found =
-      findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
-  m_widths = found.first;
-  m_widthSpectra = found.second;
-}
+void JumpFitModel::setActiveEISF(std::size_t eisfIndex, std::size_t dataIndex) {
+  const auto parametersIt = findJumpFitParameters(dataIndex);
 
-void JumpFitModel::findEISF(MatrixWorkspace_sptr workspace) {
-  auto found =
-    findAxisLabels(workspace, ContainsOneOrMore({ ".EISF" }));
-  m_eisf = found.first;
-  m_eisfSpectra = found.second;
-}
-
-void JumpFitModel::setActiveWidth(std::size_t widthIndex) {
-  setSpectra(createSpectra(m_widthSpectra[widthIndex]), 0);
-}
-
-void JumpFitModel::setActiveEISF(std::size_t eisfIndex) {
-  setSpectra(createSpectra(m_eisfSpectra[eisfIndex]), 0);
+  if (parametersIt != m_jumpParameters.end()) {
+    const auto &eisfSpectra = parametersIt->second.eisfSpectra;
+    const auto spectra = createSpectra(eisfSpectra[eisfIndex]);
+    setSpectra(spectra, dataIndex);
+  }
 }
 
 void JumpFitModel::setFitType(const std::string &fitType) {
   m_fitType = fitType;
 }
 
-const std::vector<std::string> &JumpFitModel::getWidths() const {
-  return m_widths;
+std::vector<std::string> JumpFitModel::getWidths(std::size_t dataIndex) const {
+  const auto parameters = findJumpFitParameters(dataIndex);
+  if (parameters != m_jumpParameters.end())
+    return parameters->second.widths;
+  return std::vector<std::string>();
 }
 
-const std::vector<std::string> &JumpFitModel::getEISF() const {
-  return m_eisf;
+std::vector<std::string> JumpFitModel::getEISF(std::size_t dataIndex) const {
+  const auto parameters = findJumpFitParameters(dataIndex);
+  if (parameters != m_jumpParameters.end())
+    return parameters->second.eisf;
+  return std::vector<std::string>();
 }
 
-std::size_t JumpFitModel::getWidthSpectrum(std::size_t widthIndex) const {
-  return m_widthSpectra[widthIndex];
+boost::optional<std::size_t>
+JumpFitModel::getWidthSpectrum(std::size_t widthIndex,
+                               std::size_t dataIndex) const {
+  const auto parameters = findJumpFitParameters(dataIndex);
+  if (parameters != m_jumpParameters.end())
+    return parameters->second.widthSpectra[widthIndex];
+  return boost::none;
 }
 
-std::size_t JumpFitModel::getEISFSpectrum(std::size_t eisfIndex) const {
-  return m_eisfSpectra[eisfIndex];
+boost::optional<std::size_t>
+JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
+                              std::size_t dataIndex) const {
+  const auto parameters = findJumpFitParameters(dataIndex);
+  if (parameters != m_jumpParameters.end())
+    return parameters->second.eisfSpectra[eisfIndex];
+  return boost::none;
 }
 
 std::string JumpFitModel::sequentialFitOutputName() const {

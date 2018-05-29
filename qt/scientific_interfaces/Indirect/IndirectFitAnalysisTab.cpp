@@ -591,9 +591,15 @@ void IndirectFitAnalysisTab::xMaxSelected(double xMax) {
  */
 void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_fittingModel->clearWorkspaces();
-  m_fittingModel->addWorkspace(wsName.toStdString());
-  m_spectrumPresenter->setActiveModelIndex(0);
 
+  try {
+    m_fittingModel->addWorkspace(wsName.toStdString());
+  } catch (const std::runtime_error &err) {
+    emit showMessageBox("Unable to load workspace:\n" +
+                        QString::fromStdString(err.what()));
+  }
+
+  m_spectrumPresenter->setActiveModelIndex(0);
   setInputWorkspace(m_fittingModel->getWorkspace(0));
   enablePlotPreview();
   setPlotResultEnabled(false);
