@@ -124,7 +124,7 @@ std::string EnggVanadiumCorrectionsModel::generateIntegratedFilename(
 
 std::string EnggVanadiumCorrectionsModel::generateVanadiumRunName(
     const std::string &vanadiumRunNumber) const {
-  const static size_t normalisedRunNumberLength = 8;
+  constexpr static size_t normalisedRunNumberLength = 8;
   return m_currentInstrument +
          std::string(normalisedRunNumberLength - vanadiumRunNumber.length(),
                      '0') +
