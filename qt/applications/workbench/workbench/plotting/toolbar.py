@@ -40,10 +40,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Zoom', 'Zoom to rectangle', 'fa.search-plus', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', None, 'toggle_grid', False),
-        (None, None, None, None, None),
-        ('Active', 'When enabled future plots will overwrite this figure', None, 'active', True),
-        ('Hold', 'When enabled this holds this figure open ', None, 'hold', False),
-        (None, None, None, None, None),
         ('Save', 'Save the figure', 'fa.save', 'save_figure', None),
         ('Print','Print the figure', 'fa.print', 'print_figure', None),
         (None, None, None, None, None),
@@ -89,16 +85,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     def toggle_grid(self):
         self.sig_grid_toggle_triggered.emit()
-
-    def hold(self, *args):
-        self._actions['hold'].setChecked(True)
-        self._actions['active'].setChecked(False)
-        self.sig_hold_triggered.emit()
-
-    def active(self, *args):
-        self._actions['active'].setChecked(True)
-        self._actions['hold'].setChecked(False)
-        self.sig_active_triggered.emit()
 
     def print_figure(self):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
