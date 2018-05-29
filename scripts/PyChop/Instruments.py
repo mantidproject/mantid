@@ -95,15 +95,15 @@ class ChopperSystem(object):
     """
 
     __allowed_var_names = ['name', 'chop_sam', 'sam_det', 'aperture_width', 'aperture_height', 'choppers', 'variants',
-                           'frequency_matrix', 'constant_frequencies', 'max_frequencies', 'default_frequencies',
-                           'source_rep', 'emission_time', 'overlap_ei_frac', 'ei_limits', 'flux_ref_slot', 'flux_ref_freq']
+                           'frequency_matrix', 'constant_frequencies', 'max_frequencies', 'default_frequencies', 'source_rep', 
+                           'emission_time', 'overlap_ei_frac', 'ei_limits', 'flux_ref_slot', 'flux_ref_freq', 'frequency_names']
 
     def __init__(self, inval=None):
         # Default values
         self.source_rep = 50
         self.emission_time = 0
         self.overlap_ei_frac = 0.9
-        self._ei = 22
+        self._ei = None
         # Parse input values (if any)
         wrap_attributes(self, inval, self.__allowed_var_names)
         self._parse_choppers()
@@ -128,6 +128,7 @@ class ChopperSystem(object):
         self.isFermi = False
         self.isPhaseIndependent = []
         self.defaultPhase = []
+        self.phaseNames = []
         for idx, chopper in enumerate(self.choppers):
             self.distance.append(chopper['distance'])
             if 'packages' in chopper:
@@ -151,10 +152,12 @@ class ChopperSystem(object):
                 self.isPhaseIndependent.append(
                     True if ('isPhaseIndependent' in chopper and chopper['isPhaseIndependent']) else False)
                 self.defaultPhase.append(chopper['defaultPhase'] if 'defaultPhase' in chopper else None)
+                self.phaseNames.append(chopper['phaseName'] if 'phaseName' in chopper else 'Chopper %d phase delay time' % (idx))
         if not any(self.slot_ang_pos):
             self.slot_ang_pos = None
         self.isPhaseIndependent = [ii for ii in range(len(self.isPhaseIndependent)) if self.isPhaseIndependent[ii]]
         self.defaultPhase = [self.defaultPhase[ii] for ii in self.isPhaseIndependent]
+        self.phaseNames = [self.phaseNames[ii] for ii in self.isPhaseIndependent]
         self._instpar = [self.distance, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, 
                          self.numDisk, self.sam_det, self.chop_sam, self.source_rep, self.emission_time, 
                          self.overlap_ei_frac, self.isPhaseIndependent]
@@ -202,6 +205,10 @@ class ChopperSystem(object):
 
     def getChopper(self):
         return self.package if self.isFermi else self.variant
+
+    def getChopperNames(self):
+        choppers = self.packages.keys() if self.isFermi else []
+        return sorted(set(choppers + (self.variants.keys() if hasattr(self, 'variants') else [])))
 
     def setFrequency(self, *args, **kwargs):
         """
@@ -448,6 +455,14 @@ class ChopperSystem(object):
     @tjit.setter
     def tjit(self, value):
         self.packages[self.package].tjit = value
+
+    @property
+    def emin(self):
+        return self.ei_limits[0] if hasattr(self, 'ei_limits') and self.ei_limits else 0.1
+        
+    @property
+    def emax(self):
+        return self.ei_limits[1] if hasattr(self, 'ei_limits') and self.ei_limits else 1000
         
 
 class Moderator(object):
@@ -472,7 +487,7 @@ class Moderator(object):
             # CHOP outputs the Gaussian sigma^2 in s^2, we want FWHM^2 in s^2
             tsqmod = Chop.tchi(self.mod_pars / 1000., Ei) * SIGMA2FWHMSQ
         elif self.imod == 1:
-            tsqmod = Chop.tikeda(tuple(self.mod_pars), Ei) * SIGMA2FWHMSQ
+            tsqmod = Chop.tikeda(*tuple(self.mod_pars + [Ei])) * SIGMA2FWHMSQ
         elif self.imod == 2:
             d0 = self.mod_pars[0]
             if hasattr(self, 'mod_scale_fn') and self.mod_scale_fn:
@@ -577,9 +592,9 @@ class Instrument(object):
     __allowed_var_names = ['name', 'sample', 'chopper_system', 'moderator', 'detector']
 
     __child_methods = ['setChopper', 'getChopper', 'setFrequency', 'getFrequency', 'setEi', 'getEi',
-                       'getAllowedEi', 'plotMultiRepFrame']
+                       'getAllowedEi', 'plotMultiRepFrame', 'getChopperNames', 'isFermi']
 
-    __child_properties = ['package', 'variant', 'frequency', 'phase', 'ei', 'tjit']
+    __child_properties = ['package', 'variant', 'frequency', 'phase', 'ei', 'tjit', 'emin', 'emax']
 
     def __init__(self, instrument, chopper=None, freq=None):
         if isinstance(instrument, string_types):
@@ -612,8 +627,8 @@ class Instrument(object):
         for method in self.__child_methods:
             setattr(self, method, getattr(self.chopper_system, method))
         for prop in self.__child_properties:
-            getter = lambda obj, prop=prop: ChopperSystem.__dict__[prop].__get__(self.chopper_system, ChopperSystem)
-            setter = lambda obj, val, prop=prop: ChopperSystem.__dict__[prop].__set__(self.chopper_system, val)
+            getter = lambda obj, prop=prop, self=self: ChopperSystem.__dict__[prop].__get__(self.chopper_system, ChopperSystem)
+            setter = lambda obj, val, prop=prop, self=self: ChopperSystem.__dict__[prop].__set__(self.chopper_system, val)
             setattr(type(self), prop, property(getter, setter))
         # Now reset default chopper/variant and frequency
         if chopper or freq:
@@ -625,11 +640,11 @@ class Instrument(object):
 
     def getFlux(self, Ei_in=None, frequency=None):
         """ Returns the monochromatic flux estimate in n/cm^2/s """
-        Ei = self.ei if Ei_in is None else Ei_in
+        Ei = self.chopper_system.ei if Ei_in is None else Ei_in
         return self.moderator.getFlux(Ei) * self.chopper_system.getTransmission(Ei, frequency)
 
     def getMultiRepFlux(self, Ei_in=None, frequency=None):
-        Ei = self.ei if Ei_in is None else Ei_in
+        Ei = self.chopper_system.ei if Ei_in is None else Ei_in
         if frequency:
             oldfreq = self.frequency
             self.frequency = frequency
@@ -643,16 +658,22 @@ class Instrument(object):
 
     def getWidths(self, Ei_in=None, frequency=None):
         """ Returns the time FWHM of different components for one rep (Ei) in microseconds """
-        return {k: np.sqrt(v)*1e6 for k, v in list(self.getVanVar(Ei_in, frequency)[1].items())}
+        Ei = self.chopper_system.ei if Ei_in is None else Ei_in
+        try:
+            widths = self.getVanVar(Ei, frequency)
+        except ValueError:
+            return None
+        widths[1]['Energy'] = (2 * E2V * np.sqrt(Ei**3 * widths[0])) / self.chopper_system.sam_det
+        return {k: v if 'Energy' in k else np.sqrt(v)*1e6 for k, v in list(widths[1].items())}
 
     def getMultiWidths(self, Ei_in=None, frequency=None):
         """ Returns the time FWHM of different components for each possible rep (Ei) in seconds"""
-        Ei = self.ei if Ei_in is None else Ei_in
+        Ei = self.chopper_system.ei if Ei_in is None else Ei_in
         Eis = self.getAllowedEi(Ei)
         outdic = {'Eis': Eis}
         widths = [self.getWidths(ei, frequency) for ei in Eis]
         for ky in widths[0]:
-            outdic[ky] = np.hstack(np.array([w[ky] for w in widths]))
+            outdic[ky] = np.hstack(np.array([w[ky] for w in widths if w]))
         return outdic
 
     def getResolution(self, Etrans=None, Ei_in=None, frequency=None):
@@ -671,7 +692,7 @@ class Instrument(object):
         Output:
             van - the incoherent (Vanadium) energy FWHM at etrans in meV
         """
-        Ei = self.ei if Ei_in is None else Ei_in
+        Ei = self.chopper_system.ei if Ei_in is None else Ei_in
         # If not set, sets energy transfers to values to compare exactly to RAE's original implementation.
         if Etrans is None:
             Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
@@ -686,12 +707,12 @@ class Instrument(object):
             The input energy transfer is interpreted as fractions of Ei. e.g. linspace(0,0.9,100) """
         if Etrans is None:
             Etrans = np.linspace(0.05, 0.95, 19, endpoint=True)
-        Ei = self.ei if Ei_in is None else Ei_in
+        Ei = self.chopper_system.ei if Ei_in is None else Ei_in
         return [self.getResolution(Etrans * ei, ei, frequency) for ei in self.getAllowedEi(Ei)]
 
     def getVanVar(self, Ei_in=None, frequency=None, Etrans=0):
         """ Calculates the time squared FWHM in s^2 at the sample (Vanadium widths) for different components """
-        Ei = self.ei if Ei_in is None else Ei_in
+        Ei = self.chopper_system.ei if Ei_in is None else Ei_in
         Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
         if frequency and frequency != self.frequency:
             oldfreq = self.frequency

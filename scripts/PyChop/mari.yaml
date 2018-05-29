@@ -23,6 +23,7 @@ chopper_system:
       isPhaseIndependent: True  # Is this disk to be phased independently?
       defaultPhase: "0"         # What is the default phase for this disk (either a time in microseconds
                                 #   or a slot index [as a string] for the desired rep to go through)
+      phaseName: 'Disk chopper slot index'
     -
       name: MARI Fermi
       distance: 10.05           # Distance from moderator to this chopper in metres

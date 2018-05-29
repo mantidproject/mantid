@@ -9,6 +9,7 @@ This module contains a class to create a graphical user interface for PyChop.
 """
 
 from __future__ import (absolute_import, division, print_function)
+from six import string_types
 import sys
 import re
 import numpy as np
@@ -26,76 +27,71 @@ class PyChopGui(QtGui.QMainWindow):
     at spallation sources by calculating the resolution and flux at a given neutron energies.
     """
 
-    instruments = {'MAPS': 'maps.yaml', 'MARI': 'mari.yaml', 'MERLIN': 'merlin.yaml', 'LET': 'let.yaml'}
-    choppers = {
-        'MAPS':['A', 'B', 'S'],
-        'MARI':['A', 'B', 'R', 'G', 'S'],
-        'MERLIN':['G', 'S'],
-        'LET':['High Flux', 'Intermediate', 'High Resolution']
-    }
-    minE = {'MAPS':0.1, 'MARI':0.1, 'MERLIN':0.1, 'LET':0.1}
-    maxE = {'MAPS':1000, 'MARI':1000, 'MERLIN':1000, 'LET':100}
+    instruments = {}
+    choppers = {}
+    minE = {}
+    maxE = {}
+
+    def __init__(self):
+        super(PyChopGui, self).__init__()
+        import sys, os
+        self.folder = os.path.dirname(sys.modules[self.__module__].__file__)
+        for fname in os.listdir(self.folder):
+            if fname.endswith('.yaml'):
+                instobj = Instrument(os.path.join(self.folder, fname))
+                self.instruments[instobj.name] = instobj
+                self.choppers[instobj.name] = instobj.getChopperNames()
+                self.minE[instobj.name] = instobj.emin
+                self.maxE[instobj.name] = instobj.emax
+        self.drawLayout()
+        self.setInstrument(self.instruments.keys()[0])
+        self.xlim = 0
+        self.isFramePlotted = 0
 
     def setInstrument(self, instname):
         """
         Defines the instrument parameters by the name of the instrument.
-        Allowed values: 'LET', 'MAPS', 'MARI', 'MERLIN' (case-insensitive)
         """
+        self.engine = self.instruments[str(instname)]
         self.tabs.setTabEnabled(self.tdtabID, False)
         self.widgets['ChopperCombo']['Combo'].clear()
         self.widgets['FrequencyCombo']['Combo'].clear()
         self.widgets['PulseRemoverCombo']['Combo'].clear()
         for item in self.choppers[str(instname)]:
             self.widgets['ChopperCombo']['Combo'].addItem(item)
-        if 'LET' in str(instname):
-            self.widgets['PulseRemoverCombo']['Combo'].show()
-            self.widgets['PulseRemoverCombo']['Label'].show()
-            self.widgets['PulseRemoverCombo']['Label'].setText('Pulse remover chopper freq')
-            for fq in range(10, 301, 10):
-                self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
-            for fq in range(10, 151, 10):
-                self.widgets['PulseRemoverCombo']['Combo'].addItem(str(fq))
-        elif 'MAPS' in str(instname):
-            self.widgets['PulseRemoverCombo']['Combo'].show()
-            self.widgets['PulseRemoverCombo']['Label'].show()
-            self.widgets['PulseRemoverCombo']['Label'].setText('Disk Chopper frequency')
-            for fq in range(50, 601, 50):
-                self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
-            for fq in [50, 100]:
-                self.widgets['PulseRemoverCombo']['Combo'].addItem(str(fq))
-        else:
+        rep = self.engine.moderator.source_rep
+        maxfreq = self.engine.chopper_system.max_frequencies
+        # At the moment, the GUI only supports up to two independent frequencies
+        if not hasattr(maxfreq, '__len__') or len(maxfreq) == 1:
             self.widgets['PulseRemoverCombo']['Combo'].hide()
             self.widgets['PulseRemoverCombo']['Label'].hide()
             self.widgets['Chopper2Phase']['Edit'].hide()
             self.widgets['Chopper2Phase']['Label'].hide()
-            for fq in range(50, 601, 50):
+            for fq in range(rep, (maxfreq[0] if hasattr(maxfreq, '__len__') else maxfreq) + 1, rep):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
-        if 'LET' in str(instname):
+        else:
+            self.widgets['PulseRemoverCombo']['Combo'].show()
+            self.widgets['PulseRemoverCombo']['Label'].show()
+            self.widgets['PulseRemoverCombo']['Label'].setText(self.engine.chopper_system.frequency_names[1])
+            for fq in range(rep, maxfreq[0] + 1, rep):
+                self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
+            for fq in range(rep, maxfreq[1] + 1, rep):
+                self.widgets['PulseRemoverCombo']['Combo'].addItem(str(fq))
+        if len(self.engine.chopper_system.choppers) > 1:
             self.widgets['MultiRepCheck'].setEnabled(True)
             self.tabs.setTabEnabled(self.tdtabID, True)
-            self.widgets['Chopper2Phase']['Edit'].show()
-            self.widgets['Chopper2Phase']['Label'].show()
-            self.widgets['Chopper2Phase']['Edit'].setText('5')
-            self.widgets['Chopper2Phase']['Label'].setText('Chopper 2 phase delay time')
-        elif 'MERLIN' in str(instname):
-            self.widgets['MultiRepCheck'].setEnabled(True)
-            self.tabs.setTabEnabled(self.tdtabID, True)
-            self.widgets['Chopper2Phase']['Edit'].setText('1500')
-            self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
-            if self.instSciAct.isChecked():
-                self.widgets['Chopper2Phase']['Edit'].show()
-                self.widgets['Chopper2Phase']['Label'].show()
-        elif 'MARI' in str(instname) or 'MAPS' in str(instname):
-            self.widgets['MultiRepCheck'].setEnabled(True)
-            self.tabs.setTabEnabled(self.tdtabID, True)
-            self.widgets['Chopper2Phase']['Edit'].show()
-            self.widgets['Chopper2Phase']['Label'].show()
-            self.widgets['Chopper2Phase']['Edit'].setText('0')
-            self.widgets['Chopper2Phase']['Label'].setText('Multirep mode')
         else:
             self.widgets['MultiRepCheck'].setEnabled(False)
             self.widgets['MultiRepCheck'].setChecked(False)
-        self.engine.setInstrument(self.folder + self.instruments[str(instname)])
+        if self.engine.chopper_system.isPhaseIndependent:
+            self.widgets['Chopper2Phase']['Edit'].show()
+            self.widgets['Chopper2Phase']['Label'].show()
+            self.widgets['Chopper2Phase']['Edit'].setText(str(self.engine.chopper_system.defaultPhase[0]))
+            self.widgets['Chopper2Phase']['Label'].setText(self.engine.chopper_system.phaseNames[0])
+            # Special case for MERLIN - hide phase control from normal users
+            if 'MERLIN' in str(instname) and not self.instSciAct.isChecked():
+                self.widgets['Chopper2Phase']['Edit'].hide()
+                self.widgets['Chopper2Phase']['Label'].hide()
         self.engine.setChopper(str(self.widgets['ChopperCombo']['Combo'].currentText()))
         self.engine.setFrequency(float(self.widgets['FrequencyCombo']['Combo'].currentText()))
         val = self.flxslder.val * self.maxE[self.engine.instname] / 100
@@ -104,11 +100,10 @@ class PyChopGui(QtGui.QMainWindow):
     def setChopper(self, choppername):
         """
         Defines the Fermi chopper slit package type by name, or the disk chopper arrangement variant.
-        Allowed values: 'A', 'B', 'C', 'G', 'R', 'S', 'With Chopper 3', 'Without Chopper 3'
-        Note that not all values apply to all instruments!
         """
         self.engine.setChopper(str(choppername))
         self.engine.setFrequency(float(self.widgets['FrequencyCombo']['Combo'].currentText()))
+        # Special case for MERLIN - only enable multirep for 'G' chopper
         if 'MERLIN' in self.engine.instname:
             if 'G' in str(choppername):
                 self.widgets['MultiRepCheck'].setEnabled(True)
@@ -131,19 +126,15 @@ class PyChopGui(QtGui.QMainWindow):
         """
         freq_gui = float(self.widgets['FrequencyCombo']['Combo'].currentText())
         freq_in = kwargs['manual_freq'] if ('manual_freq' in kwargs.keys()) else freq_gui
-        if 'LET' in str(self.engine.instname):
+        if len(self.engine.getFrequency()) > 1 and (not hasattr(freq_in, '__len__') or len(freq_in)==1):
             freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
-            chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 1e5
-            self.engine.setFrequency([freq_in, freqpr], phase=chop2phase)
-        elif 'MERLIN' in str(self.engine.instname) and 'G' in self.engine.getChopper():
-            chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 2e4
-            self.engine.setFrequency(freq_in, phase=chop2phase)
-        elif 'MAPS' in str(self.engine.instname): 
-            freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
-            chop2phase = str(self.widgets['Chopper2Phase']['Edit'].text())
-            self.engine.setFrequency([freq_in, freqpr], phase=chop2phase)
-        elif 'MARI' in str(self.engine.instname):
-            chop2phase = str(self.widgets['Chopper2Phase']['Edit'].text())
+            freq_in = [freq_in, freqpr]
+        if not self.widgets['Chopper2Phase']['Label'].isHidden():
+            chop2phase = self.widgets['Chopper2Phase']['Edit'].text()
+            if isinstance(self.engine.chopper_system.defaultPhase[0], string_types):
+                chop2phase = str(chop2phase)
+            else:
+                chop2phase = float(chop2phase) % (1e6 / self.engine.moderator.source_rep)
             self.engine.setFrequency(freq_in, phase=chop2phase)
         else:
             self.engine.setFrequency(freq_in)
@@ -234,7 +225,7 @@ class PyChopGui(QtGui.QMainWindow):
             ei = self.engine.getEi()
             freq = self.engine.getFrequency()
             if hasattr(freq, '__len__'):
-                freq = freq[-1] if 'LET' in inst else freq[0]
+                freq = freq[0]
             line.set_label('%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux))
             if ei > self.xlim:
                 self.xlim = ei
@@ -258,7 +249,7 @@ class PyChopGui(QtGui.QMainWindow):
         update = kwargs['update'] if 'update' in kwargs.keys() else False
         # Do not recalculate if all relevant parameters still the same.
         _, labels = self.flxaxes2.get_legend_handles_labels()
-        searchStr = '([A-Z]+) "([A-z ]+)" ([0-9]+) Hz'
+        searchStr = '([A-Z]+) "(.+)" ([0-9]+) Hz'
         tmpinst = []
         if (labels and (overplot or len(labels) == 1)) or update:
             for prevtitle in labels:
@@ -344,19 +335,24 @@ class PyChopGui(QtGui.QMainWindow):
         overplot = self.widgets['HoldCheck'].isChecked()
         # Do not recalculate if one of the plots has the same parametersc
         _, labels = self.frqaxes2.get_legend_handles_labels()
-        searchStr = '([A-Z]+) "([A-z ]+)" Ei = ([0-9.-]+) meV'
+        searchStr = '([A-Z]+) "(.+)" Ei = ([0-9.-]+) meV'
         if labels and (overplot or len(labels) == 1):
             for prevtitle in labels:
                 prevInst, prevChop, prevEi = re.search(searchStr, prevtitle).groups()
                 if inst == prevInst and chop == prevChop and abs(ei-float(prevEi)) < 0.01:
                     return
         freq0 = self.engine.getFrequency()
-        freqs = np.arange(10, 201, 10) if 'LET' in inst else np.arange(50, 601, 50)
+        rep = self.engine.moderator.source_rep
+        maxfreq = self.engine.chopper_system.max_frequencies
+        freqs = range(rep, (maxfreq[0] if hasattr(maxfreq, '__len__') else maxfreq) + 1, rep)
         flux = np.zeros(len(freqs))
         elres = np.zeros(len(freqs))
         for ie, freq in enumerate(freqs):
             try:
-                self.setFreq(manual_freq=freq)
+                if hasattr(freq0, '__len__'):
+                    self.setFreq(manual_freq=[freq] + freq0[1:])
+                else:
+                    self.setFreq(manual_freq=freq)
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0., ei)[0]
             except ValueError:
@@ -367,7 +363,7 @@ class PyChopGui(QtGui.QMainWindow):
         else:
             self.frqaxes1.clear()
             self.frqaxes2.clear()
-        self.setFreq(manual_freq=(freq0[-1] if hasattr(freq0, '__len__') else freq0))
+        self.setFreq(manual_freq=freq0)
         self.frqaxes1.set_xlabel('Chopper Frequency (Hz)')
         self.frqaxes1.set_ylabel('Flux (n/cm$^2$/s)')
         line, = self.frqaxes1.plot(freqs, flux, 'o-')
@@ -385,17 +381,16 @@ class PyChopGui(QtGui.QMainWindow):
         """
         Callback function for the "Instrument Scientist Mode" menu option
         """
-        if any([instname in self.engine.instname for instname in ['LET', 'MAPS', 'MARI']]):
-            self.widgets['Chopper2Phase']['Edit'].show()   # Widget should show all the time for LET.
-            self.widgets['Chopper2Phase']['Label'].show()
-        elif self.instSciAct.isChecked() and 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
-            self.widgets['Chopper2Phase']['Edit'].show()
-            self.widgets['Chopper2Phase']['Label'].show()
-            self.widgets['Chopper2Phase']['Edit'].setText('1500')
-            self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
-        else:
-            self.widgets['Chopper2Phase']['Edit'].hide()
-            self.widgets['Chopper2Phase']['Label'].hide()
+        # MERLIN is a special case - want to hide ability to change phase from users
+        if 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
+            if self.instSciAct.isChecked():
+                self.widgets['Chopper2Phase']['Edit'].show()
+                self.widgets['Chopper2Phase']['Label'].show()
+                self.widgets['Chopper2Phase']['Edit'].setText('1500')
+                self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
+            else:
+                self.widgets['Chopper2Phase']['Edit'].hide()
+                self.widgets['Chopper2Phase']['Label'].hide()
         if self.instSciAct.isChecked():
             self.tabs.insertTab(self.scrtabID, self.scrtab, 'ScriptOutput')
             self.scrtab.show()
@@ -407,9 +402,10 @@ class PyChopGui(QtGui.QMainWindow):
         """
         Plots the distance-time diagram in the right tab
         """
-        self.repaxes.clear()
-        self.engine.plotMultiRepFrame(self.repaxes)
-        self.repcanvas.draw()
+        if len(self.engine.chopper_system.choppers) > 1:
+            self.repaxes.clear()
+            self.engine.plotMultiRepFrame(self.repaxes)
+            self.repcanvas.draw()
 
     def genText(self):
         """
@@ -425,67 +421,45 @@ class PyChopGui(QtGui.QMainWindow):
             msg.setStandardButtons(QtGui.QMessageBox.Ok)
             msg.exec_()
             raise ValueError(err)
-        obj = self.engine.getObject()
+        obj = self.engine
         instname, chtyp, freqs, ei_in = tuple([obj.instname, obj.getChopper(), obj.getFrequency(), obj.getEi()])
-        if 'LET' in str(instname):
-            eis = obj.getAllowedEi()
-            enmr = np.linspace(0, 0.95, 10)
-            resmr = obj.getMultiRepResolution(enmr)
-            if not hasattr(resmr, '__len__'):
-                resmr = [[resmr]]
-            txt = '# ------------------------------------------------------------- #\n'
-            txt += '# Resolution calculation for LET %s\n' % (chtyp)
-            txt += '#   with the resolution chopper at %3i Hz,\n' % (freqs[-1])
-            txt += '#   and the pulse remover chopper at %3i Hz\n' % (freqs[2])
-            txt += '# ------------------------------------------------------------- #\n'
-            txt += '# Ei = %6.2f meV\n' % (ei_in)
-            txt += '#  EN (meV)   dE (meV)\n'
-            for ii in range(len(res)):
-                txt += '%12.5f %12.5f\n' % (en[ii], res[ii])
-            txt += '# ------------------------------------------------------------- #\n'
-            for ie, ei in enumerate(eis):
-                if np.abs(ei-ei_in) > 0.1:
-                    txt += '# Ei = %6.2f meV\n' % (ei)
-                    txt += '#  EN (meV)   dE (meV)\n'
-                    for ii in range(len(resmr[ie])):
-                        txt += '%12.5f %12.5f\n' % (enmr[ii]*ei, resmr[ie][ii])
-                    txt += '# ------------------------------------------------------------- #\n'
+        ei = ei_in
+        tsqvan, tsqdic = obj.getVanVar()
+        x0, _, x1, x2, _ = obj.chopper_system.getDistances()
+        txt = '# ------------------------------------------------------------- #\n'
+        txt += '# Chop calculation for instrument %s\n' % (instname)
+        if obj.isFermi:
+            txt += '#     with chopper %s at %3i Hz\n' % (chtyp, freqs[0])
         else:
-            ei = ei_in
-            v_van, tmod, tchop = obj.getVanVar()
-            x0, x1, x2 = tuple([obj._ISISFermi__Instruments[obj.instname][ii] for ii in [0, 2, 3]])
-            geom = x1/x0 + x2/x0
-            v_mod = np.sqrt(tmod**2 / geom**2)
-            v_chop = np.sqrt(tchop**2 / (1+geom)**2)
-            txt = '# ------------------------------------------------------------- #\n'
-            txt += '# Chop calculation for %s ''%s'' Chopper at %3i Hz, Ei=%6.2f meV\n' % (instname, chtyp, freqs, ei)
-            txt += '# ------------------------------------------------------------- #\n'
-            txt += '# Flux = %8.2f n/cm2/s/150uAhrs\n' % (flux)
-            txt += '# Elastic resolution = %6.2f meV\n' % (res[0])
-            txt += '# Time width at detector = %6.2f us\n' % (1e6*np.sqrt(v_van))
-            txt += '#     of which: Moderator width = %6.2f us\n' % (1e6*tmod)
-            txt += '#             : Chopper width   = %6.2f us\n' % (1e6*tchop)
-            txt += '# Time width at Fermi = %6.2f us\n' % (1e6*(v_mod + v_chop))
-            txt += '#     of which: Moderator v_mod = %6.2f us\n' % (1e6*v_mod)
-            txt += '#             : Chopper v_chop  = %6.2f us\n' % (1e6*v_chop)
-            txt += '# %s distances:\n' % (instname)
-            txt += '#     x0 = %6.2f m (moderator to Fermi)\n' % (x0)
-            txt += '#     x1 = %6.2f m (Fermi to sample)\n' % (x1)
-            txt += '#     x2 = %6.2f m (sample to detector)\n' % (x2)
-            txt += '# Approximate inelastic resolution is given by:\n'
-            txt += '#     dE = convfac * sqrt(en**3 * v_van2) / x2\n'
-            txt += '#     where:  convfac = 2059.956975\n'
-            txt += '#             v_van2 = (geom*v_mod)**2 + ((1+geom)*v_chop)**2\n'
-            txt += '#             geom = x1/x0 + ((ei/ef)**1.5)*(x2/x0)\n'
-            txt += '# Which in this case is:\n'
-            txt += '#     %.2f*sqrt(ef**3 * ( %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2 \n' % (2059.956975/x2, v_mod**2, x1/x0, x2/x0)
-            txt += '#                         + %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2) )\n' % (v_chop**2, 1+x1/x0, x2/x0)
-            txt += '#  EN (meV)   Full dE (meV)   Approx dE (meV)\n'
-            for ii in range(len(res)):
-                ef = ei-en[ii]
-                approx = (2059.956975/x2)*np.sqrt(ef**3 * ((v_mod**2)*((x1/x0)+(x2/x0)*(ei/ef)**1.5)**2
-                                                           + (v_chop**2)*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5)**2))
-                txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
+            txt += '#     in %s mode with:\n' % (chtyp)
+            freq_names = obj.chopper_system.frequency_names
+            for idx in range(len(freq_names)):
+                txt += '#     %s at %3i Hz\n' % (freq_names[idx], freqs[idx])
+        txt += '# ------------------------------------------------------------- #\n'
+        txt += '# Flux = %8.2f n/cm2/s\n' % (flux)
+        txt += '# Elastic resolution = %6.2f meV\n' % (res[0])
+        txt += '# Time width at detector = %6.2f us, of which:\n' % (1e6*np.sqrt(tsqvan))
+        for ky, val in list(tsqdic.items()):
+            txt += '#     %20s : %6.2f us\n' % (ky, 1e6*np.sqrt(val))
+        txt += '# %s distances:\n' % (instname)
+        txt += '#     x0 = %6.2f m (moderator to Fermi)\n' % (x0)
+        txt += '#     x1 = %6.2f m (Fermi to sample)\n' % (x1)
+        txt += '#     x2 = %6.2f m (sample to detector)\n' % (x2)
+        v_mod, v_chop = (tsqdic['moderator'], tsqdic['chopper'])
+        txt += '# Approximate inelastic resolution is given by:\n'
+        txt += '#     dE = convfac * sqrt(en**3 * v_van2) / x2\n'
+        txt += '#     where:  convfac = 2059.956975\n'
+        txt += '#             v_van2 = (geom*v_mod)**2 + ((1+geom)*v_chop)**2\n'
+        txt += '#             geom = x1/x0 + ((ei/ef)**1.5)*(x2/x0)\n'
+        txt += '# Which in this case is:\n'
+        txt += '#     %.2f*sqrt(ef**3 * ( %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2 \n' % (2059.956975/x2, v_mod, x1/x0, x2/x0)
+        txt += '#                         + %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2) )\n' % (v_chop, 1+x1/x0, x2/x0)
+        txt += '#  EN (meV)   Full dE (meV)   Approx dE (meV)\n'
+        for ii in range(len(res)):
+            ef = ei-en[ii]
+            approx = (2059.956975/x2)*np.sqrt(ef**3 * ((v_mod**2)*((x1/x0)+(x2/x0)*(ei/ef)**1.5)**2
+                                                       + (v_chop**2)*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5)**2))
+            txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
         return txt
 
     def showText(self):
@@ -533,8 +507,8 @@ class PyChopGui(QtGui.QMainWindow):
             for ie, ee in enumerate(out['Eis']):
                 res = out['Energy'][ie]
                 percent = res / ee * 100
-                chop_width = out['Chopper'][ie]
-                mod_width = out['Moderator'][ie]
+                chop_width = out['chopper'][ie]
+                mod_width = out['moderator'][ie]
                 new_str += 'Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ee, res * 1000, percent)
                 new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
         else:
@@ -542,8 +516,8 @@ class PyChopGui(QtGui.QMainWindow):
             out = self.engine.getWidths()
             res = out['Energy']
             percent = res / ei * 100
-            chop_width = out['Chopper']
-            mod_width = out['Moderator']
+            chop_width = out['chopper']
+            mod_width = out['moderator']
             new_str = '\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ei, res * 1000, percent)
             new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
         self.scredt.append(new_str)
@@ -769,16 +743,6 @@ class PyChopGui(QtGui.QMainWindow):
         self.setCentralWidget(self.mainWidget)
         self.setWindowTitle('PyChopGUI')
         self.show()
-
-    def __init__(self):
-        super(PyChopGui, self).__init__()
-        import sys, os
-        self.folder = os.path.dirname(sys.modules[self.__module__].__file__) + '/'
-        self.engine = Instrument(self.folder+self.instruments['MAPS'], 'A', 50)
-        self.drawLayout()
-        self.setInstrument('MAPS')
-        self.xlim = 0
-        self.isFramePlotted = 0
 
 
 def show():

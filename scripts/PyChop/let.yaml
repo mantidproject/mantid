@@ -27,6 +27,7 @@ chopper_system:
       isPhaseIndependent: True  # Is this disk to be phased independently?
       defaultPhase: 5           # What is the default phase for this disk (either a time in microseconds
                                 #   or a slot index for the desired rep to go through).
+      phaseName: 'Chopper 2 phase delay time'
     -
       name: LET Disk 3 Pulse Remover
       distance: 11.75           # Distance from moderator to this chopper in metres
@@ -48,7 +49,7 @@ chopper_system:
     -
       name: LET Disk 5 Resolution
       distance: 23.5            # Distance from moderator to this chopper in metres
-      slot_width: 20            # Slot width in mm
+      slot_width: 31            # Slot width in mm
       guide_width: 20           # Width of guide after chopper in mm
       nslot: 2                  # Number of slots. (Assume all slots equally spaced)
       radius: 290               # Disk radius
@@ -65,6 +66,9 @@ chopper_system:
      [1, 0]]
   constant_frequencies:         # This specifies if a chopper should be run at a fixed constant frequency
     [0, 10., 0., 0., 0.]        # On LET, Disk 2, the frame-overlap chopper, should always run at 10 Hz
+  frequency_names:
+    - 'Resolution frequency'
+    - 'Pulse remover frequency'
   max_frequencies:
     [300, 300]                  # Maximum frequencies (Hz)
   default_frequencies:
@@ -75,16 +79,16 @@ chopper_system:
   flux_ref_freq: 150            # Reference final chopper freq (Hz) for flux transmission calc (disk choppers only)
   # Can define variants which overide one of the above parameters
   variants:                     # On LET the final chopper has 3 sets of slots with different widths
-    Intermediate:               # This is the default mode (uses the 20mm slot).
+    High Flux:                  # This is the default mode (uses the widest 31mm slot).
       default: True             # If this key is omitted, the variant without any option is used as default
-    High Flux:
+    Intermediate:
       choppers:                 # Note that we need to leave the required number of dashes to indicate
         -                       #   choppers whos parameters have not changed.
         -
         -
         -
         -
-          slot_width: 31
+          slot_width: 20
     High Resolution:
       frequency_matrix:
         [[0.5, 0],
@@ -107,7 +111,7 @@ moderator:
   mod_pars: [-3.143, 49.28, .535] # imod==3 is polynomial. Pars are coeff from highest order to lowest
   theta: 32.0                   # Angle beamline makes with moderator face (degrees)
   source_rep: 10                # Frequency of source (Hz)
-  emission_time: 3500           # Time width of source pulse in microseconds
+  emission_time: 3500           # Time width of source pulse in microseconds (only used to determine spurious reps in multi-rep mode)
   measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
     scale_factor: 63276.8362    # A factor to scale the flux values below by
     wavelength: [0.5,   0.6,   0.7,   0.8,   0.9,   1. ,   1.1,   1.2,   1.3,

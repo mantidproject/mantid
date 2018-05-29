@@ -22,6 +22,7 @@ chopper_system:
       isPhaseIndependent: True  # Is this disk to be phased independently?
       defaultPhase: 1500        # What is the default phase for this disk (either a time in microseconds
                                 #   or a slot index [as a string] for the desired rep to go through)
+      phaseName: 'Disk chopper phase delay time'
     -
       name: MERLIN Fermi
       distance: 10.0            # Distance from moderator to this chopper in metres

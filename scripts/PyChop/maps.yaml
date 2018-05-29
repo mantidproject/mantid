@@ -23,6 +23,7 @@ chopper_system:
       isPhaseIndependent: True  # Is this disk to be phased independently?
       defaultPhase: "1"         # What is the default phase for this disk (either a time in microseconds
                                 #   or a slot index [as a string] for the desired rep to go through)
+      phaseName: 'Multirep mode number'
     -
       name: MAPS Fermi
       distance: 10.1            # Distance from moderator to this chopper in metres
@@ -61,6 +62,9 @@ chopper_system:
   frequency_matrix:
     [[0, 1],                    # f1 is the Fermi frequency
      [1, 0]]                    # f2 is the Disk frequency
+  frequency_names:
+    - 'Fermi frequency'
+    - 'Disk frequency'
   max_frequencies:
     [600, 100]                  # Maximum frequencies (Hz)
   default_frequencies:

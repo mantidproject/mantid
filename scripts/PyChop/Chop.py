@@ -105,18 +105,16 @@ def tikeda(S1, S2, B1, B2, Emod, Ei):
     """
     ! Calculates the moderator time width based on the Ikeda-Carpenter distribution
     """
+    Ei = np.array(Ei if hasattr(Ei, '__len__') else [Ei])
     sig = np.sqrt((S1*S1) + ((S2*S2*81.8048)/Ei))
     A = 4.37392e-4 * sig * np.sqrt(Ei)
     tausqr = []
-    for j in range(len(Ei)):
-        if Ei[j] > 130.0:
-            B = B2
-        else:
-            B = B1
-        R = np.exp(-Ei/Emod)
-        tausqr[j] = (3.0/(A*A)) + (R*(2.0-R)) / (B*B)
+    B = np.array([B1] * len(Ei))
+    B[np.where(Ei > 130.0)] = B2
+    R = np.exp(-Ei/Emod)
+    tausqr = (3.0/(A**2)) + (R*(2.0-R)) / (B**2)
     # variance currently in mms**2. Convert to sec**2
-    return tausqr*1.0e-12
+    return (tausqr if len(tausqr) > 1 else tausqr[0]) * 1.0e-12
 
 
 def tchi(delta, Ei):
