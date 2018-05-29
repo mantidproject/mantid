@@ -35,11 +35,15 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.widget.get_filter_text = mock.Mock(return_value="")
 
         self.model = mock.Mock(spec=PlotSelectorModel)
-        self.model.configure_mock(plot_list=["Plot1", "Plot2", "Plot3"])
+        self.model.configure_mock(plot_list=["Plot1", "Plot2", "Plot3", "Graph99"])
 
         self.presenter = PlotSelectorPresenter(None, self.widget, self.model)
         self.presenter.widget = self.widget
         self.presenter.model = self.model
+
+        # Ignore calls during the setup
+        self.widget.reset_mock()
+        self.model.reset_mock()
 
     def convert_list_to_calls(self, list_to_convert):
         call_list = []
@@ -47,7 +51,18 @@ class PlotSelectorPresenterTest(unittest.TestCase):
             call_list.append(mock.call(item))
         return call_list
 
-    # ------------------------ Closing Tests ------------------------
+    def test_plot_list_update(self):
+        self.presenter.update_plot_list()
+        self.assertEqual(self.model.update_plot_list.call_count, 1)
+        self.widget.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3", "Graph99"])
+
+    def test_plot_list_update_with_filter_set(self):
+        self.widget.get_filter_text = mock.Mock(return_value="Graph99")
+        self.presenter.update_plot_list()
+        self.assertEqual(self.model.update_plot_list.call_count, 1)
+        self.widget.set_plot_list.assert_called_once_with(["Graph99"])
+
+    # ------------------------ Plot Closing -------------------------
 
     def test_close_button_pressed_single_plot(self):
         self.widget.get_all_selected_plot_names = mock.Mock(return_value=["Plot1"])
@@ -75,6 +90,38 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
         self.presenter.close_button_clicked()
         self.assertEqual(self.model.close_plot.call_count, 0)
+
+    # ----------------------- Plot Filtering ------------------------
+
+    def test_no_filtering_displays_all_plots(self):
+        self.presenter.filter_text_changed()
+        self.widget.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3", "Graph99"])
+
+    def test_plots_filtered_on_full_name(self):
+        self.widget.get_filter_text = mock.Mock(return_value="Plot1")
+        self.presenter.filter_text_changed()
+
+        self.widget.set_plot_list.assert_called_once_with(["Plot1"])
+
+    def test_plots_filtered_on_substring(self):
+        self.widget.get_filter_text = mock.Mock(return_value="lot")
+        self.presenter.filter_text_changed()
+
+        self.widget.set_plot_list.assert_called_once_with(["Plot1", "Plot2", "Plot3"])
+
+    def test_filtering_case_invariant(self):
+        self.widget.get_filter_text = mock.Mock(return_value="pLOT1")
+        self.presenter.filter_text_changed()
+
+        self.widget.set_plot_list.assert_called_once_with(["Plot1"])
+
+    # ----------------------- Plot Selection ------------------------
+
+    def test_double_clicking_plot_brings_to_front(self):
+        self.widget.get_currently_selected_plot_name = mock.Mock(return_value="Plot2")
+        self.presenter.list_double_clicked()
+
+        self.model.make_plot_active.assert_called_once_with("Plot2")
 
 
 if __name__ == '__main__':

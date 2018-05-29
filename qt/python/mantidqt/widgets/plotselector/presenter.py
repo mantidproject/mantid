@@ -39,16 +39,42 @@ class PlotSelectorPresenter(object):
         # Make sure the plot list is up to date
         self.update_plot_list()
 
-    def get_widget(self):
-        return self.view
-
     def update_plot_list(self):
         self.model.update_plot_list()
         filter_text = self.view.get_filter_text()
         if not filter_text:
             self.view.set_plot_list(self.model.plot_list)
         else:
-            self.filter_list_by_string(filter_text)
+            self._filter_plot_list_by_string(filter_text)
+
+    # ------------------------ Plot Closing -------------------------
+
+    def close_button_clicked(self):
+        selected_plots = self.view.get_all_selected_plot_names()
+        self._close_plots(selected_plots)
+
+    def _close_plots(self, list_of_plots):
+        for plot_name in list_of_plots:
+            self._close_plot(plot_name)
+
+    def _close_plot(self, plot_name):
+        self.model.close_plot(plot_name)
+
+    # ----------------------- Plot Filtering ------------------------
+
+    def filter_text_changed(self):
+        filter_text = self.view.get_filter_text()
+        self._filter_plot_list_by_string(filter_text)
+
+    def _filter_plot_list_by_string(self, filter_text):
+        if not filter_text:
+            self.view.set_plot_list(self.model.plot_list)
+        else:
+            filtered_plot_list = []
+            for plot_name in self.model.plot_list:
+                if filter_text.lower() in plot_name.lower():
+                    filtered_plot_list.append(plot_name)
+            self.view.set_plot_list(filtered_plot_list)
 
     # ----------------------- Plot Selection ------------------------
 
@@ -58,33 +84,3 @@ class PlotSelectorPresenter(object):
 
     def make_plot_active(self, plot_name):
         self.model.make_plot_active(plot_name)
-
-    # ----------------------- Plot Filtering ------------------------
-
-    def filter_text_changed(self):
-        filter_text = self.view.get_filter_text()
-        self.filter_list_by_string(filter_text)
-
-    def filter_list_by_string(self, filter_text):
-        if not filter_text:
-            self.view.set_plot_list(self.model.plot_list)
-        else:
-            filtered_plot_list = []
-            for plot_name in self.model.plot_list:
-                if filter_text in plot_name:
-                    filtered_plot_list.append(plot_name)
-            self.view.set_plot_list(filtered_plot_list)
-
-    # ------------------------ Plot Closing -------------------------
-
-    def close_button_clicked(self):
-        selected_plots = self.view.get_all_selected_plot_names()
-        self.close_plots(selected_plots)
-
-    def close_plots(self, list_of_plots):
-        for plot_name in list_of_plots:
-            self.close_plot(plot_name)
-
-    def close_plot(self, plot_name):
-        self.model.close_plot(plot_name)
-
