@@ -218,9 +218,11 @@ public:
                             QWidget *parent /TransferThis/ = nullptr);
 
 signals:
-  void plotSpectrumClicked(const QStringList & workspaceName);
-  void plotSpectrumWithErrorsClicked(const QStringList & workspaceName);
-  void plotColorfillClicked(const QStringList &workspaceName);
+  void plotSpectrumClicked(const QStringList & workspaceNames);
+  void overplotSpectrumClicked(const QStringList & workspaceNames);
+  void plotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
+  void overplotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
+  void plotColorfillClicked(const QStringList &workspaceNames);
 };
 
 // ---------------------------------
