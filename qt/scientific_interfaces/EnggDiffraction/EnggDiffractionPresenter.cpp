@@ -1076,8 +1076,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   m_vanadiumCorrectionsModel->setCurrentInstrument(m_view->currentInstrument());
   const auto vanadiumCorrectionWorkspaces =
       m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(vanNo);
-  const auto vanIntegWS = vanadiumCorrectionWorkspaces.first;
-  const auto vanCurvesWS = vanadiumCorrectionWorkspaces.second;
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
@@ -1731,8 +1731,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   const auto vanadiumCorrectionWorkspaces =
       m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(
           m_view->currentVanadiumNo());
-  const auto vanIntegWS = vanadiumCorrectionWorkspaces.first;
-  const auto vanCurvesWS = vanadiumCorrectionWorkspaces.second;
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
