@@ -46,7 +46,7 @@ std::string rmInsertFunction(const std::string &originalTie) {
   return LHName + RHName;
 }
 
-int findName(const std::vector<std::string> &colNames, const char* name) {
+int findName(const std::vector<std::string> &colNames, const char *name) {
   for (size_t j = 0; j < colNames.size(); j++) {
     if (colNames[j] == name) {
       return static_cast<int>(j);
