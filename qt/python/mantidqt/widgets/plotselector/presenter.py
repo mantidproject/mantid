@@ -25,12 +25,12 @@ class PlotSelectorPresenter(object):
     Presents (controls) a plot selector view. This UI element allows the user
     to select and make active a plot.
     """
-    def __init__(self, current_figure_class, view = None, model = None):
+    def __init__(self, current_figure_class, widget = None, model = None):
         # Create model and view, or accept mocked versions
-        if view is None:
-            self.view = PlotSelectorWidget(self)
+        if widget is None:
+            self.widget = PlotSelectorWidget(self)
         else:
-            self.view = view
+            self.widget = widget
         if model is None:
             self.model = PlotSelectorModel(self, current_figure_class)
         else:
@@ -41,16 +41,16 @@ class PlotSelectorPresenter(object):
 
     def update_plot_list(self):
         self.model.update_plot_list()
-        filter_text = self.view.get_filter_text()
+        filter_text = self.widget.get_filter_text()
         if not filter_text:
-            self.view.set_plot_list(self.model.plot_list)
+            self.widget.set_plot_list(self.model.plot_list)
         else:
             self._filter_plot_list_by_string(filter_text)
 
     # ------------------------ Plot Closing -------------------------
 
     def close_button_clicked(self):
-        selected_plots = self.view.get_all_selected_plot_names()
+        selected_plots = self.widget.get_all_selected_plot_names()
         self._close_plots(selected_plots)
 
     def _close_plots(self, list_of_plots):
@@ -63,23 +63,23 @@ class PlotSelectorPresenter(object):
     # ----------------------- Plot Filtering ------------------------
 
     def filter_text_changed(self):
-        filter_text = self.view.get_filter_text()
+        filter_text = self.widget.get_filter_text()
         self._filter_plot_list_by_string(filter_text)
 
     def _filter_plot_list_by_string(self, filter_text):
         if not filter_text:
-            self.view.set_plot_list(self.model.plot_list)
+            self.widget.set_plot_list(self.model.plot_list)
         else:
             filtered_plot_list = []
             for plot_name in self.model.plot_list:
                 if filter_text.lower() in plot_name.lower():
                     filtered_plot_list.append(plot_name)
-            self.view.set_plot_list(filtered_plot_list)
+            self.widget.set_plot_list(filtered_plot_list)
 
     # ----------------------- Plot Selection ------------------------
 
     def list_double_clicked(self):
-        plot_name = self.view.get_currently_selected_plot_name()
+        plot_name = self.widget.get_currently_selected_plot_name()
         self.make_plot_active(plot_name)
 
     def make_plot_active(self, plot_name):

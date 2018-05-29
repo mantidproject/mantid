@@ -16,15 +16,14 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
-import sys
 from mantidqt.widgets.plotselector.model import PlotSelectorModel
 from mantidqt.widgets.plotselector.presenter import PlotSelectorPresenter
 from mantidqt.widgets.plotselector.widget import PlotSelectorWidget
 
 import unittest
-if sys.version_info.major == 3:
+try:
     from unittest import mock
-else:
+except ImportError:
     import mock
 
 

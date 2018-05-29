@@ -162,28 +162,20 @@ class CurrentFigure(object):
         for num, figure_manager in cls.figs.items():
             if figure_manager.get_window_title() == figure_title:
                 return num
+        return None
 
     @classmethod
     def get_figure_manager_from_name(cls, figure_title):
         for figure_manager in cls.figs.values():
             if figure_manager.get_window_title() == figure_title:
                 return figure_manager
+        return None
 
     @classmethod
     def set_hold(cls, manager):
         """If this manager is active then set inactive"""
         if cls._active == manager:
             cls._active = None
-
-    @classmethod
-    def bring_to_front_by_name(cls, figure_title):
-        """
-        Make the figure corresponding to figure_title come to the top.
-        """
-        for figure_manager in cls.figs.values():
-            if figure_manager.get_window_title() == figure_title:
-                figure_manager.show()
-                break
 
     # ---------------------- Observer methods ---------------------
     # This is currently very simple as the only observer is

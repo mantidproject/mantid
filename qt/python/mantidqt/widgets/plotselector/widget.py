@@ -104,4 +104,3 @@ class PlotSelectorWidget(QWidget):
 
     def get_filter_text(self):
         return self.filter_box.text()
-

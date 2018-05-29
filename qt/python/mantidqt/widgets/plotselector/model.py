@@ -45,8 +45,11 @@ class PlotSelectorModel(object):
         self.presenter.update_plot_list()
 
     def make_plot_active(self, plot_name):
-        self.CurrentFigure.bring_to_front_by_name(plot_name)
+        figure_manager = self.CurrentFigure.get_figure_manager_from_name(plot_name)
+        if figure_manager is not None:
+            figure_manager.show()
 
     def close_plot(self, plot_name):
         figure_number_to_close = self.CurrentFigure.get_figure_number_from_name(plot_name)
-        self.CurrentFigure.destroy(figure_number_to_close)
+        if figure_number_to_close is not None:
+            self.CurrentFigure.destroy(figure_number_to_close)
