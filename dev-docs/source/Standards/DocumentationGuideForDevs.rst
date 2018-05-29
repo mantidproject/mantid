@@ -251,14 +251,4 @@ For multi-configuration generators such as Visual Studio or XCode you will need 
 Building the HTML Development Documentation
 ===========================================
 
-The developer documentation is written as .rst files, the html files can be built using a python script;
-
--  Copy the python script ``runsphinx_html.py`` from the ``docs/`` directory from the mantid build directory, into ``dev-docs/``.
--  Open the script (in e.g. Notepad++) and modify the paths of the following global variables at the top of the file to point to dev-docs rather than docs: ``CONF_DIR``, ``SPHINX_BUILD_DIR``, ``BUILD_DIR``.
--  Open the ``command-prompt.bat`` file in the build directory to open a command prompt and enter (on Windows, for Linux/Mac change from backlslash to forward slashes);
-
-.. code-block:: sh
-
-   bin\Debug\MantidPlot -xq dev-docs\runsphinx_html.py
-
--  This will build all the development documentation into ``dev-docs/html/``, for specific files use the option ``-R name`` where name is a regular expression and therefore matched to parts of or entire filenames.
+The developer documentation is written as .rst files, the html files can be built by through visual studio. Opening mantid in visual studio, and in the solution explorer right click on the dev-docs-html project (inside Documentation) and select build. This will build all the development documentation into the mantid build folder under ``dev-docs/html/``.
