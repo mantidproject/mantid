@@ -7,8 +7,6 @@
 #include <Poco/Path.h>
 #include <boost/optional.hpp>
 
-#include <unordered_map>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -74,11 +72,6 @@ private:
   EnggDiffCalibSettings m_calibSettings;
 
   std::string m_currentInstrument;
-
-  mutable std::unordered_map<std::string, std::string> m_curvesFilenameCache;
-
-  mutable std::unordered_map<std::string, std::string>
-      m_integratedFilenameCache;
 };
 
 } // CustomInterfaces

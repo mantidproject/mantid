@@ -75,17 +75,9 @@ EnggVanadiumCorrectionsModel::fetchCorrectionWorkspaces(
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
 EnggVanadiumCorrectionsModel::fetchCachedCurvesWorkspace(
     const std::string &vanadiumRunNumber) const {
-
-  if (m_curvesFilenameCache.find(vanadiumRunNumber) !=
-      m_curvesFilenameCache.end()) {
-    return loadMatrixWorkspace(m_curvesFilenameCache[vanadiumRunNumber],
-                               CURVES_WORKSPACE_NAME);
-  }
-
   const auto filename = generateCurvesFilename(vanadiumRunNumber);
   const Poco::File inputFile(filename);
   if (inputFile.exists()) {
-    m_curvesFilenameCache[vanadiumRunNumber] = filename;
     return loadMatrixWorkspace(filename, CURVES_WORKSPACE_NAME);
   }
 
@@ -95,17 +87,9 @@ EnggVanadiumCorrectionsModel::fetchCachedCurvesWorkspace(
 boost::optional<Mantid::API::ITableWorkspace_sptr>
 EnggVanadiumCorrectionsModel::fetchCachedIntegratedWorkspace(
     const std::string &vanadiumRunNumber) const {
-
-  if (m_integratedFilenameCache.find(vanadiumRunNumber) !=
-      m_integratedFilenameCache.end()) {
-    return loadTableWorkspace(m_integratedFilenameCache[vanadiumRunNumber],
-                              INTEGRATED_WORKSPACE_NAME);
-  }
-
   const auto filename = generateIntegratedFilename(vanadiumRunNumber);
   const Poco::File inputFile(filename);
   if (inputFile.exists()) {
-    m_integratedFilenameCache[vanadiumRunNumber] = filename;
     return loadTableWorkspace(filename, INTEGRATED_WORKSPACE_NAME);
   }
 
@@ -177,11 +161,9 @@ void EnggVanadiumCorrectionsModel::saveCorrectionsToCache(
     const Mantid::API::ITableWorkspace_sptr integratedWorkspace) const {
   const auto curvesFilename = generateCurvesFilename(runNumber);
   saveNexus(curvesFilename, curvesWorkspace);
-  m_curvesFilenameCache[runNumber] = curvesFilename;
 
   const auto integratedFilename = generateIntegratedFilename(runNumber);
   saveNexus(integratedFilename, integratedWorkspace);
-  m_integratedFilenameCache[runNumber] = integratedFilename;
 }
 
 void EnggVanadiumCorrectionsModel::saveNexus(
