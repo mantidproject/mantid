@@ -94,12 +94,12 @@ std::string getRunLabel(const std::string &instrument,
   std::ostringstream label;
   label << instrument;
   for (auto range : ranges) {
-	  label << createStringFromRange(range, zeroPadding);
-	  // Only pad the first set
-	  zeroPadding = 0;
-	  if (range != ranges.back()) {
-		  label << ", ";
-	  }
+    label << createStringFromRange(range, zeroPadding);
+    // Only pad the first set
+    zeroPadding = 0;
+    if (range != ranges.back()) {
+      label << ", ";
+    }
   }
 
   return label.str();
@@ -135,15 +135,15 @@ std::string createStringFromRange(const std::pair<int, int> &range,
     // Remove the common part of the first and last run, so we get e.g.
     // "12345-56" instead of "12345-12356"
     size_t sharedDigits = 0;
-	for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
-		if (firstRun[i] != lastRun[i]) {
-			lastRun.erase(0, i);
-			break;
-		}
-	}
-	if (sharedDigits > 0) {
-		lastRun.erase(0, sharedDigits);
-	}
+    for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i) {
+      if (firstRun[i] != lastRun[i]) {
+        lastRun.erase(0, i);
+        break;
+      }
+    }
+    if (sharedDigits > 0) {
+      lastRun.erase(0, sharedDigits);
+    }
     paddedLabel << "-" << lastRun;
   }
 

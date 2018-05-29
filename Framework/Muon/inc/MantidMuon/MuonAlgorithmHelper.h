@@ -37,10 +37,10 @@ struct AnalysisOptions {
   double timeZero = 0;                  /// Value to use for t0 correction
   double loadedTimeZero = 0;            /// Time zero from data file
   std::pair<double, double> timeLimits; /// Min, max X values
-  std::string rebinArgs;                /// Arguments for rebin (empty to not rebin)
-  std::string groupPairName;            /// Name of group or pair to use
-  Mantid::API::Grouping grouping;       /// Grouping to use
-  PlotType plotType = {};               /// Type of analysis to perform
+  std::string rebinArgs;          /// Arguments for rebin (empty to not rebin)
+  std::string groupPairName;      /// Name of group or pair to use
+  Mantid::API::Grouping grouping; /// Grouping to use
+  PlotType plotType = {};         /// Type of analysis to perform
   explicit AnalysisOptions() {}
 };
 
@@ -55,11 +55,12 @@ DLLExport Mantid::API::MatrixWorkspace_sptr firstPeriod(API::Workspace_sptr ws);
 DLLExport std::string getRunLabel(const API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
-DLLExport std::string getRunLabel(const std::vector<API::Workspace_sptr> &wsList);
+DLLExport std::string
+getRunLabel(const std::vector<API::Workspace_sptr> &wsList);
 
 /// Get a run label given instrument and run numbers
 DLLExport std::string getRunLabel(const std::string &instrument,
-                        const std::vector<int> &runNumbers);
+                                  const std::vector<int> &runNumbers);
 
 /// Create a string from a range "first-last", removing common digits from last.
 /// Also pads with zeros up to zeroPadding digits.
@@ -68,7 +69,7 @@ DLLExport std::string createStringFromRange(const std::pair<int, int> &range,
 
 /// Makes sure the specified workspaces are in specified group
 DLLExport void groupWorkspaces(const std::string &groupName,
-                     const std::vector<std::string> &inputWorkspaces);
+                               const std::vector<std::string> &inputWorkspaces);
 
 /// Finds runs of consecutive numbers
 DLLExport std::vector<std::pair<int, int>>
