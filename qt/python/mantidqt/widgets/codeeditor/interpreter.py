@@ -164,7 +164,7 @@ class PythonFileInterpreter(QWidget):
         # set a margin large enough for sensible file sizes < 1000 lines
         # and the progress marker
         font_metrics = QFontMetrics(self.font())
-        editor.setMarginWidth(1, font_metrics.averageCharWidth()*3 + 12)
+        editor.setMarginWidth(1, font_metrics.averageCharWidth() * 3 + 20)
 
         # fill with content if supplied and set source filename
         if default_content is not None:
