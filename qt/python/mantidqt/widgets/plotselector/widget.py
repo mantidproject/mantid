@@ -54,6 +54,11 @@ class PlotSelectorWidget(QWidget):
         layout.sizeHint()
         self.setLayout(layout)
 
+        # Connect presenter methods to things in the view
+        self.list_view.doubleClicked.connect(self.presenter.list_double_clicked)
+        self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
+        self.close_button.clicked.connect(self.presenter.close_button_clicked)
+
     def _make_filter_box(self):
         """
         Make the filter by plot name box

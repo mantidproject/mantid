@@ -25,18 +25,19 @@ class PlotSelectorPresenter(object):
     Presents (controls) a plot selector view. This UI element allows the user
     to select and make active a plot.
     """
-    def __init__(self, current_figure_class):
-        # Create model and view
-        self.view = PlotSelectorWidget(self)
-        self.model = PlotSelectorModel(self, current_figure_class)
+    def __init__(self, current_figure_class, view = None, model = None):
+        # Create model and view, or accept mocked versions
+        if view is None:
+            self.view = PlotSelectorWidget(self)
+        else:
+            self.view = view
+        if model is None:
+            self.model = PlotSelectorModel(self, current_figure_class)
+        else:
+            self.model = model
 
         # Make sure the plot list is up to date
         self.update_plot_list()
-
-        # Connect presenter methods to things in the view
-        self.view.list_view.doubleClicked.connect(self._list_double_clicked)
-        self.view.filter_box.textChanged.connect(self._filter_text_changed)
-        self.view.close_button.clicked.connect(self._close_button_clicked)
 
     def get_widget(self):
         return self.view
@@ -51,7 +52,7 @@ class PlotSelectorPresenter(object):
 
     # ----------------------- Plot Selection ------------------------
 
-    def _list_double_clicked(self):
+    def list_double_clicked(self):
         plot_name = self.view.get_currently_selected_plot_name()
         self.make_plot_active(plot_name)
 
@@ -60,7 +61,7 @@ class PlotSelectorPresenter(object):
 
     # ----------------------- Plot Filtering ------------------------
 
-    def _filter_text_changed(self):
+    def filter_text_changed(self):
         filter_text = self.view.get_filter_text()
         self.filter_list_by_string(filter_text)
 
@@ -76,7 +77,7 @@ class PlotSelectorPresenter(object):
 
     # ------------------------ Plot Closing -------------------------
 
-    def _close_button_clicked(self):
+    def close_button_clicked(self):
         selected_plots = self.view.get_all_selected_plot_names()
         self.close_plots(selected_plots)
 
