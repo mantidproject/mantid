@@ -1,5 +1,11 @@
 set ( SRC_FILES
+    Reduction/Group.cpp
+    Reduction/RangeInQ.cpp
+    Reduction/ReductionWorkspaces.cpp
+    Reduction/Row.cpp
+    Reduction/SlicedReductionWorkspaces.cpp
     BatchView.cpp
+    ValidateRow.cpp
     BatchPresenter.cpp
     MeasurementItem.cpp
     InstrumentOptionDefaults.cpp

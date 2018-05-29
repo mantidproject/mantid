@@ -3,6 +3,7 @@
 #include "DllConfig.h"
 #include <memory>
 #include "IBatchView.h"
+#include "Reduction/Group.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,15 +36,56 @@ public:
   void notifyDeleteGroupRequested() override;
 
 private:
-  bool
-  isGroupLocation(MantidQt::MantidWidgets::Batch::RowLocation const &location) const;
-  bool containsGroups(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations) const;
+  bool isGroupLocation(MantidWidgets::Batch::RowLocation const &location) const;
+  bool isRowLocation(MantidWidgets::Batch::RowLocation const &location) const;
+  int groupOf(MantidWidgets::Batch::RowLocation const &location) const;
+  int rowOf(MantidWidgets::Batch::RowLocation const &location) const;
+
+  bool containsGroups(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations)
+      const;
   std::vector<int> groupIndexesFromSelection(
       std::vector<MantidWidgets::Batch::RowLocation> const &selected) const;
+
+  std::vector<int> mapToContainingGroups(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
+          mustNotContainRoot) const;
+  void
+  removeGroupsFromView(std::vector<int> const &groupIndicesOrderedLowToHigh);
+  void
+  removeGroupsFromModel(std::vector<int> const &groupIndicesOrderedLowToHigh);
+  void removeRowsFromModel(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rows);
+  void
+  showAllCellsOnRowAsValid(MantidWidgets::Batch::RowLocation const &itemIndex);
+
+  void removeRowsAndGroupsFromView(std::vector<
+      MantidQt::MantidWidgets::Batch::RowLocation> const &locations);
+  void removeRowsAndGroupsFromModel(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> locations);
+
+  void appendRowsToGroupsInView(std::vector<int> const &groupIndices);
+  void appendRowsToGroupsInModel(std::vector<int> const &groupIndices);
+  void appendEmptyGroupInModel();
+  void appendEmptyGroupInView();
+  void insertEmptyGroupInModel(int beforeGroup);
+  void insertEmptyGroupInView(int beforeGroup);
+  void insertEmptyRowInModel(int groupIndex, int beforeRow);
+  std::vector<std::string>
+  mapToContentText(std::vector<MantidWidgets::Batch::Cell> const &cells) const;
+  std::vector<std::string>
+  cellTextFromViewAt(MantidWidgets::Batch::RowLocation const &location) const;
+  void
+  showCellsAsInvalidInView(MantidWidgets::Batch::RowLocation const &itemIndex,
+                           std::vector<int> const &invalidColumns);
+
   static auto constexpr DEPTH_LIMIT = 2;
+
   IBatchView *m_view;
   std::vector<std::string> m_instruments;
-  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> m_clipboard;
+  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
+      m_clipboard;
+  std::vector<UnslicedGroup> m_model;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenterFactory {

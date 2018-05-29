@@ -1,13 +1,16 @@
 #include <gmock/gmock.h>
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 class EXPORT_OPT_MANTIDQT_COMMON MockJobTreeView : public IJobTreeView {
 public:
-  virtual void filterRowsBy(std::unique_ptr<RowPredicate> predicate) {
+  void filterRowsBy(std::unique_ptr<RowPredicate> predicate) override {
     filterRowsBy(predicate.get());
   }
   MOCK_METHOD1(filterRowsBy, void(RowPredicate *));
@@ -53,6 +56,7 @@ public:
   MOCK_CONST_METHOD0(deadCell, Cell());
 };
 
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 }
 }
 }

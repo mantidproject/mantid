@@ -10,8 +10,9 @@ BatchView::BatchView(std::vector<std::string> const &instruments,
   m_ui.setupUi(this);
   m_jobs =
       Mantid::Kernel::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
-          QStringList({"Run(s)", "Angle", "Transmission Run(s)", "Q min",
-                       "Q max", "dQ/Q", "Scale", "Options"}),
+          QStringList({"Run(s)", "Angle", "First Transmission Run",
+                       "Second Transmission Run", "Q min", "Q max", "dQ/Q",
+                       "Scale", "Options"}),
           MantidQt::MantidWidgets::Batch::Cell(""), this);
   m_ui.mainLayout->insertWidget(1, m_jobs.get());
   addToolbarActions();
@@ -95,17 +96,11 @@ void BatchView::onDeleteGroupPressed(bool) {
   m_notifyee->notifyDeleteGroupRequested();
 }
 
-void BatchView::onCopyPressed(bool) {
-  m_notifyee->notifyCopyRowsRequested();
-}
+void BatchView::onCopyPressed(bool) { m_notifyee->notifyCopyRowsRequested(); }
 
-void BatchView::onCutPressed(bool) {
-  m_notifyee->notifyCutRowsRequested();
-}
+void BatchView::onCutPressed(bool) { m_notifyee->notifyCutRowsRequested(); }
 
-void BatchView::onPastePressed(bool) {
-  m_notifyee->notifyPasteRowsRequested();
-}
+void BatchView::onPastePressed(bool) { m_notifyee->notifyPasteRowsRequested(); }
 
 BatchViewFactory::BatchViewFactory(std::vector<std::string> const &instruments)
     : m_instruments(instruments) {}

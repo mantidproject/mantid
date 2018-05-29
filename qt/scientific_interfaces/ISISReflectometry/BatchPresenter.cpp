@@ -1,5 +1,9 @@
 #include "BatchPresenter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include "Reduction/Group.h"
+#include "ValidateRow.h"
+
+#include <iostream>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -14,44 +18,70 @@ operator()(IBatchView *view) const {
 
 BatchPresenter::BatchPresenter(IBatchView *view,
                                std::vector<std::string> const &instruments)
-    : m_view(view), m_instruments(instruments) {
+    : m_view(view), m_instruments(instruments), m_model() {
   m_view->subscribe(this);
+}
+
+void BatchPresenter::removeRowsFromModel(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rows) {
+  std::sort(rows.begin(), rows.end());
+  for (auto row = rows.crbegin(); row != rows.crend(); ++row) {
+    auto const groupIndex = groupOf(*row);
+    auto const rowIndex = rowOf(*row);
+    m_model[groupIndex].removeRow(rowIndex);
+  }
 }
 
 void BatchPresenter::notifyDeleteRowRequested() {
   auto selected = m_view->jobs().selectedRowLocations();
   if (!selected.empty()) {
     if (!containsGroups(selected)) {
-      m_view->jobs().removeRows(selected);
+      removeRowsAndGroupsFromView(selected);
+      removeRowsFromModel(selected);
     } else {
       // TODO: m_view->mustNotSelectGroupError();
     }
   } else {
-    // TODO: m_view->mustNotSelectRowError();
+    // TODO: m_view->mustSelectRowError();
   }
 }
 
 void BatchPresenter::notifyDeleteGroupRequested() {
   auto selected = m_view->jobs().selectedRowLocations();
   if (selected.size() > 0) {
-    auto groups = groupIndexesFromSelection(selected);
-    // groupIndexesFromSelection returns indexes ordered from low to high.
-    // To avoid invalidating our row locations we need to delete in the reverse
-    // order.
-    for (auto it = groups.crbegin(); it < groups.crend(); ++it)
-      m_view->jobs().removeRowAt(
-          MantidQt::MantidWidgets::Batch::RowLocation({*it}));
+    auto groupIndicesOrderedLowToHigh = groupIndexesFromSelection(selected);
+    removeGroupsFromModel(groupIndicesOrderedLowToHigh);
+    removeGroupsFromView(groupIndicesOrderedLowToHigh);
   } else {
     // TODO: m_view->mustSelectGroupOrRowError();
   }
 }
 
-void BatchPresenter::notifyPauseRequested() {
-
+void BatchPresenter::removeGroupsFromView(
+    std::vector<int> const &groupIndicesOrderedLowToHigh) {
+  for (auto it = groupIndicesOrderedLowToHigh.crbegin();
+       it < groupIndicesOrderedLowToHigh.crend(); ++it)
+    m_view->jobs().removeRowAt(
+        MantidQt::MantidWidgets::Batch::RowLocation({*it}));
 }
 
-void BatchPresenter::notifyProcessRequested() {
+void BatchPresenter::removeGroupsFromModel(
+    std::vector<int> const &groupIndicesOrderedLowToHigh) {
+  for (auto it = groupIndicesOrderedLowToHigh.crbegin();
+       it < groupIndicesOrderedLowToHigh.crend(); ++it)
+    m_model.erase(m_model.begin() + (*it));
+}
 
+void BatchPresenter::notifyPauseRequested() {}
+
+void BatchPresenter::notifyProcessRequested() {
+  for (auto &&group : m_model) {
+    std::cout << "Group\n";
+    for (auto &&row : group.rows()) {
+      std::cout << "  Row\n";
+    }
+  }
+  std::cout << std::endl;
 }
 
 template <typename T>
@@ -61,13 +91,14 @@ void sortAndRemoveDuplicatesInplace(std::vector<T> &items) {
   items.erase(eraseBegin, items.end());
 }
 
-std::vector<int> mapToContainingGroups(std::vector<
-    MantidQt::MantidWidgets::Batch::RowLocation> const &mustNotContainRoot) {
+std::vector<int> BatchPresenter::mapToContainingGroups(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
+        mustNotContainRoot) const {
   auto groups = std::vector<int>();
   std::transform(mustNotContainRoot.cbegin(), mustNotContainRoot.cend(),
                  std::back_inserter(groups),
-                 [](MantidWidgets::Batch::RowLocation const &location)
-                     -> int { return location.path()[0]; });
+                 [this](MantidWidgets::Batch::RowLocation const &location)
+                     -> int { return groupOf(location); });
   return groups;
 }
 
@@ -82,24 +113,62 @@ void BatchPresenter::notifyInsertRowRequested() {
   auto selected = m_view->jobs().selectedRowLocations();
   if (selected.size() > 0) {
     auto groups = groupIndexesFromSelection(selected);
-    for (auto &&groupIndex : groups)
-      m_view->jobs().appendChildRowOf(
-          MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}));
+    appendRowsToGroupsInModel(groups);
+    appendRowsToGroupsInView(groups);
   } else {
     // TODO: m_view->mustSelectGroupError();
   }
 }
 
+void BatchPresenter::appendRowsToGroupsInView(
+    std::vector<int> const &groupIndices) {
+  for (auto &&groupIndex : groupIndices)
+    m_view->jobs().appendChildRowOf(
+        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}));
+}
+
+void BatchPresenter::appendRowsToGroupsInModel(
+    std::vector<int> const &groupIndices) {
+  for (auto &&groupIndex : groupIndices)
+    m_model[groupIndex].appendEmptyRow();
+}
+
 void BatchPresenter::notifyInsertGroupRequested() {
   auto selected = m_view->jobs().selectedRowLocations();
   if (selected.size() > 0) {
-    auto groups = groupIndexesFromSelection(selected);
-    m_view->jobs().insertChildRowOf(
-        MantidQt::MantidWidgets::Batch::RowLocation(), groups[0] + 1);
+    auto beforeGroup = groupIndexesFromSelection(selected)[0] + 1;
+    insertEmptyGroupInModel(beforeGroup);
+    insertEmptyGroupInView(beforeGroup);
   } else {
-    m_view->jobs().appendChildRowOf(
-        MantidQt::MantidWidgets::Batch::RowLocation());
+    appendEmptyGroupInModel();
+    appendEmptyGroupInView();
   }
+}
+
+void BatchPresenter::appendEmptyGroupInModel() {
+  m_model.emplace_back(std::string(), std::vector<boost::optional<SingleRow>>(),
+                       std::string());
+}
+
+void BatchPresenter::appendEmptyGroupInView() {
+  m_view->jobs().appendChildRowOf(
+      MantidQt::MantidWidgets::Batch::RowLocation());
+}
+
+void BatchPresenter::insertEmptyGroupInModel(int beforeGroup) {
+  m_model.insert(m_model.begin() + beforeGroup,
+                 UnslicedGroup(std::string(),
+                               std::vector<boost::optional<SingleRow>>(),
+                               std::string()));
+}
+
+void BatchPresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
+  m_model[groupIndex].insertRow(boost::none, beforeRow);
+}
+
+void BatchPresenter::insertEmptyGroupInView(int beforeGroup) {
+  m_view->jobs().insertChildRowOf(MantidQt::MantidWidgets::Batch::RowLocation(),
+                                  beforeGroup);
 }
 
 void BatchPresenter::notifyExpandAllRequested() { m_view->jobs().expandAll(); }
@@ -108,13 +177,77 @@ void BatchPresenter::notifyCollapseAllRequested() {
   m_view->jobs().collapseAll();
 }
 
+std::vector<std::string> BatchPresenter::mapToContentText(
+    std::vector<MantidWidgets::Batch::Cell> const &cells) const {
+  std::vector<std::string> cellText;
+  cellText.reserve(cells.size());
+  std::transform(cells.cbegin(), cells.cend(), std::back_inserter(cellText),
+                 [](MantidWidgets::Batch::Cell const &cell)
+                     -> std::string { return cell.contentText(); });
+  return cellText;
+}
+
+std::vector<std::string> BatchPresenter::cellTextFromViewAt(
+    MantidWidgets::Batch::RowLocation const &location) const {
+  return mapToContentText(m_view->jobs().cellsAt(location));
+}
+
+void BatchPresenter::showAllCellsOnRowAsValid(MantidWidgets::Batch::RowLocation const &itemIndex) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (auto&& cell : cells) {
+    cell.setIconFilePath("");
+    cell.setBorderColor("darkGrey");
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void BatchPresenter::showCellsAsInvalidInView(
+    MantidWidgets::Batch::RowLocation const &itemIndex,
+    std::vector<int> const &invalidColumns) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (auto &&column : invalidColumns) {
+    cells[column].setIconFilePath(":/invalid.png");
+    cells[column].setBorderColor("darkRed");
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
 void BatchPresenter::notifyCellTextChanged(
     MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
-    std::string const &oldValue, std::string const &newValue) {}
+    std::string const &oldValue, std::string const &newValue) {
+  if (!isGroupLocation(itemIndex)) {
+    auto const groupIndex = groupOf(itemIndex);
+    auto const rowIndex = rowOf(itemIndex);
+    auto rowValidationResult =
+        validateRow<SingleRow>(cellTextFromViewAt(itemIndex));
+    if (rowValidationResult.isValid()) {
+      showAllCellsOnRowAsValid(itemIndex);
+      m_model[groupIndex].updateRow(groupIndex,
+                                    rowValidationResult.validRowElseNone());
+    } else {
+      showCellsAsInvalidInView(itemIndex, rowValidationResult.invalidColumns());
+    }
+  }
+}
 
 bool BatchPresenter::isGroupLocation(
     MantidQt::MantidWidgets::Batch::RowLocation const &location) const {
   return location.depth() == 1;
+}
+
+bool BatchPresenter::isRowLocation(
+    MantidWidgets::Batch::RowLocation const &location) const {
+  return location.depth() == 2;
+}
+
+int BatchPresenter::groupOf(
+    MantidWidgets::Batch::RowLocation const &location) const {
+  return location.path()[0];
+}
+
+int BatchPresenter::rowOf(
+    MantidWidgets::Batch::RowLocation const &location) const {
+  return location.path()[1];
 }
 
 bool BatchPresenter::containsGroups(
@@ -128,17 +261,41 @@ bool BatchPresenter::containsGroups(
 
 void BatchPresenter::notifyRowInserted(
     MantidQt::MantidWidgets::Batch::RowLocation const &newRowLocation) {
-  if (newRowLocation.depth() > DEPTH_LIMIT)
+  if (newRowLocation.depth() > DEPTH_LIMIT) {
     m_view->jobs().removeRowAt(newRowLocation);
-  else if (isGroupLocation(newRowLocation))
+  } else if (isGroupLocation(newRowLocation)) {
+    insertEmptyGroupInModel(groupOf(newRowLocation) + 1);
     // TODO kill the cells.
-    return;
+  } else if (isRowLocation(newRowLocation)) {
+    insertEmptyRowInModel(groupOf(newRowLocation), rowOf(newRowLocation) + 1);
+  }
+}
+
+void BatchPresenter::removeRowsAndGroupsFromModel(std::vector<
+    MantidQt::MantidWidgets::Batch::RowLocation> locationsOfRowsToRemove) {
+  std::sort(locationsOfRowsToRemove.begin(), locationsOfRowsToRemove.end());
+  for (auto location = locationsOfRowsToRemove.crbegin();
+       location != locationsOfRowsToRemove.crend(); ++location) {
+    auto const groupIndex = groupOf(*location);
+    if (isRowLocation(*location)) {
+      auto const rowIndex = rowOf(*location);
+      m_model[groupIndex].removeRow(rowIndex);
+    } else if (isGroupLocation(*location)) {
+      m_model.erase(m_model.begin() + groupIndex);
+    }
+  }
+}
+
+void BatchPresenter::removeRowsAndGroupsFromView(std::vector<
+    MantidQt::MantidWidgets::Batch::RowLocation> const& locationsOfRowsToRemove) {
+  m_view->jobs().removeRows(locationsOfRowsToRemove);
 }
 
 void BatchPresenter::notifyRemoveRowsRequested(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
         locationsOfRowsToRemove) {
-  m_view->jobs().removeRows(locationsOfRowsToRemove);
+  removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
+  removeRowsAndGroupsFromView(locationsOfRowsToRemove);
 }
 
 void BatchPresenter::notifyCopyRowsRequested() {

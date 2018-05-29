@@ -59,6 +59,7 @@ set ( TEST_FILES
   test/ReflBatchPresenterTest.h
   test/RunMapTest.h
   test/UserInputValidatorTest.h
+  test/GroupTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
