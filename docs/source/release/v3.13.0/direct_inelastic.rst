@@ -16,9 +16,13 @@ Algorithms
 New features
 ############
 
+- The *EPPWorkspace* input property has been removed from :ref:`DirectILLCollectData <algm-DirectILLCollectData>`.
 
 Improvements
 ############
+
+- :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` now applies a hard mask over the beamstop region of IN5.
+- :ref:`DirectILLReduction <algm-DirectILLReduction>` now converts all its output workspaces to distributions, i.e. divides the histograms by the bin width.
 
 Bug fixes
 #########

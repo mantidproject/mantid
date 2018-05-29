@@ -1,0 +1,94 @@
+digraph QENSFitSequential {
+  label="QENSFitSequential Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+    InputWorkspace
+    Input
+    FitParameters
+    Function
+    StartX
+    EndX
+    SpecMin
+    SpecMax
+    ConvolveMembers
+    ExtractMembers
+    PassWSIndexToFunction
+    Minimizer
+    CostFunction
+    MaxIterations
+    PeakRadius
+    EvaluationType
+    LogValue
+    ParameterTable
+    FitWorkspaces
+    NormalisedCovarianceWorkspace
+    ParameterNames
+	OutputWorkspace
+	OutputParameterWorkspace
+	OutputWorkspaceGroup
+    SampleLog
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    ConvertSpectrumAxis
+    PlotPeakByLogValue
+    DeleteWorkspace
+    ExtractQENSMembers
+    ProcessIndirectFitParameters
+    CopyLogs
+    RenameWorkspace
+  }
+
+  subgraph decisions  {
+    $decision_style
+    do_extract_members                  [label="Do Extract Members?"]
+  }
+
+  subgraph processes {
+    $process_style
+    extract_members                     [label="extract_members\nExtracts the members of\nthe convolution fit, into\n their own workspace, which\n are subsequently grouped."]
+  }
+
+  InputWorkspace                 -> FitFunction
+  Input                          -> FitFunction
+  Function                       -> FitFunction
+  FitParameters                  -> FitFunction
+  SpecMin                        -> FitFunction
+  SpecMax                        -> FitFunction
+  InputWorkspace                 -> ConvertSpectrumAxis            [label="Attempt conversion to Elastic Q"]
+  ConvertSpectrumAxis            -> PlotPeakByLogValue             [label="InputWorkspace"]
+  Input                          -> PlotPeakByLogValue
+  FitFunction                    -> PlotPeakByLogValue
+  StartX                         -> PlotPeakByLogValue
+  EndX                           -> PlotPeakByLogValue
+  ConvolveMembers                -> PlotPeakByLogValue
+  MaxIterations                  -> PlotPeakByLogValue
+  Minimizer                      -> PlotPeakByLogValue
+  CostFunction                   -> PlotPeakByLogValue
+  PeakRadius                     -> PlotPeakByLogValue
+  LogValue                       -> PlotPeakByLogValue
+  PassWSIndexToFunction          -> PlotPeakByLogValue
+  EvaluationType                 -> PlotPeakByLogValue
+  PlotPeakByLogValue             -> NormalisedCovarianceWorkspace
+  PlotPeakByLogValue             -> ParameterTable
+  PlotPeakByLogValue             -> FitWorkspaces
+  NormalisedCovarianceWorkspace  -> DeleteWorkspace                [label="Unrequired product of PlotPeakByLogValue"]
+  FitType                        -> ParameterNames                 [label="Desired parameters obtained from FitType"]
+  ParameterTable                 -> ProcessIndirectFitParameters
+  ParameterNames                 -> ProcessIndirectFitParameters
+  ProcessIndirectFitParameters   -> ResultWorkspace
+  InputWorkspace                 -> CopyLogs
+  ResultWorkspace                -> CopyLogs
+  CopyLogs                       -> OutputWorkspace
+  SampleLog                      -> CopyLogs
+  FitWorkspace                   -> CopyLogs
+  ParameterTable                 -> RenameWorkspace                [label="Change name to expected name for table"]
+  FitWorkspaces                  -> RenameWorkspace                [label="Renames to match input names"]
+  ExtractMembers                 -> do_extract_members
+  FitWorkspaces                  -> do_extract_members
+  InputWorkspace                 -> do_extract_members
+  do_extract_members             -> ExtractQENSMembers             [label="Yes"]
+}

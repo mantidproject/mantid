@@ -97,6 +97,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadSampleShape.cpp
 	src/LoadSESANS.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
@@ -131,6 +132,7 @@ set ( SRC_FILES
 	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
+	src/SaveBankScatteringAngles.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
@@ -143,6 +145,7 @@ set ( SRC_FILES
 	src/SaveFITS.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
+	src/SaveGDA.cpp
 	src/SaveGSASInstrumentFile.cpp
 	src/SaveGSS.cpp
 	src/SaveILLCosmosAscii.cpp
@@ -272,6 +275,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadSampleShape.h
 	inc/MantidDataHandling/LoadSESANS.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
@@ -307,6 +311,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
+	inc/MantidDataHandling/SaveBankScatteringAngles.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
@@ -319,6 +324,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFITS.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
+	inc/MantidDataHandling/SaveGDA.h
 	inc/MantidDataHandling/SaveGSASInstrumentFile.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveILLCosmosAscii.h
@@ -443,6 +449,7 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
+	LoadSampleShapeTest.h
 	LoadSESANSTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
@@ -476,6 +483,7 @@ set ( TEST_FILES
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h
 	SaveAsciiTest.h
+	SaveBankScatteringAnglesTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h

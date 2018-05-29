@@ -9,10 +9,26 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Powder Diffraction
+------------------
+
+- Changing settings while running methods on the PEARL object no
+  longer updates the default settings. Instead, initial settings are
+  taken as the default, and any changes are reverted back to the
+  default once the line they were made on has finished executing
+- Focusing in texture-mode (160 banks) was enabled for GEM. The output
+  is saved to the three-column MAUD format
+- :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
+
+- New SNAP instrument geometry for 2018 run cycle
+
+- New POWGEN instrument geometry for 2018 run cycle
+
 New Features
 ------------
 
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to compute the detector efficiencies also for the 2-dimensional scanning diffractometer D2B at the ILL.
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` performs powder diffraction data reduction for WAND² with calibration, monitor normalisation and background subtraction.
 
 
 Engineering Diffraction
@@ -32,6 +48,7 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
+
 
 - New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load multiple single crystal diffraction data files from the DNS instrument into MDEventWorkspace.
 

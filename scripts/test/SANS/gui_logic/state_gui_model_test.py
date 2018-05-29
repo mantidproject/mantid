@@ -429,6 +429,8 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.q_xy_max == "")
         self.assertTrue(state_gui_model.q_xy_step == "")
         self.assertTrue(state_gui_model.q_xy_step_type is None)
+        self.assertEqual(state_gui_model.r_cut, "")
+        self.assertEqual(state_gui_model.w_cut, "")
 
     def test_that_can_set_the_q_limits(self):
         state_gui_model = StateGuiModel({"test": [1]})
@@ -436,11 +438,15 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.q_xy_max = 1.
         state_gui_model.q_xy_step = 122.
         state_gui_model.q_xy_step_type = RangeStepType.Log
+        state_gui_model.r_cut = 45.
+        state_gui_model.w_cut = 890.
 
         self.assertTrue(state_gui_model.q_1d_rebin_string == "test")
         self.assertTrue(state_gui_model.q_xy_max == 1.)
         self.assertTrue(state_gui_model.q_xy_step == 122.)
         self.assertTrue(state_gui_model.q_xy_step_type is RangeStepType.Log)
+        self.assertEqual(state_gui_model.r_cut, 45.)
+        self.assertEqual(state_gui_model.w_cut, 890.)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity
