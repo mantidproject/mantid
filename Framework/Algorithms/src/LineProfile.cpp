@@ -99,7 +99,7 @@ struct IndexLimits {
  * @param Es Profile's E values.
  * @return A single histogram profile workspace.
  */
-Workspace2D_sptr makeOutput(const MatrixWorkspace &ws,
+Workspace2D_sptr makeOutput(const MatrixWorkspace &parent,
                             const LineDirection direction,
                             std::vector<double> &&Xs, std::vector<double> &&Ys,
                             std::vector<double> &&Es) {
@@ -108,8 +108,8 @@ Workspace2D_sptr makeOutput(const MatrixWorkspace &ws,
   builder.setY(std::move(Ys));
   builder.setE(std::move(Es));
   builder.setDistribution(direction == LineDirection::horizontal &&
-                          ws.isDistribution());
-  return create<Workspace2D>(ws, 1, builder.build());
+                          parent.isDistribution());
+  return create<Workspace2D>(parent, 1, builder.build());
 }
 
 /**
@@ -224,7 +224,7 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
   Ys.resize(lineSize);
   Es.resize(lineSize);
   const auto convertFromDistribution =
-      dir == LineDirection::vertical ? ws.isDistribution() : false;
+      dir == LineDirection::vertical && ws.isDistribution();
   for (size_t i = limits.lineStart; i < limits.lineEnd; ++i) {
     Xs[i - limits.lineStart] = lineBins[i];
     double ySum = 0;
@@ -290,6 +290,13 @@ auto createMode(const std::string &modeName) noexcept {
     return averageMode;
   }
   return sumMode;
+}
+
+void divideByBinHeight(MatrixWorkspace &ws) {
+  const BinEdgeAxis &axis = *static_cast<BinEdgeAxis *>(ws.getAxis(1));
+  const auto height = axis.getMax() - axis.getMin();
+  ws.mutableY(0) /= height;
+  ws.mutableE(0) /= height;
 }
 }
 
@@ -446,6 +453,9 @@ void LineProfile::exec() {
                            ? horizontalBins[horInterval.second]
                            : horizontalBins.back();
   setAxesAndUnits(*outWS, *ws, actualBounds, dir);
+  if (dir == LineDirection::vertical && ws->isDistribution()) {
+    divideByBinHeight(*outWS);
+  }
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outWS);
 }
 

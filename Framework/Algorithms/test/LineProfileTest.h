@@ -528,7 +528,7 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
   }
 
-  void test_vertical_profile_from_distribution_multiplies_by_bin_widths() {
+  void test_vertical_profile_from_distribution_normalized_by_bin_widths() {
     const size_t nHist{4};
     const size_t nBins{3};
     const BinEdges edges{{0., 0.1, 1.1, 11.1}};
@@ -552,17 +552,23 @@ public:
     TS_ASSERT(outputWS);
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
+    const auto axis = static_cast<BinEdgeAxis *>(outputWS->getAxis(1));
+    TS_ASSERT_EQUALS(axis->length(), 2)
+    TS_ASSERT_EQUALS(axis->getMin(), edges.front())
+    TS_ASSERT_EQUALS(axis->getMax(), edges.back())
+    const auto binHeight = axis->getMax() - axis->getMin();
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto &Xs = outputWS->x(0);
     const std::vector<double> profilePoints{{1., 2., 3., 4.}};
     TS_ASSERT_EQUALS(Xs.rawData(), profilePoints)
     const auto &Ys = outputWS->y(0);
-    const auto horizontalIntegral = 3. * 0.1 + 2. * 1. + 1. * 10.;
-    const std::vector<double> profileCounts(nHist, horizontalIntegral / nBins);
-    TS_ASSERT_EQUALS(Ys.rawData(), profileCounts)
+    const auto horizontalIntegral = (3. * 0.1 + 2. * 1. + 1. * 10.) / binHeight;
+    for (const auto y : Ys) {
+      TS_ASSERT_DELTA(y, horizontalIntegral / nBins, 1e-12)
+    }
     const auto &Es = outputWS->e(0);
     const auto horizontalError =
-        std::sqrt(3. * 0.1 * 0.1 + 2. * 1. * 1. + 1. * 10. * 10.);
+        std::sqrt(3. * 0.1 * 0.1 + 2. * 1. * 1. + 1. * 10. * 10.) / binHeight;
     const std::vector<double> profileErrors(nHist, horizontalError / nBins);
     TS_ASSERT_EQUALS(Es.rawData(), profileErrors)
   }
