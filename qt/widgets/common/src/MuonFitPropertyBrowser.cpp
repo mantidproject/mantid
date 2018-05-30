@@ -534,7 +534,7 @@ void MuonFitPropertyBrowser::setNormalization(const std::string name) {
   auto norms = readMultipleNormalization();
   std::string tmp = name;
   if (rawData()) {
-	  tmp = tmp + "_Raw";
+    tmp = tmp + "_Raw";
   }
   // stored with ; instead of spaces
   std::replace(tmp.begin(), tmp.end(), ' ', ';');
@@ -563,21 +563,21 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_keepNorm) {
     const bool val = m_boolManager->value(prop);
     if (val) { // record data for later
-		double norm = 0.0;
-		int j = m_enumManager->value(m_workspace);
-		std::string name = m_workspaceNames[j].toStdString();
+      double norm = 0.0;
+      int j = m_enumManager->value(m_workspace);
+      std::string name = m_workspaceNames[j].toStdString();
 
-		auto norms = readMultipleNormalization();
-		std::string tmp = name;
-		if (rawData()) {
-			tmp = tmp + "_Raw";
-		}
-		// stored with ; instead of spaces
-		std::replace(tmp.begin(), tmp.end(), ' ', ';');
-		auto it = norms.find(tmp);
-		if (it != norms.end()) {
-			norm = it->second;
-		}
+      auto norms = readMultipleNormalization();
+      std::string tmp = name;
+      if (rawData()) {
+        tmp = tmp + "_Raw";
+      }
+      // stored with ; instead of spaces
+      std::replace(tmp.begin(), tmp.end(), ' ', ';');
+      auto it = norms.find(tmp);
+      if (it != norms.end()) {
+        norm = it->second;
+      }
       ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
       AnalysisDataService::Instance().addOrReplace("__keepNorm__", table);
       table->addColumn("double", "norm");
@@ -854,7 +854,6 @@ Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
   }
   return boost::dynamic_pointer_cast<IFunction>(multi);
 }
-
 
 /** Reads the normalization constants and which WS
 * they belong to

@@ -235,11 +235,13 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
         AnalysisDataService::Instance().add(name, ws);
         if (!groupLabel.empty()) {
           MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
-		  if(Mantid::API::AnalysisDataService::Instance().doesExist("tmp_unNorm")) {
-			  const std::string unnorm = "_unNorm";
-			  Mantid::API::AnalysisDataService::Instance().rename("tmp_unNorm", name + unnorm);
-			  MuonAnalysisHelper::groupWorkspaces(groupLabel, { name+unnorm });
-		  }
+          if (Mantid::API::AnalysisDataService::Instance().doesExist(
+                  "tmp_unNorm")) {
+            const std::string unnorm = "_unNorm";
+            Mantid::API::AnalysisDataService::Instance().rename("tmp_unNorm",
+                                                                name + unnorm);
+            MuonAnalysisHelper::groupWorkspaces(groupLabel, {name + unnorm});
+          }
         }
       }
     }
@@ -446,7 +448,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     analysisOptions.timeLimits.second = m_dataSelector->getEndTime();
     analysisOptions.groupPairName = params.itemName;
     analysisOptions.plotType = params.plotType;
-	analysisOptions.wsName = name;
+    analysisOptions.wsName = name;
     outputWS =
         m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
 

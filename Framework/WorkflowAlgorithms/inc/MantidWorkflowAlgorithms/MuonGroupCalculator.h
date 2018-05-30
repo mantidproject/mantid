@@ -37,6 +37,7 @@ public:
                       const int groupIndex);
   void setStartEnd(const double start, const double end);
   void setWSName(const std::string wsName);
+
 protected:
   /// Workspace index of the group to analyse
   const int m_groupIndex;

@@ -389,7 +389,7 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
     alg->setProperty("RebinParams", options.rebinArgs);
   }
   if (options.wsName != "") {
-	  alg->setProperty("WorkspaceName", options.wsName);
+    alg->setProperty("WorkspaceName", options.wsName);
   }
   // ---- Analysis ----
 

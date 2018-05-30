@@ -9,10 +9,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
 
-
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/AnalysisDataService.h"
-
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -118,7 +116,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
       std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-  return std::distance(xData.rawData().begin(), upper+1);
+  return std::distance(xData.rawData().begin(), upper + 1);
 }
 /**
 * find the first index in bin edges that is after
@@ -137,27 +135,30 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
 /*****
  The following functions are for manipulating the normalisation table
 ******/
-void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table, const std::vector<std::string> &wsNames, const std::vector<double> &norms, const std::vector<std::string> &methods){
-	
-	for (size_t j = 0; j < wsNames.size(); j++) {
-		bool updated = false;
-		std::string tmp = wsNames[j];
-		std::replace(tmp.begin(), tmp.end(), ' ', ';');
-		for (size_t row = 0; row < table->rowCount(); row++) {
+void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table,
+                              const std::vector<std::string> &wsNames,
+                              const std::vector<double> &norms,
+                              const std::vector<std::string> &methods) {
 
-			if (table->String(row, 1) ==tmp) {
-				table->removeRow(row);
-				table->insertRow(row);
-				Mantid::API::TableRow tableRow = table->getRow(row);
-				tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
-				updated = true;
-			}
-		}
-		if (!updated) {
-			Mantid::API::TableRow tableRow = table->appendRow();
-			tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
-		}
-	}
+  for (size_t j = 0; j < wsNames.size(); j++) {
+    bool updated = false;
+    std::string tmp = wsNames[j];
+    std::replace(tmp.begin(), tmp.end(), ' ', ';');
+    for (size_t row = 0; row < table->rowCount(); row++) {
+
+      if (table->String(row, 1) == tmp) {
+        table->removeRow(row);
+        table->insertRow(row);
+        Mantid::API::TableRow tableRow = table->getRow(row);
+        tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
+        updated = true;
+      }
+    }
+    if (!updated) {
+      Mantid::API::TableRow tableRow = table->appendRow();
+      tableRow << static_cast<double>(norms[j]) << tmp << methods[j];
+    }
+  }
 }
 
 } // namespace Mantid

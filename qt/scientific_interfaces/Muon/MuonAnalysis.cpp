@@ -453,19 +453,19 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
   const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
   const std::string wsRawName = wsName + "_Raw";
   const std::string unnorm = "_unNorm";
-  std::vector<std::string> wsNames = { wsName, wsRawName };
+  std::vector<std::string> wsNames = {wsName, wsRawName};
   // Create workspace and a raw (unbinned) version of it
-  auto ws = createAnalysisWorkspace(itemType, tableRow, plotType,wsName);
+  auto ws = createAnalysisWorkspace(itemType, tableRow, plotType, wsName);
   if (ads.doesExist("tmp_unNorm")) {
-	  ads.rename("tmp_unNorm", wsName + unnorm);
-		  wsNames.push_back(wsName+unnorm);
+    ads.rename("tmp_unNorm", wsName + unnorm);
+    wsNames.push_back(wsName + unnorm);
   }
 
-  auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, wsRawName,true);
+  auto wsRaw =
+      createAnalysisWorkspace(itemType, tableRow, plotType, wsRawName, true);
   if (ads.doesExist("tmp_unNorm")) {
-	  ads.rename("tmp_unNorm", wsRawName + unnorm);
-		  wsNames.push_back(wsRawName+unnorm);
-
+    ads.rename("tmp_unNorm", wsRawName + unnorm);
+    wsNames.push_back(wsRawName + unnorm);
   }
   // Make sure they end up in the ADS
   ads.addOrReplace(wsName, ws);
@@ -577,7 +577,8 @@ MuonAnalysis::parsePlotType(QComboBox *selector) {
 Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
                                                      int tableRow,
                                                      PlotType plotType,
-	                                                 std::string wsName, bool isRaw) {
+                                                     std::string wsName,
+                                                     bool isRaw) {
   auto loadedWS =
       AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
   Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());

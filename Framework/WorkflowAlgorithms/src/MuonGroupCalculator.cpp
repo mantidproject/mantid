@@ -23,7 +23,7 @@ void MuonGroupCalculator::setStartEnd(const double start, const double end) {
   m_endX = end;
 }
 void MuonGroupCalculator::setWSName(const std::string wsName) {
-	m_wsName = wsName;
+  m_wsName = wsName;
 }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
