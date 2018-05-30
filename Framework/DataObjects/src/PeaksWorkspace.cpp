@@ -285,18 +285,20 @@ Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
   Geometry::Goniometer goniometer;
 
   LogManager_const_sptr props = getLogs();
-  if (props->hasProperty("wavelength") || props->hasProperty("energy")) {
-    // Assume constant wavelenth
-    // Calculate Q lab from Q sample and wavelength
-    double wavelength;
-    if (props->hasProperty("energy")) {
-      wavelength = Kernel::UnitConversion::run(
-          "Energy", "Wavelength",
-          props->getPropertyValueAsType<double>("energy"), 0, 0, 0,
-          Kernel::DeltaEMode::Elastic, 0);
-    } else {
-      wavelength = props->getPropertyValueAsType<double>("wavelength");
-    }
+  // See if we can get a wavelength/energy
+  // Then assume constant wavelenth
+  double wavelength(0);
+  if (props->hasProperty("wavelength")) {
+    wavelength = props->getPropertyValueAsType<double>("wavelength");
+  } else if (props->hasProperty("energy")) {
+    wavelength = Kernel::UnitConversion::run(
+        "Energy", "Wavelength", props->getPropertyValueAsType<double>("energy"),
+        0, 0, 0, Kernel::DeltaEMode::Elastic, 0);
+  } else if (getInstrument()->hasParameter("wavelength")) {
+    wavelength = getInstrument()->getNumberParameter("wavelength").at(0);
+  }
+
+  if (wavelength > 0) {
     goniometer.calcFromQSampleAndWavelength(position, wavelength);
     g_log.information() << "Found goniometer rotation to be "
                         << goniometer.getEulerAngles()[0]
