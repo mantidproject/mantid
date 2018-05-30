@@ -171,9 +171,7 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
 class ApplyMuonDetectorGroupingTest : public CxxTest::TestSuite {
 public:
   // WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  ApplyMuonDetectorGroupingTest() {
-    Mantid::API::FrameworkManager::Instance();
-  }
+  ApplyMuonDetectorGroupingTest() { Mantid::API::FrameworkManager::Instance(); }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ApplyMuonDetectorGroupingTest *createSuite() {
