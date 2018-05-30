@@ -79,7 +79,6 @@ void ParameterPropertyManager::setDescription(QtProperty *property,
 void ParameterPropertyManager::clearError(QtProperty *property) {
   m_errors.remove(property);
   emit propertyChanged(property);
-  updateTooltip(property);
 }
 
 /**
