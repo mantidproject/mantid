@@ -47,6 +47,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DataProcessorPresenter {
 public:
+  class DeleteAllRowsCancelledException : public std::exception {
+  public:
+    const char *what() const noexcept override { return m_msg.c_str(); }
+
+  private:
+    std::string m_msg{"User cancelled operation to delete all existing rows"};
+  };
+
   virtual ~DataProcessorPresenter(){};
 
   enum Flag {
