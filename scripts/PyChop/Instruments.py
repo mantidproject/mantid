@@ -95,8 +95,9 @@ class ChopperSystem(object):
     """
 
     __allowed_var_names = ['name', 'chop_sam', 'sam_det', 'aperture_width', 'aperture_height', 'choppers', 'variants',
-                           'frequency_matrix', 'constant_frequencies', 'max_frequencies', 'default_frequencies', 'source_rep', 
-                           'emission_time', 'overlap_ei_frac', 'ei_limits', 'flux_ref_slot', 'flux_ref_freq', 'frequency_names']
+                           'frequency_matrix', 'constant_frequencies', 'max_frequencies', 'default_frequencies', 
+                           'source_rep', 'n_frame', 'emission_time', 'overlap_ei_frac', 'ei_limits', 
+                           'flux_ref_slot', 'flux_ref_freq', 'frequency_names']
 
     def __init__(self, inval=None):
         # Default values
@@ -158,8 +159,9 @@ class ChopperSystem(object):
         self.isPhaseIndependent = [ii for ii in range(len(self.isPhaseIndependent)) if self.isPhaseIndependent[ii]]
         self.defaultPhase = [self.defaultPhase[ii] for ii in self.isPhaseIndependent]
         self.phaseNames = [self.phaseNames[ii] for ii in self.isPhaseIndependent]
+        source_rep = self.source_rep if (not hasattr(self, 'n_frame') or self.n_frame == 1) else [self.source_rep, self.n_frame]
         self._instpar = [self.distance, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, 
-                         self.numDisk, self.sam_det, self.chop_sam, self.source_rep, self.emission_time, 
+                         self.numDisk, self.sam_det, self.chop_sam, source_rep, self.emission_time, 
                          self.overlap_ei_frac, self.isPhaseIndependent]
         if self.isFermi:
             self.package = self.packages.keys()[0]
@@ -284,7 +286,11 @@ class ChopperSystem(object):
             x4 = (totDist-newline[1]) / (newline[0])
             plt.plot([x1, x4], [modSamDist, totDist], c='r')
             plt.text(x2, totDist+0.2, "{:3.1f}".format(Eis[i]))
-        xmax = (1.e6 / self.source_rep) if hasattr(self, 'source_rep') and self.source_rep else np.max(chop_times)
+        xmax = 1.e6 / self.source_rep
+        if hasattr(self, 'n_frame') and self.n_frame > 1:
+            xmax *= self.n_frame
+            for i in range(1, self.n_frame):
+                plt.plot([i * 1.e6 / self.source_rep] * 2, [0, totDist], c='k')
         if h_plt is None:
             plt.xlim(0, xmax)
             plt.xlabel(r'TOF ($\mu$sec)')
@@ -471,7 +477,7 @@ class Moderator(object):
     """
 
     __allowed_var_names = ['name', 'imod', 'ch_mod', 'mod_pars', 'mod_scale_fn', 'mod_scale_par', 'theta',
-                           'source_rep', 'emission_time', 'measured_flux']
+                           'source_rep', 'n_frame', 'emission_time', 'measured_flux']
 
     def __init__(self, inval=None):
         wrap_attributes(self, inval, self.__allowed_var_names)
@@ -606,10 +612,9 @@ class Instrument(object):
         if ((hasattr(instrument, 'moderator') or hasattr(instrument, 'chopper_system')) or
             ('moderator' in instrument or 'chopper_system' in instrument)):
             wrap_attributes(self, instrument, self.__allowed_var_names)
-            if 'source_rep' in self.moderator:
-                self.chopper_system['source_rep'] = self.moderator['source_rep']
-            if 'emission_time' in self.moderator:
-                self.chopper_system['emission_time'] = self.moderator['emission_time']
+            for key in ['source_rep', 'n_frame', 'emission_time']:
+                if key in self.moderator:
+                    self.chopper_system[key] = self.moderator[key]
         else:
             raise RuntimeError('Input to Instrument must be an Instrument object, a dictionary or a filename string')
         # If we have just loaded a YAML file or constructed from a dictionary, need to convert to correct class

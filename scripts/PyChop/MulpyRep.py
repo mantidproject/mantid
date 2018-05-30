@@ -29,7 +29,8 @@ def findLine(chop_times, chopDist, moderator_limits):
         rightM = (-chopDist) / (moderator_limits[1]-chop_times[i][1])
         leftC = -leftM*moderator_limits[0]
         rightC = -rightM*moderator_limits[1]
-        lines.append([[leftM, leftC], [rightM, rightC]])
+        if leftM > 0 and rightM > 0:
+            lines.append([[leftM, leftC], [rightM, rightC]])
     return lines
 
 
@@ -85,8 +86,9 @@ def calcEnergy(lines, samDist):
     massN = 1.674927e-27
     for i in range(len(lines)):
         # look at the middle of the time window
-        x1 = ((samDist-lines[i][0][1]) / lines[i][0][0] + (samDist-lines[i][1][1]) / lines[i][1][0]) / 2.
-        v = samDist / x1
+        #x1 = ((samDist-lines[i][0][1]) / lines[i][0][0] + (samDist-lines[i][1][1]) / lines[i][1][0]) / 2.
+        #v = samDist / x1
+        v = 0.5 * (lines[i][0][0] + lines[i][1][0])
         Ei[i] = (v*1e6)**2 * massN / 2. / 1.60217662e-22
     return Ei
 
@@ -180,21 +182,27 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
 
     # extracts the instrument parameters
     dist, nslot, slots_ang_pos, slot_width, guide_width, radius, numDisk = tuple(instrumentpars[:7])
-    samp_det, chop_samp, source_rep, tmod, frac_ei, ph_ind_v = tuple(instrumentpars[7:])
+    samp_det, chop_samp, rep, tmod, frac_ei, ph_ind_v = tuple(instrumentpars[7:])
 
     chop_times = []             # empty list to hold each chopper opening period
 
     # figures out phase information
-    if not (hasattr(ph_ind_v, '__len__') and len(ph_ind_v) == len(dist)):
+    if not (hasattr(ph_ind_v, '__len__') and len(ph_ind_v) == len(dist)) and ph_ind_v:
         ph_ind = [i==(ph_ind_v[-1] if hasattr(ph_ind_v, '__len__') else ph_ind_v) for i in range(len(dist))]
-    chop2Phase = phase = chop2Phase if hasattr(chop2Phase, '__len__') else [chop2Phase]
-    if len(chop2Phase) != len(dist):
-        if len(chop2Phase) == len(ph_ind_v):
-            phase = [False] * len(dist)
-            for i in range(len(ph_ind_v)):
-                phase[ph_ind_v[i]] = chop2Phase[i]
-        else:
-            phase = [chop2Phase[-1] if ph_ind[i] else False for i in range(len(dist))]
+        chop2Phase = phase = chop2Phase if hasattr(chop2Phase, '__len__') else [chop2Phase]
+        if len(chop2Phase) != len(dist):
+            if len(chop2Phase) == len(ph_ind_v):
+                phase = [False] * len(dist)
+                for i in range(len(ph_ind_v)):
+                    phase[ph_ind_v[i]] = chop2Phase[i]
+            else:
+                phase = [chop2Phase[-1] if ph_ind[i] else False for i in range(len(dist))]
+    else:
+        ph_ind = [False] * len(dist)
+
+    # do we want multiple frames?
+    source_rep, nframe = tuple(rep[:2]) if (hasattr(rep, '__len__') and len(rep) > 1) else (rep, 1)
+    p_frames = source_rep / nframe
 
     # first we optimise on the main Ei
     for i in range(len(dist)):
@@ -219,7 +227,7 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
         chop_times.append([])
         if slots_ang_pos and nslot[i] > 1 and slots_ang_pos[i]:
             tslots = [(uSec * slots_ang_pos[i][j] / 360. / freq[i]) for j in range(nslot[i])]
-            tslots = [[(t + r * (uSec / freq[i])) - tslots[0] for r in range(int(freq[i] / source_rep))] for t in tslots]
+            tslots = [[(t + r * (uSec / freq[i])) - tslots[0] for r in range(int(freq[i] / p_frames))] for t in tslots]
             realTimeOp -= np.max(tslots[islt % nslot[i]])
             islt = 0
             next_win_t = uSec/source_rep + (uSec / freq[i])
@@ -236,13 +244,19 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
             # If angular positions of slots not defined, assumed evenly spaced (LET, MERLIN)
             next_win_t = uSec / (nslot[i]*freq[i])
             realTimeOp -= next_win_t * np.ceil(realTimeOp[0]/next_win_t)
-            while realTimeOp[0] < (uSec/source_rep+next_win_t):
+            while realTimeOp[0] < (uSec/p_frames+next_win_t):
                 chop_times[i].append(copy.deepcopy(realTimeOp[:]))
                 realTimeOp += next_win_t
     # then we look for what else gets through
     # firstly calculate the bounding box for each window in final chopper
-    lines = findLine(chop_times[-1], dist[-1], [0, tmod])
-    lines = checkPath(chop_times[0:-1], lines, dist[:-1], dist[-1])
+    lines_all = []
+    for i in range(nframe):
+        t0 = i * uSec / source_rep
+        lines = findLine(chop_times[-1], dist[-1], [t0, t0+tmod])
+        lines = checkPath(chop_times[0:-1], lines, dist[:-1], dist[-1])
+        if lines:
+            for line in lines:
+                lines_all.append(line)
     # ok, now we know the possible neutron velocities. we now ned their energies
-    Ei = calcEnergy(lines, (dist[-1]+chop_samp))
-    return Ei, chop_times, [chop_times[0][0], chop_times[-1][0]], dist[-1]-dist[0], lines
+    Ei = calcEnergy(lines_all, (dist[-1]+chop_samp))
+    return Ei, chop_times, [chop_times[0][0], chop_times[-1][0]], dist[-1]-dist[0], lines_all
