@@ -106,17 +106,17 @@ public:
     // load the summed eventworkspace
     MatrixWorkspace_sptr outputItemEvent =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "EventData" + postfix);
+            "EventData" + postfix);
     const auto sumTotal = extractSumAndTest(outputItemEvent, 107163.7852);
 
     MatrixWorkspace_sptr outputItemEvent_k01 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "k01_events_dat_list_p_x_y_n_id_t" + postfix);
+            "k01_events_dat_list_p_x_y_n_id_t" + postfix);
     const auto sum_k01 = extractSumAndTest(outputItemEvent_k01, 107141.3295);
 
     MatrixWorkspace_sptr outputItemEvent_k02 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "k02_events_dat_list_p_x_y_n_id_t" + postfix);
+            "k02_events_dat_list_p_x_y_n_id_t" + postfix);
     const auto sum_k02 = extractSumAndTest(outputItemEvent_k02, 22.4558);
 
     TS_ASSERT_DELTA(sumTotal, (sum_k01 + sum_k02), 0.0001);
@@ -139,7 +139,7 @@ public:
     outputSpace = "LoadMcStasTestLoadSameDataTwice";
     algToBeTested.setProperty("OutputWorkspace", outputSpace);
     algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace",
-      boost::lexical_cast<std::string>(true));
+                                   boost::lexical_cast<std::string>(true));
     // load the same dataset twice
     load_test("mccode_contains_one_bank.h5", outputSpace);
     auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
@@ -153,7 +153,7 @@ public:
     algToBeTested.setProperty("OutputWorkspace", outputSpace);
 
     algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace",
-      boost::lexical_cast<std::string>(true));
+                                   boost::lexical_cast<std::string>(true));
     auto outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 1);
 
