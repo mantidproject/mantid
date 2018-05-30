@@ -36,7 +36,7 @@ The workspaces which hold the analysed data are stored in the *WorkspaceGroup*, 
 
 then the name would be "inputGroup; Group; test; Counts; #1". A second workspace is also created with the same name, but ending in "#1_Raw", the only difference being that the *RebinArgs* are not applied to the latter workspace.
 
-An option exists to apply dead time correction to the counts if *ApplyDeadTimeCorrection* is true, requiring a *DeadTimeTable* with the format as in :ref:`algm-DeadTimeCorr`.
+An option exists to apply dead time correction to the counts if *ApplyDeadTimeCorrection* is true, requiring a *DeadTimeTable* with the format as in :ref:`algm-ApplyDeadTimeCorr`.
 
 The *TimeOffset* parameter shifts the time axis to start at the given time (all bins are offset by the value). In :ref:`algm-MuonProcess` this is equivalent to *LoadedTimeZero* - *TimeZero*. Note that the *TimeMin* and *TimeMax* refer to the values before the offset is applied.
 
