@@ -29,7 +29,7 @@ namespace {
 // Create fake muon data with exponential decay
 struct yDataAsymmetry {
   double operator()(const double time, size_t specNum) {
-    double amplitude = (specNum + 1) * 10.;
+    double amplitude = (static_cast<double>(specNum) + 1) * 10.;
     double tau = Mantid::PhysicalConstants::MuonLifetime *
                  1e6; // Muon life time in microseconds
     return (20. * (1.0 + amplitude * exp(-time / tau)));
@@ -159,7 +159,7 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
 
   for (size_t spec = 0; spec < deadTimes.size(); spec++) {
     TableRow newRow = deadTimeTable->appendRow();
-    newRow << spec + 1;
+    newRow << static_cast<int>(spec) + 1;
     newRow << deadTimes[spec];
   }
 
@@ -173,21 +173,21 @@ public:
   // WorkflowAlgorithms do not appear in the FrameworkManager without this line
   ApplyMuonDetectorGroupingTest() {
     Mantid::API::FrameworkManager::Instance();
-  };
+  }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ApplyMuonDetectorGroupingTest *createSuite() {
     return new ApplyMuonDetectorGroupingTest();
-  };
+  }
   static void destroySuite(ApplyMuonDetectorGroupingTest *suite) {
     delete suite;
-  };
+  }
 
   void test_Init() {
     ApplyMuonDetectorGrouping alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-  };
+  }
 
   void test_createCountsWorkspace() {
 
