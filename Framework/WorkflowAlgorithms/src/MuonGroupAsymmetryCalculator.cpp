@@ -119,7 +119,6 @@ MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
 MatrixWorkspace_sptr
 MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
                                                 const int index) const {
-  std::vector<double> normEst;
   const std::string normTableName = "MuonAnalysisTFNormalizations";
   API::AnalysisDataServiceImpl &ads = API::AnalysisDataService::Instance();
   if (!ads.doesExist(normTableName)) {
