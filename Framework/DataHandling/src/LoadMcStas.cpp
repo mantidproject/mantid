@@ -180,7 +180,7 @@ std::vector<std::string> LoadMcStas::readEventData(
 
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
-  bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
+  const bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
 
   // will assume that each top level entry contain one mcstas
   // generated IDF and any event data entries within this top level
@@ -277,16 +277,17 @@ std::vector<std::string> LoadMcStas::readEventData(
   double shortestTOF(0.0);
   double longestTOF(0.0);
 
+  // create vector container all the event output workspaces needed
   const size_t numEventEntries = eventEntries.size();
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
   const auto eventDataTotalName = std::string("EventData_") + nameOfGroupWS;
   std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
       {eventWS, eventDataTotalName}};
   // if numEventEntries > 1 also create separate event workspaces
-  if (numEventEntries > 1) {
+  const bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
+  if (!onlySummedEventWorkspace && numEventEntries > 1) {
     for (const auto &eventEntry : eventEntries) {
       const std::string &dataName = eventEntry.first;
-      const std::string &dataType = eventEntry.second;
       // create container to hold partial event data
       // plus the name users will see for it
       const auto ws_name = dataName + std::string("_") + nameOfGroupWS;
@@ -298,9 +299,7 @@ std::vector<std::string> LoadMcStas::readEventData(
 
   // Refer to entry in allEventWS. The first non-summed workspace index is 1
   auto eventWSIndex = 1u;
-  // All entries of allEventWS except the first are eventWS entries for
-  // individual event data in the nexus file except for the first entry.
-  // Loop over McStas components that stores event data
+  // Loop over McStas event data components
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
@@ -412,7 +411,7 @@ std::vector<std::string> LoadMcStas::readEventData(
               data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
         }
         allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
-        if (numEventEntries > 1) {
+        if (!onlySummedEventWorkspace && numEventEntries > 1) {
           allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) +=
               weightedEvent;
         }
@@ -435,7 +434,7 @@ std::vector<std::string> LoadMcStas::readEventData(
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
   for (auto eventWS : allEventWS) {
-    auto ws = eventWS.first;
+    const auto ws = eventWS.first;
     ws->setAllX(axis);
     AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
     scatteringWSNames.emplace_back(eventWS.second);
