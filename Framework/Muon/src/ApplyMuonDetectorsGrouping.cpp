@@ -17,18 +17,6 @@ const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
 
 namespace {
 
-bool isWorkspaceGroup(std::string &name) {
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  if (ads.doesExist(name)) {
-    auto ws = ads.retrieve(name);
-    if (auto wscheck =
-            boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // Convert input string plot type to PlotType.
 Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
   if (plotType == "Counts") {
@@ -499,7 +487,7 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
     errors["GroupName"] = "The group must be named.";
   }
 
-  if (!std::any_of(std::begin(groupName), std::end(groupName), std::isalnum)) {
+  if (!std::any_of(std::begin(groupName), std::end(groupName), ::isalnum)) {
     errors["GroupName"] =
         "The group name must contain at least one alphnumeric character.";
   }
