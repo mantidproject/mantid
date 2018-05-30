@@ -568,7 +568,7 @@ public:
     groupList.insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(2);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -585,7 +585,7 @@ public:
         .WillOnce(Return("Custom"));
 
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-        .Times(8)
+        .Times(6)
         .WillRepeatedly(Return("INTER"));
 
     TS_ASSERT_THROWS_NOTHING(

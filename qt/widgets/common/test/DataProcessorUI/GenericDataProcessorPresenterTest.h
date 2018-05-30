@@ -275,8 +275,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-
-        << "";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "24682"
@@ -286,8 +285,8 @@ private:
         << "2.9"
         << "0.04"
         << "1"
+        << "ProcessingInstructions='0'";
 
-        << "";
     return ws;
   }
 
@@ -575,6 +574,19 @@ private:
   void expectNoWarningsOrErrors(MockDataProcessorView &mockDataProcessorView) {
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
+  }
+
+  void expectInstrumentIsINTER(MockDataProcessorView &mockDataProcessorView,
+                               Cardinality numTimes) {
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+          .Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+          .Times(numTimes)
+          .WillRepeatedly(Return("INTER"));
+    }
   }
 
   // A list of commonly used input/output workspace names
@@ -1277,6 +1289,7 @@ public:
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     expectNotifiedReductionResumed(mockMainPresenter);
+    expectInstrumentIsINTER(mockDataProcessorView, Exactly(2));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -1292,7 +1305,7 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
     auto presenter = makeDefaultPresenterNoThread();
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.01\"");
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -1307,18 +1320,30 @@ public:
 
     createTOFWorkspace("TOF_12345", "12345");
     createTOFWorkspace("TOF_12346", "12346");
+    createTOFWorkspace("TOF_24681", "24681");
+    createTOFWorkspace("TOF_24682", "24682");
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(0));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
+    expectInstrumentIsINTER(mockDataProcessorView, Exactly(4));
     expectNotifiedReductionResumed(mockMainPresenter);
+
     presenter->notify(DataProcessorPresenter::ProcessAllFlag);
 
     // Check output and tidy up
-    checkWorkspacesExistInADS(m_defaultWorkspaces);
-    removeWorkspacesFromADS(m_defaultWorkspaces);
+    auto firstGroupWorkspaces = m_defaultWorkspaces;
+    auto secondGroupWorkspaces = std::vector<std::string>{
+        "TestWorkspace", "TOF_24681", "TOF_24682", "IvsQ_binned_TOF_24681",
+        "IvsQ_TOF_24681", "IvsLam_TOF_24681", "IvsQ_binned_TOF_24682",
+        "IvsQ_TOF_24682", "IvsLam_TOF_24682", "IvsQ_TOF_24681_TOF_24682"};
+
+    checkWorkspacesExistInADS(firstGroupWorkspaces);
+    checkWorkspacesExistInADS(secondGroupWorkspaces);
+    removeWorkspacesFromADS(secondGroupWorkspaces);
+    removeWorkspacesFromADS(firstGroupWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -2437,8 +2462,8 @@ public:
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t\t");
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2509,7 +2534,7 @@ public:
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t");
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
