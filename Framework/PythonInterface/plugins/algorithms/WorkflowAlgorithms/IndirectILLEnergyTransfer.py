@@ -185,7 +185,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         factor = size / (size - 1)
 
-        # minus sign is needed 
+        # minus sign is needed
         if self._doppler_energy != 0:
             formula = '-(x/{0} - 1)*{1}'.format(mid, self._doppler_energy * scale * factor)
         else:
