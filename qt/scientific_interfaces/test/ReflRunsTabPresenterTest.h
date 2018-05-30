@@ -61,6 +61,7 @@ public:
   void test_presenter_sets_commands_when_ADS_changed() {
     auto presenter = createMocksAndPresenter(1);
 
+    constexpr int GROUP_NUMBER = 0;
     // Expect that the view clears the list of commands
     EXPECT_CALL(*m_mockRunsTabView, clearCommands()).Times(Exactly(1));
     // Expect that the view is populated with the list of table commands
@@ -68,8 +69,25 @@ public:
     // Expect that the view is populated with the list of row commands
     EXPECT_CALL(*m_mockRunsTabView, setRowCommandsProxy()).Times(Exactly(1));
     // The presenter is notified that something changed in the ADS
-    int group = 0;
-    presenter.notifyADSChanged(QSet<QString>(), group);
+    presenter.notifyADSChanged(QSet<QString>(), GROUP_NUMBER);
+
+    verifyAndClearExpectations();
+  }
+
+  void test_presenter_sets_commands_on_correct_group_when_ADS_changed() {
+    auto presenter = createMocksAndPresenter(3);
+
+    constexpr int GROUP_NUMBER = 1;
+    EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(3))
+        .WillRepeatedly(Return(GROUP_NUMBER));
+    // Commands should be updated with presenter of selected group
+    EXPECT_CALL(*mockTablePresenter(0), publishCommandsMocked()).Times(0);
+    EXPECT_CALL(*mockTablePresenter(1), publishCommandsMocked()).Times(1);
+    EXPECT_CALL(*mockTablePresenter(2), publishCommandsMocked()).Times(0);
+    presenter.notifyADSChanged(QSet<QString>(), 0);
+    presenter.notifyADSChanged(QSet<QString>(), 1);
+    presenter.notifyADSChanged(QSet<QString>(), 2);
 
     verifyAndClearExpectations();
   }

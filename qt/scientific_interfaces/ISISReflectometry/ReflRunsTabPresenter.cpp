@@ -592,7 +592,12 @@ void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
                                             int group) {
 
   UNUSED_ARG(workspaceList);
-  pushCommands(group);
+
+  // All groups pass on notifications about ADS changes. We only push commands
+  // for the active group.
+  if (group == m_view->getSelectedGroup())
+    pushCommands(group);
+
   m_view->updateMenuEnabledState(m_tablePresenters.at(group)->isProcessing());
 }
 
