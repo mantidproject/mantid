@@ -91,9 +91,6 @@ public:
     algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace",
                                    boost::lexical_cast<std::string>(false));
 
-    // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
-
     load_test("mcstas_event_hist.h5", outputSpace);
 
     std::string postfix = "_" + outputSpace;

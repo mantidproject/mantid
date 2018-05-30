@@ -16,7 +16,7 @@ workspace equals that of the mcstas component name + '_' + name of the OutputWor
 In addition an EventWorkspace with the name 'EventData' + '_' + name of the OutputWorkspace
 is created which contains the sum of all event datasets in the Nexus file.
 Note if OutputOnlySummedEventWorkspace=True only this EventWorkspace is returned
-by the algorithm, and this is the default.
+by the algorithm.
 
 For information about how to create McStas outputs that can 
 readily be read by this loader, see `here <https://github.com/McStasMcXtrace/McCode/wiki/McStas-and-Mantid>`_.
