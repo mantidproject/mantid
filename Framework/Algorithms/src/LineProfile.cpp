@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -35,6 +36,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramBuilder;
 using Mantid::HistogramData::Points;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
@@ -101,25 +103,13 @@ Workspace2D_sptr makeOutput(const MatrixWorkspace &ws,
                             const LineDirection direction,
                             std::vector<double> &&Xs, std::vector<double> &&Ys,
                             std::vector<double> &&Es) {
-  Workspace2D_sptr outWS;
-  const bool histogramOutput = direction == LineDirection::horizontal
-                                   ? ws.isHistogramData()
-                                   : Xs.size() > Ys.size();
-  if (histogramOutput) {
-    if (direction == LineDirection::horizontal && ws.isDistribution()) {
-      outWS = create<Workspace2D>(ws, 1,
-                                  Histogram(BinEdges(Xs), Frequencies(Ys),
-                                            FrequencyStandardDeviations(Es)));
-    } else {
-      outWS =
-          create<Workspace2D>(ws, 1, Histogram(BinEdges(Xs), Counts(Ys),
-                                               CountStandardDeviations(Es)));
-    }
-  } else {
-    outWS = create<Workspace2D>(
-        ws, 1, Histogram(Points(Xs), Counts(Ys), CountStandardDeviations(Es)));
-  }
-  return outWS;
+  HistogramBuilder builder;
+  builder.setX(std::move(Xs));
+  builder.setY(std::move(Ys));
+  builder.setE(std::move(Es));
+  builder.setDistribution(direction == LineDirection::horizontal &&
+                          ws.isDistribution());
+  return create<Workspace2D>(ws, 1, builder.build());
 }
 
 /**
