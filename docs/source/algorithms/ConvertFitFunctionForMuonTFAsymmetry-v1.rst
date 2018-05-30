@@ -58,23 +58,23 @@ This example is for converting a function.
    fit_output =    Fit(Function=str(returnFunc),InputWorkspace=ws,MaxIterations=0,Output="return_params")
 
    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
-   print('Gradients:')
-   print("Gradient 1: {0:.2f}".format(paramTable.column(1)[3]))
-   print("Gradient 2: {0:.2f}".format(paramTable.column(1)[1]))
-   print('offsets:')
-   print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
-   print("Constant 2: {0:.2f}".format(paramTable.column(1)[2]))
+
+   if paramTable.column(1)[0] == paramTable.column(1)[2]:
+       print("Constant tie has been preserved")
+   else:
+       print("Constant tie has not been preserved")
+
+   if paramTable.column(1)[1] == 3.0:
+      print("Fix has been preserved")
+   else:
+      print("Fix has not been presreved")
 
 Output:
 
-.. testoutput:: ExCounts
+.. testoutput:: example
 
-   Gradients:
-   Gradient 1: 0.56
-   Gradient 2: 3.00
-   offsets:
-   Constant 1: -1.39
-   Constant 2: -1.39
+   Constant tie has been preserved
+   Fix has been preserved
 
 .. categories::
 

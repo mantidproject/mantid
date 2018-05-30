@@ -2,8 +2,6 @@
 #define MANTID_ALGORITHMS_INVERTMASKTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -71,7 +69,7 @@ public:
       detid_t tempdetid = *(tempdetids.begin());
       TS_ASSERT_EQUALS(tempdetids.size(), 1);
       TS_ASSERT_DELTA(ws4->getValue(tempdetid), ws1->getValue(tempdetid), 1);
-      TS_ASSERT_DELTA(ws4->readY(ih)[0], ws1->readY(ih)[0], 1);
+      TS_ASSERT_DELTA(ws4->y(ih)[0], ws1->y(ih)[0], 1);
     }
 
     return;

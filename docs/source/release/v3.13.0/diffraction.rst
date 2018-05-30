@@ -42,6 +42,11 @@ Engineering Diffraction
     loaded into the tab
 
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` now supports Pawley refinement as well as Rietveld
+- Single peak fitting output is now saved as HDF5 instead of CSV,
+  using :ref:`EnggSaveSinglePeakFitResultsToHDF5
+  <algm-EnggSaveSinglePeakFitResultsToHDF5>`. The algorithm previously
+  used, :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>`, has
+  been deprecated.
 
 
 :ref:`Release 3.13.0 <v3.13.0>`
@@ -53,6 +58,8 @@ Single Crystal Diffraction
 - New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load multiple single crystal diffraction data files from the DNS instrument into MDEventWorkspace.
 
 - :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
+
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
 
 Improvements
 ############
