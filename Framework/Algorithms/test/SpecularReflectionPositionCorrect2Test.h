@@ -20,7 +20,7 @@ private:
   // Initialise the algorithm and set the properties
   void setupAlgorithm(SpecularReflectionPositionCorrect2 &alg,
                       const double twoTheta, const std::string &correctionType,
-                      const std::string &detectorName) {
+                      const std::string &detectorName, int detectorID = 0) {
     if (!alg.isInitialized())
       alg.initialize();
     alg.setChild(true);
@@ -30,6 +30,8 @@ private:
       alg.setProperty("DetectorCorrectionType", correctionType);
     if (!detectorName.empty())
       alg.setProperty("DetectorComponentName", detectorName);
+    if (detectorID > 0)
+      alg.setProperty("DetectorID", detectorID);
     alg.setPropertyValue("OutputWorkspace", "test_out");
   }
 
@@ -107,6 +109,17 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", m_interWS);
+    alg.setProperty("DetectorID", 222222222);
+    alg.setProperty("TwoTheta", 1.4);
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+  void test_detector_id_is_valid() {
+    SpecularReflectionPositionCorrect2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", m_interWS);
     alg.setProperty("DetectorComponentName", "invalid-detector-name");
     alg.setProperty("TwoTheta", 1.4);
     alg.setPropertyValue("OutputWorkspace", "test_out");
@@ -147,9 +160,52 @@ public:
     TS_ASSERT_DELTA(detOut.Y(), 0.06508, 1e-5);
   }
 
+  void test_correct_point_detector_via_detid_vertical_shift_default() {
+    // Omit the DetectorCorrectionType property to check that a vertical shift
+    // is done by default
+    SpecularReflectionPositionCorrect2 alg;
+    setupAlgorithm(alg, 1.4, "", "", 4);
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
+
+    auto instrIn = m_interWS->getInstrument();
+    auto instrOut = outWS->getInstrument();
+
+    // Sample should not have moved
+    auto sampleIn = instrIn->getSample()->getPos();
+    auto sampleOut = instrOut->getSample()->getPos();
+    TS_ASSERT_EQUALS(sampleIn, sampleOut);
+    // 'point-detector' should have been moved vertically only
+    auto detIn = instrIn->getComponentByName("point-detector")->getPos();
+    auto detOut = instrOut->getComponentByName("point-detector")->getPos();
+    TS_ASSERT_EQUALS(detIn.X(), detOut.X());
+    TS_ASSERT_EQUALS(detIn.Z(), detOut.Z());
+    TS_ASSERT_DELTA(detOut.Y(), 0.06508, 1e-5);
+  }
+
   void test_correct_point_detector_rotation() {
     SpecularReflectionPositionCorrect2 alg;
     setupAlgorithm(alg, 1.4, "RotateAroundSample", "point-detector");
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
+
+    auto instrIn = m_interWS->getInstrument();
+    auto instrOut = outWS->getInstrument();
+
+    // Sample should not have moved
+    auto sampleIn = instrIn->getSample()->getPos();
+    auto sampleOut = instrOut->getSample()->getPos();
+    TS_ASSERT_EQUALS(sampleIn, sampleOut);
+    // 'point-detector' should have been moved  both vertically and in
+    // the beam direction
+    auto detIn = instrIn->getComponentByName("point-detector")->getPos();
+    auto detOut = instrOut->getComponentByName("point-detector")->getPos();
+    TS_ASSERT_EQUALS(detIn.X(), detOut.X());
+    TS_ASSERT_DELTA(detOut.Z(), 2.66221, 1e-5);
+    TS_ASSERT_DELTA(detOut.Y(), 0.06506, 1e-5);
+  }
+
+  void test_correct_point_detector_by_detid_rotation() {
+    SpecularReflectionPositionCorrect2 alg;
+    setupAlgorithm(alg, 1.4, "RotateAroundSample", "", 4);
     MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
     auto instrIn = m_interWS->getInstrument();

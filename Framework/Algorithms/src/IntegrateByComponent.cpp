@@ -89,8 +89,8 @@ void IntegrateByComponent::exec() {
         if (spectrumInfo.isMasked(hists[i]))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->y(hists[i])[0];
+        const double eValue = integratedWS->e(hists[i])[0];
 
         if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
@@ -125,8 +125,8 @@ void IntegrateByComponent::exec() {
         if (spectrumInfo.isMasked(hists[i]))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->y(hists[i])[0];
+        const double eValue = integratedWS->e(hists[i])[0];
         if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
@@ -205,16 +205,10 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::vector<std::vector<size_t>> speclist;
   std::vector<size_t> speclistsingle;
 
-  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it,
-      s_it;
-
-  for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
+  auto s_it = mymap.begin();
+  for (auto m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
     Mantid::Geometry::ComponentID theKey = (*m_it).first;
-    std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID,
-                                      size_t>::iterator,
-              std::unordered_multimap<Mantid::Geometry::ComponentID,
-                                      size_t>::iterator> keyRange =
-        mymap.equal_range(theKey);
+    auto keyRange = mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();

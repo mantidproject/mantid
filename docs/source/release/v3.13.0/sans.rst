@@ -14,9 +14,14 @@ ISIS SANS Interface
 
 New features
 ############
+* A string of wavelength ranges can now be specified. A reduction is then done for each wavelength range.
 
 Improvements
 ############
+
+* Added thickness column to table in new GUI.
+* Added EventSlice option to options column in new GUI.
+* Added Radius Cutoff and Wavelength Cutoff boxes to the old and new GUI.
 
 Bug fixes
 #########

@@ -1,0 +1,24 @@
+graph {
+
+      file[label="123456-123457.hdf5"	shape="box"];
+
+      run1[label="Run 123456" shape="box"];
+
+      run2[label="Run 123457" shape="box"];
+
+      bank1[label="Bank 1" shape="box"];
+
+      bank2[label="Bank 2" shape="box"];
+
+      bank3[label="Bank1" shape="box"];
+
+      fitgroup1[label="Single Peak Fitting" shape="box"];
+
+      fitgroup2[label="Single Peak Fitting" shape="box"];
+
+      fitgroup3[label="Single Peak Fitting" shape="box"];
+
+      file -- run1 -- bank1 -- fitgroup1;
+              run1 -- bank2 -- fitgroup2;
+      file -- run2 -- bank3 -- fitgroup3;
+}
