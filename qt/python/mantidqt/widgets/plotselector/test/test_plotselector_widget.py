@@ -90,9 +90,15 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
     def test_close_button_pressed_calls_presenter(self):
         QTest.mouseClick(self.widget.close_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.close_button_clicked.call_count, 1)
+        self.assertEquals(self.presenter.close_action_called.call_count, 1)
         QTest.mouseClick(self.widget.close_button, Qt.LeftButton)
-        self.assertEquals(self.presenter.close_button_clicked.call_count, 2)
+        self.assertEquals(self.presenter.close_action_called.call_count, 2)
+
+    def test_delete_key_pressed_calls_presenter(self):
+        QTest.keyClick(self.widget.close_button, Qt.Key_Delete)
+        self.assertEquals(self.presenter.close_action_called.call_count, 1)
+        QTest.keyClick(self.widget.close_button, Qt.Key_Delete)
+        self.assertEquals(self.presenter.close_action_called.call_count, 2)
 
     # ----------------------- Plot Filtering ------------------------
 

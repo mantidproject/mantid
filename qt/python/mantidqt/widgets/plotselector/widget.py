@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import (QStandardItem, QStandardItemModel)
 from qtpy.QtWidgets import (QAbstractItemView, QListView, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit)
 
@@ -57,7 +57,19 @@ class PlotSelectorWidget(QWidget):
         # Connect presenter methods to things in the view
         self.list_view.doubleClicked.connect(self.presenter.list_double_clicked)
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
-        self.close_button.clicked.connect(self.presenter.close_button_clicked)
+        self.close_button.clicked.connect(self.presenter.close_action_called)
+        self.keyPressed.connect(self.presenter.close_action_called)
+
+    keyPressed = Signal(int)
+
+    def keyPressEvent(self, event):
+        """
+        This might be better to override on list_view, but there is
+        only ever an active selection when focused on the list.
+        """
+        super(PlotSelectorWidget, self).keyPressEvent(event)
+        if event.key() == Qt.Key_Delete:
+            self.keyPressed.emit(event.key())
 
     def _make_filter_box(self):
         """
@@ -79,6 +91,8 @@ class PlotSelectorWidget(QWidget):
         list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
         plot_list = QStandardItemModel(list_view)
         list_view.setModel(plot_list)
+
+        list_view.installEventFilter(self)
         return list_view
 
     def set_plot_list(self, plot_list):

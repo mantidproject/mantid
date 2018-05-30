@@ -49,7 +49,7 @@ class PlotSelectorPresenter(object):
 
     # ------------------------ Plot Closing -------------------------
 
-    def close_button_clicked(self):
+    def close_action_called(self):
         selected_plots = self.widget.get_all_selected_plot_names()
         self._close_plots(selected_plots)
 

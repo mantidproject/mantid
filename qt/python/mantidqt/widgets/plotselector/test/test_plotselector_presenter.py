@@ -63,31 +63,31 @@ class PlotSelectorPresenterTest(unittest.TestCase):
 
     # ------------------------ Plot Closing -------------------------
 
-    def test_close_button_pressed_single_plot(self):
+    def test_close_action_single_plot(self):
         self.widget.get_all_selected_plot_names = mock.Mock(return_value=["Plot1"])
 
-        self.presenter.close_button_clicked()
+        self.presenter.close_action_called()
         self.model.close_plot.assert_called_once_with("Plot1")
 
-    def test_close_button_pressed_multiple_plots(self):
+    def test_close_action_multiple_plots(self):
         self.widget.get_all_selected_plot_names = mock.Mock(return_value=["Plot1", "Plot3"])
 
-        self.presenter.close_button_clicked()
+        self.presenter.close_action_called()
         self.assertEqual(self.model.close_plot.call_count, 2)
         self.model.close_plot.assert_has_calls(self.convert_list_to_calls(["Plot1", "Plot3"]),
                                                any_order=True)
 
-    def test_close_button_pressed_with_no_plots_open(self):
+    def test_close_action_with_no_plots_open(self):
         self.widget.get_all_selected_plot_names = mock.Mock(return_value=[])
         self.model.configure_mock(plot_list=[])
 
-        self.presenter.close_button_clicked()
+        self.presenter.close_action_called()
         self.assertEqual(self.model.close_plot.call_count, 0)
 
-    def test_close_button_pressed_with_no_plots_selected(self):
+    def test_close_action_with_no_plots_selected(self):
         self.widget.get_all_selected_plot_names = mock.Mock(return_value=[])
 
-        self.presenter.close_button_clicked()
+        self.presenter.close_action_called()
         self.assertEqual(self.model.close_plot.call_count, 0)
 
     # ----------------------- Plot Filtering ------------------------
