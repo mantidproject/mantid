@@ -71,10 +71,6 @@ class Gem(AbstractInst):
             angles_filename = filename_stub + "_grouping.new"
             out_file_names["angles_filename"] = angles_filename
 
-        if self._inst_settings.save_gda:
-            gda_filename = filename_stub + ".gda"
-            out_file_names["gda_filename"] = gda_filename
-
         return out_file_names
 
     @staticmethod

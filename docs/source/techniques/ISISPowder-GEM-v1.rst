@@ -124,7 +124,6 @@ The following parameters may also be optionally set:
 - :ref:`texture_mode_isis-powder-diffraction-ref`
 - :ref:`unit_to_keep_gem_isis-powder-diffraction-ref`
 - :ref:`save_angles_gem_isis-powder-diffraction-ref`
-- :ref:`save_gda_gem_isis-powder-diffraction-ref`
 
 If :ref:`sample_empty_gem_isis-powder-diffraction-ref` is
 set then the following parameter is also required:
@@ -719,20 +718,6 @@ On GEM this is set to the following:
 .. code-block:: python
 
    save_angles: False
-
-.. _save_gda_gem_isis-powder-diffraction-ref:
-
-save_gda
-^^^^^^^^
-
-If set to **True**, this saves the focused data to the MAUD-readable
-``.gda`` format, using :ref:`SaveGDA <algm-SaveGDA>`.
-
-On GEM this is set to the following:
-
-.. code-block:: python
-
-   save_gda: False
 
 .. _save_maud_gem_isis-powder-diffraction-ref:
 

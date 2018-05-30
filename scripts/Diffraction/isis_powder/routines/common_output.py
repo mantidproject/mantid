@@ -67,16 +67,9 @@ def save_focused_data(d_spacing_group, tof_group, output_paths, run_number_strin
     if "angles_filename" in output_paths:
         _save_angles(d_spacing_group, output_paths["angles_filename"])
 
-    if "gda_filename" in output_paths:
-        _save_gda(tof_group, output_paths["gda_filename"])
-
 
 def _save_angles(d_spacing_group, output_path):
     mantid.SaveBankScatteringAngles(InputWorkspace=d_spacing_group, Filename=output_path)
-
-
-def _save_gda(tof_group, output_path):
-    mantid.SaveGDA(InputWorkspace=tof_group, Filename=output_path)
 
 
 def _save_maud(d_spacing_group, output_path):
