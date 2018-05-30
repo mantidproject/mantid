@@ -647,8 +647,9 @@ DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
  * @param deltaX :: TOF delta x-value
  */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
-    const double startX, const V3D &slit1Pos, const V3D &slit2Pos, const double vg1, const double vg2,
-    const V3D &sourcePos, const V3D &monitorPos, const V3D &samplePos, const V3D &detectorPos,
+    const double startX, const V3D &slit1Pos, const V3D &slit2Pos,
+    const double vg1, const double vg2, const V3D &sourcePos,
+    const V3D &monitorPos, const V3D &samplePos, const V3D &detectorPos,
     const int nBins, const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
@@ -686,15 +687,11 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 * @param deltaX :: TOF delta x-value
 */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-    const double startX, const double detSize,
-        const V3D &slit1Pos,
-        const V3D &slit2Pos,
-        const double vg1, const double vg2,
-        const V3D &sourcePos,
-        const V3D &monitorPos,
-        const V3D &samplePos,
-        const V3D &detectorCenterPos,
-        const int nSpectra, const int nBins, const double deltaX) {
+    const double startX, const double detSize, const V3D &slit1Pos,
+    const V3D &slit2Pos, const double vg1, const double vg2,
+    const V3D &sourcePos, const V3D &monitorPos, const V3D &samplePos,
+    const V3D &detectorCenterPos, const int nSpectra, const int nBins,
+    const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left,

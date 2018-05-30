@@ -106,7 +106,8 @@ twoThetaWidth(const size_t wsIndex,
   Mantid::Algorithms::ReflectometrySumInQ::MinMax range;
   if (wsIndex == 0) {
     if (spectrumInfo.size() <= 1) {
-      throw std::runtime_error("Cannot calculate pixel widths from a workspace containing a single histogram.");
+      throw std::runtime_error("Cannot calculate pixel widths from a workspace "
+                               "containing a single histogram.");
     }
     const auto nextTwoTheta = spectrumInfo.twoTheta(1);
     const auto d = std::abs(nextTwoTheta - twoTheta) / 2.;
@@ -253,15 +254,17 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
   const auto iter = std::find(indices.begin(), indices.end(),
                               static_cast<size_t>(beamCentre));
   if (iter == indices.end()) {
-    issues[Prop::BEAM_CENTRE] = "Beam centre is not included in InputWorkspaceIndexSet.";
+    issues[Prop::BEAM_CENTRE] =
+        "Beam centre is not included in InputWorkspaceIndexSet.";
   }
   for (const auto i : indices) {
     if (spectrumInfo.isMonitor(i)) {
       issues["InputWorkspaceIndexSet"] = "Index set cannot include monitors.";
       break;
-    }
-    else if ((i > 0 && spectrumInfo.isMonitor(i - 1)) || (i < spectrumInfo.size() - 1 && spectrumInfo.isMonitor(i + 1))) {
-      issues["InputWorkspaceIndexSet"] = "A neighbour to any detector in the index set cannot be a monitor";
+    } else if ((i > 0 && spectrumInfo.isMonitor(i - 1)) ||
+               (i < spectrumInfo.size() - 1 && spectrumInfo.isMonitor(i + 1))) {
+      issues["InputWorkspaceIndexSet"] =
+          "A neighbour to any detector in the index set cannot be a monitor";
       break;
     }
   }

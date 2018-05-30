@@ -266,7 +266,7 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
   auto translateAdd = [&groups](const std::string &str) {
     const auto tokens = Kernel::StringTokenizer(
         str, "+", Kernel::StringTokenizer::TOK_TRIM |
-                               Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     std::vector<Integer> group;
     group.reserve(tokens.count());
     for (const auto &t : tokens) {
@@ -280,7 +280,7 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
     // add a group with the numbers in the range
     const auto tokens = Kernel::StringTokenizer(
         str, "-", Kernel::StringTokenizer::TOK_TRIM |
-                               Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if (tokens.count() != 2)
       throw std::runtime_error("Malformed range (-) operation.");
     Integer first = boost::lexical_cast<Integer>(tokens[0]);
@@ -300,7 +300,7 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
     // add a group per number
     const auto tokens = Kernel::StringTokenizer(
         str, ":", Kernel::StringTokenizer::TOK_TRIM |
-                               Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if (tokens.count() != 2)
       throw std::runtime_error("Malformed range (:) operation.");
     Integer first = boost::lexical_cast<Integer>(tokens[0]);
@@ -316,9 +316,9 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
   try {
     // split into comma separated groups, each group potentially containing
     // an operation (+-:) that produces even more groups.
-    const auto tokens = StringTokenizer(
-        str, ",",
-        StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens =
+        StringTokenizer(str, ",", StringTokenizer::TOK_TRIM |
+                                      StringTokenizer::TOK_IGNORE_EMPTY);
     for (const auto &token : tokens) {
       // Look for the various operators in the string. If one is found then
       // do the necessary translation into groupings.
@@ -334,8 +334,7 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
       }
     }
   } catch (boost::bad_lexical_cast &) {
-    throw std::runtime_error("Cannot parse numbers from string: '" +
-                             str + "'");
+    throw std::runtime_error("Cannot parse numbers from string: '" + str + "'");
   }
 
   return groups;

@@ -34,6 +34,7 @@ using namespace DataObjects;
 using std::size_t;
 
 namespace { // anonymous namespace
+
 /**
  * Translate the PerformIndexOperations processing instructions from a vector
  * into a format usable by GroupDetectors.

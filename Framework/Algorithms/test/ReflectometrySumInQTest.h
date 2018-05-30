@@ -15,12 +15,16 @@ class ReflectometrySumInQTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometrySumInQTest *createSuite() { return new ReflectometrySumInQTest(); }
-  static void destroySuite( ReflectometrySumInQTest *suite ) { delete suite; }
+  static ReflectometrySumInQTest *createSuite() {
+    return new ReflectometrySumInQTest();
+  }
+  static void destroySuite(ReflectometrySumInQTest *suite) { delete suite; }
 
-  static Mantid::API::MatrixWorkspace_sptr convertToWavelength(Mantid::API::MatrixWorkspace_sptr ws) {
+  static Mantid::API::MatrixWorkspace_sptr
+  convertToWavelength(Mantid::API::MatrixWorkspace_sptr ws) {
     using namespace Mantid;
-    auto toWavelength = API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+    auto toWavelength =
+        API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
     toWavelength->initialize();
     toWavelength->setChild(true);
     toWavelength->setProperty("InputWorkspace", ws);
@@ -31,7 +35,8 @@ public:
     return toWavelength->getProperty("OutputWorkspace");
   }
 
-  static Mantid::API::MatrixWorkspace_sptr detectorsOnly(Mantid::API::MatrixWorkspace_sptr ws) {
+  static Mantid::API::MatrixWorkspace_sptr
+  detectorsOnly(Mantid::API::MatrixWorkspace_sptr ws) {
     using namespace Mantid;
     auto &specturmInfo = ws->spectrumInfo();
     std::vector<size_t> detectorIndices;
@@ -41,7 +46,8 @@ public:
       }
       detectorIndices.emplace_back(i);
     }
-    auto extractDetectors = API::AlgorithmManager::Instance().createUnmanaged("ExtractSpectra");
+    auto extractDetectors =
+        API::AlgorithmManager::Instance().createUnmanaged("ExtractSpectra");
     extractDetectors->initialize();
     extractDetectors->setChild(true);
     extractDetectors->setProperty("InputWorkspace", ws);
@@ -51,11 +57,10 @@ public:
     return extractDetectors->getProperty("OutputWorkspace");
   }
 
-  void test_init()
-  {
+  void test_init() {
     ReflectometrySumInQ alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
 
   void test_sumSingleHistogram() {
@@ -73,9 +78,12 @@ public:
         alg.setRethrows(true);
         TS_ASSERT_THROWS_NOTHING(alg.initialize())
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-        TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaceIndexSet", std::to_string(i)))
-        TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-        TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", static_cast<int>(i)))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("InputWorkspaceIndexSet", std::to_string(i)))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setProperty("BeamCentre", static_cast<int>(i)))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 20.))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
@@ -84,7 +92,8 @@ public:
         TS_ASSERT(outputWS);
         TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
         auto &Ys = outputWS->y(0);
-        const auto totalYSummedInQ = std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
+        const auto totalYSummedInQ =
+            std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
         TS_ASSERT_DELTA(totalYSummedInQ, totalY, 1e-10)
       }
     }
@@ -103,15 +112,19 @@ public:
     const std::array<bool, 2> flatSampleOptions{{true, false}};
     for (const auto isFlatSample : flatSampleOptions) {
       // Loop over possible beam centres.
-      for (size_t beamCentre = 0; beamCentre < inputWS->getNumberHistograms(); ++beamCentre) {
+      for (size_t beamCentre = 0; beamCentre < inputWS->getNumberHistograms();
+           ++beamCentre) {
         ReflectometrySumInQ alg;
         alg.setChild(true);
         alg.setRethrows(true);
         TS_ASSERT_THROWS_NOTHING(alg.initialize())
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-        TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaceIndexSet", "0, 1, 2"))
-        TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-        TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", static_cast<int>(beamCentre)))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("InputWorkspaceIndexSet", "0, 1, 2"))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setProperty("BeamCentre", static_cast<int>(beamCentre)))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 20.))
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
@@ -120,7 +133,8 @@ public:
         TS_ASSERT(outputWS);
         TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
         auto &Ys = outputWS->y(0);
-        const auto totalYSummedInQ = std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
+        const auto totalYSummedInQ =
+            std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
         TS_ASSERT_DELTA(totalYSummedInQ, totalY, 1e-10)
       }
     }
@@ -138,13 +152,18 @@ public:
     TS_ASSERT(!inputWS->spectrumInfo().isMonitor(detectorIdx))
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaceIndexSet", std::to_string(detectorIdx)))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", static_cast<int>(detectorIdx)))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaceIndexSet",
+                                                  std::to_string(detectorIdx)))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("BeamCentre", static_cast<int>(detectorIdx)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 15.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(), std::string("Some invalid Properties found"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Some invalid Properties found"))
   }
 
   void test_monitorInIndexSetThrows() {
@@ -157,13 +176,18 @@ public:
     TS_ASSERT(inputWS->spectrumInfo().isMonitor(monitorIdx))
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaceIndexSet", std::to_string(monitorIdx)))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", static_cast<int>(monitorIdx)))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaceIndexSet",
+                                                  std::to_string(monitorIdx)))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("BeamCentre", static_cast<int>(monitorIdx)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 15.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(), std::string("Some invalid Properties found"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Some invalid Properties found"))
   }
 
   void test_BeamCentreNotInIndexSetThrows() {
@@ -175,15 +199,18 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaceIndexSet", "0, 1"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspaceIndexSet", "0, 1"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMin", 0.1))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WavelengthMax", 15.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(), std::string("Some invalid Properties found"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Some invalid Properties found"))
   }
-
 
 private:
   static Mantid::API::MatrixWorkspace_sptr testWorkspace() {
@@ -196,7 +223,9 @@ private:
     constexpr double vg2{1.};
     const Kernel::V3D sourcePos{0., 0., -50.};
     const Kernel::V3D monitorPos{0., 0., -0.5};
-    const Kernel::V3D samplePos{0., 0., 0.,};
+    const Kernel::V3D samplePos{
+        0., 0., 0.,
+    };
     constexpr double twoTheta{0.87 / 180. * M_PI};
     constexpr double detectorHeight{0.001};
     constexpr double l2{2.3};
@@ -205,7 +234,9 @@ private:
     const Kernel::V3D centrePos{0., y, z};
     constexpr int nSpectra{4}; // One spectrum is monitor
     constexpr int nBins{50};
-    return create2DWorkspaceWithReflectometryInstrumentMultiDetector(startX, detectorHeight, slit1Pos, slit2Pos, vg1, vg2, sourcePos, monitorPos, samplePos, centrePos, nSpectra, nBins);
+    return create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+        startX, detectorHeight, slit1Pos, slit2Pos, vg1, vg2, sourcePos,
+        monitorPos, samplePos, centrePos, nSpectra, nBins);
   }
 };
 
@@ -214,7 +245,9 @@ public:
   static ReflectometrySumInQTestPerformance *createSuite() {
     return new ReflectometrySumInQTestPerformance();
   }
-  static void destroySuite(ReflectometrySumInQTestPerformance *suite) { delete suite; }
+  static void destroySuite(ReflectometrySumInQTestPerformance *suite) {
+    delete suite;
+  }
 
   ReflectometrySumInQTestPerformance() {
     using namespace Mantid;
@@ -226,7 +259,9 @@ public:
     constexpr double vg2{1.};
     const Kernel::V3D sourcePos{0., 0., -50.};
     const Kernel::V3D monitorPos{0., 0., -0.5};
-    const Kernel::V3D samplePos{0., 0., 0.,};
+    const Kernel::V3D samplePos{
+        0., 0., 0.,
+    };
     constexpr double twoTheta{5.87 / 180. * M_PI};
     constexpr double detectorHeight{0.001};
     constexpr double l2{2.3};
@@ -236,7 +271,9 @@ public:
     constexpr int nSpectra{101}; // One spectrum is monitor
     constexpr int nBins{200};
     constexpr double binWidth{1250.};
-    m_workspace = create2DWorkspaceWithReflectometryInstrumentMultiDetector(startX, detectorHeight, slit1Pos, slit2Pos, vg1, vg2, sourcePos, monitorPos, samplePos, centrePos, nSpectra, nBins, binWidth);
+    m_workspace = create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+        startX, detectorHeight, slit1Pos, slit2Pos, vg1, vg2, sourcePos,
+        monitorPos, samplePos, centrePos, nSpectra, nBins, binWidth);
     m_workspace = ReflectometrySumInQTest::convertToWavelength(m_workspace);
     m_workspace = ReflectometrySumInQTest::detectorsOnly(m_workspace);
     m_fullIndexSet.assign(m_workspace->getNumberHistograms(), 0);

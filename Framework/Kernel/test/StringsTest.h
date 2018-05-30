@@ -496,7 +496,8 @@ public:
   void test_parseGroups_comma() {
     std::vector<std::vector<int>> result;
     TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("7,13"))
-    std::vector<std::vector<int>> expected{{std::vector<int>(1, 7), std::vector<int>(1, 13)}};
+    std::vector<std::vector<int>> expected{
+        {std::vector<int>(1, 7), std::vector<int>(1, 13)}};
     TS_ASSERT_EQUALS(result, expected)
   }
 
@@ -507,7 +508,6 @@ public:
     expected.front().emplace_back(7);
     expected.front().emplace_back(13);
     TS_ASSERT_EQUALS(result, expected)
-
   }
 
   void test_parseGroups_dash() {
@@ -539,7 +539,8 @@ public:
 
   void test_parseGroups_acceptsWhitespace() {
     std::vector<std::vector<int>> result;
-    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>(" 1\t, 4 +  5\t+ 8 , 7\t- 13 ,\t1  "))
+    TS_ASSERT_THROWS_NOTHING(
+        result = parseGroups<int>(" 1\t, 4 +  5\t+ 8 , 7\t- 13 ,\t1  "))
     std::vector<std::vector<int>> expected;
     expected.emplace_back(1, 1);
     expected.emplace_back();
@@ -555,12 +556,18 @@ public:
   }
 
   void test_parseGroups_throwsWhenInputContainsNonnumericCharacters() {
-    TS_ASSERT_THROWS_EQUALS(parseGroups<int>("a"), const std::runtime_error &e, e.what(), std::string("Cannot parse numbers from string: 'a'"))
+    TS_ASSERT_THROWS_EQUALS(
+        parseGroups<int>("a"), const std::runtime_error &e, e.what(),
+        std::string("Cannot parse numbers from string: 'a'"))
   }
 
   void test_parseGroups_throwsWhenOperationsAreInvalid() {
-    TS_ASSERT_THROWS_EQUALS(parseGroups<int>("-1"), const std::runtime_error &e, e.what(), std::string("Malformed range (-) operation."))
-    TS_ASSERT_THROWS_EQUALS(parseGroups<int>(":1"), const std::runtime_error &e, e.what(), std::string("Malformed range (:) operation."))
+    TS_ASSERT_THROWS_EQUALS(parseGroups<int>("-1"), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Malformed range (-) operation."))
+    TS_ASSERT_THROWS_EQUALS(parseGroups<int>(":1"), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Malformed range (:) operation."))
   }
 
   void test_toString_vector_of_ints() {
