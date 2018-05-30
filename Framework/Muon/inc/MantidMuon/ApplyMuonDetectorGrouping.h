@@ -1,5 +1,5 @@
-#ifndef MANTID_MUON_APPLYMUONDETECTORSGROUPING_H_
-#define MANTID_MUON_APPLYMUONDETECTORSGROUPING_H_
+#ifndef MANTID_MUON_APPLYMUONDETECTORGROUPING_H_
+#define MANTID_MUON_APPLYMUONDETECTORGROUPING_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace Muon {
 
-/** ApplyMuonDetectorsGrouping :
+/** ApplyMuonDetectorGrouping :
 
 @date 2018-05-04
 
@@ -116,4 +116,4 @@ private:
 } // namespace Muon
 } // namespace Mantid
 
-#endif /* MANTID_MUON_APPLYMUONDETECTORSGROUPING_H_ */
+#endif /* MANTID_MUON_APPLYMUONDETECTORGROUPING_H_ */

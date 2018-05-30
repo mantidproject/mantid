@@ -1,5 +1,5 @@
-#ifndef MANTID_MUON_APPLYMUONDETECTORSGROUPINGTEST_H_
-#define MANTID_MUON_APPLYMUONDETECTORSGROUPINGTEST_H_
+#ifndef MANTID_MUON_APPLYMUONDETECTORGROUPINGTEST_H_
+#define MANTID_MUON_APPLYMUONDETECTORGROUPINGTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -13,7 +13,7 @@
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidMuon/ApplyMuonDetectorsGrouping.h"
+#include "MantidMuon/ApplyMuonDetectorGrouping.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -169,18 +169,18 @@ ITableWorkspace_sptr createDeadTimeTable(const int &nspec,
 
 } // namespace
 
-class ApplyMuonDetectorsGroupingTest : public CxxTest::TestSuite {
+class ApplyMuonDetectorGroupingTest : public CxxTest::TestSuite {
 public:
   // WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  ApplyMuonDetectorsGroupingTest() {
+  ApplyMuonDetectorGroupingTest() {
     Mantid::API::FrameworkManager::Instance();
   };
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ApplyMuonDetectorsGroupingTest *createSuite() {
-    return new ApplyMuonDetectorsGroupingTest();
+  static ApplyMuonDetectorGroupingTest *createSuite() {
+    return new ApplyMuonDetectorGroupingTest();
   };
-  static void destroySuite(ApplyMuonDetectorsGroupingTest *suite) {
+  static void destroySuite(ApplyMuonDetectorGroupingTest *suite) {
     delete suite;
   };
 
@@ -777,4 +777,4 @@ public:
   }
 };
 
-#endif /* MANTID_MUON_APPLYMUONDETECTORSGROUPINGTEST_H_ */
+#endif /* MANTID_MUON_APPLYMUONDETECTORGROUPINGTEST_H_ */

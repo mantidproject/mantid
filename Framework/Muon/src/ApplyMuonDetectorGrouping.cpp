@@ -1,4 +1,4 @@
-#include "MantidMuon/ApplyMuonDetectorsGrouping.h"
+#include "MantidMuon/ApplyMuonDetectorGrouping.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"

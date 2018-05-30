@@ -1,15 +1,15 @@
 set ( SRC_FILES
-        src/ApplyMuonDetectorsGrouping.cpp
+        src/ApplyMuonDetectorGrouping.cpp
         src/MuonAlgorithmHelper.cpp
 )
 
 set ( INC_FILES
-        inc/MantidMuon/ApplyMuonDetectorsGrouping.h
+        inc/MantidMuon/ApplyMuonDetectorGrouping.h
         inc/MantidMuon/MuonAlgorithmHelper.h
 )
 
 set ( TEST_FILES
-        ApplyMuonDetectorsGroupingTest.h
+        ApplyMuonDetectorGroupingTest.h
         MuonAlgorithmHelperTest.h)
 
 if (COVERALLS)
