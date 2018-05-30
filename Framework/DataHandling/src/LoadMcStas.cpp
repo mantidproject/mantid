@@ -284,7 +284,8 @@ std::vector<std::string> LoadMcStas::readEventData(
   std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
       {eventWS, eventDataTotalName}};
   // if numEventEntries > 1 also create separate event workspaces
-  const bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
+  const bool onlySummedEventWorkspace =
+      getProperty("OutputOnlySummedEventWorkspace");
   if (!onlySummedEventWorkspace && numEventEntries > 1) {
     for (const auto &eventEntry : eventEntries) {
       const std::string &dataName = eventEntry.first;

@@ -50,7 +50,7 @@ public:
     WorkspaceGroup_sptr output =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(), 5);
-    
+
     // check if event data was loaded
     MatrixWorkspace_sptr outputItemEvent =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -89,7 +89,7 @@ public:
     outputSpace = "LoadMcStasTestLoadHistPlusEvent2";
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
     algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace",
-      boost::lexical_cast<std::string>(false));
+                                   boost::lexical_cast<std::string>(false));
 
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
@@ -100,23 +100,23 @@ public:
 
     // test if expected number of workspaces returned
     WorkspaceGroup_sptr output =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(), 7);
 
     // load the summed eventworkspace
     MatrixWorkspace_sptr outputItemEvent =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "EventData" + postfix);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          "EventData" + postfix);
     const auto sumTotal = extractSumAndTest(outputItemEvent, 107163.7852);
 
     MatrixWorkspace_sptr outputItemEvent_k01 =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "k01_events_dat_list_p_x_y_n_id_t" + postfix);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          "k01_events_dat_list_p_x_y_n_id_t" + postfix);
     const auto sum_k01 = extractSumAndTest(outputItemEvent_k01, 107141.3295);
 
     MatrixWorkspace_sptr outputItemEvent_k02 =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "k02_events_dat_list_p_x_y_n_id_t" + postfix);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          "k02_events_dat_list_p_x_y_n_id_t" + postfix);
     const auto sum_k02 = extractSumAndTest(outputItemEvent_k02, 22.4558);
 
     TS_ASSERT_DELTA(sumTotal, (sum_k01 + sum_k02), 0.0001);
@@ -126,7 +126,7 @@ public:
     outputSpace = "LoadMcStasTestLoadMultipleDatasets";
     algToBeTested.setProperty("OutputWorkspace", outputSpace);
     algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace",
-      boost::lexical_cast<std::string>(false));
+                                   boost::lexical_cast<std::string>(false));
     // load one dataset
     auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 1);
 
     algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace",
-      boost::lexical_cast<std::string>(false));
+                                   boost::lexical_cast<std::string>(false));
     outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 3);
   }
