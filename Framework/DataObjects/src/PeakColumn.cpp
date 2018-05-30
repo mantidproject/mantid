@@ -214,6 +214,8 @@ bool PeakColumn::getReadOnly() const {
 /// Specialized type check
 bool PeakColumn::isBool() const { return false; }
 
+bool PeakColumn::isNumber() const { return false; }
+
 /// @returns overall memory size taken by the column.
 long int PeakColumn::sizeOfData() const {
   return sizeof(double) * static_cast<long int>(m_peaks.size());

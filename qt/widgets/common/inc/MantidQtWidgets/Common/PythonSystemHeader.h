@@ -18,6 +18,7 @@
 #define IS_PY3K
 #define INT_CHECK PyLong_Check
 #define TO_LONG PyLong_AsLong
+#define FROM_LONG PyLong_FromLong
 #define STR_CHECK PyUnicode_Check
 #define TO_CSTRING _PyUnicode_AsString
 #define FROM_CSTRING PyUnicode_FromString
@@ -29,6 +30,7 @@
 #define TO_CSTRING PyString_AsString
 #define FROM_CSTRING PyString_FromString
 #define CODE_OBJECT(x) (PyCodeObject *) x
+#define FROM_LONG PyInt_FromLong
 #endif
 
 #endif // PYTHONSYSTEMHEADER_H_
