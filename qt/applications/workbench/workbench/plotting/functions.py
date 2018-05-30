@@ -68,7 +68,8 @@ def _validate_pcolormesh_inputs(workspaces):
         raise_if_not_sequence(workspaces, 'Workspaces')
 
 
-def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
+def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
+         overplot=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -78,6 +79,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
     :param spectrum_nums: A list of spectrum number identifiers (general start from 1)
     :param wksp_indices: A list of workspace indexes (starts from 0)
     :param errors: If true then error bars are added for each plot
+    :param overplot: If true then overplot over the current figure if one exists
     :returns: The figure containing the plots
     """
     # check inputs
@@ -86,17 +88,25 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
         kw, nums = 'specNum', spectrum_nums
     else:
         kw, nums = 'wkspIndex', wksp_indices
-    # create figure
-    fig = plt.figure()
-    fig.clf()
-    ax = fig.add_subplot(111, projection=PROJECTION)
+
+    # get/create the axes to hold the plot
+    if overplot:
+        ax = plt.gca(projection=PROJECTION)
+        fig = ax.figure
+    else:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection=PROJECTION)
+
+    # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
     for ws in workspaces:
         for num in nums:
             plot_fn(ws, **{kw: num})
 
     ax.legend()
-    ax.set_title(workspaces[0].name())
+    title = workspaces[0].name()
+    ax.set_title(title)
+    fig.canvas.set_window_title(title)
     fig.canvas.draw()
     fig.show()
     return fig
