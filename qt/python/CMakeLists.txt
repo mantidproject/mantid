@@ -86,6 +86,7 @@ endif ()
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_plotselector_model.py
     mantidqt/widgets/test/test_plotselector_presenter.py
+    mantidqt/widgets/test/test_plotselector_widget.py
   )
 
   # Tests

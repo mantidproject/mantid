@@ -53,7 +53,7 @@ def requires_qapp(cls):
     """
     def is_test_method(name, x):
         # Python 3 returns a functions type for methods not bound to an instance
-        return name.startswith('test') and (isfunction(x) or ismethod(x))
+        return (name.startswith('test') or name == 'setUp') and (isfunction(x) or ismethod(x))
 
     for name in dir(cls):
         attr = getattr(cls, name)

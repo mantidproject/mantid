@@ -36,7 +36,7 @@ class PlotSelectorWidget(QWidget):
 
         self.close_button = QPushButton('Close')
         self.filter_box = self._make_filter_box()
-        self.list_view, self.plot_list = self._make_plot_list()
+        self.list_view = self._make_plot_list()
 
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.close_button)
@@ -66,7 +66,7 @@ class PlotSelectorWidget(QWidget):
         """
         text_box = QLineEdit(self)
         text_box.setPlaceholderText("Filter Plots")
-        text_box.setClearButtonEnabled(True)
+        #text_box.setClearButtonEnabled(True)
         return text_box
 
     def _make_plot_list(self):
@@ -78,7 +78,18 @@ class PlotSelectorWidget(QWidget):
         list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
         plot_list = QStandardItemModel(list_view)
         list_view.setModel(plot_list)
-        return list_view, plot_list
+        return list_view
+
+    def set_plot_list(self, plot_list):
+        """
+        Populate the plot list from the Presenter
+        :param plot_list: the list of plot names (list of strings)
+        """
+        self.list_view.model().clear()
+        for plot_name in plot_list:
+            item = QStandardItem(plot_name)
+            item.setEditable(False)
+            self.list_view.model().appendRow(item)
 
     def get_all_selected_plot_names(self):
         selected = self.list_view.selectedIndexes()
@@ -90,17 +101,6 @@ class PlotSelectorWidget(QWidget):
     def get_currently_selected_plot_name(self):
         index = self.list_view.currentIndex()
         return index.data(Qt.DisplayRole)
-
-    def set_plot_list(self, plot_list):
-        """
-        Populate the plot list from the Presenter
-        :param plot_list: the list of plot names (list of strings)
-        """
-        self.plot_list.clear()
-        for plot_name in plot_list:
-            item = QStandardItem(plot_name)
-            item.setEditable(False)
-            self.plot_list.appendRow(item)
 
     def get_filter_text(self):
         return self.filter_box.text()
