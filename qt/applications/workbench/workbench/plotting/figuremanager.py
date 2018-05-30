@@ -17,7 +17,6 @@
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 
 # std imports
-import functools
 import sys
 
 # 3rdparty imports
@@ -25,7 +24,7 @@ import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QMetaObject, QObject, QThread, Signal, Slot
+from qtpy.QtCore import Qt, QEvent, QMetaObject, QObject, QThread, Signal, Slot
 from qtpy.QtWidgets import QApplication, QLabel, QMainWindow
 from six import reraise, text_type
 
@@ -91,7 +90,13 @@ class QAppThreadCall(QObject):
 
 
 class MainWindow(QMainWindow):
+    activated = Signal()
     closing = Signal()
+
+    def event(self, event):
+        if event.type() == QEvent.WindowActivate:
+            self.activated.emit()
+        return QMainWindow.event(self, event)
 
     def closeEvent(self, event):
         self.closing.emit()
@@ -124,6 +129,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.canvas = canvas
         self.window = MainWindow()
+        self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self._widgetclosed)
 
@@ -185,6 +191,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.showNormal()
         else:
             self.window.showFullScreen()
+
+    def _window_activated(self):
+        Gcf.set_active(self)
 
     def _widgetclosed(self):
         if self.window._destroying:
