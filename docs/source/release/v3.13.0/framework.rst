@@ -38,6 +38,7 @@ New Algorithms
 Improved
 ########
 
+- :ref:`LoadMcStas <algm-LoadMcStas>` new alg property which controls the granularity of event data returned.
 - :ref:`Maxent <algm-Maxent>` when outputting the results of the iterations, it no longer pads with zeroes but
   returns as many items as iterations done for each spectrum, making the iterations easy to count.
 - :ref:`ConvertToPointData <algm-ConvertToPointData>` and :ref:`ConvertToHistogram <algm-ConvertToHistogram>` now propagate the Dx errors to the output.
@@ -50,6 +51,7 @@ Improved
 Bug fixes
 #########
 
+- In :ref:`LoadMcStas <algm-LoadMcStas>` internally reduce number of event workspaces created. If n mcstas event components now create n*(n-1) fewer.
 - The documentation of the algorithm :ref:`algm-CreateSampleWorkspace` did not match its implementation. The axis in beam direction will now be correctly described as Z instead of X.
 - The :ref:`ExtractMask <algm-ExtractMask>` algorithm now returns a non-empty list of detector ID's when given a MaskWorkspace.
 - Fixed a crash when the input workspace for :ref:`GroupDetectors <algm-GroupDetectors>` contained any other units than spectrum numbers.
