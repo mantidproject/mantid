@@ -27,9 +27,9 @@ using namespace Mantid::MuonAlgorithmHelper;
 namespace {
 
 struct yDataCounts {
-  yDataCounts() : m_count(-1){};
+  yDataCounts() : m_count(-1) {}
   int m_count;
-  double operator()(const double x, size_t) {
+  double operator()(const double , size_t) {
     m_count++;
     return static_cast<double>(m_count);
   }

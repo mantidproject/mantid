@@ -37,9 +37,9 @@ struct yDataAsymmetry {
 };
 
 struct yDataCounts {
-  yDataCounts() : m_count(-1){};
+  yDataCounts() : m_count(-1) {}
   int m_count;
-  double operator()(const double x, size_t) {
+  double operator()(const double, size_t) {
     m_count++;
     return static_cast<double>(m_count);
   }
@@ -144,7 +144,7 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   return wsGroup;
 }
 
-ITableWorkspace_sptr createDeadTimeTable(const int &nspec,
+ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
                                          std::vector<double> &deadTimes) {
 
   auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
@@ -154,11 +154,10 @@ ITableWorkspace_sptr createDeadTimeTable(const int &nspec,
   deadTimeTable->addColumn("double", "Dead Time");
 
   if (deadTimes.size() != nspec) {
-    // g_log.notice("deadTimes length is not equal to nspec");
     return deadTimeTable;
   }
 
-  for (int spec = 0; spec < deadTimes.size(); spec++) {
+  for (size_t spec = 0; spec < deadTimes.size(); spec++) {
     TableRow newRow = deadTimeTable->appendRow();
     newRow << spec + 1;
     newRow << deadTimes[spec];
