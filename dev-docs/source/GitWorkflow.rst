@@ -85,7 +85,7 @@ When creating a pull request you should:
 
   - The title should **not** contain the issue number
 - `Reference the issue which the pull request is closing  <https://github.com/blog/1506-closing-issues-via-pull-requests>`_, using one of `these <https://help.github.com/articles/closing-issues-via-commit-messages>`_ keywords
-- State the user who initiated the original issue, if they are named in the issue
+- State the user who initiated the original issue, if they are named in the issue. Please do not put full email addresses on the Pull Request, as it is publicly accessible.
 - Ensure the description follows the format described by the `PR
   template
   <https://github.com/mantidproject/mantid/blob/master/.github/PULL_REQUEST_TEMPLATE.md>`_
