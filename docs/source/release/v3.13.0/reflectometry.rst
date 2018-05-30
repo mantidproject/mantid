@@ -34,6 +34,7 @@ Algorithms
 New features
 ############
 
+* A new algorithm :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>` is available for coherent summation of the reflected beam.
 
 Improvements
 ############
