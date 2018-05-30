@@ -1,20 +1,16 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/FractionalRebinning.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
@@ -30,10 +26,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-
-/// Default constructor
-SofQWNormalisedPolygon::SofQWNormalisedPolygon()
-    : Rebin2D(), m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1) {}
 
 /**
  * @return the name of the Algorithm
@@ -72,9 +64,12 @@ void SofQWNormalisedPolygon::exec() {
         "The input workspace must have common binning across all spectra");
   }
 
-  RebinnedOutput_sptr outputWS =
-      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout,
-                                 getProperty("EAxisBinning"));
+  // Compute input caches
+  m_EmodeProperties.initCachedValues(*inputWS, this);
+
+  RebinnedOutput_sptr outputWS = SofQW::setUpOutputWorkspace<RebinnedOutput>(
+      *inputWS, getProperty("QAxisBinning"), m_Qout,
+      getProperty("EAxisBinning"), m_EmodeProperties);
   g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();
@@ -88,9 +83,6 @@ void SofQWNormalisedPolygon::exec() {
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
 
-  // Compute input caches
-  m_EmodeProperties.initCachedValues(*inputWS, this);
-
   std::vector<double> par =
       inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
   if (par.empty()) {
@@ -103,7 +95,6 @@ void SofQWNormalisedPolygon::exec() {
   }
 
   const auto &X = inputWS->x(0);
-  int emode = m_EmodeProperties.m_emode;
 
   const auto &inputIndices = inputWS->indexInfo();
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -117,23 +108,20 @@ void SofQWNormalisedPolygon::exec() {
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
+    const auto *det =
+        m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
 
-    double theta = this->m_theta[i];
-    double phi = this->m_phi[i];
-    double thetaWidth = this->m_thetaWidths[i];
-    double phiWidth = this->m_phiWidths[i];
+    const double theta = this->m_theta[i];
+    const double phi = this->m_phi[i];
+    const double thetaWidth = this->m_thetaWidths[i];
+    const double phiWidth = this->m_phiWidths[i];
 
     // Compute polygon points
-    double thetaHalfWidth = 0.5 * thetaWidth;
-    double phiHalfWidth = 0.5 * phiWidth;
+    const double thetaHalfWidth = 0.5 * thetaWidth;
 
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
 
-    const double phiLower = phi - phiHalfWidth;
-    const double phiUpper = phi + phiHalfWidth;
-
-    const double efixed = m_EmodeProperties.getEFixed(spectrumInfo.detector(i));
     const auto specNo = static_cast<specnum_t>(inputIndices.spectrumNumber(i));
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
@@ -143,16 +131,12 @@ void SofQWNormalisedPolygon::exec() {
       const double dE_j = X[j];
       const double dE_jp1 = X[j + 1];
 
-      const double lrQ =
-          this->calculateQ(efixed, emode, dE_jp1, thetaLower, phiLower);
+      const double lrQ = m_EmodeProperties.q(dE_jp1, thetaLower, det);
 
-      const V2D ll(dE_j,
-                   this->calculateQ(efixed, emode, dE_j, thetaLower, phiLower));
+      const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, det));
       const V2D lr(dE_jp1, lrQ);
-      const V2D ur(dE_jp1, this->calculateQ(efixed, emode, dE_jp1, thetaUpper,
-                                            phiUpper));
-      const V2D ul(dE_j,
-                   this->calculateQ(efixed, emode, dE_j, thetaUpper, phiUpper));
+      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
+      const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
         logStream << "Spectrum=" << specNo << ", theta=" << theta
                   << ",thetaWidth=" << thetaWidth << ", phi=" << phi
@@ -209,34 +193,6 @@ void SofQWNormalisedPolygon::exec() {
   }
 }
 
-/**
- * Calculate the Q value for a given set of energy transfer, scattering
- * and azimuthal angle.
- * @param efixed :: An fixed energy value
- * @param emode  :: the energy evaluation mode
- * @param deltaE :: The energy change
- * @param twoTheta :: The value of the scattering angle
- * @param azimuthal :: The value of the azimuthual angle
- * @return The value of Q
- */
-double SofQWNormalisedPolygon::calculateQ(const double efixed, int emode,
-                                          const double deltaE,
-                                          const double twoTheta,
-                                          const double azimuthal) const {
-  double ki = 0.0;
-  double kf = 0.0;
-  if (emode == 1) {
-    ki = std::sqrt(efixed * SofQW::energyToK());
-    kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
-  } else if (emode == 2) {
-    ki = std::sqrt((deltaE + efixed) * SofQW::energyToK());
-    kf = std::sqrt(efixed * SofQW::energyToK());
-  }
-  const double Qx = ki - kf * std::cos(twoTheta);
-  const double Qy = -kf * std::sin(twoTheta) * std::cos(azimuthal);
-  const double Qz = -kf * std::sin(twoTheta) * std::sin(azimuthal);
-  return std::sqrt(Qx * Qx + Qy * Qy + Qz * Qz);
-}
 /**
  * A map detector ID and Q ranges
  * This method looks unnecessary as it could be calculated on the fly but
@@ -394,55 +350,6 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     this->m_thetaWidths[i] = thetaWidth;
     this->m_phiWidths[i] = phiWidth;
   }
-}
-
-/** Creates the output workspace, setting the axes according to the input
- * binning parameters
- *  @param[in]  inputWorkspace The input workspace
- *  @param[in]  qbinParams The q-bin parameters from the user
- *  @param[out] qAxis The 'vertical' (q) axis defined by the given parameters
- *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
- *  @return A pointer to the newly-created workspace
- */
-RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
-    const API::MatrixWorkspace &inputWorkspace,
-    const std::vector<double> &qbinParams, std::vector<double> &qAxis,
-    const std::vector<double> &ebinParams) {
-  using Kernel::VectorHelper::createAxisFromRebinParams;
-
-  HistogramData::BinEdges xAxis(0);
-  // Create vector to hold the new X axis values
-  if (ebinParams.empty()) {
-    xAxis = inputWorkspace.binEdges(0);
-  } else {
-    static_cast<void>(
-        createAxisFromRebinParams(ebinParams, xAxis.mutableRawData()));
-  }
-
-  // Create a vector to temporarily hold the vertical ('y') axis and populate
-  // that
-  const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(qbinParams, qAxis));
-
-  // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace =
-      create<RebinnedOutput>(inputWorkspace, yLength - 1, xAxis);
-
-  // Create a binned numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new BinEdgeAxis(qAxis);
-  outputWorkspace->replaceAxis(1, verticalAxis);
-
-  // Set the axis units
-  verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxis->title() = "|Q|";
-
-  // Set the X axis title (for conversion to MD)
-  outputWorkspace->getAxis(0)->title() = "Energy transfer";
-
-  outputWorkspace->setYUnit("");
-  outputWorkspace->setYUnitLabel("Intensity");
-
-  return std::move(outputWorkspace);
 }
 
 } // namespace Mantid

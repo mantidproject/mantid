@@ -6,5 +6,6 @@
 :: Assume the buildenv.bat script exists and is in the same directory
 call %~dp0buildenv.bat
 set VCVARS=@MSVC_VAR_LOCATION@
+set UseEnv=true
 :: Start command line
-%COMSPEC% /k ""%VCVARS%\vcvarsall.bat"" amd64
+%COMSPEC% /k ""%VCVARS%\vcvarsall.bat"" amd64 @CMAKE_SYSTEM_VERSION@

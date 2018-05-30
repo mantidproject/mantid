@@ -186,16 +186,14 @@ public:
     alg.setProperty("Seed", 11);
     alg.execute();
     IFunction_sptr fun = alg.getProperty("Function");
-#ifdef _WIN32
     double A = fun->getParameter("A");
     double B = fun->getParameter("B");
     double I = fun->getParameter("I");
     double S = fun->getParameter("S");
-    TS_ASSERT_DELTA(A, 199.3392, 1e-4);
-    TS_ASSERT_DELTA(B, 130.9085, 1e-4);
-    TS_ASSERT_DELTA(I, 3.5418, 1e-4);
-    TS_ASSERT_DELTA(S, 1.4130, 1e-4);
-#endif
+    TS_ASSERT_DELTA(A, 131.2747, 1e-4);
+    TS_ASSERT_DELTA(B, 145.7469, 1e-4);
+    TS_ASSERT_DELTA(I, 3.7114, 1e-4);
+    TS_ASSERT_DELTA(S, 1.5160, 1e-4);
     TS_ASSERT(fun->isFixed(fun->parameterIndex("A")));
     TS_ASSERT(fun->isFixed(fun->parameterIndex("B")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("I")));
@@ -222,16 +220,14 @@ public:
     alg.setProperty("Seed", 11);
     alg.execute();
     IFunction_sptr fun = alg.getProperty("Function");
-#ifdef _WIN32
     double A = fun->getParameter("A");
     double B = fun->getParameter("B");
     double I = fun->getParameter("I");
     double S = fun->getParameter("S");
-    TS_ASSERT_DELTA(A, 199.3392, 1e-4);
-    TS_ASSERT_DELTA(B, 130.9085, 1e-4);
-    TS_ASSERT_DELTA(I, 3.5418, 1e-4);
-    TS_ASSERT_DELTA(S, 1.4130, 1e-4);
-#endif
+    TS_ASSERT_DELTA(A, 131.2747, 1e-4);
+    TS_ASSERT_DELTA(B, 145.7469, 1e-4);
+    TS_ASSERT_DELTA(I, 3.7114, 1e-4);
+    TS_ASSERT_DELTA(S, 1.5160, 1e-4);
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("A")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("B")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("I")));

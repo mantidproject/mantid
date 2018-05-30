@@ -5,12 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport SaveDiffFittingAscii : public Mantid::API::Algorithm {
+class DLLExport SaveDiffFittingAscii : public Mantid::API::Algorithm,
+                                       public API::DeprecatedAlgorithm {
 public:
   /// (Empty) Constructor
   SaveDiffFittingAscii();

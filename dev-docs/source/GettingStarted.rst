@@ -20,10 +20,21 @@ Install the following:
 
 * `Visual Studio 2015 Community Edition <https://go.microsoft.com/fwlink/?LinkId=532606&clcid=0x409>`_. If you are at RAL then
   ask for the location of the locally-cached offline version.
+
+  * Select a custom install and include at minimum:
+
+    * Programming Languages -> Visual C++
+    * Universal Windows App Development Kits -> Tools and Windows 10 SDK
+    * Windows 8.1 and Windows Phone 8.0/8.1 Tools -> Tools and Windows SDKs
+
 * `Git <https://git-scm.com/>`_. After installation open Git Bash and run ``git lfs install``.
 * `CMake <https://cmake.org/download/>`_
-* `MiKTeX <https://miktex.org/download>`_. Instructions are
-  `available here <https://miktex.org/howto/install-miktex>`_.
+* `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
+
+  * open the MikTeX console from the start menu
+  * switch to administrator mode
+  * settings -> select "Always install missing packages on-the-fly"
+
 * `NSIS <http://nsis.sourceforge.net/Download>`_ (optional). Used for building packages
 
 `Graphviz <http://graphviz.org/download/>`__ is required to generate the workflow diagrams in the documentation.
@@ -70,25 +81,11 @@ We use `Git`_ as our version control system (VCS). The master copies of our repo
 
 If you are not already set up with Git, you can follow these `instructions <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_.
 
-If you are at RAL then please run the following commands before cloning the repository:
-
-.. code-block:: sh
-
-    git config --global url.git@github.com:mantidproject.insteadOf http://mantidweb.nd.rl.ac.uk/mirror/git/
-
-This will speed up the clone and intial cmake run considerably.
-
 There are a number of URLs via which the code can be checked out using various protocols. The easiest way to get the one you want is to select the protocol you want on the right side of the `mantid <http://github.com/mantidproject/mantid>`_ repository page on github and copy the url into your clipboard. The way to clone the repository via ssh on the command line, into a directory called Mantid, is:
 
 .. code-block:: sh
 
     git clone git@github.com:mantidproject/mantid.git
-
-If at RAL now remove the config section above
-
-.. code-block:: sh
-
-    git config --global --unset url.git@github.com:mantidproject
 
 
 Building Mantid

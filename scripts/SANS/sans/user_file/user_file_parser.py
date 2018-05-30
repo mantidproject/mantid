@@ -839,9 +839,10 @@ class MaskParser(UserFileComponentParser):
 
         # Time Mask
         self._time_or_t = "\\s*(TIME|T)\\s*"
-        self._detector_time = "\\s*((" + self._hab + "|" + self._lab + ")"+"\\s*/\\s*)?\\s*"
-        self._time_pattern = re.compile(start_string + self._detector_time + self._time_or_t + space_string +
-                                        self._two_floats + end_string)
+        self._detector_time = "\\s*((" + self._hab + "|" + self._lab + ")"+"\\s*)?\\s*"
+        self._time_pattern = re.compile(start_string + self._detector_time + "/?" + self._time_or_t + space_string +
+                                        self._two_floats + end_string + "|" + start_string + self._time_or_t +
+                                        "/?" + self._detector_time + space_string + self._two_floats + end_string)
 
         # Block mask
         self._v_plus_h = "\\s*" + self._v + integer_number + "\\s*\\+\\s*" + self._h + integer_number
@@ -859,7 +860,6 @@ class MaskParser(UserFileComponentParser):
     def parse_line(self, line):
         # Get the settings, ie remove command
         setting = UserFileComponentParser.get_settings(line, MaskParser.get_type_pattern())
-
         # Determine the qualifier and extract the user setting
         if self._is_block_mask(setting):
             output = self._extract_block_mask(setting)
@@ -983,12 +983,13 @@ class MaskParser(UserFileComponentParser):
         if has_hab is not None or has_lab is not None:
             key = MaskId.time_detector
             detector_type = DetectorType.HAB if has_hab is not None else DetectorType.LAB
-            regex_string = "\s*(" + self._hab + ")\s*/\s*" if has_hab else "\s*(" + self._lab + ")\s*/\s*"
+            regex_string = "\s*(" + self._hab + ")\s*" if has_hab else "\s*(" + self._lab + ")\s*"
             min_and_max_time_range = re.sub(regex_string, "", line)
         else:
             key = MaskId.time
             detector_type = None
             min_and_max_time_range = line
+        min_and_max_time_range = re.sub("\s*/\s*", "", min_and_max_time_range)
         min_and_max_time_range = re.sub(self._time_or_t, "", min_and_max_time_range)
         min_and_max_time = extract_float_range(min_and_max_time_range)
         return {key: range_entry_with_detector(start=min_and_max_time[0], stop=min_and_max_time[1],

@@ -174,13 +174,14 @@ and the reconstructed image, i.e. Fourier transform (right).
 Output:
 
 .. testoutput:: ExFourierCoeffs
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    First  reconstructed coefficient: 0.847
    Second reconstructed coefficient: 0.846
    Third  reconstructed coefficient: 0.846
    Fourth reconstructed coefficient: 0.896
    Fifth  reconstructed coefficient: 0.896
-   Number of iterations: 3495
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -223,13 +224,14 @@ and :ref:`algm-FFT` (right).
 Output:
 
 .. testoutput:: ExMUSR00022725
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at -1.359: 0.100
    Image at 0.000: 0.009
    Image at 1.359: 0.100
    Negative background 0.006431
    Positive background 0.006431
-   Number of iterations: 22
+   Number of iterations: ...
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
 
@@ -258,6 +260,7 @@ and its imaginary part (right).
 Output:
 
 .. testoutput:: ExEMU00020884
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image (real part) at -1.389: -0.063
    Image (real part) at  0.000:  0.035
@@ -265,7 +268,7 @@ Output:
    Image (imaginary part) at -1.389: -0.277
    Image (imaginary part) at  0.000:  0.000
    Image (imaginary part) at  1.389:  0.277
-   Number of iterations: 33
+   Number of iterations: ...
 
 
 .. figure:: ../images/MaxEntMUSR00020884.png
@@ -304,11 +307,12 @@ the original and reconstructed data (left), and the reconstructed image (right).
 Output:
 
 .. testoutput:: ExRealImage
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image (real part) at 0.318: 0.000
    Image (real part) at 0.477: 5.862
    Image (real part) at 0.637: 0.000
-   Number of iterations: 20000
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntComplexData.png
    :align: center
@@ -359,12 +363,13 @@ image in order to obtain smooth results).
 Output:
 
 .. testoutput:: ExRealPosImage
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
    Image at 0.477: 5.862 (PositiveImage=False), 5.913 (PositiveImage=True)
    Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
-   Number of iterations: 20000
-   Number of iterations: 11
+   Number of iterations: ...
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
@@ -443,11 +448,12 @@ shows how to combine two workspaces with complex data.
 Output:
 
 .. testoutput:: ExComplexData
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-   Number of iterations dataset1 separate: 11
-   Number of iterations dataset2 separate: 7
-   Number of iterations dataset1 combined: 11
-   Number of iterations dataset2 combined: 7
+   Number of iterations dataset1 separate: ...
+   Number of iterations dataset2 separate: ...
+   Number of iterations dataset1 combined: ...
+   Number of iterations dataset2 combined: ...
 
 
 Increasing the number of points in the image
@@ -479,11 +485,12 @@ from the default 1.0; the dataset contains 270 data points and here set to be sl
 Output:
 
 .. testoutput:: ExResolutionFactor
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at 0.000: 0.035 (ResolutionFactor=1)
    Image at 0.000: 0.068 (ResolutionFactor=2)
-   Number of iterations: 33
-   Number of iterations: 20
+   Number of iterations: ...
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
@@ -510,11 +517,12 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
 Output:
 
 .. testoutput:: ExResolutionFactor2
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-   Number of iterations: 41
-   Number of iterations: 20
-   Number of iterations: 24
-   Number of iterations: 32
+   Number of iterations: ...
+   Number of iterations: ...
+   Number of iterations: ...
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center

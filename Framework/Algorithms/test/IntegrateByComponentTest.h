@@ -56,7 +56,7 @@ public:
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      TS_ASSERT_DELTA(static_cast<double>(i) * 2, result->readY(i)[0], 1e-10);
+      TS_ASSERT_DELTA(static_cast<double>(i) * 2, result->y(i)[0], 1e-10);
     }
 
     // Remove workspace from the data service.
@@ -88,10 +88,9 @@ public:
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms() / 2; i++) {
-      TS_ASSERT_DELTA(result->readY(i * 2)[0], result->readY(i * 2 + 1)[0],
+      TS_ASSERT_DELTA(result->y(i * 2)[0], result->y(i * 2 + 1)[0], 1e-10);
+      TS_ASSERT_DELTA(static_cast<double>(i) * 4 + 1, result->y(i * 2 + 1)[0],
                       1e-10);
-      TS_ASSERT_DELTA(static_cast<double>(i) * 4 + 1,
-                      result->readY(i * 2 + 1)[0], 1e-10);
     }
 
     // Remove workspace from the data service.
@@ -123,13 +122,10 @@ public:
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms() / 4; i++) {
-      TS_ASSERT_DELTA(result->readY(i * 4)[0], result->readY(i * 4 + 1)[0],
-                      1e-10);
-      TS_ASSERT_DELTA(result->readY(i * 4)[0], result->readY(i * 4 + 2)[0],
-                      1e-10);
-      TS_ASSERT_DELTA(result->readY(i * 4)[0], result->readY(i * 4 + 3)[0],
-                      1e-10);
-      TS_ASSERT_DELTA(static_cast<double>(i) * 8 + 3, result->readY(i * 4)[0],
+      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 1)[0], 1e-10);
+      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 2)[0], 1e-10);
+      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 3)[0], 1e-10);
+      TS_ASSERT_DELTA(static_cast<double>(i) * 8 + 3, result->y(i * 4)[0],
                       1e-10);
     }
 
@@ -162,7 +158,7 @@ public:
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      TS_ASSERT_DELTA(result->readY(i)[0], 11., 1e-10);
+      TS_ASSERT_DELTA(result->y(i)[0], 11., 1e-10);
     }
 
     // Remove workspace from the data service.
@@ -194,7 +190,7 @@ public:
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      TS_ASSERT_DELTA(result->readY(i)[0], 11., 1e-10);
+      TS_ASSERT_DELTA(result->y(i)[0], 11., 1e-10);
     }
 
     // Remove workspace from the data service.
@@ -227,9 +223,9 @@ public:
       return;
     const auto &spectrumInfo = result->spectrumInfo();
     for (size_t i = 0; i < result->getNumberHistograms() / 4; i++) {
-      TS_ASSERT_DELTA(result->readY(4 * i + 1)[0], 8 * i + 4, 1e-10);
-      TS_ASSERT_DELTA(result->readY(4 * i + 2)[0], 8 * i + 4, 1e-10);
-      TS_ASSERT_DELTA(result->readY(4 * i + 3)[0], 8 * i + 4, 1e-10);
+      TS_ASSERT_DELTA(result->y(4 * i + 1)[0], 8 * i + 4, 1e-10);
+      TS_ASSERT_DELTA(result->y(4 * i + 2)[0], 8 * i + 4, 1e-10);
+      TS_ASSERT_DELTA(result->y(4 * i + 3)[0], 8 * i + 4, 1e-10);
       TS_ASSERT(spectrumInfo.isMasked(4 * i));
     }
 

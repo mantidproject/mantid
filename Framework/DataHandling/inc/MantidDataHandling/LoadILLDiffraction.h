@@ -93,10 +93,11 @@ private:
                                   const std::string &propertyName) const;
 
   void initStaticWorkspace();
-  void initMovingWorkspace(const NeXus::NXDouble &scan);
+  void initMovingWorkspace(const NeXus::NXDouble &scan,
+                           const std::string &start_time);
 
   void loadDataScan();
-  API::MatrixWorkspace_sptr loadEmptyInstrument();
+  API::MatrixWorkspace_sptr loadEmptyInstrument(const std::string &start_time);
   void loadMetaData();
   void loadScanVars();
   void loadStaticInstrument();
@@ -121,6 +122,8 @@ private:
   std::string m_filename;               ///< file name to load
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
+  double m_pixelHeight{0.};             ///< height of the pixel in D2B
+  double m_maxHeight{0.}; ///< maximum absolute height of the D2B tubes
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata

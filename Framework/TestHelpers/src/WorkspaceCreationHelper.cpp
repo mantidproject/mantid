@@ -73,14 +73,6 @@ EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
       height(height_), fitStatus(fitStatus_) {}
 
 /**
- * @param name :: The name of the workspace
- * @param ws :: The workspace object
- */
-void storeWS(const std::string &name, Mantid::API::Workspace_sptr ws) {
-  Mantid::API::AnalysisDataService::Instance().add(name, ws);
-}
-
-/**
  * Deletes a workspace
  * @param name :: The name of the workspace
  */

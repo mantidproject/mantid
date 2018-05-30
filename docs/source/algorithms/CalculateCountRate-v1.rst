@@ -68,18 +68,19 @@ Usage
         log = LogTest.run().getLogData(log_name)
         print("log {0} contains {1} entries".format(log_name, log.size()))
         print("log starts at {0} and records value: {1}".format(log.firstTime(), log.firstValue()))
-        print("log ends   at {0} and records value: {1}".format(log.lastTime(), log.lastValue()))        
+        print("log ends   at {0} and records value: {1}".format(log.lastTime(), log.lastValue()))
    else:
-       print("{0}".format(rez))        
+       print("{0}".format(rez))
 
    
 .. testoutput:: ExCalcCountRate
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     Initially, Property block_count_rate not found
     The Algorithm produced log: block_count_rate
     log block_count_rate contains 200 entries
-    log starts at 2010-01-01T00:00:09.011891145  and records value: 991.0
-    log ends   at 2010-01-01T00:59:50.996493194  and records value: 1010.0
+    log starts at 2010-01-01T00:00:09... and records value: ...
+    log ends   at 2010-01-01T00:59:50... and records value: ...
  
 .. categories::
 

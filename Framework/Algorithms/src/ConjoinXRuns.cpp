@@ -113,13 +113,21 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
-  // find if there are workspaces that are not Matrix or not a point-data
-  for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
+  std::vector<std::string> workspaces;
+  try { // input workspace must be a group or a MatrixWorkspace
+    workspaces = RunCombinationHelper::unWrapGroups(inputs_given);
+  } catch (const std::exception &e) {
+    issues[INPUT_WORKSPACE_PROPERTY] = std::string(e.what());
+  }
+
+  // find if there are grouped workspaces that are not Matrix or not a
+  // point-data
+  for (const auto &input : workspaces) {
     MatrixWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
     if (!ws) {
       issues[INPUT_WORKSPACE_PROPERTY] +=
-          "Workspace " + ws->getName() + " is not a MatrixWorkspace\n";
+          "Workspace " + input + " is not a MatrixWorkspace\n";
     } else if (ws->isHistogramData()) {
       issues[INPUT_WORKSPACE_PROPERTY] +=
           "Workspace " + ws->getName() + " is not a point-data\n";
@@ -182,7 +190,8 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
       try {
         run.getLogAsSingleValue(m_logEntry);
 
-        // try if numeric time series, then the size must match to the blocksize
+        // try if numeric time series, then the size must match to the
+        // blocksize
         const int blocksize = static_cast<int>(ws->blocksize());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);

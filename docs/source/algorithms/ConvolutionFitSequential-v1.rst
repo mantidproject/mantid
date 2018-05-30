@@ -10,14 +10,14 @@
 Description
 -----------
 
-An algorithm designed mainly as a sequential call to PlotPeakByLogValue 
-but used within the ConvFit tab within the Indirect Analysis interface 
-to fit Convolution Functions.
+Performs a sequential fit involving a convolution with a defined resolution. This algorithm is a special-case of
+:ref:`QENSFitSequential <algm-QENSFitSequential>`, which calculates the elastic incoherent scattering factor when
+a delta function is provided in the fitting model.
 
 Workflow
 --------
 
-.. diagram:: ConvolutionFitSequential-v1_wkflw.dot
+.. diagram:: QENSFitSequential-v1_wkflw.dot
 
 
 Usage
@@ -38,7 +38,6 @@ Usage
   (composite=Convolution,FixResolution=true,NumDeriv=true;
   name=Resolution,Workspace=resolution,WorkspaceIndex=0;
   name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175)"""
-  bgType = "Fixed Flat"
   startX = -0.547608
   endX = 0.543217
   specMin = 0
@@ -48,10 +47,13 @@ Usage
   maxIt = 500
 
   # Run algorithm
-  result_ws = ConvolutionFitSequential(InputWorkspace=sample,
-      Function=function, PassWSIndexToFunction=True, BackgroundType=bgType,
-      StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
-      Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
+  result_ws, _, _ = ConvolutionFitSequential(InputWorkspace=sample,
+                                             Function=function,
+                                             PassWSIndexToFunction=True,
+                                             StartX=startX, EndX=endX,
+                                             SpecMin=specMin, SpecMax=specMax,
+                                             ConvolveMembers=convolve,
+                                             Minimizer=minimizer, MaxIterations=maxIt)
   
   print("Result has %i Spectra" %result_ws.getNumberHistograms())
   
@@ -89,4 +91,5 @@ Output:
 .. categories::
 
 .. sourcelink::
+        :filename: ConvolutionFit
 

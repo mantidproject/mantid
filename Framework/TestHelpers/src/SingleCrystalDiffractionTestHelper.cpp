@@ -8,6 +8,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/normal_distribution.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -169,9 +170,9 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
   const auto tofSigma = std::get<2>(sigmas);
 
   // distributions for beam divergence and TOF broadening
-  std::normal_distribution<> xDist(0, xSigma);
-  std::normal_distribution<> yDist(0, ySigma);
-  std::normal_distribution<> tofDist(tofExact, tofSigma);
+  Kernel::normal_distribution<> xDist(0, xSigma);
+  Kernel::normal_distribution<> yDist(0, ySigma);
+  Kernel::normal_distribution<> tofDist(tofExact, tofSigma);
 
   // add events to the workspace
   for (int i = 0; i < nEvents; ++i) {

@@ -19,6 +19,9 @@ class IEnggDiffMultiRunFittingWidgetView {
 public:
   virtual ~IEnggDiffMultiRunFittingWidgetView() = default;
 
+  /// Get RunLabels of all runs loaded into the widget
+  virtual std::vector<RunLabel> getAllRunLabels() const = 0;
+
   /// Get run number and bank ID of the run currently selected in the list
   virtual boost::optional<RunLabel> getSelectedRunLabel() const = 0;
 

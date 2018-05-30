@@ -160,9 +160,7 @@ view shows changes other than your own it is most likely that the base
 branch is incorrect and it needs to be fixed.
 
 As an example consider the scenario where a branch named ``topic`` has
-been based off the ``master`` branch as follows:
-
-.. code-block:: bash
+been based off the ``master`` branch as follows::
 
    o---o---o---o---o  master
       |           \
@@ -171,9 +169,7 @@ been based off the ``master`` branch as follows:
         o---o---o---o---o  release
 
 where we actually want the ``topic`` branch based off ``release``
-instead i.e.
-
-.. code-block:: bash
+instead i.e. ::
 
    o---o---o---o---o  master
        \
