@@ -428,6 +428,7 @@ void MaxEnt::exec() {
     Progress progress(this, 0.0, 1.0, nIter);
 
     // Run maxent algorithm
+    bool stop = false;
     for (size_t it = 0; it < nIter; it++) {
 
       // Iterates one step towards the solution. This means calculating
@@ -459,6 +460,7 @@ void MaxEnt::exec() {
         g_log.information() << "Stopped after " << it + 1 << " iterations"
                             << std::endl;
         iterationCounts.push_back(it + 1);
+        stop = true;
         break;
       }
 
@@ -470,6 +472,11 @@ void MaxEnt::exec() {
       progress.report();
 
     } // Next Iteration
+
+      // If we didn't stop, we still need to record the number of iterations
+    if (!stop) {
+      iterationCounts.push_back(nIter);
+    }
 
     // Get calculated data
     auto solData = maxentCalculator.getReconstructedData();

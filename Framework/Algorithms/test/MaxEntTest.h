@@ -277,6 +277,51 @@ public:
     // seg faults after these tests.....
   }
 
+  void test_cosine_three_spectra() {
+
+    auto ws = createWorkspaceReal(10, 0.0, 3);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("A", 0.01);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+    TS_ASSERT(chi);
+    TS_ASSERT(angle);
+
+    // Test some values
+    TS_ASSERT_EQUALS(data->y(0).size(), 10);
+    TS_ASSERT_EQUALS(data->y(1).size(), 10);
+    TS_ASSERT_EQUALS(data->y(2).size(), 10);
+    TS_ASSERT_EQUALS(data->y(5).size(), 10);
+    TS_ASSERT_DELTA(data->y(0)[5], 0.261, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[5], 0.665, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[5], 0.898, 0.001);
+    TS_ASSERT_DELTA(data->y(5)[5], 0.000, 0.001);
+
+    // Test that the algorithm converged
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
+    TS_ASSERT_DELTA(chi->y(1).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(1).back(), 0.001, 0.001);
+    TS_ASSERT_DELTA(chi->y(2).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(2).back(), 0.001, 0.001);
+  }
+
   void test_sine_cosine_neg() {
     // Complex signal: cos(w * x) + i sin(w * x)
     // PosNeg images
@@ -686,7 +731,7 @@ public:
     // Frequency of the oscillations
     double w = 1.6;
     // phase shift between spectra
-    double shift = 1.0;
+    double shift = 0.5;
 
     size_t nPts = maxt*nSpec;
     MantidVec X(nPts);
