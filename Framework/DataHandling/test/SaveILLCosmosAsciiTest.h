@@ -8,6 +8,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <fstream>
 #include <Poco/File.h>
+#include <string>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -24,9 +25,9 @@ public:
   SaveILLCosmosAsciiTest() {
     m_filename = "SaveILLCosmosAsciiTestFile.txt";
     m_name = "SaveILLCosmosAsciiWS";
-    for (int i = 1; i < 11; ++i) {
+    for (int i = 1; i < m_points + 1; ++i) {
       m_data.push_back(i);
-      m_zeros.push_back(0);
+      m_zeros.push_back(0.);
     }
   }
   ~SaveILLCosmosAsciiTest() override {}
@@ -253,7 +254,8 @@ private:
     TS_ASSERT_EQUALS(fullline, "Number of file format: 2");
     getline(in, fullline);
     std::cout << sep;
-    TS_ASSERT_EQUALS(fullline, "Number of data points:" + sep + "10");
+    TS_ASSERT_EQUALS(fullline,
+                     "Number of data points:" + sep + std::to_string(m_points));
     getline(in, fullline);
     getline(in, fullline);
     TS_ASSERT_EQUALS(fullline, sep + "q" + sep + "refl" + sep + "refl_err" +
@@ -261,7 +263,8 @@ private:
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
                 bool createLogs = false) {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspace(1, m_points);
 
     if (createLogs) {
       ws->mutableRun().addProperty("run_title",
@@ -295,6 +298,8 @@ private:
     AnalysisDataService::Instance().remove(m_name);
   }
   std::string m_filename, m_name, m_long_filename;
-  std::vector<double> m_data, m_zeros;
+  int m_points{2};
+  std::vector<double> m_data;
+  std::vector<double> m_zeros;
 };
 #endif /*MANTID_DATAHANDLING_SAVEILLCOSMOSASCIITEST_H_*/
