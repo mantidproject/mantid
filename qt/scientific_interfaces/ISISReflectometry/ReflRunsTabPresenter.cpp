@@ -323,7 +323,7 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
     tablePresenter->setPromptUser(false);
     try {
       tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error &) {
       // If the user cancelled the deletion, don't start autoreduction
       return;
     }
