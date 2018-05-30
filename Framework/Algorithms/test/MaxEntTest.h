@@ -206,7 +206,7 @@ public:
 
   void test_cosine() {
 
-    auto ws = createWorkspaceReal(50, 0.0);
+    auto ws = createWorkspaceReal(50, 0.0, 1);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -243,7 +243,7 @@ public:
 
   void test_sine() {
 
-    auto ws = createWorkspaceReal(50, M_PI / 2.);
+    auto ws = createWorkspaceReal(50, M_PI / 2.0, 1);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -378,7 +378,7 @@ public:
 
     size_t npoints = 50;
 
-    auto ws = createWorkspaceReal(npoints, 0.0);
+    auto ws = createWorkspaceReal(npoints, 0.0, 1);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -416,7 +416,7 @@ public:
 
   void test_adjustments() {
 
-    auto ws = createWorkspaceReal(20, 0.0);
+    auto ws = createWorkspaceReal(20, 0.0, 1);
     auto linAdj = createWorkspaceAdjustments(1.0, 0.0);
     auto constAdj = createWorkspaceAdjustments(0.0, 0.0);
 
@@ -460,7 +460,7 @@ public:
 
     size_t npoints = 2;
 
-    auto ws = createWorkspaceReal(npoints, 0.0);
+    auto ws = createWorkspaceReal(npoints, 0.0, 1);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -596,7 +596,7 @@ public:
   }
 
   void test_unevenlySpacedInputData() {
-    auto ws = createWorkspaceReal(3, 0.0);
+    auto ws = createWorkspaceReal(3, 0.0, 1);
     Points xData{0, 1, 5};
     ws->setPoints(0, xData);
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
@@ -679,21 +679,26 @@ public:
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
-  MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {
+  MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase, int nSpec) {
 
     // Create cosine with phase 'phase'
 
     // Frequency of the oscillations
     double w = 1.6;
+    // phase shift between spectra
+    double shift = 1.0;
 
-    MantidVec X(maxt);
-    MantidVec Y(maxt);
-    MantidVec E(maxt);
+    size_t nPts = maxt*nSpec;
+    MantidVec X(nPts);
+    MantidVec Y(nPts);
+    MantidVec E(nPts);
     for (size_t t = 0; t < maxt; t++) {
       double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
-      X[t] = x;
-      Y[t] = cos(w * x + phase);
-      E[t] = 0.1;
+      for (size_t s = 0; s < nSpec; s++) {
+        X[t + s*maxt] = x;
+        Y[t + s*maxt] = cos(w*x + phase + s*shift);
+        E[t + s*maxt] = 0.1;
+      }
     }
     auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
     createWS->initialize();
@@ -701,6 +706,7 @@ public:
     createWS->setProperty("DataX", X);
     createWS->setProperty("DataY", Y);
     createWS->setProperty("DataE", E);
+    createWS->setProperty("NSpec", nSpec);
     createWS->setPropertyValue("OutputWorkspace", "ws");
     createWS->execute();
     MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
