@@ -10,6 +10,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
+#include <ctype.h>
 #include <string>
 #include <vector>
 
@@ -487,7 +488,7 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
     errors["GroupName"] = "The group must be named.";
   }
 
-  if (!std::any_of(std::begin(groupName), std::end(groupName), ::isalnum)) {
+  if (!std::any_of(std::begin(groupName), std::end(groupName), isalnum)) {
     errors["GroupName"] =
         "The group name must contain at least one alphnumeric character.";
   }
