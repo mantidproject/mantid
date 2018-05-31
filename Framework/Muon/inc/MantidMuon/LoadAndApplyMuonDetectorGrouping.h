@@ -72,6 +72,16 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
+
+  API::Grouping loadGroupsAndPairs();
+
+  void addGroupingToGroupWorkspace(const Mantid::API::Grouping &grouping,
+                                   Mantid::API::Workspace_sptr ws,
+                                   Mantid::API::WorkspaceGroup_sptr wsGrouped);
+
+  void addPairingToGroupWorkspace(const Mantid::API::Grouping &grouping,
+                                  Mantid::API::Workspace_sptr ws,
+                                  Mantid::API::WorkspaceGroup_sptr wsGrouped);
 };
 
 } // namespace Muon
