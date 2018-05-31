@@ -402,14 +402,14 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
  *
  * @param workspace :: Workspace(Group) that will have its bins reset
  */
-void LoadLiveData::resetAllXToSingleBin(API::Workspace* workspace) {
-  if (auto *ws_event = dynamic_cast<EventWorkspace*>(workspace)) {
+void LoadLiveData::resetAllXToSingleBin(API::Workspace *workspace) {
+  if (auto *ws_event = dynamic_cast<EventWorkspace *>(workspace)) {
     ws_event->resetAllXToSingleBin();
-  } else if (auto *ws_group = dynamic_cast<WorkspaceGroup*>(workspace)) {
+  } else if (auto *ws_group = dynamic_cast<WorkspaceGroup *>(workspace)) {
     auto num_entries = static_cast<size_t>(ws_group->getNumberOfEntries());
     for (size_t i = 0; i < num_entries; ++i) {
       auto ws = ws_group->getItem(i);
-      if (auto *ws_event = dynamic_cast<EventWorkspace*>(ws.get()))
+      if (auto *ws_event = dynamic_cast<EventWorkspace *>(ws.get()))
         ws_event->resetAllXToSingleBin();
     }
   }
