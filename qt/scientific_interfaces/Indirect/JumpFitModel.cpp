@@ -170,7 +170,7 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
   const auto hwhmWorkspace = appendAll(subworkspaces);
   const auto axis = workspace->getAxis(1)->clone(hwhmWorkspace.get());
   hwhmWorkspace->replaceAxis(1, dynamic_cast<TextAxis *>(axis));
-  return addToADS(appendAll(subworkspaces), hwhmName);
+  return addToADS(hwhmWorkspace, hwhmName);
 }
 
 boost::optional<std::size_t>
