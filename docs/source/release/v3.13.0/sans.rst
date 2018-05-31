@@ -19,6 +19,7 @@ New features
 
 Improvements
 ############
+* Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
 
 * Added thickness column to table in new GUI.
 * Added EventSlice option to options column in new GUI.
