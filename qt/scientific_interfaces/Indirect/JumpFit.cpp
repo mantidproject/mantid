@@ -24,15 +24,21 @@ JumpFit::JumpFit(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
       m_uiForm(new Ui::JumpFit) {
   m_uiForm->setupUi(parent);
+
+  m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
+  setFitDataPresenter(
+      new IndirectFitDataPresenter(m_jumpFittingModel, m_uiForm->fitDataView));
+  setPlotView(m_uiForm->pvFitPlotView);
+  setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 
 void JumpFit::setupFitTab() {
-  m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
-  setSpectrumSelectionView(m_uiForm->svSpectrumView);
-
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
+
+  setSampleWSSuffices({ "_Result" });
+  setSampleFBSuffices({ "_Result.nxs" });
 
   auto chudleyElliot =
       FunctionFactory::Instance().createFunction("ChudleyElliot");
@@ -46,75 +52,20 @@ void JumpFit::setupFitTab() {
   addComboBoxFunctionGroup("FickDiffusion", {fickDiffusion});
   addComboBoxFunctionGroup("TeixeiraWater", {teixeiraWater});
 
-  disablePlotGuess();
-  disablePlotPreview();
-
-  // Create range selector
-  auto qRangeSelector = m_uiForm->ppPlotTop->addRangeSelector("JumpFitQ");
-  connect(qRangeSelector, SIGNAL(minValueChanged(double)), this,
-          SLOT(xMinSelected(double)));
-  connect(qRangeSelector, SIGNAL(maxValueChanged(double)), this,
-          SLOT(xMaxSelected(double)));
-
   m_uiForm->cbWidth->setEnabled(false);
 
-  // Connect data selector to handler method
-  connect(m_uiForm->dsSample, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleSampleInputReady(const QString &)));
   // Connect width selector to handler method
   connect(m_uiForm->cbWidth, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleWidthChange(int)));
 
   // Handle plotting and saving
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
-  connect(m_uiForm->pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
-
-  connect(m_uiForm->ckPlotGuess, SIGNAL(stateChanged(int)), this,
-          SLOT(updatePlotGuess()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
 }
 
 void JumpFit::updateModelFitTypeString() {
   m_jumpFittingModel->setFitType(selectedFitType().toStdString());
-}
-
-bool JumpFit::doPlotGuess() const {
-  return m_uiForm->ckPlotGuess->isEnabled() &&
-         m_uiForm->ckPlotGuess->isChecked();
-}
-
-/**
- * Validate the form to check the program can be run
- *
- * @return :: Whether the form was valid
- */
-bool JumpFit::validate() {
-  UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSample);
-
-  // this workspace doesn't have any valid widths
-  if (m_jumpFittingModel->getWidths().empty())
-    uiv.addErrorMessage(
-        "Sample Input: Workspace doesn't appear to contain any width data");
-
-  if (isEmptyModel())
-    uiv.addErrorMessage("No fit function has been selected");
-
-  const auto errors = uiv.generateErrorMessage();
-  emit showMessageBox(errors);
-  return errors.isEmpty();
-}
-
-/**
- * Set the data selectors to use the default save directory
- * when browsing for input files.
- *
- * @param settings :: The current settings
- */
-void JumpFit::loadSettings(const QSettings &settings) {
-  m_uiForm->dsSample->readSettings(settings.group());
 }
 
 /**
@@ -124,15 +75,7 @@ void JumpFit::loadSettings(const QSettings &settings) {
  * @param filename :: The name of the workspace to plot
  */
 void JumpFit::handleSampleInputReady(const QString &filename) {
-  IndirectFitAnalysisTab::newInputDataLoaded(filename);
   setAvailableWidths(m_jumpFittingModel->getWidths());
-
-  QPair<double, double> res;
-  QPair<double, double> range = m_uiForm->ppPlotTop->getCurveRange("Sample");
-  auto bounds = getResolutionRangeFromWs(filename, res) ? res : range;
-  auto qRangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
-  qRangeSelector->setMinimum(bounds.first);
-  qRangeSelector->setMaximum(bounds.second);
 
   if (m_jumpFittingModel->getWorkspace(0)) {
     m_uiForm->cbWidth->setEnabled(true);
@@ -166,59 +109,12 @@ void JumpFit::handleWidthChange(int widthIndex) {
   setSelectedSpectrum(spectrum);
 }
 
-void JumpFit::startXChanged(double startX) {
-  auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
-  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
-  rangeSelector->setMinimum(startX);
-}
-
-void JumpFit::endXChanged(double endX) {
-  auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
-  MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
-  rangeSelector->setMaximum(endX);
-}
-
-void JumpFit::disablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(false); }
-
-void JumpFit::enablePlotGuess() { m_uiForm->ckPlotGuess->setEnabled(true); }
-
-/**
- * Updates the plot
- */
-void JumpFit::updatePreviewPlots() {
-  IndirectFitAnalysisTab::updatePlots(m_uiForm->ppPlotTop,
-                                      m_uiForm->ppPlotBottom);
-}
-
-void JumpFit::updatePlotRange() {
-  auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("JumpFitQ");
-  if (m_uiForm->ppPlotTop->hasCurve("Sample")) {
-    const auto range = m_uiForm->ppPlotTop->getCurveRange("Sample");
-    rangeSelector->setRange(range.first, range.second);
-  }
-}
-
 void JumpFit::updatePlotOptions() {}
 
 void JumpFit::setPlotResultEnabled(bool enabled) {}
 
 void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
-}
-
-void JumpFit::enablePlotPreview() { m_uiForm->pbPlotPreview->setEnabled(true); }
-
-void JumpFit::disablePlotPreview() {
-  m_uiForm->pbPlotPreview->setEnabled(false);
-}
-
-void JumpFit::addGuessPlot(MatrixWorkspace_sptr workspace) {
-  m_uiForm->ppPlotTop->addSpectrum("Guess", workspace, 0, Qt::green);
-}
-
-void JumpFit::removeGuessPlot() {
-  m_uiForm->ppPlotTop->removeSpectrum("Guess");
-  m_uiForm->ckPlotGuess->setChecked(false);
 }
 
 } // namespace IDA
