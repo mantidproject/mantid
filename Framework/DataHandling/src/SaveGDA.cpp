@@ -102,7 +102,8 @@ void SaveGDA::exec() {
   outFile << std::fixed << std::setprecision(0) << std::setfill(' ');
 
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
-  for (int i = 0; i < inputWS->getNumberOfEntries(); ++i) {
+  const auto numBanks = inputWS->getNumberOfEntries();
+  for (int i = 0; i < numBanks; ++i) {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
@@ -118,8 +119,9 @@ void SaveGDA::exec() {
         std::min({tofScaled.size(), intensity.size(), error.size()});
 
     const auto averageDeltaTByT = computeAverageDeltaTByT(tof);
-    const auto header = generateBankHeader(i + 1, (int)std::round(tofScaled[0]),
-                                           numPoints, averageDeltaTByT);
+    const auto header =
+        generateBankHeader(numBanks - i, (int)std::round(tofScaled[0]),
+                           numPoints, averageDeltaTByT);
 
     outFile << std::left << std::setw(80) << header << '\n' << std::right;
 
