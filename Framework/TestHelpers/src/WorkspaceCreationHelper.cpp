@@ -634,7 +634,6 @@ DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
  * @param monitorPos :: monitor position
  * @param samplePos :: sample position
  * @param detectorPos :: detector position
- * @param nSpectra :: number of spectra
  * @param nBins :: number of bins
  * @param deltaX :: TOF delta x-value
  */
@@ -671,12 +670,19 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 * Create a very small 2D workspace for a virtual reflectometry instrument with
 * multiple detectors
 * @return workspace with instrument attached.
-* @param startX : X Tof start value for the workspace.
-* @param detSize : optional detector height (default is 0 which puts all
-* detectors at the same position)
-* @param nSpectra :: number of spectra
-* @param nBins :: number of bins
-* @param deltaX :: TOF delta x-value
+* @param startX :: X Tof start value for the workspace.
+* @param detSize :: detector height
+* @param slit1Pos :: position of the first slit (counting from source)
+* @param slit2Pos :: position of the second slit (counting from source)
+* @param v1g :: slit 1 vertical gap
+* @param v2g :: slit 2 vertical gap
+* @param sourcePos :: source position
+* @param monitorPos :: monitor position
+* @param samplePos :: sample position
+* @param detectorCenterPos :: position of the detector center
+* @param nSpectra :: number of spectra (detectors + monitor)
+* @param nBins :: number of TOF channels
+* @param deltaX :: TOF channel width
 */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     const double startX, const double detSize, const V3D &slit1Pos,
