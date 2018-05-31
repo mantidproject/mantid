@@ -54,12 +54,12 @@ chopper_system:
   constant_frequencies:         # This specifies if a chopper should be run at a fixed constant frequency
     [0, 60., 60., 0.]           # On CNCS, the rep/frame-overlap choppers should always run at 60 Hz
   frequency_names:
-    - 'Fermi frequency'
     - 'Resolution disk frequency'
+    - 'Fermi frequency'
   max_frequencies:
     [300, 300]                  # Maximum frequencies (Hz)
   default_frequencies:
-    [120, 120]
+    [300, 180]
   overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
   ei_limits: [0, 30]            # Limits on ei for multirep calculations (reps outside range ignored)
   flux_ref_slot: 20             # Reference slot width (mm) for flux transmission calculation (disk choppers only)

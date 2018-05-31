@@ -268,11 +268,17 @@ class ChopperSystem(object):
             self.setFrequency(oldfreq)
         modSamDist = self.distance[-1] + self.chop_sam
         totDist = modSamDist + self.sam_det
+        xmax = 1.e6 / self.source_rep
+        if hasattr(self, 'n_frame') and self.n_frame > 1:
+            xmax *= self.n_frame
+            for i in range(1, self.n_frame):
+                plt.plot([i * 1.e6 / self.source_rep] * 2, [0, totDist], c='k')
+        limits = [-1.e6 / self.source_rep, xmax]
         for i in range(len(self.distance)):
-            plt.plot([-20000, 120000], [self.distance[i], self.distance[i]], c='k', linewidth=1.)
+            plt.plot(limits, [self.distance[i], self.distance[i]], c='k', linewidth=1.)
             for j in range(len(chop_times[i][:])):
                 plt.plot(chop_times[i][j], [self.distance[i], self.distance[i]], c='white', linewidth=1.)
-        plt.plot([-20000, 120000], [totDist, totDist], c='k', linewidth=2.)
+        plt.plot(limits, [totDist, totDist], c='k', linewidth=2.)
         for i in range(len(lines)):
             x0 = (-lines[i][0][1] / lines[i][0][0] - lines[i][1][1] / lines[i][1][0]) / 2.
             x1 = ((modSamDist-lines[i][0][1]) / lines[i][0][0] + (modSamDist-lines[i][1][1]) / lines[i][1][0]) / 2.
@@ -287,11 +293,6 @@ class ChopperSystem(object):
             x4 = (totDist-newline[1]) / (newline[0])
             plt.plot([x1, x4], [modSamDist, totDist], c='r')
             plt.text(x2, totDist+0.2, "{:3.1f}".format(Eis[i]))
-        xmax = 1.e6 / self.source_rep
-        if hasattr(self, 'n_frame') and self.n_frame > 1:
-            xmax *= self.n_frame
-            for i in range(1, self.n_frame):
-                plt.plot([i * 1.e6 / self.source_rep] * 2, [0, totDist], c='k')
         if h_plt is None:
             plt.xlim(0, xmax)
             plt.xlabel(r'TOF ($\mu$sec)')

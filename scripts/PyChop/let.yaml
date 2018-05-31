@@ -72,7 +72,7 @@ chopper_system:
   max_frequencies:
     [300, 300]                  # Maximum frequencies (Hz)
   default_frequencies:
-    [200, 100]
+    [240, 120]
   overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
   ei_limits: [0, 30]            # Limits on ei for multirep calculations (reps outside range ignored)
   flux_ref_slot: 20             # Reference slot width (mm) for flux transmission calculation (disk choppers only)

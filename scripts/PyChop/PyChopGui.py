@@ -56,6 +56,7 @@ class PyChopGui(QtGui.QMainWindow):
         self.tabs.setTabEnabled(self.tdtabID, False)
         self.widgets['ChopperCombo']['Combo'].clear()
         self.widgets['FrequencyCombo']['Combo'].clear()
+        self.widgets['FrequencyCombo']['Label'].setText('Frequency')
         self.widgets['PulseRemoverCombo']['Combo'].clear()
         for item in self.choppers[str(instname)]:
             self.widgets['ChopperCombo']['Combo'].addItem(item)
@@ -67,10 +68,14 @@ class PyChopGui(QtGui.QMainWindow):
             self.widgets['PulseRemoverCombo']['Label'].hide()
             for fq in range(rep, (maxfreq[0] if hasattr(maxfreq, '__len__') else maxfreq) + 1, rep):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
+            if hasattr(self.engine.chopper_system, 'frequency_names'):
+                self.widgets['FrequencyCombo']['Label'].setText(self.engine.chopper_system.frequency_names[0])
         else:
             self.widgets['PulseRemoverCombo']['Combo'].show()
             self.widgets['PulseRemoverCombo']['Label'].show()
-            self.widgets['PulseRemoverCombo']['Label'].setText(self.engine.chopper_system.frequency_names[1])
+            if hasattr(self.engine.chopper_system, 'frequency_names'):
+                for idx, chp in enumerate([self.widgets['FrequencyCombo']['Label'], self.widgets['PulseRemoverCombo']['Label']]):
+                    chp.setText(self.engine.chopper_system.frequency_names[idx])
             for fq in range(rep, maxfreq[0] + 1, rep):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
             for fq in range(rep, maxfreq[1] + 1, rep):
@@ -98,6 +103,12 @@ class PyChopGui(QtGui.QMainWindow):
         self.flxedt.setText('%3.2f' % (val))
         nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, 'n_frame') else 1
         self.repfig_nframe_edit.setText(str(nframe))
+        if hasattr(self.engine.chopper_system, 'default_frequencies'):
+            cb = [self.widgets['FrequencyCombo']['Combo'], self.widgets['PulseRemoverCombo']['Combo']]
+            for idx, freq in enumerate(self.engine.chopper_system.default_frequencies):
+                cb[idx].setCurrentIndex([i for i in range(cb[idx].count()) if str(freq) in cb[idx].itemText(i)][0])
+                if idx > 1:
+                    break
 
     def setChopper(self, choppername):
         """
@@ -755,6 +766,7 @@ class PyChopGui(QtGui.QMainWindow):
         self.reptab = QtGui.QWidget(self.tabs)
         self.repfig_nframe = QtGui.QWidget(self.reptab)
         self.repfig_nframe.setLayout(self.repfig_nframe_box)
+        self.repfig_nframe.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed))
         self.reptabbox = QtGui.QVBoxLayout()
         self.reptabbox.addWidget(self.repcanvas)
         self.reptabbox.addWidget(self.repfig_nframe)
