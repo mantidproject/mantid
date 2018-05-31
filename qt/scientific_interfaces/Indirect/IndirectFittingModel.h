@@ -97,6 +97,8 @@ protected:
   std::string createSingleFitOutputName(const std::string &formatString,
                                         std::size_t index,
                                         std::size_t spectrum) const;
+  void addNewWorkspace(MatrixWorkspace_sptr workspace, const Spectra &spectra);
+  void removeFittingData(std::size_t index);
 
 private:
   Mantid::API::IAlgorithm_sptr
