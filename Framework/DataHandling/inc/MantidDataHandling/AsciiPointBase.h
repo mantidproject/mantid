@@ -71,7 +71,7 @@ protected:
   virtual void appendSeparatorProperty();
   /// The separator character
   char m_sep;
-  size_t m_xlength = 0;
+  size_t m_length = 0;
 
   API::MatrixWorkspace_const_sptr m_ws;
 };

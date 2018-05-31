@@ -67,7 +67,7 @@ void AsciiPointBase::exec() {
  */
 std::vector<double> AsciiPointBase::header(std::ofstream &file) {
   const auto &xTemp = m_ws->x(0);
-  m_xlength = m_ws->y(0).size();
+  m_length = m_ws->y(0).size();
   std::vector<double> XData(xTemp.size());
   if (m_ws->isHistogramData()) {
     for (size_t i = 0; i < xTemp.size() - 1; ++i) {
@@ -90,7 +90,7 @@ void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
   const auto &yData = m_ws->y(0);
   const auto &eData = m_ws->e(0);
   if (exportDeltaQ) {
-    for (size_t i = 0; i < m_xlength; ++i) {
+    for (size_t i = 0; i < m_length; ++i) {
       outputval(XData[i], file, leadingSep());
       outputval(yData[i], file);
       outputval(eData[i], file);
@@ -101,7 +101,7 @@ void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
       file << '\n';
     }
   } else {
-    for (size_t i = 0; i < m_xlength; ++i) {
+    for (size_t i = 0; i < m_length; ++i) {
       outputval(XData[i], file, leadingSep());
       outputval(yData[i], file);
       outputval(eData[i], file);

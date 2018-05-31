@@ -15,11 +15,11 @@ using namespace API;
 
 /// virtual method to set the extra properties required for this algorithm
 void SaveMFT::extraProps() {
-  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
-                  "List of logs to write to file.");
-  declareProperty("UserContact", "",
-                  "Text to be written to the User-local contact field");
-  declareProperty("Title", "", "Text to be written to the Title field");
+    declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
+                    "List of logs to write to file.");
+    declareProperty("UserContact", "",
+                    "Text to be written to the User-local contact field");
+    declareProperty("Title", "", "Text to be written to the Title field");
   appendSeparatorProperty();
 }
 
@@ -73,7 +73,7 @@ void SaveMFT::extraHeaders(std::ofstream &file) {
   }
 
   file << "Number of file format: 2\n";
-  file << "Number of data points:" << m_sep << m_xlength << '\n';
+  file << "Number of data points: " << m_length << '\n';
   file << '\n';
 
   file << m_sep << "q" << m_sep << "refl" << m_sep << "refl_err" << m_sep

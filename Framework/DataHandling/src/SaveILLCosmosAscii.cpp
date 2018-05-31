@@ -73,7 +73,7 @@ void SaveILLCosmosAscii::extraHeaders(std::ofstream &file) {
   }
 
   file << "Number of file format: 2\n";
-  file << "Number of data points:" << m_sep << m_xlength << '\n';
+  file << "Number of data points:" << m_sep << m_length << '\n';
   file << '\n';
 
   file << m_sep << "q" << m_sep << "refl" << m_sep << "refl_err" << m_sep

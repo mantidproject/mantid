@@ -1,11 +1,7 @@
 #ifndef MANTID_DATAHANDLING_SaveMFT_H_
 #define MANTID_DATAHANDLING_SaveMFT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 
 namespace Mantid {
@@ -44,7 +40,7 @@ public:
   const std::string name() const override { return "SaveMFT"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Saves a 2D workspace to a ascii file of format mft.";
+    return "Saves a 2D workspace to a ascii file of format mft";
   }
 
   /// Algorithm's version for identification overriding a virtual method
