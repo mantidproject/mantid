@@ -17,8 +17,10 @@ using ReductionOptionsMap = std::unordered_map<std::string, std::string>;
 // Immutability here makes update notification easier.
 template <typename ReducedWorkspaceNames> class Row {
 public:
+  using WorkspaceNames = ReducedWorkspaceNames;
+
   Row(std::vector<std::string> number, double theta,
-      std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
+      std::pair<std::string, std::string> tranmissionRuns, boost::optional<RangeInQ> qRange,
       double scaleFactor,
       boost::optional<ReducedWorkspaceNames> reducedWorkspaceNames,
       ReductionOptionsMap reductionOptions = ReductionOptionsMap());
@@ -26,25 +28,15 @@ public:
   std::vector<std::string> const &runNumbers() const;
   std::pair<std::string, std::string> transmissionWorkspaceNames();
   double theta() const;
-  RangeInQ const &qRange() const;
+  boost::optional<RangeInQ> const &qRange() const;
   double scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   boost::optional<ReducedWorkspaceNames> const &reducedWorkspaceNames() const;
 
-  Row withRunNumbers(std::vector<std::string> const &rows) const;
-  Row withTheta(double theta) const;
-  Row withQRange(RangeInQ const &qRange) const;
-  Row withScaleFactor(double scaleFactor) const;
-  Row withReductionOptions(ReductionOptionsMap const &reductionOptions) const;
-  Row withTransmissionRunNumbers(
-      std::pair<std::string, std::string> const &tranmissionRuns) const;
-  Row withReducedWorkspaceNames(
-      boost::optional<ReducedWorkspaceNames> const &workspaceNames) const;
-
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
-  RangeInQ m_qRange;
+  boost::optional<RangeInQ> m_qRange;
   double m_scaleFactor;
   std::pair<std::string, std::string> m_transmissionRuns;
   boost::optional<ReducedWorkspaceNames> m_reducedWorkspaceNames;

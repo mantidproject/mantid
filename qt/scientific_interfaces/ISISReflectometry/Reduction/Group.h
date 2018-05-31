@@ -16,6 +16,7 @@ public:
         std::string postprocessedWorkspaceName);
 
   std::string const& name() const;
+  void setName(std::string const& name);
   std::string const& postprocessedWorkspaceName() const;
 
   void appendEmptyRow();

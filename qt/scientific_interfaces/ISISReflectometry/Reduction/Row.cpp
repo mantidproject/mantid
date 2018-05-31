@@ -6,7 +6,7 @@ namespace CustomInterfaces {
 template <typename ReducedWorkspaceNames>
 Row<ReducedWorkspaceNames>::Row(
     std::vector<std::string> runNumbers, double theta,
-    std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
+    std::pair<std::string, std::string> transmissionRuns, boost::optional<RangeInQ> qRange,
     double scaleFactor,
     boost::optional<ReducedWorkspaceNames> reducedWorkspaceNames,
     ReductionOptionsMap reductionOptions)
@@ -27,7 +27,7 @@ double Row<ReducedWorkspaceNames>::theta() const {
 }
 
 template <typename ReducedWorkspaceNames>
-RangeInQ const &Row<ReducedWorkspaceNames>::qRange() const {
+boost::optional<RangeInQ> const &Row<ReducedWorkspaceNames>::qRange() const {
   return m_qRange;
 }
 
@@ -62,54 +62,6 @@ template <typename ReducedWorkspaceNames>
 bool operator!=(Row<ReducedWorkspaceNames> const &lhs,
                 Row<ReducedWorkspaceNames> const &rhs) {
   return !(lhs == rhs);
-}
-
-template <typename ReducedWorkspaceNames>
-auto Row<ReducedWorkspaceNames>::withRunNumbers(
-    std::vector<std::string> const &runNumbers) const -> Row {
-  return Row(runNumbers, m_theta, m_transmissionRuns, m_qRange, m_scaleFactor,
-             m_reducedWorkspaceNames, m_reductionOptions);
-}
-
-template <typename ReducedWorkspaceNames>
-auto Row<ReducedWorkspaceNames>::withTheta(double theta) const -> Row {
-  return Row(m_runNumbers, theta, m_transmissionRuns, m_qRange, m_scaleFactor,
-             m_reducedWorkspaceNames, m_reductionOptions);
-}
-
-template <typename ReducedWorkspaceNames>
-auto Row<ReducedWorkspaceNames>::withQRange(RangeInQ const &qRange) const
-    -> Row {
-  return Row(m_runNumbers, m_theta, m_transmissionRuns, qRange, m_scaleFactor,
-             m_reducedWorkspaceNames, m_reductionOptions);
-}
-
-template <typename ReducedWorkspaceNames>
-auto Row<ReducedWorkspaceNames>::withScaleFactor(double scaleFactor) const
-    -> Row {
-  return Row(m_runNumbers, m_theta, m_transmissionRuns, m_qRange, scaleFactor,
-             m_reducedWorkspaceNames, m_reductionOptions);
-}
-
-template <typename ReducedWorkspaceNames>
-auto Row<ReducedWorkspaceNames>::withReductionOptions(
-    ReductionOptionsMap const &reductionOptions) const -> Row {
-  return Row(m_runNumbers, m_theta, m_transmissionRuns, m_qRange, m_scaleFactor,
-             m_reducedWorkspaceNames, reductionOptions);
-}
-
-template <typename ReducedWorkspaceNames>
-auto Row<ReducedWorkspaceNames>::withTransmissionRunNumbers(
-    std::pair<std::string, std::string> const &transmissionRuns) const -> Row {
-  return Row(m_runNumbers, m_theta, transmissionRuns, m_qRange, m_scaleFactor,
-             m_reducedWorkspaceNames, m_reductionOptions);
-}
-
-template <typename ReducedWorkspaceNames>
-auto Row<ReducedWorkspaceNames>::withReducedWorkspaceNames(
-    boost::optional<ReducedWorkspaceNames> const &workspaceNames) const -> Row {
-  return Row(m_runNumbers, m_theta, m_transmissionRuns, m_qRange, m_scaleFactor,
-             workspaceNames, m_reductionOptions);
 }
 
 template class Row<SlicedReductionWorkspaces>;

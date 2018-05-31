@@ -6,7 +6,6 @@ namespace CustomInterfaces {
 RangeInQ::RangeInQ(double min, double step, double max)
     : m_min(min), m_step(step), m_max(max) {
   assert(min < max);
-  assert(step > 0);
 }
 
 double RangeInQ::min() const {

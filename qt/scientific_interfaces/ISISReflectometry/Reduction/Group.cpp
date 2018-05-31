@@ -12,6 +12,10 @@ template <typename Row> std::string const &Group<Row>::name() const {
   return m_name;
 }
 
+template <typename Row> void Group<Row>::setName(std::string const& name) {
+  m_name = name;
+}
+
 template <typename Row>
 std::string const &Group<Row>::postprocessedWorkspaceName() const {
   return m_postprocessedWorkspaceName;
