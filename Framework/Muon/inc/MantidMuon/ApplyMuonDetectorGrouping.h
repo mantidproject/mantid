@@ -79,7 +79,7 @@ private:
   /// Creates and analyses a workspace, if noRebin does not rebin.
   API::Workspace_sptr createAnalysisWorkspace(API::Workspace_sptr inputWS,
                                               bool noRebin,
-                                              Muon::AnalysisOptions &options);
+                                              Muon::AnalysisOptions options);
   /// Sets algorithm properties according to options.
   void setMuonProcessAlgorithmProperties(API::IAlgorithm &alg,
                                          const AnalysisOptions &options) const;

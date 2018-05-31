@@ -294,20 +294,20 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
  * Creates workspace, processing the data using the MuonProcess algorithm.
  */
 Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
-    Workspace_sptr inputWS, bool noRebin, Muon::AnalysisOptions &options) {
+    Workspace_sptr inputWS, bool noRebin, Muon::AnalysisOptions options) {
 
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+
+  if (noRebin) {
+    options.rebinArgs = "";
+  }
 
   alg->initialize();
   setMuonProcessPeriodProperties(*alg, inputWS, options);
   setMuonProcessAlgorithmProperties(*alg, options);
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
-
-  if (noRebin) {
-    options.rebinArgs = "";
-  }
 
   alg->execute();
   return alg->getProperty("OutputWorkspace");

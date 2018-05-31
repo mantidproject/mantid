@@ -772,6 +772,69 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0050, 0.0001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0050, 0.0001);
   }
+
+  void test_rebinning() {
+    std::string emptyString("");
+
+    auto ws = createCountsWorkspace(3, 10, 0.0);
+    auto wsGroup = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().addOrReplace("inputData", ws);
+    AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
+
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 0);
+
+    ApplyMuonDetectorGrouping alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspaceGroup", wsGroup->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("groupName", "test2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Grouping", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AnalysisType", "Counts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMin", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeMax", 30.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RebinArgs", "0.2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeOffset", 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriods", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriods", emptyString));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyDeadTimeCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT(wsGroup);
+    if (wsGroup) {
+      TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
+    }
+
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1"));
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+
+    auto wsOutNoRebin = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("inputGroup; Group; test2; Counts; #1_Raw"));
+
+    // Check values against calculation by hand.
+    TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[9], 0.900, 0.001);
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("inputGroup; Group; test2; Counts; #1"));
+
+    // Check values against calculation by hand.
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.800, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 5, 0.1);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 17, 0.1);
+
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00707, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.00707, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00707, 0.0001);
+  }
 };
 
 #endif /* MANTID_MUON_APPLYMUONDETECTORGROUPINGTEST_H_ */
