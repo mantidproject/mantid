@@ -32,7 +32,7 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
     PAWLEY_REFINEMENT = "Pawley refinement"
     RIETVELD_REFINEMENT = "Rietveld refinement"
     RWP_DATASET_NAME = "Rwp"
-    PROFILE_COEFFS_DATASET_NAME = "Profile Coefficients"
+    PROFILE_COEFFS_GROUP_NAME = "Profile Coefficients"
 
     def category(self):
         return "DataHandling"
@@ -168,19 +168,12 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
 
     def _save_profile_coefficients(self, results_group, refine_sigma, refine_gamma, sigmas, gammas, index):
         if refine_sigma or refine_gamma:
-            if refine_sigma and refine_gamma:
-                dtype = [(self.PROP_SIGMA, "f"), (self.PROP_GAMMA, "f")]
-                values = sigmas[index], gammas[index]
-            elif refine_sigma:
-                dtype = [(self.PROP_SIGMA, "f")]
-                values = sigmas[index]
-            elif refine_gamma:
-                dtype = [(self.PROP_GAMMA, "f")]
-                values = gammas[index]
+            coeffs_group = results_group.create_group(name=self.PROFILE_COEFFS_GROUP_NAME)
 
-            coefficients_dataset = results_group.create_dataset(name=self.PROFILE_COEFFS_DATASET_NAME, shape=(1,),
-                                                                dtype=dtype)
-            coefficients_dataset[0] = values
+            if refine_sigma:
+                coeffs_group.create_dataset(name="Sigma", data=sigmas[index])
+            if refine_gamma:
+                coeffs_group.create_dataset(name="Gamma", data=gammas[index])
 
     def _save_refinement_params(self, results_group):
         refinement_params_dtype = [(self.PROP_REFINEMENT_METHOD, "S19"),

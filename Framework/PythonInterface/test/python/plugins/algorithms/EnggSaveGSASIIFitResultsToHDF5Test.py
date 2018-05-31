@@ -95,11 +95,11 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
             self.assertTrue("Profile Coefficients" in fit_results_group)
-            profile_coeffs = fit_results_group["Profile Coefficients"][0]
+            profile_coeffs = fit_results_group["Profile Coefficients"]
 
             self.assertEquals(len(profile_coeffs), 2)
-            self.assertEquals(profile_coeffs[0], sigma)
-            self.assertEquals(profile_coeffs[1], gamma)
+            self.assertEquals(profile_coeffs["Sigma"].value, sigma)
+            self.assertEquals(profile_coeffs["Gamma"].value, gamma)
 
     def test_profileCoeffsNotSavedWhenNotRefined(self):
         run_algorithm(self.ALG_NAME,
