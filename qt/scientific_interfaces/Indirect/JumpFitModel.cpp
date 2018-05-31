@@ -97,6 +97,7 @@ MatrixWorkspace_sptr extractSpectra(MatrixWorkspace_sptr workspace,
   extractAlg->setProperty("StartWorkspaceIndex", startIndex);
   extractAlg->setProperty("EndWorkspaceIndex", endIndex);
   extractAlg->setProperty("OutputWorkspace", "__extracted");
+  extractAlg->execute();
   return extractAlg->getProperty("OutputWorkspace");
 }
 
@@ -119,6 +120,7 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr lhs,
   appendAlg->setProperty("InputWorkspace1", lhs);
   appendAlg->setProperty("InputWorkspace2", rhs);
   appendAlg->setProperty("OutputWorkspace", "__appended");
+  appendAlg->execute();
   return appendAlg->getProperty("OutputWorkspace");
 }
 
