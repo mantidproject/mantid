@@ -25,8 +25,11 @@ New Features
 New Algorithms
 ##############
 
-- :ref:`LoadSampleShape <algm-LoadSampleShape>` loads a shape into the sample in a workspace from an STL file,
-  which contains a list of triangles.
+- :ref:`LoadSampleShape <algm-LoadSampleShape>` loads a shape into the sample in a workspace from an 
+  ASCII `STL <https://en.wikipedia.org/wiki/STL_(file_format)>`_  file,
+  which contains a list of triangles or an 
+  ASCII `OFF <https://en.wikipedia.org/wiki/OFF_(file_format)>`_ file, 
+  which has a list of vertices and triangles. 
 
 - :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` outputs a group workspace with the separate absorption and multiple scattering corrections for flexibility to the User to apply them to the sample workspace
 
@@ -59,5 +62,21 @@ New
 
 - Algorithm :ref:`FitPeaks <algm-FitPeaks>` is implemented as a generalized multiple-spectra multiple-peak fitting algorithm.
 
+
+Python
+------
+
+Improved
+########
+
+- Python fit functions that use from ``IPeakFunction`` as a base no longer require a ``functionDeriveLocal`` method to compute an analytical derivative. If
+  the method is absent then a numerical derivative is calculate.
+
+Bugfixes
+########
+
+- Checks on the structure of Python fit function classes have been improved to avoid scenarios, such as writing ``function1d`` rather than ``function1D``, which
+  would previously have resulted in a hard crash.
+- Fit functions defined in a python script can be used with the new fit function API right after sibscription.
 
 :ref:`Release 3.13.0 <v3.13.0>`

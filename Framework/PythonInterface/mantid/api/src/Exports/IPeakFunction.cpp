@@ -10,7 +10,7 @@ using namespace boost::python;
 void export_IPeakFunction() {
   class_<IPeakFunction, bases<IFunction1D>,
          boost::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
-      "IPeakFunction")
+      "IPeakFunction", "Base class for peak Fit functions")
       .def("functionLocal",
            (object (IPeakFunctionAdapter::*)(const object &) const) &
                IPeakFunction::functionLocal,

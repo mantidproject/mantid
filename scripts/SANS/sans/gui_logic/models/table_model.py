@@ -7,9 +7,9 @@ information regarding the custom output name and the information in the options 
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import re
 
 from sans.gui_logic.sans_data_processor_gui_algorithm import create_option_column_properties
-from sans.gui_logic.gui_common import OPTIONS_SEPARATOR, OPTIONS_EQUAL
 
 
 class TableModel(object):
@@ -69,7 +69,7 @@ class TableIndexModel(object):
                  can_scatter, can_scatter_period,
                  can_transmission, can_transmission_period,
                  can_direct, can_direct_period,
-                 output_name="", user_file="", options_column_string=""):
+                 output_name="", user_file="", options_column_string="", sample_thickness='0.0'):
         super(TableIndexModel, self).__init__()
         self.index = index
         self.sample_scatter = sample_scatter
@@ -87,6 +87,7 @@ class TableIndexModel(object):
         self.can_direct_period = can_direct_period
 
         self.user_file = user_file
+        self.sample_thickness = sample_thickness
         self.output_name = output_name
 
         # Options column entries
@@ -117,17 +118,28 @@ class OptionsColumnModel(object):
         :param options_column_string: the string in the options column
         :return: a dict with parsed values
         """
-        parsed = {}
         # Remove all white space
+        parsed = {}
         options_column_string_no_whitespace = "".join(options_column_string.split())
+        options_column_string_no_whitespace = options_column_string_no_whitespace.replace('"', '')
+        options_column_string_no_whitespace = options_column_string_no_whitespace.replace("'", '')
+
         if not options_column_string_no_whitespace:
             return parsed
 
-        # Split by the comma
-        elements = options_column_string_no_whitespace.split(OPTIONS_SEPARATOR)
-        for element in elements:
-            key, value = element.split(OPTIONS_EQUAL)
-            parsed.update({key: value})
+        # This is a regular expression to detect key value pairs in the options string.
+        # The different parts are:
+        # ([^,=]+) Anything except equals detects keys in the options string
+        # =* then an equals sign
+        # ((?:[^,=]+(?:,|$))*) Any number of repetitions of a string without = followed by a comma or end of input.
+        option_pattern = re.compile(r'''([^,=]+)=*((?:[^,=]+(?:,|$))*)''')
+
+        # The findall option finds all instances of the pattern specified above in the options string.
+        for key, value in option_pattern.findall(options_column_string_no_whitespace):
+            if value.endswith(','):
+                value=value[:-1]
+            parsed.update({key:value})
+
         return parsed
 
     @staticmethod
