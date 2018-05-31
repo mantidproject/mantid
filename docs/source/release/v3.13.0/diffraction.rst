@@ -50,7 +50,8 @@ Engineering Diffraction
     previously used for saving to CSV, **SaveDiffFittingAscii**, has
     been deprecated
   - Fit results and parameters are saved to HDF5 from the **GSAS
-    Refinement** tab
+    Refinement** tab using :ref:`EnggSaveGSASIIFitResultsToHDF5
+    <algm-EnggSaveGSASIIFitResultsToHDF5>`
 
 
 :ref:`Release 3.13.0 <v3.13.0>`
