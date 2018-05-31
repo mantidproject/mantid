@@ -674,8 +674,8 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 * @param detSize :: detector height
 * @param slit1Pos :: position of the first slit (counting from source)
 * @param slit2Pos :: position of the second slit (counting from source)
-* @param v1g :: slit 1 vertical gap
-* @param v2g :: slit 2 vertical gap
+* @param vg1 :: slit 1 vertical gap
+* @param vg2 :: slit 2 vertical gap
 * @param sourcePos :: source position
 * @param monitorPos :: monitor position
 * @param samplePos :: sample position
