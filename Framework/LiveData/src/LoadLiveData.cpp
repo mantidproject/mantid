@@ -402,26 +402,15 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
  *
  * @param workspace :: Workspace(Group) that will have its bins reset
  */
-void LoadLiveData::resetAllXToSingleBin(API::Workspace &workspace) {
-  try {
-    EventWorkspace &ws_event = dynamic_cast<EventWorkspace &>(workspace);
-    ws_event.resetAllXToSingleBin();
-  } catch (std::bad_cast &) {
-    // Not an EventWorkspace, might be a WorkspaceGroup?
-    try {
-      WorkspaceGroup &ws_group = dynamic_cast<WorkspaceGroup &>(workspace);
-      auto num_entries = static_cast<size_t>(ws_group.getNumberOfEntries());
-      for (size_t i = 0; i < num_entries; ++i) {
-        auto ws = ws_group.getItem(i);
-        try {
-          auto &ws_event = dynamic_cast<EventWorkspace &>(*ws.get());
-          ws_event.resetAllXToSingleBin();
-        } catch (std::bad_cast &) {
-          // Not an EventWorkspace, ignore
-        }
-      }
-    } catch (std::bad_cast &) {
-      // Not a WorkspaceGroup, ignore
+void LoadLiveData::resetAllXToSingleBin(API::Workspace* workspace) {
+  if (auto *ws_event = dynamic_cast<EventWorkspace*>(workspace)) {
+    ws_event->resetAllXToSingleBin();
+  } else if (auto *ws_group = dynamic_cast<WorkspaceGroup*>(workspace)) {
+    auto num_entries = static_cast<size_t>(ws_group->getNumberOfEntries());
+    for (size_t i = 0; i < num_entries; ++i) {
+      auto ws = ws_group->getItem(i);
+      if (auto *ws_event = dynamic_cast<EventWorkspace*>(ws.get()))
+        ws_event->resetAllXToSingleBin();
     }
   }
 }
@@ -481,7 +470,7 @@ void LoadLiveData::exec() {
   // "Process" step. Any custom rebinning should be done in Post-Processing.
   bool PreserveEvents = this->getProperty("PreserveEvents");
   if (PreserveEvents)
-    this->resetAllXToSingleBin(*chunkWS.get());
+    this->resetAllXToSingleBin(chunkWS.get());
 
   // Now we process the chunk
   Workspace_sptr processed = this->processChunk(chunkWS);
@@ -544,7 +533,7 @@ void LoadLiveData::exec() {
   // For EventWorkspaces, we adjust the X values such that all events fit
   // within the bin boundaries. This is done both before and after the
   // "Process" step. Any custom rebinning should be done in Post-Processing.
-  this->resetAllXToSingleBin(*m_accumWS.get());
+  this->resetAllXToSingleBin(m_accumWS.get());
 
   // At this point, m_accumWS is set.
 
