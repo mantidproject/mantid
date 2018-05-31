@@ -18,6 +18,7 @@ class DLLExport JumpFitModel : public IndirectFittingModel {
 public:
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                     const Spectra &) override;
+  void removeWorkspace(std::size_t index);
   void setFitType(const std::string &fitType);
 
   std::string getFitParameterName(std::size_t dataIndex,

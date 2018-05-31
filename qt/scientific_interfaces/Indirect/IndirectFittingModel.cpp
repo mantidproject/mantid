@@ -413,18 +413,19 @@ void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
   if (!m_fittingData.empty() &&
       equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
     m_fittingData.back()->combine(IndirectFitData(workspace, spectra));
-  else {
-    m_fittingData.emplace_back(new IndirectFitData(workspace, spectra));
-    m_defaultParameters.emplace_back(
-        createDefaultParameters(m_fittingData.size() - 1));
-  }
+  else
+    addNewWorkspace(workspace, spectra);
+}
+
+void IndirectFittingModel::addNewWorkspace(MatrixWorkspace_sptr workspace,
+                                           const Spectra &spectra) {
+  m_fittingData.emplace_back(new IndirectFitData(workspace, spectra));
+  m_defaultParameters.emplace_back(
+      createDefaultParameters(m_fittingData.size() - 1));
 }
 
 void IndirectFittingModel::removeWorkspace(std::size_t index) {
-  if (m_fitOutput)
-    m_fitOutput->removeOutput(m_fittingData[index].get());
-  m_fittingData.erase(m_fittingData.begin() + index);
-  m_defaultParameters.erase(m_defaultParameters.begin() + index);
+  removeFittingData(index);
 
   if (index > 0 && m_fittingData.size() > index) {
     const auto previousWS = m_fittingData[index - 1]->workspace();
@@ -435,6 +436,13 @@ void IndirectFittingModel::removeWorkspace(std::size_t index) {
       m_fittingData.erase(m_fittingData.begin() + index);
     }
   }
+}
+
+void IndirectFittingModel::removeFittingData(std::size_t index) {
+  if (m_fitOutput)
+    m_fitOutput->removeOutput(m_fittingData[index].get());
+  m_fittingData.erase(m_fittingData.begin() + index);
+  m_defaultParameters.erase(m_defaultParameters.begin() + index);
 }
 
 void IndirectFittingModel::clearWorkspaces() {
