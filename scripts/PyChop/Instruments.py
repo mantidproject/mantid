@@ -332,7 +332,9 @@ class ChopperSystem(object):
             fudge = self.packages[self.package].fluxcorr # A chopper package dependent fudge factor
             return self.packages[self.package].getTransmission(Ei, freq) * magic / fudge
         else:
-            return (self.slot_width[-1] / self.flux_ref_slot) * (self.flux_ref_freq / freq)
+            # For disk choppers, transmission goes quadratic with freq at high resolution, linear at low
+            freqdep = (self.flux_ref_freq / freq)**2 if hires else  (self.flux_ref_freq / freq)
+            return (self.slot_width[-1] / self.flux_ref_slot) * freqdep
 
     def setNFrame(self, value):
         self.n_frame = value
@@ -537,7 +539,9 @@ class Moderator(object):
         if not self.measured_flux:
             raise AttributeError('This instrument does not have a table of measured flux')
         f = interp1d(self.measured_flux['wavelength'], self.measured_flux['flux'], kind='cubic')
-        return f(np.sqrt(E2L / np.array(Ei)))
+        mn, mx = (min(self.measured_flux['wavelength']), max(self.measured_flux['wavelength']))
+        wavelength = [min(max(l, mn), mx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
+        return f(wavelength)
 
     @property
     def theta_m(self):
@@ -651,7 +655,8 @@ class Instrument(object):
     def getFlux(self, Ei_in=None, frequency=None):
         """ Returns the monochromatic flux estimate in n/cm^2/s """
         Ei = self.chopper_system.ei if Ei_in is None else Ei_in
-        return self.moderator.getFlux(Ei) * self.chopper_system.getTransmission(Ei, frequency)
+        isHires = False if (self.isFermi or (self.getResolution(0., Ei) / Ei) > 0.02) else True
+        return self.moderator.getFlux(Ei) * self.chopper_system.getTransmission(Ei, frequency, hires=isHires)
 
     def getMultiRepFlux(self, Ei_in=None, frequency=None):
         Ei = self.chopper_system.ei if Ei_in is None else Ei_in

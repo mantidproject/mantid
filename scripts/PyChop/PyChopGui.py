@@ -41,7 +41,7 @@ class PyChopGui(QtGui.QMainWindow):
                 instobj = Instrument(os.path.join(self.folder, fname))
                 self.instruments[instobj.name] = instobj
                 self.choppers[instobj.name] = instobj.getChopperNames()
-                self.minE[instobj.name] = instobj.emin
+                self.minE[instobj.name] = max([instobj.emin, 0.01])
                 self.maxE[instobj.name] = instobj.emax
         self.drawLayout()
         self.setInstrument(self.instruments.keys()[0])
