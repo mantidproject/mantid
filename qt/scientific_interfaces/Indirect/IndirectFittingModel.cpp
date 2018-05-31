@@ -578,7 +578,9 @@ IndirectFittingModel::getFitParameters(std::size_t index,
 
 std::unordered_map<std::string, ParameterValue>
 IndirectFittingModel::getDefaultParameters(std::size_t index) const {
-  return mapKeys(m_defaultParameters[index], mapDefaultParameterNames());
+  if (index > m_defaultParameters.size())
+    return mapKeys(m_defaultParameters[index], mapDefaultParameterNames());
+  return std::unordered_map<std::string, ParameterValue>();
 }
 
 std::unordered_map<std::string, std::string>
