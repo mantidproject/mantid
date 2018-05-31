@@ -462,8 +462,8 @@ public:
   void test_adjustments() {
 
     auto ws = createWorkspaceReal(20, 0.0, 1);
-    auto linAdj = createWorkspaceAdjustments(20, 0.99, 0.00);
-    auto constAdj = createWorkspaceAdjustments(20, 0.0, 0.015);
+    auto linAdj = createWorkspaceAdjustments(20, 1.05, 0.00, 0.0, 1);
+    auto constAdj = createWorkspaceAdjustments(20, 0.0, 0.1, 0.2, 1);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -491,13 +491,60 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 20);
-    TS_ASSERT_DELTA(data->y(0)[15], 0.352, 0.001);
-    TS_ASSERT_DELTA(data->y(0)[16], -0.214, 0.001);
-    TS_ASSERT_DELTA(data->y(0)[17], -0.603, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[15], 0.245, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[16], -0.146, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[17], -0.602, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
     TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
+  }
+
+  void test_adjustments_three_spectra() {
+
+    auto ws = createWorkspaceReal(10, 0.0, 3);
+    auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 3);
+    auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.1, 0.2, 3);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("A", 0.01);
+    alg->setProperty("DataLinearAdj", linAdj);
+    alg->setProperty("DataConstAdj", constAdj);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+    TS_ASSERT(chi);
+    TS_ASSERT(angle);
+
+    // Test some values
+    TS_ASSERT_EQUALS(data->y(0).size(), 10);
+    TS_ASSERT_DELTA(data->y(0)[5], 0.237, 0.001);
+    TS_ASSERT_DELTA(data->y(1)[5], 0.664, 0.001);
+    TS_ASSERT_DELTA(data->y(2)[5], 0.895, 0.001);
+    TS_ASSERT_EQUALS(data->y(5).size(), 10);
+    TS_ASSERT_DELTA(data->y(5)[5], 0.0, 0.001);
+
+    // Test that the algorithm converged
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
+    TS_ASSERT_DELTA(chi->y(1).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(1).back(), 0.001, 0.001);
+    TS_ASSERT_DELTA(chi->y(2).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(2).back(), 0.001, 0.001);
   }
 
   void test_output_label() {
@@ -804,10 +851,7 @@ public:
     return ws;
   }
 
-  MatrixWorkspace_sptr createWorkspaceAdjustments(size_t maxt, double base, double magnitude) {
-
-    int nSpec = 1;
-    double phase = 0.0;
+  MatrixWorkspace_sptr createWorkspaceAdjustments(size_t maxt, double base, double magnitude, double phase, int nSpec) {
 
     // Frequency of the oscillations
     double w = 2.4;
@@ -827,7 +871,7 @@ public:
         E[t + s*maxt] = 0.0;
         // Imaginary
         X[t + s*maxt + nPts] = 0.0;
-        Y[t + s*maxt + nPts] = base + magnitude*sin(w*x + phase + s*shift);
+        Y[t + s*maxt + nPts] = magnitude*sin(w*x + phase + s*shift);
         E[t + s*maxt + nPts] = 0.0;
       }
     }
