@@ -12,6 +12,9 @@ class LoadWANDSCD(PythonAlgorithm):
     def category(self):
         return 'DataHandling\\Nexus'
 
+    def seeAlso(self):
+        return [ "ConvertWANDSCDtoQ" ]
+
     def name(self):
         return 'LoadWANDSCD'
 

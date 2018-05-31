@@ -12,7 +12,14 @@ Description
 This algorithm will convert the output of :ref:`algm-LoadWANDSCD` in
 either Q or HKL space. :ref:`algm-FindPeaksMD` can be run on the
 output Q sample space, then the UB can be found and used to then
-convert to HKL.
+convert to HKL. The default binning ranges are good for converting to
+Q sample with the default wavelength.
+
+The normalization is calculated in the same way as
+:ref:`algm-MDNormSCD` but with the solid angle and flux coming from
+the NormalisationWorkspace, normally vanadium. A brief introduction to
+the multi-dimensional data normalization can be found :ref:`here
+<MDNorm>`.
 
 When converting to HKL it will use the UB matrix from the UBWorkspace
 if provided otherwise it will use the UB matrix from the
@@ -33,7 +40,7 @@ Usage
 .. code-block:: python
 
     # Load Data and normalisation
-    LoadWANDSCD(IPTS=7776, RunNumbers=26509, OutputWorkspace='norm',Grouping='4x4')
+    LoadWANDSCD(IPTS=7776, RunNumbers=26509, OutputWorkspace='norm',Grouping='4x4') # Vanadium
     LoadWANDSCD(IPTS=7776, RunNumbers='26640-27944', OutputWorkspace='data',Grouping='4x4')
     ConvertWANDSCDtoQ(InputWorkspace='data',
                       NormalisationWorkspace='norm',
@@ -58,7 +65,7 @@ Output:
 .. code-block:: python
 
     # Load Data and normalisation
-    LoadWANDSCD(IPTS=7776, RunNumbers=26509, OutputWorkspace='norm',Grouping='4x4')
+    LoadWANDSCD(IPTS=7776, RunNumbers=26509, OutputWorkspace='norm',Grouping='4x4') # Vanadium
     LoadWANDSCD(IPTS=7776, RunNumbers='26640-27944', OutputWorkspace='data',Grouping='4x4')
     SetUB('data', UB='0,0.1770619741,-0.00927942487,0.177304965,0,0,0,-0.00927942487,-0.177061974')
     ConvertWANDSCDtoQ(InputWorkspace='data',

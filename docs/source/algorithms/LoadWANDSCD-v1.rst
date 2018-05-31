@@ -14,9 +14,12 @@ has dimensions x and y detector pixels vs scanIndex. The scanIndex is
 the omega rotation of the sample. The instrument from the first run
 only will be copied to the OutputWorkspace. In addition the s1 (omega
 rotation), duration, run_number and monitor count is read from every
-file and included in the logs of the OutputWorkspace. If the
-"HB2C:CS:CrystalAlign:UBMatrix" property exist it will be converted
-into the OrientedLattice on the OutputWorkspace.
+file and included in the logs of the OutputWorkspace.
+
+If the "HB2C:CS:CrystalAlign:UBMatrix" property exist it will be
+converted into the OrientedLattice on the OutputWorkspace. The
+goniometer tilts (sgu and sgl) are combined into the UB Matrix so that
+only omega (s1) needs to be taken into account during rotation.
 
 This algorithm doesn't use Mantid loaders but instead h5py and numpy
 to load and integrate the events.

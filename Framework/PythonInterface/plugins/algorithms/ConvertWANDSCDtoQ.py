@@ -12,11 +12,14 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
     def category(self):
         return 'DataHandling\\Nexus'
 
+    def seeAlso(self):
+        return [ "LoadWANDSCD" ]
+
     def name(self):
         return 'ConvertWANDSCDtoQ'
 
     def summary(self):
-        return 'Convert from WANDSCD data to Q or HKL'
+        return 'Convert the output of LoadWANDSCD to Q or HKL'
 
     def PyInit(self):
         self.declareProperty(IMDHistoWorkspaceProperty("InputWorkspace", "",
@@ -34,7 +37,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         self.declareProperty("Wavelength", 1.488, validator=FloatBoundedValidator(0.0), doc="Wavelength to set the workspace")
         self.declareProperty('NormaliseBy', 'Monitor', StringListValidator(['None', 'Time', 'Monitor']),
                              "Normalise to monitor, time or None.")
-        self.declareProperty('Frame', 'Q (sample frame)', StringListValidator(['Q (sample frame)', 'HKL']),
+        self.declareProperty('Frame', 'Q_sample', StringListValidator(['Q_sample', 'HKL']),
                              "Selects Q-dimensions of the output workspace")
         self.declareProperty(FloatArrayProperty("Uproj", [1,0,0], FloatArrayLengthValidator(3), direction=Direction.Input),
                              "Defines the first projection vector of the target Q coordinate system in HKL mode")
@@ -65,6 +68,11 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         issues = dict()
 
         inWS = self.getProperty("InputWorkspace").value
+
+        if inWS.getNumDims() != 3:
+            issues["InputWorkspace"] = "InputWorkspace has wrong number of dimensions, need 3"
+            return issues
+
         d0 = inWS.getDimension(0)
         d1 = inWS.getDimension(1)
         d2 = inWS.getDimension(2)
@@ -190,7 +198,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                                                                           ol.qFromHKL(W[1]).norm(),
                                                                           ol.qFromHKL(W[2]).norm())
             frames = 'HKL,HKL,HKL'
-            k = 1/self.getProperty("Wavelength").value
+            k = 1/self.getProperty("Wavelength").value # Not 2pi/wavelength to save dividing by 2pi later
         else:
             names = 'Q_sample_x,Q_sample_y,Q_sample_z'
             units = 'Angstrom^-1,Angstrom^-1,Angstrom^-1'
