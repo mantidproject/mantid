@@ -82,6 +82,8 @@ private:
   void addPairingToGroupWorkspace(const Mantid::API::Grouping &grouping,
                                   Mantid::API::Workspace_sptr ws,
                                   Mantid::API::WorkspaceGroup_sptr wsGrouped);
+
+  void addGroupingInformationToADS(const Mantid::API::Grouping &grouping);
 };
 
 } // namespace Muon
