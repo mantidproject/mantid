@@ -110,6 +110,28 @@ public:
     TS_ASSERT_EQUALS(angle->blocksize(), 1);
   }
 
+  void test_complex_data_adjustments() {
+    // Run one iteration, we just want to test the output workspaces' dimensions
+    int nHist = 6;
+    int nBins = 10;
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataLinearAdj", ws);
+    alg->setProperty("DataConstAdj", ws);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+  }
+
   void test_bad_complex_data() {
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
@@ -128,7 +150,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
-  void test_bad_complex_linear_adjustment() {
+  void test_bad_linear_adjustment() {
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
 
@@ -147,7 +169,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
-  void test_bad_complex_const_adjustment() {
+  void test_bad_const_adjustment() {
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
 
