@@ -1,6 +1,7 @@
 #include "MantidMuon/ApplyMuonDetectorGrouping.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -77,9 +78,10 @@ void ApplyMuonDetectorGrouping::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("GroupName", emptyString, "The name of the group. Must "
-                                            "contain at least one alphanumeric "
-                                            "character.",
+  declareProperty("GroupName", emptyString,
+                  "The name of the group. Must "
+                  "contain at least one alphanumeric "
+                  "character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "
@@ -295,19 +297,15 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
 Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
     Workspace_sptr inputWS, bool noRebin, Muon::AnalysisOptions options) {
 
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+  IAlgorithm_sptr alg = Algorithm::createChildAlgorithm("MuonProcess");
 
   if (noRebin) {
     options.rebinArgs = "";
   }
 
-  alg->initialize();
   setMuonProcessPeriodProperties(*alg, inputWS, options);
   setMuonProcessAlgorithmProperties(*alg, options);
-  alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
-
   alg->execute();
   return alg->getProperty("OutputWorkspace");
 }
