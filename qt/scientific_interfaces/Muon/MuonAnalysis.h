@@ -301,6 +301,7 @@ private:
   Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
                                                       Muon::PlotType plotType,
+                                                      std::string wsName,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
