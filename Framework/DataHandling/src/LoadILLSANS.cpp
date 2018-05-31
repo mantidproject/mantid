@@ -661,13 +661,11 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
  * Used only for D33 in TOF mode
  */
 void LoadILLSANS::adjustTOF() {
-
   const auto &specInfo = m_localWorkspace->spectrumInfo();
   const double l1 = m_sourcePos;
+  const size_t nHist = m_localWorkspace->getNumberHistograms();
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int64_t index = 0;
-       index < static_cast<int64_t>(m_localWorkspace->getNumberHistograms() -
-                                    N_MONITORS);
+  for (int64_t index = 0; index < static_cast<int64_t>(nHist - N_MONITORS);
        ++index) {
     const double l2 = specInfo.l2(index);
     const double z = specInfo.position(index).Z();
@@ -675,6 +673,24 @@ void LoadILLSANS::adjustTOF() {
     const double scale = (l1 + z) / (l1 + l2);
     std::transform(x.begin(), x.end(), x.begin(),
                    [scale](double lambda) { return scale * lambda; });
+  }
+
+  // Try to set sensible (but not strictly physical) wavelength axes for
+  // monitors
+  // Normalisation is done by acquisition time, so these axes should not be used
+  auto firstPixel = m_localWorkspace->histogram(0).dataX();
+  const double l2 = specInfo.l2(0);
+  const double monitor2 = -specInfo.position(nHist - 1).Z();
+  const double l1Monitor2 = m_sourcePos - monitor2;
+  const double monScale = (l1 + l2) / l1Monitor2;
+  std::transform(firstPixel.begin(), firstPixel.end(), firstPixel.begin(),
+                 [monScale](double lambda) { return monScale * lambda; });
+  for (size_t mIndex = nHist - N_MONITORS; mIndex < nHist; ++mIndex) {
+    const HistogramData::Counts counts =
+        m_localWorkspace->histogram(mIndex).counts();
+    const HistogramData::BinEdges binEdges(firstPixel);
+    m_localWorkspace->setHistogram(mIndex, std::move(binEdges),
+                                   std::move(counts));
   }
 }
 
