@@ -251,12 +251,7 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
       getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
   const auto &spectrumInfo = inWS->spectrumInfo();
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
-  const auto iter = std::find(indices.begin(), indices.end(),
-                              static_cast<size_t>(beamCentre));
-  if (iter == indices.end()) {
-    issues[Prop::BEAM_CENTRE] =
-        "Beam centre is not included in InputWorkspaceIndexSet.";
-  }
+  bool beamCentreFound{false};
   for (const auto i : indices) {
     if (spectrumInfo.isMonitor(i)) {
       issues["InputWorkspaceIndexSet"] = "Index set cannot include monitors.";
@@ -267,6 +262,12 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
           "A neighbour to any detector in the index set cannot be a monitor";
       break;
     }
+	if (i == static_cast<size_t>(beamCentre)) {
+      beamCentreFound = true;
+	}
+  }
+  if (!beamCentreFound) {
+    issues[Prop::BEAM_CENTRE] = "Beam centre is not included in InputWorkspaceIndexSet.";
   }
   return issues;
 }
