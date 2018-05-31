@@ -73,20 +73,17 @@ private:
   void init() override;
   void exec() override;
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  double fitPeakFirstTime(const int64_t s, bool isAbsolbute, const double xmin,
-                          const double xmax,
-                          GetDetectorsOffset::PeakLinearFunction &fit_result,
-                          const bool use_fit_result);
+  double fitPeak(const int64_t s, bool isAbsolbute, const double xmin,
+                 const double xmax,
+                 GetDetectorsOffset::PeakLinearFunction &fit_result,
+                 const bool use_fit_result);
 
   /// analyze the fit result to see whether it shall be masked
   bool
-  analyzeFitResult(const size_t wi, const double minimum_peak_height,
+  analyzeFitResult(const size_t wi, const double offset,
+                   const double minimum_peak_height,
                    const GetDetectorsOffset::PeakLinearFunction &fit_result);
 
-  double fitPeakSecondTime(size_t wi, const bool isAbsolute,
-                           const double minimum_peak_height,
-                           GetDetectorsOffset::PeakLinearFunction &fit_result,
-                           bool &mask_it);
   /// Create a function string from the given parameters and the algorithm
   /// inputs
   API::IFunction_sptr createFunction(const double peakHeight,

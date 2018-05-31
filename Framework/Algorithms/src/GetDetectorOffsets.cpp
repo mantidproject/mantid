@@ -82,10 +82,12 @@ void GetDetectorOffsets::init() {
                   "and XMax. Second round peak fitting range will be limited "
                   "by FHWM.");
 
-  declareProperty("OutputFitResult", false,
-                  "If true, then a TableWorkspace containing all the fitted "
-                  "parameters' values will be output with the name as "
-                  "OUTPUTWORKSPACE_FitResult");
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "PeakFitResultTableWorkspace", "", Direction::Output,
+          PropertyMode::Optional),
+      "Optional name of the input Tableworkspace containing peak fit window "
+      "information for each spectrum. ");
 
   declareProperty(
       "MinimumPeakHeight", 0., mustBePositive,
@@ -102,6 +104,7 @@ void GetDetectorOffsets::init() {
  *successfully
  */
 void GetDetectorOffsets::exec() {
+  // process inputs
   inputW = getProperty("InputWorkspace");
   m_Xmin = getProperty("XMin");
   m_Xmax = getProperty("XMax");
@@ -133,10 +136,15 @@ void GetDetectorOffsets::exec() {
   double minimum_peak_height = getProperty("MinimumPeakHeight");
 
   // output fitting result?
-  bool output_fit_result = getProperty("OutputFitResult");
+  std::string output_table_name =
+      getPropertyValue("PeakFitResultTableWorkspace");
+  bool output_fit_result(true);
   TableWorkspace_sptr fit_result_table(0);
-  if (output_fit_result)
+  if (output_table_name == "")
+    output_fit_result = false;
+  else {
     fit_result_table = GenerateFitResultTable();
+  }
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0.0, 1.0, nspec);
@@ -144,32 +152,33 @@ void GetDetectorOffsets::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
   for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
-    // Fit the peak
+    // Fit the peak (for the first time)
     GetDetectorsOffset::PeakLinearFunction fit_result;
-    double offset =
-        fitPeakFirstTime(wi, isAbsolute, m_Xmin, m_Xmax, fit_result, false);
+    double offset = fitPeak(wi, isAbsolute, m_Xmin, m_Xmax, fit_result, false);
 
-    // fit peak for the second time
+    // check output
     bool mask_it(false);
-
-    if (fit_peak_twice) {
+    if (std::abs(offset) > m_maxOffset) {
+      // offset is too large from first round peak fit. mask it anyway
+      mask_it = true;
+    } else if (fit_peak_twice) {
+      // second round peak fit with better guess on FWHM
       // check fitting result.  It shall be put outside of this if-statement.
       // But ISIS people may use it differently
-      mask_it = analyzeFitResult(wi, minimum_peak_height, fit_result);
-
-      if (!mask_it)
-        offset = fitPeakSecondTime(wi, isAbsolute, minimum_peak_height,
-                                   fit_result, mask_it);
-      double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
-      double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
-      offset = fitFirstPeak(wi, isAbsolute, xmin, xmax, fit_result, true);
+      mask_it = analyzeFitResult(wi, offset, minimum_peak_height, fit_result);
+      if (!mask_it) {
+        // assume the peak function is Gaussian
+        double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
+        double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
+        offset = fitPeak(wi, isAbsolute, xmin, xmax, fit_result, true);
+        mask_it = analyzeFitResult(wi, offset, minimum_peak_height, fit_result);
+      }
     }
 
-    double mask = 0.0;
-    if (std::abs(offset) > m_maxOffset) {
-      // offset = 0.0;
-      mask = 1.0;
-    }
+    // set the mask
+    double mask(0.0);
+    if (mask_it)
+      mask = 1.;
 
     // Get the list of detectors in this pixel
     const auto &dets = inputW->getSpectrum(wi).getDetectorIDs();
@@ -222,14 +231,7 @@ void GetDetectorOffsets::exec() {
 
   // Return the output fit result table
   if (fit_result_table) {
-    std::string fit_result_table_name = getPropertyValue("OutputWorkspace");
-    fit_result_table_name += "_FitResult";
-    declareProperty(
-        make_unique<WorkspaceProperty<TableWorkspace>>(
-            "PeakFitResultTableWorkspace", fit_result_table_name,
-            Direction::Output),
-        "Name of the input Tableworkspace containing peak fit window "
-        "information for each spectrum. ");
+
     setProperty("PeakFitResultTableWorkspace", fit_result_table);
   }
 }
@@ -237,19 +239,26 @@ void GetDetectorOffsets::exec() {
 //-----------------------------------------------------------------------------------------
 /** analyze the fit result in order to mask the BAD pixels
  * @brief GetDetectorOffsets::analyzeFitResult
+ * @param wi
+ * @param offset : offset of peak position
  * @param minimum_peak_height : minimum peak height allowed
- * @param fit_result : fit result from previous peak fit
+ * @param fit_result :  fit result from previous peak fit
  * @return
  */
 bool GetDetectorOffsets::analyzeFitResult(
-    const size_t wi, const double minimum_peak_height,
+    const size_t wi, const double offset, const double minimum_peak_height,
     const GetDetectorsOffset::PeakLinearFunction &fit_result) {
 
   bool mask_it = false;
   std::stringstream error_ss;
   error_ss << "spectrum (ws index) " << wi << ": ";
 
-  if (fit_result.height < minimum_peak_height) {
+  if (offset > m_maxOffset) {
+    // offset exceeds maximum
+    mask_it = true;
+    error_ss << "offset " << offset << " is larger than maximum "
+             << m_maxOffset;
+  } else if (fit_result.height < minimum_peak_height) {
     // doesn't meet the minumum peak height requirement
     mask_it = true;
     error_ss << "fitted peak height " << fit_result.height << " < (required) "
@@ -279,78 +288,82 @@ bool GetDetectorOffsets::analyzeFitResult(
 }
 
 //-----------------------------------------------------------------------------------------
-/** Fit the peak for the second time
- * @brief GetDetectorOffsets::fitPeakSecondTime
- * @param wi
- * @param isAbsolute
- * @param minimum_peak_height
- * @param fit_result
- * @param mask_it
- * @return
- */
-double GetDetectorOffsets::fitPeakSecondTime(
-    size_t wi, const bool isAbsolute, const double minimum_peak_height,
-    GetDetectorsOffset::PeakLinearFunction &fit_result, bool &mask_it) {
-  // check y
-  double offset(0);
-  mask_it = false;
+//** Fit the peak for the second time
+// * @brief GetDetectorOffsets::fitPeakSecondTime
+// * @param wi
+// * @param isAbsolute
+// * @param minimum_peak_height
+// * @param fit_result
+// * @param mask_it
+// * @return
+// */
+// double GetDetectorOffsets::fitPeakSecondTime(
+//    size_t wi, const bool isAbsolute, const double minimum_peak_height,
+//    GetDetectorsOffset::PeakLinearFunction &fit_result, bool &mask_it) {
+//  // check y
+//  double offset(0);
+//  mask_it = false;
 
-  if (fit_result.height < minimum_peak_height) {
-    // doesn't meet the minumum peak height requirement
-    mask_it = true;
-    g_log.warning() << "ws-index " << wi << " peak height " << fit_result.height
-                    << " too low!"
-                    << "\n";
-  } else if (fit_result.sigma < 0.5) {
-    // doesn't meet the minimum peak sigma
-    mask_it = true;
-  }
+//  if (fit_result.height < minimum_peak_height) {
+//    // doesn't meet the minumum peak height requirement
+//    mask_it = true;
+//    g_log.warning() << "ws-index " << wi << " peak height " <<
+//    fit_result.height
+//                    << " too low!"
+//                    << "\n";
+//  } else if (fit_result.sigma < 0.5) {
+//    // doesn't meet the minimum peak sigma
+//    mask_it = true;
+//  }
 
-  if (mask_it) {
-    offset = -1;
-    return offset;
-  }
+//  if (mask_it) {
+//    offset = -1;
+//    return offset;
+//  }
 
-  // also check whether there is any nan in vector Y
-  auto vec_y = inputW->histogram(wi).points();
-  for (auto iter : vec_y) {
-    if (std::isnan(iter)) {
-      mask_it = true;
-      break;
-    }
-  }
-  if (mask_it) {
-    // set offset to -2 to indicate it is an array with NaN in Y value
-    offset = -2;
-    return offset;
-  }
+//  // also check whether there is any nan in vector Y
+//  auto vec_y = inputW->histogram(wi).points();
+//  for (auto iter : vec_y) {
+//    if (std::isnan(iter)) {
+//      mask_it = true;
+//      break;
+//    }
+//  }
+//  if (mask_it) {
+//    // set offset to -2 to indicate it is an array with NaN in Y value
+//    offset = -2;
+//    return offset;
+//  }
 
-  // fit second time!
-  double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
-  double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
-  g_log.debug() << "ws-index " << wi << " found: center = " << fit_result.center
-                << ", FHWM = " << fit_result.sigma
-                << "; new fit range: " << xmin << ", " << xmax << "\n";
-  offset = fitFirstPeak(wi, isAbsolute, xmin, xmax, fit_result, true);
+//  // fit second time!
+//  double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
+//  double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
+//  g_log.debug() << "ws-index " << wi << " found: center = " <<
+//  fit_result.center
+//                << ", FHWM = " << fit_result.sigma
+//                << "; new fit range: " << xmin << ", " << xmax << "\n";
+//  offset = fitPeak(wi, isAbsolute, xmin, xmax, fit_result, true);
 
-  return offset;
-}
+//  return offset;
+//}
 
 //-----------------------------------------------------------------------------------------
-/** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
+/** Calls Fit as a child algorithm to fit the offset peak in a spectrum
  *
- *  @param s :: The Workspace Index to fit
+ *  @param wi :: The Workspace Index to fit
  *  @param isAbsolbute :: Whether to calculate an absolute offset
  *  @param xmin: minimum value in fit range
  *  @param xmax: maximum value in fit range
- *  @param fit_result: collection of fitting result
- *  @param use_fit_result:
+ *  @param fit_result: collection of fitting result (Input/Output)
+ *  @param use_fit_result: flag to use previously fit result as starting peak
+ * parameter values or 'observe' starting values
  *  @return The calculated offset value
  */
-double GetDetectorOffsets::fitSpectra(
-    const int64_t wi, bool isAbsolbute, const double xmin, const double xmax,
-    GetDetectorsOffset::PeakLinearFunction &fit_result,
-    const bool use_fit_result) {
+double
+GetDetectorOffsets::fitPeak(const int64_t wi, bool isAbsolbute,
+                            const double xmin, const double xmax,
+                            GetDetectorsOffset::PeakLinearFunction &fit_result,
+                            const bool use_fit_result) {
 
   double bkgd_a0(0.), bkgd_a1(0.);
   double peakHeight(0.), peakLoc(0.), peakSigma(-1);
@@ -369,10 +382,6 @@ double GetDetectorOffsets::fitSpectra(
     peakLoc = inputW->x(wi)[it - yValues.begin()];
   }
 
-  //  double peakSigma(-1);
-  //  if (use_fit_result) {
-  //      peakSigma = fit_result.sigma;
-  //  }
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
   if (std::isnan(peakHeight))
@@ -401,10 +410,18 @@ double GetDetectorOffsets::fitSpectra(
   //  fit_alg->setProperty("Function", fun_ptr);
 
   fit_alg->executeAsChildAlg();
-  std::string fitStatus = fit_alg->getProperty("OutputStatus");
-  // Pixel with large offset will be masked
-  if (fitStatus != "success")
-    return (1000.);
+  try {
+    std::string fitStatus = fit_alg->getProperty("OutputStatus");
+    // Pixel with large offset will be masked
+    if (fitStatus != "success")
+      return (1000.);
+  } catch (std::invalid_argument &) {
+    // xmin and xmax are out of range
+    g_log.error() << "Input workspace: " << inputW->getName()
+                  << ". ws-index = " << wi << ", xmin = " << xmin
+                  << ", xmax = " << xmax << "\n";
+    return (1.E20);
+  }
 
   // std::vector<double> params = fit_alg->getProperty("Parameters");
   API::IFunction_sptr function = fit_alg->getProperty("Function");
@@ -449,11 +466,11 @@ double GetDetectorOffsets::fitSpectra(
 //-----------------------------------------------------------------------------------------
 /** Create a function string from the given parameters and the algorithm inputs
  * @brief GetDetectorOffsets::createFunction
- * @param peakHeight
- * @param peakLoc
- * @param peakSigma
- * @param a0
- * @param a1
+ * @param peakHeight : peak height
+ * @param peakLoc : peak location
+ * @param peakSigma : sigma
+ * @param a0 : flat background
+ * @param a1 : linear background
  * @return
  */
 IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
@@ -486,6 +503,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   return boost::shared_ptr<IFunction>(fitFunc);
 }
 
+//-----------------------------------------------------------------------------------------
 /**
  * @brief GetDetectorOffsets::GenerateFitResultTable
  * @return
