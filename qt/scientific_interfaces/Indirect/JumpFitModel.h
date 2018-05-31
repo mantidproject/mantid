@@ -7,15 +7,27 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+struct JumpFitParameters {
+  std::vector<std::string> widths;
+  std::vector<std::size_t> widthSpectra;
+  std::vector<std::string> eisf;
+  std::vector<std::size_t> eisfSpectra;
+};
+
 class DLLExport JumpFitModel : public IndirectFittingModel {
 public:
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra) override;
+                    const Spectra &) override;
   void setFitType(const std::string &fitType);
 
-  const std::vector<std::string> &getWidths() const;
-  std::size_t getWidthSpectrum(std::size_t widthIndex) const;
-  void setActiveWidth(std::size_t widthIndex);
+  std::vector<std::string> getWidths(std::size_t dataIndex) const;
+  std::vector<std::string> getEISF(std::size_t dataIndex) const;
+  boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex,
+                                                std::size_t dataIndex) const;
+  boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex,
+                                               std::size_t dataIndex) const;
+  void setActiveWidth(std::size_t widthIndex, std::size_t dataIndex);
+  void setActiveEISF(std::size_t eisfIndex, std::size_t dataIndex);
 
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
@@ -23,11 +35,14 @@ public:
                                   std::size_t spectrum) const override;
 
 private:
-  void findWidths(Mantid::API::MatrixWorkspace_sptr workspace);
+  JumpFitParameters &
+  addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
+                       const std::string &hwhmName);
+  std::unordered_map<std::string, JumpFitParameters>::const_iterator
+  findJumpFitParameters(std::size_t dataIndex) const;
 
   std::string m_fitType;
-  std::vector<std::string> m_widths;
-  std::vector<std::size_t> m_widthSpectra;
+  std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;
 };
 
 } // namespace IDA
