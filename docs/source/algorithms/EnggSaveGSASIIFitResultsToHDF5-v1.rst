@@ -114,9 +114,9 @@ Usage
                             RefineSigma=True,
                             RefineGamma=False)
 
-   EnggSaveGSASIIFitResultsToHDF5(LatticeParams=lattice_params,
+   EnggSaveGSASIIFitResultsToHDF5(LatticeParamWorkspaces=[lattice_params],
                                   Filename=r"D:\doctest.hdf5",
-                                  BankID=input_ws.run()["bankid"].value,
+                                  BankIDs=[input_ws.run()["bankid"].value],
                                   RefinementMethod="Rietveld refinement",
                                   XMin=min(fitted_peaks.readX(0)),
                                   XMax=max(fitted_peaks.readX(0)),
