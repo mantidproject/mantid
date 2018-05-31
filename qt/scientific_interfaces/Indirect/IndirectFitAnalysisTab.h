@@ -261,9 +261,6 @@ protected:
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
 
-  virtual void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                                int maxIterations) const;
-
   virtual std::string createSequentialFitOutputName() const;
 
   virtual std::string createSingleFitOutputName() const = 0;

@@ -23,6 +23,7 @@ digraph DirectILLReduction {
     $algorithm_style
     AbsoluteUnits [label="Scale to absolute units"]
     ApplyDiagnostics [label="Mask spectra"]
+    ConvertToDistribution [label="ConvertToDistribution"]
     ConvertToEnergy [label="Convert TOF to energy transfer"]
     CorrectKiKf [label="CorrectKiKf"]
     DetectorEfficiency [label="DetectorEfficiencyCorUser"]
@@ -49,7 +50,8 @@ digraph DirectILLReduction {
   ConvertToEnergy -> CorrectKiKf
   CorrectKiKf -> Rebin
   wRebinParams -> Rebin
-  Rebin -> DetectorEfficiency
+  Rebin -> ConvertToDistribution
+  ConvertToDistribution -> DetectorEfficiency
   DetectorEfficiency -> GroupDetectors
   GroupDetectors -> outputOptionalWS
   GroupDetectors -> SofQW
