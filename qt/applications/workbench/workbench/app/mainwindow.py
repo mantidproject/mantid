@@ -170,7 +170,6 @@ class MainWindow(QMainWindow):
         self.plot_selector.register_plugin()
         self.widgets.append(self.plot_selector)
 
-
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
         self.editor = MultiFileEditor(self)

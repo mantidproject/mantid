@@ -16,6 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
+
 class PlotSelectorModel(object):
     """
     This is the model for the plot selector widget. Essentially this

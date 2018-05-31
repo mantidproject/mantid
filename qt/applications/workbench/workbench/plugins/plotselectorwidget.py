@@ -1,6 +1,6 @@
 #    This file is part of the mantid workbench.
 #
-#    Copyright (C) 2017 mantidproject
+#    Copyright (C) 2018 mantidproject
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ from qtpy.QtWidgets import QVBoxLayout
 from workbench.plugins.base import PluginWidget
 from workbench.plotting.currentfigure import CurrentFigure
 from mantidqt.widgets.plotselector.presenter import PlotSelectorPresenter
+
 
 class PlotSelector(PluginWidget):
     """Provides an algorithm selector widget for selecting algorithms to run"""
