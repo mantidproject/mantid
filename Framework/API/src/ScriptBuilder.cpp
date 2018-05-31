@@ -210,7 +210,7 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     propStr.erase(propStr.size() - 1);
   }
 
-  return name + "(" + propStr + ")";
+  return name + "(" + propStr + ") # " + algHistory->executionDate().toFormattedString();
 }
 
 /**
