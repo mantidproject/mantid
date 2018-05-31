@@ -81,16 +81,18 @@ public:
 
   double counts() const {
     const auto &y = m_histogram.y();
-    if (yModeIsCounts()) {
+    if (!yModeIsFrequencies()) {
+      // Follow the convention in Histogram::counts():
+      // YMode::Uninitialized is handled as counts.
       return y[m_index];
     } else {
-      return y[m_index] / binWidth();
+      return y[m_index] * binWidth();
     }
   }
 
   double countVariance() const {
     const auto &e = m_histogram.e();
-    if (yModeIsCounts()) {
+    if (!yModeIsFrequencies()) {
       return e[m_index] * e[m_index];
     } else {
       const auto width = binWidth();
@@ -100,7 +102,7 @@ public:
 
   double countStandardDeviation() const {
     const auto &e = m_histogram.e();
-    if (yModeIsCounts()) {
+    if (!yModeIsFrequencies()) {
       return e[m_index];
     } else {
       const auto width = binWidth();
@@ -111,19 +113,21 @@ public:
   double frequency() const {
     const auto &y = m_histogram.y();
     if (yModeIsCounts()) {
-      return y[m_index] * binWidth();
+      return y[m_index] / binWidth();
     } else {
+      // Follow the convention in Histogram::frequency():
+      // YMode::Uninitialized is handled as frequencies.
       return y[m_index];
     }
   }
 
   double frequencyVariance() const {
     const auto &e = m_histogram.e();
-    if (!yModeIsCounts()) {
-      return e[m_index] * e[m_index];
-    } else {
+    if (yModeIsCounts()) {
       const auto width = binWidth();
       return (e[m_index] * e[m_index]) / (width * width);
+    } else {
+      return e[m_index] * e[m_index];
     }
   }
 
@@ -174,6 +178,11 @@ private:
   bool yModeIsCounts() const {
     return Histogram::YMode::Counts == m_histogram.yMode();
   }
+
+  bool yModeIsFrequencies() const {
+    return Histogram::YMode::Frequencies == m_histogram.yMode();
+  }
+
   // Deleted assignment operator as a HistogramItem is not copyable
   HistogramItem operator=(const HistogramItem &) = delete;
 
