@@ -12,7 +12,7 @@ Does this update require release notes?
 - [ ] Yes
 - [ ] No
 <!--
-Either edit the file in docs/source/release/... and it will be in your pull request or state
+If yes, edit the file docs/source/release/... or state release notes.
 -->
 
 ---
