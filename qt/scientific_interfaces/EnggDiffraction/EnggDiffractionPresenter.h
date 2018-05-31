@@ -9,6 +9,7 @@
 #include "IEnggDiffractionParam.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
+#include "IEnggVanadiumCorrectionsModel.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -210,29 +211,6 @@ private:
                   size_t bank, const std::string &specNos,
                   const std::string &dgFile);
 
-  void
-  loadOrCalcVanadiumWorkspaces(const std::string &vanNo,
-                               const std::string &inputDirCalib,
-                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS,
-                               bool forceRecalc, const std::string &specNos);
-
-  void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
-                                        const std::string &inputDirCalib,
-                                        std::string &preIntegFilename,
-                                        std::string &preCurvesFilename,
-                                        bool &found);
-
-  void loadVanadiumPrecalcWorkspaces(
-      const std::string &preIntegFilename, const std::string &preCurvesFilename,
-      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo,
-      const std::string &specNos);
-
-  void calcVanadiumWorkspaces(const std::string &vanNo,
-                              Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                              Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
-
   /// @name Methods related to pre-processing / re-binning
   //@{
   void inputChecksBeforeRebin(const std::string &runNo);
@@ -375,6 +353,10 @@ private:
 
   /// the current selected instrument
   std::string m_currentInst = "";
+
+  /// Model for calculating the vanadium corrections workspaces for focus and
+  /// calib
+  boost::shared_ptr<IEnggVanadiumCorrectionsModel> m_vanadiumCorrectionsModel;
 };
 
 } // namespace CustomInterfaces

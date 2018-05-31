@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
 #include <MantidQtWidgets/Common/MantidTreeWidget.h>
 #include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
 
 #include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/FileProperty.h>
@@ -17,9 +18,8 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(MantidDisplayBase *mdb,
-                                                     QWidget *parent)
-    : WorkspaceTreeWidget(mdb, parent),
+WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
+    : WorkspaceTreeWidget(new MantidTreeModel(), parent),
       m_plotSpectrum(new QAction("spectrum...", this)),
       m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),
       m_plotColorfill(new QAction("colorfill", this)) {
