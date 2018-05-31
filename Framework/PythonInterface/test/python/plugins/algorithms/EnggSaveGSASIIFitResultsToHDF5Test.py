@@ -76,7 +76,7 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
             self.assertEquals(len(refinement_params), 5)
 
             # refinement_params is a tuple, so test that parameters are at the correct index
-            self.assertEquals(refinement_params["RefinementMethod"].value, refinement_method.encode())
+            self.assertEquals(refinement_params["RefinementMethod"].value, refinement_method)
             self.assertTrue(refinement_params["RefineSigma"].value)
             self.assertFalse(refinement_params["RefineGamma"].value)
             self.assertEquals(refinement_params["XMin"].value, x_min)
