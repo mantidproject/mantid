@@ -26,7 +26,7 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
     BANK_GROUP_NAME = "Bank {}".format
     RUN_GROUP_NAME = "Run {}".format
     LATTICE_PARAMS_GROUP_NAME = "Lattice Parameters"
-    REFINEMENT_PARAMS_DATASET_NAME = "Refinement Parameters"
+    REFINEMENT_PARAMS_GROUP_NAME = "Refinement Parameters"
     FIT_RESULTS_GROUP_NAME = "GSAS-II Fitting"
     LATTICE_PARAMS = ["a", "b", "c", "alpha", "beta", "gamma", "volume"]
     PAWLEY_REFINEMENT = "Pawley refinement"
@@ -175,30 +175,24 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
             if refine_gamma:
                 coeffs_group.create_dataset(name="Gamma", data=gammas[index])
 
+    def _copy_property_to_dataset(self, group, property_name):
+        group.create_dataset(name=property_name, data=self.getProperty(property_name).value)
+
     def _save_refinement_params(self, results_group):
-        refinement_params_dtype = [(self.PROP_REFINEMENT_METHOD, "S19"),
-                                   (self.PROP_REFINE_SIGMA, "b"),
-                                   (self.PROP_REFINE_GAMMA, "b"),
-                                   (self.PROP_XMIN, "f"),
-                                   (self.PROP_XMAX, "f")]
+        refinement_params_group = results_group.create_group(name=self.REFINEMENT_PARAMS_GROUP_NAME)
 
-        refinement_method = self.getProperty(self.PROP_REFINEMENT_METHOD).value
-        refinement_params_list = [refinement_method,
-                                  self.getProperty(self.PROP_REFINE_SIGMA).value,
-                                  self.getProperty(self.PROP_REFINE_GAMMA).value,
-                                  self.getProperty(self.PROP_XMIN).value,
-                                  self.getProperty(self.PROP_XMAX).value]
+        mandatory_properties = {self.PROP_REFINEMENT_METHOD,
+                                self.PROP_REFINE_SIGMA,
+                                self.PROP_REFINE_GAMMA,
+                                self.PROP_XMIN,
+                                self.PROP_XMAX}
 
-        if refinement_method == self.PAWLEY_REFINEMENT:
-            refinement_params_dtype += [(self.PROP_PAWLEY_DMIN, "f"),
-                                        (self.PROP_PAWLEY_NEGATIVE_WEIGHT, "f")]
-            refinement_params_list += [self.getProperty(self.PROP_PAWLEY_DMIN).value,
-                                       self.getProperty(self.PROP_PAWLEY_NEGATIVE_WEIGHT).value]
+        for prop_name in mandatory_properties:
+            self._copy_property_to_dataset(refinement_params_group, prop_name)
 
-        refinement_params_dataset = results_group.create_dataset(name=self.REFINEMENT_PARAMS_DATASET_NAME, shape=(1,),
-                                                                 dtype=refinement_params_dtype)
-
-        refinement_params_dataset[0] = tuple(refinement_params_list)
+        if self.getProperty(self.PROP_REFINEMENT_METHOD).value == self.PAWLEY_REFINEMENT:
+            self._copy_property_to_dataset(refinement_params_group, self.PROP_PAWLEY_DMIN)
+            self._copy_property_to_dataset(refinement_params_group, self.PROP_PAWLEY_NEGATIVE_WEIGHT)
 
     def _save_rwp(self, results_group, rwp):
         results_group.create_dataset(self.RWP_DATASET_NAME, data=numpy.array(rwp))

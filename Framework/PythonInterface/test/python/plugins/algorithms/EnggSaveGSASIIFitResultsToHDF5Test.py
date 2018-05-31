@@ -71,16 +71,16 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             fit_results_group = output_file["Bank 2"]["GSAS-II Fitting"]
             self.assertTrue("Refinement Parameters" in fit_results_group)
-            refinement_params = fit_results_group["Refinement Parameters"][0]
+            refinement_params = fit_results_group["Refinement Parameters"]
 
             self.assertEquals(len(refinement_params), 5)
 
             # refinement_params is a tuple, so test that parameters are at the correct index
-            self.assertEquals(refinement_params[0], refinement_method.encode())
-            self.assertTrue(refinement_params[1])  # RefineSigma
-            self.assertFalse(refinement_params[2])  # RefineGamma
-            self.assertEquals(refinement_params[3], x_min)
-            self.assertEquals(refinement_params[4], x_max)
+            self.assertEquals(refinement_params["RefinementMethod"].value, refinement_method.encode())
+            self.assertTrue(refinement_params["RefineSigma"].value)
+            self.assertFalse(refinement_params["RefineGamma"].value)
+            self.assertEquals(refinement_params["XMin"].value, x_min)
+            self.assertEquals(refinement_params["XMax"].value, x_max)
 
     def test_saveProfileCoefficients(self):
         sigma = 13
@@ -120,10 +120,10 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             fit_results_group = output_file["Bank 1"]["GSAS-II Fitting"]
-            refinement_params = fit_results_group["Refinement Parameters"][0]
+            refinement_params = fit_results_group["Refinement Parameters"]
             self.assertEquals(len(refinement_params), 7)
-            self.assertEquals(refinement_params[5], d_min)
-            self.assertEquals(refinement_params[6], negative_weight)
+            self.assertEquals(refinement_params["PawleyDMin"].value, d_min)
+            self.assertEquals(refinement_params["PawleyNegativeWeight"].value, negative_weight)
 
     def test_saveRwp(self):
         rwp = 75
