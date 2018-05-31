@@ -40,6 +40,7 @@ private:
   bool isRowLocation(MantidWidgets::Batch::RowLocation const &location) const;
   int groupOf(MantidWidgets::Batch::RowLocation const &location) const;
   int rowOf(MantidWidgets::Batch::RowLocation const &location) const;
+  void applyGroupStyling(MantidWidgets::Batch::RowLocation const &location);
 
   bool containsGroups(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations)

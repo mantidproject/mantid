@@ -60,6 +60,7 @@ set ( TEST_FILES
   test/RunMapTest.h
   test/UserInputValidatorTest.h
   test/GroupTest.h
+  test/ValidateRowTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

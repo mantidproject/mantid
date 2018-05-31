@@ -19,9 +19,9 @@ public:
 
   void testCanAddEmptyRowToGroup() {
     auto slicedGroup = SlicedGroup("Group1", {}, "Postprocessed Ws Name");
-    auto run = SlicedRun({"000000", "000002"}, 0.02, {"", ""},
+    auto run = SlicedRow({"000000", "000002"}, 0.02, {"", ""},
                          RangeInQ(0, 1, 10), 1.2, boost::none, {});
-    slicedGroup.appendRun(run);
+    slicedGroup.appendRow(run);
     TS_ASSERT_EQUALS(run, slicedGroup[0]);
   }
 };
