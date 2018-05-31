@@ -15,6 +15,8 @@ ISIS Reflectometry Interface
 New features
 ############
 
+- Fully-automatic processing has been added to the interface. Click ``Autoprocess`` to process all of the runs for an investigation and to start polling for new runs. Whenever new runs are found, they will automatically be added to the table and processed.
+
 Improvements
 ############
 
