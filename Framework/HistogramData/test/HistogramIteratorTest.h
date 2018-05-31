@@ -196,12 +196,12 @@ public:
     Histogram hist(BinEdges{-1, 2, 3.3, 5}, Frequencies{2, 3, 4});
     auto expectedCountVariances = hist.countVariances();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(),
-                         expectedCountVariances.begin(),
-                         [](const HistogramItem &item, const double &variance) {
-                           constexpr double delta{1e-12};
-                           return std::abs(item.countVariance() - variance) < delta;
-                         }));
+    TS_ASSERT(
+        std::equal(hist.begin(), hist.end(), expectedCountVariances.begin(),
+                   [](const HistogramItem &item, const double &variance) {
+                     constexpr double delta{1e-12};
+                     return std::abs(item.countVariance() - variance) < delta;
+                   }));
   }
 
   void test_iterate_over_histogram_count_std_when_histogram_has_counts() {
@@ -229,12 +229,12 @@ public:
     Histogram hist(BinEdges{-1, 2, 3.3, 5}, Counts{2, 3, 4});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
-    TS_ASSERT(std::equal(hist.begin(), hist.end(),
-                         expectedFrequencyVariances.begin(),
-                         [](const HistogramItem &item, const double &variance) {
-                           constexpr double delta{1e-12};
-                           return std::abs(item.frequencyVariance() - variance) < delta;
-                         }));
+    TS_ASSERT(std::equal(
+        hist.begin(), hist.end(), expectedFrequencyVariances.begin(),
+        [](const HistogramItem &item, const double &variance) {
+          constexpr double delta{1e-12};
+          return std::abs(item.frequencyVariance() - variance) < delta;
+        }));
   }
 
   void
@@ -249,8 +249,7 @@ public:
                          }));
   }
 
-  void
-  test_iterate_over_histogram_frequency_std_when_histogram_has_counts() {
+  void test_iterate_over_histogram_frequency_std_when_histogram_has_counts() {
     Histogram hist(BinEdges{-1, 2, 3.3, 5}, Counts{2, 3, 4});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
