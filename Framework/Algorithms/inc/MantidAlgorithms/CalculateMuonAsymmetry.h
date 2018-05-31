@@ -81,9 +81,7 @@ private:
   void init() override;
   void exec() override;
   // calculate Muon normalisation constant
-  double getNormConstant(API::MatrixWorkspace_sptr ws, int wsIndex,
-                         const double estNormConst, const double startX,
-                         const double endX);
+  std::vector<double> getNormConstants();
   std::map<std::string, std::string> validateInputs() override;
 };
 
