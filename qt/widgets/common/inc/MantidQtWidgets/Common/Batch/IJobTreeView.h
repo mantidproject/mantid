@@ -36,12 +36,13 @@ public:
 
   virtual void subscribe(JobTreeViewSubscriber &subscriber) = 0;
 
-  virtual void insertChildRowOf(RowLocation const &parent, int beforeRow,
-                                std::vector<Cell> const &rowText) = 0;
-  virtual void insertChildRowOf(RowLocation const &parent, int beforeRow) = 0;
-  virtual void appendChildRowOf(RowLocation const &parent) = 0;
-  virtual void appendChildRowOf(RowLocation const &parentLocation,
-                                std::vector<Cell> const &rowText) = 0;
+  virtual RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
+                                       std::vector<Cell> const &rowText) = 0;
+  virtual RowLocation insertChildRowOf(RowLocation const &parent,
+                                       int beforeRow) = 0;
+  virtual RowLocation appendChildRowOf(RowLocation const &parent) = 0;
+  virtual RowLocation appendChildRowOf(RowLocation const &parentLocation,
+                                       std::vector<Cell> const &rowText) = 0;
 
   virtual void removeRowAt(RowLocation const &location) = 0;
   virtual void removeRows(std::vector<RowLocation> rowsToRemove) = 0;

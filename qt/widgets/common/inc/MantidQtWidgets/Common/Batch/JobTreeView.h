@@ -31,11 +31,11 @@ public:
 
   void subscribe(JobTreeViewSubscriber &subscriber) override;
 
-  void insertChildRowOf(RowLocation const &parent, int beforeRow,
+  RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
                         std::vector<Cell> const &rowText) override;
-  void insertChildRowOf(RowLocation const &parent, int beforeRow) override;
-  void appendChildRowOf(RowLocation const &parent) override;
-  void appendChildRowOf(RowLocation const &parentLocation,
+  RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow) override;
+  RowLocation appendChildRowOf(RowLocation const &parent) override;
+  RowLocation appendChildRowOf(RowLocation const &parentLocation,
                         std::vector<Cell> const &rowText) override;
 
   void removeRowAt(RowLocation const &location) override;

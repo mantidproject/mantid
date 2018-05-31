@@ -21,11 +21,11 @@ public:
   MOCK_METHOD1(subscribe, void(JobTreeViewSubscriber &));
 
   MOCK_METHOD3(insertChildRowOf,
-               void(RowLocation const &, int, std::vector<Cell> const &));
-  MOCK_METHOD2(insertChildRowOf, void(RowLocation const &, int));
-  MOCK_METHOD1(appendChildRowOf, void(RowLocation const &));
+               RowLocation(RowLocation const &, int, std::vector<Cell> const &));
+  MOCK_METHOD2(insertChildRowOf, RowLocation(RowLocation const &, int));
+  MOCK_METHOD1(appendChildRowOf, RowLocation(RowLocation const &));
   MOCK_METHOD2(appendChildRowOf,
-               void(RowLocation const &, std::vector<Cell> const &));
+               RowLocation(RowLocation const &, std::vector<Cell> const &));
 
   MOCK_METHOD1(removeRowAt, void(RowLocation const &));
   MOCK_METHOD1(removeRows, void(std::vector<RowLocation>));
