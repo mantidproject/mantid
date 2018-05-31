@@ -17,10 +17,9 @@ Powder Diffraction
   taken as the default, and any changes are reverted back to the
   default once the line they were made on has finished executing
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
-
-- New SNAP instrument geometry for 2018 run cycle
-
+- New NOMAD instrument geometry for 2018 run cycle
 - New POWGEN instrument geometry for 2018 run cycle
+- New SNAP instrument geometry for 2018 run cycle
 
 New Features
 ------------
