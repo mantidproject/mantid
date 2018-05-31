@@ -104,6 +104,7 @@ class ChopperSystem(object):
         self.source_rep = 50
         self.emission_time = 0
         self.overlap_ei_frac = 0.9
+        self.n_frame = 1
         self._ei = None
         # Parse input values (if any)
         wrap_attributes(self, inval, self.__allowed_var_names)
@@ -333,8 +334,12 @@ class ChopperSystem(object):
         else:
             return (self.slot_width[-1] / self.flux_ref_slot) * (self.flux_ref_freq / freq)
 
+    def setNFrame(self, value):
+        self.n_frame = value
+        self._instpar[9] = [self.source_rep, value]
+
     def _get_state(self, Ei_in=None):
-        return hash((self.variant, self.package, tuple(self.frequency), tuple(self.phase), Ei_in if Ei_in else self.ei))
+        return hash((self.variant, self.package, tuple(self.frequency), tuple(self.phase), Ei_in if Ei_in else self.ei, self.n_frame))
 
     def _removeLowIntensityReps(self, Eis, lines, Ei=None):
         # Removes reps with Ei where there are no neutrons
@@ -785,6 +790,15 @@ class Instrument(object):
     @property
     def instname(self):
         return self.name
+
+    @property
+    def n_frame(self):
+        return self.chopper_system.n_frame
+
+    @n_frame.setter
+    def n_frame(self, value):
+        self.moderator.n_frame = value
+        self.chopper_system.setNFrame(value)
 
     @classmethod
     def calculate(cls, *args, **kwargs):

@@ -13,6 +13,7 @@ from six import string_types
 import sys
 import re
 import numpy as np
+import os
 from .Instruments import Instrument
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -34,7 +35,6 @@ class PyChopGui(QtGui.QMainWindow):
 
     def __init__(self):
         super(PyChopGui, self).__init__()
-        import sys, os
         self.folder = os.path.dirname(sys.modules[self.__module__].__file__)
         for fname in os.listdir(self.folder):
             if fname.endswith('.yaml'):
@@ -65,8 +65,6 @@ class PyChopGui(QtGui.QMainWindow):
         if not hasattr(maxfreq, '__len__') or len(maxfreq) == 1:
             self.widgets['PulseRemoverCombo']['Combo'].hide()
             self.widgets['PulseRemoverCombo']['Label'].hide()
-            self.widgets['Chopper2Phase']['Edit'].hide()
-            self.widgets['Chopper2Phase']['Label'].hide()
             for fq in range(rep, (maxfreq[0] if hasattr(maxfreq, '__len__') else maxfreq) + 1, rep):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
         else:
@@ -83,6 +81,8 @@ class PyChopGui(QtGui.QMainWindow):
         else:
             self.widgets['MultiRepCheck'].setEnabled(False)
             self.widgets['MultiRepCheck'].setChecked(False)
+        self.widgets['Chopper2Phase']['Edit'].hide()
+        self.widgets['Chopper2Phase']['Label'].hide()
         if self.engine.chopper_system.isPhaseIndependent:
             self.widgets['Chopper2Phase']['Edit'].show()
             self.widgets['Chopper2Phase']['Label'].show()
@@ -96,6 +96,8 @@ class PyChopGui(QtGui.QMainWindow):
         self.engine.setFrequency(float(self.widgets['FrequencyCombo']['Combo'].currentText()))
         val = self.flxslder.val * self.maxE[self.engine.instname] / 100
         self.flxedt.setText('%3.2f' % (val))
+        nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, 'n_frame') else 1
+        self.repfig_nframe_edit.setText(str(nframe))
 
     def setChopper(self, choppername):
         """
@@ -168,10 +170,7 @@ class PyChopGui(QtGui.QMainWindow):
             if self.instSciAct.isChecked():
                 self.update_script()
         except ValueError as err:
-            msg = QtGui.QMessageBox()
-            msg.setText(str(err))
-            msg.setStandardButtons(QtGui.QMessageBox.Ok)
-            msg.exec_()
+            self.errormessage(err)
 
     def calculate(self):
         """
@@ -313,10 +312,7 @@ class PyChopGui(QtGui.QMainWindow):
         if val is None:
             val = float(self.flxedt.text()) / self.maxE[self.engine.instname] * 100
             if val < self.minE[self.engine.instname]:
-                msg = QtGui.QMessageBox()
-                msg.setText("Max Ei must be greater than %2.1f" % (self.minE[self.engine.instname]))
-                msg.setStandardButtons(QtGui.QMessageBox.Ok)
-                msg.exec_()
+                self.errormessage("Max Ei must be greater than %2.1f" % (self.minE[self.engine.instname]))
                 val = (self.minE[self.engine.instname]+0.1) / self.maxE[self.engine.instname] * 100
             self.flxslder.set_val(val)
         else:
@@ -398,11 +394,70 @@ class PyChopGui(QtGui.QMainWindow):
             self.tabs.removeTab(self.scrtabID)
             self.scrtab.hide()
 
+    def errormessage(self, message):
+        msg = QtGui.QMessageBox()
+        msg.setText(str(message))
+        msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.exec_()
+
+    def loadYaml(self):
+        yaml_file = str(QtGui.QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)'))
+        new_folder = os.path.dirname(yaml_file)
+        if new_folder != self.folder:
+            self.folder = new_folder
+        try:
+            new_inst = Instrument(yaml_file)
+        except (RuntimeError, AttributeError, ValueError) as err:
+            self.errormessage(err)
+        newname = new_inst.name
+        if newname in self.instruments.keys() and not self.overwriteload.isChecked():
+            overwrite, newname = self._ask_overwrite()
+            if overwrite == 1:
+                return
+            elif overwrite == 0:
+                newname = new_inst.name
+        self.instruments[newname] = new_inst
+        self.choppers[newname] = new_inst.getChopperNames()
+        self.updateInstrumentList()
+
+    def _ask_overwrite(self):
+        msg = QtGui.QDialog()
+        msg.setWindowTitle('Load overwrite')
+        layout = QtGui.QGridLayout()
+        layout.addWidget(QtGui.QLabel('Instrument %s already exists in memory. Overwrite this?'), 0, 0, 1, -1)
+        buttons = [QtGui.QPushButton(label) for label in ['Load and overwrite', 'Cancel Load', 'Load and rename to']]
+        locations = [[1, 0], [1, 1], [2, 0]]
+        self.overwrite_flag = 1
+        def overwriteCB(idx):
+            self.overwrite_flag = idx
+            msg.accept()
+        for idx, button in enumerate(buttons):
+            button.clicked.connect(lambda _, idx=idx: overwriteCB(idx))
+            layout.addWidget(button, locations[idx][0], locations[idx][1])
+        newname = QtGui.QLineEdit()
+        newname.editingFinished.connect(lambda: overwriteCB(2))
+        layout.addWidget(newname, 2, 1)
+        msg.setLayout(layout)
+        msg.exec_()
+        newname = str(newname.text())
+        if not newname or newname in self.instruments:
+            self.errormessage('Invalid instrument name. Cancelling load.')
+            self.overwrite_flag = 1
+        return self.overwrite_flag, newname
+
+    def updateInstrumentList(self):
+        combo = self.widgets['InstrumentCombo']['Combo']
+        old_instruments = [str(combo.itemText(i)) for i in range(combo.count())]
+        new_instruments = [inst for inst in self.instruments if inst not in old_instruments]
+        for inst in new_instruments:
+            combo.addItem(inst)
+
     def plot_frame(self):
         """
         Plots the distance-time diagram in the right tab
         """
         if len(self.engine.chopper_system.choppers) > 1:
+            self.engine.n_frame = int(self.repfig_nframe_edit.text())
             self.repaxes.clear()
             self.engine.plotMultiRepFrame(self.repaxes)
             self.repcanvas.draw()
@@ -416,10 +471,7 @@ class PyChopGui(QtGui.QMainWindow):
             flux = self.engine.getFlux()
             res = self.engine.getResolution(en)
         except ValueError as err:
-            msg = QtGui.QMessageBox()
-            msg.setText(str(err))
-            msg.setStandardButtons(QtGui.QMessageBox.Ok)
-            msg.exec_()
+            self.errormessage(err)
             raise ValueError(err)
         obj = self.engine
         instname, chtyp, freqs, ei_in = tuple([obj.instname, obj.getChopper(), obj.getFrequency(), obj.getEi()])
@@ -552,12 +604,6 @@ class PyChopGui(QtGui.QMainWindow):
             self.hlploop = QtCore.QEventLoop()
             self.hlploop.exec_()
 
-    def dummy(self, text):
-        """
-        Does nothing.
-        """
-        pass
-
     def drawLayout(self):
         """
         Draws the GUI layout.
@@ -571,8 +617,8 @@ class PyChopGui(QtGui.QMainWindow):
             ['pair', 'hide', 'Chopper 2 phase delay time', 'edit', '5', self.setFreq, 'Chopper2Phase'],
             ['spacer'],
             ['single', 'show', 'Calculate and Plot', 'button', self.calc_callback, 'CalculateButton'],
-            ['single', 'show', 'Hold current plot', 'check', self.dummy, 'HoldCheck'],
-            ['single', 'show', 'Show multi-reps', 'check', self.dummy, 'MultiRepCheck'],
+            ['single', 'show', 'Hold current plot', 'check', lambda: None, 'HoldCheck'],
+            ['single', 'show', 'Show multi-reps', 'check', lambda: None, 'MultiRepCheck'],
             ['spacer'],
             ['single', 'show', 'Show data ascii window', 'button', self.showText, 'ShowAsciiButton'],
             ['single', 'show', 'Save data as ascii', 'button', self.saveText, 'SaveAsciiButton']
@@ -698,9 +744,20 @@ class PyChopGui(QtGui.QMainWindow):
         self.repaxes.set_xlabel(r'TOF ($\mu$sec)')
         self.repaxes.set_ylabel('Distance (m)')
         self.repfig_controls = NavigationToolbar(self.repcanvas, self)
+        self.repfig_nframe_label = QtGui.QLabel('Number of frames to plot')
+        self.repfig_nframe_edit = QtGui.QLineEdit('1')
+        self.repfig_nframe_button = QtGui.QPushButton('Replot')
+        self.repfig_nframe_button.clicked.connect(lambda: self.plot_frame())
+        self.repfig_nframe_box = QtGui.QHBoxLayout()
+        self.repfig_nframe_box.addWidget(self.repfig_nframe_label)
+        self.repfig_nframe_box.addWidget(self.repfig_nframe_edit)
+        self.repfig_nframe_box.addWidget(self.repfig_nframe_button)
         self.reptab = QtGui.QWidget(self.tabs)
+        self.repfig_nframe = QtGui.QWidget(self.reptab)
+        self.repfig_nframe.setLayout(self.repfig_nframe_box)
         self.reptabbox = QtGui.QVBoxLayout()
         self.reptabbox.addWidget(self.repcanvas)
+        self.reptabbox.addWidget(self.repfig_nframe)
         self.reptabbox.addWidget(self.repfig_controls)
         self.reptab.setLayout(self.reptabbox)
 
@@ -723,15 +780,25 @@ class PyChopGui(QtGui.QMainWindow):
         self.scrtabID = 4
         self.rightPanel.addWidget(self.tabs)
 
+        self.menuLoad = QtGui.QMenu('Load')
+        self.loadAct = QtGui.QAction('Load YAML', self.menuLoad)
+        self.loadAct.triggered.connect(self.loadYaml)
+        self.menuLoad.addAction(self.loadAct)
         self.menuOptions = QtGui.QMenu('Options')
         self.instSciAct = QtGui.QAction('Instrument Scientist Mode', self.menuOptions, checkable=True)
         self.instSciAct.triggered.connect(self.instSciCB)
         self.menuOptions.addAction(self.instSciAct)
         self.eiPlots = QtGui.QAction('Press Enter in Ei box updates plots', self.menuOptions, checkable=True)
         self.menuOptions.addAction(self.eiPlots)
+        self.overwriteload = QtGui.QAction('Always overwrite instruments in memory', self.menuOptions, checkable=True)
+        self.menuOptions.addAction(self.overwriteload)
+        self.menuBar().addMenu(self.menuLoad)
         self.menuBar().addMenu(self.menuOptions)
 
-        self.fullWindow.addLayout(self.leftPanel, 0, 0)
+        self.leftPanelWidget = QtGui.QWidget()
+        self.leftPanelWidget.setLayout(self.leftPanel)
+        self.leftPanelWidget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred))
+        self.fullWindow.addWidget(self.leftPanelWidget, 0, 0)
         self.fullWindow.addLayout(self.rightPanel, 0, 1)
         self.helpbtn = QtGui.QPushButton("?", self)
         self.helpbtn.setMaximumWidth(30)
