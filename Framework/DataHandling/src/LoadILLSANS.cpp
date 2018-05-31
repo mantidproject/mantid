@@ -21,6 +21,10 @@
 namespace Mantid {
 namespace DataHandling {
 
+namespace {
+static constexpr size_t N_MONITORS = 2;
+}
+
 using namespace Kernel;
 using namespace API;
 using namespace NeXus;
@@ -32,7 +36,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
  */
 LoadILLSANS::LoadILLSANS()
     : m_supportedInstruments{"D11", "D22", "D33"}, m_defaultBinning{0, 0},
-      m_resMode("nominal") {}
+      m_resMode("nominal"), m_isTOF(false), m_sourcePos(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -103,6 +107,10 @@ void LoadILLSANS::exec() {
         getDetectorPositionD33(firstEntry, instrumentPath);
     progress.report("Moving detectors");
     moveDetectorsD33(std::move(detPos));
+    if (m_isTOF) {
+        adjustTOF();
+        moveSource();
+    }
   } else {
     progress.report("Initializing the workspace for " + m_instrumentName);
     initWorkSpace(firstEntry, instrumentPath);
@@ -192,7 +200,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   NXData dataGroup = firstEntry.openNXData("data");
   NXInt data = dataGroup.openIntData();
   data.load();
-  int numberOfHistograms = data.dim0() * data.dim1() + 2;
+  int numberOfHistograms = data.dim0() * data.dim1() + N_MONITORS;
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
   size_t nextIndex =
@@ -242,7 +250,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
 
   g_log.debug("Creating empty workspace...");
   // TODO : Must put this 2 somewhere else: number of monitors!
-  createEmptyWorkspace(numberOfHistograms + 2, dataRear.dim2());
+  createEmptyWorkspace(numberOfHistograms + N_MONITORS, dataRear.dim2());
 
   loadMetaData(firstEntry, instrumentPath);
 
@@ -257,7 +265,25 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
     binningDown = m_defaultBinning;
     binningUp = m_defaultBinning;
 
-  } else {
+  } else { // TOF
+    m_isTOF = true;
+    NXInt masterPair =
+        firstEntry.openNXInt(m_instrumentName + "/tof/master_pair");
+    masterPair.load();
+
+    const std::string first = std::to_string(masterPair[0]);
+    const std::string second = std::to_string(masterPair[1]);
+    g_log.debug("Master choppers are " + first + " and " + second);
+
+    NXFloat firstChopper = firstEntry.openNXFloat(
+        m_instrumentName + "/chopper" + first + "/sample_distance");
+    firstChopper.load();
+    NXFloat secondChopper = firstEntry.openNXFloat(
+        m_instrumentName + "/chopper" + second + "/sample_distance");
+    secondChopper.load();
+    m_sourcePos = (firstChopper[0] + secondChopper[0]) / 2.;
+    g_log.debug("Source distance computed, moving moderator to Z=-" +
+                std::to_string(m_sourcePos));
     g_log.debug("Getting wavelength bins from the nexus file...");
     std::string binPathPrefix(instrumentPath + "/tof/tof_wavelength_detector");
 
@@ -280,8 +306,8 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
                                                      nextIndex);
   nextIndex =
       loadDataIntoWorkspaceFromVerticalTubes(dataLeft, binningLeft, nextIndex);
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataDown, binningDown,
-                                                       nextIndex);
+  nextIndex =
+      loadDataIntoWorkspaceFromVerticalTubes(dataDown, binningDown, nextIndex);
   nextIndex =
       loadDataIntoWorkspaceFromVerticalTubes(dataUp, binningUp, nextIndex);
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
@@ -302,11 +328,9 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0()
                     << "x" << data.dim1() << "x" << data.dim2() << '\n';
       const size_t vectorSize = data.dim2() + 1;
-      std::vector<double> positionsBinning;
-      positionsBinning.reserve(vectorSize);
       HistogramData::BinEdges histoBinEdges(
-          vectorSize, HistogramData::LinearGenerator(0.0, vectorSize));
-      if (firstEntry.getFloat("mode") == 0.0) { // Not TOF
+          vectorSize, HistogramData::LinearGenerator(0.0, 1));
+      if (!m_isTOF) { // Not TOF
         histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
       }
       const HistogramData::Counts histoCounts(data(), data() + data.dim2());
@@ -482,7 +506,7 @@ void LoadILLSANS::moveDetectorHorizontal(double shift,
   V3D pos = getComponentPosition(componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
-  mover->setProperty("X", -shift); // positive means right from the sample
+  mover->setProperty("X", shift);
   mover->setProperty("Y", pos.Y());
   mover->setProperty("Z", pos.Z());
   mover->setProperty("RelativePosition", false);
@@ -630,6 +654,44 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
     m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
     nxStat = NXclose(&nxHandle);
   }
+}
+
+/**
+ * Adjusts pixel by pixel the wavelength axis
+ * Used only for D33 in TOF mode
+ */
+void LoadILLSANS::adjustTOF() {
+
+  const auto &specInfo = m_localWorkspace->spectrumInfo();
+  const double l1 = m_sourcePos;
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int64_t index = 0;
+       index < static_cast<int64_t>(m_localWorkspace->getNumberHistograms() -
+                                    N_MONITORS);
+       ++index) {
+    const double l2 = specInfo.l2(index);
+    const double z = specInfo.position(index).Z();
+    auto &x = m_localWorkspace->mutableX(index);
+    const double scale = (l1 + z) / (l1 + l2);
+    std::transform(x.begin(), x.end(), x.begin(),
+                   [scale](double lambda) { return scale * lambda; });
+  }
+}
+
+/**
+ * Moves the source to the middle of the two master choppers
+ * Used only for D33 in TOF mode
+ */
+void LoadILLSANS::moveSource() {
+    API::IAlgorithm_sptr mover =
+        createChildAlgorithm("MoveInstrumentComponent");
+    mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    mover->setProperty("ComponentName", "moderator");
+    mover->setProperty("X", 0.);
+    mover->setProperty("Y", 0.);
+    mover->setProperty("Z", -m_sourcePos);
+    mover->setProperty("RelativePosition", false);
+    mover->executeAsChildAlg();
 }
 
 } // namespace DataHandling

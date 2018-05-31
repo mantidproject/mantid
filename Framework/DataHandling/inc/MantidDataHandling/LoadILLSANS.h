@@ -91,17 +91,22 @@ private:
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
   void rotateD22(double, const std::string &);
+  void adjustTOF();
+  void moveSource();
 
-  LoadHelper m_loader;  
+  LoadHelper m_loader;          ///< Load helper for metadata
   std::string m_instrumentName; ///< Name of the instrument
-  std::vector<std::string> m_supportedInstruments;
-  API::MatrixWorkspace_sptr m_localWorkspace;
-  std::vector<double> m_defaultBinning;
+  std::vector<std::string>
+      m_supportedInstruments;                 ///< List of supported instruments
+  API::MatrixWorkspace_sptr m_localWorkspace; ///< to-be output workspace
+  std::vector<double> m_defaultBinning;       ///< the default x-axis binning
   std::string m_resMode; ///< Resolution mode for D11 and D22
+  bool m_isTOF;          ///< TOF or monochromatic flag
+  double m_sourcePos;    ///< Source Z (for D33 TOF)
 
   double calculateQ(const double lambda, const double twoTheta) const;
   std::pair<double, double> calculateQMaxQMin();
-  void setFinalProperties(const std::string& filename);
+  void setFinalProperties(const std::string &filename);
 };
 
 } // namespace DataHandling
