@@ -210,8 +210,7 @@ void IndirectSpectrumSelectionView::hideMaskSpectrumSelector() {
 }
 
 void IndirectSpectrumSelectionView::showMaskSpectrumSelector() {
-  m_selector->spMaskSpectrum->show();
-  m_selector->cbMaskSpectrum->show();
+  m_selector->swMaskSpectrumSelection->show();
 }
 
 void IndirectSpectrumSelectionView::clearMaskString() {
