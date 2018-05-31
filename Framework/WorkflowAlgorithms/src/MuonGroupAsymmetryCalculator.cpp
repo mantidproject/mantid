@@ -24,7 +24,7 @@ namespace WorkflowAlgorithms {
 * @param start is the start time
 * @param end is the end time
 * @param groupIndex :: [input] Workspace index of the group to analyse
-* @param wsName :: the name of the workspace (for normalization table) 
+* @param wsName :: the name of the workspace (for normalization table)
  */
 MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
     const Mantid::API::WorkspaceGroup_sptr inputWS,

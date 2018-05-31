@@ -258,7 +258,6 @@ public:
       TS_ASSERT_DELTA(fineOutWS->e(0)[1 + j * 3], coarseOutWS->e(0)[j], Delta);
     }
   }
-
 };
 
 class CalculateMuonAsymmetryTestPerformance : public CxxTest::TestSuite {
