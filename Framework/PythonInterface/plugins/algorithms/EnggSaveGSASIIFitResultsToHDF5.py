@@ -25,7 +25,7 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
 
     BANK_GROUP_NAME = "Bank {}".format
     RUN_GROUP_NAME = "Run {}".format
-    LATTICE_PARAMS_DATASET_NAME = "Lattice Parameters"
+    LATTICE_PARAMS_GROUP_NAME = "Lattice Parameters"
     REFINEMENT_PARAMS_DATASET_NAME = "Refinement Parameters"
     FIT_RESULTS_GROUP_NAME = "GSAS-II Fitting"
     LATTICE_PARAMS = ["a", "b", "c", "alpha", "beta", "gamma", "volume"]
@@ -160,12 +160,11 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
         return {}
 
     def _save_lattice_params(self, results_group, lattice_params_ws):
-        lattice_params_dataset = results_group.create_dataset(name=self.LATTICE_PARAMS_DATASET_NAME,
-                                                              shape=(1,),
-                                                              dtype=[(param, "f") for param in self.LATTICE_PARAMS])
-
+        lattice_params_group = results_group.create_group(name=self.LATTICE_PARAMS_GROUP_NAME)
         lattice_params = lattice_params_ws.row(0)
-        lattice_params_dataset[0] = tuple(lattice_params[param] for param in self.LATTICE_PARAMS)
+
+        for param_name in self.LATTICE_PARAMS:
+            lattice_params_group.create_dataset(name=param_name, data=lattice_params[param_name])
 
     def _save_profile_coefficients(self, results_group, refine_sigma, refine_gamma, sigmas, gammas, index):
         if refine_sigma or refine_gamma:

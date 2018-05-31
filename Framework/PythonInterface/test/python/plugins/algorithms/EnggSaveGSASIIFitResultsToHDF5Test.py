@@ -48,10 +48,10 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
 
             self.assertTrue("Lattice Parameters" in fit_results_group)
             lattice_params_dataset = fit_results_group["Lattice Parameters"]
-            lattice_params_row = [lattice_params.row(0)[param] for param in self.LATTICE_PARAMS]
+            lattice_params_row = lattice_params.row(0)
 
-            for val_from_file, val_from_input in zip(lattice_params_row, lattice_params_dataset[0]):
-                self.assertAlmostEqual(val_from_file, val_from_input)
+            for param in self.LATTICE_PARAMS:
+                self.assertAlmostEqual(lattice_params_row[param], lattice_params_dataset[param].value)
 
     def test_saveRefinementParameters(self):
         refinement_method = "Rietveld refinement"
