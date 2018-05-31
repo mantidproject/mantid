@@ -102,15 +102,6 @@ private:
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName(const Muon::AnalysisOptions &options,
                                         const std::string &groupWSName);
-  /// Add the grouped counts to a workspace named "MuonAanalysisGrouped" if its
-  /// in the ADS
-  void addCountsToMuonAnalysisGrouped(API::Workspace_sptr inputWS,
-                                      const Muon::AnalysisOptions options);
-  /// If "MuonAnalysisGrouped" in ADS and a grouped workspace return the
-  /// workspace names it contains, else return "MuonAnalysisGrouped"
-  std::vector<std::string> getMuonAnalysisGroupedWorkspaceNames();
-  /// Delete a workspace if it is in the ADS
-  void deleteWorkspaceIfExists(const std::string &name);
 };
 
 } // namespace Muon

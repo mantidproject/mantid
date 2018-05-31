@@ -166,8 +166,6 @@ void ApplyMuonDetectorGrouping::exec() {
   WorkspaceGroup_sptr muonWS = convertInputWStoWSGroup(inputWS);
   clipXRangeToWorkspace(*muonWS, options);
 
-  addCountsToMuonAnalysisGrouped(inputWS, options);
-
   auto ws = createAnalysisWorkspace(inputWS, false, options);
   auto wsRaw = createAnalysisWorkspace(inputWS, true, options);
 
@@ -182,92 +180,7 @@ void ApplyMuonDetectorGrouping::exec() {
   MuonAlgorithmHelper::groupWorkspaces(groupedWSName, wsNames);
 }
 
-/*
- * Add counts data to the workspace names "MuonAnalysisGrouped" which
- * is a WorkspaceGroup
- */
-void ApplyMuonDetectorGrouping::addCountsToMuonAnalysisGrouped(
-    Workspace_sptr inputWS, Muon::AnalysisOptions options) {
 
-  options.plotType = Mantid::Muon::PlotType::Counts;
-  options.rebinArgs = "";
-
-  IAlgorithm_sptr alg = Algorithm::createChildAlgorithm("MuonProcess");
-  setMuonProcessPeriodProperties(*alg, inputWS, options);
-  setMuonProcessAlgorithmProperties(*alg, options);
-  alg->execute();
-  Workspace_sptr wsTemp = alg->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr wsOut =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(wsTemp);
-  AnalysisDataService::Instance().addOrReplace("wsTemp", wsOut);
-
-  std::vector<std::string> names = getMuonAnalysisGroupedWorkspaceNames();
-
-  for (auto &name : names) {
-    IAlgorithm_sptr algAppend =
-        Algorithm::createChildAlgorithm("AppendSpectra");
-    // auto ws = AnalysisDataService::Instance().retrieve(name);
-    // auto wsAppended = boost::make_shared<MatrixWorkspace>();
-    algAppend->setPropertyValue("InputWorkspace1", name);
-    algAppend->setPropertyValue("InputWorkspace2", wsOut->getName());
-    // alg->setPropertyValue("OutputWorkspace", wsAppended->getName());
-
-    algAppend->execute();
-    MatrixWorkspace_sptr wsAppended = algAppend->getProperty("OutputWorkspace");
-
-    if (AnalysisDataService::Instance().doesExist(name)) {
-      IAlgorithm_sptr deleteAlg =
-          AlgorithmManager::Instance().create("DeleteWorkspace");
-      deleteAlg->setLogging(false);
-      deleteAlg->setPropertyValue("Workspace", name);
-      deleteAlg->execute();
-    }
-    AnalysisDataService::Instance().add(name, wsAppended);
-  }
-
-  deleteWorkspaceIfExists(wsOut->getName());
-
-  auto wsGroup = boost::make_shared<WorkspaceGroup>();
-  AnalysisDataService::Instance().addOrReplace("MuonAnalysisGrouped", wsGroup);
-  MuonAlgorithmHelper::groupWorkspaces("MuonAnalysisGrouped", names);
-}
-
-void ApplyMuonDetectorGrouping::deleteWorkspaceIfExists(
-    const std::string &name) {
-  if (AnalysisDataService::Instance().doesExist(name)) {
-    IAlgorithm_sptr deleteAlg =
-        AlgorithmManager::Instance().create("DeleteWorkspace");
-    deleteAlg->setLogging(false);
-    deleteAlg->setPropertyValue("Workspace", name);
-    deleteAlg->execute();
-  }
-}
-
-std::vector<std::string>
-ApplyMuonDetectorGrouping::getMuonAnalysisGroupedWorkspaceNames() {
-
-  std::vector<std::string> names;
-  names.clear();
-
-  auto &ads = AnalysisDataService::Instance();
-
-  if (!ads.doesExist("MuonAnalysisGrouped")) {
-    g_log.notice("MuonAnalysisGrouped workspace not found in ADS.");
-    return names;
-  }
-
-  auto muonGroupedWS = ads.retrieve("MuonAnalysisGrouped");
-
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(muonGroupedWS)) {
-    names.emplace_back(ws->getName());
-    return names;
-  }
-  // if WorkspaceGroup
-  else {
-    auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(muonGroupedWS);
-    return wsGroup->getNames();
-  }
-}
 
 /*
  * Generate the name of the new workspace
