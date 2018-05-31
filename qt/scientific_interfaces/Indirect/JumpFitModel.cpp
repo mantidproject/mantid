@@ -89,7 +89,7 @@ MatrixWorkspace_sptr scaleWorkspace(MatrixWorkspace_sptr workspace,
 
 MatrixWorkspace_sptr extractSpectra(MatrixWorkspace_sptr workspace,
                                     int startIndex, int endIndex) {
-  auto extractAlg = AlgorithmManager::Instance().create("Scale");
+  auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
   extractAlg->initialize();
   extractAlg->setChild(true);
   extractAlg->setLogging(false);
@@ -112,7 +112,7 @@ MatrixWorkspace_sptr extractHWHMSpectrum(MatrixWorkspace_sptr workspace,
 
 MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr lhs,
                                      MatrixWorkspace_sptr rhs) {
-  auto appendAlg = AlgorithmManager::Instance().create("Scale");
+  auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->initialize();
   appendAlg->setChild(true);
   appendAlg->setLogging(false);
