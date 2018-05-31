@@ -320,15 +320,6 @@ void FitPeaks::init() {
       "the peak width either estimted by observation or calculate.");
 
   // additional output for reviewing
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputPeakParametersWorkspace", "", Direction::Output),
-                  "Name of workspace containing all fitted peak parameters.  "
-                  "X-values are spectra/workspace index.");
-  declareProperty("RawPeakParameters", true,
-                  "false generates table with effective centre/width/height "
-                  "parameters. true generates a table with peak function "
-                  "parameters");
-
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FittedPeaksWorkspace", "", Direction::Output,
@@ -337,6 +328,16 @@ void FitPeaks::init() {
       "This output workspace have the same dimesion as the input workspace."
       "The Y values belonged to peaks to fit are replaced by fitted value. "
       "Values of estimated background are used if peak fails to be fit.");
+
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+                      "OutputPeakParametersWorkspace", "", Direction::Output),
+                  "Name of workspace containing all fitted peak parameters.  "
+                  "X-values are spectra/workspace index.");
+
+  declareProperty("RawPeakParameters", true,
+                  "false generates table with effective centre/width/height "
+                  "parameters. true generates a table with peak function "
+                  "parameters");
 
   std::string addoutgrp("Analysis");
   setPropertyGroup("OutputPeakParametersWorkspace", addoutgrp);
@@ -424,8 +425,7 @@ void FitPeaks::exec() {
   generateCalculatedPeaksWS();
 
   // fit peaks
-  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results =
-      fitPeaks();
+  auto fit_results = fitPeaks();
 
   // set the output workspaces to properites
   processOutputs(fit_results);
@@ -1166,12 +1166,6 @@ void FitPeaks::calculateFittedPeaks(std::vector<
       if (chi2 > 10.e10)
         continue;
 
-      // DEBUG CHECK  TODO Remove after testing are passed
-      if (fit_result_i->getNumberParameters() !=
-          num_peakfunc_params + num_bkgdfunc_params)
-        throw std::runtime_error(
-            "Numbers of function parameters do not match!");
-
       for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
         peak_function->setParameter(
             iparam, fit_result_i->getParameterValue(ipeak, iparam));
@@ -1351,7 +1345,7 @@ int FitPeaks::estimatePeakParameters(
 //----------------------------------------------------------------------------------------------
 /** check whether a peak profile is allowed to observe peak width and set width
  * @brief isObservablePeakProfile
- * @param peakprofile
+ * @param peakprofile : name of peak profile to check against
  * @return
  */
 bool FitPeaks::isObservablePeakProfile(const std::string &peakprofile) {
@@ -1786,16 +1780,7 @@ void FitPeaks::generateOutputPeakPositionWS() {
 //----------------------------------------------------------------------------------------------
 void FitPeaks::generateFittedParametersValueWorkspace() {
   // peak parameter workspace
-  //  std::string param_table_name =
-  //      getPropertyValue("OutputPeakParametersWorkspace");
   m_rawPeaksTable = getProperty("RawPeakParameters");
-
-  //  // check whether it is not asked to create such table workspace
-  //  if (param_table_name.size() == 0) {
-  //    // Skip if it is not specified
-  //    m_fittedParamTable = nullptr;
-  //    return;
-  //  }
 
   // create
   m_fittedParamTable =
