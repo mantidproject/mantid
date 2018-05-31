@@ -6,10 +6,13 @@ import os
 import json
 
 from mantid.kernel import Logger
-
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from sans.gui_logic.gui_common import JSON_SUFFIX
-
+from ui.sans_isis.work_handler import WorkHandler
+from sans.gui_logic.models.create_state import create_state_for_row
+import time
+from sans.common.file_information import SANSFileInformationFactory
+from PyQt4.QtCore import pyqtSlot, QThreadPool, QThread
 
 class SettingsDiagnosticPresenter(object):
     class ConcreteSettingsDiagnosticTabListener(SettingsDiagnosticTab.SettingsDiagnosticTabListener):
@@ -32,12 +35,24 @@ class SettingsDiagnosticPresenter(object):
         def on_save_state_to_file(self):
             self._presenter.on_save_state()
 
+    class CreateStateListener(WorkHandler.WorkListener):
+        def __init__(self, presenter):
+            super(SettingsDiagnosticPresenter.CreateStateListener, self).__init__()
+            self._presenter = presenter
+
+        def on_processing_finished(self, result):
+            self._presenter.on_row_changed_finished(result)
+
+        def on_processing_error(self, error):
+            self._presenter.on_row_change_error(error)
+
     def __init__(self, parent_presenter):
         super(SettingsDiagnosticPresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         # Logger
         self.gui_logger = Logger("SANS GUI LOGGER")
+        self._work_handler = WorkHandler()
 
     def on_collapse(self):
         self._view.collapse()
@@ -46,10 +61,22 @@ class SettingsDiagnosticPresenter(object):
         self._view.expand()
 
     def on_row_changed(self):
+        self._view.set_processing(True)
         row_index = self._view.get_current_row()
-        state = self.get_state(row_index)
+        state_model, table_model, number_of_rows, instrument = self._parent_presenter.get_state_model_table_workspace_number_of_rows_instrument()
+        facility = self._parent_presenter._facility
+        listener = SettingsDiagnosticPresenter.CreateStateListener(self)
+        self._work_handler.process(listener, self.get_state, row_index, state_model, table_model, number_of_rows, instrument, facility)
+
+    def on_row_changed_finished(self, state):
         if state:
             self.display_state_diagnostic_tree(state)
+        self._view.set_processing(False)
+
+    def on_row_change_error(self, error):
+        self._view.set_processing(False)
+        self.gui_logger.error(error[1].message)
+        self._parent_presenter.display_warning_box('Warning', 'Unable to find files.', error[1].message)
 
     def on_update_rows(self):
         """
@@ -88,8 +115,8 @@ class SettingsDiagnosticPresenter(object):
         self._view.update_rows([])
         self.display_state_diagnostic_tree(state=None)
 
-    def get_state(self, index):
-        return self._parent_presenter.get_state_for_row(index)
+    def get_state(self, index, state_model, table_model, number_of_rows, instrument, facility):
+        return create_state_for_row(state_model, table_model, number_of_rows, instrument, facility, index, file_lookup=True)
 
     def display_state_diagnostic_tree(self, state):
         # Convert to dict before passing the state to the view

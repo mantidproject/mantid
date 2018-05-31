@@ -11,7 +11,8 @@ import copy
 from sans.state.data import get_data_builder
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.file_information import SANSFileInformationFactory
-
+from sans.common.enums import (SANSInstrument, DetectorType)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 class GuiStateDirector(object):
     def __init__(self, table_model, state_gui_model, facility):
@@ -20,12 +21,16 @@ class GuiStateDirector(object):
         self._state_gui_model = state_gui_model
         self._facility = facility
 
-    def create_state(self, row):
+    def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
         file_name = table_index_model.sample_scatter
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information(file_name)
+        if file_lookup:
+            file_information_factory = SANSFileInformationFactory()
+            file_information = file_information_factory.create_sans_file_information(file_name)
+        else:
+            file_information = SANSFileInformationMock(instrument=instrument, facility=self._facility)
+
         data_builder = get_data_builder(self._facility, file_information)
 
         self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
