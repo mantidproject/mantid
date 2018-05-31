@@ -10,7 +10,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
 #include <string>
 #include <vector>
 
@@ -77,9 +77,10 @@ void ApplyMuonDetectorGrouping::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("GroupName", emptyString, "The name of the group. Must "
-                                            "contain at least one alphanumeric "
-                                            "character.",
+  declareProperty("GroupName", emptyString,
+                  "The name of the group. Must "
+                  "contain at least one alphanumeric "
+                  "character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "
@@ -155,6 +156,49 @@ void ApplyMuonDetectorGrouping::init() {
   setPropertyGroup("DeadTimeTable", dtcGrp);
 }
 
+/**
+ * Performs validation of inputs to the algorithm.
+ * - Checks the bounds on X axis are sensible
+ * - Checks that the workspaceGroup is named differently to the workspace with
+ * the data.
+ * - Checks that a group name is entered.
+ * @returns Map of parameter names to errors
+ */
+std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  double tmin = this->getProperty("TimeMin");
+  double tmax = this->getProperty("TimeMax");
+  if (tmin > tmax) {
+    errors["TimeMin"] = "TimeMin > TimeMax";
+  }
+  if (tmin < 0) {
+    errors["TimeMin"] = "Time values are negative.";
+  }
+  if (tmax < 0) {
+    errors["TimeMax"] = "Time values are negative.";
+  }
+
+  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  if (groupedWS->getName() == inputWS->getName()) {
+    errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
+                                    "the same name as InputWorkspace.";
+  }
+
+  const std::string groupName = getPropertyValue("GroupName");
+  if (groupName.empty()) {
+    errors["GroupName"] = "The group must be named.";
+  }
+
+  if (!std::any_of(std::begin(groupName), std::end(groupName), isalnum)) {
+    errors["GroupName"] =
+        "The group name must contain at least one alphnumeric character.";
+  }
+
+  return errors;
+}
+
 void ApplyMuonDetectorGrouping::exec() {
 
   WorkspaceGroup_sptr groupWS = getProperty("InputWorkspaceGroup");
@@ -179,8 +223,6 @@ void ApplyMuonDetectorGrouping::exec() {
   std::vector<std::string> wsNames = {wsName, wsRawName};
   MuonAlgorithmHelper::groupWorkspaces(groupedWSName, wsNames);
 }
-
-
 
 /*
  * Generate the name of the new workspace
@@ -364,49 +406,6 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
   setMuonProcessAlgorithmGroupingProperties(alg, options);
   setMuonProcessAlgorithmOutputTypeProperty(alg, options);
   setMuonProcessAlgorithmTimeProperties(alg, options);
-}
-
-/**
- * Performs validation of inputs to the algorithm.
- * - Checks the bounds on X axis are sensible
- * - Checks that the workspaceGroup is named differently to the workspace with
- * the data.
- * - Checks that a group name is entered.
- * @returns Map of parameter names to errors
- */
-std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
-  std::map<std::string, std::string> errors;
-
-  double tmin = this->getProperty("TimeMin");
-  double tmax = this->getProperty("TimeMax");
-  if (tmin > tmax) {
-    errors["TimeMin"] = "TimeMin > TimeMax";
-  }
-  if (tmin < 0) {
-    errors["TimeMin"] = "Time values are negative.";
-  }
-  if (tmax < 0) {
-    errors["TimeMax"] = "Time values are negative.";
-  }
-
-  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
-  if (groupedWS->getName() == inputWS->getName()) {
-    errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
-                                    "the same name as InputWorkspace.";
-  }
-
-  const std::string groupName = getPropertyValue("GroupName");
-  if (groupName.empty()) {
-    errors["GroupName"] = "The group must be named.";
-  }
-
-  if (!std::any_of(std::begin(groupName), std::end(groupName), isalnum)) {
-    errors["GroupName"] =
-        "The group name must contain at least one alphnumeric character.";
-  }
-
-  return errors;
 }
 
 // Allow WorkspaceGroup property to function correctly.
