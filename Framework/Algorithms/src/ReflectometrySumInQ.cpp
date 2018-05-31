@@ -262,12 +262,13 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
           "A neighbour to any detector in the index set cannot be a monitor";
       break;
     }
-	if (i == static_cast<size_t>(beamCentre)) {
+    if (i == static_cast<size_t>(beamCentre)) {
       beamCentreFound = true;
-	}
+    }
   }
   if (!beamCentreFound) {
-    issues[Prop::BEAM_CENTRE] = "Beam centre is not included in InputWorkspaceIndexSet.";
+    issues[Prop::BEAM_CENTRE] =
+        "Beam centre is not included in InputWorkspaceIndexSet.";
   }
   return issues;
 }
