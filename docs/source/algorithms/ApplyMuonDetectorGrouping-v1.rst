@@ -83,10 +83,10 @@ Usage
 
 
     output_rebin = mtd['MUSR00015193; Group; Test; Counts; #1']
-    print("Total counts (rebinned) : {}".format( sum(output_rebin.readY(0))) )
+    print("Total counts (rebinned) : {0:.0f}".format( sum(output_rebin.readY(0))) )
 
     output_noRebin = mtd['MUSR00015193; Group; Test; Counts; #1_Raw']
-    print("Total counts (no rebin) : {}\n".format(sum(output_noRebin.readY(0))) )
+    print("Total counts (no rebin) : {0:.0f}\n".format(sum(output_noRebin.readY(0))) )
 
 
     print("Time range (original) : {0:.3f} - {1:.3f} mus".format(mtd['MuonAnalysis_1'].readX(0)[0],mtd['MuonAnalysis_1'].readX(0)[-1]))
@@ -101,8 +101,8 @@ Output:
 
 .. testoutput:: ExCountsOffsetAndRebin
 
-   Total counts (rebinned) : 84438.0
-   Total counts (no rebin) : 84438.0
+   Total counts (rebinned) : 84438
+   Total counts (no rebin) : 84438
 
    Time range (original) : -0.550 - 31.450 mus
    Time range (no rebin) : -0.550 - 31.450 mus
