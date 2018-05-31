@@ -33,34 +33,7 @@ It is also possible to calculate the asymmetry from an estimated asymmetry.
 Usage
 -----
 
-**Example - Calculating Asymmetry From Counts:**
-This example is for calculating the Asymmetry from counts.
 
-.. testcode:: ExCounts
-
-   import math
-   import numpy as np
-   xData=np.linspace(start=0,stop=10,num=22)   
-   yData=[]
-   tau =  2.1969811
-   for x in xData:
-        yData.append(50.*(1+10.*math.cos(3.*x))*math.exp(-x/tau))
-   input = CreateWorkspace(xData,yData)
-   run = input.getRun()
-   run.addProperty("goodfrm","10","None",True)
-   output,norm=CalculateMuonAsymmetry   (InputWorkspace=input,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="counts",Minimizer="Levenberg-MarquardtMD",MaxIterations=500 )
-   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
-   print("Normalization constant: {0:.2f}".format(norm[0]))
-
-Output:
-
-.. testoutput:: ExCounts
-
-   Asymmetry:  ['5.49', '0.43', '-6.07', '-2.85', '4.56', '3.44', '-4.29', '-5.36', '2.07', '5.24', '-1.25', '-6.31', '-1.21', '5.26', '2.00', '-5.40', '-4.23', '3.50', '4.52', '-2.92', '-6.05', '0.50']
-   Normalization constant: 8.47
-
-**Example - Calculating Asymmetry From Estimated Asymmetry:**
-This example is for calculating the Asymmetry from an estimate of the asymmetry.
 
 .. categories::
 
