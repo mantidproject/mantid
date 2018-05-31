@@ -193,6 +193,7 @@ private slots:
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
   void browseDirFocusing();
+  void forceRecalculateStateChanged();
 
   // slots for the focusing options
   void browseTextureDetGroupingFile();
