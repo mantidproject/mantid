@@ -12,7 +12,7 @@ Does this update require release notes?
 - [ ] Yes
 - [ ] No
 <!--
-If yes, edit the file docs/source/release/... or state release notes.
+If yes, edit the file docs/source/release/... 
 -->
 
 ---
