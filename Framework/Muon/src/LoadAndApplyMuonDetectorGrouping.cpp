@@ -21,7 +21,23 @@
 #include <string>
 #include <vector>
 
-namespace {} // namespace
+namespace {
+
+/// Convert the enum PlotType to a string to pass to ApplyMuonDetectorGroup
+std::string plotTypeToString(const Mantid::Muon::PlotType &plotType) {
+  switch (plotType) {
+  case Mantid::Muon::PlotType::Asymmetry:
+    return "Asymmetry";
+  case Mantid::Muon::PlotType::Counts:
+    return "Counts";
+  case Mantid::Muon::PlotType::Logarithm:
+    return "Counts";
+  }
+  // Default to counts
+  return "Counts";
+}
+
+} // namespace
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -52,6 +68,9 @@ void LoadAndApplyMuonDetectorGrouping::init() {
           "WorkspaceGroup", "", Direction::Input, PropertyMode::Optional),
       "The workspaces created by the algorithm will be placed inside this "
       "group. If not specified will save to \"MuonAnalysisGroup\" ");
+
+  declareProperty("ApplyAsymmetryToGroups", true,
+                  "Whether to calculate asymmetry and store the workspaces.");
 }
 
 /**
@@ -67,16 +86,33 @@ LoadAndApplyMuonDetectorGrouping::validateInputs() {
 
 void LoadAndApplyMuonDetectorGrouping::exec() {
 
-  Grouping grouping = loadGroupsAndPairs();
+  AnalysisOptions options = setDefaultOptions();
+  options.grouping = loadGroupsAndPairs();
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
   WorkspaceGroup_sptr groupedWS = getProperty("WorkspaceGroup");
 
-  addGroupingToGroupWorkspace(grouping, inputWS, groupedWS);
-  addPairingToGroupWorkspace(grouping, inputWS, groupedWS);
+  addGroupingToADS(options, inputWS, groupedWS);
+  addPairingToADS(options, inputWS, groupedWS);
 
-  addGroupingInformationToADS(grouping);
+  if (getProperty("ApplyAsymmetryToGroups")) {
+    options.plotType = PlotType::Asymmetry;
+    addGroupingToADS(options, inputWS, groupedWS);
+  }
+
+  addGroupingInformationToADS(options.grouping);
 }
+
+AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
+  AnalysisOptions options;
+  options.summedPeriods = "1";
+  options.subtractedPeriods = "";
+  options.timeZero = 0;
+  options.loadedTimeZero = 0;
+  options.rebinArgs = "";
+  options.plotType = Muon::PlotType::Counts;
+  return options;
+};
 
 /**
  * Adds the group names and corresponding detector IDs to
@@ -116,26 +152,28 @@ API::Grouping LoadAndApplyMuonDetectorGrouping::loadGroupsAndPairs() {
  * Add all the supplied groups to the ADS, inside wsGrouped, by
  * executing the ApplyMuonDetectorGrouping algorithm
  */
-void LoadAndApplyMuonDetectorGrouping::addGroupingToGroupWorkspace(
-    const Mantid::API::Grouping &grouping, Mantid::API::Workspace_sptr ws,
+void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
+    const Mantid::Muon::AnalysisOptions &options,
+    Mantid::API::Workspace_sptr ws,
     Mantid::API::WorkspaceGroup_sptr wsGrouped) {
 
-  size_t numGroups = grouping.groups.size();
+  size_t numGroups = options.grouping.groups.size();
   for (auto i = 0; i < numGroups; i++) {
     IAlgorithm_sptr alg =
         this->createChildAlgorithm("ApplyMuonDetectorGrouping");
     alg->setProperty("InputWorkspace", ws->getName());
     alg->setProperty("InputWorkspaceGroup", wsGrouped->getName());
-    alg->setProperty("GroupName", grouping.groupNames[i]);
-    alg->setProperty("Grouping", grouping.groups[i]);
+    alg->setProperty("GroupName", options.grouping.groupNames[i]);
+    alg->setProperty("Grouping", options.grouping.groups[i]);
+    alg->setProperty("AnalysisType", plotTypeToString(options.plotType));
     alg->execute();
   }
 };
 
-/// The pairing algorithm is not yet implemented
-void LoadAndApplyMuonDetectorGrouping::addPairingToGroupWorkspace(
-    const Mantid::API::Grouping &grouping, Mantid::API::Workspace_sptr ws,
-    Mantid::API::WorkspaceGroup_sptr wsGrouped){
+// The pairing algorithm is not yet implemented
+void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
+    const Mantid::Muon::AnalysisOptions &options,
+    Mantid::API::Workspace_sptr ws, Mantid::API::WorkspaceGroup_sptr wsGrouped){
 
 };
 

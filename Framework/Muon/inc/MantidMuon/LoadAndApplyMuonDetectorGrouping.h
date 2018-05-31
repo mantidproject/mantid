@@ -75,15 +75,21 @@ private:
 
   API::Grouping loadGroupsAndPairs();
 
-  void addGroupingToGroupWorkspace(const Mantid::API::Grouping &grouping,
-                                   Mantid::API::Workspace_sptr ws,
-                                   Mantid::API::WorkspaceGroup_sptr wsGrouped);
+  // Add all the supplied groups to the ADS, inside wsGrouped, by
+  // executing the ApplyMuonDetectorGrouping algorithm
+  void addGroupingToADS(const Mantid::Muon::AnalysisOptions &options,
+                        Mantid::API::Workspace_sptr ws,
+                        Mantid::API::WorkspaceGroup_sptr wsGrouped);
 
-  void addPairingToGroupWorkspace(const Mantid::API::Grouping &grouping,
-                                  Mantid::API::Workspace_sptr ws,
-                                  Mantid::API::WorkspaceGroup_sptr wsGrouped);
+  // The pairing algorithm is not yet implemented
+  void addPairingToADS(const Mantid::Muon::AnalysisOptions &options,
+                       Mantid::API::Workspace_sptr ws,
+                       Mantid::API::WorkspaceGroup_sptr wsGrouped);
 
   void addGroupingInformationToADS(const Mantid::API::Grouping &grouping);
+
+  /// Sets some default options for grouping algorithm.
+  Mantid::Muon::AnalysisOptions setDefaultOptions();
 };
 
 } // namespace Muon
