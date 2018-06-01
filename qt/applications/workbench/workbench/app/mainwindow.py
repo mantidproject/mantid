@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
         default_layout = {
             'widgets': [
                 # column 0
-                [[workspacewidget, plot_selector], [algorithm_selector]],
+                [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
                 [[editor, ipython]],
                 # column 2
