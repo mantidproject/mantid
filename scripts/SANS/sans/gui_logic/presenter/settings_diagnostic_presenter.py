@@ -8,7 +8,6 @@ import json
 from mantid.kernel import Logger
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from sans.gui_logic.gui_common import JSON_SUFFIX
-from ui.sans_isis.work_handler import WorkHandler
 
 
 class SettingsDiagnosticPresenter(object):
