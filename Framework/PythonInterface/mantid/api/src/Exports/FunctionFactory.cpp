@@ -24,6 +24,43 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
 
+namespace Mantid {
+namespace PythonInterface {
+
+/// Specialization for IFunction. Fit functions defined in
+/// python need to be wrapped in FunctionWrapper without
+/// asking the user to do additional actions.
+/// The instantiator lets the fit function class object know
+/// that an instance will be created by the FunctionFactory
+/// and it needs to be a subclass of IFunction and not a
+/// FunctionWrapper.
+template <>
+boost::shared_ptr<IFunction>
+PythonObjectInstantiator<IFunction>::createInstance() const {
+  using namespace boost::python;
+  Environment::GlobalInterpreterLock gil;
+
+  // The class may instantiate different objects depending on whether
+  // it is being created by the function factory or not
+  bool const isClassFactoryAware =
+      PyObject_HasAttrString(m_classObject.ptr(), "_factory_use");
+
+  if (isClassFactoryAware) {
+    m_classObject.attr("_factory_use")();
+  }
+  object instance = m_classObject();
+  if (isClassFactoryAware) {
+    m_classObject.attr("_factory_free")();
+  }
+  auto instancePtr = extract<boost::shared_ptr<IFunction>>(instance)();
+  auto *deleter =
+      boost::get_deleter<converter::shared_ptr_deleter, IFunction>(instancePtr);
+  instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
+  return instancePtr;
+}
+}
+}
+
 namespace {
 ///@cond
 

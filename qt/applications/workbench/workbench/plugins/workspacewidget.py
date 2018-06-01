@@ -22,7 +22,6 @@ import functools
 # third-party library imports
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger
-from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
 from mantidqt.widgets.workspacewidget.plotselectiondialog import get_plot_selection
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QVBoxLayout
@@ -72,18 +71,17 @@ class WorkspaceWidget(PluginWidget):
         super(WorkspaceWidget, self).__init__(parent)
 
         # layout
-        workspacewidget = WorkspaceTreeWidget(MantidTreeModel())
-        self.workspacewidget = workspacewidget
+        self.workspacewidget = WorkspaceTreeWidget()
         layout = QVBoxLayout()
         layout.addWidget(self.workspacewidget)
         self.setLayout(layout)
 
         # behaviour
-        workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                      errors=False))
-        workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                errors=True))
-        workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
+        self.workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                           errors=False))
+        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                                     errors=True))
+        self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
 
     # ----------------- Plugin API --------------------
 

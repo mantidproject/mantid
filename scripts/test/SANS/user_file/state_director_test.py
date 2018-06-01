@@ -73,8 +73,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def _assert_wavelength(self, state):
         wavelength = state.wavelength
-        self.assertTrue(wavelength.wavelength_low == 1.5)
-        self.assertTrue(wavelength.wavelength_high == 12.5)
+        self.assertTrue(wavelength.wavelength_low == [1.5])
+        self.assertTrue(wavelength.wavelength_high == [12.5])
         self.assertTrue(wavelength.wavelength_step == 0.125)
         self.assertTrue(wavelength.wavelength_step_type is RangeStepType.Lin)
 
@@ -102,8 +102,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(normalize_to_monitor.prompt_peak_correction_min == 1000)
         self.assertTrue(normalize_to_monitor.prompt_peak_correction_max == 2000)
         self.assertTrue(normalize_to_monitor.rebin_type is RebinType.InterpolatingRebin)
-        self.assertTrue(normalize_to_monitor.wavelength_low == 1.5)
-        self.assertTrue(normalize_to_monitor.wavelength_high == 12.5)
+        self.assertTrue(normalize_to_monitor.wavelength_low == [1.5])
+        self.assertTrue(normalize_to_monitor.wavelength_high == [12.5])
         self.assertTrue(normalize_to_monitor.wavelength_step == 0.125)
         self.assertTrue(normalize_to_monitor.wavelength_step_type is RangeStepType.Lin)
         self.assertTrue(normalize_to_monitor.background_TOF_general_start == 3500)
@@ -126,8 +126,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(calculate_transmission.transmission_mask_files == ["test3.xml", "test4.xml"])
         self.assertTrue(calculate_transmission.transmission_monitor == 4)
         self.assertTrue(calculate_transmission.rebin_type is RebinType.InterpolatingRebin)
-        self.assertTrue(calculate_transmission.wavelength_low == 1.5)
-        self.assertTrue(calculate_transmission.wavelength_high == 12.5)
+        self.assertTrue(calculate_transmission.wavelength_low == [1.5])
+        self.assertTrue(calculate_transmission.wavelength_high == [12.5])
         self.assertTrue(calculate_transmission.wavelength_step == 0.125)
         self.assertTrue(calculate_transmission.wavelength_step_type is RangeStepType.Lin)
         self.assertFalse(calculate_transmission.use_full_wavelength_range)
@@ -155,8 +155,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment
-        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_low == 1.5)
-        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_high == 12.5)
+        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_low == [1.5])
+        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_high == [12.5])
         self.assertTrue(wavelength_and_pixel_adjustment.wavelength_step == 0.125)
         self.assertTrue(wavelength_and_pixel_adjustment.wavelength_step_type is RangeStepType.Lin)
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[

@@ -33,6 +33,7 @@ from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.sans_batch import SANSCentreFinder
+from sans.common.file_information import SANSFileInformationFactory
 
 try:
     import mantidplot
@@ -130,7 +131,9 @@ class RunTabPresenter(object):
 
         # Set the step type options for wavelength
         range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
-                            RangeStepType.to_string(RangeStepType.Log)]
+                            RangeStepType.to_string(RangeStepType.Log),
+                            RangeStepType.to_string(RangeStepType.RangeLog),
+                            RangeStepType.to_string(RangeStepType.RangeLin)]
         self._view.wavelength_step_type = range_step_types
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
@@ -274,7 +277,6 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
-
         try:
             self._view.disable_buttons()
             self.sans_logger.information("Starting processing of batch table.")
@@ -460,7 +462,6 @@ class RunTabPresenter(object):
 
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
-
         # 2. Update the table model
         table_model = self._get_table_model()
 
@@ -724,6 +725,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("wavelength_min", state_model)
         self._set_on_state_model("wavelength_max", state_model)
         self._set_on_state_model("wavelength_step", state_model)
+        self._set_on_state_model("wavelength_range", state_model)
 
         self._set_on_state_model("absolute_scale", state_model)
         self._set_on_state_model("sample_shape", state_model)
@@ -888,6 +890,7 @@ class RunTabPresenter(object):
             can_direct_period = self.get_cell_value(row, 'CAN_DIRECT_PERIOD_INDEX') if is_multi_period_view else ""
 
             output_name = self.get_cell_value(row, 'OUTPUT_NAME_INDEX')
+            sample_thickness = self.get_cell_value(row, 'SAMPLE_THICKNESS_INDEX')
             user_file = self.get_cell_value(row, 'USER_FILE_INDEX')
 
             # Get the options string
@@ -910,6 +913,7 @@ class RunTabPresenter(object):
                                                 can_direct_period=can_direct_period,
                                                 output_name=output_name,
                                                 user_file = user_file,
+                                                sample_thickness=sample_thickness,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
@@ -976,7 +980,6 @@ class RunTabPresenter(object):
 
         def get_string_period(_tag):
             return "" if _tag == ALL_PERIODS else str(_tag)
-
         # 1. Pull out the entries
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
         sample_scatter_period = get_string_entry(BatchReductionEntry.SampleScatterPeriod, row)
@@ -991,6 +994,9 @@ class RunTabPresenter(object):
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
         can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
         output_name = get_string_entry(BatchReductionEntry.Output, row)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(sample_scatter)
+        sample_thickness = file_information._thickness
 
         # If one of the periods is not null, then we should switch the view to multi-period view
         if any ((sample_scatter_period, sample_transmission_period, sample_direct_period, can_scatter_period,
@@ -1002,29 +1008,29 @@ class RunTabPresenter(object):
         if self._view.is_multi_period_view():
             row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
                         "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
-                        "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
-                                                                   get_string_period(sample_scatter_period),
-                                                                   sample_transmission,
-                                                                   get_string_period(sample_transmission_period),
-                                                                   sample_direct,
-                                                                   get_string_period(sample_direct_period),
-                                                                   can_scatter,
-                                                                   get_string_period(can_scatter_period),
-                                                                   can_transmission,
-                                                                   get_string_period(can_transmission_period),
-                                                                   can_direct,
-                                                                   get_string_period(can_direct_period),
-                                                                   output_name)
+                        "CanDirect:{},cdp:{},OutputName:{},Sample Thickness:{}".format(sample_scatter,
+                                                                                       get_string_period(sample_scatter_period),
+                                                                                       sample_transmission,
+                                                                                       get_string_period(sample_transmission_period),
+                                                                                       sample_direct,
+                                                                                       get_string_period(sample_direct_period),
+                                                                                       can_scatter,
+                                                                                       get_string_period(can_scatter_period),
+                                                                                       can_transmission,
+                                                                                       get_string_period(can_transmission_period),
+                                                                                       can_direct,
+                                                                                       get_string_period(can_direct_period),
+                                                                                       output_name, sample_thickness)
         else:
             row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
                         "CanScatter:{},CanTrans:{}," \
-                        "CanDirect:{},OutputName:{}".format(sample_scatter,
-                                                            sample_transmission,
-                                                            sample_direct,
-                                                            can_scatter,
-                                                            can_transmission,
-                                                            can_direct,
-                                                            output_name)
+                        "CanDirect:{},OutputName:{},Sample Thickness:{}".format(sample_scatter,
+                                                                                sample_transmission,
+                                                                                sample_direct,
+                                                                                can_scatter,
+                                                                                can_transmission,
+                                                                                can_direct,
+                                                                                output_name, sample_thickness)
 
         self._view.add_row(row_entry)
 

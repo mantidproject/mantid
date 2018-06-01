@@ -44,7 +44,7 @@ public:
   void enggFitPeaks(const RunLabel &runLabel,
                     const std::string &expectedPeaks) override;
 
-  void saveDiffFittingAscii(const RunLabel &runLabel,
+  void saveFitResultsToHDF5(const std::vector<RunLabel> &runLabels,
                             const std::string &filename) const override;
 
   void createFittedPeaksWS(const RunLabel &runLabel) override;
@@ -105,6 +105,9 @@ private:
                                const std::string &outputWSName);
 
   void cloneWorkspace(const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
+                      const std::string &outputWSName) const;
+
+  void cloneWorkspace(const Mantid::API::ITableWorkspace_sptr inputWorkspace,
                       const std::string &outputWSName) const;
 
   void setDataToClonedWS(const std::string &wsToCopyName,
