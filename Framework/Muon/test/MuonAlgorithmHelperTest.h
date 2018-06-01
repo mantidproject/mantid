@@ -50,7 +50,7 @@ struct eData {
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed) {
+                                           double seed, size_t detectorIDseed = 1) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
@@ -62,7 +62,7 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
 
   for (int g = 0; g < static_cast<int>(nspec); g++) {
     auto &spec = ws->getSpectrum(g);
-    spec.addDetectorID(g + 1);
+    spec.addDetectorID(g + detectorIDseed);
     spec.setSpectrumNo(g + 1);
     ws->mutableY(g) += seed;
   }
@@ -120,6 +120,32 @@ Workspace_sptr createWs(const std::string &instrName, int runNumber,
   ws->setInstrument(instr);
   ws->mutableRun().addProperty("run_number", runNumber);
   return ws;
+}
+
+/**
+* 
+*/
+WorkspaceGroup_sptr
+createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec, size_t maxt,
+	const std::string &wsGroupName) {
+
+	WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+	AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
+
+	std::string wsNameStem = "MuonDataPeriod_";
+	std::string wsName;
+
+	for (int period = 1; period < nWorkspaces + 1; period++) {
+		// Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
+		// Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
+		size_t detIDstart = (period-1) * nspec + 1;
+		MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period, detIDstart);
+		wsGroup->addWorkspace(ws);
+		wsName = wsNameStem + std::to_string(period);
+		AnalysisDataService::Instance().addOrReplace(wsName, ws);
+	}
+
+	return wsGroup;
 }
 
 } // namespace
@@ -383,6 +409,89 @@ public:
     TS_ASSERT_EQUALS(checkGroup->getNames().size(), 5);
     TS_ASSERT_EQUALS(checkGroup->getNames()[0], names[0]);
     TS_ASSERT_EQUALS(checkGroup->getNames()[4], names[4]);
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_checkItemsInSet() {
+    std::set<int> set = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::set<int> emptySet = {};
+    std::vector<int> itemsIn = {1, 2, 3, 8, 9, 10};
+    std::vector<int> itemsNotIn = {11, 100, 0, -1};
+    std::vector<int> noItems = {};
+    TS_ASSERT(checkItemsInSet(itemsIn, set));
+    TS_ASSERT(!checkItemsInSet(itemsNotIn, set));
+    TS_ASSERT(checkItemsInSet(noItems, set));
+    TS_ASSERT(checkItemsInSet(noItems, set));
+    TS_ASSERT(!checkItemsInSet(itemsNotIn, emptySet));
+    TS_ASSERT(checkItemsInSet(noItems, emptySet));
+  }
+
+  void test_getAllDetectorIDsFromMatrixWorkspace() {
+    auto ws = createCountsWorkspace(5, 3, 0);
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromMatrixWorkspace(ws);
+    for (auto i = 1; i < 6; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+  }
+
+  void test_getAllDetectorIDsWorkspace_Matrix() {
+    Workspace_sptr ws = createCountsWorkspace(5, 3, 0);
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromWorkspace(ws);
+    for (auto i = 1; i < 6; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+  }
+
+  void test_getAllDetectorIDsFromGroupWorkspace() {
+    auto ws = createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromGroupWorkspace(ws);
+    for (auto i = 1; i < 10; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_getAllDetectorIDsWorkspace_Group() {
+    Workspace_sptr ws =
+        createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromWorkspace(ws);
+    for (auto i = 1; i < 10; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_getAllDetectorIDsFromGroup() {
+    // Duplicates are allowed, and no ordering is implied.
+    API::Grouping grouping;
+    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9"};
+    grouping.groups = groups;
+    std::vector<int> ids = getAllDetectorIDsFromGroup(grouping);
+    for (auto i = 1; i < 10; i++) {
+      TS_ASSERT_DIFFERS(std::find(ids.begin(), ids.end(), i), ids.end());
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_checkGroupDetectorsInWorkspaceTrue() {
+    API::Grouping grouping;
+    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9"};
+    grouping.groups = groups;
+    Workspace_sptr ws =
+        createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+    TS_ASSERT(checkGroupDetectorsInWorkspace(grouping, ws));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_checkGroupDetectorsInWorkspaceFalse() {
+    API::Grouping grouping;
+    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9", "10"};
+    grouping.groups = groups;
+    Workspace_sptr ws =
+        createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+    TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
+
     AnalysisDataService::Instance().clear();
   }
 };
