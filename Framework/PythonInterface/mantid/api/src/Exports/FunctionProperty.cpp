@@ -4,6 +4,7 @@
 
 using Mantid::API::FunctionProperty;
 using Mantid::API::IFunction;
+using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::PythonInterface::PropertyWithValueExporter;
 using namespace boost::python;
@@ -16,6 +17,7 @@ void export_FunctionProperty() {
 
   class_<FunctionProperty, bases<PropertyWithValue<HeldType>>,
          boost::noncopyable>("FunctionProperty", no_init)
-      .def(init<const std::string &>(
-          arg("name"), "Constructs a FunctionProperty with the given name"));
+      .def(init<const std::string &, const unsigned int>(
+          (arg("self"), arg("name"), arg("direction") = Direction::Input),
+          "Constructs a FunctionProperty with the given name"));
 }

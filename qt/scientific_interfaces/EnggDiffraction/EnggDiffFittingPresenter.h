@@ -72,7 +72,8 @@ public:
   //@}
 
   /// the fitting hard work that a worker / thread will run
-  void doFitting(const RunLabel &runLabel, const std::string &expectedPeaks);
+  void doFitting(const std::vector<RunLabel> &runLabels,
+                 const std::string &expectedPeaks);
 
   void plotFocusedFile(bool plotSinglePeaks,
                        Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
@@ -147,9 +148,6 @@ private:
 
   /// Handle the user selecting a different run to plot
   void processSelectRun();
-
-  /// Whether the user is doing fitting on multiple runs
-  bool m_multiRunMode;
 };
 
 } // namespace CustomInterfaces
