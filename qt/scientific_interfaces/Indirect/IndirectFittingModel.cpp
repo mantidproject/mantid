@@ -684,6 +684,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("Function", function);
+  fitAlgorithm->setProperty("PassWSIndexToFunction", true);
 
   const auto range = initialFitData->getRange(0);
   fitAlgorithm->setProperty("StartX", range.first);
