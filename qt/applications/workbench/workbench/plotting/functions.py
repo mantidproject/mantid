@@ -19,11 +19,13 @@ our custom window.
 """
 
 # std imports
+import collections
 import math
 
 # 3rd party imports
 from mantid.api import MatrixWorkspace
 import matplotlib.pyplot as plt
+from mantidqt.py3compat import is_text_string
 
 # local imports
 
@@ -79,6 +81,28 @@ def current_figure_or_none():
         return None
 
 
+def figure_title(workspaces, fig_num):
+    """Create a default figure title from a single workspace, list of workspaces or
+    workspace names and a figure number. The name of the first workspace in the list
+    is concatenated with the figure number.
+
+    :param workspaces: A single workspace, list of workspaces or workspace name/list of workspace names
+    :param fig_num: An integer denoting the figure number
+    :return: A title for the figure
+    """
+    def wsname(w):
+        return w.name() if hasattr(w, 'name') else w
+
+    if is_text_string(workspaces) or not isinstance(workspaces, collections.Sequence):
+        # assume a single workspace
+        first = workspaces
+    else:
+        assert len(workspaces) > 0
+        first = workspaces[0]
+
+    return wsname(first) + '-' + str(fig_num)
+
+
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False):
     """
@@ -117,7 +141,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     ax.legend()
     title = workspaces[0].name()
     ax.set_title(title)
-    fig.canvas.set_window_title(title)
+    fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     fig.canvas.draw()
     fig.show()
     return fig
@@ -171,6 +195,7 @@ def pcolormesh(workspaces):
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
     fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
+    fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     fig.canvas.draw()
     fig.show()
     return fig
