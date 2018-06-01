@@ -1,6 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 #define MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 
+#include "DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "ReflTransferStrategy.h"
 #include <QAbstractTableModel>
@@ -36,7 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflSearchModel : public QAbstractTableModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSearchModel
+    : public QAbstractTableModel {
   Q_OBJECT
 public:
   ReflSearchModel(const ReflTransferStrategy &transferMethod,

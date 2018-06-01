@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "../ISISReflectometry/ReflAutoreduction.h"
 #include "../ISISReflectometry/ReflRunsTabPresenter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
@@ -144,6 +145,126 @@ public:
     verifyAndClearExpectations();
   }
 
+  void test_startNewAutoreduction() {
+    auto presenter = createMocksAndPresenter(2);
+    constexpr int GROUP_NUMBER = 1;
+    expectSelectedGroup(GROUP_NUMBER);
+    EXPECT_CALL(*m_mockRunsTabView, getSearchString()).Times(Exactly(2));
+    expectStartAutoreduction();
+
+    presenter.notify(IReflRunsTabPresenter::StartAutoreductionFlag);
+    verifyAndClearExpectations();
+    TS_ASSERT_EQUALS(presenter.m_autoreduction.running(), true);
+    TS_ASSERT_EQUALS(presenter.m_autoreduction.group(), GROUP_NUMBER);
+  }
+
+  void
+  test_starting_autoreduction_does_not_clear_tables_if_settings_not_changed() {
+    auto presenter = createMocksAndPresenter(1);
+    EXPECT_CALL(*mockTablePresenter(0), setPromptUser(false)).Times(Exactly(0));
+    EXPECT_CALL(*mockTablePresenter(0),
+                notify(DataProcessorPresenter::DeleteAllFlag))
+        .Times(Exactly(0));
+
+    presenter.notify(IReflRunsTabPresenter::StartAutoreductionFlag);
+    verifyAndClearExpectations();
+  }
+
+  void
+  test_start_new_autoreduction_clears_selected_table_if_settings_changed() {
+    auto presenter = createMocksAndPresenter(2);
+
+    // Change the instrument to force a new autoreduction to start
+    EXPECT_CALL(*m_mockMainPresenter, setInstrumentName(_));
+    presenter.notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+    // Check that all existing rows are deleted from the selected group only
+    constexpr int GROUP_NUMBER = 1;
+    expectSelectedGroup(GROUP_NUMBER);
+
+    EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER), setPromptUser(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER),
+                notify(DataProcessorPresenter::DeleteAllFlag))
+        .Times(Exactly(1));
+    // Check the other table is not cleared
+    EXPECT_CALL(*mockTablePresenter(0),
+                notify(DataProcessorPresenter::DeleteAllFlag))
+        .Times(Exactly(0));
+    // Check that the icat search is initiated
+    EXPECT_CALL(*m_mockRunsTabView, startIcatSearch());
+
+    presenter.notify(IReflRunsTabPresenter::StartAutoreductionFlag);
+    verifyAndClearExpectations();
+  }
+
+  void test_pauseAutoreduction_when_autoreduction_not_running() {
+    auto presenter = createMocksAndPresenter(2);
+    // If autoreduction is not running, the selected group is paused
+    constexpr int GROUP_NUMBER = 1;
+    expectSelectedGroup(GROUP_NUMBER);
+    EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER),
+                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(1));
+    // Check the other table is not affected
+    EXPECT_CALL(*mockTablePresenter(0),
+                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(0));
+
+    presenter.notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
+    verifyAndClearExpectations();
+    // Autoreduction was not running so still shouldn't be
+    TS_ASSERT_EQUALS(presenter.m_autoreduction.running(), false);
+  }
+
+  void test_pauseAutoreduction_when_autoreduction_is_running() {
+    auto presenter = createMocksAndPresenter(2);
+    // Start autoreduction on the selected group
+    constexpr int GROUP_NUMBER = 1;
+    expectSelectedGroup(GROUP_NUMBER);
+    presenter.startNewAutoreduction();
+    verifyAndClearExpectations();
+
+    // We shouldn't re-check the active group
+    EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup()).Times(Exactly(0));
+    // Notify the cached autoreduction group
+    EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER),
+                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(1));
+    // Check the other table is not affected
+    EXPECT_CALL(*mockTablePresenter(0),
+                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(0));
+
+    presenter.notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
+    verifyAndClearExpectations();
+    // Autoreduction continues until we get confirmation paused
+    TS_ASSERT_EQUALS(presenter.m_autoreduction.running(), true);
+  }
+
+  void test_timer_event_starts_autoreduction() {
+    auto presenter = createMocksAndPresenter(1);
+    expectStartAutoreduction();
+    presenter.notify(IReflRunsTabPresenter::TimerEventFlag);
+    verifyAndClearExpectations();
+  }
+
+  void test_transfer_selected_rows() {
+    auto presenter = createMocksAndPresenter(2);
+
+    // Transfer should be done to the currently selected table
+    constexpr int GROUP_NUMBER = 1;
+    expectSelectedGroup(GROUP_NUMBER);
+    // Select a couple of rows with random indices
+    auto rows = std::set<int>{3, 5};
+    EXPECT_CALL(*m_mockRunsTabView, getSelectedSearchRows())
+        .Times(Exactly(1))
+        .WillOnce(Return(rows));
+    expectTransferDataForTwoRows(presenter);
+    // Check that only the selected table is affecffed
+    EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER), transfer(_))
+        .Times(Exactly(1));
+    EXPECT_CALL(*mockTablePresenter(0), transfer(_)).Times(Exactly(0));
+
+    presenter.notify(IReflRunsTabPresenter::TransferFlag);
+    verifyAndClearExpectations();
+  }
+
   void test_instrumentChanged() {
     auto presenter = createMocksAndPresenter(1);
 
@@ -209,6 +330,7 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(true))
         .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, stopTimer()).Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_NUMBER))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockProgress, setProgressRange(0, 100)).Times(Exactly(1));
@@ -254,9 +376,9 @@ public:
     // finished
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionFinished(GROUP_NUMBER))
         .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, startTimer(_)).Times(Exactly(1));
 
     presenter.confirmReductionFinished(GROUP_NUMBER);
-
     verifyAndClearExpectations();
   }
 
@@ -269,7 +391,6 @@ public:
         .Times(Exactly(1));
 
     presenter.confirmReductionPaused(GROUP_NUMBER);
-
     verifyAndClearExpectations();
   }
 
@@ -282,11 +403,23 @@ public:
         .Times(Exactly(1));
 
     presenter.confirmReductionResumed(GROUP_NUMBER);
-
     verifyAndClearExpectations();
   }
 
 private:
+  class ReflRunsTabPresenterFriend : public ReflRunsTabPresenter {
+    friend class ReflRunsTabPresenterTest;
+
+  public:
+    ReflRunsTabPresenterFriend(
+        IReflRunsTabView *mainView, ProgressableView *progressView,
+        std::vector<DataProcessorPresenter *> tablePresenter,
+        boost::shared_ptr<IReflSearcher> searcher =
+            boost::shared_ptr<IReflSearcher>())
+        : ReflRunsTabPresenter(mainView, progressView, tablePresenter,
+                               searcher) {}
+  };
+
   using MockRunsTabView_uptr = std::unique_ptr<NiceMock<MockRunsTabView>>;
   using MockMainWindowPresenter_uptr = std::unique_ptr<MockMainWindowPresenter>;
   using MockProgressableView_uptr = std::unique_ptr<MockProgressableView>;
@@ -316,21 +449,21 @@ private:
   }
 
   // Create the runs tab presenter. You must call createMocks() first.
-  ReflRunsTabPresenter createPresenter() {
+  ReflRunsTabPresenterFriend createPresenter() {
     TS_ASSERT(m_mockRunsTabView && m_mockMainPresenter && m_mockProgress);
     // The presenter requires the table presenters as a vector of raw pointers
     std::vector<DataProcessorPresenter *> tablePresenters;
     for (auto &tablePresenter : m_tablePresenters)
       tablePresenters.push_back(tablePresenter.get());
     // Create the presenter
-    ReflRunsTabPresenter presenter(m_mockRunsTabView.get(),
-                                   m_mockProgress.get(), tablePresenters);
+    ReflRunsTabPresenterFriend presenter(m_mockRunsTabView.get(),
+                                         m_mockProgress.get(), tablePresenters);
     presenter.acceptMainPresenter(m_mockMainPresenter.get());
     return presenter;
   }
 
   // Shortcut to create both mocks and presenter
-  ReflRunsTabPresenter createMocksAndPresenter(int numGroups) {
+  ReflRunsTabPresenterFriend createMocksAndPresenter(int numGroups) {
     createMocks(numGroups);
     return createPresenter();
   }
@@ -347,6 +480,45 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mockProgress));
     for (auto &tablePresenter : m_tablePresenters)
       TS_ASSERT(Mock::VerifyAndClearExpectations(tablePresenter.get()));
+  }
+
+  void expectStartAutoreduction() {
+    EXPECT_CALL(*m_mockRunsTabView, stopTimer()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, startIcatSearch()).Times(Exactly(1));
+  }
+
+  void expectTransferDataForTwoRows(ReflRunsTabPresenterFriend &presenter) {
+    constexpr int NUMBER_ROWS = 2;
+    // Set up a transfer method
+    presenter.m_currentTransferMethod = "Description";
+    EXPECT_CALL(*m_mockRunsTabView, getTransferMethod())
+        .Times(Exactly(1))
+        .WillOnce(Return(presenter.m_currentTransferMethod));
+    // Set up some search results for our two fake rows
+    auto searchModel = boost::make_shared<MockReflSearchModel>();
+    presenter.m_searchModel = searchModel;
+    EXPECT_CALL(*searchModel, data(_, _))
+        .Times(Exactly(4 * NUMBER_ROWS)) // 4 values for each row
+        .WillOnce(Return("run1"))
+        .WillOnce(Return("description1"))
+        .WillOnce(Return("location1"))
+        .WillOnce(Return("run2"))
+        .WillOnce(Return("description2"))
+        .WillOnce(Return("location2"))
+        .WillOnce(Return("error1"))
+        .WillOnce(Return("")); // no error
+    // Setting up progress bar clears progress then sets range then re-sets
+    // range due to update as percentage indicator
+    EXPECT_CALL(*m_mockProgress, clearProgress()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockProgress, setProgressRange(_, _)).Times(Exactly(2));
+    // Each row is a step in the progress bar
+    EXPECT_CALL(*m_mockProgress, setProgress(_)).Times(Exactly(NUMBER_ROWS));
+  }
+
+  void expectSelectedGroup(int group) {
+    EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(group));
   }
 };
 

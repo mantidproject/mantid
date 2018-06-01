@@ -158,6 +158,7 @@ public:
   MOCK_METHOD1(setPromptUser, void(const bool));
   MOCK_METHOD1(setForcedReProcessing, void(bool));
   MOCK_METHOD0(settingsChanged, void());
+  MOCK_METHOD1(transfer, void(const std::vector<std::map<QString, QString>> &));
 
 private:
   // Calls we don't care about
@@ -175,7 +176,6 @@ private:
   std::set<QString> getTableList() const { return std::set<QString>(); };
   // Calls we don't care about
   void setOptions(const std::map<QString, QVariant> &) override {}
-  void transfer(const std::vector<std::map<QString, QString>> &) override {}
   void setInstrumentList(const QStringList &, const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
   void acceptViews(DataProcessorView *, ProgressableView *) override{};

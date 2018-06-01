@@ -102,9 +102,16 @@ public:
   bool autoreductionRunning() const override;
   bool autoreductionRunning(int group) const override;
 
-private:
+protected:
+  /// Information about the autoreduction process
+  ReflAutoreduction m_autoreduction;
+  void startNewAutoreduction();
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
+  /// The current transfer method
+  std::string m_currentTransferMethod;
+
+private:
   /// The main view we're managing
   IReflRunsTabView *m_view;
   /// The progress view
@@ -115,23 +122,18 @@ private:
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
-  /// The current transfer method
-  std::string m_currentTransferMethod;
   /// Legacy transfer method
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
-  /// Information about the autoreduction process
-  ReflAutoreduction m_autoreduction;
 
   /// searching
   bool search();
   void icatSearchComplete();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   /// autoreduction
-  void startNewAutoreduction();
   void startAutoreduction();
   void pauseAutoreduction();
   void runAutoreduction();

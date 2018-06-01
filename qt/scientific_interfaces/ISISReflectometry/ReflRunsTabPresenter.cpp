@@ -90,7 +90,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false), m_autoreduction() {
+      m_searcher(searcher), m_instrumentChanged(false) {
   assert(m_view != nullptr);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
@@ -304,8 +304,8 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
                                     m_view->getSearchInstrument());
   } else {
     // Create a new search results list and display it on the view
-    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
-        *getTransferStrategy(), results, m_view->getSearchInstrument()));
+    m_searchModel = boost::make_shared<ReflSearchModel>(
+        *getTransferStrategy(), results, m_view->getSearchInstrument());
     m_view->showSearch(m_searchModel);
   }
 }
@@ -315,11 +315,13 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 */
 void ReflRunsTabPresenter::startNewAutoreduction() {
 
+  auto const group = m_view->getSelectedGroup();
+
   if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
-    auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+    auto tablePresenter = m_tablePresenters.at(group);
     tablePresenter->setPromptUser(false);
     try {
       tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
@@ -328,8 +330,7 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
     }
   }
 
-  if (m_autoreduction.start(m_view->getSelectedGroup(),
-                            m_view->getSearchString()))
+  if (m_autoreduction.start(group, m_view->getSearchString()))
     startAutoreduction();
 }
 

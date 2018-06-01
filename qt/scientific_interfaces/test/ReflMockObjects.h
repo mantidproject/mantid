@@ -1,10 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "MantidKernel/ICatalogInfo.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "../ISISReflectometry/ExperimentOptionDefaults.h"
+#include "../ISISReflectometry/IReflAsciiSaver.h"
 #include "../ISISReflectometry/IReflEventPresenter.h"
 #include "../ISISReflectometry/IReflEventTabPresenter.h"
 #include "../ISISReflectometry/IReflEventView.h"
@@ -17,10 +15,14 @@
 #include "../ISISReflectometry/IReflSettingsPresenter.h"
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
-#include "../ISISReflectometry/ReflSearchModel.h"
-#include "../ISISReflectometry/ExperimentOptionDefaults.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
-#include "../ISISReflectometry/IReflAsciiSaver.h"
+#include "../ISISReflectometry/ReflLegacyTransferStrategy.h"
+#include "../ISISReflectometry/ReflSearchModel.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -31,6 +33,17 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
+/**** Models ****/
+
+class MockReflSearchModel : public ReflSearchModel {
+public:
+  MockReflSearchModel()
+      : ReflSearchModel(ReflLegacyTransferStrategy(), ITableWorkspace_sptr(),
+                        std::string()) {}
+  ~MockReflSearchModel() override {}
+  MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
+};
 
 /**** Views ****/
 

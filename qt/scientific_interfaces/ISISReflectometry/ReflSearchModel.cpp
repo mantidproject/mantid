@@ -17,7 +17,8 @@ using namespace Mantid::API;
 ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
                                  ITableWorkspace_sptr tableWorkspace,
                                  const std::string &instrument) {
-  addDataFromTable(transferMethod, tableWorkspace, instrument);
+  if (tableWorkspace)
+    addDataFromTable(transferMethod, tableWorkspace, instrument);
 }
 
 //----------------------------------------------------------------------------------------------

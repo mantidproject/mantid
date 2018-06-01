@@ -1,6 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLAUTOREDUCTION_H
 #define MANTID_ISISREFLECTOMETRY_REFLAUTOREDUCTION_H
 
+#include "DllConfig.h"
 #include <string>
 
 namespace MantidQt {
@@ -10,7 +11,7 @@ namespace CustomInterfaces {
 
 Class to hold information about an autoreduction process
 */
-class ReflAutoreduction {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReflAutoreduction {
 public:
   /// Constructor
   ReflAutoreduction();
