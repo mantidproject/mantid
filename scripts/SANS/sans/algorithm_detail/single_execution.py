@@ -247,7 +247,7 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
 
     if must_reload:
     #if output_bundle.output_workspace is None or partial_output_require_reload:
-        output_bundle, output_parts_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
+        output_bundle, output_parts_bundle, output_transmission_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
 
         # Now we need to tag the workspaces and add it to the ADS
         if output_bundle.output_workspace is not None:
@@ -268,4 +268,4 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
                                                   partial_type=OutputParts.Norm,
                                                   reduction_mode=reduction_mode)
 
-    return output_bundle, output_parts_bundle
+    return output_bundle, output_parts_bundle, output_transmission_bundle
