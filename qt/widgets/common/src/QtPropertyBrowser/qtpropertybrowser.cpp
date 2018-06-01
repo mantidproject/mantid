@@ -207,7 +207,13 @@ QList<QtProperty *> QtProperty::subProperties() const {
 QtAbstractPropertyManager *QtProperty::propertyManager() const {
   return d_ptr->m_manager;
 }
-
+/**
+   Checks if a property exists
+   @return if the property exists
+*/
+bool QtAbstractPropertyManager::hasProperty(QtProperty*const prop) const {
+	return d_ptr->m_properties.contains(prop);
+}
 /**
     Returns the property's  tool tip.
 
