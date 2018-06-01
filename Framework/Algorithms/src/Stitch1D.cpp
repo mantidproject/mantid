@@ -28,14 +28,62 @@ using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::Points;
 
 namespace {
-
+/// Returns a tuple holding the first and last x value of the first spectrum and
+/// the lhs and rhs workspace, respectively
 using MinMaxTuple = boost::tuple<double, double>;
 MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS,
                                    MatrixWorkspace_const_sptr &rhsWS) {
   return MinMaxTuple(rhsWS->x(0).front(), lhsWS->x(0).back());
 }
 
+/// Check if a double is not zero and returns a bool indicating success
 bool isNonzero(double i) { return (0 != i); }
+
+/** Sort x axis
+ @param ws :: Input workspace
+ @return A shared pointer to the resulting MatrixWorkspace
+ */
+void sortXAxis(MatrixWorkspace_sptr &ws) {
+  // using a std::multimap (keys are sorted)
+  std::multimap<double, double> sorter;
+  double x_value;
+  const int nHists = static_cast<int>(ws->getNumberHistograms());
+  for (int i = 0; i < nHists; ++i) {
+    for (size_t k = 0; k < ws->size(); ++k) {
+      x_value = ws->x(i)[k];
+      sorter.insert(std::pair<double, double>(x_value, ws->y(i)[k]));
+      sorter.insert(std::pair<double, double>(x_value, ws->e(i)[k]));
+      if (ws->hasDx(i))
+        sorter.insert(std::pair<double, double>(x_value, ws->dx(i)[k]));
+    }
+    size_t ws_size = ws->size();
+    Mantid::MantidVec vecx(ws_size);
+    Mantid::MantidVec vecy(ws_size);
+    Mantid::MantidVec vece(ws_size);
+    Mantid::MantidVec vecdx(ws_size);
+    int l = 0;
+    auto it = sorter.cbegin();
+    while (it != sorter.cend()) {
+      vecx[l] = it->first;
+      vecy[l] = it->second;
+      vece[l] = (++it)->second;
+      if (ws->hasDx(i))
+        vecdx[l] = (++it)->second;
+      ++l;
+      ++it;
+    }
+    auto x = make_cow<HistogramX>(std::move(vecx));
+    auto y = make_cow<HistogramY>(std::move(vecy));
+    auto e = make_cow<HistogramE>(std::move(vece));
+    ws->setSharedX(i, x);
+    ws->setSharedY(i, y);
+    ws->setSharedE(i, e);
+    if (ws->hasDx(i)) {
+      auto dx = make_cow<HistogramDx>(std::move(vecdx));
+      ws->setSharedDx(i, dx);
+    }
+  }
+}
 }
 
 namespace Mantid {
@@ -411,56 +459,6 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
   Mantid::API::AnalysisDataService::Instance().remove(in2);
   API::Workspace_sptr ws = conjoinX->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-}
-
-/** Sort x axis
- @param ws :: Input workspace
- @return A shared pointer to the resulting MatrixWorkspace
- */
-void Stitch1D::sortXAxis(MatrixWorkspace_sptr &ws) {
-  // using a std::multimap (keys are sorted)
-  std::multimap<double, double> sorter;
-  double x_value;
-  const int nHists = static_cast<int>(ws->getNumberHistograms());
-  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (int i = 0; i < nHists; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    for (size_t k = 0; k < ws->size(); ++k) {
-      x_value = ws->x(i)[k];
-      sorter.insert(std::pair<double, double>(x_value, ws->y(i)[k]));
-      sorter.insert(std::pair<double, double>(x_value, ws->e(i)[k]));
-      if (ws->hasDx(i))
-        sorter.insert(std::pair<double, double>(x_value, ws->dx(i)[k]));
-    }
-    size_t ws_size = ws->size();
-    Mantid::MantidVec vecx(ws_size);
-    Mantid::MantidVec vecy(ws_size);
-    Mantid::MantidVec vece(ws_size);
-    Mantid::MantidVec vecdx(ws_size);
-    int l = 0;
-    auto it = sorter.cbegin();
-    while (it != sorter.cend()) {
-      vecx[l] = it->first;
-      vecy[l] = it->second;
-      vece[l] = (++it)->second;
-      if (ws->hasDx(i))
-        vecdx[l] = (++it)->second;
-      ++l;
-      ++it;
-    }
-    auto x = make_cow<HistogramX>(std::move(vecx));
-    auto y = make_cow<HistogramY>(std::move(vecy));
-    auto e = make_cow<HistogramE>(std::move(vece));
-    ws->setSharedX(i, x);
-    ws->setSharedY(i, y);
-    ws->setSharedE(i, e);
-    if (ws->hasDx(i)) {
-      auto dx = make_cow<HistogramDx>(std::move(vecdx));
-      ws->setSharedDx(i, dx);
-    }
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /** Runs the CreateSingleValuedWorkspace Algorithm as a child

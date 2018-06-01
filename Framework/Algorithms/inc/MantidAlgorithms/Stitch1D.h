@@ -89,8 +89,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   conjoinXAxis(Mantid::API::MatrixWorkspace_sptr &inOne,
                Mantid::API::MatrixWorkspace_sptr &inTwo);
-  /// Sort x axis
-  void sortXAxis(Mantid::API::MatrixWorkspace_sptr &ws);
   /// Find the start and end indexes
   boost::tuple<int, int>
   findStartEndIndexes(double startOverlap, double endOverlap,
