@@ -10,9 +10,9 @@ class SpectrumInfo;
 }
 
 namespace HistogramData {
-class HistogramE;
-class HistogramX;
-class HistogramY;
+class BinEdges;
+class Counts;
+class CountStandardDeviations;
 }
 namespace Algorithms {
 
@@ -75,9 +75,9 @@ private:
                               const Angles &refAngles);
   void processValue(const int inputIdx, const MinMax &twoThetaRange,
                     const Angles &refAngles,
-                    const HistogramData::HistogramX &inputX,
-                    const HistogramData::HistogramY &inputY,
-                    const HistogramData::HistogramE &inputE,
+                    const Mantid::HistogramData::BinEdges &inputX,
+                    const Mantid::HistogramData::Counts &inputY,
+                    const Mantid::HistogramData::CountStandardDeviations &inputE,
                     API::MatrixWorkspace &IvsLam, std::vector<double> &outputE);
   MinMax projectedLambdaRange(const MinMax &wavelengthRange,
                               const MinMax &twoThetaRange,
