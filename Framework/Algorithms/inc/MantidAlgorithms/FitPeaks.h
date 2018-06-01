@@ -319,9 +319,6 @@ private:
   //----- Result criterias ---------------
   /// peak positon tolerance case b, c and d
   bool m_peakPosTolCase234;
-
-  /// Supported peak profiles for observation
-  std::vector<std::string> m_observablePeakProfiles;
 };
 
 } // namespace Algorithms

@@ -161,12 +161,6 @@ enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 FitPeaks::FitPeaks()
     : m_fitPeaksFromRight(true), m_numPeaksToFit(0), m_minPeakHeight(20.),
       m_bkgdSimga(1.), m_peakPosTolCase234(false) {
-  m_observablePeakProfiles.clear();
-  m_observablePeakProfiles.push_back("Gaussian");
-  m_observablePeakProfiles.push_back("PseudoVoigt");
-  m_observablePeakProfiles.push_back("Voigt");
-  m_observablePeakProfiles.push_back("Lorentzian");
-  std::sort(m_observablePeakProfiles.begin(), m_observablePeakProfiles.end());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -859,6 +853,10 @@ FitPeaks::fitPeaks() {
 }
 
 namespace {
+/// Supported peak profiles for observation
+std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian",
+                                                 "PseudoVoigt", "Voigt"};
+
 double numberCounts(const Histogram &histogram) {
   double total = 0.;
   for (const auto &value : histogram.y())
@@ -1349,8 +1347,9 @@ int FitPeaks::estimatePeakParameters(
  * @return
  */
 bool FitPeaks::isObservablePeakProfile(const std::string &peakprofile) {
-  return std::binary_search(m_observablePeakProfiles.begin(),
-                            m_observablePeakProfiles.end(), peakprofile);
+  return (std::find(supported_peak_profiles.begin(),
+                    supported_peak_profiles.end(),
+                    peakprofile) == supported_peak_profiles.end());
 }
 
 //----------------------------------------------------------------------------------------------
