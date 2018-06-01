@@ -8,6 +8,7 @@ from mantid.kernel import Logger
 
 sans_logger = Logger("SANS")
 
+
 def create_states(state_model, table_model, instrument, number_of_rows, facility, row_index=None, file_lookup=True):
     """
     Here we create the states based on the settings in the models
@@ -54,6 +55,7 @@ def create_row_state(director, states, row, instrument, file_lookup=True):
     except (ValueError, RuntimeError) as e:
         raise RuntimeError("There was a bad entry for row {}. {}".format(row, str(e)))
 
+
 def is_empty_row(row, table):
     for key, value in table._table_entries[row].__dict__.iteritems():
         if value:
@@ -64,7 +66,7 @@ def is_empty_row(row, table):
 def create_state_for_row(state_model_with_view_update, table_model, number_of_rows, instrument, facility, row_index, file_lookup=True):
     if table_model and state_model_with_view_update:
         states = create_states(state_model_with_view_update, table_model, instrument, number_of_rows, facility,
-                                     row_index, file_lookup=file_lookup)
+                               row_index, file_lookup=file_lookup)
     else:
         sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
         return None

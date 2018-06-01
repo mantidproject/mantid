@@ -16,7 +16,6 @@ from mantid.kernel import (Property)
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
@@ -32,8 +31,8 @@ from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.sans_batch import SANSCentreFinder
-from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.models.create_state import create_states
+from ui.sans_isis.work_handler import WorkHandler
 
 try:
     import mantidplot
@@ -76,17 +75,6 @@ class RunTabPresenter(object):
         def on_instrument_changed(self):
             self._presenter.on_instrument_changed()
 
-    class ProcessSetupListener(WorkHandler.WorkListener):
-        def __init__(self, presenter):
-            super(RunTabPresenter.ProcessSetupListener, self).__init__()
-            self._presenter = presenter
-
-        def on_processing_finished(self, result):
-            pass#self._presenter.on_process_setup_finished(result)
-
-        def on_processing_error(self, error):
-            pass#self._presenter.on_process_setup_error(error)
-
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
         self._facility = facility
@@ -98,7 +86,6 @@ class RunTabPresenter(object):
         self._view = None
         self.set_view(view)
         self._processing = False
-        self._work_handler = WorkHandler()
 
         # Models that are being used by the presenter
         self._state_model = None
@@ -268,7 +255,6 @@ class RunTabPresenter(object):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
-
     def on_data_changed(self):
         if not self._processing:
             # 1. Perform calls on child presenters
@@ -296,8 +282,6 @@ class RunTabPresenter(object):
             self._validate_rows()
 
             # 1. Set up the states and convert them into property managers
-            # listener = RunTabPresenter.ProcessSetupListener(self)
-            # self._work_handler.process(listener, self.setup_processing_state)
             states = self.get_states()
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
@@ -322,14 +306,6 @@ class RunTabPresenter(object):
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
-
-    def setup_processing_state(self):
-        states = self.get_states()
-        if not states:
-            raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                               " has been loaded")
-        property_manager_service = PropertyManagerService()
-        property_manager_service.add_states_to_pmds(states)
 
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
@@ -495,7 +471,7 @@ class RunTabPresenter(object):
         # 3. Go through each row and construct a state object
         if table_model and state_model_with_view_update:
             states = create_states(state_model_with_view_update, table_model, self._view.instrument,
-                                         self._view.get_number_of_rows(), self._facility, row_index, file_lookup=file_lookup)
+                                   self._view.get_number_of_rows(), self._facility, row_index, file_lookup=file_lookup)
         else:
             states = None
         stop_time_state_generation = time.time()

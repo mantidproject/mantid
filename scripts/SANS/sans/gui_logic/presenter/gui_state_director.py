@@ -11,8 +11,9 @@ import copy
 from sans.state.data import get_data_builder
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.file_information import SANSFileInformationFactory
-from sans.common.enums import (SANSInstrument, DetectorType)
+from sans.common.enums import (SANSInstrument)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
+
 
 class GuiStateDirector(object):
     def __init__(self, table_model, state_gui_model, facility):

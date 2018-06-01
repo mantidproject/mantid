@@ -10,9 +10,7 @@ from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from sans.gui_logic.gui_common import JSON_SUFFIX
 from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.models.create_state import create_state_for_row
-import time
-from sans.common.file_information import SANSFileInformationFactory
-from PyQt4.QtCore import pyqtSlot, QThreadPool, QThread
+
 
 class SettingsDiagnosticPresenter(object):
     class ConcreteSettingsDiagnosticTabListener(SettingsDiagnosticTab.SettingsDiagnosticTabListener):
@@ -63,7 +61,8 @@ class SettingsDiagnosticPresenter(object):
     def on_row_changed(self):
         self._view.set_processing(True)
         row_index = self._view.get_current_row()
-        state_model, table_model, number_of_rows, instrument = self._parent_presenter.get_state_model_table_workspace_number_of_rows_instrument()
+        state_model, table_model, number_of_rows, instrument =\
+            self._parent_presenter.get_state_model_table_workspace_number_of_rows_instrument()
         facility = self._parent_presenter._facility
         listener = SettingsDiagnosticPresenter.CreateStateListener(self)
         self._work_handler.process(listener, self.get_state, row_index, state_model, table_model, number_of_rows, instrument, facility)
