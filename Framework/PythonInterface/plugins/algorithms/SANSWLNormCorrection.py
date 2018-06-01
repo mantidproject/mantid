@@ -49,8 +49,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 action=FileAction.OptionalLoad,
                 extensions=[".ini"],
             ),
-            doc=("Name of the configuration file. See algorith help for the file format. "
-                 "All properties in this file will have higher priortity. If the same "
+            doc=("Name of the configuration file. See algorithm help for the file format. "
+                 "All properties in this file will have higher priority. If the same "
                  "property appears in the algorithm call and in the file, "
                  "the file takes precedence.")
 
@@ -145,7 +145,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
         Called before everything else to make sure the inputs are valid
         '''
 
-        # If the poperty is not in the algorithm call and exists in the config file
+        # If the property is not in the algorithm call and exists in the config file
         # Get it from there
         self._parse_config_file(self.getProperty('ConfigurationFile').value)
         if self.parser:
@@ -186,13 +186,16 @@ class SANSWLNormCorrection(PythonAlgorithm):
                     self.getProperty('InputWorkspaces').value) - 1:
             message = "The length of K List Parameters must be 1 or equal to the length of the input workspaces - 1"
             issues['KList'] = message
+        
+        logger.debug("Issues so far {}".format(issues))
         try:
             pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
         except Exception:
             pm = []
 
         if "OutputDirectory" not in pm and self.getProperty("OutputDirectory").value.strip() == "":
-            issues['OutputDirectory'] = "Property Manager has no OutputDirectory."
+            issues['OutputDirectory'] = "Property Manager has no OutputDirectory. "\
+                                        "Please specify it directly in the OutputDirectory field."
 
         return issues
 
@@ -568,10 +571,11 @@ class SANSWLNormCorrection(PythonAlgorithm):
         for p in props:
             self.parser.set('DEFAULT', p.name, str(p.value))
 
+        # Remove the reference element from the list
         self.parser.set('DEFAULT', 'KList',
-                        ",".join(str(e) for e in ws_table.column("K")))
+                        ",".join(str(e) for e in ws_table.column("K") if e != 1))
         self.parser.set('DEFAULT', 'BList',
-                        ",".join(str(e) for e in ws_table.column("B")))
+                        ",".join(str(e) for e in ws_table.column("B") if e != 0))
 
         conf_file_new_name = self.output_prefix + "_config.ini"
         conf_file_new_path = os.path.join(self.output_directory, conf_file_new_name)
