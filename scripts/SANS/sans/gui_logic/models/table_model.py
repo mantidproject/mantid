@@ -123,6 +123,7 @@ class OptionsColumnModel(object):
         options_column_string_no_whitespace = "".join(options_column_string.split())
         options_column_string_no_whitespace = options_column_string_no_whitespace.replace('"', '')
         options_column_string_no_whitespace = options_column_string_no_whitespace.replace("'", '')
+
         if not options_column_string_no_whitespace:
             return parsed
         pat = re.compile(r'''([^,=]+)=*((?:[^,=]+(?:,|$))*)''')
@@ -132,6 +133,18 @@ class OptionsColumnModel(object):
                 v=v[:-1]
             parsed.update({k:v})
 
+        # This is a regular expression to detect key value pairs in the options string.
+        # The different parts are:
+        # ([^,=]+) Anything except equals detects keys in the options string
+        # =* then an equals sign
+        # ((?:[^,=]+(?:,|$))*) Any number of repetitions of a string without = followed by a comma or end of input.
+        option_pattern = re.compile(r'''([^,=]+)=*((?:[^,=]+(?:,|$))*)''')
+
+        # The findall option finds all instances of the pattern specified above in the options string.
+        for key, value in option_pattern.findall(options_column_string_no_whitespace):
+            if value.endswith(','):
+                value=value[:-1]
+            parsed.update({key:value})
         return parsed
 
     @staticmethod

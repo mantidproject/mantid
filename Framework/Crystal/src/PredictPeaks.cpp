@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -81,6 +82,32 @@ void PredictPeaks::init() {
   declareProperty(make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
                                                          Direction::Input),
                   "Maximum d-spacing of peaks to consider.");
+
+  declareProperty("CalculateGoniometerForCW", false,
+                  "This will calculate the goniometer rotation (around y-axis "
+                  "only) for a constant wavelength.");
+
+  auto nonNegativeDbl = boost::make_shared<BoundedValidator<double>>();
+  nonNegativeDbl->setLower(0);
+  declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
+                  "Wavelength to use when calculating goniometer angle");
+  setPropertySettings(
+      "Wavelength", make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
+                                                     IS_NOT_DEFAULT));
+
+  declareProperty(make_unique<PropertyWithValue<double>>("MinAngle", -180,
+                                                         Direction::Input),
+                  "Minimum goniometer rotation angle");
+  setPropertySettings(
+      "MinAngle", make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
+                                                   IS_NOT_DEFAULT));
+
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("MaxAngle", 180, Direction::Input),
+      "Maximum goniometer rotation angle");
+  setPropertySettings(
+      "MaxAngle", make_unique<EnabledWhenProperty>("CalculateGoniometerForCW",
+                                                   IS_NOT_DEFAULT));
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
@@ -154,8 +181,8 @@ void PredictPeaks::exec() {
       boost::dynamic_pointer_cast<MatrixWorkspace>(rawInputWorkspace);
   PeaksWorkspace_sptr peaksWS =
       boost::dynamic_pointer_cast<PeaksWorkspace>(rawInputWorkspace);
-  IMDEventWorkspace_sptr mdWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(rawInputWorkspace);
+  MultipleExperimentInfos_sptr mdWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(rawInputWorkspace);
 
   std::vector<DblMatrix> gonioVec;
   if (matrixWS) {
@@ -265,27 +292,37 @@ void PredictPeaks::exec() {
   m_detectorCacheSearch =
       Kernel::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
-  for (auto &goniometerMatrix : gonioVec) {
-    // Final transformation matrix (HKL to Q in lab frame)
-    DblMatrix orientedUB = goniometerMatrix * ub;
-
-    /* Because of the additional filtering step it's better to keep track of the
-     * allowed peaks with a counter. */
-    HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
-
+  if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;
     int seqNum = 1;
 
-    bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
-    if (useExtendedDetectorSpace &&
-        !m_inst->getComponentByName("extended-detector-space")) {
-      g_log.warning() << "Attempting to find peaks outside of detectors but "
-                         "no extended detector space has been defined\n";
+    double wavelength = getProperty("Wavelength");
+    if (wavelength == DBL_MAX) {
+      if (m_inst->hasParameter("wavelength")) {
+        wavelength = m_inst->getNumberParameter("wavelength").at(0);
+      } else {
+        throw std::runtime_error(
+            "Could not get wavelength, neither Wavelength algorithm property "
+            "set nor instrument wavelength parameter");
+      }
     }
-
+    double angleMin = getProperty("MinAngle");
+    double angleMax = getProperty("MaxAngle");
     for (auto &possibleHKL : possibleHKLs) {
-      if (lambdaFilter.isAllowed(possibleHKL)) {
-        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix,
+      Geometry::Goniometer goniometer;
+      V3D q_sample = ub * possibleHKL * (2.0 * M_PI * m_qConventionFactor);
+      goniometer.calcFromQSampleAndWavelength(q_sample, wavelength);
+      double angle = goniometer.getEulerAngles()[0];
+      if (!std::isfinite(angle) || angle < angleMin || angle > angleMax)
+        continue;
+      DblMatrix orientedUB = goniometer.getR() * ub;
+      V3D q_lab = orientedUB * possibleHKL;
+      double lambda = (2.0 * q_lab.Z()) / (q_lab.norm2());
+      if (std::abs(wavelength - lambda) < 0.01) {
+        g_log.information() << "Found goniometer rotation to be "
+                            << goniometer.getEulerAngles()[0]
+                            << " degrees for HKL = " << possibleHKL << "\n";
+        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR(),
                                  seqNum);
         ++allowedPeakCount;
       }
@@ -293,6 +330,38 @@ void PredictPeaks::exec() {
     }
 
     logNumberOfPeaksFound(allowedPeakCount);
+
+  } else {
+    for (auto &goniometerMatrix : gonioVec) {
+      // Final transformation matrix (HKL to Q in lab frame)
+      DblMatrix orientedUB = goniometerMatrix * ub;
+
+      /* Because of the additional filtering step it's better to keep track of
+       * the allowed peaks with a counter. */
+      HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
+
+      size_t allowedPeakCount = 0;
+      int seqNum = 1;
+
+      bool useExtendedDetectorSpace =
+          getProperty("PredictPeaksOutsideDetectors");
+      if (useExtendedDetectorSpace &&
+          !m_inst->getComponentByName("extended-detector-space")) {
+        g_log.warning() << "Attempting to find peaks outside of detectors but "
+                           "no extended detector space has been defined\n";
+      }
+
+      for (auto &possibleHKL : possibleHKLs) {
+        if (lambdaFilter.isAllowed(possibleHKL)) {
+          calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix,
+                                   seqNum);
+          ++allowedPeakCount;
+        }
+        prog.report();
+      }
+
+      logNumberOfPeaksFound(allowedPeakCount);
+    }
   }
 
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);

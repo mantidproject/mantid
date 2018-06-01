@@ -7,7 +7,7 @@ import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
                                    PositiveFloatParameter, FloatParameter, ClassTypeParameter, DictParameter,
-                                   PositiveFloatWithNoneParameter, BoolParameter)
+                                   PositiveFloatWithNoneParameter, BoolParameter, PositiveFloatListParameter)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
@@ -25,8 +25,8 @@ class StateNormalizeToMonitor(StateBase):
     prompt_peak_correction_enabled = BoolParameter()
 
     rebin_type = ClassTypeParameter(RebinType)
-    wavelength_low = PositiveFloatParameter()
-    wavelength_high = PositiveFloatParameter()
+    wavelength_low = PositiveFloatListParameter()
+    wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
     wavelength_step_type = ClassTypeParameter(RangeStepType)
 

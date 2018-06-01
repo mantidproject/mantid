@@ -25,6 +25,51 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 
+namespace He3TubeEffeciencyHelper {
+void createWorkspace2DInADS(const std::string inputWS) {
+  const int nspecs(4);
+  const int nbins(5);
+
+  auto space2D = createWorkspace<Workspace2D>(nspecs, nbins + 1, nbins);
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+
+  BinEdges x{0.1, 0.2, 0.3, 0.4, 0.5, 0.6};
+  Counts y(nbins, 10.0);
+  CountStandardDeviations e(nbins, sqrt(5.0));
+
+  for (int i = 0; i < nspecs; i++) {
+    space2D->setBinEdges(i, x);
+    space2D->setCounts(i, y);
+    space2D->setCountStandardDeviations(i, e);
+    space2D->getSpectrum(i).setSpectrumNo(i);
+  }
+
+  AnalysisDataService::Instance().add(inputWS, space2D);
+
+  LoadInstrument loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename",
+                          "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+  loader.setPropertyValue("Workspace", inputWS);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+  loader.execute();
+}
+
+void createEventWorkspaceInADS(const std::string inputEvWS) {
+  EventWorkspace_sptr event =
+      WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
+  event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  AnalysisDataService::Instance().add(inputEvWS, event);
+
+  LoadInstrument loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename",
+                          "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+  loader.setPropertyValue("Workspace", inputEvWS);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+  loader.execute();
+}
+}
 class He3TubeEfficiencyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -37,7 +82,7 @@ public:
   He3TubeEfficiencyTest() : inputWS("testInput"), inputEvWS("testEvInput") {}
 
   void testCorrection() {
-    createWorkspace2D();
+    He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -52,17 +97,17 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.0, 1e-6);
     // Check some detector values
-    TS_ASSERT_DELTA(result->readY(1).back(), 15.989063, 1e-6);
-    TS_ASSERT_DELTA(result->readY(2)[2], 21.520201, 1e-6);
-    TS_ASSERT_DELTA(result->readY(3).front(), 31.716197, 1e-6);
+    TS_ASSERT_DELTA(result->y(1).back(), 15.989063, 1e-6);
+    TS_ASSERT_DELTA(result->y(2)[2], 21.520201, 1e-6);
+    TS_ASSERT_DELTA(result->y(3).front(), 31.716197, 1e-6);
 
     AnalysisDataService::Instance().remove(inputWS);
   }
 
   void testEventCorrection() {
-    createEventWorkspace();
+    He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -92,7 +137,7 @@ public:
   }
 
   void testBadOverrideParameters() {
-    createWorkspace2D();
+    He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     alg.initialize();
 
@@ -107,7 +152,7 @@ public:
   }
 
   void testBadTubeThickness() {
-    createWorkspace2D();
+    He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -123,17 +168,17 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.0, 1e-6);
     // Check that detector values should be zero
-    TS_ASSERT_DELTA(result->readY(1).back(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(result->readY(2)[2], 0.0, 1e-6);
-    TS_ASSERT_DELTA(result->readY(3).front(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(1).back(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(2)[2], 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(3).front(), 0.0, 1e-6);
 
     AnalysisDataService::Instance().remove(inputWS);
   }
 
   void testBadTubeThicknessEvents() {
-    createEventWorkspace();
+    He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -165,49 +210,5 @@ public:
 private:
   const std::string inputWS;
   const std::string inputEvWS;
-
-  void createWorkspace2D() {
-    const int nspecs(4);
-    const int nbins(5);
-
-    auto space2D = createWorkspace<Workspace2D>(nspecs, nbins + 1, nbins);
-    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-
-    BinEdges x{0.1, 0.2, 0.3, 0.4, 0.5, 0.6};
-    Counts y(nbins, 10.0);
-    CountStandardDeviations e(nbins, sqrt(5.0));
-
-    for (int i = 0; i < nspecs; i++) {
-      space2D->setBinEdges(i, x);
-      space2D->setCounts(i, y);
-      space2D->setCountStandardDeviations(i, e);
-    }
-
-    AnalysisDataService::Instance().add(inputWS, space2D);
-
-    LoadInstrument loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
-    loader.setPropertyValue("Workspace", inputWS);
-    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-    loader.execute();
-  }
-
-  void createEventWorkspace() {
-    EventWorkspace_sptr event =
-        WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
-    event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    AnalysisDataService::Instance().add(inputEvWS, event);
-
-    LoadInstrument loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
-    loader.setPropertyValue("Workspace", inputEvWS);
-    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-    loader.execute();
-  }
 };
-
 #endif // HE3TUBEEFFICIENCYTEST_H_

@@ -102,6 +102,8 @@ public:
   /// Specialized type check
   bool isBool() const override { return false; }
 
+  bool isNumber() const override { return false; }
+
   /// Overall memory size taken by the column (bytes)
   long int sizeOfData() const override {
     long int size(0);

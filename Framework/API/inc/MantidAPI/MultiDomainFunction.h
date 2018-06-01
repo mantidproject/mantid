@@ -44,7 +44,7 @@ class CompositeDomain;
 class MANTID_API_DLL MultiDomainFunction : public CompositeFunction {
 public:
   /// Constructor
-  MultiDomainFunction() : m_nDomains(0), m_maxIndex(0) {}
+  MultiDomainFunction();
 
   /// Returns the function's name
   std::string name() const override { return "MultiDomainFunction"; }

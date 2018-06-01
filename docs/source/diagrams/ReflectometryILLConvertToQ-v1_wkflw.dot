@@ -1,0 +1,39 @@
+digraph ReflectometryILLConvertToQ {
+  label = "ReflectometryILLConvertToQ workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    input      [label="InputWorkspace"]
+    output     [label="OutputWorkspace"]
+    direct     [label="DirectBeamWorkspace"]
+    reflected  [label="ReflectedBeamWorkspace"]
+    polarized  [label="Polarized"]
+    q_grouping [label="GroupingQFraction"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    to_q          [label="ReflectometryMomentumTransfer"]
+    to_point_data [label="ConvertToPointData"]
+    group_points  [label="Group points to\nQ resolution"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    if_grouping [label="Is GroupingQFraction\ngiven?"]
+  }
+
+  input -> to_q
+  reflected -> to_q
+  direct -> to_q
+  polarized -> to_q
+  to_q -> to_point_data
+  to_point_data -> if_grouping
+
+  if_grouping -> output [label="no"]
+
+  if_grouping -> group_points [label="yes"]
+  q_grouping -> group_points
+  group_points -> output
+}

@@ -86,6 +86,37 @@ Usage
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_d.png
 
+**Background subtraction**
+
+.. code-block:: python
+
+   silicon =LoadWAND('/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5')
+   vanadium=LoadWAND('/HFIR/HB2C/IPTS-7776/nexus/HB2C_26509.nxs.h5')
+
+   # Create fake flat background, constant 10
+   bkg=CreateWorkspace(DataX=[1.487,1.489]*silicon.getNumberHistograms(),
+                       DataY=[10]*silicon.getNumberHistograms(),
+                       NSpec=silicon.getNumberHistograms(),
+                       UnitX="Wavelength",ParentWorkspace=silicon)
+
+   WANDPowderReduction(InputWorkspace=silicon,
+                       CalibrationWorkspace=vanadium,
+                       BackgroundWorkspace=bkg,
+                       Target='Theta',
+                       NumberBins=1000,
+                       OutputWorkspace='silicon_powder_background')
+
+   # Scale background by 50%
+   WANDPowderReduction(InputWorkspace=silicon,
+                       CalibrationWorkspace=vanadium,
+                       BackgroundWorkspace=bkg,
+                       BackgroundScale=0.5,
+                       Target='Theta',
+                       NumberBins=1000,
+                       OutputWorkspace='silicon_powder_background_0.5')
+
+.. figure:: /images/WANDPowderReduction_silicon_powder_bkg.png
+
 .. categories::
 
 .. sourcelink::

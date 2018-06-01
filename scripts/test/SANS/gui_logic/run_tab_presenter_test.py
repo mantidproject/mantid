@@ -353,7 +353,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Assert
         # We should have two states in the PropertyManagerDataService
-        self.assertTrue(len(PropertyManagerDataService.getObjectNames()) == 2)
+        self.assertEqual(len(PropertyManagerDataService.getObjectNames()), 2)
 
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
