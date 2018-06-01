@@ -12,6 +12,7 @@ namespace CustomInterfaces {
 template <typename Row>
 class Group {
 public:
+  Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows,
         std::string postprocessedWorkspaceName);
 

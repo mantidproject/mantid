@@ -4,6 +4,7 @@
 #include <memory>
 #include "IBatchView.h"
 #include "Reduction/Group.h"
+#include "Reduction/ReductionJobs.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -11,7 +12,8 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
     : public BatchViewSubscriber {
 public:
-  BatchPresenter(IBatchView *view, std::vector<std::string> const &instruments);
+  BatchPresenter(IBatchView *view, std::vector<std::string> const &instruments,
+                 ReductionJobs reductionJobs);
 
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;
@@ -34,6 +36,8 @@ public:
   void notifyInsertGroupRequested() override;
   void notifyDeleteRowRequested() override;
   void notifyDeleteGroupRequested() override;
+
+  ReductionJobs const& reductionJobs() const;
 
 private:
   bool isGroupLocation(MantidWidgets::Batch::RowLocation const &location) const;
@@ -86,7 +90,7 @@ private:
   std::vector<std::string> m_instruments;
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_clipboard;
-  std::vector<UnslicedGroup> m_model;
+  ReductionJobs m_model;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenterFactory {

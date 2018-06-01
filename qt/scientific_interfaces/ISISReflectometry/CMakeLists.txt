@@ -4,6 +4,7 @@ set ( SRC_FILES
     Reduction/ReductionWorkspaces.cpp
     Reduction/Row.cpp
     Reduction/SlicedReductionWorkspaces.cpp
+    Reduction/ReductionJobs.cpp
     BatchView.cpp
     ValidateRow.cpp
     BatchPresenter.cpp

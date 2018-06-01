@@ -3,6 +3,7 @@
 #include "DllConfig.h"
 #include "IBatchView.h"
 #include <gmock/gmock.h>
+#include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
@@ -17,7 +18,7 @@ public:
   MOCK_METHOD0(jobs, MantidQt::MantidWidgets::Batch::IJobTreeView &());
 };
 
+}
+}
 GCC_DIAG_ON_SUGGEST_OVERRIDE
-}
-}
 #endif // MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_

@@ -8,6 +8,11 @@ Group<Row>::Group(std::string name, std::vector<boost::optional<Row>> rows,
     : m_name(std::move(name)), m_rows(std::move(rows)),
       m_postprocessedWorkspaceName(std::move(postprocessedWorkspaceName)) {}
 
+template <typename Row>
+Group<Row>::Group(std::string name)
+    : m_name(std::move(name)), m_rows(),
+      m_postprocessedWorkspaceName() {}
+
 template <typename Row> std::string const &Group<Row>::name() const {
   return m_name;
 }
