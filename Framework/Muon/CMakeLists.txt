@@ -14,7 +14,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
         ApplyMuonDetectorGroupingTest.h
-        ApplyMuonDetectorGroupingPairing.h
+        ApplyMuonDetectorGroupPairing.h
         ConvertFitFunctionForMuonTFAsymmetryTest.h
         MuonAlgorithmHelperTest.h)
 
