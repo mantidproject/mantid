@@ -90,11 +90,15 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
   options.grouping = loadGroupsAndPairs();
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
+
+  checkDetectorIDsInWorkspace(options.grouping, inputWS);
+
   WorkspaceGroup_sptr groupedWS = getProperty("WorkspaceGroup");
   if (!groupedWS) {
-	  groupedWS = addGroupedWSWithDefaultName(inputWS);
+    groupedWS = addGroupedWSWithDefaultName(inputWS);
   }
 
+  // Perform the analysis specified in options
   addGroupingToADS(options, inputWS, groupedWS);
   addPairingToADS(options, inputWS, groupedWS);
 
@@ -105,15 +109,31 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
   addGroupingInformationToADS(options.grouping);
 }
 
+// Checks that the detector IDs are consistsent with the supplied workspace
+void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
+    API::Grouping &grouping, Workspace_sptr workspace) {
+  bool check =
+      MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, workspace);
+  if (!check) {
+    g_log.error("One or more detector IDs specified in the groups is not "
+                "contained in the InputWorkspace");
+    throw std::runtime_error(
+        "One or more detector IDs specified in the groups is not "
+        "contained in the InputWorkspace");
+  }
+}
+
 /**
-* Adds an empty workspaceGroup to the ADS with a name 
-* that it would have if created by the MuonAnalysis GUI.
-*/
-WorkspaceGroup_sptr LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(Workspace_sptr workspace) {
-	std::string  groupedWSName = MuonAlgorithmHelper::getRunLabel(workspace);
-	WorkspaceGroup_sptr groupedWS = boost::make_shared<WorkspaceGroup>();
-	AnalysisDataService::Instance().addOrReplace(groupedWSName, groupedWS);
-	return groupedWS;
+ * Adds an empty workspaceGroup to the ADS with a name
+ * that it would have if created by the MuonAnalysis GUI.
+ */
+WorkspaceGroup_sptr
+LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
+    Workspace_sptr workspace) {
+  std::string groupedWSName = MuonAlgorithmHelper::getRunLabel(workspace);
+  WorkspaceGroup_sptr groupedWS = boost::make_shared<WorkspaceGroup>();
+  AnalysisDataService::Instance().addOrReplace(groupedWSName, groupedWS);
+  return groupedWS;
 }
 
 AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
