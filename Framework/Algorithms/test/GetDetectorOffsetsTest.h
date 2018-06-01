@@ -228,7 +228,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin", "-20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax", "20"));
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("FitEachPeakTwice", true));
-    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("OutputFitResult", true));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue(
+        "PeakFitResultTableWorkspace", "offsetsped_FitResult"));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 

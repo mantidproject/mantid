@@ -10,6 +10,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
@@ -76,11 +77,21 @@ void GetDetectorOffsets::init() {
                   "The known peak centre value from the NIST standard "
                   "information, this is only used in Absolute OffsetMode.");
 
-  declareProperty("FitPeakWithFittedFWHM", false,
+  declareProperty("FitEachPeakTwice", false,
                   "If true, then each peak will be fitted twice."
                   "First round fitting range will be determined by given XMin "
                   "and XMax. Second round peak fitting range will be limited "
                   "by FHWM.");
+
+  declareProperty(
+      "MinimumPeakHeight", 0., mustBePositive,
+      "If it is specified and FitEachPeakTwice is specified as true "
+      "then any spectrum having peak with height less this value in the "
+      "first-round "
+      "peak fitting will be masked.");
+  setPropertySettings("MinimumPeakHeight",
+                      make_unique<EnabledWhenProperty>("FitEachPeakTwice",
+                                                       IS_EQUAL_TO, "true"));
 
   declareProperty(
       make_unique<WorkspaceProperty<TableWorkspace>>(
@@ -88,13 +99,6 @@ void GetDetectorOffsets::init() {
           PropertyMode::Optional),
       "Optional name of the input Tableworkspace containing peak fit window "
       "information for each spectrum. ");
-
-  declareProperty(
-      "MinimumPeakHeight", 0., mustBePositive,
-      "If it is specified and FitPeakWithFittedFWHM is specified as true "
-      "then any spectrum having peak with height less this value in the "
-      "first-round "
-      "peak fitting will be masked.");
 }
 
 //-----------------------------------------------------------------------------------------
@@ -132,7 +136,7 @@ void GetDetectorOffsets::exec() {
       maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // fit each peak twice?
-  bool fit_peak_twice = getProperty("FitPeakWithFittedFWHM");
+  bool fit_peak_twice = getProperty("FitEachPeakTwice");
   double minimum_peak_height = getProperty("MinimumPeakHeight");
 
   // output fitting result?
