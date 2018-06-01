@@ -33,7 +33,8 @@ const std::string LoadNexusGeometry::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadNexusGeometry::summary() const {
-  return "Loads an instrument from OFF nexus geometry file";
+  return "Loads an instrument from OFF nexus geometry file into an empty "
+         "workspace";
 }
 
 //----------------------------------------------------------------------------------------------

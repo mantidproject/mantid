@@ -7,7 +7,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadNexusGeometry : TODO: DESCRIPTION
+/** LoadNexusGeometry : Algorithm to load nexus geometry into an empty
+  workspace, similar to Load Instrument.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
