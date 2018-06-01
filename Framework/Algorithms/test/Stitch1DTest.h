@@ -286,7 +286,7 @@ public:
     const auto &e = HistogramE(3, LinearGenerator(7., -1.));
     const auto &dx1 = HistogramDx(3, LinearGenerator(3., -1.));
     auto ws1 = createWorkspace(x1, y1, e, dx1);
-    auto ws2 = ws1;
+    auto ws2 = createWorkspace(x1, y1, e, dx1);
     Stitch1D alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -363,8 +363,8 @@ public:
     const auto &e = HistogramE(2, 1.);
     const auto &dx = HistogramDx(2, LinearGenerator(3., 0.1));
     auto ws2 = createWorkspace(x, y, e, dx);
-    auto ws3 = ws1;
-    auto ws4 = ws2;
+    auto ws3 = createWorkspace(x, y, e, dx);
+    auto ws4 = createWorkspace(x, y, e, dx);
     TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass",
                               do_stitch1D(ws2, ws1));
     Mantid::Algorithms::CompareWorkspaces compare;
