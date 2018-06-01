@@ -444,7 +444,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         msg = QtGui.QMessageBox()
         msg.setIcon(QtGui.QMessageBox.Warning)
 
-        msg.setText('     ' + message + '                    ')
+        message_length = len(message)
+
+        # This is to ensure that the QMessage box if wide enough to display nicely.
+        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
         msg.setWindowTitle(title)
         msg.setDetailedText(details)
         msg.setStandardButtons(QtGui.QMessageBox.Ok)
