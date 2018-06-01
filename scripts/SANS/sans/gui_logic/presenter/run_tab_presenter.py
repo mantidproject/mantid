@@ -31,7 +31,7 @@ from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.sans_batch import SANSCentreFinder
-from sans.gui_logic.models.create_state import create_states
+from sans.gui_logic.models.create_state import create_states, create_state_for_row
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
 

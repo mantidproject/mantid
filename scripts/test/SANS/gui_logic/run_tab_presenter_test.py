@@ -136,11 +136,11 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.beam_centre.hab_pos_2, -169.6)
 
         # Assert certain function calls
-        self.assertTrue(view.get_user_file_path.call_count == 3)
-        self.assertTrue(view.get_batch_file_path.call_count == 2)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
-        self.assertEqual(view.get_cell.call_count, 68)
+        self.assertEqual(view.get_user_file_path.call_count, 2)
+        self.assertEqual(view.get_batch_file_path.call_count, 1)  # called once for the sub presenter updates (masking table)  # noqa
+        self.assertEqual(view.get_cell.call_count, 34)
 
-        self.assertTrue(view.get_number_of_rows.call_count == 6)
+        self.assertEqual(view.get_number_of_rows.call_count, 3)
 
         # clean up
         remove_file(user_file_path)
@@ -169,7 +169,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Assert
-        self.assertTrue(view.add_row.call_count == 2)
+        self.assertEqual(view.add_row.call_count, 2)
         if use_multi_period:
             expected_first_row = "SampleScatter:SANS2D00022024,ssp:,SampleTrans:SANS2D00022048,stp:,SampleDirect:SANS2D00022048,sdp:," \
                                  "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,Sample Thickness:1.0"
