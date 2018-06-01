@@ -19,11 +19,12 @@ technical reports:
 
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
+import warnings
+warnings.simplefilter('always', UserWarning)
 
 # ------------------------------------------------------------------------------------------------- #
 # Chopper functions
 # ------------------------------------------------------------------------------------------------- #
-
 
 def tchop(freq, Ei, pslit, radius, rho):
     """
@@ -46,7 +47,8 @@ def tchop(freq, Ei, pslit, radius, rho):
         #area[idx] = pre * 0.60 * gamm[idx] * ((groot-2.00)**2) * (groot+8.00) / (groot+4.00)
     else:
         if gamm >= 4.00:
-            raise ValueError('PyChop: tchop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq))
+            warnings.warn('PyChop: tchop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq))
+            return np.nan
         if gamm <= 1.00:
             gsqr = (1.00-(gamm**2)**2 /10.00) / (1.00-(gamm**2)/6.00)
         else:
@@ -86,7 +88,8 @@ def achop(Ei, freq, dslat, pslit, radius, rho):
         area[idx] = pre * groot * ((groot-2.0)**2) * (groot+4.0)/6.0
     else:
         if gamm >= 4.00:
-            raise ValueError('PyChop: achop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq))
+            warnings.warn('PyChop: achop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq), UserWarning)
+            return np.nan
         else:
             if gamm <= 1.00:
                 f1 = 1.00-(gamm**2)/6.00

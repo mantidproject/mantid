@@ -14,13 +14,13 @@ import sys
 import re
 import numpy as np
 import os
+import warnings
 from .Instruments import Instrument
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
-
 
 class PyChopGui(QtGui.QMainWindow):
     """
@@ -172,8 +172,6 @@ class PyChopGui(QtGui.QMainWindow):
         """
         Calls routines to calculate the resolution / flux and to update the Matplotlib graphs.
         """
-        self.plot_flux_ei()
-        self.plot_flux_hz()
         try:
             if self.engine.getChopper() is None:
                 self.setChopper(self.widgets['ChopperCombo']['Combo'].currentText())
@@ -182,26 +180,40 @@ class PyChopGui(QtGui.QMainWindow):
             self.calculate()
             self.plot_res()
             self.plot_frame()
+            if self.errormess:
+                raise ValueError(self.errormess)
             if self.instSciAct.isChecked():
                 self.update_script()
         except ValueError as err:
             self.errormessage(err)
+        self.plot_flux_ei()
+        self.plot_flux_hz()
 
     def calculate(self):
         """
         Performs the resolution and flux calculations.
         """
+        self.errormess = None
         if self.engine.getEi() is None:
             self.setEi()
         if self.widgets['MultiRepCheck'].isChecked():
             en = np.linspace(0, 0.95, 200)
             self.eis = self.engine.getAllowedEi()
-            self.res = self.engine.getMultiRepResolution(en)
-            self.flux = self.engine.getMultiRepFlux()
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter('always', UserWarning)
+                self.res = self.engine.getMultiRepResolution(en)
+                self.flux = self.engine.getMultiRepFlux()
+                if len(w) > 1:
+                    mess = [str(w[i].message) for i in range(len(w))]
+                    self.errormess = '\n'.join([m for m in mess if 'tchop' in m])
         else:
             en = np.linspace(0, 0.95*self.engine.getEi(), 200)
-            self.res = self.engine.getResolution(en)
-            self.flux = self.engine.getFlux()
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter('always', UserWarning)
+                self.res = self.engine.getResolution(en)
+                self.flux = self.engine.getFlux()
+                if len(w) > 1:
+                    raise ValueError(w[0].message)
 
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
@@ -219,6 +231,7 @@ class PyChopGui(QtGui.QMainWindow):
         overplot = self.widgets['HoldCheck'].isChecked()
         multiplot = self.widgets['MultiRepCheck'].isChecked()
         self._set_overplot(overplot, 'resaxes')
+        self._set_overplot(overplot, 'qeaxes')
         inst = self.engine.instname
         freq = self.engine.getFrequency()
         if hasattr(freq, '__len__'):
@@ -306,21 +319,19 @@ class PyChopGui(QtGui.QMainWindow):
             self.flxaxes2.hold(True)
             for ii, instrument in enumerate(tmpinst):
                 for ie, ei in enumerate(eis):
-                    try:
+                    with warnings.catch_warnings(record=True) as w:
+                        warnings.simplefilter('always', UserWarning)
                         flux[ie] = instrument.getFlux(ei)
                         elres[ie] = instrument.getResolution(0., ei)[0]
-                    except ValueError:
-                        pass
                 self.flxaxes1.plot(eis, flux)
                 line, = self.flxaxes2.plot(eis, elres)
                 line.set_label(labels[ii])
         else:
             for ie, ei in enumerate(eis):
-                try:
+                with warnings.catch_warnings(record=True) as w:
+                    warnings.simplefilter('always', UserWarning)
                     flux[ie] = self.engine.getFlux(ei)
                     elres[ie] = self.engine.getResolution(0., ei)[0]
-                except ValueError:
-                    pass
             if overplot:
                 self.flxaxes1.hold(True)
                 self.flxaxes2.hold(True)
@@ -379,15 +390,14 @@ class PyChopGui(QtGui.QMainWindow):
         flux = np.zeros(len(freqs))
         elres = np.zeros(len(freqs))
         for ie, freq in enumerate(freqs):
-            try:
-                if hasattr(freq0, '__len__'):
-                    self.setFreq(manual_freq=[freq] + freq0[1:])
-                else:
-                    self.setFreq(manual_freq=freq)
+            if hasattr(freq0, '__len__'):
+                self.setFreq(manual_freq=[freq] + freq0[1:])
+            else:
+                self.setFreq(manual_freq=freq)
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter('always', UserWarning)
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0., ei)[0]
-            except ValueError:
-                pass
         if overplot:
             self.frqaxes1.hold(True)
             self.frqaxes2.hold(True)
