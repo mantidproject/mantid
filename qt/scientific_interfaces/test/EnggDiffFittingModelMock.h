@@ -44,8 +44,9 @@ public:
   MOCK_METHOD2(enggFitPeaks, void(const RunLabel &runLabel,
                                   const std::string &expectedPeaks));
 
-  MOCK_CONST_METHOD2(saveDiffFittingAscii, void(const RunLabel &runLabel,
-                                                const std::string &filename));
+  MOCK_CONST_METHOD2(saveFitResultsToHDF5,
+                     void(const std::vector<RunLabel> &runLabels,
+                          const std::string &filename));
 
   MOCK_METHOD1(createFittedPeaksWS, void(const RunLabel &runLabel));
 

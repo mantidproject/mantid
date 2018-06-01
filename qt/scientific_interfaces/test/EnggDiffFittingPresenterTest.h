@@ -37,7 +37,7 @@ private:
   void startAsyncFittingWorker(const std::vector<RunLabel> &runLabels,
                                const std::string &ExpectedPeaks) override {
     assert(runLabels.size() == 1);
-    doFitting(runLabels[0], ExpectedPeaks);
+    doFitting(runLabels, ExpectedPeaks);
     fittingFinished();
   }
 };

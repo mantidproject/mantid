@@ -25,9 +25,9 @@ digraph QENSFitSequential {
     FitWorkspaces
     NormalisedCovarianceWorkspace
     ParameterNames
-	OutputWorkspace
-	OutputParameterWorkspace
-	OutputWorkspaceGroup
+    OutputWorkspace
+    OutputParameterWorkspace
+    OutputWorkspaceGroup
     SampleLog
   }
 
