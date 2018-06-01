@@ -21,8 +21,8 @@ set ( TEST_FILES
   workbench/test/test_import.py
 )
 
+set ( PYUNITTEST_QT_API pyqt5)
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
   workbench ${TEST_FILES}
 )
-
 # Not installed yet...
