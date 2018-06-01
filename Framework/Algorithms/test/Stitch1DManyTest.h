@@ -1149,7 +1149,9 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_input_manualScaleFactors() {
+  void test_MatrixWorkspace_inputs_manualScaleFactors() {
+    // If the input workspaces are MatrixWorkspaces and not WorkspaceGroups, the
+    // user must specify ManualScaleFactors if UseManualScaleFactors is true.
     createUniformWorkspace(0.1, 0.1, 1., 2., "ws1", true);
     createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2", true);
     Stitch1DMany alg;
