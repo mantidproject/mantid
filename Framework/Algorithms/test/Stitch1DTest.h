@@ -356,7 +356,7 @@ public:
     TS_ASSERT_EQUALS(scaleFactor, 1. / 3.);
   }
 
-  void test_histogram_workspaces_pass() {
+  void test_histogram_data_input_workspaces_not_modified() {
     auto ws1 = make_arbitrary_histogram_ws();
     const auto &x = HistogramX(3, LinearGenerator(-1.2, 0.2));
     const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
