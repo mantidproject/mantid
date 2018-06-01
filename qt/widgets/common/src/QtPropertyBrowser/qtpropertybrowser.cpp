@@ -211,8 +211,8 @@ QtAbstractPropertyManager *QtProperty::propertyManager() const {
    Checks if a property exists
    @return if the property exists
 */
-bool QtAbstractPropertyManager::hasProperty(QtProperty*const prop) const {
-	return d_ptr->m_properties.contains(prop);
+bool QtAbstractPropertyManager::hasProperty(QtProperty *const prop) const {
+  return d_ptr->m_properties.contains(prop);
 }
 /**
     Returns the property's  tool tip.

@@ -164,7 +164,7 @@ public:
 
   QSet<QtProperty *> properties() const;
   void clear() const;
-  bool hasProperty(QtProperty*const prop) const;
+  bool hasProperty(QtProperty *const prop) const;
 
   QtProperty *addProperty(const QString &name = QString());
 Q_SIGNALS:

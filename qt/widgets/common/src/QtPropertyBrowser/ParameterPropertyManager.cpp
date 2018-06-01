@@ -77,11 +77,11 @@ void ParameterPropertyManager::setDescription(QtProperty *property,
  * @param property :: Property to clear error for
  */
 void ParameterPropertyManager::clearError(QtProperty *property) {
-		m_errors.remove(property);
-		if (hasProperty(property)) {
-			emit propertyChanged(property);
-			updateTooltip(property);
-		}
+  m_errors.remove(property);
+  if (hasProperty(property)) {
+    emit propertyChanged(property);
+    updateTooltip(property);
+  }
 }
 
 /**
