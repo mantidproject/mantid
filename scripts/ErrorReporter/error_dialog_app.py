@@ -19,12 +19,12 @@ from ErrorReporter.errorreport import CrashReportPage # noqa
 
 def main():
     if not UsageService.isEnabled():
-        return
+        return int(command_line_args.exit_code)
     app = QtGui.QApplication(sys.argv)
     form = CrashReportPage(show_continue_terminate=False)
     ErrorReporterPresenter(form, command_line_args.exit_code)
     app.exec_()
-
+    return int(command_line_args.exit_code)
 
 if __name__ == '__main__':              # if we're running file directly and not importing it
-    main()                              # run the main function
+    sys.exit(main())                              # run the main function
