@@ -26,13 +26,14 @@ class PlotSelectorView(QWidget):
     The view to the plot selector, a PyQt widget.
     """
 
-    keyPressed = Signal(int)
+    # A signal to capture when delete is pressed
+    deleteKeyPressed = Signal(int)
 
     def __init__(self, presenter, parent=None):
         """
         Initialise a new instance of PlotSelectorWidget
-        :param presenter: The presenter that created this class
-        :param parent: A parent QWidget
+        :param presenter: The presenter controlling this view
+        :param parent: Optional - the parent QWidget
         """
         super(PlotSelectorView, self).__init__(parent)
         self.presenter = presenter
@@ -61,21 +62,26 @@ class PlotSelectorView(QWidget):
         self.list_view.doubleClicked.connect(self.presenter.list_double_clicked)
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
         self.close_button.clicked.connect(self.presenter.close_action_called)
-        self.keyPressed.connect(self.presenter.close_action_called)
+        self.deleteKeyPressed.connect(self.presenter.close_action_called)
 
     def keyPressEvent(self, event):
         """
+        This overrides keyPressEvent from QWidget to emit a signal
+        whenever the delete key is pressed.
+
         This might be better to override on list_view, but there is
         only ever an active selection when focused on the list.
+        :param event: A QKeyEvent holding the key that was pressed
         """
         super(PlotSelectorView, self).keyPressEvent(event)
         if event.key() == Qt.Key_Delete:
-            self.keyPressed.emit(event.key())
+            self.deleteKeyPressed.emit(event.key())
 
     def _make_filter_box(self):
         """
-        Make the filter by plot name box
-        :return: A QLineEdit object with text and a clear button
+        Make the text box to filter the plots by name
+        :return: A QLineEdit object with placeholder text and a
+                 clear button
         """
         text_box = QLineEdit(self)
         text_box.setPlaceholderText("Filter Plots")
@@ -108,6 +114,11 @@ class PlotSelectorView(QWidget):
             self.list_view.model().appendRow(item)
 
     def get_all_selected_plot_names(self):
+        """
+        Returns a list with the names of all the currently selected
+        plots
+        :return: A list of strings with the plot names (figure titles)
+        """
         selected = self.list_view.selectedIndexes()
         selected_plots = []
         for item in selected:
@@ -115,8 +126,17 @@ class PlotSelectorView(QWidget):
         return selected_plots
 
     def get_currently_selected_plot_name(self):
+        """
+        Returns a string with the plot name for the currently active
+        plot
+        :return: A string with the plot name (figure title)
+        """
         index = self.list_view.currentIndex()
         return index.data(Qt.DisplayRole)
 
     def get_filter_text(self):
+        """
+        Returns the currently set text in the filter box
+        :return: A string with current filter text
+        """
         return self.filter_box.text()

@@ -167,6 +167,12 @@ class GlobalFigureManager(object):
 
     @classmethod
     def get_figure_number_from_name(cls, figure_title):
+        """
+        Returns the figure number corresponding to the figure title
+        passed in as a string
+        :param figure_title: A String containing the figure title
+        :return: The figure number (int)
+        """
         for num, figure_manager in cls.figs.items():
             if figure_manager.get_window_title() == figure_title:
                 return num
@@ -174,6 +180,12 @@ class GlobalFigureManager(object):
 
     @classmethod
     def get_figure_manager_from_name(cls, figure_title):
+        """
+        Returns the figure manager corresponding to the figure title
+        passed in as a string
+        :param figure_title: A String containing the figure title
+        :return: The figure manager
+        """
         for figure_manager in cls.figs.values():
             if figure_manager.get_window_title() == figure_title:
                 return figure_manager
@@ -185,10 +197,18 @@ class GlobalFigureManager(object):
 
     @classmethod
     def add_observer(cls, observer):
+        """
+        Add an observer to this class - this can be any class with a
+        notify() method
+        :param observer: A class with a notify method
+        """
         cls.observers.append(observer)
 
     @classmethod
     def notify_observers(cls):
+        """
+        Calls notify method on all observers
+        """
         for observer in cls.observers:
             observer.notify()
 

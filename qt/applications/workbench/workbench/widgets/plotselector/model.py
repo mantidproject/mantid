@@ -20,13 +20,15 @@ from __future__ import absolute_import, print_function
 class PlotSelectorModel(object):
     """
     This is the model for the plot selector widget. Essentially this
-    is just a thin wrapper to the true model - CurrentFigure.
+    is just a wrapper to the true model - GlobalFigureManager.
     """
-
     def __init__(self, presenter, global_figure_manager):
         """
-        Initialise a new instance of PlotSelectorModel
-        :param presenter: A presenter controlling this model.
+        Initialise the model, keeping references to the presenter and
+        GlobalFigureManager
+        :param presenter: The presenter controlling this model
+        :param global_figure_manager: The GlobalFigureManager
+                                      singleton controlling plotting
         """
         self.GlobalFigureManager = global_figure_manager
         self.presenter = presenter
@@ -37,20 +39,42 @@ class PlotSelectorModel(object):
         self.GlobalFigureManager.add_observer(self)
 
     def update_plot_list(self):
+        """
+        Update the list of plots that is stored in this class, by
+        getting the list from the GlobalFigureManager
+        """
         self.plot_list = []
         figures = self.GlobalFigureManager.get_all_fig_managers()
         for figure in figures:
             self.plot_list.append(figure.get_window_title())
 
     def notify(self):
+        """
+        This is called by GlobalFigureManager when plots are created
+        or destroyed. This calls the presenter to update the plot
+        list in the model and the view.
+        :return:
+        """
         self.presenter.update_plot_list()
 
     def make_plot_active(self, plot_name):
+        """
+        For a given plot name make this plot active - bring it to the
+        front and make it the destination for overplotting
+        :param plot_name: A string with the name of the plot
+                          (figure title)
+        """
         figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
         if figure_manager is not None:
             figure_manager.show()
 
     def close_plot(self, plot_name):
+        """
+        For a given plot close and remove all reference in the
+        GlobalFigureManager
+        :param plot_name: A string with the name of the plot
+                          (figure title)
+        """
         figure_number_to_close = self.GlobalFigureManager.get_figure_number_from_name(plot_name)
         if figure_number_to_close is not None:
             self.GlobalFigureManager.destroy(figure_number_to_close)
