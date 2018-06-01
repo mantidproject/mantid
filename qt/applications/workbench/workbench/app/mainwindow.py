@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
         default_layout = {
             'widgets': [
                 # column 0
-                [[workspacewidget], [algorithm_selector], [plot_selector]],
+                [[workspacewidget, plot_selector], [algorithm_selector]],
                 # column 1
                 [[editor, ipython]],
                 # column 2
@@ -298,7 +298,7 @@ class MainWindow(QMainWindow):
             'width-fraction': [0.25,            # column 0 width
                                0.50,            # column 1 width
                                0.25],           # column 2 width
-            'height-fraction': [[0.34, 0.33, 0.33],     # column 0 row heights
+            'height-fraction': [[0.5, 0.5],     # column 0 row heights
                                 [1.0],          # column 1 row heights
                                 [1.0]]          # column 2 row heights
         }
