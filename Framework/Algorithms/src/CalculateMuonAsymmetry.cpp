@@ -114,12 +114,12 @@ namespace Mantid {
 				validationOutput["ReNormalizedWorkspaceList"] = "The ReNormalizedWorkspaceList and UnNormalizedWorkspaceList must contain the same number of workspaces.";
 			}
 			API::IFunction_sptr tmp = getProperty("InputFunction");
-			auto function = boost::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
-			//if (function->getNumberDomains() != normWS.size()) {
-			//	validationOutput["FittingFunction"] = "The Fitting function does not have the same number of domains as the number of domains to fit.";
-			//}
+			auto function = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
+			if (function->getNumberDomains() != normWS.size()) {
+				validationOutput["InputFunction"] = "The Fitting function does not have the same number of domains as the number of domains to fit.";
+			}
 
-			// check norm table is correct -> move this to helper
+			// check norm table is correct -> move this to helper when move muon algs to muon folder
 			API::ITableWorkspace_const_sptr tabWS = getProperty("NormalisationTable");
 
 			if (tabWS->columnCount() == 0) {
@@ -241,40 +241,44 @@ namespace Mantid {
 			std::string fitStatus = fit->getProperty("OutputStatus");
 
 			API::IFunction_sptr tmp = fit->getProperty("Function");
-			
-			if (wsNames.size() == 1) {
-				// N(1+g) + exp
-				auto result = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
+			try {
+				if (wsNames.size() == 1) {
+					// N(1+g) + exp
+					auto result = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
 
-				// getFunction(0) -> N(1+g)
-				auto TFFunc =
-					boost::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(0));
+					// getFunction(0) -> N(1+g)
+					auto TFFunc =
+						boost::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(0));
 
-				// getFunction(0) -> N
-				TFFunc =
-					boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
-				double norm = TFFunc->getParameter("f0.A0");
-				norms.push_back(norm);
+					// getFunction(0) -> N
+					TFFunc =
+						boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
+					double norm = TFFunc->getParameter("f0.A0");
+					norms.push_back(norm);
+				}
+				else {
+					auto result = boost::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
+					for (size_t j = 0; j < wsNames.size(); j++) {
+						// get domain
+						auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(j));
+						// N(1+g) + exp
+						TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
+
+						// getFunction(0) -> N(1+g)
+						TFFunc =
+							boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
+
+						// getFunction(0) -> N
+						TFFunc =
+							boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
+						double norm = TFFunc->getParameter("f0.A0");
+						norms.push_back(norm);
+					}
+				}
 			}
-			else {
-				auto result = boost::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
-			for (size_t j = 0; j < wsNames.size(); j++) {
-				// get domain
-				auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(j));
-				// N(1+g) + exp
-				TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
-
-				// getFunction(0) -> N(1+g)
-				TFFunc =
-					boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
-
-				// getFunction(0) -> N
-				TFFunc =
-					boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
-				double norm = TFFunc->getParameter("f0.A0");
-				norms.push_back(norm);
+			catch (...) {
+				throw std::invalid_argument("The fitting function is not of the expected form. Try using ConvertFitFunctionForMuonTFAsymmetry");
 			}
-		}
   return norms;
 }
 
