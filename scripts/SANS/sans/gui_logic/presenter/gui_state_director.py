@@ -58,6 +58,9 @@ class GuiStateDirector(object):
         if output_name:
             state_gui_model.output_name = output_name
 
+        if table_index_model.sample_thickness:
+            state_gui_model.sample_thickness = float(table_index_model.sample_thickness)
+
         # 4. Create the rest of the state based on the builder.
         user_file_state_director = StateDirectorISIS(data, file_information)
         settings = copy.deepcopy(state_gui_model.settings)
@@ -100,5 +103,5 @@ class GuiStateDirector(object):
         if "WavelengthMax" in options.keys():
             state_gui_model.wavelength_max = options["WavelengthMax"]
 
-        if "Thickness" in options.keys():
-            state_gui_model.sample_thickness = options["Thickness"]
+        if "EventSlices" in options.keys():
+            state_gui_model.event_slices = options["EventSlices"]

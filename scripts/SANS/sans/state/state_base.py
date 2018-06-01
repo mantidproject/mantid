@@ -74,6 +74,12 @@ def all_list_elements_are_float_and_not_empty(value):
     return typed_comparison(value)
 
 
+def all_list_elements_are_float_and_positive_and_not_empty(value):
+    typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=float,
+                               additional_comparison=lambda x: x >= 0)
+    return typed_comparison(value)
+
+
 def all_list_elements_are_string_and_not_empty(value):
     typed_comparison = partial(all_list_elements_are_of_instance_type_and_not_empty, comparison_type=str)
     return typed_comparison(value)
@@ -200,8 +206,8 @@ class ClassTypeParameter(TypedParameter):
     def _type_check(self, value):
         if not issubclass(value, self.parameter_type):
             raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
-                                                                               str(value), type(value)))
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
 
 
 class FloatWithNoneParameter(TypedParameter):
@@ -211,8 +217,8 @@ class FloatWithNoneParameter(TypedParameter):
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type) and value is not None:
             raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
-                                                                               str(value), type(value)))
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
 
 
 class StringWithNoneParameter(TypedParameter):
@@ -222,8 +228,8 @@ class StringWithNoneParameter(TypedParameter):
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type) and value is not None:
             raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
-                                                                               str(value), type(value)))
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
 
 
 class PositiveFloatWithNoneParameter(TypedParameter):
@@ -233,8 +239,8 @@ class PositiveFloatWithNoneParameter(TypedParameter):
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type) and value is not None:
             raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
-                                                                               str(value), type(value)))
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
 
 
 class FloatListParameter(TypedParameter):
@@ -244,8 +250,20 @@ class FloatListParameter(TypedParameter):
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type) or not all_list_elements_are_float_and_not_empty(value):
             raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
-                                                                               str(value), type(value)))
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
+
+
+class PositiveFloatListParameter(TypedParameter):
+    def __init__(self):
+        super(PositiveFloatListParameter, self).__init__(list, all_list_elements_are_float_and_positive_and_not_empty)
+
+    def _type_check(self, value):
+
+        if not isinstance(value, self.parameter_type) or not all_list_elements_are_float_and_not_empty(value):
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
 
 
 class StringListParameter(TypedParameter):
@@ -255,8 +273,8 @@ class StringListParameter(TypedParameter):
         def _type_check(self, value):
             if not isinstance(value, self.parameter_type) or not all_list_elements_are_string_and_not_empty(value):
                 raise TypeError("Trying to set {0} which expects a value of type {1}."
-                                " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
-                                                                                   str(value), type(value)))
+                                " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                                   value, type(value)))
 
 
 class PositiveIntegerListParameter(TypedParameter):
@@ -267,8 +285,8 @@ class PositiveIntegerListParameter(TypedParameter):
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type) or not all_list_elements_are_int_and_not_empty(value):
             raise TypeError("Trying to set {0} which expects a value of type {1}."
-                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
-                                                                               str(value), type(value)))
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
 
 
 class ClassTypeListParameter(TypedParameter):
