@@ -57,5 +57,5 @@ HAB_CAN_SUFFIX = "_hab_can"
 HAB_CAN_COUNT_SUFFIX = "_hab_can_count"
 HAB_CAN_NORM_SUFFIX = "_hab_can_norm"
 
-REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION = "can_sample_workspaces_from_merged_reduction"
+REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION = "LAB_and_HAB_workspaces_from_merged_reduction"
 REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION = "reduced_can_and_partial_can_workspaces"
