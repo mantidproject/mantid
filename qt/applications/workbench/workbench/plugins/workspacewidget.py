@@ -24,11 +24,12 @@ from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger
 from mantidqt.widgets.workspacewidget.plotselectiondialog import get_plot_selection
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from qtpy.QtWidgets import QVBoxLayout
+from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import pcolormesh, plot
+from workbench.plotting.figuretype import figure_type, FigureType
+from workbench.plotting.functions import current_figure_or_none, pcolormesh, plot
 
 LOGGER = Logger(b"workspacewidget")
 
@@ -106,8 +107,14 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         :param errors: If true then error bars will be plotted on the points
         :param overplot: If true then the add to the current figure if one
-                         exists
+                         exists and it is a compatible figure
         """
+        if overplot:
+            compatible, error_msg = self._can_overplot()
+            if not compatible:
+                QMessageBox.warning(self, "", error_msg)
+                return
+
         try:
             selection = get_plot_selection(_workspaces_from_names(names), self)
             if selection is not None:
@@ -129,3 +136,22 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _can_overplot(self):
+        """
+        Checks if overplotting can proceed with the given options
+
+        :return: A 2-tuple of boolean indicating compatability and
+        a string containing an error message if the current figure is not
+        compatible.
+        """
+        compatible = False
+        msg = "Unable to overplot on currently active plot type.\n" \
+              "Please select another plot."
+        fig = current_figure_or_none()
+        if fig is not None:
+            figtype = figure_type(fig)
+            if figtype is FigureType.Line or figtype is FigureType.Errorbar:
+                compatible, msg = True, None
+
+        return compatible, msg

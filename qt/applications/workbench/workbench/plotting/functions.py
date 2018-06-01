@@ -68,6 +68,17 @@ def _validate_pcolormesh_inputs(workspaces):
         raise_if_not_sequence(workspaces, 'Workspaces')
 
 
+def current_figure_or_none():
+    """If an active figure exists then return it otherwise return None
+
+    :return: An active figure or None
+    """
+    if len(plt.get_fignums()) > 0:
+        return plt.gcf()
+    else:
+        return None
+
+
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False):
     """
