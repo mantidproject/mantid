@@ -73,6 +73,7 @@ detector:
   dd: 0.025                     # Detector depth (diameter for tube) in metres
   tbin: 0.0                     # Detector time bins (microseconds)
   phi: 0.0                      # Detector scattering angle (degrees)
+  tthlims: [2.838, 135.69]      # Min and max 2-theta angles of detectors (for Q-E plot)
 
 moderator:
   name: AP                      # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations

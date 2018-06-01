@@ -110,6 +110,7 @@ detector:
   dd: 0.025                     # Detector depth (diameter for tube) in metres
   tbin: 0.0                     # Detector time bins (microseconds)
   phi: 0.0                      # Detector scattering angle (degrees)
+  tthlims: [3.43, 29.14, 30.86, 44.14, 45.86, 59.15, 60.86, 74.14, 75.86, 89.14, 90.86, 104.14, 105.86, 119.14, 120.86, 134.14]
 
 moderator:
   name: CH4                     # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations

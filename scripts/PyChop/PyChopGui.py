@@ -45,7 +45,8 @@ class PyChopGui(QtGui.QMainWindow):
                 self.maxE[instobj.name] = instobj.emax
         self.drawLayout()
         self.setInstrument(self.instruments.keys()[0])
-        self.xlim = 0
+        self.resaxes_xlim = 0
+        self.qeaxes_xlim = 0
         self.isFramePlotted = 0
 
     def setInstrument(self, instname):
@@ -109,6 +110,9 @@ class PyChopGui(QtGui.QMainWindow):
                 cb[idx].setCurrentIndex([i for i in range(cb[idx].count()) if str(freq) in cb[idx].itemText(i)][0])
                 if idx > 1:
                     break
+        self.tabs.setTabEnabled(self.qetabID, False)
+        if self.engine.has_detector and hasattr(self.engine.detector, 'tthlims'):
+            self.tabs.setTabEnabled(self.qetabID, True)
 
     def setChopper(self, choppername):
         """
@@ -191,6 +195,7 @@ class PyChopGui(QtGui.QMainWindow):
             self.setEi()
         if self.widgets['MultiRepCheck'].isChecked():
             en = np.linspace(0, 0.95, 200)
+            self.eis = self.engine.getAllowedEi()
             self.res = self.engine.getMultiRepResolution(en)
             self.flux = self.engine.getMultiRepFlux()
         else:
@@ -198,53 +203,72 @@ class PyChopGui(QtGui.QMainWindow):
             self.res = self.engine.getResolution(en)
             self.flux = self.engine.getFlux()
 
+    def _set_overplot(self, overplot, axisname):
+        axis = getattr(self, axisname)
+        if overplot:
+            axis.hold(True)
+        else:
+            setattr(self, axisname+'_xlim', 0)
+            axis.clear()
+            axis.axhline(color='k')
+
     def plot_res(self):
         """
         Plots the resolution in the resolution tab
         """
         overplot = self.widgets['HoldCheck'].isChecked()
         multiplot = self.widgets['MultiRepCheck'].isChecked()
-        if overplot:
-            self.resaxes.hold(True)
-        else:
-            self.xlim = 0
-            self.resaxes.clear()
-            self.resaxes.axhline(color='k')
+        self._set_overplot(overplot, 'resaxes')
+        inst = self.engine.instname
+        freq = self.engine.getFrequency()
+        if hasattr(freq, '__len__'):
+            freq = freq[0]
         if multiplot:
-            Eis = self.engine.getAllowedEi()
-            inst = self.engine.instname
-            freq = self.engine.getFrequency()
-            if hasattr(freq, '__len__'):
-                freq = freq[0]
             self.resaxes.hold(True)
-            for ie, Ei in enumerate(Eis):
+            for ie, Ei in enumerate(self.eis):
                 en = np.linspace(0, 0.95*Ei, 200)
                 if any(self.res[ie]):
                     if not self.flux[ie]:
                         continue
                     line, = self.resaxes.plot(en, self.res[ie])
-                    line.set_label('%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, Ei, freq, self.flux[ie]))
-                    if Ei > self.xlim:
-                        self.xlim = Ei
+                    label_text = '%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, Ei, freq, self.flux[ie])
+                    line.set_label(label_text)
+                    if self.tabs.isTabEnabled(self.qetabID):
+                        self.plot_qe(Ei, label_text, hold=True)
+                    self.resaxes_xlim = max(Ei, self.resaxes_xlim)
             self.resaxes.hold(False)
         else:
-            en = np.linspace(0, 0.95*self.engine.getEi(), 200)
-            line, = self.resaxes.plot(en, self.res)
-            inst = self.engine.instname
-            chopper = self.engine.getChopper()
             ei = self.engine.getEi()
-            freq = self.engine.getFrequency()
-            if hasattr(freq, '__len__'):
-                freq = freq[0]
-            line.set_label('%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux))
-            if ei > self.xlim:
-                self.xlim = ei
-        self.resaxes.set_xlim([0, self.xlim])
-        lg = self.resaxes.legend()
-        lg.draggable()
+            en = np.linspace(0, 0.95*ei, 200)
+            line, = self.resaxes.plot(en, self.res)
+            chopper = self.engine.getChopper()
+            label_text = '%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux)
+            line.set_label(label_text)
+            if self.tabs.isTabEnabled(self.qetabID):
+                self.plot_qe(ei, label_text, overplot)
+            self.resaxes_xlim = max(ei, self.resaxes_xlim)
+        self.resaxes.set_xlim([0, self.resaxes_xlim])
+        self.resaxes.legend().draggable()
         self.resaxes.set_xlabel('Energy Transfer (meV)')
         self.resaxes.set_ylabel(r'$\Delta$E (meV FWHM)')
         self.rescanvas.draw()
+
+    def plot_qe(self, Ei, label_text, hold=False):
+        """ Plots the Q-E diagram """
+        from scipy import constants
+        E2q, meV2J = (2. * constants.m_n / (constants.hbar ** 2), constants.e / 1000.)
+        en = np.linspace(-Ei / 5., Ei, 100)
+        q2 = []
+        for tth in self.engine.detector.tthlims:
+            q = np.sqrt(E2q * (2 * Ei - en - 2 * np.sqrt(Ei * (Ei - en)) * np.cos(np.deg2rad(tth))) * meV2J) / 1e10
+            q2.append(np.concatenate((np.flipud(q), q)))
+        self._set_overplot(hold, 'qeaxes')
+        self.qeaxes_xlim = max(np.max(q2), self.qeaxes_xlim)
+        line, = self.qeaxes.plot(np.hstack(q2), np.concatenate((np.flipud(en), en)).tolist() * len(self.engine.detector.tthlims))
+        line.set_label(label_text)
+        self.qeaxes.set_xlim([0, self.qeaxes_xlim])
+        self.qeaxes.legend().draggable()
+        self.qecanvas.draw()
 
     def plot_flux_ei(self, **kwargs):
         """
@@ -501,7 +525,7 @@ class PyChopGui(QtGui.QMainWindow):
         txt += '# ------------------------------------------------------------- #\n'
         txt += '# Flux = %8.2f n/cm2/s\n' % (flux)
         txt += '# Elastic resolution = %6.2f meV\n' % (res[0])
-        txt += '# Time width at detector = %6.2f us, of which:\n' % (1e6*np.sqrt(tsqvan))
+        txt += '# Time width at sample = %6.2f us, of which:\n' % (1e6*np.sqrt(tsqvan))
         for ky, val in list(tsqdic.items()):
             txt += '#     %20s : %6.2f us\n' % (ky, 1e6*np.sqrt(val))
         txt += '# %s distances:\n' % (instname)
@@ -573,7 +597,7 @@ class PyChopGui(QtGui.QMainWindow):
                 chop_width = out['chopper'][ie]
                 mod_width = out['moderator'][ie]
                 new_str += 'Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ee, res * 1000, percent)
-                new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
+                new_str += 'FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
         else:
             ei =  self.engine.getEi()
             out = self.engine.getWidths()
@@ -582,7 +606,7 @@ class PyChopGui(QtGui.QMainWindow):
             chop_width = out['chopper']
             mod_width = out['moderator']
             new_str = '\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ei, res * 1000, percent)
-            new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
+            new_str += 'FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
         self.scredt.append(new_str)
 
     def onHelp(self):
@@ -773,6 +797,20 @@ class PyChopGui(QtGui.QMainWindow):
         self.reptabbox.addWidget(self.repfig_controls)
         self.reptab.setLayout(self.reptabbox)
 
+        self.qefig = Figure()
+        self.qefig.patch.set_facecolor('white')
+        self.qecanvas = FigureCanvas(self.qefig)
+        self.qeaxes = self.qefig.add_subplot(111)
+        self.qeaxes.axhline(color='k')
+        self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
+        self.qeaxes.set_ylabel('Energy Transfer (meV)')
+        self.qefig_controls = NavigationToolbar(self.qecanvas, self)
+        self.qetabbox = QtGui.QVBoxLayout()
+        self.qetabbox.addWidget(self.qecanvas)
+        self.qetabbox.addWidget(self.qefig_controls)
+        self.qetab = QtGui.QWidget(self.tabs)
+        self.qetab.setLayout(self.qetabbox)
+
         self.scrtab = QtGui.QWidget(self.tabs)
         self.scredt = QtGui.QTextEdit()
         self.scrcls = QtGui.QPushButton("Clear")
@@ -789,7 +827,10 @@ class PyChopGui(QtGui.QMainWindow):
         self.tabs.addTab(self.reptab, 'Time-Distance')
         self.tdtabID = 3
         self.tabs.setTabEnabled(self.tdtabID, False)
-        self.scrtabID = 4
+        self.tabs.addTab(self.qetab, 'Q-E')
+        self.qetabID = 4
+        self.tabs.setTabEnabled(self.qetabID, False)
+        self.scrtabID = 5
         self.rightPanel.addWidget(self.tabs)
 
         self.menuLoad = QtGui.QMenu('Load')

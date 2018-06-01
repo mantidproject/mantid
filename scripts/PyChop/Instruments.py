@@ -580,7 +580,7 @@ class Detector(object):
     Class which represents a sample shape
     """
 
-    __allowed_var_names = ['name', 'idet', 'dd', 'tbin', 'phi']
+    __allowed_var_names = ['name', 'idet', 'dd', 'tbin', 'phi', 'tthlims']
 
     def __init__(self, inval=None):
         wrap_attributes(self, inval, self.__allowed_var_names)
@@ -763,7 +763,7 @@ class Instrument(object):
         tsqape = apefac**2 * (self.aperture_width**2 / 12.) * SIGMA2FWHMSQ
         vsqvan = tsqmod + tsqchp + tsqjit + tsqape
         outdic = {'moderator': tsqmod, 'chopper': tsqchp, 'jitter': tsqjit, 'aperture': tsqape}
-        if self.has_detector:
+        if self.has_detector and hasattr(self.detector, 'idet'):
             phi = self.detector.phi_deg * np.pi / 180.
             tsqdet = (1. / vf)**2 * np.array([self.detector.getWidthSquared(Ei, en) for en in Etrans])
             vsqvan += tsqdet

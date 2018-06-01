@@ -118,6 +118,7 @@ detector:
   dd: 0.025                     # Detector depth (diameter for tube) in metres
   tbin: 0.0                     # Detector time bins (microseconds)
   phi: 0.0                      # Detector scattering angle (degrees)
+  tthlims: [1.997, 61.926]      # Min and max 2-theta angles of detectors (for Q-E plot)
 
 moderator:
   name: Ambient Water           # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
@@ -128,7 +129,7 @@ moderator:
   theta: -13.75                 # Angle beamline makes with moderator face (degrees)
   source_rep: 60                # Frequency of source (Hz)
   measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
-    scale_factor: 100000.0      # A factor to scale the flux values below by
+    scale_factor: 10000000      # A factor to scale the flux values below by
     wavelength: [0.0285984265, 0.2335051748, 0.2859842653, 0.310193488, 0.3418165757, 0.3856211047, 0.4521808267, 0.4834016372,
                  0.522133444, 0.5719685306, 0.6394802577, 0.6936137254, 0.7643250991, 0.8255654628, 0.9043616533, 0.9809179374,
                  1.0809189212, 1.2194410046, 1.4299213265, 1.5286501982, 1.6511309256, 1.8087233066, 2.0222141331, 2.3350517482]

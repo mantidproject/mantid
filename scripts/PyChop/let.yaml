@@ -104,6 +104,10 @@ chopper_system:
         -
           slot_width: 15
 
+detector:
+  name: LET detector banks
+  tthlims: [2.65, 140.0]        # Min and max 2-theta angles of detectors (for Q-E plot)
+
 moderator:
   name: TS2 Hydrogen            # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
                                 # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
