@@ -23,22 +23,22 @@ class PlotSelectorModel(object):
     is just a thin wrapper to the true model - CurrentFigure.
     """
 
-    def __init__(self, presenter, current_figure_class):
+    def __init__(self, presenter, global_figure_manager):
         """
         Initialise a new instance of PlotSelectorModel
         :param presenter: A presenter controlling this model.
         """
-        self.CurrentFigure = current_figure_class
+        self.GlobalFigureManager = global_figure_manager
         self.presenter = presenter
         self.plot_list = []
 
         # Register with CurrentFigure that we want to know of any
         # changes to the list of plots
-        self.CurrentFigure.add_observer(self)
+        self.GlobalFigureManager.add_observer(self)
 
     def update_plot_list(self):
         self.plot_list = []
-        figures = self.CurrentFigure.get_all_fig_managers()
+        figures = self.GlobalFigureManager.get_all_fig_managers()
         for figure in figures:
             self.plot_list.append(figure.get_window_title())
 
@@ -46,11 +46,11 @@ class PlotSelectorModel(object):
         self.presenter.update_plot_list()
 
     def make_plot_active(self, plot_name):
-        figure_manager = self.CurrentFigure.get_figure_manager_from_name(plot_name)
+        figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
         if figure_manager is not None:
             figure_manager.show()
 
     def close_plot(self, plot_name):
-        figure_number_to_close = self.CurrentFigure.get_figure_number_from_name(plot_name)
+        figure_number_to_close = self.GlobalFigureManager.get_figure_number_from_name(plot_name)
         if figure_number_to_close is not None:
-            self.CurrentFigure.destroy(figure_number_to_close)
+            self.GlobalFigureManager.destroy(figure_number_to_close)

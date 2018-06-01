@@ -151,6 +151,7 @@ class GlobalFigureManager(object):
                 cls._activeQue.append(m)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
+        cls.notify_observers()
 
     @classmethod
     def draw_all(cls, force=False):
@@ -177,12 +178,6 @@ class GlobalFigureManager(object):
             if figure_manager.get_window_title() == figure_title:
                 return figure_manager
         return None
-
-    @classmethod
-    def set_hold(cls, manager):
-        """If this manager is active then set inactive"""
-        if cls._active == manager:
-            cls._active = None
 
     # ---------------------- Observer methods ---------------------
     # This is currently very simple as the only observer is

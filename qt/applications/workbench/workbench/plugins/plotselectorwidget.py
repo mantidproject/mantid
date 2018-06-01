@@ -23,7 +23,7 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.currentfigure import CurrentFigure
+from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 
 
@@ -33,7 +33,7 @@ class PlotSelector(PluginWidget):
     def __init__(self, parent):
         super(PlotSelector, self).__init__(parent)
 
-        plot_selector_presenter = PlotSelectorPresenter(CurrentFigure)
+        plot_selector_presenter = PlotSelectorPresenter(GlobalFigureManager)
 
         # layout
         self.plot_selector_widget = plot_selector_presenter.widget
