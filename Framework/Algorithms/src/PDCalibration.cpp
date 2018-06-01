@@ -246,7 +246,7 @@ void PDCalibration::init() {
       "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
   declareProperty(
-      "ConstrainPeakPositions", true,
+      "ConstrainPeakPositions", false,
       "If true peak position will be constrained by estimated positions "
       "(highest Y value position) and "
       "the peak width either estimted by observation or calculate.");
@@ -473,8 +473,10 @@ void PDCalibration::exec() {
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);
   algFitPeaks->setProperty("HighBackground", false);
-  algFitPeaks->setProperty("ConstrainPeakPositions",
-                           false); // TODO Pete: need to test this option
+  bool constrainPeakPosition = getProperty("ConstrainPeakPositions");
+  algFitPeaks->setProperty(
+      "ConstrainPeakPositions",
+      constrainPeakPosition); // TODO Pete: need to test this option
   //  optimization setup // TODO : need to test LM or LM-MD
   algFitPeaks->setProperty("Minimizer", "Levenberg-Marquardt");
   algFitPeaks->setProperty("CostFunction", "Least squares");
