@@ -303,9 +303,11 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
       std::ceil((wavelengthRange.max - wavelengthRange.min) / binWidth));
   // Construct the histogram with these X values. Y and E values are zero.
   const HistogramData::BinEdges bins(
-      numBins + 1, HistogramData::LinearGenerator(wavelengthRange.min, binWidth));
+      numBins + 1,
+      HistogramData::LinearGenerator(wavelengthRange.min, binWidth));
   const HistogramData::Counts counts(numBins, 0.);
-  const HistogramData::Histogram modelHistogram(std::move(bins), std::move(counts));
+  const HistogramData::Histogram modelHistogram(std::move(bins),
+                                                std::move(counts));
   // Create the output workspace
   API::MatrixWorkspace_sptr outputWS =
       DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1,
@@ -361,8 +363,9 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
   const auto twoThetaMinRange = twoThetaWidth(twoThetaMin.first, spectrumInfo);
   // For bLambda, use the average bin size for this spectrum
   const auto minThetaEdges = detectorWS.binEdges(twoThetaMin.first);
-  double bLambda = (minThetaEdges[minThetaEdges.size() - 1] - minThetaEdges[0]) /
-                   static_cast<int>(minThetaEdges.size());
+  double bLambda =
+      (minThetaEdges[minThetaEdges.size() - 1] - minThetaEdges[0]) /
+      static_cast<int>(minThetaEdges.size());
   MinMax lambdaRange(lambdaMax - bLambda / 2., lambdaMax + bLambda / 2.);
   auto r = projectedLambdaRange(lambdaRange, twoThetaMinRange, refAngles);
   wavelengthRange.max = r.max;
@@ -395,14 +398,11 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
 * @param IvsLam [in,out] :: the output workspace
 * @param outputE [in,out] :: the projected E values
 */
-void ReflectometrySumInQ::processValue(const int inputIdx,
-                                       const MinMax &twoThetaRange,
-                                       const Angles &refAngles,
-                                       const HistogramData::BinEdges &edges,
-                                       const HistogramData::Counts &counts,
-                                       const HistogramData::CountStandardDeviations &stdDevs,
-                                       API::MatrixWorkspace &IvsLam,
-                                       std::vector<double> &outputE) {
+void ReflectometrySumInQ::processValue(
+    const int inputIdx, const MinMax &twoThetaRange, const Angles &refAngles,
+    const HistogramData::BinEdges &edges, const HistogramData::Counts &counts,
+    const HistogramData::CountStandardDeviations &stdDevs,
+    API::MatrixWorkspace &IvsLam, std::vector<double> &outputE) {
 
   // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = counts[inputIdx];
@@ -530,8 +530,8 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
     const int ySize = static_cast<int>(inputCounts.size());
     for (int inputIdx = 0; inputIdx < ySize; ++inputIdx) {
       // Do the summation in Q
-      processValue(inputIdx, twoThetaRange, refAngles, inputBinEdges, inputCounts, inputStdDevs,
-                   *IvsLam, projectedE);
+      processValue(inputIdx, twoThetaRange, refAngles, inputBinEdges,
+                   inputCounts, inputStdDevs, *IvsLam, projectedE);
     }
     // Sum errors in quadrature
     const int eSize = static_cast<int>(outputE.size());
