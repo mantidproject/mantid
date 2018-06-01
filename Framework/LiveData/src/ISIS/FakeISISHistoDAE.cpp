@@ -2,11 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
-#include <numeric>
 
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
-#include <Poco/Thread.h>
 
 namespace Mantid {
 namespace LiveData {
@@ -314,17 +312,6 @@ public:
 using namespace Kernel;
 using namespace API;
 
-/// (Empty) Constructor
-FakeISISHistoDAE::FakeISISHistoDAE() : m_server(nullptr) {}
-
-/// Destructor
-FakeISISHistoDAE::~FakeISISHistoDAE() {
-  if (m_server) {
-    m_server->stop();
-    delete m_server;
-  }
-}
-
 /**
  * Declare the algorithm properties
  */
@@ -352,16 +339,15 @@ void FakeISISHistoDAE::exec() {
   int nbins = getProperty("NBins");
   int port = getProperty("Port");
 
-  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
 
-  m_server = new Poco::Net::TCPServer(
+  Poco::Net::TCPServer server(
       TestServerConnectionFactory::Ptr(
           new TestServerConnectionFactory(nper, nspec, nbins)),
       socket);
-  m_server->start();
-  // Keep going until you get cancelled
+  server.start();
+  // Keep going until you get cancelled or an error occurs
   while (true) {
     try {
       // Exit if the user presses cancel
@@ -374,10 +360,10 @@ void FakeISISHistoDAE::exec() {
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
   }
-  if (m_server) {
-    m_server->stop();
-    m_server = nullptr;
-  }
+  // It's most likely that we got here from a cancel request
+  // so calling prog->report after this point
+  // will generate another CancelException
+  server.stop();
   socket.close();
 }
 

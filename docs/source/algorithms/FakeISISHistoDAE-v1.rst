@@ -36,20 +36,21 @@ Usage
     def captureLive():
         ConfigService.setFacility("TEST_LIVE")
 
-        # start a Live data listener updating every second, that rebins the data
-        # and replaces the results each time with those of the last second.
-        StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
-                      AccumulationMethod='Replace')
+        try:
+            # start a Live data listener updating every second, that rebins the data
+            # and replaces the results each time with those of the last second.
+            StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
+                          AccumulationMethod='Replace')
 
-        # give it a couple of seconds before stopping it
-        time.sleep(2)
-
-        # This will cancel both algorithms
-        # you can do the same in the GUI
-        # by clicking on the details button on the bottom right
-        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-        AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
-        time.sleep(1) # give them time to cancel
+            # give it a couple of seconds before stopping it
+            time.sleep(2)
+        finally:
+            # This will cancel both algorithms
+            # you can do the same in the GUI
+            # by clicking on the details button on the bottom right
+            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+            AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
+            time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 
     oldFacility = ConfigService.getFacility().name()

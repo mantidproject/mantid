@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from mantid.simpleapi import CreateWorkspace, RenameWorkspace
+from mantid.simpleapi import CreateWorkspace, Transpose, Multiply
 from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
@@ -36,34 +36,18 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
 
     def PyExec(self):
         input_ws = self.getProperty("InputWorkspace").value
-        efficiency_workspace = self.getProperty("DetectorEfficiencyWorkspace").value
-
-        y_values = input_ws.extractY()
-        y_values = y_values.reshape(y_values.size)
-        e_values = input_ws.extractE()
-        e_values = e_values.reshape(e_values.size)
-
-        efficiency_values = efficiency_workspace.extractY()
-        efficiency_values = efficiency_values.reshape(efficiency_values.size)
-
-        detector_info = input_ws.detectorInfo()
-        for i in range(detector_info.size()):
-            if detector_info.isMonitor(i):
-                efficiency_values = np.insert(efficiency_values, 0, 1) # add the monitor efficiency
-
-        if (y_values.size % efficiency_values.size) is not 0:
-            raise ValueError('Number of entries in input workspace is not a multiple of number of efficiencies in detector efficiency '
+        eff_ws = self.getProperty("DetectorEfficiencyWorkspace").value
+        transposed = Transpose(InputWorkspace=eff_ws, StoreInADS=False)
+        efficiencies = transposed.extractY().flatten()
+        errors = transposed.extractE().flatten()
+        n_hist = input_ws.getNumberHistograms()
+        if n_hist % efficiencies.size != 0:
+            raise ValueError('Number of histograms in input workspace is not a multiple of number of entries in detector efficiency '
                              'workspace.')
-        number_time_indexes = y_values.size / efficiency_values.size
-
-        full_efficiency_values = np.repeat(efficiency_values, number_time_indexes)
-        y_values *= full_efficiency_values
-        e_values *= full_efficiency_values
-
-        __output_ws = CreateWorkspace(DataX=input_ws.extractX(), DataY=y_values, DataE=e_values, Nspec=y_values.size,
-                                      ParentWorkspace=input_ws)
-
-        RenameWorkspace(__output_ws, self.getPropertyValue("OutputWorkspace"))
-        self.setProperty("OutputWorkspace", __output_ws)
+        n_time_indexes = n_hist / efficiencies.size
+        to_multiply = CreateWorkspace(DataY=np.repeat(efficiencies, n_time_indexes),DataE=np.repeat(errors, n_time_indexes),
+                                      DataX=np.zeros(n_hist), NSpec=n_hist, StoreInADS=False)
+        output = Multiply(LHSWorkspace=input_ws, RHSWorkspace=to_multiply, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
+        self.setProperty("OutputWorkspace", output)
 
 AlgorithmFactory.subscribe(ApplyDetectorScanEffCorr)

@@ -51,10 +51,14 @@ public:
 
   void onReductionPaused() override;
   void onReductionResumed() override;
+  void notifySliceTypeChanged(SliceType newSliceType) override;
 
 private:
+  std::string logFilterAndSliceValues(std::string const &slicingValues,
+                                      std::string const &logFilter) const;
   /// The view we are managing
   IReflEventView *m_view;
+  SliceType m_sliceType;
 };
 }
 }

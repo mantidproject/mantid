@@ -25,7 +25,11 @@ Usage
 
 **Example:**
 
-.. testcode:: exFakeISISEventDAE
+.. This test is currently hanging on macOS as the MonitorLiveData algorithm
+   is taking a long time to cancel
+.. .. testcode:: exFakeISISEventDAE
+
+.. code-block:: python
 
     from threading import Thread
     import time
@@ -42,20 +46,22 @@ Usage
     def captureLive():
         ConfigService.setFacility("TEST_LIVE")
 
-        # start a Live data listener updating every second, that rebins the data
-        # and replaces the results each time with those of the last second.
-        StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
-                      ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1',
-                      AccumulationMethod='Add', PreserveEvents=True)
+        try:
+            # start a Live data listener updating every second, that rebins the data
+            # and replaces the results each time with those of the last second.
+            StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
+                          ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1',
+                          AccumulationMethod='Add', PreserveEvents=True)
 
-        # give it a couple of seconds before stopping it
-        time.sleep(2)
-
-        # This will cancel both algorithms
-        # you can do the same in the GUI
-        # by clicking on the details button on the bottom right
-        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-        AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+            # give it a couple of seconds before stopping it
+            time.sleep(2)
+        finally:
+            # This will cancel both algorithms
+            # you can do the same in the GUI
+            # by clicking on the details button on the bottom right
+            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+            AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+            time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 
     oldFacility = ConfigService.getFacility().name()

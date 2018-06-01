@@ -4,6 +4,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -196,7 +197,8 @@ void FindPeaksMD::init() {
   auto nonNegativeDbl = boost::make_shared<BoundedValidator<double>>();
   nonNegativeDbl->setLower(0);
   declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
-                  "Wavelength to use when calculating goniometer angle");
+                  "Wavelength to use when calculating goniometer angle. If not"
+                  "set will use the wavelength parameter on the instrument.");
 
   setPropertySettings("Wavelength",
                       make_unique<EnabledWhenProperty>(
@@ -295,30 +297,22 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
     if (calcGoniometer) {
       // Calculate Q lab from Q sample and wavelength
       double wavelength = getProperty("Wavelength");
-      double wv = 2.0 * M_PI / wavelength;
-      double norm_q2 = Q.norm2();
-      double theta = acos(1 - norm_q2 / (2 * wv * wv));
-      double phi = asin(-Q[1] / wv * sin(theta));
-      V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
-                wv * (1 - cos(theta)));
+      if (wavelength == DBL_MAX) {
+        if (inst->hasParameter("wavelength")) {
+          wavelength = inst->getNumberParameter("wavelength").at(0);
+        } else {
+          throw std::runtime_error(
+              "Could not get wavelength, neither Wavelength algorithm property "
+              "set nor instrument wavelength parameter");
+        }
+      }
 
-      // Solve to find rotation matrix, assuming only rotation around y-axis
-      // A * X = B
-      Matrix<double> A({Q[0], Q[2], Q[2], -Q[0]}, 2, 2);
-      A.Invert();
-      std::vector<double> B{Q_lab[0], Q_lab[2]};
-      std::vector<double> X = A * B;
-      double rot = atan2(X[1], X[0]);
+      Geometry::Goniometer goniometer;
+      goniometer.calcFromQSampleAndWavelength(Q, wavelength);
       g_log.information() << "Found goniometer rotation to be "
-                          << rot * 180 / M_PI
-                          << " degrees for peak at Q sample = " << Q << "\n";
-
-      Matrix<double> goniometer(3, 3, true);
-      goniometer[0][0] = cos(rot);
-      goniometer[0][2] = sin(rot);
-      goniometer[2][0] = -sin(rot);
-      goniometer[2][2] = cos(rot);
-      p = boost::make_shared<Peak>(inst, Q, goniometer);
+                          << goniometer.getEulerAngles()[0]
+                          << " degrees for Q sample = " << Q << "\n";
+      p = boost::make_shared<Peak>(inst, Q, goniometer.getR());
 
     } else {
       p = boost::make_shared<Peak>(inst, Q, m_goniometer);
@@ -773,11 +767,6 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
                                     "can only be used with an MDEventWorkspace "
                                     "as the input.";
   }
-
-  double wavelength = getProperty("Wavelength");
-  if (getProperty("CalculateGoniometerForCW") && wavelength == DBL_MAX)
-    result["Wavelength"] =
-        "Must set wavelength when using CalculateGoniometerForCW option";
 
   return result;
 }

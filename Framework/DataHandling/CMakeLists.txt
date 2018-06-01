@@ -98,6 +98,7 @@
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadSampleShape.cpp
 	src/LoadSESANS.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
@@ -274,6 +275,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadSampleShape.h
 	inc/MantidDataHandling/LoadSESANS.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
@@ -446,6 +448,7 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
+	LoadSampleShapeTest.h
 	LoadSESANSTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h

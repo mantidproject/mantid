@@ -16,7 +16,7 @@ class PearlMCAbsorption(PythonAlgorithm):
 
     def seeAlso(self):
         return [ "MonteCarloAbsorption", "MayersSampleCorrection",
-                 "MultipleScatteringCylinderAbsorption", "VesuvioCalculateMS" ]
+                 "CarpenterSampleCorrection", "VesuvioCalculateMS" ]
 
     def PyInit(self):
         # Input file

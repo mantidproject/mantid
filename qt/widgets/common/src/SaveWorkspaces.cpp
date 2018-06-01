@@ -342,7 +342,7 @@ void SaveWorkspaces::saveSel() {
     } // end if save in this format
   }   // end loop over formats
 
-  saveCommands += "print 'success'";
+  saveCommands += "print('success')";
   QString status(runPythonCode(saveCommands).trimmed());
 
   if (m_saveAsZeroErrorFree) {

@@ -70,7 +70,7 @@ boost::shared_ptr<CSGObject> createCappedCylinder(double radius, double height,
 }
 
 void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
-                           std::string name = "moderator") {
+                           const std::string &name) {
   ObjComponent *source =
       new ObjComponent(name, IObject_sptr(new CSGObject), instrument.get());
   source->setPos(sourcePos);

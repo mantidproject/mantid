@@ -85,6 +85,8 @@ First calculate the :math:`\textbf{Q}_{lab}` using
 
 .. math:: \phi = \sin^{-1}(-\textbf{Q}_{sample}^y \sin(\theta)/k)
 
+where :math:`\theta` is from 0 to :math:`\pi` and  :math:`\phi` is from :math:`-\pi/2` to :math:`\pi/2`. This means that it will assume your detector position is on the left of the beam even it it's not.
+
 Now you have :math:`\theta`, :math:`\phi` and k you can get :math:`\textbf{Q}_{lab}` using (1).
 
 We need to now solve :math:`G \textbf{Q}_{sample} =

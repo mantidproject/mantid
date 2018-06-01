@@ -13,6 +13,7 @@ from sans.user_file.state_director import StateDirectorISIS
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.gui_logic.models.diagnostics_page_model import run_integral
+from sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------
@@ -72,13 +73,15 @@ class SANSDiagnosticPageTest(unittest.TestCase):
     def test_that_produces_correct_workspace_for_SANS2D(self):
         # Arrange
         # Build the data information
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00034484")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D00034484")
         data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_state)
+        user_file_director = StateDirectorISIS(data_state, file_information)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -104,13 +107,15 @@ class SANSDiagnosticPageTest(unittest.TestCase):
     def test_that_produces_correct_workspace_multiperiod_LARMOR(self):
         # Arrange
         # Build the data information
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("LARMOR00013065")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("LARMOR00013065")
         data_builder.set_calibration("80tubeCalibration_1-05-2015_r3157-3160.nxs")
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_state)
+        user_file_director = StateDirectorISIS(data_state, file_information)
         user_file_director.set_user_file("USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt")
 
         # Construct the final state

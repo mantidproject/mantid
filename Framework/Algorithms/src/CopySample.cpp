@@ -80,8 +80,8 @@ void CopySample::exec() {
 
   Sample sample;
   // get input sample
-  IMDEventWorkspace_const_sptr inMDWS =
-      boost::dynamic_pointer_cast<const IMDEventWorkspace>(inWS);
+  MultipleExperimentInfos_sptr inMDWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(inWS);
   if (inMDWS != nullptr) // it is an MD workspace
   {
     int inputSampleNumber = getProperty("MDInputSampleNumber");
@@ -116,9 +116,8 @@ void CopySample::exec() {
   bool copyOrientation = getProperty("CopyOrientationOnly");
 
   // Sample copy;
-
-  IMDEventWorkspace_sptr outMDWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+  MultipleExperimentInfos_sptr outMDWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(outWS);
   if (outMDWS != nullptr) {
     int outputSampleNumber = getProperty("MDOutputSampleNumber");
     if ((outputSampleNumber == EMPTY_INT()) ||

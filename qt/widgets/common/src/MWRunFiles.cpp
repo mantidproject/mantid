@@ -615,24 +615,21 @@ IAlgorithm_const_sptr MWRunFiles::stopLiveAlgorithm() {
  * of the thread, and emits fileFound() if it has been successful.
  */
 void MWRunFiles::inspectThreadResult(const FindFilesSearchResults &results) {
-  // Unpack the search results
-  const auto error = results.error;
-  const auto filenames = results.filenames;
-  const auto valueForProperty = results.valueForProperty;
+  // Update caches before we might exit early
+  m_cachedResults = results;
+  m_valueForProperty = QString::fromStdString(results.valueForProperty);
+  m_foundFiles.clear();
+  m_lastFoundFiles.clear();
 
-  // Get results from the file finding thread.
-  if (!error.empty()) {
-    setFileProblem(QString::fromStdString(error));
+  // Early exit on failure
+  if (!results.error.empty()) {
+    setFileProblem(QString::fromStdString(results.error));
     emit fileInspectionFinished();
     return;
   }
 
-  m_valueForProperty = QString::fromStdString(valueForProperty);
-  m_lastFoundFiles = m_foundFiles;
-  m_foundFiles.clear();
-
-  for (size_t i = 0; i < filenames.size(); ++i) {
-    m_foundFiles.append(QString::fromStdString(filenames[i]));
+  for (const auto &filename : results.filenames) {
+    m_foundFiles.append(QString::fromStdString(filename));
   }
   if (m_foundFiles.isEmpty() && !isOptional()) {
     setFileProblem(
@@ -650,8 +647,6 @@ void MWRunFiles::inspectThreadResult(const FindFilesSearchResults &results) {
     emit filesFound();
   if (m_lastFoundFiles != m_foundFiles)
     emit filesFoundChanged();
-
-  m_cachedResults = results;
 }
 
 /**

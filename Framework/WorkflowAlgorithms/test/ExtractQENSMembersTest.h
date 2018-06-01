@@ -178,7 +178,7 @@ private:
   createResultWorkspace(const std::vector<std::string> &members,
                         const std::vector<double> &dataX) const {
     MatrixWorkspace_sptr resultWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(
+        WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(
             static_cast<int>(members.size()), static_cast<int>(dataX.size()),
             dataX.data());
 

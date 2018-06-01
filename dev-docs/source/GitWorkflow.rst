@@ -85,6 +85,8 @@ When creating a pull request you should:
 
   - The title should **not** contain the issue number
 - `Reference the issue which the pull request is closing  <https://github.com/blog/1506-closing-issues-via-pull-requests>`_, using one of `these <https://help.github.com/articles/closing-issues-via-commit-messages>`_ keywords
+- State the user and facility (if relevant) who initiated the original issue, if they are named in the issue. Please do not put full email addresses on the Pull Request, as it is publicly accessible. 
+  If the user would not be easily identified by someone picking up the ticket, be prepared to act as a point of contact with the reporter.
 - Ensure the description follows the format described by the `PR
   template
   <https://github.com/mantidproject/mantid/blob/master/.github/PULL_REQUEST_TEMPLATE.md>`_
@@ -160,9 +162,7 @@ view shows changes other than your own it is most likely that the base
 branch is incorrect and it needs to be fixed.
 
 As an example consider the scenario where a branch named ``topic`` has
-been based off the ``master`` branch as follows:
-
-.. code-block:: bash
+been based off the ``master`` branch as follows::
 
    o---o---o---o---o  master
       |           \
@@ -171,9 +171,7 @@ been based off the ``master`` branch as follows:
         o---o---o---o---o  release
 
 where we actually want the ``topic`` branch based off ``release``
-instead i.e.
-
-.. code-block:: bash
+instead i.e. ::
 
    o---o---o---o---o  master
        \

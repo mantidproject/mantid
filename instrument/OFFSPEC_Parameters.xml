@@ -21,14 +21,6 @@
    <value val="14.0"/>
   </parameter>
 
-  <parameter name="PointDetectorStart">
-    <value val="3"/>
-  </parameter>
-
-  <parameter name="PointDetectorStop">
-    <value val="3"/>
-  </parameter>
-
   <parameter name="MultiDetectorStart">
   <!--
   This channel number is marks the start of all other linear and/or area detectors.
@@ -48,13 +40,27 @@
     <value val="14.0"/>
   </parameter>
   
-  <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
-    <value val="10"/>
+  <parameter name="TransRunStartOverlap">
+    <value val="10.0"/>
   </parameter>
 
-  <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
-    <value val="12"/>
+  <parameter name="TransRunEndOverlap"> 
+    <value val="12.0"/>
+    
+  </parameter>
+  <parameter name="ProcessingInstructions" type="string"> 
+    <value val="390-415"/>
   </parameter>
   
+<parameter name="DetectorCorrectionType" type="string">
+    <value val="RotateAroundSample"/>
+</parameter>
+
+<parameter name="AnalysisMode" type="string">
+    <value val="MultiDetectorAnalysis"/>
+</parameter>
+
+   
+   
 </component-link>
 </parameter-file>

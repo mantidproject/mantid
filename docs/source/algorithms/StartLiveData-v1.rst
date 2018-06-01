@@ -123,20 +123,22 @@ Usage
     def captureLive():
         ConfigService.setFacility("TEST_LIVE")
 
-        # start a Live data listener updating every second, that rebins the data
-        # and replaces the results each time with those of the last second.
-        StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
-                      ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1',
-                      AccumulationMethod='Add', PreserveEvents=True)
+        try:
+            # start a Live data listener updating every second, that rebins the data
+            # and replaces the results each time with those of the last second.
+            StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
+                          ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1',
+                          AccumulationMethod='Add', PreserveEvents=True)
 
-        # give it a couple of seconds before stopping it
-        time.sleep(2)
-
-        # This will cancel both algorithms
-        # you can do the same in the GUI
-        # by clicking on the details button on the bottom right
-        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-        AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+            # give it a couple of seconds before stopping it
+            time.sleep(2)
+        finally:
+            # This will cancel both algorithms
+            # you can do the same in the GUI
+            # by clicking on the details button on the bottom right
+            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+            AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+            time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 
     oldFacility = ConfigService.getFacility().name()
@@ -187,20 +189,22 @@ Output:
     def captureLive():
         ConfigService.setFacility("TEST_LIVE")
 
-        # Start a Live data listener updating every second,
-        # that replaces the results each time with those of the last second.
-        # Load only spectra 2,4, and 6 from periods 1 and 3
-        StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
-                            AccumulationMethod='Replace', PeriodList=[1,3],SpectraList=[2,4,6])
+        try:
+            # Start a Live data listener updating every second,
+            # that replaces the results each time with those of the last second.
+            # Load only spectra 2,4, and 6 from periods 1 and 3
+            StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
+                          AccumulationMethod='Replace', PeriodList=[1,3],SpectraList=[2,4,6])
 
-        # give it a couple of seconds before stopping it
-        time.sleep(2)
-
-        # This will cancel both algorithms
-        # you can do the same in the GUI
-        # by clicking on the details button on the bottom right
-        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-        AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
+            # give it a couple of seconds before stopping it
+            time.sleep(2)
+        finally:
+            # This will cancel both algorithms
+            # you can do the same in the GUI
+            # by clicking on the details button on the bottom right
+            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+            AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
+            time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 
     oldFacility = ConfigService.getFacility().name()

@@ -16,7 +16,8 @@ from sans.state.adjustment import get_adjustment_builder
 from sans.state.convert_to_q import get_convert_to_q_builder
 
 from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality,
-                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape)
+                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape, SANSInstrument)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class TestDirector(object):
@@ -51,10 +52,11 @@ class TestDirector(object):
 
     def construct(self):
         facility = SANSFacility.ISIS
+        file_information = SANSFileInformationMock(run_number=22024, instrument=SANSInstrument.SANS2D)
 
         # Build the SANSStateData
         if self.data_state is None:
-            data_builder = get_data_builder(facility)
+            data_builder = get_data_builder(facility, file_information)
             data_builder.set_sample_scatter("SANS2D00022024")
             data_builder.set_can_scatter("SANS2D00022024")
             self.data_state = data_builder.build()
@@ -94,8 +96,8 @@ class TestDirector(object):
         # Build the SANSStateWavelength
         if self.wavelength_state is None:
             wavelength_builder = get_wavelength_builder(self.data_state)
-            wavelength_builder.set_wavelength_low(1.0)
-            wavelength_builder.set_wavelength_high(10.0)
+            wavelength_builder.set_wavelength_low([1.0])
+            wavelength_builder.set_wavelength_high([10.0])
             wavelength_builder.set_wavelength_step(2.0)
             wavelength_builder.set_wavelength_step_type(RangeStepType.Lin)
             wavelength_builder.set_rebin_type(RebinType.Rebin)
@@ -110,7 +112,7 @@ class TestDirector(object):
 
         # Build the SANSStateScale
         if self.scale_state is None:
-            scale_builder = get_scale_builder(self.data_state)
+            scale_builder = get_scale_builder(self.data_state, file_information)
             scale_builder.set_shape(SampleShape.Cuboid)
             scale_builder.set_width(1.0)
             scale_builder.set_height(2.0)
@@ -122,8 +124,8 @@ class TestDirector(object):
         if self.adjustment_state is None:
             # NormalizeToMonitor
             normalize_to_monitor_builder = get_normalize_to_monitor_builder(self.data_state)
-            normalize_to_monitor_builder.set_wavelength_low(1.0)
-            normalize_to_monitor_builder.set_wavelength_high(10.0)
+            normalize_to_monitor_builder.set_wavelength_low([1.0])
+            normalize_to_monitor_builder.set_wavelength_high([10.0])
             normalize_to_monitor_builder.set_wavelength_step(2.0)
             normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.Lin)
             normalize_to_monitor_builder.set_rebin_type(RebinType.Rebin)
@@ -136,8 +138,8 @@ class TestDirector(object):
             calculate_transmission_builder = get_calculate_transmission_builder(self.data_state)
             calculate_transmission_builder.set_transmission_monitor(3)
             calculate_transmission_builder.set_incident_monitor(2)
-            calculate_transmission_builder.set_wavelength_low(1.0)
-            calculate_transmission_builder.set_wavelength_high(10.0)
+            calculate_transmission_builder.set_wavelength_low([1.0])
+            calculate_transmission_builder.set_wavelength_high([10.0])
             calculate_transmission_builder.set_wavelength_step(2.0)
             calculate_transmission_builder.set_wavelength_step_type(RangeStepType.Lin)
             calculate_transmission_builder.set_rebin_type(RebinType.Rebin)
@@ -156,8 +158,8 @@ class TestDirector(object):
 
             # Wavelength and pixel adjustment
             wavelength_and_pixel_builder = get_wavelength_and_pixel_adjustment_builder(self.data_state)
-            wavelength_and_pixel_builder.set_wavelength_low(1.0)
-            wavelength_and_pixel_builder.set_wavelength_high(10.0)
+            wavelength_and_pixel_builder.set_wavelength_low([1.0])
+            wavelength_and_pixel_builder.set_wavelength_high([10.0])
             wavelength_and_pixel_builder.set_wavelength_step(2.0)
             wavelength_and_pixel_builder.set_wavelength_step_type(RangeStepType.Lin)
             wavelength_and_pixel = wavelength_and_pixel_builder.build()

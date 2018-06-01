@@ -9,8 +9,7 @@ Release Checklist
 
 These are the steps involved in performing a full Mantid release. To
 request or perform a patch release look at the
-`patch release
-checklist <%7B%7B%20site.url%20%7D%7D/release_checklist/patch/>`__
+:ref:`patch release checklist <PatchReleaseChecklist>`.
 
 Timeline
 ########

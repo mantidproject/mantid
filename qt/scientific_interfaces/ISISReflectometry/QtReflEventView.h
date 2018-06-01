@@ -3,6 +3,7 @@
 
 #include "IReflEventView.h"
 #include "ui_ReflEventWidget.h"
+#include "QWidgetGroup.h"
 #include <memory>
 
 namespace MantidQt {
@@ -44,35 +45,44 @@ public:
   ~QtReflEventView() override;
   /// Returns the presenter managing this view
   IReflEventPresenter *getPresenter() const override;
-
   /// Returns time-slicing values
-  std::string getTimeSlicingValues() const override;
-  /// Returns time-slicing type
-  std::string getTimeSlicingType() const override;
+  void initUniformSliceTypeLayout();
+  void initUniformEvenSliceTypeLayout();
+  void initLogValueSliceTypeLayout();
+  void initCustomSliceTypeLayout();
 
-  void enableAll() override;
-  void disableAll() override;
+  void enableSliceType(SliceType sliceType) override;
+  void disableSliceType(SliceType sliceType) override;
+
+  void enableSliceTypeSelection() override;
+  void disableSliceTypeSelection() override;
+
+  std::string getLogValueTimeSlicingType() const override;
+  std::string getLogValueTimeSlicingValues() const override;
+  std::string getCustomTimeSlicingValues() const override;
+  std::string getUniformTimeSlicingValues() const override;
+  std::string getUniformEvenTimeSlicingValues() const override;
 
 public slots:
-  /// Enable / disable slicing option entry fields
-  void toggleSlicingOptions() const;
+  void toggleUniform(bool isChecked);
+  void toggleUniformEven(bool isChecked);
+  void toggleCustom(bool isChecked);
+  void toggleLogValue(bool isChecked);
 
 private:
   /// Initialise the interface
   void initLayout();
+  std::string textFrom(QLineEdit const *const widget) const;
+  QWidgetGroup<2> m_uniformGroup;
+  QWidgetGroup<2> m_uniformEvenGroup;
+  QWidgetGroup<4> m_logValueGroup;
+  QWidgetGroup<2> m_customGroup;
+  QWidgetGroup<4> m_sliceTypeRadioButtons;
 
   /// The widget
   Ui::ReflEventWidget m_ui;
   /// The presenter
   std::unique_ptr<IReflEventPresenter> m_presenter;
-
-  /// Current slice type
-  mutable SliceType m_sliceType;
-  /// Slice type to string conversion map
-  std::map<SliceType, std::string> m_sliceTypeMap;
-
-  /// List of radio buttons
-  std::vector<QRadioButton *> m_buttonList;
 };
 
 } // namespace Mantid

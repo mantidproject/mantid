@@ -195,6 +195,13 @@ Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
                           " not contained in the group");
 }
 
+/** Return all workspaces in the group as one call for thread safety
+ */
+std::vector<Workspace_sptr> WorkspaceGroup::getAllItems() const {
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+  return m_workspaces;
+}
+
 /// Empty all the entries out of the workspace group. Does not remove the
 /// workspaces from the ADS.
 void WorkspaceGroup::removeAll() { m_workspaces.clear(); }

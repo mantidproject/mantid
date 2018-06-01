@@ -121,8 +121,8 @@ Mantid-specific Guidelines
 
    .. code-block:: c++
 
-      static NameOfTest *createSuite() { return new NameOfTest(); }
-      static void destroySuite(NameOfTest *suite) { delete suite; }
+      static NameOfTest *createSuite() { return new NameOfTest(); }
+      static void destroySuite(NameOfTest *suite) { delete suite; }
 
    where ``NameOfTest`` is the name of the test class. Without this, the
    class is turned into a static meaning that the constructor is run at

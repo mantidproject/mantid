@@ -8,8 +8,6 @@
 
 #include "ui_EnggDiffractionQtTabFitting.h"
 
-#include <boost/scoped_ptr.hpp>
-
 // Qt classes forward declarations
 class QMessageBox;
 class QMutex;
@@ -126,14 +124,6 @@ public:
 
   void setFittingRunNumVec(std::vector<std::string> assignVec) override;
 
-  bool getFittingMultiRunMode() override;
-
-  void setFittingMultiRunMode(bool mode) override;
-
-  bool getFittingSingleRunMode() override;
-
-  void setFittingSingleRunMode(bool mode) override;
-
   double getPeakCentre() const override;
 
   bool peakPickerEnabled() const override;
@@ -175,7 +165,6 @@ signals:
 private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void resetFittingMode();
   void setPeakPick();
   void clearPeakList();
   void loadClicked();
@@ -208,12 +197,6 @@ private:
 
   static const std::string g_peaksListExt;
 
-  /// indentifier for fitting multi-run or single run input
-  static bool m_fittingMutliRunMode;
-
-  /// indentifier for fitting multi-run or single run input
-  static bool m_fittingSingleRunMode;
-
   // vector holding directory of focused bank file
   static std::vector<std::string> m_fitting_runno_dir_vec;
 
@@ -244,7 +227,7 @@ private:
   boost::shared_ptr<IEnggDiffractionPythonRunner> m_mainPythonRunner;
 
   /// presenter as in the model-view-presenter
-  boost::scoped_ptr<IEnggDiffFittingPresenter> m_presenter;
+  boost::shared_ptr<IEnggDiffFittingPresenter> m_presenter;
 
   /// current selected instrument
   /// updated from the EnggDiffractionPresenter processInstChange
