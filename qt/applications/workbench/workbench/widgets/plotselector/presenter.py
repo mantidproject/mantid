@@ -17,7 +17,7 @@
 from __future__ import absolute_import, print_function
 
 from .model import PlotSelectorModel
-from .widget import PlotSelectorWidget
+from .view import PlotSelectorView
 
 
 class PlotSelectorPresenter(object):
@@ -28,7 +28,7 @@ class PlotSelectorPresenter(object):
     def __init__(self, current_figure_class, widget = None, model = None):
         # Create model and view, or accept mocked versions
         if widget is None:
-            self.widget = PlotSelectorWidget(self)
+            self.widget = PlotSelectorView(self)
         else:
             self.widget = widget
         if model is None:

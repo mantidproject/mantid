@@ -21,7 +21,7 @@ from qtpy.QtGui import (QStandardItem, QStandardItemModel)
 from qtpy.QtWidgets import (QAbstractItemView, QListView, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit)
 
 
-class PlotSelectorWidget(QWidget):
+class PlotSelectorView(QWidget):
     """
     The view to the plot selector, a PyQt widget.
     """
@@ -67,7 +67,7 @@ class PlotSelectorWidget(QWidget):
         This might be better to override on list_view, but there is
         only ever an active selection when focused on the list.
         """
-        super(PlotSelectorWidget, self).keyPressEvent(event)
+        super(PlotSelectorView, self).keyPressEvent(event)
         if event.key() == Qt.Key_Delete:
             self.keyPressed.emit(event.key())
 

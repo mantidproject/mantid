@@ -21,8 +21,8 @@ from qtpy.QtTest import QTest
 
 from mantidqt.utils.qt.testing import requires_qapp
 
-from mantidqt.widgets.plotselector.presenter import PlotSelectorPresenter
-from mantidqt.widgets.plotselector.widget import PlotSelectorWidget
+from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
+from workbench.widgets.plotselector.view import PlotSelectorView
 
 import unittest
 try:
@@ -36,7 +36,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
     def setUp(self):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
-        self.widget = PlotSelectorWidget(self.presenter)
+        self.widget = PlotSelectorView(self.presenter)
 
     def test_setting_plot_names_sets_names_in_list_view(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]

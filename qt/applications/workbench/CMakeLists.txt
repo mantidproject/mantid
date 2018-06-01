@@ -19,6 +19,10 @@ add_dependencies ( workbench workbench_resources mantidqt )
 set ( TEST_FILES
   workbench/config/test/test_user.py
   workbench/test/test_import.py
+
+  workbench/widgets/plotselector/test/test_plotselector_model.py
+  workbench/widgets/plotselector/test/test_plotselector_presenter.py
+  workbench/widgets/plotselector/test/test_plotselector_view.py
 )
 
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}

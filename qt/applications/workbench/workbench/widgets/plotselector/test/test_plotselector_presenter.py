@@ -16,9 +16,9 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
-from mantidqt.widgets.plotselector.model import PlotSelectorModel
-from mantidqt.widgets.plotselector.presenter import PlotSelectorPresenter
-from mantidqt.widgets.plotselector.widget import PlotSelectorWidget
+from workbench.widgets.plotselector.model import PlotSelectorModel
+from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
+from workbench.widgets.plotselector.view import PlotSelectorView
 
 import unittest
 try:
@@ -30,7 +30,7 @@ except ImportError:
 class PlotSelectorPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        self.widget = mock.Mock(spec=PlotSelectorWidget)
+        self.widget = mock.Mock(spec=PlotSelectorView)
         self.widget.get_filter_text = mock.Mock(return_value="")
 
         self.model = mock.Mock(spec=PlotSelectorModel)

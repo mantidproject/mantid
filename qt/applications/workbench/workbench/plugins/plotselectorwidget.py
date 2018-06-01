@@ -24,7 +24,7 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from workbench.plugins.base import PluginWidget
 from workbench.plotting.currentfigure import CurrentFigure
-from mantidqt.widgets.plotselector.presenter import PlotSelectorPresenter
+from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 
 
 class PlotSelector(PluginWidget):

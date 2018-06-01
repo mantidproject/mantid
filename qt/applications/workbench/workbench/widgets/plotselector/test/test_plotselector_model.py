@@ -16,8 +16,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
-from mantidqt.widgets.plotselector.model import PlotSelectorModel
-from mantidqt.widgets.plotselector.presenter import PlotSelectorPresenter
+from workbench.widgets.plotselector.model import PlotSelectorModel
+from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 
 import unittest
 try:
