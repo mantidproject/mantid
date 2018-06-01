@@ -34,10 +34,10 @@ ScopedFileHelper::ScopedFile createXML() {
 
   std::string fileContents("");
   fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"fwd\"> \n";
+  fileContents += "\t<group name=\"test\"> \n";
   fileContents += "\t\t<ids val=\"1,2,3\"/>\n";
   fileContents += "\t</group>\n";
-  fileContents += "\t<default name=\"fwd\"/>\n";
+  fileContents += "\t<default name=\"test\"/>\n";
   fileContents += "</detector-grouping>";
 
   ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
@@ -189,7 +189,7 @@ public:
   void test_workspaceProduced() {
     // Simple XML with only one group, with only single detector
 
-    auto ws = createCountsWorkspace(15, 10, 0.0);
+    auto ws = createCountsWorkspace(5, 10, 0.0);
     auto wsGroup = boost::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace("inputData", ws);
     AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
@@ -197,7 +197,7 @@ public:
     auto file = createXML();
     std::string filename = file.getFileName();
 
-	TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 0);
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 0);
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -207,23 +207,140 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("WorkspaceGroup", wsGroup->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
-	TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-	TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
 
-	AnalysisDataService::Instance().clear();
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+
+    // Check values against calculation by hand.
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 30, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 57, 0.0001);
+    // Errors added in quadrature.
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_workspaceOverwrite() {
     // Simple XML with only one group, with only single detector.
     // ensure overwrites a workspace with the same name
+
+    auto &ads = AnalysisDataService::Instance();
+
+    auto ws = createCountsWorkspace(5, 10, 0.0);
+    auto wsGroup = boost::make_shared<WorkspaceGroup>();
+    ads.addOrReplace("inputData", ws);
+    ads.addOrReplace("inputGroup", wsGroup);
+
+    auto ws1 = createCountsWorkspace(1, 20, 5.0);
+    auto ws2 = createCountsWorkspace(1, 20, 10.0);
+    ads.addOrReplace("inputGroup; Group; test; Counts; #1", ws1);
+    ads.addOrReplace("inputGroup; Group; test; Counts; #1_Raw", ws2);
+    wsGroup->add("inputGroup; Group; test; Counts; #1");
+    wsGroup->add("inputGroup; Group; test; Counts; #1_Raw");
+
+    auto file = createXML();
+    std::string filename = file.getFileName();
+
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
+
+    Muon::LoadAndApplyMuonDetectorGrouping alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("WorkspaceGroup", wsGroup->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
+
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
+    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+
+    // Check values against calculation by hand.
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 30, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 57, 0.0001);
+    // Errors added in quadrature.
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_workspaceGroupDefaultName() {
     // Give no workspace group and check that the default
-    // name matches the previous code (i.e. EMUnnnn).
+    // name is correct.
+
+    auto ws = createCountsWorkspace(5, 10, 0.0);
+    ws->mutableRun().addProperty("run_number", 10);
+    AnalysisDataService::Instance().addOrReplace("inputData", ws);
+
+    auto file = createXML();
+    std::string filename = file.getFileName();
+
+    Muon::LoadAndApplyMuonDetectorGrouping alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("basic010"));
+
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("basic010"));
+
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
+    TS_ASSERT(wsGroup->contains("basic010; Group; test; Counts; #1"));
+    TS_ASSERT(wsGroup->contains("basic010; Group; test; Counts; #1_Raw"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("basic010; Group; test; Counts; #1_Raw"));
+
+    // Check values against calculation by hand.
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 30, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 57, 0.0001);
+    // Errors added in quadrature.
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_singleGroupDoesntChangeData() {

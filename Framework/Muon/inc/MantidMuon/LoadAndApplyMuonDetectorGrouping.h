@@ -90,6 +90,9 @@ private:
 
   /// Sets some default options for grouping algorithm.
   Mantid::Muon::AnalysisOptions setDefaultOptions();
+  
+  /// If no workspace group supplied, adds one with the correct name
+  Mantid::API::WorkspaceGroup_sptr addGroupedWSWithDefaultName(Mantid::API::Workspace_sptr inputWS);
 };
 
 } // namespace Muon

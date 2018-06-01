@@ -91,6 +91,9 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
   WorkspaceGroup_sptr groupedWS = getProperty("WorkspaceGroup");
+  if (!groupedWS) {
+	  groupedWS = addGroupedWSWithDefaultName(inputWS);
+  }
 
   addGroupingToADS(options, inputWS, groupedWS);
   addPairingToADS(options, inputWS, groupedWS);
@@ -99,8 +102,18 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
     options.plotType = PlotType::Asymmetry;
     addGroupingToADS(options, inputWS, groupedWS);
   }
-
   addGroupingInformationToADS(options.grouping);
+}
+
+/**
+* Adds an empty workspaceGroup to the ADS with a name 
+* that it would have if created by the MuonAnalysis GUI.
+*/
+WorkspaceGroup_sptr LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(Workspace_sptr workspace) {
+	std::string  groupedWSName = MuonAlgorithmHelper::getRunLabel(workspace);
+	WorkspaceGroup_sptr groupedWS = boost::make_shared<WorkspaceGroup>();
+	AnalysisDataService::Instance().addOrReplace(groupedWSName, groupedWS);
+	return groupedWS;
 }
 
 AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
