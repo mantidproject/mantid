@@ -9,27 +9,28 @@
 Description
 -----------
 
-Loads an ILL D33 nexus file into a :ref:`Workspace2D <Workspace2D>` with
-the given name.
+This loads the nexus files produced by the SANS instruments D11, D22, D33 at the ILL.
+For D33, it supports both monochromatic and TOF modes.
+This loader reads the detector positions from the nexus file and places the detectors accordingly.
+For D11 and D22 it supports the nominal and low resolution modes (pixel splitting).
+The output is a histogram workspace with unit of wavelength.
+It has a single bin for monochromatic, and many bins for TOF mode for D33.
 
-This loader reads the detector positions from the NeXus file and places all the five detectors (front and back) at the right positions.
-It supports both TOF and non TOF modes.
+.. include:: ../usagedata-note.txt
 
-Usage
------
+**Example - Loads a D33 TOF file.**
 
-**Example - Load ILL D33 NeXus file:**
-
-.. code-block:: python
-
-   # Load ILL D33 data file into a workspace 2D.
-   ws = Load('ILLD33_sample_001425.nxs')
-
-   print("This workspace has {} dimensions and has {} histograms.".format(ws.getNumDims(), ws.getNumberHistograms()))
+.. testcode:: ExLoad
+    ws = LoadILLSANS('ILL/D33/042610.nxs')
+    numHistograms = ws.getNumberHistograms()
+    numTOF = ws.blocksize()
+    print('This workspace has {0} spectra and {1} TOF channels.'.format(numHistograms, numTOF))
 
 Output:
-	
-	This workspace has 2 dimensions and has 65538 histograms.
+
+.. testoutput:: ExLoad
+
+    This workspace has 65538 spectra and 200 TOF channels.
 
 .. categories::
 
