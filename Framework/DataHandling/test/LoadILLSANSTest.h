@@ -37,9 +37,7 @@ public:
     ConfigService::Instance().setFacility("ILL");
   }
 
-  void tearDown() override {
-      AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_name() {
     LoadILLSANS alg;

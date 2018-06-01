@@ -52,7 +52,7 @@ const std::string LoadILLSANS::category() const {
 
 /// Algorithm's summary. @see Algorithm::summery
 const std::string LoadILLSANS::summary() const {
-    return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
+  return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -108,8 +108,8 @@ void LoadILLSANS::exec() {
     progress.report("Moving detectors");
     moveDetectorsD33(std::move(detPos));
     if (m_isTOF) {
-        adjustTOF();
-        moveSource();
+      adjustTOF();
+      moveSource();
     }
   } else {
     progress.report("Initializing the workspace for " + m_instrumentName);
@@ -699,15 +699,14 @@ void LoadILLSANS::adjustTOF() {
  * Used only for D33 in TOF mode
  */
 void LoadILLSANS::moveSource() {
-    API::IAlgorithm_sptr mover =
-        createChildAlgorithm("MoveInstrumentComponent");
-    mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    mover->setProperty("ComponentName", "moderator");
-    mover->setProperty("X", 0.);
-    mover->setProperty("Y", 0.);
-    mover->setProperty("Z", -m_sourcePos);
-    mover->setProperty("RelativePosition", false);
-    mover->executeAsChildAlg();
+  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+  mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  mover->setProperty("ComponentName", "moderator");
+  mover->setProperty("X", 0.);
+  mover->setProperty("Y", 0.);
+  mover->setProperty("Z", -m_sourcePos);
+  mover->setProperty("RelativePosition", false);
+  mover->executeAsChildAlg();
 }
 
 } // namespace DataHandling
