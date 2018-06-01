@@ -622,9 +622,10 @@ class Instrument(object):
         if ((hasattr(instrument, 'moderator') or hasattr(instrument, 'chopper_system')) or
             ('moderator' in instrument or 'chopper_system' in instrument)):
             wrap_attributes(self, instrument, self.__allowed_var_names)
-            for key in ['source_rep', 'n_frame', 'emission_time']:
-                if key in self.moderator:
-                    self.chopper_system[key] = self.moderator[key]
+            if isinstance(self.moderator, dict) and isinstance(self.chopper_system, dict):
+                for key in ['source_rep', 'n_frame', 'emission_time']:
+                    if key in self.moderator:
+                        self.chopper_system[key] = self.moderator[key]
         else:
             raise RuntimeError('Input to Instrument must be an Instrument object, a dictionary or a filename string')
         # If we have just loaded a YAML file or constructed from a dictionary, need to convert to correct class
@@ -712,7 +713,7 @@ class Instrument(object):
         # If not set, sets energy transfers to values to compare exactly to RAE's original implementation.
         if Etrans is None:
             Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
-        v_van, _ = self.getVanVar(Ei, frequency, Etrans)
+        v_van, _, _ = self.getVanVar(Ei, frequency, Etrans)
         x2 = self.chopper_system.sam_det
         Ef = Ei - np.array(Etrans)
         van = (2 * E2V * np.sqrt(Ef**3 * v_van)) / x2
@@ -745,7 +746,8 @@ class Instrument(object):
             x0 -= xm                         # Propagate from first chopper, not from moderator (after rescaling tmod)
             tsqmod = tsmeff if (tsqchp[1] > tsmeff) else tsqchp[1]
         tsqchp = tsqchp[0]
-        # Propagate the time widths to the detector position
+        tsqmodchop = np.array([tsqmod, tsqchp, x0])
+        # Propagate the time widths to the sample position
         omega = self.frequency[0] * 2 * np.pi
         vi = E2V * np.sqrt(Ei)
         vf = E2V * np.sqrt(Ei - Etrans)
@@ -779,7 +781,7 @@ class Instrument(object):
             outdic['sample'] = tsqsam
         if frequency:
             self.frequency = oldfreq
-        return vsqvan, outdic
+        return vsqvan, outdic, tsqmodchop
 
     @property
     def aperture_width(self):

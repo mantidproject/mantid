@@ -15,6 +15,7 @@ import re
 import numpy as np
 import os
 import warnings
+import copy
 from .Instruments import Instrument
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -292,7 +293,7 @@ class PyChopGui(QtGui.QMainWindow):
         freq = self.engine.getFrequency()
         overplot = self.widgets['HoldCheck'].isChecked()
         if hasattr(freq, '__len__'):
-            freq = freq[-1]
+            freq = freq[0]
         update = kwargs['update'] if 'update' in kwargs.keys() else False
         # Do not recalculate if all relevant parameters still the same.
         _, labels = self.flxaxes2.get_legend_handles_labels()
@@ -302,7 +303,7 @@ class PyChopGui(QtGui.QMainWindow):
             for prevtitle in labels:
                 prevInst, prevChop, prevFreq = re.search(searchStr, prevtitle).groups()
                 if update:
-                    tmpinst.append(PyChop2(prevInst, prevChop, float(prevFreq)))
+                    tmpinst.append(copy.deepcopy(Instrument(self.instruments[prevInst], prevChop, float(prevFreq))))
                 else:
                     if inst == prevInst and chop == prevChop and freq == float(prevFreq):
                         return
@@ -521,8 +522,13 @@ class PyChopGui(QtGui.QMainWindow):
         obj = self.engine
         instname, chtyp, freqs, ei_in = tuple([obj.instname, obj.getChopper(), obj.getFrequency(), obj.getEi()])
         ei = ei_in
-        tsqvan, tsqdic = obj.getVanVar()
+        tsqvan, tsqdic, tsqmodchop = obj.getVanVar()
+        v_mod, v_chop = tuple(np.sqrt(tsqmodchop[:2]) * 1e6)
         x0, _, x1, x2, _ = obj.chopper_system.getDistances()
+        first_component = 'moderator'
+        if x0 != tsqmodchop[2]:
+            x0 = tsqmodchop[2]
+            first_component = 'chopper 1'
         txt = '# ------------------------------------------------------------- #\n'
         txt += '# Chop calculation for instrument %s\n' % (instname)
         if obj.isFermi:
@@ -539,24 +545,25 @@ class PyChopGui(QtGui.QMainWindow):
         for ky, val in list(tsqdic.items()):
             txt += '#     %20s : %6.2f us\n' % (ky, 1e6*np.sqrt(val))
         txt += '# %s distances:\n' % (instname)
-        txt += '#     x0 = %6.2f m (moderator to Fermi)\n' % (x0)
+        txt += '#     x0 = %6.2f m (%s to Fermi)\n' % (x0, first_component)
         txt += '#     x1 = %6.2f m (Fermi to sample)\n' % (x1)
         txt += '#     x2 = %6.2f m (sample to detector)\n' % (x2)
-        v_mod, v_chop = (tsqdic['moderator'], tsqdic['chopper'])
         txt += '# Approximate inelastic resolution is given by:\n'
-        txt += '#     dE = convfac * sqrt(en**3 * v_van2) / x2\n'
-        txt += '#     where:  convfac = 2059.956975\n'
-        txt += '#             v_van2 = (geom*v_mod)**2 + ((1+geom)*v_chop)**2\n'
-        txt += '#             geom = x1/x0 + ((ei/ef)**1.5)*(x2/x0)\n'
+        txt += '#     dE = 2 * E2V * sqrt(ef**3 * t_van**2) / x2\n'
+        txt += '#     where:  E2V = 4.373e-4 meV/(m/us) conversion from energy to speed\n'
+        txt += '#             t_van**2 = (geom*t_mod)**2 + ((1+geom)*t_chop)**2\n'
+        txt += '#             geom = (x1 + x2*(ei/ef)**1.5) / x0\n'
+        txt += '#     and t_mod and t_chop are the moderator and chopper time widths at the\n'
+        txt += '#     moderator and chopper positions (not at the sample as listed above).\n'
         txt += '# Which in this case is:\n'
-        txt += '#     %.2f*sqrt(ef**3 * ( %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2 \n' % (2059.956975/x2, v_mod, x1/x0, x2/x0)
-        txt += '#                         + %.5e*(%.3f+%.3f*(ei/ef)**1.5)**2) )\n' % (v_chop, 1+x1/x0, x2/x0)
+        txt += '#     %.4e*sqrt(ef**3 * ( (%6.5f*(%.3f+%.3f*(ei/ef)**1.5))**2 \n' % (874.78672e-6/x2, v_mod, x1/x0, x2/x0)
+        txt += '#                              + (%6.5f*(%.3f+%.3f*(ei/ef)**1.5))**2) )\n' % (v_chop, 1+x1/x0, x2/x0)
         txt += '#  EN (meV)   Full dE (meV)   Approx dE (meV)\n'
         for ii in range(len(res)):
             ef = ei-en[ii]
-            approx = (2059.956975/x2)*np.sqrt(ef**3 * ((v_mod**2)*((x1/x0)+(x2/x0)*(ei/ef)**1.5)**2
-                                                       + (v_chop**2)*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5)**2))
-            txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
+            approx = (874.78672e-6/x2)*np.sqrt(ef**3 * ((v_mod*((x1/x0)+(x2/x0)*(ei/ef)**1.5))**2
+                                                       + (v_chop*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5))**2))
+            txt += '%12.5f %12.5f %12.5f %f\n' % (en[ii], res[ii], approx)
         return txt
 
     def showText(self):
