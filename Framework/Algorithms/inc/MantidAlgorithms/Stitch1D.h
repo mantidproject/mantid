@@ -107,8 +107,7 @@ private:
   double m_errorScaleFactor;
   /// Scale workspace (left hand side or right hand side)
   void scaleWorkspace(API::MatrixWorkspace_sptr &ws,
-                      API::MatrixWorkspace_sptr &divident,
-                      API::MatrixWorkspace_sptr &divisor,
+                      API::MatrixWorkspace_sptr &scaleFactorWS,
                       API::MatrixWorkspace_const_sptr &dxWS);
   /// Index per workspace spectra of Nans
   SpecialTypeIndexes m_nanEIndexes;

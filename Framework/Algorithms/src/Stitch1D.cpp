@@ -525,16 +525,13 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
 /**
  * @brief scaleWorkspace will set m_scaleFactor and m_errorScaleFactor
  * @param ws :: Input workspace
- * @param divident
- * @param divisor
+ * @param scaleFactorWS :: A MatrixWorkspace holding the scaling factor
  * @param dxWS :: A MatrixWorkspace (size of ws) containing Dx values
  */
 void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
-                              MatrixWorkspace_sptr &divident,
-                              MatrixWorkspace_sptr &divisor,
+                              MatrixWorkspace_sptr &scaleFactorWS,
                               MatrixWorkspace_const_sptr &dxWS) {
-  const auto ratio = divident / divisor;
-  ws *= ratio;
+  ws *= scaleFactorWS;
   // We lost Dx values (Multiply) and need to get them back for point data
   if (ws->size() == dxWS->size()) {
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
@@ -543,8 +540,8 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
       }
     }
   }
-  m_scaleFactor = ratio->y(0).front();
-  m_errorScaleFactor = ratio->e(0).front();
+  m_scaleFactor = scaleFactorWS->y(0).front();
+  m_errorScaleFactor = scaleFactorWS->e(0).front();
   if (m_scaleFactor < 1e-2 || m_scaleFactor > 1e2 ||
       std::isnan(m_scaleFactor)) {
     std::stringstream messageBuffer;
@@ -627,10 +624,13 @@ void Stitch1D::exec() {
   } else {
     auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
     auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
-    if (scaleRHS)
-      scaleWorkspace(rhs, lhsOverlapIntegrated, rhsOverlapIntegrated, rhsWS);
-    else
-      scaleWorkspace(lhs, rhsOverlapIntegrated, lhsOverlapIntegrated, lhsWS);
+    if (scaleRHS) {
+      auto scaleRHS = lhsOverlapIntegrated / rhsOverlapIntegrated;
+      scaleWorkspace(rhs, scaleRHS, rhsWS);
+    } else {
+      auto scaleLHS = rhsOverlapIntegrated / lhsOverlapIntegrated;
+      scaleWorkspace(lhs, scaleLHS, lhsWS);
+    }
   }
   // Provide log information about the scale factors used in the calculations.
   std::stringstream messageBuffer;
