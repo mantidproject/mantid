@@ -160,8 +160,7 @@ enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
     : m_fitPeaksFromRight(true), m_numPeaksToFit(0), m_minPeakHeight(20.),
-      m_bkgdSimga(1.), m_peakPosTolCase234(false) {
-}
+      m_bkgdSimga(1.), m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
