@@ -71,7 +71,7 @@ private:
   void exec() override;
 
   void calculateRelativeRotations(std::vector<double> &instrumentAngles,
-                                  const Kernel::V3D &tube1Position);
+                                  const Kernel::V3D &firstTubePosition);
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
   void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
