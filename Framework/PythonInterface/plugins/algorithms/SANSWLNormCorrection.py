@@ -186,7 +186,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
                     self.getProperty('InputWorkspaces').value) - 1:
             message = "The length of K List Parameters must be 1 or equal to the length of the input workspaces - 1"
             issues['KList'] = message
-        
+
         logger.debug("Issues so far {}".format(issues))
         try:
             pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
