@@ -138,7 +138,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert certain function calls
         self.assertEqual(view.get_user_file_path.call_count, 4)
         self.assertEqual(view.get_batch_file_path.call_count, 3)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
-        self.assertEqual(view.get_cell.call_count, 95)
+        self.assertEqual(view.get_cell.call_count, 101)
 
         self.assertEqual(view.get_number_of_rows.call_count, 8)
 
