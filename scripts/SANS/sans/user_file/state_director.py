@@ -123,8 +123,8 @@ def set_wavelength_limits(builder, user_file_items):
             check_if_contains_only_one_element(wavelength_range, OtherId.wavelength_range)
             wavelength_range = wavelength_range[-1]
             wavelength_start, wavelength_stop = get_ranges_from_event_slice_setting(wavelength_range)
-            wavelength_start = [wavelength_start[0]] + wavelength_start
-            wavelength_stop = [wavelength_stop[-1]] + wavelength_stop
+            wavelength_start = [min(wavelength_start)] + wavelength_start
+            wavelength_stop = [max(wavelength_stop)] + wavelength_stop
 
             wavelength_step_type = RangeStepType.Lin if wavelength_limits.step_type is RangeStepType.RangeLin \
                 else RangeStepType.Log
@@ -683,8 +683,8 @@ class StateDirectorISIS(object):
                     start_times_hab.append(times.start)
                     stop_times_hab.append(times.stop)
                 elif times.detector_type is DetectorType.LAB:
-                    start_times_hab.append(times.start)
-                    stop_times_hab.append(times.stop)
+                    start_times_lab.append(times.start)
+                    stop_times_lab.append(times.stop)
                 else:
                     RuntimeError("UserFileStateDirector: The specified detector {0} is not "
                                  "known".format(times.detector_type))

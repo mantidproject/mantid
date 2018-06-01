@@ -63,7 +63,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     single_reduction_options = {"UseOptimizations": use_optimizations}
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
     reduction_alg.setChild(False)
-
     # Perform the data reduction
     for reduction_package in reduction_packages:
         # -----------------------------------
@@ -487,19 +486,19 @@ def split_reduction_packages_for_wavelength_range(reduction_packages):
 
             states.append(state_copy)
 
-            workspaces = reduction_package.workspaces
-            monitors = reduction_package.monitors
-            is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-            is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-            for state in states:
-                new_state = deepcopy(state)
-                new_reduction_package = ReductionPackage(state=new_state,
-                                                         workspaces=workspaces,
-                                                         monitors=monitors,
-                                                         is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
-                                                         is_part_of_event_slice_reduction=is_part_of_event_slice_reduction,
-                                                         is_part_of_wavelength_range_reduction=True)
-                reduction_packages_split.append(new_reduction_package)
+        workspaces = reduction_package.workspaces
+        monitors = reduction_package.monitors
+        is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
+        is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
+        for state in states:
+            new_state = deepcopy(state)
+            new_reduction_package = ReductionPackage(state=new_state,
+                                                     workspaces=workspaces,
+                                                     monitors=monitors,
+                                                     is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
+                                                     is_part_of_event_slice_reduction=is_part_of_event_slice_reduction,
+                                                     is_part_of_wavelength_range_reduction=True)
+            reduction_packages_split.append(new_reduction_package)
     return reduction_packages_split
 
 
@@ -791,7 +790,9 @@ def group_workspaces_if_required(reduction_package):
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
+    is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
+    requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction\
+        or is_part_of_wavelength_range_reduction
 
     reduced_lab = reduction_package.reduced_lab
     reduced_hab = reduction_package.reduced_hab
@@ -842,18 +843,16 @@ def add_to_group(workspace, name_of_group_workspace):
             group_options = {"InputWorkspaces": [name_of_workspace],
                              "OutputWorkspace": name_of_group_workspace}
             group_alg = create_unmanaged_algorithm(group_name, **group_options)
-            # At this point we are dealing with the ADS, hence we need to make sure that this is not called as
-            # a child algorithm
-            group_alg.setChild(False)
+
+            group_alg.setAlwaysStoreInADS(True)
             group_alg.execute()
     else:
         group_name = "GroupWorkspaces"
         group_options = {"InputWorkspaces": [name_of_workspace],
                          "OutputWorkspace": name_of_group_workspace}
         group_alg = create_unmanaged_algorithm(group_name, **group_options)
-        # At this point we are dealing with the ADS, hence we need to make sure that this is not called as
-        # a child algorithm
-        group_alg.setChild(False)
+
+        group_alg.setAlwaysStoreInADS(True)
         group_alg.execute()
 
 
@@ -905,17 +904,22 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors):
     def _delete_workspaces(_delete_alg, _workspaces):
         _workspace_names_to_delete = set([_workspace.name() for _workspace in _workspaces if _workspace is not None])
         for _workspace_name_to_delete in _workspace_names_to_delete:
-            if _workspace_name_to_delete:
+            if _workspace_name_to_delete and AnalysisDataService.doesExist(_workspace_name_to_delete):
                 _delete_alg.setProperty("Workspace", _workspace_name_to_delete)
                 _delete_alg.execute()
 
     def _delete_workspaces_from_dict(_delete_alg, workspaces):
-        for key, workspace_list in workspaces.iteritems():
-            workspace_names_to_delete = set([workspace.name() for workspace in workspace_list if workspace is not None])
-            for workspace_name_to_delete in workspace_names_to_delete:
-                if workspace_name_to_delete and AnalysisDataService.doesExist(workspace_name_to_delete):
-                    _delete_alg.setProperty("Workspace", workspace_name_to_delete)
-                    _delete_alg.execute()
+        _workspace_names_to_delete = []
+        for key, workspace_list in workspaces.items():
+            for workspace in workspace_list:
+                if workspace and workspace.name():
+                    _workspace_names_to_delete.append(workspace.name())
+
+        for _workspace_name_to_delete in _workspace_names_to_delete:
+            if _workspace_name_to_delete and AnalysisDataService.doesExist(_workspace_name_to_delete):
+                _delete_alg.setProperty("Workspace", _workspace_name_to_delete)
+                _delete_alg.execute()
+
     delete_name = "DeleteWorkspace"
     delete_options = {}
     delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)

@@ -70,9 +70,9 @@ Mayers Sample Correction
 ------------------------
 Documentation for this algorithm can found :ref:`here <algm-MayersSampleCorrection>`.
 
-Multiple Scattering Cylinder Absorption
+Carpenter Sample Correction
 ---------------------------------------
-This is a Carpenter style correction. For more details see :ref:`here <algm-MultipleScatteringCylinderAbsorption>`.
+This is a Carpenter style correction. For more details see :ref:`here <algm-CarpenterSampleCorrection>`.
 
 References
 ~~~~~~~~~~

@@ -106,8 +106,14 @@ struct EPPTableRow {
   FitStatus fitStatus = FitStatus::SUCCESS;
 };
 
-/// Adds a workspace to the ADS
-void storeWS(const std::string &name, Mantid::API::Workspace_sptr ws);
+/**
+ * Adds a workspace to the ADS
+ * @param name :: The name of the workspace
+ * @param ws :: The workspace object
+ */
+template <typename WSType> void storeWS(const std::string &name, WSType &ws) {
+  Mantid::API::AnalysisDataService::Instance().add(name, ws);
+}
 /// Deletes a workspace
 void removeWS(const std::string &name);
 /// Returns a workspace of a given type

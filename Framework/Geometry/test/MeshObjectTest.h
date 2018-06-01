@@ -59,63 +59,38 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   double min = 0.0 - 0.5 * size;
   double max = 0.5 * size;
   std::vector<V3D> vertices;
-  vertices.push_back(centre + V3D(max, max, max));
-  vertices.push_back(centre + V3D(min, max, max));
-  vertices.push_back(centre + V3D(max, min, max));
-  vertices.push_back(centre + V3D(min, min, max));
-  vertices.push_back(centre + V3D(max, max, min));
-  vertices.push_back(centre + V3D(min, max, min));
-  vertices.push_back(centre + V3D(max, min, min));
-  vertices.push_back(centre + V3D(min, min, min));
+  vertices.emplace_back(centre + V3D(max, max, max));
+  vertices.emplace_back(centre + V3D(min, max, max));
+  vertices.emplace_back(centre + V3D(max, min, max));
+  vertices.emplace_back(centre + V3D(min, min, max));
+  vertices.emplace_back(centre + V3D(max, max, min));
+  vertices.emplace_back(centre + V3D(min, max, min));
+  vertices.emplace_back(centre + V3D(max, min, min));
+  vertices.emplace_back(centre + V3D(min, min, min));
 
   std::vector<uint16_t> triangles;
   // top face of cube - z max
-  triangles.push_back(0);
-  triangles.push_back(1);
-  triangles.push_back(2);
-  triangles.push_back(2);
-  triangles.push_back(1);
-  triangles.push_back(3);
+  triangles.insert(triangles.end(), {0, 1, 2});
+  triangles.insert(triangles.end(), {2, 1, 3});
   // right face of cube - x max
-  triangles.push_back(0);
-  triangles.push_back(2);
-  triangles.push_back(4);
-  triangles.push_back(4);
-  triangles.push_back(2);
-  triangles.push_back(6);
+  triangles.insert(triangles.end(), {0, 2, 4});
+  triangles.insert(triangles.end(), {4, 2, 6});
   // back face of cube - y max
-  triangles.push_back(0);
-  triangles.push_back(4);
-  triangles.push_back(1);
-  triangles.push_back(1);
-  triangles.push_back(4);
-  triangles.push_back(5);
+  triangles.insert(triangles.end(), {0, 4, 1});
+  triangles.insert(triangles.end(), {1, 4, 5});
   // bottom face of cube - z min
-  triangles.push_back(7);
-  triangles.push_back(5);
-  triangles.push_back(6);
-  triangles.push_back(6);
-  triangles.push_back(5);
-  triangles.push_back(4);
+  triangles.insert(triangles.end(), {7, 5, 6});
+  triangles.insert(triangles.end(), {6, 5, 4});
   // left face of cube - x min
-  triangles.push_back(7);
-  triangles.push_back(3);
-  triangles.push_back(5);
-  triangles.push_back(5);
-  triangles.push_back(3);
-  triangles.push_back(1);
+  triangles.insert(triangles.end(), {7, 3, 5});
+  triangles.insert(triangles.end(), {5, 3, 1});
   // front fact of cube - y min
-  triangles.push_back(7);
-  triangles.push_back(6);
-  triangles.push_back(3);
-  triangles.push_back(3);
-  triangles.push_back(6);
-  triangles.push_back(2);
+  triangles.insert(triangles.end(), {7, 6, 3});
+  triangles.insert(triangles.end(), {3, 6, 2});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-      new MeshObject(std::move(triangles), std::move(vertices),
-                     Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+      std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -136,50 +111,34 @@ std::unique_ptr<MeshObject> createOctahedron() {
   // Opposite vertices have indices differing by 3.
   double u = 1.0000000001;
   std::vector<V3D> vertices;
-  vertices.push_back(V3D(u, 0, 0));
-  vertices.push_back(V3D(0, u, 0));
-  vertices.push_back(V3D(0, 0, u));
-  vertices.push_back(V3D(-u, 0, 0));
-  vertices.push_back(V3D(0, -u, 0));
-  vertices.push_back(V3D(0, 0, -u));
+  vertices.emplace_back(V3D(u, 0, 0));
+  vertices.emplace_back(V3D(0, u, 0));
+  vertices.emplace_back(V3D(0, 0, u));
+  vertices.emplace_back(V3D(-u, 0, 0));
+  vertices.emplace_back(V3D(0, -u, 0));
+  vertices.emplace_back(V3D(0, 0, -u));
 
   std::vector<uint16_t> triangles;
   // +++ face
-  triangles.push_back(0);
-  triangles.push_back(1);
-  triangles.push_back(2);
+  triangles.insert(triangles.end(), {0, 1, 2});
   //++- face
-  triangles.push_back(0);
-  triangles.push_back(5);
-  triangles.push_back(1);
+  triangles.insert(triangles.end(), {0, 5, 1});
   // +-- face
-  triangles.push_back(0);
-  triangles.push_back(4);
-  triangles.push_back(5);
+  triangles.insert(triangles.end(), {0, 4, 5});
   // +-+ face
-  triangles.push_back(0);
-  triangles.push_back(2);
-  triangles.push_back(4);
+  triangles.insert(triangles.end(), {0, 2, 4});
   // --- face
-  triangles.push_back(3);
-  triangles.push_back(5);
-  triangles.push_back(4);
+  triangles.insert(triangles.end(), {3, 5, 4});
   // --+ face
-  triangles.push_back(3);
-  triangles.push_back(4);
-  triangles.push_back(2);
+  triangles.insert(triangles.end(), {3, 4, 2});
   // -++ face
-  triangles.push_back(3);
-  triangles.push_back(2);
-  triangles.push_back(1);
+  triangles.insert(triangles.end(), {3, 2, 1});
   // -+- face
-  triangles.push_back(3);
-  triangles.push_back(1);
-  triangles.push_back(5);
+  triangles.insert(triangles.end(), {3, 1, 5});
 
   // Use flexible constructor
-  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-      new MeshObject(triangles, vertices, Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+      triangles, vertices, Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -190,87 +149,50 @@ std::unique_ptr<MeshObject> createLShape() {
   *  where Z = 0 or 1.
   */
   std::vector<V3D> vertices;
-  vertices.push_back(V3D(0, 0, 0));
-  vertices.push_back(V3D(2, 0, 0));
-  vertices.push_back(V3D(2, 1, 0));
-  vertices.push_back(V3D(1, 1, 0));
-  vertices.push_back(V3D(1, 2, 0));
-  vertices.push_back(V3D(0, 2, 0));
-  vertices.push_back(V3D(0, 0, 1));
-  vertices.push_back(V3D(2, 0, 1));
-  vertices.push_back(V3D(2, 1, 1));
-  vertices.push_back(V3D(1, 1, 1));
-  vertices.push_back(V3D(1, 2, 1));
-  vertices.push_back(V3D(0, 2, 1));
+  vertices.emplace_back(V3D(0, 0, 0));
+  vertices.emplace_back(V3D(2, 0, 0));
+  vertices.emplace_back(V3D(2, 1, 0));
+  vertices.emplace_back(V3D(1, 1, 0));
+  vertices.emplace_back(V3D(1, 2, 0));
+  vertices.emplace_back(V3D(0, 2, 0));
+  vertices.emplace_back(V3D(0, 0, 1));
+  vertices.emplace_back(V3D(2, 0, 1));
+  vertices.emplace_back(V3D(2, 1, 1));
+  vertices.emplace_back(V3D(1, 1, 1));
+  vertices.emplace_back(V3D(1, 2, 1));
+  vertices.emplace_back(V3D(0, 2, 1));
 
   std::vector<uint16_t> triangles;
   // z min
-  triangles.push_back(0);
-  triangles.push_back(5);
-  triangles.push_back(1);
-  triangles.push_back(1);
-  triangles.push_back(3);
-  triangles.push_back(2);
-  triangles.push_back(3);
-  triangles.push_back(5);
-  triangles.push_back(4);
+  triangles.insert(triangles.end(), {0, 5, 1});
+  triangles.insert(triangles.end(), {1, 3, 2});
+  triangles.insert(triangles.end(), {3, 5, 4});
   // z max
-  triangles.push_back(6);
-  triangles.push_back(7);
-  triangles.push_back(11);
-  triangles.push_back(11);
-  triangles.push_back(9);
-  triangles.push_back(10);
-  triangles.push_back(9);
-  triangles.push_back(7);
-  triangles.push_back(8);
+  triangles.insert(triangles.end(), {6, 7, 11});
+  triangles.insert(triangles.end(), {11, 9, 10});
+  triangles.insert(triangles.end(), {9, 7, 8});
   // y min
-  triangles.push_back(0);
-  triangles.push_back(1);
-  triangles.push_back(6);
-  triangles.push_back(6);
-  triangles.push_back(1);
-  triangles.push_back(7);
+  triangles.insert(triangles.end(), {0, 1, 6});
+  triangles.insert(triangles.end(), {6, 1, 7});
   // x max
-  triangles.push_back(1);
-  triangles.push_back(2);
-  triangles.push_back(7);
-  triangles.push_back(7);
-  triangles.push_back(2);
-  triangles.push_back(8);
+  triangles.insert(triangles.end(), {1, 2, 7});
+  triangles.insert(triangles.end(), {7, 2, 8});
   // y mid
-  triangles.push_back(2);
-  triangles.push_back(3);
-  triangles.push_back(8);
-  triangles.push_back(8);
-  triangles.push_back(3);
-  triangles.push_back(9);
+  triangles.insert(triangles.end(), {2, 3, 8});
+  triangles.insert(triangles.end(), {8, 3, 9});
   // x mid
-  triangles.push_back(3);
-  triangles.push_back(4);
-  triangles.push_back(9);
-  triangles.push_back(9);
-  triangles.push_back(4);
-  triangles.push_back(10);
+  triangles.insert(triangles.end(), {3, 4, 9});
+  triangles.insert(triangles.end(), {9, 4, 10});
   // y max
-  triangles.push_back(4);
-  triangles.push_back(5);
-  triangles.push_back(10);
-  triangles.push_back(10);
-  triangles.push_back(5);
-  triangles.push_back(11);
+  triangles.insert(triangles.end(), {4, 5, 10});
+  triangles.insert(triangles.end(), {10, 5, 11});
   // x min
-  triangles.push_back(5);
-  triangles.push_back(0);
-  triangles.push_back(11);
-  triangles.push_back(11);
-  triangles.push_back(0);
-  triangles.push_back(6);
+  triangles.insert(triangles.end(), {5, 0, 11});
+  triangles.insert(triangles.end(), {11, 0, 6});
 
   // Use efficient constructor
-  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-      new MeshObject(std::move(triangles), std::move(vertices),
-                     Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = Mantid::Kernel::make_unique<MeshObject>(
+      std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
 }
@@ -281,28 +203,16 @@ public:
   void testConstructor() {
 
     std::vector<V3D> vertices;
-    vertices.push_back(V3D(0, 0, 0));
-    vertices.push_back(V3D(1, 0, 0));
-    vertices.push_back(V3D(0, 1, 0));
-    vertices.push_back(V3D(0, 0, 1));
+    vertices.emplace_back(V3D(0, 0, 0));
+    vertices.emplace_back(V3D(1, 0, 0));
+    vertices.emplace_back(V3D(0, 1, 0));
+    vertices.emplace_back(V3D(0, 0, 1));
 
     std::vector<uint16_t> triangles;
-    // face
-    triangles.push_back(1);
-    triangles.push_back(2);
-    triangles.push_back(3);
-    // face
-    triangles.push_back(2);
-    triangles.push_back(1);
-    triangles.push_back(0);
-    // face
-    triangles.push_back(3);
-    triangles.push_back(0);
-    triangles.push_back(1);
-    // face
-    triangles.push_back(0);
-    triangles.push_back(3);
-    triangles.push_back(2);
+    triangles.insert(triangles.end(), {1, 2, 3});
+    triangles.insert(triangles.end(), {2, 1, 0});
+    triangles.insert(triangles.end(), {3, 0, 1});
+    triangles.insert(triangles.end(), {0, 3, 2});
 
     // Test flexible constructor
     TS_ASSERT_THROWS_NOTHING(
@@ -327,28 +237,16 @@ public:
   void testMaterial() {
     using Mantid::Kernel::Material;
     std::vector<V3D> vertices;
-    vertices.push_back(V3D(0, 0, 0));
-    vertices.push_back(V3D(1, 0, 0));
-    vertices.push_back(V3D(0, 1, 0));
-    vertices.push_back(V3D(0, 0, 1));
+    vertices.emplace_back(V3D(0, 0, 0));
+    vertices.emplace_back(V3D(1, 0, 0));
+    vertices.emplace_back(V3D(0, 1, 0));
+    vertices.emplace_back(V3D(0, 0, 1));
 
     std::vector<uint16_t> triangles;
-    // face
-    triangles.push_back(1);
-    triangles.push_back(2);
-    triangles.push_back(3);
-    // face
-    triangles.push_back(2);
-    triangles.push_back(1);
-    triangles.push_back(0);
-    // face
-    triangles.push_back(3);
-    triangles.push_back(0);
-    triangles.push_back(1);
-    // face
-    triangles.push_back(0);
-    triangles.push_back(3);
-    triangles.push_back(2);
+    triangles.insert(triangles.end(), {1, 2, 3});
+    triangles.insert(triangles.end(), {2, 1, 0});
+    triangles.insert(triangles.end(), {3, 0, 1});
+    triangles.insert(triangles.end(), {0, 3, 2});
 
     auto testMaterial =
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
@@ -429,7 +327,7 @@ public:
     Track track(V3D(-10, 1, 1), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -440,7 +338,7 @@ public:
     Track track(V3D(-8, -6, 1), V3D(0.8, 0.6, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -460,7 +358,7 @@ public:
     Track track(V3D(-10, 0.2, 0.2), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -471,7 +369,7 @@ public:
     Track track(V3D(-10, 0.2, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -482,7 +380,7 @@ public:
     Track track(V3D(-10, 0.0, 0.0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -493,9 +391,9 @@ public:
     Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.4142135, *geom_obj));
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828427, *geom_obj));
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -526,8 +424,9 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(
+        Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(
         Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
     checkTrackIntercept(TL, expectedResults);
   }
@@ -548,16 +447,17 @@ public:
     TS_ASSERT(object2->interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
-    expectedResults.push_back(Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
+    expectedResults.emplace_back(
+        Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.emplace_back(
+        Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
   void checkTrackIntercept(Track &track,
                            const std::vector<Link> &expectedResults) {
     size_t index = 0;
-    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
-         ++it) {
+    for (auto it = track.cbegin(); it != track.cend(); ++it) {
       if (index < expectedResults.size()) {
         TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
                         1e-6);

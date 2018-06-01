@@ -2,6 +2,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -71,7 +76,7 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
     if (m_efixedGiven)
       efixed = m_efixed; // user provided a value
     else {
-      std::vector<double> param = det.getNumberParameter("EFixed");
+      const std::vector<double> param = det.getNumberParameter("EFixed");
       if (param.empty())
         throw std::runtime_error(
             "Cannot find EFixed parameter for component \"" + det.getName() +
@@ -81,6 +86,151 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
     }
   }
   return efixed;
+}
+
+/**
+ * Calculate the Q value
+ * @param deltaE The energy transfer in meV
+ * @param twoTheta The scattering angle in radians
+ * @param det A pointer to the corresponding detector, can be nullptr
+ *        for direct emode.
+ * @return The momentum transfer in A-1
+ */
+double SofQCommon::q(const double deltaE, const double twoTheta,
+                     const Geometry::IDetector *det) const {
+  if (m_emode == 1) {
+    return directQ(deltaE, twoTheta);
+  }
+  return indirectQ(deltaE, twoTheta, det);
+}
+
+/**
+ * Return a pair of (minimum Q, maximum Q) for given workspace.
+ * @param ws a workspace
+ * @param minE minimum energy transfer in ws
+ * @param maxE maximum energy transfer in ws
+ * @return a pair containing global minimun and maximum Q
+ */
+std::pair<double, double> SofQCommon::qBinHints(const API::MatrixWorkspace &ws,
+                                                const double minE,
+                                                const double maxE) const {
+  if (m_emode == 1) {
+    return qBinHintsDirect(ws, minE, maxE);
+  }
+  return qBinHintsIndirect(ws, minE, maxE);
+}
+
+/**
+ * Calculate the Q value for a direct instrument
+ * @param deltaE The energy change
+ * @param twoTheta The value of the scattering angle
+ * @return The value of Q
+ */
+double SofQCommon::directQ(const double deltaE, const double twoTheta) const {
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
+  const double ki = std::sqrt(m_efixed / E_mev_toNeutronWavenumberSq);
+  const double kf =
+      std::sqrt((m_efixed - deltaE) / E_mev_toNeutronWavenumberSq);
+  return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
+}
+
+/**
+ * Calculate the Q value for an  indirect instrument
+ * @param deltaE The energy change
+ * @param twoTheta The value of the scattering angle
+ * @param det A pointer to the corresponding Detector
+ * @return The value of Q
+ */
+double SofQCommon::indirectQ(const double deltaE, const double twoTheta,
+                             const Geometry::IDetector *det) const {
+  using Mantid::PhysicalConstants::E_mev_toNeutronWavenumberSq;
+  if (!det) {
+    throw std::runtime_error("indirectQ: det is nullptr.");
+  }
+  const auto efixed = getEFixed(*det);
+  const double ki = std::sqrt((efixed + deltaE) / E_mev_toNeutronWavenumberSq);
+  const double kf = std::sqrt(efixed / E_mev_toNeutronWavenumberSq);
+  return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
+}
+
+/**
+ * Return a pair of (minimum Q, maximum Q) for given
+ * direct geometry workspace.
+ * @param ws a workspace
+ * @param minE minimum energy transfer in ws
+ * @param maxE maximum energy transfer in ws
+ * @return a pair containing global minimun and maximum Q
+ */
+std::pair<double, double>
+SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
+                            const double maxE) const {
+  using namespace Mantid::PhysicalConstants;
+  auto minTwoTheta = std::numeric_limits<double>::max();
+  auto maxTwoTheta = std::numeric_limits<double>::lowest();
+  const auto &spectrumInfo = ws.spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+    const auto twoTheta = spectrumInfo.twoTheta(i);
+    if (twoTheta < minTwoTheta) {
+      minTwoTheta = twoTheta;
+    }
+    if (twoTheta > maxTwoTheta) {
+      maxTwoTheta = twoTheta;
+    }
+  }
+  if (minTwoTheta == std::numeric_limits<double>::max()) {
+    throw std::runtime_error("Could not determine Q binning: workspace does "
+                             "not contain usable spectra.");
+  }
+  std::array<double, 4> q;
+  q[0] = directQ(minE, minTwoTheta);
+  q[1] = directQ(minE, maxTwoTheta);
+  q[2] = directQ(maxE, minTwoTheta);
+  q[3] = directQ(maxE, maxTwoTheta);
+  const auto minmaxQ = std::minmax_element(q.cbegin(), q.cend());
+  return std::make_pair(*minmaxQ.first, *minmaxQ.second);
+}
+
+/**
+ * Return a pair of (minimum Q, maximum Q) for given
+ * indirect geometry workspace. Estimates the Q range from all detectors.
+ * If workspace contains grouped detectors/not all detectors are linked
+ * to a spectrum, the returned interval may be larger than actually needed.
+ * @param ws a workspace
+ * @param minE minimum energy transfer in ws
+ * @param maxE maximum energy transfer in ws
+ * @return a pair containing global minimun and maximum Q
+ */
+std::pair<double, double>
+SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
+                              const double maxE) const {
+  using namespace Mantid::PhysicalConstants;
+  auto minQ = std::numeric_limits<double>::max();
+  auto maxQ = std::numeric_limits<double>::lowest();
+  const auto &detectorInfo = ws.detectorInfo();
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (detectorInfo.isMasked(i) || detectorInfo.isMonitor(i)) {
+      continue;
+    }
+    const auto twoTheta = detectorInfo.twoTheta(i);
+    const auto &det = detectorInfo.detector(i);
+    const auto Q1 = indirectQ(minE, twoTheta, &det);
+    const auto Q2 = indirectQ(maxE, twoTheta, &det);
+    const auto minmaxQ = std::minmax(Q1, Q2);
+    if (minmaxQ.first < minQ) {
+      minQ = minmaxQ.first;
+    }
+    if (minmaxQ.second > maxQ) {
+      maxQ = minmaxQ.second;
+    }
+  }
+  if (minQ == std::numeric_limits<double>::max()) {
+    throw std::runtime_error("Could not determine Q binning: workspace does "
+                             "not contain usable spectra.");
+  }
+  return std::make_pair(minQ, maxQ);
 }
 }
 }

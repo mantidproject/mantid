@@ -72,6 +72,8 @@ class InputSplitter(IPyInputSplitter):
             self._update_indent(lines)
         except TypeError: # _update_indent was changed in IPython 6.0
             self._update_indent()
+        except AttributeError: # changed definition in IPython 6.3
+            self.get_indent_spaces()
         try:
             self.code = self._compile(source, symbol="exec")
         # Invalid syntax can produce any of a number of different errors from

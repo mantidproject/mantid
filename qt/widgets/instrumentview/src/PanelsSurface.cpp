@@ -178,6 +178,7 @@ void PanelsSurface::init() {
   if (ndet == 0)
     return;
 
+  clearBanks();
   constructFromComponentInfo();
   spreadBanks();
 

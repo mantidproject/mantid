@@ -16,6 +16,7 @@ public:
   enum Notification {
     DoRefinement, ///< Perform a GSAS refinement on a run
     LoadRun,      ///< Load a focused run
+    RefineAll,    ///< Do refinement on all runs loaded into the tab
     SelectRun,    ///< The user has selected a different run in the multi-run
                   /// widget
     ShutDown,     ///< Shut down the interface
@@ -30,6 +31,8 @@ public:
    * @param notif Type of notification to process.
    */
   virtual void notify(IEnggDiffGSASFittingPresenter::Notification notif) = 0;
+
+  void notifyRefinementsComplete() override = 0;
 
   void notifyRefinementSuccessful(const GSASIIRefineFitPeaksOutputProperties &
                                       refinementResults) override = 0;

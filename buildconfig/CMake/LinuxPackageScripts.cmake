@@ -136,6 +136,8 @@ endif()
 # .so symlink is only present when a -dev/-devel package is present
 if ( TCMALLOC_FOUND )
   get_filename_component ( TCMALLOC_RUNTIME_LIB ${TCMALLOC_LIBRARIES} REALPATH )
+  # We only want to use the major version number
+  string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" TCMALLOC_RUNTIME_LIB ${TCMALLOC_RUNTIME_LIB} )
 endif ()
 
 # Local dev version

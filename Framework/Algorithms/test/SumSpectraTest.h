@@ -39,6 +39,89 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  void testValidateInputsWithDefaultsPasses() {
+    Mantid::Algorithms::SumSpectra runner;
+    runner.initialize();
+    auto validationErrors = runner.validateInputs();
+    TS_ASSERT(validationErrors.empty());
+  }
+
+  void testValidateInputsWithMinGreaterThanMaxReturnErrors() {
+    Mantid::Algorithms::SumSpectra runner;
+    runner.initialize();
+    runner.setProperty("StartWorkspaceIndex", 10);
+    runner.setProperty("EndWorkspaceIndex", 9);
+    auto validationErrors = runner.validateInputs();
+    TS_ASSERT_EQUALS(2, validationErrors.size());
+    TSM_ASSERT_THROWS_NOTHING(
+        "Validation errors should contain a StartWorkspaceIndex entry",
+        validationErrors["StartWorkspaceIndex"]);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Validation errors should contain an EndWorkspaceIndex entry",
+        validationErrors["EndWorkspaceIndex"]);
+  }
+
+  void testValidateInputsWithWorkspaceChecksAgainstWorkspaceSize() {
+    Mantid::Algorithms::SumSpectra runner;
+    runner.setChild(true);
+    runner.initialize();
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace123(3, 1);
+
+    // bad start workspace index
+    runner.setProperty("InputWorkspace", testWS);
+    runner.setProperty("StartWorkspaceIndex", 3);
+    auto validationErrors = runner.validateInputs();
+    TS_ASSERT_EQUALS(1, validationErrors.size());
+    TSM_ASSERT_THROWS_NOTHING(
+        "Validation errors should contain a StartWorkspaceIndex entry",
+        validationErrors["StartWorkspaceIndex"]);
+
+    // bad end workspace index
+    runner.setProperty("StartWorkspaceIndex", 0);
+    runner.setProperty("EndWorkspaceIndex", 5);
+    validationErrors = runner.validateInputs();
+    TS_ASSERT_EQUALS(1, validationErrors.size());
+    TSM_ASSERT_THROWS_NOTHING(
+        "Validation errors should contain a EndWorkspaceIndex entry",
+        validationErrors["EndWorkspaceIndex"]);
+  }
+
+  void testValidateInputsWithValidWorkspaceGroup() {
+    Mantid::Algorithms::SumSpectra runner;
+    runner.setChild(true);
+    runner.initialize();
+    const std::string nameStem(
+        "SumSpectraTest_testValidateInputsWithValidWorkspaceGroup");
+    auto testGroup =
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 1, 1, nameStem);
+    runner.setProperty("InputWorkspace", nameStem);
+
+    auto validationErrors = runner.validateInputs();
+    TS_ASSERT(validationErrors.empty());
+
+    Mantid::API::AnalysisDataService::Instance().remove(nameStem);
+  }
+
+  void testValidateInputsWithWorkspaceGroupAndInvalidIndex() {
+    Mantid::Algorithms::SumSpectra runner;
+    runner.setChild(true);
+    runner.initialize();
+    const std::string nameStem(
+        "SumSpectraTest_testValidateInputsWithWorkspaceGroupAndInvalidIndex");
+    auto testGroup =
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 1, 1, nameStem);
+    runner.setPropertyValue("InputWorkspace", nameStem);
+    runner.setProperty("StartWorkspaceIndex", 11);
+
+    auto validationErrors = runner.validateInputs();
+    TS_ASSERT_EQUALS(1, validationErrors.size());
+    TSM_ASSERT_THROWS_NOTHING(
+        "Validation errors should contain StartWorkspaceIndex",
+        validationErrors["StartWorkspaceIndex"]);
+
+    Mantid::API::AnalysisDataService::Instance().remove(nameStem);
+  }
+
   void testExecWithLimits() {
     if (!alg.isInitialized()) {
       alg.initialize();

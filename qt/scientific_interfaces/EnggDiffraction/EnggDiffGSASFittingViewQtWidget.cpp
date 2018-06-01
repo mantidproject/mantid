@@ -261,6 +261,10 @@ void EnggDiffGSASFittingViewQtWidget::loadFocusedRun() {
   m_presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
 }
 
+void EnggDiffGSASFittingViewQtWidget::refineAll() {
+  m_presenter->notify(IEnggDiffGSASFittingPresenter::RefineAll);
+}
+
 bool EnggDiffGSASFittingViewQtWidget::runFileLineEditEmpty() const {
   return m_ui.lineEdit_runFile->text().isEmpty();
 }
@@ -298,6 +302,7 @@ void EnggDiffGSASFittingViewQtWidget::setEnabled(const bool enabled) {
   m_ui.checkBox_refineGamma->setEnabled(enabled);
 
   m_ui.pushButton_doRefinement->setEnabled(enabled);
+  m_ui.pushButton_refineAll->setEnabled(enabled);
 
   m_multiRunWidgetView->setEnabled(enabled);
 }
@@ -339,6 +344,8 @@ void EnggDiffGSASFittingViewQtWidget::setupUI() {
 
   connect(m_ui.pushButton_doRefinement, SIGNAL(clicked()), this,
           SLOT(doRefinement()));
+  connect(m_ui.pushButton_refineAll, SIGNAL(clicked()), this,
+          SLOT(refineAll()));
 
   connect(m_multiRunWidgetView.get(), SIGNAL(runSelected()), this,
           SLOT(selectRun()));

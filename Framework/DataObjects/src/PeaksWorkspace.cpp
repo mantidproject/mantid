@@ -16,6 +16,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
@@ -38,6 +39,8 @@ namespace Mantid {
 namespace DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(PeaksWorkspace)
+
+Mantid::Kernel::Logger g_log("PeaksWorkspace");
 
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
@@ -278,7 +281,31 @@ PeaksWorkspace::createPeak(const Kernel::V3D &position,
  */
 Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
   // Create a peak from QSampleFrame
-  const auto goniometer = run().getGoniometer();
+
+  Geometry::Goniometer goniometer;
+
+  LogManager_const_sptr props = getLogs();
+  // See if we can get a wavelength/energy
+  // Then assume constant wavelenth
+  double wavelength(0);
+  if (props->hasProperty("wavelength")) {
+    wavelength = props->getPropertyValueAsType<double>("wavelength");
+  } else if (props->hasProperty("energy")) {
+    wavelength = Kernel::UnitConversion::run(
+        "Energy", "Wavelength", props->getPropertyValueAsType<double>("energy"),
+        0, 0, 0, Kernel::DeltaEMode::Elastic, 0);
+  } else if (getInstrument()->hasParameter("wavelength")) {
+    wavelength = getInstrument()->getNumberParameter("wavelength").at(0);
+  }
+
+  if (wavelength > 0) {
+    goniometer.calcFromQSampleAndWavelength(position, wavelength);
+    g_log.information() << "Found goniometer rotation to be "
+                        << goniometer.getEulerAngles()[0]
+                        << " degrees for Q sample = " << position << "\n";
+  } else {
+    goniometer = run().getGoniometer();
+  }
   // create a peak using the qLab frame
   auto peak = new Peak(getInstrument(), position, goniometer.getR());
   // Take the run number from this

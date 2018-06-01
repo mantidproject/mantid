@@ -20,12 +20,7 @@ class SANSBatchReductionTest(unittest.TestCase):
 
     def _run_batch_reduction(self, states, use_optimizations=False):
         batch_reduction_alg = SANSBatchReduction()
-        try:
-            batch_reduction_alg(states, use_optimizations, OutputMode.PublishToADS)
-            did_raise = False
-        except:  # noqa
-            did_raise = True
-        self.assertFalse(did_raise)
+        batch_reduction_alg(states, use_optimizations, OutputMode.PublishToADS)
 
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
@@ -110,8 +105,6 @@ class SANSBatchReductionTest(unittest.TestCase):
         # Build the data information
         file_information_factory = SANSFileInformationFactory()
         file_information = file_information_factory.create_sans_file_information("SANS2D0005512")
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter("SANS2D0005512")
 

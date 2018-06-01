@@ -14,9 +14,9 @@ from sans.test_helper.user_file_test_helper import create_user_file, sample_user
 
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
-    def _get_table_model(option_string=""):
+    def _get_table_model(option_string="", sample_thickness=8.0):
         table_index_model = TableIndexModel(0, "SANS2D00022024", "", "", "", "", "", "", "", "",
-                                            "", "", "", "", "", option_string)
+                                            "", "", "", "", "", option_string, sample_thickness=sample_thickness)
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
         return table_model
@@ -63,6 +63,17 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertTrue(isinstance(state, State))
         self.assertTrue(state.wavelength.wavelength_low == [3.14])
         self.assertTrue(state.wavelength.wavelength_high == [10.3])
+
+    def test_that_sample_thickness_set_on_state(self):
+        table_model = self._get_table_model(sample_thickness = '78.0')
+        state_model = self._get_state_gui_model()
+        director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
+
+        state = director.create_state(0)
+        self.assertTrue(isinstance(state, State))
+
+        self.assertEqual(state.scale.thickness, 78.0)
+
 
 
 if __name__ == '__main__':

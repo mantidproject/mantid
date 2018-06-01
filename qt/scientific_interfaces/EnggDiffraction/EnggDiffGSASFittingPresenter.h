@@ -36,6 +36,8 @@ public:
 
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
+  void notifyRefinementsComplete() override;
+
   void notifyRefinementSuccessful(
       const GSASIIRefineFitPeaksOutputProperties &refinementResults) override;
 
@@ -46,9 +48,13 @@ public:
 private:
   void processDoRefinement();
   void processLoadRun();
+  void processRefineAll();
   void processSelectRun();
   void processShutDown();
   void processStart();
+
+  /// Collect GSASIIRefineFitPeaks parameters for all runs loaded in
+  std::vector<GSASIIRefineFitPeaksParameters> collectAllInputParameters() const;
 
   /// Collect GSASIIRefineFitPeaks input parameters for a given run from the
   /// presenter's various children
@@ -57,10 +63,10 @@ private:
                          const Mantid::API::MatrixWorkspace_sptr ws) const;
 
   /**
-   Perform a refinement on a run
-   @param params Input parameters for GSASIIRefineFitPeaks
+   Perform refinements on a number of runs
+   @param params Input parameters for each run to pass to GSASIIRefineFitPeaks
    */
-  void doRefinement(const GSASIIRefineFitPeaksParameters &params);
+  void doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params);
 
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in

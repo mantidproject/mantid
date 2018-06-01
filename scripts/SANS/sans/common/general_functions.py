@@ -686,14 +686,14 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
                                  dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
                                  start_time_as_string + end_time_as_string)
-        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string +
-                                      wavelength_range_string + phi_limits_as_string)
+        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
+                                      + phi_limits_as_string)
     else:
         output_workspace_name = (short_run_number_as_string + period_as_string + transmission_name +
                                  wavelength_range_string + phi_limits_as_string + start_time_as_string
                                  + end_time_as_string)
         output_workspace_base_name = (short_run_number_as_string + transmission_name +
-                                      wavelength_range_string + phi_limits_as_string)
+                                      phi_limits_as_string)
     return output_workspace_name, output_workspace_base_name
 
 
@@ -729,27 +729,28 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
             and user_specified_output_name:
         use_reduction_mode_as_suffix = True
 
-    if multi_reduction_type["period"] and user_specified_output_name:
-        period = state.data.sample_scatter_period
-        period_as_string = "p" + str(period)
-        user_specified_output_name = user_specified_output_name + period_as_string
+    if multi_reduction_type and user_specified_output_name:
+        if multi_reduction_type["period"]:
+            period = state.data.sample_scatter_period
+            period_as_string = "p" + str(period)
+            user_specified_output_name = user_specified_output_name + period_as_string
 
-    if multi_reduction_type["event_slice"] and user_specified_output_name:
-        slice_state = state.slice
-        start_time = slice_state.start_time
-        end_time = slice_state.end_time
-        if start_time and end_time:
-            start_time_as_string = '_t%.2f' % start_time[0]
-            end_time_as_string = '_T%.2f' % end_time[0]
-        else:
-            start_time_as_string = ""
-            end_time_as_string = ""
-        user_specified_output_name = user_specified_output_name + start_time_as_string + end_time_as_string
+        if multi_reduction_type["event_slice"]:
+            slice_state = state.slice
+            start_time = slice_state.start_time
+            end_time = slice_state.end_time
+            if start_time and end_time:
+                start_time_as_string = '_t%.2f' % start_time[0]
+                end_time_as_string = '_T%.2f' % end_time[0]
+            else:
+                start_time_as_string = ""
+                end_time_as_string = ""
+            user_specified_output_name = user_specified_output_name + start_time_as_string + end_time_as_string
 
-    if multi_reduction_type["wavelength_range"] and user_specified_output_name:
-        wavelength = state.wavelength
-        wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
-        user_specified_output_name = user_specified_output_name + wavelength_range_string
+        if multi_reduction_type["wavelength_range"]:
+            wavelength = state.wavelength
+            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
+            user_specified_output_name = user_specified_output_name + wavelength_range_string
 
     # An output name requires special attention when the workspace is part of a multi-period reduction
     # or slice event scan
