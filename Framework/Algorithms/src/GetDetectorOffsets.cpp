@@ -142,13 +142,9 @@ void GetDetectorOffsets::exec() {
   // output fitting result?
   std::string output_table_name =
       getPropertyValue("PeakFitResultTableWorkspace");
-  bool output_fit_result(true);
   TableWorkspace_sptr fit_result_table(0);
-  if (output_table_name == "")
-    output_fit_result = false;
-  else {
+  if (output_table_name != "")
     fit_result_table = GenerateFitResultTable();
-  }
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0.0, 1.0, nspec);
@@ -235,7 +231,6 @@ void GetDetectorOffsets::exec() {
 
   // Return the output fit result table
   if (fit_result_table) {
-
     setProperty("PeakFitResultTableWorkspace", fit_result_table);
   }
 }
