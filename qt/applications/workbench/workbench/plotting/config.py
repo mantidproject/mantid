@@ -20,7 +20,7 @@ from __future__ import (absolute_import)
 
 # 3rd-party imports
 import matplotlib as mpl
-import matplotlib._pylab_helpers as pylab_helpers
+import matplotlib._pylab_helpers as _pylab_helpers
 
 # local imports
 from .globalfiguremanager import GlobalFigureManager
@@ -34,12 +34,10 @@ DEFAULT_RCPARAMS = {
 }
 
 
-def setup_matplotlib():
+def initialize_matplotlib():
     """Configures our defaults"""
-    # Replace vanilla Gcf with our custom instance
-    setattr(pylab_helpers, 'Gcf', GlobalFigureManager)
-    # Our backend
-    mpl.use(MPL_BACKEND)
+    # Replace vanilla Gcf with our custom manager
+    setattr(_pylab_helpers, 'Gcf', GlobalFigureManager)
     # Set our defaults
     reset_rcparams_to_default()
 
@@ -47,12 +45,12 @@ def setup_matplotlib():
 def reset_rcparams_to_default():
     """
     Reset the rcParams to the default settings.
-
-    :param rcp: A dictionary containing new rcparams values
     """
     mpl.rcParams.clear()
     mpl.rc_file_defaults()
     set_rcparams(DEFAULT_RCPARAMS)
+    # We must keep our backend
+    mpl.use(MPL_BACKEND)
 
 
 def set_rcparams(rcp):
@@ -60,4 +58,6 @@ def set_rcparams(rcp):
     Update the current rcParams with the given set
     :param rcp: A dictionary containing new rcparams values
     """
+    # We must keep our backend
+    assert 'backend' not in rcp
     mpl.rcParams.update(rcp)
