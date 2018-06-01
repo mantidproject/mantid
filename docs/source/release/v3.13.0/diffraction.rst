@@ -61,6 +61,8 @@ Single Crystal Diffraction
 
 - :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
 
+- New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
+
 Improvements
 ############
 
