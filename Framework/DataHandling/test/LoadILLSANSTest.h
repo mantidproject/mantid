@@ -6,9 +6,18 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadILLSANS.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/ConfigService.h"
 
 using Mantid::DataHandling::LoadILLSANS;
-using namespace Mantid::API;
+using Mantid::API::MatrixWorkspace_const_sptr;
+using Mantid::API::AnalysisDataService;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::V3D;
+using Mantid::Geometry::IComponent_const_sptr;
+using Mantid::Geometry::Instrument;
 
 class LoadILLSANSTest : public CxxTest::TestSuite {
 public:
@@ -17,9 +26,17 @@ public:
   static LoadILLSANSTest *createSuite() { return new LoadILLSANSTest(); }
   static void destroySuite(LoadILLSANSTest *suite) { delete suite; }
 
-  LoadILLSANSTest()
-      : m_testFileTof("ILLD33_001030.nxs"),
-        m_testFileNonTof("ILLD33_041714_NonTof.nxs") {}
+  void setUp() override {
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D11/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D33/");
+    ConfigService::Instance().setFacility("ILL");
+  }
+
+  void tearDown() override {
+      AnalysisDataService::Instance().clear();
+  }
+
   void testName() {
     LoadILLSANS alg;
     TS_ASSERT_EQUALS(alg.name(), "LoadILLSANS");
@@ -30,63 +47,71 @@ public:
     TS_ASSERT_EQUALS(alg.version(), 1);
   }
 
-  void test_Init() {
+  void test_init() {
     LoadILLSANS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec_TOF() {
-    LoadILLSANS loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", m_testFileTof);
+void test_D11() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "010560.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),128*128+2)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128*128))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128*128+1))
+    TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    const auto &instrument = outputWS->getInstrument();
+    IComponent_const_sptr component = instrument->getComponentByName("detector");
+    V3D pos = component->getPos();
+    TS_ASSERT_DELTA(pos.Z(), 20.007, 1E-3)
+    const auto& xAxis = outputWS->x(0).rawData();
+    const auto& spec6 = outputWS->y(6).rawData();
+    TS_ASSERT_EQUALS(xAxis.size(), 2)
+    TS_ASSERT_DELTA(xAxis[0], 5.72778, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 6.26757, 1E-5)
+    TS_ASSERT_EQUALS(spec6[0], 20)
+}
 
-    std::string outputSpace = "LoadILLSANSTest_out";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
+void test_D22() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "192068.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),128*256+2)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128*256))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128*256+1))
+    TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    const auto &instrument = outputWS->getInstrument();
+    IComponent_const_sptr component = instrument->getComponentByName("detector");
+    V3D pos = component->getPos();
+    TS_ASSERT_DELTA(pos.Z(), 8, 0.01)
+    TS_ASSERT_DELTA(pos.X(), 0.35, 0.01)
+    const auto& xAxis = outputWS->x(0).rawData();
+    const auto& spec6 = outputWS->y(6).rawData();
+    TS_ASSERT_EQUALS(xAxis.size(), 2)
+    TS_ASSERT_DELTA(xAxis[0], 4.75015, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 5.25016, 1E-5)
+    TS_ASSERT_EQUALS(spec6[0], 45)
+}
 
-    //  test workspace, copied from LoadMuonNexusTest.h
-    MatrixWorkspace_sptr output;
-
-    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace));
-    MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
-
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 65536 + 2);
-    TS_ASSERT_EQUALS(output2D->blocksize(), 100);
-    TS_ASSERT_DIFFERS(output2D->run().getPropertyValueAsType<double>("monitor"),
-                      0.0);
-    AnalysisDataService::Instance().clear();
-  }
-
-  void test_exec_nonTOF() {
-    LoadILLSANS loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", m_testFileNonTof);
-
-    std::string outputSpace = "LoadILLSANSTest_out";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-
-    //  test workspace, copied from LoadMuonNexusTest.h
-    MatrixWorkspace_sptr output;
-
-    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace));
-    MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
-
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 65536 + 2);
-    TS_ASSERT_EQUALS(output2D->blocksize(), 1);
-    TS_ASSERT_DIFFERS(output2D->run().getPropertyValueAsType<double>("monitor"),
-                      0.0);
-    AnalysisDataService::Instance().clear();
-  }
-
-private:
-  std::string m_testFileTof;
-  std::string m_testFileNonTof;
 };
 
 class LoadILLSANSTestPerformance : public CxxTest::TestSuite {
