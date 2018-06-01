@@ -25,13 +25,16 @@ class PlotSelectorView(QWidget):
     """
     The view to the plot selector, a PyQt widget.
     """
+
+    keyPressed = Signal(int)
+
     def __init__(self, presenter, parent=None):
         """
         Initialise a new instance of PlotSelectorWidget
         :param presenter: The presenter that created this class
         :param parent: A parent QWidget
         """
-        QWidget.__init__(self, parent)
+        super(PlotSelectorView, self).__init__(parent)
         self.presenter = presenter
 
         self.close_button = QPushButton('Close')
@@ -59,8 +62,6 @@ class PlotSelectorView(QWidget):
         self.filter_box.textChanged.connect(self.presenter.filter_text_changed)
         self.close_button.clicked.connect(self.presenter.close_action_called)
         self.keyPressed.connect(self.presenter.close_action_called)
-
-    keyPressed = Signal(int)
 
     def keyPressEvent(self, event):
         """
