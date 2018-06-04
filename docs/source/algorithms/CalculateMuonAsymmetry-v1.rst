@@ -56,7 +56,10 @@ This example is for calculating the Asymmetry for a single data set.
 
    tab.addRow([11.,"a","Estimate"])
    tab.addRow([22.,"b","Estimate"])
-
+   
+   ws= makeData("a",2.30)
+   ws2= makeData("b",1.10)
+   
    myFunc='name=GausOsc,$domains=i,Frequency=5.;'  
    TFFunc = ConvertFitFunctionForMuonTFAsymmetry(myFunc,tab,["a"],"Construct")
    CalculateMuonAsymmetry(tab,["a"],["b"],str(TFFunc),OutputFitWorkspace="fit_result",StartX=0.1,EndX=9.9)
@@ -117,6 +120,7 @@ Output:
 
    Normalization constant for b: 2.30
    Normalization constant for d: 4.10
+   
 .. categories::
 
 .. sourcelink::
