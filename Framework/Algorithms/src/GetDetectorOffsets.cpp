@@ -95,8 +95,7 @@ void GetDetectorOffsets::init() {
 
   declareProperty(
       make_unique<WorkspaceProperty<TableWorkspace>>(
-          "PeakFitResultTableWorkspace", "", Direction::Output,
-          PropertyMode::Optional),
+          "PeakFitResultTableWorkspace", "_EMPTY_", Direction::Output),
       "Optional name of the input Tableworkspace containing peak fit window "
       "information for each spectrum. ");
 }
@@ -142,9 +141,11 @@ void GetDetectorOffsets::exec() {
   // output fitting result?
   std::string output_table_name =
       getPropertyValue("PeakFitResultTableWorkspace");
-  TableWorkspace_sptr fit_result_table(0);
-  if (output_table_name != "")
-    fit_result_table = GenerateFitResultTable();
+  bool write_fit_result(true);
+  if (output_table_name == "_EMPTY_")
+    write_fit_result = false;
+
+  TableWorkspace_sptr fit_result_table = GenerateFitResultTable();
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0.0, 1.0, nspec);
@@ -203,7 +204,7 @@ void GetDetectorOffsets::exec() {
           maskWS->mutableY(workspaceIndex)[0] = mask;
         }
       }
-      if (fit_result_table) {
+      if (write_fit_result) {
         API::TableRow row = fit_result_table->getRow(wi);
         row << static_cast<int>(wi) << fit_result.center << fit_result.sigma
             << fit_result.height << fit_result.a0 << fit_result.a1;
@@ -230,9 +231,7 @@ void GetDetectorOffsets::exec() {
   }
 
   // Return the output fit result table
-  if (fit_result_table) {
-    setProperty("PeakFitResultTableWorkspace", fit_result_table);
-  }
+  setProperty("PeakFitResultTableWorkspace", fit_result_table);
 }
 
 //-----------------------------------------------------------------------------------------
