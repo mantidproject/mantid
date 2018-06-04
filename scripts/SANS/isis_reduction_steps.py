@@ -1053,7 +1053,7 @@ class Mask_ISIS(ReductionStep):
                     raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
         if len(self.spec_list) > 0:
-            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list)
+            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list, ForceInstrumentMasking=True)
 
         if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(Workspace=workspace, ShapeXML=self._lim_phi_xml)

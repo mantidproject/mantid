@@ -192,11 +192,11 @@ void ReflectometryReductionOneAuto2::init() {
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
       "Effective polarizing power of the polarizing system. "
-      "Expressed as a ratio 0 < Pp < 1");
+      "Expressed as a ratio 0 &lt; Pp &lt; 1");
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
       "Effective polarizing power of the analyzing system. "
-      "Expressed as a ratio 0 < Ap < 1");
+      "Expressed as a ratio 0 &lt; Ap &lt; 1");
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
