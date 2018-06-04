@@ -101,9 +101,7 @@ EstimateMuonAsymmetryFromCounts::validateInputs() {
  */
 void EstimateMuonAsymmetryFromCounts::exec() {
   std::vector<int> spectra = getProperty("Spectra");
-  std::vector<std::string> methods;
-  std::vector<std::string> wsNames;
-  // Get original workspace
+ // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   std::string wsName = getProperty("WorkspaceName");
   if (wsName == "") {
@@ -158,21 +156,12 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   std::vector<double> norm(specLength, 0.0);
 
   double normConst = getProperty("NormalizationIn");
-  for (int j = 0; j < specLength; j++) {
-    if (normConst == 0) {
-      methods.push_back("Estimate");
-    } else {
-      methods.push_back("Fixed");
-    }
-
-    if (specLength > 1) {
-      wsNames.push_back(wsName + "_spec_");
-    } else {
-
-      wsNames.push_back(wsName);
-    }
-  }
-
+  
+  std::string status = (normConst ==0) ? "Estimate":"Fixed";
+  std::vector<std::string> methods(specLength, status);
+  std::string name = (specLength >1) ? wsName+"_spec_":wsName;
+  std::vector<std::string> wsNames(specLength,name);
+ 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION

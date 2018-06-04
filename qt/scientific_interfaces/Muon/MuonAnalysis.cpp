@@ -452,21 +452,14 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
   // Find names for new workspaces
   const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
   const std::string wsRawName = wsName + "_Raw";
-  const std::string unnorm = "_unNorm";
   std::vector<std::string> wsNames = {wsName, wsRawName};
   // Create workspace and a raw (unbinned) version of it
   auto ws = createAnalysisWorkspace(itemType, tableRow, plotType, wsName);
-  if (ads.doesExist("tmp_unNorm")) {
-    ads.rename("tmp_unNorm", wsName + unnorm);
-    wsNames.push_back(wsName + unnorm);
-  }
+  moveUnNormWS(wsName,wsNames);
 
   auto wsRaw =
       createAnalysisWorkspace(itemType, tableRow, plotType, wsRawName, true);
-  if (ads.doesExist("tmp_unNorm")) {
-    ads.rename("tmp_unNorm", wsRawName + unnorm);
-    wsNames.push_back(wsRawName + unnorm);
-  }
+  moveUnNormWS(wsRawName,wsNames);
   // Make sure they end up in the ADS
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
@@ -475,6 +468,16 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
   return wsName;
 }
 
+void MuonAnalysis::moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames)
+{
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const std::string unnorm = "_unNorm";
+  if (ads.doesExist("tmp_unNorm")) {
+    ads.rename("tmp_unNorm", name + unnorm);
+    wsNames.push_back(name + unnorm);
+  }
+ 
+}
 /**
  * Creates workspace for specified group/pair and plots it;
  * @param itemType :: Whether it's a group or pair
