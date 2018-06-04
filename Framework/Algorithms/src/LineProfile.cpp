@@ -7,6 +7,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/HistogramBuilder.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -37,6 +38,7 @@ using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramBuilder;
+using Mantid::HistogramData::HistogramIterator;
 using Mantid::HistogramData::Points;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
@@ -223,8 +225,6 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
   Xs.resize(lineSize + (isBinEdges ? 1 : 0));
   Ys.resize(lineSize);
   Es.resize(lineSize);
-  const auto convertFromDistribution =
-      dir == LineDirection::vertical && ws.isDistribution();
   for (size_t i = limits.lineStart; i < limits.lineEnd; ++i) {
     Xs[i - limits.lineStart] = lineBins[i];
     double ySum = 0;
@@ -233,17 +233,13 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
     for (size_t j = limits.widthStart; j < limits.widthEnd; ++j) {
       const size_t iHor = dir == LineDirection::horizontal ? i : j;
       const size_t iVert = dir == LineDirection::horizontal ? j : i;
-      double y = ws.y(iVert)[iHor];
+      auto iter = ws.histogram(iVert).begin();
+      std::advance(iter, iHor);
+      const double y = iter->counts();
       if ((ignoreNans && std::isnan(y)) || (ignoreInfs && std::isinf(y))) {
         continue;
       }
-      double e = ws.e(iVert)[iHor];
-      if (convertFromDistribution) {
-        const auto binWidth =
-            std::abs(ws.x(iVert)[iHor + 1] - ws.x(iVert)[iHor]);
-        y *= binWidth;
-        e *= binWidth;
-      }
+      const double e = iter->countStandardDeviation();
       ySum += y;
       eSqSum += e * e;
       ++n;
