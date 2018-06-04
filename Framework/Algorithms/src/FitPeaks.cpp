@@ -2029,15 +2029,24 @@ void FitPeaks::estimateLinearBackground(const Histogram &histogram,
                                         double left_window_boundary,
                                         double right_window_boundary,
                                         double &bkgd_a0, double &bkgd_a1) {
-  const auto &vecX = histogram.points();
-  size_t istart = findXIndex(vecX.rawData(), left_window_boundary);
-  size_t istop = findXIndex(vecX.rawData(), right_window_boundary);
+  bkgd_a0 = 0.;
+  bkgd_a1 = 0.;
 
-  double bg2, chisq;
-  //  HistogramData::estimatePolynomial(1, histogram, istart, istop, bkgd_a0,
-  //                                    bkgd_a1, bg2, chisq);
-  HistogramData::estimateBackground(1, histogram, istart, istop, istart + 10,
-                                    istop - 10, bkgd_a0, bkgd_a1, bg2, chisq);
+  const auto &vecX = histogram.points();
+  const size_t istart = findXIndex(vecX.rawData(), left_window_boundary);
+  const size_t istop = findXIndex(vecX.rawData(), right_window_boundary);
+
+  // 10 is a magic number that worked in a variety of situations
+  const size_t iback_start = istart + 10;
+  const size_t iback_stop = istop - 10;
+
+  // there aren't enough bins in the window to try to estimate so just leave the
+  // estimate at zero
+  if (iback_start < iback_stop) {
+    double bg2, chisq;
+    HistogramData::estimateBackground(1, histogram, istart, istop, iback_start,
+                                      iback_stop, bkgd_a0, bkgd_a1, bg2, chisq);
+  }
 }
 
 //----------------------------------------------------------------------------------------------
