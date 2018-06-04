@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidWorkflowAlgorithms/SetupILLD33Reduction.h"
+#include "MantidWorkflowAlgorithms/SetupILLSANSReduction.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -18,13 +18,13 @@ namespace Mantid {
 namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SetupILLD33Reduction)
+DECLARE_ALGORITHM(SetupILLSANSReduction)
 
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-void SetupILLD33Reduction::init() {
+void SetupILLSANSReduction::init() {
   // Load options
   std::string load_grp = "Load Options";
 
@@ -63,7 +63,7 @@ void SetupILLD33Reduction::init() {
   //    Option 2: Find it (expose properties from FindCenterOfMass)
   declareProperty(
       make_unique<API::FileProperty>(
-          "BeamCenterFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+          "BeamCenterFile", "", API::FileProperty::OptionalLoad, ".nxs"),
       "The name of the input event Nexus file to load");
   setPropertySettings("BeamCenterFile",
                       make_unique<VisibleWhenProperty>(
@@ -104,14 +104,14 @@ void SetupILLD33Reduction::init() {
   // Dark current
   declareProperty(
       make_unique<API::FileProperty>(
-          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
   // Sensitivity
   std::string eff_grp = "Sensitivity";
   declareProperty(
       make_unique<API::FileProperty>(
-          "SensitivityFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+          "SensitivityFile", "", API::FileProperty::OptionalLoad, ".nxs"),
       "Flood field or sensitivity file.");
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
@@ -480,7 +480,7 @@ void SetupILLD33Reduction::init() {
                   Direction::Input);
 }
 
-void SetupILLD33Reduction::exec() {
+void SetupILLSANSReduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   if (reductionManagerName.empty()) {
@@ -522,7 +522,6 @@ void SetupILLD33Reduction::exec() {
   }
 
   // Load algorithm
-  // IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad");
   // TODO : It looks like properties need cleanup
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadILLSANS");
 
@@ -698,7 +697,7 @@ void SetupILLD33Reduction::exec() {
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
 }
 
-void SetupILLD33Reduction::setupSensitivity(
+void SetupILLSANSReduction::setupSensitivity(
     boost::shared_ptr<PropertyManager> reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
@@ -765,7 +764,7 @@ void SetupILLD33Reduction::setupSensitivity(
     reductionManager->declareProperty(std::move(sensalgProp));
   }
 }
-void SetupILLD33Reduction::setupTransmission(
+void SetupILLSANSReduction::setupTransmission(
     boost::shared_ptr<PropertyManager> reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Transmission options
@@ -792,7 +791,7 @@ void SetupILLD33Reduction::setupTransmission(
       reductionManager->declareProperty(std::move(transalgProp));
     } else {
       g_log.information(
-          "SetupILLD33Reduction [TransmissionAlgorithm]:"
+          "SetupILLSANSReduction [TransmissionAlgorithm]:"
           "expected transmission/error values and got empty values");
     }
   }
@@ -849,7 +848,7 @@ void SetupILLD33Reduction::setupTransmission(
   }
 }
 
-void SetupILLD33Reduction::setupBackground(
+void SetupILLSANSReduction::setupBackground(
     boost::shared_ptr<PropertyManager> reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
@@ -882,7 +881,7 @@ void SetupILLD33Reduction::setupBackground(
       reductionManager->declareProperty(std::move(bckTransAlgProp));
     } else {
       g_log.information(
-          "SetupILLD33Reduction [BckTransmissionAlgorithm]: "
+          "SetupILLSANSReduction [BckTransmissionAlgorithm]: "
           "expected transmission/error values and got empty values");
     }
   } else if (boost::iequals(bckTransMethod, "DirectBeam")) {

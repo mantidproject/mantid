@@ -589,6 +589,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
+
+  // Add a log called timer with the value of duration
+  const double duration = entry.getFloat("duration");
+  runDetails.addProperty<double>("timer", duration);
 }
 
 /**

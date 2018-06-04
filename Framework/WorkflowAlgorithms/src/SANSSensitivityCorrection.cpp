@@ -104,7 +104,9 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
     g_log.error("Error reading file " + filePath);
     throw Exception::FileError("Unable to read data in File:", filePath);
   } else if (count == 0) {
-    g_log.error("Error no entries found in " + filePath);
+    // this is normal for ILL SANS nexus files, so do not log as error or
+    // warning
+    g_log.information("No entries found in " + filePath);
     return false;
   }
 
