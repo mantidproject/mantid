@@ -53,7 +53,7 @@ void sortXAxis(MatrixWorkspace_sptr &ws) {
       x_value = ws->x(i)[k];
       sorter.insert(std::pair<double, double>(x_value, ws->y(i)[k]));
       sorter.insert(std::pair<double, double>(x_value, ws->e(i)[k]));
-      if (ws->hasDx(i))
+      if (ws->hasDx(i) && !ws->isHistogramData())
         sorter.insert(std::pair<double, double>(x_value, ws->dx(i)[k]));
     }
     size_t ws_size = ws->size();
@@ -67,7 +67,7 @@ void sortXAxis(MatrixWorkspace_sptr &ws) {
       vecx[l] = it->first;
       vecy[l] = it->second;
       vece[l] = (++it)->second;
-      if (ws->hasDx(i))
+      if (ws->hasDx(i) && !ws->isHistogramData())
         vecdx[l] = (++it)->second;
       ++l;
       ++it;
@@ -78,7 +78,7 @@ void sortXAxis(MatrixWorkspace_sptr &ws) {
     ws->setSharedX(i, x);
     ws->setSharedY(i, y);
     ws->setSharedE(i, e);
-    if (ws->hasDx(i)) {
+    if (ws->hasDx(i) && !ws->isHistogramData()) {
       auto dx = make_cow<HistogramDx>(std::move(vecdx));
       ws->setSharedDx(i, dx);
     }
@@ -221,9 +221,12 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   RunCombinationHelper combHelper;
   combHelper.setReferenceProperties(lhs);
   std::string compatible = combHelper.checkCompatibility(rhs, true);
-  if (!compatible.empty())
-    issues["RHSWorkspace"] = "Workspace " + rhs->getName() +
-                             " is not compatible: " + compatible + "\n";
+  if (!compatible.empty()) {
+    if (!(compatible == "spectra must have either Dx values or not; ") ||
+        (rhs->isHistogramData())) // Issue only for point data
+      issues["RHSWorkspace"] = "Workspace " + rhs->getName() +
+                               " is not compatible: " + compatible + "\n";
+  }
   return issues;
 }
 
@@ -535,7 +538,7 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
   // We lost Dx values (Multiply) and need to get them back for point data
   if (ws->size() == dxWS->size()) {
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      if (dxWS->hasDx(i) && !ws->hasDx(i)) {
+      if (dxWS->hasDx(i) && !ws->hasDx(i) && !ws->isHistogramData()) {
         ws->setSharedDx(i, dxWS->sharedDx(i));
       }
     }

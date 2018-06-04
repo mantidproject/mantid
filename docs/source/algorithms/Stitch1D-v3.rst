@@ -10,15 +10,15 @@ Description
 -----------
 
 Stitches single histogram :ref:`Matrix Workspaces <MatrixWorkspace>`
-together outputting a stitched Matrix Workspace. Note that workspaces must be histogrammed, you may
-want to use :ref:`algm-ConvertToHistogram` on workspaces prior to passing them to this algorithm.
+together outputting a stitched Matrix Workspace.
+The type of the input workspaces (histogram or point data) determines the stitch procedure.
+The x-error values Dx will always be ignored in case of histogram workspaces.
+Point data workspaces must be consistent, i.e. must have Dx defined or not.
 
 Either the right-hand-side or left-hand-side workspace can be chosen to be scaled.
 Users can optionally provide :ref:`algm-Rebin` :literal:`Params`, otherwise they are calculated from the input workspaces.
 Likewise, :literal:`StartOverlap` and :literal:`EndOverlap` are optional. If not provided, then these
 are taken to be the region of X-axis intersection.
-
-The type of the input workspaces (histogram or point data) determines the x values in the overlap range of the output workspace.
 
 The algorithm workflow for histograms is as follows:
 

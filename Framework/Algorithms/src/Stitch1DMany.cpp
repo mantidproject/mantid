@@ -141,10 +141,14 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
         for (const auto &ws : column) {
           // check if all the others are compatible with the reference
           std::string compatible = combHelper.checkCompatibility(ws, true);
-          if (!compatible.empty())
-            issues["InputWorkspaces"] = "Workspace " + ws->getName() +
-                                        " is not compatible: " + compatible +
-                                        "\n";
+          if (!compatible.empty()) {
+            if (!(compatible ==
+                  "spectra must have either Dx values or not; ") ||
+                (ws->isHistogramData())) // Issue only for point data
+              issues["RHSWorkspace"] = "Workspace " + ws->getName() +
+                                       " is not compatible: " + compatible +
+                                       "\n";
+          }
         }
         m_inputWSMatrix.emplace_back(column);
       } else if (m_inputWSMatrix.size() !=
@@ -173,7 +177,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
 
       int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
       m_scaleFactorFromPeriod = static_cast<size_t>(scaleFactorFromPeriod);
-      m_scaleFactorFromPeriod--; // To account for period being indexed from 1
+      m_scaleFactorFromPeriod--; // To account for period being indexed from
+                                 // 1
       if (m_scaleFactorFromPeriod >= m_inputWSMatrix.size()) {
         std::stringstream expectedRange;
         expectedRange << m_inputWSMatrix.size();
@@ -231,7 +236,8 @@ void Stitch1DMany::exec() {
     std::string groupName = this->getProperty("OutputWorkspace");
     std::string outName;
 
-    // Determine whether or not we are scaling workspaces using scale factors
+    // Determine whether or not we are scaling workspaces using scale
+    // factors
     // from a specific period
     Property *manualSF = this->getProperty("ManualScaleFactors");
     bool usingScaleFromPeriod = m_useManualScaleFactors &&
@@ -347,7 +353,8 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
 
 /** Performs the Stitch1DMany algorithm at a specific period
  * @param period :: The period index we are stitching at
- * @param useManualScaleFactors :: True to use provided values for scale factors
+ * @param useManualScaleFactors :: True to use provided values for scale
+ * factors
  * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
  */
