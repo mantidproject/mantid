@@ -22,6 +22,8 @@ Improvements
 ############
 
 - :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>`:
+    - it is now possible to set the thresholds for elastic peak and noisy background diagnostics in the IPFs
+        - ILL's IN6 now sets its own default ``PeakDiagnosticsLowThreshold``
     - a hard mask is applied over the beamstop region of IN5
     - user masked detectors are not included in the report anymore
 - :ref:`DirectILLReduction <algm-DirectILLReduction>` now converts all its output workspaces to distributions, i.e. divides the histograms by the bin width.
@@ -37,6 +39,7 @@ Instrument Definitions
 
 - The source component of ILL's IN5 has been moved from :math:`z = -2` to :math:`z = -2.10945` meters and renamed to ``frame-overlap_chopper``.
 - The source component of ILL's IN6 has been moved from :math:`z = -0.395` to :math:`z = -0.595` meters and renamed to ``suppressor_chopper``.
+- ILL's IN4 and IN6 now validate the wavelengths and chopper speeds in :ref:`MergeRuns <algm-MergeRuns>`.
 
 :ref:`Release 3.13.0 <v3.13.0>`
 
