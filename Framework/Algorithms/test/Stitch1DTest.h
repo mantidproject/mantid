@@ -287,12 +287,15 @@ public:
     const auto &dx1 = HistogramDx(3, LinearGenerator(3., -1.));
     auto ws1 = createWorkspace(x1, y1, e, dx1);
     auto ws2 = createWorkspace(x1, y1, e, dx1);
+    const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
+    auto ws3 = createWorkspace(x1, y2, e, dx1);
+    auto ws4 = createWorkspace(x1, y2, e, dx1);
     Stitch1D alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("LHSWorkspace", ws1);
-    alg.setProperty("RHSWorkspace", ws1);
+    alg.setProperty("RHSWorkspace", ws3);
     alg.setProperty("UseManualScaleFactor", true);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
@@ -302,6 +305,11 @@ public:
     compare.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws2));
+    TS_ASSERT(compare.execute());
+    TS_ASSERT(compare.isExecuted());
+    TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), "1");
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws3));
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws4));
     TS_ASSERT(compare.execute());
     TS_ASSERT(compare.isExecuted());
     TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), "1");
@@ -358,12 +366,12 @@ public:
 
   void test_histogram_data_input_workspaces_not_modified() {
     auto ws1 = make_arbitrary_histogram_ws();
-    const auto &x = HistogramX(3, LinearGenerator(-1.2, 0.2));
+    auto ws3 = make_arbitrary_histogram_ws();
+    const auto &x = HistogramX(3, LinearGenerator(-1., 0.2));
     const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
     const auto &e = HistogramE(2, 1.);
     const auto &dx = HistogramDx(2, LinearGenerator(3., 0.1));
     auto ws2 = createWorkspace(x, y, e, dx);
-    auto ws3 = createWorkspace(x, y, e, dx);
     auto ws4 = createWorkspace(x, y, e, dx);
     TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass",
                               do_stitch1D(ws2, ws1));
