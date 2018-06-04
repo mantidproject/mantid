@@ -338,6 +338,14 @@ public:
     TS_ASSERT(alg.isExecuted());
     double scaleFactor = alg.getProperty("OutScaleFactor");
     TS_ASSERT_EQUALS(scaleFactor, 1. / 3.);
+    MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
+    const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
+    TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
+    const std::vector<double> y_values{1., 5. * scaleFactor, 2.,
+                                       6. * scaleFactor, 3., 7. * scaleFactor};
+    TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
+    const std::vector<double> dx_values{3., 9., 2., 9., 1., 9.};
+    TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
   }
 
   void test_point_data_without_dx() {
@@ -362,6 +370,13 @@ public:
     TS_ASSERT(alg.isExecuted());
     double scaleFactor = alg.getProperty("OutScaleFactor");
     TS_ASSERT_EQUALS(scaleFactor, 1. / 3.);
+    MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
+    const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
+    TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
+    const std::vector<double> y_values{1., 5. * scaleFactor, 2.,
+                                       6. * scaleFactor, 3., 7. * scaleFactor};
+    TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
+    TS_ASSERT(!stitched->hasDx(0));
   }
 
   void test_histogram_data_input_workspaces_not_modified() {
