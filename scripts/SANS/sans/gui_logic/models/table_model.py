@@ -126,13 +126,7 @@ class OptionsColumnModel(object):
 
         if not options_column_string_no_whitespace:
             return parsed
-        pat = re.compile(r'''([^,=]+)=*((?:[^,=]+(?:,|$))*)''')
-
-        for k, v in pat.findall(options_column_string_no_whitespace):
-            if v.endswith(','):
-                v=v[:-1]
-            parsed.update({k:v})
-
+        
         # This is a regular expression to detect key value pairs in the options string.
         # The different parts are:
         # ([^,=]+) Anything except equals detects keys in the options string
