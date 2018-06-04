@@ -145,8 +145,9 @@ ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
         "NormalizationTable has " + std::to_string(normCount) + " norm columns";
   }
   if (wsNamesCount > 1) {
-    result["NormalizationTable"] =
-        "NormalizationTable has " + std::to_string(wsNamesCount) + " name columns";
+    result["NormalizationTable"] = "NormalizationTable has " +
+                                   std::to_string(wsNamesCount) +
+                                   " name columns";
   }
   // Check units, should be microseconds
   return result;

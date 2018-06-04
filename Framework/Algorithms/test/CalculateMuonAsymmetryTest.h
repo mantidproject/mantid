@@ -16,7 +16,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
-
 using namespace Mantid::API;
 using Mantid::MantidVec;
 using Mantid::Algorithms::CalculateMuonAsymmetry;
@@ -39,7 +38,6 @@ struct yData {
 struct eData {
   double operator()(const double, size_t) { return 0.005; }
 };
-
 
 MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
   MatrixWorkspace_sptr ws =
@@ -64,30 +62,31 @@ void genData() {
   AnalysisDataService::Instance().addOrReplace("ws4", ws4);
 }
 
-
-
 ITableWorkspace_sptr genTable() {
   Mantid::API::ITableWorkspace_sptr table =
       Mantid::API::WorkspaceFactory::Instance().createTable();
   table->addColumn("double", "norm");
   table->addColumn("str", "name");
   table->addColumn("str", "method");
- 
+
   // populate table
   TableRow row = table->appendRow();
-  row << 2.2 << "ws1" << "Estimate";
+  row << 2.2 << "ws1"
+      << "Estimate";
   row = table->appendRow();
-  row << 2.2 << "ws2" << "Estimate";
+  row << 2.2 << "ws2"
+      << "Estimate";
   row = table->appendRow();
-  row << 2.2 << "ws3" << "Estimate";
+  row << 2.2 << "ws3"
+      << "Estimate";
   row = table->appendRow();
-  row << 2.2 << "ws4" << "Estimate";
+  row << 2.2 << "ws4"
+      << "Estimate";
   return table;
 }
 
-
 IAlgorithm_sptr setUpFuncAlg(std::vector<std::string> wsNames,
-                         const IFunction_sptr &func) {
+                             const IFunction_sptr &func) {
   IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create(
       "ConvertFitFunctionForMuonTFAsymmetry");
   asymmAlg->initialize();
@@ -99,31 +98,31 @@ IAlgorithm_sptr setUpFuncAlg(std::vector<std::string> wsNames,
   return asymmAlg;
 }
 
-
-
-IFunction_sptr genSingleFunc(std::vector<std::string> wsNames){
-  IFunction_sptr func = FunctionFactory::Instance().createInitialized("name=GausOsc,Frequency=3.0");
+IFunction_sptr genSingleFunc(std::vector<std::string> wsNames) {
+  IFunction_sptr func = FunctionFactory::Instance().createInitialized(
+      "name=GausOsc,Frequency=3.0");
   IAlgorithm_sptr alg = setUpFuncAlg(wsNames, func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
   return funcOut;
 }
 
-IFunction_sptr genDoubleFunc(std::vector<std::string> wsNames){
+IFunction_sptr genDoubleFunc(std::vector<std::string> wsNames) {
   std::string multiFuncString = "composite=MultiDomainFunction,NumDeriv=1;";
-  multiFuncString+="name=GausOsc,$domains=i,Frequency=3.0;";
-  multiFuncString+="name=GausOsc,$domains=i,Frequency=3.0;";
-  IFunction_sptr func = FunctionFactory::Instance().createInitialized(multiFuncString);
+  multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
+  multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
+  IFunction_sptr func =
+      FunctionFactory::Instance().createInitialized(multiFuncString);
   IAlgorithm_sptr alg = setUpFuncAlg(wsNames, func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
-  std::cout<<funcOut<<std::endl;
+  std::cout << funcOut << std::endl;
   return funcOut;
 }
 
-
-
-IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table, IFunction_sptr func,std::vector<std::string> wsNamesNorm, std::vector<std::string> wsOut) {
+IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table, IFunction_sptr func,
+                         std::vector<std::string> wsNamesNorm,
+                         std::vector<std::string> wsOut) {
   IAlgorithm_sptr asymmAlg =
       AlgorithmManager::Instance().create("CalculateMuonAsymmetry");
   asymmAlg->initialize();
@@ -131,17 +130,14 @@ IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table, IFunction_sptr func,std::v
   asymmAlg->setProperty("NormalizationTable", table);
   asymmAlg->setProperty("StartX", 0.1);
   asymmAlg->setProperty("EndX", 0.9);
-  asymmAlg->setProperty("InputFunction",func);
-  asymmAlg->setProperty("UnNormalizedWorkspaceList",wsNamesNorm);
-  asymmAlg->setProperty("ReNormalizedWorkspaceList",wsOut);
-
+  asymmAlg->setProperty("InputFunction", func);
+  asymmAlg->setProperty("UnNormalizedWorkspaceList", wsNamesNorm);
+  asymmAlg->setProperty("ReNormalizedWorkspaceList", wsOut);
 
   return asymmAlg;
 }
 
-void clearADS(){
-  AnalysisDataService::Instance().clear();
-}
+void clearADS() { AnalysisDataService::Instance().clear(); }
 
 class CalculateMuonAsymmetryTest : public CxxTest::TestSuite {
 public:
@@ -155,9 +151,9 @@ public:
   CalculateMuonAsymmetryTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    //IAlgorithm_sptr alg = setUpAlg();
+    // IAlgorithm_sptr alg = setUpAlg();
 
-    //TS_ASSERT(alg->isInitialized());
+    // TS_ASSERT(alg->isInitialized());
   }
 
   void test_Execute() {
@@ -168,13 +164,13 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     clearADS();
-    //MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    // MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
-  void test_singleFit(){
+  void test_singleFit() {
 
     genData();
     std::vector<std::string> wsNames = {"ws1"};
@@ -182,73 +178,75 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
-    
-    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
-  
+    std::vector<std::string> output =
+        alg->getProperty("ReNormalizedWorkspaceList");
+
+    MatrixWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
+
     double delta = 0.0001;
 
-    TS_ASSERT_DELTA(table->Double(1,0),3.4,delta);
-    TS_ASSERT_EQUALS(table->String(1,1),"ws2");
-    TS_ASSERT_EQUALS(table->String(1,2),"Calculated");
+    TS_ASSERT_DELTA(table->Double(1, 0), 3.4, delta);
+    TS_ASSERT_EQUALS(table->String(1, 1), "ws2");
+    TS_ASSERT_EQUALS(table->String(1, 2), "Calculated");
 
-    TS_ASSERT_DELTA(outWS->x(0)[10], 0.5,delta);
-    TS_ASSERT_DELTA(outWS->x(0)[40], 2.0,delta);
-    TS_ASSERT_DELTA(outWS->x(0)[100],5.0,delta);
+    TS_ASSERT_DELTA(outWS->x(0)[10], 0.5, delta);
+    TS_ASSERT_DELTA(outWS->x(0)[40], 2.0, delta);
+    TS_ASSERT_DELTA(outWS->x(0)[100], 5.0, delta);
 
-    TS_ASSERT_DELTA(outWS->y(0)[10],  0.1031,delta);
-    TS_ASSERT_DELTA(outWS->y(0)[40], -0.1250,delta);
-    TS_ASSERT_DELTA(outWS->y(0)[100],-0.0065,delta);
+    TS_ASSERT_DELTA(outWS->y(0)[10], 0.1031, delta);
+    TS_ASSERT_DELTA(outWS->y(0)[40], -0.1250, delta);
+    TS_ASSERT_DELTA(outWS->y(0)[100], -0.0065, delta);
 
-    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0015,delta);
-    TS_ASSERT_DELTA(outWS->e(0)[40], 0.0015,delta);
-    TS_ASSERT_DELTA(outWS->e(0)[100],0.0015,delta);
+    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0015, delta);
+    TS_ASSERT_DELTA(outWS->e(0)[40], 0.0015, delta);
+    TS_ASSERT_DELTA(outWS->e(0)[100], 0.0015, delta);
 
     clearADS();
   }
-  void test_badFittingRange(){
+  void test_badFittingRange() {
 
     genData();
     std::vector<std::string> wsNames = {"ws1"};
     std::vector<std::string> wsOut = {"ws2"};
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
-    
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
     alg->setProperty("StartX", 10.);
     alg->setProperty("EndX", 1.);
-    TS_ASSERT_THROWS(alg->execute(),std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     clearADS();
   }
 
-  void test_mismatchWSLists(){
+  void test_mismatchWSLists() {
 
     genData();
     std::vector<std::string> wsNames = {"ws1"};
-    std::vector<std::string> wsOut = {"ws2","ws3"};
+    std::vector<std::string> wsOut = {"ws2", "ws3"};
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
-    
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
-    TS_ASSERT_THROWS(alg->execute(),std::runtime_error);
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     clearADS();
   }
 
-  void test_multiFuncSingleWS(){
+  void test_multiFuncSingleWS() {
 
     genData();
     // need the 2 here to get multi func
-    std::vector<std::string> wsNames = {"ws1","ws3"};
+    std::vector<std::string> wsNames = {"ws1", "ws3"};
     std::vector<std::string> wsOut = {"ws2"};
     auto func = genDoubleFunc(wsNames);
     auto table = genTable();
     wsNames = {"ws1"};
-    
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
-    TS_ASSERT_THROWS(alg->execute(),std::runtime_error);
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     clearADS();
   }
 
@@ -259,60 +257,61 @@ public:
     std::vector<std::string> wsOut = {"ws2"};
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
-    
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
-    
-    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
-  
+    std::vector<std::string> output =
+        alg->getProperty("ReNormalizedWorkspaceList");
+
+    MatrixWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
+
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "Asymmetry");
   }
 
-  void test_multiFuncWS(){
+  void test_multiFuncWS() {
 
     genData();
     // need the 2 here to get multi func
-    std::vector<std::string> wsNames = {"ws1","ws2"};
-    std::vector<std::string> wsOut = {"ws3","ws4"};
+    std::vector<std::string> wsNames = {"ws1", "ws2"};
+    std::vector<std::string> wsOut = {"ws3", "ws4"};
     auto func = genDoubleFunc(wsNames);
     auto table = genTable();
-    
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
-    
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
- 
-    for(int j =0; j<2;j++){   
-    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[j]);
-  
-    double delta = 0.0001;
+    std::vector<std::string> output =
+        alg->getProperty("ReNormalizedWorkspaceList");
 
-    TS_ASSERT_DELTA(table->Double(j+2,0),3.4,delta);
-    TS_ASSERT_EQUALS(table->String(j+2,1),output[j]);
-    TS_ASSERT_EQUALS(table->String(j+2,2),"Calculated");
+    for (int j = 0; j < 2; j++) {
+      MatrixWorkspace_sptr outWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              output[j]);
 
-    TS_ASSERT_DELTA(outWS->x(0)[10], 0.5,delta);
-    TS_ASSERT_DELTA(outWS->x(0)[40], 2.0,delta);
-    TS_ASSERT_DELTA(outWS->x(0)[100],5.0,delta);
+      double delta = 0.0001;
 
-    TS_ASSERT_DELTA(outWS->y(0)[10],  0.1031,delta);
-    TS_ASSERT_DELTA(outWS->y(0)[40], -0.1250,delta);
-    TS_ASSERT_DELTA(outWS->y(0)[100],-0.0065,delta);
+      TS_ASSERT_DELTA(table->Double(j + 2, 0), 3.4, delta);
+      TS_ASSERT_EQUALS(table->String(j + 2, 1), output[j]);
+      TS_ASSERT_EQUALS(table->String(j + 2, 2), "Calculated");
 
-    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0015,delta);
-    TS_ASSERT_DELTA(outWS->e(0)[40], 0.0015,delta);
-    TS_ASSERT_DELTA(outWS->e(0)[100],0.0015,delta);
+      TS_ASSERT_DELTA(outWS->x(0)[10], 0.5, delta);
+      TS_ASSERT_DELTA(outWS->x(0)[40], 2.0, delta);
+      TS_ASSERT_DELTA(outWS->x(0)[100], 5.0, delta);
 
+      TS_ASSERT_DELTA(outWS->y(0)[10], 0.1031, delta);
+      TS_ASSERT_DELTA(outWS->y(0)[40], -0.1250, delta);
+      TS_ASSERT_DELTA(outWS->y(0)[100], -0.0065, delta);
+
+      TS_ASSERT_DELTA(outWS->e(0)[10], 0.0015, delta);
+      TS_ASSERT_DELTA(outWS->e(0)[40], 0.0015, delta);
+      TS_ASSERT_DELTA(outWS->e(0)[100], 0.0015, delta);
     }
-
 
     clearADS();
   }
-
-
 };
 
 class CalculateMuonAsymmetryTestPerformance : public CxxTest::TestSuite {
@@ -338,24 +337,23 @@ public:
     std::vector<std::string> wsOut = {"ws2"};
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
-    
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
-    
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+
     alg->execute();
     clearADS();
   }
 
-
   void testExec2D() {
 
     genData();
-    std::vector<std::string> wsNames = {"ws1","ws2"};
-    std::vector<std::string> wsOut = {"ws3","ws4"};
+    std::vector<std::string> wsNames = {"ws1", "ws2"};
+    std::vector<std::string> wsOut = {"ws3", "ws4"};
     auto func = genDoubleFunc(wsNames);
     auto table = genTable();
-    
-    IAlgorithm_sptr alg = setUpAlg(table, func,wsNames,wsOut);
-    
+
+    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+
     alg->execute();
     clearADS();
   }
