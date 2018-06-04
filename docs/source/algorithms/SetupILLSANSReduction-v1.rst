@@ -10,7 +10,7 @@ Description
 -----------
 
 Create a PropertyManager object setting the reduction options for ILL
-D33 SANS TOF instrument. The property manager object is then added to
+SANS instruments. The property manager object is then added to
 the PropertyManagerDataService.
 This was based on the :ref:`SetupEQSANSReduction <algm-SetupEQSANSReduction>`.
 
@@ -52,7 +52,7 @@ Usage
 		17550,17551]
 
 	# Set all the necessary parameters to reduce the data
-	SetupILLD33Reduction(
+	SetupILLSANSReduction(
 		MaskedDetectorList=maskedDetectors,
 		BeamCenterMethod="DirectBeam",
 		BeamCenterFile="ILLD33_direct_beam_transm_001427.nxs",
@@ -66,7 +66,7 @@ Usage
 		TransmissionUseSampleDC=False,
 		BackgroundFiles= "ILLD33_empty_cell_001422.nxs",
 		BckTransmissionSampleDataFile="ILLD33_empty_cell_transm_001428.nxs",
-		DoAzimuthalAverage=False,	
+		DoAzimuthalAverage=False,
 		Do2DReduction=False,
 		ComputeResolution=True,
 		ReductionProperties="d33")
@@ -76,7 +76,7 @@ Usage
 
 	# Rebin
 	Rebin(InputWorkspace='d33out',OutputWorkspace='d33out_rebin',Params='4,0.1,15')
-	
+
 	# Do a radial integration
 	SANSAzimuthalAverage1D(InputWorkspace='d33out_rebin',Binning='0.001,0.0002,0.03',OutputWorkspace='IQ_curve')
 

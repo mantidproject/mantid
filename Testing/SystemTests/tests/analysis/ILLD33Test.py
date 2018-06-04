@@ -18,7 +18,7 @@ class ILLD33SANSTest(unittest.TestCase):
 
     def test_all(self):
 
-        ms.SetupILLD33Reduction(
+        ms.SetupILLSANSReduction(
             # Beam center shouldn't work
             #BeamCenterMethod="None",
             MaskedDetectorList=[14709,14710,14711,14712,14713,14714,14715,14716,14717,14718,14719,
