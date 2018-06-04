@@ -481,6 +481,9 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("Minimizer", "Levenberg-Marquardt");
   algFitPeaks->setProperty("CostFunction", "Least squares");
 
+  // FitPeaks will abstract the peak parameters if you ask
+  algFitPeaks->setProperty("RawPeakParameters", false);
+
   // Analysis output
   algFitPeaks->setPropertyValue("OutputPeakParametersWorkspace",
                                 diagnostic_prefix + "_fitparam");
@@ -549,14 +552,13 @@ void PDCalibration::exec() {
         throw std::runtime_error(
             "peak index mismatch but workspace index matched");
 
-      // TODO FIXME Pete: the following only works Gaussian because in FitPeaks,
-      // the exact parameter name is used
+      // get the effective peak parameters
       const double centre =
-          fittedTable->getRef<double>("PeakCentre", rowIndexInFitTable);
+          fittedTable->getRef<double>("centre", rowIndexInFitTable);
       const double width =
-          fittedTable->getRef<double>("Sigma", rowIndexInFitTable);
+          fittedTable->getRef<double>("width", rowIndexInFitTable);
       const double height =
-          fittedTable->getRef<double>("Height", rowIndexInFitTable);
+          fittedTable->getRef<double>("height", rowIndexInFitTable);
       const double chi2 =
           fittedTable->getRef<double>("chi2", rowIndexInFitTable);
 
