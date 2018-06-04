@@ -261,7 +261,6 @@ private slots:
   void updateNormalization(QString name);
 
 private:
-
   void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames);
   bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
