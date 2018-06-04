@@ -860,6 +860,7 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrument != Supported::Figaro) {
     return inMeter(doubleFromRun(m_detectorDistanceName));
   }
+  // There is a new entry Distance.sample_offset_position. Can maybe used here?
   const double restZ =
       inMeter(doubleFromRun("Distance.D1"));
   // Motor DH1 vertical coordinate.
@@ -883,7 +884,7 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
   if (m_instrument != Supported::Figaro) {
     return 0.;
   }
-  return inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
+  return inMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
 }
 
 /** Return the source to sample distance for the current instrument.
@@ -894,7 +895,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     return doubleFromRun("Distance.D0");
   } else {
     const double chopperDist =
-        inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+        inMeter(doubleFromRun("Distance.dist_chop_samp"));
     const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
     return chopperDist + m_sampleZOffset / std::cos(inRad(deflectionAngle));
   }
