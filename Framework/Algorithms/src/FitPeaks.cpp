@@ -1155,11 +1155,7 @@ void FitPeaks::calculateFittedPeaks(std::vector<
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
       // get and set the peak function parameters
-      size_t row_index =
-          (static_cast<size_t>(iws) - m_startWorkspaceIndex) * m_numPeaksToFit +
-          ipeak;
-      double chi2 = m_fittedParamTable->cell<double>(
-          row_index, num_peakfunc_params + num_bkgdfunc_params + 2);
+      const double chi2 = fit_result_i->getCost(ipeak);
       if (chi2 > 10.e10)
         continue;
 
@@ -1182,7 +1178,7 @@ void FitPeaks::calculateFittedPeaks(std::vector<
           std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
 
       if (start_x_iter == stop_x_iter)
-        throw std::runtime_error("Range size is zero");
+        throw std::runtime_error("Range size is zero in calculateFittedPeaks");
 
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
@@ -1297,7 +1293,7 @@ int FitPeaks::estimatePeakParameters(
 
   // calculate background
   if (start_index == stop_index)
-    throw std::runtime_error("Range size is zero");
+    throw std::runtime_error("Range size is zero in estimatePeakParameters");
   FunctionDomain1DVector domain(start_iter, stop_iter);
   FunctionValues bkgd_values(domain);
   bkgdfunction->function(domain, bkgd_values);
