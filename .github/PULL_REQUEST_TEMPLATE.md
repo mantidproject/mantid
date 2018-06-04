@@ -1,4 +1,6 @@
-**Description of work**
+**Description of work.**
+
+**Report to:** [user name]/[nobody]. <!--If the original issue was raised by a user they should be named here.-->
 
 **To test:**
 
@@ -6,10 +8,11 @@
 
 Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 
-**Release Notes** 
+Does this update require release notes?
+- [ ] Yes
+- [ ] No
 <!--
-Either edit the file in docs/source/release/... and it will be in your pull request or state
-*Does not need to be in the release notes.*
+If yes, edit the file docs/source/release/... 
 -->
 
 ---

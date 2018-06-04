@@ -110,8 +110,8 @@ void SetUB::exec() {
   Workspace_sptr ws = this->getProperty("Workspace");
 
   // Sample copy;
-  IMDEventWorkspace_sptr mdws =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+  MultipleExperimentInfos_sptr mdws =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
   if (mdws != nullptr) {
     int sampleNumber = getProperty("MDSampleNumber");
     if ((sampleNumber == EMPTY_INT()) ||

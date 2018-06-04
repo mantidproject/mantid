@@ -78,5 +78,6 @@ Bugfixes
 
 - Checks on the structure of Python fit function classes have been improved to avoid scenarios, such as writing ``function1d`` rather than ``function1D``, which
   would previously have resulted in a hard crash.
+- Fit functions defined in a python script can be used with the new fit function API right after sibscription.
 
 :ref:`Release 3.13.0 <v3.13.0>`

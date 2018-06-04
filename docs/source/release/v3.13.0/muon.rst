@@ -18,12 +18,14 @@ Bug fixes
 - Fit options are not disabled after changing tabs.
 - The run number is now updated before the periods, preventing irrelevant warningsfrom being produced.
 - In single fit the workspace can be changed.
+- In multiple fitting the function can be replaced without causing a crash.
 
 Algorithms
 ----------
 
 New
 ###
+- :ref:`ConvertFitFunctionForMuonTFAsymmetry <algm-ConvertFitFunctionForMuonTFAsymmetry>` has been added to help convert fitting functions for TF asymmetry fitting.
 
 Improvements
 ############

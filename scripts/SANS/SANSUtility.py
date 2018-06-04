@@ -573,7 +573,7 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 
     masked_det_ids = list(_yield_masked_det_ids(masking_ws))
 
-    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
+    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids, ForceInstrumentMasking=True)
 
 
 def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entries=None):
@@ -2180,7 +2180,7 @@ def MaskBySpecNumber(workspace, speclist):
     speclist = speclist.rstrip(',')
     if speclist == '':
         return ''
-    MaskDetectors(Workspace=workspace, SpectraList = speclist)
+    MaskDetectors(Workspace=workspace, SpectraList = speclist, ForceInstrumentMasking=True)
 
 
 @deprecated
