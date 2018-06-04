@@ -240,7 +240,7 @@ public:
     // check names in table
 
     TS_ASSERT_EQUALS(table->String(0, 1), "fine");
-    //   TS_ASSERT_EQUALS(table->String(1,1),"coarse");
+    TS_ASSERT_EQUALS(table->String(1,1),"coarse");
 
     double Delta = 0.05; // only expect numbers to be similar
     for (int j = 0; j < 28; j++) {
