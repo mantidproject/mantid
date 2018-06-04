@@ -84,9 +84,7 @@ private:
   double detectorAngle() const;
   double offsetAngle(const double peakCentre, const double detectorCentre,
                      const double detectorDistance) const;
-  double sampleDetectorDistance() const;
   double sampleHorizontalOffset() const;
-  double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   Supported m_instrument{Supported::D17}; ///< Name of the instrument
@@ -95,7 +93,6 @@ private:
   double m_tofDelay{0.0};
   size_t m_numberOfHistograms{0};
   double m_channelWidth{0.0};
-  std::string m_detectorDistanceName;
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetName;
