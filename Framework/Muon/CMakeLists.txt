@@ -1,13 +1,19 @@
 set ( SRC_FILES
-	src/ConvertFitFunctionForMuonTFAsymmetry.cpp
+        src/ApplyMuonDetectorGrouping.cpp
+        src/ConvertFitFunctionForMuonTFAsymmetry.cpp
+        src/MuonAlgorithmHelper.cpp
 )
 
 set ( INC_FILES
-	inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
+        inc/MantidMuon/ApplyMuonDetectorGrouping.h
+        inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
+        inc/MantidMuon/MuonAlgorithmHelper.h
 )
 
- set ( TEST_FILES 
-        ConvertFitFunctionForMuonTFAsymmetryTest.h)
+set ( TEST_FILES
+        ApplyMuonDetectorGroupingTest.h
+        ConvertFitFunctionForMuonTFAsymmetryTest.h
+        MuonAlgorithmHelperTest.h)
 
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
