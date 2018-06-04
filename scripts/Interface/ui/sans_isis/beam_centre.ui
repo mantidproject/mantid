@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1015</width>
-    <height>527</height>
+    <height>649</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,6 +29,12 @@
          <string>Centre Position</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
+         <item row="3" column="0">
+          <widget class="QLineEdit" name="hab_pos_1_line_edit"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLineEdit" name="lab_pos_1_line_edit"/>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="lab_centre_label">
            <property name="text">
@@ -36,11 +42,15 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLineEdit" name="lab_pos_1_line_edit"/>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="hab_pos_2_line_edit"/>
          </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="lab_pos_2_line_edit"/>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Detector</string>
+           </property>
+          </widget>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="hab_centre_label">
@@ -49,11 +59,25 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QLineEdit" name="hab_pos_1_line_edit"/>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="lab_pos_2_line_edit"/>
          </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="hab_pos_2_line_edit"/>
+         <item row="5" column="0">
+          <widget class="QComboBox" name="component_combo_box"/>
+         </item>
+         <item row="4" column="1">
+          <widget class="QCheckBox" name="update_lab_check_box">
+           <property name="text">
+            <string>Update LAB</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QCheckBox" name="update_hab_check_box">
+           <property name="text">
+            <string>Update HAB</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

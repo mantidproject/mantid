@@ -136,11 +136,11 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.beam_centre.hab_pos_2, -169.6)
 
         # Assert certain function calls
-        self.assertTrue(view.get_user_file_path.call_count == 3)
-        self.assertTrue(view.get_batch_file_path.call_count == 2)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
-        self.assertEqual(view.get_cell.call_count, 68)
+        self.assertEqual(view.get_user_file_path.call_count, 4)
+        self.assertEqual(view.get_batch_file_path.call_count, 3)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
+        self.assertEqual(view.get_cell.call_count, 101)
 
-        self.assertTrue(view.get_number_of_rows.call_count == 6)
+        self.assertEqual(view.get_number_of_rows.call_count, 8)
 
         # clean up
         remove_file(user_file_path)

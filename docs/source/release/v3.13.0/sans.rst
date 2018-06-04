@@ -20,6 +20,7 @@ New features
 Improvements
 ############
 * Added thickness column to table in new GUI.
+* The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
 * Added EventSlice option to options column in new GUI.
 * Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
 * Added thickness column to table in new GUI.
