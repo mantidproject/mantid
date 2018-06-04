@@ -51,7 +51,7 @@ namespace Mantid {
 			// norm table to update
 			declareProperty(
 				make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-					"NormalisationTable", "", Direction::Input),
+					"NormalizationTable", "", Direction::Input),
 				"Name of the table containing the normalisations for the asymmetries.");
 			// list of uNonrm workspaces to fit to
 			declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
@@ -120,15 +120,15 @@ namespace Mantid {
 			}
 
 			// check norm table is correct -> move this to helper when move muon algs to muon folder
-			API::ITableWorkspace_const_sptr tabWS = getProperty("NormalisationTable");
+			API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
 
 			if (tabWS->columnCount() == 0) {
-				validationOutput["NormalisationTable"] =
-					"Please provide a non-empty NormalisationTable.";
+				validationOutput["NormalizationTable"] =
+					"Please provide a non-empty NormalizationTable.";
 			}
-			// NormalisationTable should have three columns: (norm, name, method)
+			// NormalizationTable should have three columns: (norm, name, method)
 			if (tabWS->columnCount() != 3) {
-				validationOutput["NormalisationTable"] = "NormalisationTable must have three columns";
+				validationOutput["NormalizationTable"] = "NormalizationTable must have three columns";
 			}
 			auto names = tabWS->getColumnNames();
 			int normCount = 0;
@@ -144,18 +144,18 @@ namespace Mantid {
 				}
 			}
 			if (normCount == 0) {
-				validationOutput["NormalisationTable"] = "NormalisationTable needs norm column";
+				validationOutput["NormalizationTable"] = "NormalizationTable needs norm column";
 			}
 			if (wsNamesCount == 0) {
-				validationOutput["NormalisationTable"] = "NormalisationTable needs a name column";
+				validationOutput["NormalizationTable"] = "NormalizationTable needs a name column";
 			}
 			if (normCount > 1) {
-				validationOutput["NormalisationTable"] =
-					"NormalisationTable has " + std::to_string(normCount) + " norm columns";
+				validationOutput["NormalizationTable"] =
+					"NormalizationTable has " + std::to_string(normCount) + " norm columns";
 			}
 			if (wsNamesCount > 1) {
-				validationOutput["NormalisationTable"] =
-					"NormalisationTable has " + std::to_string(wsNamesCount) + " name columns";
+				validationOutput["NormalizationTable"] =
+					"NormalizationTable has " + std::to_string(wsNamesCount) + " name columns";
 			}
 			
 			return validationOutput;
@@ -181,7 +181,7 @@ namespace Mantid {
 			}
 			// update table with new norm
 			std::vector<std::string> methods(wsNames.size(), "Calculated");
-			API::ITableWorkspace_sptr table = getProperty("NormalisationTable");
+			API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
 			updateNormalizationTable(table, wsNames, norms, methods);
 }
 
