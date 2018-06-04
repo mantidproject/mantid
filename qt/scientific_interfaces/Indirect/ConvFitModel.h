@@ -39,7 +39,8 @@ private:
   Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(std::size_t index) const override;
-  std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
+  std::unordered_map<std::string, std::string>
+  mapDefaultParameterNames() const override;
 
   IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
