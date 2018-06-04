@@ -116,7 +116,7 @@ QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
     } else if (role == Qt::BackgroundRole) {
       // setting the background colour for any unsuccessful transfers
       if (runHasError(run))
-        return QColor("#FF8040");
+        return QColor("#accbff");
     } else {
       // we have no unsuccessful transfers so return empty QVariant
       return QVariant();
