@@ -331,7 +331,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   }
   g_log.debug() << "Instrument name: " << instrumentName << '\n';
   if (m_instrument == Supported::D17) {
-    m_detectorDistanceName = "det";
+    m_detectorDistanceName = "det.value";
     m_detectorAngleName = "dan.value";
     m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
@@ -339,9 +339,6 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::Figaro) {
-    // For Figaro, the DTR field contains the sample-to-detector distance
-    // when the detector is at the horizontal position (angle = 0).
-    m_detectorDistanceName = "DTR";
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
@@ -861,10 +858,10 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrument != Supported::Figaro) {
-    return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+    return inMeter(doubleFromRun(m_detectorDistanceName));
   }
   const double restZ =
-      inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+      inMeter(doubleFromRun("Distance.D1"));
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double detAngle = detectorAngle();
@@ -894,10 +891,7 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrument != Supported::Figaro) {
-    const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
-    // Chopper pair separation is in cm in sample logs.
-    const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
-    return pairCentre - 0.5 * pairSeparation;
+    return doubleFromRun("Distance.D0");
   } else {
     const double chopperDist =
         inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
