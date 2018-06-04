@@ -526,6 +526,82 @@ Output:
 
 .. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center
+   
+Adjusting the Reconstructed Data
+--------------------------------
+
+.. testcode:: ExAdjustment
+
+   from math import pi, sin, cos
+   from random import random, seed
+
+   # Construct workspace (cosine + noise) over 3 spectra
+   X = []
+   Y = []
+   E = []
+   N = 200
+   w = 3
+   for s in range(0,3):
+       seed(0)
+       for i in range(0,N):
+           x = 2*pi*i/N
+           X.append(x)
+           Y.append(cos(w*x)+(random()-0.5)*0.3)
+           E.append(0.2)
+        
+   CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=3)
+
+   # Construct linear adjustment workspace (real = 1, imaginary linear)
+   # no adjustment on first spectrum, double adjustment on third spectrum.
+   Zeroes = []
+   Ylin = []
+   Magnitude = - 0.1
+   # Real values
+   for s in range(0,3):
+       for i in range(0,N):
+           Ylin.append(1.0)
+           Zeroes.append(0)
+        
+   # Imaginary values
+   for s in range(0,3):
+       for i in range(0,N):
+           X.append(X[i])
+           Ylin.append(s*Magnitude*X[i])
+           Zeroes.append(0)
+        
+   CreateWorkspace(OutputWorkspace='linadj', DataX=X, DataY=Ylin, DataE=Zeroes, NSpec=6)
+
+   # Construct linear adjustment workspace (real = 0, imaginary linear)
+   # no adjustment on first spectrum, double adjustment on third spectrum.
+   Yconst = []
+   Magnitude = 0.2
+   # Real values
+   for s in range(0,3):
+       for i in range(0,N):
+           Yconst.append(0)
+        
+   # Imaginary values
+   for s in range(0,3):
+       for i in range(0,N):
+           Yconst.append(s*Magnitude*X[i])
+        
+   CreateWorkspace(OutputWorkspace='constadj',DataX=X, DataY=Yconst, DataE=Zeroes, NSpec=6)
+
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001)
+
+Output:
+
+.. testoutput:: ExAdjustment
+   
+   Reconstruction at 05 of first spectrum: 0.657
+   Reconstruction at 10 of first spectrum: 0.433
+   Reconstruction at 15 of first spectrum: 0.115
+   Reconstruction at 05 of third spectrum: 0.522
+   Reconstruction at 10 of third spectrum: 0.485
+   Reconstruction at 15 of third spectrum: -0.019
+   Number of iterations of first spectrum: 5
+   Number of iterations of second spectrum: 37
+   Number of iterations of third spectrum: 70
 
 References
 ----------
