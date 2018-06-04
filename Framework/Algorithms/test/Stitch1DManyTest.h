@@ -157,9 +157,10 @@ public:
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "ws1");
-    alg.setProperty("Params", "0.1, 0.1, 1.8");
-    alg.setProperty("OutputWorkspace", "outws");
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "ws1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 1.8"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     AnalysisDataService::Instance().clear();
   }
@@ -170,11 +171,12 @@ public:
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "ws1, ws2");
-    alg.setProperty("Params", "0.1");
-    alg.setProperty("StartOverlaps", "-0.5, -0.6");
-    alg.setProperty("EndOverlaps", "0.5");
-    alg.setProperty("OutputWorkspace", "outws");
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "ws1, ws2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "-0.5, -0.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "0.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     AnalysisDataService::Instance().clear();
   }
@@ -513,7 +515,7 @@ public:
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
-    auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    const auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -933,14 +935,17 @@ public:
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "group1, group2, group3");
-    alg.setProperty("Params", "0.1, 0.1, 2.6");
-    alg.setProperty("StartOverlaps", "0.8, 1.6");
-    alg.setProperty("EndOverlaps", "1.1, 1.9");
-    alg.setProperty("UseManualScaleFactors", "1");
-    alg.setProperty("ScaleFactorFromPeriod", 2);
-    alg.setProperty("OutputWorkspace", "outws");
-    alg.execute();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseManualScaleFactors", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactorFromPeriod", 2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
     // By keeping ManualScaleFactors empty (default value) it allows workspaces
     // in other periods to be scaled by scale factors from a specific period.
@@ -1024,12 +1029,13 @@ public:
     createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2", true);
     Stitch1DMany alg;
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "ws1, ws2");
-    alg.setProperty("Params", "0.1, 0.1, 1.8");
-    alg.setProperty("StartOverlaps", "0.8");
-    alg.setProperty("EndOverlaps", "1.1");
-    alg.setProperty("OutputWorkspace", "outws");
-    alg.execute();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "ws1, ws2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 1.8"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
@@ -1065,12 +1071,14 @@ public:
 
     Stitch1DMany alg;
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "group1, group2");
-    alg.setProperty("Params", "0.1");
-    alg.setProperty("StartOverlaps", "0.8");
-    alg.setProperty("EndOverlaps", "1.1");
-    alg.setProperty("OutputWorkspace", "outws");
-    alg.execute();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspaces", "group1, group2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
@@ -1118,14 +1126,16 @@ public:
 
     Stitch1DMany alg;
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "group1, group2, group3");
-    alg.setProperty("Params", "0.1, 0.1, 2.6");
-    alg.setProperty("StartOverlaps", "0.8, 1.6");
-    alg.setProperty("EndOverlaps", "1.1, 1.9");
-    alg.setProperty("UseManualScaleFactors", "1");
-    alg.setProperty("ScaleFactorFromPeriod", 2);
-    alg.setProperty("OutputWorkspace", "outws");
-    alg.execute();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseManualScaleFactors", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactorFromPeriod", 2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
@@ -1156,34 +1166,48 @@ public:
     createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2", true);
     Stitch1DMany alg;
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "ws1, ws2");
-    alg.setProperty("UseManualScaleFactors", "1");
-    alg.setProperty("OutputWorkspace", "ws");
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "ws1, ws2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseManualScaleFactors", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_two_point_data_workspaces() {
+  void test_three_point_data_workspaces() {
     const auto &x1 = Mantid::HistogramData::Points({0.2, 0.9, 1.6});
     const auto &y1 = Mantid::HistogramData::Counts({56., 77., 48.});
     Mantid::HistogramData::Histogram histogram1(x1, y1);
+    histogram1.setPointStandardDeviations(std::vector<double>{2., 1., 3.589});
     auto ws1 = boost::make_shared<Mantid::DataObjects::Workspace2D>();
-    ws1->initialize(1, histogram1);
+    ws1->initialize(1, std::move(histogram1));
     const auto &x2 = Mantid::HistogramData::Points({0.23, 1.3, 2.6});
     const auto &y2 = Mantid::HistogramData::Counts({1.1, 2., 3.7});
     Mantid::HistogramData::Histogram histogram2(x2, y2);
+    histogram2.setPointStandardDeviations(std::vector<double>{1.34, 1.4, 3.1});
     auto ws2 = boost::make_shared<Mantid::DataObjects::Workspace2D>();
-    ws2->initialize(1, histogram2);
+    ws2->initialize(1, std::move(histogram2));
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws2", ws2);
     Stitch1DMany alg;
+    alg.setChild(true);
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "ws1, ws2");
-    alg.setProperty("UseManualScaleFactors", "1");
-    alg.setProperty("ManualScaleFactors", "1");
-    alg.setProperty("OutputWorkspace", "ws");
-    alg.execute();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "ws1, ws2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseManualScaleFactors", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ManualScaleFactors", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
+    const auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    const std::vector<double> x_values{0.2, 0.23, 0.9, 1.3, 1.6, 2.6};
+    TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
+    const std::vector<double> y_values{56., 1.1, 77., 2., 48., 3.7};
+    TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
+    const std::vector<double> dx_values{2., 1.34, 1., 1.4, 3.589, 3.1};
+    TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 };
