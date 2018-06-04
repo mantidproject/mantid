@@ -194,12 +194,8 @@ void CalculateMuonAsymmetry::exec() {
 /**
  * Calculate normalization constant after the exponential decay has been removed
  * to a linear fitting function
- * @param ws ::  workspace
- * @param wsIndex :: workspace index
- * @param estNormConstant :: estimate of normalization constant
- * @param startX :: the smallest x value for the fit
- * @param endX :: the largest x value for the fit
- * @return normalization constant
+ * @param wsNames ::  names of workspaces to fit to
+ * @return normalization constants
 */
 
 std::vector<double> CalculateMuonAsymmetry::getNormConstants(
@@ -267,7 +263,11 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   }
   return norms;
 }
-
+/**
+* Gets the normalization from a fitting function
+* @param func ::  fittef function
+* @return normalization constant
+*/
 double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
 
   // getFunction(0) -> N(1+g)
