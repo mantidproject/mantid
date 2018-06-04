@@ -200,7 +200,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   NXData dataGroup = firstEntry.openNXData("data");
   NXInt data = dataGroup.openIntData();
   data.load();
-  int numberOfHistograms = data.dim0() * data.dim1() + N_MONITORS;
+  const size_t numberOfHistograms =
+      static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
   size_t nextIndex =
@@ -243,14 +244,15 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
     throw std::runtime_error(
         "The time bins have not the same dimension for all the 5 detectors!");
   }
-  int numberOfHistograms =
+  const size_t numberOfHistograms = static_cast<size_t>(
       dataRear.dim0() * dataRear.dim1() + dataRight.dim0() * dataRight.dim1() +
       dataLeft.dim0() * dataLeft.dim1() + dataDown.dim0() * dataDown.dim1() +
-      dataUp.dim0() * dataUp.dim1();
+      dataUp.dim0() * dataUp.dim1());
 
   g_log.debug("Creating empty workspace...");
   // TODO : Must put this 2 somewhere else: number of monitors!
-  createEmptyWorkspace(numberOfHistograms + N_MONITORS, dataRear.dim2());
+  createEmptyWorkspace(numberOfHistograms + N_MONITORS,
+                       static_cast<size_t>(dataRear.dim2()));
 
   loadMetaData(firstEntry, instrumentPath);
 
@@ -392,8 +394,8 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
  * @param numberOfHistograms : number of spectra
  * @param numberOfChannels : number of TOF channels
  */
-void LoadILLSANS::createEmptyWorkspace(int numberOfHistograms,
-                                       int numberOfChannels) {
+void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms,
+                                       const size_t numberOfChannels) {
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", numberOfHistograms, numberOfChannels + 1,
       numberOfChannels);
@@ -477,10 +479,10 @@ void LoadILLSANS::moveDetectorDistance(double distance,
 
 /**
  * Rotates D22 detector around y-axis
- * @param componentName : "detector"
  * @param angle : the angle to rotate [degree]
+ * @param componentName : "detector"
  */
-void LoadILLSANS::rotateD22(double angle, const ::std::string &componentName) {
+void LoadILLSANS::rotateD22(double angle, const std::string &componentName) {
   API::IAlgorithm_sptr rotater =
       createChildAlgorithm("RotateInstrumentComponent");
   rotater->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
@@ -551,7 +553,7 @@ V3D LoadILLSANS::getComponentPosition(const std::string &componentName) {
 /**
  * Loads some metadata present in the nexus file
  * @param entry : opened nexus entry
- * @param instrumentPath : the nexus entry of the instrument
+ * @param instrumentNamePath : the nexus entry of the instrument
  */
 void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
                                const std::string &instrumentNamePath) {
