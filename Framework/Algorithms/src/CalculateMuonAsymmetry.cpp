@@ -8,7 +8,6 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFuncMinimizer.h"
@@ -161,7 +160,7 @@ namespace Mantid {
 			std::vector<std::string> wsNames = getProperty("reNormalizedWorkspaceList");
 
 			// get new norm
-			std::vector<double> norms = getNormConstants(); // this will do the fit
+			std::vector<double> norms = getNormConstants(wsNamesUnNorm); // this will do the fit
 			// update the ws to new norm
 			for (size_t j = 0; j < wsNames.size();j++) {
 				API::MatrixWorkspace_sptr ws = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(wsNamesUnNorm[j]);
@@ -188,8 +187,7 @@ namespace Mantid {
  * @return normalization constant
 */
 
-		std::vector<double> CalculateMuonAsymmetry::getNormConstants() {
-			const std::vector<std::string> wsNames = getProperty("UnNormalizedWorkspaceList");
+		std::vector<double> CalculateMuonAsymmetry::getNormConstants(const std::vector<std::string> wsNames) {
 			std::vector<double> norms;
 
 			double startX = getProperty("StartX");
@@ -236,17 +234,8 @@ namespace Mantid {
 			try {
 				if (wsNames.size() == 1) {
 					// N(1+g) + exp
-					auto result = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
-
-					// getFunction(0) -> N(1+g)
-					auto TFFunc =
-						boost::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(0));
-
-					// getFunction(0) -> N
-					TFFunc =
-						boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
-					double norm = TFFunc->getParameter("f0.A0");
-					norms.push_back(norm);
+					auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
+					norms.push_back(getNormValue(TFFunc));
 				}
 				else {
 					auto result = boost::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
@@ -254,17 +243,8 @@ namespace Mantid {
 						// get domain
 						auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(j));
 						// N(1+g) + exp
-						TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
-
-						// getFunction(0) -> N(1+g)
-						TFFunc =
-							boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
-
-						// getFunction(0) -> N
-						TFFunc =
-							boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
-						double norm = TFFunc->getParameter("f0.A0");
-						norms.push_back(norm);
+	                    TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
+						norms.push_back(getNormValue(TFFunc));
 					}
 				}
 			}
@@ -274,5 +254,17 @@ namespace Mantid {
   return norms;
 }
 
+double CalculateMuonAsymmetry::getNormValue( API::CompositeFunction_sptr &func) {
+
+
+	// getFunction(0) -> N(1+g)
+	auto TFFunc =
+		boost::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
+
+	// getFunction(0) -> N
+	TFFunc =
+		boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc->getFunction(0));
+	return TFFunc->getParameter("f0.A0");
+}
 } // namespace Algorithm
 } // namespace Mantid

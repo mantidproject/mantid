@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -82,8 +83,9 @@ private:
   void init() override;
   void exec() override;
   // calculate Muon normalisation constant
-  std::vector<double> getNormConstants();
+  std::vector<double> getNormConstants(std::vector<std::string> wsNames);
   std::map<std::string, std::string> validateInputs() override;
+  double getNormValue(API::CompositeFunction_sptr &func);
 };
 
 } // namespace Algorithm
