@@ -38,6 +38,9 @@
 		<parameter name="enable_elastic_peak_diagnostics" type="bool">
 			<value val="true" />
 		</parameter>
+		<parameter name="elastic_peak_diagnostics_low_threshold" type="number">
+			<value val="0.45" />
+		</parameter>
 		<parameter name="enable_incident_energy_calibration" type="bool">
 			<value val="true" />
 		</parameter>
