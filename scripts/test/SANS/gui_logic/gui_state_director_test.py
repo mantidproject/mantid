@@ -74,18 +74,5 @@ class GuiStateDirectorTest(unittest.TestCase):
 
         self.assertEqual(state.scale.thickness, 78.0)
 
-
-    def test_that_sample_thickness_set_on_state(self):
-        table_model = self._get_table_model(sample_thickness = '78.0')
-        state_model = self._get_state_gui_model()
-        director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
-
-        state = director.create_state(0)
-        self.assertTrue(isinstance(state, State))
-
-        self.assertEqual(state.scale.thickness, 78.0)
-
-
-
 if __name__ == '__main__':
     unittest.main()
