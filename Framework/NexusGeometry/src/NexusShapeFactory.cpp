@@ -74,7 +74,7 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 
   return triangularFaces;
 }
-
+/*
 bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
   auto v0 = vertices[0] - vertices[1];
   auto v1 = vertices[1] - vertices[2];
@@ -83,7 +83,7 @@ bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
   // http://www.ambrsoft.com/TrigoCalc/Plan3D/PointsCoplanar.htm
   bool in_plane = v1.scalar_prod(v2.cross_prod(v0)) == 0;
 }
-
+*/
 } // namespace
 
 std::unique_ptr<const Geometry::IObject>
