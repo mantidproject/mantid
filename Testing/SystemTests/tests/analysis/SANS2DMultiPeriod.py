@@ -1,13 +1,11 @@
 #pylint: disable=no-init,too-few-public-methods
 
+# test batch mode with sans2d and selecting a period in batch mode
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-
 from mantid.api import AnalysisDataService
 from ISISCommandInterface import *
 from SANSBatchMode import *
-
-# test batch mode with sans2d and selecting a period in batch mode
 
 
 class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
@@ -85,8 +83,8 @@ class LARMORMultiPeriodEventModeLoading(stresstesting.MantidStressTest):
             ws_name = base_name + str(index)
             workspace = AnalysisDataService.retrieve(ws_name)
             position, rotation = self._get_position_and_rotation(workspace)
-            if position != reference_position or rotation != reference_rotation:
-                self.success = False
+            self.assertEqual(position, reference_position)
+            self.assertEqual(rotation, reference_rotation)
 
     def runTest(self):
         LARMOR()

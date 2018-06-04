@@ -81,25 +81,11 @@ We use `Git`_ as our version control system (VCS). The master copies of our repo
 
 If you are not already set up with Git, you can follow these `instructions <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_.
 
-If you are at RAL then please run the following commands before cloning the repository:
-
-.. code-block:: sh
-
-    git config --global url.git@github.com:mantidproject.insteadOf http://mantidweb.nd.rl.ac.uk/mirror/git/
-
-This will speed up the clone and intial cmake run considerably.
-
 There are a number of URLs via which the code can be checked out using various protocols. The easiest way to get the one you want is to select the protocol you want on the right side of the `mantid <http://github.com/mantidproject/mantid>`_ repository page on github and copy the url into your clipboard. The way to clone the repository via ssh on the command line, into a directory called Mantid, is:
 
 .. code-block:: sh
 
     git clone git@github.com:mantidproject/mantid.git
-
-If at RAL now remove the config section above
-
-.. code-block:: sh
-
-    git config --global --unset url.git@github.com:mantidproject
 
 
 Building Mantid

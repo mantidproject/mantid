@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1211</width>
-    <height>898</height>
+    <height>832</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -95,7 +95,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1569,58 +1569,156 @@ QGroupBox::title {
                   </layout>
                  </widget>
                 </item>
-                <item>
+                <item alignment="Qt::AlignTop">
                  <widget class="QGroupBox" name="groupBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="toolTip">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when dat a is transformed from time-of-flight to wavlength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="title">
                    <string>Wavelength</string>
                   </property>
-                  <layout class="QGridLayout" name="gridLayout_6">
+                  <layout class="QHBoxLayout" name="horizontalLayout_10">
+                   <item>
+                    <widget class="QStackedWidget" name="wavelength_stacked_widget">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>66</height>
+                      </size>
+                     </property>
+                     <property name="lineWidth">
+                      <number>0</number>
+                     </property>
+                     <property name="currentIndex">
+                      <number>1</number>
+                     </property>
+                     <widget class="QWidget" name="page">
+                      <layout class="QGridLayout" name="gridLayout_3">
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="wavelength_min_label">
+                         <property name="text">
+                          <string>Min [Å]</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QLabel" name="wavelength_max_label">
+                         <property name="text">
+                          <string>Max  [Å]</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLineEdit" name="wavelength_min_line_edit"/>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QLineEdit" name="wavelength_max_line_edit"/>
+                       </item>
+                      </layout>
+                     </widget>
+                     <widget class="QWidget" name="page_2">
+                      <layout class="QGridLayout" name="gridLayout_6">
+                       <item row="2" column="0">
+                        <widget class="QLineEdit" name="wavelength_slices_line_edit"/>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="label_7">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slcie from teh start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Ranges  [Å]</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QWidget" name="widget" native="true">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>66</height>
+                      </size>
+                     </property>
+                     <layout class="QGridLayout" name="gridLayout_14">
+                      <item row="0" column="0">
+                       <widget class="QLabel" name="wavelength_step_label">
+                        <property name="text">
+                         <string>Step  [Å]</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="1">
+                       <widget class="QLabel" name="wavelength_step_type_label">
+                        <property name="text">
+                         <string>Step Type</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="0">
+                       <widget class="QLineEdit" name="wavelength_step_line_edit"/>
+                      </item>
+                      <item row="1" column="1">
+                       <widget class="QComboBox" name="wavelength_step_type_combo_box"/>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="groupBox_2">
+                  <property name="title">
+                   <string>Cuts</string>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout_14">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="q_1d_label_2">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 1D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="text">
+                      <string>RCut [mm]</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="q_1d_label_3">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 1D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="text">
+                      <string>WCut [Å]</string>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="1" column="0">
-                    <layout class="QGridLayout" name="gridLayout_3">
-                     <item row="0" column="2">
-                      <widget class="QLabel" name="wavelength_step_label">
-                       <property name="text">
-                        <string>Step  [Å]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="1">
-                      <widget class="QLabel" name="wavelength_max_label">
-                       <property name="text">
-                        <string>Max  [Å]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="3">
-                      <widget class="QComboBox" name="wavelength_step_type_combo_box"/>
-                     </item>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="wavelength_min_label">
-                       <property name="text">
-                        <string>Min [Å]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="3">
-                      <widget class="QLabel" name="wavelength_step_type_label">
-                       <property name="text">
-                        <string>Step Type</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="2">
-                      <widget class="QLineEdit" name="wavelength_step_line_edit"/>
-                     </item>
-                     <item row="1" column="1">
-                      <widget class="QLineEdit" name="wavelength_max_line_edit"/>
-                     </item>
-                     <item row="1" column="0">
-                      <widget class="QLineEdit" name="wavelength_min_line_edit"/>
-                     </item>
-                    </layout>
+                    <widget class="QLineEdit" name="r_cut_line_edit"/>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QLineEdit" name="w_cut_line_edit"/>
                    </item>
                   </layout>
                  </widget>
@@ -1978,19 +2076,6 @@ QGroupBox::title {
                   </layout>
                  </widget>
                 </item>
-                <item>
-                 <spacer name="verticalSpacer">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>40</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
                </layout>
               </item>
               <item>
@@ -2015,6 +2100,17 @@ QGroupBox::title {
      </layout>
     </item>
    </layout>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>100</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_9"/>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -2104,8 +2200,6 @@ QGroupBox::title {
   <tabstop>event_binning_line_edit</tabstop>
   <tabstop>wavelength_min_line_edit</tabstop>
   <tabstop>wavelength_max_line_edit</tabstop>
-  <tabstop>wavelength_step_line_edit</tabstop>
-  <tabstop>wavelength_step_type_combo_box</tabstop>
   <tabstop>absolute_scale_line_edit</tabstop>
   <tabstop>geometry_combo_box</tabstop>
   <tabstop>height_line_edit</tabstop>

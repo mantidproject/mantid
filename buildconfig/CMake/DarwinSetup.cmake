@@ -107,6 +107,15 @@ set ( PLUGINS_DIR plugins )
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
+# use homebrew OpenSSL package
+if (NOT OPENSSL_ROOT_DIR)
+  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+endif(NOT OPENSSL_ROOT_DIR)
+
+if (NOT HDF5_ROOT)
+  set ( HDF5_ROOT /usr/local/opt/hdf5 )
+endif()
+
 if ( ENABLE_MANTIDPLOT )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
@@ -154,15 +163,6 @@ string(FIND "${SITEPACKAGES_SYMLINK_sipso}" "sip.so" STOPPOS)
 string(SUBSTRING "${SITEPACKAGES_SYMLINK_sipso}" 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
 set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
 string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
-
-# use homebrew OpenSSL package
-if (NOT OPENSSL_ROOT_DIR)
-  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
-endif(NOT OPENSSL_ROOT_DIR)
-
-if (NOT HDF5_ROOT)
-  set ( HDF5_ROOT /usr/local/opt/hdf5 )
-endif()
 
 # Python packages
 

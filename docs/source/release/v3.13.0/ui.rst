@@ -16,3 +16,8 @@ MantidPlot
 ----------
 
 - MantidPlot's pyplot API has been removed.
+
+Bugfixes
+--------
+
+- A bug in the load dialog where bad filename input would cause the last file to be loaded has been fixed.
