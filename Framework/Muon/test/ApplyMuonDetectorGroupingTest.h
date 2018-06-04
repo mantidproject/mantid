@@ -518,7 +518,7 @@ public:
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.1297, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.1139, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9],  -0.08961, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.08961, 0.0001);
     // Errors are simply normalized by a constant.
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00001978, 0.0000001);
     TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00002373, 0.0000001);
