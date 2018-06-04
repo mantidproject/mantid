@@ -5,30 +5,22 @@
 #include "MantidAlgorithms/CalculateMuonAsymmetry.h"
 #include "MantidAlgorithms/MuonAsymmetryHelper.h"
 
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/StartsWithValidator.h"
-
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/ADSValidator.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
 
 #include <cmath>
 #include <numeric>
@@ -52,17 +44,17 @@ namespace Mantid {
 			declareProperty(
 				make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
 					"NormalizationTable", "", Direction::Input),
-				"Name of the table containing the normalisations for the asymmetries.");
+				"Name of the table containing the normalizations for the asymmetries.");
 			// list of uNonrm workspaces to fit to
 			declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
 				"UnNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
 				"An ordered list of workspaces (to get the initial values "
-				"for the normalisations).");
+				"for the normalizations).");
 			// list of workspaces to output renormalized result to 
 			declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
 				"ReNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
 				"An ordered list of workspaces (to get the initial values "
-				"for the normalisations).");
+				"for the normalizations).");
 
 			declareProperty(
 				"OutputFitWorkspace", "fit", 
@@ -186,14 +178,14 @@ namespace Mantid {
 }
 
 /**
- * Calculate normalisation constant after the exponential decay has been removed
+ * Calculate normalization constant after the exponential decay has been removed
  * to a linear fitting function
  * @param ws ::  workspace
  * @param wsIndex :: workspace index
- * @param estNormConstant :: estimate of normalisation constant
+ * @param estNormConstant :: estimate of normalization constant
  * @param startX :: the smallest x value for the fit
  * @param endX :: the largest x value for the fit
- * @return normalisation constant
+ * @return normalization constant
 */
 
 		std::vector<double> CalculateMuonAsymmetry::getNormConstants() {
