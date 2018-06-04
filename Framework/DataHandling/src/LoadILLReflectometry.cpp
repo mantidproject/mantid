@@ -428,7 +428,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
     m_numberOfChannels = size_t(timeOfFlight[1]);
     m_tofDelay = timeOfFlight[2];
     if (m_instrument == Supported::Figaro) {
-      NXFloat eDelay = entry.openNXFloat("instrument/Theta/edelay_delay");
+      NXFloat eDelay = entry.openNXFloat("instrument/Distance/edelay_delay");
       eDelay.load();
       m_tofDelay += static_cast<double>(eDelay[0]);
     }
