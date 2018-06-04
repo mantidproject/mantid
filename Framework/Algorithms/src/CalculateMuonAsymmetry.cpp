@@ -243,8 +243,6 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
 
   fit->execute();
 
-  std::string fitStatus = fit->getProperty("OutputStatus");
-
   API::IFunction_sptr tmp = fit->getProperty("Function");
   try {
     if (wsNames.size() == 1) {
