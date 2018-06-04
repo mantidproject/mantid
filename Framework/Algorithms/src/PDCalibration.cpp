@@ -176,7 +176,7 @@ const std::string PDCalibration::summary() const {
 /** Initialize the algorithm's properties.
  */
 void PDCalibration::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace> >(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
                   "Input signal workspace");
 
