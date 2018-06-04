@@ -448,7 +448,7 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
 }
 
 void parseNexusMeshAndAddDetectors(const std::vector<uint16_t> &detFaces,
-                                   const std::vector<uint16_t> faceIndices,
+                                   const std::vector<uint16_t> &faceIndices,
                                    const std::vector<uint16_t> &windingOrder,
                                    const std::vector<float> &vertices,
                                    const size_t numDets, const int32_t minDetId,
