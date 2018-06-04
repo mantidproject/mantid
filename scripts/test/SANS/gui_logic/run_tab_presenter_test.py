@@ -136,11 +136,10 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.beam_centre.hab_pos_2, -169.6)
 
         # Assert certain function calls
-        self.assertEqual(view.get_user_file_path.call_count, 2)
-        self.assertEqual(view.get_batch_file_path.call_count, 1)  # called once for the sub presenter updates (masking table)  # noqa
-        self.assertEqual(view.get_cell.call_count, 34)
-
-        self.assertEqual(view.get_number_of_rows.call_count, 3)
+        self.assertEqual(view.get_user_file_path.call_count, 3)
+        self.assertEqual(view.get_batch_file_path.call_count, 2)
+        self.assertEqual(view.get_cell.call_count, 66)
+        self.assertEqual(view.get_number_of_rows.call_count, 5)
 
         # clean up
         remove_file(user_file_path)
@@ -172,14 +171,14 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.add_row.call_count, 2)
         if use_multi_period:
             expected_first_row = "SampleScatter:SANS2D00022024,ssp:,SampleTrans:SANS2D00022048,stp:,SampleDirect:SANS2D00022048,sdp:," \
-                                 "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,Sample Thickness:1.0"
+                                 "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,User File:user_test_file,Sample Thickness:1.0"
             expected_second_row = "SampleScatter:SANS2D00022024,ssp:,SampleTrans:,stp:,SampleDirect:,sdp:," \
-                                  "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2,Sample Thickness:1.0"
+                                  "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2,User File:,Sample Thickness:1.0"
         else:
             expected_first_row = "SampleScatter:SANS2D00022024,SampleTrans:SANS2D00022048,SampleDirect:SANS2D00022048," \
-                                 "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file,Sample Thickness:1.0"
+                                 "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file,User File:user_test_file,Sample Thickness:1.0"
             expected_second_row = "SampleScatter:SANS2D00022024,SampleTrans:,SampleDirect:," \
-                                  "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file2,Sample Thickness:1.0"
+                                  "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file2,User File:,Sample Thickness:1.0"
 
         calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
         view.add_row.assert_has_calls(calls)
@@ -213,7 +212,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.set_multi_period_view_mode.call_count, 1)
 
         expected_row = "SampleScatter:SANS2D00022024,ssp:3,SampleTrans:,stp:,SampleDirect:,sdp:," \
-                       "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,Sample Thickness:1.0"
+                       "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,User File:,Sample Thickness:1.0"
 
         calls = [mock.call(expected_row)]
         view.add_row.assert_has_calls(calls)

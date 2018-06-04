@@ -1,6 +1,6 @@
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
+#  Copyright (C) 2018 mantidproject
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,10 +27,17 @@ This module should be fully compatible with:
     * Python 3
 """
 
-from __future__ import absolute_import, print_function
+from __future__ import (absolute_import, print_function, unicode_literals)
 
 import six
-from six import * # noqa
+from six import *  # noqa
+
+# Enumerations are built in with Python 3
+try:
+    from enum import Enum
+except ImportError:
+    # use a compatability layer
+    from mantidqt.py3compat.enum import Enum  # noqa
 
 # -----------------------------------------------------------------------------
 # Globals and constants

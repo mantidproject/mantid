@@ -382,8 +382,8 @@ def start_workbench(app):
     # Load matplotlib as early as possible and set our defaults
     # Setup our custom backend and monkey patch in custom current figure manager
     main_window.set_splash('Preloading matplotlib')
-    from workbench.plotting.setup import setup_matplotlib  # noqa
-    setup_matplotlib()
+    from workbench.plotting.config import initialize_matplotlib  # noqa
+    initialize_matplotlib()
 
     # Setup widget layouts etc. mantid cannot be imported before this
     # or the log messages don't get through
