@@ -5,20 +5,23 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/ExtractPolarizationEfficiencies.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Points.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::DataHandling::ExtractPolarizationEfficiencies;
 using namespace Mantid::API;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using namespace Mantid::HistogramData;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
 
 class ExtractPolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
@@ -271,6 +274,74 @@ public:
     TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
+  }
+
+  void test_loading_from_file() {
+    auto workspace = createPointWS(1, 0, 10);
+    LoadInstrument loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename",
+                            "IDFs_for_UNIT_TESTING/REFLECTOMETRY_Definition.xml");
+    loader.setProperty("Workspace", workspace);
+    loader.setProperty("RewriteSpectraMap", OptionalBool(true));
+    loader.execute();
+
+    ExtractPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 6);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "Pp");
+    TS_ASSERT_EQUALS(axis1->label(1), "Ap");
+    TS_ASSERT_EQUALS(axis1->label(2), "Rho");
+    TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
+
+    TS_ASSERT(!outWS->isHistogramData());
+
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[1], 1.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[2], 2.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[3], 3.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[4], 4.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[5], 5.0, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.991, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 0.992, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[2], 0.993, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[3], 0.994, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[4], 0.995, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[5], 0.996, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(1)[0], 0.981, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[1], 0.982, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[2], 0.983, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[3], 0.984, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[4], 0.985, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[5], 0.986, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(2)[0], 0.971, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[1], 0.972, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[2], 0.973, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[3], 0.974, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[4], 0.975, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[5], 0.976, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(3)[0], 0.961, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[4], 0.965, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[5], 0.966, 1e-14);
   }
 
 private:

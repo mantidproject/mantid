@@ -72,8 +72,7 @@ const std::string ExtractPolarizationEfficiencies::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ExtractPolarizationEfficiencies::summary() const {
-  return "Retrieves a workspace of monitor data held within the input "
-         "workspace, if present.";
+  return "Extracts polarization efficiencies from instrument's parameter file.";
 }
 
 /** Initialize the algorithm's properties.

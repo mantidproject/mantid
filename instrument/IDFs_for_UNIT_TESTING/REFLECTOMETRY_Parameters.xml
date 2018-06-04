@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFLECTOMETRY" valid-from="forever">
+
+<component-link name="REFLECTOMETRY" >
+  <parameter name="polarization_correction_method" type="string">
+    <value val="Fredrikze" />
+  </parameter>
+
+  <parameter name="efficiency_lambda" type="string">
+    <value val="0 1 2 3 4 5" />
+    <description is="The wavelengths at which the efficiencies are sampled."/>
+  </parameter>
+
+  <parameter name="Pp" type="string">
+    <value val="0.991 0.992 0.993 0.994 0.995 0.996" />
+    <description is="The values of the Pp efficiency."/>
+  </parameter>
+
+  <parameter name="Ap" type="string">
+    <value val="0.981 0.982 0.983 0.984 0.985 0.986" />
+    <description is="The values of the Ap efficiency."/>
+  </parameter>
+
+  <parameter name="Rho" type="string">
+    <value val="0.971 0.972 0.973 0.974 0.975 0.976" />
+    <description is="The values of the Rho efficiency."/>
+  </parameter>
+
+  <parameter name="Alpha" type="string">
+    <value val="0.961 0.962 0.963 0.964 0.965 0.966" />
+    <description is="The values of the Alpha efficiency."/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>
