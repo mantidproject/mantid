@@ -20,9 +20,7 @@ New features
 Improvements
 ############
 * Transmission workspaces are now output by default from the new GUI.
-
-Bug fixes
-#########
+* The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
 * Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
 * Added thickness column to table in new GUI.
 * Added EventSlice option to options column in new GUI.
@@ -31,6 +29,7 @@ Bug fixes
 Bug fixes
 #########
 * Fixed a bug where the beam stop arm was not being masked on LOQ.
+* Fixed a bug where userfiles specified in the batch file were not being loaded into the new GUI.
 
 Features Removed
 ################
