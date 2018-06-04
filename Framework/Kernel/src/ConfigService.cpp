@@ -2078,6 +2078,7 @@ void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
 /** Sets the Log level for a filter channel
 * @param filterChannelName the channel name of the filter channel to change
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @param quiet do not emit log messages
 * @throws std::invalid_argument if the channel name is incorrect or it is not a
 * filterChannel
 */
