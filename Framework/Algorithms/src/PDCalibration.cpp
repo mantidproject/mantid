@@ -176,10 +176,9 @@ const std::string PDCalibration::summary() const {
 /** Initialize the algorithm's properties.
  */
 void PDCalibration::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace> >(
                       "InputWorkspace", "", Direction::InOut),
-                  "Input signal workspace.\nIf the workspace does not exist it "
-                  "will read it from the SignalFile into this workspace.");
+                  "Input signal workspace");
 
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(
                       "TofBinning", boost::make_shared<RebinParamsValidator>()),
@@ -230,12 +229,8 @@ void PDCalibration::init() {
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
                   "The estimated peak width as a "
                   "percentage of the d-spacing "
-                  "of the center of the peak.");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
-      "List of tolerance on fitted peak positions against given peak positions."
-      "If there is only one value given, then ");
+                  "of the center of the peak. This is the same as the width in "
+                  "time-of-flight.");
 
   declareProperty("MinimumPeakHeight", 2.,
                   "Minimum peak height such that all the fitted peaks with "
@@ -285,7 +280,6 @@ void PDCalibration::init() {
   setPropertyGroup("PeakPositions", fitPeaksGroup);
   setPropertyGroup("PeakWindow", fitPeaksGroup);
   setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
-  setPropertyGroup("PositionTolerance", fitPeaksGroup);
   setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
