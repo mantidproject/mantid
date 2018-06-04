@@ -211,8 +211,11 @@ class CrystalField(object):
         for param in CrystalField.field_parameter_names:
             if param in free_parameters:
                 self.function.setParameter(param, free_parameters[param])
-            elif param not in getSymmAllowedParam(self.Symmetry):
+            symm_allowed_par = getSymmAllowedParam(self.Symmetry)
+            if param not in symm_allowed_par:
                 self.function.fixParameter(param)
+            else:
+                self.function.freeParameter(param)
 
         self._setPeaks()
 
@@ -1075,7 +1078,7 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.search('ties=\((.*?)\)', str(self.crystalFieldFunction))
+        ties = re.search(',ties=\((.*?)\)', str(self.crystalFieldFunction))
         return ties.group(1) if ties else ''
 
     def _getFieldConstraints(self):
