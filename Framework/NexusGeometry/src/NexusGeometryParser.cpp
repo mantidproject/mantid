@@ -421,10 +421,9 @@ parseNexusMesh(const Group &detectorGroup, const Group &shapeGroup) {
 }
 
 void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
-                        const std::vector<uint16_t> &faceIndices,
                         const std::vector<uint16_t> &windingOrder,
                         const std::vector<float> &vertices,
-                        const int32_t minDetId, const const size_t vertsPerFace,
+                        const int32_t minDetId, const size_t vertsPerFace,
                         std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
                         std::vector<std::vector<uint16_t>> &detFaceIndices,
                         std::vector<std::vector<uint16_t>> &detWindingOrder,
@@ -449,7 +448,7 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
 }
 
 void parseNexusMeshAndAddDetectors(const std::vector<uint16_t> &detFaces,
-                                   const std::vector<uint16_t> &faceIndices,
+                                   const std::vector<uint16_t> faceIndices,
                                    const std::vector<uint16_t> &windingOrder,
                                    const std::vector<float> &vertices,
                                    const size_t numDets, const int32_t minDetId,
@@ -461,9 +460,8 @@ void parseNexusMeshAndAddDetectors(const std::vector<uint16_t> &detFaces,
   std::vector<std::vector<uint16_t>> detWindingOrder(numDets);
   std::vector<int> detIds(numDets);
 
-  extractFacesAndIDs(detFaces, faceIndices, windingOrder, vertices, minDetId,
-                     vertsPerFace, detFaceVerts, detFaceIndices,
-                     detWindingOrder, detIds);
+  extractFacesAndIDs(detFaces, windingOrder, vertices, minDetId, vertsPerFace,
+                     detFaceVerts, detFaceIndices, detWindingOrder, detIds);
 
   for (size_t i = 0; i < numDets; ++i) {
     auto &detVerts = detFaceVerts[i];
@@ -480,14 +478,12 @@ void parseNexusMeshAndAddDetectors(const std::vector<uint16_t> &detFaces,
 
     auto shape =
         NexusShapeFactory::createFromOFFMesh(detIndices, detWinding, detVerts);
-    builder.addDetectorToLastBank(
-        name + "_" + std::to_string(i), detIds[i], centre,
-        boost::shared_ptr<const Geometry::IObject>(std::move(shape)));
+    builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i],
+                                  centre, std::move(shape));
   }
 }
 
-void parseAndAddBank(const H5File &file, const Group &shapeGroup,
-                     InstrumentBuilder &builder,
+void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
                      const std::vector<int> &detectorIds,
                      const std::string &bankName) {
   // Load mapping between detector IDs and faces, winding order of vertices for
@@ -564,13 +560,6 @@ void parseAndAddSample(const H5File &file, const Group &root,
   builder.addSample(sampleName, samplePos);
 }
 
-Eigen::Vector3d getSourcePosition(const H5File &file, const Group &root) {
-  H5std_string sourcePath = "raw_data_1/instrument/source";
-  Group sourceGroup = root.openGroup(sourcePath);
-  auto sourceTransformations = getTransformations(file, sourceGroup);
-  return sourceTransformations * Eigen::Vector3d(0.0, 0.0, 0.0);
-}
-
 void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
   std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
 
@@ -613,7 +602,7 @@ extractInstrument(const H5File &file, const Group &root) {
 
     try {
       auto shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
-      parseAndAddBank(file, shapeGroup, builder, detectorIds, bankName);
+      parseAndAddBank(shapeGroup, builder, detectorIds, bankName);
       continue;
     } catch (...) { // No detector_shape group
     }

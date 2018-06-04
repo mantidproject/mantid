@@ -56,7 +56,7 @@ public:
   void addDetectorToLastBank(
       const std::string &detName, int detId,
       const Eigen::Vector3d &relativeOffset,
-      boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
+      boost::shared_ptr<const Mantid::Geometry::IObject> shape);
   /// Adds detector to instrument
   void addMonitor(const std::string &detName, int detId,
                   const Eigen::Vector3d &position,

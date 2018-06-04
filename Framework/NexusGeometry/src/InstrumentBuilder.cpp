@@ -47,7 +47,7 @@ InstrumentBuilder::addComponent(const std::string &compName,
 void InstrumentBuilder::addDetectorToLastBank(
     const std::string &detName, int detId,
     const Eigen::Vector3d &relativeOffset,
-    boost::shared_ptr<const Geometry::IObject> &shape) {
+    boost::shared_ptr<const Geometry::IObject> shape) {
   if (!m_lastBank)
     throw std::runtime_error("No bank to add the detector to");
   auto *detector = new Geometry::Detector(

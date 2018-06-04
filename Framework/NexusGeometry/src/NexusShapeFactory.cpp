@@ -74,6 +74,16 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 
   return triangularFaces;
 }
+
+bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
+  auto v0 = vertices[0] - vertices[1];
+  auto v1 = vertices[1] - vertices[2];
+  auto v2 = vertices[0] - vertices[2];
+
+  // http://www.ambrsoft.com/TrigoCalc/Plan3D/PointsCoplanar.htm
+  bool in_plane = v1.scalar_prod(v2.cross_prod(v0)) == 0;
+}
+
 } // namespace
 
 std::unique_ptr<const Geometry::IObject>
@@ -170,6 +180,11 @@ createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
 std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices) {
+
+  // http://www.ambrsoft.com/TrigoCalc/Plan3D/PointsCoplanar.htm
+  // TODO - check vertices are coplanar, and if so, create a 2D mesh instead,
+  // though this should be put somehow inside Mesh2D?
+
   return Mantid::Kernel::make_unique<Geometry::MeshObject>(
       std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
