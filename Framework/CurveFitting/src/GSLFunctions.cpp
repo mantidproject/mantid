@@ -92,9 +92,6 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
         ++ia;
       }
     }
-    if (x->size != ia) {
-      throw Kernel::Exception::FitSizeWarning(x->size, ia);
-    }
   }
   p->function->applyTies();
 
