@@ -387,7 +387,7 @@ from converging. If the image is known to be real this property can be safely se
 
 Complex Data
 ------------
-If the input property "ComplexData* is set to *True*, the algorithm will assume complex data for the calculations with all the
+If the input property *ComplexData* is set to *True*, the algorithm will assume complex data for the calculations with all the
 real parts listed before all the imaginary parts. This means that if you have workspaces where the imaginary part immediately
 follow the real part, such workspaces cannot be combined by using the :ref:`algm-AppendSpectra` algorithm because the resulting
 output will not order the real and imaginary parts corrected as needed for this algorithm. The following usage example
@@ -529,6 +529,9 @@ Output:
    
 Adjusting the Reconstructed Data
 --------------------------------
+The reconstructed data can be adjusted by multiplying by the *DataLinearAdj* property and then adding the *DataConstAdj* property. 
+Each of these properties is a workspace with complex Y values, just like complex input workspaces. Each Y value is then applied to 
+the corresponding Y values in the reconstructed data at each iteration.
 
 .. testcode:: ExAdjustment
 
