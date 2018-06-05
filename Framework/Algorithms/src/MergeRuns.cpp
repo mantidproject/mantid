@@ -130,7 +130,7 @@ void MergeRuns::exec() {
     // Iterate over the collection of input workspaces
     auto it = m_inMatrixWS.begin();
 
-    size_t numberOfWSs = m_inMatrixWS.size();
+    const size_t numberOfWSs = m_inMatrixWS.size();
 
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
@@ -478,43 +478,48 @@ bool MergeRuns::validateInputsForEventWorkspaces(
 
 //------------------------------------------------------------------------------------------------
 /** Calculates the parameters to hand to the Rebin algorithm. Specifies the new
- * binning, bin-by-bin,
- *  to cover the full range covered by the two input workspaces. In regions of
- * overlap, the bins from
- *  the workspace having the wider bins are taken. Note that because the list of
- * input workspaces
- *  is sorted, ws1 will always start before (or at the same point as) ws2.
- *  @param ws1 ::    The first input workspace. Will start before ws2.
- *  @param ws2 ::    The second input workspace.
+ *  binning, bin-by-bin, to cover the full range covered by the two input
+ *  workspaces. In regions of overlap, the bins from the workspace having the
+ *  wider bins are taken.
+ *  @param ws1 ::    The first input workspace
+ *  @param ws2 ::    The second input workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
 void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
                                      const API::MatrixWorkspace_const_sptr &ws2,
-                                     std::vector<double> &params) const {
-  auto &X1 = ws1->x(0);
-  auto &X2 = ws2->x(0);
-  const double end1 = X1.back();
-  const double start2 = X2.front();
-  const double end2 = X2.back();
+                                     std::vector<double> &params) {
+  auto const &X1 = ws1->x(0);
+  auto const &X2 = ws2->x(0);
+  params.clear();
+  // Try to reserve memory for the worst-case scenario: two non-overlapping
+  // ranges.
+  params.reserve(1 + 2 * (X1.size() - 1) + 2 + 2 * (X2.size() - 1));
+  // Sort by X axis which starts smaller
+  bool const firstIsFirst = X1.front() < X2.front();
+  auto const &smallerX = firstIsFirst ? X1 : X2;
+  auto const &greaterX = firstIsFirst ? X2 : X1;
+  double const end1 = smallerX.back();
+  double const start2 = greaterX.front();
+  double const end2 = greaterX.back();
 
   if (end1 <= start2) {
     // First case is if there's no overlap between the workspaces
-    this->noOverlapParams(X1, X2, params);
+    noOverlapParams(smallerX, greaterX, params);
   } else {
-    // Add the bins from the first workspace up to the start of the overlap
-    params.push_back(X1[0]);
+    // Add the bins up to the start of the overlap
+    params.emplace_back(smallerX.front());
     int64_t i;
-    for (i = 1; X1[i] <= start2; ++i) {
-      params.push_back(X1[i] - X1[i - 1]);
-      params.push_back(X1[i]);
+    for (i = 1; smallerX[i] <= start2; ++i) {
+      params.emplace_back(smallerX[i] - smallerX[i - 1]);
+      params.emplace_back(smallerX[i]);
     }
-    // If the range of workspace2 is completely within that of workspace1, then
-    // call the
-    // 'inclusion' routine. Otherwise call the standard 'intersection' one.
+    // If the range of one of the workspaces is completely within that
+    // of the other, call the 'inclusion' routine.
+    // Otherwise call the standard 'intersection' one.
     if (end1 < end2) {
-      this->intersectionParams(X1, i, X2, params);
+      intersectionParams(smallerX, i, greaterX, params);
     } else {
-      this->inclusionParams(X1, i, X2, params);
+      inclusionParams(smallerX, i, greaterX, params);
     }
   }
 }
@@ -527,23 +532,23 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
  *  @param params :: A reference to the vector of rebinning parameters
  */
 void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2,
-                                std::vector<double> &params) const {
+                                std::vector<double> &params) {
   // Add all the bins from the first workspace
   for (size_t i = 1; i < X1.size(); ++i) {
-    params.push_back(X1[i - 1]);
-    params.push_back(X1[i] - X1[i - 1]);
+    params.emplace_back(X1[i - 1]);
+    params.emplace_back(X1[i] - X1[i - 1]);
   }
   // Put a single bin in the 'gap' (but check first the 'gap' isn't zero)
   if (X1.back() < X2.front()) {
-    params.push_back(X1.back());
-    params.push_back(X2.front() - X1.back());
+    params.emplace_back(X1.back());
+    params.emplace_back(X2.front() - X1.back());
   }
   // Now add all the bins from the second workspace
   for (size_t j = 1; j < X2.size(); ++j) {
-    params.push_back(X2[j - 1]);
-    params.push_back(X2[j] - X2[j - 1]);
+    params.emplace_back(X2[j - 1]);
+    params.emplace_back(X2[j] - X2[j - 1]);
   }
-  params.push_back(X2.back());
+  params.emplace_back(X2.back());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -558,34 +563,36 @@ void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2,
  */
 void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
                                    const HistogramX &X2,
-                                   std::vector<double> &params) const {
+                                   std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
-  int64_t overlapbins1, overlapbins2;
-  overlapbins1 = X1.size() - i;
-  for (overlapbins2 = 0; X2[overlapbins2] < X1.back(); ++overlapbins2) {
+  int64_t const overlapbins1 = X1.size() - i;
+  const auto iterX2 = std::lower_bound(X2.cbegin(), X2.cend(), X1.back());
+  if (iterX2 == X2.end()) {
+    throw std::runtime_error("MergerRuns::intersectionParams: no intersection "
+                             "between the histograms.");
   }
-
+  int64_t const overlapbins2 = std::distance(X2.cbegin(), iterX2);
   // We want to use whichever one has the larger bins (on average)
   if (overlapbins1 < overlapbins2) {
     // In this case we want the rest of the bins from the first workspace.....
     for (; i < static_cast<int64_t>(X1.size()); ++i) {
-      params.push_back(X1[i] - X1[i - 1]);
-      params.push_back(X1[i]);
+      params.emplace_back(X1[i] - X1[i - 1]);
+      params.emplace_back(X1[i]);
     }
     // Now remove the last bin & boundary
     params.pop_back();
     params.pop_back();
     // ....and then the non-overlap ones from the second workspace
     for (size_t j = overlapbins2; j < X2.size(); ++j) {
-      params.push_back(X2[j] - params.back());
-      params.push_back(X2[j]);
+      params.emplace_back(X2[j] - params.back());
+      params.emplace_back(X2[j]);
     }
   } else {
     // In this case we just have to add all the bins from the second workspace
     for (size_t j = 1; j < X2.size(); ++j) {
-      params.push_back(X2[j] - params.back());
-      params.push_back(X2[j]);
+      params.emplace_back(X2[j] - params.back());
+      params.emplace_back(X2[j]);
     }
   }
 }
@@ -603,14 +610,16 @@ void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
  */
 void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
                                 const HistogramX &X2,
-                                std::vector<double> &params) const {
+                                std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
-  int64_t overlapbins1, overlapbins2;
-  for (overlapbins1 = 1; X1[i + overlapbins1] < X2.back(); ++overlapbins1) {
+  const auto iterX1 = std::lower_bound(X1.cbegin() + i, X1.cend(), X2.back());
+  if (iterX1 == X1.cend()) {
+    throw std::runtime_error(
+        "MergeRuns::inclusionParams: no overlap between the histograms");
   }
-  //++overlapbins1;
-  overlapbins2 = X2.size() - 1;
+  int64_t const overlapbins1 = std::distance(X1.cbegin(), iterX1) - i;
+  int64_t const overlapbins2 = X2.size() - 1;
 
   // In the overlap region, we want to use whichever one has the larger bins (on
   // average)
@@ -618,21 +627,21 @@ void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
     // In the case where the first workspace has larger bins it's easy
     // - just add the rest of X1's bins
     for (; i < static_cast<int64_t>(X1.size()); ++i) {
-      params.push_back(X1[i] - X1[i - 1]);
-      params.push_back(X1[i]);
+      params.emplace_back(X1[i] - X1[i - 1]);
+      params.emplace_back(X1[i]);
     }
   } else {
     // In this case we want all of X2's bins first (without the first and last
     // boundaries)
     for (size_t j = 1; j < X2.size() - 1; ++j) {
-      params.push_back(X2[j] - params.back());
-      params.push_back(X2[j]);
+      params.emplace_back(X2[j] - params.back());
+      params.emplace_back(X2[j]);
     }
     // And now those from X1 that lie above the overlap region
     i += overlapbins1;
     for (; i < static_cast<int64_t>(X1.size()); ++i) {
-      params.push_back(X1[i] - params.back());
-      params.push_back(X1[i]);
+      params.emplace_back(X1[i] - params.back());
+      params.emplace_back(X1[i]);
     }
   }
 }
