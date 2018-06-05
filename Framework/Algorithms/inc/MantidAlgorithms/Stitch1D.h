@@ -61,11 +61,11 @@ private:
   /// Overwrites Algorithm method.
   void exec() override;
   /// Get the start overlap
-  double getStartOverlap(const double &intesectionMin,
-                         const double &intesectionMax) const;
+  double getStartOverlap(const double intesectionMin,
+                         const double intesectionMax) const;
   /// Get the end overlap
-  double getEndOverlap(const double &intesectionMin,
-                       const double &intesectionMax) const;
+  double getEndOverlap(const double intesectionMin,
+                       const double intesectionMax) const;
 
   /// Get the rebin parameters
   std::vector<double>
@@ -78,9 +78,9 @@ private:
         const std::vector<double> &params);
   /// Perform integration
   Mantid::API::MatrixWorkspace_sptr
-  integration(Mantid::API::MatrixWorkspace_sptr &input, const double &start,
-              const double &stop);
-  Mantid::API::MatrixWorkspace_sptr singleValueWS(const double &val);
+  integration(Mantid::API::MatrixWorkspace_sptr &input, const double start,
+              const double stop);
+  Mantid::API::MatrixWorkspace_sptr singleValueWS(const double val);
   /// Calculate the weighted mean
   Mantid::API::MatrixWorkspace_sptr
   weightedMean(Mantid::API::MatrixWorkspace_sptr &inOne,

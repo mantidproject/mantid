@@ -237,8 +237,8 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
  to inhabit
  @return a double contianing the start of the overlapping region
  */
-double Stitch1D::getStartOverlap(const double &intesectionMin,
-                                 const double &intesectionMax) const {
+double Stitch1D::getStartOverlap(const double intesectionMin,
+                                 const double intesectionMax) const {
   Property *startOverlapProp = this->getProperty("StartOverlap");
   double startOverlapVal = this->getProperty("StartOverlap");
   startOverlapVal -= this->range_tolerance;
@@ -268,8 +268,8 @@ double Stitch1D::getStartOverlap(const double &intesectionMin,
  to inhabit
  @return a double contianing the end of the overlapping region
  */
-double Stitch1D::getEndOverlap(const double &intesectionMin,
-                               const double &intesectionMax) const {
+double Stitch1D::getEndOverlap(const double intesectionMin,
+                               const double intesectionMax) const {
   Property *endOverlapProp = this->getProperty("EndOverlap");
   double endOverlapVal = this->getProperty("EndOverlap");
   endOverlapVal += this->range_tolerance;
@@ -380,7 +380,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
     auto &sourceE = outWS->mutableE(i);
 
     for (size_t j = 0; j < sourceY.size(); ++j) {
-      const double &value = sourceY[j];
+      const double value = sourceY[j];
       if (std::isnan(value)) {
         nanYIndexes.push_back(j);
         sourceY[j] = 0;
@@ -389,7 +389,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
         sourceY[j] = 0;
       }
 
-      const double &eValue = sourceE[j];
+      const double eValue = sourceE[j];
       if (std::isnan(eValue)) {
         nanEIndexes.push_back(j);
         sourceE[j] = 0;
@@ -413,8 +413,8 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input,
-                                           const double &start,
-                                           const double &stop) {
+                                           const double start,
+                                           const double stop) {
   auto integration = this->createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", input);
@@ -468,7 +468,7 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
  @param val :: The double to convert to a single value workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::singleValueWS(const double &val) {
+MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
   auto singleValueWS =
       this->createChildAlgorithm("CreateSingleValuedWorkspace");
   singleValueWS->initialize();
@@ -587,8 +587,8 @@ void Stitch1D::exec() {
   MatrixWorkspace_sptr rhs = rhsWS->clone();
   if (lhsWS->isHistogramData()) {
     MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
-    const double &xMin = params.front();
-    const double &xMax = params.back();
+    const double xMin = params.front();
+    const double xMax = params.back();
 
     if (std::abs(xMin - startOverlap) < 1E-6)
       startOverlap = xMin;
