@@ -33,6 +33,7 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
     RIETVELD_REFINEMENT = "Rietveld refinement"
     RWP_DATASET_NAME = "Rwp"
     PROFILE_COEFFS_GROUP_NAME = "Profile Coefficients"
+    WRONG_NUMBER_PARAM_MSG = "One {} value must be supplied for every run {}"
 
     def category(self):
         return "DataHandling"
@@ -151,11 +152,9 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
                                                 sigmas=sigmas, gammas=gammas, index=i)
 
     def _wrong_number_warning_dict(self, prop_name, num_runs, condition=""):
-        wrong_number_param_msg = "One {} value must be supplied for every run {}".format
-
         prop = self.getProperty(prop_name).value
         if len(prop) != num_runs:
-            return {prop_name: wrong_number_param_msg(prop_name, condition)}
+            return {prop_name: self.WRONG_NUMBER_PARAM_MSG.format(prop_name, condition)}
 
         return {}
 
