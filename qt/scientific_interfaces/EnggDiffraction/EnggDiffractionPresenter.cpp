@@ -2656,11 +2656,11 @@ Poco::Path EnggDiffractionPresenter::outFilesRootDir() const {
 
   try {
 // takes to the root of directory according to the platform
-#ifdef __unix__
-    dir = Poco::Path().home();
-#else
+#ifdef _WIN32
     const std::string ROOT_DRIVE = "C:/";
     dir.assign(ROOT_DRIVE);
+#else
+    dir = Poco::Path().home();
 #endif
     dir.append(rootDir);
 
