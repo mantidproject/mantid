@@ -127,6 +127,7 @@ public:
   }
   /// overwrite base method
   void set(size_t iY, size_t iP, double value) override {
+    if (iP >= m_index.size()) return;
     int j = m_index[iP];
     if (j >= 0)
       gsl_matrix_set(m_J, iY, j, value);
