@@ -154,7 +154,7 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   void changeInstrument();
   void changeGroup();
-  void updateWidgetEnabledState(const bool isProcessing) const;
+  void updateWidgetEnabledState() const;
   DataProcessorPresenter *getTablePresenter(int group) const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);

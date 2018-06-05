@@ -539,8 +539,8 @@ void GenericDataProcessorPresenter::processNextItem() {
 
   if (m_pauseReduction) {
     // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused(m_group);
     m_reductionPaused = true;
+    m_mainPresenter->confirmReductionPaused(m_group);
     return;
   }
 
@@ -637,8 +637,8 @@ void GenericDataProcessorPresenter::endReduction(
 
   // Stop the reduction
   pause();
-  m_reductionPaused = true;
   m_mainPresenter->confirmReductionPaused(m_group);
+  m_reductionPaused = true;
 }
 
 /**

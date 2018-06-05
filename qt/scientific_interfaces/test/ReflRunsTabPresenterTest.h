@@ -134,8 +134,8 @@ public:
     auto presenter = createMocksAndPresenter(3);
 
     EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup())
-        .Times(Exactly(1))
-        .WillOnce(Return(1));
+        .Times(Exactly(2))
+        .WillRepeatedly(Return(1));
     // Commands should be updated with presenter of selected group
     EXPECT_CALL(*mockTablePresenter(0), publishCommandsMocked()).Times(0);
     EXPECT_CALL(*mockTablePresenter(1), publishCommandsMocked()).Times(1);
@@ -149,6 +149,7 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     expectSetWidgetEnabledState(false, false);
+    expectSelectedGroup(0, 2);
     presenter.notify(IReflRunsTabPresenter::GroupChangedFlag);
 
     verifyAndClearExpectations();
@@ -247,15 +248,15 @@ public:
     // Start autoreduction on one of the groups
     constexpr int GROUP_TO_PAUSE = 0;
     constexpr int AUTOREDUCTION_GROUP = 1;
-    expectSelectedGroup(AUTOREDUCTION_GROUP);
-    presenter.startNewAutoreduction();
-    verifyAndClearExpectations();
+    presenter.m_autoreduction.setupNewAutoreduction(AUTOREDUCTION_GROUP,
+                                                    "dummy");
 
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter,
                 notifyReductionPaused(AUTOREDUCTION_GROUP))
         .Times(Exactly(0));
+    expectSetWidgetEnabledState(false, true);
 
     presenter.pause(GROUP_TO_PAUSE);
     verifyAndClearExpectations();
@@ -269,9 +270,9 @@ public:
     // Start and stop autoreduction on one of the groups
     constexpr int GROUP_TO_PAUSE = 0;
     constexpr int AUTOREDUCTION_GROUP = 1;
-    expectSelectedGroup(AUTOREDUCTION_GROUP);
     EXPECT_CALL(*m_mockProgress, setProgressRange(0, 100)).Times(Exactly(1));
-    presenter.startNewAutoreduction();
+    presenter.m_autoreduction.setupNewAutoreduction(AUTOREDUCTION_GROUP,
+                                                    "dummy");
     presenter.m_autoreduction.pause(AUTOREDUCTION_GROUP);
     verifyAndClearExpectations();
 
@@ -375,16 +376,6 @@ public:
     verifyAndClearExpectations();
   }
 
-  void test_resume() {
-    auto presenter = createMocksAndPresenter(1);
-
-    constexpr int GROUP_NUMBER = 0;
-    expectSetWidgetEnabledState(true, false);
-    presenter.resume(GROUP_NUMBER);
-
-    verifyAndClearExpectations();
-  }
-
   void test_confirmReductionFinished() {
     auto presenter = createMocksAndPresenter(1);
 
@@ -399,7 +390,8 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     constexpr int GROUP_NUMBER = 0;
-    // Expect that the main presenter is notified that data reduction is paused
+    expectSetWidgetEnabledState(false, false);
+    expectTablePresenterIsProcessing(GROUP_NUMBER, false, 2);
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_NUMBER))
         .Times(Exactly(1));
 
@@ -411,7 +403,8 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     auto GROUP_NUMBER = 0;
-    // Expect that the main presenter is notified that data reduction is resumed
+    expectTablePresenterIsProcessing(GROUP_NUMBER, true, 2);
+    expectSetWidgetEnabledState(true, false);
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionResumed(GROUP_NUMBER))
         .Times(Exactly(1));
 
@@ -528,19 +521,21 @@ private:
     EXPECT_CALL(*m_mockProgress, setProgress(_)).Times(Exactly(NUMBER_ROWS));
   }
 
-  void expectSelectedGroup(int group) {
+  void expectSelectedGroup(int group, int numTimes = 1) {
     EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup())
-        .Times(Exactly(1))
-        .WillOnce(Return(group));
+        .Times(Exactly(numTimes))
+        .WillRepeatedly(Return(group));
+  }
+
+  void expectTablePresenterIsProcessing(int group, bool processing,
+                                        int numTimes = 1) {
+    EXPECT_CALL(*mockTablePresenter(group), isProcessing())
+        .Times(Exactly(numTimes))
+        .WillRepeatedly(Return(processing));
   }
 
   void expectSetWidgetEnabledState(bool isProcessing, bool isAutoreducing) {
     EXPECT_CALL(*m_mockRunsTabView, updateMenuEnabledState(isProcessing))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setAutoreduceButtonEnabled(!isProcessing))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView,
-                setAutoreducePauseButtonEnabled(isProcessing))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setTransferButtonEnabled(!isProcessing))
         .Times(Exactly(1));

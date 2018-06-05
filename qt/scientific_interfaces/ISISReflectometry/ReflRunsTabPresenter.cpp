@@ -710,18 +710,21 @@ bool ReflRunsTabPresenter::hasPerAngleOptions(int group) const {
  * @param isProcessing :: true if processing is in progress
  *
  */
-void ReflRunsTabPresenter::updateWidgetEnabledState(
-    const bool isProcessing) const {
-  // Update the menus
-  m_view->updateMenuEnabledState(isProcessing);
+void ReflRunsTabPresenter::updateWidgetEnabledState() const {
+  auto processing = isProcessing();
 
-  // Update specific buttons
-  m_view->setAutoreduceButtonEnabled(!isProcessing);
-  m_view->setAutoreducePauseButtonEnabled(isProcessing);
-  m_view->setTransferButtonEnabled(!isProcessing);
-  m_view->setInstrumentComboEnabled(!isProcessing);
+  // Update the menus
+  m_view->updateMenuEnabledState(processing);
+
+  // Disable these buttons when any processing is running
+  m_view->setTransferButtonEnabled(!processing);
+  m_view->setInstrumentComboEnabled(!processing);
+
+  // Disable these buttons when processing is running for the active group
+  m_view->setAutoreduceButtonEnabled(!isProcessing(selectedGroup()));
 
   // These components are always enabled unless autoreduction is running
+  m_view->setAutoreducePauseButtonEnabled(autoreductionRunning());
   m_view->setTransferMethodComboEnabled(!autoreductionRunning());
   m_view->setSearchTextEntryEnabled(!autoreductionRunning());
   m_view->setSearchButtonEnabled(!autoreductionRunning());
@@ -733,7 +736,6 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
 void ReflRunsTabPresenter::pause(int group) {
   if (m_autoreduction.pause(group)) {
     m_view->stopTimer();
-    updateWidgetEnabledState(false);
     m_progressView->setAsPercentageIndicator();
   }
 
@@ -748,7 +750,6 @@ void ReflRunsTabPresenter::pause(int group) {
 */
 void ReflRunsTabPresenter::resume(int group) const {
   UNUSED_ARG(group);
-  updateWidgetEnabledState(true);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be finished
@@ -763,12 +764,14 @@ void ReflRunsTabPresenter::confirmReductionFinished(int group) {
 * via a user command to pause reduction
 */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
+  updateWidgetEnabledState();
   m_mainPresenter->notifyReductionPaused(group);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
 */
 void ReflRunsTabPresenter::confirmReductionResumed(int group) {
+  updateWidgetEnabledState();
   m_mainPresenter->notifyReductionResumed(group);
 }
 
@@ -786,7 +789,7 @@ void ReflRunsTabPresenter::changeInstrument() {
 }
 
 void ReflRunsTabPresenter::changeGroup() {
-  updateWidgetEnabledState(isProcessing());
+  updateWidgetEnabledState();
   // Update the current menu commands based on the current group
   pushCommands(selectedGroup());
 }
