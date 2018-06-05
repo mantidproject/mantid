@@ -352,6 +352,7 @@ class ResolutionModel:
                     to tabulate the functions such that linear interpolation between the
                     tabulated points has this accuracy. If not given a default value is used.
         """
+        errmsg = 'Resolution model must be either a tuple of two arrays, a function, PyChop object or list of one of these'
         self.multi = False
         if hasattr(model, '__call__'):
             self.model = self._makeModel(model, xstart, xend, accuracy)
@@ -359,6 +360,9 @@ class ResolutionModel:
             Ei = model.getEi()
             self.model = self._makeModel(model.getResolution, -Ei, 0.9 * Ei, 0.01)
         elif hasattr(model, 'model'):
+            self.model = model
+        elif isinstance(model, tuple):
+            self._checkModel(model)
             self.model = model
         elif hasattr(model, '__len__'):
             if len(model) == 0:
@@ -375,10 +379,11 @@ class ResolutionModel:
                 for m in model:
                     self._checkModel(m)
                 self.model = model
+            else:
+                raise RuntimeError(errmsg)
             self.multi = True
         else:
-            self._checkModel(model)
-            self.model = model
+            raise RuntimeError(errmsg)
 
     @property
     def NumberOfSpectra(self):

@@ -525,7 +525,8 @@ class CrystalField(object):
         else:
             self._resolutionModel = ResolutionModel(value)
         if self._isMultiSpectrum:
-            NSpec = self.NumberOfSpectra - len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
+            NumberOfPhysProp = len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
+            NSpec = self.NumberOfSpectra - NumberOfPhysProp
             if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != NSpec:
                 raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
                                    (NSpec, self._resolutionModel.NumberOfSpectra))
