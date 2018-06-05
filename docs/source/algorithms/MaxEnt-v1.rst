@@ -588,6 +588,16 @@ Adjusting the Reconstructed Data
    CreateWorkspace(OutputWorkspace='constadj',DataX=X, DataY=Yconst, DataE=Zeroes, NSpec=6)
 
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001)
+    
+   print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.readY(0)[5]))
+   print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.readY(0)[10]))
+   print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.readY(0)[15]))
+   print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.readY(2)[5]))
+   print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.readY(2)[10]))
+   print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.readY(2)[15]))
+   print("Number of iterations of first spectrum: "+str( len(evolAngle.readX(0))))
+   print("Number of iterations of second spectrum: "+str( len(evolAngle.readX(1))))
+   print("Number of iterations of third spectrum: "+str( len(evolAngle.readX(2))))
 
 Output:
 
