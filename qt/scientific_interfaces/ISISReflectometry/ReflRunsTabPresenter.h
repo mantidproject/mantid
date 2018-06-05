@@ -99,8 +99,6 @@ public:
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceNames) override;
-  bool autoreductionRunning() const override;
-  bool autoreductionRunning(int group) const override;
 
 protected:
   /// Information about the autoreduction process
@@ -134,23 +132,29 @@ private:
   void icatSearchComplete();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   /// autoreduction
+  bool requireNewAutoreduction() const;
+  bool setupNewAutoreduction(int group, const std::string &searchString);
   void checkForNewRuns();
-  void pauseAutoreduction();
   void autoreduceNewRuns();
+  void pauseAutoreduction();
+  void stopAutoreduction();
+  int selectedGroup() const;
+  int autoreductionGroup() const;
+  bool shouldUpdateExistingSearchResults() const;
+  bool autoreductionRunning(int group) const override;
+  bool autoreductionRunning() const override;
+  // processing
+  bool isProcessing(int group) const override;
+  bool isProcessing() const override;
+
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer, int group,
                 const TransferMatch matchType = TransferMatch::Any);
   void pushCommands(int group);
-  /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
-  /// change the instrument
   void changeInstrument();
-  /// enable/disable widgets on the view
   void updateWidgetEnabledState(const bool isProcessing) const;
-  /// Autoreduction
-  bool requireNewAutoreduction() const;
-  bool setupNewAutoreduction(int group, const std::string &searchString);
-  void stopAutoreduction();
+  DataProcessorPresenter *getTablePresenter(int group) const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
   /// Get runs to transfer from row indices
@@ -162,12 +166,6 @@ private:
       const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
-  /// Return true if processing is currently in progress for a group
-  bool processingInProgress(int group) const;
-  void stopAutoreduction() const;
-  int selectedGroup() const;
-  int autoreductionGroup() const;
-  bool shouldUpdateExistingSearchResults() const;
 };
 }
 }

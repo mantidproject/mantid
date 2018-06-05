@@ -222,6 +222,8 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   }
+  bool isProcessing(int) const override { return false; }
+  bool isProcessing() const override { return false; }
   ~MockRunsTabPresenter() override{};
 };
 
@@ -315,7 +317,6 @@ public:
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
                     std::string const &));
   MOCK_METHOD1(notify, void(IReflMainWindowPresenter::Flag));
-  MOCK_METHOD1(notifyReductionFinished, void(int));
   MOCK_METHOD1(notifyReductionPaused, void(int));
   MOCK_METHOD1(notifyReductionResumed, void(int));
   MOCK_METHOD3(askUserString,
@@ -337,8 +338,8 @@ public:
     UNUSED_ARG(group);
     return std::string();
   }
-  bool checkIfProcessing() const override { return false; }
-  bool checkIfProcessing(int) const override { return false; }
+  bool isProcessing() const override { return false; }
+  bool isProcessing(int) const override { return false; }
 
   ~MockMainWindowPresenter() override{};
 };

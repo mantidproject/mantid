@@ -415,10 +415,7 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     constexpr int GROUP_NUMBER = 0;
-    // Expect that the main presenter is notified that data reduction is
-    // finished
-    EXPECT_CALL(*m_mockMainPresenter, notifyReductionFinished(GROUP_NUMBER))
-        .Times(Exactly(1));
+
     EXPECT_CALL(*m_mockRunsTabView, startTimer(_)).Times(Exactly(1));
 
     presenter.confirmReductionFinished(GROUP_NUMBER);

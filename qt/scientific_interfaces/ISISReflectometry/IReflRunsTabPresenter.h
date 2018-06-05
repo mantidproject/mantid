@@ -54,10 +54,10 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
-  // Determine whether autoreduction is running for any group
-  virtual bool autoreductionRunning() const = 0;
-  // Determine whether autoreduction is running for a specific group
   virtual bool autoreductionRunning(int group) const = 0;
+  virtual bool autoreductionRunning() const = 0;
+  virtual bool isProcessing(int group) const = 0;
+  virtual bool isProcessing() const = 0;
 };
 }
 }

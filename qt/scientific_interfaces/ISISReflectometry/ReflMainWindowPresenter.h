@@ -82,11 +82,10 @@ public:
   void setInstrumentName(const std::string &instName) const override;
 
   /// Returns whether the Runs Tab is currently processing any runs
-  bool checkIfProcessing() const override;
-  bool checkIfProcessing(int group) const override;
+  bool isProcessing() const override;
+  bool isProcessing(int group) const override;
   void settingsChanged(int group) override;
   void notify(IReflMainWindowPresenter::Flag flag) override;
-  void notifyReductionFinished(int group) override;
   void notifyReductionPaused(int group) override;
   void notifyReductionResumed(int group) override;
 
@@ -117,8 +116,6 @@ private:
   IReflSettingsTabPresenter *m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'
   std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
-  /// State boolean on whether runs are currently being processed or not
-  mutable bool m_isProcessing;
 };
 }
 }

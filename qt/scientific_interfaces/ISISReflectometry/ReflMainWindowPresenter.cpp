@@ -26,7 +26,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
     std::unique_ptr<IReflSaveTabPresenter> savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
-      m_savePresenter(std::move(savePresenter)), m_isProcessing(false) {
+      m_savePresenter(std::move(savePresenter)) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
@@ -51,20 +51,13 @@ void ReflMainWindowPresenter::completedRowReductionSuccessfully(
   m_savePresenter->completedRowReductionSuccessfully(group, workspaceName);
 }
 
-void ReflMainWindowPresenter::notifyReductionFinished(int group) {
-  UNUSED_ARG(group);
-  m_isProcessing = false;
-}
-
 void ReflMainWindowPresenter::notifyReductionPaused(int group) {
-  m_isProcessing = false;
   m_savePresenter->onAnyReductionPaused();
   m_settingsPresenter->onReductionPaused(group);
   m_eventPresenter->onReductionPaused(group);
 }
 
 void ReflMainWindowPresenter::notifyReductionResumed(int group) {
-  m_isProcessing = true;
   m_savePresenter->onAnyReductionResumed();
   m_settingsPresenter->onReductionResumed(group);
   m_eventPresenter->onReductionResumed(group);
@@ -234,8 +227,8 @@ void ReflMainWindowPresenter::setInstrumentName(
 Checks whether or not data is currently being processed in the Runs Tab
 * @return : Bool on whether data is being processed
 */
-bool ReflMainWindowPresenter::checkIfProcessing() const {
-  return m_isProcessing || m_runsPresenter->autoreductionRunning();
+bool ReflMainWindowPresenter::isProcessing() const {
+  return m_runsPresenter->isProcessing();
 }
 
 /**
@@ -243,8 +236,8 @@ Checks whether or not data is currently being processed in the Runs Tab
 for a specific group
 * @return : Bool on whether data is being processed
 */
-bool ReflMainWindowPresenter::checkIfProcessing(int group) const {
-  return m_isProcessing || m_runsPresenter->autoreductionRunning(group);
+bool ReflMainWindowPresenter::isProcessing(int group) const {
+  return m_runsPresenter->isProcessing(group);
 }
 
 /** Checks for Settings Tab null pointer

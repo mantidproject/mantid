@@ -211,7 +211,7 @@ void ReflRunsTabPresenter::pushCommands(int group) {
 
   // The expected number of commands
   const size_t nCommands = 31;
-  auto commands = m_tablePresenters.at(group)->publishCommands();
+  auto commands = getTablePresenter(group)->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
@@ -318,7 +318,7 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
-    auto tablePresenter = m_tablePresenters.at(group);
+    auto tablePresenter = getTablePresenter(group);
     tablePresenter->setPromptUser(false);
     try {
       tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
@@ -329,6 +329,24 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
 
   if (setupNewAutoreduction(group, m_view->getSearchString()))
     checkForNewRuns();
+}
+
+/** Determines whether to start a new autoreduction. Starts a new one if the
+* either the search number, transfer method or instrument has changed
+* @return : Boolean on whether to start a new autoreduction
+*/
+bool ReflRunsTabPresenter::requireNewAutoreduction() const {
+  bool searchNumChanged =
+      m_autoreduction.searchStringChanged(m_view->getSearchString());
+  bool transferMethodChanged =
+      m_currentTransferMethod != m_view->getTransferMethod();
+
+  return searchNumChanged || transferMethodChanged || m_instrumentChanged;
+}
+
+bool ReflRunsTabPresenter::setupNewAutoreduction(
+    int group, const std::string &searchString) {
+  return m_autoreduction.setupNewAutoreduction(group, searchString);
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
@@ -343,10 +361,53 @@ void ReflRunsTabPresenter::checkForNewRuns() {
   m_view->startIcatSearch();
 }
 
+/** Run an autoreduction process based on the latest search results
+ */
+void ReflRunsTabPresenter::autoreduceNewRuns() {
+
+  m_autoreduction.setSearchResultsExist();
+  auto rowsToTransfer = m_view->getAllSearchRows();
+
+  if (rowsToTransfer.size() > 0) {
+    transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
+    auto tablePresenter = getTablePresenter(autoreductionGroup());
+    tablePresenter->setPromptUser(false);
+    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
+  } else {
+    confirmReductionFinished(autoreductionGroup());
+  }
+}
+
 void ReflRunsTabPresenter::pauseAutoreduction() {
   if (autoreductionRunning())
-    m_tablePresenters.at(autoreductionGroup())
+    getTablePresenter(autoreductionGroup())
         ->notify(DataProcessorPresenter::PauseFlag);
+}
+
+void ReflRunsTabPresenter::stopAutoreduction() {
+  m_view->stopTimer();
+  m_autoreduction.stop();
+}
+
+bool ReflRunsTabPresenter::autoreductionRunning() const {
+  return m_autoreduction.running();
+}
+
+int ReflRunsTabPresenter::autoreductionGroup() const {
+  return m_autoreduction.group();
+}
+
+bool ReflRunsTabPresenter::isProcessing(int group) const {
+  return getTablePresenter(group)->isProcessing();
+}
+
+bool ReflRunsTabPresenter::isProcessing() const {
+  auto const numberOfGroups = static_cast<int>(m_tablePresenters.size());
+  for (int group = 0; group < numberOfGroups; ++group) {
+    if (isProcessing(group))
+      return true;
+  }
+  return false;
 }
 
 void ReflRunsTabPresenter::icatSearchComplete() {
@@ -360,39 +421,12 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   }
 }
 
-/** Run an autoreduction process based on the latest search results
- */
-void ReflRunsTabPresenter::autoreduceNewRuns() {
+DataProcessorPresenter *
+ReflRunsTabPresenter::getTablePresenter(int group) const {
+  if (group < 0 || group > static_cast<int>(m_tablePresenters.size()))
+    throw std::runtime_error("Invalid group number " + std::to_string(group));
 
-  m_autoreduction.setSearchResultsExist();
-  auto rowsToTransfer = m_view->getAllSearchRows();
-
-  if (rowsToTransfer.size() > 0) {
-    transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
-    auto tablePresenter = m_tablePresenters.at(autoreductionGroup());
-    tablePresenter->setPromptUser(false);
-    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
-  } else {
-    confirmReductionFinished(autoreductionGroup());
-  }
-}
-
-bool ReflRunsTabPresenter::autoreductionRunning() const {
-  return m_autoreduction.running();
-}
-
-bool ReflRunsTabPresenter::setupNewAutoreduction(
-    int group, const std::string &searchString) {
-  return m_autoreduction.setupNewAutoreduction(group, searchString);
-}
-
-void ReflRunsTabPresenter::stopAutoreduction() {
-  m_view->stopTimer();
-  m_autoreduction.stop();
-}
-
-int ReflRunsTabPresenter::autoreductionGroup() const {
-  return m_autoreduction.group();
+  return m_tablePresenters.at(group);
 }
 
 int ReflRunsTabPresenter::selectedGroup() const {
@@ -404,10 +438,6 @@ bool ReflRunsTabPresenter::shouldUpdateExistingSearchResults() const {
   // autoreduction is running and has valid results
   return m_searchModel && autoreductionRunning() &&
          m_autoreduction.searchResultsExist();
-}
-
-bool ReflRunsTabPresenter::processingInProgress(int group) const {
-  return m_mainPresenter->checkIfProcessing(group);
 }
 
 bool ReflRunsTabPresenter::autoreductionRunning(int group) const {
@@ -540,8 +570,8 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
   updateErrorStateInSearchModel(rowsToTransfer, transferDetails.getErrorRuns());
 
   // Do the transfer
-  m_tablePresenters.at(group)
-      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+  getTablePresenter(group)->transfer(
+      ::MantidQt::CustomInterfaces::fromStdStringVectorMap(
           transferDetails.getTransferRuns()));
 }
 
@@ -598,7 +628,7 @@ void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
   if (group == selectedGroup())
     pushCommands(group);
 
-  m_view->updateMenuEnabledState(m_tablePresenters.at(group)->isProcessing());
+  m_view->updateMenuEnabledState(isProcessing(group));
 }
 
 /** Requests global pre-processing options. Options are supplied by
@@ -709,7 +739,7 @@ void ReflRunsTabPresenter::pause(int group) {
 
   // If processing has already finished, confirm reduction is paused; otherwise
   // leave it to finish
-  if (!processingInProgress(group))
+  if (!isProcessing(group))
     confirmReductionPaused(group);
 }
 
@@ -721,25 +751,12 @@ void ReflRunsTabPresenter::resume(int group) const {
   updateWidgetEnabledState(true);
 }
 
-/** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number, transfer method or instrument has changed
-* @return : Boolean on whether to start a new autoreduction
-*/
-bool ReflRunsTabPresenter::requireNewAutoreduction() const {
-  bool searchNumChanged =
-      m_autoreduction.searchStringChanged(m_view->getSearchString());
-  bool transferMethodChanged =
-      m_currentTransferMethod != m_view->getTransferMethod();
-
-  return searchNumChanged || transferMethodChanged || m_instrumentChanged;
-}
-
 /** Notifies main presenter that data reduction is confirmed to be finished
 * i.e. after all rows have been reduced
 */
 void ReflRunsTabPresenter::confirmReductionFinished(int group) {
+  UNUSED_ARG(group);
   m_view->startTimer(5000);
-  m_mainPresenter->notifyReductionFinished(group);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
