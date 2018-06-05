@@ -164,7 +164,7 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     // Start the search algorithm. If it is not started, make sure
     // autoreduction is not left running
     if (!search())
-      m_autoreduction.stop();
+      stopAutoreduction();
     break;
   case IReflRunsTabPresenter::StartAutoreductionFlag:
     startNewAutoreduction();
@@ -173,21 +173,21 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     pauseAutoreduction();
     break;
   case IReflRunsTabPresenter::TimerEventFlag:
-    startAutoreduction();
+    checkForNewRuns();
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     icatSearchComplete();
     break;
   }
   case IReflRunsTabPresenter::TransferFlag:
-    transfer(m_view->getSelectedSearchRows(), m_view->getSelectedGroup(),
+    transfer(m_view->getSelectedSearchRows(), selectedGroup(),
              TransferMatch::Any);
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     changeInstrument();
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
-    pushCommands(m_view->getSelectedGroup());
+    pushCommands(selectedGroup());
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -296,10 +296,7 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   m_instrumentChanged = false;
   m_currentTransferMethod = m_view->getTransferMethod();
 
-  if (m_searchModel && autoreductionRunning() &&
-      m_autoreduction.searchResultsExist()) {
-    // We're continuing an existing autoreduction process. Just update the
-    // existing search results list with any new runs
+  if (shouldUpdateExistingSearchResults()) {
     m_searchModel->addDataFromTable(*getTransferStrategy(), results,
                                     m_view->getSearchInstrument());
   } else {
@@ -315,7 +312,7 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 */
 void ReflRunsTabPresenter::startNewAutoreduction() {
 
-  auto const group = m_view->getSelectedGroup();
+  auto const group = selectedGroup();
 
   if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
@@ -330,16 +327,15 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
     }
   }
 
-  if (m_autoreduction.start(group, m_view->getSearchString()))
-    startAutoreduction();
+  if (setupNewAutoreduction(group, m_view->getSearchString()))
+    checkForNewRuns();
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
  *  any new runs in the table.
  */
-void ReflRunsTabPresenter::startAutoreduction() {
-
-  // Stop any more notifications during processing
+void ReflRunsTabPresenter::checkForNewRuns() {
+  // Stop notifications during processing
   m_view->stopTimer();
 
   // Initially we just need to start an ICat search and the reduction will be
@@ -347,20 +343,10 @@ void ReflRunsTabPresenter::startAutoreduction() {
   m_view->startIcatSearch();
 }
 
-/** Called when the user clicks the pause-autoreduction button
- */
 void ReflRunsTabPresenter::pauseAutoreduction() {
-  // The pause-autoprocess button does exactly the same as the pause button on
-  // the data processor, so we just notify the data processor to pause. We
-  // allow this button to be used to pause processing started manually as well
-  // as auto-processing - we use the active group to pause manual processing.
-  int group = 0;
   if (autoreductionRunning())
-    group = m_autoreduction.group();
-  else
-    group = m_view->getSelectedGroup();
-
-  m_tablePresenters.at(group)->notify(DataProcessorPresenter::PauseFlag);
+    m_tablePresenters.at(autoreductionGroup())
+        ->notify(DataProcessorPresenter::PauseFlag);
 }
 
 void ReflRunsTabPresenter::icatSearchComplete() {
@@ -369,48 +355,61 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
   populateSearch(searchAlg);
 
-  // If autoreduction is running, perform the next reduction using the new
-  // search results
   if (autoreductionRunning()) {
-    m_autoreduction.setSearchResultsExist();
-    runAutoreduction();
+    autoreduceNewRuns();
   }
 }
 
 /** Run an autoreduction process based on the latest search results
  */
-void ReflRunsTabPresenter::runAutoreduction() {
-  // Transfer all of the search results to the table (this excludes any that
-  // already exist so will only add new ones)
+void ReflRunsTabPresenter::autoreduceNewRuns() {
+
+  m_autoreduction.setSearchResultsExist();
   auto rowsToTransfer = m_view->getAllSearchRows();
-  const auto group = m_autoreduction.group();
-  auto tablePresenter = m_tablePresenters.at(group);
 
   if (rowsToTransfer.size() > 0) {
-    transfer(rowsToTransfer, m_autoreduction.group(), TransferMatch::Strict);
+    transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
+    auto tablePresenter = m_tablePresenters.at(autoreductionGroup());
+    tablePresenter->setPromptUser(false);
+    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
+  } else {
+    confirmReductionFinished(autoreductionGroup());
   }
-
-  // Don't prompt the user on errors such as an empty table
-  tablePresenter->setPromptUser(false);
-
-  // Process all rows in the table
-  tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
 }
 
-/** Check whether autoreduction is running for any group
- */
 bool ReflRunsTabPresenter::autoreductionRunning() const {
   return m_autoreduction.running();
 }
 
-/** Check whether processing is in progress
- */
+bool ReflRunsTabPresenter::setupNewAutoreduction(
+    int group, const std::string &searchString) {
+  return m_autoreduction.setupNewAutoreduction(group, searchString);
+}
+
+void ReflRunsTabPresenter::stopAutoreduction() {
+  m_view->stopTimer();
+  m_autoreduction.stop();
+}
+
+int ReflRunsTabPresenter::autoreductionGroup() const {
+  return m_autoreduction.group();
+}
+
+int ReflRunsTabPresenter::selectedGroup() const {
+  return m_view->getSelectedGroup();
+}
+
+bool ReflRunsTabPresenter::shouldUpdateExistingSearchResults() const {
+  // Existing search results should be updated rather than replaced if
+  // autoreduction is running and has valid results
+  return m_searchModel && autoreductionRunning() &&
+         m_autoreduction.searchResultsExist();
+}
+
 bool ReflRunsTabPresenter::processingInProgress(int group) const {
   return m_mainPresenter->checkIfProcessing(group);
 }
 
-/** Check whether autoreduction is running for a specific group
- */
 bool ReflRunsTabPresenter::autoreductionRunning(int group) const {
   return autoreductionRunning() && m_autoreduction.group() == group;
 }
@@ -596,7 +595,7 @@ void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
 
   // All groups pass on notifications about ADS changes. We only push commands
   // for the active group.
-  if (group == m_view->getSelectedGroup())
+  if (group == selectedGroup())
     pushCommands(group);
 
   m_view->updateMenuEnabledState(m_tablePresenters.at(group)->isProcessing());
@@ -702,12 +701,11 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(
  * based on the fact that processing is not in progress
 */
 void ReflRunsTabPresenter::pause(int group) {
-  if (!m_autoreduction.stop(group))
-    return;
-
-  m_view->stopTimer();
-  updateWidgetEnabledState(false);
-  m_progressView->setAsPercentageIndicator();
+  if (m_autoreduction.pause(group)) {
+    m_view->stopTimer();
+    updateWidgetEnabledState(false);
+    m_progressView->setAsPercentageIndicator();
+  }
 
   // If processing has already finished, confirm reduction is paused; otherwise
   // leave it to finish
@@ -740,10 +738,8 @@ bool ReflRunsTabPresenter::requireNewAutoreduction() const {
 * i.e. after all rows have been reduced
 */
 void ReflRunsTabPresenter::confirmReductionFinished(int group) {
+  m_view->startTimer(5000);
   m_mainPresenter->notifyReductionFinished(group);
-
-  // Start a timer to re-run autoreduction periodically
-  m_view->startTimer(1000);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused

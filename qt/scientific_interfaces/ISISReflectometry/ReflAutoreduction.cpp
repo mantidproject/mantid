@@ -37,14 +37,14 @@ bool ReflAutoreduction::searchResultsExist() const {
  */
 void ReflAutoreduction::setSearchResultsExist() { m_searchResultsExist = true; }
 
-/** Start an autoreduction on the given group
+/** Initialise a new autoreduction on the given group
  *
  * @param group : the index of which group to start the reduction on
  * @param searchString : the search string to use for finding runs
  * @return : true if started
  */
-bool ReflAutoreduction::start(const int group,
-                              const std::string &searchString) {
+bool ReflAutoreduction::setupNewAutoreduction(const int group,
+                                              const std::string &searchString) {
   m_group = group;
   m_searchString = searchString;
   m_running = true;
@@ -56,7 +56,11 @@ bool ReflAutoreduction::start(const int group,
  * @param group : the group to stop autoreduction for
  * @return : true if stopped
  */
-bool ReflAutoreduction::stop(int group) {
+bool ReflAutoreduction::pause(int group) {
+  // If autoreduction is already stopped then return success
+  if (!m_running)
+    return true;
+
   // Currently there can only be one autoreduction running so do nothing if
   // the group doesn't match
   if (group != m_group)
@@ -66,12 +70,8 @@ bool ReflAutoreduction::stop(int group) {
   return true;
 }
 
-/** Stop an autoreduction if there is one in progress
- * @return : true if stopped
+/** Stop autoreduction on any group for which it is running
  */
-bool ReflAutoreduction::stop() {
-  m_running = false;
-  return true;
-}
+void ReflAutoreduction::stop() { m_running = false; }
 }
 }

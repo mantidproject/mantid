@@ -198,13 +198,8 @@ public:
   }
 
   void test_pauseAutoreduction_when_autoreduction_not_running() {
-    auto presenter = createMocksAndPresenter(2);
-    // If autoreduction is not running, the selected group is paused
-    constexpr int GROUP_NUMBER = 1;
-    expectSelectedGroup(GROUP_NUMBER);
-    EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER),
-                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(1));
-    // Check the other table is not affected
+    auto presenter = createMocksAndPresenter(1);
+
     EXPECT_CALL(*mockTablePresenter(0),
                 notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(0));
 
@@ -235,6 +230,54 @@ public:
     verifyAndClearExpectations();
     // Autoreduction continues until we get confirmation paused
     TS_ASSERT_EQUALS(presenter.m_autoreduction.running(), true);
+  }
+
+  void test_pause_when_autoreduction_is_running_in_different_group() {
+    auto presenter = createMocksAndPresenter(2);
+
+    // Start autoreduction on one of the groups
+    constexpr int GROUP_TO_PAUSE = 0;
+    constexpr int AUTOREDUCTION_GROUP = 1;
+    expectSelectedGroup(AUTOREDUCTION_GROUP);
+    presenter.startNewAutoreduction();
+    verifyAndClearExpectations();
+
+    EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockMainPresenter,
+                notifyReductionPaused(AUTOREDUCTION_GROUP))
+        .Times(Exactly(0));
+
+    presenter.pause(GROUP_TO_PAUSE);
+    verifyAndClearExpectations();
+    // Autoreduction is still running in its original group
+    TS_ASSERT_EQUALS(presenter.m_autoreduction.running(), true);
+  }
+
+  void test_pause_when_autoreduction_is_paused_in_different_group() {
+    auto presenter = createMocksAndPresenter(2);
+
+    // Start and stop autoreduction on one of the groups
+    constexpr int GROUP_TO_PAUSE = 0;
+    constexpr int AUTOREDUCTION_GROUP = 1;
+    expectSelectedGroup(AUTOREDUCTION_GROUP);
+    EXPECT_CALL(*m_mockProgress, setProgressRange(0, 100)).Times(Exactly(1));
+    presenter.startNewAutoreduction();
+    presenter.m_autoreduction.pause(AUTOREDUCTION_GROUP);
+    verifyAndClearExpectations();
+
+    // When autoreduction is not running its group should be ignored, so pause
+    // should act on the requested group
+    EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockMainPresenter,
+                notifyReductionPaused(AUTOREDUCTION_GROUP))
+        .Times(Exactly(0));
+
+    presenter.pause(GROUP_TO_PAUSE);
+    verifyAndClearExpectations();
+    // Autoreduction was not running so still shouldn't be
+    TS_ASSERT_EQUALS(presenter.m_autoreduction.running(), false);
   }
 
   void test_timer_event_starts_autoreduction() {

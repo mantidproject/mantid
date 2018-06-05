@@ -134,9 +134,9 @@ private:
   void icatSearchComplete();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   /// autoreduction
-  void startAutoreduction();
+  void checkForNewRuns();
   void pauseAutoreduction();
-  void runAutoreduction();
+  void autoreduceNewRuns();
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer, int group,
                 const TransferMatch matchType = TransferMatch::Any);
@@ -147,8 +147,10 @@ private:
   void changeInstrument();
   /// enable/disable widgets on the view
   void updateWidgetEnabledState(const bool isProcessing) const;
-  /// Determine whether to start a new autoreduction
+  /// Autoreduction
   bool requireNewAutoreduction() const;
+  bool setupNewAutoreduction(int group, const std::string &searchString);
+  void stopAutoreduction();
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
   /// Get runs to transfer from row indices
@@ -162,6 +164,10 @@ private:
   std::string searchModelData(const int row, const int column);
   /// Return true if processing is currently in progress for a group
   bool processingInProgress(int group) const;
+  void stopAutoreduction() const;
+  int selectedGroup() const;
+  int autoreductionGroup() const;
+  bool shouldUpdateExistingSearchResults() const;
 };
 }
 }
