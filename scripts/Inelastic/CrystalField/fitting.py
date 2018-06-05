@@ -525,10 +525,11 @@ class CrystalField(object):
         else:
             self._resolutionModel = ResolutionModel(value)
         if self._isMultiSpectrum:
-            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != self.NumberOfSpectra:
+            NSpec = self.NumberOfSpectra - len(self._physprop) if islistlike(self._physprop) else (0 if self._physprop is None else 1)
+            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != NSpec:
                 raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
-                                   (self.NumberOfSpectra, self._resolutionModel.NumberOfSpectra))
-            for i in range(self.NumberOfSpectra):
+                                   (NSpec, self._resolutionModel.NumberOfSpectra))
+            for i in range(self._resolutionModel.NumberOfSpectra):
                 model = self._resolutionModel.model[i]
                 self.crystalFieldFunction.setAttributeValue('FWHMX%s' % i, model[0])
                 self.crystalFieldFunction.setAttributeValue('FWHMY%s' % i, model[1])
