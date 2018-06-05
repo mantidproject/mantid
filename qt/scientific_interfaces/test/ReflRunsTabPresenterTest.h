@@ -145,6 +145,15 @@ public:
     verifyAndClearExpectations();
   }
 
+  void test_when_group_changes_widget_states_are_updated() {
+    auto presenter = createMocksAndPresenter(1);
+
+    expectSetWidgetEnabledState(false, false);
+    presenter.notify(IReflRunsTabPresenter::GroupChangedFlag);
+
+    verifyAndClearExpectations();
+  }
+
   void test_startNewAutoreduction() {
     auto presenter = createMocksAndPresenter(2);
     constexpr int GROUP_NUMBER = 1;
@@ -355,24 +364,7 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     constexpr int GROUP_NUMBER = 0;
-    // Expect that the view updates the menu with isProcessing=false
-    // and enables the 'autoreduce', 'transfer' and 'instrument' buttons
-    EXPECT_CALL(*m_mockRunsTabView, updateMenuEnabledState(false))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setAutoreduceButtonEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setAutoreducePauseButtonEnabled(false))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setTransferButtonEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setInstrumentComboEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setTransferMethodComboEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setSearchTextEntryEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(true))
-        .Times(Exactly(1));
+    expectSetWidgetEnabledState(false, false);
     EXPECT_CALL(*m_mockRunsTabView, stopTimer()).Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_NUMBER))
         .Times(Exactly(1));
@@ -386,26 +378,8 @@ public:
   void test_resume() {
     auto presenter = createMocksAndPresenter(1);
 
-    // Expect that the view updates the menu with isProcessing=true
-    // and disables the 'autoreduce', 'transfer' and 'instrument' buttons
-    EXPECT_CALL(*m_mockRunsTabView, updateMenuEnabledState(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setAutoreduceButtonEnabled(false))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setAutoreducePauseButtonEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setTransferButtonEnabled(false))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setInstrumentComboEnabled(false))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setTransferMethodComboEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setSearchTextEntryEnabled(true))
-        .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(true))
-        .Times(Exactly(1));
-    // Resume presenter
     constexpr int GROUP_NUMBER = 0;
+    expectSetWidgetEnabledState(true, false);
     presenter.resume(GROUP_NUMBER);
 
     verifyAndClearExpectations();
@@ -415,7 +389,6 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     constexpr int GROUP_NUMBER = 0;
-
     EXPECT_CALL(*m_mockRunsTabView, startTimer(_)).Times(Exactly(1));
 
     presenter.confirmReductionFinished(GROUP_NUMBER);
@@ -559,6 +532,27 @@ private:
     EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
+  }
+
+  void expectSetWidgetEnabledState(bool isProcessing, bool isAutoreducing) {
+    EXPECT_CALL(*m_mockRunsTabView, updateMenuEnabledState(isProcessing))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setAutoreduceButtonEnabled(!isProcessing))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView,
+                setAutoreducePauseButtonEnabled(isProcessing))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setTransferButtonEnabled(!isProcessing))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setInstrumentComboEnabled(!isProcessing))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView,
+                setTransferMethodComboEnabled(!isAutoreducing))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setSearchTextEntryEnabled(!isAutoreducing))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(!isAutoreducing))
+        .Times(Exactly(1));
   }
 };
 

@@ -187,7 +187,7 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     changeInstrument();
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
-    pushCommands(selectedGroup());
+    changeGroup();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -783,6 +783,12 @@ void ReflRunsTabPresenter::changeInstrument() {
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
   m_instrumentChanged = true;
+}
+
+void ReflRunsTabPresenter::changeGroup() {
+  updateWidgetEnabledState(isProcessing());
+  // Update the current menu commands based on the current group
+  pushCommands(selectedGroup());
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

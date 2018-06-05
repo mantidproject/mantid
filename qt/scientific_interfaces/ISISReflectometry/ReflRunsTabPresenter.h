@@ -153,6 +153,7 @@ private:
   void pushCommands(int group);
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   void changeInstrument();
+  void changeGroup();
   void updateWidgetEnabledState(const bool isProcessing) const;
   DataProcessorPresenter *getTablePresenter(int group) const;
   /// Check that a given set of row indices are valid to transfer
