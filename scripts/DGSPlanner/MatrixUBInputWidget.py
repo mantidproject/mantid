@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 import sys
 import mantid
 from DGSPlanner.ValidateOL import ValidateUB
+from LoadNexusUB import LoadNexusUB
 try:
     from PyQt4.QtCore import QString
 except ImportError:
@@ -82,9 +83,14 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self._tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self._tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.LoadIsawUBButton=QtGui.QPushButton("LoadIsawUB")
+        self.LoadNexusUBButton=QtGui.QPushButton("LoadNexusUB")
         self.layout().addWidget(QtGui.QLabel('UB matrix'))
         self.layout().addWidget(self._tableView)
-        self.layout().addWidget(self.LoadIsawUBButton)
+        self.hbox = QtGui.QHBoxLayout()
+        self.hbox.addStretch(1)
+        self.hbox.addWidget(self.LoadIsawUBButton)
+        self.hbox.addWidget(self.LoadNexusUBButton)
+        self.layout().addLayout(self.hbox)
         self.ol=ol
         self.UBmodel = UBTableModel(self.ol,self)
         self._tableView.setModel(self.UBmodel)
@@ -92,8 +98,7 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self._tableView.setMinimumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*4)
         self._tableView.setMaximumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*4)
         self.LoadIsawUBButton.clicked.connect(self.loadIsawUBDialog)
-        self.LoadIsawUBButton.setMinimumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*2)
-        self.LoadIsawUBButton.setMaximumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*2)
+        self.LoadNexusUBButton.clicked.connect(self.loadNexusUBDialog)
         self.layout().addStretch(1)
 
     def loadIsawUBDialog(self):
@@ -110,6 +115,33 @@ class MatrixUBInputWidget(QtGui.QWidget):
         except:
             mantid.logger.error("Could not open the file, or not a valid UB matrix")
 
+
+    def loadNexusUBDialog(self):
+        # pylint: disable=bare-except
+        try:
+            fname = QtGui.QFileDialog.getOpenFileName(self, 'Open Nexus file to extract UB matrix',filter=QString('Nexus file (*.nxs.h5);;All Files (*)'))
+            this_here_UB = LoadNexusUB(str(fname))
+            UB00 = self.UBmodel.createIndex(0,0)
+            UB01 = self.UBmodel.createIndex(0,1)
+            UB02 = self.UBmodel.createIndex(0,2)
+            UB10 = self.UBmodel.createIndex(1,0)
+            UB11 = self.UBmodel.createIndex(1,1)
+            UB12 = self.UBmodel.createIndex(1,2)
+            UB20 = self.UBmodel.createIndex(2,0)
+            UB21 = self.UBmodel.createIndex(2,1)
+            UB22 = self.UBmodel.createIndex(2,2)
+            self.UBmodel.setData(UB00, this_here_UB[0,0])
+            self.UBmodel.setData(UB01, this_here_UB[0,1])
+            self.UBmodel.setData(UB02, this_here_UB[0,2])
+            self.UBmodel.setData(UB10, this_here_UB[1,0])
+            self.UBmodel.setData(UB11, this_here_UB[1,1])
+            self.UBmodel.setData(UB12, this_here_UB[1,2])
+            self.UBmodel.setData(UB20, this_here_UB[2,0])
+            self.UBmodel.setData(UB21, this_here_UB[2,1])
+            self.UBmodel.setData(UB22, this_here_UB[2,2])
+            self.UBmodel.sendSignal()
+        except:
+            mantid.logger.error("Could not open the Nexus file, or could not find UB matrix")
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
