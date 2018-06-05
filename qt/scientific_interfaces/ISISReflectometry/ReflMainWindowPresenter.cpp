@@ -76,12 +76,6 @@ Used by the view to tell the presenter something has changed
 void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
 
   switch (flag) {
-  case Flag::ConfirmReductionPausedFlag:
-    m_isProcessing = false;
-    break;
-  case Flag::ConfirmReductionResumedFlag:
-    m_isProcessing = true;
-    break;
   case Flag::HelpPressed:
     showHelp();
     break;
