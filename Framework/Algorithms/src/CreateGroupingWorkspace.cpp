@@ -74,11 +74,9 @@ void CreateGroupingWorkspace::init() {
 
   std::vector<std::string> grouping{"", "All", "Group", "2_4Grouping", "Column",
                                     "bank"};
-  declareProperty(
-      "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
-      "Only used if GroupNames is empty: All detectors as one group, Groups "
-      "(Group or East,West for SNAP), 2_4Grouping (SNAP), Columns, detector "
-      "banks");
+  declareProperty("GroupDetectorsBy", "",
+                  boost::make_shared<StringListValidator>(grouping),
+                  "Only used if GroupNames is empty");
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
@@ -370,6 +368,8 @@ void CreateGroupingWorkspace::exec() {
       GroupNames = inst->getName();
     } else if (inst->getName() == "SNAP" && grouping == "Group") {
       GroupNames = "East,West";
+    } else if (inst->getName() == "POWGEN" && grouping == "Group") {
+      GroupNames = "South,North";
     } else if (inst->getName() == "SNAP" && grouping == "2_4Grouping") {
       GroupNames = "Column1,Column2,Column3,Column4,Column5,Column6,";
     } else {
