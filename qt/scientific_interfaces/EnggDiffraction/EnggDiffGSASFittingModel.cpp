@@ -38,6 +38,15 @@ std::string refinementMethodToString(
 namespace MantidQt {
 namespace CustomInterfaces {
 
+EnggDiffGSASFittingModel::EnggDiffGSASFittingModel() {
+  qRegisterMetaType<
+      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
+      "GSASIIRefineFitPeaksOutputProperties");
+  qRegisterMetaType<Mantid::API::IAlgorithm_sptr>("IAlgorithm_sptr");
+  qRegisterMetaType<std::vector<GSASIIRefineFitPeaksOutputProperties>>(
+      "std::vector<GSASIIRefineFitPeaksOutputProperties>");
+}
+
 EnggDiffGSASFittingModel::~EnggDiffGSASFittingModel() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
@@ -143,13 +152,6 @@ void EnggDiffGSASFittingModel::doRefinements(
   EnggDiffGSASFittingWorker *worker =
       new EnggDiffGSASFittingWorker(this, params);
   worker->moveToThread(m_workerThread.get());
-
-  qRegisterMetaType<
-      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
-      "GSASIIRefineFitPeaksOutputProperties");
-  qRegisterMetaType<Mantid::API::IAlgorithm_sptr>("IAlgorithm_sptr");
-  qRegisterMetaType<std::vector<GSASIIRefineFitPeaksOutputProperties>>(
-      "std::vector<GSASIIRefineFitPeaksOutputProperties>");
 
   connect(m_workerThread.get(), SIGNAL(started()), worker,
           SLOT(doRefinements()));
