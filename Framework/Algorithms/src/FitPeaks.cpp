@@ -312,13 +312,7 @@ void FitPeaks::init() {
       "(highest Y value position) and "
       "the peak width either estimted by observation or calculate.");
 
-  std::string helpgrp("Additional Information");
-
   // additional output for reviewing
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputPeakParametersWorkspace", "", Direction::Output),
-                  "Name of workspace containing all fitted peak parameters.  "
-                  "X-values are spectra/workspace index.");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FittedPeaksWorkspace", "", Direction::Output,
@@ -328,9 +322,20 @@ void FitPeaks::init() {
       "The Y values belonged to peaks to fit are replaced by fitted value. "
       "Values of estimated background are used if peak fails to be fit.");
 
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+                      "OutputPeakParametersWorkspace", "", Direction::Output),
+                  "Name of workspace containing all fitted peak parameters.  "
+                  "X-values are spectra/workspace index.");
+
+  declareProperty("RawPeakParameters", true,
+                  "false generates table with effective centre/width/height "
+                  "parameters. true generates a table with peak function "
+                  "parameters");
+
   std::string addoutgrp("Analysis");
   setPropertyGroup("OutputPeakParametersWorkspace", addoutgrp);
   setPropertyGroup("FittedPeaksWorkspace", addoutgrp);
+  setPropertyGroup("RawPeakParameters", addoutgrp);
 
   return;
 }
@@ -413,10 +418,10 @@ void FitPeaks::exec() {
   generateCalculatedPeaksWS();
 
   // fit peaks
-  fitPeaks();
+  auto fit_results = fitPeaks();
 
   // set the output workspaces to properites
-  processOutputs();
+  processOutputs(fit_results);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -475,7 +480,7 @@ void FitPeaks::processInputs() {
   // about peak width and other peak parameter estimating method
   if (m_peakWidthPercentage > 0.)
     m_peakWidthEstimateApproach = EstimatePeakWidth::InstrumentResolution;
-  else if (m_peakFunction->name() == "Gaussian")
+  else if (isObservablePeakProfile((m_peakFunction->name())))
     m_peakWidthEstimateApproach = EstimatePeakWidth::Observation;
   else
     m_peakWidthEstimateApproach = EstimatePeakWidth::NoEstimation;
@@ -799,9 +804,16 @@ void FitPeaks::convertParametersNameToIndex() {
 //----------------------------------------------------------------------------------------------
 /** main method to fit peaks among all
  */
-void FitPeaks::fitPeaks() {
+std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+FitPeaks::fitPeaks() {
   API::Progress prog(this, 0., 1.,
                      m_stopWorkspaceIndex - m_startWorkspaceIndex);
+
+  /// Vector to record all the FitResult (only containing specified number of
+  /// spectra. shift is expected)
+  size_t num_fit_result = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
+  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+      fit_result_vector(num_fit_result);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
@@ -827,6 +839,7 @@ void FitPeaks::fitPeaks() {
     PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
       writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
                      fit_result);
+      fit_result_vector[wi - m_startWorkspaceIndex] = fit_result;
     }
     prog.report();
 
@@ -834,9 +847,15 @@ void FitPeaks::fitPeaks() {
   }
 
   PARALLEL_CHECK_INTERUPT_REGION
+
+  return fit_result_vector;
 }
 
 namespace {
+/// Supported peak profiles for observation
+std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian",
+                                                 "PseudoVoigt", "Voigt"};
+
 double numberCounts(const Histogram &histogram) {
   double total = 0.;
   for (const auto &value : histogram.y())
@@ -1102,11 +1121,13 @@ void FitPeaks::processSinglePeakFitResult(
 }
 
 //----------------------------------------------------------------------------------------------
-// TODO/NOW - Implement such that it can be parallelized
 /** calculate fitted peaks with background in the output workspace
+ * The current version gets the peak parameters and background parameters from
+ * fitted parameter
+ * table
  */
-void FitPeaks::calculateFittedPeaks() {
-  // TODO don't calculate bad fits (above minchisq)
+void FitPeaks::calculateFittedPeaks(std::vector<
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results) {
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
@@ -1125,6 +1146,12 @@ void FitPeaks::calculateFittedPeaks() {
     IBackgroundFunction_sptr bkgd_function =
         boost::dynamic_pointer_cast<IBackgroundFunction>(
             m_bkgdFunction->clone());
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result_i =
+        fit_results[iws - m_startWorkspaceIndex];
+    // FIXME - This is a just a pure check
+    if (!fit_result_i)
+      throw std::runtime_error(
+          "There is something wroing with PeakFitResult vector!");
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
       // get and set the peak function parameters
@@ -1136,21 +1163,13 @@ void FitPeaks::calculateFittedPeaks() {
       if (chi2 > 10.e10)
         continue;
 
-      for (size_t ipar = 0; ipar < num_peakfunc_params; ++ipar) {
-        double value_i = m_fittedParamTable->cell<double>(row_index, 2 + ipar);
-        peak_function->setParameter(ipar, value_i);
-      }
-
-      // check whether the peak has a fit or not
-      if (fabs(peak_function->height()) < 1.E-20)
-        continue;
-
-      // get and set the background function parameters
-      for (size_t ipar = 0; ipar < num_bkgdfunc_params; ++ipar) {
-        double value_i = m_fittedParamTable->cell<double>(
-            row_index, 2 + num_peakfunc_params + ipar);
-        bkgd_function->setParameter(ipar, value_i);
-      }
+      for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
+        peak_function->setParameter(
+            iparam, fit_result_i->getParameterValue(ipeak, iparam));
+      for (size_t iparam = 0; iparam < num_bkgdfunc_params; ++iparam)
+        bkgd_function->setParameter(iparam,
+                                    fit_result_i->getParameterValue(
+                                        ipeak, num_peakfunc_params + iparam));
 
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
@@ -1318,6 +1337,18 @@ int FitPeaks::estimatePeakParameters(
   }
 
   return GOOD;
+}
+
+//----------------------------------------------------------------------------------------------
+/** check whether a peak profile is allowed to observe peak width and set width
+ * @brief isObservablePeakProfile
+ * @param peakprofile : name of peak profile to check against
+ * @return
+ */
+bool FitPeaks::isObservablePeakProfile(const std::string &peakprofile) {
+  return (std::find(supported_peak_profiles.begin(),
+                    supported_peak_profiles.end(),
+                    peakprofile) == supported_peak_profiles.end());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1747,15 +1778,7 @@ void FitPeaks::generateOutputPeakPositionWS() {
 //----------------------------------------------------------------------------------------------
 void FitPeaks::generateFittedParametersValueWorkspace() {
   // peak parameter workspace
-  std::string param_table_name =
-      getPropertyValue("OutputPeakParametersWorkspace");
-
-  // check whether it is not asked to create such table workspace
-  if (param_table_name.size() == 0) {
-    // Skip if it is not specified
-    m_fittedParamTable = nullptr;
-    return;
-  }
+  m_rawPeaksTable = getProperty("RawPeakParameters");
 
   // create
   m_fittedParamTable =
@@ -1763,15 +1786,29 @@ void FitPeaks::generateFittedParametersValueWorkspace() {
   // add columns
   m_fittedParamTable->addColumn("int", "wsindex");
   m_fittedParamTable->addColumn("int", "peakindex");
-  for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
-    m_fittedParamTable->addColumn("double",
-                                  m_peakFunction->parameterName(iparam));
+  // peaks
+  if (m_rawPeaksTable) {
+    // raw parameters for output table workspace
+    for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
+      m_fittedParamTable->addColumn("double",
+                                    m_peakFunction->parameterName(iparam));
+  } else {
+    // effective parameters or output table worspace
+    m_fittedParamTable->addColumn("double", "centre");
+    m_fittedParamTable->addColumn("double", "width");
+    m_fittedParamTable->addColumn("double", "height");
+    m_fittedParamTable->addColumn("double", "intensity");
+  }
+  // background
   for (size_t iparam = 0; iparam < m_bkgdFunction->nParams(); ++iparam)
     m_fittedParamTable->addColumn("double",
                                   m_bkgdFunction->parameterName(iparam));
+  // chi^2
   m_fittedParamTable->addColumn("double", "chi2");
 
-  const size_t numParam = m_peakFunction->nParams() + m_bkgdFunction->nParams();
+  const size_t numParam = m_fittedParamTable->columnCount() - 3;
+  // replace: m_peakFunction->nParams() + m_bkgdFunction->nParams();
+
   // add rows
   for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
@@ -1813,7 +1850,8 @@ void FitPeaks::generateCalculatedPeaksWS() {
 
 //----------------------------------------------------------------------------------------------
 /// set up output workspaces
-void FitPeaks::processOutputs() {
+void FitPeaks::processOutputs(std::vector<
+    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_result_vec) {
   setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
 
   // optional
@@ -1823,7 +1861,7 @@ void FitPeaks::processOutputs() {
   // optional
   if (m_fittedPeakWS && m_fittedParamTable) {
     g_log.debug("about to calcualte fitted peaks");
-    calculateFittedPeaks();
+    calculateFittedPeaks(fit_result_vec);
     setProperty("FittedPeaksWorkspace", m_fittedPeakWS);
   }
 }
@@ -2044,13 +2082,14 @@ void FitPeaks::writeFitResult(
 
   // last column of the table is for chi2
   size_t chi2_index = m_fittedParamTable->columnCount() - 1;
-  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-    // get row number
-    size_t row_index = out_wi * m_numPeaksToFit + ipeak;
+
+  // check TableWorkspace and given FitResult
+  if (m_rawPeaksTable) {
+    // duplicate from FitPeakResult to table workspace
     // check again with the column size versus peak parameter values
     if (fit_result->getNumberParameters() !=
         m_fittedParamTable->columnCount() - 3) {
-      g_log.error() << "Peak " << ipeak << " has "
+      g_log.error() << "Peak of type (" << m_peakFunction->name() << ") has "
                     << fit_result->getNumberParameters()
                     << " parameters.  Parameter table shall have 3 more "
                        "columns.  But not it has "
@@ -2059,25 +2098,65 @@ void FitPeaks::writeFitResult(
           "Peak parameter vector for one peak has different sizes to output "
           "table workspace");
     }
+  } else {
+    // effective peak profile parameters: need to re-construct the peak function
+    if (4 + m_bkgdFunction->nParams() !=
+        m_fittedParamTable->columnCount() - 3) {
 
-    // case for fit peak with signals
-    for (size_t iparam = 0; iparam < fit_result->getNumberParameters();
-         ++iparam) {
-      size_t col_index = iparam + 2;
-      if (col_index >= m_fittedParamTable->columnCount()) {
-        stringstream err_ss;
-        err_ss << "Try to access FittedParamTable's " << col_index
-               << "-th column, which is out of range [0, "
-               << m_fittedParamTable->columnCount() << ")";
-        const std::vector<std::string> &col_names =
-            m_fittedParamTable->getColumnNames();
-        for (const auto &name : col_names)
-          err_ss << name << "  ";
-        throw std::runtime_error(err_ss.str());
-      }
-      m_fittedParamTable->cell<double>(row_index, col_index) =
-          fit_result->getParameterValue(ipeak, iparam);
-    } // end for (iparam)
+      std::stringstream err_ss;
+      err_ss << "Peak has 4 effective peak parameters and "
+             << m_bkgdFunction->nParams() << " background parameters "
+             << ". Parameter table shall have 3 more  columns.  But not it has "
+             << m_fittedParamTable->columnCount() << " columns";
+      throw std::runtime_error(err_ss.str());
+    }
+  }
+
+  // go through each peak
+  // get a copy of peak function and background function
+  IPeakFunction_sptr peak_function =
+      boost::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
+  size_t num_peakfunc_params = peak_function->nParams();
+  size_t num_bkgd_params = m_bkgdFunction->nParams();
+
+  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+    // get row number
+    size_t row_index = out_wi * m_numPeaksToFit + ipeak;
+
+    // treat as different cases for writing out raw or effective parametr
+    if (m_rawPeaksTable) {
+      // duplicate from FitPeakResult to table workspace
+      for (size_t iparam = 0; iparam < num_peakfunc_params + num_bkgd_params;
+           ++iparam) {
+        size_t col_index = iparam + 2;
+        // check column index against table columns
+        if (col_index >= m_fittedParamTable->columnCount()) {
+          // TODO FIXME Remove this check after testing!
+          throw std::runtime_error("This is not possible!");
+        }
+        m_fittedParamTable->cell<double>(row_index, col_index) =
+            fit_result->getParameterValue(ipeak, iparam);
+      } // end for (iparam)
+    } else {
+      // effective peak profile parameter
+      // construct the peak function
+      for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
+        peak_function->setParameter(
+            iparam, fit_result->getParameterValue(ipeak, iparam));
+
+      // set the effective peak parameters
+      m_fittedParamTable->cell<double>(row_index, 2) = peak_function->centre();
+      m_fittedParamTable->cell<double>(row_index, 3) = peak_function->fwhm();
+      m_fittedParamTable->cell<double>(row_index, 4) = peak_function->height();
+      m_fittedParamTable->cell<double>(row_index, 5) =
+          peak_function->intensity();
+
+      // background
+      for (size_t iparam = 0; iparam < num_bkgd_params; ++iparam)
+        m_fittedParamTable->cell<double>(row_index, 6 + iparam) =
+            fit_result->getParameterValue(ipeak, num_peakfunc_params + iparam);
+    }
+
     // set chi2
     m_fittedParamTable->cell<double>(row_index, chi2_index) =
         fit_result->getCost(ipeak);

@@ -125,6 +125,7 @@ class MainWindow(QMainWindow):
         self.workspacewidget = None
         self.editor = None
         self.algorithm_selector = None
+        self.plot_selector = None
         self.widgets = []
 
         # Widget layout map: required for use in Qt.connection
@@ -162,6 +163,12 @@ class MainWindow(QMainWindow):
         self.algorithm_selector = AlgorithmSelector(self)
         self.algorithm_selector.register_plugin()
         self.widgets.append(self.algorithm_selector)
+
+        self.set_splash("Loading Plot Selector")
+        from workbench.plugins.plotselectorwidget import PlotSelector
+        self.plot_selector = PlotSelector(self)
+        self.plot_selector.register_plugin()
+        self.widgets.append(self.plot_selector)
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
@@ -278,10 +285,11 @@ class MainWindow(QMainWindow):
         workspacewidget = self.workspacewidget
         editor = self.editor
         algorithm_selector = self.algorithm_selector
+        plot_selector = self.plot_selector
         default_layout = {
             'widgets': [
                 # column 0
-                [[workspacewidget], [algorithm_selector]],
+                [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
                 [[editor, ipython]],
                 # column 2
@@ -382,8 +390,8 @@ def start_workbench(app):
     # Load matplotlib as early as possible and set our defaults
     # Setup our custom backend and monkey patch in custom current figure manager
     main_window.set_splash('Preloading matplotlib')
-    from workbench.plotting.setup import setup_matplotlib  # noqa
-    setup_matplotlib()
+    from workbench.plotting.config import initialize_matplotlib  # noqa
+    initialize_matplotlib()
 
     # Setup widget layouts etc. mantid cannot be imported before this
     # or the log messages don't get through
