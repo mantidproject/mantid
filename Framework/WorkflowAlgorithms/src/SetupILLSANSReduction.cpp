@@ -26,7 +26,7 @@ using namespace Geometry;
 
 void SetupILLSANSReduction::init() {
   // Load options
-  std::string load_grp = "Load Options";
+  std::string load_grp = "Solid Angle Correction";
 
   declareProperty(
       "SolidAngleCorrection", true,
@@ -395,10 +395,12 @@ void SetupILLSANSReduction::init() {
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
-
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      "MaskedWorkspace", "", Direction::Input, PropertyMode::Optional));
   setPropertyGroup("MaskedDetectorList", mask_grp);
   setPropertyGroup("MaskedEdges", mask_grp);
   setPropertyGroup("MaskedSide", mask_grp);
+  setPropertyGroup("MaskedWorkspace", mask_grp);
 
   // Absolute scale
   std::string abs_scale_grp = "Absolute Scale";
@@ -621,6 +623,7 @@ void SetupILLSANSReduction::exec() {
   const std::string maskDetList = getPropertyValue("MaskedDetectorList");
   const std::string maskEdges = getPropertyValue("MaskedEdges");
   const std::string maskSide = getProperty("MaskedSide");
+  API::MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskedWorkspace");
 
   IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
   // The following is broken, try PropertyValue
@@ -628,6 +631,7 @@ void SetupILLSANSReduction::exec() {
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskEdges);
   maskAlg->setProperty("MaskedSide", maskSide);
+  maskAlg->setProperty("MaskedWorkspace", maskedWorkspace);
   auto maskalgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
   maskalgProp->setValue(maskAlg->toString());
   reductionManager->declareProperty(std::move(maskalgProp));
