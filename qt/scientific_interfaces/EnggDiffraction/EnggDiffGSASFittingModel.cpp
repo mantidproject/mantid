@@ -3,12 +3,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
 
 #include <boost/algorithm/string/join.hpp>
 
 using namespace Mantid;
-
-Q_DECLARE_METATYPE(Mantid::API::IAlgorithm_sptr)
 
 namespace {
 

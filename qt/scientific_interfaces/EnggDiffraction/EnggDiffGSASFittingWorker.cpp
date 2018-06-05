@@ -3,8 +3,6 @@
 
 #include "MantidAPI/Algorithm.h"
 
-Q_DECLARE_METATYPE(Mantid::API::IAlgorithm_sptr)
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
