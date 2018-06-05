@@ -6,6 +6,13 @@
 
 .navbar-version { display: none; }
 
+/*-------------------- $INTRO --------------------*/
+
+intro {
+	font-family: Arial, Geneva, Helvetica, sans-serif;
+    font-size: 1.25em;
+}
+
 /*-------------------- $LINKS --------------------*/
 
 a {

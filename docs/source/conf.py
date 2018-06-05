@@ -41,6 +41,10 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
+# Include the custom stylesheet
+def setup(app):
+    app.add_stylesheet('custom.css')
+
 # General information about the project.
 project = u'MantidProject'
 copyright = u'2015, Mantid'

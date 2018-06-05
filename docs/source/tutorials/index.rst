@@ -6,7 +6,7 @@ Training
 
 .. raw :: html
     
-    <blockquote>These tutorials and training courses are designed to give you a step-by-step guide to how to use some of the basic features of Mantid.
+    <intro>These tutorials and training courses are designed to give you a step-by-step guide to how to use some of the basic features of Mantid.
     The initial sections deal with some of the fundamental functions that are required for (almost) any use of of Mantid. We then build
     up to more bespoke functionality, providing the tools that you need to manipulate Mantid for your particular problem. We also
     include some more instrument specific training, provided by various sites.
@@ -23,7 +23,7 @@ Training
     capabilities of Mantid, by developing your own scripts.</li>
     <li>ILL Training gives an ILL site-specific introduction to many of the features of Mantid.</li>
     </ul>
-    </blockquote>
+    </intro>
 
 .. toctree::
    :maxdepth: 1

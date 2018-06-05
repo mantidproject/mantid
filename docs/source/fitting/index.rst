@@ -6,7 +6,7 @@ Fitting Overview
 
 .. raw :: html
 
-    <blockquote>This is technical documentation relating to fitting capabilities in Mantid. The fitting 
+    <intro>This is technical documentation relating to fitting capabilities in Mantid. The fitting 
     process is separated into two choices; the function and the minimizer. The function is 
     how you think the data should be represented, the minimizer takes the combination of 
     data and function and finds the best fit.
@@ -18,7 +18,7 @@ Fitting Overview
     <li>Fitting minimizers gives links to detailed descriptions of the various minimizers available in 
     Mantid. Choosing the right minimizer is an art as much as a science, a discussion of choosing 
     the right minimizer is provided <a href='http://docs.mantidproject.org/nightly/concepts/FittingMinimizers.html'> here</a>.</li>
-    </blockquote>
+    </intro>
 
 .. toctree::
    :maxdepth: 1
