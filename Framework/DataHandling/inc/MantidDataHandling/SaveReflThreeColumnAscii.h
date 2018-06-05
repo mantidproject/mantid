@@ -56,8 +56,7 @@ public:
     return {"SaveReflCustomAscii", "SaveAscii"};
   }
   /// Algorithm's version for data output overriding a virtual method
-  void data(std::ofstream &file, const std::vector<double> &XData,
-            bool exportDeltaQ = false) override;
+  void data(std::ofstream &file, bool exportDeltaQ = false) override;
   SaveReflThreeColumnAscii() {
     this->useAlgorithm("SaveMFT");
     this->deprecatedDate("2018-06-29");

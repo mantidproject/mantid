@@ -20,13 +20,15 @@ void SaveILLCosmosAscii::extraProps() {
   declareProperty("UserContact", "",
                   "Text to be written to the User-local contact field");
   declareProperty("Title", "", "Text to be written to the Title field");
-  appendSeparatorProperty();
 }
 
 /** virtual method to add information to the file before the data
  *  @param file :: pointer to output file stream
  */
 void SaveILLCosmosAscii::extraHeaders(std::ofstream &file) {
+    MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
+    if (!m_ws)
+      throw std::runtime_error("Cannot treat InputWorkspace");
   auto samp = m_ws->run();
   std::string instrument;
   std::string user = getProperty("UserContact");

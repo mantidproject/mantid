@@ -25,6 +25,9 @@ void SaveReflThreeColumnAscii::extraProps() {
  *  @param file :: pointer to output file stream
  */
 void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
+    MatrixWorkspace_const_sptr m_ws = getProperty("InputWorkspace");
+    if (!m_ws)
+      throw std::runtime_error("Cannot treat InputWorkspace");
   auto samp = m_ws->run();
   std::string title = getProperty("Title");
 
@@ -49,11 +52,9 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
  *  @param exportDeltaQ :: bool on whether deltaQ column to be printed
  * (permanantly false in this case)
  */
-void SaveReflThreeColumnAscii::data(std::ofstream &file,
-                                    const std::vector<double> &XData,
-                                    bool exportDeltaQ) {
+void SaveReflThreeColumnAscii::data(std::ofstream &file, bool exportDeltaQ) {
   exportDeltaQ = false;
-  AsciiPointBase::data(file, XData, exportDeltaQ);
+  AsciiPointBase::data(file, exportDeltaQ);
 }
 
 } // namespace DataHandling

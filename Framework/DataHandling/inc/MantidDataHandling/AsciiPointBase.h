@@ -60,20 +60,15 @@ private:
   void exec() override;
   /// print the appropriate value to file
   void outputval(double val, std::ofstream &file, bool leadingSep = true);
-  /// write the top of the file
-  virtual std::vector<double> header(std::ofstream &file);
 
 protected:
   /// write the main content of the data
-  virtual void data(std::ofstream &file, const std::vector<double> &XData,
-                    bool exportDeltaQ = true);
+  virtual void data(std::ofstream &file, bool exportDeltaQ = true);
   /// Retrieves the separator property
   virtual void appendSeparatorProperty();
   /// The separator character
-  char m_sep;
-  size_t m_length = 0;
-
-  API::MatrixWorkspace_const_sptr m_ws;
+  char m_sep{'\t'};
+  size_t m_length{0};
 };
 
 } // namespace DataHandling

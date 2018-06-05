@@ -55,8 +55,7 @@ public:
   }
 
   ///
-  void data(std::ofstream &file, const std::vector<double> &XData,
-            bool exportDeltaQ) override;
+  void data(std::ofstream &file, bool exportDeltaQ) override;
   SaveReflCustomAscii() {
     this->useAlgorithm("SaveMFT");
     this->deprecatedDate("2018-06-29");
