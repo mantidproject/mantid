@@ -5,11 +5,9 @@ from mantid.simpleapi import *
 
 
 def LoadNexusUB(fname):
-    raw=LoadEventNexus(Filename=fname)
+    raw=LoadEventNexus(Filename=fname, MetaDataOnly=True)
     run = raw.getRun()
     run_keys = run.keys()
-    for test_key in run_keys:
-        if test_key[-8:] == 'UBMatrix':
-            UBMatrix_key = test_key
+    UBMatrix_key = [test_key for test_key in run_keys if 'UBMatrix' in test_key][0]
     UB=np.array( eval(raw.run()[UBMatrix_key].value[0].strip(')').split('(')[1]))
     return UB

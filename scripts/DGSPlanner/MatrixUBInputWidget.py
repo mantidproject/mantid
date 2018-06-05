@@ -118,28 +118,13 @@ class MatrixUBInputWidget(QtGui.QWidget):
     def loadNexusUBDialog(self):
         # pylint: disable=bare-except
         try:
-            fname = QtGui.QFileDialog.getOpenFileName(\
-                    self, 'Open Nexus file to extract UB matrix',\
+            fname = QtGui.QFileDialog.getOpenFileName(
+                    self, 'Open Nexus file to extract UB matrix',
                     filter=QString('Nexus file (*.nxs.h5);;All Files (*)'))
-            this_here_UB = LoadNexusUB(str(fname))
-            UB00 = self.UBmodel.createIndex(0,0)
-            UB01 = self.UBmodel.createIndex(0,1)
-            UB02 = self.UBmodel.createIndex(0,2)
-            UB10 = self.UBmodel.createIndex(1,0)
-            UB11 = self.UBmodel.createIndex(1,1)
-            UB12 = self.UBmodel.createIndex(1,2)
-            UB20 = self.UBmodel.createIndex(2,0)
-            UB21 = self.UBmodel.createIndex(2,1)
-            UB22 = self.UBmodel.createIndex(2,2)
-            self.UBmodel.setData(UB00, this_here_UB[0,0])
-            self.UBmodel.setData(UB01, this_here_UB[0,1])
-            self.UBmodel.setData(UB02, this_here_UB[0,2])
-            self.UBmodel.setData(UB10, this_here_UB[1,0])
-            self.UBmodel.setData(UB11, this_here_UB[1,1])
-            self.UBmodel.setData(UB12, this_here_UB[1,2])
-            self.UBmodel.setData(UB20, this_here_UB[2,0])
-            self.UBmodel.setData(UB21, this_here_UB[2,1])
-            self.UBmodel.setData(UB22, this_here_UB[2,2])
+            __tempUB = LoadNexusUB(str(fname))
+            ol=mantid.geometry.OrientedLattice()
+            ol.setUB(__tempUB)
+            self.UBmodel.updateOL(ol)
             self.UBmodel.sendSignal()
         except:
             mantid.logger.error("Could not open the Nexus file, or could not find UB matrix")
