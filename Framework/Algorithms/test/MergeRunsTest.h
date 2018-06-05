@@ -3,28 +3,29 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <stdarg.h>
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/Rebin.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTypes/SpectrumDefinition.h"
+#include <stdarg.h>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h>
-#include <MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h>
-#include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
@@ -1725,6 +1726,38 @@ public:
     TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 1)
     TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 1)
     TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 1)
+  }
+
+  void test_merging_not_sorted_by_X() {
+    // This test checks that issue #22402 has been and remains fixed.
+    // Confusingly, MergeRuns used to sort the input workspaces
+    // according to their X axes.
+    const BinEdges edges1{{0., 1., 2.}};
+    const Counts counts(edges1.size() - 1, 0.);
+    const Histogram h1{edges1, counts};
+    MatrixWorkspace_sptr ws1 = create<Workspace2D>(1, h1);
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    ws1->mutableRun().addProperty("workspace_number", 1., true);
+    const BinEdges edges2{{1., 2., 3.}};
+    const Histogram h2{edges2, counts};
+    MatrixWorkspace_sptr ws2 = create<Workspace2D>(1, h2);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    ws2->mutableRun().addProperty("workspace_number", 2., true);
+    MergeRuns alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspaces", "ws2, ws1"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "test_merging_not_sorted_by_X"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING(
+        outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "test_merging_not_sorted_by_X"));
+    TS_ASSERT_EQUALS(
+        outWS->run().getPropertyValueAsType<double>("workspace_number"), 2.)
+    AnalysisDataService::Instance().clear();
   }
 };
 
