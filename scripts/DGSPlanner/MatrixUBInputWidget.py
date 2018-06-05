@@ -115,11 +115,12 @@ class MatrixUBInputWidget(QtGui.QWidget):
         except:
             mantid.logger.error("Could not open the file, or not a valid UB matrix")
 
-
     def loadNexusUBDialog(self):
         # pylint: disable=bare-except
         try:
-            fname = QtGui.QFileDialog.getOpenFileName(self, 'Open Nexus file to extract UB matrix',filter=QString('Nexus file (*.nxs.h5);;All Files (*)'))
+            fname = QtGui.QFileDialog.getOpenFileName(\
+                    self, 'Open Nexus file to extract UB matrix',\
+                    filter=QString('Nexus file (*.nxs.h5);;All Files (*)'))
             this_here_UB = LoadNexusUB(str(fname))
             UB00 = self.UBmodel.createIndex(0,0)
             UB01 = self.UBmodel.createIndex(0,1)
