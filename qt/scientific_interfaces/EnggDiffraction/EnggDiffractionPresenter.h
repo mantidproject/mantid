@@ -250,9 +250,12 @@ private:
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
-  Poco::Path outFilesUserDir(const std::string &addToDir) override;
+  Poco::Path outFilesUserDir(const std::string &addToDir) const override;
+  std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFMultiRunFilename(
+      const std::vector<RunLabel> &runLabels) const override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
-  Poco::Path outFilesRootDir();
+  Poco::Path outFilesRootDir() const;
 
   std::string appendToPath(const std::string &path,
                            const std::string &toAppend) const;
