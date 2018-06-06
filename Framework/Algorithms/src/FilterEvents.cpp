@@ -615,7 +615,7 @@ void FilterEvents::copyNoneSplitLogs(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Split all the TimeSeriesProperty sample logs to all the output workspace
+/** Split ALL the TimeSeriesProperty sample logs to all the output workspace
  * @brief FilterEvents::splitTimeSeriesLogs
  * @param int_tsp_vector
  * @param dbl_tsp_vector
@@ -688,6 +688,12 @@ void FilterEvents::splitTimeSeriesLogs(
 }
 
 //----------------------------------------------------------------------------------------------
+/** split one single time-series property (template)
+ * @brief FilterEvents::splitTimeSeriesProperty
+ * @param tsp :: a time series property instance
+ * @param split_datetime_vec :: splitter
+ * @param max_target_index :: maximum number of separated time series
+ */
 template <typename TYPE>
 void FilterEvents::splitTimeSeriesProperty(
     Kernel::TimeSeriesProperty<TYPE> *tsp,

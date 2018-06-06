@@ -603,6 +603,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     }
   }
 
+  // TODO: how to initialize the first entry????
+
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
   while (continue_search) {
@@ -665,6 +667,16 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       split_stop_time = splitter_time_vec[index_splitter + 1];
     }
   } // END-OF-WHILE
+
+  // Add a debugging check such that there won't be any time entry with zero log
+  for (size_t i = 0; i < outputs.size(); ++i) {
+    if (outputs[i]->size() == 0) {
+      g_log.error() << i << "-th split-out term (out of " << outputs.size() << ") of "
+                    << m_name << " has zero size" << "\n";
+      // if the output has zero length, then put the last valid entrance ???
+      // but it is not a good solution! because it can be very confusing
+    }
+  }
 
   return;
 }
