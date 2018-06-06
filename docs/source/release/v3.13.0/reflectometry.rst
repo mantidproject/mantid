@@ -49,4 +49,7 @@ Bug fixes
 
 * Correct the angle to the value of ``ThetaIn`` property if summing in lambda in ``ReflectometryReductionOne-v2``.
 
+Liquids Reflectometer
+---------------------
+* New REF_L instrument geometry for 2018 run cycle.
 :ref:`Release 3.13.0 <v3.13.0>`
