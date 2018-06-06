@@ -295,7 +295,6 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
   if (!slicing->hasSlicing()) {
     // Check if any input event workspaces still exist in ADS
     if (proceedIfWSTypeInADS(m_itemsToProcess, true)) {
-      setPromptUser(false); // Prevent prompting user twice
       GenericDataProcessorPresenter::process(m_itemsToProcess);
     }
     return;
