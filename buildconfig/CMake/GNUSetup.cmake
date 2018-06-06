@@ -51,7 +51,10 @@ add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
 if ( CMAKE_COMPILER_IS_GNUCXX )
   add_compile_options ( -Wpedantic )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override> )
+    # Add flags
+    add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>
+                          $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-final-types>
+                          $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-final-methods>)
   endif()
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "7.1"))
     # Consider enabling once [[fallthrough]] is available on all platforms.
