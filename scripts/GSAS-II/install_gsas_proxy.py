@@ -28,7 +28,7 @@ GSAS_HOME_DIR_NAME = "g2conda"
 def download_zip_file(target_location):
     try:
         response = urllib2.urlopen(GSAS_SVN_URL)
-    except urllib2.URLError as e:
+    except urllib2.URLError:
         raise RuntimeError(FAILED_DOWNLOAD_MESSAGE)
     zip_file = response.read()
     response.close()
