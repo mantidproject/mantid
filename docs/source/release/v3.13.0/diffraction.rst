@@ -17,10 +17,9 @@ Powder Diffraction
   taken as the default, and any changes are reverted back to the
   default once the line they were made on has finished executing
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
-
-- New SNAP instrument geometry for 2018 run cycle
-
+- New NOMAD instrument geometry for 2018 run cycle
 - New POWGEN instrument geometry for 2018 run cycle
+- New SNAP instrument geometry for 2018 run cycle
 
 New Features
 ------------
@@ -50,7 +49,8 @@ Engineering Diffraction
     previously used for saving to CSV, **SaveDiffFittingAscii**, has
     been deprecated
   - Fit results and parameters are saved to HDF5 from the **GSAS
-    Refinement** tab
+    Refinement** tab using :ref:`EnggSaveGSASIIFitResultsToHDF5
+    <algm-EnggSaveGSASIIFitResultsToHDF5>`
   - After focusing, workspace sample logs are saved to HDF5 using
     :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>`
 
@@ -66,6 +66,8 @@ Single Crystal Diffraction
 - :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
 
 - :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
+
+- New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
 
 Improvements
 ############

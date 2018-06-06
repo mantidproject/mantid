@@ -25,6 +25,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
   friend void EnggDiffGSASFittingWorker::doRefinements();
 
 public:
+  EnggDiffGSASFittingModel();
+
   ~EnggDiffGSASFittingModel();
 
   void setObserver(

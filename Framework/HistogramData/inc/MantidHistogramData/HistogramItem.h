@@ -84,7 +84,7 @@ public:
     if (yModeIsCounts()) {
       return y[m_index];
     } else {
-      return y[m_index] / binWidth();
+      return y[m_index] * binWidth();
     }
   }
 
@@ -111,7 +111,7 @@ public:
   double frequency() const {
     const auto &y = m_histogram.y();
     if (yModeIsCounts()) {
-      return y[m_index] * binWidth();
+      return y[m_index] / binWidth();
     } else {
       return y[m_index];
     }

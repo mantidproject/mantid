@@ -157,6 +157,114 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test output of effective peak parameters
+   * @brief test_effectivePeakParameters
+   */
+  void test_effectivePeakParameters() {
+    // set up parameters with starting value
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createGuassParameters(peakparnames, peakparvalues);
+
+    // Generate input workspace
+    createTestData(m_inputWorkspaceName);
+
+    // initialize algorithm to test
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("RawPeakParameters", false));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
+    fitpeaks.setProperty("ConstrainPeakPositions", false);
+
+    fitpeaks.execute();
+
+    // check result
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    // get fitted peak data
+    API::MatrixWorkspace_sptr main_out_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
+    TS_ASSERT(main_out_ws);
+    TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
+
+    API::MatrixWorkspace_sptr plot_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
+    TS_ASSERT(plot_ws);
+    TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
+
+    API::ITableWorkspace_sptr param_ws =
+        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakParametersWS"));
+    TS_ASSERT(param_ws);
+    TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
+
+    // check values: fitted peak positions
+    // spectrum 1
+    const auto &fitted_positions_0 = main_out_ws->histogram(0).y();
+    TS_ASSERT_EQUALS(fitted_positions_0.size(), 2); // with 2 peaks to fit
+    TS_ASSERT_DELTA(fitted_positions_0[0], 5.0, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-6);
+    // spectrum 3
+    const auto &fitted_positions_2 = main_out_ws->histogram(2).y();
+    TS_ASSERT_EQUALS(fitted_positions_2.size(), 2); // with 2 peaks to fit
+    TS_ASSERT_DELTA(fitted_positions_2[0], 5.03, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_2[1], 10.02, 1.E-6);
+
+    // check other fitted parameters including height and width
+    // spectrum 2: (center, width, height, intensity)
+    double ws1peak0_height = param_ws->cell<double>(2, 4);
+    double ws1peak0_width = param_ws->cell<double>(2, 3);
+    TS_ASSERT_DELTA(ws1peak0_height, 4., 1E-6);
+    TS_ASSERT_DELTA(ws1peak0_width, 0.17 * 2.3548, 1E-4);
+
+    double ws1peak1_height = param_ws->cell<double>(3, 4);
+    double ws1peak1_width = param_ws->cell<double>(3, 3);
+    TS_ASSERT_DELTA(ws1peak1_height, 2., 1E-6);
+    TS_ASSERT_DELTA(ws1peak1_width, 0.12 * 2.3548, 1E-4);
+
+    // check the fitted peak workspace
+    API::MatrixWorkspace_sptr data_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            API::AnalysisDataService::Instance().retrieve(
+                m_inputWorkspaceName));
+    TS_ASSERT_EQUALS(plot_ws->histogram(0).x().size(),
+                     data_ws->histogram(0).x().size());
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().front(),
+                    data_ws->histogram(0).x().front(), 1E-10);
+    TS_ASSERT_DELTA(plot_ws->histogram(0).x().back(),
+                    data_ws->histogram(0).x().back(), 1E-10);
+
+    // clean up
+    AnalysisDataService::Instance().remove(m_inputWorkspaceName);
+    AnalysisDataService::Instance().remove("PeakPositionsWS");
+    AnalysisDataService::Instance().remove("FittedPeaksWS");
+    AnalysisDataService::Instance().remove("PeakParametersWS");
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test on single peak on partial spectra
     */
   void Ntest_singlePeakMultiSpectra() {

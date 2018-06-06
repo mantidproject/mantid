@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 from sans.state.state import State
 from sans.algorithm_detail.batch_execution import (single_reduction_for_batch)
-from sans.common.enums import (OutputMode, FindDirectionEnum)
+from sans.common.enums import (OutputMode, FindDirectionEnum, DetectorType)
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 
 
@@ -83,7 +83,8 @@ class SANSCentreFinder(object):
         super(SANSCentreFinder, self).__init__()
 
     def __call__(self, state, r_min = 60, r_max = 280, max_iter = 20, x_start = 0.0, y_start = 0.0,
-                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False):
+                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False,
+                 component=DetectorType.LAB):
         """
         This is the start of the beam centre finder algorithm.
 
@@ -102,19 +103,19 @@ class SANSCentreFinder(object):
 
         if reduction_method:
             return self._execute_reduction_method(state, r_min, r_max, max_iter, x_start, y_start, tolerance,
-                                                  find_direction, verbose)
+                                                  find_direction, verbose, component)
         else:
-            return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance)
+            return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance, component)
 
     @staticmethod
-    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose):
+    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose, component):
         # Perform the beam centre finder algorithm
-        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose)
+        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose, component)
 
     @staticmethod
-    def _execute_mass_method(state, r_min, max_iter, xstart, ystart, tolerance):
+    def _execute_mass_method(state, r_min, max_iter, xstart, ystart, tolerance, component):
         # Perform the beam centre finder algorithm
-        return centre_finder_mass(state, r_min, max_iter, xstart, ystart, tolerance)
+        return centre_finder_mass(state, r_min, max_iter, xstart, ystart, tolerance, component)
 
     def validate_inputs(self, state, r_min, r_max, max_iter, xstart, ystart, tolerance):
         # We are strict about the types here.

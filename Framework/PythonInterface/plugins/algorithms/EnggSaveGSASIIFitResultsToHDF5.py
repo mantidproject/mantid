@@ -25,14 +25,15 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
 
     BANK_GROUP_NAME = "Bank {}".format
     RUN_GROUP_NAME = "Run {}".format
-    LATTICE_PARAMS_DATASET_NAME = "Lattice Parameters"
-    REFINEMENT_PARAMS_DATASET_NAME = "Refinement Parameters"
+    LATTICE_PARAMS_GROUP_NAME = "Lattice Parameters"
+    REFINEMENT_PARAMS_GROUP_NAME = "Refinement Parameters"
     FIT_RESULTS_GROUP_NAME = "GSAS-II Fitting"
     LATTICE_PARAMS = ["a", "b", "c", "alpha", "beta", "gamma", "volume"]
     PAWLEY_REFINEMENT = "Pawley refinement"
     RIETVELD_REFINEMENT = "Rietveld refinement"
     RWP_DATASET_NAME = "Rwp"
-    PROFILE_COEFFS_DATASET_NAME = "Profile Coefficients"
+    PROFILE_COEFFS_GROUP_NAME = "Profile Coefficients"
+    WRONG_NUMBER_PARAM_MSG = "One {} value must be supplied for every run {}"
 
     def category(self):
         return "DataHandling"
@@ -151,62 +152,46 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
                                                 sigmas=sigmas, gammas=gammas, index=i)
 
     def _wrong_number_warning_dict(self, prop_name, num_runs, condition=""):
-        wrong_number_param_msg = "One {} value must be supplied for every run {}".format
-
         prop = self.getProperty(prop_name).value
         if len(prop) != num_runs:
-            return {prop_name: wrong_number_param_msg(prop_name, condition)}
+            return {prop_name: self.WRONG_NUMBER_PARAM_MSG.format(prop_name, condition)}
 
         return {}
 
     def _save_lattice_params(self, results_group, lattice_params_ws):
-        lattice_params_dataset = results_group.create_dataset(name=self.LATTICE_PARAMS_DATASET_NAME,
-                                                              shape=(1,),
-                                                              dtype=[(param, "f") for param in self.LATTICE_PARAMS])
-
+        lattice_params_group = results_group.create_group(name=self.LATTICE_PARAMS_GROUP_NAME)
         lattice_params = lattice_params_ws.row(0)
-        lattice_params_dataset[0] = tuple(lattice_params[param] for param in self.LATTICE_PARAMS)
+
+        for param_name in self.LATTICE_PARAMS:
+            lattice_params_group.create_dataset(name=param_name, data=lattice_params[param_name])
 
     def _save_profile_coefficients(self, results_group, refine_sigma, refine_gamma, sigmas, gammas, index):
         if refine_sigma or refine_gamma:
-            if refine_sigma and refine_gamma:
-                dtype = [(self.PROP_SIGMA, "f"), (self.PROP_GAMMA, "f")]
-                values = sigmas[index], gammas[index]
-            elif refine_sigma:
-                dtype = [(self.PROP_SIGMA, "f")]
-                values = sigmas[index]
-            elif refine_gamma:
-                dtype = [(self.PROP_GAMMA, "f")]
-                values = gammas[index]
+            coeffs_group = results_group.create_group(name=self.PROFILE_COEFFS_GROUP_NAME)
 
-            coefficients_dataset = results_group.create_dataset(name=self.PROFILE_COEFFS_DATASET_NAME, shape=(1,),
-                                                                dtype=dtype)
-            coefficients_dataset[0] = values
+            if refine_sigma:
+                coeffs_group.create_dataset(name="Sigma", data=sigmas[index])
+            if refine_gamma:
+                coeffs_group.create_dataset(name="Gamma", data=gammas[index])
+
+    def _copy_property_to_dataset(self, group, property_name):
+        group.create_dataset(name=property_name, data=self.getProperty(property_name).value)
 
     def _save_refinement_params(self, results_group):
-        refinement_params_dtype = [(self.PROP_REFINEMENT_METHOD, "S19"),
-                                   (self.PROP_REFINE_SIGMA, "b"),
-                                   (self.PROP_REFINE_GAMMA, "b"),
-                                   (self.PROP_XMIN, "f"),
-                                   (self.PROP_XMAX, "f")]
+        refinement_params_group = results_group.create_group(name=self.REFINEMENT_PARAMS_GROUP_NAME)
 
-        refinement_method = self.getProperty(self.PROP_REFINEMENT_METHOD).value
-        refinement_params_list = [refinement_method,
-                                  self.getProperty(self.PROP_REFINE_SIGMA).value,
-                                  self.getProperty(self.PROP_REFINE_GAMMA).value,
-                                  self.getProperty(self.PROP_XMIN).value,
-                                  self.getProperty(self.PROP_XMAX).value]
+        mandatory_properties = {self.PROP_REFINEMENT_METHOD,
+                                self.PROP_REFINE_SIGMA,
+                                self.PROP_REFINE_GAMMA,
+                                self.PROP_XMIN,
+                                self.PROP_XMAX}
 
-        if refinement_method == self.PAWLEY_REFINEMENT:
-            refinement_params_dtype += [(self.PROP_PAWLEY_DMIN, "f"),
-                                        (self.PROP_PAWLEY_NEGATIVE_WEIGHT, "f")]
-            refinement_params_list += [self.getProperty(self.PROP_PAWLEY_DMIN).value,
-                                       self.getProperty(self.PROP_PAWLEY_NEGATIVE_WEIGHT).value]
+        for prop_name in mandatory_properties:
+            self._copy_property_to_dataset(refinement_params_group, prop_name)
 
-        refinement_params_dataset = results_group.create_dataset(name=self.REFINEMENT_PARAMS_DATASET_NAME, shape=(1,),
-                                                                 dtype=refinement_params_dtype)
-
-        refinement_params_dataset[0] = tuple(refinement_params_list)
+        if self.getProperty(self.PROP_REFINEMENT_METHOD).value == self.PAWLEY_REFINEMENT:
+            self._copy_property_to_dataset(refinement_params_group, self.PROP_PAWLEY_DMIN)
+            self._copy_property_to_dataset(refinement_params_group, self.PROP_PAWLEY_NEGATIVE_WEIGHT)
 
     def _save_rwp(self, results_group, rwp):
         results_group.create_dataset(self.RWP_DATASET_NAME, data=numpy.array(rwp))
