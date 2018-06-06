@@ -95,3 +95,21 @@ See :ref:`BuildingWithCMake` for information about building Mantid.
 Building VATES
 ##############
 See :ref:`BuildingVATES` for infromation about building VATES.
+
+Archive access
+##############
+
+It is very convenient to be able to access the data archive directly.
+At ISIS, this is automatically done on the Windows machines, however OSX
+requires some extra setup.
+
+OSX
+---
+
+* In Finder "command"+k opens a mounting dialogue
+* For `Server address` enter `smb://isisdatar80/inst$/` hit Connect
+* This should prompt you for federal ID `clrc\....` and password
+* After completing this the drive is now mounted
+* It can be found at `/Volumes/inst$`
+
+**NB** the address in step 2 sometimes changes - if it does not work, replace `80` with `55` or `3`.
