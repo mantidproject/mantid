@@ -14,6 +14,7 @@ set ( INC_FILES
 set ( TEST_FILES
     InstrumentBuilderTest.h
     NexusGeometryParserTest.h
+    NexusShapeFactoryTest.h
         )
 
 if (COVERALLS)
