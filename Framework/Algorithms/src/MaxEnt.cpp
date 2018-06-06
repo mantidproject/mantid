@@ -217,6 +217,9 @@ void MaxEnt::init() {
       "Adjusts the calculated data by adding to each value the corresponding Y value of this workspace. "
       "If DataLinearAdj is also specified, this addition is done after its multiplication. "
       "The data in this workspace is complex in the same manner as complex input data");
+  declareProperty("PerSpectrumReconstruction", true,
+    "Reconstruction is done independently on each spectrum. "
+    "If false, all the spectra are added together in the reconstruction.");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
@@ -319,7 +322,7 @@ void MaxEnt::exec() {
   // Read input workspace
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
-  size_t nSpec = inWS->getNumberHistograms();
+  size_t nHist = inWS->getNumberHistograms();
   // Number of data points - assumed to be constant between spectra or
   // this will throw an exception
   size_t npoints = inWS->blocksize() * resolutionFactor;
@@ -329,10 +332,12 @@ void MaxEnt::exec() {
   MatrixWorkspace_const_sptr dataLinearAdj = getProperty("DataLinearAdj");
   // Constant adjustment of calculated data
   MatrixWorkspace_const_sptr dataConstAdj = getProperty("DataConstAdj");
+  // Add spectra in reconstruction if false
+  const bool perSpectrumReconstruction = getProperty("PerSpectrumReconstruction");
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
-  for (size_t s = 0; s < nSpec; s++) {
+  for (size_t s = 0; s < nHist; s++) {
     auto errors = inWS->e(s).rawData();
 
     size_t npoints = errors.size();
@@ -379,7 +384,12 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  nSpec = complexData ? nSpec / 2 : nSpec;
+  size_t nSpec = complexData ? nHist / 2 : nHist;
+  size_t nSpecSum = 1;
+  if (!perSpectrumReconstruction) {
+    nSpecSum = nSpec;
+    nSpec = 1;
+  }
   outImageWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npoints, npoints);
   for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
