@@ -34,7 +34,7 @@ void PostprocessingStep::ensureRowSizeMatchesColumnCount(
 }
 
 QString PostprocessingStep::getPostprocessedWorkspaceName(
-    const GroupData &groupData, boost::optional<size_t> sliceIndex) {
+    const GroupData &groupData, boost::optional<size_t> sliceIndex) const {
   /* This method calculates, for a given set of rows, the name of the output
    * (post-processed) workspace for a given slice */
 

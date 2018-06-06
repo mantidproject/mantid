@@ -241,7 +241,7 @@ protected:
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(
       const GroupData &groupData,
-      boost::optional<size_t> sliceIndex = boost::optional<size_t>());
+      boost::optional<size_t> sliceIndex = boost::optional<size_t>()) const;
   // process the next group/row
   void processNextItem();
   // Refl GUI Group.
@@ -382,6 +382,17 @@ private:
                       int parentColumn) override;
   int getNumberOfRows() override;
   void clearTable() override;
+  void setGroupIsProcessed(const int groupIndex, const bool isProcessed);
+  void setGroupError(const int groupIndex, const std::string &error);
+  void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
+  void setRowError(RowData_sptr rowData, const std::string &error);
+  bool workspaceIsOutputOfGroup(GroupData &groupData,
+                                const std::string &workspaceName) const;
+  bool workspaceIsOutputOfRow(RowData_sptr rowData,
+                              const std::string &workspaceName) const;
+  void handleWorkspaceRemoved(const std::string &workspaceName,
+                              const std::string &action);
+  void handleAllWorkspacesRemoved(const std::string &action);
   void resetProcessedState(const int groupIndex);
   void resetProcessedState(RowData_sptr rowData);
   void resetProcessedState(const std::string &workspaceName);
