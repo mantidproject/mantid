@@ -110,6 +110,54 @@ void CreateGroupingWorkspace::init() {
                   Direction::Output);
 }
 
+std::map<std::string, std::string> CreateGroupingWorkspace::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // only allow specifying the instrument in one way
+  int numInstrument = 0;
+  if (!isDefault("InputWorkspace"))
+    numInstrument += 1;
+  if (!isDefault("InstrumentName"))
+    numInstrument += 1;
+  if (!isDefault("InstrumentFilename"))
+    numInstrument += 1;
+  if (numInstrument == 0) {
+    std::string msg("Must supply an instrument");
+    result["InputWorkspace"] = msg;
+    result["InstrumentName"] = msg;
+    result["InstrumentFilename"] = msg;
+  } else if (numInstrument > 1) {
+    std::string msg("Must supply an instrument only one way");
+
+    if (!isDefault("InputWorkspace"))
+      result["InputWorkspace"] = msg;
+    if (!isDefault("InstrumentName"))
+      result["InstrumentName"] = msg;
+    if (!isDefault("InstrumentFilename"))
+      result["InstrumentFilename"] = msg;
+  }
+
+  // only allow specifying the grouping one way
+  int numGroupings = 0;
+  if (!isDefault("GroupNames"))
+    numGroupings += 1;
+  if (!isDefault("GroupDetectorsBy"))
+    numGroupings += 1;
+  if (!isDefault("ComponentName"))
+    numGroupings += 1;
+  if (numGroupings != 1) {
+    std::string msg("Must supply grouping only one way");
+    if (!isDefault("GroupNames"))
+      result["GroupNames"] = msg;
+    if (!isDefault("GroupDetectorsBy"))
+      result["GroupDetectorsBy"] = msg;
+    if (!isDefault("ComponentName"))
+      result["ComponentName"] = msg;
+  }
+
+  return result;
+}
+
 //------------------------------------------------------------------------------------------------
 /** Read old-style .cal file to get the grouping
  *
