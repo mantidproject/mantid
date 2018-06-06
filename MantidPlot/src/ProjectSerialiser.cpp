@@ -468,7 +468,8 @@ QString ProjectSerialiser::saveWorkspaces() {
         wsNames += ",";
         wsNames += QString::fromStdString(secondLevelItems[j]);
         std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-        window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
+        // TODO commented out
+		// window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
       }
     } else {
       // check whether the user wants to save this workspace
@@ -479,7 +480,8 @@ QString ProjectSerialiser::saveWorkspaces() {
       wsNames += wsName;
 
       std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-      window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
+	  // TODO commented out
+      //window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
     }
 
     // update listening progress bars
@@ -743,7 +745,7 @@ void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
   }
   std::string fileName(window->workingDir.toStdString() + "/" + wsName);
   fileName.append(".nxs");
-  window->mantidUI->loadWSFromFile(wsName, fileName);
+  // window->mantidUI->loadWSFromFile(wsName, fileName);
 }
 
 /**

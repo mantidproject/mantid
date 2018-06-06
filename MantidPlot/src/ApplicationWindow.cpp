@@ -4665,8 +4665,6 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   // Read the rest of the project file in for parsing
   std::string lines = fileTS.readAll().toUtf8().constData();
 
-  d_loaded_current = nullptr;
-
   // Open as a top level folder
   ProjectSerialiser serialiser(this);
   try {
@@ -4676,9 +4674,6 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
     // We failed to load - bail out
     return this;
   }
-
-  if (d_loaded_current)
-    curFolder = d_loaded_current;
 
   {
     // WHY use another fileinfo?
