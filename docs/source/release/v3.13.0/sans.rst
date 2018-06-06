@@ -9,8 +9,11 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-ISIS SANS 
----------
+
+* :ref:`LoadILLSANS <algm-LoadILLSANS>` is upgraded to load the modern nexus files from instruments D11, D22 and D33 at the ILL.
+
+ISIS SANS Interface
+----------------------------
 
 New features
 ############

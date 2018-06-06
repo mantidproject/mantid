@@ -178,8 +178,7 @@ const std::string PDCalibration::summary() const {
 void PDCalibration::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
-                  "Input signal workspace.\nIf the workspace does not exist it "
-                  "will read it from the SignalFile into this workspace.");
+                  "Input signal workspace");
 
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(
                       "TofBinning", boost::make_shared<RebinParamsValidator>()),
@@ -230,12 +229,8 @@ void PDCalibration::init() {
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
                   "The estimated peak width as a "
                   "percentage of the d-spacing "
-                  "of the center of the peak.");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
-      "List of tolerance on fitted peak positions against given peak positions."
-      "If there is only one value given, then ");
+                  "of the center of the peak. This is the same as the width in "
+                  "time-of-flight.");
 
   declareProperty("MinimumPeakHeight", 2.,
                   "Minimum peak height such that all the fitted peaks with "
@@ -246,7 +241,7 @@ void PDCalibration::init() {
       "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
   declareProperty(
-      "ConstrainPeakPositions", true,
+      "ConstrainPeakPositions", false,
       "If true peak position will be constrained by estimated positions "
       "(highest Y value position) and "
       "the peak width either estimted by observation or calculate.");
@@ -285,7 +280,6 @@ void PDCalibration::init() {
   setPropertyGroup("PeakPositions", fitPeaksGroup);
   setPropertyGroup("PeakWindow", fitPeaksGroup);
   setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
-  setPropertyGroup("PositionTolerance", fitPeaksGroup);
   setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
@@ -473,11 +467,16 @@ void PDCalibration::exec() {
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);
   algFitPeaks->setProperty("HighBackground", false);
-  algFitPeaks->setProperty("ConstrainPeakPositions",
-                           false); // TODO Pete: need to test this option
+  bool constrainPeakPosition = getProperty("ConstrainPeakPositions");
+  algFitPeaks->setProperty(
+      "ConstrainPeakPositions",
+      constrainPeakPosition); // TODO Pete: need to test this option
   //  optimization setup // TODO : need to test LM or LM-MD
   algFitPeaks->setProperty("Minimizer", "Levenberg-Marquardt");
   algFitPeaks->setProperty("CostFunction", "Least squares");
+
+  // FitPeaks will abstract the peak parameters if you ask
+  algFitPeaks->setProperty("RawPeakParameters", false);
 
   // Analysis output
   algFitPeaks->setPropertyValue("OutputPeakParametersWorkspace",
@@ -547,14 +546,13 @@ void PDCalibration::exec() {
         throw std::runtime_error(
             "peak index mismatch but workspace index matched");
 
-      // TODO FIXME Pete: the following only works Gaussian because in FitPeaks,
-      // the exact parameter name is used
+      // get the effective peak parameters
       const double centre =
-          fittedTable->getRef<double>("PeakCentre", rowIndexInFitTable);
+          fittedTable->getRef<double>("centre", rowIndexInFitTable);
       const double width =
-          fittedTable->getRef<double>("Sigma", rowIndexInFitTable);
+          fittedTable->getRef<double>("width", rowIndexInFitTable);
       const double height =
-          fittedTable->getRef<double>("Height", rowIndexInFitTable);
+          fittedTable->getRef<double>("height", rowIndexInFitTable);
       const double chi2 =
           fittedTable->getRef<double>("chi2", rowIndexInFitTable);
 

@@ -21,3 +21,8 @@ Bugfixes
 --------
 
 - A bug in the load dialog where bad filename input would cause the last file to be loaded has been fixed.
+
+Improvements
+------------
+
+- DGSPlanner has an option to load the UB matrix from the Nexus file metadata

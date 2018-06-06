@@ -20,25 +20,19 @@ from __future__ import (absolute_import, division, print_function,
 import unittest
 
 from qtpy.QtCore import QObject, Qt, Slot
-from qtpy.QtWidgets import QAction, QApplication, QMenu, QToolBar
+from qtpy.QtWidgets import QAction, QMenu, QToolBar
 try:
     from qtpy.QtCore import SIGNAL
     NEW_STYLE_SIGNAL = False
 except ImportError:
     NEW_STYLE_SIGNAL = True
 
+from mantidqt.utils.qt.testing import requires_qapp
 from mantidqt.utils.qt import add_actions, create_action
 
-QAPP = None
 
-
+@requires_qapp
 class CreateActionTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        global QAPP
-        if QApplication.instance() is None:
-            QAPP = QApplication([''])
 
     def test_parent_and_name_only_required(self):
         class Parent(QObject):
@@ -79,13 +73,8 @@ class CreateActionTest(unittest.TestCase):
         self.assertEqual(Qt.WindowShortcut, action.shortcutContext())
 
 
+@requires_qapp
 class AddActionsTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        global QAPP
-        if QApplication.instance() is None:
-            QAPP = QApplication([''])
 
     def test_add_actions_with_qmenu_target(self):
         test_act_1 = create_action(None, "Test Action 1")
