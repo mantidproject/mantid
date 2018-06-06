@@ -4,6 +4,27 @@ from os import listdir
 from os.path import isfile, join
 import datetime
 
+def _concatenate_iso_datetime(datetime):
+    '''
+    Concatenates the datetime string provided by Mantid into a single integer
+    Args:
+        datetime: ISO 8601 standard datetime string
+    Returns:
+        int
+    '''
+    date = datetime.split('T')[0]
+    time = datetime.split('T')[1]
+    yy = str(date.split('-')[0])
+    mo = str(date.split('-')[1])
+    dd = str(date.split('-')[2])
+    hh = str(time.split(':')[0])
+    mm = str(time.split(':')[1])
+    secs = time.split(':')[2]
+    ss = str(secs.split('.')[0])
+    ms = str(secs.split('.')[1])
+
+    return int(yy+mo+dd+hh+mm+ss+ms)
+
 
 def _has_duplicates(values):
     '''
@@ -59,27 +80,15 @@ all_commands = [i for sublist in commands for i in sublist]
 if _has_duplicates(all_commands):
     all_unique_commands = _remove_duplicates(all_commands)
 
-# Convert the date to a sensible format
-## Split date and time into separate elements
-all_unique_commands = [(i[0], i[1].split(' ')[1], i[1].split(' ')[2]) 
+# Convert the datetime into a sortable integer
+all_unique_commands = [(i[0], _concatenate_iso_datetime(i[1]))
         for i in all_unique_commands]
 
-## Change the date string to a number
-all_unique_commands = [(i[0], i[1].split('-')[0], months[i[1].split('-')[1]], 
-        i[1].split('-')[2], i[2]) for i in all_unique_commands]
-all_unique_commands = [(i[0], "%s-%s-%s" % (i[1], i[2], i[3]), i[4]) for 
-        i in all_unique_commands]
-
-# Sort the new list on date-time
-# Write to file
-with open ('PreOrderedHistory.py', 'w') as outfile:
-    for x in all_unique_commands:
-        outfile.write('{} # {} {} \n'.format(x[0], x[1], x[2]))
-
-all_unique_commands.sort(key=lambda x: datetime.datetime.strptime(x[1], '%Y-%m-%d'))  # date sort
-#all_unique_commands.sort(key=lambda x: x[2]) # time sort
+# Sort the new list on datetime integer
+all_unique_commands.sort(key=lambda x: (x[1])) 
 
 # Write to file
 with open ('OrderedHistory.py', 'w') as outfile:
     for x in all_unique_commands:
-        outfile.write('{} # {} {} \n'.format(x[0], x[1], x[2]))
+        outfile.write('{} # {} \n'.format(x[0], x[1]))
+
