@@ -79,7 +79,7 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 
 bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
   if (vertices.size() < 3)
-    throw std::invalid_argument("Minimum of 3 points required");
+    return false; // Not a plane with < 3 points
 
   auto v0 = vertices[1] - vertices[0];
 
