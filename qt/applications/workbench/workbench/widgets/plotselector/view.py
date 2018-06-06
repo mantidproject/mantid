@@ -91,8 +91,7 @@ class PlotSelectorView(QWidget):
         """
         text_box = QLineEdit(self)
         text_box.setPlaceholderText("Filter Plots")
-        if hasattr(text_box, 'setClearButtonEnabled'):
-            text_box.setClearButtonEnabled(True)  # PyQt 5.2+ only
+        text_box.setClearButtonEnabled(True)
         return text_box
 
     def _make_list_widget(self):
