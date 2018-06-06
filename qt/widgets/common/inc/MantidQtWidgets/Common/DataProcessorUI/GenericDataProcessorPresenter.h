@@ -323,6 +323,8 @@ private:
   void pasteSelected();
   // group selected rows together
   void groupRows();
+  // Handle when the table has been updated
+  void tableUpdated();
   // expand selection to group
   void expandSelection();
   // expand all groups

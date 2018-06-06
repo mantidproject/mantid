@@ -1299,7 +1299,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     newTable();
     break;
   case DataProcessorPresenter::TableUpdatedFlag:
-    m_tableDirty = true;
+    tableUpdated();
     break;
   case DataProcessorPresenter::ExpandSelectionFlag:
     expandSelection();
@@ -1538,6 +1538,14 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, static_cast<int>(m_whitelist.size())))
     m_workspaceList.insert(qName);
+}
+
+/** Handle when the table has been updated
+ */
+void GenericDataProcessorPresenter::tableUpdated() {
+  // We don't care about changes if the table is empty
+  if (m_manager->rowCount() > 0)
+    m_tableDirty = true;
 }
 
 /** Expands the current selection */
