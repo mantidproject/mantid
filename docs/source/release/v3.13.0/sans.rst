@@ -9,6 +9,9 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+
+* :ref:`LoadILLSANS <algm-LoadILLSANS>` is upgraded to load the modern nexus files from instruments D11, D22 and D33 at the ILL.
+
 ISIS SANS Interface
 ----------------------------
 
@@ -19,8 +22,10 @@ New features
 
 Improvements
 ############
+* Added thickness column to table in new GUI.
+* The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
+* Added EventSlice option to options column in new GUI.
 * Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
-
 * Added thickness column to table in new GUI.
 * Added EventSlice option to options column in new GUI.
 * Added Radius Cutoff and Wavelength Cutoff boxes to the old and new GUI.
@@ -28,6 +33,7 @@ Improvements
 Bug fixes
 #########
 * Fixed a bug where the beam stop arm was not being masked on LOQ.
+* Fixed a bug where userfiles specified in the batch file were not being loaded into the new GUI.
 
 Features Removed
 ################
