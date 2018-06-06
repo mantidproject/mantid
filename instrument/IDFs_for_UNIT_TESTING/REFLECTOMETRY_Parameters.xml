@@ -6,6 +6,10 @@
     <value val="Fredrikze" />
   </parameter>
 
+  <parameter name="polarization_correction_option" type="string">
+    <value val="PA" />
+  </parameter>
+
   <parameter name="efficiency_lambda" type="string">
     <value val="0 1 2 3 4 5" />
     <description is="The wavelengths at which the efficiencies are sampled."/>

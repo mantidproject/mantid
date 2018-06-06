@@ -24,6 +24,7 @@ namespace {
 std::string const METHOD_FREDRIKZE("Fredrikze");
 std::string const METHOD_WILDES("Wildes");
 std::string const METHOD_PARAMETER("polarization_correction_method");
+std::string const OPTION_PARAMETER("polarization_correction_option");
 std::string const LAMBDA_PARAMETER("efficiency_lambda");
 
 std::map<std::string, std::vector<std::string>> const EFFICIENCIES{
@@ -85,6 +86,14 @@ void ExtractPolarizationEfficiencies::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The workspace with extracted eficiencies.");
+  declareProperty<std::string>(
+      "CorrectionMethod", "",
+      "Correction method: Fredrikze or Wildes.",
+      Kernel::Direction::Output);
+  declareProperty<std::string>(
+      "CorrectionOption", "",
+      "Correction option, eg \"PA\" or \"PNR\" for Fredrikze method.",
+      Kernel::Direction::Output);
 }
 
 /** Execute the algorithm.
@@ -100,6 +109,7 @@ void ExtractPolarizationEfficiencies::exec() {
   if (method != METHOD_FREDRIKZE && method != METHOD_WILDES) {
     throw std::invalid_argument("Unknown correction method: " + method);
   }
+  setProperty("CorrectionMethod", method);
   auto const lambdaValue = instrument->getParameterAsString(LAMBDA_PARAMETER);
   if (lambdaValue.empty()) {
     throw std::invalid_argument(
@@ -122,6 +132,11 @@ void ExtractPolarizationEfficiencies::exec() {
   alg->execute();
   MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", result);
+  auto const option = instrument->getParameterAsString(OPTION_PARAMETER);
+  if (option.empty()) {
+    throw std::invalid_argument("Correction option is undefined");
+  }
+  setProperty("CorrectionOption", option);
 }
 
 } // namespace DataHandling

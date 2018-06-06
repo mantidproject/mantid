@@ -4,15 +4,26 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ReflectometryReductionOneAuto2;
 using namespace Mantid::API;
+using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
 
 class ReflectometryReductionOneAuto2Test : public CxxTest::TestSuite {
 private:
@@ -645,6 +656,80 @@ public:
       TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
       TS_ASSERT_DELTA(outLam->x(0)[7], 8.0658, 0.0001);
     }
+  }
+
+  void test_polarization_correction_default() {
+
+    MatrixWorkspace_sptr first = createHistoWS(10, 1, 4);
+    MatrixWorkspace_sptr second = first->clone();
+    MatrixWorkspace_sptr third = first->clone();
+    MatrixWorkspace_sptr fourth = first->clone();
+
+    WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
+    inputWSGroup->addWorkspace(first);
+    inputWSGroup->addWorkspace(second);
+    inputWSGroup->addWorkspace(third);
+    inputWSGroup->addWorkspace(fourth);
+    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 5.0);
+    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "ParameterFile");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    auto outQGroup =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    auto outLamGroup =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsLam");
+
+    TS_ASSERT(outQGroup);
+    TS_ASSERT(outLamGroup);
+
+    if (!outQGroup || !outLamGroup)
+      return;
+
+    TS_ASSERT_EQUALS(outQGroup->size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup->size(), 4);
+
+    auto outLam =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(0));
+    // X range in outLam
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 3.1, 0.0001);
+
+    std::cerr << std::endl;
+    for (size_t i = 0; i < 10; ++i) {
+      std::cerr << outLam->y(0)[i] << std::endl;
+    }
+  }
+
+private:
+  MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
+                                     double endX) const {
+    double const dX = (endX - startX) / double(size);
+    BinEdges xVals(size + 1, LinearGenerator(startX, dX));
+    Counts yVals(size, 1.0);
+    auto workspace = boost::make_shared<Workspace2D>();
+    workspace->initialize(1, Histogram(xVals, yVals));
+    workspace->getAxis(0)->setUnit("Wavelength");
+
+    LoadInstrument loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename",
+                            "IDFs_for_UNIT_TESTING/REFLECTOMETRY_Definition.xml");
+    loader.setProperty("Workspace", workspace);
+    loader.setProperty("RewriteSpectraMap", OptionalBool(true));
+    loader.execute();
+
+    return workspace;
   }
 };
 
