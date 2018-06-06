@@ -29,7 +29,7 @@ class RefineSatellitePeaksTestFixedNumQ(stresstesting.MantidStressTest):
 
         k = 2
 
-        self._satellites_refined = RefineSatellitePeaks(MainPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
+        self._satellites_refined = RefineSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
                                                         NumOfQs=k, **fixed_params)
 
     def validate(self):
@@ -52,7 +52,7 @@ class RefineSatellitePeaksTestAutoFindQ(stresstesting.MantidStressTest):
         }
 
         threshold = 1.0
-        self._satellites_refined = RefineSatellitePeaks(MainPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
+        self._satellites_refined = RefineSatellitePeaks(NuclearPeaks=main_peaks, SatellitePeaks=satellite_peaks, MDWorkspace=md_workspace,
                                                         ClusterThreshold=threshold, **fixed_params)
 
     def validate(self):

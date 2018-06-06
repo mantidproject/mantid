@@ -14,7 +14,7 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         return 'Crystal\\Peaks'
 
     def PyInit(self):
-        self.declareProperty(IPeaksWorkspaceProperty(name="MainPeaks",
+        self.declareProperty(IPeaksWorkspaceProperty(name="NuclearPeaks",
                                                      defaultValue="",
                                                      direction=Direction.Input),
                              doc="Main integer HKL peaks. Q vectors will be calculated relative to these peaks.")
@@ -27,7 +27,7 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty(name="MDWorkspace",
                                                defaultValue="",
                                                direction=Direction.Input),
-                             doc="Workspace to search for satellites peak in.")
+                             doc="MD workspace to search for satellites peak in. This data must be in the HKL frame.")
 
         self.declareProperty(IPeaksWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue="",
@@ -64,7 +64,7 @@ class RefineSatellitePeaks(DataProcessorAlgorithm):
             k = None
 
         md = self.getProperty("MDWorkspace").value
-        nuclear = self.getProperty("MainPeaks").value
+        nuclear = self.getProperty("NuclearPeaks").value
         sats = self.getProperty("SatellitePeaks").value
 
         nuclear_hkls = self.get_hkls(nuclear)
