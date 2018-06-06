@@ -333,7 +333,7 @@ void MaxEnt::exec() {
   // Constant adjustment of calculated data
   MatrixWorkspace_const_sptr dataConstAdj = getProperty("DataConstAdj");
   // Add spectra in reconstruction if false
-  const bool perSpectrumReconstruction = getProperty("PerSpectrumReconstruction");
+  const bool sumSpectra = !getProperty("PerSpectrumReconstruction");
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
@@ -386,7 +386,7 @@ void MaxEnt::exec() {
 
   size_t nSpec = complexData ? nHist / 2 : nHist;
   size_t nSpecSum = 1;
-  if (!perSpectrumReconstruction) {
+  if (sumSpectra) {
     nSpecSum = nSpec;
     nSpec = 1;
   }
@@ -414,20 +414,30 @@ void MaxEnt::exec() {
     std::vector<double> data;
     std::vector<double> errors;
     if (complexData) {
-      data = toComplex(inWS, spec, false);  // false -> data
-      errors = toComplex(inWS, spec, true); // true -> errors
+      data = toComplex(inWS, spec, false, sumSpectra);  // false -> data
+      errors = toComplex(inWS, spec, true, sumSpectra); // true -> errors
     } else {
-      data = inWS->y(spec).rawData();
-      errors = inWS->e(spec).rawData();
+      if (sumSpectra) {
+        for (size_t s = 0; s < nSpecSum; s++) {
+          // Can't add so-called vectors, so
+          // more complicated code needs to go here
+          // data += inWS->y(s).rawData();
+          // errors += inWS->e(s).rawData();
+        }
+      }
+      else {
+        data = inWS->y(spec).rawData();
+        errors = inWS->e(spec).rawData();
+      }
     }
 
     std::vector<double> linearAdjustments;
     std::vector<double> constAdjustments;
     if (dataLinearAdj) {
-      linearAdjustments = toComplex(dataLinearAdj, spec, false);
+      linearAdjustments = toComplex(dataLinearAdj, spec, false, sumSpectra);
     }
     if (dataConstAdj) {
-      constAdjustments = toComplex(dataConstAdj, spec, false);
+      constAdjustments = toComplex(dataConstAdj, spec, false, sumSpectra);
     }
 
     // To record the algorithm's progress
@@ -518,17 +528,18 @@ void MaxEnt::exec() {
 
 //----------------------------------------------------------------------------------------------
 
-/** Returns a given spectrum as a complex number
+/** Returns a given spectrum or sum of spectra as a complex number
 * @param inWS :: [input] The input workspace containing all the spectra
 * @param spec :: [input] The spectrum of interest
 * @param errors :: [input] If true, returns the errors, otherwise returns the
 * counts
+* @param sumSpec :: [input] If true, use sum of all spectra (ignoring spec)
 * @return : Spectrum 'spec' as a complex vector
 */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                      size_t spec, bool errors) {
+                                      size_t spec, bool errors, bool sumSpec ) {
   const size_t numBins = inWS->y(0).size();
-  std::vector<double> result(numBins * 2);
+  std::vector<double> result(numBins * 2, 0.0);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
@@ -538,13 +549,29 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
 
   if (!errors) {
     for (size_t i = 0; i < numBins; i++) {
-      result[2 * i] = inWS->y(spec)[i];
-      result[2 * i + 1] = inWS->y(spec + nspec)[i];
+      if (sumSpec) {
+        for (size_t s = 0; s < nspec; s++) {
+          result[2 * i] += inWS->y(s)[i];
+          result[2 * i + 1] += inWS->y(s + nspec)[i];
+        }
+      }
+      else {
+        result[2 * i] = inWS->y(spec)[i];
+        result[2 * i + 1] = inWS->y(spec + nspec)[i];
+      }
     }
   } else {
     for (size_t i = 0; i < numBins; i++) {
-      result[2 * i] = inWS->e(spec)[i];
-      result[2 * i + 1] = inWS->e(spec + nspec)[i];
+      if (sumSpec) {
+        for (size_t s = 0; s < nspec; s++) {
+          result[2 * i] += inWS->e(s)[i];
+          result[2 * i + 1] += inWS->e(s + nspec)[i];
+        }
+      }
+      else {
+        result[2 * i] = inWS->e(spec)[i];
+        result[2 * i + 1] = inWS->e(spec + nspec)[i];
+      }
     }
   }
   return result;

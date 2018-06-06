@@ -63,7 +63,7 @@ private:
   void exec() override;
   /// Returns spectrum 'spec' as a complex vector
   std::vector<double> toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                size_t spec, bool errors);
+                                size_t spec, bool errors, bool sumSpec);
   // Calculates chi-square by solving the matrix equation A*x = b
   double calculateChi(const QuadraticCoefficients &coeffs, double a,
                       std::vector<double> &beta);
