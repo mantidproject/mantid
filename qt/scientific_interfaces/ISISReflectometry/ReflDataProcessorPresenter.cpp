@@ -1037,6 +1037,7 @@ void ReflDataProcessorPresenter::endReduction(const bool reductionSuccessful) {
     // signal reduction has finished but leave the GUI in the "processing"
     // state
     m_mainPresenter->confirmReductionFinished(m_group);
+    m_reductionPaused = true;
   } else {
     // Paused, or reduction has completely finished. Stop the reduction
     pause();
