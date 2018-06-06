@@ -510,6 +510,11 @@ bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
 Process selected items
 */
 void GenericDataProcessorPresenter::processSelection() {
+  // If the selection is empty we will process all rows. In this case,
+  // as with process-all, assume they don't want to reprocess failed rows.
+  if (selectedParents().empty() && selectedChildren().empty())
+    m_forceProcessingFailed = false;
+
   process(m_manager->selectedData(m_promptUser));
 }
 

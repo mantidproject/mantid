@@ -1285,7 +1285,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     expectNotifiedReductionResumed(mockMainPresenter);
@@ -1370,7 +1370,7 @@ public:
 
     // The user hits the "process" button
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1));
+    expectGetSelection(mockDataProcessorView, AtLeast(1));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
@@ -1409,7 +1409,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1458,7 +1458,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1506,7 +1506,7 @@ public:
     // This means we will process the selected rows but we will not
     // post-process them
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), rowlist);
     expectAskUserYesNo(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1540,7 +1540,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     expectNotebookIsEnabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1665,7 +1665,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
@@ -3131,7 +3131,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -3282,7 +3282,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspace was stitched with params = '-0.04'

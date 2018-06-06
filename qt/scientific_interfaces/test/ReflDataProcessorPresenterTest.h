@@ -187,10 +187,10 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
@@ -266,10 +266,10 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
@@ -351,10 +351,10 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
@@ -429,10 +429,10 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
@@ -514,10 +514,10 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
@@ -572,10 +572,10 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
+        .Times(AtLeast(1))
         .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingValues(DEFAULT_GROUP_NUMBER))
         .Times(1)
