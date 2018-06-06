@@ -39,9 +39,9 @@ class PlotSelectorPresenter(object):
         """
         # Create model and view, or accept mocked versions
         if view is None:
-            self.widget = PlotSelectorView(self)
+            self.view = PlotSelectorView(self)
         else:
-            self.widget = view
+            self.view = view
         if model is None:
             self.model = PlotSelectorModel(self, global_figure_manager)
         else:
@@ -56,9 +56,9 @@ class PlotSelectorPresenter(object):
         is applied to the updated selection if required.
         """
         self.model.update_plot_list()
-        filter_text = self.widget.get_filter_text()
+        filter_text = self.view.get_filter_text()
         if not filter_text:
-            self.widget.set_plot_list(self.model.plot_list)
+            self.view.set_plot_list(self.model.plot_list)
         else:
             self._filter_plot_list_by_string(filter_text)
 
@@ -69,8 +69,16 @@ class PlotSelectorPresenter(object):
         This is called by the view when closing plots is requested
         (e.g. pressing close or delete).
         """
-        selected_plots = self.widget.get_all_selected_plot_names()
+        selected_plots = self.view.get_all_selected_plot_names()
         self._close_plots(selected_plots)
+
+    def single_close_requested(self, plot_name):
+        """
+        This is used to close plots when a close action is called
+        that does not refer to the selected plot(s)
+        :param plot_name: Name of the plot to close
+        """
+        self._close_plots([plot_name])
 
     def _close_plots(self, list_of_plots):
         """
@@ -87,7 +95,7 @@ class PlotSelectorPresenter(object):
         Called by the view when the filter text is changed (e.g. by
         typing or clearing the text)
         """
-        filter_text = self.widget.get_filter_text()
+        filter_text = self.view.get_filter_text()
         self._filter_plot_list_by_string(filter_text)
 
     def _filter_plot_list_by_string(self, filter_text):
@@ -97,13 +105,13 @@ class PlotSelectorPresenter(object):
         :param filter_text: A string containing the filter text
         """
         if not filter_text:
-            self.widget.set_plot_list(self.model.plot_list)
+            self.view.set_plot_list(self.model.plot_list)
         else:
             filtered_plot_list = []
             for plot_name in self.model.plot_list:
                 if filter_text.lower() in plot_name.lower():
                     filtered_plot_list.append(plot_name)
-            self.widget.set_plot_list(filtered_plot_list)
+            self.view.set_plot_list(filtered_plot_list)
 
     # ----------------------- Plot Selection ------------------------
 
@@ -112,5 +120,5 @@ class PlotSelectorPresenter(object):
         When a list item is double clicked the view calls this method
         to bring the selected plot to the front
         """
-        plot_name = self.widget.get_currently_selected_plot_name()
+        plot_name = self.view.get_currently_selected_plot_name()
         self.model.make_plot_active(plot_name)

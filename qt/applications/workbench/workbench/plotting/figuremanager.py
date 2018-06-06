@@ -33,9 +33,6 @@ from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisE
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 
 
-qApp = QApplication.instance()
-
-
 class QAppThreadCall(QObject):
     """
     Wraps a callable object and forces any calls made to it to be executed
@@ -43,8 +40,10 @@ class QAppThreadCall(QObject):
     """
 
     def __init__(self, callee):
+        self.qApp = QApplication.instance()
+
         QObject.__init__(self)
-        self.moveToThread(qApp.thread())
+        self.moveToThread(self.qApp.thread())
         self.callee = callee
         # Help should then give the correct doc
         self.__call__.__func__.__doc__ = callee.__doc__
@@ -60,7 +59,7 @@ class QAppThreadCall(QObject):
         it invokes the do_call method as a slot via a
         BlockingQueuedConnection.
         """
-        if QThread.currentThread() == qApp.thread():
+        if QThread.currentThread() == self.qApp.thread():
             return self.callee(*args, **kwargs)
         else:
             self._store_function_args(*args, **kwargs)
