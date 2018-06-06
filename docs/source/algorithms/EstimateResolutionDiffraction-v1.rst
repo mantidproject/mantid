@@ -30,7 +30,7 @@ and thus
 
 where,
 
--  :math:`\Delta T` is the time resolution from modulator
+-  :math:`\Delta T` is the time resolution from moderator
 -  :math:`\Delta\theta` is the coverage of the detector, and can be
    approximated from the square root of the solid angle of the detector
    to sample

@@ -22,9 +22,10 @@ import unittest
 
 from qtpy.QtWidgets import QInputDialog
 
-from mantidqt.utils.qt.testing import ModalTester
+from mantidqt.utils.qt.testing import requires_qapp, ModalTester
 
 
+@requires_qapp
 class TestModalTester(unittest.TestCase):
 
     def test_pass_widget_closed(self):
