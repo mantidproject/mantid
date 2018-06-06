@@ -8,6 +8,17 @@ import urllib2
 import zipfile
 
 
+FAILED_DOWNLOAD_MESSAGE = "Could not download the GSAS installation package. " \
+                          "This can occur for many reasons, one of which is " \
+                          "that your computer is not connected to the internet.\n" \
+                          "A common reason is that your version of SSL is out of date " \
+                          "(often seen on OSX). From a Python shell, run " \
+                          "'import ssl; print(ssl.OPENSSL_VERSION)'\n" \
+                          "If you see a version number less than 1.0, you need to either " \
+                          "upgrade SSL (contact the Mantid team or seek help online) " \
+                          "or do a manual installation from the GSAS-II website.\n" \
+                          "If neither of these solutions yield anything useful, please " \
+                          "get in contact with the Mantid team."
 GSAS_SVN_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/GSASIIproxy.zip"
 GSAS_BOOTSTRAP_URL = "https://subversion.xray.aps.anl.gov/pyGSAS/install/bootstrap.py"
 GSAS_PROXY_FILE_NAME = "GSASIIProxy.zip"
@@ -15,7 +26,10 @@ GSAS_HOME_DIR_NAME = "g2conda"
 
 
 def download_zip_file(target_location):
-    response = urllib2.urlopen(GSAS_SVN_URL)
+    try:
+        response = urllib2.urlopen(GSAS_SVN_URL)
+    except urllib2.URLError as e:
+        raise RuntimeError(FAILED_DOWNLOAD_MESSAGE)
     zip_file = response.read()
     response.close()
 
