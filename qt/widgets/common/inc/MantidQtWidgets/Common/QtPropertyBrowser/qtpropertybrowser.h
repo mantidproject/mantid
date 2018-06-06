@@ -153,7 +153,6 @@ public:
   void propertyRemoved(QtProperty *property, QtProperty *parentProperty) const;
   void propertyInserted(QtProperty *property, QtProperty *parentProperty,
                         QtProperty *afterProperty) const;
-
   QSet<QtProperty *> m_properties;
 };
 
@@ -165,6 +164,7 @@ public:
 
   QSet<QtProperty *> properties() const;
   void clear() const;
+  bool hasProperty(QtProperty *const prop) const;
 
   QtProperty *addProperty(const QString &name = QString());
 Q_SIGNALS:

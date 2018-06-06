@@ -1,10 +1,10 @@
 #include "EnggDiffFittingViewQtWidget.h"
+#include "EnggDiffFittingModel.h"
+#include "EnggDiffFittingPresenter.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "EnggDiffFittingModel.h"
-#include "EnggDiffFittingPresenter.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include <array>

@@ -53,8 +53,8 @@ public:
     auto *sibling1 = new QStandardItem("Sibling 1");
 
     auto *rootItem = model->invisibleRootItem();
-    rootItem->appendRow({sibling0});
-    rootItem->appendRow({sibling1});
+    rootItem->appendRow(sibling0);
+    rootItem->appendRow(sibling1);
 
     auto newSiblingCell = Cell("Some Dummy Text");
 
@@ -71,8 +71,8 @@ public:
     auto *sibling1 = new QStandardItem("Sibling 1");
 
     auto *rootItem = model->invisibleRootItem();
-    rootItem->appendRow({sibling0});
-    rootItem->appendRow({sibling1});
+    rootItem->appendRow(sibling0);
+    rootItem->appendRow(sibling1);
 
     auto rootIndex = QModelIndexForMainModel();
     auto sibling0Index = fromMainModel(

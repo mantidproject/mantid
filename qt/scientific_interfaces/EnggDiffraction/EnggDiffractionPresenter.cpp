@@ -1,4 +1,7 @@
 #include "EnggDiffractionPresenter.h"
+#include "EnggDiffractionPresWorker.h"
+#include "EnggVanadiumCorrectionsModel.h"
+#include "IEnggDiffractionView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,8 +10,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "EnggDiffractionPresWorker.h"
-#include "IEnggDiffractionView.h"
 
 #include <algorithm>
 #include <cctype>
@@ -57,7 +58,10 @@ std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(nullptr), m_calibFinishedOK(false),
       m_focusFinishedOK(false), m_rebinningFinishedOK(false), m_view(view),
-      m_viewHasClosed(false) {
+      m_viewHasClosed(false),
+      m_vanadiumCorrectionsModel(
+          boost::make_shared<EnggVanadiumCorrectionsModel>(
+              m_view->currentCalibSettings(), m_view->currentInstrument())) {
   if (!m_view) {
     throw std::runtime_error(
         "Severe inconsistency found. Presenter created "
@@ -1059,8 +1063,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &ceriaNo,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
-  ITableWorkspace_sptr vanIntegWS;
-  MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
   // Append current instrument name if numerical only entry
@@ -1068,10 +1070,14 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   std::string vanFileHint, cerFileHint;
   appendCalibInstPrefix(vanNo, ceriaNo, vanFileHint, cerFileHint);
 
-  // save vanIntegWS and vanCurvesWS as open genie
-  // see where spec number comes from
-  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
-                               vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
+  // TODO: the settings tab should emit a signal when these are changed, on
+  // which the vanadium corrections model should be updated automatically
+  m_vanadiumCorrectionsModel->setCalibSettings(cs);
+  m_vanadiumCorrectionsModel->setCurrentInstrument(m_view->currentInstrument());
+  const auto vanadiumCorrectionWorkspaces =
+      m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(vanNo);
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
@@ -1711,20 +1717,15 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                                           const std::string &runNo, size_t bank,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
-  ITableWorkspace_sptr vanIntegWS;
-  MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr inWS;
 
-  const std::string vanNo = m_view->currentVanadiumNo();
-
-  // Append instrument name if numerical only entry to help load
-  std::string vanFileHint;
-  // We dont need cerium file name so just pass vanadium number twice and
-  // ignore return
-  appendCalibInstPrefix(vanNo, vanFileHint);
-
-  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
-                               vanCurvesWS, cs.m_forceRecalcOverwrite, "");
+  m_vanadiumCorrectionsModel->setCalibSettings(cs);
+  m_vanadiumCorrectionsModel->setCurrentInstrument(m_view->currentInstrument());
+  const auto vanadiumCorrectionWorkspaces =
+      m_vanadiumCorrectionsModel->fetchCorrectionWorkspaces(
+          m_view->currentVanadiumNo());
+  const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
+  const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
@@ -1854,260 +1855,6 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
       throw;
     }
   }
-}
-
-/**
-* Produce the two workspaces that are required to apply Vanadium
-* corrections. Try to load them if precalculated results are
-* available from files, otherwise load the source Vanadium run
-* workspace and do the calculations.
-*
-* @param vanNo Vanadium run number
-*
-* @param inputDirCalib The 'calibration files' input directory given
-* in settings
-*
-* @param vanIntegWS workspace where to create/load the Vanadium
-* spectra integration
-*
-* @param vanCurvesWS workspace where to create/load the Vanadium
-* aggregated per-bank curve
-*
-* @param forceRecalc whether to calculate Vanadium corrections even
-* if the files of pre-calculated results are found
-*
-*
-* @param specNos string carrying cropped calib info: spectra to use
-* when cropped calibrating.
-*/
-void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
-    const std::string &vanNo, const std::string &inputDirCalib,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    bool forceRecalc, const std::string &specNos) {
-  bool foundPrecalc = false;
-
-  std::string preIntegFilename, preCurvesFilename;
-  findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
-                                   preCurvesFilename, foundPrecalc);
-
-  // if pre calculated not found ..
-  if (forceRecalc || !foundPrecalc) {
-    g_log.notice() << "Calculating Vanadium corrections. This may take a "
-                      "while...\n";
-    try {
-      calcVanadiumWorkspaces(vanNo, vanIntegWS, vanCurvesWS);
-    } catch (std::invalid_argument &ia) {
-      g_log.error() << "Failed to calculate Vanadium corrections. "
-                       "There was an error in the execution of the algorithms "
-                       "required to calculate Vanadium corrections. Some "
-                       "properties passed to the algorithms were invalid. "
-                       "This is possibly because some of the settings are not "
-                       "consistent. Please check the log messages for "
-                       "details. Details: " +
-                           std::string(ia.what()) << '\n';
-      throw;
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Failed to calculate Vanadium corrections. "
-                       "There was an error while executing one of the "
-                       "algorithms used to perform Vanadium corrections. "
-                       "There was no obvious error in the input properties "
-                       "but the algorithm failed. Please check the log "
-                       "messages for details." +
-                           std::string(re.what()) << '\n';
-      throw;
-    }
-  } else {
-    g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run " << vanNo
-                   << ". Re-using these files: " << preIntegFilename << ", and "
-                   << preCurvesFilename << '\n';
-    try {
-      loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
-                                    vanIntegWS, vanCurvesWS, vanNo, specNos);
-    } catch (std::invalid_argument &ia) {
-      g_log.error() << "Error while loading precalculated Vanadium corrections",
-          "The files with precalculated Vanadium corection features (spectra "
-          "integration and per-bank curves) were found (with names '" +
-              preIntegFilename + "' and '" + preCurvesFilename +
-              "', respectively, but there was a problem with the inputs to "
-              "the "
-              "load algorithms to load them: " +
-              std::string(ia.what());
-      throw;
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Error while loading precalculated Vanadium corrections",
-          "The files with precalculated Vanadium corection features (spectra "
-          "integration and per-bank curves) were found (with names '" +
-              preIntegFilename + "' and '" + preCurvesFilename +
-              "', respectively, but there was a problem while loading them. "
-              "Please check the log messages for details. You might want to "
-              "delete those files or force recalculations (in settings). "
-              "Error "
-              "details: " +
-              std::string(re.what());
-      throw;
-    }
-  }
-}
-
-/**
-* builds the expected names of the precalculated Vanadium correction
-* files and tells if both files are found, similar to:
-* ENGINX_precalculated_vanadium_run000236516_integration.nxs
-* ENGINX_precalculated_vanadium_run00236516_bank_curves.nxs
-*
-* @param vanNo Vanadium run number
-* @param inputDirCalib calibration directory in settings
-* @param preIntegFilename if not found on disk, the string is set as empty
-* @param preCurvesFilename if not found on disk, the string is set as empty
-* @param found true if both files are found and (re-)usable
-*/
-void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
-    const std::string &vanNo, const std::string &inputDirCalib,
-    std::string &preIntegFilename, std::string &preCurvesFilename,
-    bool &found) {
-  found = false;
-
-  const std::string runNo = std::string(2, '0').append(vanNo);
-
-  preIntegFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
-                     "_integration.nxs";
-
-  preCurvesFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
-                      "_bank_curves.nxs";
-
-  Poco::Path pathInteg(inputDirCalib);
-  pathInteg.append(preIntegFilename);
-
-  Poco::Path pathCurves(inputDirCalib);
-  pathCurves.append(preCurvesFilename);
-
-  if (Poco::File(pathInteg).exists() && Poco::File(pathCurves).exists()) {
-    preIntegFilename = pathInteg.toString();
-    preCurvesFilename = pathCurves.toString();
-    found = true;
-  }
-}
-
-/**
-* Load precalculated results from Vanadium corrections previously
-* calculated.
-*
-* @param preIntegFilename filename (can be full path) where the
-* vanadium spectra integration table should be loaded from
-*
-* @param preCurvesFilename filename (can be full path) where the
-* vanadium per-bank curves should be loaded from
-*
-* @param vanIntegWS output (matrix) workspace loaded from the
-* precalculated Vanadium correction file, with the integration
-* resutls
-*
-* @param vanCurvesWS output (matrix) workspace loaded from the
-* precalculated Vanadium correction file, with the per-bank curves
-*
-* @param vanNo the Vanadium run number used for the openGenieAscii
-* output label
-*
-* @param specNos string carrying cropped calib info: spectra to use
-* when cropped calibrating.
-*/
-void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
-    const std::string &preIntegFilename, const std::string &preCurvesFilename,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
-    const std::string &vanNo, const std::string &specNos) {
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-
-  auto alg =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadNexus");
-  alg->initialize();
-  alg->setPropertyValue("Filename", preIntegFilename);
-  std::string integWSName = g_vanIntegrationWSName;
-  alg->setPropertyValue("OutputWorkspace", integWSName);
-  alg->execute();
-  // alg->getProperty("OutputWorkspace");
-  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integWSName);
-
-  auto algCurves =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadNexus");
-  algCurves->initialize();
-  algCurves->setPropertyValue("Filename", preCurvesFilename);
-  const std::string curvesWSName = g_vanCurvesWSName;
-  algCurves->setPropertyValue("OutputWorkspace", curvesWSName);
-  algCurves->execute();
-  // algCurves->getProperty("OutputWorkspace");
-  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
-
-  const std::string northBank = "North";
-  const std::string southBank = "South";
-
-  if (specNos != "") {
-    if (specNos == northBank) {
-      // when north bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, northBank, vanNo);
-    } else if (specNos == southBank) {
-      // when south bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, southBank, vanNo);
-    } else {
-
-      // when SpectrumNos are provided
-      std::string CustomisedBankName = m_view->currentCalibCustomisedBankName();
-
-      // assign default value if empty string passed
-      if (CustomisedBankName.empty())
-        CustomisedBankName = "cropped";
-
-      saveOpenGenie(curvesWSName, CustomisedBankName, vanNo);
-    }
-  } else {
-    // when full calibration is carried; saves both banks
-    saveOpenGenie(curvesWSName, northBank, vanNo);
-    saveOpenGenie(curvesWSName, southBank, vanNo);
-  }
-}
-
-/**
-* Calculate vanadium corrections (in principle only for when
-* pre-calculated results are not available). This is expensive.
-*
-* @param vanNo Vanadium run number
-*
-* @param vanIntegWS where to keep the Vanadium run spectra
-* integration values
-*
-* @param vanCurvesWS workspace where to keep the per-bank vanadium
-* curves
-*/
-void EnggDiffractionPresenter::calcVanadiumWorkspaces(
-    const std::string &vanNo, ITableWorkspace_sptr &vanIntegWS,
-    MatrixWorkspace_sptr &vanCurvesWS) {
-
-  auto load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-  load->initialize();
-  load->setPropertyValue("Filename",
-                         vanNo); // TODO more specific build Vanadium filename
-  std::string vanWSName = "engggui_vanadium_ws";
-  load->setPropertyValue("OutputWorkspace", vanWSName);
-  load->execute();
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  MatrixWorkspace_sptr vanWS = ADS.retrieveWS<MatrixWorkspace>(vanWSName);
-  // TODO?: maybe use setChild() and then
-  // load->getProperty("OutputWorkspace");
-
-  auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      "EnggVanadiumCorrections");
-  alg->initialize();
-  alg->setProperty("VanadiumWorkspace", vanWS);
-  std::string integName = g_vanIntegrationWSName;
-  alg->setPropertyValue("OutIntegrationWorkspace", integName);
-  const std::string curvesName = g_vanCurvesWSName;
-  alg->setPropertyValue("OutCurvesWorkspace", curvesName);
-  alg->execute();
-
-  ADS.remove(vanWSName);
-
-  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
-  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
 }
 
 /**
@@ -2829,7 +2576,7 @@ std::string EnggDiffractionPresenter::outFitParamsTblNameGenerator(
 * "Focus"
 */
 Poco::Path
-EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) const {
   std::string rbn = m_view->getRBNumber();
   Poco::Path dir = outFilesRootDir();
 
@@ -2851,6 +2598,25 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
                   << dir.toString() << ". Error details: " << re.what() << '\n';
   }
   return dir;
+}
+
+std::string
+EnggDiffractionPresenter::userHDFRunFilename(const int runNumber) const {
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(runNumber) + ".hdf5");
+  return userOutputDir.toString();
+}
+
+std::string EnggDiffractionPresenter::userHDFMultiRunFilename(
+    const std::vector<RunLabel> &runLabels) const {
+  const auto &begin = runLabels.cbegin();
+  const auto &end = runLabels.cend();
+  const auto minLabel = std::min_element(begin, end);
+  const auto maxLabel = std::max_element(begin, end);
+  auto userOutputDir = outFilesUserDir("Runs");
+  userOutputDir.append(std::to_string(minLabel->runNumber) + "_" +
+                       std::to_string(maxLabel->runNumber) + ".hdf5");
+  return userOutputDir.toString();
 }
 
 /**
@@ -2888,7 +2654,7 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
 /**
  * Produces the root path where output files are going to be written.
  */
-Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
+Poco::Path EnggDiffractionPresenter::outFilesRootDir() const {
   // TODO decide whether to move into settings or use mantid's default directory
   // after discussion with users
   const std::string rootDir = "EnginX_Mantid";
@@ -2896,11 +2662,11 @@ Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
 
   try {
 // takes to the root of directory according to the platform
-#ifdef __unix__
-    dir = Poco::Path().home();
-#else
+#ifdef _WIN32
     const std::string ROOT_DRIVE = "C:/";
     dir.assign(ROOT_DRIVE);
+#else
+    dir = Poco::Path().home();
 #endif
     dir.append(rootDir);
 

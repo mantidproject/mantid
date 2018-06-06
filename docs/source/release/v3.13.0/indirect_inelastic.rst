@@ -35,7 +35,7 @@ Improved
 
 - :ref:`algm-ConvolutionFitSequential` and :ref:`algm-IqtFitSequential` can now accept multiple datasets as input, in
   the same format as that of :ref:`algm-PlotPeakByLogValue`.
-
+- :ref:`algm-IndirectILLEnergyTransfer` was fixed to have the correct sign for the energy transfer.
 
 Data Analysis Interfaces
 ------------------------
