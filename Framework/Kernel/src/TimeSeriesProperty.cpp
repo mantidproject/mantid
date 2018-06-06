@@ -673,6 +673,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     if (outputs[i]->size() == 0) {
       g_log.error() << i << "-th split-out term (out of " << outputs.size() << ") of "
                     << m_name << " has zero size" << "\n";
+      throw std::runtime_error("Found a failed case!");
       // if the output has zero length, then put the last valid entrance ???
       // but it is not a good solution! because it can be very confusing
     }
