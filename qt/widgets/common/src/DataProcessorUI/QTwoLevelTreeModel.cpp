@@ -900,8 +900,8 @@ void QTwoLevelTreeModel::tableDataUpdated(const QModelIndex &topLeft,
   setProcessed(false, group);
   setError("", group);
   for (int i = start; i <= end; ++i) {
-    setProcessed(false, group, index(group, 0));
-    setError("", group, index(group, 0));
+    setProcessed(false, i, index(group, 0));
+    setError("", i, index(group, 0));
   }
 
   // Update cached row data from the values in the table
