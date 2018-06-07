@@ -211,12 +211,13 @@ std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices) {
 
-  // http://www.ambrsoft.com/TrigoCalc/Plan3D/PointsCoplanar.htm
-  // TODO - check vertices are coplanar, and if so, create a 2D mesh instead,
-  // though this should be put somehow inside Mesh2D?
-
-  return Mantid::Kernel::make_unique<Geometry::MeshObject>(
-      std::move(triangularFaces), std::move(vertices), Kernel::Material{});
+  if (NexusShapeFactory::pointsCoplanar(vertices))
+    // TODO. Make Mesh2D
+    return Mantid::Kernel::make_unique<Geometry::MeshObject>(
+        std::move(triangularFaces), std::move(vertices), Kernel::Material{});
+  else
+    return Mantid::Kernel::make_unique<Geometry::MeshObject>(
+        std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
 } // namespace NexusShapeFactory
 } // namespace NexusGeometry

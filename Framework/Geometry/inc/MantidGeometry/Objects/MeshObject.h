@@ -37,7 +37,8 @@ class vtkGeometryCacheWriter;
 
 Mesh Object of Triangles assumed to form one or more
 non-intersecting closed surfaces enclosing separate volumes.
-The number of vertices is limited to 65535.
+The number of vertices is limited to 2^16 based on index type. For 2D Meshes see
+Mesh2DObject
 
 Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
