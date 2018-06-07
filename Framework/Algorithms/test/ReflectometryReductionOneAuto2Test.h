@@ -8,13 +8,13 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -642,10 +642,8 @@ public:
     TS_ASSERT_DELTA(outLam0->x(0).back(), 4.0, 0.0001);
 
     TS_ASSERT_DELTA(outLam0->y(0)[0], 0.8101767718, 0.0001);
-    // 1 and 2 values are swapped because of a bug
-    // in PolarizationCorrectionFredrikze
-    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.7836941583, 0.0001);
-    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.7893217144, 0.0001);
+    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.7893217144, 0.0001);
+    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.7836941583, 0.0001);
     TS_ASSERT_DELTA(outLam3->y(0)[0], 0.7628391019, 0.0001);
 
     auto IvsQ0 =
@@ -660,10 +658,8 @@ public:
     TS_ASSERT_EQUALS(IvsQ0->blocksize(), 10);
 
     TS_ASSERT_DELTA(IvsQ0->y(0)[0], 0.8182525527, 0.0001);
-    // 1 and 2 values are swapped because of a bug
-    // in PolarizationCorrectionFredrikze
-    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.8162703504, 0.0001);
-    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.8153535819, 0.0001);
+    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.8153535819, 0.0001);
+    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.8162703504, 0.0001);
     TS_ASSERT_DELTA(IvsQ3->y(0)[0], 0.8133713796, 0.0001);
 
     ADS.clear();
@@ -730,10 +726,8 @@ public:
     TS_ASSERT_DELTA(outLam0->x(0).back(), 4.0, 0.0001);
 
     TS_ASSERT_DELTA(outLam0->y(0)[0], 0.901752, 0.0001);
-    // 1 and 2 values are swapped because of a bug
-    // in PolarizationCorrectionFredrikze
-    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.697277, 0.0001);
-    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.797947, 0.0001);
+    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.797947, 0.0001);
+    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.697277, 0.0001);
     TS_ASSERT_DELTA(outLam3->y(0)[0], 0.593471, 0.0001);
 
     auto IvsQ0 =
@@ -748,10 +742,8 @@ public:
     TS_ASSERT_EQUALS(IvsQ0->blocksize(), 10);
 
     TS_ASSERT_DELTA(IvsQ0->y(0)[0], 0.9012838, 0.0001);
-    // 1 and 2 values are swapped because of a bug
-    // in PolarizationCorrectionFredrikze
-    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.697734, 0.0001);
-    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.797947, 0.0001);
+    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.797947, 0.0001);
+    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.697734, 0.0001);
     TS_ASSERT_DELTA(IvsQ3->y(0)[0], 0.594403, 0.0001);
 
     ADS.clear();

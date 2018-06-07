@@ -3,16 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
 #include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/CreatePolarizationEfficiencies.h"
+#include "MantidDataHandling/JoinISISPolarizationEfficiencies.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
-
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/make_shared.hpp>
@@ -310,6 +311,86 @@ public:
       checkAlg->execute();
       TS_ASSERT(checkAlg->getProperty("Result"));
     }
+  }
+
+  void test_run_PA_non_unity() {
+    auto Rpp = create1DWorkspace(4, 0.9, 1);
+    auto Rpa = create1DWorkspace(4, 0.8, 1);
+    auto Rap = create1DWorkspace(4, 0.7, 1);
+    auto Raa = create1DWorkspace(4, 0.6, 1);
+
+    auto Pp = create1DWorkspace(4, 0.99, 1);
+    auto Ap = create1DWorkspace(4, 0.98, 1);
+    auto Pa = create1DWorkspace(4, 0.97, 1);
+    auto Aa = create1DWorkspace(4, 0.96, 1);
+
+    auto Rho = Pa / Pp;
+    auto Alpha = Aa / Ap;
+
+    Mantid::DataHandling::JoinISISPolarizationEfficiencies join_eff;
+    join_eff.initialize();
+    join_eff.setChild(true);
+    join_eff.setRethrows(true);
+    join_eff.setProperty("Pp", Pp);
+    join_eff.setProperty("Ap", Ap);
+    join_eff.setProperty("Rho", Rho);
+    join_eff.setProperty("Alpha", Alpha);
+    join_eff.setPropertyValue("OutputWorkspace", "dummy");
+    join_eff.execute();
+    MatrixWorkspace_sptr efficiencies = join_eff.getProperty("OutputWorkspace");
+    TS_ASSERT(efficiencies);
+
+    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+
+    auto Ipp = (Rpp * (Pp + 1.0) * (Ap + 1.0) +
+                Raa * (Pp * (-1.0) + 1.0) * (Ap * (-1.0) + 1.0) +
+                Rpa * (Pp + 1.0) * (Ap * (-1.0) + 1.0) +
+                Rap * (Pp * (-1.0) + 1.0) * (Ap + 1.0)) /
+               4.;
+    auto Iaa = (Raa * (Pa + 1.0) * (Aa + 1.0) +
+                Rpp * (Pa * (-1.0) + 1.0) * (Aa * (-1.0) + 1.0) +
+                Rap * (Pa + 1.0) * (Aa * (-1.0) + 1.0) +
+                Rpa * (Pa * (-1.0) + 1.0) * (Aa + 1.0)) /
+               4.;
+    auto Ipa = (Rpa * (Pp + 1.0) * (Aa + 1.0) +
+                Rap * (Pp * (-1.0) + 1.0) * (Aa * (-1.0) + 1.0) +
+                Rpp * (Pp + 1.0) * (Aa * (-1.0) + 1.0) +
+                Raa * (Pp * (-1.0) + 1.0) * (Aa + 1.0)) /
+               4.;
+    auto Iap = (Rap * (Pa + 1.0) * (Ap + 1.0) +
+                Rpa * (Pa * (-1.0) + 1.0) * (Ap * (-1.0) + 1.0) +
+                Raa * (Pa + 1.0) * (Ap * (-1.0) + 1.0) +
+                Rpp * (Pa * (-1.0) + 1.0) * (Ap + 1.0)) /
+               4.;
+
+    groupWS->addWorkspace(Ipp);
+    groupWS->addWorkspace(Ipa);
+    groupWS->addWorkspace(Iap);
+    groupWS->addWorkspace(Iaa);
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("Efficiencies", efficiencies);
+    alg.execute();
+    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(),
+                      groupWS->size());
+
+    auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(0));
+    auto out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(1));
+    auto out3 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(2));
+    auto out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS->getItem(3));
+
+    TS_ASSERT_DELTA(out1->y(0)[0], 0.9, 1e-14);
+    TS_ASSERT_DELTA(out2->y(0)[0], 0.8, 1e-14);
+    TS_ASSERT_DELTA(out3->y(0)[0], 0.7, 1e-14);
+    TS_ASSERT_DELTA(out4->y(0)[0], 0.6, 1e-14);
   }
 };
 
