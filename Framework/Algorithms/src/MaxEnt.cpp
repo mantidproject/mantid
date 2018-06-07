@@ -260,7 +260,9 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   }
 
   // Check linear adjustments, we expect and even number of histograms
-  // and if any, they must be sufficient for all spectra in input workspace.
+  // and if any, they must be sufficient for all spectra in input workspace,
+  // if per spectrum reconstruction is done.
+  bool psr = getProperty("perSpectrumReconstruction");
   MatrixWorkspace_sptr linAdj = getProperty("DataLinearAdj");
   size_t nAHistograms = 0;
   if(linAdj) 
@@ -268,12 +270,13 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   if (nAHistograms % 2) 
     result["DataLinearAdj"] = "The number of histograms in the linear "
     "adjustments workspace must be even, because they are complex data";
-  else if (nAHistograms > 0 && nAHistograms < nHistograms)
+  else if (psr && nAHistograms > 0 && nAHistograms < nHistograms)
     result["DataLinearAdj"] = "The number of histograms in the linear "
     "adjustments workspace is insufficient for the input workspace";
 
   // Check constant adjustments, we expect and even number of histograms
-  // and if any, they must be sufficient for all spectra in input workspace.
+  // and if any, they must be sufficient for all spectra in input workspace,
+  // if per spectrum reconstruction is done.
   MatrixWorkspace_sptr constAdj = getProperty("DataConstAdj");
   nAHistograms = 0; 
   if(constAdj) 
@@ -281,7 +284,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   if (nAHistograms % 2)
     result["DataConstAdj"] = "The number of histograms in the constant "
     "adjustments workspace must be even, because they are complex data";
-  else if (nAHistograms > 0 && nAHistograms < nHistograms)
+  else if (psr && nAHistograms > 0 && nAHistograms < nHistograms)
     result["DataConstAdj"] = "The number of histograms in the constant "
     "adjustments workspace is insufficient for the input workspace";
 
@@ -439,10 +442,10 @@ void MaxEnt::exec() {
     std::vector<double> linearAdjustments;
     std::vector<double> constAdjustments;
     if (dataLinearAdj) {
-      linearAdjustments = toComplex(dataLinearAdj, spec, false, sumSpectra);
+      linearAdjustments = toComplex(dataLinearAdj, spec, false, false);
     }
     if (dataConstAdj) {
-      constAdjustments = toComplex(dataConstAdj, spec, false, sumSpectra);
+      constAdjustments = toComplex(dataConstAdj, spec, false, false);
     }
 
     // To record the algorithm's progress
