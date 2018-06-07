@@ -153,6 +153,7 @@ private:
                     size_t sliceIndex);
 
   void setReductionPaused() override;
+  void setReductionCompleted();
 
   Mantid::API::IEventWorkspace_sptr
   retrieveWorkspaceOrCritical(QString const &name) const;

@@ -1028,6 +1028,14 @@ void ReflDataProcessorPresenter::setReductionPaused() {
   m_mainPresenter->confirmReductionPaused(m_group);
 }
 
+/** This override does not update the widget state yet because this is done via
+ * a call back from the main presenter, taking autoreduction into account
+ */
+void ReflDataProcessorPresenter::setReductionCompleted() {
+  m_reductionPaused = true;
+  m_mainPresenter->confirmReductionCompleted(m_group);
+}
+
 /**
 End reduction
 *
@@ -1041,10 +1049,10 @@ void ReflDataProcessorPresenter::endReduction(const bool reductionSuccessful) {
     saveNotebook(m_itemsToProcess);
 
   if (m_mainPresenter->autoreductionRunning(m_group) && !m_pauseReduction) {
-    // Finished processing but autoreduction is still running
-    setReductionPaused();
+    // Just signal that the reduction has completed
+    setReductionCompleted();
   } else {
-    // Paused, or reduction has completely finished. Stop the reduction
+    // Stop all processing
     pause();
     setReductionPaused();
   }
