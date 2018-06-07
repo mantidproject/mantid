@@ -75,6 +75,7 @@ private:
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
   std::vector<std::string>
       m_outputWorkspaces; ///< get a vector of workspaces to plot
+  QString validateDetectorGrouping();
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

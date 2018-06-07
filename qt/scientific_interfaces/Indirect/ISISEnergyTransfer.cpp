@@ -46,7 +46,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
-
+  QRegExp re("([0-9]+[-]?[0-9]*,[ ])*[0-9]+[-]?[0-9]*");
+  m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
   // Validate to remove invalid markers
   validateTab();
 }
@@ -72,11 +73,9 @@ bool ISISEnergyTransfer::validate() {
     uiv.addErrorMessage("Calibration file/workspace is invalid.");
   }
 
-  // Mapping file
-  if ((m_uiForm.cbGroupingOptions->currentText() == "File") &&
-      (!m_uiForm.dsMapFile->isValid())) {
-    uiv.addErrorMessage("Mapping file is invalid.");
-  }
+  QString groupingError = validateDetectorGrouping();
+  if (!groupingError.isEmpty())
+    uiv.addErrorMessage(groupingError);
 
   // Rebinning
   if (!m_uiForm.ckDoNotRebin->isChecked()) {
@@ -185,6 +184,15 @@ bool ISISEnergyTransfer::validate() {
   showMessageBox(error);
 
   return uiv.isAllInputValid();
+}
+
+QString ISISEnergyTransfer::validateDetectorGrouping() {
+  if (m_uiForm.cbGroupingOptions->currentText() == "File") {
+    if (!m_uiForm.dsMapFile->isValid()) {
+      return "Mapping file is invalid.";
+    }
+  }
+  return "";
 }
 
 void ISISEnergyTransfer::run() {
