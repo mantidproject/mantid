@@ -98,6 +98,15 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         QTest.keyClick(self.view.close_button, Qt.Key_Delete)
         self.assertEquals(self.presenter.close_action_called.call_count, 2)
 
+    def test_x_button_pressed_calls_presenter(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        item = self.view.list_widget.item(1)
+        widget = self.view.list_widget.itemWidget(item)
+        QTest.mouseClick(widget.x_button, Qt.LeftButton)
+        self.presenter.close_single_plot.assert_called_once_with("Plot2")
+
     # ----------------------- Plot Filtering ------------------------
 
     def test_filter_text_typing_calls_presenter_and_sets_filter_text(self):

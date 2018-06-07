@@ -72,7 +72,7 @@ class PlotSelectorPresenter(object):
         selected_plots = self.view.get_all_selected_plot_names()
         self._close_plots(selected_plots)
 
-    def single_close_requested(self, plot_name):
+    def close_single_plot(self, plot_name):
         """
         This is used to close plots when a close action is called
         that does not refer to the selected plot(s)

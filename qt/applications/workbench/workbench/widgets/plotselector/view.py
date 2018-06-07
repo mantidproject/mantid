@@ -159,19 +159,19 @@ class WidgetItemWithCloseButton(QWidget):
         self.presenter = presenter
 
         self.label = QLabel(text)
-        self.close_icon = QIcon.fromTheme('window-close')
-        self.close_button = QPushButton(self.close_icon, "")
-        self.close_button.sizeHint()
-        self.close_button.setMaximumWidth(self.close_button.sizeHint().width())
-        self.close_button.pressed.connect(lambda: self.x_pressed(self.label.text()))
+        self.x_icon = QIcon.fromTheme('window-close')
+        self.x_button = QPushButton(self.x_icon, "")
+        self.x_button.sizeHint()
+        self.x_button.setMaximumWidth(self.x_button.sizeHint().width())
+        self.x_button.pressed.connect(lambda: self.x_pressed(self.label.text()))
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.label)
-        self.layout.addWidget(self.close_button)
+        self.layout.addWidget(self.x_button)
 
         self.layout.sizeHint()
 
         self.setLayout(self.layout)
 
     def x_pressed(self, plot_name):
-        self.presenter.single_close_requested(plot_name)
+        self.presenter.close_single_plot(plot_name)
