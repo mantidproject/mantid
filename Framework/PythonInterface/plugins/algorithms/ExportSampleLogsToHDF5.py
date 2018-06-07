@@ -50,20 +50,9 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
 
             for log_property in log_properties:
                 property_dtype = self._dtype_from_property_type(log_property)
-
-                if isinstance(log_property, FloatArrayProperty):
-                    if len(log_property.value) > 0:
-                        log_value = log_property.value[0]
-                    else:
-                        continue
-                elif self._is_time_series(log_property):
-                    log_value = log_property.timeAverageValue()
-                else:
-                    log_value = log_property.value
-
-                    if isinstance(log_value, str):
-                        # For h5py and Python 3 - h5py doesn't get on well with Unicode strings
-                        log_value = log_value.encode()
+                log_value = self._get_value_from_property(log_property)
+                if log_value is None:
+                    continue
 
                 log_dataset = sample_logs_group.create_dataset(name=log_property.name, shape=(1,), dtype=property_dtype,
                                                                data=[log_value])
@@ -80,6 +69,22 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
             return "S{}".format(len(prop.value))
         raise RuntimeError("Unrecognised property type: \"{}\". Please contact the development team with this message".
                            format(prop.type))
+
+    def _get_value_from_property(self, prop):
+        if isinstance(prop, FloatArrayProperty):
+            if len(prop.value) > 0:
+                return prop.value[0]
+            else:
+                # The array is empty, so just skip it
+                return None
+        elif self._is_time_series(prop):
+            return prop.timeAverageValue()
+        else:
+            value = prop.value
+            if isinstance(value, str):
+                # For h5py and Python 3 - h5py doesn't get on well with Unicode strings
+                value = value.encode()
+            return value
 
     def _ignore_property(self, prop):
         # Skip StringTimeSeriesProperty, as time-averaging them means nothing, and also skip empty strings
