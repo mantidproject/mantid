@@ -16,6 +16,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
+from workbench.plotting.globalfiguremanager import FigureAction
+
 
 class PlotSelectorModel(object):
     """
@@ -48,14 +50,23 @@ class PlotSelectorModel(object):
         for figure in figures:
             self.plot_list.append(figure.get_window_title())
 
-    def notify(self):
+    def append_to_plot_list(self, plot_name):
+        self.plot_list.append(plot_name)
+
+    def remove_from_plot_list(self, plot_name):
+        self.plot_list.remove(plot_name)
+
+    def notify(self, action, plot_name):
         """
         This is called by GlobalFigureManager when plots are created
         or destroyed. This calls the presenter to update the plot
         list in the model and the view.
         :return:
         """
-        self.presenter.update_plot_list()
+        if action == FigureAction.New:
+            self.presenter.append_to_plot_list(plot_name)
+        if action == FigureAction.Closed:
+            self.presenter.remove_from_plot_list(plot_name)
 
     def make_plot_active(self, plot_name):
         """

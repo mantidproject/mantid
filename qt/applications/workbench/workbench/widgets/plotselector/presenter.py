@@ -62,6 +62,14 @@ class PlotSelectorPresenter(object):
         else:
             self._filter_plot_list_by_string(filter_text)
 
+    def append_to_plot_list(self, plot_name):
+        self.model.append_to_plot_list(plot_name)
+        self.view.append_to_plot_list(plot_name)
+
+    def remove_from_plot_list(self, plot_name):
+        self.model.remove_from_plot_list(plot_name)
+        self.view.remove_from_plot_list(plot_name)
+
     # ------------------------ Plot Closing -------------------------
 
     def close_action_called(self):

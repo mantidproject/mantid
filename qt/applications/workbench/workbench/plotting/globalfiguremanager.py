@@ -23,6 +23,13 @@ import gc
 # 3rdparty imports
 import six
 
+from mantidqt.py3compat import Enum
+
+
+class FigureAction(Enum):
+    New = 0
+    Closed = 1
+
 
 class GlobalFigureManager(object):
     """
@@ -69,6 +76,7 @@ class GlobalFigureManager(object):
         if not cls.has_fignum(num):
             return
         manager = cls.figs[num]
+        window_title = manager.get_window_title()
         manager.canvas.mpl_disconnect(manager._cidgcf)
 
         # There must be a good reason for the following careful
@@ -82,7 +90,7 @@ class GlobalFigureManager(object):
         del cls.figs[num]
         manager.destroy()
         gc.collect(1)
-        cls.notify_observers()
+        cls.notify_observers(FigureAction.Closed, window_title)
 
     @classmethod
     def destroy_fig(cls, fig):
@@ -151,7 +159,7 @@ class GlobalFigureManager(object):
                 cls._activeQue.append(m)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
-        cls.notify_observers()
+        cls.notify_observers(FigureAction.New, manager.get_window_title())
 
     @classmethod
     def draw_all(cls, force=False):
@@ -205,11 +213,12 @@ class GlobalFigureManager(object):
         cls.observers.append(observer)
 
     @classmethod
-    def notify_observers(cls):
+    def notify_observers(cls, action, plot_name):
         """
         Calls notify method on all observers
         """
         for observer in cls.observers:
-            observer.notify()
+            observer.notify(action, plot_name)
+
 
 atexit.register(GlobalFigureManager.destroy_all)

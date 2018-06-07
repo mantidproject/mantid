@@ -38,13 +38,16 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
         self.view = PlotSelectorView(self.presenter)
 
+    def get_widget_by_row_number(self, row_number):
+        item = self.view.list_widget.item(row_number)
+        return self.view.list_widget.itemWidget(item)
+
     def test_setting_plot_names_sets_names_in_list_view(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
         for index in range(len(self.view.list_widget)):
-            item = self.view.list_widget.item(index)
-            widget = self.view.list_widget.itemWidget(item)
+            widget = self.get_widget_by_row_number(index)
             self.assertEqual(widget.label.text(), plot_names[index])
 
     def test_setting_plot_names_to_empty_list(self):
@@ -102,10 +105,30 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        item = self.view.list_widget.item(1)
-        widget = self.view.list_widget.itemWidget(item)
+        widget = self.get_widget_by_row_number(1)
         QTest.mouseClick(widget.x_button, Qt.LeftButton)
         self.presenter.close_single_plot.assert_called_once_with("Plot2")
+
+    def test_x_button_pressed_leaves_selection_unchanged(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        # Set the selected items by clicking with control held
+        for row in [0, 2]:
+            widget = self.get_widget_by_row_number(row)
+            QTest.mouseClick(widget, Qt.LeftButton, Qt.ControlModifier)
+        plots_selected_old = self.view.get_all_selected_plot_names()
+        self.assertEquals(plots_selected_old, ["Plot1", "Plot3"])
+
+        widget = self.get_widget_by_row_number(1)
+        QTest.mouseClick(widget.x_button, Qt.LeftButton)
+
+        # We need to actually update the plot list, as the presenter would
+        self.view.remove_from_plot_list("Plot2")
+        self.presenter.close_single_plot.assert_called_once_with("Plot2")
+
+        plots_selected_new = self.view.get_all_selected_plot_names()
+        self.assertEquals(plots_selected_old, plots_selected_new)
 
     # ----------------------- Plot Filtering ------------------------
 

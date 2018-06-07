@@ -16,6 +16,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
+from workbench.plotting.globalfiguremanager import FigureAction
+
 from workbench.widgets.plotselector.model import PlotSelectorModel
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 
@@ -56,11 +58,13 @@ class PlotSelectorModelTest(unittest.TestCase):
     def test_observer_added_during_setup(self):
         self.assertEqual(self.global_figure_manager.add_observer.call_count, 1)
 
-    def test_notify_calls_update_in_presenter(self):
-        self.model.notify()
-        self.assertEqual(self.presenter.update_plot_list.call_count, 1)
-        self.model.notify()
-        self.assertEqual(self.presenter.update_plot_list.call_count, 2)
+    def test_notify_for_new_plot_calls_append_in_presenter(self):
+        self.model.notify(FigureAction.New, "Plot1")
+        self.presenter.append_to_plot_list.assert_called_once_with("Plot1")
+
+    def test_notify_for_closing_plot_calls_remove_in_presenter(self):
+        self.model.notify(FigureAction.Closed, "Plot1")
+        self.presenter.remove_from_plot_list.assert_called_once_with("Plot1")
 
     def test_make_plot_active_calls_current_figure(self):
         self.model.make_plot_active("Plot1")

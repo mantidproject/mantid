@@ -60,9 +60,13 @@ class PlotSelectorView(QWidget):
         layout.sizeHint()
         self.setLayout(layout)
 
-        # This must happen in the main GUI thread, else segfaults
+        # These must happen in the main GUI thread, else segfaults
         self.set_plot_list_orig = self.set_plot_list
         self.set_plot_list = QAppThreadCall(self.set_plot_list_orig)
+        self.append_to_plot_list_orig = self.append_to_plot_list
+        self.append_to_plot_list = QAppThreadCall(self.append_to_plot_list_orig)
+        self.remove_from_plot_list_orig = self.remove_from_plot_list
+        self.remove_from_plot_list = QAppThreadCall(self.remove_from_plot_list_orig)
 
         # Connect presenter methods to things in the view
         self.list_widget.doubleClicked.connect(self.presenter.list_double_clicked)
@@ -105,6 +109,14 @@ class PlotSelectorView(QWidget):
         list_widget.installEventFilter(self)
         return list_widget
 
+    def _add_to_plot_list(self, plot_name):
+        real_item = WidgetItemWithCloseButton(self.presenter, plot_name)
+        widget_item = QListWidgetItem()
+        size_hint = real_item.sizeHint()
+        widget_item.setSizeHint(size_hint)
+        self.list_widget.addItem(widget_item)
+        self.list_widget.setItemWidget(widget_item, real_item)
+
     def set_plot_list(self, plot_list):
         """
         Populate the plot list from the Presenter
@@ -112,12 +124,19 @@ class PlotSelectorView(QWidget):
         """
         self.list_widget.clear()
         for plot_name in plot_list:
-            real_item = WidgetItemWithCloseButton(self.presenter, plot_name)
-            widget_item = QListWidgetItem()
-            size_hint = real_item.sizeHint()
-            widget_item.setSizeHint(size_hint)
-            self.list_widget.addItem(widget_item)
-            self.list_widget.setItemWidget(widget_item, real_item)
+            self._add_to_plot_list(plot_name)
+
+    def append_to_plot_list(self, plot_name):
+        self._add_to_plot_list(plot_name)
+
+    def remove_from_plot_list(self, plot_name):
+        for index in range(len(self.list_widget)):
+            item = self.list_widget.item(index)
+            widget = self.list_widget.itemWidget(item)
+            if widget.label.text() == plot_name:
+                taken_item = self.list_widget.takeItem(index)
+                del taken_item
+                return
 
     def get_all_selected_plot_names(self):
         """
