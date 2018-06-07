@@ -2246,8 +2246,7 @@ void EnggDiffractionPresenter::saveGSS(const RunLabel &runLabel,
 
 void EnggDiffractionPresenter::saveNexus(const RunLabel &runLabel,
                                          const std::string &inputWorkspace) {
-  const auto filename =
-      outFileNameFactory(inputWorkspace, runLabel, ".nxs");
+  const auto filename = outFileNameFactory(inputWorkspace, runLabel, ".nxs");
   auto saveDirectory = outFilesUserDir("Focus");
   saveDirectory.append(filename);
   const auto fullOutFileName = saveDirectory.toString();
