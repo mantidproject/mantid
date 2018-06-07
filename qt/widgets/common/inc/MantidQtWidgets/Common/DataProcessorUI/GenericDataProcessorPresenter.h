@@ -172,6 +172,8 @@ public:
   // Sets whether to prompt user when getting selected runs
   void setPromptUser(bool allowPrompt) override;
 
+  void confirmReductionPaused() override;
+
 protected:
   template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
   // The table view we're managing
@@ -269,6 +271,7 @@ protected slots:
   void rowThreadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
+  virtual void setReductionPaused();
 
 private:
   void applyDefaultOptions(std::map<QString, QVariant> &options);

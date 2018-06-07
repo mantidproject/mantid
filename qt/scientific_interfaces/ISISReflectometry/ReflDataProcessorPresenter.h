@@ -152,6 +152,8 @@ private:
   QString takeSlice(const QString &runNo, TimeSlicingInfo &slicing,
                     size_t sliceIndex);
 
+  void setReductionPaused() override;
+
   Mantid::API::IEventWorkspace_sptr
   retrieveWorkspaceOrCritical(QString const &name) const;
 

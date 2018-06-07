@@ -570,7 +570,6 @@ void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
 
   // Don't continue if there are no items selected
   if (m_itemsToProcess.size() == 0) {
-    resume();
     endReduction(false);
     return;
   }
@@ -618,9 +617,7 @@ Process the next item in the selection
 void GenericDataProcessorPresenter::processNextItem() {
 
   if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
-    m_reductionPaused = true;
-    m_mainPresenter->confirmReductionPaused(m_group);
+    setReductionPaused();
     return;
   }
 
@@ -717,8 +714,7 @@ void GenericDataProcessorPresenter::endReduction(
 
   // Stop the reduction
   pause();
-  m_mainPresenter->confirmReductionPaused(m_group);
-  m_reductionPaused = true;
+  setReductionPaused();
 }
 
 /**
@@ -1791,26 +1787,31 @@ Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
-
-  updateWidgetEnabledState(false);
-
-  m_mainPresenter->pause(m_group);
-
   m_pauseReduction = true;
+  m_mainPresenter->pause(m_group);
 }
 
 /** Resumes reduction if currently paused
 */
 void GenericDataProcessorPresenter::resume() {
-
-  updateWidgetEnabledState(true);
-  m_mainPresenter->resume(m_group);
-
   m_pauseReduction = false;
   m_reductionPaused = false;
+  updateWidgetEnabledState(true);
+
+  m_mainPresenter->resume(m_group);
   m_mainPresenter->confirmReductionResumed(m_group);
 
   processNextItem();
+}
+
+void GenericDataProcessorPresenter::setReductionPaused() {
+  m_reductionPaused = true;
+  confirmReductionPaused();
+  m_mainPresenter->confirmReductionPaused(m_group);
+}
+
+void GenericDataProcessorPresenter::confirmReductionPaused() {
+  updateWidgetEnabledState(false);
 }
 
 /**

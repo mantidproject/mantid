@@ -118,6 +118,7 @@ public:
 
   virtual void skipProcessing() = 0;
   virtual void setPromptUser(bool allowPrompt) = 0;
+  virtual void confirmReductionPaused() {}
 };
 }
 }

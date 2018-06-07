@@ -3328,7 +3328,8 @@ public:
 
     // User hits the 'pause' button
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectUpdateViewToPausedState(mockDataProcessorView, Exactly(1));
+    // The widget states are not updated immediately (only on confirm)
+    expectUpdateViewToPausedState(mockDataProcessorView, Exactly(0));
     EXPECT_CALL(mockMainPresenter, pause(GROUP_NUMBER)).Times(1);
     presenter->notify(DataProcessorPresenter::PauseFlag);
 

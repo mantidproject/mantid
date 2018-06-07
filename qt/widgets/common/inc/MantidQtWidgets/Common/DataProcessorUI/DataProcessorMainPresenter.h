@@ -84,7 +84,7 @@ public:
   virtual void resume(int) const {}
 
   /// Handle data reduction paused/resumed confirmation
-  virtual void confirmReductionFinished(int) {}
+  virtual void confirmReductionCompleted(int) {}
   virtual void confirmReductionPaused(int){};
   virtual void confirmReductionResumed(int){};
   virtual void completedGroupReductionSuccessfully(GroupData const &,

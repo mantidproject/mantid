@@ -374,7 +374,7 @@ void ReflRunsTabPresenter::autoreduceNewRuns() {
     tablePresenter->setPromptUser(false);
     tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
   } else {
-    confirmReductionFinished(autoreductionGroup());
+    confirmReductionCompleted(autoreductionGroup());
   }
 }
 
@@ -745,9 +745,6 @@ void ReflRunsTabPresenter::pause(int group) {
     confirmReductionPaused(group);
 }
 
-/** Tells view to update the enabled/disabled state of all relevant widgets
- * based on the fact that processing is in progress
-*/
 void ReflRunsTabPresenter::resume(int group) const {
   UNUSED_ARG(group);
 }
@@ -755,7 +752,7 @@ void ReflRunsTabPresenter::resume(int group) const {
 /** Notifies main presenter that data reduction is confirmed to be finished
 * i.e. after all rows have been reduced
 */
-void ReflRunsTabPresenter::confirmReductionFinished(int group) {
+void ReflRunsTabPresenter::confirmReductionCompleted(int group) {
   UNUSED_ARG(group);
   m_view->startTimer(5000);
 }
@@ -766,6 +763,12 @@ void ReflRunsTabPresenter::confirmReductionFinished(int group) {
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   updateWidgetEnabledState();
   m_mainPresenter->notifyReductionPaused(group);
+
+  // We need to notify back to the table presenter to update the widget
+  // state. This must be done from here otherwise there is no notification to
+  // the table to update when autoprocessing is paused.
+  if (!autoreductionRunning())
+    getTablePresenter(group)->confirmReductionPaused();
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed

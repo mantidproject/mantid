@@ -376,13 +376,13 @@ public:
     verifyAndClearExpectations();
   }
 
-  void test_confirmReductionFinished() {
+  void test_confirmReductionCompleted() {
     auto presenter = createMocksAndPresenter(1);
 
     constexpr int GROUP_NUMBER = 0;
     EXPECT_CALL(*m_mockRunsTabView, startTimer(_)).Times(Exactly(1));
 
-    presenter.confirmReductionFinished(GROUP_NUMBER);
+    presenter.confirmReductionCompleted(GROUP_NUMBER);
     verifyAndClearExpectations();
   }
 

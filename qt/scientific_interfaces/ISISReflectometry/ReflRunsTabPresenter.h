@@ -89,7 +89,7 @@ public:
   void pause(int group) override;
   void resume(int group) const override;
   /// Reduction finished/paused/resumed confirmation handler
-  void confirmReductionFinished(int group) override;
+  void confirmReductionCompleted(int group) override;
   void confirmReductionPaused(int group) override;
   void confirmReductionResumed(int group) override;
   void settingsChanged(int group) override;

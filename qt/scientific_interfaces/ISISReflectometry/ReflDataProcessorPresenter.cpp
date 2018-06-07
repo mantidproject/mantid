@@ -1020,6 +1020,14 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
   return optionsForAngle;
 }
 
+/** This override does not update the widget state yet because this is done via
+ * a call back from the main presenter, taking autoreduction into account
+ */
+void ReflDataProcessorPresenter::setReductionPaused() {
+  m_reductionPaused = true;
+  m_mainPresenter->confirmReductionPaused(m_group);
+}
+
 /**
 End reduction
 *
@@ -1033,16 +1041,12 @@ void ReflDataProcessorPresenter::endReduction(const bool reductionSuccessful) {
     saveNotebook(m_itemsToProcess);
 
   if (m_mainPresenter->autoreductionRunning(m_group) && !m_pauseReduction) {
-    // When autoreduction is running, unless the user has requested to pause,
-    // signal reduction has finished but leave the GUI in the "processing"
-    // state
-    m_mainPresenter->confirmReductionFinished(m_group);
-    m_reductionPaused = true;
+    // Finished processing but autoreduction is still running
+    setReductionPaused();
   } else {
     // Paused, or reduction has completely finished. Stop the reduction
     pause();
-    m_reductionPaused = true;
-    m_mainPresenter->confirmReductionPaused(m_group);
+    setReductionPaused();
   }
 }
 
