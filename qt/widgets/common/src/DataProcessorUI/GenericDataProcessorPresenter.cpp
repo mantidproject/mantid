@@ -368,7 +368,7 @@ bool GenericDataProcessorPresenter::workspaceIsBeingReduced(
     return false;
 
   return workspaceIsOutputOfGroup(m_currentGroupData, workspaceName) ||
-      workspaceIsOutputOfRow(m_currentRowData, workspaceName);
+         workspaceIsOutputOfRow(m_currentRowData, workspaceName);
 }
 
 /** Update any rows/groups whose output workspace matches the given name

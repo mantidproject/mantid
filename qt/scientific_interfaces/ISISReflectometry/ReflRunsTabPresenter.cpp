@@ -570,8 +570,8 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
   updateErrorStateInSearchModel(rowsToTransfer, transferDetails.getErrorRuns());
 
   // Do the transfer
-  getTablePresenter(group)->transfer(
-      ::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+  getTablePresenter(group)
+      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
           transferDetails.getTransferRuns()));
 }
 
@@ -745,9 +745,7 @@ void ReflRunsTabPresenter::pause(int group) {
     confirmReductionPaused(group);
 }
 
-void ReflRunsTabPresenter::resume(int group) const {
-  UNUSED_ARG(group);
-}
+void ReflRunsTabPresenter::resume(int group) const { UNUSED_ARG(group); }
 
 /** Notifies main presenter that data reduction is confirmed to be finished
 * i.e. after all rows have been reduced

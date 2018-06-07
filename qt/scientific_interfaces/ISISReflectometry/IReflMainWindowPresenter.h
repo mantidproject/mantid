@@ -40,9 +40,7 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
-  enum class Flag {
-    HelpPressed
-  };
+  enum class Flag { HelpPressed };
 
   virtual void notify(Flag flag) = 0;
   virtual void notifyReductionPaused(int group) = 0;

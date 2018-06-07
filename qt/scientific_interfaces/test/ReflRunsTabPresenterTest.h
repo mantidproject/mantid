@@ -254,8 +254,7 @@ public:
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter,
-                notifyReductionPaused(AUTOREDUCTION_GROUP))
-        .Times(Exactly(0));
+                notifyReductionPaused(AUTOREDUCTION_GROUP)).Times(Exactly(0));
     expectSetWidgetEnabledState(false, true);
 
     presenter.pause(GROUP_TO_PAUSE);
@@ -281,8 +280,7 @@ public:
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter,
-                notifyReductionPaused(AUTOREDUCTION_GROUP))
-        .Times(Exactly(0));
+                notifyReductionPaused(AUTOREDUCTION_GROUP)).Times(Exactly(0));
 
     presenter.pause(GROUP_TO_PAUSE);
     verifyAndClearExpectations();
@@ -541,9 +539,8 @@ private:
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setInstrumentComboEnabled(!isProcessing))
         .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView,
-                setTransferMethodComboEnabled(!isAutoreducing))
-        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setTransferMethodComboEnabled(
+                                        !isAutoreducing)).Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchTextEntryEnabled(!isAutoreducing))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(!isAutoreducing))
