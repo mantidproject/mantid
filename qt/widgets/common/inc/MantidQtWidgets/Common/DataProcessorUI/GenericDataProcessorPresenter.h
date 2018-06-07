@@ -271,6 +271,10 @@ protected slots:
   void rowThreadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
+  void setGroupIsProcessed(const int groupIndex, const bool isProcessed);
+  void setGroupError(const int groupIndex, const std::string &error);
+  void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
+  void setRowError(RowData_sptr rowData, const std::string &error);
   virtual void setReductionPaused();
 
 private:
@@ -387,10 +391,6 @@ private:
                       int parentColumn) override;
   int getNumberOfRows() override;
   void clearTable() override;
-  void setGroupIsProcessed(const int groupIndex, const bool isProcessed);
-  void setGroupError(const int groupIndex, const std::string &error);
-  void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
-  void setRowError(RowData_sptr rowData, const std::string &error);
   bool workspaceIsOutputOfGroup(const GroupData &groupData,
                                 const std::string &workspaceName) const;
   bool workspaceIsOutputOfRow(RowData_sptr rowData,

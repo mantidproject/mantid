@@ -165,6 +165,8 @@ private:
   bool proceedIfWSTypeInADS(
       const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
       const bool findEventWS);
+  void handleError(RowData_sptr rowData, const std::string &error);
+  void handleError(const int groupIndex, const std::string &error);
 
   std::map<int, size_t> m_numGroupSlicesMap;
 };

@@ -473,15 +473,30 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
       // should always be the same.
       updateModelFromResults(alg, rowData);
     } catch (std::runtime_error &e) {
-      slice->setError(e.what());
+      handleError(slice, e.what());
       return false;
     } catch (...) {
-      slice->setError("Unexpected exception while reducing slice");
+      handleError(slice, "Unexpected error while reducing slice");
       return false;
     }
+
+    slice->setProcessed(true);
   }
 
+  setRowIsProcessed(rowData, true);
   return true;
+}
+
+void ReflDataProcessorPresenter::handleError(RowData_sptr rowData,
+                                             const std::string &error) {
+  setRowIsProcessed(rowData, true);
+  setRowError(rowData, error);
+}
+
+void ReflDataProcessorPresenter::handleError(const int groupIndex,
+                                             const std::string &error) {
+  setGroupIsProcessed(groupIndex, true);
+  setGroupError(groupIndex, error);
 }
 
 /** Processes a group of runs
@@ -534,12 +549,17 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
       try {
         postProcessGroup(sliceGroup);
 
+      } catch (std::exception &e) {
+        handleError(groupID, e.what());
+        errors = true;
       } catch (...) {
+        handleError(groupID, "Unexpected error while post-processing group");
         errors = true;
       }
     }
   }
 
+  setGroupIsProcessed(groupID, true);
   return errors;
 }
 
@@ -574,6 +594,8 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
       return true;
     // Do the reduction
     reduceRow(rowData);
+    // Update the state
+    setRowIsProcessed(rowData, true);
     // Update the tree
     m_manager->update(groupID, row.first, rowData->data());
   }
@@ -582,11 +604,16 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
   if (group.size() > 1) {
     try {
       postProcessGroup(group);
+    } catch (std::exception &e) {
+      handleError(groupID, e.what());
+      errors = true;
     } catch (...) {
+      handleError(groupID, "Unexpected error while post-processing group");
       errors = true;
     }
   }
 
+  setGroupIsProcessed(groupID, true);
   return errors;
 }
 
