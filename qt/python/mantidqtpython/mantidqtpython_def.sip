@@ -1497,6 +1497,40 @@ public:
 	QStringList getParameterNames() const;
 };
 
+class Hint {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Hint.h"
+%End
+public:
+  Hint(std::string word, std::string description);
+  const std::string& word() const;
+  const std::string& description() const;
+};
+
+
+class HintStrategy
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/HintStrategy.h"
+%End
+public:
+  HintStrategy();
+  virtual std::vector<MantidQt::MantidWidgets::Hint> createHints() = 0;
+  virtual ~HintStrategy();
+};
+
+class AlgorithmHintStrategy : public MantidQt::MantidWidgets::HintStrategy
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+%End
+public:
+  AlgorithmHintStrategy(const std::string& algorithmName,
+                        std::vector<std::string> blacklist);
+  virtual std::vector<MantidQt::MantidWidgets::Hint> createHints();
+};
+
+
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 
@@ -1595,6 +1629,8 @@ public:
     void filterRowsBy(MantidQt::MantidWidgets::Batch::RowPredicate* predicate /Transfer/);
     void resetFilter();
     bool hasFilter() const;
+
+    void setHintsForColumn(int column, HintStrategy* hintStrategy /Transfer/);
 
     bool isOnlyChildOfRoot(const MantidQt::MantidWidgets::Batch::RowLocation& location) const;
     std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsAt(const MantidQt::MantidWidgets::Batch::RowLocation &location) const;

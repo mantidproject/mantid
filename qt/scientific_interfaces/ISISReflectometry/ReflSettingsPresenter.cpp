@@ -373,13 +373,8 @@ std::string ReflSettingsPresenter::getStitchOptions() const {
 /** Creates hints for 'Stitch1DMany'
 */
 void ReflSettingsPresenter::createStitchHints() {
-
-  // The algorithm
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
-  // The blacklist
-  std::set<std::string> blacklist{"InputWorkspaces", "OutputWorkspace"};
-  AlgorithmHintStrategy strategy(alg, blacklist);
-
+  auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
+  AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   m_view->createStitchHints(strategy.createHints());
 }
 /** Fills experiment settings with default values

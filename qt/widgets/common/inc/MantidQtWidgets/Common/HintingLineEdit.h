@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "DllOption.h"
+#include "Hint.h"
 
 #include <QLineEdit>
 
@@ -44,7 +45,7 @@ class EXPORT_OPT_MANTIDQT_COMMON HintingLineEdit : public QLineEdit {
   Q_OBJECT
 public:
   HintingLineEdit(QWidget *parent,
-                  const std::map<std::string, std::string> &hints);
+                  std::vector<Hint> hints);
   ~HintingLineEdit() override;
 
 protected:
@@ -55,10 +56,10 @@ protected:
   void clearSuggestion();
   void nextSuggestion();
   void prevSuggestion();
-  std::string m_curKey;
-  std::string m_curMatch;
-  std::map<std::string, std::string> m_matches;
-  std::map<std::string, std::string> m_hints;
+  std::vector<Hint> m_matches;
+  std::vector<Hint> m_hints;
+  std::string m_currentPrefix; // m_curKey;
+  typename std::vector<Hint>::const_iterator m_match;
   bool m_dontComplete;
   QLabel *m_hintLabel;
 protected slots:

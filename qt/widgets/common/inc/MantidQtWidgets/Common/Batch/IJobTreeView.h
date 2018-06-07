@@ -3,6 +3,7 @@
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
+#include "MantidQtWidgets/Common/HintStrategy.h"
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -33,6 +34,9 @@ public:
   virtual void filterRowsBy(RowPredicate *predicate) = 0;
   virtual void resetFilter() = 0;
   virtual bool hasFilter() const = 0;
+
+  virtual void setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) = 0;
+  virtual void setHintsForColumn(int column, HintStrategy* hintStrategy) = 0;
 
   virtual void subscribe(JobTreeViewSubscriber &subscriber) = 0;
 

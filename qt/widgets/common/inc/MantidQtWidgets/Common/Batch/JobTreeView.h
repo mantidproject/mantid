@@ -29,6 +29,9 @@ public:
   void resetFilter() override;
   bool hasFilter() const override;
 
+  void setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) override;
+  void setHintsForColumn(int column, HintStrategy* hintStrategy) override;
+
   void subscribe(JobTreeViewSubscriber &subscriber) override;
 
   RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,

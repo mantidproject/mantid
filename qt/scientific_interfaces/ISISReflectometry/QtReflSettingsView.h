@@ -108,7 +108,7 @@ public:
   bool detectorCorrectionEnabled() const override;
   /// Creates hints for 'Stitch1DMany'
   void
-  createStitchHints(const std::map<std::string, std::string> &hints) override;
+  createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
   void disableAll() override;
   void enableAll() override;
 

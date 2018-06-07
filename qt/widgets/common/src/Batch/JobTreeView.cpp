@@ -6,6 +6,7 @@
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
+#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <algorithm>
@@ -111,6 +112,14 @@ void JobTreeView::appendAllDescendants(QModelIndexList &descendantsList,
       descendantsList.append(childIndex);
     appendAllDescendants(descendantsList, childIndex);
   }
+}
+
+void JobTreeView::setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) {
+  setItemDelegateForColumn(column, new HintingLineEditFactory(itemDelegate(), std::move(hintStrategy)));
+}
+
+void JobTreeView::setHintsForColumn(int column, HintStrategy* hintStrategy) {
+  setHintsForColumn(column, std::unique_ptr<HintStrategy>(hintStrategy));
 }
 
 QModelIndexList

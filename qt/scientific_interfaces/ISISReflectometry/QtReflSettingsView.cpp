@@ -476,7 +476,7 @@ QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
 * @param hints :: Hints as a map
 */
 void QtReflSettingsView::createStitchHints(
-    const std::map<std::string, std::string> &hints) {
+    const std::vector<Hint> &hints) {
 
   // We want to add the stitch params box next to the stitch
   // label, so first find the label's position

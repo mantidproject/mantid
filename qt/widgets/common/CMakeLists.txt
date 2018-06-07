@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
+  src/Hint.cpp
 	src/FlowLayout.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
@@ -287,6 +288,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/GraphOptions.h
 	inc/MantidQtWidgets/Common/DistributionOptions.h
 	inc/MantidQtWidgets/Common/HelpWindow.h
+	inc/MantidQtWidgets/Common/Hint.h
 	inc/MantidQtWidgets/Common/InterfaceFactory.h
 	inc/MantidQtWidgets/Common/InterfaceManager.h
 	inc/MantidQtWidgets/Common/IProjectSerialisable.h
