@@ -73,7 +73,7 @@ public:
     // report that some rows failed
     for (auto const &row : m_rows) {
       if (!row.error().empty())
-        return "Reduction failed for some rows in the group";
+        return "Some rows in the group have errors";
     }
     // Return an empty string if there is no error
     return std::string();
