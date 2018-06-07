@@ -1407,3 +1407,33 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
                                              algm_object.workspaceMethodOn())
 
 # -------------------------------------------------------------------------------------------------------------
+
+def write_workspace_history(ws, filename=None):
+    """
+       Writes the history of the workspace to a .py file that can be used to re-load the state
+       :param ws a workspace object
+       :param filename the name of the file to write out to
+
+    """
+    hist = ws.getHistory()
+    if filename == None:
+        filename = '%s_ws.py' % hist.name()
+    names = [al.name() for al in hist.getAlgorithmHistories()]
+    dates = [al.executionDate() for al in hist.getAlgorithmHistories()]
+    prop_val = []
+    for al in hist.getAlgorithmHistories():
+        props = al.getProperties()
+        n = [p.name() for p in props]
+        vals = [p.value() for p in props]
+        nv = zip(n, vals)
+        prop_val.append(nv)
+# Convert tuples to strings with brackets and commas as required for a command
+    prop_val_string = []
+    for pv in prop_val:
+        prop_val_string.append([ ''.join((i[0], '=\'', i[1], '\', ')) for i in pv])
+    pv_string = [''.join(i[:])[:-2] for i in prop_val_string]
+# Convert list of strings to a single string, removing trailin comma
+    with open(filename, 'w') as f:
+        for i in range(len(hist.getAlgorithmHistories())):
+            f.write('%s(%s) # %s \n' % (names[i], pv_string[i], dates[i]))
+
