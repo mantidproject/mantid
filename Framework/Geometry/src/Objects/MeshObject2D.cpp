@@ -81,14 +81,35 @@ bool MeshObject2D::pointsCoplanar(
 
 MeshObject2D::MeshObject2D(const std::vector<uint16_t> &faces,
                            const std::vector<Kernel::V3D> &vertices,
-                           const Kernel::Material &material) {
-  CoplanarChecks::validatePointsCoplanar(vertices);
+                           const Kernel::Material &material)
+    : m_triangles(faces), m_vertices(vertices), m_material(material) {
+  initialize();
 }
 
 MeshObject2D::MeshObject2D(std::vector<uint16_t> &&faces,
                            std::vector<Kernel::V3D> &&vertices,
-                           const Kernel::Material &&material) {
-  CoplanarChecks::validatePointsCoplanar(vertices);
+                           const Kernel::Material &&material)
+    : m_triangles(std::move(faces)), m_vertices(std::move(vertices)),
+      m_material(std::move(material)) {
+  initialize();
+}
+
+void MeshObject2D::initialize() {
+  CoplanarChecks::validatePointsCoplanar(m_vertices);
+  if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
+    throw std::invalid_argument(
+        "Too many vertices (" + std::to_string(m_vertices.size()) +
+        "). MeshObject cannot have more than 65535 vertices.");
+  }
+  // m_handler = boost::make_shared<GeometryHandler>(this);
+}
+bool MeshObject2D::hasValidShape() const {
+  // 3 or more points define a plane.
+  return (m_triangles.size() >= 1 && m_vertices.size() >= 3);
+}
+
+double MeshObject2D::volume() const {
+  return 0; // Volume is always 0 for a plane
 }
 
 } // namespace Geometry

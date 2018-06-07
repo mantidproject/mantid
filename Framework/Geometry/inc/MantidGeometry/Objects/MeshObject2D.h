@@ -2,13 +2,12 @@
 #define MANTID_GEOMETRY_MESHOBJECT2D_H_
 
 #include "MantidGeometry/DllConfig.h"
-
+#include "MantidKernel/Material.h"
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
 class V3D;
-class Material;
 }
 
 namespace Geometry {
@@ -52,7 +51,21 @@ public:
                std::vector<Mantid::Kernel::V3D> &&vertices,
                const Kernel::Material &&material);
 
+  double volume() const;
+
   static bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices);
+
+  bool hasValidShape() const;
+
+private:
+  void initialize();
+  /// Triangles are specified by indices into a list of vertices. Offset is
+  /// always 3.
+  std::vector<uint16_t> m_triangles;
+  /// Vertices
+  std::vector<Kernel::V3D> m_vertices;
+  /// Material composition
+  Kernel::Material m_material;
 };
 
 } // namespace Geometry
