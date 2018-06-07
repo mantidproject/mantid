@@ -762,7 +762,7 @@ void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   // We need to notify back to the table presenter to update the widget
   // state. This must be done from here otherwise there is no notification to
   // the table to update when autoprocessing is paused.
-  if (!isAutoreducing())
+  if (!isAutoreducing(group))
     getTablePresenter(group)->confirmReductionPaused();
 }
 
