@@ -615,6 +615,81 @@ Output:
    Number of iterations of first spectrum: 5
    Number of iterations of second spectrum: 37
    Number of iterations of third spectrum: 70
+   
+This can also be done with the spectra in the reconstructed data and image summed together. 
+This is done by setting the *PerSpectrumReconstruction* property to *false*.
+
+.. testcode:: ExAdjustmentSummed
+
+   from math import pi, sin, cos
+   from random import random, seed
+
+   # Construct workspace (cosine + noise) over 3 spectra
+   X = []
+   Y = []
+   E = []
+   N = 200
+   w = 3
+   for s in range(0,3):
+      seed(0)
+      for i in range(0,N):
+        x = 2*pi*i/N
+        X.append(x)
+        Y.append(cos(w*x)+(random()-0.5)*0.3)
+        E.append(0.2)
+        
+   CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=3)
+
+   # Construct linear adjustment workspace (real = 1, imaginary linear)
+   # no adjustment on first spectrum, double adjustment on third spectrum.
+   Zeroes = []
+   Xlin = []
+   Ylin = []
+   Magnitude = - 0.1
+   # Real values
+   for i in range(0,N):
+      Xlin.append(X[i])
+      Ylin.append(1.0)
+      Zeroes.append(0)
+        
+   # Imaginary values
+   for i in range(0,N):
+      Xlin.append(X[i])
+      Ylin.append(Magnitude*X[i])
+      Zeroes.append(0)
+        
+   CreateWorkspace(OutputWorkspace='linadj', DataX=Xlin, DataY=Ylin, DataE=Zeroes, NSpec=2)
+
+   # Construct linear adjustment workspace (real = 0, imaginary linear)
+   # no adjustment on first spectrum, double adjustment on third spectrum.
+   Yconst = []
+   Magnitude = 0.2
+   # Real values
+   for i in range(0,N):
+       Yconst.append(0)
+        
+   # Imaginary values
+   for i in range(0,N):
+       Yconst.append(Magnitude*X[i])
+        
+        
+   CreateWorkspace(OutputWorkspace='constadj',DataX=Xlin, DataY=Yconst, DataE=Zeroes, NSpec=2)
+
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001, PerSpectrumReconstruction=False)
+
+   print("Summed Reconstruction at 05: {:.3f}".format(data.readY(0)[5]))
+   print("Summed Reconstruction at 10: {:.3f}".format(data.readY(0)[10]))
+   print("Summed Reconstruction at 15: {:.3f}".format(data.readY(0)[15]))
+   print("Number of iterations of summed spectrum: "+str( len(evolAngle.readX(0))))
+   
+Output:
+
+.. testoutput:: ExAdjustmentSummed
+
+   Summed Reconstruction at 05: 2.211
+   Summed Reconstruction at 10: 1.479
+   Summed Reconstruction at 15: 0.419
+   Number of iterations of summed spectrum: 8
 
 References
 ----------
