@@ -91,6 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
+                   src/ProjectRecovery.cpp
                    src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
@@ -290,6 +291,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
+                   src/ProjectRecovery.h
                    src/ProjectSerialiser.h
                    src/ProjectSaveView.h
                    src/PythonScript.h
@@ -465,6 +467,21 @@ add_custom_command ( OUTPUT ${SIP_SRC}
 include_directories ( SYSTEM ${SIP_INCLUDE_DIR} )
 # Needed for sip generated files to find includes in src
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
+
+# Add a definition for ProjectRecovery
+
+mtd_add_sip_module (
+  MODULE_NAME _ProjectRecovery
+  TARGET_NAME mantidplot_projectRecovery
+  SIP_SRCS src/ProjectRecovery.sip
+  HEADER_DEPS src/ProjectRecovery.h
+  PYQT_VERSION 4
+  LINK_LIBS
+    ${common_link_libs}
+    ${PYTHON_LIBRARIES}
+  FOLDER MantidPlot
+)
+
 
 ###########################################################################
 # Specify the files that we need to pass to Qt macros
