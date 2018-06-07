@@ -531,6 +531,9 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::splitByTimeVector(
     std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
     std::vector<TimeSeriesProperty *> outputs) {
+  g_log.notice("Starting....");
+  std::cout << "Starting...................\n";
+
   // check inputs
   if (splitter_time_vec.size() != target_vec.size() + 1) {
     std::stringstream errss;
@@ -566,6 +569,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   std::vector<DateAndTime>::iterator splitter_iter;
   splitter_iter = std::lower_bound(splitter_time_vec.begin(),
                                    splitter_time_vec.end(), tsp_time);
+  // tps_time is start time of time series property
   if (splitter_iter == splitter_time_vec.begin()) {
     // do nothing as the first TimeSeriesProperty entry's time is before any
     // splitters
@@ -581,8 +585,11 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     split_stop_time = splitter_time_vec[index_splitter + 1];
   }
 
-  g_log.debug() << "TSP entry: " << index_tsp_time
-                << ", Splitter index = " << index_splitter << "\n";
+  std::cout << "[END-STEP-1] Move splitters index... TSP entry: "
+            << index_tsp_time << ", Splitter index = " << index_splitter
+            << " ---> continue to search = " << continue_search
+            << ", no entry in range (splitter to early!) = "
+            << no_entry_in_range << "\n";
 
   // move along the entries to find the entry inside the current splitter
   if (!no_entry_in_range) {
@@ -593,7 +600,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       // the first splitter's start time is LATER than the last TSP entry, then
       // there won't be any
       // TSP entry to be split into any target splitter.
-      no_entry_in_range = true;
+      no_entry_in_range = true; // too late! FIXME: this is not catched!
     } else {
       // first splitter start time is between tsp_time_iter and the one before
       // it.
@@ -601,12 +608,28 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       index_tsp_time = tsp_time_iter - tsp_time_vec.begin();
       tsp_time = *tsp_time_iter; // tsp_time_vec[index_splitter];
     }
+  } else {
+    // no entry in range is true, which corresponding to the previous case
+    // "already search to the last splitter which is still earlier than first
+    // TSP
+    // entry"
   }
 
   // TODO: how to initialize the first entry????
+  if (no_entry_in_range) {
+    // initialize all the splitters with the last value
+    DateAndTime last_entry_time = this->lastTime();
+    TYPE last_entry_value = this->lastValue();
+    for (size_t i = 0; i < outputs.size(); ++i)
+      outputs[i]->addValue(last_entry_time, last_entry_value);
+  }
 
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
+  std::cout << "[DB...BAT] continue search = " << continue_search
+            << ", index_splitter = " << index_splitter
+            << ", index_tsp_time = " << index_tsp_time << "\n";
+
   while (continue_search) {
     // get next target
     int target = target_vec[index_splitter];
@@ -671,9 +694,12 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   // Add a debugging check such that there won't be any time entry with zero log
   for (size_t i = 0; i < outputs.size(); ++i) {
     if (outputs[i]->size() == 0) {
-      g_log.error() << i << "-th split-out term (out of " << outputs.size() << ") of "
-                    << m_name << " has zero size" << "\n";
-      throw std::runtime_error("Found a failed case!");
+      std::stringstream errss;
+      errss << i << "-th split-out term (out of " << outputs.size() << ") of "
+            << m_name << " has zero size";
+      g_log.error(errss.str());
+      std::cout << errss.str();
+      // throw std::runtime_error(errss.str());
       // if the output has zero length, then put the last valid entrance ???
       // but it is not a good solution! because it can be very confusing
     }
