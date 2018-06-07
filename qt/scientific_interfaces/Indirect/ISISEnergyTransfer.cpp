@@ -419,10 +419,10 @@ void ISISEnergyTransfer::mappingOptionSelected(const QString &groupType) {
     m_uiForm.swGrouping->setCurrentIndex(0);
   } else if (groupType == "Groups") {
     m_uiForm.swGrouping->setCurrentIndex(1);
-  } else if (groupType == "All" || groupType == "Individual" ||
-             groupType == "Default") {
+  } else if (groupType =="Custom") {
     m_uiForm.swGrouping->setCurrentIndex(2);
-  }
+  } else
+      m_uiForm.swGrouping->setCurrentIndex(3);
 }
 
 /**
