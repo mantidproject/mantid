@@ -9,6 +9,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>
@@ -18,7 +19,18 @@
 
 const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
 
-namespace {} // namespace
+namespace {
+
+// Take a string of ints and ranges (e.g. "2,5,3-4,5,1") and return
+// an ordered set of unique elements "1,2,3,4,5"
+std::set<int>
+parseGroupStringToSetOfUniqueElements(const std::string &groupString) {
+  std::vector<int> groupVec = Mantid::Kernel::Strings::parseRange(groupString);
+  std::set<int> groupSet(groupVec.begin(), groupVec.end());
+  return groupSet;
+}
+
+} // namespace
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -205,17 +217,60 @@ void ApplyMuonDetectorGroupPairing::init() {
 
 /**
  * Performs validation of inputs to the algorithm.
- * -
+ * - Checks Alpha > 0
+ * - Checks TMin > TMax
+ * - Checks the workspace and workspaceGroup are different
+ * - Check PairName is given and contains at least one alnum character
+ * - Check the two groups are different
  * @returns Map of parameter names to errors
  */
 std::map<std::string, std::string>
 ApplyMuonDetectorGroupPairing::validateInputs() {
   std::map<std::string, std::string> errors;
 
+  double alpha = this->getProperty("Alpha");
+  if (alpha <= 0.0) {
+    errors["Alpha"] = "Alpha must be greater than 0.";
+  }
+
+  double tmin = this->getProperty("TimeMin");
+  double tmax = this->getProperty("TimeMax");
+  if (tmin > tmax) {
+    errors["TimeMin"] = "TimeMin > TimeMax";
+  }
+
+  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+
+  if (groupedWS->getName() == inputWS->getName()) {
+    errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
+                                    "the same name as InputWorkspace.";
+  }
+
+  const std::string pairName = getPropertyValue("PairName");
+  if (pairName.empty()) {
+    errors["PairName"] = "The pair must be named.";
+  }
+  if (!std::all_of(std::begin(pairName), std::end(pairName), isalnum)) {
+    errors["PairName"] = "PairName must contain only alphnumeric characters.";
+  }
+
+  std::set<int> group1 =
+      parseGroupStringToSetOfUniqueElements(this->getProperty("Group1"));
+  std::set<int> group2 =
+      parseGroupStringToSetOfUniqueElements(this->getProperty("Group2"));
+  if (group1.size() > 0 && group1 == group2) {
+    errors["Group1"] = "The two groups must contain at least one ID and be "
+                       "different.";
+  }
+
   return errors;
 }
 
 void ApplyMuonDetectorGroupPairing::exec() {
+  // Allows exceptions from MuonProcess validator to be also thrown from this
+  // algorithm
+  this->setRethrows(true);
 
   const double alpha = static_cast<double>(getProperty("Alpha"));
 
@@ -227,7 +282,8 @@ void ApplyMuonDetectorGroupPairing::exec() {
   std::pair<std::string, std::string> names =
       getGroupWorkspaceNames(groupedWSName);
 
-  std::string pairWorkspaceName = getPairWorkspaceName(pairName, groupedWSName);
+  std::string pairWSName = getPairWorkspaceName(pairName, groupedWSName);
+  std::string pairWSNameNoRebin = pairWSName + "_Raw";
 
   MatrixWorkspace_sptr pairWS;
   MatrixWorkspace_sptr pairWSRaw;
@@ -235,14 +291,17 @@ void ApplyMuonDetectorGroupPairing::exec() {
     Workspace_sptr inputWS = getProperty("InputWorkspace");
     pairWS = createPairWorkspaceManually(inputWS, false);
     pairWSRaw = createPairWorkspaceManually(inputWS, true);
+
+    AnalysisDataService::Instance().addOrReplace(pairWSName, pairWS);
+    groupedWS->add(pairWSName);
   } else {
     MatrixWorkspace_sptr ws1 = getProperty("InputWorkspace1");
     MatrixWorkspace_sptr ws2 = getProperty("InputWorkspace2");
-    pairWS = createPairWorkspaceFromGroupWorkspaces(ws1, ws2, alpha);
+    pairWSRaw = createPairWorkspaceFromGroupWorkspaces(ws1, ws2, alpha);
   }
 
-  AnalysisDataService::Instance().addOrReplace(pairWorkspaceName, pairWS);
-  groupedWS->add(pairWorkspaceName);
+  AnalysisDataService::Instance().addOrReplace(pairWSNameNoRebin, pairWSRaw);
+  groupedWS->add(pairWSNameNoRebin);
 }
 
 /// Get the names of the two workspaces in the ADS to pair
@@ -392,6 +451,7 @@ void ApplyMuonDetectorGroupPairing::setMuonProcessPeriodProperties(
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
     alg.setProperty("SummedPeriodSet", "1");
+    alg.setProperty("SubtractedPeriodSet", "");
   } else {
     throw std::runtime_error("Cannot create workspace: workspace must be "
                              "MatrixWorkspace or WorkspaceGroup.");
