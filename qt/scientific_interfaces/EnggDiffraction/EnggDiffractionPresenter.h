@@ -72,9 +72,8 @@ public:
                         const std::string &specNos);
 
   /// the focusing hard work that a worker / thread will run
-  void doFocusRun(const std::string &dir, const std::string &runNo,
-                  const std::vector<bool> &banks, const std::string &specNos,
-                  const std::string &dgFile);
+  void doFocusRun(const std::string &runNo, const std::vector<bool> &banks,
+                  const std::string &specNos, const std::string &dgFile);
 
   /// checks if its a valid run number returns string
   std::string isValidRunNumber(const std::vector<std::string> &dir);
@@ -174,8 +173,7 @@ private:
                      const std::string &dgFile = "");
 
   virtual void
-  startAsyncFocusWorker(const std::string &dir,
-                        const std::vector<std::string> &multi_RunNo,
+  startAsyncFocusWorker(const std::vector<std::string> &multi_RunNo,
                         const std::vector<bool> &banks,
                         const std::string &specNos, const std::string &dgFile);
 

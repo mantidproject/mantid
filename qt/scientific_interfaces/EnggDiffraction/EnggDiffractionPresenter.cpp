@@ -526,14 +526,12 @@ void EnggDiffractionPresenter::startFocusing(
   g_log.notice() << "EnggDiffraction GUI: starting new focusing" << optMsg
                  << ". This may take some seconds... \n";
 
-  const std::string focusDir = m_view->focusingDir();
-
   m_view->showStatus("Focusing...");
   m_view->enableCalibrateFocusFitUserActions(false);
   // GUI-blocking alternative:
-  // doFocusRun(focusDir, outFilenames, runNo, banks, specNos, dgFile)
+  // doFocusRun(outFilenames, runNo, banks, specNos, dgFile)
   // focusingFinished()
-  startAsyncFocusWorker(focusDir, multi_RunNo, banks, specNos, dgFile);
+  startAsyncFocusWorker(multi_RunNo, banks, specNos, dgFile);
 }
 
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
@@ -1463,21 +1461,19 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
 * the Qt event loop. For that reason this class needs to be a
 * Q_OBJECT.
 *
-* @param dir directory (full path) for the focused output files
 * @param multi_RunNo input vector of run number
 * @param banks instrument bank to focus
 * @param specNos list of spectra (as usual csv list of spectra in Mantid)
 * @param dgFile detector grouping file name
 */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
-    const std::string &dir, const std::vector<std::string> &multi_RunNo,
-    const std::vector<bool> &banks, const std::string &dgFile,
-    const std::string &specNos) {
+    const std::vector<std::string> &multi_RunNo, const std::vector<bool> &banks,
+    const std::string &dgFile, const std::string &specNos) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, multi_RunNo, banks, dgFile, specNos);
+      new EnggDiffWorker(this, multi_RunNo, banks, dgFile, specNos);
   worker->moveToThread(m_workerThread);
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
   connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
@@ -1493,7 +1489,6 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
 * should use to run the calculations required to process a 'focus'
 * push or similar from the user.
 *
-* @param dir directory (full path) for the output focused files
 * @param runNo input run number
 *
 * @param specNos list of spectra to use when focusing. Not empty
@@ -1505,8 +1500,7 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
 * @param banks for every bank, (true/false) to consider it or not for
 * the focusing
 */
-void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
-                                          const std::string &runNo,
+void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                                           const std::vector<bool> &banks,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
@@ -1518,8 +1512,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
   // to track last valid run
   g_lastValidRun = runNo;
 
-  g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: " << dir << '\n';
+  g_log.notice() << "Generating new focusing workspace(s) and file(s)";
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();

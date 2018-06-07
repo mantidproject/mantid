@@ -45,13 +45,6 @@ public:
    * @return calibration settings object with current user settings
    */
   virtual EnggDiffCalibSettings currentCalibSettings() const = 0;
-
-  /**
-   * Directory set for outputs from focusing calculations.
-   *
-   * @return directory path as a string
-   */
-  virtual std::string focusingDir() const = 0;
 };
 
 } // namespace CustomInterfaces
