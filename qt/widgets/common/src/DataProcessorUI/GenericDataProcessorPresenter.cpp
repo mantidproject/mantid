@@ -359,6 +359,18 @@ void GenericDataProcessorPresenter::setRowError(RowData_sptr rowData,
   rowData->setError(error);
 }
 
+/** Return true if the given workspace name is the output of a current
+ * reduction that is in progress
+ */
+bool GenericDataProcessorPresenter::workspaceIsBeingReduced(
+    const std::string &workspaceName) const {
+  if (m_reductionPaused)
+    return false;
+
+  return workspaceIsOutputOfGroup(m_currentGroupData, workspaceName) ||
+      workspaceIsOutputOfRow(m_currentRowData, workspaceName);
+}
+
 /** Update any rows/groups whose output workspace matches the given name
  * after the workspace has been deleted
  * @param workspaceName : the name of the workspace that has been removed
@@ -366,6 +378,11 @@ void GenericDataProcessorPresenter::setRowError(RowData_sptr rowData,
  */
 void GenericDataProcessorPresenter::handleWorkspaceRemoved(
     const std::string &workspaceName, const std::string &action) {
+  // If the workspace is currently being processed then don't mark it as
+  // deleted because it will be re-created when processing finishes.
+  if (workspaceIsBeingReduced(workspaceName))
+    return;
+
   auto tree = m_manager->allData(false);
   auto error = action + ": " + workspaceName;
 
@@ -403,7 +420,7 @@ void GenericDataProcessorPresenter::handleAllWorkspacesRemoved(
 }
 
 bool GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
-    GroupData &groupData, const std::string &workspaceName) const {
+    const GroupData &groupData, const std::string &workspaceName) const {
   return hasPostprocessing() &&
          getPostprocessedWorkspaceName(groupData).toStdString() ==
              workspaceName;
@@ -1494,8 +1511,8 @@ Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.remove(QString::fromStdString(name));
-  handleWorkspaceRemoved(name, "Workspace deleted");
   m_mainPresenter->notifyADSChanged(m_workspaceList, m_group);
+  handleWorkspaceRemoved(name, "Workspace deleted");
 }
 
 /**

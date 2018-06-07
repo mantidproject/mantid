@@ -391,10 +391,11 @@ private:
   void setGroupError(const int groupIndex, const std::string &error);
   void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
   void setRowError(RowData_sptr rowData, const std::string &error);
-  bool workspaceIsOutputOfGroup(GroupData &groupData,
+  bool workspaceIsOutputOfGroup(const GroupData &groupData,
                                 const std::string &workspaceName) const;
   bool workspaceIsOutputOfRow(RowData_sptr rowData,
                               const std::string &workspaceName) const;
+  bool workspaceIsBeingReduced(const std::string &workspaceName) const;
   void handleWorkspaceRemoved(const std::string &workspaceName,
                               const std::string &action);
   void handleAllWorkspacesRemoved(const std::string &action);
