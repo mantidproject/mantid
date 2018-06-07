@@ -141,8 +141,8 @@ private:
   int selectedGroup() const;
   int autoreductionGroup() const;
   bool shouldUpdateExistingSearchResults() const;
-  bool autoreductionRunning(int group) const override;
-  bool autoreductionRunning() const override;
+  bool isAutoreducing(int group) const override;
+  bool isAutoreducing() const override;
   // processing
   bool isProcessing(int group) const override;
   bool isProcessing() const override;

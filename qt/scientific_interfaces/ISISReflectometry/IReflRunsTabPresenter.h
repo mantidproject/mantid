@@ -54,8 +54,8 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
-  virtual bool autoreductionRunning(int group) const = 0;
-  virtual bool autoreductionRunning() const = 0;
+  virtual bool isAutoreducing(int group) const = 0;
+  virtual bool isAutoreducing() const = 0;
   virtual bool isProcessing(int group) const = 0;
   virtual bool isProcessing() const = 0;
 };

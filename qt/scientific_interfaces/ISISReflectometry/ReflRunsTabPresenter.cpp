@@ -379,7 +379,7 @@ void ReflRunsTabPresenter::autoreduceNewRuns() {
 }
 
 void ReflRunsTabPresenter::pauseAutoreduction() {
-  if (autoreductionRunning())
+  if (isAutoreducing())
     getTablePresenter(autoreductionGroup())
         ->notify(DataProcessorPresenter::PauseFlag);
 }
@@ -389,8 +389,12 @@ void ReflRunsTabPresenter::stopAutoreduction() {
   m_autoreduction.stop();
 }
 
-bool ReflRunsTabPresenter::autoreductionRunning() const {
+bool ReflRunsTabPresenter::isAutoreducing() const {
   return m_autoreduction.running();
+}
+
+bool ReflRunsTabPresenter::isAutoreducing(int group) const {
+  return isAutoreducing() && m_autoreduction.group() == group;
 }
 
 int ReflRunsTabPresenter::autoreductionGroup() const {
@@ -416,7 +420,7 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
   populateSearch(searchAlg);
 
-  if (autoreductionRunning()) {
+  if (isAutoreducing()) {
     autoreduceNewRuns();
   }
 }
@@ -436,12 +440,8 @@ int ReflRunsTabPresenter::selectedGroup() const {
 bool ReflRunsTabPresenter::shouldUpdateExistingSearchResults() const {
   // Existing search results should be updated rather than replaced if
   // autoreduction is running and has valid results
-  return m_searchModel && autoreductionRunning() &&
+  return m_searchModel && isAutoreducing() &&
          m_autoreduction.searchResultsExist();
-}
-
-bool ReflRunsTabPresenter::autoreductionRunning(int group) const {
-  return autoreductionRunning() && m_autoreduction.group() == group;
 }
 
 /** Check that the given rows are valid for a transfer and warn the user if not
@@ -536,7 +536,7 @@ ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
   auto nsteps = static_cast<int64_t>(rowsToTransfer.size());
   auto progress = ProgressPresenter(start, end, nsteps, this->m_progressView);
 
-  if (autoreductionRunning())
+  if (isAutoreducing())
     progress.setAsEndlessIndicator();
   else
     progress.setAsPercentageIndicator();
@@ -710,23 +710,21 @@ bool ReflRunsTabPresenter::hasPerAngleOptions(int group) const {
  *
  */
 void ReflRunsTabPresenter::updateWidgetEnabledState() const {
-  auto processing = isProcessing();
+  auto const processing = isProcessing();
+  auto const autoreducing = isAutoreducing();
+  auto const processingActiveGroup = isProcessing(selectedGroup());
 
   // Update the menus
   m_view->updateMenuEnabledState(processing);
 
-  // Disable these buttons when any processing is running
-  m_view->setTransferButtonEnabled(!processing);
-  m_view->setInstrumentComboEnabled(!processing);
-
-  // Disable these buttons when processing is running for the active group
-  m_view->setAutoreduceButtonEnabled(!isProcessing(selectedGroup()));
-
-  // These components are always enabled unless autoreduction is running
-  m_view->setAutoreducePauseButtonEnabled(autoreductionRunning());
-  m_view->setTransferMethodComboEnabled(!autoreductionRunning());
-  m_view->setSearchTextEntryEnabled(!autoreductionRunning());
-  m_view->setSearchButtonEnabled(!autoreductionRunning());
+  // Update components
+  m_view->setTransferButtonEnabled(!processing && !autoreducing);
+  m_view->setInstrumentComboEnabled(!processing && !autoreducing);
+  m_view->setAutoreducePauseButtonEnabled(autoreducing);
+  m_view->setTransferMethodComboEnabled(!autoreducing);
+  m_view->setSearchTextEntryEnabled(!autoreducing);
+  m_view->setSearchButtonEnabled(!autoreducing);
+  m_view->setAutoreduceButtonEnabled(!autoreducing && !processingActiveGroup);
 }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
@@ -764,7 +762,7 @@ void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   // We need to notify back to the table presenter to update the widget
   // state. This must be done from here otherwise there is no notification to
   // the table to update when autoprocessing is paused.
-  if (!autoreductionRunning())
+  if (!isAutoreducing())
     getTablePresenter(group)->confirmReductionPaused();
 }
 

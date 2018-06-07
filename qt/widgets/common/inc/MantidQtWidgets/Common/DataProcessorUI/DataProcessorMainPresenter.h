@@ -75,9 +75,9 @@ public:
   virtual bool hasPerAngleOptions(int) const { return false; }
 
   /// Return true if autoreduction is in progress for any group
-  virtual bool autoreductionRunning() const { return false; }
+  virtual bool isAutoreducing() const { return false; }
   /// Return true if autoreduction is in progress for a specific group
-  virtual bool autoreductionRunning(int) const { return false; }
+  virtual bool isAutoreducing(int) const { return false; }
 
   /// Handle data reduction paused/resumed
   virtual void pause(int) {}

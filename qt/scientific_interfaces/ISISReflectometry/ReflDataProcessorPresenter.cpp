@@ -1048,7 +1048,7 @@ void ReflDataProcessorPresenter::endReduction(const bool reductionSuccessful) {
   if (reductionSuccessful && m_view->getEnableNotebook())
     saveNotebook(m_itemsToProcess);
 
-  if (m_mainPresenter->autoreductionRunning(m_group) && !m_pauseReduction) {
+  if (m_mainPresenter->isAutoreducing(m_group) && !m_pauseReduction) {
     // Just signal that the reduction has completed
     setReductionCompleted();
   } else {
@@ -1066,7 +1066,7 @@ void ReflDataProcessorPresenter::threadFinished(const int exitCode) {
   m_workerThread.release();
 
   // We continue regardless of errors if autoreducing
-  if (m_mainPresenter->autoreductionRunning(m_group) || exitCode == 0) {
+  if (m_mainPresenter->isAutoreducing(m_group) || exitCode == 0) {
     m_progressReporter->report();
     processNextItem();
   } else { // Error and not autoreducing
