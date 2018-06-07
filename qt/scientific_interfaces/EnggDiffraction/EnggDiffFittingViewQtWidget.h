@@ -75,7 +75,7 @@ public:
   void userError(const std::string &err,
                  const std::string &description) override;
   void enableCalibrateFocusFitUserActions(bool enable) override;
-  
+
   /// From the IEnggDiffractionSettings interface
   EnggDiffCalibSettings currentCalibSettings() const override;
 
@@ -178,7 +178,7 @@ private slots:
   void plotFittedPeaksStateChanged();
   void removeRunClicked();
 
-private:  
+private:
   /// Setup the interface (tab UI)
   void doSetup();
 
