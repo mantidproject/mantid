@@ -38,13 +38,22 @@ extern "C" {
 void file_compress(const char *file, const char *mode);
 }
 
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
-    : window(window), m_currentFolder(nullptr), m_windowCount(0),
-      m_saveAll(true) {}
+// We assume any caller which do not explicitly mention the recovery flag
+// do not want it, so set it to false
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window) :
+	ProjectSerialiser(window, false) {}
 
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder) :
+	ProjectSerialiser(window, folder, false) {}
+
+
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, bool isRecovery)
+    : window(window), m_currentFolder(nullptr), m_windowCount(0),
+      m_saveAll(true), m_projectRecovery(isRecovery) {}
+
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder, bool isRecovery)
     : window(window), m_currentFolder(folder), m_windowCount(0),
-      m_saveAll(true) {}
+      m_saveAll(true), m_projectRecovery(isRecovery) {}
 
 void ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &wsNames,
@@ -164,7 +173,8 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
 
   // If this is the top level folder of the project, we'll need to load the
   // workspaces before anything else.
-  if (isTopLevel) {
+  // If were recovering projects the workspaces should already be loaded
+  if (isTopLevel && !m_projectRecovery) {
     loadWorkspaces(tsv);
   }
 
@@ -467,9 +477,12 @@ QString ProjectSerialiser::saveWorkspaces() {
 
         wsNames += ",";
         wsNames += QString::fromStdString(secondLevelItems[j]);
-        std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-        // TODO commented out
-		// window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
+		
+		// Do not save out grouped workspaces in project recovery mode
+		if (!m_projectRecovery) {
+			const std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
+			window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
+		}
       }
     } else {
       // check whether the user wants to save this workspace
@@ -479,9 +492,11 @@ QString ProjectSerialiser::saveWorkspaces() {
       wsNames += "\t";
       wsNames += wsName;
 
-      std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-	  // TODO commented out
-      //window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
+	  // Skip saving in project recovery mode
+	  if (!m_projectRecovery) {
+		  const std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
+		  window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
+	  }
     }
 
     // update listening progress bars

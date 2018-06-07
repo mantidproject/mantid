@@ -14,19 +14,19 @@
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "qstring.h"
-#include "Folder.h"
 #include "Graph3D.h"
 #include "Mantid/MantidMatrix.h"
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
+class Folder;
 
 /** Manages saving and loading Mantid project files.
 
   @author Samuel Jackson, ISIS, RAL
   @date 21/06/2016
 
-  Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2007-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -56,6 +56,10 @@ public:
   /// Create a new serialiser with the current application window
   explicit ProjectSerialiser(ApplicationWindow *window);
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
+
+  explicit ProjectSerialiser(ApplicationWindow *window, bool isRecovery);
+  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder, bool isRecovery);
+
 
   /// Save the current state of the project to disk
   void save(const QString &projectName, const std::vector<std::string> &wsNames,
@@ -89,8 +93,10 @@ private:
   std::vector<std::string> m_workspaceNames;
   /// Store a count of the number of windows during saving
   int m_windowCount;
-  /// Flag to check if e should save all workspaces
+  /// Flag to check if we should save all workspaces
   bool m_saveAll;
+  /// Flag to check if we are operating for project recovery
+  const bool m_projectRecovery;
 
   // Saving Functions
 
