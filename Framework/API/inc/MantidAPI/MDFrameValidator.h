@@ -1,10 +1,9 @@
 #ifndef MANTID_API_MDFRAMEVALIDATOR_H
 #define MANTID_API_MDFRAMEVALIDATOR_H
 
-#include "MantidKernel/TypedValidator.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IMDWorkspace.h"
-
+#include "MantidKernel/TypedValidator.h"
 
 /**
   A validator which checks that the frame of the MDWorkspace referred to
@@ -33,23 +32,25 @@
 */
 namespace Mantid {
 namespace API {
-class MANTID_API_DLL MDFrameValidator : public Kernel::TypedValidator<IMDWorkspace_sptr> {
+class MANTID_API_DLL MDFrameValidator
+    : public Kernel::TypedValidator<IMDWorkspace_sptr> {
 public:
-    explicit MDFrameValidator(const std::string& frameName);
-    /// Gets the type of the validator
-    inline std::string getType() const { return "mdframe"; }
-    /// Clone the current state
-    Kernel::IValidator_sptr clone() const override;
+  explicit MDFrameValidator(const std::string &frameName);
+  /// Gets the type of the validator
+  inline std::string getType() const { return "mdframe"; }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const override;
 
 private:
-    /// Check for validity.
-    virtual std::string checkValidity(const IMDWorkspace_sptr &workspace) const override;
+  /// Check for validity.
+  virtual std::string
+  checkValidity(const IMDWorkspace_sptr &workspace) const override;
 
-    /// The name of the required frame
-    const std::string m_frameID;
+  /// The name of the required frame
+  const std::string m_frameID;
 };
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
 
 #endif // MANTID_API_MDFRAMEVALIDATOR_H

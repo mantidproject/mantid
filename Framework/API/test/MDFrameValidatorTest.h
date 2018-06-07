@@ -10,7 +10,6 @@
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
@@ -29,8 +28,7 @@ public:
     MDFrameValidator frameValidator(HKL::HKLName);
 
     HKLFrameFactory factory;
-    auto frame =
-        factory.create(MDFrameArgument{HKL::HKLName, Symbol::RLU});
+    auto frame = factory.create(MDFrameArgument{HKL::HKLName, Symbol::RLU});
     auto dim = boost::make_shared<MDHistoDimension>("x", "x", *frame, 0.0f,
                                                     100.0f, 10);
     auto ws = boost::make_shared<MDHistoWorkspaceTester>(dim, dim, dim);
@@ -58,7 +56,7 @@ public:
     auto frame1 = HKLFrameFactory().create(axisArgs1);
     auto frame2 = QLabFrameFactory().create(axisArgs2);
     auto dim1 = boost::make_shared<MDHistoDimension>("x", "x", *frame1, 0.0f,
-                                                    100.0f, 10);
+                                                     100.0f, 10);
     auto dim2 = boost::make_shared<MDHistoDimension>("x", "x", *frame1, 0.0f,
                                                      100.0f, 10);
     auto ws = boost::make_shared<MDHistoWorkspaceTester>(dim1, dim2, dim2);
