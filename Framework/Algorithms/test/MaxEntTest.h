@@ -132,6 +132,29 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
+  void test_complex_data_adjustments_summed() {
+    // Run one iteration, we just want to test the output workspaces' dimensions
+    int nHist = 2;
+    int nBins = 10;
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("DataLinearAdj", ws);
+    alg->setProperty("DataConstAdj", ws);
+    alg->setProperty("PerSpectrumReconstruction", false);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+  }
+
   void test_bad_complex_data() {
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
@@ -567,6 +590,48 @@ public:
     TS_ASSERT_DELTA(angle->y(1).back(), 0.001, 0.001);
     TS_ASSERT_DELTA(chi->y(2).back(), 1.000, 0.001);
     TS_ASSERT_DELTA(angle->y(2).back(), 0.001, 0.001);
+  }
+
+  void test_adjustments_three_spectra_summed() {
+
+    auto ws = createWorkspaceReal(10, 0.0, 3);
+    auto linAdj = createWorkspaceAdjustments(10, 1.05, 0.00, 0.0, 1);
+    auto constAdj = createWorkspaceAdjustments(10, 0.0, 0.1, 0.2, 1);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("A", 0.01);
+    alg->setProperty("DataLinearAdj", linAdj);
+    alg->setProperty("DataConstAdj", constAdj);
+    alg->setProperty("PerSpectrumReconstruction", false);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT(data);
+    TS_ASSERT(image);
+    TS_ASSERT(chi);
+    TS_ASSERT(angle);
+
+    // Test some values
+    TS_ASSERT_EQUALS(data->y(0).size(), 10);
+    TS_ASSERT_DELTA(data->y(0)[4], -0.479, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[5], 1.823, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[6], 2.397, 0.001);
+
+    // Test that the algorithm converged
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
+    TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
   }
 
   void test_output_label() {
