@@ -75,13 +75,13 @@ public:
     TS_ASSERT_EQUALS(sProp->isValid(), "");
   }
 
-  void Xtest_SetValue() {
+  void test_SetValue() {
     TS_ASSERT_THROWS(iProp->setValue("1"), Exception::NotImplementedError);
     TS_ASSERT_THROWS(dProp->setValue("5.5"), Exception::NotImplementedError);
     TS_ASSERT_THROWS(sProp->setValue("aValue"), Exception::NotImplementedError);
   }
 
-  void Xtest_AddValue() {
+  void test_AddValue() {
     const std::string tester("2007-11-30T16:17:00");
     int sizepre = iProp->size();
     TS_ASSERT_THROWS_NOTHING(iProp->addValue(tester, 1));
@@ -124,7 +124,7 @@ public:
     TS_ASSERT_EQUALS(twoVals[1], threeVals[2]);
     TS_ASSERT_EQUALS(newVal, threeVals[1]);
   }
-  void Xtest_GetDerivative() {
+  void test_GetDerivative() {
     dProp->addValue("2007-11-30T16:17:10", 10);
     dProp->addValue("2007-11-30T16:17:12", 12);
     dProp->addValue("2007-11-30T16:17:01", 01);
@@ -154,7 +154,7 @@ public:
     derValues = derProp->valuesAsVector();
     TS_ASSERT_EQUALS(derValues[0], 1);
   }
-  void Xtest_timesAsVector() {
+  void test_timesAsVector() {
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 5.55));
@@ -177,7 +177,7 @@ public:
     delete p;
   }
 
-  void Xtest_replaceValues() {
+  void test_replaceValues() {
     // Arrange
     size_t num = 1000;
     DateAndTime first("2007-11-30T16:17:10");
@@ -205,7 +205,7 @@ public:
                       103.0);
   }
 
-  void Xtest_addValues() {
+  void test_addValues() {
     size_t num = 1000;
     DateAndTime first("2007-11-30T16:17:10");
     std::vector<DateAndTime> times;
@@ -221,7 +221,7 @@ public:
     TS_ASSERT_EQUALS(tsp.nthValue(3), 3.0);
   }
 
-  void Xtest_Casting() {
+  void test_Casting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
                       static_cast<Property *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
@@ -233,7 +233,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void Xtest_AdditionOperator() {
+  void test_AdditionOperator() {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:19:10", 2));
@@ -262,7 +262,7 @@ public:
 
   //----------------------------------------------------------------------------
   /// Ticket 2097: This caused an infinite loop
-  void Xtest_AdditionOperatorOnYourself() {
+  void test_AdditionOperatorOnYourself() {
     TimeSeriesProperty<int> *log = createIntegerTSP(2);
 
     (*log) += log;
@@ -272,7 +272,7 @@ public:
     delete log;
   }
 
-  void Xtest_ComparisonOperator() {
+  void test_ComparisonOperator() {
     // Setup two logs and two filters so that logs have different sizes but are
     // the same size after applying the filter
 
@@ -306,7 +306,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void Xtest_filterByTime() {
+  void test_filterByTime() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
@@ -323,7 +323,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void Xtest_filterByTimes1() {
+  void test_filterByTimes1() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
@@ -344,7 +344,7 @@ public:
     delete log;
   }
 
-  void Xtest_filterByTimesN() {
+  void test_filterByTimesN() {
     TimeSeriesProperty<int> *log = createIntegerTSP(10);
     TS_ASSERT_EQUALS(log->realSize(), 10);
 
@@ -372,7 +372,7 @@ public:
 
   //----------------------------------------------------------------------------
   /// Ticket #2591
-  void Xtest_filterByTime_ifOnlyOneValue_assumes_constant_instead() {
+  void test_filterByTime_ifOnlyOneValue_assumes_constant_instead() {
     TimeSeriesProperty<int> *log = createIntegerTSP(1);
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
@@ -388,7 +388,7 @@ public:
 
   //----------------------------------------------------------------------------
   /// Ticket #2591
-  void Xtest_filterByTime_ifOnlyOneValue_assumes_constant_instead_2() {
+  void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2() {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("1990-01-01T00:00:00", 1));
     TS_ASSERT_EQUALS(log->realSize(), 1);
@@ -404,7 +404,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void Xtest_makeFilterByValue() {
+  void test_makeFilterByValue() {
     TimeSeriesProperty<double> *log =
         new TimeSeriesProperty<double>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
@@ -460,14 +460,14 @@ public:
     delete log;
   }
 
-  void Xtest_makeFilterByValue_throws_for_string_property() {
+  void test_makeFilterByValue_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(log.makeFilterByValue(splitter, 0.0, 0.0, 0.0, true),
                      Exception::NotImplementedError);
   }
 
-  void Xtest_expandFilterToRange() {
+  void test_expandFilterToRange() {
     TimeSeriesProperty<int> log("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log.addValue("2007-11-30T16:17:00", 1));
     TS_ASSERT_THROWS_NOTHING(log.addValue("2007-11-30T16:17:10", 2));
@@ -541,7 +541,7 @@ public:
                     1e-3);
   }
 
-  void Xtest_expandFilterToRange_throws_for_string_property() {
+  void test_expandFilterToRange_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(
@@ -549,7 +549,7 @@ public:
         Exception::NotImplementedError);
   }
 
-  void Xtest_averageValueInFilter() {
+  void test_averageValueInFilter() {
     auto dblLog = createDoubleTSP();
     auto intLog = createIntegerTSP(5);
 
@@ -609,7 +609,7 @@ public:
     delete intLog;
   }
 
-  void Xtest_timeAverageValue() {
+  void test_timeAverageValue() {
     auto dblLog = createDoubleTSP();
     auto intLog = createIntegerTSP(5);
 
@@ -621,14 +621,14 @@ public:
     delete intLog;
   }
 
-  void Xtest_averageValueInFilter_throws_for_string_property() {
+  void test_averageValueInFilter_throws_for_string_property() {
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter),
                      Exception::NotImplementedError);
   }
 
   //----------------------------------------------------------------------------
-  void Xtest_splitByTime_and_getTotalValue() {
+  void test_splitByTime_and_getTotalValue() {
     TimeSeriesProperty<int> *log = createIntegerTSP(12);
     // Make the outputs
     std::vector<Property *> outputs;
@@ -682,7 +682,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void Xtest_splitByTime_withOverlap() {
+  void test_splitByTime_withOverlap() {
     TimeSeriesProperty<int> *log = createIntegerTSP(12);
 
     // Make the outputs
@@ -720,7 +720,7 @@ public:
    * otuput 3 has entries: 7
    * @brief test_splitByTimeVector
    */
-  void Xtest_splitByTimeVector() {
+  void test_splitByTimeVector() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
     split_time_vec.push_back(DateAndTime("2007-11-30T16:17:10"));
@@ -796,7 +796,7 @@ public:
   /** last splitter is before first entry
    * @brief test_splitByTimeVectorEarlySplitter
    */
-  void test_splitByTimeVectorEarlySplitter() {
+  void Throw_test_splitByTimeVectorEarlySplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
     split_time_vec.push_back(DateAndTime("2007-11-30T16:00:10"));
@@ -893,7 +893,7 @@ public:
     // check
     for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
-      TS_ASSERT_EQUALS(out_i->size(), 0);
+      TS_ASSERT_EQUALS(out_i->size(), 1);
     }
   }
 
@@ -901,7 +901,7 @@ public:
   /** high-frequency splitters splits a slow change log
    * @brief test_splitByTimeVectorFastLogSplitter
    */
-  void Xtest_splitByTimeVectorFastLogSplitter() {
+  void test_splitByTimeVectorFastLogSplitter() {
     // create test log
     TimeSeriesProperty<int> log("test log");
     log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
@@ -1017,7 +1017,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void Xtest_statistics() {
+  void test_statistics() {
     TimeSeriesProperty<double> *log =
         new TimeSeriesProperty<double>("MydoubleLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
@@ -1046,7 +1046,7 @@ public:
     delete log;
   }
 
-  void Xtest_empty_statistics() {
+  void test_empty_statistics() {
     TimeSeriesProperty<double> *log =
         new TimeSeriesProperty<double>("MydoubleLog");
     TimeSeriesPropertyStatistics stats = log->getStatistics();
@@ -1060,7 +1060,7 @@ public:
     delete log;
   }
 
-  void Xtest_PlusEqualsOperator_Incompatible_Types_dontThrow() {
+  void test_PlusEqualsOperator_Incompatible_Types_dontThrow() {
     // Adding incompatible types together should not throw, but issue a warning
     // in the log
 
@@ -1081,7 +1081,7 @@ public:
     delete val;
   }
 
-  void Xtest_PlusEqualsOperator_() {
+  void test_PlusEqualsOperator_() {
     TimeSeriesProperty<double> *lhs =
         new TimeSeriesProperty<double>("doubleLog");
     TS_ASSERT_THROWS_NOTHING(lhs->addValue("2007-11-30T16:17:00", 1));
@@ -1110,7 +1110,7 @@ public:
    * boundary
    * (4) outside lower bound
    */
-  void Xtest_getSingleValue() {
+  void test_getSingleValue() {
     TimeSeriesProperty<double> *p = createDoubleTSP();
 
     DateAndTime time1("2007-11-30T16:17:23");
@@ -1136,7 +1136,7 @@ public:
     delete p;
   }
 
-  void Xtest_getSingleValue_emptyPropertyThrows() {
+  void test_getSingleValue_emptyPropertyThrows() {
     const TimeSeriesProperty<int> empty("Empty");
 
     DateAndTime time("2013-01-30T16:17:23");
@@ -1145,7 +1145,7 @@ public:
     TS_ASSERT_THROWS(empty.getSingleValue(time, i), std::runtime_error);
   }
 
-  void Xtest_firstLastTimeValue() {
+  void test_firstLastTimeValue() {
     TimeSeriesProperty<double> *p = createDoubleTSP();
 
     Mantid::Types::Core::DateAndTime t0 = p->firstTime();
@@ -1168,7 +1168,7 @@ public:
     return;
   }
 
-  void Xtest_firstLastTimeValue_emptyPropertyThrows() {
+  void test_firstLastTimeValue_emptyPropertyThrows() {
     const TimeSeriesProperty<int> empty("Empty");
 
     TS_ASSERT_THROWS(empty.firstTime(), std::runtime_error);
@@ -1177,7 +1177,7 @@ public:
     TS_ASSERT_THROWS(empty.lastValue(), std::runtime_error);
   }
 
-  void Xtest_min_max_value() {
+  void test_min_max_value() {
     // Test a double property
     const TimeSeriesProperty<double> *p = createDoubleTSP();
     TS_ASSERT_EQUALS(p->minValue(), 5.55);
@@ -1201,7 +1201,7 @@ public:
   /*
    * Test merge()
    */
-  void Xtest_Merge() {
+  void test_Merge() {
     // 1. Construct p1 and p2
     TimeSeriesProperty<double> *p1 = createDoubleTSP();
     TimeSeriesProperty<double> *p2 =
@@ -1237,7 +1237,7 @@ public:
   /*
    * Test setName and getName
    */
-  void Xtest_Name() {
+  void test_Name() {
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
 
@@ -1253,7 +1253,7 @@ public:
   /*
    * Test value()
    */
-  void Xtest_Value() {
+  void test_Value() {
     TimeSeriesProperty<double> *p = createDoubleTSP();
 
     std::string pvalue = p->value();
@@ -1269,7 +1269,7 @@ public:
   /*
    * Test valueAsVector()
    */
-  void Xtest_ValueAsVector() {
+  void test_ValueAsVector() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1294,7 +1294,7 @@ public:
   /*
    * Test clone
    */
-  void Xtest_Clone() {
+  void test_Clone() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1334,7 +1334,7 @@ public:
   /*
    * Test countSize()
    */
-  void Xtest_CountSize() {
+  void test_CountSize() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1356,7 +1356,7 @@ public:
   /*
    * Test isTimeString()
    */
-  void Xtest_IsTimeString() {
+  void test_IsTimeString() {
     TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("Test");
 
     std::string timestring1("2007-11-30T16:17:00");
@@ -1376,7 +1376,7 @@ public:
     return;
   }
 
-  void Xtest_clear() {
+  void test_clear() {
     boost::scoped_ptr<TimeSeriesProperty<int>> p(
         new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00", 1);
@@ -1391,7 +1391,7 @@ public:
     TS_ASSERT_EQUALS(p->realSize(), 0);
   }
 
-  void Xtest_clearOutdated() {
+  void test_clearOutdated() {
     boost::scoped_ptr<TimeSeriesProperty<int>> p(
         new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00", 99);
@@ -1425,7 +1425,7 @@ public:
   /** Test 2 create() functions by creating 3 properties in different
    * approaches.
    */
-  void Xtest_Create() {
+  void test_Create() {
     // Create property by add 4 entries
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1499,7 +1499,7 @@ public:
   /*
    * Test time_tValue()
    */
-  void Xtest_timeTValue() {
+  void test_timeTValue() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1530,7 +1530,7 @@ public:
   /*
    * Test valueAsCorrectMap()
    */
-  void Xtest_valueAsCorrectMap() {
+  void test_valueAsCorrectMap() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1571,7 +1571,7 @@ public:
     return;
   }
 
-  void Xtest_valueAsMultiMap() {
+  void test_valueAsMultiMap() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1613,7 +1613,7 @@ public:
   /* Test method valueAsVector
    *
    */
-  void Xtest_valueAsVector() {
+  void test_valueAsVector() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1656,7 +1656,7 @@ public:
   /*
    * Test valueAsMap()
    */
-  void Xtest_valueAsMap() {
+  void test_valueAsMap() {
     // 1. Create property
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
@@ -1703,7 +1703,7 @@ public:
   /*
    * Test nth Time
    */
-  void Xtest_nthTime() {
+  void test_nthTime() {
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
 
@@ -1747,7 +1747,7 @@ public:
   /*
    * Test nthInterval()
    */
-  void Xtest_nthInterval() {
+  void test_nthInterval() {
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
 
@@ -1789,7 +1789,7 @@ public:
   /*
    * Test filterWith() and clear filter
    */
-  void Xtest_filter() {
+  void test_filter() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
@@ -1860,7 +1860,7 @@ public:
     return;
   }
 
-  void Xtest_filter_with_single_value_in_series() {
+  void test_filter_with_single_value_in_series() {
     auto p1 = boost::make_shared<TimeSeriesProperty<double>>("SingleValueTSP");
     p1->addValue("2007-11-30T16:17:00", 1.5);
 
@@ -1885,7 +1885,7 @@ public:
    * Filter_T0 < Log_T0 < LogTf < Filter_Tf, T... F... T... F...
    * Log will be extended to Filter_T0
    */
-  void Xtest_filterBoundary1() {
+  void test_filterBoundary1() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
@@ -1961,7 +1961,7 @@ public:
     * Test filterWith() on different boundary conditions
     * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
     */
-  void Xtest_filterBoundary2() {
+  void test_filterBoundary2() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
@@ -2013,7 +2013,7 @@ public:
     * Test filterWith() on different boundary conditions
     * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
     */
-  void Xtest_filterBoundary3() {
+  void test_filterBoundary3() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
@@ -2074,7 +2074,7 @@ public:
    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
   */
 
-  void Xtest_filterBoundary4() {
+  void test_filterBoundary4() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
@@ -2126,7 +2126,7 @@ public:
    * Test getMemorySize()
    * Note that this will be same with new container
    */
-  void Xtest_getMemorySize() {
+  void test_getMemorySize() {
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
 
@@ -2154,7 +2154,7 @@ public:
     return;
   }
 
-  void Xtest_filter_by_first_value() {
+  void test_filter_by_first_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -2167,7 +2167,7 @@ public:
                       expectedFilteredValue, actualFilteredValue);
   }
 
-  void Xtest_filter_by_last_value() {
+  void test_filter_by_last_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -2180,7 +2180,7 @@ public:
                       expectedFilteredValue, actualFilteredValue);
   }
 
-  void Xtest_filter_by_minimum_value() {
+  void test_filter_by_minimum_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -2195,7 +2195,7 @@ public:
                       expectedFilteredValue, actualFilteredValue);
   }
 
-  void Xtest_filter_by_maximum_value() {
+  void test_filter_by_maximum_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -2210,7 +2210,7 @@ public:
                       expectedFilteredValue, actualFilteredValue);
   }
 
-  void Xtest_filter_by_mean_value() {
+  void test_filter_by_mean_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 1;
@@ -2226,7 +2226,7 @@ public:
                       expectedFilteredValue, actualFilteredValue);
   }
 
-  void Xtest_filter_by_median() {
+  void test_filter_by_median() {
     TimeSeriesProperty<double> series("doubleProperty");
 
     const double expectedFilteredValue = 2;
@@ -2247,7 +2247,7 @@ public:
 
   /** A test for filter nothing
     */
-  void Xtest_filterByTime_out_of_range_filters_nothing() {
+  void test_filterByTime_out_of_range_filters_nothing() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
 
     size_t original_size = log->realSize();
@@ -2268,7 +2268,7 @@ public:
   }
 
   /// Test that getStatistics respects the filter
-  void Xtest_getStatistics_filtered() {
+  void test_getStatistics_filtered() {
     const auto &log = getFilteredTestLog();
 
     // Get the stats and compare to expected values
@@ -2282,12 +2282,12 @@ public:
   }
 
   /// Test that timeAverageValue respects the filter
-  void Xtest_timeAverageValue_filtered() {
+  void test_timeAverageValue_filtered() {
     const auto &log = getFilteredTestLog();
     TS_ASSERT_DELTA(log->timeAverageValue(), 5.588, 1e-3);
   }
 
-  void Xtest_filteredValuesAsVector() {
+  void test_filteredValuesAsVector() {
     const auto &log = getFilteredTestLog();
 
     const auto &unfilteredValues = log->valuesAsVector();
@@ -2298,7 +2298,7 @@ public:
     TS_ASSERT_EQUALS(filteredValues.size(), 9);
   }
 
-  void Xtest_getSplittingIntervals_noFilter() {
+  void test_getSplittingIntervals_noFilter() {
     const auto &log = getTestLog(); // no filter
     const auto &intervals = log->getSplittingIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 1);
@@ -2307,7 +2307,7 @@ public:
     TS_ASSERT_EQUALS(range.stop(), log->lastTime());
   }
 
-  void Xtest_getSplittingIntervals_repeatedEntries() {
+  void test_getSplittingIntervals_repeatedEntries() {
     const auto &log = getTestLog();
     // Add the filter
     auto filter =
@@ -2334,7 +2334,7 @@ public:
     }
   }
 
-  void Xtest_getSplittingIntervals_startEndTimes() {
+  void test_getSplittingIntervals_startEndTimes() {
     const auto &log = getTestLog();
     // Add the filter
     auto filter =
