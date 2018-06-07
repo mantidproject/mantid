@@ -707,7 +707,6 @@ bool ReflRunsTabPresenter::hasPerAngleOptions(int group) const {
 
 /** Tells the view to update the enabled/disabled state of all relevant widgets
  * based on whether processing is in progress or not.
- * @param isProcessing :: true if processing is in progress
  *
  */
 void ReflRunsTabPresenter::updateWidgetEnabledState() const {
