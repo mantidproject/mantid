@@ -74,7 +74,10 @@ void export_WorkspaceValidators() {
   class_<MDFrameValidator, bases<TypedValidator<IMDWorkspace_sptr>>,
          boost::noncopyable>(
       "MDFrameValidator",
-      init<std::string>(
-          arg("frameName"),
-          "Checks the MD workspace has th given frame along all dimensions"));
+      init<std::string>(arg("frameName"),
+                        "Checks the MD workspace has the given frame along all "
+                        "dimensions. Accepted values for the `frameName` are "
+                        "currently: `HKL`, `QLab`, `QSample`, `Time of "
+                        "Flight`, `Distance`, `General frame`, `Unknown "
+                        "frame` "));
 }

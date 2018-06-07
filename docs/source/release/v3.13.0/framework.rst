@@ -72,6 +72,11 @@ New
 Python
 ------
 
+New
+###
+
+- Added a new ``MDFrameValidator`` which can check that a MD workspace passed to a python algorithm has the expected MD frame (e.g. HKL, QLab, QSample etc.).
+
 Improved
 ########
 
