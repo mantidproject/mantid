@@ -422,31 +422,16 @@ void LoadEventNexus::exec() {
   m_ws->mutableRun().addProperty("Filename", m_filename);
   // Save output
   this->setProperty("OutputWorkspace", m_ws->combinedWorkspace());
-  // Load the monitors
+
+  // close the file since LoadNexusMonitors will take care of its own file
+  // handle
+  m_file->close();
+
+  // Load the monitors with child algorithm 'LoadNexusMonitors'
   if (load_monitors) {
     prog.report("Loading monitors");
-    const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
-
-    if (monitorsAsEvents && !this->hasEventMonitors()) {
-      g_log.warning()
-          << "The property MonitorsAsEvents has been enabled but "
-             "this file does not seem to have monitors with events.\n";
-    }
-    if (monitorsAsEvents) {
-      // no matter whether the file has events or not, the user has requested to
-      // load events from monitors
-      if (m_ws->nPeriods() > 1) {
-        throw std::runtime_error(
-            "Loading multi-period monitors in event mode is not supported.");
-      }
-      this->runLoadMonitorsAsEvents(&prog);
-    } else {
-      // this resorts to child algorithm 'LoadNexusMonitors', passing the
-      // property 'MonitorsAsEvents'
-      this->runLoadMonitors();
-    }
+    this->runLoadMonitors();
   }
-  m_file->close();
 }
 
 /**
@@ -1162,80 +1147,6 @@ bool LoadEventNexus::hasEventMonitors() {
   return result;
 }
 
-/**
-* Load the Monitors from the NeXus file into an event workspace. A
-* new event workspace is created and associated to the data
-* workspace. The name of the new event workspace is contructed by
-* appending '_monitors' to the base workspace name.
-*
-* This is used when the property "MonitorsAsEvents" is enabled, and
-* there are monitors with events.
-*
-* @param prog :: progress reporter
-*/
-void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
-  try {
-    // Note the reuse of the m_ws member variable below. Means I need to grab a
-    // copy of its current value.
-    auto dataWS = m_ws;
-    m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm
-                                                           // currently relies
-                                                           // on an
-    // object-level workspace ptr
-    // add filename
-    m_ws->mutableRun().addProperty("Filename", m_filename);
-
-    // Re-use instrument, which has probably been loaded into the data
-    // workspace (this happens in the first call to loadEvents() (inside
-    // LoadEventNexuss::exec()). The second call to loadEvents(), immediately
-    // below, can re-use it.
-    if (m_instrument_loaded_correctly) {
-      m_ws->setInstrument(dataWS->getInstrument());
-      g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace.\n";
-    }
-
-    // Perform the load (only events from monitor)
-    loadEvents(prog, true);
-
-    // and re-use log entries (but only after loading metadata in loadEvents()
-    // this is not strictly needed for the load to work (like the instrument is)
-    // so it can be done after loadEvents, and it doesn't throw
-    if (m_logs_loaded_correctly) {
-      g_log.information()
-          << "Copying log data into monitors workspace from the "
-          << "data workspace.\n";
-      try {
-        auto to = m_ws->getSingleHeldWorkspace();
-        copyLogs(dataWS, to);
-        g_log.information() << "Log data copied.\n";
-      } catch (std::runtime_error &) {
-        g_log.error()
-            << "Could not copy log data into monitors workspace. Some "
-               " logs may be wrong and/or missing in the output "
-               "monitors workspace.\n";
-      }
-    }
-
-    std::string mon_wsname = this->getProperty("OutputWorkspace");
-    mon_wsname.append("_monitors");
-    this->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
-            "MonitorWorkspace", mon_wsname, Direction::Output),
-        "Monitors from the Event NeXus file");
-    this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace",
-                                            m_ws->getSingleHeldWorkspace());
-    // Set the internal monitor workspace pointer as well
-    dataWS->setMonitorWorkspace(m_ws->getSingleHeldWorkspace());
-    // If the run was paused at any point, filter out those events (SNS only, I
-    // think)
-    filterDuringPause(m_ws);
-  } catch (const std::exception &e) {
-    g_log.error() << "Error while loading monitors as events from file: ";
-    g_log.error() << e.what() << '\n';
-  }
-}
-
 //-----------------------------------------------------------------------------
 /**
 * Load the Monitors from the NeXus file into a workspace. The original
@@ -1265,15 +1176,18 @@ void LoadEventNexus::runLoadMonitors() {
                                    this->getProperty("LoadHistoMonitors"));
     loadMonitors->execute();
     Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
-    this->declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            "MonitorWorkspace", mon_wsname, Direction::Output),
-        "Monitors from the Event NeXus file");
-    this->setProperty("MonitorWorkspace", monsOut);
+
     // The output will either be a group workspace or a matrix workspace
     MatrixWorkspace_sptr mons =
         boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
     if (mons) {
+      // create the output workspace property on the fly
+      this->declareProperty(
+          Kernel::make_unique<WorkspaceProperty<MatrixWorkspace> >(
+              "MonitorWorkspace", mon_wsname, Direction::Output),
+          "Monitors from the Event NeXus file");
+      this->setProperty("MonitorWorkspace", mons);
+
       // Set the internal monitor workspace pointer as well
       m_ws->setMonitorWorkspace(mons);
 

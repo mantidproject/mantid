@@ -195,7 +195,6 @@ private:
   void deleteBanks(EventWorkspaceCollection_sptr workspace,
                    std::vector<std::string> bankNames);
   bool hasEventMonitors();
-  void runLoadMonitorsAsEvents(API::Progress *const prog);
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
