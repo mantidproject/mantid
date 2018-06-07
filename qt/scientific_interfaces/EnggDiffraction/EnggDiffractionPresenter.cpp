@@ -1573,7 +1573,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                           " into: " << effectiveFilenames[idx] << '\n';
     try {
       m_focusFinishedOK = false;
-      doFocusing(cs, runNo, bankIDs[idx], specs[idx], dgFile);
+      doFocusing(cs, RunLabel(std::stoi(runNo), bankIDs[idx]), specs[idx],
+                 dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &rexc) {
       g_log.error() << "The focusing calculations failed. One of the algorithms"
@@ -1696,9 +1697,7 @@ void EnggDiffractionPresenter::focusingFinished() {
 * @param cs user settings for calibration (this does not calibrate but
 * uses calibration input files such as vanadium runs
 *
-* @param runNo input run to focus
-*
-* @param bank instrument bank number to focus
+* @param runLabel run number and bank ID of the run to focus
 *
 * @param specNos string specifying a list of spectra (for "cropped"
 * focusing or "texture" focusing), only considered if not empty
@@ -1707,7 +1706,7 @@ void EnggDiffractionPresenter::focusingFinished() {
 * texture focusing
 */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
-                                          const std::string &runNo, size_t bank,
+                                          const RunLabel &runLabel,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
   MatrixWorkspace_sptr inWS;
@@ -1770,7 +1769,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     try {
       auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
       load->initialize();
-      load->setPropertyValue("Filename", instStr + runNo);
+      load->setPropertyValue("Filename",
+                             instStr + std::to_string(runLabel.runNumber));
       load->setPropertyValue("OutputWorkspace", inWSName);
       load->execute();
 
@@ -1782,22 +1782,21 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                        "Could not run the algorithm Load succesfully for "
                        "the focusing "
                        "sample (run number: " +
-                           runNo + "). Error description: " + re.what() +
+                           std::to_string(runLabel.runNumber) +
+                           "). Error description: " + re.what() +
                            " Please check also the previous log messages "
                            "for details.";
       throw;
     }
   }
-
+  const auto bankString = std::to_string(runLabel.bank);
   std::string outWSName;
   if (!dgFile.empty()) {
     // doing focus "texture"
-    outWSName = "engggui_focusing_output_ws_texture_bank_" +
-                boost::lexical_cast<std::string>(bank);
+    outWSName = "engggui_focusing_output_ws_texture_bank_" + bankString;
   } else if (specNos.empty()) {
     // doing focus "normal" / by banks
-    outWSName = "engggui_focusing_output_ws_bank_" +
-                boost::lexical_cast<std::string>(bank);
+    outWSName = "engggui_focusing_output_ws_bank_" + bankString;
   } else {
     // doing focus "cropped"
     outWSName = "engggui_focusing_output_ws_cropped";
@@ -1811,7 +1810,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
     // cropped / normal focusing
     if (specNos.empty()) {
-      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
+      alg->setPropertyValue("Bank", bankString);
     } else {
       alg->setPropertyValue("SpectrumNumbers", specNos);
     }
@@ -1824,21 +1823,20 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate successfully for bank " +
-            boost::lexical_cast<std::string>(bank) + ". Error description: " +
-            re.what() + " Please check also the log messages for details.";
+            bankString + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
     throw;
   }
   g_log.notice() << "Produced focused workspace: " << outWSName << '\n';
 
-  bool saveOutputFiles = m_view->saveFocusedOutputFiles();
-  const auto bankString = boost::lexical_cast<std::string>(bank);
+  const bool saveOutputFiles = m_view->saveFocusedOutputFiles();
 
   if (saveOutputFiles) {
     try {
-      saveFocusedXYE(outWSName, bankString, runNo);
-      saveGSS(outWSName, bankString, runNo);
-      saveOpenGenie(outWSName, bankString, runNo);
-      saveNexus(outWSName, bankString, runNo);
+      saveFocusedXYE(runLabel, outWSName);
+      saveGSS(runLabel, outWSName);
+      saveOpenGenie(runLabel, outWSName);
+      saveNexus(runLabel, outWSName);
     } catch (std::runtime_error &re) {
       g_log.error() << "Error saving focused data. ",
           "There was an error while saving focused data. "
@@ -2158,17 +2156,15 @@ void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difc,
 * Convert the generated output files and saves them in
 * FocusedXYE format
 *
+* @param runLabel run number and bank ID of the workspace to save
 * @param inputWorkspace title of the focused workspace
-* @param bank the number of the bank as a string
-* @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveFocusedXYE(const std::string &inputWorkspace,
-                                              const std::string &bank,
-                                              const std::string &runNo) {
+void EnggDiffractionPresenter::saveFocusedXYE(
+    const RunLabel &runLabel, const std::string &inputWorkspace) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
-      outFileNameFactory(inputWorkspace, runNo, bank, ".dat");
+      outFileNameFactory(inputWorkspace, runLabel, ".dat");
 
   const std::string focusingComp = "Focus";
   // Creates appropriate directory
@@ -2187,7 +2183,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string &inputWorkspace,
     const std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
-    alg->setPropertyValue("StartAtBankNumber", bank);
+    alg->setPropertyValue("StartAtBankNumber", std::to_string(runLabel.bank));
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in saving FocusedXYE format file. ",
@@ -2206,17 +2202,15 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string &inputWorkspace,
 * Convert the generated output files and saves them in
 * GSS format
 *
+* @param runLabel run number and bank ID the workspace to save
 * @param inputWorkspace title of the focused workspace
-* @param bank the number of the bank as a string
-* @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveGSS(const std::string &inputWorkspace,
-                                       const std::string &bank,
-                                       const std::string &runNo) {
+void EnggDiffractionPresenter::saveGSS(const RunLabel &runLabel,
+                                       const std::string &inputWorkspace) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
-      outFileNameFactory(inputWorkspace, runNo, bank, ".gss");
+      outFileNameFactory(inputWorkspace, runLabel, ".gss");
 
   const std::string focusingComp = "Focus";
   // Creates appropriate directory
@@ -2235,7 +2229,7 @@ void EnggDiffractionPresenter::saveGSS(const std::string &inputWorkspace,
     std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
-    alg->setPropertyValue("Bank", bank);
+    alg->setPropertyValue("Bank", std::to_string(runLabel.bank));
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in saving GSS format file. ",
@@ -2250,11 +2244,10 @@ void EnggDiffractionPresenter::saveGSS(const std::string &inputWorkspace,
   copyToGeneral(saveDir, focusingComp);
 }
 
-void EnggDiffractionPresenter::saveNexus(const std::string &inputWorkspace,
-                                         const std::string &bank,
-                                         const std::string &runNumber) {
+void EnggDiffractionPresenter::saveNexus(const RunLabel &runLabel,
+                                         const std::string &inputWorkspace) {
   const auto filename =
-      outFileNameFactory(inputWorkspace, runNumber, bank, ".nxs");
+      outFileNameFactory(inputWorkspace, runLabel, ".nxs");
   auto saveDirectory = outFilesUserDir("Focus");
   saveDirectory.append(filename);
   const auto fullOutFileName = saveDirectory.toString();
@@ -2284,17 +2277,15 @@ void EnggDiffractionPresenter::saveNexus(const std::string &inputWorkspace,
 * Convert the generated output files and saves them in
 * OpenGenie format
 *
+* @param runLabel run number and bank ID of the workspace to save
 * @param inputWorkspace title of the focused workspace
-* @param bank the number of the bank as a string
-* @param runNo the run number as a string
 */
-void EnggDiffractionPresenter::saveOpenGenie(const std::string &inputWorkspace,
-                                             const std::string &bank,
-                                             const std::string &runNo) {
+void EnggDiffractionPresenter::saveOpenGenie(
+    const RunLabel &runLabel, const std::string &inputWorkspace) {
 
   // Generates the file name in the appropriate format
   std::string fullFilename =
-      outFileNameFactory(inputWorkspace, runNo, bank, ".his");
+      outFileNameFactory(inputWorkspace, runLabel, ".his");
 
   std::string comp;
   Poco::Path saveDir;
@@ -2340,14 +2331,17 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string &inputWorkspace,
 * Generates the required file name of the output files
 *
 * @param inputWorkspace title of the focused workspace
-* @param runNo the run number as a string
-* @param bank the number of the bank as a string
+* @param runLabel run number and bank ID of the workspace to save
 * @param format the format of the file to be saved as
 */
-std::string EnggDiffractionPresenter::outFileNameFactory(
-    const std::string &inputWorkspace, const std::string &runNo,
-    const std::string &bank, const std::string &format) {
+std::string
+EnggDiffractionPresenter::outFileNameFactory(const std::string &inputWorkspace,
+                                             const RunLabel &runLabel,
+                                             const std::string &format) {
   std::string fullFilename;
+
+  const auto runNo = std::to_string(runLabel.runNumber);
+  const auto bank = std::to_string(runLabel.bank);
 
   // calibration output files
   if (inputWorkspace.std::string::find("curves") != std::string::npos) {

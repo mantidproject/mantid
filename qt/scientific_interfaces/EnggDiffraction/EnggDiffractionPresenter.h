@@ -204,9 +204,8 @@ private:
                                std::vector<size_t> &bankIDs,
                                std::vector<std::string> &specs);
 
-  void doFocusing(const EnggDiffCalibSettings &cs, const std::string &runNo,
-                  size_t bank, const std::string &specNos,
-                  const std::string &dgFile);
+  void doFocusing(const EnggDiffCalibSettings &cs, const RunLabel &runLabel,
+                  const std::string &specNos, const std::string &dgFile);
 
   /// @name Methods related to pre-processing / re-binning
   //@{
@@ -235,19 +234,16 @@ private:
                           std::string specNos);
 
   // algorithms to save the generated workspace
-  void saveGSS(const std::string &inputWorkspace, const std::string &bank,
-               const std::string &runNo);
-  void saveFocusedXYE(const std::string &inputWorkspace,
-                      const std::string &bank, const std::string &runNo);
-  void saveNexus(const std::string &inputWorkspace, const std::string &bank,
-                 const std::string &runNumber);
-  void saveOpenGenie(const std::string &inputWorkspace, const std::string &bank,
-                     const std::string &runNo);
+  void saveGSS(const RunLabel &runLabel, const std::string &inputWorkspace);
+  void saveFocusedXYE(const RunLabel &runLabel,
+                      const std::string &inputWorkspace);
+  void saveNexus(const RunLabel &runLabel, const std::string &inputWorkspace);
+  void saveOpenGenie(const RunLabel &runLabel,
+                     const std::string &inputWorkspace);
 
   // generates the required file name of the output files
   std::string outFileNameFactory(const std::string &inputWorkspace,
-                                 const std::string &runNo,
-                                 const std::string &bank,
+                                 const RunLabel &runLabel,
                                  const std::string &format);
 
   // returns a directory as a path, creating it if not found, and checking
