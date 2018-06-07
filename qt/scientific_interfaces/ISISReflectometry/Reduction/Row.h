@@ -2,8 +2,9 @@
 #define MANTID_CUSTOMINTERFACES_RUN_H_
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <boost/variant.hpp>
+#include <boost/optional.hpp>
 #include "RangeInQ.h"
 #include "ReductionWorkspaces.h"
 #include "SlicedReductionWorkspaces.h"
@@ -12,7 +13,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using ReductionOptionsMap = std::unordered_map<std::string, std::string>;
+using ReductionOptionsMap = std::map<std::string, std::string>;
 
 // Immutability here makes update notification easier.
 template <typename ReducedWorkspaceNames> class Row {
@@ -21,15 +22,14 @@ public:
 
   Row(std::vector<std::string> number, double theta,
       std::pair<std::string, std::string> tranmissionRuns, boost::optional<RangeInQ> qRange,
-      double scaleFactor,
-      boost::optional<ReducedWorkspaceNames> reducedWorkspaceNames,
-      ReductionOptionsMap reductionOptions = ReductionOptionsMap());
-
+      boost::optional<double> scaleFactor,
+      ReductionOptionsMap reductionOptions,
+      boost::optional<ReducedWorkspaceNames> reducedWorkspaceNames);
   std::vector<std::string> const &runNumbers() const;
   std::pair<std::string, std::string> transmissionWorkspaceNames();
   double theta() const;
   boost::optional<RangeInQ> const &qRange() const;
-  double scaleFactor() const;
+  boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   boost::optional<ReducedWorkspaceNames> const &reducedWorkspaceNames() const;
 
@@ -37,10 +37,10 @@ private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
   boost::optional<RangeInQ> m_qRange;
-  double m_scaleFactor;
+  boost::optional<double> m_scaleFactor;
   std::pair<std::string, std::string> m_transmissionRuns;
   boost::optional<ReducedWorkspaceNames> m_reducedWorkspaceNames;
-  std::unordered_map<std::string, std::string> m_reductionOptions;
+  ReductionOptionsMap m_reductionOptions;
 };
 
 template <typename ReducedWorkspaceNames>

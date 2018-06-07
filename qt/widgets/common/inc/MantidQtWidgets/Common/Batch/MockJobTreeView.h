@@ -52,6 +52,13 @@ public:
   MOCK_CONST_METHOD2(cellAt, Cell(RowLocation, int));
   MOCK_METHOD3(setCellAt, void(RowLocation, int, Cell const&));
 
+  MOCK_METHOD2(setHintsForColumn,
+               void(int, MantidQt::MantidWidgets::HintStrategy*));
+
+  void setHintsForColumn(int column, std::unique_ptr<MantidQt::MantidWidgets::HintStrategy> strategy) override {
+    setHintsForColumn(column, strategy.get());
+  }
+
   MOCK_CONST_METHOD0(selectedRowLocations, std::vector<RowLocation>());
   MOCK_CONST_METHOD0(selectedSubtrees, boost::optional<std::vector<Subtree>>());
   MOCK_CONST_METHOD0(selectedSubtreeRoots, boost::optional<std::vector<RowLocation>>());

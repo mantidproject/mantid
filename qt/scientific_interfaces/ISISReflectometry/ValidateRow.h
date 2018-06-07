@@ -6,23 +6,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template <typename Param>
-bool allInitialized(boost::optional<Param> const &param) {
-  return param.is_initialized();
-}
-
-template <typename FirstParam, typename SecondParam, typename... Params>
-bool allInitialized(boost::optional<FirstParam> const &first,
-                    boost::optional<SecondParam> const &second,
-                    boost::optional<Params> const &... params) {
-  return first.is_initialized() && allInitialized(second, params...);
-}
-
-template <typename Result, typename... Params>
-Result makeUsingValues(boost::optional<Params> const &... params) {
-  return Result(params.get()...);
-}
-
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
 parseDouble(std::string string);
 
@@ -55,14 +38,22 @@ bool isEntirelyWhitespace(std::string const &string);
 using TransmissionRunPair = std::pair<std::string, std::string>;
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-    boost::variant<TransmissionRunPair, std::vector<int>>
-    parseTransmissionRuns(std::string const &firstTransmissionRun,
-                          std::string const &secondTransmissionRun);
+boost::variant<TransmissionRunPair, std::vector<int>>
+parseTransmissionRuns(std::string const &firstTransmissionRun,
+                      std::string const &secondTransmissionRun);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-    boost::variant<boost::optional<RangeInQ>, std::vector<int>>
-    parseQRange(std::string const &min, std::string const &max,
-                std::string const &step);
+boost::variant<boost::optional<RangeInQ>, std::vector<int>>
+parseQRange(std::string const &min, std::string const &max,
+            std::string const &step);
+
+MANTIDQT_ISISREFLECTOMETRY_DLL
+boost::optional<boost::optional<double>>
+parseScaleFactor(std::string const &scaleFactor);
+
+MANTIDQT_ISISREFLECTOMETRY_DLL
+boost::optional<std::map<std::string, std::string>>
+parseOptions(std::string const &options);
 
 template <typename Row> class RowValidationResult {
 public:
@@ -78,6 +69,26 @@ private:
   boost::optional<Row> m_validRow;
 };
 
+template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
+public:
+  RowValidationResult<Row> operator()(std::vector<std::string> const &cellText);
+
+private:
+  boost::optional<std::vector<std::string>>
+  parseRunNumbers(std::vector<std::string> const &cellText);
+  boost::optional<double> parseTheta(std::vector<std::string> const &cellText);
+  boost::optional<TransmissionRunPair>
+  parseTransmissionRuns(std::vector<std::string> const &cellText);
+  boost::optional<boost::optional<RangeInQ>>
+  parseQRange(std::vector<std::string> const &cellText);
+  boost::optional<boost::optional<double>>
+  parseScaleFactor(std::vector<std::string> const &cellText);
+  boost::optional<std::map<std::string, std::string>>
+  parseOptions(std::vector<std::string> const &cellText);
+
+  std::vector<int> m_invalidColumns;
+};
+
 template <typename Row>
 RowValidationResult<Row> validateRow(std::vector<std::string> const &cellText);
 
@@ -89,6 +100,7 @@ extern template MANTIDQT_ISISREFLECTOMETRY_DLL RowValidationResult<SlicedRow>
 validateRow(std::vector<std::string> const &);
 extern template MANTIDQT_ISISREFLECTOMETRY_DLL RowValidationResult<SingleRow>
 validateRow(std::vector<std::string> const &);
+
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_

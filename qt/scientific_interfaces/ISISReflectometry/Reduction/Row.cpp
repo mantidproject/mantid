@@ -7,9 +7,9 @@ template <typename ReducedWorkspaceNames>
 Row<ReducedWorkspaceNames>::Row(
     std::vector<std::string> runNumbers, double theta,
     std::pair<std::string, std::string> transmissionRuns, boost::optional<RangeInQ> qRange,
-    double scaleFactor,
-    boost::optional<ReducedWorkspaceNames> reducedWorkspaceNames,
-    ReductionOptionsMap reductionOptions)
+    boost::optional<double> scaleFactor,
+    ReductionOptionsMap reductionOptions,
+    boost::optional<ReducedWorkspaceNames> reducedWorkspaceNames)
     : m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),
@@ -32,7 +32,7 @@ boost::optional<RangeInQ> const &Row<ReducedWorkspaceNames>::qRange() const {
 }
 
 template <typename ReducedWorkspaceNames>
-double Row<ReducedWorkspaceNames>::scaleFactor() const {
+boost::optional<double> Row<ReducedWorkspaceNames>::scaleFactor() const {
   return m_scaleFactor;
 }
 

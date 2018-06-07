@@ -1,6 +1,7 @@
 #include "BatchView.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,12 +16,26 @@ BatchView::BatchView(std::vector<std::string> const &instruments,
                        "Scale", "Options"}),
           MantidQt::MantidWidgets::Batch::Cell(""), this);
   m_ui.mainLayout->insertWidget(1, m_jobs.get());
+  showAlgorithmPropertyHintsInOptionsColumn();
   addToolbarActions();
   m_jobs->addActions(m_ui.toolBar->actions());
 
   for (auto &&instrument : m_instruments)
     m_ui.instrumentSelector->addItem(QString::fromStdString(instrument));
   m_ui.instrumentSelector->setCurrentIndex(defaultInstrumentIndex);
+}
+
+void BatchView::showAlgorithmPropertyHintsInOptionsColumn() {
+  auto constexpr optionsColumn = 8;
+  m_jobs->setHintsForColumn(
+      optionsColumn,
+      Mantid::Kernel::make_unique<MantidQt::MantidWidgets::AlgorithmHintStrategy>(
+          "ReflectometryReductionOneAuto",
+          std::vector<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",
+           "OutputWorkspaceBinned", "OutputWorkspaceWavelength",
+           "FirstTransmissionRun", "SecondTransmissionRun",
+           "MomentumTransferMin", "MomentumTransferMax", "MomentumTransferStep",
+           "ScaleFactor"}));
 }
 
 QAction *BatchView::addToolbarItem(std::string const &iconPath,

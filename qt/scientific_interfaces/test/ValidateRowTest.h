@@ -157,6 +157,12 @@ public:
     TS_ASSERT_EQUALS(boost::none, parseTheta("0.0"));
   }
 
+  void testParseScaleFactor() {
+    TS_ASSERT_EQUALS(boost::none, parseScaleFactor("ABSC"));
+    TS_ASSERT_EQUALS(boost::none, parseScaleFactor("").get());
+    TS_ASSERT_EQUALS(0.1, parseScaleFactor("0.1").get().get());
+  }
+
   void testParsesFirstTransmissionRun() {
     auto const expected = std::pair<std::string, std::string>("1000", "");
     auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));

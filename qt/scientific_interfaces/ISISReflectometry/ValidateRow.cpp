@@ -1,6 +1,7 @@
 #include "ValidateRow.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -61,10 +62,23 @@ boost::optional<int> parseNonNegativeInt(std::string string) {
     return boost::none;
 }
 
+boost::optional<boost::optional<double>>
+parseScaleFactor(std::string const &scaleFactor) {
+  auto value = parseDouble(scaleFactor);
+  if (value.is_initialized()) {
+    return value;
+  } else if (isEntirelyWhitespace(scaleFactor)) {
+    return boost::optional<double>(boost::none);
+  } else {
+    return boost::none;
+  }
+}
+
 boost::variant<boost::optional<RangeInQ>, std::vector<int>>
 parseQRange(std::string const &min, std::string const &max,
             std::string const &step) {
-  if (!(isEntirelyWhitespace(min) && isEntirelyWhitespace(max) && isEntirelyWhitespace(step))) {
+  if (!(isEntirelyWhitespace(min) && isEntirelyWhitespace(max) &&
+        isEntirelyWhitespace(step))) {
     auto minimum = parseNonNegativeDouble(min);
     auto maximum = parseNonNegativeNonZeroDouble(max);
     auto stepValue = parseDouble(step);
@@ -72,7 +86,8 @@ parseQRange(std::string const &min, std::string const &max,
     auto invalidParams = std::vector<int>();
     if (allInitialized(minimum, maximum, stepValue)) {
       if (maximum.get() > minimum.get()) {
-        return boost::optional<RangeInQ>(RangeInQ(minimum.get(), stepValue.get(), maximum.get()));
+        return boost::optional<RangeInQ>(
+            RangeInQ(minimum.get(), stepValue.get(), maximum.get()));
       } else {
         invalidParams.emplace_back(0);
         invalidParams.emplace_back(1);
@@ -145,16 +160,25 @@ template class RowValidationResult<SlicedRow>;
 
 boost::optional<std::vector<std::string>>
 parseRunNumbers(std::string const &runNumberString) {
-  auto runNumberCandidates = std::vector<std::string>();
-  boost::split(runNumberCandidates, runNumberString, boost::is_any_of("+"));
-  for (auto &runNumberCandidate : runNumberCandidates) {
-    auto maybeRunNumber = parseRunNumber(std::move(runNumberCandidate));
-    if (maybeRunNumber.is_initialized())
-      runNumberCandidate = maybeRunNumber.get();
-    else
+  auto runNumbers = std::vector<std::string>();
+  auto runNumberCandidates =
+      boost::tokenizer<boost::escaped_list_separator<char>>(
+          runNumberString,
+          boost::escaped_list_separator<char>("\\", ",+", "\"'"));
+
+  for (auto const &runNumberCandidate : runNumberCandidates) {
+    auto maybeRunNumber = parseRunNumber(runNumberCandidate);
+    if (maybeRunNumber.is_initialized()) {
+      runNumbers.emplace_back(maybeRunNumber.get());
+    } else {
       return boost::none;
+    }
   }
-  return runNumberCandidates;
+
+  if (runNumbers.empty())
+    return boost::none;
+  else
+    return runNumbers;
 }
 
 boost::optional<std::string>
@@ -192,6 +216,15 @@ boost::optional<double> parseTheta(std::string const &theta) {
     return boost::none;
 }
 
+boost::optional<std::map<std::string, std::string>>
+parseOptions(std::string const &options) {
+  try {
+    return MantidQt::MantidWidgets::parseKeyValueString(options);
+  } catch (std::runtime_error &) {
+    return boost::none;
+  }
+}
+
 template <typename T>
 class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
 public:
@@ -218,34 +251,103 @@ private:
 };
 
 template <typename Row>
-RowValidationResult<Row> validateRow(std::vector<std::string> const &cellText) {
-  auto invalidColumns = std::vector<int>();
-
-  auto runNumbers = parseRunNumbers(cellText[0]);
+boost::optional<std::vector<std::string>>
+RowValidator<Row>::parseRunNumbers(std::vector<std::string> const &cellText) {
+  auto runNumbers = ::MantidQt::CustomInterfaces::parseRunNumbers(cellText[0]);
   if (!runNumbers.is_initialized())
-    invalidColumns.emplace_back(0);
+    m_invalidColumns.emplace_back(0);
+  return runNumbers;
+}
 
-  auto theta = parseTheta(cellText[1]);
+template <typename Row>
+boost::optional<double>
+RowValidator<Row>::parseTheta(std::vector<std::string> const &cellText) {
+  auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[1]);
   if (!theta.is_initialized())
-    invalidColumns.emplace_back(1);
+    m_invalidColumns.emplace_back(1);
+  return theta;
+}
 
+template <typename Row>
+boost::optional<TransmissionRunPair> RowValidator<Row>::parseTransmissionRuns(
+    std::vector<std::string> const &cellText) {
   auto transmissionRunsOrError =
-      parseTransmissionRuns(cellText[2], cellText[3]);
-  auto transmissionRuns = boost::apply_visitor(
-      AppendErrorIfNotType<TransmissionRunPair>(invalidColumns, 2),
+      ::MantidQt::CustomInterfaces::parseTransmissionRuns(cellText[2],
+                                                          cellText[3]);
+  return boost::apply_visitor(
+      AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, 2),
       transmissionRunsOrError);
+}
 
-  auto qRangeOrError = parseQRange(cellText[4], cellText[5], cellText[6]);
-  auto qRange = boost::apply_visitor(
-      AppendErrorIfNotType<boost::optional<RangeInQ>>(invalidColumns, 4), qRangeOrError);
+template <typename Row>
+boost::optional<boost::optional<RangeInQ>>
+RowValidator<Row>::parseQRange(std::vector<std::string> const &cellText) {
+  auto qRangeOrError = ::MantidQt::CustomInterfaces::parseQRange(
+      cellText[4], cellText[5], cellText[6]);
+  return boost::apply_visitor(
+      AppendErrorIfNotType<boost::optional<RangeInQ>>(m_invalidColumns, 4),
+      qRangeOrError);
+}
 
-  if (invalidColumns.empty())
-    return RowValidationResult<Row>(
-        makeUsingValues<Row>(runNumbers, theta, transmissionRuns, qRange,
-                             boost::optional<double>(0.0),
-                             boost::optional<boost::optional<typename Row::WorkspaceNames>>(boost::optional<typename Row::WorkspaceNames>())));
+template <typename Row>
+boost::optional<boost::optional<double>>
+RowValidator<Row>::parseScaleFactor(std::vector<std::string> const &cellText) {
+  auto optionalScaleFactorOrNoneIfError =
+      ::MantidQt::CustomInterfaces::parseScaleFactor(cellText[7]);
+  if (!optionalScaleFactorOrNoneIfError.is_initialized())
+    m_invalidColumns.emplace_back(7);
+  return optionalScaleFactorOrNoneIfError;
+}
+
+template <typename Row>
+boost::optional<std::map<std::string, std::string>>
+RowValidator<Row>::parseOptions(std::vector<std::string> const &cellText) {
+  auto options = ::MantidQt::CustomInterfaces::parseOptions(cellText[8]);
+  if (!options.is_initialized())
+    m_invalidColumns.emplace_back(8);
+  return options;
+}
+
+template <typename Param>
+bool allInitialized(boost::optional<Param> const &param) {
+  return param.is_initialized();
+}
+
+template <typename FirstParam, typename SecondParam, typename... Params>
+bool allInitialized(boost::optional<FirstParam> const &first,
+                    boost::optional<SecondParam> const &second,
+                    boost::optional<Params> const &... params) {
+  return first.is_initialized() && allInitialized(second, params...);
+}
+
+template <typename Result, typename... Params>
+boost::optional<Result>
+makeIfAllInitialized(boost::optional<Params> const &... params) {
+  if (allInitialized(params...))
+    return Result(params.get()...);
   else
-    return RowValidationResult<Row>(invalidColumns);
+    return boost::none;
+}
+
+template <typename Row>
+RowValidationResult<Row> RowValidator<Row>::
+operator()(std::vector<std::string> const &cellText) {
+  auto maybeRow = makeIfAllInitialized<Row>(
+      parseRunNumbers(cellText), parseTheta(cellText),
+      parseTransmissionRuns(cellText), parseQRange(cellText),
+      parseScaleFactor(cellText), parseOptions(cellText),
+      boost::optional<boost::optional<typename Row::WorkspaceNames>>(
+          boost::optional<typename Row::WorkspaceNames>()));
+  if (maybeRow.is_initialized())
+    return RowValidationResult<Row>(maybeRow.get());
+  else
+    return RowValidationResult<Row>(m_invalidColumns);
+}
+
+template <typename Row>
+RowValidationResult<Row> validateRow(std::vector<std::string> const &cellText) {
+  auto validate = RowValidator<Row>();
+  return validate(cellText);
 }
 
 template RowValidationResult<SingleRow>

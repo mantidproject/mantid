@@ -37,6 +37,7 @@ private:
   void addToolbarActions();
   QAction *addToolbarItem(std::string const &iconPath,
                           std::string const &description);
+  void showAlgorithmPropertyHintsInOptionsColumn();
   Ui::BatchView m_ui;
   std::unique_ptr<MantidQt::MantidWidgets::Batch::JobTreeView> m_jobs;
   std::vector<std::string> m_instruments;

@@ -21,6 +21,7 @@
 #include "../ISISReflectometry/ExperimentOptionDefaults.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "../ISISReflectometry/IReflAsciiSaver.h"
+#include "MantidQtWidgets/Common/Hint.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -125,7 +126,7 @@ public:
   MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
   void
-  createStitchHints(const std::map<std::string, std::string> &hints) override {
+  createStitchHints(const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
     UNUSED_ARG(hints);
   };
   IReflSettingsPresenter *getPresenter() const override { return nullptr; }
