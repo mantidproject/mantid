@@ -169,7 +169,6 @@ protected:
 
   const std::string toString() const override;
 
-
 private:
   std::string m_convention;
   IMDWorkspace *doClone() const override = 0;

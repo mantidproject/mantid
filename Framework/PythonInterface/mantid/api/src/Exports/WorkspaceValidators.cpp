@@ -20,15 +20,13 @@ void export_MatrixWorkspaceValidator() {
   using Mantid::API::MatrixWorkspaceValidator;
   TypedValidatorExporter<MatrixWorkspace_sptr>::define(
       "MatrixWorkspaceValidator");
-  TypedValidatorExporter<IMDWorkspace_sptr>::define(
-            "IMDWorkspaceValidator");
+  TypedValidatorExporter<IMDWorkspace_sptr>::define("IMDWorkspaceValidator");
 
   class_<MatrixWorkspaceValidator, bases<TypedValidator<MatrixWorkspace_sptr>>,
          boost::noncopyable>("MatrixWorkspaceValidator", no_init);
 
-    class_<TypedValidator<IMDWorkspace_sptr >,
-            boost::noncopyable>("IMDWorkspaceValidator", no_init);
-
+  class_<TypedValidator<IMDWorkspace_sptr>, boost::noncopyable>(
+      "IMDWorkspaceValidator", no_init);
 }
 /// Export a validator derived from a MatrixWorkspaceValidator that has a no-arg
 /// constructor
@@ -74,6 +72,9 @@ void export_WorkspaceValidators() {
       "Checks whether the axis specified by axisNumber is a NumericAxis");
 
   class_<MDFrameValidator, bases<TypedValidator<IMDWorkspace_sptr>>,
-         boost::noncopyable>("MDFrameValidator", init<std::string>(arg("frameName"),
+         boost::noncopyable>(
+      "MDFrameValidator",
+      init<std::string>(
+          arg("frameName"),
           "Checks the MD workspace has th given frame along all dimensions"));
 }

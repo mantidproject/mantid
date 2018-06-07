@@ -23,7 +23,6 @@
 #include <string>
 
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -31,6 +30,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -433,36 +433,38 @@ public:
   virtual std::vector<std::unique_ptr<IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override {
-      UNUSED_ARG(suggestedNumCores)
-      UNUSED_ARG(function)
+    UNUSED_ARG(suggestedNumCores)
+    UNUSED_ARG(function)
     throw std::runtime_error("Not Implemented");
   }
 
-  virtual signal_t
-  getSignalAtCoord(const coord_t *coords,
-                   const Mantid::API::MDNormalization &normalization) const override {
-      UNUSED_ARG(coords);
-      UNUSED_ARG(normalization);
+  virtual signal_t getSignalAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const override {
+    UNUSED_ARG(coords);
+    UNUSED_ARG(normalization);
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalWithMaskAtCoord(
       const coord_t *coords,
       const Mantid::API::MDNormalization &normalization) const override {
-      UNUSED_ARG(coords);
-      UNUSED_ARG(normalization);
+    UNUSED_ARG(coords);
+    UNUSED_ARG(normalization);
     throw std::runtime_error("Not Implemented");
   }
 
   virtual void
   setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override {
-      UNUSED_ARG(maskingRegion);
+    UNUSED_ARG(maskingRegion);
     throw std::runtime_error("Not Implemented");
   }
 
-  virtual void clearMDMasking() override { throw std::runtime_error("Not Implemented"); }
+  virtual void clearMDMasking() override {
+    throw std::runtime_error("Not Implemented");
+  }
 
-  virtual SpecialCoordinateSystem getSpecialCoordinateSystem() const override{
+  virtual SpecialCoordinateSystem getSpecialCoordinateSystem() const override {
     throw std::runtime_error("Not Implemented");
   }
 
@@ -484,201 +486,201 @@ public:
 
   virtual void setTo(signal_t signal, signal_t errorSquared,
                      signal_t numEvents) override {
-      UNUSED_ARG(signal);
-      UNUSED_ARG(errorSquared);
-      UNUSED_ARG(numEvents);
+    UNUSED_ARG(signal);
+    UNUSED_ARG(errorSquared);
+    UNUSED_ARG(numEvents);
     throw std::runtime_error("Not Implemented");
   }
 
   virtual Mantid::Kernel::VMD getCenter(size_t linearIndex) const override {
-      UNUSED_ARG(linearIndex);
+    UNUSED_ARG(linearIndex);
     throw std::runtime_error("Not Implemented");
   }
 
   virtual void setSignalAt(size_t index, signal_t value) override {
-      UNUSED_ARG(index)
-      UNUSED_ARG(value)
+    UNUSED_ARG(index)
+    UNUSED_ARG(value)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual void setErrorSquaredAt(size_t index, signal_t value) override {
-      UNUSED_ARG(index)
-      UNUSED_ARG(value)
+    UNUSED_ARG(index)
+    UNUSED_ARG(value)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorAt(size_t index) const override {
-      UNUSED_ARG(index)
+    UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorAt(size_t index1, size_t index2) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorAt(size_t index1, size_t index2,
                               size_t index3) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorAt(size_t index1, size_t index2, size_t index3,
                               size_t index4) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
-      UNUSED_ARG(index4)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
+    UNUSED_ARG(index4)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalAt(size_t index) const override {
-      UNUSED_ARG(index)
+    UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalAt(size_t index1, size_t index2) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalAt(size_t index1, size_t index2,
                                size_t index3) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalAt(size_t index1, size_t index2, size_t index3,
                                size_t index4) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
-      UNUSED_ARG(index4)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
+    UNUSED_ARG(index4)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalNormalizedAt(size_t index) const override {
-      UNUSED_ARG(index)
+    UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalNormalizedAt(size_t index1,
                                          size_t index2) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalNormalizedAt(size_t index1, size_t index2,
                                          size_t index3) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getSignalNormalizedAt(size_t index1, size_t index2,
                                          size_t index3,
                                          size_t index4) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
-      UNUSED_ARG(index4)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
+    UNUSED_ARG(index4)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorNormalizedAt(size_t index) const override {
-      UNUSED_ARG(index)
+    UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorNormalizedAt(size_t index1,
                                         size_t index2) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorNormalizedAt(size_t index1, size_t index2,
                                         size_t index3) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t getErrorNormalizedAt(size_t index1, size_t index2,
                                         size_t index3,
                                         size_t index4) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
-      UNUSED_ARG(index4)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
+    UNUSED_ARG(index4)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t &errorSquaredAt(size_t index) override {
-      UNUSED_ARG(index)
+    UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual signal_t &signalAt(size_t index) override {
-      UNUSED_ARG(index)
+    UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual size_t getLinearIndex(size_t index1, size_t index2) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual size_t getLinearIndex(size_t index1, size_t index2,
                                 size_t index3) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual size_t getLinearIndex(size_t index1, size_t index2, size_t index3,
                                 size_t index4) const override {
-      UNUSED_ARG(index1)
-      UNUSED_ARG(index2)
-      UNUSED_ARG(index3)
-      UNUSED_ARG(index4)
+    UNUSED_ARG(index1)
+    UNUSED_ARG(index2)
+    UNUSED_ARG(index3)
+    UNUSED_ARG(index4)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual LinePlot
   getLineData(const Mantid::Kernel::VMD &start, const Mantid::Kernel::VMD &end,
               Mantid::API::MDNormalization normalize) const override {
-      UNUSED_ARG(start)
-      UNUSED_ARG(end)
-      UNUSED_ARG(normalize)
+    UNUSED_ARG(start)
+    UNUSED_ARG(end)
+    UNUSED_ARG(normalize)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual double &operator[](const size_t &index) override {
-      UNUSED_ARG(index)
+    UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual void
   setCoordinateSystem(const SpecialCoordinateSystem coordinateSystem) override {
-      UNUSED_ARG(coordinateSystem)
+    UNUSED_ARG(coordinateSystem)
     throw std::runtime_error("Not Implemented");
   }
 
   virtual void setDisplayNormalization(
       const Mantid::API::MDNormalization &preferredNormalization) override {
-      UNUSED_ARG(preferredNormalization);
+    UNUSED_ARG(preferredNormalization);
     throw std::runtime_error("Not Implemented");
   }
 
@@ -707,15 +709,13 @@ public:
 
     throw std::runtime_error("Not Implemented");
   }
-    MDHistoWorkspaceTester(MDHistoDimension_sptr dimX,
-    MDHistoDimension_sptr dimY,
-    MDHistoDimension_sptr dimZ) {
-      std::vector<IMDDimension_sptr> dimensions {dimX, dimY, dimZ};
-      initGeometry(dimensions);
+  MDHistoWorkspaceTester(MDHistoDimension_sptr dimX, MDHistoDimension_sptr dimY,
+                         MDHistoDimension_sptr dimZ) {
+    std::vector<IMDDimension_sptr> dimensions{dimX, dimY, dimZ};
+    initGeometry(dimensions);
   }
 
 private:
-
   IMDHistoWorkspace *doClone() const override {
     throw std::runtime_error("Not Implemented");
   }
