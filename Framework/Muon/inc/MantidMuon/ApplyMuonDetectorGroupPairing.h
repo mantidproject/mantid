@@ -58,12 +58,48 @@ public:
   }
   /// See also
   const std::vector<std::string> seeAlso() const override {
-	  return{ "MuonProcess;ApplyMuonDetectorGrouping;LoadAndApplyMuonDetectorGrouping" };
+    return {"MuonProcess;ApplyMuonDetectorGrouping;"
+            "LoadAndApplyMuonDetectorGrouping"};
   }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
+
+  /// Get the names of the two workspaces in the ADS to pair
+  std::pair<std::string, std::string>
+  getGroupWorkspaceNames(const std::string &groupWSName);
+
+  /// Get the names of the two workspaces in the ADS to pair manually.
+  const std::string
+  getGroupWorkspaceNamesManually(const std::string &groupName,
+                                 const std::string &groupWSName);
+
+  /// Get the name of the workspace to be saved.
+  const std::string getPairWorkspaceName(const std::string &pairName,
+                                         const std::string &groupWSName);
+
+  API::MatrixWorkspace_sptr createPairWorkspaceManually(API::Workspace_sptr inputWS, bool noRebin);
+
   /// Allow WorkspaceGroup property to function correctly.
   bool checkGroups() override;
+
+  Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput();
+
+  void
+  setMuonProcessPeriodProperties(IAlgorithm &alg, API::Workspace_sptr inputWS,
+                                 const Muon::AnalysisOptions &options) const;
+
+  void
+  setMuonProcessAlgorithmProperties(IAlgorithm &alg,
+                                    const Muon::AnalysisOptions &options) const;
+
+  API::MatrixWorkspace_sptr createPairWorkspaceFromGroupWorkspaces(
+	  API::MatrixWorkspace_sptr inputWS1, API::MatrixWorkspace_sptr inputWS2, const double &alpha);
+
+  void setMuonProcessAlgorithmGroupingProperties(
+	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+
+  void setMuonProcessAlgorithmTimeProperties(
+	  IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
 private:
   /// Initialisation code

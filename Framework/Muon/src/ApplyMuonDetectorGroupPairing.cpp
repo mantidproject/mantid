@@ -1,6 +1,7 @@
 #include "MantidMuon/ApplyMuonDetectorGroupPairing.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -45,11 +46,15 @@ void ApplyMuonDetectorGroupPairing::init() {
                   "character.",
                   Direction::Input);
 
-  // Select groups via workspaces
+  declareProperty("Alpha", 1.0,
+                  "Alpha parameter used in the asymmetry calculation.",
+                  Direction::Input);
 
   declareProperty("SpecifyGroupsManually", false,
                   "Specify the pair of groups manually using the raw data and "
                   "various optional parameters.");
+
+  // Select groups via workspaces
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -63,14 +68,12 @@ void ApplyMuonDetectorGroupPairing::init() {
           PropertyMode::Optional),
       "Input workspace containing data from grouped detectors.");
 
-  setPropertySettings(
-      "InputWorkspace1",
-      make_unique<Kernel::EnabledWhenProperty>("SpecifyGroupsManually",
-                                               Kernel::IS_DEFAULT, ""));
-  setPropertySettings(
-      "InputWorkspace2",
-      make_unique<Kernel::EnabledWhenProperty>("SpecifyGroupsManually",
-                                               Kernel::IS_DEFAULT, ""));
+  setPropertySettings("InputWorkspace1",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SpecifyGroupsManually", Kernel::IS_DEFAULT, ""));
+  setPropertySettings("InputWorkspace2",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SpecifyGroupsManually", Kernel::IS_DEFAULT, ""));
 
   // Specify groups manually
 
@@ -213,14 +216,239 @@ ApplyMuonDetectorGroupPairing::validateInputs() {
 }
 
 void ApplyMuonDetectorGroupPairing::exec() {
-	// if manual, set up workspaces and get their names
-	std::pair<std::string, std::string> names = getGroupWorkspaceNames();
 
-	pairWorkspaceName = getPairWorkspaceName();
+  const double alpha = static_cast<double>(getProperty("Alpha"));
 
-	createPairWorkspace(pairWorkspaceName);
+  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+  std::string groupedWSName = groupedWS->getName();
+  std::string pairName = getProperty("PairName");
 
+  // if manual, set up workspaces and get their names
+  std::pair<std::string, std::string> names =
+      getGroupWorkspaceNames(groupedWSName);
 
+  std::string pairWorkspaceName = getPairWorkspaceName(pairName, groupedWSName);
+
+  MatrixWorkspace_sptr pairWS;
+  MatrixWorkspace_sptr pairWSRaw;
+  if (getProperty("SpecifyGroupsManually")) {
+    Workspace_sptr inputWS = getProperty("InputWorkspace");
+    pairWS = createPairWorkspaceManually(inputWS, false);
+    pairWSRaw = createPairWorkspaceManually(inputWS, true);
+  } else {
+    MatrixWorkspace_sptr ws1 = getProperty("InputWorkspace1");
+    MatrixWorkspace_sptr ws2 = getProperty("InputWorkspace2");
+    pairWS = createPairWorkspaceFromGroupWorkspaces(ws1, ws2, alpha);
+  }
+
+  AnalysisDataService::Instance().addOrReplace(pairWorkspaceName, pairWS);
+  groupedWS->add(pairWorkspaceName);
+}
+
+/// Get the names of the two workspaces in the ADS to pair
+std::pair<std::string, std::string>
+ApplyMuonDetectorGroupPairing::getGroupWorkspaceNames(
+    const std::string &groupWSName) {
+  std::pair<std::string, std::string> names;
+  if (getProperty("SpecifyGroupsManually")) {
+    names.first = getGroupWorkspaceNamesManually("group1", groupWSName);
+    names.second = getGroupWorkspaceNamesManually("group2", groupWSName);
+  } else {
+    names.first = getProperty("InputWorkspace1");
+    names.second = getProperty("InputWorkspace2");
+  }
+  return names;
+}
+
+/// Get the names of the two workspaces in the ADS to pair.
+const std::string ApplyMuonDetectorGroupPairing::getGroupWorkspaceNamesManually(
+    const std::string &groupName, const std::string &groupWSName) {
+  Muon::DatasetParams params;
+  // don't fill in instrument, runs, periods; not required.
+  params.label = groupWSName;
+  params.itemType = Muon::ItemType::Group;
+  params.itemName = groupName;
+  params.plotType = Muon::PlotType::Counts;
+  params.version = 1;
+  const std::string wsName = generateWorkspaceName(params);
+  return wsName;
+}
+
+/// Get the name of the workspace to be saved.
+const std::string ApplyMuonDetectorGroupPairing::getPairWorkspaceName(
+    const std::string &pairName, const std::string &groupWSName) {
+  Muon::DatasetParams params;
+  // don't fill in instrument, runs, periods; not required.
+  params.label = groupWSName;
+  params.itemType = Muon::ItemType::Pair;
+  params.itemName = pairName;
+  params.plotType = Muon::PlotType::Asymmetry;
+  params.version = 1;
+  const std::string wsName = generateWorkspaceName(params);
+  return wsName;
+}
+
+MatrixWorkspace_sptr
+ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
+    MatrixWorkspace_sptr inputWS1, MatrixWorkspace_sptr inputWS2,
+    const double &alpha) {
+
+  IAlgorithm_sptr alg = this->createChildAlgorithm("AppendSpectra");
+  alg->setProperty("InputWorkspace1", inputWS1);
+  alg->setProperty("InputWorkspace2", inputWS2);
+  alg->setProperty("ValidateInputs", true);
+  alg->execute();
+
+  MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+
+  // Pair indices as vectors
+  std::vector<int> fwd = {0};
+  std::vector<int> bwd = {1};
+
+  IAlgorithm_sptr algAsym = this->createChildAlgorithm("AsymmetryCalc");
+  algAsym->setProperty("InputWorkspace", ws);
+  algAsym->setProperty("ForwardSpectra", fwd);
+  algAsym->setProperty("BackwardSpectra", bwd);
+  algAsym->setProperty("Alpha", alpha);
+  // alg->setProperty("OutputWorkspace", "__NotUsed__");
+  algAsym->execute();
+  Workspace_sptr outWS = algAsym->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+}
+
+/*
+ * Store the input properties in options
+ */
+Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput() {
+  Muon::AnalysisOptions options;
+
+  Grouping grouping;
+  grouping.description = "no description";
+  grouping.groupNames.emplace_back("group1");
+  grouping.groups.emplace_back(this->getPropertyValue("Group1"));
+  grouping.groupNames.emplace_back("group2");
+  grouping.groups.emplace_back(this->getPropertyValue("Group2"));
+  const double alpha = static_cast<double>(getProperty("Alpha"));
+  grouping.pairAlphas.emplace_back(alpha);
+  grouping.pairNames.emplace_back(this->getPropertyValue("PairName"));
+  grouping.pairs.emplace_back(std::make_pair(0, 1));
+
+  options.grouping = grouping;
+  options.summedPeriods = this->getPropertyValue("SummedPeriods");
+  options.subtractedPeriods = this->getPropertyValue("SubtractedPeriods");
+  options.timeZero = 0.0;
+  options.loadedTimeZero = this->getProperty("TimeOffset");
+  options.timeLimits.first = this->getProperty("TimeMin");
+  options.timeLimits.second = this->getProperty("TimeMax");
+  options.rebinArgs = this->getPropertyValue("rebinArgs");
+
+  options.plotType = Muon::PlotType::Asymmetry;
+  options.groupPairName = this->getPropertyValue("PairName");
+
+  return options;
+}
+
+/**
+ * return a workspace for a pair of detector groups, using the user input
+ * options.
+ */
+MatrixWorkspace_sptr ApplyMuonDetectorGroupPairing::createPairWorkspaceManually(
+    Workspace_sptr inputWS, bool noRebin) {
+
+  IAlgorithm_sptr alg = this->createChildAlgorithm("MuonProcess");
+
+  Muon::AnalysisOptions options = getUserInput();
+
+  if (noRebin) {
+    options.rebinArgs = "";
+  }
+
+  setMuonProcessPeriodProperties(*alg, inputWS, options);
+  setMuonProcessAlgorithmProperties(*alg, options);
+  alg->execute();
+
+  Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+}
+
+/**
+ * Set algorithm properties (input workspace and period properties) according
+ * to the given options. For use with MuonProcess.
+ */
+void ApplyMuonDetectorGroupPairing::setMuonProcessPeriodProperties(
+    IAlgorithm &alg, Workspace_sptr inputWS,
+    const Muon::AnalysisOptions &options) const {
+
+  auto inputGroup = boost::make_shared<WorkspaceGroup>();
+  // If is a group, will need to handle periods
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+    for (int i = 0; i < group->getNumberOfEntries(); i++) {
+      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      inputGroup->addWorkspace(ws);
+    }
+    alg.setProperty("SummedPeriodSet", options.summedPeriods);
+    alg.setProperty("SubtractedPeriodSet", options.subtractedPeriods);
+  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+    // Put this single WS into a group and set it as the input property
+    inputGroup->addWorkspace(ws);
+    alg.setProperty("SummedPeriodSet", "1");
+  } else {
+    throw std::runtime_error("Cannot create workspace: workspace must be "
+                             "MatrixWorkspace or WorkspaceGroup.");
+  }
+  alg.setProperty("InputWorkspace", inputGroup);
+}
+
+/**
+ * Set algorithm properties according to the given options. For use with
+ * MuonProcess.
+ */
+void ApplyMuonDetectorGroupPairing::setMuonProcessAlgorithmProperties(
+    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+
+  alg.setProperty("Mode", "Combined");
+  alg.setProperty("CropWorkspace", false);
+  if (!options.rebinArgs.empty()) {
+    alg.setProperty("RebinParams", options.rebinArgs);
+  }
+  setMuonProcessAlgorithmGroupingProperties(alg, options);
+  setMuonProcessAlgorithmTimeProperties(alg, options);
+  alg.setProperty("OutputType", "PairAsymmetry");
+}
+
+// Set grouping properies of MuonProcess
+void ApplyMuonDetectorGroupPairing::setMuonProcessAlgorithmGroupingProperties(
+    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+
+  alg.setProperty("DetectorGroupingTable", options.grouping.toTable());
+  alg.setProperty("GroupIndex", 0);
+  alg.setProperty("Alpha", options.grouping.pairAlphas[0]);
+  int first = static_cast<int>(options.grouping.pairs[0].first);
+  int second = static_cast<int>(options.grouping.pairs[0].second);
+  alg.setProperty("PairFirstIndex", first);
+  alg.setProperty("PairSecondIndex", second);
+}
+
+/**
+ * Set time properties according to the given options. For use with
+ * MuonProcess.
+ */
+void ApplyMuonDetectorGroupPairing::setMuonProcessAlgorithmTimeProperties(
+    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+  alg.setProperty("TimeZero", options.timeZero);
+  alg.setProperty("LoadedTimeZero", options.loadedTimeZero);
+  alg.setProperty("Xmin", options.timeLimits.first);
+  double Xmax = options.timeLimits.second;
+  if (Xmax != Mantid::EMPTY_DBL()) {
+    alg.setProperty("Xmax", Xmax);
+  }
+
+  bool applyDTC = getProperty("ApplyDeadTimeCorrection");
+  if (applyDTC) {
+    TableWorkspace_sptr DTC = getProperty("DeadTimeTable");
+    alg.setProperty("ApplyDeadTimeCorrection", true);
+    alg.setProperty("DeadTimeTable", DTC);
+  }
 }
 
 // Allow WorkspaceGroup property to function correctly.
