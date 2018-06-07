@@ -310,7 +310,7 @@ public:
                        testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
-    const std::string userDir("/user/directory");
+    const auto &userDir(Poco::Path::home());
     EXPECT_CALL(*paramMock, outFilesUserDir(""))
         .Times(1)
         .WillOnce(Return(userDir));
@@ -339,7 +339,7 @@ public:
                        testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
-    const std::string userDir("/user/directory");
+    const auto &userDir(Poco::Path::home());
     EXPECT_CALL(*paramMock, outFilesUserDir(""))
         .Times(1)
         .WillOnce(Return(userDir));
@@ -374,7 +374,7 @@ public:
                        testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
-    const std::string userDir("/user/directory");
+    const auto &userDir(Poco::Path::home());
     EXPECT_CALL(*paramMock, outFilesUserDir(""))
         .Times(1)
         .WillOnce(Return(userDir));
@@ -401,7 +401,7 @@ public:
                        testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
-    const std::string userDir("/user/directory");
+    const auto &userDir(Poco::Path::home());
     EXPECT_CALL(*paramMock, outFilesUserDir(""))
         .Times(1)
         .WillOnce(Return(userDir));
