@@ -185,6 +185,7 @@ Output:
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
+   
 
 **Example - Reconstruct a real muon dataset**
 
@@ -494,7 +495,7 @@ Output:
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
-
+   
 In the next example, we increased the density of points by factors of 10, 20 and 40. We show the reconstructed image (left) and
 a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
 
@@ -615,6 +616,13 @@ Output:
    Number of iterations of first spectrum: 5
    Number of iterations of second spectrum: 37
    Number of iterations of third spectrum: 70
+   
+.. figure:: ../images/MaxEntAdjust.png
+   :align: center
+   
+   The first plot shows the reconstructed data and the second plot the corresponding image.
+   The first three spectra plotted are the real parts of the 3 spectra
+   and the other three spectra are the imaginary parts.
    
 This can also be done with the spectra in the reconstructed data and image summed together. 
 This is done by setting the *PerSpectrumReconstruction* property to *false*.
