@@ -710,17 +710,11 @@ public:
     MDHistoWorkspaceTester(MDHistoDimension_sptr dimX,
     MDHistoDimension_sptr dimY,
     MDHistoDimension_sptr dimZ) {
-
-      m_dimensions.push_back(dimX);
-      m_dimensions.push_back(dimY);
-      m_dimensions.push_back(dimZ);
-
-      initGeometry(m_dimensions);
+      std::vector<IMDDimension_sptr> dimensions {dimX, dimY, dimZ};
+      initGeometry(dimensions);
   }
-protected:
 
 private:
-    std::vector<IMDDimension_sptr> m_dimensions;
 
   IMDHistoWorkspace *doClone() const override {
     throw std::runtime_error("Not Implemented");
