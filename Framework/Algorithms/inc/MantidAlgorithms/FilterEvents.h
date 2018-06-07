@@ -164,10 +164,11 @@ private:
       std::vector<Types::Core::DateAndTime> &split_datetime_vec,
       const int max_target_index);
 
-//  void splitDoubleTimeSeriesLogs(
-//      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
-//      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
-//      const int max_target_index);
+  //  void splitDoubleTimeSeriesLogs(
+  //      const std::vector<Kernel::TimeSeriesProperty<double> *>
+  //      &dbl_tsp_vector,
+  //      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
+  //      const int max_target_index);
 
   void groupOutputWorkspace();
 
