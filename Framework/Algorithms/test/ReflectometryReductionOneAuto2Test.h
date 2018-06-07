@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/Counts.h"
@@ -18,7 +19,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::ReflectometryReductionOneAuto2;
+using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
@@ -578,31 +579,30 @@ public:
 
   void test_polarization_correction() {
 
-    MatrixWorkspace_sptr first = m_TOF->clone();
-    MatrixWorkspace_sptr second = m_TOF->clone();
-    MatrixWorkspace_sptr third = m_TOF->clone();
-    MatrixWorkspace_sptr fourth = m_TOF->clone();
+    auto &ADS = AnalysisDataService::Instance();
 
-    WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
-    inputWSGroup->addWorkspace(first);
-    inputWSGroup->addWorkspace(second);
-    inputWSGroup->addWorkspace(third);
-    inputWSGroup->addWorkspace(fourth);
-    WorkspaceGroup_sptr transWSGroup = boost::make_shared<WorkspaceGroup>();
-    transWSGroup->addWorkspace(first);
-    transWSGroup->addWorkspace(second);
-    transWSGroup->addWorkspace(third);
-    transWSGroup->addWorkspace(fourth);
-    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
-    AnalysisDataService::Instance().addOrReplace("trans", transWSGroup);
+    MatrixWorkspace_sptr first =  createHistoWS(10, 1, 4, 0.9);
+    ADS.addOrReplace("input_1", first);
+    MatrixWorkspace_sptr second = createHistoWS(10, 1, 4, 0.8);
+    ADS.addOrReplace("input_2", second);
+    MatrixWorkspace_sptr third =  createHistoWS(10, 1, 4, 0.7);
+    ADS.addOrReplace("input_3", third);
+    MatrixWorkspace_sptr fourth = createHistoWS(10, 1, 4, 0.6);
+    ADS.addOrReplace("input_4", fourth);
+
+    GroupWorkspaces mkGroup;
+    mkGroup.initialize();
+    mkGroup.setProperty("InputWorkspaces", "input_1, input_2, input_3, input_4");
+    mkGroup.setProperty("OutputWorkspace", "input");
+    mkGroup.execute();
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "input");
-    alg.setPropertyValue("FirstTransmissionRun", "trans");
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 5.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "0");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "PA");
     alg.setProperty("Pp", "1,1,2");
@@ -627,50 +627,66 @@ public:
     TS_ASSERT_EQUALS(outQGroup->size(), 4);
     TS_ASSERT_EQUALS(outLamGroup->size(), 4);
 
-    {
-      auto outQ =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(0));
-      TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-      TS_ASSERT_EQUALS(outQ->blocksize(), 14);
-      // X range in outQ
-      TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
-      TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
-      auto outLam =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(0));
-      // X range in outLam
-      TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
-      TS_ASSERT_DELTA(outLam->x(0)[7], 8.0658, 0.0001);
-    }
+    auto outLam0 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(0));
+    auto outLam1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(1));
+    auto outLam2 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(2));
+    auto outLam3 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(3));
 
-    {
-      auto outQ =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(1));
-      TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-      TS_ASSERT_EQUALS(outQ->blocksize(), 14);
-      // X range in outQ
-      TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
-      TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
-      auto outLam =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(1));
-      // X range in outLam
-      TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
-      TS_ASSERT_DELTA(outLam->x(0)[7], 8.0658, 0.0001);
-    }
+    TS_ASSERT_EQUALS(outLam0->blocksize(), 10);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLam0->x(0).front(), 1.0, 0.0001);
+    TS_ASSERT_DELTA(outLam0->x(0).back(), 4.0, 0.0001);
+
+    TS_ASSERT_DELTA(outLam0->y(0)[0], 0.8101767718, 0.0001);
+    // 1 and 2 values are swapped because of a bug
+    // in PolarizationCorrectionFredrikze
+    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.7836941583, 0.0001);
+    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.7893217144, 0.0001);
+    TS_ASSERT_DELTA(outLam3->y(0)[0], 0.7628391019, 0.0001);
+
+    auto IvsQ0 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(0));
+    auto IvsQ1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(1));
+    auto IvsQ2 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(2));
+    auto IvsQ3 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(3));
+
+    TS_ASSERT_EQUALS(IvsQ0->blocksize(), 10);
+
+    TS_ASSERT_DELTA(IvsQ0->y(0)[0], 0.8182525527, 0.0001);
+    // 1 and 2 values are swapped because of a bug
+    // in PolarizationCorrectionFredrikze
+    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.8162703504, 0.0001);
+    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.8153535819, 0.0001);
+    TS_ASSERT_DELTA(IvsQ3->y(0)[0], 0.8133713796, 0.0001);
+
+    ADS.clear();
   }
 
   void test_polarization_correction_default() {
 
-    MatrixWorkspace_sptr first = createHistoWS(10, 1, 4);
-    MatrixWorkspace_sptr second = first->clone();
-    MatrixWorkspace_sptr third = first->clone();
-    MatrixWorkspace_sptr fourth = first->clone();
+    auto &ADS = AnalysisDataService::Instance();
 
-    WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
-    inputWSGroup->addWorkspace(first);
-    inputWSGroup->addWorkspace(second);
-    inputWSGroup->addWorkspace(third);
-    inputWSGroup->addWorkspace(fourth);
-    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
+    MatrixWorkspace_sptr first =  createHistoWS(10, 1, 4, 0.9);
+    ADS.addOrReplace("input_1", first);
+    MatrixWorkspace_sptr second = createHistoWS(10, 1, 4, 0.8);
+    ADS.addOrReplace("input_2", second);
+    MatrixWorkspace_sptr third =  createHistoWS(10, 1, 4, 0.7);
+    ADS.addOrReplace("input_3", third);
+    MatrixWorkspace_sptr fourth = createHistoWS(10, 1, 4, 0.6);
+    ADS.addOrReplace("input_4", fourth);
+
+    GroupWorkspaces mkGroup;
+    mkGroup.initialize();
+    mkGroup.setProperty("InputWorkspaces", "input_1, input_2, input_3, input_4");
+    mkGroup.setProperty("OutputWorkspace", "input");
+    mkGroup.execute();
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -699,24 +715,54 @@ public:
     TS_ASSERT_EQUALS(outQGroup->size(), 4);
     TS_ASSERT_EQUALS(outLamGroup->size(), 4);
 
-    auto outLam =
+    auto outLam0 =
         boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(0));
-    // X range in outLam
-    TS_ASSERT_DELTA(outLam->x(0)[0], 1.0, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 3.1, 0.0001);
+    auto outLam1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(1));
+    auto outLam2 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(2));
+    auto outLam3 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outLamGroup->getItem(3));
 
-    std::cerr << std::endl;
-    for (size_t i = 0; i < 10; ++i) {
-      std::cerr << outLam->y(0)[i] << std::endl;
-    }
+    TS_ASSERT_EQUALS(outLam0->blocksize(), 10);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLam0->x(0).front(), 1.0, 0.0001);
+    TS_ASSERT_DELTA(outLam0->x(0).back(), 4.0, 0.0001);
+
+    TS_ASSERT_DELTA(outLam0->y(0)[0], 0.901752, 0.0001);
+    // 1 and 2 values are swapped because of a bug
+    // in PolarizationCorrectionFredrikze
+    TS_ASSERT_DELTA(outLam1->y(0)[0], 0.697277, 0.0001);
+    TS_ASSERT_DELTA(outLam2->y(0)[0], 0.797947, 0.0001);
+    TS_ASSERT_DELTA(outLam3->y(0)[0], 0.593471, 0.0001);
+
+    auto IvsQ0 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(0));
+    auto IvsQ1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(1));
+    auto IvsQ2 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(2));
+    auto IvsQ3 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outQGroup->getItem(3));
+
+    TS_ASSERT_EQUALS(IvsQ0->blocksize(), 10);
+
+    TS_ASSERT_DELTA(IvsQ0->y(0)[0], 0.9012838, 0.0001);
+    // 1 and 2 values are swapped because of a bug
+    // in PolarizationCorrectionFredrikze
+    TS_ASSERT_DELTA(IvsQ1->y(0)[0], 0.697734, 0.0001);
+    TS_ASSERT_DELTA(IvsQ2->y(0)[0], 0.797947, 0.0001);
+    TS_ASSERT_DELTA(IvsQ3->y(0)[0], 0.594403, 0.0001);
+
+    ADS.clear();
   }
 
 private:
   MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
-                                     double endX) const {
+                                     double endX, double value) const {
     double const dX = (endX - startX) / double(size);
     BinEdges xVals(size + 1, LinearGenerator(startX, dX));
-    Counts yVals(size, 1.0);
+    Counts yVals(size, value);
     auto workspace = boost::make_shared<Workspace2D>();
     workspace->initialize(1, Histogram(xVals, yVals));
     workspace->getAxis(0)->setUnit("Wavelength");

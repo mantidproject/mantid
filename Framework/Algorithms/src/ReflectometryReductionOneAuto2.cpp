@@ -828,6 +828,7 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(std::string con
   
   Algorithm_sptr polAlg =
       createChildAlgorithm("PolarizationEfficiencyCor");
+  polAlg->setChild(false);
   polAlg->setProperty("OutputWorkspace", outputIvsLam);
   polAlg->setProperty("Efficiencies", efficiencies);
   polAlg->setProperty("CorrectionMethod", correctionMethod);
