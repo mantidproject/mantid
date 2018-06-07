@@ -406,23 +406,28 @@ void MaxEnt::exec() {
   iterationCounts.reserve(nSpec);
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
 
+  size_t dataLength = complexData ? 2 * inWS->y(0).size() : inWS->y(0).size();
+
   for (size_t spec = 0; spec < nSpec; spec++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
-
-    std::vector<double> data;
-    std::vector<double> errors;
+    
+    std::vector<double> data(dataLength, 0.0);
+    std::vector<double> errors(dataLength, 0.0);
     if (complexData) {
       data = toComplex(inWS, spec, false, sumSpectra);  // false -> data
       errors = toComplex(inWS, spec, true, sumSpectra); // true -> errors
     } else {
       if (sumSpectra) {
+        const size_t numBins = inWS->y(0).size();
+        data.reserve(numBins);
+        errors.reserve(numBins);
         for (size_t s = 0; s < nSpecSum; s++) {
-          // Can't add so-called vectors, so
-          // more complicated code needs to go here
-          // data += inWS->y(s).rawData();
-          // errors += inWS->e(s).rawData();
+          for (size_t i = 0; i < numBins; i++) {
+            data[i] += inWS->y(s).rawData()[i];
+            errors[i] += inWS->e(s).rawData()[i];
+          }
         }
       }
       else {
