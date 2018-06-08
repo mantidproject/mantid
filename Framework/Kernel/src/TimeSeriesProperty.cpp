@@ -721,21 +721,21 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   // Add a debugging check such that there won't be any time entry with zero log
   bool has_zero_entry(false);
   for (size_t i = 0; i < outputs.size(); ++i) {
-      std::stringstream errss;
-      errss << i << "-th split-out term (out of " << outputs.size()
-            << " total output TSP) of '" << m_name << "'' has "
-            << outputs[i]->size() << " size, whose first entry is at "
-            << this->firstTime().toSimpleString();
-      g_log.error(errss.str());
-      std::cout << errss.str() << "\n";
-      if (outputs[i]->size() == 0) {
-        int target = static_cast<int>(i);
-        std::set<int>::iterator findit = target_set.find(target);
-        if (findit != target_set.end())
-          has_zero_entry = true;
-        // throw std::runtime_error(errss.str());
-        // if the output has zero length, then put the last valid entrance ???
-        // but it is not a good solution! because it can be very confusing
+    std::stringstream errss;
+    errss << i << "-th split-out term (out of " << outputs.size()
+          << " total output TSP) of '" << m_name << "'' has "
+          << outputs[i]->size() << " size, whose first entry is at "
+          << this->firstTime().toSimpleString();
+    g_log.error(errss.str());
+    std::cout << errss.str() << "\n";
+    if (outputs[i]->size() == 0) {
+      int target = static_cast<int>(i);
+      std::set<int>::iterator findit = target_set.find(target);
+      if (findit != target_set.end())
+        has_zero_entry = true;
+      // throw std::runtime_error(errss.str());
+      // if the output has zero length, then put the last valid entrance ???
+      // but it is not a good solution! because it can be very confusing
     }
   }
   if (has_zero_entry)
