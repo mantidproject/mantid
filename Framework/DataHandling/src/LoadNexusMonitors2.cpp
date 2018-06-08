@@ -10,6 +10,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
@@ -29,6 +30,7 @@ using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
+using Mantid::DataHandling::LoadNexusMonitorsAlg::MonitorInfo;
 
 namespace Mantid {
 namespace DataHandling {
@@ -68,7 +70,49 @@ void loadSampleDataISIScompatibilityInfo(
 
   file.closeGroup();
 }
-} // namespace
+
+const std::string LOAD_EVENTS("Events");
+const std::string LOAD_HISTO("Histogram");
+
+// collection of static methods to inspect monitors to determine type
+bool keyExists(std::string const &key,
+               std::map<std::string, std::string> const &entries) {
+  return entries.find(key) != entries.cend();
+}
+
+// returns true if all of the entries necessary for a histogram exist monitor in
+// the currently open group
+bool isHistoMonitor(::NeXus::File &monitorFileHandle) {
+  const auto fields = monitorFileHandle.getEntries();
+  return keyExists("data", fields) && keyExists("time_of_flight", fields);
+}
+
+std::size_t sizeOfUnopenedSDS(::NeXus::File &file,
+                              const std::string &fieldName) {
+  file.openData(fieldName);
+  auto size = static_cast<std::size_t>(file.getInfo().dims[0]);
+  file.closeData();
+  return size;
+}
+
+bool eventIdNotEmptyIfExists(::NeXus::File &file,
+                             std::map<std::string, std::string> const &fields) {
+  if (keyExists("event_id", fields))
+    return sizeOfUnopenedSDS(file, "event_id") > 1;
+  else
+    return true;
+}
+
+// returns true if all of the entries necessary for an event monitor exist in
+// the currently open group
+bool isEventMonitor(::NeXus::File &file) {
+  const auto fields = file.getEntries();
+  return keyExists("event_index", fields) &&
+         keyExists("event_time_offset", fields) &&
+         keyExists("event_time_zero", fields) &&
+         eventIdNotEmptyIfExists(file, fields);
+}
+} // anonymous namespace
 
 //------------------------------------------------------------------------------
 /// Initialization method.
@@ -84,28 +128,16 @@ void LoadNexusMonitors2::init() {
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "MonitorsAsEvents", true, Kernel::Direction::Input),
-                  "If enabled (by default), load the monitors as events (into "
-                  "an EventWorkspace), as long as there is event data. If "
-                  "disabled, load monitors as spectra (into a Workspace2D, "
-                  "regardless of whether event data is found.");
+  declareProperty(
+      Kernel::make_unique<Kernel::PropertyWithValue<std::string> >(
+          "NXentryName", "", Kernel::Direction::Input),
+      "Optional: Name of the NXentry to load if it's not the default.");
 
-  declareProperty("LoadEventMonitors", true,
-                  "Load event monitor in NeXus file both event monitor and "
-                  "histogram monitor found in NeXus file."
-                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
-                  "or both of them are false,"
-                  "then it is in the auto mode such that any existing monitor "
-                  "will be loaded.");
-
-  declareProperty("LoadHistoMonitors", true,
-                  "Load histogram monitor in NeXus file both event monitor and "
-                  "histogram monitor found in NeXus file."
-                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
-                  "or both of them are false,"
-                  "then it is in the auto mode such that any existing monitor "
-                  "will be loaded.");
+  std::vector<std::string> options{ "", LOAD_EVENTS, LOAD_HISTO };
+  declareProperty("LoadOnly", "",
+                  boost::make_shared<Kernel::StringListValidator>(options),
+                  "If multiple repesentations exist, which one to load. "
+                  "Default is to load the one that is present.");
 }
 
 //------------------------------------------------------------------------------
@@ -124,32 +156,35 @@ void LoadNexusMonitors2::exec() {
         "Failed to recognize this file as a NeXus file, cannot continue.");
   }
 
+  m_top_entry_name = this->getPropertyValue("NXentryName");
+
   // top level file information
   ::NeXus::File file(m_filename);
 
-  // Start with the base entry
+  // open the correct entry
   using string_map_t = std::map<std::string, std::string>;
   string_map_t::const_iterator it;
   string_map_t entries = file.getEntries();
-  for (it = entries.begin(); it != entries.end(); ++it) {
-    if (((it->first == "entry") || (it->first == "raw_data_1")) &&
-        (it->second == "NXentry")) {
-      file.openGroup(it->first, it->second);
-      m_top_entry_name = it->first;
-      break;
+
+  if (m_top_entry_name.empty()) {
+    for (it = entries.begin(); it != entries.end(); ++it) {
+      if (((it->first == "entry") || (it->first == "raw_data_1")) &&
+          (it->second == "NXentry")) {
+        file.openGroup(it->first, it->second);
+        m_top_entry_name = it->first;
+        break;
+      }
+    }
+  } else {
+    if (!keyExists(m_top_entry_name, entries)) {
+      throw std::invalid_argument(
+          m_filename + " does not contain an entry named " + m_top_entry_name);
     }
   }
   prog1.report();
 
-  size_t numHistMon = 0;
-  size_t numEventMon = 0;
   size_t numPeriods = 0;
-  std::vector<std::string> monitorNames;
-  std::map<int, std::string> monitorNumber2Name;
-  std::vector<bool> isEventMonitors;
-  m_monitor_count =
-      getMonitorInfo(file, monitorNames, numHistMon, numEventMon, numPeriods,
-                     monitorNumber2Name, isEventMonitors);
+  m_monitor_count = getMonitorInfo(file, numPeriods);
 
   if (numPeriods > 1) {
     m_multiPeriodCounts.resize(m_monitor_count);
@@ -165,32 +200,11 @@ void LoadNexusMonitors2::exec() {
     throw std::invalid_argument(m_filename + " does not contain any monitors");
   }
 
-  // With this property you can make the exception that even if there's event
-  // data, monitors will be loaded
-  // as histograms (if set to false)
-  bool monitorsAsEvents = getProperty("MonitorsAsEvents");
-  // Beware, even if monitorsAsEvents==False (user requests to load monitors as
-  // histograms)
-  // check if there's histogram data. If not, ignore setting, step back and load
-  // monitors as
-  // events which is the only possibility left.
-
-  m_allMonitorsHaveHistoData = allMonitorsHaveHistoData(file, monitorNames);
-  if (!monitorsAsEvents)
-    if (!m_allMonitorsHaveHistoData) {
-      g_log.information() << "Cannot load monitors as histogram data. Loading "
-                             "as events even if the opposite was requested by "
-                             "disabling the property MonitorsAsEvents\n";
-      monitorsAsEvents = true;
-    }
-
   // only used if using event monitors
   // EventWorkspace_sptr eventWS;
   // Create the output workspace
   std::vector<bool> loadMonitorFlags;
-  bool useEventMon = createOutputWorkspace(
-      numHistMon, numEventMon, monitorsAsEvents, monitorNames, isEventMonitors,
-      monitorNumber2Name, loadMonitorFlags);
+  bool useEventMon = createOutputWorkspace(loadMonitorFlags);
 
   // a temporary place to put the spectra/detector numbers
   boost::scoped_array<specnum_t> spectra_numbers(
@@ -206,7 +220,7 @@ void LoadNexusMonitors2::exec() {
   for (std::size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
 
     // TODO 1: SKIP if this monitor is not to be loaded!
-    g_log.information() << "Loading " << monitorNames[i_mon];
+    g_log.information() << "Loading " << m_monitorInfo[i_mon].name;
     if (loadMonitorFlags[i_mon]) {
       g_log.information() << "\n";
     } else {
@@ -220,21 +234,7 @@ void LoadNexusMonitors2::exec() {
           "Overcedes the number of histograms in output event "
           "workspace.");
 
-    // TODO 3: REFACTOR to get spectrumNo and momIndex
-    // Do not rely on the order in path list
-    Poco::Path monPath(monitorNames[i_mon]);
-    std::string monitorName = monPath.getBaseName();
-
-    // check for monitor name - in our case will be of the form either monitor1
-    // or monitor_1
-    std::string::size_type loc = monitorName.rfind('_');
-    if (loc == std::string::npos) {
-      loc = monitorName.rfind('r');
-    }
-
-    detid_t monIndex = -1 * boost::lexical_cast<int>(
-                                monitorName.substr(loc + 1)); // SNS default
-    file.openGroup(monitorNames[i_mon], "NXmonitor");
+    file.openGroup(m_monitorInfo[i_mon].name, "NXmonitor");
 
     // Check if the spectra index is there
     specnum_t spectrumNo(static_cast<specnum_t>(ws_index + 1));
@@ -246,11 +246,11 @@ void LoadNexusMonitors2::exec() {
       // Use the default as matching the workspace index
     }
 
-    g_log.debug() << "monIndex = " << monIndex << '\n';
+    g_log.debug() << "monIndex = " << m_monitorInfo[i_mon].detNum << '\n';
     g_log.debug() << "spectrumNo = " << spectrumNo << '\n';
 
     spectra_numbers[ws_index] = spectrumNo;
-    detector_numbers[ws_index] = monIndex;
+    detector_numbers[ws_index] = m_monitorInfo[i_mon].detNum;
 
     if (useEventMon) {
       // load as an event monitor
@@ -264,7 +264,8 @@ void LoadNexusMonitors2::exec() {
 
     // Default values, might change later.
     m_workspace->getSpectrum(ws_index).setSpectrumNo(spectrumNo);
-    m_workspace->getSpectrum(ws_index).setDetectorID(monIndex);
+    m_workspace->getSpectrum(ws_index)
+        .setDetectorID(m_monitorInfo[i_mon].detNum);
 
     ++ws_index;
     prog3.report();
@@ -284,7 +285,7 @@ void LoadNexusMonitors2::exec() {
   // Fix the detector numbers if the defaults above are not correct
   // fixUDets(detector_numbers, file, spectra_numbers, m_monitor_count);
   fixUDets(detector_numbers, file, spectra_numbers,
-           m_workspace->getNumberHistograms());
+           m_workspace->getNumberHistograms()); // TODO SHOULDN'T BE NECESSARY
 
   // Check for and ISIS compat block to get the detector IDs for the loaded
   // spectrum numbers
@@ -363,32 +364,6 @@ void LoadNexusMonitors2::exec() {
   } else {
     this->setProperty("OutputWorkspace", m_workspace);
   }
-}
-
-//------------------------------------------------------------------------------
-/**
-* Can we get a histogram (non event data) for every monitor?
-*
-* @param file :: NeXus file object (open)
-* @param monitorNames :: names of monitors of interest
-* @return If there seems to be histograms for all monitors (they have "data")
-**/
-bool LoadNexusMonitors2::allMonitorsHaveHistoData(
-    ::NeXus::File &file, const std::vector<std::string> &monitorNames) {
-  bool res = true;
-
-  try {
-    for (std::size_t i = 0; i < m_monitor_count; ++i) {
-      file.openGroup(monitorNames[i], "NXmonitor");
-      file.openData("data");
-      file.closeData();
-      file.closeGroup();
-    }
-  } catch (::NeXus::Exception &) {
-    file.closeGroup();
-    res = false;
-  }
-  return res;
 }
 
 //------------------------------------------------------------------------------
@@ -545,60 +520,18 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   this->setProperty("OutputWorkspace", wsGroup);
 }
 
-std::size_t
-LoadNexusMonitors2::sizeOfUnopenedEntry(::NeXus::File &file,
-                                        const std::string &entryName) const {
-  file.openData(entryName);
-  auto size = static_cast<std::size_t>(file.getInfo().dims[0]);
-  file.closeData();
-  return size;
-}
+size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
+                                          size_t &numPeriods) {
+  // should already be open to the correct NXentry
 
-bool LoadNexusMonitors2::keyExists(
-    std::string const &key,
-    std::map<std::string, std::string> const &entries) const {
-  return entries.find(key) != entries.cend();
-}
+  m_monitorInfo.clear();
 
-bool LoadNexusMonitors2::eventIdNotEmptyIfExists(
-    ::NeXus::File &monitorFileHandle,
-    std::map<std::string, std::string> const &entries) const {
-  if (keyExists("event_id", entries))
-    return sizeOfUnopenedEntry(monitorFileHandle, "event_id") > 1;
-  else
-    return true;
-}
-
-bool LoadNexusMonitors2::hasAllEventLikeAttributes(
-    std::map<std::string, std::string> const &entries) const {
-  return keyExists("event_index", entries) &&
-         keyExists("event_time_offset", entries) &&
-         keyExists("event_time_zero", entries);
-}
-
-bool LoadNexusMonitors2::isEventMonitor(
-    ::NeXus::File &monitorFileHandle) const {
-  auto entries = monitorFileHandle.getEntries();
-  return hasAllEventLikeAttributes(entries) &&
-         eventIdNotEmptyIfExists(monitorFileHandle, entries);
-}
-
-size_t LoadNexusMonitors2::getMonitorInfo(
-    ::NeXus::File &file, std::vector<std::string> &monitorNames,
-    size_t &numHistMon, size_t &numEventMon, size_t &numPeriods,
-    std::map<int, std::string> &monitorNumber2Name,
-    std::vector<bool> &isEventMonitors) {
   using string_map_t = std::map<std::string, std::string>;
 
   // Now we want to go through and find the monitors
   string_map_t entries = file.getEntries();
-  monitorNames.clear();
-  numHistMon = 0;
-  numEventMon = 0;
   numPeriods = 0;
   // we want to sort monitors by monitor_number if they are present
-  monitorNumber2Name.clear();
-  // prog1.report();
 
   API::Progress prog2(this, 0.2, 0.6, entries.size());
 
@@ -607,157 +540,121 @@ size_t LoadNexusMonitors2::getMonitorInfo(
     std::string entry_name(it->first);
     std::string entry_class(it->second);
     if ((entry_class == "NXmonitor")) {
-      monitorNames.push_back(entry_name);
+      MonitorInfo info;
 
       // check for event/histogram monitor
       // -> This will prefer event monitors over histogram
       //    if they are found in the same group.
       file.openGroup(entry_name, "NXmonitor");
+      info.name = entry_name;
+      info.hasEvent = isEventMonitor(file);
+      info.hasHisto = isHistoMonitor(file);
+
       string_map_t inner_entries = file.getEntries(); // get list of entries
-
-      if (isEventMonitor(file)) {
-        numEventMon += 1;
-        isEventMonitors.push_back(true);
+      if (inner_entries.find("monitor_number") != inner_entries.end()) {
+        // get monitor number from field in file
+        file.openData("monitor_number");
+        file.getData(&info.detNum);
+        file.closeData();
       } else {
-        // it is a histogram monitor
-        numHistMon += 1;
-        isEventMonitors.push_back(false);
+        // default creates it from monitor name
+        Poco::Path monPath(entry_name);
+        std::string monitorName = monPath.getBaseName();
 
-        if (inner_entries.find("monitor_number") != inner_entries.end()) {
-          specnum_t monitorNo;
-          file.openData("monitor_number");
-          file.getData(&monitorNo);
-          file.closeData();
-          monitorNumber2Name[monitorNo] = entry_name;
+        // check for monitor name - in our case will be of the form either
+        // monitor1
+        // or monitor_1
+        std::string::size_type loc = monitorName.rfind('_');
+        if (loc == std::string::npos) {
+          loc = monitorName.rfind('r');
         }
-        if ((numPeriods == 0) &&
-            (inner_entries.find("period_index") != inner_entries.end())) {
-          MantidVec period_data;
-          file.openData("period_index");
-          file.getDataCoerce(period_data);
-          file.closeData();
-          numPeriods = period_data.size();
-        }
+
+        info.detNum = -1 * boost::lexical_cast<int>(
+                               monitorName.substr(loc + 1)); // SNS default
       }
+
+      if (info.hasHisto && (numPeriods == 0) &&
+          (inner_entries.find("period_index") != inner_entries.end())) {
+        MantidVec period_data;
+        file.openData("period_index");
+        file.getDataCoerce(period_data);
+        file.closeData();
+        numPeriods = period_data.size();
+      }
+
       file.closeGroup(); // close NXmonitor
+      m_monitorInfo.push_back(info);
     }
     prog2.report();
   }
 
-  return monitorNames.size();
+  // sort based on the absolute value of the monitor number
+  // this takes care of the fact that SNS monitors have negative numbers
+  std::sort(m_monitorInfo.begin(), m_monitorInfo.end(),
+            [](const MonitorInfo &left, const MonitorInfo &right) {
+    return std::abs(left.detNum) < std::abs(right.detNum);
+  });
+
+  return m_monitorInfo.size();
 }
 
-/** Create output workspace
-* @brief LoadNexusMonitors2::createOutputWorkspace
-* @param numHistMon
-* @param numEventMon
-* @param monitorsAsEvents
-* @param monitorNames
-* @param isEventMonitors
-* @param monitorNumber2Name
-* @param loadMonitorFlags
-* @return
-*/
-bool LoadNexusMonitors2::createOutputWorkspace(
-    size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
-    std::vector<std::string> &monitorNames, std::vector<bool> &isEventMonitors,
-    const std::map<int, std::string> &monitorNumber2Name,
-    std::vector<bool> &loadMonitorFlags) {
-
-  // Find out using event monitor or histogram monitor
-  bool loadEventMon = getProperty("LoadEventMonitors");
-  bool loadHistoMon = getProperty("LoadHistoMonitors");
-  if (!loadEventMon && !loadHistoMon) {
-    // both of them are false is equivlanet to both of them are true
-    loadEventMon = true;
-    loadHistoMon = true;
-  }
-  // create vector for flags to load monitor or not
+bool
+LoadNexusMonitors2::createOutputWorkspace(std::vector<bool> &loadMonitorFlags) {
   loadMonitorFlags.clear();
-  loadMonitorFlags.resize(m_monitor_count);
 
-  bool useEventMon;
-  // Create the output workspace
-  if (numHistMon == m_monitor_count) {
-    // all monitors are histogram monitors
-    useEventMon = false;
-    // with single type of monitor, there is no need to be specified right by
-    // user
-    loadHistoMon = true;
-    loadEventMon = false;
+  size_t numEventMon =
+      std::count_if(m_monitorInfo.begin(), m_monitorInfo.end(),
+                    [](const MonitorInfo &info) { return info.hasEvent; });
+  size_t numHistoMon =
+      std::count_if(m_monitorInfo.begin(), m_monitorInfo.end(),
+                    [](const MonitorInfo &info) { return info.hasHisto; });
 
-  } else if (numEventMon == m_monitor_count) {
-    // all monitors are event monitors
+  bool useEventMon; // which type of workspace to create/is created
+  const std::string loadType = getProperty("LoadOnly");
+  if (loadType == LOAD_EVENTS) {
     useEventMon = true;
-    // with single type of monitor, there is no need to be specified right by
-    // user
-    loadHistoMon = false;
-    loadEventMon = true;
-
-  } else if (loadEventMon == loadHistoMon && !monitorsAsEvents) {
-    // Both event monitors and histogram monitors exist
-    // while the user wants the result be read from histogram data
-    // in the event monitor
-
-    // check
-    if (!m_allMonitorsHaveHistoData) {
+    if (numEventMon <= 0) { // make sure there are some
+      throw std::runtime_error(
+          "Loading event data. Trying to load event data but failed to "
+          "find event monitors. This file may be corrupted or it may not be "
+          "supported");
+    }
+  } else if (loadType == LOAD_HISTO) {
+    useEventMon = false;
+    if (numHistoMon <= 0) { // make sure there are some
+      throw std::runtime_error(
+          "Not loading event data. Trying to load histogram data but failed to "
+          "find monitors with histogram data or could not interpret the data. "
+          "This file may be corrupted or it may not be supported");
+    }
+  } else { // only other option is to go with the default
+    if (numEventMon > 0 && numHistoMon > 0) { // TODO message
       std::stringstream errmsg;
-      errmsg << "There are " << numHistMon << " histogram monitors and "
-             << numEventMon << " event monitors.  But not all of the event "
-             << "monitors have 'data' entry to be converted to histogram.";
+      errmsg << "There are " << numHistoMon << " histogram monitors and "
+             << numEventMon
+             << " event monitors. Need to specify which to load.";
       throw std::invalid_argument(errmsg.str());
     }
-    // set value
-    useEventMon = false;
-  } else if (loadEventMon == loadHistoMon && monitorsAsEvents) {
-    // Both event monitors are histogram monitor exist,
-    // But the user tries to export them as event data.
-    std::stringstream errmsg;
-    errmsg << "There are " << numHistMon << " histogram monitors and "
-           << numEventMon << " event monitors.  It is not allowed to "
-           << "read all of them as event monitor.";
-    throw std::invalid_argument(errmsg.str());
-  } else if (loadEventMon) {
-    // coexistence of event monitor and histo monitor. load event monitor only.
-    useEventMon = true;
-  } else {
-    // coexistence of event monitor and histo monitor. load histo monitor only.
-    useEventMon = false;
+    // more than one event monitor means use that since both can't be nonzero
+    useEventMon = (numEventMon > 0);
   }
 
   // set up the flags to load monitor
   if (useEventMon) {
     // load event
     for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
-      if (isEventMonitors[i_mon])
-        loadMonitorFlags[i_mon] = true;
-      else
-        loadMonitorFlags[i_mon] = false;
+      loadMonitorFlags.push_back(m_monitorInfo[i_mon].hasEvent);
     }
   } else {
     // load histogram
     for (size_t i_mon = 0; i_mon < m_monitor_count; ++i_mon) {
-      if (!isEventMonitors[i_mon]) {
-        // histo
-        loadMonitorFlags[i_mon] = true;
-      } else if (loadEventMon && loadHistoMon) {
-        // event mode but load both
-        loadMonitorFlags[i_mon] = true;
-      } else {
-        loadMonitorFlags[i_mon] = false;
-      }
+      loadMonitorFlags.push_back(m_monitorInfo[i_mon].hasHisto);
     }
   }
 
   // create workspace
   if (useEventMon) {
     // Use event monitors and create event workspace
-    // check
-    if (numEventMon == 0)
-      throw std::runtime_error(
-          "Loading event data. Trying to load event data but failed to "
-          "find event monitors."
-          "This file may be corrupted or it may not be supported");
 
     // only used if using event monitors
     EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
@@ -768,37 +665,19 @@ bool LoadNexusMonitors2::createOutputWorkspace(
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
     eventWS->setYUnit("Counts");
     m_workspace = eventWS;
-  } else {
+  } else { // only other option is histograms
     // Use histogram monitors and event monitors' histogram data.
     // And thus create a Workspace2D.
-    // check
-    if (m_monitor_count == 0)
-      throw std::runtime_error(
-          "Not loading event data. Trying to load histogram data but failed to "
-          "find monitors with histogram data or could not interpret the data. "
-          "This file may be corrupted or it may not be supported");
 
-    // Create
-    size_t numSpec(numHistMon);
-    if (loadEventMon)
-      numSpec = m_monitor_count;
-
-    m_workspace =
-        API::WorkspaceFactory::Instance().create("Workspace2D", numSpec, 2, 1);
-    // if there is a distinct monitor number for each monitor sort them by that
-    // number
-    if (monitorNumber2Name.size() == monitorNames.size()) {
-      monitorNames.clear();
-      for (auto &numberName : monitorNumber2Name) {
-        monitorNames.push_back(numberName.second);
-      }
-    }
+    m_workspace = API::WorkspaceFactory::Instance().create("Workspace2D",
+                                                           numHistoMon, 2, 1);
   }
 
   return useEventMon;
 }
 
-void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
+void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file,
+                                               size_t ws_index) {
   // setup local variables
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
@@ -827,7 +706,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   file.closeData();
 
   // load up the event list
-  DataObjects::EventList &event_list = eventWS->getSpectrum(i);
+  DataObjects::EventList &event_list = eventWS->getSpectrum(ws_index);
 
   Mantid::Types::Core::DateAndTime pulsetime(0);
   Mantid::Types::Core::DateAndTime lastpulsetime(0);
@@ -855,7 +734,8 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);
 }
 
-void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i,
+void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file,
+                                               size_t ws_index,
                                                size_t numPeriods) {
   // Now, actually retrieve the necessary data
   file.openData("data");
@@ -870,11 +750,11 @@ void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i,
   file.closeData();
 
   if (numPeriods > 1) {
-    m_multiPeriodBinEdges[i] = std::move(tof);
-    m_multiPeriodCounts[i] = std::move(data);
+    m_multiPeriodBinEdges[ws_index] = std::move(tof);
+    m_multiPeriodCounts[ws_index] = std::move(data);
   } else {
     m_workspace->setHistogram(
-        i, Histogram(BinEdges(std::move(tof)), Counts(std::move(data))));
+        ws_index, Histogram(BinEdges(std::move(tof)), Counts(std::move(data))));
   }
 }
 

@@ -385,7 +385,6 @@ public:
     // This will produce a workspace with suffix _monitors, that is used below
     // in test_MonitorsAsEvents
     ldLMM.setProperty<bool>("LoadMonitors", true);
-    ldLMM.setProperty<bool>("MonitorsAsEvents", true);
 
     TS_ASSERT(ldLMM.execute());
 

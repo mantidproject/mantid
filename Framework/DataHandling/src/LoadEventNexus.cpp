@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
@@ -210,27 +211,11 @@ void LoadEventNexus::init() {
                                                        Direction::Input),
                   "Load the monitors from the file (optional, default False).");
 
-  declareProperty(
-      make_unique<PropertyWithValue<bool>>("MonitorsAsEvents", false,
-                                           Direction::Input),
-      "If present, load the monitors as events. '''WARNING:''' WILL "
-      "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
-
-  declareProperty("LoadEventMonitors", true,
-                  "Load event monitor in NeXus file both event monitor and "
-                  "histogram monitor found in NeXus file."
-                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
-                  "or both of them are false,"
-                  "then it is in the auto mode such that any existing monitor "
-                  "will be loaded.");
-
-  declareProperty("LoadHistoMonitors", true,
-                  "Load histogram monitor in NeXus file both event monitor and "
-                  "histogram monitor found in NeXus file."
-                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
-                  "or both of them are false,"
-                  "then it is in the auto mode such that any existing monitor "
-                  "will be loaded.");
+  std::vector<std::string> options{ "", "Events", "Histogram" };
+  declareProperty("MonitorsLoadOnly", "",
+                  boost::make_shared<Kernel::StringListValidator>(options),
+                  "If multiple repesentations exist, which one to load. "
+                  "Default is to load the one that is present.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
@@ -257,17 +242,11 @@ void LoadEventNexus::init() {
                   "the run).");
 
   setPropertySettings(
-      "MonitorsAsEvents",
-      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      "LoadEventMonitors",
-      make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
-  setPropertySettings(
-      "LoadHistoMonitors",
+      "MonitorsLoadOnly",
       make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> prop =
-        make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
+        make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1");
     return prop;
   };
   setPropertySettings("FilterMonByTofMin", asEventsIsOn());
@@ -277,9 +256,7 @@ void LoadEventNexus::init() {
 
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);
-  setPropertyGroup("MonitorsAsEvents", grp4);
-  setPropertyGroup("LoadEventMonitors", grp4);
-  setPropertyGroup("LoadHistoMonitors", grp4);
+  setPropertyGroup("MonitorsLoadOnly", grp4);
   setPropertyGroup("FilterMonByTofMin", grp4);
   setPropertyGroup("FilterMonByTofMax", grp4);
   setPropertyGroup("FilterMonByTimeStart", grp4);
@@ -1152,9 +1129,6 @@ bool LoadEventNexus::hasEventMonitors() {
 * Load the Monitors from the NeXus file into a workspace. The original
 * workspace name is used and appended with _monitors.
 *
-* This is used when the property "MonitorsAsEvents" is not
-* enabled, and uses LoadNexusMonitors to load monitor data into a
-* Workspace2D.
 */
 void LoadEventNexus::runLoadMonitors() {
   std::string mon_wsname = this->getProperty("OutputWorkspace");
@@ -1168,12 +1142,10 @@ void LoadEventNexus::runLoadMonitors() {
     g_log.information() << "New workspace name for monitors: " << mon_wsname
                         << '\n';
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
-    loadMonitors->setPropertyValue("MonitorsAsEvents",
-                                   this->getProperty("MonitorsAsEvents"));
-    loadMonitors->setPropertyValue("LoadEventMonitors",
-                                   this->getProperty("LoadEventMonitors"));
-    loadMonitors->setPropertyValue("LoadHistoMonitors",
-                                   this->getProperty("LoadHistoMonitors"));
+    loadMonitors->setPropertyValue("LoadOnly",
+                                   this->getProperty("MonitorsLoadOnly"));
+    loadMonitors->setPropertyValue("NXentryName",
+                                   this->getProperty("NXentryName"));
     loadMonitors->execute();
     Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
 

@@ -46,8 +46,6 @@ void LoadNexusMonitors::exec() {
   // Forward algorithm properties
   alg->setPropertyValue("Filename", getPropertyValue("Filename"));
   alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-  alg->setPropertyValue("MonitorsAsEvents",
-                        getPropertyValue("MonitorsAsEvents"));
 
   // Run new algorithm
   alg->execute();

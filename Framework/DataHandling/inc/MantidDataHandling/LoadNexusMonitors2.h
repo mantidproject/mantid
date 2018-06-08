@@ -49,6 +49,18 @@ namespace DataHandling {
 *
 * File change history is stored at: <https://github.com/mantidproject/mantid>
 */
+
+namespace LoadNexusMonitorsAlg {
+// spectrum  is implicit in the structure as index + 1 - TODO was spectrumNo
+struct MonitorInfo {
+  std::string name{ "" }; ///< name of the group in the nexus file - TODO was
+  /// monitorName
+  detid_t detNum{ 0 }; ///< detector number for monitor - TODO was monIndex
+  bool hasEvent{ false };
+  bool hasHisto{ false };
+};
+}
+
 class DLLExport LoadNexusMonitors2 : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification
@@ -86,46 +98,23 @@ private:
   void runLoadLogs(const std::string filename,
                    API::MatrixWorkspace_sptr localWorkspace);
 
-  bool allMonitorsHaveHistoData(::NeXus::File &file,
-                                const std::vector<std::string> &monitorNames);
-
   /// is it possible to open the file?
   bool canOpenAsNeXus(const std::string &fname);
 
   /// split multi period histogram workspace into a workspace group
   void splitMutiPeriodHistrogramData(const size_t numPeriods);
 
-  size_t getMonitorInfo(NeXus::File &file,
-                        std::vector<std::string> &monitorNames,
-                        size_t &numHistMon, size_t &numEventMon,
-                        size_t &numPeriods,
-                        std::map<int, std::string> &monitorNumber2Name,
-                        std::vector<bool> &isEventMonitors);
+  size_t getMonitorInfo(NeXus::File &file, size_t &numPeriods);
 
-  bool isEventMonitor(::NeXus::File &monitorFileHandle) const;
-  std::size_t sizeOfUnopenedEntry(::NeXus::File &file,
-                                  const std::string &entryName) const;
-  bool eventIdNotEmptyIfExists(
-      ::NeXus::File &monitorFileHandle,
-      std::map<std::string, std::string> const &entries) const;
-  bool hasAllEventLikeAttributes(
-      std::map<std::string, std::string> const &entries) const;
-  bool keyExists(std::string const &key,
-                 std::map<std::string, std::string> const &entries) const;
+  bool createOutputWorkspace(std::vector<bool> &loadMonitorFlags);
 
-  bool
-  createOutputWorkspace(size_t numHistMon, size_t numEventMon,
-                        bool monitorsAsEvents,
-                        std::vector<std::string> &monitorNames,
-                        std::vector<bool> &isEventMonitors,
-                        const std::map<int, std::string> &monitorNumber2Name,
-                        std::vector<bool> &loadMonitorFlags);
+  void readEventMonitorEntry(NeXus::File &file, size_t ws_index);
 
-  void readEventMonitorEntry(NeXus::File &file, size_t i);
-
-  void readHistoMonitorEntry(NeXus::File &file, size_t i, size_t numPeriods);
+  void readHistoMonitorEntry(NeXus::File &file, size_t ws_index,
+                             size_t numPeriods);
 
 private:
+  std::vector<LoadNexusMonitorsAlg::MonitorInfo> m_monitorInfo;
   std::vector<HistogramData::BinEdges> m_multiPeriodBinEdges;
   std::vector<HistogramData::Counts> m_multiPeriodCounts;
   std::string m_filename; ///< The name and path of the input file
