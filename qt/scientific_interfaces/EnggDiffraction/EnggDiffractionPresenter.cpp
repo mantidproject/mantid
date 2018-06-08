@@ -777,13 +777,13 @@ void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
     throw std::invalid_argument("The Ceria number" + g_runNumberErrorStr);
   }
 
-  const auto &cs = m_view->currentCalibSettings();
-  const auto &pixelCalib = cs.m_pixelCalibFilename;
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  const std::string pixelCalib = cs.m_pixelCalibFilename;
   if (pixelCalib.empty()) {
     throw std::invalid_argument(
         "You need to set a pixel (full) calibration in settings.");
   }
-  const auto &templGSAS = cs.m_templateGSAS_PRM;
+  const std::string templGSAS = cs.m_templateGSAS_PRM;
   if (templGSAS.empty()) {
     throw std::invalid_argument(
         "You need to set a template calibration file for GSAS in settings.");
@@ -1056,12 +1056,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &ceriaNo,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
-  if (cs.m_inputDirCalib.empty()) {
-    m_view->userWarning("No calibration directory selected",
-                        "Please select a calibration directory in Settings. "
-                        "This will be used to cache Vanadium calibration data");
-    return;
-  }
   MatrixWorkspace_sptr ceriaWS;
 
   // Append current instrument name if numerical only entry
