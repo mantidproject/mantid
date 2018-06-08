@@ -26,49 +26,39 @@ using namespace Mantid::Muon;
 
 namespace {
 
-// Create a fake muon dataset
-struct yDataBeforeAsymmetry {
-  yDataBeforeAsymmetry() {
+/**
+ * Create a fake muon dataset, each spectrum is offset by 4 degrees in phase
+ * and has a different normalization.
+ */
+struct yDataAsymmetry {
+  yDataAsymmetry() {
     m_amp = 1.5;
     m_phi = 0.1;
   };
-  yDataBeforeAsymmetry(const double amp, const double phi)
-      : m_amp(amp), m_phi(phi) {};
+  yDataAsymmetry(const double amp, const double phi) : m_amp(amp), m_phi(phi){};
+
   double operator()(const double t, size_t spec) {
-    double w = 5.0;     // Frequency of the oscillations
-    double tau = Mantid::PhysicalConstants::MuonLifetime *
-                 1e6; // Muon life time in microseconds
     double e = exp(-t / tau);
     double factor = (static_cast<double>(spec) + 1.0) * 0.5;
-    return (10. * factor * (1.0 + m_amp * cos(w * t + m_phi)) * e);
+    double phase_offset = 4 * M_PI / 180;
+    return (10. * factor *
+            (1.0 + m_amp * cos(m_omega * t + m_phi + spec * phase_offset)) * e);
   }
 
 private:
-  double m_amp; // Amplitude of the oscillations
-  double m_phi;
+  double m_amp;         // Amplitude of the oscillations
+  double m_phi;         // Phase of the sinusoid
+  double m_omega = 5.0; // Frequency of the oscillations
+  double tau =
+      PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
 };
 
-// Create fake muon data with exponential decay
-struct yDataAsymmetry {
-  yDataAsymmetry() { m_amp = 10.; };
-  yDataAsymmetry(const double amp) : m_amp(amp){};
-  double operator()(const double time, size_t specNum) {
-    double amplitude = m_amp * (static_cast<double>(specNum) + 1);
-    double tau = Mantid::PhysicalConstants::MuonLifetime *
-                 1e6; // Muon life time in microseconds
-    return (20. * (1.0 + amplitude * exp(-time / tau)));
-  }
-
-private:
-  double m_amp;
-};
-
+// Simple count for use with workspace creator
 struct yDataCounts {
   yDataCounts() : m_count(-1) {}
   int m_count;
   double operator()(const double, size_t) {
-    m_count++;
-    return static_cast<double>(m_count);
+    return static_cast<double>(++m_count);
   }
 };
 
@@ -88,7 +78,7 @@ struct eData {
  */
 template <typename Function = yDataAsymmetry>
 MatrixWorkspace_sptr
-createAsymmetryWorkspace(size_t nspec, size_t maxt, double amp = 10.,
+createAsymmetryWorkspace(size_t nspec, size_t maxt,
                          Function dataGenerator = yDataAsymmetry()) {
 
   MatrixWorkspace_sptr ws =
@@ -205,6 +195,7 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
 }
 
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
+// Use when specifying groups manually
 void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
                                 std::string inputWSName,
                                 std::string wsGroupName) {
@@ -226,6 +217,7 @@ void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
 }
 
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
+// Use when entering workspaces to pair
 void setPairAlgorithmPropertiesForInputWorkspace(
     ApplyMuonDetectorGroupPairing &alg, std::string inputWSName,
     std::string wsGroupName) {
@@ -402,7 +394,8 @@ public:
   }
 
   void test_workspacePairingHasCorrectAsymmetryValues() {
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        createAsymmetryWorkspace(10, 10, yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -418,14 +411,14 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.492635, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.491110, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.489006, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.4692, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.0517, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6119, 0.0001);
 
     // The error calculation as per Issue #5035
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.01008430, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.01101931, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.01230289, 0.000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04212, 0.00001);
+    //TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.00000, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06946, 0.00001);
   }
 
   void test_timeOffsetShiftsTimeAxisCorrectly() {
@@ -448,6 +441,8 @@ public:
   void test_detectorIDsNotInWorkspaceFails() {
     // If the input detector IDs are not in the input workspace the algorithm
     // should not execute
+
+    // Add this once Load algorithm is merged and use the new helper methods
   }
 
   void test_summingPeriodsGivesCorrectAsymmetryValues() {
@@ -510,7 +505,8 @@ public:
 
   void test_applyingDeadTimeCorrectionGivesCorrectAsymmetryValues() {
 
-    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        createAsymmetryWorkspace(10, 10, yDataAsymmetry());
     setUpADSWithWorkspace setup(ws);
 
     ApplyMuonDetectorGroupPairing alg;
@@ -533,14 +529,14 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.5152, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.9689, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 0.4172, 0.001);
+    // Dead time applied before asymmetry
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.51813228, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -1.05389309, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.63497325, 0.001);
 
-    // TODO : Calculate these by hand
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0050, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0050, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.03856093, 0.0001);
+    //TS_ASSERT_DELTA(wsOut->readE(0)[4], -0.0000000, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06679145, 0.0001);
   }
 
   void test_CheckAsymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
@@ -549,11 +545,12 @@ public:
     setUpADSWithWorkspace setup(ws);
     ApplyMuonDetectorGroupPairing alg;
     alg.initialize();
-	setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName, setup.groupWSName);
+    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
+                                                setup.groupWSName);
     MatrixWorkspace_sptr groupWS1 =
-        createAsymmetryWorkspace(1, 10, 10., yDataBeforeAsymmetry(0.5, 0.1));
+        createAsymmetryWorkspace(1, 10, yDataAsymmetry(0.5, 0.1));
     MatrixWorkspace_sptr groupWS2 =
-        createAsymmetryWorkspace(1, 10, 20., yDataBeforeAsymmetry(1.0, 0.2));
+        createAsymmetryWorkspace(1, 10, yDataAsymmetry(1.0, 0.2));
     const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
     const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
     AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
@@ -575,17 +572,59 @@ public:
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.28995348, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.02261807, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.07656296, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.14980417, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.12491937, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.24211334, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.47372239, 0.001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.39502973, 0.001);
   }
 
   void test_inputWorkspaceWithMultipleSpectraFails() {
     // We expect the input workspaces to have a single spectra.
+
+    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    setUpADSWithWorkspace setup(ws);
+    ApplyMuonDetectorGroupPairing alg;
+    alg.initialize();
+    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
+                                                setup.groupWSName);
+    MatrixWorkspace_sptr groupWS1 =
+        createAsymmetryWorkspace(2, 10, yDataAsymmetry(0.5, 0.1));
+    MatrixWorkspace_sptr groupWS2 =
+        createAsymmetryWorkspace(1, 10, yDataAsymmetry(1.0, 0.2));
+    const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
+    const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
+    AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
+    AnalysisDataService::Instance().addOrReplace(groupWS2Name, groupWS2);
+    setup.wsGroup->add(groupWS1Name);
+    setup.wsGroup->add(groupWS2Name);
+    alg.setProperty("InputWorkspace1", groupWS1Name);
+    alg.setProperty("InputWorkspace2", groupWS2Name);
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_inputWorkspaceWithDifferentTimeAxisFails() {
     // e.g. rebin with non-rebin should throw an error from this algorithm.
+
+    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    setUpADSWithWorkspace setup(ws);
+    ApplyMuonDetectorGroupPairing alg;
+    alg.initialize();
+    setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName,
+                                                setup.groupWSName);
+    MatrixWorkspace_sptr groupWS1 =
+        createAsymmetryWorkspace(1, 10, yDataAsymmetry(0.5, 0.1));
+    MatrixWorkspace_sptr groupWS2 =
+        createAsymmetryWorkspace(1, 20, yDataAsymmetry(1.0, 0.2));
+    const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
+    const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
+    AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
+    AnalysisDataService::Instance().addOrReplace(groupWS2Name, groupWS2);
+    setup.wsGroup->add(groupWS1Name);
+    setup.wsGroup->add(groupWS2Name);
+    alg.setProperty("InputWorkspace1", groupWS1Name);
+    alg.setProperty("InputWorkspace2", groupWS2Name);
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 };
 

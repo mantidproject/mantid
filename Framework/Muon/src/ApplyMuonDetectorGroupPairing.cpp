@@ -266,6 +266,13 @@ ApplyMuonDetectorGroupPairing::validateInputs() {
       errors["Group1"] = "The two groups must contain at least one ID and be "
                          "different.";
     }
+  } else {
+    MatrixWorkspace_sptr ws1 = getProperty("InputWorkspace1");
+    MatrixWorkspace_sptr ws2 = getProperty("InputWorkspace1");
+    if (ws1->getNumberHistograms() != 1 || ws2->getNumberHistograms() != 1) {
+      errors["InputWorkspace1"] =
+          "The input workspaces should have exactly one spectra";
+    }
   }
 
   // Multi period checks are left for MuonProcess
@@ -358,6 +365,8 @@ ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
 
   MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
 
+  ws->getSpectrum(0).setSpectrumNo(0);
+  ws->getSpectrum(1).setSpectrumNo(1);
   std::vector<int> fwd = {0};
   std::vector<int> bwd = {1};
 
