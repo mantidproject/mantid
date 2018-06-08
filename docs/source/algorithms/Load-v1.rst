@@ -6,6 +6,8 @@
 
 .. properties::
 
+.. _load algorithm:
+
 Description
 -----------
 
