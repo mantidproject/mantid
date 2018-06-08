@@ -536,6 +536,10 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     // Update the model with the results
     m_manager->update(groupID, rowID, rowData->data());
+
+    // Need to set the processed state as the last step because the table
+    // update resets it
+    setRowIsProcessed(rowData, true);
   }
 
   // Post-process (if needed)
@@ -557,7 +561,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
       // Post process the group of slices
       try {
         postProcessGroup(sliceGroup);
-
+        setGroupIsProcessed(groupID, true);
       } catch (std::exception &e) {
         handleError(groupID, e.what());
         errors = true;
@@ -568,7 +572,6 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     }
   }
 
-  setGroupIsProcessed(groupID, true);
   return errors;
 }
 
@@ -615,16 +618,18 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
       errors = true;
       continue;
     }
-    // Update the state
-    setRowIsProcessed(rowData, true);
     // Update the tree
     m_manager->update(groupID, row.first, rowData->data());
+    // Need to update the state as the last step because the table update
+    // resets it
+    setRowIsProcessed(rowData, true);
   }
 
   // Post-process (if needed)
   if (group.size() > 1) {
     try {
       postProcessGroup(group);
+      setGroupIsProcessed(groupID, true);
     } catch (std::exception &e) {
       handleError(groupID, e.what());
       errors = true;
@@ -634,7 +639,6 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
     }
   }
 
-  setGroupIsProcessed(groupID, true);
   return errors;
 }
 
