@@ -21,6 +21,7 @@ Bugfixes
 --------
 
 - A bug in the load dialog where bad filename input would cause the last file to be loaded has been fixed.
+- Fix crash when starting the Mantid VSI on MacOS.
 
 Improvements
 ------------
