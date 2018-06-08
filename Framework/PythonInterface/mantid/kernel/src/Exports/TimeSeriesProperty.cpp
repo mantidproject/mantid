@@ -35,6 +35,11 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
   self.addValue(*dateandtime, value);
 }
 
+// Function to return numpy friendly string format for dtype
+template <typename TYPE>
+void dtype(TimeSeriesProperty<TYPE> &self) {
+}
+
 // Macro to reduce copy-and-paste
 #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                   \
   register_ptr_to_python<TimeSeriesProperty<TYPE> *>();                        \
@@ -80,7 +85,8 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
            arg("self"),                                                        \
            "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
-           arg("self"));
+           arg("self"))                                                       \
+      .def("dtype", &dtype<TYPE>, arg("self"), "returns :numpy_array");        \
 }
 
 void export_TimeSeriesProperty_Double() {
