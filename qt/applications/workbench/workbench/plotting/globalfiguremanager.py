@@ -24,6 +24,7 @@ import gc
 import six
 
 from mantidqt.py3compat import Enum
+from .observabledictionary import DictionaryAction, ObservableDictionary
 
 
 class FigureAction(Enum):
@@ -31,74 +32,6 @@ class FigureAction(Enum):
     New = 1
     Closed = 2
     Renamed = 3
-
-
-class DictionaryAction(Enum):
-    Create = 0
-    Set = 1
-    Removed = 2
-    Clear = 3
-    Update = 4
-
-
-class ObservableDictionary(dict):
-    """
-    Override parts of dictionary that deal with adding, removing
-    or changing data in the dictionary to call an observer.
-    """
-    def __init__(self, value):
-        super(ObservableDictionary, self).__init__(value)
-        self.observers = []
-
-    def add_observer(self, observer):
-        """
-        Add an observer to this class - this can be any class with a
-        notify() method
-        :param observer: A class with a notify method
-        """
-        self.observers.append(observer)
-
-    def _notify_observers(self, action, new_value=None, old_value=None):
-        for observer in self.observers:
-            observer.notify(action, new_value, old_value)
-
-    def __setitem__(self, key, new_value):
-        action = DictionaryAction.Set
-
-        if key in self:
-            old_value = self.__getitem__(key)
-        else:
-            old_value = None
-            action = DictionaryAction.Create
-        dict.__setitem__(self, key, new_value)
-
-        self._notify_observers(action, new_value, old_value)
-
-    def __delitem__(self, key):
-        old_value = dict.__getitem__(self, key)
-        dict.__delitem__(self, key)
-        self._notify_observers(DictionaryAction.Removed, old_value=old_value)
-
-    def clear(self):
-        dict.clear(self)
-        self._notify_observers(DictionaryAction.Unknown)
-
-    def pop(self, key, default=None):
-        if key in self:
-            old_value = dict.pop(self, key)
-            self._notify_observers(DictionaryAction.Removed, old_value=old_value)
-            return old_value
-        else:
-            return dict.pop(self, key, default)
-
-    def popitem(self):
-        key, old_value = dict.popitem(self)
-        self._notify_observers(DictionaryAction.Removed, old_value=old_value)
-        return key, old_value
-
-    def update(self, updated_dictionary):
-        dict.update(self, updated_dictionary)
-        self._notify_observers(DictionaryAction.Unknown)
 
 
 class DictionaryObserver(object):
