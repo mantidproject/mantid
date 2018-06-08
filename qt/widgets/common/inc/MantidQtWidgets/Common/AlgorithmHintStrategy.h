@@ -46,7 +46,7 @@ public:
 
       // If it's not in the blacklist, add the property to our hints
       if (m_blacklist.find(name) == m_blacklist.end())
-        hints[name] = (*it)->briefDocumentation();
+        hints[name] = (*it)->documentation();
     }
 
     return hints;

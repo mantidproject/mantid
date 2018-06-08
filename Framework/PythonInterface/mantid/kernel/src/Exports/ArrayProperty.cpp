@@ -32,20 +32,20 @@ using return_cloned_numpy =
          boost::noncopyable>(#prefix "ArrayProperty", no_init)                 \
       .def(init<const std::string &, const unsigned int>(                      \
           (arg("self"), arg("name"), arg("direction") = Direction::Input),     \
-          "Construct an ArrayProperty of type" #type))                         \
+          "Construct an ArrayProperty of type " #type))                        \
                                                                                \
       .def(init<const std::string &, IValidator_sptr, const unsigned int>(     \
           (arg("self"), arg("name"), arg("validator"),                         \
            arg("direction") = Direction::Input),                               \
-          "Construct an ArrayProperty of type" #type "with a validator"))      \
+          "Construct an ArrayProperty of type " #type " with a validator"))    \
                                                                                \
       .def(init<const std::string &, const std::string &, IValidator_sptr,     \
                 const unsigned int>(                                           \
           (arg("self"), arg("name"), arg("values"),                            \
            arg("validator") = IValidator_sptr(new NullValidator),              \
            arg("direction") = Direction::Input),                               \
-          "Construct an ArrayProperty of type" #type                           \
-          "with a validator giving the values as a string"))                   \
+          "Construct an ArrayProperty of type " #type                          \
+          " with a validator giving the values as a string"))                  \
       .def("__init__",                                                         \
            make_constructor(                                                   \
                &createArrayPropertyFromList<type>, default_call_policies(),    \

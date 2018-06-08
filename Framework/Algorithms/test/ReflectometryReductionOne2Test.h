@@ -587,7 +587,7 @@ public:
 
     ReflectometryReductionOne2 alg;
 
-    auto inputWS = MatrixWorkspace_sptr(std::move(m_multiDetectorWS->clone()));
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
     alg.setChild(true);
@@ -631,7 +631,7 @@ public:
 
     ReflectometryReductionOne2 alg;
 
-    auto inputWS = MatrixWorkspace_sptr(std::move(m_multiDetectorWS->clone()));
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
     alg.setChild(true);

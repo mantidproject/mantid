@@ -18,10 +18,11 @@ class ModelConstructor(object):
             self.transformModels={}
             # generate the models
             MaxEnt =maxent_model.MaxEntModel()
+            MaxEntWrapper =maxent_model.MaxEntWrapper(MaxEnt)
             FFT =fft_model.FFTModel()
             FFTWrapper=fft_model.FFTWrapper(FFT)
             # adds the models to the transformation tab
-            self.transformModels["MaxEnt"]=MaxEnt
+            self.transformModels[MaxEnt.getName()]=MaxEntWrapper
             self.transformModels[FFT.getName()]=FFTWrapper
 
     # gets the model

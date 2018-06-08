@@ -170,8 +170,8 @@ public:
     // be called and the instrument name will be updated
     const std::string instrumentName = "ENGINX";
     EXPECT_CALL(mockView, currentInstrument())
-        .Times(1)
-        .WillOnce(Return(instrumentName));
+        .Times(2)
+        .WillRepeatedly(Return(instrumentName));
 
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1397,7 +1397,7 @@ public:
     // we are calling it twice, once on presenter initialisation
     // and a second time after when using pres.notify!
     EXPECT_CALL(mockView, currentInstrument())
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(instrumentName));
 
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);

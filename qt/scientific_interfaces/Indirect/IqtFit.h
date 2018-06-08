@@ -43,8 +43,6 @@ protected:
   std::string createSequentialFitOutputName() const override;
   Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
-  void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                        int maxIterations) const override;
   void enablePlotResult() override;
   void disablePlotResult() override;
   void enableSaveResult() override;
