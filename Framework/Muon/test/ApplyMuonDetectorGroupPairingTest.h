@@ -26,14 +26,41 @@ using namespace Mantid::Muon;
 
 namespace {
 
+// Create a fake muon dataset
+struct yDataBeforeAsymmetry {
+  yDataBeforeAsymmetry() {
+    m_amp = 1.5;
+    m_phi = 0.1;
+  };
+  yDataBeforeAsymmetry(const double amp, const double phi)
+      : m_amp(amp), m_phi(phi) {};
+  double operator()(const double t, size_t spec) {
+    double w = 5.0;     // Frequency of the oscillations
+    double tau = Mantid::PhysicalConstants::MuonLifetime *
+                 1e6; // Muon life time in microseconds
+    double e = exp(-t / tau);
+    double factor = (static_cast<double>(spec) + 1.0) * 0.5;
+    return (10. * factor * (1.0 + m_amp * cos(w * t + m_phi)) * e);
+  }
+
+private:
+  double m_amp; // Amplitude of the oscillations
+  double m_phi;
+};
+
 // Create fake muon data with exponential decay
 struct yDataAsymmetry {
+  yDataAsymmetry() { m_amp = 10.; };
+  yDataAsymmetry(const double amp) : m_amp(amp){};
   double operator()(const double time, size_t specNum) {
-    double amplitude = (static_cast<double>(specNum) + 1) * 10.;
+    double amplitude = m_amp * (static_cast<double>(specNum) + 1);
     double tau = Mantid::PhysicalConstants::MuonLifetime *
                  1e6; // Muon life time in microseconds
     return (20. * (1.0 + amplitude * exp(-time / tau)));
   }
+
+private:
+  double m_amp;
 };
 
 struct yDataCounts {
@@ -59,11 +86,14 @@ struct eData {
  * Number of bins = maxt - 1 .
  * @return Pointer to the workspace.
  */
-MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec, size_t maxt) {
+template <typename Function = yDataAsymmetry>
+MatrixWorkspace_sptr
+createAsymmetryWorkspace(size_t nspec, size_t maxt, double amp = 10.,
+                         Function dataGenerator = yDataAsymmetry()) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataAsymmetry(), static_cast<int>(nspec), 0.0, 1.0,
+          dataGenerator, static_cast<int>(nspec), 0.0, 1.0,
           (1.0 / static_cast<double>(maxt)), true, eData());
 
   ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
@@ -195,6 +225,18 @@ void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
   alg.setLogging(false);
 }
 
+// Set algorithm properties to sensible defaults (assuming data with 10 groups)
+void setPairAlgorithmPropertiesForInputWorkspace(
+    ApplyMuonDetectorGroupPairing &alg, std::string inputWSName,
+    std::string wsGroupName) {
+  alg.setProperty("SpecifyGroupsManually", false);
+  alg.setProperty("PairName", "test");
+  alg.setProperty("Alpha", 1.0);
+  alg.setProperty("InputWorkspace", inputWSName);
+  alg.setProperty("InputWorkspaceGroup", wsGroupName);
+  alg.setLogging(false);
+}
+
 // Simple class to set up the ADS with the configuration required by the
 // algorithm (a MatrixWorkspace and an empty group).
 class setUpADSWithWorkspace {
@@ -204,6 +246,7 @@ public:
     wsGroup = boost::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace(groupWSName, wsGroup);
   };
+
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
   WorkspaceGroup_sptr wsGroup;
 
@@ -494,10 +537,47 @@ public:
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.9689, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], 0.4172, 0.001);
 
-	// TODO : Calculate these by hand
+    // TODO : Calculate these by hand
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0050, 0.0001);
     TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0050, 0.0001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0050, 0.0001);
+  }
+
+  void test_CheckAsymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
+
+    MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
+    setUpADSWithWorkspace setup(ws);
+    ApplyMuonDetectorGroupPairing alg;
+    alg.initialize();
+	setPairAlgorithmPropertiesForInputWorkspace(alg, setup.inputWSName, setup.groupWSName);
+    MatrixWorkspace_sptr groupWS1 =
+        createAsymmetryWorkspace(1, 10, 10., yDataBeforeAsymmetry(0.5, 0.1));
+    MatrixWorkspace_sptr groupWS2 =
+        createAsymmetryWorkspace(1, 10, 20., yDataBeforeAsymmetry(1.0, 0.2));
+    const std::string groupWS1Name = "EMU000012345; Group; fwd; Counts; #1_Raw";
+    const std::string groupWS2Name = "EMU000012345; Group; bwd; Counts; #1_Raw";
+    AnalysisDataService::Instance().addOrReplace(groupWS1Name, groupWS1);
+    AnalysisDataService::Instance().addOrReplace(groupWS2Name, groupWS2);
+    setup.wsGroup->add(groupWS1Name);
+    setup.wsGroup->add(groupWS2Name);
+    alg.setProperty("InputWorkspace1", groupWS1Name);
+    alg.setProperty("InputWorkspace2", groupWS2Name);
+    alg.execute();
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.13876491, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.28995348, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.02261807, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.07656296, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.14980417, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.12491937, 0.0001);
   }
 
   void test_inputWorkspaceWithMultipleSpectraFails() {

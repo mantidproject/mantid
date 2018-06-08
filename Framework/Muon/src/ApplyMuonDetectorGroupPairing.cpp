@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -233,20 +234,6 @@ ApplyMuonDetectorGroupPairing::validateInputs() {
     errors["Alpha"] = "Alpha must be greater than 0.";
   }
 
-  double tmin = this->getProperty("TimeMin");
-  double tmax = this->getProperty("TimeMax");
-  if (tmin > tmax) {
-    errors["TimeMin"] = "TimeMin > TimeMax";
-  }
-
-  WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
-
-  if (groupedWS->getName() == inputWS->getName()) {
-    errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
-                                    "the same name as InputWorkspace.";
-  }
-
   const std::string pairName = getPropertyValue("PairName");
   if (pairName.empty()) {
     errors["PairName"] = "The pair must be named.";
@@ -255,13 +242,30 @@ ApplyMuonDetectorGroupPairing::validateInputs() {
     errors["PairName"] = "PairName must contain only alphnumeric characters.";
   }
 
-  std::set<int> group1 =
-      parseGroupStringToSetOfUniqueElements(this->getProperty("Group1"));
-  std::set<int> group2 =
-      parseGroupStringToSetOfUniqueElements(this->getProperty("Group2"));
-  if (group1.size() > 0 && group1 == group2) {
-    errors["Group1"] = "The two groups must contain at least one ID and be "
-                       "different.";
+  if (getProperty("SpecifyGroupsManually")) {
+
+    double tmin = this->getProperty("TimeMin");
+    double tmax = this->getProperty("TimeMax");
+    if (tmin > tmax) {
+      errors["TimeMin"] = "TimeMin > TimeMax";
+    }
+
+    WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
+    Workspace_sptr inputWS = getProperty("InputWorkspace");
+
+    if (groupedWS->getName() == inputWS->getName()) {
+      errors["InputWorkspaceGroup"] = "The InputWorkspaceGroup should not have "
+                                      "the same name as InputWorkspace.";
+    }
+
+    std::set<int> group1 =
+        parseGroupStringToSetOfUniqueElements(this->getProperty("Group1"));
+    std::set<int> group2 =
+        parseGroupStringToSetOfUniqueElements(this->getProperty("Group2"));
+    if (group1.size() > 0 && group1 == group2) {
+      errors["Group1"] = "The two groups must contain at least one ID and be "
+                         "different.";
+    }
   }
 
   // Multi period checks are left for MuonProcess
@@ -296,7 +300,12 @@ void ApplyMuonDetectorGroupPairing::exec() {
   } else {
     MatrixWorkspace_sptr ws1 = getProperty("InputWorkspace1");
     MatrixWorkspace_sptr ws2 = getProperty("InputWorkspace2");
-    pairWSNoRebin = createPairWorkspaceFromGroupWorkspaces(ws1, ws2, alpha);
+    if (MuonAlgorithmHelper::checkValidPair(ws1->getName(), ws2->getName())) {
+      pairWSNoRebin = createPairWorkspaceFromGroupWorkspaces(ws1, ws2, alpha);
+    } else {
+      throw std::invalid_argument(
+          "Input workspaces are not compatible for pair asymmetry.");
+    }
   }
 
   AnalysisDataService::Instance().addOrReplace(pairWSNameNoRebin,
@@ -336,7 +345,6 @@ const std::string ApplyMuonDetectorGroupPairing::getGroupWorkspaceNamesManually(
  * calculate asymmetry for a pair of workspaces of grouped detectors, using
  * parameter alpha, returning the resulting workspace.
  */
-
 MatrixWorkspace_sptr
 ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
     MatrixWorkspace_sptr inputWS1, MatrixWorkspace_sptr inputWS2,
@@ -350,7 +358,6 @@ ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
 
   MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
 
-  // Pair indices as vectors
   std::vector<int> fwd = {0};
   std::vector<int> bwd = {1};
 
@@ -359,10 +366,10 @@ ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
   algAsym->setProperty("ForwardSpectra", fwd);
   algAsym->setProperty("BackwardSpectra", bwd);
   algAsym->setProperty("Alpha", alpha);
-  // alg->setProperty("OutputWorkspace", "__NotUsed__");
+  algAsym->setProperty("OutputWorkspace", "__NotUsed__");
   algAsym->execute();
-  Workspace_sptr outWS = algAsym->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+  MatrixWorkspace_sptr outWS = algAsym->getProperty("OutputWorkspace");
+  return outWS;
 }
 
 /**
