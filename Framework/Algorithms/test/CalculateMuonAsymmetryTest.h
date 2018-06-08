@@ -213,13 +213,13 @@ public:
     TS_ASSERT_DELTA(outWS->x(0)[19], 3.800, Delta);
     TS_ASSERT_DELTA(outWS->x(0)[49], 9.800, Delta);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], -7.8056, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], 9.6880, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], 3.9431, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[10], -14.6114, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[19], 20.3760, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[49], 8.8861, Delta);
     // Test some E values
-    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0006, Delta);
-    TS_ASSERT_DELTA(outWS->e(0)[19], 0.0014, Delta);
-    TS_ASSERT_DELTA(outWS->e(0)[49], 0.0216, Delta);
+    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0012, Delta);
+    TS_ASSERT_DELTA(outWS->e(0)[19], 0.0028, Delta);
+    TS_ASSERT_DELTA(outWS->e(0)[49], 0.0433, Delta);
   }
 
   void test_NumberOfDataPoints() {
@@ -256,79 +256,6 @@ public:
       TS_ASSERT_DELTA(fineOutWS->y(0)[1 + j * 3], coarseOutWS->y(0)[j], Delta);
       // Test some E values
       TS_ASSERT_DELTA(fineOutWS->e(0)[1 + j * 3], coarseOutWS->e(0)[j], Delta);
-    }
-  }
-
-  void test_FitToEstimateAsymmetry() {
-    // create count data
-    double dx = 10.0 * (1.0 / static_cast<double>(100.0));
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        yAsymmData(), 4, 0.0, 10.0, dx, true, eData());
-    ws->mutableRun().addProperty("goodfrm", 10);
-
-    // Calculate everything in one step
-    IAlgorithm_sptr alg = setUpAlg();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", "fromCounts");
-    alg->setProperty("StartX", 0.1);
-    alg->setProperty("EndX", 10.);
-    alg->setPropertyValue("InputDataType", "counts");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-    MatrixWorkspace_sptr outFromCounts = alg->getProperty("OutputWorkspace");
-    auto normFromCounts =
-        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
-            alg->getPropertyValue("NormalizationConstant"));
-    // calculate in two parts
-    // get estimate for asymmetry
-    IAlgorithm_sptr estAlg =
-        AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
-    estAlg->initialize();
-    estAlg->setChild(true);
-    estAlg->setProperty("StartX", 0.1);
-    estAlg->setProperty("EndX", 10.0);
-    estAlg->setProperty("InputWorkspace", ws);
-    estAlg->setPropertyValue("OutputWorkspace", "est");
-    TS_ASSERT_THROWS_NOTHING(estAlg->execute());
-    TS_ASSERT(estAlg->isExecuted());
-    MatrixWorkspace_sptr estAsymm = estAlg->getProperty("OutputWorkspace");
-    auto estNorm = estAlg->getPropertyValue("NormalizationConstant");
-    // get asymmetry from estimate
-    IAlgorithm_sptr alg2 = setUpAlg();
-    alg2->setProperty("InputWorkspace", estAsymm);
-    alg2->setPropertyValue("OutputWorkspace", "fromEst");
-    alg2->setProperty("StartX", 0.1);
-    alg2->setProperty("EndX", 10.);
-    alg2->setPropertyValue("InputDataType", "asymmetry");
-    std::vector<int> spec = {0, 1, 2, 3};
-    alg2->setProperty("spectra", spec);
-    alg2->setProperty("PreviousnormalizationConstant", estNorm);
-    TS_ASSERT_THROWS_NOTHING(alg2->execute());
-    TS_ASSERT(alg2->isExecuted());
-    MatrixWorkspace_sptr outFromAsymm = alg2->getProperty("OutputWorkspace");
-    auto normFromAsymm =
-        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
-            alg2->getPropertyValue("NormalizationConstant"));
-
-    // normalization constants should be the same for both methods
-    double Delta = 1.e-4;
-    for (unsigned int j = 0; j < normFromAsymm.size(); j++) {
-      TS_ASSERT_DELTA(normFromCounts[j], normFromAsymm[j], Delta);
-    }
-    // asymmetry values should be the same for both methods
-    Delta = 0.0001;
-    for (int j = 0; j < 4; j++) {
-      for (int k = 0; k < 20; k++) {
-        // Test some X values
-        TS_ASSERT_DELTA(outFromAsymm->x(j)[k * 4], outFromCounts->x(j)[k * 4],
-                        Delta);
-        // Test some Y values
-        TS_ASSERT_DELTA(outFromAsymm->y(j)[k * 4], outFromCounts->y(j)[k * 4],
-                        Delta);
-        // Test some E values
-        TS_ASSERT_DELTA(outFromAsymm->e(j)[k * 4], outFromCounts->e(j)[k * 4],
-                        Delta);
-      }
     }
   }
 };
