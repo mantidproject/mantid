@@ -625,9 +625,9 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 10);
-    TS_ASSERT_DELTA(data->y(0)[4], -0.479, 0.001);
-    TS_ASSERT_DELTA(data->y(0)[5], 1.823, 0.001);
-    TS_ASSERT_DELTA(data->y(0)[6], 2.397, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[4], -0.479, 0.003);
+    TS_ASSERT_DELTA(data->y(0)[5], 1.823, 0.003);
+    TS_ASSERT_DELTA(data->y(0)[6], 2.397, 0.003);
 
     // Test that the algorithm converged
     TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
