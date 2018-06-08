@@ -320,15 +320,9 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
     if (groupNeedsProcessing(groupIndex))
       resetProcessedState(groupIndex);
 
-    GroupData groupData = item.second;
-
-    // Groups that are already processed or cannot be post-processed (only 1
-    // child row selected) do not count in progress
-    if (groupNeedsProcessing(groupIndex) && groupData.size() > 1)
-      maxProgress++;
-
     try {
       // First load the runs.
+      GroupData groupData = item.second;
       bool allEventWS = loadGroup(groupData);
 
       if (allEventWS) {
