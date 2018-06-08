@@ -1512,3 +1512,16 @@ public:
 private:
   MantidUI(const MantidUI &);
 };
+
+class ProjectRecoveryAdaptor {
+
+%TypeHeaderCode
+#include "src/ProjectRecoveryAdaptor.h"
+using namespace MantidQt::API;
+%End
+
+public:
+    ProjectRecoveryAdaptor();
+    bool saveOpenWindows();
+    bool loadOpenWindows(std::string);
+};

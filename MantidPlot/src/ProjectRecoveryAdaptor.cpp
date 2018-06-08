@@ -9,5 +9,9 @@ namespace API {
 
 ProjectRecoveryAdaptor::ProjectRecoveryAdaptor() {}
 
+bool ProjectRecoveryAdaptor::saveOpenWindows() { return false; }
+
+bool ProjectRecoveryAdaptor::loadOpenWindows(std::string projectFilePath) { return false; }
+
 } // namespace API
 } // namespace MantidQt
