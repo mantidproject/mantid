@@ -48,7 +48,7 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 
   // Add validation to custom detector grouping
-  QRegExp re("([0-9]+[-]?[0-9]*,[ ])*[0-9]+[-]?[0-9]*");
+  QRegExp re("([0-9]+[-]?[0-9]*,[ ]?)*[0-9]+[-]?[0-9]*");
   m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
 
   // Validate to remove invalid markers

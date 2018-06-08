@@ -575,7 +575,7 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 # -------------------------------------------------------------------------------
 
 
-def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
+def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -586,7 +586,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
+    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string)
 
     if grouped_ws is not None:
         mtd.addOrReplace(workspace_name, grouped_ws)
