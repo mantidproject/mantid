@@ -585,6 +585,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
+    @param group_string String for custom method - comma separated list or range
     """
     grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string)
 
@@ -602,7 +603,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
-    @param group_string String for custom method
+    @param group_string String for custom method - comma separated list or range
     """
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
