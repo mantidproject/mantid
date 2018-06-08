@@ -53,4 +53,8 @@ Liquids Reflectometer
 ---------------------
 * New REF_L instrument geometry for 2018 run cycle.
 
+Magnetism Reflectometer
+---------------------
+* Added live data information to Facilities.xml
+
 :ref:`Release 3.13.0 <v3.13.0>`
