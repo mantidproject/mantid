@@ -55,7 +55,6 @@ def _get_analysis_data_service():
     import mantid
     return mantid.AnalysisDataService.Instance()
 
-
 # -------------------------- Wrapped MantidPlot functions -----------------
 
 def runPythonScript(code, async=False, quiet=False, redirect=True):
@@ -70,6 +69,14 @@ def runPythonScript(code, async=False, quiet=False, redirect=True):
         async = False
     threadsafe_call(_qti.app.runPythonScript, code, async, quiet, redirect)
 
+def get_project_recovery_handle():
+    """Returns a pointer which can be used to save and load MantidPlot
+    windows as part of project recovery
+
+    Returns:
+        A handle to a ProjectRecoveryAdaptor
+    """
+    return new_proxy(proxies.MDIWindow, _qti.app.getRecoveryHandle)
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
 def workspace(name):
