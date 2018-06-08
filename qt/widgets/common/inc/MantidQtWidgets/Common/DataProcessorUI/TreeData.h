@@ -128,9 +128,11 @@ public:
   bool reductionFailed() const;
 
   /// Get the reduced workspace name, optionally adding a prefix
-  QString reducedName(const QString prefix = QString());
+  QString reducedName(const QString prefix = QString()) const;
   /// Set the reduced workspace name
   void setReducedName(const QString &name) { m_reducedName = name; }
+  bool hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,
+                                           const QString &prefix) const;
 
 private:
   /// Check if a preprocessed property exists

@@ -430,8 +430,8 @@ bool GenericDataProcessorPresenter::workspaceIsOutputOfRow(
     RowData_sptr rowData, const std::string &workspaceName) const {
   // Only check the default output workspace (other output workspaces are
   // optional)
-  return rowData->reducedName(m_processor.defaultOutputPrefix())
-             .toStdString() == workspaceName;
+  return rowData->hasOutputWorkspaceWithNameAndPrefix(
+      QString::fromStdString(workspaceName), m_processor.defaultOutputPrefix());
 }
 
 /** Reset the processed state for a group

@@ -309,11 +309,26 @@ bool RowData::reductionFailed() const {
  * prefixes have been applied for specific output properties.
  * @param prefix [in] : if not empty, apply this prefix to the name
  */
-QString RowData::reducedName(const QString prefix) {
+QString RowData::reducedName(const QString prefix) const {
   if (prefix.isEmpty())
     return m_reducedName;
   else
     return prefix + m_reducedName;
+}
+
+/** Check if this row has an output workspace with the given workspace name
+ * and prefix (including any slices)
+ */
+bool RowData::hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,
+                                                  const QString &prefix) const {
+  if (reducedName(prefix) == workspaceName) {
+    return true;
+  }
+  for (auto slice : m_slices) {
+    if (slice->hasOutputWorkspaceWithNameAndPrefix(workspaceName, prefix))
+      return true;
+  }
+  return false;
 }
 }
 }
