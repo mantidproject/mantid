@@ -79,6 +79,7 @@ void ProjectSerialiser::save(const QString &projectName, bool compress,
                              bool saveAll) {
   m_windowCount = 0;
   m_saveAll = saveAll;
+  auto name = projectName.toStdString();
   QFile fileHandle(projectName);
 
   // attempt to backup project files and check we can write
@@ -101,13 +102,35 @@ void ProjectSerialiser::save(const QString &projectName, bool compress,
 /**
  * Load the state of Mantid from a collection of lines read from a project file
  *
- * @param lines :: string of characters from a project file
+ * @param lines :: filepath to load from
  * @param fileVersion :: project file version used
  * @param isTopLevel :: whether this function is being called on a top level
  * 		folder. (Default True)
  */
-void ProjectSerialiser::load(std::string lines, const int fileVersion,
+void ProjectSerialiser::load(std::string filepath, const int fileVersion,
                              const bool isTopLevel) {
+	// We have to accept std::string to maintain Python compatibility
+	auto qfilePath = QString::fromStdString(filepath);
+	QFile file(qfilePath);
+	QFileInfo fileInfo(qfilePath);
+
+	if (!file.open(QIODevice::ReadOnly))
+		throw std::runtime_error("Couldn't open project file");
+
+	QTextStream fileTS(&file);
+	fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
+
+	// Skip mantid version line
+	fileTS.readLine();
+
+	// Skip the <scripting-lang> line. We only really use python now anyway.
+	fileTS.readLine();
+
+	// Skip the <windows> line.
+	fileTS.readLine();
+
+	std::string lines = fileTS.readAll().toUtf8().constData();
+
   // If we're not the top level folder, read the folder settings and create the
   // folder
   // This is a legacy edgecase because folders are written
@@ -761,7 +784,8 @@ void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
   }
   std::string fileName(window->workingDir.toStdString() + "/" + wsName);
   fileName.append(".nxs");
-  // window->mantidUI->loadWSFromFile(wsName, fileName);
+  if (!m_projectRecovery)
+	window->mantidUI->loadWSFromFile(wsName, fileName);
 }
 
 /**
