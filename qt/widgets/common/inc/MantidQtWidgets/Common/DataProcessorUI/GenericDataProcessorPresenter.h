@@ -262,6 +262,18 @@ protected:
   bool m_pauseReduction;
   // resume reduction
   void resume();
+  bool promptUser() const { return m_promptUser; }
+  void setGroupIsProcessed(const int groupIndex, const bool isProcessed);
+  void setGroupError(const int groupIndex, const std::string &error);
+  void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
+  void setRowError(RowData_sptr rowData, const std::string &error);
+  bool rowNeedsProcessing(RowData_sptr rowData) const;
+  bool groupNeedsProcessing(const int groupIndex) const;
+  void resetProcessedState(const int groupIndex);
+  void resetProcessedState(RowData_sptr rowData);
+  void resetProcessedState(const std::string &workspaceName);
+  void resetProcessedState();
+  virtual void setReductionPaused();
 
 protected slots:
   void reductionError(const QString &ex);
@@ -271,11 +283,6 @@ protected slots:
   void rowThreadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
-  void setGroupIsProcessed(const int groupIndex, const bool isProcessed);
-  void setGroupError(const int groupIndex, const std::string &error);
-  void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
-  void setRowError(RowData_sptr rowData, const std::string &error);
-  virtual void setReductionPaused();
 
 private:
   void applyDefaultOptions(std::map<QString, QVariant> &options);
@@ -399,12 +406,6 @@ private:
   void handleWorkspaceRemoved(const std::string &workspaceName,
                               const std::string &action);
   void handleAllWorkspacesRemoved(const std::string &action);
-  void resetProcessedState(const int groupIndex);
-  void resetProcessedState(RowData_sptr rowData);
-  void resetProcessedState(const std::string &workspaceName);
-  void resetProcessedState();
-  bool groupNeedsProcessing(const int groupIndex) const;
-  bool rowNeedsProcessing(RowData_sptr rowData) const;
 };
 }
 }

@@ -316,17 +316,24 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
   // Loop in groups
   for (const auto &item : m_itemsToProcess) {
+    auto const groupIndex = item.first;
+    if (groupNeedsProcessing(groupIndex))
+      resetProcessedState(groupIndex);
 
-    // Group of runs
-    GroupData group = item.second;
+    GroupData groupData = item.second;
+
+    // Groups that are already processed or cannot be post-processed (only 1
+    // child row selected) do not count in progress
+    if (groupNeedsProcessing(groupIndex) && groupData.size() > 1)
+      maxProgress++;
 
     try {
       // First load the runs.
-      bool allEventWS = loadGroup(group);
+      bool allEventWS = loadGroup(groupData);
 
       if (allEventWS) {
         // Process the group
-        if (processGroupAsEventWS(item.first, group, *slicing.get()))
+        if (processGroupAsEventWS(groupIndex, groupData, *slicing.get()))
           errors = true;
 
         // Notebook not implemented yet
@@ -342,7 +349,7 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
       } else {
         // Process the group
-        if (processGroupAsNonEventWS(item.first, group))
+        if (processGroupAsNonEventWS(groupIndex, groupData))
           errors = true;
         // Notebook
         if (m_view->getEnableNotebook())
@@ -358,10 +365,10 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
     progressReporter.report();
   }
 
-  if (!allGroupsWereEvent && m_promptUser)
+  if (!allGroupsWereEvent && promptUser())
     m_view->giveUserWarning(
         "Some groups could not be processed as event workspaces", "Warning");
-  if (errors && m_promptUser)
+  if (errors && promptUser())
     m_view->giveUserWarning("Some errors were encountered when "
                             "reducing table. Some groups may not have "
                             "been fully processed.",
@@ -517,12 +524,15 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     const auto rowData = row.second;   // data values for this row
     auto runNo = row.second->value(0); // The run number
 
+    if (!rowNeedsProcessing(rowData))
+      continue;
+
     // Set up all data required for processing the row
     if (!initRowForProcessing(rowData))
-      return true;
+      continue;
 
     if (!reduceRowAsEventWS(rowData, slicing))
-      return true;
+      continue;
 
     // Update the model with the results
     m_manager->update(groupID, rowID, rowData->data());
@@ -588,11 +598,23 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
 
   for (auto &row : group) {
     auto rowData = row.second;
+    if (!rowNeedsProcessing(rowData))
+      continue;
     // Set up all data required for processing the row
     if (!initRowForProcessing(rowData))
-      return true;
+      continue;
     // Do the reduction
-    reduceRow(rowData);
+    try {
+      reduceRow(rowData);
+    } catch (std::exception &e) {
+      handleError(rowData, e.what());
+      errors = true;
+      continue;
+    } catch (...) {
+      handleError(rowData, "Unknown error");
+      errors = true;
+      continue;
+    }
     // Update the state
     setRowIsProcessed(rowData, true);
     // Update the tree
