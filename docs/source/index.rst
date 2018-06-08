@@ -16,6 +16,7 @@ Mantid Documentation
    :glob:
    :maxdepth: 1
 
+   basics/index
    tutorials/index
    tutorials/ill_training/index
    algorithms/index
@@ -41,6 +42,7 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
+* :ref:`mantid basics`
 * :ref:`Algorithms List`
 * :ref:`training`
     - `Mantid Basic Course <http://www.mantidproject.org/Mantid_Basic_Course>`_
