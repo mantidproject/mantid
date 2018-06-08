@@ -45,6 +45,7 @@ struct yDataCounts {
   }
 };
 
+// Errors are a fixed value
 struct eData {
   double operator()(const double, size_t) { return 0.005; }
 };
@@ -144,6 +145,13 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   return wsGroup;
 }
 
+/**
+ * Create a simple dead time TableWorkspace with two columns (spectrum number
+ * and dead time).
+ * @param nspec :: The number of spectra (rows in table).
+ * @param deadTimes ::  The dead times for each spectra.
+ * @return TableWorkspace with dead times appropriate for pairing algorithm.
+ */
 ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
                                          std::vector<double> &deadTimes) {
 
@@ -166,6 +174,7 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
   return deadTimeTable;
 }
 
+// Set algorithm properties to sensible defaults (assuming data with 10 groups)
 void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
                                 std::string inputWSName,
                                 std::string wsGroupName) {
@@ -187,7 +196,7 @@ void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
 }
 
 // Simple class to set up the ADS with the configuration required by the
-// algorithm (a matrixWorkspace and an empty group).
+// algorithm (a MatrixWorkspace and an empty group).
 class setUpADSWithWorkspace {
 public:
   setUpADSWithWorkspace(Workspace_sptr ws) {
@@ -398,7 +407,7 @@ public:
     // should not execute
   }
 
-  void test_SummedPeriodsGivesCorrectAsymmetryValues() {
+  void test_summingPeriodsGivesCorrectAsymmetryValues() {
     WorkspaceGroup_sptr ws =
         createMultiPeriodWorkspaceGroup(4, 10, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
@@ -426,7 +435,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.03208, 0.00001);
   }
 
-  void test_SubtractedPeriodsGivesCorrectAsymmetryValues() {
+  void test_subtractingPeriodsGivesCorrectAsymmetryValues() {
     WorkspaceGroup_sptr ws =
         createMultiPeriodWorkspaceGroup(4, 10, 10, "MuonAnalysis");
     setUpADSWithWorkspace setup(ws);
@@ -441,7 +450,7 @@ public:
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
-	// Subtraction of periods occurs AFTER asymmetry calculation
+    // Subtraction of periods occurs AFTER asymmetry calculation
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
@@ -456,7 +465,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.05491692, 0.00001);
   }
 
-  void test_deadTimeCorrection() {
+  void test_applyingDeadTimeCorrectionGivesCorrectAsymmetryValues() {
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(10, 10);
     setUpADSWithWorkspace setup(ws);
@@ -465,6 +474,7 @@ public:
     alg.initialize();
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
 
+    // Apply same dead time to every spectra
     std::vector<double> deadTimes(10, 0.0025);
     ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(10, deadTimes);
 
@@ -472,7 +482,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeadTimeTable", deadTimeTable));
 
     alg.execute();
-	
 
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
@@ -485,6 +494,7 @@ public:
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.9689, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], 0.4172, 0.001);
 
+	// TODO : Calculate these by hand
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0050, 0.0001);
     TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0050, 0.0001);
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0050, 0.0001);
