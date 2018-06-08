@@ -633,8 +633,8 @@ public:
    *      events
    *
    * Splitter-log test:
-        979: 0: 0  -  3.5e+07: 0
-        979: 1: 3.5e+07  -  1.95e+08: 1
+        979: 0: 0         -  3.5e+07:  0
+        979: 1: 3.5e+07   -  1.95e+08: 1
         979: 2: 1.95e+08  -  2.65e+08: 2
         979: 3: 2.65e+08  -  3.65e+08: 2
         979: 4: 3.65e+08  -  4.65e+08: 2
@@ -1177,6 +1177,7 @@ public:
         if (i == 0) {
           pchargeLog->addValue(pulsetime, 1.);
           std::cout << "Add proton charge log " << pulsetime.totalNanoseconds()
+                    << " (" << pulsetime.toSimpleString() << ")"
                     << "\n";
         }
 
@@ -1210,6 +1211,9 @@ public:
       Types::Core::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
       int log_value = static_cast<int>(i + 1) * 20;
       int_tsp->addValue(log_time, log_value);
+      std::cout << "Add slow int log (" << i
+                << "): " << log_time.toSimpleString() << ", " << log_value
+                << "\n";
     }
     eventWS->mutableRun().addLogData(int_tsp.release());
 
@@ -1458,10 +1462,11 @@ public:
       splitterws->mutableY(0)[iy] = static_cast<double>(index_vec[iy]);
 
     // print out splitters
-    for (size_t ix = 0; ix < size_y; ++ix)
-      std::cout << ix << ": " << splitterws->mutableX(0)[ix] << "  -  "
-                << splitterws->mutableX(0)[ix + 1] << ": "
-                << splitterws->mutableY(0)[ix] << "\n";
+    for (size_t ix = 0; ix < size_y; ++ix) {
+      std::cout << ix << ": " << splitterws->mutableX(0)[ix] << " sec  -  "
+                << splitterws->mutableX(0)[ix + 1] << " sec "
+                << ": " << splitterws->mutableY(0)[ix] << "\n";
+    }
 
     return splitterws;
   }

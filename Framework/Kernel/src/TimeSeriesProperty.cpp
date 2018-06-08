@@ -534,6 +534,11 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   g_log.notice("Starting....");
   std::cout << "Starting...................\n";
 
+  // check target vector to make it a set
+  std::set<int> target_set;
+  for (auto target : target_vec)
+    target_set.insert(target);
+
   // check inputs
   if (splitter_time_vec.size() != target_vec.size() + 1) {
     std::stringstream errss;
@@ -563,6 +568,11 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
   // move splitter index such that the first entry of TSP is before the stop
   // time of a splitter
+  std::cout << "Stage 1: [" << this->name()
+            << "] First entry (TSP) = " << this->firstTime()
+            << ".  First splitter = " << splitter_time_vec.front()
+            << ", Last splitter = " << splitter_time_vec.back() << "\n";
+
   bool continue_search = true;
   bool no_entry_in_range = false;
 
@@ -573,25 +583,27 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   if (splitter_iter == splitter_time_vec.begin()) {
     // do nothing as the first TimeSeriesProperty entry's time is before any
     // splitters
+    std::cout << "Stage 1 Case 1\n";
     ;
   } else if (splitter_iter == splitter_time_vec.end()) {
     // already search to the last splitter which is still earlier than first TSP
     // entry
     no_entry_in_range = true;
+    std::cout << "Stage 1 Case 2\n";
   } else {
     // calculate the splitter's index (now we check the stop time)
     index_splitter = splitter_iter - splitter_time_vec.begin() - 1;
     split_start_time = splitter_time_vec[index_splitter];
     split_stop_time = splitter_time_vec[index_splitter + 1];
+    std::cout << "Stage 1 Case 3\n";
   }
 
-  std::cout << "[END-STEP-1] Move splitters index... TSP entry: "
+  // move along the entries to find the entry inside the current splitter
+  std::cout << "[STAGE-2] Moved splitters index... TSP entry: "
             << index_tsp_time << ", Splitter index = " << index_splitter
             << " ---> continue to search = " << continue_search
             << ", no entry in range (splitter to early!) = "
             << no_entry_in_range << "\n";
-
-  // move along the entries to find the entry inside the current splitter
   bool first_splitter_after_last_entry(false);
   if (!no_entry_in_range) {
     std::vector<DateAndTime>::iterator tsp_time_iter;
@@ -603,20 +615,25 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       // TSP entry to be split into any target splitter.
       no_entry_in_range = true;
       first_splitter_after_last_entry = true;
+      std::cout << "Stage 2 Case 1\n";
     } else {
       // first splitter start time is between tsp_time_iter and the one before
       // it.
       // so the index for tsp_time_iter is the first TSP entry in the splitter
       index_tsp_time = tsp_time_iter - tsp_time_vec.begin();
       tsp_time = *tsp_time_iter; // tsp_time_vec[index_splitter];
+      std::cout << "Stage 2 Case 2: TSP time = " << tsp_time.toSimpleString()
+                << "\n";
     }
   } else {
     // no entry in range is true, which corresponding to the previous case
     // "already search to the last splitter which is still earlier than first
     // TSP
     // entry"
+    std::cout << "Stage 2 Case 3\n";
   }
 
+  //
   if (no_entry_in_range && first_splitter_after_last_entry) {
     // initialize all the splitters with the last value
     DateAndTime last_entry_time = this->lastTime();
@@ -627,10 +644,11 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
-  std::cout << "[DB...BAT] continue search = " << continue_search
+  std::cout << "[STAGE-3] continue search = " << continue_search
             << ", index_splitter = " << index_splitter
             << ", index_tsp_time = " << index_tsp_time << "\n";
 
+  size_t outer_while_counter = 0;
   while (continue_search) {
     // get next target
     int target = target_vec[index_splitter];
@@ -642,7 +660,12 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     // add the continous entries to same target time series property
     bool continue_add = true;
     const size_t tspTimeVecSize = tsp_time_vec.size();
+
+    std::cout << "Outer-while-counter = " << outer_while_counter
+              << ", target = " << target << "\n";
+
     while (continue_add) {
+      size_t inner_while_counter = 0;
       if (index_tsp_time == tspTimeVecSize) {
         // last entry. quit all loops
         continue_add = false;
@@ -679,6 +702,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       // advance to next entry
       ++index_tsp_time;
 
+      ++inner_while_counter;
     } // END-WHILE continue add
 
     // make splitters to advance to next
@@ -690,22 +714,32 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       split_start_time = split_stop_time;
       split_stop_time = splitter_time_vec[index_splitter + 1];
     }
+
+    ++outer_while_counter;
   } // END-OF-WHILE
 
   // Add a debugging check such that there won't be any time entry with zero log
+  bool has_zero_entry(false);
   for (size_t i = 0; i < outputs.size(); ++i) {
-    if (outputs[i]->size() == 0) {
       std::stringstream errss;
-      errss << i << "-th split-out term (out of " << outputs.size() << ") of "
-            << m_name << " has zero size";
+      errss << i << "-th split-out term (out of " << outputs.size()
+            << " total output TSP) of '" << m_name << "'' has "
+            << outputs[i]->size() << " size, whose first entry is at "
+            << this->firstTime().toSimpleString();
       g_log.error(errss.str());
-      std::cout << errss.str();
-      throw std::runtime_error("in which case will this happen?");
-      // throw std::runtime_error(errss.str());
-      // if the output has zero length, then put the last valid entrance ???
-      // but it is not a good solution! because it can be very confusing
+      std::cout << errss.str() << "\n";
+      if (outputs[i]->size() == 0) {
+        int target = static_cast<int>(i);
+        std::set<int>::iterator findit = target_set.find(target);
+        if (findit != target_set.end())
+          has_zero_entry = true;
+        // throw std::runtime_error(errss.str());
+        // if the output has zero length, then put the last valid entrance ???
+        // but it is not a good solution! because it can be very confusing
     }
   }
+  if (has_zero_entry)
+    throw std::runtime_error("in which case will this happen?");
 
   return;
 }
