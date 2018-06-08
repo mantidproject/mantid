@@ -698,6 +698,12 @@ Output:
    Summed Reconstruction at 10: 1.479
    Summed Reconstruction at 15: 0.419
    Number of iterations of summed spectrum: 8
+   
+.. figure:: ../images/MaxEntAdjustSummed.png
+   :align: center
+   
+   The first plot shows the reconstructed data and the second plot the corresponding image.
+   The first spectrum is the real part and the second spectrum is the imaginary part.
 
 References
 ----------
