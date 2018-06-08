@@ -40,11 +40,6 @@ const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 
-const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
-    "engggui_vanadium_integration_ws";
-const std::string EnggDiffractionPresenter::g_vanCurvesWSName =
-    "engggui_vanadium_curves_ws";
-
 const std::string EnggDiffractionPresenter::g_calibBanksParms =
     "engggui_calibration_banks_parameters";
 
@@ -1070,10 +1065,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     return;
   }
 
-  ITableWorkspace_sptr vanIntegWS;
-  MatrixWorkspace_sptr vanCurvesWS;
-  MatrixWorkspace_sptr ceriaWS;
-
   // Append current instrument name if numerical only entry
   // to help Load algorithm determine instrument
   std::string vanFileHint, cerFileHint;
@@ -1088,6 +1079,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   const auto &vanIntegWS = vanadiumCorrectionWorkspaces.first;
   const auto &vanCurvesWS = vanadiumCorrectionWorkspaces.second;
 
+  MatrixWorkspace_sptr ceriaWS;
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
