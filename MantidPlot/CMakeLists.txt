@@ -91,7 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
-                   src/ProjectRecovery.cpp
+                   src/ProjectRecoveryAdaptor.cpp
                    src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
@@ -291,7 +291,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
-                   src/ProjectRecovery.h
+                   src/ProjectRecoveryAdaptor.h
                    src/ProjectSerialiser.h
                    src/ProjectSaveView.h
                    src/PythonScript.h
@@ -473,12 +473,13 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 mtd_add_sip_module (
   MODULE_NAME _ProjectRecovery
   TARGET_NAME mantidplot_projectRecovery
-  SIP_SRCS src/ProjectRecovery.sip
-  HEADER_DEPS src/ProjectRecovery.h
+  SIP_SRCS src/ProjectRecoveryAdaptor.sip
+  HEADER_DEPS src/ProjectRecoveryAdaptor.h
   PYQT_VERSION 4
   LINK_LIBS
     ${common_link_libs}
     ${PYTHON_LIBRARIES}
+    API
   FOLDER MantidPlot
 )
 
