@@ -1,10 +1,11 @@
-#ifndef PROJECT_RECOVERY_H_
-#define PROJECT_RECOVERY_H_
+#ifndef PROJECT_RECOVERY_ADAPTOR_H_
+#define PROJECT_RECOVERY_ADAPTOR_H_
+
+#include <string>
 
 // Forward declarations
 class ApplicationWindow;
 class Folder;
-
 
 /** Adapter class which handles saving or restoring project windows
 
@@ -34,9 +35,15 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 
 namespace MantidQt {
 namespace API {
-class ProjectRecoveryAdaptor : public {
-	ProjectRecoveryAdaptor() = default;
+class ProjectRecoveryAdaptor {
+public:
+  ProjectRecoveryAdaptor();
 
+  void saveOpenWindows();
+  void loadOpenWindows(std::string projectFilePath);
 };
 
-#endif // PROJECT_RECOVERY_H_
+} // namespace API
+} // namespace MantidQt
+
+#endif // PROJECT_RECOVERY_ADAPTOR_H_

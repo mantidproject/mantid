@@ -1,5 +1,6 @@
 #include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
+#include "Folder.h"
 #include "Graph3D.h"
 #include "Matrix.h"
 #include "Note.h"
