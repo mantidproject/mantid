@@ -859,7 +859,7 @@ public:
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase,
-                                           int nSpec) {
+                                           size_t nSpec) {
 
     // Create cosine with phase 'phase'
 
@@ -876,7 +876,7 @@ public:
       double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
       for (size_t s = 0; s < nSpec; s++) {
         X[t + s * maxt] = x;
-        Y[t + s * maxt] = cos(w * x + phase + s * shift);
+        Y[t + s * maxt] = cos(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt] = 0.1;
       }
     }
@@ -941,7 +941,7 @@ public:
 
   MatrixWorkspace_sptr createWorkspaceAdjustments(size_t maxt, double base,
                                                   double magnitude,
-                                                  double phase, int nSpec) {
+                                                  double phase, size_t nSpec) {
 
     // Frequency of the oscillations
     double w = 2.4;
@@ -957,11 +957,11 @@ public:
       for (size_t s = 0; s < nSpec; s++) {
         // Real
         X[t + s * maxt] = 0.0;
-        Y[t + s * maxt] = base + magnitude * cos(w * x + phase + s * shift);
+        Y[t + s * maxt] = base + magnitude * cos(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt] = 0.0;
         // Imaginary
         X[t + s * maxt + nPts] = 0.0;
-        Y[t + s * maxt + nPts] = magnitude * sin(w * x + phase + s * shift);
+        Y[t + s * maxt + nPts] = magnitude * sin(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt + nPts] = 0.0;
       }
     }
