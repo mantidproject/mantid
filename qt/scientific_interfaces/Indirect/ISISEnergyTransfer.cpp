@@ -46,8 +46,11 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
+
+  // Add validation to custom detector grouping
   QRegExp re("([0-9]+[-]?[0-9]*,[ ])*[0-9]+[-]?[0-9]*");
   m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
+
   // Validate to remove invalid markers
   validateTab();
 }
@@ -275,6 +278,8 @@ void ISISEnergyTransfer::run() {
     reductionRuntimeProps["GroupingWorkspace"] = grouping.second.toStdString();
   else if (grouping.first == "File")
     reductionAlg->setProperty("MapFile", grouping.second.toStdString());
+  else if (grouping.first == "Custom")
+    reductionAlg->setProperty("GroupingString", grouping.second.toStdString());
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
   reductionAlg->setProperty("OutputWorkspace",
@@ -472,6 +477,9 @@ ISISEnergyTransfer::createMapFile(const QString &groupType) {
     return qMakePair(QString("Workspace"), groupWS);
   } else if (groupType == "Default") {
     return qMakePair(QString("IPF"), QString());
+  }
+  else if (groupType == "Custom") {
+    return qMakePair(QString("Custom"), m_uiForm.leCustomGroups->text());
   } else {
     // Catch All and Individual
     return qMakePair(groupType, QString());

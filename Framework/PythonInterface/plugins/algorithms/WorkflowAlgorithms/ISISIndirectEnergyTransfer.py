@@ -105,6 +105,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Workspace containing spectra grouping.')
+        self.declareProperty(name='GroupingString', defaultValue='',
+                             direction=Direction.Input,
+                             optional=PropertyMode.Optional,
+                             doc='Spectra to group as string',
+                             )
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.map']),
@@ -249,7 +254,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                               masked_detectors=masked_detectors,
                               method=self._grouping_method,
                               group_file=self._grouping_map_file,
-                              group_ws=self._grouping_ws)
+                              group_ws=self._grouping_ws,
+                              group_string=self._grouping_string)
 
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)
