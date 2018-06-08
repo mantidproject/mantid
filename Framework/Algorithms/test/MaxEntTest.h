@@ -886,7 +886,7 @@ public:
     createWS->setProperty("DataX", X);
     createWS->setProperty("DataY", Y);
     createWS->setProperty("DataE", E);
-    createWS->setProperty("NSpec", nSpec);
+    createWS->setProperty("NSpec", static_cast<int>(nSpec));
     createWS->setPropertyValue("OutputWorkspace", "ws");
     createWS->execute();
     MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
@@ -974,7 +974,7 @@ public:
     createWS->setProperty("DataX", X);
     createWS->setProperty("DataY", Y);
     createWS->setProperty("DataE", E);
-    createWS->setProperty("NSpec", 2 * nSpec);
+    createWS->setProperty("NSpec", 2 * static_cast<int>(nSpec));
     createWS->setPropertyValue("OutputWorkspace", "ws");
     createWS->execute();
     MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
