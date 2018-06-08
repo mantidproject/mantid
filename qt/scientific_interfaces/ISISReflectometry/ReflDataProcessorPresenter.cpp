@@ -275,7 +275,6 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
   // Don't continue if there are no items to process
   if (m_itemsToProcess.empty()) {
-    resume();
     endReduction(false);
     return;
   }
@@ -359,10 +358,10 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
     progressReporter.report();
   }
 
-  if (!allGroupsWereEvent)
+  if (!allGroupsWereEvent && m_promptUser)
     m_view->giveUserWarning(
         "Some groups could not be processed as event workspaces", "Warning");
-  if (errors)
+  if (errors && m_promptUser)
     m_view->giveUserWarning("Some errors were encountered when "
                             "reducing table. Some groups may not have "
                             "been fully processed.",
