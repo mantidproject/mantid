@@ -129,14 +129,22 @@ class PlotSelectorView(QWidget):
     def append_to_plot_list(self, plot_name):
         self._add_to_plot_list(plot_name)
 
-    def remove_from_plot_list(self, plot_name):
-        for index in range(len(self.list_widget)):
-            item = self.list_widget.item(index)
+    def get_row_and_widget_from_label_text(self, label_text):
+        for row in range(len(self.list_widget)):
+            item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
-            if widget.label.text() == plot_name:
-                taken_item = self.list_widget.takeItem(index)
-                del taken_item
-                return
+            if widget.label.text() == label_text:
+                return row, widget
+
+    def remove_from_plot_list(self, plot_name):
+        row, widget = self.get_row_and_widget_from_label_text(plot_name)
+        taken_item = self.list_widget.takeItem(row)
+        del taken_item
+        return
+
+    def rename_in_plot_list(self, new_name, old_name):
+        row, widget = self.get_row_and_widget_from_label_text(old_name)
+        widget.label.setText(new_name)
 
     def get_all_selected_plot_names(self):
         """

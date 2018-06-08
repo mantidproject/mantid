@@ -254,7 +254,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         return text_type(self.window.windowTitle())
 
     def set_window_title(self, title):
+        old_title = self.get_window_title()
         self.window.setWindowTitle(title)
+        # We need to add a call to the figure manager here to call
+        # notify methods when a figure is renamed, to update our
+        # plot list.
+        Gcf.figure_title_changed(old_title, title)
 
     # ------------------------ Interaction events --------------------
     def on_button_press(self, event):

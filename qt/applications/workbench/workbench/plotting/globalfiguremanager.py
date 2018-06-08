@@ -27,8 +27,101 @@ from mantidqt.py3compat import Enum
 
 
 class FigureAction(Enum):
-    New = 0
-    Closed = 1
+    Unknown = 0
+    New = 1
+    Closed = 2
+    Renamed = 3
+
+
+class DictionaryAction(Enum):
+    Create = 0
+    Set = 1
+    Removed = 2
+    Clear = 3
+    Update = 4
+
+
+class ObservableDictionary(dict):
+    """
+    Override parts of dictionary that deal with adding, removing
+    or changing data in the dictionary to call an observer.
+    """
+    def __init__(self, value):
+        super(ObservableDictionary, self).__init__(value)
+        self.observers = []
+
+    def add_observer(self, observer):
+        """
+        Add an observer to this class - this can be any class with a
+        notify() method
+        :param observer: A class with a notify method
+        """
+        self.observers.append(observer)
+
+    def _notify_observers(self, action, new_value=None, old_value=None):
+        for observer in self.observers:
+            observer.notify(action, new_value, old_value)
+
+    def __setitem__(self, key, new_value):
+        action = DictionaryAction.Set
+
+        if key in self:
+            old_value = self.__getitem__(key)
+        else:
+            old_value = None
+            action = DictionaryAction.Create
+        dict.__setitem__(self, key, new_value)
+
+        self._notify_observers(action, new_value, old_value)
+
+    def __delitem__(self, key):
+        old_value = dict.__getitem__(self, key)
+        dict.__delitem__(self, key)
+        self._notify_observers(DictionaryAction.Removed, old_value=old_value)
+
+    def clear(self):
+        dict.clear(self)
+        self._notify_observers(DictionaryAction.Unknown)
+
+    def pop(self, key, default=None):
+        if key in self:
+            old_value = dict.pop(self, key)
+            self._notify_observers(DictionaryAction.Removed, old_value=old_value)
+            return old_value
+        else:
+            return dict.pop(self, key, default)
+
+    def popitem(self):
+        key, old_value = dict.popitem(self)
+        self._notify_observers(DictionaryAction.Removed, old_value=old_value)
+        return key, old_value
+
+    def update(self, updated_dictionary):
+        dict.update(self, updated_dictionary)
+        self._notify_observers(DictionaryAction.Unknown)
+
+
+class DictionaryObserver(object):
+    def notify(self, action, new_value=None, old_value=None):
+        """
+        This method is called when a dictionary entry is added,
+        removed or changed
+        :param action: An enum with the type of dictionary action
+        :param new_value: New value(s) added
+        :param old_value: Old value(s) removed
+        """
+        gcf = GlobalFigureManager
+
+        if action == DictionaryAction.Create:
+            gcf.notify_observers(FigureAction.New, new_value.get_window_title())
+        elif action == DictionaryAction.Set:
+            gcf.notify_observers(FigureAction.Renamed, (new_value.get_window_title(), old_value.get_window_title()))
+        elif action == DictionaryAction.Removed:
+            gcf.notify_observers(FigureAction.Closed, old_value.get_window_title())
+        else:
+            # Not expecting clear or update to be used, so we are
+            # being lazy here and just updating the entire plot list
+            GlobalFigureManager.notify_observers(FigureAction.Unknown, "")
 
 
 class GlobalFigureManager(object):
@@ -51,7 +144,8 @@ class GlobalFigureManager(object):
 
     """
     _activeQue = []
-    figs = {}
+    figs = ObservableDictionary({})
+    figs.add_observer(DictionaryObserver())
     observers = []
 
     @classmethod
@@ -90,7 +184,6 @@ class GlobalFigureManager(object):
         del cls.figs[num]
         manager.destroy()
         gc.collect(1)
-        cls.notify_observers(FigureAction.Closed, window_title)
 
     @classmethod
     def destroy_fig(cls, fig):
@@ -159,7 +252,6 @@ class GlobalFigureManager(object):
                 cls._activeQue.append(m)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
-        cls.notify_observers(FigureAction.New, manager.get_window_title())
 
     @classmethod
     def draw_all(cls, force=False):
@@ -219,6 +311,10 @@ class GlobalFigureManager(object):
         """
         for observer in cls.observers:
             observer.notify(action, plot_name)
+
+    @classmethod
+    def figure_title_changed(cls, old_title, new_title):
+        cls.notify_observers(FigureAction.Renamed, (old_title, new_title))
 
 
 atexit.register(GlobalFigureManager.destroy_all)

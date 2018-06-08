@@ -70,6 +70,10 @@ class PlotSelectorPresenter(object):
         self.model.remove_from_plot_list(plot_name)
         self.view.remove_from_plot_list(plot_name)
 
+    def rename_in_plot_list(self, new_name, old_name):
+        self.model.replace_in_plot_list(new_name, old_name)
+        self.view.rename_in_plot_list(new_name, old_name)
+
     # ------------------------ Plot Closing -------------------------
 
     def close_action_called(self):

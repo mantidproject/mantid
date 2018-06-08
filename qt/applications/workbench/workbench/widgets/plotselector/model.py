@@ -56,6 +56,9 @@ class PlotSelectorModel(object):
     def remove_from_plot_list(self, plot_name):
         self.plot_list.remove(plot_name)
 
+    def replace_in_plot_list(self, new_name, old_name):
+        self.plot_list = [new_name if plot_name == old_name else plot_name for plot_name in self.plot_list]
+
     def notify(self, action, plot_name):
         """
         This is called by GlobalFigureManager when plots are created
@@ -67,6 +70,9 @@ class PlotSelectorModel(object):
             self.presenter.append_to_plot_list(plot_name)
         if action == FigureAction.Closed:
             self.presenter.remove_from_plot_list(plot_name)
+        if action == FigureAction.Renamed:
+            old_name, new_name = plot_name
+            self.presenter.rename_in_plot_list(new_name, old_name)
 
     def make_plot_active(self, plot_name):
         """
