@@ -103,7 +103,6 @@ class TiledWindow;
 #define SHARED_MENUBAR
 #endif
 
-
 namespace MantidQt {
 
 namespace MantidWidgets {

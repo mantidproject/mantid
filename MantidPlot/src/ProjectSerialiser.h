@@ -57,8 +57,8 @@ public:
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
 
   explicit ProjectSerialiser(ApplicationWindow *window, bool isRecovery);
-  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder, bool isRecovery);
-
+  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder,
+                             bool isRecovery);
 
   /// Save the current state of the project to disk
   void save(const QString &projectName, const std::vector<std::string> &wsNames,
