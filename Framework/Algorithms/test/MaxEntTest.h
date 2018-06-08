@@ -957,11 +957,14 @@ public:
       for (size_t s = 0; s < nSpec; s++) {
         // Real
         X[t + s * maxt] = 0.0;
-        Y[t + s * maxt] = base + magnitude * cos(w * x + phase + static_cast<double>(s) * shift);
+        Y[t + s * maxt] =
+            base +
+            magnitude * cos(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt] = 0.0;
         // Imaginary
         X[t + s * maxt + nPts] = 0.0;
-        Y[t + s * maxt + nPts] = magnitude * sin(w * x + phase + static_cast<double>(s) * shift);
+        Y[t + s * maxt + nPts] =
+            magnitude * sin(w * x + phase + static_cast<double>(s) * shift);
         E[t + s * maxt + nPts] = 0.0;
       }
     }
