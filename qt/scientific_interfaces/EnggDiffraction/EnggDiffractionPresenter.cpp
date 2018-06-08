@@ -40,11 +40,6 @@ const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 
-const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
-    "engggui_vanadium_integration_ws";
-const std::string EnggDiffractionPresenter::g_vanCurvesWSName =
-    "engggui_vanadium_curves_ws";
-
 const std::string EnggDiffractionPresenter::g_calibBanksParms =
     "engggui_calibration_banks_parameters";
 
