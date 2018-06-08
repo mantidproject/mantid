@@ -55,8 +55,7 @@ public:
                const std::vector<double> &errors,
                const std::vector<double> &image, double background,
                const std::vector<double> &linearAdjustments,
-               const std::vector<double> &constAdjustments
-  );
+               const std::vector<double> &constAdjustments);
 
   // Getters
   // Returns the reconstructed (calculated) data

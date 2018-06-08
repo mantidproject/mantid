@@ -858,7 +858,8 @@ public:
     TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
-  MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase, int nSpec) {
+  MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase,
+                                           int nSpec) {
 
     // Create cosine with phase 'phase'
 
@@ -867,16 +868,16 @@ public:
     // phase shift between spectra
     double shift = 0.5;
 
-    size_t nPts = maxt*nSpec;
+    size_t nPts = maxt * nSpec;
     MantidVec X(nPts);
     MantidVec Y(nPts);
     MantidVec E(nPts);
     for (size_t t = 0; t < maxt; t++) {
       double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
       for (size_t s = 0; s < nSpec; s++) {
-        X[t + s*maxt] = x;
-        Y[t + s*maxt] = cos(w*x + phase + s*shift);
-        E[t + s*maxt] = 0.1;
+        X[t + s * maxt] = x;
+        Y[t + s * maxt] = cos(w * x + phase + s * shift);
+        E[t + s * maxt] = 0.1;
       }
     }
     auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
@@ -938,28 +939,30 @@ public:
     return ws;
   }
 
-  MatrixWorkspace_sptr createWorkspaceAdjustments(size_t maxt, double base, double magnitude, double phase, int nSpec) {
+  MatrixWorkspace_sptr createWorkspaceAdjustments(size_t maxt, double base,
+                                                  double magnitude,
+                                                  double phase, int nSpec) {
 
     // Frequency of the oscillations
     double w = 2.4;
     // phase shift between spectra
     double shift = 0.5;
 
-    size_t nPts = maxt*nSpec;
-    MantidVec X(2*nPts);
-    MantidVec Y(2*nPts);
-    MantidVec E(2*nPts);
+    size_t nPts = maxt * nSpec;
+    MantidVec X(2 * nPts);
+    MantidVec Y(2 * nPts);
+    MantidVec E(2 * nPts);
     for (size_t t = 0; t < maxt; t++) {
       double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
       for (size_t s = 0; s < nSpec; s++) {
         // Real
-        X[t + s*maxt] = 0.0;
-        Y[t + s*maxt] = base + magnitude*cos(w*x + phase + s*shift);
-        E[t + s*maxt] = 0.0;
+        X[t + s * maxt] = 0.0;
+        Y[t + s * maxt] = base + magnitude * cos(w * x + phase + s * shift);
+        E[t + s * maxt] = 0.0;
         // Imaginary
-        X[t + s*maxt + nPts] = 0.0;
-        Y[t + s*maxt + nPts] = magnitude*sin(w*x + phase + s*shift);
-        E[t + s*maxt + nPts] = 0.0;
+        X[t + s * maxt + nPts] = 0.0;
+        Y[t + s * maxt + nPts] = magnitude * sin(w * x + phase + s * shift);
+        E[t + s * maxt + nPts] = 0.0;
       }
     }
     auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
@@ -968,7 +971,7 @@ public:
     createWS->setProperty("DataX", X);
     createWS->setProperty("DataY", Y);
     createWS->setProperty("DataE", E);
-    createWS->setProperty("NSpec", 2*nSpec);
+    createWS->setProperty("NSpec", 2 * nSpec);
     createWS->setPropertyValue("OutputWorkspace", "ws");
     createWS->execute();
     MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");

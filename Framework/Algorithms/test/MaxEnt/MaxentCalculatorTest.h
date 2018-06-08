@@ -55,14 +55,17 @@ public:
     double bkg = 1;
 
     // Empty image
-    TS_ASSERT_THROWS(calculator.iterate(vec, vec, emptyVec, bkg, emptyVec, emptyVec),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(
+        calculator.iterate(vec, vec, emptyVec, bkg, emptyVec, emptyVec),
+        std::invalid_argument);
     // Empty errors
-    TS_ASSERT_THROWS(calculator.iterate(vec, emptyVec, vec, bkg, emptyVec, emptyVec),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(
+        calculator.iterate(vec, emptyVec, vec, bkg, emptyVec, emptyVec),
+        std::invalid_argument);
     // Empty data
-    TS_ASSERT_THROWS(calculator.iterate(emptyVec, vec, vec, bkg, emptyVec, emptyVec),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(
+        calculator.iterate(emptyVec, vec, vec, bkg, emptyVec, emptyVec),
+        std::invalid_argument);
 
     // Bad background (should be positive)
     TS_ASSERT_THROWS(calculator.iterate(vec, vec, vec, 0, emptyVec, emptyVec),
@@ -70,8 +73,9 @@ public:
 
     // Size mismatch between data and errors
     std::vector<double> vec2 = {0, 1, 1};
-    TS_ASSERT_THROWS(calculator.iterate(vec, vec2, vec, bkg, emptyVec, emptyVec),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(
+        calculator.iterate(vec, vec2, vec, bkg, emptyVec, emptyVec),
+        std::invalid_argument);
   }
 
   void test_size_mismatch_data_image() {
@@ -102,8 +106,9 @@ public:
     EXPECT_CALL(*transform, dataToImage(vec2)).Times(0);
     EXPECT_CALL(*entropy, derivative(vec2, 1)).Times(0);
     EXPECT_CALL(*entropy, secondDerivative(vec2, bkg)).Times(0);
-    TS_ASSERT_THROWS(calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(
+        calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec),
+        std::runtime_error);
 
     Mock::VerifyAndClearExpectations(entropy);
     Mock::VerifyAndClearExpectations(transform);
@@ -143,7 +148,8 @@ public:
     EXPECT_CALL(*entropy, secondDerivative(vec2, bkg))
         .Times(1)
         .WillOnce(Return(vec2));
-    TS_ASSERT_THROWS_NOTHING(calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec));
+    TS_ASSERT_THROWS_NOTHING(
+        calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec));
 
     Mock::VerifyAndClearExpectations(entropy);
     Mock::VerifyAndClearExpectations(transform);
@@ -186,7 +192,8 @@ public:
         .Times(1)
         .WillOnce(Return(vec2));
     // This is OK: data.size() = N * image.size()
-    TS_ASSERT_THROWS_NOTHING(calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec));
+    TS_ASSERT_THROWS_NOTHING(
+        calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec));
 
     EXPECT_CALL(*entropy, correctValues(vec1, 1))
         .Times(1)
@@ -198,8 +205,9 @@ public:
     EXPECT_CALL(*entropy, derivative(_, _)).Times(0);
     EXPECT_CALL(*entropy, secondDerivative(_, _)).Times(0);
     // But this is not: N * data.size() = image.size()
-    TS_ASSERT_THROWS(calculator.iterate(vec2, vec2, vec1, bkg, emptyVec, emptyVec),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(
+        calculator.iterate(vec2, vec2, vec1, bkg, emptyVec, emptyVec),
+        std::runtime_error);
 
     Mock::VerifyAndClearExpectations(entropy);
     Mock::VerifyAndClearExpectations(transform);
@@ -252,7 +260,8 @@ public:
         .Times(1)
         .WillOnce(Return(img));
 
-    TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg, emptyVec, emptyVec));
+    TS_ASSERT_THROWS_NOTHING(
+        calculator.iterate(dat, err, img, bkg, emptyVec, emptyVec));
     TS_ASSERT_DELTA(calculator.getChisq(), 1, 1e-8);
     TS_ASSERT_DELTA(calculator.getAngle(), 0.7071, 1e-4);
 
@@ -290,7 +299,8 @@ public:
         .Times(1)
         .WillOnce(Return(img));
 
-    TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg, emptyVec, emptyVec));
+    TS_ASSERT_THROWS_NOTHING(
+        calculator.iterate(dat, err, img, bkg, emptyVec, emptyVec));
 
     auto dirs = calculator.getSearchDirections();
     TS_ASSERT_EQUALS(dirs[0].size(), 4);

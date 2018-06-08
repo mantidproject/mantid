@@ -185,22 +185,24 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   if (!linearAdjustments.empty()) {
     if (linearAdjustments.size() < m_dataCalc.size()) {
       throw std::invalid_argument(
-       "Cannot adjust calculated data: too few linear adjustments");
+          "Cannot adjust calculated data: too few linear adjustments");
     }
-    for (size_t j = 0; j < m_dataCalc.size()/2; ++j) {
+    for (size_t j = 0; j < m_dataCalc.size() / 2; ++j) {
       double yr = m_dataCalc[2 * j];
       double yi = m_dataCalc[2 * j + 1];
-      m_dataCalc[2 * j] = yr*linearAdjustments[2 * j] - yi*linearAdjustments[2 * j + 1];
-      m_dataCalc[2 * j + 1] = yi*linearAdjustments[2 * j] + yr*linearAdjustments[2 * j + 1];
+      m_dataCalc[2 * j] =
+          yr * linearAdjustments[2 * j] - yi * linearAdjustments[2 * j + 1];
+      m_dataCalc[2 * j + 1] =
+          yi * linearAdjustments[2 * j] + yr * linearAdjustments[2 * j + 1];
     }
   }
   if (!constAdjustments.empty()) {
     if (constAdjustments.size() < m_dataCalc.size()) {
       throw std::invalid_argument(
-        "Cannot adjust calculated data: too few constant adjustments");
+          "Cannot adjust calculated data: too few constant adjustments");
     }
     for (size_t i = 0; i < m_dataCalc.size(); ++i) {
-      m_dataCalc[i] += constAdjustments[i];  
+      m_dataCalc[i] += constAdjustments[i];
     }
   }
 

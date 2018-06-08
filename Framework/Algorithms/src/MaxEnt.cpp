@@ -205,21 +205,27 @@ void MaxEnt::init() {
                                                          Direction::Input),
                   "Maximum number of iterations in alpha chop.");
   declareProperty(
-    make_unique<WorkspaceProperty<>>(
-      "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
-      boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
-      "Adjusts the calculated data by multiplying each value by the corresponding Y value of this workspace. "
-      "The data in this workspace is complex in the same manner as complex input data");
+      make_unique<WorkspaceProperty<>>(
+          "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
+          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+      "Adjusts the calculated data by multiplying each value by the "
+      "corresponding Y value of this workspace. "
+      "The data in this workspace is complex in the same manner as complex "
+      "input data");
   declareProperty(
-    make_unique<WorkspaceProperty<>>(
-      "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
-      boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
-      "Adjusts the calculated data by adding to each value the corresponding Y value of this workspace. "
-      "If DataLinearAdj is also specified, this addition is done after its multiplication. "
-      "The data in this workspace is complex in the same manner as complex input data");
-  declareProperty("PerSpectrumReconstruction", true,
-    "Reconstruction is done independently on each spectrum. "
-    "If false, all the spectra are added together in the reconstruction.");
+      make_unique<WorkspaceProperty<>>(
+          "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
+          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+      "Adjusts the calculated data by adding to each value the corresponding Y "
+      "value of this workspace. "
+      "If DataLinearAdj is also specified, this addition is done after its "
+      "multiplication. "
+      "The data in this workspace is complex in the same manner as complex "
+      "input data");
+  declareProperty(
+      "PerSpectrumReconstruction", true,
+      "Reconstruction is done independently on each spectrum. "
+      "If false, all the spectra are added together in the reconstruction.");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
@@ -256,7 +262,8 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
       result["InputWorkspace"] = "The number of histograms in the input "
                                  "workspace must be even for complex data";
     if (!complex)
-      nHistograms *= 2; // Double number of histograms to compare with adjustments.
+      nHistograms *=
+          2; // Double number of histograms to compare with adjustments.
   }
 
   // Check linear adjustments, we expect and even number of histograms
@@ -265,28 +272,32 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   bool psr = getProperty("perSpectrumReconstruction");
   MatrixWorkspace_sptr linAdj = getProperty("DataLinearAdj");
   size_t nAHistograms = 0;
-  if(linAdj) 
+  if (linAdj)
     nAHistograms = linAdj->getNumberHistograms();
-  if (nAHistograms % 2) 
-    result["DataLinearAdj"] = "The number of histograms in the linear "
-    "adjustments workspace must be even, because they are complex data";
+  if (nAHistograms % 2)
+    result["DataLinearAdj"] =
+        "The number of histograms in the linear "
+        "adjustments workspace must be even, because they are complex data";
   else if (psr && nAHistograms > 0 && nAHistograms < nHistograms)
-    result["DataLinearAdj"] = "The number of histograms in the linear "
-    "adjustments workspace is insufficient for the input workspace";
+    result["DataLinearAdj"] =
+        "The number of histograms in the linear "
+        "adjustments workspace is insufficient for the input workspace";
 
   // Check constant adjustments, we expect and even number of histograms
   // and if any, they must be sufficient for all spectra in input workspace,
   // if per spectrum reconstruction is done.
   MatrixWorkspace_sptr constAdj = getProperty("DataConstAdj");
-  nAHistograms = 0; 
-  if(constAdj) 
+  nAHistograms = 0;
+  if (constAdj)
     nAHistograms = constAdj->getNumberHistograms();
   if (nAHistograms % 2)
-    result["DataConstAdj"] = "The number of histograms in the constant "
-    "adjustments workspace must be even, because they are complex data";
+    result["DataConstAdj"] =
+        "The number of histograms in the constant "
+        "adjustments workspace must be even, because they are complex data";
   else if (psr && nAHistograms > 0 && nAHistograms < nHistograms)
-    result["DataConstAdj"] = "The number of histograms in the constant "
-    "adjustments workspace is insufficient for the input workspace";
+    result["DataConstAdj"] =
+        "The number of histograms in the constant "
+        "adjustments workspace is insufficient for the input workspace";
 
   return result;
 }
@@ -415,7 +426,7 @@ void MaxEnt::exec() {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
-    
+
     std::vector<double> data(dataLength, 0.0);
     std::vector<double> errors(dataLength, 0.0);
     if (complexData) {
@@ -432,8 +443,7 @@ void MaxEnt::exec() {
             errors[i] += inWS->e(s).rawData()[i];
           }
         }
-      }
-      else {
+      } else {
         data = inWS->y(spec).rawData();
         errors = inWS->e(spec).rawData();
       }
@@ -461,7 +471,8 @@ void MaxEnt::exec() {
 
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
-      maxentCalculator.iterate(data, errors, image, background, linearAdjustments, constAdjustments);
+      maxentCalculator.iterate(data, errors, image, background,
+                               linearAdjustments, constAdjustments);
 
       // Calculate delta to construct new image (SB eq. 25)
       double currChisq = maxentCalculator.getChisq();
@@ -501,7 +512,7 @@ void MaxEnt::exec() {
 
     } // Next Iteration
 
-      // If we didn't stop, we still need to record the number of iterations
+    // If we didn't stop, we still need to record the number of iterations
     if (!stop) {
       iterationCounts.push_back(nIter);
     }
@@ -545,7 +556,7 @@ void MaxEnt::exec() {
 * @return : Spectrum 'spec' as a complex vector
 */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                      size_t spec, bool errors, bool sumSpec ) {
+                                      size_t spec, bool errors, bool sumSpec) {
   const size_t numBins = inWS->y(0).size();
   std::vector<double> result(numBins * 2, 0.0);
 
@@ -562,8 +573,7 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
           result[2 * i] += inWS->y(s)[i];
           result[2 * i + 1] += inWS->y(s + nspec)[i];
         }
-      }
-      else {
+      } else {
         result[2 * i] = inWS->y(spec)[i];
         result[2 * i + 1] = inWS->y(spec + nspec)[i];
       }
@@ -575,8 +585,7 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
           result[2 * i] += inWS->e(s)[i];
           result[2 * i + 1] += inWS->e(s + nspec)[i];
         }
-      }
-      else {
+      } else {
         result[2 * i] = inWS->e(spec)[i];
         result[2 * i + 1] = inWS->e(spec + nspec)[i];
       }
