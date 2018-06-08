@@ -39,8 +39,8 @@ class ProjectRecoveryAdaptor {
 public:
   ProjectRecoveryAdaptor();
 
-  void saveOpenWindows();
-  void loadOpenWindows(std::string projectFilePath);
+  bool saveOpenWindows();
+  bool loadOpenWindows(std::string projectFilePath);
 };
 
 } // namespace API

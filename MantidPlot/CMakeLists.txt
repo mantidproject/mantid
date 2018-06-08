@@ -468,22 +468,6 @@ include_directories ( SYSTEM ${SIP_INCLUDE_DIR} )
 # Needed for sip generated files to find includes in src
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-# Add a definition for ProjectRecovery
-
-mtd_add_sip_module (
-  MODULE_NAME _ProjectRecovery
-  TARGET_NAME mantidplot_projectRecovery
-  SIP_SRCS src/ProjectRecoveryAdaptor.sip
-  HEADER_DEPS src/ProjectRecoveryAdaptor.h
-  PYQT_VERSION 4
-  LINK_LIBS
-    ${common_link_libs}
-    ${PYTHON_LIBRARIES}
-    API
-  FOLDER MantidPlot
-)
-
-
 ###########################################################################
 # Specify the files that we need to pass to Qt macros
 ###########################################################################
