@@ -41,18 +41,18 @@ void file_compress(const char *file, const char *mode);
 
 // We assume any caller which do not explicitly mention the recovery flag
 // do not want it, so set it to false
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window) :
-	ProjectSerialiser(window, false) {}
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
+    : ProjectSerialiser(window, false) {}
 
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder) :
-	ProjectSerialiser(window, folder, false) {}
-
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
+    : ProjectSerialiser(window, folder, false) {}
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, bool isRecovery)
     : window(window), m_currentFolder(nullptr), m_windowCount(0),
       m_saveAll(true), m_projectRecovery(isRecovery) {}
 
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder, bool isRecovery)
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder,
+                                     bool isRecovery)
     : window(window), m_currentFolder(folder), m_windowCount(0),
       m_saveAll(true), m_projectRecovery(isRecovery) {}
 
@@ -109,27 +109,27 @@ void ProjectSerialiser::save(const QString &projectName, bool compress,
  */
 void ProjectSerialiser::load(std::string filepath, const int fileVersion,
                              const bool isTopLevel) {
-	// We have to accept std::string to maintain Python compatibility
-	auto qfilePath = QString::fromStdString(filepath);
-	QFile file(qfilePath);
-	QFileInfo fileInfo(qfilePath);
+  // We have to accept std::string to maintain Python compatibility
+  auto qfilePath = QString::fromStdString(filepath);
+  QFile file(qfilePath);
+  QFileInfo fileInfo(qfilePath);
 
-	if (!file.open(QIODevice::ReadOnly))
-		throw std::runtime_error("Couldn't open project file");
+  if (!file.open(QIODevice::ReadOnly))
+    throw std::runtime_error("Couldn't open project file");
 
-	QTextStream fileTS(&file);
-	fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
+  QTextStream fileTS(&file);
+  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
 
-	// Skip mantid version line
-	fileTS.readLine();
+  // Skip mantid version line
+  fileTS.readLine();
 
-	// Skip the <scripting-lang> line. We only really use python now anyway.
-	fileTS.readLine();
+  // Skip the <scripting-lang> line. We only really use python now anyway.
+  fileTS.readLine();
 
-	// Skip the <windows> line.
-	fileTS.readLine();
+  // Skip the <windows> line.
+  fileTS.readLine();
 
-	std::string lines = fileTS.readAll().toUtf8().constData();
+  std::string lines = fileTS.readAll().toUtf8().constData();
 
   // If we're not the top level folder, read the folder settings and create the
   // folder
@@ -501,12 +501,14 @@ QString ProjectSerialiser::saveWorkspaces() {
 
         wsNames += ",";
         wsNames += QString::fromStdString(secondLevelItems[j]);
-		
-		// Do not save out grouped workspaces in project recovery mode
-		if (!m_projectRecovery) {
-			const std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-			window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
-		}
+
+        // Do not save out grouped workspaces in project recovery mode
+        if (!m_projectRecovery) {
+          const std::string fileName(workingDir + "//" + secondLevelItems[j] +
+                                     ".nxs");
+          window->mantidUI->savedatainNexusFormat(fileName,
+                                                  secondLevelItems[j]);
+        }
       }
     } else {
       // check whether the user wants to save this workspace
@@ -516,11 +518,12 @@ QString ProjectSerialiser::saveWorkspaces() {
       wsNames += "\t";
       wsNames += wsName;
 
-	  // Skip saving in project recovery mode
-	  if (!m_projectRecovery) {
-		  const std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-		  window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
-	  }
+      // Skip saving in project recovery mode
+      if (!m_projectRecovery) {
+        const std::string fileName(workingDir + "//" + wsName.toStdString() +
+                                   ".nxs");
+        window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
+      }
     }
 
     // update listening progress bars
@@ -785,7 +788,7 @@ void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
   std::string fileName(window->workingDir.toStdString() + "/" + wsName);
   fileName.append(".nxs");
   if (!m_projectRecovery)
-	window->mantidUI->loadWSFromFile(wsName, fileName);
+    window->mantidUI->loadWSFromFile(wsName, fileName);
 }
 
 /**

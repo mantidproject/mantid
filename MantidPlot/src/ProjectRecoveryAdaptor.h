@@ -35,7 +35,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 
 namespace MantidQt {
 namespace API {
-class ProjectRecoveryAdaptor : public QObject{
+class ProjectRecoveryAdaptor : public QObject {
 public:
   ProjectRecoveryAdaptor(ApplicationWindow *windowHandle);
 
@@ -43,9 +43,10 @@ public:
   void loadOpenWindows(std::string projectFilePath);
 
 private:
-	// Constructor deleted, this allows SIP bindings to find the deleted definition
-	ProjectRecoveryAdaptor() = delete;
-	ApplicationWindow *m_windowPtr;
+  // Constructor deleted, this allows SIP bindings to find the deleted
+  // definition
+  ProjectRecoveryAdaptor() = delete;
+  ApplicationWindow *m_windowPtr;
 };
 
 } // namespace API
