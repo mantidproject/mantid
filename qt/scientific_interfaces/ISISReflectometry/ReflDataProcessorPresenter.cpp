@@ -369,6 +369,7 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
                             "Warning");
 
   progressReporter.clear();
+  endReduction(true);
 }
 
 /** Loads a group of runs. Tries loading runs as event workspaces. If any of the

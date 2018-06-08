@@ -32,6 +32,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
   m_runsPresenter->acceptMainPresenter(this);
   m_savePresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
+  m_eventPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);

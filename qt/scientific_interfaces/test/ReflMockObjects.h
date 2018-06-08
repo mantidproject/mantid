@@ -231,9 +231,11 @@ class MockEventPresenter : public IReflEventPresenter {
 public:
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
+  MOCK_METHOD1(acceptTabPresenter, void(IReflEventTabPresenter *));
   MOCK_METHOD0(onReductionPaused, void());
   MOCK_METHOD0(onReductionResumed, void());
   MOCK_METHOD1(notifySliceTypeChanged, void(SliceType));
+  MOCK_METHOD0(notifySettingsChanged, void());
   ~MockEventPresenter() override{};
 };
 
@@ -241,6 +243,8 @@ class MockEventTabPresenter : public IReflEventTabPresenter {
 public:
   std::string getTimeSlicingValues(int) const override { return std::string(); }
   std::string getTimeSlicingType(int) const override { return std::string(); }
+  MOCK_METHOD1(acceptMainPresenter, void(IReflMainWindowPresenter *));
+  MOCK_METHOD1(settingsChanged, void(int));
   MOCK_METHOD1(onReductionPaused, void(int));
   MOCK_METHOD1(onReductionResumed, void(int));
 
