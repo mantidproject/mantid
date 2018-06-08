@@ -1,0 +1,5 @@
+.. _exercises:
+
+=========
+Exercises
+=========
