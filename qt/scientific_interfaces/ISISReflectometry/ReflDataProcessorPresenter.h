@@ -152,6 +152,7 @@ private:
   QString takeSlice(const QString &runNo, TimeSlicingInfo &slicing,
                     size_t sliceIndex);
 
+  void setReductionResumed();
   void setReductionPaused() override;
   void setReductionCompleted();
 

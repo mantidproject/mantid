@@ -273,6 +273,8 @@ protected:
   void resetProcessedState(RowData_sptr rowData);
   void resetProcessedState(const std::string &workspaceName);
   void resetProcessedState();
+  void updateWidgetEnabledState(const bool isProcessing) const;
+
   virtual void setReductionPaused();
 
 protected slots:
@@ -371,8 +373,6 @@ private:
 
   // end reduction
   virtual void endReduction(const bool success);
-
-  void updateWidgetEnabledState(const bool isProcessing) const;
 
   bool m_forceProcessing = false;
   bool m_forceProcessingFailed = false;

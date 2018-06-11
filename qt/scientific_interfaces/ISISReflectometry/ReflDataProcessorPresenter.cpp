@@ -314,11 +314,15 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
   // True if errors where encountered when reducing table
   bool errors = false;
 
+  setReductionResumed();
+
   // Loop in groups
   for (const auto &item : m_itemsToProcess) {
     auto const groupIndex = item.first;
-    if (groupNeedsProcessing(groupIndex))
-      resetProcessedState(groupIndex);
+    if (!groupNeedsProcessing(groupIndex))
+      continue;
+
+    resetProcessedState(groupIndex);
 
     try {
       // First load the runs.
@@ -1065,6 +1069,16 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
   optionsForAngle.insert(options.begin(), options.end());
 
   return optionsForAngle;
+}
+
+/** Update state to indicate reduction is in progress
+ */
+void ReflDataProcessorPresenter::setReductionResumed() {
+  m_pauseReduction = false;
+  m_reductionPaused = false;
+  updateWidgetEnabledState(true);
+  m_mainPresenter->resume(m_group);
+  m_mainPresenter->confirmReductionResumed(m_group);
 }
 
 /** This override does not update the widget state yet because this is done via
