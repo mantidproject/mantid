@@ -1,3 +1,4 @@
+from mantid.simpleapi import *
 import tempfile
 import os
 
@@ -12,13 +13,13 @@ adaptor = get_project_recovery_handle()
 
 if save:
     # Save
-    ws = CreateSampleWorkspace(OutputWorkspace='sds') 
+    ws = CreateSampleWorkspace(OutputWorkspace='sds')
     plot2D(ws)
     for i in range(0, 10):
         plotSpectrum(ws, i)
-    
+
     adaptor.saveOpenWindows(full_path)
 else:
     # Load
-    CreateSampleWorkspace(OutputWorkspace='sds') 
+    CreateSampleWorkspace(OutputWorkspace='sds')
     adaptor.loadOpenWindows(full_path)
