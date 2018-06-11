@@ -749,7 +749,7 @@ void ReflRunsTabPresenter::resume(int group) const { UNUSED_ARG(group); }
 */
 void ReflRunsTabPresenter::confirmReductionCompleted(int group) {
   UNUSED_ARG(group);
-  m_view->startTimer(5000);
+  m_view->startTimer(10000);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
