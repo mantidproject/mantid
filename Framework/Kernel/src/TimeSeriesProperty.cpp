@@ -649,6 +649,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
             << ", index_tsp_time = " << index_tsp_time << "\n";
 
   size_t outer_while_counter = 0;
+  bool partial_target_filled(false);
   while (continue_search) {
     // get next target
     int target = target_vec[index_splitter];
@@ -669,7 +670,10 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       if (index_tsp_time == tspTimeVecSize) {
         // last entry. quit all loops
         continue_add = false;
+        std::cout << "[.... Outer-while-loop quit: index_tsp == tspTimeVecSize"
+                  << "; splitter index = " << index_splitter << "]\n";
         continue_search = false;
+        partial_target_filled = true;
         break;
       }
 
@@ -717,6 +721,28 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
     ++outer_while_counter;
   } // END-OF-WHILE
+
+  // It was in 'continue search'-while-loop.  But the TSP runs over before
+  // splitters.
+  // Therefore, the rest of the chopper must have one more entry added!
+  if (partial_target_filled) {
+    std::cout << "Starting splitter index = " << index_splitter << "\n";
+    // fill the target
+    std::set<int> fill_target_set;
+    for (size_t isplitter = index_splitter;
+         isplitter < splitter_time_vec.size() - 1; ++isplitter) {
+      int target_i = target_vec[isplitter];
+      if (fill_target_set.find(target_i) == fill_target_set.end()) {
+        if (outputs[target_i]->lastTime() != m_values.back().time())
+          outputs[target_i]->addValue(m_values.back().time(),
+                                      m_values.back().value());
+        fill_target_set.insert(target_i);
+        // quit loop if it goes over all the targets
+        if (fill_target_set.size() == target_set.size())
+          break;
+      }
+    }
+  }
 
   // Add a debugging check such that there won't be any time entry with zero log
   bool has_zero_entry(false);

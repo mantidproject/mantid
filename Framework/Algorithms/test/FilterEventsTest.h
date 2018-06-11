@@ -1399,8 +1399,7 @@ public:
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
-      // std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 <<
-      // "\n";
+      std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 << "\n";
     }
 
     return splitterws;
