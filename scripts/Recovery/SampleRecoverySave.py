@@ -1,3 +1,4 @@
+from mantid.simpleapi import *
 import tempfile
 import os
 
@@ -6,7 +7,7 @@ name = "recoverytest.py"
 full_path = os.path.join(dir, name)
 
 # Trivial history
-ws = CreateSampleWorkspace(OutputWorkspace='sds') 
+ws = CreateSampleWorkspace(OutputWorkspace='sds')
 ws_rename = RenameWorkspace(InputWorkspace=ws)
 ws_rebin = Rebin(InputWorkspace=ws_rename, params="0, 0.5, 100")
 

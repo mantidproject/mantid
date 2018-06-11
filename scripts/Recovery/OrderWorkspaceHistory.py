@@ -4,16 +4,17 @@ from os import listdir
 from os.path import isfile, join
 import datetime
 
-def _concatenate_iso_datetime(datetime):
+
+def _concatenate_iso_datetime(date_time):
     '''
     Concatenates the datetime string provided by Mantid into a single integer
     Args:
-        datetime: ISO 8601 standard datetime string
+        date_time: ISO 8601 standard datetime string
     Returns:
         int
     '''
-    date = datetime.split('T')[0]
-    time = datetime.split('T')[1]
+    date = date_time.split('T')[0]
+    time = date_time.split('T')[1]
     yy = str(date.split('-')[0])
     mo = str(date.split('-')[1])
     dd = str(date.split('-')[2])
@@ -23,7 +24,7 @@ def _concatenate_iso_datetime(datetime):
     ss = str(secs.split('.')[0])
     ms = str(secs.split('.')[1])
 
-    return int(yy+mo+dd+hh+mm+ss+ms)
+    return int(yy + mo + dd + hh + mm + ss + ms)
 
 
 def _has_duplicates(values):
@@ -37,10 +38,11 @@ def _has_duplicates(values):
     # For each element, check all following elements for a duplicate.
     for i in range(len(values)):
         for x in range(i + 1, len(values)):
-    # Both command and date/time must be the same to deem a duplicate
+            # Both command and date/time must be the same to deem a duplicate
             if values[i][0] == values[x][0] and values[i][1] == values[x][1]:
                 return True
     return False
+
 
 def _remove_duplicates(values):
     '''
@@ -50,17 +52,18 @@ def _remove_duplicates(values):
     Returns:
         output: a list of tuples
     '''
-    output = [values[0]]    # The first command is never seen before
+    output = [values[0]]  # The first command is never seen before
     for i in range(1, len(values)):
         duplicated = False
         for j in range(len(output)):
             if values[i][1] == output[j][1] and values[i][0] == output[j][0]:
                 duplicated = True
 
-        if not duplicated:    
+        if not duplicated:
             output.append(values[i])
-            
+
     return output
+
 
 # Get list of all workspace histories
 onlyfiles = [f for f in listdir('.') if isfile(join('.', f))]
@@ -82,13 +85,12 @@ if _has_duplicates(all_commands):
 
 # Convert the datetime into a sortable integer
 all_unique_commands = [(i[0], _concatenate_iso_datetime(i[1]))
-        for i in all_unique_commands]
+                       for i in all_unique_commands]
 
 # Sort the new list on datetime integer
-all_unique_commands.sort(key=lambda x: (x[1])) 
+all_unique_commands.sort(key=lambda x: (x[1]))
 
 # Write to file
-with open ('OrderedHistory.py', 'w') as outfile:
+with open('OrderedHistory.py', 'w') as outfile:
     for x in all_unique_commands:
         outfile.write('{} # {} \n'.format(x[0], x[1]))
-
