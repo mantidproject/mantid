@@ -357,7 +357,7 @@ void MaxEnt::exec() {
     size_t npoints = errors.size();
     for (size_t i = 0; i < npoints; i++) {
       if (errors[i] <= 0.0) {
-        throw std::invalid_argument("Input data must have non-zero errors.");
+        throw std::invalid_argument("Input data must have all errors non-zero.");
       }
     }
   }
