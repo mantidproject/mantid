@@ -140,6 +140,8 @@ private:
   QVariant getToolTipRole(const QModelIndex &index) const;
 
   RowData_sptr rowData(int groupIndex, int rowIndex) const;
+  int getPositionToInsertRowInGroup(
+      const int groupIndex, const std::map<QString, QString> &rowValues);
 
   /// List of all groups ordered by the group's position in the tree
   std::vector<GroupInfo> m_groups;

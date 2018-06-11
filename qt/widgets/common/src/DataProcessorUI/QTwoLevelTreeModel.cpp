@@ -1107,6 +1107,47 @@ void QTwoLevelTreeModel::insertRowWithValues(
   updateAllGroupData();
 }
 
+/** Find the position in a group to insert a row with given values. Maintains
+ * sorting within the group by key columns or, if there are no key columns,
+ * inserts
+ * at the end of the group.
+ * @param groupIndex : the group to insert into
+ * @param rowValues : the row values as a map of column name to value
+ */
+int QTwoLevelTreeModel::getPositionToInsertRowInGroup(
+    const int groupIndex, const std::map<QString, QString> &rowValues) {
+
+  auto numberOfRowsInGroup = rowCount(index(groupIndex, 0));
+  auto group = m_groups[groupIndex];
+
+  for (int rowIndex = 0; rowIndex < numberOfRowsInGroup; ++rowIndex) {
+    int columnIndex = 0;
+    for (auto columnIt = m_whitelist.begin(); columnIt != m_whitelist.end();
+         ++columnIt, ++columnIndex) {
+      const auto column = *columnIt;
+
+      // Find the first key column where we have a search value
+      if (!column.isKey() || !rowValues.count(column.name()))
+        continue;
+
+      auto searchValue = rowValues.at(column.name()).toStdString();
+      auto compareValue = cellValue(groupIndex, rowIndex, columnIndex);
+
+      // If the row value is greater than the search value, we'll insert the
+      // new row before it
+      if (compareValue > searchValue) {
+        return rowIndex;
+      }
+
+      // Insert at the end of the group
+      return numberOfRowsInGroup;
+    }
+  }
+
+  // If no values were found to compare, insert at the end of the group
+  return numberOfRowsInGroup;
+}
+
 void QTwoLevelTreeModel::insertRowAndGroupWithValues(
     const std::map<QString, QString> &rowValues) {
 
@@ -1134,7 +1175,7 @@ void QTwoLevelTreeModel::insertRowAndGroupWithValues(
     groupIndex = findOrAddGroup(groupName);
   } else {
     // We'll add a new row to the end of the group
-    rowIndex = rowCount(index(groupIndex, 0));
+    rowIndex = getPositionToInsertRowInGroup(groupIndex, rowValues);
   }
 
   insertRowWithValues(groupIndex, rowIndex, rowValues);
