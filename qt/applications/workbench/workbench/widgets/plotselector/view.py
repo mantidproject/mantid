@@ -188,6 +188,7 @@ class WidgetItemWithCloseButton(QWidget):
         self.label = QLabel(text)
         self.x_icon = QIcon.fromTheme('window-close')
         self.x_button = QPushButton(self.x_icon, "")
+        self.x_button.setFlat(True)
         self.x_button.sizeHint()
         self.x_button.setMaximumWidth(self.x_button.sizeHint().width())
         self.x_button.pressed.connect(lambda: self.x_pressed(self.label.text()))
@@ -197,8 +198,12 @@ class WidgetItemWithCloseButton(QWidget):
         self.layout.addWidget(self.x_button)
 
         self.layout.sizeHint()
-
         self.setLayout(self.layout)
+
+        # Get rid of the top and bottom margins - the button provides
+        # some natural margin anyway
+        margins = self.layout.contentsMargins()
+        self.layout.setContentsMargins(margins.left(), 0, margins.right(), 0)
 
     def x_pressed(self, plot_name):
         self.presenter.close_single_plot(plot_name)

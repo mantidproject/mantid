@@ -65,7 +65,7 @@ class ObservableDictionary(dict):
 
     def clear(self):
         dict.clear(self)
-        self._notify_observers(DictionaryAction.Unknown)
+        self._notify_observers(DictionaryAction.Clear)
 
     def pop(self, key, default=None):
         if key in self:
@@ -82,4 +82,4 @@ class ObservableDictionary(dict):
 
     def update(self, updated_dictionary):
         dict.update(self, updated_dictionary)
-        self._notify_observers(DictionaryAction.Unknown)
+        self._notify_observers(DictionaryAction.Update)
