@@ -104,6 +104,16 @@ DLLExport bool checkGroupDetectorsInWorkspace(const API::Grouping &grouping,
 /// Checks that all of the entries of a vector are contained in a set.
 DLLExport bool checkItemsInSet(const std::vector<int> &items,
                                const std::set<int> &set);
+/// Parse analysis workspace name
+DLLExport Muon::DatasetParams parseWorkspaceName(const std::string &wsName);
+
+/// Parse run label into instrument and runs
+DLLExport void parseRunLabel(const std::string &label,
+	std::string &instrument,
+	std::vector<int> &runNumbers);
+
+/// Checks that the names allow a pairing
+DLLExport bool checkValidPair(const std::string &name1, const std::string &name2);
 
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid

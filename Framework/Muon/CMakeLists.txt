@@ -1,5 +1,6 @@
 set ( SRC_FILES
         src/ApplyMuonDetectorGrouping.cpp
+        src/ApplyMuonDetectorGroupPairing.cpp
         src/ConvertFitFunctionForMuonTFAsymmetry.cpp
         src/LoadAndApplyMuonDetectorGrouping.cpp
         src/MuonAlgorithmHelper.cpp
@@ -7,6 +8,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
         inc/MantidMuon/ApplyMuonDetectorGrouping.h
+        inc/MantidMuon/ApplyMuonDetectorGroupPairing.h
         inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
         inc/MantidMuon/LoadAndApplyMuonDetectorGrouping.h
         inc/MantidMuon/MuonAlgorithmHelper.h
@@ -14,6 +16,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
         ApplyMuonDetectorGroupingTest.h
+        ApplyMuonDetectorGroupPairingTest.h
         ConvertFitFunctionForMuonTFAsymmetryTest.h
         LoadAndApplyMuonDetectorGroupingTest.h
         MuonAlgorithmHelperTest.h)

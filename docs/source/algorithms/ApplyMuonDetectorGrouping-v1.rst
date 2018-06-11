@@ -66,34 +66,34 @@ Usage
     ws = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws")
     RenameWorkspace(  InputWorkspace="wsGroup", 
-                      OutputWorkspace='EMU00020882', 
+                      OutputWorkspace='MUSR00015193', 
                       OverwriteExisting=True)
 
     # Load the data
-    LoadMuonNexus(  Filename='EMU00020882.nxs', 
+    LoadMuonNexus(  Filename='MUSR00015193.nxs', 
                     OutputWorkspace='MuonAnalysis')
 
     ApplyMuonDetectorGrouping(
                     InputWorkspace='MuonAnalysis', 
-                    InputWorkspaceGroup='EMU00020882', 
+                    InputWorkspaceGroup='MUSR00015193', 
                     GroupName='Test', 
                     Grouping='1,2,3,5-10', 
                     TimeOffset=0.0,
                     RebinArgs = "0.2")
 
 
-    output_rebin = mtd['EMU00020882; Group; Test; Counts; #1']
-    print("Total counts (rebinned) : {}".format( sum(output_rebin.readY(0))) )
+    output_rebin = mtd['MUSR00015193; Group; Test; Counts; #1']
+    print("Total counts (rebinned) : {0:.0f}".format( sum(output_rebin.readY(0))) )
 
-    output_noRebin = mtd['EMU00020882; Group; Test; Counts; #1_Raw']
-    print("Total counts (no rebin) : {}\n".format(sum(output_noRebin.readY(0))) )
+    output_noRebin = mtd['MUSR00015193; Group; Test; Counts; #1_Raw']
+    print("Total counts (no rebin) : {0:.0f}\n".format(sum(output_noRebin.readY(0))) )
 
 
-    print("Time range (original) : {0:.3f} - {1:.3f} mus".format(mtd['MuonAnalysis'].readX(0)[0],mtd['MuonAnalysis'].readX(0)[-1]))
+    print("Time range (original) : {0:.3f} - {1:.3f} mus".format(mtd['MuonAnalysis_1'].readX(0)[0],mtd['MuonAnalysis_1'].readX(0)[-1]))
     print("Time range (no rebin) : {0:.3f} - {1:.3f} mus".format(output_noRebin.readX(0)[0],output_noRebin.readX(0)[-1]))
     print("Time range (rebinned) : {0:.3f} - {1:.3f} mus\n".format(output_rebin.readX(0)[0],output_rebin.readX(0)[-1]))
 
-    print("Time step (original)  : {0:.3f} mus".format(mtd['MuonAnalysis'].readX(0)[1]-mtd['MuonAnalysis'].readX(0)[0]))
+    print("Time step (original)  : {0:.3f} mus".format(mtd['MuonAnalysis_1'].readX(0)[1]-mtd['MuonAnalysis_1'].readX(0)[0]))
     print("Time step (no rebin)  : {0:.3f} mus".format(output_noRebin.readX(0)[1]-output_noRebin.readX(0)[0]))
     print("Time step (rebinned)  : {0:.3f} mus".format(output_rebin.readX(0)[1]-output_rebin.readX(0)[0]))
 
@@ -101,12 +101,12 @@ Output:
 
 .. testoutput:: ExCountsOffsetAndRebin
 
-   Total counts (rebinned) : 346398.0
-   Total counts (no rebin) : 346398.0
+   Total counts (rebinned) : 84438
+   Total counts (no rebin) : 84438
 
-   Time range (original) : -0.239 - 31.761 mus
-   Time range (no rebin) : -0.139 - 31.861 mus
-   Time range (rebinned) : -0.139 - 31.861 mus
+   Time range (original) : -0.550 - 31.450 mus
+   Time range (no rebin) : -0.550 - 31.450 mus
+   Time range (rebinned) : -0.550 - 31.450 mus
 
    Time step (original)  : 0.016 mus
    Time step (no rebin)  : 0.016 mus
