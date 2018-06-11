@@ -130,6 +130,21 @@ public:
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT_EQUALS(data->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(image->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(chi->getNumberHistograms(), nHist / 2);
+    TS_ASSERT_EQUALS(angle->getNumberHistograms(), nHist / 2);
+
+    TS_ASSERT_EQUALS(data->blocksize(), nBins);
+    TS_ASSERT_EQUALS(image->blocksize(), nBins);
+    TS_ASSERT_EQUALS(chi->blocksize(), 1);
+    TS_ASSERT_EQUALS(angle->blocksize(), 1);
   }
 
   void test_complex_data_adjustments_summed() {
@@ -153,6 +168,21 @@ public:
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr chi = alg->getProperty("EvolChi");
+    MatrixWorkspace_sptr angle = alg->getProperty("EvolAngle");
+
+    TS_ASSERT_EQUALS(data->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(image->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(chi->getNumberHistograms(), nHist / 2);
+    TS_ASSERT_EQUALS(angle->getNumberHistograms(), nHist / 2);
+
+    TS_ASSERT_EQUALS(data->blocksize(), nBins);
+    TS_ASSERT_EQUALS(image->blocksize(), nBins);
+    TS_ASSERT_EQUALS(chi->blocksize(), 1);
+    TS_ASSERT_EQUALS(angle->blocksize(), 1);
   }
 
   void test_bad_complex_data() {
