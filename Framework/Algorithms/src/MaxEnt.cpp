@@ -430,8 +430,8 @@ void MaxEnt::exec() {
     std::vector<double> data(dataLength, 0.0);
     std::vector<double> errors(dataLength, 0.0);
     if (complexData) {
-      data = toComplex(inWS, spec, false, sumSpectra);  // false -> data
-      errors = toComplex(inWS, spec, true, sumSpectra); // true -> errors
+      data = toComplex(inWS, spec, false, sumSpectra);  // 3rd arg false -> data
+      errors = toComplex(inWS, spec, true, sumSpectra); // 3rd arg true -> errors
     } else {
       if (sumSpectra) {
         const size_t numBins = inWS->y(0).size();
