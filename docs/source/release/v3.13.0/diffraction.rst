@@ -51,6 +51,8 @@ Engineering Diffraction
   - Fit results and parameters are saved to HDF5 from the **GSAS
     Refinement** tab using :ref:`EnggSaveGSASIIFitResultsToHDF5
     <algm-EnggSaveGSASIIFitResultsToHDF5>`
+  - After focusing, workspace sample logs are saved to HDF5 using
+    :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>`
 
 
 :ref:`Release 3.13.0 <v3.13.0>`

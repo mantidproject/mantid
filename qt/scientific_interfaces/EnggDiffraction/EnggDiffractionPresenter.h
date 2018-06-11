@@ -243,6 +243,8 @@ private:
                       std::string runNo);
   void saveOpenGenie(std::string inputWorkspace, std::string bank,
                      std::string runNo);
+  void exportSampleLogsToHDF5(const std::string &inputWorkspace,
+                              const std::string &filename) const;
 
   // generates the required file name of the output files
   std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,

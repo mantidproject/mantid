@@ -81,7 +81,7 @@ protected slots:
   void processRefinementFailed(const std::string &failureMessage);
 
   void processRefinementSuccessful(
-      Mantid::API::IAlgorithm_sptr alg,
+      Mantid::API::IAlgorithm_sptr successfulAlgorithm,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults);
 
   void processRefinementCancelled();

@@ -1864,6 +1864,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   copyFocusedToUserAndAll(fullFilename);
 
+  exportSampleLogsToHDF5(outWSName, userHDFRunFilename(std::stoi(runNo)));
+
   bool saveOutputFiles = m_view->saveFocusedOutputFiles();
 
   if (saveOutputFiles) {
@@ -2335,6 +2337,17 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
   g_log.notice() << "Saves OpenGenieAscii (.his) file written as: "
                  << saveDir.toString() << '\n';
   copyToGeneral(saveDir, comp);
+}
+
+void EnggDiffractionPresenter::exportSampleLogsToHDF5(
+    const std::string &inputWorkspace, const std::string &filename) const {
+  auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+      "ExportSampleLogsToHDF5");
+  saveAlg->initialize();
+  saveAlg->setProperty("InputWorkspace", inputWorkspace);
+  saveAlg->setProperty("Filename", filename);
+  saveAlg->setProperty("Blacklist", "bankid");
+  saveAlg->execute();
 }
 
 /**
