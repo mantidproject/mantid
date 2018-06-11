@@ -61,6 +61,7 @@ public:
   // Get data for a cell
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
+  std::string cellValue(int groupIndex, int rowIndex, int columnIndex) const;
   // Get header data for the table
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
@@ -115,7 +116,6 @@ private slots:
 private:
   void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
-  std::string cellValue(int groupIndex, int rowIndex, int columnIndex) const;
   bool runListsMatch(const std::string &newValue, const std::string &oldValue,
                      const bool exactMatch) const;
   bool rowMatches(int groupIndex, int rowIndex,
@@ -142,6 +142,8 @@ private:
   RowData_sptr rowData(int groupIndex, int rowIndex) const;
   int getPositionToInsertRowInGroup(
       const int groupIndex, const std::map<QString, QString> &rowValues);
+  bool checkColumnInComparisons(const Column &column,
+                                const bool exactMatch) const;
 
   /// List of all groups ordered by the group's position in the tree
   std::vector<GroupInfo> m_groups;

@@ -64,6 +64,7 @@ public:
   const_iterator cend() const;
   const_iterator end() const;
   std::vector<QString> const &names() const;
+  bool hasKeyColumns() const;
 
 private:
   std::vector<QString> m_names;

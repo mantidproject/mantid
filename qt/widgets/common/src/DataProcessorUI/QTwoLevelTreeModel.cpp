@@ -1010,6 +1010,22 @@ bool QTwoLevelTreeModel::runListsMatch(const std::string &newValue,
   return true;
 }
 
+bool QTwoLevelTreeModel::checkColumnInComparisons(const Column &column,
+                                                  const bool exactMatch) const {
+  // If looking for exact matches, check all columns
+  if (exactMatch)
+    return true;
+
+  // If the whitelist does not have any key columns treat them all as key
+  // columns,
+  // i.e. check all columns
+  if (!m_whitelist.hasKeyColumns())
+    return true;
+
+  // Otherwise, only check key columns
+  return column.isKey();
+}
+
 /** Check whether the given row in the model matches the given row values
  * @param groupIndex : the group to check in the model
  * @param rowIndex : the row to check in the model
@@ -1042,9 +1058,7 @@ bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
       continue;
     }
 
-    // If looking for an exact match check all columns; otherwise only check
-    // key columns
-    if (!exactMatch && !column.isKey())
+    if (!checkColumnInComparisons(column, exactMatch))
       continue;
 
     // Ok, compare the values
