@@ -25,25 +25,11 @@ using namespace API;
 using namespace Geometry;
 
 void SetupILLSANSReduction::init() {
-  // Load options
-  std::string load_grp = "Solid Angle Correction";
-
-  declareProperty(
-      "SolidAngleCorrection", true,
-      "If true, the solide angle correction will be applied to the data");
-  declareProperty(
-      "DetectorTubes", false,
-      "If true, the solid angle correction for tube detectors will be applied");
-
-  // -- Define group --
-  setPropertyGroup("SolidAngleCorrection", load_grp);
-  setPropertyGroup("DetectorTubes", load_grp);
 
   // Beam center
-  std::string center_grp = "Beam Center";
+  const std::string center_grp = "Beam Center";
   std::vector<std::string> centerOptions{"None", "Value", "DirectBeam",
                                          "Scattering"};
-
   declareProperty("BeamCenterMethod", "None",
                   boost::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the data beam center");
@@ -64,7 +50,7 @@ void SetupILLSANSReduction::init() {
   declareProperty(
       make_unique<API::FileProperty>(
           "BeamCenterFile", "", API::FileProperty::OptionalLoad, ".nxs"),
-      "The name of the input event Nexus file to load");
+      "The name of the beam center file to load");
   setPropertySettings("BeamCenterFile",
                       make_unique<VisibleWhenProperty>(
                           "BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
@@ -86,8 +72,16 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("BeamCenterFile", center_grp);
   setPropertyGroup("BeamRadius", center_grp);
 
+  // Dark current
+  const std::string dark_grp = "Dark Current (Cd/B4C)";
+  declareProperty(
+      make_unique<API::FileProperty>(
+          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
+      "The name of the input event Nexus file to load as dark current.");
+  setPropertyGroup("DarkCurrentFile", dark_grp);
+
   // Normalisation
-  std::string norm_grp = "Normalisation";
+  const std::string norm_grp = "Normalisation";
   std::vector<std::string> incidentBeamNormOptions;
   incidentBeamNormOptions.emplace_back("None");
   // The data will be normalised to the monitor counts
@@ -98,17 +92,38 @@ void SetupILLSANSReduction::init() {
       "Normalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
-
   setPropertyGroup("Normalisation", norm_grp);
 
-  // Dark current
+  // Masking
+  const std::string mask_grp = "Mask";
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      "MaskedWorkspace", "", Direction::Input, PropertyMode::Optional));
   declareProperty(
-      make_unique<API::FileProperty>(
-          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
-      "The name of the input event Nexus file to load as dark current.");
+      make_unique<ArrayProperty<int>>("MaskedEdges"),
+      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty("MaskedComponent","","Component names to mask the edges of.");
+  declareProperty(make_unique<ArrayProperty<int>>("MaskedDetectorList"),
+                  "List of detector IDs to be masked");
+  declareProperty("MaskedFullComponent", "", "Component name to mask entirely.");
+  setPropertyGroup("MaskedWorkspace", mask_grp);
+  setPropertyGroup("MaskedEdges", mask_grp);
+  setPropertyGroup("MaskedComponent", mask_grp);
+  setPropertyGroup("MaskedFullComponent", mask_grp);
+  setPropertyGroup("MaskedDetectorList", mask_grp);
+
+  // Solid angle correction
+  const std::string load_grp = "Solid Angle Correction";
+  declareProperty(
+      "SolidAngleCorrection", true,
+      "If true, the solide angle correction will be applied to the data");
+  declareProperty(
+      "DetectorTubes", false,
+      "If true, the solid angle correction for tube detectors will be applied");
+  setPropertyGroup("SolidAngleCorrection", load_grp);
+  setPropertyGroup("DetectorTubes", load_grp);
 
   // Sensitivity
-  std::string eff_grp = "Sensitivity";
+  const std::string eff_grp = "Sensitivity";
   declareProperty(
       make_unique<API::FileProperty>(
           "SensitivityFile", "", API::FileProperty::OptionalLoad, ".nxs"),
@@ -124,7 +139,7 @@ void SetupILLSANSReduction::init() {
                                         "subtracted from the flood field.");
   declareProperty(make_unique<API::FileProperty>(
                       "SensitivityDarkCurrentFile", "",
-                      API::FileProperty::OptionalLoad, "_event.nxs"),
+                      API::FileProperty::OptionalLoad, ".nxs"),
                   "The name of the input file to load as dark current.");
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
@@ -179,7 +194,7 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("OutputSensitivityWorkspace", eff_grp);
 
   // Transmission
-  std::string trans_grp = "Transmission";
+  const std::string trans_grp = "Transmission";
   std::vector<std::string> transOptions{"Value", "DirectBeam"};
   declareProperty("TransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
@@ -279,13 +294,12 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("TransmissionBeamCenterX", trans_grp);
   setPropertyGroup("TransmissionBeamCenterY", trans_grp);
   setPropertyGroup("TransmissionBeamCenterFile", trans_grp);
-
   setPropertyGroup("TransmissionDarkCurrentFile", trans_grp);
   setPropertyGroup("TransmissionUseSampleDC", trans_grp);
   setPropertyGroup("ThetaDependentTransmission", trans_grp);
 
   // Background options
-  std::string bck_grp = "Background";
+  const std::string bck_grp = "Background";
   declareProperty("BackgroundFiles", "", "Background data files");
   declareProperty("BckTransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
@@ -362,7 +376,6 @@ void SetupILLSANSReduction::init() {
                       make_unique<VisibleWhenProperty>("BckTransmissionMethod",
                                                        IS_EQUAL_TO,
                                                        "BeamSpreader"));
-
   declareProperty(
       "BckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
@@ -381,29 +394,8 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("BckTransmissionDarkCurrentFile", bck_grp);
   setPropertyGroup("BckThetaDependentTransmission", bck_grp);
 
-  // Geometry correction
-  declareProperty("SampleThickness", EMPTY_DBL(), "Sample thickness [cm]");
-
-  // Masking
-  std::string mask_grp = "Mask";
-  declareProperty(make_unique<ArrayProperty<int>>("MaskedDetectorList"),
-                  "List of detector IDs to be masked");
-  declareProperty(
-      make_unique<ArrayProperty<int>>("MaskedEdges"),
-      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
-  std::vector<std::string> maskOptions{"None", "Front", "Back"};
-  declareProperty("MaskedSide", "None",
-                  boost::make_shared<StringListValidator>(maskOptions),
-                  "Mask one side of the detector");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "MaskedWorkspace", "", Direction::Input, PropertyMode::Optional));
-  setPropertyGroup("MaskedDetectorList", mask_grp);
-  setPropertyGroup("MaskedEdges", mask_grp);
-  setPropertyGroup("MaskedSide", mask_grp);
-  setPropertyGroup("MaskedWorkspace", mask_grp);
-
   // Absolute scale
-  std::string abs_scale_grp = "Absolute Scale";
+  const std::string abs_scale_grp = "Absolute Scale";
   std::vector<std::string> scaleOptions;
   scaleOptions.emplace_back("None");
   scaleOptions.emplace_back("Value");
@@ -449,8 +441,13 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("AbsoluteScalingAttenuatorTrans", abs_scale_grp);
   setPropertyGroup("AbsoluteScalingApplySensitivity", abs_scale_grp);
 
+  // Sample thickness
+  const std::string sample_group = "Sample Thickness";
+  declareProperty("SampleThickness", EMPTY_DBL(), "Sample thickness [cm]");
+  setPropertyGroup("SampleThickness", sample_group);
+
   // I(Q) calculation
-  std::string iq1d_grp = "I(q) Calculation";
+  const std::string iq1d_grp = "I(q) Transformation";
   declareProperty("DoAzimuthalAverage", true);
   auto positiveInt = boost::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
@@ -458,10 +455,10 @@ void SetupILLSANSReduction::init() {
                   "Number of I(q) bins when binning is not specified");
   declareProperty("IQLogBinning", false,
                   "I(q) log binning when binning is not specified");
-  declareProperty("ComputeResolution", false,
+  declareProperty("ComputeResolution", true,
                   "If true the Q resolution will be computed");
 
-  declareProperty("Do2DReduction", true);
+  declareProperty("Do2DReduction", false);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
 
@@ -474,12 +471,17 @@ void SetupILLSANSReduction::init() {
   setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
 
   // Outputs
+  const std::string out_grp = "Output";
   declareProperty("ProcessInfo", "", "Additional process information");
   declareProperty("OutputDirectory", "",
                   "Directory to put the output files in");
   declareProperty("OutputMessage", "", Direction::Output);
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
+  setPropertyGroup("ProcessInfo", out_grp);
+  setPropertyGroup("OutputMessage", out_grp);
+  setPropertyGroup("OutputDirectory", out_grp);
+  setPropertyGroup("ReductionProperties", out_grp);
 }
 
 void SetupILLSANSReduction::exec() {
@@ -524,9 +526,7 @@ void SetupILLSANSReduction::exec() {
   }
 
   // Load algorithm
-  // TODO : It looks like properties need cleanup
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadILLSANS");
-
   auto algProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
   algProp->setValue(loadAlg->toString());
   reductionManager->declareProperty(std::move(algProp));
@@ -620,17 +620,17 @@ void SetupILLSANSReduction::exec() {
   }
 
   // Mask
-  const std::string maskDetList = getPropertyValue("MaskedDetectorList");
-  const std::string maskEdges = getPropertyValue("MaskedEdges");
-  const std::string maskSide = getProperty("MaskedSide");
-  API::MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskedWorkspace");
-
   IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
-  // The following is broken, try PropertyValue
+  const std::string maskedDetList = getPropertyValue("MaskedDetectorList");
+  const std::string maskedEdges = getPropertyValue("MaskedEdges");
+  const std::string maskedComponent = getPropertyValue("MaskedComponent");
+  const std::string maskedFullComponent = getPropertyValue("MaskedFullComponent");
+  API::MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskedWorkspace");  
   maskAlg->setPropertyValue("Facility", "SNS");
-  maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
-  maskAlg->setPropertyValue("MaskedEdges", maskEdges);
-  maskAlg->setProperty("MaskedSide", maskSide);
+  maskAlg->setPropertyValue("MaskedDetectorList", maskedDetList);
+  maskAlg->setPropertyValue("MaskedEdges", maskedEdges);
+  maskAlg->setPropertyValue("MaskedComponent", maskedComponent);
+  maskAlg->setPropertyValue("MaskedFullComponent", maskedFullComponent);
   maskAlg->setProperty("MaskedWorkspace", maskedWorkspace);
   auto maskalgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
   maskalgProp->setValue(maskAlg->toString());
@@ -681,6 +681,7 @@ void SetupILLSANSReduction::exec() {
     iqAlg->setPropertyValue("NumberOfBins", nBins);
     iqAlg->setProperty("LogBinning", logBinning);
     iqAlg->setProperty("ComputeResolution", computeResolution);
+    iqAlg->setPropertyValue("NumberOfWedges", "0");
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     auto iqalgProp = make_unique<AlgorithmProperty>("IQAlgorithm");
