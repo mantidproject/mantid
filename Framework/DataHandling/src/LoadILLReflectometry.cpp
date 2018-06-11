@@ -809,7 +809,7 @@ void LoadILLReflectometry::placeDetector() {
 
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
-  const double dist = doubleFromRun("Distance.D0");
+  const double dist = inMeter(doubleFromRun("Distance.D0"));
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
   const std::string source = "chopper1";
   const V3D newPos{0.0, 0.0, -dist};
