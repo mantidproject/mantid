@@ -59,9 +59,9 @@ Usage
 
    For examples of applying custom rebinning, please refer to :ref:`algm-Rebin` documentation.
 
-**Example - Counts for EMU run with time offset and rebinning:**
+**Example - Pair asymmetry for MUSR run:**
 
-.. testcode:: ExCountsOffsetAndRebin
+.. testcode:: ExMUSRPairAsymmetry
 
     # Clear the ADS before starting
     AnalysisDataService.clear()
@@ -69,7 +69,8 @@ Usage
     # Create the workspace group in which the analysed workspaces will be placed
     ws = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws")
-    RenameWorkspace(  InputWorkspace="wsGroup", 
+    RenameWorkspace(  
+                      InputWorkspace="wsGroup", 
                       OutputWorkspace='MUSR00015193', 
                       OverwriteExisting=True)
 
@@ -77,45 +78,43 @@ Usage
     LoadMuonNexus(  Filename='MUSR00015193.nxs', 
                     OutputWorkspace='MuonAnalysis')
 
+    # Create two detector groupings
     ApplyMuonDetectorGrouping(
-                    InputWorkspace='MuonAnalysis', 
-                    InputWorkspaceGroup='MUSR00015193', 
-                    GroupName='Test', 
-                    Grouping='1,2,3,5-10', 
-                    TimeOffset=0.0,
-                    RebinArgs = "0.2")
+        InputWorkspace='MuonAnalysis', 
+        InputWorkspaceGroup='MUSR00015193', 
+        GroupName='fwd', 
+        Grouping='1-32'
+        )
+    ApplyMuonDetectorGrouping(
+        InputWorkspace='MuonAnalysis', 
+        InputWorkspaceGroup='MUSR00015193', 
+        GroupName='bwd', 
+        Grouping='33-64'
+        )
+    # Add the groupings to the group workspace
+    wsGroup.add('MUSR00015193; Group; fwd; Counts; #1_Raw')
+    wsGroup.add('MUSR00015193; Group; bwd; Counts; #1_Raw')
+
+    # Apply the pairing algorithm to the two groups
+    ApplyMuonDetectorGroupPairing(
+           InputWorkspaceGroup='MUSR00015193', 
+           PairName='pairTest',
+           Alpha=1.0,
+           SpecifyGroupsManually=False,
+           InputWorkspace1='MUSR00015193; Group; fwd; Counts; #1_Raw', 
+           InputWorkspace2='MUSR00015193; Group; bwd; Counts; #1_Raw'
+           )
+
+    output = mtd['MUSR00015193; Pair; pairTest; Asym; #1_Raw']
 
 
-    output_rebin = mtd['MUSR00015193; Group; Test; Counts; #1']
-    print("Total counts (rebinned) : {0:.0f}".format( sum(output_rebin.readY(0))) )
-
-    output_noRebin = mtd['MUSR00015193; Group; Test; Counts; #1_Raw']
-    print("Total counts (no rebin) : {0:.0f}\n".format(sum(output_noRebin.readY(0))) )
-
-
-    print("Time range (original) : {0:.3f} - {1:.3f} mus".format(mtd['MuonAnalysis_1'].readX(0)[0],mtd['MuonAnalysis_1'].readX(0)[-1]))
-    print("Time range (no rebin) : {0:.3f} - {1:.3f} mus".format(output_noRebin.readX(0)[0],output_noRebin.readX(0)[-1]))
-    print("Time range (rebinned) : {0:.3f} - {1:.3f} mus\n".format(output_rebin.readX(0)[0],output_rebin.readX(0)[-1]))
-
-    print("Time step (original)  : {0:.3f} mus".format(mtd['MuonAnalysis_1'].readX(0)[1]-mtd['MuonAnalysis_1'].readX(0)[0]))
-    print("Time step (no rebin)  : {0:.3f} mus".format(output_noRebin.readX(0)[1]-output_noRebin.readX(0)[0]))
-    print("Time step (rebinned)  : {0:.3f} mus".format(output_rebin.readX(0)[1]-output_rebin.readX(0)[0]))
+    print(output.readY(0).mean())
 
 Output:
 
 .. testoutput:: ExCountsOffsetAndRebin
 
-   Total counts (rebinned) : 84438
-   Total counts (no rebin) : 84438
-
-   Time range (original) : -0.550 - 31.450 mus
-   Time range (no rebin) : -0.550 - 31.450 mus
-   Time range (rebinned) : -0.550 - 31.450 mus
-
-   Time step (original)  : 0.016 mus
-   Time step (no rebin)  : 0.016 mus
-   Time step (rebinned)  : 0.200 mus
-
+   -0.0176193517359
 
 .. categories::
 
