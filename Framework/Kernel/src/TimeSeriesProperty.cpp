@@ -733,7 +733,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
          isplitter < splitter_time_vec.size() - 1; ++isplitter) {
       int target_i = target_vec[isplitter];
       if (fill_target_set.find(target_i) == fill_target_set.end()) {
-        if (outputs[target_i]->lastTime() != m_values.back().time())
+        if (outputs[target_i]->size() == 0 ||
+            outputs[target_i]->lastTime() != m_values.back().time())
           outputs[target_i]->addValue(m_values.back().time(),
                                       m_values.back().value());
         fill_target_set.insert(target_i);
