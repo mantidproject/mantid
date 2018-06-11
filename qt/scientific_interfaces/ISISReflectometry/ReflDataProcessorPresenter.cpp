@@ -259,7 +259,8 @@ ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     postprocessor, group, postprocessMap,
-                                    loader) {}
+                                    loader),
+      m_processingAsEventData(false) {}
 
 /**
 * Destructor
@@ -330,28 +331,16 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
       bool allEventWS = loadGroup(groupData);
 
       if (allEventWS) {
+        m_processingAsEventData = true;
         // Process the group
         if (processGroupAsEventWS(groupIndex, groupData, *slicing.get()))
           errors = true;
 
-        // Notebook not implemented yet
-        if (m_view->getEnableNotebook()) {
-          /// @todo Implement save notebook for event-sliced workspaces.
-          // The per-slice input properties are stored in the RowData but
-          // at the moment GenerateNotebook just uses the parent row
-          // saveNotebook(m_itemsToProcess);
-          GenericDataProcessorPresenter::giveUserWarning(
-              "Notebook not implemented for sliced data yet",
-              "Notebook will not be generated");
-        }
-
       } else {
+        m_processingAsEventData = false;
         // Process the group
         if (processGroupAsNonEventWS(groupIndex, groupData))
           errors = true;
-        // Notebook
-        if (m_view->getEnableNotebook())
-          saveNotebook(m_itemsToProcess);
       }
 
       if (!allEventWS)
@@ -1106,8 +1095,18 @@ End reduction
 void ReflDataProcessorPresenter::endReduction(const bool reductionSuccessful) {
 
   // Create an ipython notebook if "Output Notebook" is checked.
-  if (reductionSuccessful && m_view->getEnableNotebook())
-    saveNotebook(m_itemsToProcess);
+  if (reductionSuccessful && m_view->getEnableNotebook()) {
+    if (m_processingAsEventData) {
+      /// @todo Implement save notebook for event-sliced workspaces.
+      // The per-slice input properties are stored in the RowData but
+      // at the moment GenerateNotebook just uses the parent row
+      GenericDataProcessorPresenter::giveUserWarning(
+          "Notebook not implemented for sliced data yet",
+          "Notebook will not be generated");
+    } else {
+      saveNotebook(m_itemsToProcess);
+    }
+  }
 
   if (m_mainPresenter->isAutoreducing(m_group) && !m_pauseReduction) {
     // Just signal that the reduction has completed

@@ -170,6 +170,7 @@ private:
   void handleError(const int groupIndex, const std::string &error);
 
   std::map<int, size_t> m_numGroupSlicesMap;
+  bool m_processingAsEventData;
 };
 }
 }
