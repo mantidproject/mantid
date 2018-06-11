@@ -39,7 +39,7 @@ MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS,
 /// Check if a double is not zero and returns a bool indicating success
 bool isNonzero(double i) { return (0 != i); }
 
-/** Sort x axis
+/** Sort x axis (Dx will be handled only for point data)
  @param ws :: Input workspace
  @return A shared pointer to the resulting MatrixWorkspace
  */
@@ -53,34 +53,21 @@ void sortXAxis(MatrixWorkspace_sptr &ws) {
       x_value = ws->x(i)[k];
       sorter.insert(std::pair<double, double>(x_value, ws->y(i)[k]));
       sorter.insert(std::pair<double, double>(x_value, ws->e(i)[k]));
+      // histograms: no recalculation of Dx implemented -> skip
       if (ws->hasDx(i) && !ws->isHistogramData())
         sorter.insert(std::pair<double, double>(x_value, ws->dx(i)[k]));
     }
-    size_t ws_size = ws->size();
-    Mantid::MantidVec vecx(ws_size);
-    Mantid::MantidVec vecy(ws_size);
-    Mantid::MantidVec vece(ws_size);
-    Mantid::MantidVec vecdx(ws_size);
     int l = 0;
     auto it = sorter.cbegin();
     while (it != sorter.cend()) {
-      vecx[l] = it->first;
-      vecy[l] = it->second;
-      vece[l] = (++it)->second;
+      ws->mutableX(i)[l] = it->first;
+      ws->mutableY(i)[l] = it->second;
+      ws->mutableE(i)[l] = (++it)->second;
+      // histograms: no recalculation of Dx implemented -> skip
       if (ws->hasDx(i) && !ws->isHistogramData())
-        vecdx[l] = (++it)->second;
+        ws->mutableDx(i)[l] = (++it)->second;
       ++l;
       ++it;
-    }
-    auto x = make_cow<HistogramX>(std::move(vecx));
-    auto y = make_cow<HistogramY>(std::move(vecy));
-    auto e = make_cow<HistogramE>(std::move(vece));
-    ws->setSharedX(i, x);
-    ws->setSharedY(i, y);
-    ws->setSharedE(i, e);
-    if (ws->hasDx(i) && !ws->isHistogramData()) {
-      auto dx = make_cow<HistogramDx>(std::move(vecdx));
-      ws->setSharedDx(i, dx);
     }
   }
 }
@@ -222,6 +209,7 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   combHelper.setReferenceProperties(lhs);
   std::string compatible = combHelper.checkCompatibility(rhs, true);
   if (!compatible.empty()) {
+    // histograms: no recalculation of Dx implemented -> do not treat Dx
     if (!(compatible == "spectra must have either Dx values or not; ") ||
         (rhs->isHistogramData())) // Issue only for point data
       issues["RHSWorkspace"] = "Workspace " + rhs->getName() +
