@@ -53,11 +53,23 @@ public:
 
   double volume() const;
 
+  static bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
+                           const Kernel::V3D &b, const Kernel::V3D &c);
   static bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices);
 
   bool hasValidShape() const;
+  double distanceToPlane(const Kernel::V3D &point) const;
+  bool isValid(const Kernel::V3D &point) const; ///< Check if a point is inside
+  bool isOnSide(const Kernel::V3D &) const;
 
 private:
+  struct PlaneParameters {
+    double a;
+    double b;
+    double c;
+    double k;
+  } m_planeParameters;
+
   void initialize();
   /// Triangles are specified by indices into a list of vertices. Offset is
   /// always 3.

@@ -10,6 +10,26 @@
 using Mantid::Geometry::MeshObject2D;
 using Mantid::Kernel::V3D;
 
+namespace {
+MeshObject2D makeSimpleTriangleMesh() {
+  std::vector<V3D> vertices;
+  vertices.emplace_back(V3D(-1, 0, 0));
+  vertices.emplace_back(V3D(1, 0, 0));
+  vertices.emplace_back(V3D(0, 1, 0));
+  std::vector<uint16_t> triangles;
+  triangles.insert(triangles.end(), {0, 1, 2});
+  return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
+}
+MeshObject2D makeTrapezoidMesh(const V3D &a, const V3D &b, const V3D &c,
+                               const V3D &d) {
+  std::vector<V3D> vertices{a, b, c, d};
+  std::vector<uint16_t> triangles;
+  triangles.insert(triangles.end(), {0, 1, 2});
+  triangles.insert(triangles.end(), {2, 3, 0});
+  return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
+}
+}
+
 class MeshObject2DTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -96,6 +116,54 @@ public:
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material());
     TS_ASSERT(mesh.hasValidShape());
     TS_ASSERT_EQUALS(mesh.volume(), 0);
+  }
+
+  void test_isValid() {
+    auto mesh = makeSimpleTriangleMesh();
+    TS_ASSERT(mesh.isValid(V3D{0, 0.5, 0}));
+    TS_ASSERT(mesh.isValid(V3D{-1, 0, 0}));
+    TS_ASSERT(mesh.isValid(V3D{1, 0, 0}));
+    TS_ASSERT(mesh.isValid(V3D{0, 1, 0}));
+    TS_ASSERT(!mesh.isValid(V3D{0, 0.5, 1}));
+  }
+
+  void test_distanceToPlane() {
+    auto mesh = makeSimpleTriangleMesh();
+    TS_ASSERT_EQUALS(0, mesh.distanceToPlane(V3D{0, 0.5, 0}));
+    TS_ASSERT_EQUALS(0, mesh.distanceToPlane(V3D{-1, 0, 0}));
+    TS_ASSERT_EQUALS(0, mesh.distanceToPlane(V3D{1, 0, 0}));
+    TS_ASSERT_EQUALS(0, mesh.distanceToPlane(V3D{0, 1, 0}));
+    TS_ASSERT_EQUALS(1.0, mesh.distanceToPlane(V3D{0, 0.5, 1}));
+  }
+
+  void test_isValid_multi_triangle() {
+
+    // Make 2 Triangles bounded by the specified V3Ds
+    auto mesh = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
+                                  V3D{1, 0, 0});
+    double delta = 1e-6;
+    TS_ASSERT(mesh.isValid(V3D{0, 0, 0}));
+    TS_ASSERT(mesh.isValid(V3D{0.5, 0.5, 0}));
+    TS_ASSERT(mesh.isValid(V3D{0, 0, 0}));
+    TSM_ASSERT("Just outside", !mesh.isValid(V3D{0 - delta, 0, 0}));
+    TS_ASSERT(mesh.isValid(V3D{1, 1, 0}));
+    TSM_ASSERT("Just outside", !mesh.isValid(V3D{1, 1 + delta, 0}));
+  }
+
+  void test_isOnTriangle_Approach() {
+    auto p1 = V3D{-1, -1, 0};
+    auto p2 = V3D{1, -1, 0};
+    auto p3 = V3D{0, 1, 0};
+    TS_ASSERT(MeshObject2D::isOnTriangle(V3D{0, 0, 0}, p1, p2, p3));
+    TS_ASSERT(MeshObject2D::isOnTriangle(p1, p1, p2, p3));
+    TS_ASSERT(MeshObject2D::isOnTriangle(p2, p1, p2, p3));
+    TS_ASSERT(MeshObject2D::isOnTriangle(p3, p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p1 - V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p1 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p2 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p2 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
   }
 };
 
