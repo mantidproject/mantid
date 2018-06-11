@@ -37,7 +37,7 @@ namespace MantidQt {
 namespace API {
 class ProjectRecoveryAdaptor : public QObject {
 public:
-  ProjectRecoveryAdaptor(ApplicationWindow *windowHandle);
+  explicit ProjectRecoveryAdaptor(ApplicationWindow *windowHandle);
 
   void saveOpenWindows(std::string projectFilepath);
   void loadOpenWindows(std::string projectFilePath);
