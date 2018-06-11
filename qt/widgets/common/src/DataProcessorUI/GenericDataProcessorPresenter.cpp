@@ -1307,7 +1307,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::ProcessAllFlag:
     // Process-All is a background process so we don't want to re-process
     // failed rows
-    m_forceProcessingFailed = false;
+    m_forceProcessingFailed = true;
     processAll();
     break;
   case DataProcessorPresenter::GroupRowsFlag:
