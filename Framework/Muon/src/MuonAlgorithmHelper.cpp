@@ -350,11 +350,15 @@ bool checkGroupDetectorsInWorkspace(const Grouping &grouping,
 // Checks that all of the entries of a vector are contained in a set, returns
 // true/false
 bool checkItemsInSet(const std::vector<int> &items, const std::set<int> &set) {
-  for (const auto item : items) {
-    if (set.find(item) == set.end()) {
-      return false;
-    }
-  }
+	for (const auto item : items) {
+		if (set.find(item) == set.end()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
  * Parse a workspace name into dataset parameters
  * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
  * @param wsName :: [input] Name of workspace
