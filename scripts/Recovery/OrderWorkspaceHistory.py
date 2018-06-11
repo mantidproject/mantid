@@ -75,7 +75,7 @@ for infile in historyfiles:
         reader = csv.reader(f, delimiter='#')
         commands.append([tuple(r) for r in reader])
 
-# Add lists of histories together 
+# Add lists of histories together
 all_commands = [i for sublist in commands for i in sublist]
 
 # Remove duplicate commands
