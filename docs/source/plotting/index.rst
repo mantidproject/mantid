@@ -3,27 +3,41 @@
 .. contents:: Table of contents
     :local:
 
+
 ====================================
 Introduction to Matplotlib in Mantid
 ====================================
 
-Mantid now can use `Matplotlib <https://matplotlib.org/>`_ to produce figures. 
-There are several advantages of using this software package:
+.. raw :: html
 
-* it is python based, so it can easily be incorporated into Mantid scripts
-* there is a large user community, and therefore excellent documentation and examples are available
-* it is easy to change from plotting on the screen to produce publication quality plots in various image formats 
+    <span class="larger_font">Mantid now can use <a href="https://matplotlib.org/"> Matplotlib </a> to produce figures. 
+    There are several advantages of using this software package:
+    </span>
+    <br>
+    <br>
+    <ul>
+    <span class="larger_font">
+    <li> it is Python based, so it can easily be incorporated into Mantid scripts</li>
+    <li> there is a large user community, and therefore excellent documentation and examples are available</li>
+    <li> it is easy to change from plotting on the screen to produce publication quality plots in various image formats </li>
+    </span>
+    </ul>
+    <br>
+    <br>
+    <span class="larger_font">While Matplotlib is using data arrays for inputs in the plotting routines,
+    it is now possible to also use several types on Mantid workspaces instead.
+    For a detailed list of functions that use workspaces, see the documentaion
+    of the :ref:`mantid.plots <mantid.plots>` module. 
+    <br>
+    <br>
+    This page is intended to provide examples about how to use different
+    Matplotlib commands for several types of common task that Mantid users are interested in.
+    <br>
+    <br>
 
-While Matplotlib is using data arrays for inputs in the plotting routines,
-it is now possible to also use several types on Mantid workspaces instead.
-For a detailed list of functions that use workspaces, see the documentaion
-of the :ref:`mantid.plots <mantid.plots>` module. 
-
-This page is intended to provide examples about how to use different
-Matplotlib commands for several types of common task that Mantid users are interested in.
-
-To understand the matplotlib vocabulary, a useful tool is the `"anatomy of a figure"
-<https://matplotlib.org/examples/showcase/anatomy.html>`_, also shown below.
+    To understand the matplotlib vocabulary, a useful tool is the 
+    <a href="https://matplotlib.org/examples/showcase/anatomy.html"> anatomy of a figure </a>, also shown below.
+    </span>
 
 .. plot::
    
