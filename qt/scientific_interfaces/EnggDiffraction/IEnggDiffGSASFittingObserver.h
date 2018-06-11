@@ -21,7 +21,7 @@ public:
 
   /// Notify the observer that a single refinement has terminated successfully
   virtual void notifyRefinementSuccessful(
-      const Mantid::API::IAlgorithm_sptr alg,
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults) = 0;
 
   /// Notify the observer that a refinement has failed

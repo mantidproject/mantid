@@ -50,9 +50,11 @@ Engineering Diffraction
     been deprecated
   - Fit results and parameters are saved to HDF5 from the **GSAS
     Refinement** tab using :ref:`EnggSaveGSASIIFitResultsToHDF5
-    <algm-EnggSaveGSASIIFitResultsToHDF5>`
-- The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
+  <algm-EnggSaveGSASIIFitResultsToHDF5>`
+  - After focusing, workspace sample logs are saved to HDF5 using
+    :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>`
 
+- The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
 
 :ref:`Release 3.13.0 <v3.13.0>`
 

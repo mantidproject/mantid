@@ -1830,13 +1830,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   g_log.notice() << "Produced focused workspace: " << outWSName << '\n';
 
   const bool saveOutputFiles = m_view->saveFocusedOutputFiles();
-
   if (saveOutputFiles) {
     try {
       saveFocusedXYE(runLabel, outWSName);
       saveGSS(runLabel, outWSName);
       saveOpenGenie(runLabel, outWSName);
       saveNexus(runLabel, outWSName);
+      exportSampleLogsToHDF5(outWSName, userHDFRunFilename(runLabel.runNumber));
     } catch (std::runtime_error &re) {
       g_log.error() << "Error saving focused data. ",
           "There was an error while saving focused data. "
@@ -2324,6 +2324,17 @@ void EnggDiffractionPresenter::saveOpenGenie(
   g_log.notice() << "Saves OpenGenieAscii (.his) file written as: "
                  << saveDir.toString() << '\n';
   copyToGeneral(saveDir, comp);
+}
+
+void EnggDiffractionPresenter::exportSampleLogsToHDF5(
+    const std::string &inputWorkspace, const std::string &filename) const {
+  auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+      "ExportSampleLogsToHDF5");
+  saveAlg->initialize();
+  saveAlg->setProperty("InputWorkspace", inputWorkspace);
+  saveAlg->setProperty("Filename", filename);
+  saveAlg->setProperty("Blacklist", "bankid");
+  saveAlg->execute();
 }
 
 /**

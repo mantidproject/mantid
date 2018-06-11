@@ -36,6 +36,9 @@ New Algorithms
 
 - :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>` replaces *MultipleScatteringCylinderAbsorption* and uses :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` for calculating its corrections. 
 
+- :ref:`ExportSampleLogsToHDF5 <algm-ExportSampleLogsToHDF5>` saves a
+  workspace's samples logs to an HDF5 file
+
 Improved
 ########
 
@@ -57,6 +60,7 @@ Bug fixes
 - :ref:`ConvertToMD <algm-ConvertToMD>` can now be used with workspaces that aren't in the ADS. 
 - Fixed :ref:`SumSpectra <algm-SumSpectra>` to avoid a crash when validation of inputs was called with a WorkspaceGroup.
 - Fixed a bug in TableWorkspaces where vector column data was set to 0 when the table was viewed    
+- The output workspace of :ref:`LineProfile <algm-LineProfile>` now has correct sample logs, instrument and history.
 
 New
 ###

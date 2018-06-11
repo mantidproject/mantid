@@ -240,6 +240,8 @@ private:
   void saveNexus(const RunLabel &runLabel, const std::string &inputWorkspace);
   void saveOpenGenie(const RunLabel &runLabel,
                      const std::string &inputWorkspace);
+  void exportSampleLogsToHDF5(const std::string &inputWorkspace,
+                              const std::string &filename) const;
 
   // generates the required file name of the output files
   std::string outFileNameFactory(const std::string &inputWorkspace,
