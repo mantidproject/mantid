@@ -291,6 +291,22 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
   }
 }
 
+/** Utility to get the data for a cell from the group/row/column index
+ */
+std::string QTwoLevelTreeModel::cellValue(int groupIndex, int rowIndex,
+                                          int columnIndex) const {
+  const auto rowQIndex =
+      index(rowIndex, columnIndex, index(groupIndex, columnIndex));
+  auto result = data(rowQIndex).toString().toStdString();
+
+  // Treat auto-generated values as empty cells
+  auto currentRowData = rowData(groupIndex, rowIndex);
+  if (currentRowData->isGenerated(columnIndex))
+    result = "";
+
+  return result;
+}
+
 /** Returns the column name (header data for given section)
 * @param section : The section (column) index
 * @param orientation : The orientation
@@ -332,6 +348,17 @@ RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) const {
   }
 
   return result;
+}
+
+/** Returns row data struct (which includes metadata about the row)
+ * for specified index
+* @param groupIndex : The group index
+* @param rowIndex : The row index within the group
+* @return : The data associated with the given index as a RowData class
+*/
+RowData_sptr QTwoLevelTreeModel::rowData(int groupIndex, int rowIndex) const {
+  const auto rowQIndex = index(rowIndex, 0, index(groupIndex, 0));
+  return rowData(rowQIndex);
 }
 
 /** Returns the index of an element specified by its row, column and parent
@@ -951,17 +978,17 @@ bool QTwoLevelTreeModel::rowIsEmpty(int row, int parent) const {
  * already exists in that row then the rows are considered to be an exact match
  * because no new runs need to be added.
  */
-bool QTwoLevelTreeModel::runListsMatch(const QString &newValue,
-                                       const QString &oldValue,
+bool QTwoLevelTreeModel::runListsMatch(const std::string &newValue,
+                                       const std::string &oldValue,
                                        const bool exactMatch) const {
   // Parse the individual runs from each list and check that they all
   // match, allowing for additional runs in one of the lists.
   auto newRuns = Mantid::Kernel::StringTokenizer(
-                     newValue.toStdString(), ",+",
-                     Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
+                     newValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM)
+                     .asVector();
   auto oldRuns = Mantid::Kernel::StringTokenizer(
-                     oldValue.toStdString(), ",+",
-                     Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
+                     oldValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM)
+                     .asVector();
 
   // Loop through all values in the shortest list and check they exist
   // in the longer list (or they all match if they're the same length).
@@ -999,38 +1026,30 @@ bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
   for (auto columnIt = m_whitelist.begin(); columnIt != m_whitelist.end();
        ++columnIt, ++columnIndex) {
     const auto column = *columnIt;
-    const auto &columnName = column.name();
 
-    // Only check non-blank values in the given row values
-    if (rowValues.count(columnName)) {
-      const auto rowQIndex =
-          index(rowIndex, columnIndex, index(groupIndex, columnIndex));
-      auto oldValue = data(rowQIndex).toString();
-      const auto newValue = rowValues.at(columnName);
+    // Skip if no value for this column is given
+    if (!rowValues.count(column.name()))
+      continue;
 
-      // Ignore generated values - if a value was auto generated then the user
-      // input was empty, so treat these as empty cells
-      auto currentRowData = rowData(rowQIndex);
-      if (currentRowData->isGenerated(columnIndex))
-        oldValue = "";
+    auto newValue = rowValues.at(column.name()).toStdString();
+    auto oldValue = cellValue(groupIndex, rowIndex, columnIndex);
 
-      // Special case for runs column to allows for new runs to be added into
-      // rows that already contain a partial list of runs for the same angle
-      if (column.name() == "Run(s)") {
-        if (!runListsMatch(newValue, oldValue, exactMatch))
-          return false;
-        continue;
-      }
-
-      // If looking for an exact match check all columns; otherwise only check
-      // key columns
-      if (!exactMatch && !column.isKey())
-        continue;
-
-      // Ok, compare the values
-      if (newValue != oldValue) {
+    // Special case for runs column to allows for new runs to be added into
+    // rows that already contain a partial list of runs for the same angle
+    if (column.name() == "Run(s)") {
+      if (!runListsMatch(newValue, oldValue, exactMatch))
         return false;
-      }
+      continue;
+    }
+
+    // If looking for an exact match check all columns; otherwise only check
+    // key columns
+    if (!exactMatch && !column.isKey())
+      continue;
+
+    // Ok, compare the values
+    if (newValue != oldValue) {
+      return false;
     }
   }
 

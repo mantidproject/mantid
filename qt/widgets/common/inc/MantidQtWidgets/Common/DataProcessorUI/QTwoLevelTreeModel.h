@@ -115,7 +115,8 @@ private slots:
 private:
   void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
-  bool runListsMatch(const QString &newValue, const QString &oldValue,
+  std::string cellValue(int groupIndex, int rowIndex, int columnIndex) const;
+  bool runListsMatch(const std::string &newValue, const std::string &oldValue,
                      const bool exactMatch) const;
   bool rowMatches(int groupIndex, int rowIndex,
                   const std::map<QString, QString> &rowValues,
@@ -137,6 +138,8 @@ private:
   QVariant getDisplayRole(const QModelIndex &index) const;
   QVariant getBackgroundRole(const QModelIndex &index) const;
   QVariant getToolTipRole(const QModelIndex &index) const;
+
+  RowData_sptr rowData(int groupIndex, int rowIndex) const;
 
   /// List of all groups ordered by the group's position in the tree
   std::vector<GroupInfo> m_groups;
