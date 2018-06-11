@@ -9,14 +9,18 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory,
                         FileProperty, FileAction,
                         MultipleFileProperty, WorkspaceProperty,
-                        PropertyMode, Progress)
+                        PropertyMode, Progress,
+                        MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty)
 from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CropWorkspace, LoadInstrument,
                               SetGoniometer, SetUB, ConvertToMD,
                               MDNormSCD, DivideMD, MinusMD, Load,
                               DeleteWorkspace, RenameWorkspaces,
                               CreateSingleValuedWorkspace, LoadNexus,
-                              MultiplyMD, LoadIsawDetCal, LoadMask)
+                              MultiplyMD, LoadIsawDetCal, LoadMask,
+                              CopyInstrumentParameters,
+                              ApplyCalibration)
 from mantid.geometry import SpaceGroupFactory, SymmetryOperationFactory
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction, Property
 from mantid import logger
@@ -86,9 +90,17 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="LoadInstrument",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]),
                              "Load a different instrument IDF onto the data from a file. See :ref:`LoadInstrument <algm-LoadInstrument>`")
+        self.declareProperty(ITableWorkspaceProperty("ApplyCalibration", '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='Calibration will be applied using this TableWorkspace using ApplyCalibration.')
         self.declareProperty(FileProperty(name="DetCal",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".detcal"]),
                              "Load an ISAW DetCal calibration onto the data from a file. See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`")
+        self.declareProperty(MatrixWorkspaceProperty("CopyInstrumentParameters", '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc='The input workpsace from which CopyInstrumentParameters will copy parameters to data')
         self.declareProperty(FileProperty(name="MaskFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml",".msk"]),
                              "Masking file for masking. Supported file format is XML and ISIS ASCII. See :ref:`LoadMask <algm-LoadMask>`")
@@ -139,7 +151,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         # Corrections
         self.setPropertyGroup("LoadInstrument","Corrections")
+        self.setPropertyGroup("ApplyCalibration","Corrections")
         self.setPropertyGroup("DetCal","Corrections")
+        self.setPropertyGroup("CopyInstrumentParameters","Corrections")
         self.setPropertyGroup("MaskFile","Corrections")
 
         # Projection and binning
@@ -172,7 +186,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         _background = bool(self.getProperty("Background").value)
         _load_inst = bool(self.getProperty("LoadInstrument").value)
+        _apply_cal = bool(self.getProperty("ApplyCalibration").value)
         _detcal = bool(self.getProperty("DetCal").value)
+        _copy_params = bool(self.getProperty("CopyInstrumentParameters").value)
         _masking = bool(self.getProperty("MaskFile").value)
         _outWS_name = self.getPropertyValue("OutputWorkspace")
 
@@ -220,8 +236,12 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                  FilterByTofMax=self.getProperty("FilterByTofMax").value)
             if _load_inst:
                 LoadInstrument(Workspace='__bkg', Filename=self.getProperty("LoadInstrument").value, RewriteSpectraMap=False)
+            if _apply_cal:
+                ApplyCalibration(Workspace='__bkg', PositionTable=self.getProperty("ApplyCalibration").value)
             if _detcal:
                 LoadIsawDetCal(InputWorkspace='__bkg', Filename=self.getProperty("DetCal").value)
+            if _copy_params:
+                CopyInstrumentParameters(OutputWorkspace='__bkg', InputWorkspace=self.getProperty("CopyInstrumentParameters").value)
             MaskDetectors(Workspace='__bkg',MaskedWorkspace='__sa')
             ConvertUnits(InputWorkspace='__bkg',OutputWorkspace='__bkg',Target='Momentum')
             CropWorkspace(InputWorkspace='__bkg',OutputWorkspace='__bkg',XMin=XMin,XMax=XMax)
@@ -237,8 +257,12 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                  FilterByTofMax=self.getProperty("FilterByTofMax").value)
             if _load_inst:
                 LoadInstrument(Workspace='__run', Filename=self.getProperty("LoadInstrument").value, RewriteSpectraMap=False)
+            if _apply_cal:
+                ApplyCalibration(Workspace='__run', PositionTable=self.getProperty("ApplyCalibration").value)
             if _detcal:
                 LoadIsawDetCal(InputWorkspace='__run', Filename=self.getProperty("DetCal").value)
+            if _copy_params:
+                CopyInstrumentParameters(OutputWorkspace='__run', InputWorkspace=self.getProperty("CopyInstrumentParameters").value)
             MaskDetectors(Workspace='__run',MaskedWorkspace='__sa')
             ConvertUnits(InputWorkspace='__run',OutputWorkspace='__run',Target='Momentum')
             CropWorkspace(InputWorkspace='__run',OutputWorkspace='__run',XMin=XMin,XMax=XMax)
