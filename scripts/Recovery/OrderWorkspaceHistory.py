@@ -2,7 +2,6 @@ from __future__ import print_function
 import csv
 from os import listdir
 from os.path import isfile, join
-import datetime
 
 
 def _concatenate_iso_datetime(date_time):
