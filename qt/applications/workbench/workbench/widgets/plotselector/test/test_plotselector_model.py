@@ -55,6 +55,34 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model = PlotSelectorModel(self.presenter, self.global_figure_manager)
         self.model.plot_list = ["Plot1", "Plot2"]
 
+    # ------------------------ Plot Updates ------------------------
+
+    def test_append_to_plot_list(self):
+        self.model.append_to_plot_list("Plot3")
+        self.assertEqual(self.model.plot_list, ["Plot1", "Plot2", "Plot3"])
+
+    def test_append_to_plot_list_with_duplicate_name_raises_name_error(self):
+        self.assertRaises(NameError, self.model.append_to_plot_list, "Plot1")
+
+    def remove_from_plot_list(self):
+        self.model.remove_from_plot_list("Plot1")
+        self.assertEqual(self.model.plot_list, ["Plot2"])
+
+    def test_remove_from_plot_list_with_nonexistent_name_raises_name_error(self):
+        self.assertRaises(NameError, self.model.remove_from_plot_list, "NotAPlot")
+
+    def test_rename_plot(self):
+        self.model.rename_in_plot_list("NewName", "Plot1")
+        self.assertEqual(self.model.plot_list, ["NewName", "Plot2"])
+
+    def test_rename_giving_invalid_old_name_raises_name_error(self):
+        self.assertRaises(NameError, self.model.rename_in_plot_list, "NewName", "NotAPlot")
+        self.assertEqual(self.model.plot_list, ["Plot1", "Plot2"])
+
+    def test_rename_giving_duplicate_new_name_raises_name_error(self):
+        self.assertRaises(NameError, self.model.rename_in_plot_list, "Plot2", "Plot1")
+        self.assertEqual(self.model.plot_list, ["Plot1", "Plot2"])
+
     def test_observer_added_during_setup(self):
         self.assertEqual(self.global_figure_manager.add_observer.call_count, 1)
 
@@ -62,25 +90,41 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.notify(FigureAction.New, "Plot1")
         self.presenter.append_to_plot_list.assert_called_once_with("Plot1")
 
+    def test_notify_for_closed_plot_calls_removed_in_presenter(self):
+        self.model.notify(FigureAction.Closed, "Plot1")
+        self.presenter.remove_from_plot_list.assert_called_once_with("Plot1")
+
+    def test_notify_for_renamed_plot_calls_rename_in_presenter(self):
+        self.model.notify(FigureAction.Renamed, ("Plot1", "Plot2"))
+        self.presenter.rename_in_plot_list.assert_called_once_with("Plot1", "Plot2")
+
+    def test_notify_unknwon_updates_plot_list_in_presenter(self):
+        self.model.notify(FigureAction.Unknown, "")
+        self.presenter.update_plot_list.assert_called_once_with()
+
+    # ------------------------ Plot Closing -------------------------
+
     def test_notify_for_closing_plot_calls_remove_in_presenter(self):
         self.model.notify(FigureAction.Closed, "Plot1")
         self.presenter.remove_from_plot_list.assert_called_once_with("Plot1")
+
+    def test_close_plot_for_invalid_name_raises_name_error(self):
+        self.assertRaises(NameError, self.model.close_plot, "NotAPlot")
+        self.global_figure_manager.destroy.assert_not_called()
+
+    def test_close_plot_calls_destroy_in_current_figure(self):
+        self.model.close_plot("Plot1")
+        self.global_figure_manager.destroy.assert_called_once_with(42)
+
+    # ---------------------- Plot Activation ------------------------
 
     def test_make_plot_active_calls_current_figure(self):
         self.model.make_plot_active("Plot1")
         self.assertEqual(self.figure_manager.show.call_count, 1)
 
     def test_make_plot_active_for_invalid_name_does_nothing(self):
-        self.model.make_plot_active("NotAPlot")
+        self.assertRaises(NameError, self.model.make_plot_active, "NotAPlot")
         self.figure_manager.show.assert_not_called()
-
-    def test_close_plot_calls_destroy_in_current_figure(self):
-        self.model.close_plot("Plot1")
-        self.global_figure_manager.destroy.assert_called_once_with(42)
-
-    def test_close_plot_for_invalid_name_does_noting(self):
-        self.model.close_plot("NotAPlot")
-        self.global_figure_manager.destroy.assert_not_called()
 
 
 if __name__ == '__main__':

@@ -50,6 +50,8 @@ class PlotSelectorPresenter(object):
         # Make sure the plot list is up to date
         self.update_plot_list()
 
+    # ------------------------ Plot Updates ------------------------
+
     def update_plot_list(self):
         """
         Updates the plot list in the model and the view. Filter text
@@ -63,16 +65,38 @@ class PlotSelectorPresenter(object):
             self._filter_plot_list_by_string(filter_text)
 
     def append_to_plot_list(self, plot_name):
-        self.model.append_to_plot_list(plot_name)
-        self.view.append_to_plot_list(plot_name)
+        """
+        Appends the plot name to the end of the plot list
+        :param plot_name: The name of the plot
+        """
+        try:
+            self.model.append_to_plot_list(plot_name)
+            self.view.append_to_plot_list(plot_name)
+        except NameError as e:
+            print(e)
 
     def remove_from_plot_list(self, plot_name):
-        self.model.remove_from_plot_list(plot_name)
-        self.view.remove_from_plot_list(plot_name)
+        """
+        Removes the plot name from the plot list
+        :param plot_name: The name of the plot
+        """
+        try:
+            self.model.remove_from_plot_list(plot_name)
+            self.view.remove_from_plot_list(plot_name)
+        except NameError as e:
+            print(e)
 
     def rename_in_plot_list(self, new_name, old_name):
-        self.model.replace_in_plot_list(new_name, old_name)
-        self.view.rename_in_plot_list(new_name, old_name)
+        """
+        Replaces a name in the plot list
+        :param new_name: The new plot name
+        :param old_name: The name of the plot to be replaced
+        """
+        try:
+            self.model.rename_in_plot_list(new_name, old_name)
+            self.view.rename_in_plot_list(new_name, old_name)
+        except NameError as e:
+            print(e)
 
     # ------------------------ Plot Closing -------------------------
 
@@ -98,7 +122,10 @@ class PlotSelectorPresenter(object):
         :param list_of_plots: A list of strings containing plot names
         """
         for plot_name in list_of_plots:
-            self.model.close_plot(plot_name)
+            try:
+                self.model.close_plot(plot_name)
+            except NameError as e:
+                print(e)
 
     # ----------------------- Plot Filtering ------------------------
 
@@ -125,7 +152,7 @@ class PlotSelectorPresenter(object):
                     filtered_plot_list.append(plot_name)
             self.view.set_plot_list(filtered_plot_list)
 
-    # ----------------------- Plot Selection ------------------------
+    # ---------------------- Plot Activation ------------------------
 
     def list_double_clicked(self):
         """

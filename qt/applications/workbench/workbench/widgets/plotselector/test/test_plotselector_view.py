@@ -38,22 +38,54 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
         self.view = PlotSelectorView(self.presenter)
 
-    def get_widget_by_row_number(self, row_number):
+    def get_NameWidget_by_row_number(self, row_number):
         item = self.view.list_widget.item(row_number)
         return self.view.list_widget.itemWidget(item)
+
+    def assert_list_of_plots_is_set_in_widget(self, plot_names):
+        self.assertEqual(len(plot_names), len(self.view.list_widget))
+        for index in range(len(self.view.list_widget)):
+            widget = self.get_NameWidget_by_row_number(index)
+            self.assertEqual(widget.label.text(), plot_names[index])
+
+    # ------------------------ Plot Updates ------------------------
 
     def test_setting_plot_names_sets_names_in_list_view(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        for index in range(len(self.view.list_widget)):
-            widget = self.get_widget_by_row_number(index)
-            self.assertEqual(widget.label.text(), plot_names[index])
+        self.assert_list_of_plots_is_set_in_widget(plot_names)
 
     def test_setting_plot_names_to_empty_list(self):
         plot_names = []
         self.view.set_plot_list(plot_names)
         self.assertEqual(len(self.view.list_widget), 0)
+
+    def test_appending_to_plot_list(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.view.append_to_plot_list("Plot4")
+
+        self.assert_list_of_plots_is_set_in_widget(plot_names + ["Plot4"])
+
+    def test_removing_from_to_plot_list(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.view.remove_from_plot_list("Plot2")
+
+        self.assert_list_of_plots_is_set_in_widget(["Plot1", "Plot3"])
+
+    def test_renaming_in_plot_list(self):
+        plot_names = ["Plot1", "Plot2", "Plot3"]
+        self.view.set_plot_list(plot_names)
+
+        self.view.rename_in_plot_list("Graph99", "Plot2")
+
+        self.assert_list_of_plots_is_set_in_widget(["Plot1", "Graph99", "Plot3"])
+
+    # ----------------------- Plot Selection ------------------------
 
     def test_getting_all_selected_plot_names(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
@@ -105,7 +137,7 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        widget = self.get_widget_by_row_number(1)
+        widget = self.get_NameWidget_by_row_number(1)
         QTest.mouseClick(widget.x_button, Qt.LeftButton)
         self.presenter.close_single_plot.assert_called_once_with("Plot2")
 
@@ -115,12 +147,12 @@ class PlotSelectorWidgetTest(unittest.TestCase):
 
         # Set the selected items by clicking with control held
         for row in [0, 2]:
-            widget = self.get_widget_by_row_number(row)
+            widget = self.get_NameWidget_by_row_number(row)
             QTest.mouseClick(widget, Qt.LeftButton, Qt.ControlModifier)
         plots_selected_old = self.view.get_all_selected_plot_names()
         self.assertEquals(plots_selected_old, ["Plot1", "Plot3"])
 
-        widget = self.get_widget_by_row_number(1)
+        widget = self.get_NameWidget_by_row_number(1)
         QTest.mouseClick(widget.x_button, Qt.LeftButton)
 
         # We need to actually update the plot list, as the presenter would
@@ -142,14 +174,14 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.assertEquals(self.presenter.filter_text_changed.call_count, 1)
         self.assertEquals(self.view.get_filter_text(), 'plot1')
 
-    # ----------------------- Plot Selection ------------------------
+    # ---------------------- Plot Activation ------------------------
 
     def test_plot_name_double_clicked_calls_presenter_and_makes_plot_current(self):
         plot_names = ["Plot1", "Plot2", "Plot3"]
         self.view.set_plot_list(plot_names)
 
-        model_index = self.view.list_widget.model().index(1, 0)
-        item_center = self.view.list_widget.visualRect(model_index).center()
+        item = self.view.list_widget.item(1)
+        item_center = self.view.list_widget.visualItemRect(item).center()
         # This single click should not be required, but otherwise the double click is not registered
         QTest.mouseClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)
         QTest.mouseDClick(self.view.list_widget.viewport(), Qt.LeftButton, pos=item_center)

@@ -109,8 +109,10 @@ class PlotSelectorView(QWidget):
         list_widget.installEventFilter(self)
         return list_widget
 
+    # ------------------------ Plot Updates ------------------------
+
     def _add_to_plot_list(self, plot_name):
-        real_item = WidgetItemWithCloseButton(self.presenter, plot_name)
+        real_item = NameWidgetWithCloseButton(self.presenter, plot_name)
         widget_item = QListWidgetItem()
         size_hint = real_item.sizeHint()
         widget_item.setSizeHint(size_hint)
@@ -129,7 +131,7 @@ class PlotSelectorView(QWidget):
     def append_to_plot_list(self, plot_name):
         self._add_to_plot_list(plot_name)
 
-    def get_row_and_widget_from_label_text(self, label_text):
+    def _get_row_and_widget_from_label_text(self, label_text):
         for row in range(len(self.list_widget)):
             item = self.list_widget.item(row)
             widget = self.list_widget.itemWidget(item)
@@ -137,14 +139,16 @@ class PlotSelectorView(QWidget):
                 return row, widget
 
     def remove_from_plot_list(self, plot_name):
-        row, widget = self.get_row_and_widget_from_label_text(plot_name)
+        row, widget = self._get_row_and_widget_from_label_text(plot_name)
         taken_item = self.list_widget.takeItem(row)
         del taken_item
         return
 
     def rename_in_plot_list(self, new_name, old_name):
-        row, widget = self.get_row_and_widget_from_label_text(old_name)
+        row, widget = self._get_row_and_widget_from_label_text(old_name)
         widget.label.setText(new_name)
+
+    # ----------------------- Plot Selection ------------------------
 
     def get_all_selected_plot_names(self):
         """
@@ -179,9 +183,9 @@ class PlotSelectorView(QWidget):
         return self.filter_box.text()
 
 
-class WidgetItemWithCloseButton(QWidget):
+class NameWidgetWithCloseButton(QWidget):
     def __init__(self, presenter, text="", parent=None):
-        super(WidgetItemWithCloseButton, self).__init__(parent)
+        super(NameWidgetWithCloseButton, self).__init__(parent)
 
         self.presenter = presenter
 
@@ -189,7 +193,6 @@ class WidgetItemWithCloseButton(QWidget):
         self.x_icon = QIcon.fromTheme('window-close')
         self.x_button = QPushButton(self.x_icon, "")
         self.x_button.setFlat(True)
-        self.x_button.sizeHint()
         self.x_button.setMaximumWidth(self.x_button.sizeHint().width())
         self.x_button.pressed.connect(lambda: self.x_pressed(self.label.text()))
 
