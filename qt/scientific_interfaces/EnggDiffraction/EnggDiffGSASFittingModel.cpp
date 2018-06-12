@@ -238,13 +238,14 @@ void EnggDiffGSASFittingModel::processRefinementFailed(
 }
 
 void EnggDiffGSASFittingModel::processRefinementSuccessful(
-    API::IAlgorithm_sptr alg,
+    API::IAlgorithm_sptr successfulAlgorithm,
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   addFitResultsToMaps(refinementResults.runLabel, refinementResults.rwp,
                       refinementResults.sigma, refinementResults.gamma,
                       refinementResults.latticeParamsWS);
   if (m_observer) {
-    m_observer->notifyRefinementSuccessful(alg, refinementResults);
+    m_observer->notifyRefinementSuccessful(successfulAlgorithm,
+                                           refinementResults);
   }
 }
 
