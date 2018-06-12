@@ -179,10 +179,10 @@ class PyChopGui(QtGui.QMainWindow):
             self.setEi()
             self.setFreq()
             self.calculate()
-            self.plot_res()
-            self.plot_frame()
             if self.errormess:
                 raise ValueError(self.errormess)
+            self.plot_res()
+            self.plot_frame()
             if self.instSciAct.isChecked():
                 self.update_script()
         except ValueError as err:
@@ -204,7 +204,7 @@ class PyChopGui(QtGui.QMainWindow):
                 warnings.simplefilter('always', UserWarning)
                 self.res = self.engine.getMultiRepResolution(en)
                 self.flux = self.engine.getMultiRepFlux()
-                if len(w) > 1:
+                if len(w) > 0:
                     mess = [str(w[i].message) for i in range(len(w))]
                     self.errormess = '\n'.join([m for m in mess if 'tchop' in m])
         else:
@@ -213,7 +213,7 @@ class PyChopGui(QtGui.QMainWindow):
                 warnings.simplefilter('always', UserWarning)
                 self.res = self.engine.getResolution(en)
                 self.flux = self.engine.getFlux()
-                if len(w) > 1:
+                if len(w) > 0:
                     raise ValueError(w[0].message)
 
     def _set_overplot(self, overplot, axisname):

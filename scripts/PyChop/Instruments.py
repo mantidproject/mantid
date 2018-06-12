@@ -45,7 +45,7 @@ def _check_input(self, *args):
     vtype = ['Incident energy', 'Frequency']
     defval = [self.ei, self.frequency]
     retval = [defval[i] if args[i] is None else args[i] for i in range(min([len(defval), len(args)]))]
-    if not all(retval):
+    if [v for v in retval if v is None]:
         raise ValueError('%s has not been specified.' % (vtype[[i for i in range(len(retval)) if retval[i] is None][0]]))
     return tuple(retval) if len(retval) > 1 else retval[0]
 
