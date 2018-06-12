@@ -432,10 +432,10 @@ void ISISEnergyTransfer::mappingOptionSelected(const QString &groupType) {
     m_uiForm.swGrouping->setCurrentIndex(0);
   } else if (groupType == "Groups") {
     m_uiForm.swGrouping->setCurrentIndex(1);
-  } else if (groupType =="Custom") {
+  } else if (groupType == "Custom") {
     m_uiForm.swGrouping->setCurrentIndex(2);
   } else
-      m_uiForm.swGrouping->setCurrentIndex(3);
+    m_uiForm.swGrouping->setCurrentIndex(3);
 }
 
 /**
@@ -477,8 +477,7 @@ ISISEnergyTransfer::createMapFile(const QString &groupType) {
     return qMakePair(QString("Workspace"), groupWS);
   } else if (groupType == "Default") {
     return qMakePair(QString("IPF"), QString());
-  }
-  else if (groupType == "Custom") {
+  } else if (groupType == "Custom") {
     return qMakePair(QString("Custom"), m_uiForm.leCustomGroups->text());
   } else {
     // Catch All and Individual
