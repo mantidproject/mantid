@@ -46,7 +46,7 @@ double computeAverageDeltaTByT(const HistogramData::HistogramX &tValues) {
 std::string generateBankHeader(int bank, int minT, size_t numberBins,
                                double deltaTByT) {
   std::stringstream stream;
-  const auto numberLines = (int)std::ceil((double)numberBins / POINTS_PER_LINE);
+  const auto numberLines = numberBins / POINTS_PER_LINE;
 
   stream << std::setprecision(2) << "BANK " << bank << " " << numberBins << "  "
          << numberLines << " RALF  " << minT << "  96  " << minT << " "
