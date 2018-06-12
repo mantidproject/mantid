@@ -6,6 +6,7 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
+* @param group :: [input] The group on the parent tab this belongs to
 * @param parent :: [input] The parent of this widget
 */
 QtReflEventView::QtReflEventView(int group, QWidget *parent) {
