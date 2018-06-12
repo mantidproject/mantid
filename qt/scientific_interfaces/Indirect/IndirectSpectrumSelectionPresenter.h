@@ -47,9 +47,6 @@ public:
   ~IndirectSpectrumSelectionPresenter() override;
   UserInputValidator &validate(UserInputValidator &validator);
 
-  void disableView();
-  void enableView();
-
 signals:
   void spectraChanged(std::size_t);
   void maskChanged(const std::string &);
@@ -61,6 +58,8 @@ public slots:
   void setActiveIndexToZero();
   void updateSpectra();
   void displayBinMask();
+  void disableView();
+  void enableView();
 
 private slots:
   void setBinMask(const std::string &maskString);
