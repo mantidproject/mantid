@@ -106,6 +106,13 @@ void IndirectSpectrumSelectionView::setMaskSelectionEnabled(bool enabled) {
   m_selector->leMaskBins->setEnabled(enabled);
 }
 
+void IndirectSpectrumSelectionView::clear() {
+  m_selector->leSpectra->clear();
+  m_selector->leMaskBins->clear();
+  m_selector->cbMaskSpectrum->clear();
+  setSpectraRange(0, 0);
+}
+
 void IndirectSpectrumSelectionView::setSpectraRegex(const std::string &regex) {
   m_selector->leSpectra->setValidator(
       createValidator(QString::fromStdString(regex)));
