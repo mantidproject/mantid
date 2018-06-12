@@ -54,22 +54,25 @@ class PlotSelectorModel(object):
 
     def append_to_plot_list(self, plot_name):
         if plot_name in self.plot_list:
-            raise NameError('Error, name {} already in use.'.format(plot_name))
+            raise ValueError('Error appending, name {} already in use.'.format(plot_name))
 
         self.plot_list.append(plot_name)
 
     def remove_from_plot_list(self, plot_name):
         if plot_name not in self.plot_list:
-            raise NameError('Error, could not find a plot with the name {}.'.format(plot_name))
+            raise ValueError('Error removing, could not find a plot with the name {}.'.format(plot_name))
 
         self.plot_list.remove(plot_name)
 
     def rename_in_plot_list(self, new_name, old_name):
         if old_name not in self.plot_list:
-            raise NameError('Error, could not find a plot with the name {}.'.format(old_name))
+            raise ValueError('Error renaming, could not find a plot with the name {}.'.format(old_name))
 
         if new_name in self.plot_list:
-            raise NameError('Error, name {} already in use.'.format(new_name))
+            raise ValueError('Error renaming, name {} already in use.'.format(new_name))
+
+        if new_name == old_name:
+            raise ValueError('Error renaming, old name and new name the same: {}.'.format(new_name))
 
         self.plot_list = [new_name if plot_name == old_name else plot_name for plot_name in self.plot_list]
 
@@ -100,7 +103,8 @@ class PlotSelectorModel(object):
                           (figure title)
         """
         if plot_name not in self.plot_list:
-            raise NameError('Error, could not find a plot with the name {}.'.format(plot_name))
+            print(self.plot_list)
+            raise ValueError('Error closing, could not find a plot with the name {}.'.format(plot_name))
 
         figure_number_to_close = self.GlobalFigureManager.get_figure_number_from_name(plot_name)
         if figure_number_to_close is not None:
@@ -116,10 +120,10 @@ class PlotSelectorModel(object):
                           (figure title)
         """
         if plot_name not in self.plot_list:
-            raise NameError('Error, could not find a plot with the name {}.'.format(plot_name))
+            raise ValueError('Error, could not find a plot with the name {}.'.format(plot_name))
 
         figure_manager = self.GlobalFigureManager.get_figure_manager_from_name(plot_name)
         if figure_manager is not None:
             figure_manager.show()
         else:
-            raise NameError('Error, could not find a plot with the name {}.'.format(plot_name))
+            raise ValueError('Error, could not find a plot with the name {}.'.format(plot_name))

@@ -61,26 +61,30 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.append_to_plot_list("Plot3")
         self.assertEqual(self.model.plot_list, ["Plot1", "Plot2", "Plot3"])
 
-    def test_append_to_plot_list_with_duplicate_name_raises_name_error(self):
-        self.assertRaises(NameError, self.model.append_to_plot_list, "Plot1")
+    def test_append_to_plot_list_with_duplicate_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.append_to_plot_list, "Plot1")
 
     def remove_from_plot_list(self):
         self.model.remove_from_plot_list("Plot1")
         self.assertEqual(self.model.plot_list, ["Plot2"])
 
-    def test_remove_from_plot_list_with_nonexistent_name_raises_name_error(self):
-        self.assertRaises(NameError, self.model.remove_from_plot_list, "NotAPlot")
+    def test_remove_from_plot_list_with_nonexistent_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.remove_from_plot_list, "NotAPlot")
 
     def test_rename_plot(self):
         self.model.rename_in_plot_list("NewName", "Plot1")
         self.assertEqual(self.model.plot_list, ["NewName", "Plot2"])
 
-    def test_rename_giving_invalid_old_name_raises_name_error(self):
-        self.assertRaises(NameError, self.model.rename_in_plot_list, "NewName", "NotAPlot")
+    def test_rename_giving_invalid_old_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.rename_in_plot_list, "NewName", "NotAPlot")
         self.assertEqual(self.model.plot_list, ["Plot1", "Plot2"])
 
-    def test_rename_giving_duplicate_new_name_raises_name_error(self):
-        self.assertRaises(NameError, self.model.rename_in_plot_list, "Plot2", "Plot1")
+    def test_rename_giving_duplicate_new_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.rename_in_plot_list, "Plot2", "Plot1")
+        self.assertEqual(self.model.plot_list, ["Plot1", "Plot2"])
+
+    def test_rename_new_and_old_equal_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.rename_in_plot_list, "Plot1", "Plot1")
         self.assertEqual(self.model.plot_list, ["Plot1", "Plot2"])
 
     def test_observer_added_during_setup(self):
@@ -108,8 +112,8 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.model.notify(FigureAction.Closed, "Plot1")
         self.presenter.remove_from_plot_list.assert_called_once_with("Plot1")
 
-    def test_close_plot_for_invalid_name_raises_name_error(self):
-        self.assertRaises(NameError, self.model.close_plot, "NotAPlot")
+    def test_close_plot_for_invalid_name_raises_value_error(self):
+        self.assertRaises(ValueError, self.model.close_plot, "NotAPlot")
         self.global_figure_manager.destroy.assert_not_called()
 
     def test_close_plot_calls_destroy_in_current_figure(self):
@@ -123,7 +127,7 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.assertEqual(self.figure_manager.show.call_count, 1)
 
     def test_make_plot_active_for_invalid_name_does_nothing(self):
-        self.assertRaises(NameError, self.model.make_plot_active, "NotAPlot")
+        self.assertRaises(ValueError, self.model.make_plot_active, "NotAPlot")
         self.figure_manager.show.assert_not_called()
 
 

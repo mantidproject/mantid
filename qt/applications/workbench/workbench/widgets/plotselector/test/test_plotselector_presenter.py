@@ -69,7 +69,7 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.view.append_to_plot_list.assert_called_once_with("Plot4")
 
     def test_append_to_plot_list_with_error_on_model_does_not_update_view(self):
-        self.model.append_to_plot_list.side_effect = NameError("Some problem")
+        self.model.append_to_plot_list.side_effect = ValueError("Some problem")
         self.presenter.append_to_plot_list("Plot1")
         self.model.append_to_plot_list.assert_called_once_with("Plot1")
         self.view.append_to_plot_list.assert_not_called()
@@ -80,20 +80,25 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.view.remove_from_plot_list.assert_called_once_with("Plot1")
 
     def test_remove_from_plot_with_error_on_model_does_not_update_view(self):
-        self.model.remove_from_plot_list.side_effect = NameError("Some problem")
+        self.model.remove_from_plot_list.side_effect = ValueError("Some problem")
         self.presenter.remove_from_plot_list("Plot1")
         self.model.remove_from_plot_list.assert_called_once_with("Plot1")
         self.view.remove_from_plot_list.assert_not_called()
 
-    def test_replace_in_plot_list_calls_update_in_model_and_view(self):
+    def test_rename_in_plot_list_calls_update_in_model_and_view(self):
         self.presenter.rename_in_plot_list("Plot4", "Plot1")
         self.model.rename_in_plot_list.assert_called_once_with("Plot4", "Plot1")
         self.view.rename_in_plot_list.assert_called_once_with("Plot4", "Plot1")
 
-    def test_replace_in_plot_list_with_error_from_model_does_no_update_view(self):
-        self.model.rename_in_plot_list.side_effect = NameError("Some problem")
+    def test_rename_in_plot_list_with_error_from_model_does_no_update_view(self):
+        self.model.rename_in_plot_list.side_effect = ValueError("Some problem")
         self.presenter.rename_in_plot_list("Plot4", "Plot1")
         self.model.rename_in_plot_list.assert_called_once_with("Plot4", "Plot1")
+        self.view.rename_in_plot_list.assert_not_called()
+
+    def test_rename_in_plot_list_with_same_old_and_new_name_does_nothing(self):
+        self.presenter.rename_in_plot_list("Plot1", "Plot1")
+        self.model.rename_in_plot_list.assert_not_called()
         self.view.rename_in_plot_list.assert_not_called()
 
     # ------------------------ Plot Closing -------------------------
@@ -112,9 +117,9 @@ class PlotSelectorPresenterTest(unittest.TestCase):
         self.model.close_plot.assert_has_calls(self.convert_list_to_calls(["Plot1", "Plot3"]),
                                                any_order=True)
 
-    def test_close_action_with_model_call_raising_name_error(self):
+    def test_close_action_with_model_call_raising_value_error(self):
         self.view.get_all_selected_plot_names = mock.Mock(return_value=["Plot1"])
-        self.model.close_plot.side_effect = NameError("Some problem")
+        self.model.close_plot.side_effect = ValueError("Some problem")
 
         self.presenter.close_action_called()
         self.model.close_plot.assert_called_once_with("Plot1")

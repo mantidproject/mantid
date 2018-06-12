@@ -72,7 +72,7 @@ class PlotSelectorPresenter(object):
         try:
             self.model.append_to_plot_list(plot_name)
             self.view.append_to_plot_list(plot_name)
-        except NameError as e:
+        except ValueError as e:
             print(e)
 
     def remove_from_plot_list(self, plot_name):
@@ -83,7 +83,7 @@ class PlotSelectorPresenter(object):
         try:
             self.model.remove_from_plot_list(plot_name)
             self.view.remove_from_plot_list(plot_name)
-        except NameError as e:
+        except ValueError as e:
             print(e)
 
     def rename_in_plot_list(self, new_name, old_name):
@@ -92,10 +92,13 @@ class PlotSelectorPresenter(object):
         :param new_name: The new plot name
         :param old_name: The name of the plot to be replaced
         """
+        if new_name == old_name:
+            return
+
         try:
             self.model.rename_in_plot_list(new_name, old_name)
             self.view.rename_in_plot_list(new_name, old_name)
-        except NameError as e:
+        except ValueError as e:
             print(e)
 
     # ------------------------ Plot Closing -------------------------
@@ -124,7 +127,7 @@ class PlotSelectorPresenter(object):
         for plot_name in list_of_plots:
             try:
                 self.model.close_plot(plot_name)
-            except NameError as e:
+            except ValueError as e:
                 print(e)
 
     # ----------------------- Plot Filtering ------------------------

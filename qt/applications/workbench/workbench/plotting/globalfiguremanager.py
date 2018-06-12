@@ -247,7 +247,7 @@ class GlobalFigureManager(object):
 
     @classmethod
     def figure_title_changed(cls, old_title, new_title):
-        cls.notify_observers(FigureAction.Renamed, (old_title, new_title))
+        cls.notify_observers(FigureAction.Renamed, (new_title, old_title))
 
 
 atexit.register(GlobalFigureManager.destroy_all)
