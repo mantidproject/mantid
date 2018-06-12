@@ -55,6 +55,10 @@ public:
     return (1);
   } ///< @return version number of algorithm
 
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreatePSDBleedMask"};
+  }
+
 private:
   void init() override; ///< Initialise the algorithm. Declare properties, etc.
   void exec() override; ///< Executes the algorithm.

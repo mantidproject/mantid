@@ -254,8 +254,8 @@ public:
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -350,9 +350,9 @@ public:
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      std::cout << "Delete output workspace name: " << outputwsnames[i] << "\n";
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      std::cout << "Delete output workspace name: " << outputwsname << "\n";
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -435,8 +435,8 @@ public:
 
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -493,8 +493,8 @@ public:
     // Delete all the workspaces generated here
     AnalysisDataService::Instance().remove("MockDirectEventWS");
     AnalysisDataService::Instance().remove("SplitterTableX");
-    for (size_t i = 0; i < vecwsname.size(); ++i) {
-      AnalysisDataService::Instance().remove(vecwsname[i]);
+    for (const auto &workspaceName : vecwsname) {
+      AnalysisDataService::Instance().remove(workspaceName);
     }
 
     return;
@@ -544,8 +544,8 @@ public:
     AnalysisDataService::Instance().remove("SplitterTableX");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -608,8 +608,8 @@ public:
     AnalysisDataService::Instance().remove("MockIndirectEventWS");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -781,10 +781,10 @@ public:
     //  Test the sample logs
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+    for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr filtered_ws =
           boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-              AnalysisDataService::Instance().retrieve(outputwsnames[i]));
+              AnalysisDataService::Instance().retrieve(outputwsname));
 
       TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
       TS_ASSERT(filtered_ws->run().hasProperty("LogB"));
@@ -805,8 +805,8 @@ public:
     // clean up all the workspaces generated
     AnalysisDataService::Instance().remove("Test10");
     AnalysisDataService::Instance().remove("Splitter10");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -977,8 +977,8 @@ public:
     AnalysisDataService::Instance().remove("TableSplitter1");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -1033,10 +1033,10 @@ public:
 
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+    for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr childworkspace =
           boost::dynamic_pointer_cast<EventWorkspace>(
-              AnalysisDataService::Instance().retrieve(outputwsnames[i]));
+              AnalysisDataService::Instance().retrieve(outputwsname));
       TS_ASSERT(childworkspace);
       // there is 1 sample logs that is excluded from propagating to the child
       // workspaces. LogB is not TSP, so it won't be excluded even if it is
@@ -1051,8 +1051,8 @@ public:
     // clean workspaces
     AnalysisDataService::Instance().remove("Test12");
     AnalysisDataService::Instance().remove("TableSplitter2");
-    for (size_t i = 0; i < outputwsnames.size(); ++i) {
-      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
     }
 
     return;
@@ -1587,8 +1587,7 @@ public:
     // 2. Add rows
     const auto &detectorInfo = inpws->detectorInfo();
     const auto detids = detectorInfo.detectorIDs();
-    for (size_t i = 0; i < detids.size(); ++i) {
-      int detid = detids[i];
+    for (int detid : detids) {
       double factor = 0.75;
       TableRow newrow = corrtable->appendRow();
       newrow << detid << factor;

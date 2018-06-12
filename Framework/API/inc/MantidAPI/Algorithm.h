@@ -183,6 +183,9 @@ public:
   /// Function to return the separator token for the category string. A default
   /// implementation ';' is provided
   const std::string categorySeparator() const override { return ";"; }
+  /// Function to return all of the seeAlso (these are not validated) algorithms
+  /// related to this algorithm.A default implementation is provided.
+  const std::vector<std::string> seeAlso() const override { return {}; };
   /// function to return any aliases to the algorithm;  A default implementation
   /// is provided
   const std::string alias() const override { return ""; }

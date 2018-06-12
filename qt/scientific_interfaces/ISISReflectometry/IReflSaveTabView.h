@@ -38,14 +38,13 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport IReflSaveTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IReflSaveTabView {
 public:
   /// Constructor
   IReflSaveTabView(){};
   /// Destructor
   virtual ~IReflSaveTabView(){};
-  /// Returns the presenter managing this view
-  virtual IReflSaveTabPresenter *getPresenter() const = 0;
+  virtual void subscribe(IReflSaveTabPresenter *presenter) = 0;
 
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;
@@ -64,6 +63,17 @@ public:
   virtual void clearParametersList() const = 0;
   virtual void setWorkspaceList(const std::vector<std::string> &) const = 0;
   virtual void setParametersList(const std::vector<std::string> &) const = 0;
+  virtual void disallowAutosave() = 0;
+
+  virtual void disableAutosaveControls() = 0;
+  virtual void enableAutosaveControls() = 0;
+
+  virtual void enableFileFormatAndLocationControls() = 0;
+  virtual void disableFileFormatAndLocationControls() = 0;
+  virtual void giveUserCritical(const std::string &prompt,
+                                const std::string &title) = 0;
+  virtual void giveUserInfo(const std::string &prompt,
+                            const std::string &title) = 0;
 };
 }
 }

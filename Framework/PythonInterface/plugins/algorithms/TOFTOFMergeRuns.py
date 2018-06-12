@@ -27,6 +27,9 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         """
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Splitting"
 
+    def seeAlso(self):
+        return [ "TOFTOFCropWorkspace","CorrectTOF" ]
+
     def name(self):
         """ Return summary
         """

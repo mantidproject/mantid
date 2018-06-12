@@ -35,7 +35,7 @@ MantidTable::MantidTable(ScriptingEnv *env,
                            : static_cast<int>(ws->rowCount()),
             transpose ? static_cast<int>(ws->rowCount() + 1)
                       : static_cast<int>(ws->columnCount()),
-            label, parent, "", 0),
+            label, parent, "", nullptr),
       m_ws(ws), m_wsName(ws->getName()), m_transposed(transpose) {
   d_table->blockResizing(true);
 
@@ -297,10 +297,7 @@ void MantidTable::cellEdited(int row, int col) {
     oldText.remove(QRegExp("\\s"));
   }
 
-  if (c->type() == "str" || c->type() == "V3D") {
-    std::istringstream textStream(oldText.toStdString());
-    c->read(index, textStream);
-  } else {
+  if (c->isNumber()) {
     // We must be dealing with numerical data. Since there semms to be no way
     // convert between QLocale and std::locale, get the number out
     // of the Qt locale and put it into default std::locale format.
@@ -319,6 +316,9 @@ void MantidTable::cellEdited(int row, int col) {
                                     1) << number;
     std::istringstream stream(textStream.str());
     c->read(index, stream);
+  } else {
+    std::istringstream textStream(oldText.toStdString());
+    c->read(index, textStream);
   }
 }
 

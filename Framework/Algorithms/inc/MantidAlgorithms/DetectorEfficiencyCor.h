@@ -97,6 +97,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"He3TubeEfficiency", "DetectorEfficiencyCorUser"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\EfficiencyCorrections;Inelastic\\Corrections";

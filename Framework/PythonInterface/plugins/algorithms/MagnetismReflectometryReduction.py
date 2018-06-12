@@ -477,29 +477,42 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         """
         sample_length = self.getProperty("SampleLength").value
 
-        #TODO: Read the slit distances relative to the sample from the logs once
-        # they are available with the new DAS.
-        slits =[[ws.getRun().getProperty("S1HWidth").getStatistics().mean, 2600.],
-                [ws.getRun().getProperty("S2HWidth").getStatistics().mean, 2019.],
-                [ws.getRun().getProperty("S3HWidth").getStatistics().mean, 714.]]
-        theta = ws.getRun().getProperty("two_theta").value/2.0
+        # In newer data files, the slit distances are part of the logs
+        if ws.getRun().hasProperty("S1Distance"):
+            s1_dist = ws.getRun().getProperty("S1Distance").value
+            s2_dist = ws.getRun().getProperty("S2Distance").value
+            s3_dist = ws.getRun().getProperty("S3Distance").value
+        else:
+            s1_dist = -2600.
+            s2_dist = -2019.
+            s3_dist = -714.
+        slits =[[ws.getRun().getProperty("S1HWidth").getStatistics().mean, s1_dist],
+                [ws.getRun().getProperty("S2HWidth").getStatistics().mean, s2_dist],
+                [ws.getRun().getProperty("S3HWidth").getStatistics().mean, s3_dist]]
+        theta = ws.getRun().getProperty("two_theta").value/2.0 * np.pi / 180.0
         res=[]
-        s_width=sample_length*math.sin(theta)
+        s_width=sample_length*np.sin(theta)
         for width, dist in slits:
             # Calculate the maximum opening angle dTheta
             if s_width > 0.:
-                d_theta = math.atan((s_width/2.*(1.+width/s_width))/dist)*2.
+                d_theta = np.arctan((s_width/2.*(1.+width/s_width))/dist)*2.
             else:
-                d_theta = math.atan(width/2./dist)*2.
+                d_theta = np.arctan(width/2./dist)*2.
             # The standard deviation for a uniform angle distribution is delta/sqrt(12)
             res.append(d_theta*0.28867513)
 
-        dq_over_q = min(res) / math.tan(theta)
+        # Wavelength uncertainty
+        lambda_min = ws.getRun().getProperty("lambda_min").value
+        lambda_max = ws.getRun().getProperty("lambda_max").value
+        dq_over_q = min(res) / np.tan(theta)
 
         data_x = ws.dataX(0)
         data_dx = ws.dataDx(0)
+        dwl = (lambda_max - lambda_min) / len(data_x) / np.sqrt(12.0)
         for i in range(len(data_x)):
-            data_dx[i] = data_x[i] * dq_over_q
+            dq_theta = data_x[i] * dq_over_q
+            dq_wl = data_x[i]**2 * dwl / (4.0*np.pi*np.sin(theta))
+            data_dx[i] = np.sqrt(dq_theta**2 + dq_wl**2)
 
         return ws
 

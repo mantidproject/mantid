@@ -39,6 +39,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"CountReflections", "PredictFractionalPeaks"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -64,7 +67,8 @@ private:
 
   void calculateQAndAddToOutput(const Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
-                                const Kernel::DblMatrix &goniometerMatrix);
+                                const Kernel::DblMatrix &goniometerMatrix,
+                                int &seqNum);
 
 private:
   /// Get the predicted detector direction from Q

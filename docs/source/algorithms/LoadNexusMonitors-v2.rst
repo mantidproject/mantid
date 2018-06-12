@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -24,7 +24,7 @@ workspace. As a side-effect of the fix, the contained individual
 workspaces for each of the periods are named slightly differently.
 
 Event monitor and histogram monitor
-===================================
+###################################
 
 There are two types of monitors, event monitors and histograms monitors.
 Both of them are of class *NXmonitor* in NeXus file.
@@ -39,14 +39,14 @@ Both of them are of class *NXmonitor* in NeXus file.
    * period_index
 
 ISIS event monitor
-==================
+##################
 
 ISIS monitor of event mode may contain entry *data*.  In this case,
 the monitor of event mode can be loaded in histogram mode.
 
 
 Load NeXus file containing both event monitor and histogram monitor
-===================================================================
+###################################################################
 
 There are a few use cases to load monitor's data if the NeXus file has coexisting
 event monitors and histogram monitors.

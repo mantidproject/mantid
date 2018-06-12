@@ -233,6 +233,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
 
+        self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
+
         self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
 
         self.process_button.clicked.connect(self._on_python_process)
@@ -294,7 +296,15 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.output_mode_file_radio_button.toggled.connect(self._on_output_mode_changed)
         self.output_mode_both_radio_button.toggled.connect(self._on_output_mode_changed)
 
+        self.wavelength_stacked_widget.setCurrentIndex(0)
+
         return True
+
+    def _on_wavelength_step_type_changed(self):
+        if self.wavelength_step_type == RangeStepType.RangeLin or self.wavelength_step_type == RangeStepType.RangeLog:
+            self.wavelength_stacked_widget.setCurrentIndex(1)
+        else:
+            self.wavelength_stacked_widget.setCurrentIndex(0)
 
     def _on_output_mode_changed(self, state):
         self.data_processor_table.settingsChanged()
@@ -990,6 +1000,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def wavelength_step(self, value):
         self.update_simple_line_edit_field(line_edit="wavelength_step_line_edit", value=value)
 
+    @property
+    def wavelength_range(self):
+        return str(self.wavelength_slices_line_edit.text())
+
+    @wavelength_range.setter
+    def wavelength_range(self, value):
+        self.wavelength_slices.setText(value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Scale Group
     # ------------------------------------------------------------------------------------------------------------------
@@ -1503,6 +1521,24 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def q_resolution_moderator_file(self, value):
         self.update_simple_line_edit_field(line_edit="q_resolution_moderator_file_line_edit", value=value)
 
+    @property
+    def r_cut(self):
+        return self.get_simple_line_edit_field(line_edit="r_cut_line_edit",
+                                               expected_type=float)
+
+    @r_cut.setter
+    def r_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="r_cut_line_edit", value=value)
+
+    @property
+    def w_cut(self):
+        return self.get_simple_line_edit_field(line_edit="w_cut_line_edit",
+                                               expected_type=float)
+
+    @w_cut.setter
+    def w_cut(self, value):
+        self.update_simple_line_edit_field(line_edit="w_cut_line_edit", value=value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # MASK TAB
@@ -1612,6 +1648,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
         self.q_xy_step_line_edit.setValidator(positive_double_validator)
 
+        self.r_cut_line_edit.setValidator(positive_double_validator)
+        self.w_cut_line_edit.setValidator(positive_double_validator)
+
         self.gravity_extra_length_line_edit.setValidator(double_validator)
 
         self.q_resolution_source_a_line_edit.setValidator(positive_double_validator)
@@ -1646,6 +1685,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.wavelength_max_line_edit.setText("")
         self.wavelength_step_line_edit.setText("")
         self.wavelength_step_type_combo_box.setCurrentIndex(0)
+        self.wavelength_slices_line_edit.setText("")
 
         self.absolute_scale_line_edit.setText("")
         self.geometry_combo_box.setCurrentIndex(0)

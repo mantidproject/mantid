@@ -19,11 +19,6 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "PropertyManagerHelper.h"
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
@@ -42,7 +37,7 @@ private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
   size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
-    Mantid::API::IMDIterator *it = ws->createIterator(nullptr);
+    auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
     for (; counter < it->getDataSize(); ++counter) {
@@ -51,7 +46,6 @@ private:
       }
       it->next(1); // Doesn't perform skipping on masked, bins, but next() does.
     }
-    delete it;
     return numberMasked;
   }
 
@@ -238,42 +232,34 @@ public:
   //-------------------------------------------------------------------------------------
   /** Create an IMDIterator */
   void test_createIterator() {
-    MDEventWorkspace3 *ew = new MDEventWorkspace3();
+    auto ew = boost::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
-    IMDIterator *it = ew->createIterator();
+    auto it = ew->createIterator();
     TS_ASSERT(it);
     TS_ASSERT_EQUALS(it->getDataSize(), 4 * 4 * 4);
     TS_ASSERT(it->next());
-    delete it;
-    auto *mdfunction = new MDImplicitFunction();
-    it = ew->createIterator(mdfunction);
+    MDImplicitFunction mdfunction;
+    it = ew->createIterator(&mdfunction);
     TS_ASSERT(it);
     TS_ASSERT_EQUALS(it->getDataSize(), 4 * 4 * 4);
     TS_ASSERT(it->next());
-    delete mdfunction;
-    delete it;
-    delete ew;
   }
 
   //-------------------------------------------------------------------------------------
   /** Create several IMDIterators to run them in parallel */
   void test_createIterators() {
-    MDEventWorkspace3 *ew = new MDEventWorkspace3();
+    auto ew = boost::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
-    std::vector<IMDIterator *> iterators = ew->createIterators(3);
+    auto iterators = ew->createIterators(3);
     TS_ASSERT_EQUALS(iterators.size(), 3);
 
     TS_ASSERT_EQUALS(iterators[0]->getDataSize(), 21);
     TS_ASSERT_EQUALS(iterators[1]->getDataSize(), 21);
     TS_ASSERT_EQUALS(iterators[2]->getDataSize(), 22);
-
-    for (size_t i = 0; i < 3; ++i)
-      delete iterators[i];
-    delete ew;
   }
 
   //-------------------------------------------------------------------------------------

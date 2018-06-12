@@ -27,7 +27,7 @@ public:
 
     HardThresholdBackground strategy(threshold, Mantid::API::NoNormalization);
 
-    TS_ASSERT(strategy.isBackground(iterator));
+    TS_ASSERT(strategy.isBackground(iterator.get()));
   }
 };
 

@@ -14,6 +14,9 @@ class LoadMultipleGSS(PythonAlgorithm):
     def category(self):
         return "DataHandling\\Text"
 
+    def seeAlso(self):
+        return [ "LoadGSS" ]
+
     def name(self):
         return "LoadMultipleGSS"
 

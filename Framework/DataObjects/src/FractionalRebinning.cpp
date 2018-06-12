@@ -152,9 +152,9 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param y_start The starting y-axis index
- * @param y_end The starting y-axis index
+ * @param y_end The ending y-axis index
  * @param x_start The starting x-axis index
- * @param x_end The starting x-axis index
+ * @param x_end The ending x-axis index
  * @param areaInfo Output vector of indices and areas of overlapping bins
  */
 void calcTrapezoidYIntersections(
@@ -202,8 +202,8 @@ void calcTrapezoidYIntersections(
   // Step 1 - construct the left/right bin lims on the lines of the y-grid.
   const double NaN = std::numeric_limits<double>::quiet_NaN();
   const double DBL_EPS = std::numeric_limits<double>::epsilon();
-  std::vector<double> leftLim(nx * (ny + 1), NaN);
-  std::vector<double> rightLim(nx * (ny + 1), NaN);
+  std::vector<double> leftLim((nx + 1) * (ny + 1), NaN);
+  std::vector<double> rightLim((nx + 1) * (ny + 1), NaN);
   auto x0_it = xAxis.begin() + x_start;
   auto x1_it = xAxis.begin() + x_end + 1;
   auto y0_it = yAxis.begin() + y_start;
@@ -239,7 +239,7 @@ void calcTrapezoidYIntersections(
       auto right_it = std::upper_bound(x0_it, x1_it, right_val);
       if (right_it != x1_it) {
         rightLim[right_it - x0_it - 1 + yjx] = right_val;
-      } else if (yAxis[yj + y_start] < ur_y) {
+      } else if (yAxis[yj + y_start] < ur_y && nx > 0) {
         right_it = x1_it - 1;
         rightLim[nx - 1 + yjx] = lr_x;
       }
@@ -277,12 +277,15 @@ void calcTrapezoidYIntersections(
         left_it--;
       if (right_it == x1_it)
         right_it--;
-      size_t li = left_it - x0_it - 1;
+      size_t li = (left_it > x0_it) ? (left_it - x0_it - 1) : 0;
+      size_t ri = (right_it > x0_it) ? (right_it - x0_it - 1) : 0;
       leftLim[li + yjx] = (mTop >= 0) ? val : ll_x;
-      rightLim[right_it - x0_it - 1 + yjx] = (mTop >= 0) ? lr_x : val;
-      for (auto x_it = left_it; x_it != right_it; x_it++) {
-        leftLim[li + 1 + yjx] = *x_it;
-        rightLim[li++ + yjx] = *x_it;
+      rightLim[ri + yjx] = (mTop >= 0) ? lr_x : val;
+      if (left_it < right_it && right_it != x1_it) {
+        for (auto x_it = left_it; x_it != right_it; x_it++) {
+          leftLim[li + 1 + yjx] = *x_it;
+          rightLim[li++ + yjx] = *x_it;
+        }
       }
     }
   }

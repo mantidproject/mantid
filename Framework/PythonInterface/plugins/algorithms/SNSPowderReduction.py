@@ -138,6 +138,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 
+    def seeAlso(self):
+        return [ "DiffractionFocussing","AlignAndFocusPowder" ]
+
     def name(self):
         return "SNSPowderReduction"
 
@@ -201,7 +204,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. "
                              "Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
-        self.declareProperty("VanadiumRadius", .3175, "Radius for MultipleScatteringCylinderAbsorption")
+        self.declareProperty("VanadiumRadius", .3175, "Radius for CarpenterSampleCorrection")
         self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
 
         # filtering
@@ -1359,9 +1362,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.SetSampleMaterial(InputWorkspace=van_run_ws_name,
                                   ChemicalFormula="V",
                                   SampleNumberDensity=0.0721)
-            api.MultipleScatteringCylinderAbsorption(InputWorkspace=van_run_ws_name,
-                                                     OutputWorkspace=van_run_ws_name,
-                                                     CylinderSampleRadius=self._vanRadius)
+            api.CarpenterSampleCorrection(InputWorkspace=van_run_ws_name,
+                                          OutputWorkspace=van_run_ws_name,
+                                          CylinderSampleRadius=self._vanRadius)
 
             # convert unit to T.O.F.
             api.ConvertUnits(InputWorkspace=van_run_ws_name,

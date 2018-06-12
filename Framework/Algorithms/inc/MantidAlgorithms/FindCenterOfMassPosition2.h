@@ -50,6 +50,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (2); }
+
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
 

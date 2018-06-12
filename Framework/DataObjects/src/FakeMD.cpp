@@ -11,9 +11,6 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Utils.h"
 
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -66,7 +63,8 @@ void FakeMD::setupDetectorCache(const API::IMDEventWorkspace &workspace) {
     auto inst = workspace.getExperimentInfo(0)->getInstrument();
     m_detIDs = inst->getDetectorIDs(true); // true=skip monitors
     size_t max = m_detIDs.size() - 1;
-    m_uniformDist = boost::uniform_int<size_t>(0, max); // Includes max
+    m_uniformDist =
+        Kernel::uniform_int_distribution<size_t>(0, max); // Includes max
   } catch (std::invalid_argument &) {
   }
 }
@@ -89,11 +87,8 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Width of the peak
   double desiredRadius = m_peakParams.back();
 
-  boost::mt19937 rng;
-  boost::uniform_real<coord_t> u2(0, 1.0); // Random from 0 to 1.0
-  boost::variate_generator<boost::mt19937 &, boost::uniform_real<coord_t>>
-      genUnit(rng, u2);
-  rng.seed(static_cast<unsigned int>(m_randomSeed));
+  std::mt19937 rng(static_cast<unsigned int>(m_randomSeed));
+  std::uniform_real_distribution<coord_t> flat(0, 1.0);
 
   // Inserter to help choose the correct event type
   auto eventHelper =
@@ -108,7 +103,7 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     coord_t centers[nd];
     coord_t radiusSquared = 0;
     for (size_t d = 0; d < nd; d++) {
-      centers[d] = genUnit() - 0.5f; // Distribute around +- the center
+      centers[d] = flat(rng) - 0.5f; // Distribute around +- the center
       radiusSquared += centers[d] * centers[d];
     }
 
@@ -118,7 +113,7 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       centers[d] /= radius;
 
     // Now place the point along this radius, scaled with ^1/n for uniformity.
-    coord_t radPos = genUnit();
+    coord_t radPos = flat(rng);
     radPos = static_cast<coord_t>(
         pow(radPos, static_cast<coord_t>(1.0 / static_cast<coord_t>(nd))));
     for (size_t d = 0; d < nd; d++) {
@@ -132,8 +127,8 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     float signal = 1.0;
     float errorSquared = 1.0;
     if (m_randomizeSignal) {
-      signal = float(0.5 + genUnit());
-      errorSquared = float(0.5 + genUnit());
+      signal = float(0.5 + flat(rng));
+      errorSquared = float(0.5 + flat(rng));
     }
 
     // Create and add the event.
@@ -227,59 +222,42 @@ void FakeMD::addFakeRandomData(const std::vector<double> &params,
     throw std::invalid_argument(
         " number of distributed events can not be equal to 0");
 
-  boost::mt19937 rng;
-  rng.seed(static_cast<unsigned int>(m_randomSeed));
-
-  // Unit-size randomizer
-  boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
-  boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>>
-      genUnit(rng, u2);
-
-  // Make a random generator for each dimensions
-  using gen_t =
-      boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>>;
-
   // Inserter to help choose the correct event type
   auto eventHelper =
       MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
 
-  gen_t *gens[nd];
+  // Array of distributions for each dimension
+  std::mt19937 rng(static_cast<unsigned int>(m_randomSeed));
+  std::array<std::uniform_real_distribution<double>, nd> gens;
   for (size_t d = 0; d < nd; ++d) {
     double min = params[d * 2 + 1];
     double max = params[d * 2 + 2];
     if (max <= min)
       throw std::invalid_argument(
           "UniformParams: min must be < max for all dimensions.");
-
-    boost::uniform_real<double> u(min, max); // Range
-    auto gen = new gen_t(rng, u);
-    gens[d] = gen;
+    gens[d] = std::uniform_real_distribution<double>(min, max);
   }
-
+  // Unit-size randomizer
+  std::uniform_real_distribution<double> flat(0, 1.0); // Random from 0 to 1.0
   // Create all the requested events
   for (size_t i = 0; i < num; ++i) {
     coord_t centers[nd];
     for (size_t d = 0; d < nd; d++) {
-      centers[d] = static_cast<coord_t>(
-          (*gens[d])()); // use a different generator for each dimension
+      centers[d] = static_cast<coord_t>(gens[d](rng));
     }
 
     // Default or randomized error/signal
     float signal = 1.0;
     float errorSquared = 1.0;
     if (m_randomizeSignal) {
-      signal = float(0.5 + genUnit());
-      errorSquared = float(0.5 + genUnit());
+      signal = float(0.5 + flat(rng));
+      errorSquared = float(0.5 + flat(rng));
     }
 
     // Create and add the event.
     eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
                               centers); // 0 = run index
   }
-
-  /// Clean up the generators
-  for (size_t d = 0; d < nd; ++d)
-    delete gens[d];
 }
 
 template <typename MDE, size_t nd>
@@ -363,13 +341,7 @@ detid_t FakeMD::pickDetectorID() {
   if (m_detIDs.empty()) {
     return -1;
   } else {
-    /// A variate generator to combine a random number generator with a
-    /// distribution
-    using uniform_generator =
-        boost::variate_generator<boost::mt19937 &, boost::uniform_int<size_t>>;
-    uniform_generator uniformRand(m_randGen, m_uniformDist);
-    const size_t randIndex = uniformRand();
-    return m_detIDs[randIndex];
+    return m_detIDs[m_uniformDist(m_randGen)];
   }
 }
 

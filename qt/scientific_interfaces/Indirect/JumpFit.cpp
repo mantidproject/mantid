@@ -117,10 +117,6 @@ void JumpFit::algorithmComplete(bool error) {
 
   // Process the parameters table
   const auto paramWsName = outputWorkspaceName() + "_Parameters";
-  const auto resultWsName = outputWorkspaceName() + "_Result";
-  deleteWorkspaceAlgorithm(paramWsName)->execute();
-  renameWorkspaceAlgorithm(outputWorkspaceName(), paramWsName)->execute();
-  processParametersAlgorithm(paramWsName, resultWsName)->execute();
   IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName);
 }
 
@@ -254,47 +250,25 @@ void JumpFit::updatePlotRange() {
 
 std::string JumpFit::createSingleFitOutputName() const {
   auto outputName = inputWorkspace()->getName();
+  auto position = outputName.rfind("_Result");
 
-  // Remove _red
-  const auto cutIndex = outputName.find_last_of('_');
-  if (cutIndex != std::string::npos)
-    outputName = outputName.substr(0, cutIndex);
+  if (position != std::string::npos)
+    outputName = outputName.substr(0, position) +
+                 outputName.substr(position + 7, outputName.size());
   return outputName + "_" + selectedFitType().toStdString() + "_JumpFit";
 }
 
 IAlgorithm_sptr JumpFit::singleFitAlgorithm() const {
-  const auto sample = inputWorkspace()->getName();
   const auto widthText = m_uiForm->cbWidth->currentText().toStdString();
   const auto width = m_spectraList.at(widthText);
 
-  auto fitAlg = AlgorithmManager::Instance().create("PlotPeakByLogValue");
+  auto fitAlg = AlgorithmManager::Instance().create("QENSFitSequential");
   fitAlg->initialize();
-  fitAlg->setProperty("Input", sample + ",i" + std::to_string(width));
-  fitAlg->setProperty("OutputWorkspace", outputWorkspaceName());
-  fitAlg->setProperty("CreateOutput", true);
+  fitAlg->setProperty("SpecMin", static_cast<int>(width));
+  fitAlg->setProperty("SpecMax", static_cast<int>(width));
+  fitAlg->setProperty("OutputWorkspace",
+                      createSingleFitOutputName() + "_Result");
   return fitAlg;
-}
-
-/*
- * Creates an algorithm for processing an output parameters workspace.
- *
- * @param parameterWSName The name of the parameters workspace.
- * @return                A processing algorithm.
- */
-IAlgorithm_sptr
-JumpFit::processParametersAlgorithm(const std::string &parameterWSName,
-                                    const std::string &resultWSName) {
-  const auto parameterNames =
-      boost::algorithm::join(fitFunction()->getParameterNames(), ",");
-
-  auto processAlg =
-      AlgorithmManager::Instance().create("ProcessIndirectFitParameters");
-  processAlg->setProperty("InputWorkspace", parameterWSName);
-  processAlg->setProperty("ColumnX", "axis-1");
-  processAlg->setProperty("XAxisUnit", "MomentumTransfer");
-  processAlg->setProperty("ParameterNames", parameterNames);
-  processAlg->setProperty("OutputWorkspace", resultWSName);
-  return processAlg;
 }
 
 IAlgorithm_sptr
@@ -302,15 +276,6 @@ JumpFit::deleteWorkspaceAlgorithm(const std::string &workspaceName) {
   auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteAlg->setProperty("Workspace", workspaceName);
   return deleteAlg;
-}
-
-IAlgorithm_sptr
-JumpFit::renameWorkspaceAlgorithm(const std::string &workspaceToRename,
-                                  const std::string &newName) {
-  auto renameAlg = AlgorithmManager::Instance().create("RenameWorkspace");
-  renameAlg->setProperty("InputWorkspace", workspaceToRename);
-  renameAlg->setProperty("OutputWorkspace", newName);
-  return renameAlg;
 }
 
 IAlgorithm_sptr JumpFit::scaleAlgorithm(const std::string &workspaceToScale,

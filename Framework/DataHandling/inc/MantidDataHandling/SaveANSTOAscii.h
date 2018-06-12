@@ -48,6 +48,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveAscii"};
+  }
 
 private:
   /// Return the file extension this algorthm should output.

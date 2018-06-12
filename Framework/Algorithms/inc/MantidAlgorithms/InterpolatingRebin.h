@@ -9,7 +9,10 @@
 
 namespace Mantid {
 namespace HistogramData {
+class HistogramE;
+class Histogram;
 class BinEdges;
+class Points;
 }
 namespace Algorithms {
 /**Uses cubic splines to interpolate the mean rate of change of the integral
@@ -79,6 +82,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"Rebin"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Rebin"; }
   /// Alias for the algorithm. Must override so it doesn't get parent class's
@@ -93,15 +97,16 @@ protected:
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
                          const HistogramData::BinEdges &XValues_new,
                          API::MatrixWorkspace_sptr outputW);
-  void cubicInterpolation(const HistogramData::BinEdges &xOld,
-                          const MantidVec &yOld, const MantidVec &eOld,
-                          const HistogramData::BinEdges &xNew, MantidVec &yNew,
-                          MantidVec &eNew) const;
-  void noInterpolation(const HistogramData::BinEdges &xOld, const double yOld,
-                       const MantidVec &eOld,
-                       const HistogramData::BinEdges &xNew, MantidVec &yNew,
-                       MantidVec &eNew) const;
-  double estimateError(const MantidVec &xsOld, const MantidVec &esOld,
+  HistogramData::Histogram
+  cubicInterpolation(const HistogramData::Histogram &oldHistogram,
+                     const HistogramData::BinEdges &xNew) const;
+
+  HistogramData::Histogram
+  noInterpolation(const HistogramData::Histogram &oldHistogram,
+                  const HistogramData::BinEdges &xNew) const;
+
+  double estimateError(const HistogramData::Points &xsOld,
+                       const HistogramData::HistogramE &esOld,
                        const double xNew) const;
 };
 

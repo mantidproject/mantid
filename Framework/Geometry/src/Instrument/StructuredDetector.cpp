@@ -289,8 +289,8 @@ std::vector<double> const &StructuredDetector::getYValues() const {
 *
 */
 void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
-                                    const std::vector<double> &x,
-                                    const std::vector<double> &y, bool isZBeam,
+                                    std::vector<double> &&x,
+                                    std::vector<double> &&y, bool isZBeam,
                                     detid_t idStart, bool idFillByFirstY,
                                     int idStepByRow, int idStep) {
   if (m_map)
@@ -328,8 +328,8 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels,
                                 "z-axis aligned beams.");
 
   // Store vertices
-  m_xvalues = x;
-  m_yvalues = y;
+  m_xvalues = std::move(x);
+  m_yvalues = std::move(y);
 
   createDetectors();
 }
@@ -398,15 +398,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrb = m_yvalues[(y * w) + x + 1];
 
   // calculate midpoint of trapeziod
-  auto a = std::fabs(xrf - xlf);
-  auto b = std::fabs(xrb - xlb);
-  auto h = std::fabs(ylb - ylf);
-  auto cx = ((a + b) / 4);
-  auto cy = h / 2;
-
-  // store detector position before translating to origin
-  auto xpos = xlb + cx;
-  auto ypos = ylb + cy;
+  // calculate midpoint of trapeziod
+  auto xpos = (xlb + xlf + xrf + xrb) / 4;
+  auto ypos = (ylb + ylf + yrf + yrb) / 4;
 
   // Translate detector shape to origin
   xlf -= xpos;

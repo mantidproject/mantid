@@ -46,9 +46,6 @@ public:
     // Establish connections between parent and worker
     connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
     connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
-    connect(worker, SIGNAL(finished(int)), parent, SLOT(threadFinished(int)));
-    connect(worker, SIGNAL(reductionErrorSignal(QString)), parent,
-            SLOT(reductionError(QString)), Qt::QueuedConnection);
     // Early deletion of thread and worker
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);

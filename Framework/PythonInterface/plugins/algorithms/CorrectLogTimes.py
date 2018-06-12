@@ -17,6 +17,9 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
         """
         return "DataHandling\\Logs"
 
+    def seeAlso(self):
+        return [ "ChangeLogTime","CreateLogTimeCorrection","ChangePulsetime","ShiftLogTime" ]
+
     def name(self):
         """ Mantid required
         """

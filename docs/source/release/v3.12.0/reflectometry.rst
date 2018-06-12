@@ -37,6 +37,7 @@ New features
   - CorrectDetectors
   - SummationType
   - ReductionType
+- There is a new checkbox on the SaveASCII tab which automatically saves the 'IvsQ_binned' workspace for single row reductions and the stitched workspace for group reductions.
 
 Improvements
 ############

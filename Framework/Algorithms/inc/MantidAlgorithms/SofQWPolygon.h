@@ -5,8 +5,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAlgorithms/Rebin2D.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/IDetector.h"
 #include <list>
 
 namespace Mantid {
@@ -71,6 +69,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SofQW", "SofQWNormalisedPolygon", "Rebin2D"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
 
@@ -79,19 +80,12 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-  /// Calculate the Q value for a direct instrument
-  double calculateDirectQ(const double efixed, const double deltaE,
-                          const double twoTheta, const double psi) const;
-  /// Calculate the Q value for an indirect instrument
-  double calculateIndirectQ(const double efixed, const double deltaE,
-                            const double twoTheta, const double psi) const;
   /// Init variables cache base on the given workspace
   void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
   /// Init the theta index
   void initThetaCache(const API::MatrixWorkspace &workspace);
 
   SofQCommon m_EmodeProperties;
-  //---------------------------------------------------------------------------------
   /// Output Q axis
   std::vector<double> m_Qout;
   /// Input theta points

@@ -254,7 +254,7 @@ def write_rst(subproject, classname, filename, args):
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 

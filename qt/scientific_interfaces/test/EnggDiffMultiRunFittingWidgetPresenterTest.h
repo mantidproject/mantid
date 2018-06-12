@@ -352,6 +352,13 @@ public:
     assertMocksUsedCorrectly();
   }
 
+  void test_getAllRunLabelsDelegatesToView() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockView, getAllRunLabels());
+    presenter->getAllRunLabels();
+    assertMocksUsedCorrectly();
+  }
+
 private:
   MockEnggDiffMultiRunFittingWidgetModel *m_mockModel;
   MockEnggDiffMultiRunFittingWidgetView *m_mockView;

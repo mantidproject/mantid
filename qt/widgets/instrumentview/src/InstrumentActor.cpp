@@ -1,5 +1,6 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -39,17 +40,6 @@ using namespace Mantid;
 namespace MantidQt {
 namespace MantidWidgets {
 namespace {
-size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
-  unsigned int index = r;
-  index *= 256;
-  index += g;
-  index *= 256;
-  index += b - 1;
-  return index;
-}
-
-GLColor defaultDetectorColor() { return GLColor(200, 200, 200, 1); }
-
 bool isPhysicalView() {
   std::string view = Mantid::Kernel::ConfigService::Instance().getString(
       "instrument.view.geometry");
@@ -83,7 +73,6 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
     : m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           wsName.toStdString())),
       m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(),
-      m_maskedColor(100, 100, 100), m_failedColor(200, 200, 200),
       m_isPhysicalInstrument(false) {
   // settings
   loadSettings();
@@ -103,13 +92,14 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   }
 
   m_isCompVisible.assign(componentInfo().size(), true);
-  setupPickColors();
+
+  m_renderer.reset(new InstrumentRenderer(*this));
+  m_renderer->changeScaleType(m_scaleType);
 
   // set up the color map
   if (!m_currentColorMapFilename.isEmpty()) {
     loadColorMap(m_currentColorMapFilename, false);
   }
-  m_colorMap.changeScaleType(m_scaleType);
 
   // set up data ranges and colours
   setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
@@ -120,30 +110,12 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
                          "This instrument appears to contain no detectors",
                          "OK");
   }
-
-  if (!m_showGuides) {
-    // hide guide and other components
-    showGuides(m_showGuides);
-  }
-
-  m_displayListId[0] = 0;
-  m_displayListId[1] = 0;
-  m_useDisplayList[0] = false;
-  m_useDisplayList[1] = false;
 }
 
 /**
  * Destructor
  */
-InstrumentActor::~InstrumentActor() {
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_displayListId[i] != 0) {
-      glDeleteLists(m_displayListId[i], 1);
-    }
-  }
-
-  saveSettings();
-}
+InstrumentActor::~InstrumentActor() { saveSettings(); }
 
 /**
  * Set up the workspace: calculate the value ranges, set the colours.
@@ -156,36 +128,28 @@ InstrumentActor::~InstrumentActor() {
 void InstrumentActor::setUpWorkspace(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
     double scaleMin, double scaleMax) {
-
-  const size_t nHist = sharedWorkspace->getNumberHistograms();
   m_WkspBinMinValue = DBL_MAX;
   m_WkspBinMaxValue = -DBL_MAX;
-  for (size_t i = 0; i < nHist; ++i) {
-    const auto &values = sharedWorkspace->x(i);
+  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
+  m_detIndex2WsIndex.resize(componentInfo().size(), INVALID_INDEX);
+  for (size_t wi = 0; wi < spectrumInfo.size(); ++wi) {
+    const auto &values = sharedWorkspace->x(wi);
     double xtest = values.front();
     if (!std::isinf(xtest)) {
-      if (xtest < m_WkspBinMinValue) {
+      if (xtest < m_WkspBinMinValue)
         m_WkspBinMinValue = xtest;
-      } else if (xtest > m_WkspBinMaxValue) {
+      else if (xtest > m_WkspBinMaxValue)
         m_WkspBinMaxValue = xtest;
-      } else {
-      }
     }
 
     xtest = values.back();
     if (!std::isinf(xtest)) {
-      if (xtest < m_WkspBinMinValue) {
+      if (xtest < m_WkspBinMinValue)
         m_WkspBinMinValue = xtest;
-      } else if (xtest > m_WkspBinMaxValue) {
+      else if (xtest > m_WkspBinMaxValue)
         m_WkspBinMaxValue = xtest;
-      } else {
-      }
     }
-  }
 
-  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
-  m_detIndex2WsIndex.resize(componentInfo().size(), INVALID_INDEX);
-  for (size_t wi = 0; wi < spectrumInfo.size(); wi++) {
     const auto &specDef = spectrumInfo.spectrumDefinition(wi);
     for (auto info : specDef)
       m_detIndex2WsIndex[info.first] = wi;
@@ -196,9 +160,9 @@ void InstrumentActor::setUpWorkspace(
   m_DataMinValue = -DBL_MAX;
   m_DataMaxValue = DBL_MAX;
 
-  if (!m_autoscaling) {
+  if (!m_autoscaling)
     setDataMinMaxRange(scaleMin, scaleMax);
-  }
+
   setDataIntegrationRange(m_WkspBinMinValue, m_WkspBinMaxValue);
   resetColors();
 
@@ -231,7 +195,7 @@ void InstrumentActor::setComponentVisible(size_t componentIndex) {
   for (auto child : children)
     m_isCompVisible[child] = true;
 
-  invalidateDisplayLists();
+  resetColors();
 }
 
 void InstrumentActor::setChildVisibility(bool on) {
@@ -392,7 +356,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const {
 }
 
 const MantidColorMap &InstrumentActor::getColorMap() const {
-  return m_colorMap;
+  return m_renderer->getColorMap();
 }
 
 size_t InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
@@ -643,41 +607,7 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
  * the masking information in ....
  */
 void InstrumentActor::resetColors() {
-  QwtDoubleInterval qwtInterval(m_DataMinScaleValue, m_DataMaxScaleValue);
-  auto sharedWorkspace = getWorkspace();
-  const auto &compInfo = componentInfo();
-  const auto &detInfo = detectorInfo();
-  auto color = m_colorMap.rgb(qwtInterval, 0);
-  m_colors.assign(compInfo.size(),
-                  GLColor(qRed(color), qGreen(color), qBlue(color), 1));
-  auto invalidColor = GLColor(100, 100, 100, 1);
-
-  IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
-  const auto &detectorIDs = detInfo.detectorIDs();
-  for (size_t det = 0; det < detInfo.size(); ++det) {
-    auto masked = false;
-
-    if (mask)
-      masked = mask->isMasked(detectorIDs[det]);
-    if (detInfo.isMasked(det) || masked)
-      m_colors[det] = m_maskedColor;
-    else {
-      auto integratedValue = getIntegratedCounts(det);
-      if (integratedValue > -1) {
-        auto color = m_colorMap.rgb(qwtInterval, integratedValue);
-        m_colors[det] = GLColor(
-            qRed(color), qGreen(color), qBlue(color),
-            static_cast<int>(255 * (integratedValue / m_DataMaxScaleValue)));
-      } else
-        m_colors[det] = invalidColor;
-    }
-  }
-
-  for (auto comp : m_components)
-    m_colors[comp] = defaultDetectorColor();
-
-  setupPickColors();
-  invalidateDisplayLists();
+  m_renderer->reset();
   emit colorMapChanged();
 }
 
@@ -691,100 +621,26 @@ void InstrumentActor::updateColors() {
  */
 void InstrumentActor::showGuides(bool on) {
   m_showGuides = on;
-  invalidateDisplayLists();
+  resetColors();
 }
 
 GLColor InstrumentActor::getColor(size_t index) const {
-  if (index <= m_colors.size() - 1)
-    return m_colors.at(index);
-
-  return m_colors.front();
+  return m_renderer->getColor(index);
 }
 
 void InstrumentActor::draw(bool picking) const {
-  if (std::none_of(m_isCompVisible.cbegin(), m_isCompVisible.cend(),
-                   [](bool visible) { return visible; }))
-    return;
-
-  OpenGLError::check("InstrumentActor::draw(0)");
-  size_t i = picking ? 1 : 0;
-  if (m_useDisplayList[i]) {
-    glCallList(m_displayListId[i]);
-  } else {
-    m_displayListId[i] = glGenLists(1);
-    m_useDisplayList[i] = true;
-    glNewList(m_displayListId[i],
-              GL_COMPILE); // Construct display list for object representation
-    doDraw(picking);
-    glEndList();
-    if (glGetError() == GL_OUT_OF_MEMORY) // Throw an exception
-      throw Mantid::Kernel::Exception::OpenGLError(
-          "OpenGL: Out of video memory");
-    glCallList(m_displayListId[i]);
-  }
-  OpenGLError::check("InstrumentActor::draw()");
+  m_renderer->renderInstrument(m_isCompVisible, m_showGuides, picking);
 }
 
-void InstrumentActor::doDraw(bool picking) const {
-  const auto &compInfo = componentInfo();
-  for (size_t i = 0; i < compInfo.size(); ++i) {
-    auto type = compInfo.componentType(i);
-    if ((!compInfo.isDetector(i) && !m_showGuides) ||
-        type == Beamline::ComponentType::OutlineComposite ||
-        type == Beamline::ComponentType::Infinite)
-      continue;
-
-    if (compInfo.hasValidShape(i)) {
-      if (m_isCompVisible[i]) {
-        if (picking)
-          m_pickColors[i].paint();
-        else
-          m_colors[i].paint();
-        glPushMatrix();
-        // Translate
-        auto pos = compInfo.position(i);
-        if (!pos.nullVector())
-          glTranslated(pos[0], pos[1], pos[2]);
-
-        // Rotate
-        auto rot = compInfo.rotation(i);
-        if (!rot.isNull()) {
-          double deg, ax0, ax1, ax2;
-          rot.getAngleAxis(deg, ax0, ax1, ax2);
-          glRotated(deg, ax0, ax1, ax2);
-        }
-
-        // Scale
-        auto scale = compInfo.scaleFactor(i);
-        if (scale != Kernel::V3D(1, 1, 1))
-          glScaled(scale[0], scale[1], scale[2]);
-
-        compInfo.shape(i).draw();
-        glPopMatrix();
-      }
-    }
-  }
-}
 /**
  * @param fname :: A color map file name.
  * @param reset_colors :: An option to reset the detector colors.
  */
 void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
-  m_colorMap.loadMap(fname);
+  m_renderer->loadColorMap(fname);
   m_currentColorMapFilename = fname;
-  if (reset_colors) {
+  if (reset_colors)
     resetColors();
-  }
-}
-
-//------------------------------------------------------------------------------
-void InstrumentActor::setupPickColors() {
-  const auto &compInfo = componentInfo();
-  m_pickColors.resize(compInfo.size());
-
-  for (size_t i = 0; i < compInfo.size(); ++i) {
-    m_pickColors[i] = makePickColor(i);
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -810,12 +666,12 @@ const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const {
  * @param type :: 0 - linear, 1 - log10.
  */
 void InstrumentActor::changeScaleType(int type) {
-  m_colorMap.changeScaleType(static_cast<GraphOptions::ScaleType>(type));
+  m_renderer->changeScaleType(type);
   resetColors();
 }
 
 void InstrumentActor::changeNthPower(double nth_power) {
-  m_colorMap.setNthPower(nth_power);
+  m_renderer->changeNthPower(nth_power);
   resetColors();
 }
 
@@ -835,7 +691,7 @@ void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
   settings.setValue("ColormapFile", m_currentColorMapFilename);
-  settings.setValue("ScaleType", (int)m_colorMap.getScaleType());
+  settings.setValue("ScaleType", (int)m_renderer->getColorMap().getScaleType());
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
 }
@@ -870,7 +726,9 @@ bool InstrumentActor::wholeRange() const {
          m_BinMaxValue == m_WkspBinMaxValue;
 }
 
-size_t InstrumentActor::ndetectors() const { return detectorInfo().size(); }
+size_t InstrumentActor::ndetectors() const {
+  return m_detIndex2WsIndex.size() - m_components.size();
+}
 
 /**
  * Set autoscaling of the y axis. If autoscaling is on the minValue() and
@@ -885,7 +743,6 @@ void InstrumentActor::setAutoscaling(bool on) {
   if (on) {
     m_DataMinScaleValue = m_DataMinValue;
     m_DataMaxScaleValue = m_DataMaxValue;
-    // setIntegrationRange(m_DataMinValue,m_DataMaxValue);
     resetColors();
   }
 }
@@ -1212,7 +1069,7 @@ void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
     auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
-    wsIndices.push_back(index);
+    wsIndices.emplace_back(index);
   }
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
@@ -1247,7 +1104,7 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
       mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
     }
     // get the vector out and add the name
-    mapCmptToNameVector[paramCompId].push_back(paramName);
+    mapCmptToNameVector[paramCompId].emplace_back(paramName);
   }
 
   // walk out from the selected component
@@ -1352,31 +1209,6 @@ const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
     return *m_physicalDetectorInfo;
   else
     return getWorkspace()->detectorInfo();
-}
-
-void InstrumentActor::invalidateDisplayLists() const {
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_displayListId[i] != 0) {
-      glDeleteLists(m_displayListId[i], 1);
-      m_displayListId[i] = 0;
-      m_useDisplayList[i] = false;
-    }
-  }
-}
-
-GLColor InstrumentActor::makePickColor(size_t pickID) {
-  pickID += 1;
-  unsigned char r, g, b;
-  r = static_cast<unsigned char>(pickID / 65536);
-  g = static_cast<unsigned char>((pickID % 65536) / 256);
-  b = static_cast<unsigned char>((pickID % 65536) % 256);
-  return GLColor(r, g, b);
-}
-
-size_t InstrumentActor::decodePickColor(const QRgb &c) {
-  return decodePickColorRGB(static_cast<unsigned char>(qRed(c)),
-                            static_cast<unsigned char>(qGreen(c)),
-                            static_cast<unsigned char>(qBlue(c)));
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

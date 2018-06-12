@@ -1,10 +1,10 @@
-.. _dev-docs-gui-calculator-example:
+.. _MVPCalculatorGUIExample:
 
 ==========================
 MVP Calculator GUI Example
 ==========================
 
-See the following files for the calculator GUI described in :ref:`dev-docs-mvp-intro`.
+See the following files for the calculator GUI described in :ref:`GuiDesignGuidelinesMVPIntro`.
 
 - :download:`Main module <Calculator.py>`
 - :download:`Model.py <Model.py>`

@@ -146,7 +146,7 @@ public:
   pqNetworkAccessManager(QHelpEngineCore *helpEngine,
                          QNetworkAccessManager *manager, QObject *parentObject)
       : Superclass(parentObject), Engine(helpEngine) {
-    Q_ASSERT(manager != NULL && helpEngine != NULL);
+    Q_ASSERT(manager != nullptr && helpEngine != nullptr);
 
     this->setCache(manager->cache());
     this->setCookieJar(manager->cookieJar());
@@ -205,7 +205,7 @@ private:
 pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
                            Qt::WindowFlags parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
-  Q_ASSERT(engine != NULL);
+  Q_ASSERT(engine != nullptr);
 
   Ui::pqHelpWindow ui;
   ui.setupUi(this);

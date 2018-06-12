@@ -88,6 +88,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"PoldiFitPeaks2D"};
+  }
   const std::string category() const override;
 
 protected:

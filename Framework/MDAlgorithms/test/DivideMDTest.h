@@ -64,7 +64,7 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-    IMDIterator *it = ws->createIterator(nullptr);
+    auto it = ws->createIterator(nullptr);
     do {
       TS_ASSERT_EQUALS(it->getNumEvents(), 1);
       TS_ASSERT_DELTA(it->getInnerSignal(0), expectedSignal, 1e-5);

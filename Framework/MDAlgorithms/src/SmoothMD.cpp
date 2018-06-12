@@ -192,8 +192,8 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
-    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+    auto iterator =
+        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
 
     if (!iterator) {
       throw std::logic_error(
@@ -318,9 +318,8 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
     for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
       PARALLEL_START_INTERUPT_REGION
-      boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
-
+      auto iterator =
+          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
       if (!iterator) {
         throw std::logic_error(
             "Failed to cast IMDIterator to MDHistoWorkspaceIterator");

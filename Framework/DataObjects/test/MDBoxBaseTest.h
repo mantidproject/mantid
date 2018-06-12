@@ -326,7 +326,7 @@ public:
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     size_t numVertexes = 0;
-    coord_t *v = b.getVertexesArray(numVertexes);
+    auto v = b.getVertexesArray(numVertexes);
     TS_ASSERT_EQUALS(numVertexes, 4);
     TS_ASSERT_EQUALS(v[0], -10.0);
     TS_ASSERT_EQUALS(v[0 + 1], -4.0);
@@ -336,7 +336,6 @@ public:
     TS_ASSERT_EQUALS(v[4 + 1], 6.0);
     TS_ASSERT_EQUALS(v[6], 10.0);
     TS_ASSERT_EQUALS(v[6 + 1], 6.0);
-    delete[] v;
   }
 
   /** Get vertexes as a bare array,
@@ -346,21 +345,18 @@ public:
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     size_t numVertexes = 0;
-    coord_t *v;
 
     bool maskDim[2] = {true, false};
-    v = b.getVertexesArray(numVertexes, 1, maskDim);
+    auto v = b.getVertexesArray(numVertexes, 1, maskDim);
     TS_ASSERT_EQUALS(numVertexes, 2);
     TS_ASSERT_EQUALS(v[0], -10.0);
     TS_ASSERT_EQUALS(v[1], 10.0);
-    delete[] v;
 
     bool maskDim2[2] = {false, true};
     v = b.getVertexesArray(numVertexes, 1, maskDim2);
     TS_ASSERT_EQUALS(numVertexes, 2);
     TS_ASSERT_EQUALS(v[0], -4.0);
     TS_ASSERT_EQUALS(v[1], 6.0);
-    delete[] v;
   }
 
   /** Get vertexes as a bare array,
@@ -371,11 +367,10 @@ public:
     b.setExtents(1, -4.0, 6.0);
     b.setExtents(2, -2.0, 8.0);
     size_t numVertexes = 0;
-    coord_t *v;
 
     // 3D projected down to 2D in X/Y
     bool maskDim[3] = {true, true, false};
-    v = b.getVertexesArray(numVertexes, 2, maskDim);
+    auto v = b.getVertexesArray(numVertexes, 2, maskDim);
     TS_ASSERT_EQUALS(numVertexes, 4);
     TS_ASSERT_EQUALS(v[0], -10.0);
     TS_ASSERT_EQUALS(v[0 + 1], -4.0);
@@ -385,7 +380,6 @@ public:
     TS_ASSERT_EQUALS(v[4 + 1], 6.0);
     TS_ASSERT_EQUALS(v[6], 10.0);
     TS_ASSERT_EQUALS(v[6 + 1], 6.0);
-    delete[] v;
 
     // Can't give 0 dimensions.
     TS_ASSERT_THROWS_ANYTHING(v = b.getVertexesArray(numVertexes, 0, maskDim));
@@ -396,7 +390,6 @@ public:
     TS_ASSERT_EQUALS(numVertexes, 2);
     TS_ASSERT_EQUALS(v[0], -4.0);
     TS_ASSERT_EQUALS(v[1], 6.0);
-    delete[] v;
 
     // 3D projected down to 2D in Y/Z
     bool maskDim3[3] = {false, true, true};
@@ -410,7 +403,6 @@ public:
     TS_ASSERT_EQUALS(v[4 + 1], 8.0);
     TS_ASSERT_EQUALS(v[6], 6.0);
     TS_ASSERT_EQUALS(v[6 + 1], 8.0);
-    delete[] v;
   }
 
   void xtest_sortBoxesByFilePos() {
@@ -456,8 +448,7 @@ public:
     b.setExtents(2, -7.0, 7.0);
     for (size_t i = 0; i < 1000000; i++) {
       size_t numVertexes;
-      coord_t *v = b.getVertexesArray(numVertexes);
-      delete[] v;
+      auto v = b.getVertexesArray(numVertexes);
     }
   }
 
@@ -469,8 +460,7 @@ public:
     bool maskDim[3] = {true, true, false};
     for (size_t i = 0; i < 1000000; i++) {
       size_t numVertexes;
-      coord_t *v = b.getVertexesArray(numVertexes, 2, maskDim);
-      delete[] v;
+      auto v = b.getVertexesArray(numVertexes, 2, maskDim);
     }
   }
 
@@ -482,8 +472,7 @@ public:
     b.setExtents(3, -6.0, 6.0);
     for (size_t i = 0; i < 1000000; i++) {
       size_t numVertexes;
-      coord_t *v = b.getVertexesArray(numVertexes);
-      delete[] v;
+      auto v = b.getVertexesArray(numVertexes);
     }
   }
   void test_getVertexesArray_4D_projected_to_3D() {
@@ -495,8 +484,7 @@ public:
     b.setExtents(3, -6.0, 6.0);
     for (size_t i = 0; i < 1000000; i++) {
       size_t numVertexes;
-      coord_t *v = b.getVertexesArray(numVertexes, 3, maskDim);
-      delete[] v;
+      auto v = b.getVertexesArray(numVertexes, 3, maskDim);
     }
   }
 };

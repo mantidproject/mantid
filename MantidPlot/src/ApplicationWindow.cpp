@@ -2446,7 +2446,7 @@ Graph3D *ApplicationWindow::dataPlot3D(const QString &caption,
   posX = formula.indexOf("(", pos);
   QString yCol = formula.mid(pos + 1, posX - pos - 1);
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->addData(w, xCol, yCol, xl, xr, yl, yr, zl, zr);
   plot->update();
 
@@ -2466,7 +2466,7 @@ Graph3D *ApplicationWindow::newPlot3D() {
 
   QString label = generateUniqueName(tr("Graph"));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->setWindowTitle(label);
   plot->setName(label);
 
@@ -2486,7 +2486,7 @@ Graph3D *ApplicationWindow::plotXYZ(Table *table, const QString &zColName,
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   QString label = generateUniqueName(tr("Graph"));
   plot->setWindowTitle(label);
   plot->setName(label);
@@ -2531,7 +2531,7 @@ Graph3D *ApplicationWindow::openPlotXYZ(const QString &caption,
   int yCol = w->colIndex(yColName);
   int zCol = w->colIndex(zColName);
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->loadData(w, xCol, yCol, zCol, xl, xr, yl, yr, zl, zr);
 
   QString label = caption;
@@ -2584,7 +2584,7 @@ void ApplicationWindow::exportMatrix() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, m != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, m != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -3051,7 +3051,7 @@ void ApplicationWindow::setPreferences(Graph *g) {
  *creates a new empty table
  */
 Table *ApplicationWindow::newTable() {
-  Table *w = new Table(scriptingEnv(), 30, 2, "", this, 0);
+  Table *w = new Table(scriptingEnv(), 30, 2, "", this, nullptr);
   initTable(w, generateUniqueName(tr("Table")));
   w->showNormal();
   return w;
@@ -3061,7 +3061,7 @@ Table *ApplicationWindow::newTable() {
  *used when opening a project file
  */
 Table *ApplicationWindow::newTable(const QString &caption, int r, int c) {
-  Table *w = new Table(scriptingEnv(), r, c, "", this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, "", this, nullptr);
   initTable(w, caption);
   if (w->objectName() != caption) { // the table was renamed
     renamedTables << caption << w->objectName();
@@ -3083,7 +3083,7 @@ bool ApplicationWindow::isDeleteWorkspacePromptEnabled() {
 
 Table *ApplicationWindow::newTable(int r, int c, const QString &name,
                                    const QString &legend) {
-  Table *w = new Table(scriptingEnv(), r, c, legend, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, legend, this, nullptr);
   initTable(w, name);
   return w;
 }
@@ -3095,7 +3095,7 @@ Table *ApplicationWindow::newTable(const QString &caption, int r, int c,
   if (lst.count() == 2)
     legend = lst[1];
 
-  Table *w = new Table(scriptingEnv(), r, c, legend, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, legend, this, nullptr);
 
   QStringList rows = text.split("\n", QString::SkipEmptyParts);
   QString rlist = rows[0];
@@ -3117,7 +3117,7 @@ Table *ApplicationWindow::newTable(const QString &caption, int r, int c,
 Table *ApplicationWindow::newHiddenTable(const QString &name,
                                          const QString &label, int r, int c,
                                          const QString &text) {
-  Table *w = new Table(scriptingEnv(), r, c, label, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, label, this, nullptr);
 
   if (!text.isEmpty()) {
     QStringList rows = text.split("\n", QString::SkipEmptyParts);
@@ -3194,14 +3194,14 @@ Note *ApplicationWindow::newNote(const QString &caption) {
 }
 
 Matrix *ApplicationWindow::newMatrix(int rows, int columns) {
-  Matrix *m = new Matrix(scriptingEnv(), rows, columns, "", this, 0);
+  Matrix *m = new Matrix(scriptingEnv(), rows, columns, "", this, nullptr);
   initMatrix(m, generateUniqueName(tr("Matrix")));
   m->showNormal();
   return m;
 }
 
 Matrix *ApplicationWindow::newMatrix(const QString &caption, int r, int c) {
-  Matrix *w = new Matrix(scriptingEnv(), r, c, "", this, 0);
+  Matrix *w = new Matrix(scriptingEnv(), r, c, "", this, nullptr);
   initMatrix(w, caption);
   if (w->objectName() != caption) // the matrix was renamed
     renamedTables << caption << w->objectName();
@@ -3397,14 +3397,14 @@ ApplicationWindow::matrixToTable(Matrix *m,
 
   Table *w = nullptr;
   if (conversionType == Direct) {
-    w = new Table(scriptingEnv(), rows, cols, "", this, 0);
+    w = new Table(scriptingEnv(), rows, cols, "", this, nullptr);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++)
         w->setCell(i, j, m->cell(i, j));
     }
   } else if (conversionType == XYZ) {
     int tableRows = rows * cols;
-    w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
+    w = new Table(scriptingEnv(), tableRows, 3, "", this, nullptr);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         int cell = i * cols + j;
@@ -3415,7 +3415,7 @@ ApplicationWindow::matrixToTable(Matrix *m,
     }
   } else if (conversionType == YXZ) {
     int tableRows = rows * cols;
-    w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
+    w = new Table(scriptingEnv(), tableRows, 3, "", this, nullptr);
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
         int cell = i * rows + j;
@@ -3600,7 +3600,7 @@ Matrix *ApplicationWindow::tableToMatrix(Table *t) {
   int cols = t->numCols();
 
   QString caption = generateUniqueName(tr("Matrix"));
-  Matrix *m = new Matrix(scriptingEnv(), rows, cols, "", this, 0);
+  Matrix *m = new Matrix(scriptingEnv(), rows, cols, "", this, nullptr);
   initMatrix(m, caption);
 
   for (int i = 0; i < rows; i++) {
@@ -5701,7 +5701,7 @@ void ApplicationWindow::exportGraph() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, plot2D != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, plot2D != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -5764,7 +5764,7 @@ void ApplicationWindow::exportLayer() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, g != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, g != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -5837,7 +5837,7 @@ void ApplicationWindow::exportAllGraphs() {
   foreach (MdiSubWindow *w, windows) {
     const std::string windowClassName = w->metaObject()->className();
     if (windowClassName == "MultiLayer") {
-      plot3D = 0;
+      plot3D = nullptr;
       plot2D = dynamic_cast<MultiLayer *>(w);
       if (!plot2D)
         continue;
@@ -5851,7 +5851,7 @@ void ApplicationWindow::exportAllGraphs() {
         continue;
       }
     } else if (windowClassName == "Graph3D") {
-      plot2D = 0;
+      plot2D = nullptr;
       plot3D = dynamic_cast<Graph3D *>(w);
       if (!plot3D)
         continue;
@@ -6137,7 +6137,7 @@ void ApplicationWindow::savetoNexusFile() {
 void ApplicationWindow::loadDataFile() {
   // Ask user for file
   QString fn = QFileDialog::getOpenFileName(
-      0, tr("Mantidplot - Open file to load"),
+      nullptr, tr("Mantidplot - Open file to load"),
       AlgorithmInputHistory::Instance().getPreviousDirectory());
   if (fn != "") {
     loadDataFileByName(fn);
@@ -6438,7 +6438,7 @@ void ApplicationWindow::showTitleDialog() {
 
     Graph *g = ml->activeGraph();
     if (g) {
-      TextDialog *td = new TextDialog(TextDialog::LayerTitle, this, 0);
+      TextDialog *td = new TextDialog(TextDialog::LayerTitle, this, nullptr);
       td->setGraph(g);
       td->exec();
     }
@@ -6462,7 +6462,7 @@ void ApplicationWindow::showAxisTitleDialog() {
   if (!g)
     return;
 
-  TextDialog *td = new TextDialog(TextDialog::AxisTitle, this, 0);
+  TextDialog *td = new TextDialog(TextDialog::AxisTitle, this, nullptr);
   td->setGraph(g);
   td->exec();
 }
@@ -7606,7 +7606,7 @@ void ApplicationWindow::removePoints() {
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
            "want to continue?"),
-        tr("Continue"), tr("Cancel"), 0, 1)) {
+        tr("Continue"), tr("Cancel"), nullptr, 1)) {
     case 0:
       g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Remove, info,
                                           SLOT(setText(const QString &))));
@@ -7651,7 +7651,7 @@ void ApplicationWindow::movePoints() {
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
            "want to continue?"),
-        tr("Continue"), tr("Cancel"), 0, 1)) {
+        tr("Continue"), tr("Cancel"), nullptr, 1)) {
     case 0:
       if (g) {
         g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Move, info,
@@ -8345,7 +8345,7 @@ void ApplicationWindow::showTextDialog() {
     if (!l)
       return;
 
-    TextDialog *td = new TextDialog(TextDialog::TextMarker, this, 0);
+    TextDialog *td = new TextDialog(TextDialog::TextMarker, this, nullptr);
     td->setLegendWidget(l);
     td->exec();
   }
@@ -9825,9 +9825,10 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     delete scriptingWindow;
     scriptingWindow = nullptr;
   }
-  /// Ensure interface python references are cleaned up before the interpreter
-  /// shuts down
+  // Ensure all python references are cleaned up before the interpreter shuts
+  // down
   delete m_iface_script;
+  delete m_interpreterDock;
 
   // Emit a shutting_down() signal that can be caught by
   // independent QMainWindow objects to know when MantidPlot
@@ -10467,7 +10468,7 @@ void ApplicationWindow::chooseHelpFolder() {
   QFileInfo hfi(helpFilePath);
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Choose the location of the MantidPlot help folder!"),
-      hfi.dir().absolutePath(), 0 /**QFileDialog::ShowDirsOnly*/);
+      hfi.dir().absolutePath(), nullptr /**QFileDialog::ShowDirsOnly*/);
 
   if (!dir.isEmpty()) {
     helpFilePath = dir + "index.html";
@@ -10522,7 +10523,7 @@ void ApplicationWindow::showHelp() {
 void ApplicationWindow::showPlotWizard() {
   QStringList lst = tableNames();
   if (lst.count() > 0) {
-    PlotWizard *pw = new PlotWizard(this, 0);
+    PlotWizard *pw = new PlotWizard(this, nullptr);
     pw->setAttribute(Qt::WA_DeleteOnClose);
     connect(pw, SIGNAL(plot(const QStringList &)), this,
             SLOT(multilayerPlot(const QStringList &)));
@@ -11612,7 +11613,8 @@ void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
 }
 
 bool ApplicationWindow::isUnityDesktop() const {
-  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity";
+  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity" ||
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
@@ -13366,7 +13368,7 @@ Graph3D *ApplicationWindow::openMatrixPlot3D(const QString &caption,
   if (!m)
     return nullptr;
 
-  Graph3D *plot = new Graph3D("", this, 0, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr, nullptr);
   plot->setWindowTitle(caption);
   plot->setName(caption);
   plot->addMatrixData(m, xl, xr, yl, yr, zl, zr);
@@ -13390,7 +13392,7 @@ Graph3D *ApplicationWindow::plot3DMatrix(Matrix *m, int style) {
   QApplication::setOverrideCursor(Qt::WaitCursor);
   QString label = generateUniqueName(tr("Graph"));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->addMatrixData(m);
   plot->customPlotStyle(style);
   customPlot3D(plot);
@@ -14409,7 +14411,7 @@ bool ApplicationWindow::deleteFolder(Folder *f) {
           this, tr("MantidPlot - Delete folder?"), // Mantid
           tr("Delete folder '%1' and all the windows it contains?")
               .arg(f->objectName()),
-          tr("Yes"), tr("No"), 0, 0))
+          tr("Yes"), tr("No"), nullptr, 0))
     return false;
   else {
     Folder *parent = projectFolder();
@@ -14858,7 +14860,8 @@ void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting) {
     // it doesn't respect the always on top
     // flag, it is treated as a sub window of its parent
     const bool capturePrint = !quitting;
-    scriptingWindow = new ScriptingWindow(scriptingEnv(), capturePrint, NULL);
+    scriptingWindow =
+        new ScriptingWindow(scriptingEnv(), capturePrint, nullptr);
     scriptingWindow->setObjectName("ScriptingWindow");
     scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     connect(scriptingWindow, SIGNAL(closeMe()), this,

@@ -2,10 +2,12 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
 
 #include "DllConfig.h"
+#include "GSASIIRefineFitPeaksOutputProperties.h"
 #include "IEnggDiffGSASFittingModel.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 #include "IEnggDiffMultiRunFittingWidgetPresenter.h"
+#include "IEnggDiffractionParam.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -23,8 +25,8 @@ public:
   EnggDiffGSASFittingPresenter(
       std::unique_ptr<IEnggDiffGSASFittingModel> model,
       IEnggDiffGSASFittingView *view,
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
-          multiRunWidget);
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+      boost::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
@@ -35,35 +37,41 @@ public:
 
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
+  void notifyRefinementsComplete(
+      Mantid::API::IAlgorithm_sptr alg,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
+          refinementResultSets) override;
+
+  void notifyRefinementSuccessful(
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+      const GSASIIRefineFitPeaksOutputProperties &refinementResults) override;
+
+  void notifyRefinementFailed(const std::string &failureMessage) override;
+
+  void notifyRefinementCancelled() override;
+
 private:
   void processDoRefinement();
   void processLoadRun();
+  void processRefineAll();
   void processSelectRun();
   void processShutDown();
   void processStart();
+
+  /// Collect GSASIIRefineFitPeaks parameters for all runs loaded in
+  std::vector<GSASIIRefineFitPeaksParameters> collectAllInputParameters() const;
 
   /// Collect GSASIIRefineFitPeaks input parameters for a given run from the
   /// presenter's various children
   GSASIIRefineFitPeaksParameters
   collectInputParameters(const RunLabel &runLabel,
-                         const Mantid::API::MatrixWorkspace_sptr ws,
-                         const GSASRefinementMethod refinementMethod) const;
+                         const Mantid::API::MatrixWorkspace_sptr ws) const;
 
   /**
-   Perform a Pawley refinement on a run
-   @param params Input parameters for GSASIIRefineFitPeaks
-   @return Fitted peaks workspace resulting from refinement
+   Perform refinements on a number of runs
+   @param params Input parameters for each run to pass to GSASIIRefineFitPeaks
    */
-  Mantid::API::MatrixWorkspace_sptr
-  doPawleyRefinement(const GSASIIRefineFitPeaksParameters &params);
-
-  /**
-   Perform a Rietveld refinement on a run
-   @param params Input parameters for GSASIIRefineFitPeaks
-   @return Fitted peaks workspace resulting from refinement
-   */
-  Mantid::API::MatrixWorkspace_sptr
-  doRietveldRefinement(const GSASIIRefineFitPeaksParameters &params);
+  void doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params);
 
   /**
    Overplot fitted peaks for a run, and display lattice parameters and Rwp in
@@ -75,6 +83,8 @@ private:
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
   boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
+
+  boost::shared_ptr<IEnggDiffractionParam> m_mainSettings;
 
   IEnggDiffGSASFittingView *m_view;
 

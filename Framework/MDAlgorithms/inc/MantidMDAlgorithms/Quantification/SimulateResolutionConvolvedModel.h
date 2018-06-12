@@ -43,7 +43,9 @@ public:
   const std::string summary() const override {
     return "Runs a simulation of a model with a selected resolution function";
   }
-
+  const std::vector<std::string> seeAlso() const override {
+    return {"FitResolutionConvolvedModel"};
+  }
   int version() const override;
 
 private:

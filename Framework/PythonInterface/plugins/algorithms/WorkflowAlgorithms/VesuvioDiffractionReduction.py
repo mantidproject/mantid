@@ -25,6 +25,9 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
     def category(self):
         return 'Diffraction\\Reduction'
 
+    def seeAlso(self):
+        return [ "ISISIndirectDiffractionReduction" ]
+
     def summary(self):
         return ('Performs diffraction reduction for VESUVIO. This algorithm is deprecated (April-2017).')
 

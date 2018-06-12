@@ -406,10 +406,11 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     }
     updatePeriodDisplay();
   } else if (prop == m_workspace) {
-    // make sure the output is updated
-    FitPropertyBrowser::enumChanged(prop);
     int j = m_enumManager->value(m_workspace);
     std::string option = m_workspaceNames[j].toStdString();
+    // update plot
+    emit workspaceNameChanged(QString::fromStdString(option));
+
     setOutputName(option);
     // only do this if in single fit mode
     if (m_periodBoxes.size() > 1 &&
@@ -429,6 +430,27 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
         m_boolManager->setValue(iter.value(), selectedPeriod == iter.key());
       }
     }
+    if (!m_browser->isItemVisible(m_multiFitSettingsGroup)) {
+      size_t end = 0;
+      // assumed structure of name
+      // isolate the group/pair
+      for (int k = 0; k < 2; k++) {
+        end = option.find_first_of(";");
+        option = option.substr(end + 1, option.size());
+      }
+      end = option.find_first_of(";");
+
+      boost::erase_all(option, " ");
+
+      auto tmp = option.substr(0, end - 1);
+      QString selectedGroup = QString::fromStdString(tmp);
+      // turn on only the relevant box
+      for (auto iter = m_groupBoxes.constBegin();
+           iter != m_groupBoxes.constEnd(); ++iter) {
+        m_boolManager->setValue(iter.value(), selectedGroup == iter.key());
+      }
+    }
+
   } else {
     FitPropertyBrowser::enumChanged(prop);
   }
@@ -498,11 +520,7 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
     }
   }
 }
-/** @returns the normalization
-*/
-double MuonFitPropertyBrowser::normalization() const {
-  return readNormalization()[0];
-}
+
 void MuonFitPropertyBrowser::setNormalization() {
   setNormalization(workspaceName());
 }
@@ -515,6 +533,9 @@ void MuonFitPropertyBrowser::setNormalization(const std::string name) {
   QString label;
   auto norms = readMultipleNormalization();
   std::string tmp = name;
+  if (rawData()) {
+    tmp = tmp + "_Raw";
+  }
   // stored with ; instead of spaces
   std::replace(tmp.begin(), tmp.end(), ' ', ';');
   auto it = norms.find(tmp);
@@ -542,7 +563,21 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_keepNorm) {
     const bool val = m_boolManager->value(prop);
     if (val) { // record data for later
-      double norm = readNormalization()[0];
+      double norm = 0.0;
+      int j = m_enumManager->value(m_workspace);
+      std::string name = m_workspaceNames[j].toStdString();
+
+      auto norms = readMultipleNormalization();
+      std::string tmp = name;
+      if (rawData()) {
+        tmp = tmp + "_Raw";
+      }
+      // stored with ; instead of spaces
+      std::replace(tmp.begin(), tmp.end(), ' ', ';');
+      auto it = norms.find(tmp);
+      if (it != norms.end()) {
+        norm = it->second;
+      }
       ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
       AnalysisDataService::Instance().addOrReplace("__keepNorm__", table);
       table->addColumn("double", "norm");
@@ -820,22 +855,6 @@ Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
   return boost::dynamic_pointer_cast<IFunction>(multi);
 }
 
-std::vector<double> readNormalization() {
-  std::vector<double> norm;
-  if (!AnalysisDataService::Instance().doesExist("__norm__")) {
-    norm.push_back(22.423);
-  } else {
-    Mantid::API::ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
-    auto colNorm = table->getColumn("norm");
-
-    for (size_t j = 0; j < table->rowCount(); j++) {
-      norm.push_back((*colNorm)[j]); // record and update norm....
-    }
-  }
-  return norm;
-}
 /** Reads the normalization constants and which WS
 * they belong to
 * @returns :: A map of normalization constants and WS names
@@ -1040,7 +1059,7 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
   if (workspaceName.endsWith("_Workspace"))
     return false;
 
-  return dynamic_cast<MatrixWorkspace *>(ws.get()) != 0;
+  return dynamic_cast<MatrixWorkspace *>(ws.get()) != nullptr;
 }
 
 void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {

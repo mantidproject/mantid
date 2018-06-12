@@ -163,11 +163,6 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             lastElement = pE;
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
             numPrimitives++;
-          } else if (primitiveName == "segmented-cylinder") {
-            lastElement = pE;
-            idMatching[idFromUser] =
-                parseSegmentedCylinder(pE, primitives, l_id);
-            numPrimitives++;
           } else if (primitiveName == "hollow-cylinder") {
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
             numPrimitives++;
@@ -1416,6 +1411,7 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
 
   shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
                           hex.rft, hex.rbt);
+
   handler->setShapeInfo(std::move(shapeInfo));
 
   shape->defineBoundingBox(std::max(xrb, xrf), yrf, ZDEPTH, std::min(xlf, xlb),

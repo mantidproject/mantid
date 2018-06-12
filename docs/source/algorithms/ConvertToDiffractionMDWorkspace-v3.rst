@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -71,8 +71,9 @@ Usage
 **Output:**
 
 .. testoutput:: ExConvertToDiffractionMDWorkspace
+   :options: +ELLIPSIS
 
-   Resulting MD workspace has 81058 events and 3 dimensions
+   Resulting MD workspace has 81... events and 3 dimensions
    Workspace Type is:  MDEventWorkspace<MDEvent,3>
 
 

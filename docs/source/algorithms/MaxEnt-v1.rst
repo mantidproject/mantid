@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -100,33 +100,33 @@ the output workspaces whether the algorithm was evolving towards the correct sol
 On the other hand, the user must always check the validity of the solution by inspecting *EvolChi* and *EvolAngle*,
 whose values will be set to zero once the true maximum entropy solution is found.
 
-.. table:: Table 1. Output workspaces for a real input workspace with M histograms and N bins
+.. table:: Table 1. Output workspaces for a real input workspace with M histograms and N bins, taking J iterations.
 
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
     | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                                                                                                                                                                        |
     +===================+==============================+================+====================================================================================================================================================================================================================================================================================================================+
-    | EvolChi           | M                            | MaxIterations  | Evolution of :math:`\chi^2` until the solution is found. Then all values are set to zero.                                                                                                                                                                                                                          |
+    | EvolChi           | M                            | J              | For spectrum :math:`k` in the input workspace, evolution of :math:`\chi^2` until the solution is found                                                                                                                                                                                                             |
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | EvolAngle         | M                            | MaxIterations  | Evolution of the angle between :math:`\nabla S` and :math:`\nabla \chi^2`, until the solution is found. Then all values are set to zero.                                                                                                                                                                           |
+    | EvolAngle         | M                            | J              | For spectrum :math:`k` in the input workspace, evolution of the angle between :math:`\nabla S` and :math:`\nabla \chi^2`, until the solution is found                                                                                                                                                              |
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedImage| 2M                           | N              | For spectrum :math:`s` in the input workspace, the reconstructed image is stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)                                                                                                                                                                 |
+    | ReconstructedImage| 2M                           | N              | For spectrum :math:`k` in the input workspace, the reconstructed image is stored in spectra :math:`k` (real part) and :math:`k+M` (imaginary part)                                                                                                                                                                 |
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedData | 2M                           | N              | For spectrum :math:`s` in the input workspace, the reconstructed data are stored in spectrum :math:`s` (real part) and :math:`s+M` (imaginary part). Note that although the input is real, the imaginary part is recorded for debugging purposes, it should be zero for all data points.                           |
+    | ReconstructedData | 2M                           | N              | For spectrum :math:`k` in the input workspace, the reconstructed data are stored in spectrum :math:`k` (real part) and :math:`k+M` (imaginary part). Note that although the input is real, the imaginary part is recorded for debugging purposes, it should be zero for all data points.                           |
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-.. table:: Table 2. Output workspaces for a complex input workspace with 2M histograms and N bins.
+.. table:: Table 2. Output workspaces for a complex input workspace with 2M histograms and N bins, taking J iterations.
 
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                |
-    +===================+==============================+================+============================================================================================================================================================+
-    | EvolChi           | M                            | MaxIterations  | Evolution of :math:`\chi^2` until the solution is found. Then all values are set to zero.                                                                  |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | EvolAngle         | M                            | MaxIterations  | Evolution of the angle between :math:`\nabla S` and :math:`\nabla \chi^2`, until the solution is found. Then all values are set to zero.                   |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedImage| 2M                           | :math:`N`      | For spectrum :math:`(s, s+M)` in the input workspace, the reconstructed image is stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)  |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    | ReconstructedData | 2M                           | :math:`N`      | For spectrum :math:`(s, s+M)` in the input workspace, the reconstructed data are stored in spectra :math:`s` (real part) and :math:`s+M` (imaginary part)  |
-    +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                  |
+    +===================+==============================+================+==============================================================================================================================================================+
+    | EvolChi           | M                            | J              | For spectrum :math:`(k, k+M)` in the input workspace, evolution of :math:`\chi^2` until the solution is found                                                |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | EvolAngle         | M                            | J              | For spectrum :math:`(k, k+M)` in the input workspace, evolution of the angle between :math:`\nabla S` and :math:`\nabla \chi^2`, until the solution is found |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | ReconstructedImage| 2M                           | :math:`N`      | For spectrum :math:`(k, k+M)` in the input workspace, the reconstructed image is stored in spectra :math:`k` (real part) and :math:`k+M` (imaginary part)    |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | ReconstructedData | 2M                           | :math:`N`      | For spectrum :math:`(k, k+M)` in the input workspace, the reconstructed data are stored in spectra :math:`k` (real part) and :math:`k+M` (imaginary part)    |
+    +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Usage
 -----
@@ -174,13 +174,14 @@ and the reconstructed image, i.e. Fourier transform (right).
 Output:
 
 .. testoutput:: ExFourierCoeffs
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    First  reconstructed coefficient: 0.847
    Second reconstructed coefficient: 0.846
    Third  reconstructed coefficient: 0.846
    Fourth reconstructed coefficient: 0.896
    Fifth  reconstructed coefficient: 0.896
-   Number of iterations: 3495
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -223,13 +224,14 @@ and :ref:`algm-FFT` (right).
 Output:
 
 .. testoutput:: ExMUSR00022725
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at -1.359: 0.100
    Image at 0.000: 0.009
    Image at 1.359: 0.100
    Negative background 0.006431
    Positive background 0.006431
-   Number of iterations: 22
+   Number of iterations: ...
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
 
@@ -258,6 +260,7 @@ and its imaginary part (right).
 Output:
 
 .. testoutput:: ExEMU00020884
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image (real part) at -1.389: -0.063
    Image (real part) at  0.000:  0.035
@@ -265,7 +268,7 @@ Output:
    Image (imaginary part) at -1.389: -0.277
    Image (imaginary part) at  0.000:  0.000
    Image (imaginary part) at  1.389:  0.277
-   Number of iterations: 33
+   Number of iterations: ...
 
 
 .. figure:: ../images/MaxEntMUSR00020884.png
@@ -304,11 +307,12 @@ the original and reconstructed data (left), and the reconstructed image (right).
 Output:
 
 .. testoutput:: ExRealImage
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image (real part) at 0.318: 0.000
    Image (real part) at 0.477: 5.862
    Image (real part) at 0.637: 0.000
-   Number of iterations: 20000
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntComplexData.png
    :align: center
@@ -359,12 +363,13 @@ image in order to obtain smooth results).
 Output:
 
 .. testoutput:: ExRealPosImage
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
    Image at 0.477: 5.862 (PositiveImage=False), 5.913 (PositiveImage=True)
    Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
-   Number of iterations: 20000
-   Number of iterations: 11
+   Number of iterations: ...
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
@@ -379,6 +384,76 @@ splitting the entropy (the same applies to its derivative) in two terms, :math:`
 where the first one refers to the real part of the entropy and the second one to the imaginary part. This is the recommended option when no prior knowledge
 about the image is available, as trying to reconstruct images that are inherently complex discarding the imaginary part will prevent the algorithm
 from converging. If the image is known to be real this property can be safely set to *False*.
+
+Complex Data
+------------
+If the input property "ComplexData* is set to *True*, the algorithm will assume complex data for the calculations with all the
+real parts listed before all the imaginary parts. This means that if you have workspaces where the imaginary part immediately
+follow the real part, such workspaces cannot be combined by using the :ref:`algm-AppendSpectra` algorithm because the resulting
+output will not order the real and imaginary parts corrected as needed for this algorithm. The following usage example
+shows how to combine two workspaces with complex data.
+
+.. testcode:: ExComplexData
+
+   from math import pi, sin, cos
+   from random import random, seed
+   seed(0)
+   # Create complex data for a workspace
+   X = []
+   YRe = []
+   YIm = []
+   E = []
+   N = 200
+   w = 3
+   for i in range(0,N):
+       x = 2*pi*i/N
+       X.append(x)
+       YRe.append(cos(w*x)+(random()-0.5)*0.3)
+       YIm.append(sin(w*x)+(random()-0.5)*0.3)
+       E.append(0.1)
+
+   seed(0)
+   # Create complex data for a second workspace
+   X2 = []
+   YRe2 = []
+   YIm2 = []
+   E2 = []
+   N2 = 200
+   w2 = 4
+   for i in range(0,N2):
+       x = 2*pi*i/N2
+       X2.append(x)
+       YRe2.append(cos(w2*x)+(random()-0.5)*0.3)
+       YIm2.append(sin(w2*x)+(random()-0.5)*0.3)
+       E2.append(0.5)
+
+   # Create two workspaces of one spectrum each    
+   CreateWorkspace(OutputWorkspace='ws1',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
+   evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws1', ComplexData=True, A=0.001, PositiveImage=True)
+
+   print ("Number of iterations dataset1 separate: "+str( len(evolAngleP.readX(0))))
+
+   CreateWorkspace(OutputWorkspace='ws2',DataX=X2+X2,DataY=YRe2+YIm2,DataE=E2+E2,NSpec=2)
+   evolChiP2, evolAngleP2, imageP2, dataP2 = MaxEnt(InputWorkspace='ws2', ComplexData=True, A=0.001, PositiveImage=True)
+
+   print ("Number of iterations dataset2 separate: "+str( len(evolAngleP2.readX(0))))
+
+   # Combine the two workspaces
+   CreateWorkspace(OutputWorkspace='wsCombined',DataX=X+X2+X+X2,DataY=YRe+YRe2+YIm+YIm2,DataE=E+E2+E+E2,NSpec=4)
+   evolChiC, evolAngleC, imageC, dataC = MaxEnt(InputWorkspace='wsCombined', ComplexData=True, A=0.001, PositiveImage=True)
+
+   print ("Number of iterations dataset1 combined: "+str( len(evolAngleC.readX(0))))
+   print ("Number of iterations dataset2 combined: "+str( len(evolAngleC.readX(1))))
+
+Output:
+
+.. testoutput:: ExComplexData
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
+
+   Number of iterations dataset1 separate: ...
+   Number of iterations dataset2 separate: ...
+   Number of iterations dataset1 combined: ...
+   Number of iterations dataset2 combined: ...
 
 
 Increasing the number of points in the image
@@ -410,11 +485,12 @@ from the default 1.0; the dataset contains 270 data points and here set to be sl
 Output:
 
 .. testoutput:: ExResolutionFactor
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
    Image at 0.000: 0.035 (ResolutionFactor=1)
    Image at 0.000: 0.068 (ResolutionFactor=2)
-   Number of iterations: 33
-   Number of iterations: 20
+   Number of iterations: ...
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
@@ -441,11 +517,12 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
 Output:
 
 .. testoutput:: ExResolutionFactor2
+   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
 
-   Number of iterations: 41
-   Number of iterations: 20
-   Number of iterations: 24
-   Number of iterations: 32
+   Number of iterations: ...
+   Number of iterations: ...
+   Number of iterations: ...
+   Number of iterations: ...
 
 .. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center

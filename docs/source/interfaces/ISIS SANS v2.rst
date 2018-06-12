@@ -94,8 +94,11 @@ Columns
 | **User File**            |   User file to use for this row. If specified it will override any options set in the GUI,      |
 |                          |   otherwise the default file will be used.                                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
+| **Sample Thickness**     |   Sets the sample thickness to be used in the reduction.                                        |
+|                          |                                                                                                 |
++--------------------------+-------------------------------------------------------------------------------------------------+
 | **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
-|                          |   and WavelengthMax can be set here.                                                            |
+|                          |   , **WavelengthMax** and **EventSlices** can be set here.                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 
 Save Options
@@ -284,7 +287,7 @@ Masking information
 
 The masking table shows detailed information about the masks which will be applied.
 These masks include bin masks, cylinder masks, mask files, spectrum masks, angle masks
-and masks for the beam stop. If as mask is applied only to a particular detector
+and line masks for the beam stop arm. If a mask is applied only to a particular detector
 then this will be shown in the masking table. Note that data needs to be specified
 in order to see the masking information. Also note if a manual change to the
 data table or other settings, requires you to update the row selection by

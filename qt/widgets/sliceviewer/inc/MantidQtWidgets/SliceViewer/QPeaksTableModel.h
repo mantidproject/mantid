@@ -116,6 +116,8 @@ public:
   static const QString QLAB;
   /// Label for Q-vector in the sample column
   static const QString QSAMPLE;
+  /// Label for Q-vector in the peak number column
+  static const QString PEAKNUM;
 
 private:
   /// Find the correct column name for this column index
@@ -161,6 +163,8 @@ private:
   static const int COL_QLAB;
   /// Index for Q-vector in the sample column
   static const int COL_QSAMPLE;
+  /// Unique peak number
+  static const int COL_PEAKNUM;
   /// The number of digits past the decimal to display in the table
   int m_hklPrec;
   /// Map from column index to raw peak data

@@ -7,14 +7,9 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Timer.h"
 
+#include <Poco/ActiveResult.h>
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
-#include <Poco/ActiveResult.h>
-#include <Poco/Thread.h>
-
-#include <boost/random/uniform_int.hpp>
-
-#include <numeric>
 
 namespace Mantid {
 namespace LiveData {
@@ -147,17 +142,6 @@ public:
 };
 } // end anonymous
 
-/// (Empty) Constructor
-FakeISISEventDAE::FakeISISEventDAE() : m_server(nullptr) {}
-
-/// Destructor
-FakeISISEventDAE::~FakeISISEventDAE() {
-  if (m_server) {
-    m_server->stop();
-    delete m_server;
-  }
-}
-
 /**
 * Declare the algorithm properties
 */
@@ -198,19 +182,18 @@ void FakeISISEventDAE::exec() {
   histoDAE->setProperty("NPeriods", nper);
   histoDAE->setProperty("NSpectra", nspec);
   histoDAE->setProperty("Port", port + 1);
-  Poco::ActiveResult<bool> histoDAEHandle = histoDAE->executeAsync();
+  auto histoDAEHandle = histoDAE->executeAsync();
 
   auto prog = boost::make_shared<Progress>(this, 0.0, 1.0, 100);
   prog->setNotifyStep(0);
   prog->report(0, "Waiting for client");
-  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
-  m_server = new Poco::Net::TCPServer(
+  Poco::Net::TCPServer server(
       TestServerConnectionFactory::Ptr(
           new TestServerConnectionFactory(nper, nspec, rate, nevents, prog)),
       socket);
-  m_server->start();
+  server.start();
   // Keep going until you get cancelled
   while (true) {
     try {
@@ -223,19 +206,12 @@ void FakeISISEventDAE::exec() {
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
   }
+  // It's most likely that we got here from a cancel request
+  // so calling prog->report after this point
+  // will generate another CancelException
   histoDAE->cancel();
   histoDAEHandle.wait();
-  if (m_server) {
-    m_server->stop();
-    m_server = nullptr;
-  }
   socket.close();
-
-  prog->report(90, "Closing ISIS event DAE");
-  histoDAE->setLogging(false); // hide the final closedown message to the log it
-                               // is confusing as it is a child alg.
-  histoDAE->cancel();
-  histoDAEHandle.wait();
 }
 
 } // namespace LiveData

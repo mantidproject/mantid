@@ -11,6 +11,9 @@ class EnggFocus(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Engineering"
 
+    def seeAlso(self):
+        return [ "AlignDetectors","DiffractionFocussing" ]
+
     def name(self):
         return "EnggFocus"
 

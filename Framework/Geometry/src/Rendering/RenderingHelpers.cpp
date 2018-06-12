@@ -1,7 +1,9 @@
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -134,109 +136,6 @@ void render(const TopoDS_Shape &ObjSurf) {
   glEnd();
 }
 #endif
-
-// Render Bitmap for RectangularDetector
-void render(const RectangularDetector &rectDet) {
-  // Because texture colours are combined with the geometry colour
-  // make sure the current colour is white
-  glColor3f(1.0f, 1.0f, 1.0f);
-
-  // Nearest-neighbor scaling
-  GLint texParam = GL_NEAREST;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texParam);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texParam);
-
-  glEnable(GL_TEXTURE_2D); // enable texture mapping
-
-  int texx, texy;
-  rectDet.getTextureSize(texx, texy);
-  double tex_frac_x = (1.0 * rectDet.xpixels()) / (texx);
-  double tex_frac_y = (1.0 * rectDet.ypixels()) / (texy);
-
-  glBegin(GL_QUADS);
-
-  glTexCoord2f(0.0, 0.0);
-  V3D pos;
-  pos = rectDet.getRelativePosAtXY(0, 0);
-  pos += V3D(rectDet.xstep() * (-0.5), rectDet.ystep() * (-0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
-  pos = rectDet.getRelativePosAtXY(rectDet.xpixels() - 1, 0);
-  pos += V3D(rectDet.xstep() * (+0.5), rectDet.ystep() * (-0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
-               static_cast<GLfloat>(tex_frac_y));
-  pos =
-      rectDet.getRelativePosAtXY(rectDet.xpixels() - 1, rectDet.ypixels() - 1);
-  pos += V3D(rectDet.xstep() * (+0.5), rectDet.ystep() * (+0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
-  pos = rectDet.getRelativePosAtXY(0, rectDet.ypixels() - 1);
-  pos += V3D(rectDet.xstep() * (-0.5), rectDet.ystep() * (+0.5),
-             0.0); // Adjust to account for the size of a pixel
-  glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-             static_cast<GLfloat>(pos.Z()));
-
-  glEnd();
-  if (glGetError() > 0)
-    std::cout << "OpenGL error in doRender(const RectangularDetector &) \n";
-
-  glDisable(
-      GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
-}
-
-void render(const StructuredDetector &structDet) {
-  const auto &xVerts = structDet.getXValues();
-  const auto &yVerts = structDet.getYValues();
-  const auto &r = structDet.getR();
-  const auto &g = structDet.getG();
-  const auto &b = structDet.getB();
-
-  if (xVerts.size() != yVerts.size())
-    return;
-
-  auto w = structDet.xPixels() + 1;
-  auto h = structDet.yPixels() + 1;
-
-  glBegin(GL_QUADS);
-
-  for (size_t iy = 0; iy < h - 1; iy++) {
-    for (size_t ix = 0; ix < w - 1; ix++) {
-
-      glColor3ub((GLubyte)r[(iy * (w - 1)) + ix],
-                 (GLubyte)g[(iy * (w - 1)) + ix],
-                 (GLubyte)b[(iy * (w - 1)) + ix]);
-      V3D pos;
-      pos = V3D(xVerts[(iy * w) + ix + w], yVerts[(iy * w) + ix + w], 0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-      pos = V3D(xVerts[(iy * w) + ix + w + 1], yVerts[(iy * w) + ix + w + 1],
-                0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-      pos = V3D(xVerts[(iy * w) + ix + 1], yVerts[(iy * w) + ix + 1], 0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-      pos = V3D(xVerts[(iy * w) + ix], yVerts[(iy * w) + ix], 0.0);
-      glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
-                 static_cast<GLfloat>(pos.Z()));
-    }
-  }
-
-  glEnd();
-
-  if (glGetError() > 0)
-    std::cout << "OpenGL error in doRender(const StructuredDetector &) \n";
-}
 
 void renderSphere(const detail::ShapeInfo &shapeInfo) {
   // create glu sphere
@@ -426,13 +325,6 @@ void renderShape(const detail::ShapeInfo &shapeInfo) {
     return;
   }
 }
-
-void renderBitmap(const RectangularDetector &rectDet) { render(rectDet); }
-
-void renderStructured(const StructuredDetector &structDet) {
-  render(structDet);
-}
-
 } // namespace RenderingHelpers
 } // namespace Geometry
 } // namespace Mantid

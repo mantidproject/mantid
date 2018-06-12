@@ -37,6 +37,9 @@ class DLLExport EqualToMD : public BooleanBinaryOperationMD {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"GreaterThanMD", "LessThanMD", "NotMD"};
+  }
 
 private:
   void initExtraProperties() override;

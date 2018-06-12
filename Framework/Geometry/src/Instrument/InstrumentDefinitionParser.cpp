@@ -1587,8 +1587,8 @@ void InstrumentDefinitionParser::createStructuredDetector(
   bool isZBeam =
       m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
   // Now, initialize all the pixels in the bank
-  bank->initialize(xpixels, ypixels, xValues, yValues, isZBeam, idstart,
-                   idfillbyfirst_y, idstepbyrow, idstep);
+  bank->initialize(xpixels, ypixels, std::move(xValues), std::move(yValues),
+                   isZBeam, idstart, idfillbyfirst_y, idstepbyrow, idstep);
 
   // Loop through all detectors in the newly created bank and mark those in
   // the instrument.

@@ -378,7 +378,7 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   vecY.clear();
 
   // Go through all events to find out their positions
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
 
   bool scancell = true;
   size_t nextindex = 1;
@@ -429,8 +429,6 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
       scancell = false;
     }
   } // ENDOF(while)
-
-  delete (mditer);
 }
 
 //----------------------------------------------------------------------------------------------

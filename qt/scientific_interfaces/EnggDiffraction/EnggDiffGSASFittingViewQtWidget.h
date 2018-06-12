@@ -5,9 +5,11 @@
 #include "EnggDiffMultiRunFittingQtWidget.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffractionParam.h"
 #include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 
+#include <boost/shared_ptr.hpp>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 
@@ -24,7 +26,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
 public:
   EnggDiffGSASFittingViewQtWidget(
       boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
+      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
+      boost::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
 
@@ -63,7 +66,7 @@ public:
 
   boost::optional<double> getXMin() const override;
 
-  void setEnabled(const bool enabled);
+  void setEnabled(const bool enabled) override;
 
   void showStatus(const std::string &status) const override;
 
@@ -82,6 +85,7 @@ private slots:
   void disableLoadIfInputEmpty();
   void doRefinement();
   void loadFocusedRun();
+  void refineAll();
   void selectRun();
 
 private:
@@ -94,7 +98,7 @@ private:
 
   boost::shared_ptr<EnggDiffMultiRunFittingQtWidget> m_multiRunWidgetView;
 
-  std::unique_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
+  boost::shared_ptr<IEnggDiffGSASFittingPresenter> m_presenter;
 
   Ui::EnggDiffractionQtTabGSAS m_ui;
 

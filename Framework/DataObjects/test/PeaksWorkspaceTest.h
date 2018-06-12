@@ -56,7 +56,7 @@ public:
 
   /** Check that the PeaksWorkspace build by buildPW() is correct */
   void checkPW(const PeaksWorkspace &pw) {
-    TS_ASSERT_EQUALS(pw.columnCount(), 17);
+    TS_ASSERT_EQUALS(pw.columnCount(), 18);
     TS_ASSERT_EQUALS(pw.rowCount(), 1);
     TS_ASSERT_EQUALS(pw.getNumberPeaks(), 1);
     if (pw.getNumberPeaks() != 1)

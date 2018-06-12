@@ -3,32 +3,25 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "WorkspaceCreationHelperTest.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
-using Mantid::Geometry::IDetector_const_sptr;
-using Mantid::Geometry::IComponent_const_sptr;
+using Mantid::Geometry::Instrument_const_sptr;
+using Mantid::Geometry::ParameterMap;
+using Mantid::Kernel::V3D;
 
 class CopyInstrumentParametersTest : public CxxTest::TestSuite {
 public:
@@ -62,10 +55,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         copyInstParam.setPropertyValue("OutputWorkspace", wsName2));
     // Get instrument of input workspace and move some detectors
-    Geometry::ParameterMap *pmap;
+    ParameterMap *pmap;
     pmap = &(ws1->instrumentParameters());
     auto &detectorInfoWs1 = ws1->mutableDetectorInfo();
-    Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
+    Instrument_const_sptr instrument = ws1->getInstrument();
     detectorInfoWs1.setPosition(0, V3D(6.0, 0.0, 0.7));
     detectorInfoWs1.setPosition(1, V3D(6.0, 0.1, 0.7));
 
@@ -119,8 +112,8 @@ public:
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName1, ws1);
 
-    Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
-    Geometry::ParameterMap *pmap;
+    Instrument_const_sptr instrument = ws1->getInstrument();
+    ParameterMap *pmap;
     pmap = &(ws1->instrumentParameters());
     // add auxiliary instrument parameters
     pmap->addDouble(instrument.get(), "Ei", 100);
@@ -218,8 +211,8 @@ public:
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.add(m_SourceWSName, ws1);
 
-    Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
-    Geometry::ParameterMap *pmap;
+    Instrument_const_sptr instrument = ws1->getInstrument();
+    ParameterMap *pmap;
     pmap = &(ws1->instrumentParameters());
     for (size_t i = 0; i < n_Parameters; i++) {
       // add auxiliary instrument parameters
@@ -230,7 +223,8 @@ public:
     // calibrate detectors;
     auto &detectorInfo = ws1->mutableDetectorInfo();
     for (size_t i = 0; i < n_detectors; i++) {
-      auto detIndex = detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
+      size_t detIndex =
+          detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
       detectorInfo.setPosition(
           detIndex, V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7));
     }
@@ -270,7 +264,7 @@ public:
 
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     MatrixWorkspace_sptr ws2 =
-        dataStore.retrieveWS<API::MatrixWorkspace>(m_TargetWSName);
+        dataStore.retrieveWS<MatrixWorkspace>(m_TargetWSName);
     auto instr2 = ws2->getInstrument();
 
     auto param_names = instr2->getParameterNames();

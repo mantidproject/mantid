@@ -24,6 +24,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         """
         return "Transforms\\Masking;Inelastic\\Utility"
 
+    def seeAlso(self):
+        return [ "MaskDetectors","MaskInstrument" ]
+
     def name(self):
         """ Mantid required
         """
@@ -62,7 +65,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         # special cases are defined, default value is in front
         self.bankmin=defaultdict(lambda: 1, {"MANDI":1,"SEQUOIA":38,"TOPAZ":10})
         self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"REF_M":1,
-                      "SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
+                      "SEQUOIA":150,"SNAP":64,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
         tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
         tubemax=defaultdict(lambda: 8, {"CORELLI":16,"MANDI":255,"POWGEN":153,"REF_M":303,"SNAP":255,"SXD":63,"TOPAZ":255,
                                         "WAND":480,"WISH":152})

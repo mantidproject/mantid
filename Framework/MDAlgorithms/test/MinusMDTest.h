@@ -105,7 +105,7 @@ public:
       TS_ASSERT_EQUALS(ws->getNPoints(), 10000);
     }
 
-    IMDIterator *it = ws->createIterator();
+    auto it = ws->createIterator();
     if (mask_ws_num == 0) {
       while (it->next()) {
         // Signal of all boxes is zero since they got subtracted

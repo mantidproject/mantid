@@ -101,7 +101,7 @@ const TopoDS_Shape &GeometryTriangulator::getOCSurface() {
 #endif
 
 void GeometryTriangulator::checkTriangulated() {
-  if (m_csgObj != nullptr) {
+  if (m_csgObj != nullptr || m_meshObj != nullptr) {
     if (!m_isTriangulated) {
       triangulate();
     }

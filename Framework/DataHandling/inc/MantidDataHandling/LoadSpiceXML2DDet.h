@@ -69,6 +69,9 @@ public:
 
   /// Algorithm version
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadSpice2D"};
+  }
 
   /// Category
   const std::string category() const override;

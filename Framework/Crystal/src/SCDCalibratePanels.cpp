@@ -102,9 +102,9 @@ void SCDCalibratePanels::exec() {
   std::vector<std::string> parameter_workspaces(
       MyBankNames.size() + MyPanels.size(), "params_");
   int i = 0;
-  for (auto iBank = MyPanels.begin(); iBank != MyPanels.end(); ++iBank) {
-    fit_workspaces[i] += *iBank;
-    parameter_workspaces[i] += *iBank;
+  for (auto &MyPanel : MyPanels) {
+    fit_workspaces[i] += MyPanel;
+    parameter_workspaces[i] += MyPanel;
     i++;
   }
   if (snapPanels) {
@@ -122,9 +122,9 @@ void SCDCalibratePanels::exec() {
                    << " degrees\n";
   }
 
-  for (auto iBank = MyBankNames.begin(); iBank != MyBankNames.end(); ++iBank) {
-    fit_workspaces[i] += *iBank;
-    parameter_workspaces[i] += *iBank;
+  for (auto &MyBankName : MyBankNames) {
+    fit_workspaces[i] += MyBankName;
+    parameter_workspaces[i] += MyBankName;
     i++;
   }
   if (bankPanels) {

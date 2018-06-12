@@ -15,6 +15,7 @@ ExternalProject_Add(googletest
   PATCH_COMMAND     "@GIT_EXECUTABLE@" reset --hard ${_tag}
             COMMAND "@GIT_EXECUTABLE@" apply --whitespace fix "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_override.patch"
             COMMAND "@GIT_EXECUTABLE@" apply --whitespace fix "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_static.patch"
+            COMMAND "@GIT_EXECUTABLE@" apply --whitespace fix "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_msvc_cpp11.patch"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
