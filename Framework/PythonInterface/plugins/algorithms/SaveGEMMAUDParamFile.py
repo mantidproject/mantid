@@ -67,6 +67,8 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
             template = template_file.read()
 
         num_banks = input_ws.getNumberOfEntries()
+        create_empty_param_list = lambda default_value="0": "\n".join(default_value for _ in range(num_banks))
+
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
             output_file.write(template.format(gsas_prm_file=gsas_filename,
                                               inst_counter_bank="Bank1",
@@ -84,22 +86,18 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                                               func_1_sigma_zeros=self._format_param_list(sigma_zeros),
                                               func_1_sigma_ones=self._format_param_list(sigma_ones),
                                               func_1_sigma_twos=self._format_param_list(sigma_twos),
-                                              func_2_alpha_zeros=self._create_empty_param_list(num_banks),
-                                              func_2_alpha_ones=self._create_empty_param_list(num_banks),
-                                              func_2_betas=self._create_empty_param_list(num_banks),
-                                              func_2_switches=self._create_empty_param_list(num_banks),
-                                              func_2_sigma_zeros=self._create_empty_param_list(num_banks),
-                                              func_2_sigma_ones=self._create_empty_param_list(num_banks),
-                                              func_2_sigma_twos=self._create_empty_param_list(num_banks),
-                                              func_2_gamma_zeros=self._create_empty_param_list(num_banks),
-                                              func_2_gamma_ones=self._create_empty_param_list(num_banks),
-                                              func_2_gamma_twos=self._create_empty_param_list(num_banks),
-                                              function_types=self._create_empty_param_list(num_banks, default_value="1")
+                                              func_2_alpha_zeros=create_empty_param_list(),
+                                              func_2_alpha_ones=create_empty_param_list(),
+                                              func_2_betas=create_empty_param_list(),
+                                              func_2_switches=create_empty_param_list(),
+                                              func_2_sigma_zeros=create_empty_param_list(),
+                                              func_2_sigma_ones=create_empty_param_list(),
+                                              func_2_sigma_twos=create_empty_param_list(),
+                                              func_2_gamma_zeros=create_empty_param_list(),
+                                              func_2_gamma_ones=create_empty_param_list(),
+                                              func_2_gamma_twos=create_empty_param_list(),
+                                              function_types=create_empty_param_list("1")
                                               ))
-
-    def _create_empty_param_list(self, num_banks, default_value="0"):
-        # Generate a list of zeroes, as several parameters are just zeroed in the .maud file
-        return "\n".join(default_value for _ in range(num_banks))
 
     def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers):
         return (bank_param_list[self.BANK_GROUPING[spec_num]] for spec_num in spectrum_numbers)
