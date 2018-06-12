@@ -110,7 +110,7 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
   addGroupingInformationToADS(options.grouping);
 }
 
-// Checks that the detector IDs are consistsent with the supplied workspace
+// Checks that the detector IDs in grouping are in the workspace
 void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
     API::Grouping &grouping, Workspace_sptr workspace) {
   bool check =
@@ -125,7 +125,7 @@ void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
 }
 
 /**
- * Adds an empty workspaceGroup to the ADS with a name
+ * Adds an empty WorkspaceGroup to the ADS with a name
  * that it would have if created by the MuonAnalysis GUI.
  */
 WorkspaceGroup_sptr
@@ -137,6 +137,7 @@ LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
   return groupedWS;
 }
 
+// Set the parameters in options to sensible defaults for this algorithm
 AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
   AnalysisOptions options;
   options.summedPeriods = "1";
@@ -173,7 +174,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(
 
 /**
  * Load the grouping and pairing information from the input file
- * into the Grouping struct.
+ * into the Grouping struct, after performing some checks.
  */
 API::Grouping LoadAndApplyMuonDetectorGrouping::loadGroupsAndPairs() {
   Grouping grouping;
@@ -185,6 +186,10 @@ API::Grouping LoadAndApplyMuonDetectorGrouping::loadGroupsAndPairs() {
   return grouping;
 };
 
+/**
+ * Check if the group/pair names are valid, and if all the groups which
+ * are paired are also included as groups.
+ */
 void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(
     const Grouping &grouping) {
   for (auto &&groupName : grouping.groupNames) {
@@ -232,6 +237,8 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
   for (auto i = 0; i < numGroups; i++) {
     IAlgorithm_sptr alg =
         this->createChildAlgorithm("ApplyMuonDetectorGrouping");
+    if (!this->isLogging())
+      alg->setLogging(false);
     alg->setProperty("InputWorkspace", ws->getName());
     alg->setProperty("InputWorkspaceGroup", wsGrouped->getName());
     alg->setProperty("GroupName", options.grouping.groupNames[i]);
@@ -241,7 +248,10 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
   }
 };
 
-// The pairing algorithm is not yet implemented
+/**
+* Add all the supplied pairs to the ADS, inside wsGrouped, by
+* executing the ApplyMuonDetectorGroupPairing algorithm
+*/
 void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     const Mantid::Muon::AnalysisOptions &options,
     Mantid::API::Workspace_sptr ws,
@@ -251,10 +261,11 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
   for (auto i = 0; i < numPairs; i++) {
     IAlgorithm_sptr alg =
         this->createChildAlgorithm("ApplyMuonDetectorGroupPairing");
+    if (!this->isLogging())
+      alg->setLogging(false);
     alg->setProperty("SpecifyGroupsManually", true);
     alg->setProperty("InputWorkspace", ws->getName());
     alg->setProperty("InputWorkspaceGroup", wsGrouped->getName());
-
     alg->setProperty("PairName", options.grouping.pairNames[i]);
     alg->setProperty("Alpha", options.grouping.pairAlphas[i]);
 

@@ -348,6 +348,7 @@ public:
 
   void test_init() {
     Muon::LoadAndApplyMuonDetectorGrouping alg;
+	alg.setLogging(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   };
@@ -363,6 +364,7 @@ public:
     std::string filename = file.getFileName();
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
+	alg.setLogging(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));

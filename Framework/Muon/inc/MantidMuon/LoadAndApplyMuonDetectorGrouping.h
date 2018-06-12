@@ -99,6 +99,8 @@ private:
   void checkDetectorIDsInWorkspace(Mantid::API::Grouping &grouping,
                                    Mantid::API::Workspace_sptr workspace);
 
+  /// Check if the group/pair names are valid, and if all the groups which
+  /// are paired are also included as groups.
   void CheckValidGroupsAndPairs(const Mantid::API::Grouping &grouping);
 };
 
