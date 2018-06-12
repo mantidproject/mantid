@@ -98,6 +98,8 @@ private:
   /// Throw an error if the detector IDs in grouping are not in workspace
   void checkDetectorIDsInWorkspace(Mantid::API::Grouping &grouping,
                                    Mantid::API::Workspace_sptr workspace);
+
+  void CheckValidGroupsAndPairs(const Mantid::API::Grouping &grouping);
 };
 
 } // namespace Muon

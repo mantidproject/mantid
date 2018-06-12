@@ -23,7 +23,7 @@
 
 namespace {
 
-/// Convert the enum PlotType to a string to pass to ApplyMuonDetectorGroup
+// Convert the enum PlotType to a string to pass to ApplyMuonDetectorGrouping
 std::string plotTypeToString(const Mantid::Muon::PlotType &plotType) {
   switch (plotType) {
   case Mantid::Muon::PlotType::Asymmetry:
@@ -85,6 +85,7 @@ LoadAndApplyMuonDetectorGrouping::validateInputs() {
 }
 
 void LoadAndApplyMuonDetectorGrouping::exec() {
+  this->setRethrows(true);
 
   AnalysisOptions options = setDefaultOptions();
   options.grouping = loadGroupsAndPairs();
@@ -178,8 +179,45 @@ API::Grouping LoadAndApplyMuonDetectorGrouping::loadGroupsAndPairs() {
   Grouping grouping;
   std::string filename = getProperty("Filename");
   GroupingLoader::loadGroupingFromXML(filename, grouping);
+
+  CheckValidGroupsAndPairs(grouping);
+
   return grouping;
 };
+
+void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(
+    const Grouping &grouping) {
+  for (auto &&groupName : grouping.groupNames) {
+    if (!MuonAlgorithmHelper::checkValidGroupPairName(groupName)) {
+      throw std::invalid_argument("Some group names are invalid");
+    }
+  }
+
+  for (size_t p = 0; p < grouping.pairs.size(); p++) {
+    std::string pairName = grouping.pairNames[p];
+    if (!MuonAlgorithmHelper::checkValidGroupPairName(pairName)) {
+      throw std::invalid_argument("Some pair names are invalid");
+    }
+    std::string pairGroup1 = grouping.groupNames[grouping.pairs[p].first];
+    std::string pairGroup2 = grouping.groupNames[grouping.pairs[p].second];
+
+    bool group1inPair =
+        (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
+                   pairGroup1) != grouping.groupNames.end());
+    bool group2inPair =
+        (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
+                   pairGroup1) != grouping.groupNames.end());
+
+    if (!group1inPair) {
+      throw std::invalid_argument("Pairing " + pairName + " : required group " +
+                                  pairGroup1 + " is missing");
+    }
+    if (!group2inPair) {
+      throw std::invalid_argument("Pairing " + pairName + " : required group " +
+                                  pairGroup2 + " is missing");
+    }
+  }
+}
 
 /**
  * Add all the supplied groups to the ADS, inside wsGrouped, by
@@ -206,8 +244,29 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
 // The pairing algorithm is not yet implemented
 void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     const Mantid::Muon::AnalysisOptions &options,
-    Mantid::API::Workspace_sptr ws, Mantid::API::WorkspaceGroup_sptr wsGrouped){
+    Mantid::API::Workspace_sptr ws,
+    Mantid::API::WorkspaceGroup_sptr wsGrouped) {
 
+  size_t numPairs = options.grouping.pairs.size();
+  for (auto i = 0; i < numPairs; i++) {
+    IAlgorithm_sptr alg =
+        this->createChildAlgorithm("ApplyMuonDetectorGroupPairing");
+    alg->setProperty("SpecifyGroupsManually", true);
+    alg->setProperty("InputWorkspace", ws->getName());
+    alg->setProperty("InputWorkspaceGroup", wsGrouped->getName());
+
+    alg->setProperty("PairName", options.grouping.pairNames[i]);
+    alg->setProperty("Alpha", options.grouping.pairAlphas[i]);
+
+    std::string group1 =
+        options.grouping.groups[options.grouping.pairs[i].first];
+    std::string group2 =
+        options.grouping.groups[options.grouping.pairs[i].second];
+    alg->setProperty("Group1", group1);
+    alg->setProperty("Group2", group2);
+
+    alg->execute();
+  };
 };
 
 // Allow WorkspaceGroup property to function correctly.
