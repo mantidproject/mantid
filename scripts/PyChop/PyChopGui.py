@@ -180,7 +180,10 @@ class PyChopGui(QtGui.QMainWindow):
             self.setFreq()
             self.calculate()
             if self.errormess:
-                raise ValueError(self.errormess)
+                idx = [i for i, ei in enumerate(self.eis) if np.abs(ei - self.engine.getEi()) < 1.e-4]
+                if idx and self.flux[idx[0]] == 0:
+                    raise ValueError(self.errormess)
+                self.errormessage(self.errormess)
             self.plot_res()
             self.plot_frame()
             if self.instSciAct.isChecked():
