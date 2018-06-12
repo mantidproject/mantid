@@ -108,16 +108,16 @@ void SaveGDA::exec() {
     std::transform(tof.begin(), tof.end(), std::back_inserter(tofScaled),
                    [](const double t) { return t * 32; });
 
+    const auto averageDeltaTByT = computeAverageDeltaTByT(tof);
+    const auto header = generateBankHeader(i + 1, (int)std::round(tofScaled[0]),
+                                           tofScaled.size(), averageDeltaTByT);
+
+    outFile << std::left << std::setw(80) << header << '\n' << std::right;
+
     const auto &intensity = matrixWS->y(0);
     const auto &error = matrixWS->e(0);
     const auto numPoints =
         std::min({tofScaled.size(), intensity.size(), error.size()});
-
-    const auto averageDeltaTByT = computeAverageDeltaTByT(tof);
-    const auto header = generateBankHeader(i + 1, (int)std::round(tofScaled[0]),
-                                           numPoints, averageDeltaTByT);
-
-    outFile << std::left << std::setw(80) << header << '\n' << std::right;
 
     for (size_t j = 0; j < numPoints; ++j) {
       outFile << std::setw(8) << tofScaled[j] << std::setw(7)
