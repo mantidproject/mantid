@@ -106,13 +106,11 @@ void MergeRuns::exec() {
   const std::string sampleLogsFailTolerances =
       getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
 
-  const std::string rebinBehaviour = getProperty("RebinBehaviour");
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs =
       RunCombinationHelper::unWrapGroups(inputs_orig);
-
   if (inputs.size() == 1) {
     g_log.warning("Only one input workspace specified");
   }
@@ -127,37 +125,12 @@ void MergeRuns::exec() {
     // This gets the list of workspaces
     RunCombinationHelper combHelper;
     m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
-
-    // Iterate over the collection of input workspaces
+    bool rebinningNeeded{false};
+    std::vector<double> rebinParams;
+    std::tie(rebinningNeeded, rebinParams) = checkRebinning();
 
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
-    auto it = m_inMatrixWS.cbegin();
-    std::vector<double> rebinParams;
-    std::vector<double> bins{outWS->x(0).rawData()};
-    bool rebinningNeeded{false};
-    for (++it; it != m_inMatrixWS.cend();) {
-      if (!WorkspaceHelpers::matchingBins(*m_inMatrixWS.front(), **it, true)) {
-        if (rebinBehaviour != REBIN_BEHAVIOUR) {
-          if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-            g_log.error() << "Could not merge run: " << (*it)->getName()
-                          << ". Binning is different from first workspace. "
-                             "MergeRuns will continue but this run will be "
-                             "skipped.\n";
-            it = m_inMatrixWS.erase(it);
-            continue;
-          } else {
-            throw std::invalid_argument(
-                "Could not merge run: " + it->get()->getName() +
-                ". Binning is different from first workspace.");
-          }
-        }
-        rebinningNeeded = true;
-        rebinParams = this->calculateRebinParams(bins, *it);
-        VectorHelper::createAxisFromRebinParams(rebinParams, bins);
-      }
-      ++it;
-    }
     if (rebinningNeeded) {
       outWS = this->rebinInput(outWS, rebinParams);
     }
@@ -172,7 +145,7 @@ void MergeRuns::exec() {
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
-    it = m_inMatrixWS.begin();
+    auto it = m_inMatrixWS.begin();
     for (++it; it != m_inMatrixWS.end(); ++it) {
       MatrixWorkspace_sptr addee;
       if (rebinningNeeded) {
@@ -335,9 +308,8 @@ void MergeRuns::buildAdditionTables() {
         detid2index_map::const_iterator map_it =
             lhs_det_to_wi.find(rhs_detector_ID);
         if (map_it != lhs_det_to_wi.cend()) {
-          outWI = static_cast<int>(map_it->second); // This is the workspace
-                                                    // index in the LHS that
-                                                    // matched rhs_detector_ID
+          // This is the workspace index in the LHS that matched rhs_detector_ID
+          outWI = static_cast<int>(map_it->second);
         } else {
           // Did not find it!
           outWI = -1; // Marker to mean its not in the LHS.
@@ -349,8 +321,7 @@ void MergeRuns::buildAdditionTables() {
 
       if (!done) {
         // Didn't find it? Now we need to iterate through the output workspace
-        // to
-        //  match the detector ID.
+        // to match the detector ID.
         // NOTE: This can be SUPER SLOW!
         for (outWI = 0; outWI < lhs_nhist; outWI++) {
           const auto &outDets2 = lhs->getSpectrum(outWI).getDetectorIDs();
@@ -486,27 +457,66 @@ bool MergeRuns::validateInputsForEventWorkspaces(
   return true;
 }
 
+/** Checks if the workspaces need to be rebinned and if so, returns the
+ *  rebinning parameters for the Rebin algorithm.
+ *  @return :: A bool signifying if rebinning is needed and the parameters as a
+ *pair.
+ */
+std::pair<bool, std::vector<double>> MergeRuns::checkRebinning() {
+  const std::string rebinBehaviour = getProperty("RebinBehaviour");
+  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
+  std::list<MatrixWorkspace_sptr> inputsSortedByX{m_inMatrixWS};
+  inputsSortedByX.sort(
+      [](const MatrixWorkspace_sptr &ws1, const MatrixWorkspace_sptr &ws2) {
+        return ws1->x(0).front() < ws2->x(0).front();
+      });
+  auto it = inputsSortedByX.cbegin();
+  std::vector<double> rebinParams;
+  std::vector<double> bins{(*it)->x(0).rawData()};
+  bool rebinningNeeded{false};
+  for (++it; it != inputsSortedByX.cend(); ++it) {
+    if (!WorkspaceHelpers::matchingBins(*inputsSortedByX.front(), **it, true)) {
+      if (rebinBehaviour != REBIN_BEHAVIOUR) {
+        if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+          g_log.error() << "Could not merge run: " << (*it)->getName()
+                        << ". Binning is different from first workspace. "
+                           "MergeRuns will continue but this run will be "
+                           "skipped.\n";
+          m_inMatrixWS.remove(*it);
+          continue;
+        } else {
+          throw std::invalid_argument(
+              "Could not merge run: " + it->get()->getName() +
+              ". Binning is different from first workspace.");
+        }
+      }
+      rebinningNeeded = true;
+      rebinParams = this->calculateRebinParams(bins, (*it)->x(0).rawData());
+      VectorHelper::createAxisFromRebinParams(rebinParams, bins);
+    }
+  }
+  return std::make_pair(rebinningNeeded, rebinParams);
+}
+
 //------------------------------------------------------------------------------------------------
 /** Calculates the parameters to hand to the Rebin algorithm. Specifies the new
- *  binning, bin-by-bin, to cover the full range covered by the two input
- *  workspaces. In regions of overlap, the bins from the workspace having the
- *  wider bins are taken.
- *  @param ws1 ::    The first input workspace
- *  @param ws2 ::    The second input workspace
- *  @param params :: A reference to the vector of rebinning parameters
+ *  binning, bin-by-bin, to cover the full range covered by the two old
+ *  binnings. In regions of overlap, the wider bins are taken.
+ *  @param bins1 ::    The first bin edges
+ *  @param bins2 ::    The second bin edges
+ *  @return :: The rebinning parameters
  */
 std::vector<double>
-MergeRuns::calculateRebinParams(const std::vector<double> &oldParams,
-                                const API::MatrixWorkspace_const_sptr &ws) {
-  auto const &X = ws->x(0).rawData();
+MergeRuns::calculateRebinParams(const std::vector<double> &bins1,
+                                const std::vector<double> &bins2) {
   std::vector<double> newParams;
   // Try to reserve memory for the worst-case scenario: two non-overlapping
   // ranges.
-  newParams.reserve(1 + 2 * (oldParams.size() - 1) + 2 + 2 * (X.size() - 1));
+  newParams.reserve(1 + 2 * (bins1.size() - 1) + 2 + 2 * (bins2.size() - 1));
   // Sort by X axis which starts smaller
-  bool const oldIsFirst = oldParams.front() < X.front();
-  auto const &smallerX = oldIsFirst ? oldParams : X;
-  auto const &greaterX = oldIsFirst ? X : oldParams;
+  bool const oldIsFirst = bins1.front() < bins2.front();
+  auto const &smallerX = oldIsFirst ? bins1 : bins2;
+  auto const &greaterX = oldIsFirst ? bins2 : bins1;
   double const end1 = smallerX.back();
   double const start2 = greaterX.front();
   double const end2 = greaterX.back();

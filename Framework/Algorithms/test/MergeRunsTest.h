@@ -1730,8 +1730,6 @@ public:
 
   void test_merging_not_sorted_by_X() {
     // This test checks that issue #22402 has been and remains fixed.
-    // Confusingly, MergeRuns used to sort the input workspaces
-    // according to their X axes.
     const BinEdges edges1{{0., 1., 2.}};
     const Counts counts(edges1.size() - 1, 0.);
     const Histogram h1{edges1, counts};
@@ -1807,6 +1805,39 @@ public:
         firstWS = outWS;
       }
     } while (std::next_permutation(indices.begin(), indices.end()));
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_rebinning_is_done_for_sorted_X() {
+    const BinEdges edges{{0., 1., 2.}};
+    const Counts counts(edges.size() - 1, 1.);
+    MatrixWorkspace_sptr ws1 = create<Workspace2D>(1, Histogram{edges, counts});
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    MatrixWorkspace_sptr ws2 =
+        create<Workspace2D>(1, Histogram{edges + 10., counts});
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    MatrixWorkspace_sptr ws3 =
+        create<Workspace2D>(1, Histogram{edges + 5., counts});
+    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+    MergeRuns alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspaces", "ws1,ws2,ws3"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "OutputWorkspace", "test_rebinning_is_done_for_sorted_X"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING(
+        outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "test_rebinning_is_done_for_sorted_X"));
+    TS_ASSERT(outWS);
+    const auto &X = outWS->x(0);
+    TS_ASSERT_EQUALS(X.size(), 9)
+    const std::array<double, 9> expectedX{{0, 1, 2, 5, 6, 7, 10, 11, 12}};
+    for (size_t i = 0; i < X.size(); ++i) {
+      TS_ASSERT_EQUALS(X[i], expectedX[i])
+    }
     AnalysisDataService::Instance().clear();
   }
 };
