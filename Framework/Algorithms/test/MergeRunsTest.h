@@ -1759,6 +1759,53 @@ public:
         outWS->run().getPropertyValueAsType<double>("workspace_number"), 2.)
     AnalysisDataService::Instance().clear();
   }
+
+  void test_output_independent_from_order_of_inputs() {
+    constexpr size_t nWS{5};
+    std::array<MatrixWorkspace_sptr, nWS> workspaces;
+    const BinEdges edges{{0., 1., 2.}};
+    const Counts counts(edges.size() - 1, 1.);
+    workspaces[0] = create<Workspace2D>(1, Histogram{edges, counts});
+    AnalysisDataService::Instance().addOrReplace("ws1", workspaces[0]);
+    workspaces[1] = create<Workspace2D>(1, Histogram{edges - 1e-5, 1.01 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws2", workspaces[1]);
+    workspaces[2] = create<Workspace2D>(1, Histogram{edges + 1e-5, 0.99 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws3", workspaces[2]);
+    workspaces[3] = create<Workspace2D>(1, Histogram{edges + 2e-5, 1.02 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws4", workspaces[3]);
+    workspaces[4] = create<Workspace2D>(1, Histogram{edges - 2e-5, 0.98 * counts});
+    AnalysisDataService::Instance().addOrReplace("ws5", workspaces[4]);
+    std::array<size_t, nWS> indices{{0, 1, 2, 3, 4}};
+    MatrixWorkspace_sptr firstWS;
+    do {
+      std::string inputWS;
+      std::string separator;
+      for (const auto i : indices) {
+        inputWS += separator + workspaces[i]->getName();
+        separator = ',';
+      }
+      MergeRuns alg;
+      alg.setRethrows(true);
+      alg.initialize();
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("InputWorkspaces", inputWS))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("OutputWorkspace", "test_output_independent_from_order_of_inputs"))
+      TS_ASSERT_THROWS_NOTHING(alg.execute())
+      MatrixWorkspace_sptr outWS;
+      TS_ASSERT_THROWS_NOTHING(
+          outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "test_output_independent_from_order_of_inputs"));
+      TS_ASSERT(outWS);
+      if (firstWS) {
+        TS_ASSERT_DELTA(outWS->y(0)[0], firstWS->y(0)[0], 1e-14)
+        TS_ASSERT_DELTA(outWS->y(0)[1], firstWS->y(0)[1], 1e-14)
+      } else {
+        firstWS = outWS;
+      }
+    } while (std::next_permutation(indices.begin(), indices.end()));
+    AnalysisDataService::Instance().clear();
+  }
 };
 
 class MergeRunsTestPerformance : public CxxTest::TestSuite {
