@@ -5,6 +5,7 @@
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -77,6 +78,9 @@ public:
   QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angle) const override;
+  bool hasPerAngleOptions() const override;
   /// Handle data reduction paused/resumed
   void pause() const override;
   void resume() const override;
@@ -86,6 +90,12 @@ public:
   void confirmReductionPaused(int group) override;
   void confirmReductionResumed(int group) override;
   void settingsChanged(int group) override;
+  void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &) override;
+  void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceNames) override;
 
 private:
   /// The search model

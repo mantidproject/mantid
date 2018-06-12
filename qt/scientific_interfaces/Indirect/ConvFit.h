@@ -22,7 +22,9 @@ public:
   bool doPlotGuess() const override;
 
 protected:
-  // Used in auto generating defaults for parameters
+  int minimumSpectrum() const override;
+  int maximumSpectrum() const override;
+
   QHash<QString, double> createDefaultValues() const override;
   std::string createSingleFitOutputName() const override;
   std::string createSequentialFitOutputName() const override;
@@ -42,7 +44,7 @@ protected:
 
 private:
   void setup() override;
-  void run() override;
+  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 

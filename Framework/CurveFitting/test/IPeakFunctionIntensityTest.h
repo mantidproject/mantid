@@ -91,12 +91,11 @@ private:
     std::vector<std::string> registeredFunctions =
         FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
 
-    for (auto it = registeredFunctions.begin(); it != registeredFunctions.end();
-         ++it) {
-      if (blackList.count(*it) == 0) {
+    for (auto &registeredFunction : registeredFunctions) {
+      if (blackList.count(registeredFunction) == 0) {
         IPeakFunction_sptr peakFunction =
             boost::dynamic_pointer_cast<IPeakFunction>(
-                FunctionFactory::Instance().createFunction(*it));
+                FunctionFactory::Instance().createFunction(registeredFunction));
 
         if (peakFunction) {
           peakFunctions.push_back(peakFunction);
@@ -110,16 +109,16 @@ private:
   void initializePeakFunctions(const std::vector<IPeakFunction_sptr> &peaks,
                                const ParameterSet &parameters) const {
 
-    for (auto it = peaks.begin(); it != peaks.end(); ++it) {
-      (*it)->setCentre(parameters.center);
+    for (const auto &peak : peaks) {
+      peak->setCentre(parameters.center);
 
       // for Ikeda-Carpenter it's not allowed to set Fwhm
       try {
-        (*it)->setFwhm(parameters.fwhm);
+        peak->setFwhm(parameters.fwhm);
       } catch (std::invalid_argument) {
       }
 
-      (*it)->setHeight(parameters.height);
+      peak->setHeight(parameters.height);
     }
   }
 
@@ -137,8 +136,8 @@ private:
   getIntensities(const std::vector<IPeakFunction_sptr> &peaks) const {
     std::vector<double> intensities;
 
-    for (auto it = peaks.begin(); it != peaks.end(); ++it) {
-      intensities.push_back((*it)->intensity());
+    for (const auto &peak : peaks) {
+      intensities.push_back(peak->intensity());
     }
 
     return intensities;

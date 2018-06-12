@@ -95,7 +95,7 @@ public:
   bool hasIntegratedTDimension() const;
 
 private:
-  typedef std::vector<IMDDimension_const_sptr> DimensionContainerType;
+  using DimensionContainerType = std::vector<IMDDimension_const_sptr>;
 
   mutable DimensionContainerType m_vecDimensions;
 

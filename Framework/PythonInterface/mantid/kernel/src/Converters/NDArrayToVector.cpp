@@ -9,6 +9,10 @@
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/str.hpp>
 
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
+
 using boost::python::extract;
 using boost::python::handle;
 using boost::python::object;
@@ -27,6 +31,14 @@ extern template int NDArrayTypeIndex<unsigned long>::typenum;
 extern template int NDArrayTypeIndex<unsigned long long>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
+extern template char NDArrayTypeIndex<bool>::typecode;
+extern template char NDArrayTypeIndex<int>::typecode;
+extern template char NDArrayTypeIndex<long>::typecode;
+extern template char NDArrayTypeIndex<long long>::typecode;
+extern template char NDArrayTypeIndex<unsigned int>::typecode;
+extern template char NDArrayTypeIndex<unsigned long>::typecode;
+extern template char NDArrayTypeIndex<unsigned long long>::typecode;
+extern template char NDArrayTypeIndex<double>::typecode;
 }
 
 namespace {

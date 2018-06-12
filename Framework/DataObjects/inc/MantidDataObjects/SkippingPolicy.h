@@ -66,7 +66,7 @@ public:
   bool keepGoing() const override { return false; }
 };
 
-typedef boost::scoped_ptr<SkippingPolicy> SkippingPolicy_scptr;
+using SkippingPolicy_scptr = boost::scoped_ptr<SkippingPolicy>;
 
 } // namespace DataObjects
 } // namespace Mantid

@@ -1,46 +1,40 @@
-.. Training master file
-   It contains a hidden root toctree directive so that Sphinx
-   has an internal index of all of the pages and doesn't
-   produce a plethora of warnings about most documents not being in
-   a toctree.
-   See http://sphinx-doc.org/tutorial.html#defining-document-structure
+.. _training:
 
-.. _Training:
+========
+Training
+========
 
-.. _training contents:
+These tutorials and training courses are designed to give you a step-by-step guide to how to use some of the basic features of Mantid.
+The initial sections deal with some of the fundamental functions that are required for (almost) any use of of Mantid. We then build
+up to more bespoke functionality, providing the tools that you need to manipulate Mantid for your particular problem. We also
+include some more instrument specific training, provided by various sites.
 
-==========
- Training
-==========
+*Mantid basic course*, runs through functions such as loading, plotting, exploring and saving data.
+At the end of this course you can start to use Mantid independently.
 
-Welcome to the ILL Mantid training course. This course is approximately 2 hours long and gives a basic introduction to using Mantid for data reduction at the ILL. The course is available at http://docs.mantidproject.org/nightly/training/index.html.
+*Python introduction* is a crash course in the Python that you need for scripting in Mantid.
 
-.. figure:: /images/Training/Mantid_ILL.png
-   :align: center
-   :width: 125
+*Python in Mantid* introduces how to interact with Mantid through Python. Some knowledge of
+Python is assumed; if you have completed the Python introduction course you are well equipped
+for this course.
 
-Outline
--------
+*Extending Mantid with Python* demonstrates how you can become a power user and really stretch the
+capabilities of Mantid, by developing your own scripts.
 
-The training course is split into four sections:
- 1. :ref:`Introduction <TrainingIntroduction>` (Ian Bush)
- 2. :ref:`MantidPlot Basics <TrainingMantidPlotBasics>` (Gagik Vardanyan)
- 3. :ref:`MantidPlot, Algorithms and Workspaces <TrainingWorkspacesAlgorithmsInterfaces>` (Verena Reimund)
- 4. :ref:`Using Mantid with Python <TrainingPythonAndMantid>` (Antti Soininen)
-
-This is only a short introduction, more complete training courses are available on the `Mantid website <https://www.mantidproject.org/Documentation>`__.
-
-**Full Contents:**
+*ILL training* gives an ILL site-specific introduction to many of the features of Mantid.
 
 .. toctree::
-   :maxdepth: 2
-   :titlesonly:
+   :maxdepth: 1
 
-   Introduction <introduction/index>
-   MantidPlot Basics <mantidplot_basics/index>
-   MantidPlot, Algorithms and Workspaces <workspaces_algorithms_interfaces/index>
-   Python and Mantid <python_and_mantid/index>
+**Sections:**
 
+.. image:: ../images/mantid.png
+   :alt: A preying mantis with arms upraised
+   :width: 200px
+   :align: right
 
-
-
+* `Mantid Basic Course <http://www.mantidproject.org/Mantid_Basic_Course>`_
+* `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+* `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
+* `Extending Mantid with Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
+* :ref:`ill_training`

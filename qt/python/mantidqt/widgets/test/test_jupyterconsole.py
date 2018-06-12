@@ -34,16 +34,18 @@ class InProcessJupyterConsoleTest(unittest.TestCase):
         self.assertTrue(hasattr(widget, "kernel_manager"))
         self.assertTrue(hasattr(widget, "kernel_client"))
         self.assertTrue(len(widget.banner) > 0)
+        del widget
 
     def test_construction_with_banner_replaces_default(self):
         widget = InProcessJupyterConsole(banner="Hello!")
         self.assertEquals("Hello!", widget.banner)
+        del widget
 
     def test_construction_with_startup_code_adds_to_banner_and_executes(self):
         widget = InProcessJupyterConsole(startup_code="x = 1")
         self.assertTrue("x = 1" in widget.banner)
         self.assertEquals(1, widget.kernel_manager.kernel.shell.user_ns['x'])
-
+        del widget
 
 if __name__ == '__main__':
     unittest.main()

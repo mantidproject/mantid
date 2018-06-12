@@ -1,12 +1,10 @@
 #include <stdexcept>
 
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
@@ -15,25 +13,13 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQW)
-
-/// Energy to K constant
-double SofQW::energyToK() {
-  static const double energyToK = 8.0 * M_PI * M_PI *
-                                  PhysicalConstants::NeutronMass *
-                                  PhysicalConstants::meV * 1e-20 /
-                                  (PhysicalConstants::h * PhysicalConstants::h);
-  return energyToK;
-}
 
 using namespace Kernel;
 using namespace API;
@@ -95,7 +81,7 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       "The bin parameters to use for the q axis (in the format used by the "
       ":ref:`algm-Rebin` algorithm).");
 
-  std::vector<std::string> propOptions{"Direct", "Indirect"};
+  const std::vector<std::string> propOptions{"Direct", "Indirect"};
   alg.declareProperty("EMode", "",
                       boost::make_shared<StringListValidator>(propOptions),
                       "The energy transfer analysis mode (Direct/Indirect)");
@@ -138,59 +124,6 @@ void SofQW::exec() {
   const size_t nHistos = inputWorkspace->getNumberHistograms();
   auto m_progress = make_unique<Progress>(this, 0.0, 1.0, nHistos);
   m_progress->report("Creating output workspace");
-}
-
-/** Creates the output workspace, setting the axes according to the input
- * binning parameters
- *  @param[in]  inputWorkspace The input workspace
- *  @param[in]  qbinParams The q-bin parameters from the user
- *  @param[out] qAxis The 'vertical' (q) axis defined by the given parameters
- *  @param[out] ebinParams The 'horizontal' (energy) axis parameters (optional)
- *  @return A pointer to the newly-created workspace
- */
-API::MatrixWorkspace_sptr
-SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                            const std::vector<double> &qbinParams,
-                            std::vector<double> &qAxis,
-                            const std::vector<double> &ebinParams) {
-  // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(0);
-  int xLength;
-  if (ebinParams.empty()) {
-    xAxis = inputWorkspace->refX(0);
-    xLength = static_cast<int>(xAxis.size());
-  } else {
-    xLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(
-        ebinParams, xAxis.mutableRawData()));
-  }
-  // Create a vector to temporarily hold the vertical ('y') axis and populate
-  // that
-  const int yLength = static_cast<int>(
-      VectorHelper::createAxisFromRebinParams(qbinParams, qAxis));
-
-  // Create the output workspace
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWorkspace, yLength - 1, xLength, xLength - 1);
-  // Create a numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new BinEdgeAxis(qAxis);
-  outputWorkspace->replaceAxis(1, verticalAxis);
-
-  // Now set the axis values
-  for (int i = 0; i < yLength - 1; ++i) {
-    outputWorkspace->setBinEdges(i, xAxis);
-  }
-
-  // Set the axis units
-  verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxis->title() = "|Q|";
-
-  // Set the X axis title (for conversion to MD)
-  outputWorkspace->getAxis(0)->title() = "Energy transfer";
-
-  outputWorkspace->setYUnit("");
-  outputWorkspace->setYUnitLabel("Intensity");
-
-  return outputWorkspace;
 }
 
 } // namespace Algorithms

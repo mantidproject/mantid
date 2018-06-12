@@ -37,18 +37,18 @@ bool doesNotContainWildCard(const std::string &ext) {
 static const std::string SUCCESS("");
 
 // Regular expressions for any adjacent + or , operators
-const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
+const std::string INVALID = R"(\+\+|,,|\+,|,\+)";
 static const boost::regex REGEX_INVALID(INVALID);
 
 // Regular expressions that represent the allowed instances of , operators
-const std::string NUM_COMMA_ALPHA("(?<=\\d)\\s*,\\s*(?=\\D)");
-const std::string ALPHA_COMMA_ALPHA("(?<=\\D)\\s*,\\s*(?=\\D)");
+const std::string NUM_COMMA_ALPHA(R"((?<=\d)\s*,\s*(?=\D))");
+const std::string ALPHA_COMMA_ALPHA(R"((?<=\D)\s*,\s*(?=\D))");
 const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
 static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
 
 // Regular expressions that represent the allowed instances of + operators
-const std::string NUM_PLUS_ALPHA("(?<=\\d)\\s*\\+\\s*(?=\\D)");
-const std::string ALPHA_PLUS_ALPHA("(?<=\\D)\\s*\\+\\s*(?=\\D)");
+const std::string NUM_PLUS_ALPHA(R"((?<=\d)\s*\+\s*(?=\D))");
+const std::string ALPHA_PLUS_ALPHA(R"((?<=\D)\s*\+\s*(?=\D))");
 const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
 static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS,
                                                boost::regex_constants::perl);

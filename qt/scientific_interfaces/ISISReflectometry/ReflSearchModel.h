@@ -72,7 +72,7 @@ protected:
 };
 
 /// Typedef for a shared pointer to \c ReflSearchModel
-typedef boost::shared_ptr<ReflSearchModel> ReflSearchModel_sptr;
+using ReflSearchModel_sptr = boost::shared_ptr<ReflSearchModel>;
 
 } // namespace CustomInterfaces
 } // namespace Mantid

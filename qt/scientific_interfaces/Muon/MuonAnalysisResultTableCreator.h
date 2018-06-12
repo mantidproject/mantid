@@ -9,8 +9,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-typedef QMap<QString, QMap<QString, double>> WSParameterList;
-typedef QMap<QString, QMap<QString, QVariant>> LogValuesMap;
+using WSParameterList = QMap<QString, QMap<QString, double>>;
+using LogValuesMap = QMap<QString, QMap<QString, QVariant>>;
 
 /** MuonAnalysisResultTableCreator : Creates table of muon fit results
   Used in the "result table" tab of Muon Analysis interface
@@ -103,6 +103,11 @@ private:
   writeDataForMultipleFits(Mantid::API::ITableWorkspace_sptr &table,
                            const QMap<QString, WSParameterList> &paramsByLabel,
                            const QStringList &paramsToDisplay) const;
+
+  void
+  addColumnToResultsTable(Mantid::API::ITableWorkspace_sptr &table,
+                          const QMap<QString, WSParameterList> &paramsByLabel,
+                          const QString &log) const;
 
   /// Items selected by user (fitted workspaces or fit labels)
   const QStringList m_items;

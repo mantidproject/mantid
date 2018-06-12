@@ -162,9 +162,9 @@ private:
 };
 
 /// shared pointer to the EventWorkspace class
-typedef boost::shared_ptr<EventWorkspace> EventWorkspace_sptr;
+using EventWorkspace_sptr = boost::shared_ptr<EventWorkspace>;
 /// shared pointer to a const Workspace2D
-typedef boost::shared_ptr<const EventWorkspace> EventWorkspace_const_sptr;
+using EventWorkspace_const_sptr = boost::shared_ptr<const EventWorkspace>;
 
 } /// namespace DataObjects
 } /// namespace Mantid

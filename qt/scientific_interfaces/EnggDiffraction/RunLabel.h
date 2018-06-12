@@ -14,8 +14,10 @@ class MANTIDQT_ENGGDIFFRACTION_DLL RunLabel {
 public:
   RunLabel(const int runNumber, const size_t bank);
 
-  const int runNumber;
-  const std::size_t bank;
+  RunLabel() = default;
+
+  int runNumber;
+  std::size_t bank;
 };
 
 MANTIDQT_ENGGDIFFRACTION_DLL bool operator==(const RunLabel &lhs,
@@ -23,6 +25,9 @@ MANTIDQT_ENGGDIFFRACTION_DLL bool operator==(const RunLabel &lhs,
 
 MANTIDQT_ENGGDIFFRACTION_DLL bool operator!=(const RunLabel &lhs,
                                              const RunLabel &rhs);
+
+MANTIDQT_ENGGDIFFRACTION_DLL bool operator<(const RunLabel &lhs,
+                                            const RunLabel &rhs);
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

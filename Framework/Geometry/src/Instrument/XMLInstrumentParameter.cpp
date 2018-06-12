@@ -117,8 +117,8 @@ double XMLInstrumentParameter::createParamValue(
   if (!m_logfileID.empty()) {
     // get value from time series
 
-    typedef std::map<std::string, Kernel::Math::StatisticType>
-        StatisticsMapType;
+    using StatisticsMapType =
+        std::map<std::string, Kernel::Math::StatisticType>;
     StatisticsMapType statistics_types;
     statistics_types.emplace("first_value", Kernel::Math::FirstValue);
     statistics_types.emplace("last_value", Kernel::Math::LastValue);

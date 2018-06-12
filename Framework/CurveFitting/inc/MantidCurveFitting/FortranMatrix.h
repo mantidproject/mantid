@@ -41,9 +41,9 @@ template <class MatrixClass> class FortranMatrix : public MatrixClass {
   int m_base2;
   /// Typedef the types returned by the base class's operators []. They aren't
   /// necessarily the same as the stored type (double or complex).
-  typedef decltype(
-      std::declval<const MatrixClass>().operator()(0, 0)) ElementConstType;
-  typedef decltype(std::declval<MatrixClass>().operator()(0, 0)) ElementRefType;
+  using ElementConstType =
+      decltype(std::declval<const MatrixClass>().operator()(0, 0));
+  using ElementRefType = decltype(std::declval<MatrixClass>().operator()(0, 0));
 
 public:
   /// Constructor

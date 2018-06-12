@@ -29,6 +29,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class FitPropertyBrowser;
 class PropertyHandler;
+class MuonFitPropertyBrowser;
 }
 }
 
@@ -196,6 +197,10 @@ private:
   void addExistingFitsAndGuess(const QStringList &curvesList);
   // Test if we are fitting muon data
   bool isMuonData() const;
+  // Test if we are fitting muon multi fit data
+  bool isMuonMultiFitData() const;
+  // Returns a pointer to the MuonFitPropertyBrowser or NULL
+  const MantidQt::MantidWidgets::MuonFitPropertyBrowser *getMuonPointer() const;
 
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitPropertyBrowser;

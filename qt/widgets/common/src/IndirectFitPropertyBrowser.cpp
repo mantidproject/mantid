@@ -355,13 +355,17 @@ void IndirectFitPropertyBrowser::setParameterValue(
  */
 void IndirectFitPropertyBrowser::setBackground(
     const std::string &backgroundName) {
-  if (m_backgroundHandler != nullptr && backgroundIndex())
+  if (m_backgroundHandler != nullptr && backgroundIndex()) {
+    MantidQt::API::SignalBlocker<QObject> blocker(this);
     FitPropertyBrowser::removeFunction(m_backgroundHandler);
+  }
 
-  if (backgroundName != "None")
+  if (backgroundName != "None") {
+    MantidQt::API::SignalBlocker<QObject> blocker(this);
     m_backgroundHandler = addFunction(backgroundName);
-  else
+  } else
     m_backgroundHandler = nullptr;
+  emit functionChanged();
 }
 
 /**
@@ -759,8 +763,14 @@ void IndirectFitPropertyBrowser::addCustomFunctionGroup(
 void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
                                                     const QString &groupName,
                                                     const int &multiples) {
-  for (int i = 0; i < multiples; ++i)
-    addCustomFunctions(prop, groupName);
+  for (int i = 0; i < multiples; ++i) {
+    if (!m_functionHandlers.contains(prop))
+      m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
+    addCustomFunctions(prop, m_groupToFunctionList[groupName]);
+  }
+
+  if (multiples > 0)
+    emit functionChanged();
 }
 
 /**
@@ -908,13 +918,7 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
     if (i >= 0) {
       functionHandlers.remove(i);
       m_customFunctionCount[handler->function()->name()] -= 1;
-
-      if (m_functionsAsSpinner.contains(prop))
-        m_intManager->setValue(prop, m_intManager->value(prop) - 1);
-      else if (m_functionsAsCheckBox.contains(prop))
-        m_boolManager->setValue(prop, false);
-      else if (prop == m_functionsInComboBox)
-        m_enumManager->setValue(m_functionsInComboBox, 0);
+      customFunctionRemoved(prop);
     }
   }
 
@@ -923,6 +927,38 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
 
   if (handler == m_backgroundHandler)
     m_enumManager->setValue(m_backgroundSelection, 0);
+}
+
+/**
+ * Called when a custom function has been removed from this fit property
+ * browser.
+ *
+ * @param prop  The property of the removed custom function.
+ */
+void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
+
+  if (m_functionsAsSpinner.contains(prop)) {
+    disconnect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
+               SLOT(intChanged(QtProperty *)));
+    m_intManager->setValue(prop, m_intManager->value(prop) - 1);
+    connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
+            SLOT(intChanged(QtProperty *)));
+    FitPropertyBrowser::intChanged(prop);
+  } else if (m_functionsAsCheckBox.contains(prop)) {
+    disconnect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
+               SLOT(boolChanged(QtProperty *)));
+    m_boolManager->setValue(prop, false);
+    connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
+            SLOT(boolChanged(QtProperty *)));
+    FitPropertyBrowser::boolChanged(prop);
+  } else if (prop == m_functionsInComboBox) {
+    disconnect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
+               SLOT(enumChanged(QtProperty *)));
+    m_enumManager->setValue(m_functionsInComboBox, 0);
+    connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
+            SLOT(enumChanged(QtProperty *)));
+    FitPropertyBrowser::enumChanged(prop);
+  }
 }
 
 /**

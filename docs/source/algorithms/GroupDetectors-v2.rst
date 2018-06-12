@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -115,6 +115,16 @@ workspace indices. This can be achieved with the following operators:
 
 One could combine these operations, for example :literal:`10+12,13:89` would
 list the sum of 10 and 12 followed by 13 to 89.
+
+Vertical Axis on Output
+#######################
+
+The OutputWorkspace of this algorithm will always have spectrum numbers as the
+vertical axis, independent of the vertical axis units in InputWorkspace. This
+is because after grouping, the vertical axis can have meaningless values and
+generally, there is not enough information available to rebuild the axis. The
+vertical axis can be manually restored afterwards by e.g.
+:ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.
 
 Previous Versions
 -----------------

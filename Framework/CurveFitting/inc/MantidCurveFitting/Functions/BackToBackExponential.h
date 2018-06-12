@@ -86,7 +86,7 @@ protected:
   double expWidth() const;
 };
 
-typedef boost::shared_ptr<BackToBackExponential> BackToBackExponential_sptr;
+using BackToBackExponential_sptr = boost::shared_ptr<BackToBackExponential>;
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -257,7 +257,7 @@ void PDFFourierTransform::exec() {
   } else {
     std::stringstream msg;
     msg << "Input data x-axis with unit \"" << inputXunit
-        << "\" is not supported (use \"MomentumTransfer\" or \"dSpacing\")";
+        << R"(" is not supported (use "MomentumTransfer" or "dSpacing"))";
     throw std::invalid_argument(msg.str());
   }
   g_log.debug() << "Input unit is " << inputXunit << "\n";

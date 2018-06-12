@@ -79,7 +79,7 @@ private:
 };
 
 /// Handy typedef for collection of builders.
-typedef std::vector<MDHistoDimensionBuilder> Vec_MDHistoDimensionBuilder;
+using Vec_MDHistoDimensionBuilder = std::vector<MDHistoDimensionBuilder>;
 }
 }
 

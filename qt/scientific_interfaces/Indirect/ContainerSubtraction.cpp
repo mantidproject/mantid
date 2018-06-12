@@ -37,6 +37,24 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
   m_uiForm.spPreviewSpec->setMaximum(0);
 }
 
+ContainerSubtraction::~ContainerSubtraction() {
+  if (m_transformedContainerWS)
+    AnalysisDataService::Instance().remove(m_transformedContainerWS->getName());
+}
+
+void ContainerSubtraction::setTransformedContainer(
+    MatrixWorkspace_sptr workspace, const std::string &name) {
+  m_transformedContainerWS = workspace;
+  AnalysisDataService::Instance().addOrReplace(name, m_transformedContainerWS);
+}
+
+void ContainerSubtraction::setTransformedContainer(
+    MatrixWorkspace_sptr workspace) {
+  m_transformedContainerWS = workspace;
+  AnalysisDataService::Instance().addOrReplace(workspace->getName(),
+                                               m_transformedContainerWS);
+}
+
 void ContainerSubtraction::setup() {}
 
 void ContainerSubtraction::run() {
@@ -68,9 +86,10 @@ void ContainerSubtraction::run() {
   if (scale)
     containerWs = scaleWorkspace(containerWs, m_uiForm.spCanScale->value());
 
-  auto outputWs = minusWorkspace(m_csSampleWS, containerWs);
+  m_csSubtractedWS = minusWorkspace(m_csSampleWS, containerWs);
   m_pythonExportWsName = createOutputName();
-  AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName, outputWs);
+  AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName,
+                                               m_csSubtractedWS);
   containerSubtractionComplete();
 }
 
@@ -216,7 +235,7 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
 
   if (m_csContainerWS) {
     m_csContainerWS = convertToHistogram(m_csContainerWS);
-    m_transformedContainerWS = m_csContainerWS;
+    setTransformedContainer(m_csContainerWS);
 
     // Plot new container
     plotInPreview("Container", m_csContainerWS, Qt::red);
@@ -231,25 +250,22 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
 void ContainerSubtraction::updateCan() {
   auto shift = m_uiForm.ckShiftCan->isChecked();
   auto scale = m_uiForm.ckScaleCan->isChecked();
+  auto transformed = m_csContainerWS;
 
-  if (m_csContainerWS) {
-    m_transformedContainerWS = m_csContainerWS;
+  if (transformed) {
 
     if (shift) {
-      m_transformedContainerWS =
-          shiftWorkspace(m_transformedContainerWS, m_uiForm.spShift->value());
-      m_transformedContainerWS =
-          rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
+      transformed = shiftWorkspace(transformed, m_uiForm.spShift->value());
+      transformed = rebinToWorkspace(transformed, m_csSampleWS);
     } else if (m_csSampleWS &&
                !checkWorkspaceBinningMatches(m_csSampleWS, m_csContainerWS)) {
-      m_transformedContainerWS =
-          rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
+      transformed = rebinToWorkspace(transformed, m_csSampleWS);
     }
 
-    if (scale) {
-      m_transformedContainerWS = scaleWorkspace(m_transformedContainerWS,
-                                                m_uiForm.spCanScale->value());
-    }
+    if (scale)
+      transformed = scaleWorkspace(transformed, m_uiForm.spCanScale->value());
+    setTransformedContainer(transformed,
+                            "__" + m_csContainerWS->getName() + "_transformed");
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
 }
@@ -293,15 +309,9 @@ void ContainerSubtraction::containerSubtractionComplete() {
   plotPreview(m_uiForm.spPreviewSpec->value());
 
   if (m_uiForm.ckShiftCan->isChecked()) {
-    IAlgorithm_sptr shiftLog =
-        AlgorithmManager::Instance().create("AddSampleLog");
-    shiftLog->initialize();
-
-    shiftLog->setProperty("Workspace", m_pythonExportWsName);
-    shiftLog->setProperty("LogName", "container_shift");
-    shiftLog->setProperty("LogType", "Number");
-    shiftLog->setProperty(
-        "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
+    auto logText = boost::lexical_cast<std::string>(m_uiForm.spShift->value());
+    auto shiftLog = addSampleLogAlgorithm(m_csSubtractedWS, "container_shift",
+                                          "Number", logText);
     m_batchAlgoRunner->addAlgorithm(shiftLog);
   }
 
@@ -345,19 +355,17 @@ void ContainerSubtraction::plotCurrentPreview() {
   QStringList workspaces = QStringList();
 
   // Check whether a sample workspace has been specified
-  if (m_csSampleWS) {
+  if (m_csSampleWS)
     workspaces.append(QString::fromStdString(m_csSampleWS->getName()));
-  }
 
   // Check whether a container workspace has been specified
-  if (m_csContainerWS) {
-    workspaces.append(QString::fromStdString(m_csContainerWS->getName()));
-  }
+  if (m_transformedContainerWS)
+    workspaces.append(
+        QString::fromStdString(m_transformedContainerWS->getName()));
 
   // Check whether a subtracted workspace has been generated
-  if (m_csSubtractedWS) {
+  if (m_csSubtractedWS)
     workspaces.append(QString::fromStdString(m_csSubtractedWS->getName()));
-  }
 
   IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
 }
@@ -399,8 +407,8 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
   }
 }
 
-MatrixWorkspace_sptr
-ContainerSubtraction::requestRebinToSample(MatrixWorkspace_sptr workspace) {
+MatrixWorkspace_sptr ContainerSubtraction::requestRebinToSample(
+    MatrixWorkspace_sptr workspace) const {
   const char *text =
       "Binning on sample and container does not match."
       "Would you like to rebin the container to match the sample?";
@@ -417,7 +425,7 @@ ContainerSubtraction::requestRebinToSample(MatrixWorkspace_sptr workspace) {
 
 MatrixWorkspace_sptr
 ContainerSubtraction::shiftWorkspace(MatrixWorkspace_sptr workspace,
-                                     double shiftValue) {
+                                     double shiftValue) const {
   auto shiftAlg = shiftAlgorithm(workspace, shiftValue);
   shiftAlg->execute();
   return shiftAlg->getProperty("OutputWorkspace");
@@ -425,7 +433,7 @@ ContainerSubtraction::shiftWorkspace(MatrixWorkspace_sptr workspace,
 
 MatrixWorkspace_sptr
 ContainerSubtraction::scaleWorkspace(MatrixWorkspace_sptr workspace,
-                                     double scaleValue) {
+                                     double scaleValue) const {
   auto scaleAlg = scaleAlgorithm(workspace, scaleValue);
   scaleAlg->execute();
   return scaleAlg->getProperty("OutputWorkspace");
@@ -433,22 +441,22 @@ ContainerSubtraction::scaleWorkspace(MatrixWorkspace_sptr workspace,
 
 MatrixWorkspace_sptr
 ContainerSubtraction::minusWorkspace(MatrixWorkspace_sptr lhsWorkspace,
-                                     MatrixWorkspace_sptr rhsWorkspace) {
+                                     MatrixWorkspace_sptr rhsWorkspace) const {
   auto minusAlg = minusAlgorithm(lhsWorkspace, rhsWorkspace);
   minusAlg->execute();
   return minusAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-ContainerSubtraction::rebinToWorkspace(MatrixWorkspace_sptr workspaceToRebin,
-                                       MatrixWorkspace_sptr workspaceToMatch) {
+MatrixWorkspace_sptr ContainerSubtraction::rebinToWorkspace(
+    MatrixWorkspace_sptr workspaceToRebin,
+    MatrixWorkspace_sptr workspaceToMatch) const {
   auto rebinAlg = rebinToWorkspaceAlgorithm(workspaceToRebin, workspaceToMatch);
   rebinAlg->execute();
   return rebinAlg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr
-ContainerSubtraction::convertToHistogram(MatrixWorkspace_sptr workspace) {
+ContainerSubtraction::convertToHistogram(MatrixWorkspace_sptr workspace) const {
   auto convertAlg = convertToHistogramAlgorithm(workspace);
   convertAlg->execute();
   return convertAlg->getProperty("OutputWorkspace");
@@ -456,7 +464,7 @@ ContainerSubtraction::convertToHistogram(MatrixWorkspace_sptr workspace) {
 
 IAlgorithm_sptr
 ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
-                                     double shiftValue) {
+                                     double shiftValue) const {
   IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
   shift->initialize();
   shift->setChild(true);
@@ -470,7 +478,7 @@ ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
 
 IAlgorithm_sptr
 ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
-                                     double scaleValue) {
+                                     double scaleValue) const {
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
   scale->setChild(true);
@@ -484,7 +492,7 @@ ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
 
 IAlgorithm_sptr
 ContainerSubtraction::minusAlgorithm(MatrixWorkspace_sptr lhsWorkspace,
-                                     MatrixWorkspace_sptr rhsWorkspace) {
+                                     MatrixWorkspace_sptr rhsWorkspace) const {
   IAlgorithm_sptr minus = AlgorithmManager::Instance().create("Minus");
   minus->initialize();
   minus->setChild(true);
@@ -497,7 +505,7 @@ ContainerSubtraction::minusAlgorithm(MatrixWorkspace_sptr lhsWorkspace,
 
 IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
     MatrixWorkspace_sptr workspaceToRebin,
-    MatrixWorkspace_sptr workspaceToMatch) {
+    MatrixWorkspace_sptr workspaceToMatch) const {
   IAlgorithm_sptr rebin =
       AlgorithmManager::Instance().create("RebinToWorkspace");
   rebin->initialize();
@@ -510,7 +518,7 @@ IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
 }
 
 IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
-    MatrixWorkspace_sptr workspace) {
+    MatrixWorkspace_sptr workspace) const {
   IAlgorithm_sptr convert =
       AlgorithmManager::Instance().create("ConvertToHistogram");
   convert->initialize();
@@ -519,6 +527,19 @@ IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
   convert->setProperty("InputWorkspace", workspace);
   convert->setProperty("OutputWorkspace", "converted");
   return convert;
+}
+
+IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
+    MatrixWorkspace_sptr workspace, const std::string &name,
+    const std::string &type, const std::string &value) const {
+  IAlgorithm_sptr shiftLog =
+      AlgorithmManager::Instance().create("AddSampleLog");
+  shiftLog->initialize();
+  shiftLog->setProperty("Workspace", workspace);
+  shiftLog->setProperty("LogName", name);
+  shiftLog->setProperty("LogType", type);
+  shiftLog->setProperty("LogText", value);
+  return shiftLog;
 }
 
 } // namespace CustomInterfaces

@@ -13,13 +13,8 @@ using namespace MantidQt::CustomInterfaces;
 class MockEnggDiffGSASFittingModel : public IEnggDiffGSASFittingModel {
 
 public:
-  MOCK_METHOD1(doPawleyRefinement,
-               Mantid::API::MatrixWorkspace_sptr(
-                   const GSASIIRefineFitPeaksParameters &params));
-
-  MOCK_METHOD1(doRietveldRefinement,
-               Mantid::API::MatrixWorkspace_sptr(
-                   const GSASIIRefineFitPeaksParameters &params));
+  MOCK_METHOD1(doRefinements,
+               void(const std::vector<GSASIIRefineFitPeaksParameters> &params));
 
   MOCK_CONST_METHOD1(getGamma,
                      boost::optional<double>(const RunLabel &runLabel));
@@ -37,6 +32,9 @@ public:
 
   MOCK_CONST_METHOD1(loadFocusedRun, Mantid::API::MatrixWorkspace_sptr(
                                          const std::string &filename));
+
+  MOCK_METHOD1(setObserver,
+               void(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

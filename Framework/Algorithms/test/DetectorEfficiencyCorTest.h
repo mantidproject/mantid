@@ -7,6 +7,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -112,8 +113,8 @@ private:
     using namespace Mantid::DataObjects;
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"1.0\" z=\"0\" /> ";
+    xmlShape += R"(<centre-of-bottom-base x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="1.0" z="0" /> )";
     xmlShape += "<radius val=\"0.0127\" /> ";
     xmlShape += "<height val=\"1\" /> ";
     xmlShape += "</cylinder>";
@@ -127,13 +128,13 @@ private:
     const int ndets(2);
     std::vector<Detector *> detectors;
     for (int i = 0; i < ndets; ++i) {
-      Detector *detector = new Detector("det", i + 1, shape, NULL);
+      Detector *detector = new Detector("det", i + 1, shape, nullptr);
       detector->setPos(i * 0.2, i * 0.2, 5);
       instrument->add(detector);
       instrument->markAsDetector(detector);
       detectors.push_back(detector);
     }
-    ObjComponent *sample = new ObjComponent("sample", shape, NULL);
+    ObjComponent *sample = new ObjComponent("sample", shape, nullptr);
     sample->setPos(0, 0, 0);
     instrument->markAsSamplePos(sample);
 

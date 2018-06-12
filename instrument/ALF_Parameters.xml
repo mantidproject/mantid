@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "ALF" valid-from = "1900-06-12T00:00:00">
+
+<component-link name = "ALF">
+
+<!-- files properties : -->
+
+<!-- Specify that the detector positions should be taken from the data file -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
+<!-- The file which defines proper (calibrated) detector positions 
+     if None - it is undefined -->
+<parameter name="det_cal_file" type="string">
+   <value val="None"/>
+   <description is = "The file which defines proper (calibrated) detector positions.
+                      If property set to None - this file is undefined."/>
+</parameter>
+
+  <!-- -->
+</component-link>
+
+</parameter-file>

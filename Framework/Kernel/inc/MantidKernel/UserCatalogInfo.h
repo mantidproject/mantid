@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace Kernel {
 
-typedef boost::optional<std::string> OptionalPath;
+using OptionalPath = boost::optional<std::string>;
 
 class CatalogConfigService {
 public:

@@ -5,8 +5,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/algorithm/string.hpp>
-#include <Poco/File.h>
+#include "Poco/File.h"
+#include "boost/algorithm/string.hpp"
+#include "boost/math/special_functions/round.hpp"
 
 #include <fstream>
 #include <iomanip>
@@ -192,8 +193,8 @@ void SaveFullprofResolution::parseTableWorkspace() {
     // and BANK matches
     for (size_t i = 1; i < numcols; ++i) {
       if (boost::starts_with(colnames[i], "Value")) {
-        int bankid = static_cast<int>(
-            m_profileTableWS->cell<double>(rowbankindex, i) + 0.5);
+        int bankid = boost::math::iround(
+            m_profileTableWS->cell<double>(rowbankindex, i));
         if (bankid == m_bankID) {
           colindex = static_cast<int>(i);
           break;

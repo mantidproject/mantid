@@ -179,8 +179,8 @@ private:
 };
 
 /// Shared pointer to ThermalNeutronBk2BkExpConvPVoigt peak/function
-typedef boost::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>
-    ThermalNeutronBk2BkExpConvPVoigt_sptr;
+using ThermalNeutronBk2BkExpConvPVoigt_sptr =
+    boost::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt>;
 
 //--- Public inline function --------------------------------------------------
 /** Calculate d = a/sqrt(h**2+k**2+l**2)

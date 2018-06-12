@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -111,7 +111,15 @@ with the desired number of peaks. Use python or the GUI to enter the
 desired HKLs. If these are fraction (e.g. magnetic peaks) then make sure
 RoundHKL=False.
 
-.. seealso :: Algorithm :ref:`algm-PredictFractionalPeaks`
+Calculate Goniometer For Constant Wavelength
+############################################
+
+If you select the "CalculateGoniometerForCW" option instead of using
+the goniometer from the input workspace it will calculate the
+goniometer rotation, assuming a constant wavelength and that the
+rotation is around the y-axis only. For details on the calculation see
+"Calculate Goniometer For Constant Wavelength" at :ref:`FindPeaksMD
+<algm-FindPeaksMD>`.
 
 .. categories::
 

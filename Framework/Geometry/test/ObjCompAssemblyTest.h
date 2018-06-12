@@ -337,8 +337,8 @@ public:
     std::stringstream obj_str;
     obj_str << "<cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
-    obj_str << "x=\"0\" y=\"0\" z=\"0\" />";
-    obj_str << "<axis x=\"0\" y=\"1\" z=\"0\" /> ";
+    obj_str << R"(x="0" y="0" z="0" />)";
+    obj_str << R"(<axis x="0" y="1" z="0" /> )";
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
@@ -359,25 +359,22 @@ public:
     boost::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
-    int otype;
+    detail::ShapeInfo::GeometryShape otype;
     std::vector<V3D> vectors;
     double radius, height;
     shape->GetObjectGeom(otype, vectors, radius, height);
 
-    TS_ASSERT_EQUALS(otype, 6);
+    TS_ASSERT_EQUALS(otype, detail::ShapeInfo::GeometryShape::CYLINDER);
     TS_ASSERT_EQUALS(radius, 0.1);
     TS_ASSERT_EQUALS(height, 0.6);
   }
 
   void test_fail_CreateOutline_for_wrong_component_type() {
     std::stringstream obj_str;
-    obj_str << "<segmented-cylinder id=\"stick\">";
-    obj_str << "<centre-of-bottom-base ";
-    obj_str << "x=\"0\" y=\"0\" z=\"0\" />";
-    obj_str << "<axis x=\"0\" y=\"1\" z=\"0\" /> ";
+    obj_str << "<sphere id=\"A\">";
+    obj_str << "<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" />";
     obj_str << "<radius val=\"0.1\" />";
-    obj_str << "<height val=\"0.2\" />";
-    obj_str << "</segmented-cylinder>";
+    obj_str << "</sphere>";
     auto s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");

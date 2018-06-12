@@ -24,7 +24,7 @@ void export_Logger() {
   register_ptr_to_python<boost::shared_ptr<Logger>>();
 
   // To distinguish between the overloaded functions
-  typedef void (Logger::*LogLevelFunction)(const std::string &);
+  using LogLevelFunction = void (Logger::*)(const std::string &);
 
   class_<Logger, boost::noncopyable>(
       "Logger", init<std::string>((arg("self"), arg("name"))))

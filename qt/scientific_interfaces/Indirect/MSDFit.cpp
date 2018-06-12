@@ -69,26 +69,16 @@ void MSDFit::setup() {
           SLOT(updatePlotGuess()));
 }
 
+int MSDFit::minimumSpectrum() const { return m_uiForm->spSpectraMin->value(); }
+
+int MSDFit::maximumSpectrum() const { return m_uiForm->spSpectraMax->value(); }
+
 bool MSDFit::doPlotGuess() const {
   return m_uiForm->ckPlotGuess->isEnabled() &&
          m_uiForm->ckPlotGuess->isChecked();
 }
 
-void MSDFit::run() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spSpectraMin->value());
-    setMaximumSpectrum(m_uiForm->spSpectraMax->value());
-    executeSequentialFit();
-  }
-}
-
-void MSDFit::singleFit() {
-  if (validate()) {
-    setMinimumSpectrum(m_uiForm->spPlotSpectrum->value());
-    setMaximumSpectrum(m_uiForm->spPlotSpectrum->value());
-    executeSingleFit();
-  }
-}
+void MSDFit::singleFit() { executeSingleFit(); }
 
 std::string MSDFit::createSingleFitOutputName() const {
   return constructBaseName() + std::to_string(selectedSpectrum());
@@ -111,16 +101,14 @@ std::string MSDFit::constructBaseName() const {
 }
 
 IAlgorithm_sptr MSDFit::singleFitAlgorithm() const {
-  const auto model = selectedFitType();
   const auto fitSpec = m_uiForm->spPlotSpectrum->value();
-  return msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
+  return msdFitAlgorithm(fitSpec, fitSpec);
 }
 
 IAlgorithm_sptr MSDFit::sequentialFitAlgorithm() const {
-  const auto model = selectedFitType();
   const auto specMin = m_uiForm->spSpectraMin->value();
   const auto specMax = m_uiForm->spSpectraMax->value();
-  return msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
+  return msdFitAlgorithm(specMin, specMax);
 }
 
 /*
@@ -128,43 +116,40 @@ IAlgorithm_sptr MSDFit::sequentialFitAlgorithm() const {
  * specified name, to be run from the specified minimum spectrum to
  * the specified maximum spectrum.
  *
- * @param model   The name of the model to be used by the algorithm.
  * @param specMin The minimum spectrum to fit.
  * @param specMax The maximum spectrum to fit.
  * @return        An MSDFit Algorithm using the specified model, which
  *                will run across all spectrum between the specified
  *                minimum and maximum.
  */
-IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
-                                        int specMax) const {
-  IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
+IAlgorithm_sptr MSDFit::msdFitAlgorithm(int specMin, int specMax) const {
+  IAlgorithm_sptr msdAlg =
+      AlgorithmManager::Instance().create("QENSFitSequential");
   msdAlg->initialize();
-  msdAlg->setProperty("Model", model);
-  msdAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
-  msdAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
-  msdAlg->setProperty("XStart", startX());
-  msdAlg->setProperty("XEnd", endX());
+  msdAlg->setProperty("SpecMin", specMin);
+  msdAlg->setProperty("SpecMax", specMax);
   msdAlg->setProperty(
       "OutputWorkspace",
-      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)));
+      outputWorkspaceName(boost::numeric_cast<size_t>(specMin)) + "_Result");
   return msdAlg;
 }
 
 bool MSDFit::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample input", m_uiForm->dsSampleInput);
+  uiv.checkDataSelectorIsValid("Sample Input", m_uiForm->dsSampleInput);
 
   auto range = std::make_pair(startX(), endX());
-  uiv.checkValidRange("a range", range);
+  uiv.checkValidRange("Fitting Range", range);
 
   int specMin = m_uiForm->spSpectraMin->value();
   int specMax = m_uiForm->spSpectraMax->value();
   auto specRange = std::make_pair(specMin, specMax + 1);
-  uiv.checkValidRange("spectrum range", specRange);
+  uiv.checkValidRange("Spectrum Range", specRange);
 
-  if (isEmptyModel())
-    uiv.addErrorMessage("No fit function has been selected");
+  // In the future the MSDFit algorithm should be modified to allow this
+  if (selectedFitType() == "None")
+    uiv.addErrorMessage("No fit type has been selected");
 
   QString errors = uiv.generateErrorMessage();
   showMessageBox(errors);
@@ -294,25 +279,6 @@ void MSDFit::endXChanged(double endX) {
   auto rangeSelector = m_uiForm->ppPlotTop->getRangeSelector("MSDRange");
   MantidQt::API::SignalBlocker<QObject> blocker(rangeSelector);
   rangeSelector->setMaximum(endX);
-}
-
-/*
- * Given the selected model in the interface, returns the name of
- * the associated model to pass to the MSDFit algorithm.
- *
- * @param model The name of the model as displayed in the interface.
- * @return      The name of the model as defined in the MSDFit algorithm.
- */
-std::string MSDFit::modelToAlgorithmProperty(const QString &model) const {
-
-  if (model == "Gaussian")
-    return "Gauss";
-  else if (model == "Peters")
-    return "Peters";
-  else if (model == "Yi")
-    return "Yi";
-  else
-    return model.toStdString();
 }
 
 /**

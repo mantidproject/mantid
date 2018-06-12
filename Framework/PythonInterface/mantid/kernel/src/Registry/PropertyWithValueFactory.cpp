@@ -16,8 +16,8 @@ namespace PythonInterface {
 namespace Registry {
 namespace {
 /// Lookup map type
-typedef std::map<PyTypeObject const *, boost::shared_ptr<PropertyValueHandler>>
-    PyTypeIndex;
+using PyTypeIndex =
+    std::map<const PyTypeObject *, boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -26,21 +26,21 @@ void initTypeLookup(PyTypeIndex &index) {
   assert(index.empty());
 
   // Map the Python types to the best match in C++
-  typedef TypedPropertyValueHandler<double> FloatHandler;
+  using FloatHandler = TypedPropertyValueHandler<double>;
   index.emplace(&PyFloat_Type, boost::make_shared<FloatHandler>());
 
-  typedef TypedPropertyValueHandler<bool> BoolHandler;
+  using BoolHandler = TypedPropertyValueHandler<bool>;
   index.emplace(&PyBool_Type, boost::make_shared<BoolHandler>());
 
   // Python 2/3 have an arbitrary-sized long type. The handler
   // will raise an error if the input value overflows a C long
-  typedef TypedPropertyValueHandler<long> IntHandler;
+  using IntHandler = TypedPropertyValueHandler<long>;
   index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
   // must be explicitly requested. The C++ string handler will accept both
   // but throw and error if the unicode string contains non-ascii characters
-  typedef TypedPropertyValueHandler<std::string> AsciiStrHandler;
+  using AsciiStrHandler = TypedPropertyValueHandler<std::string>;
   // Both versions have unicode objects
   index.emplace(&PyUnicode_Type, boost::make_shared<AsciiStrHandler>());
 
@@ -67,8 +67,8 @@ const PyTypeIndex &getTypeIndex() {
 }
 
 // Lookup map for arrays
-typedef std::map<std::string, boost::shared_ptr<PropertyValueHandler>>
-    PyArrayIndex;
+using PyArrayIndex =
+    std::map<std::string, boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -77,18 +77,18 @@ void initArrayLookup(PyArrayIndex &index) {
   assert(index.empty());
 
   // Map the Python array types to the best match in C++
-  typedef SequenceTypeHandler<std::vector<double>> FloatArrayHandler;
+  using FloatArrayHandler = SequenceTypeHandler<std::vector<double>>;
   index.emplace("FloatArray", boost::make_shared<FloatArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
+  using StringArrayHandler = SequenceTypeHandler<std::vector<std::string>>;
   index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
+  using LongIntArrayHandler = SequenceTypeHandler<std::vector<long>>;
   index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
 #if PY_MAJOR_VERSION < 3
   // Backwards compatible behaviour
-  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
+  using IntArrayHandler = SequenceTypeHandler<std::vector<int>>;
   index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
 #endif
 }

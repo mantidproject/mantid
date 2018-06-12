@@ -410,10 +410,13 @@ private:
     }
   };
 
-  typedef std::vector<boost::shared_ptr<API::Column>>::iterator
-      column_it; ///< Column iterator
-  typedef std::vector<boost::shared_ptr<API::Column>>::const_iterator
-      column_const_it; ///< Column const iterator
+  using column_it = std::vector<
+      boost::shared_ptr<API::Column>>::iterator; ///< Column iterator
+
+  ///< Column const iterator
+  using column_const_it =
+      std::vector<boost::shared_ptr<API::Column>>::const_iterator;
+
   /// Shared pointers to the columns.
   std::vector<boost::shared_ptr<API::Column>> m_columns;
   /// row count
@@ -425,10 +428,11 @@ private:
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace
-typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
+using TableWorkspace_sptr = boost::shared_ptr<TableWorkspace>;
 /// Typedef for a shared pointer to \c const \c TableWorkspace
-typedef boost::shared_ptr<const TableWorkspace> TableWorkspace_const_sptr;
+using TableWorkspace_const_sptr = boost::shared_ptr<const TableWorkspace>;
 
 } // namespace DataObjects
-} // Namespace Mantid
+} // namespace Mantid
+
 #endif /*MANTID_DATAOBJECTS_TABLEWORKSPACE_H_*/

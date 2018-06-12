@@ -9,11 +9,11 @@
 namespace Mantid {
 namespace CurveFitting {
 
-typedef FortranMatrix<ComplexMatrix> ComplexFortranMatrix;
-typedef FortranMatrix<GSLMatrix> DoubleFortranMatrix;
-typedef FortranVector<ComplexVector> ComplexFortranVector;
-typedef FortranVector<GSLVector> DoubleFortranVector;
-typedef FortranVector<std::vector<int>> IntFortranVector;
+using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
+using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
+using ComplexFortranVector = FortranVector<ComplexVector>;
+using DoubleFortranVector = FortranVector<GSLVector>;
+using IntFortranVector = FortranVector<std::vector<int>>;
 
 } // namespace CurveFitting
 } // namespace Mantid

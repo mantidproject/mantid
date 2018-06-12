@@ -22,7 +22,7 @@ class LoadWANDTest(unittest.TestCase):
         self.assertFalse(ws.detectorInfo().isMasked(2))
         self.assertTrue(ws.detectorInfo().isMasked(512))
         self.assertTrue(ws.detectorInfo().isMasked(480*512*8-256))
-        self.assertFalse(ws.detectorInfo().isMasked(480*512*8-256-512*32))
+        self.assertFalse(ws.detectorInfo().isMasked(480*512*8-256-512*6))
 
         # Check x dimension
         x=ws.getXDimension()

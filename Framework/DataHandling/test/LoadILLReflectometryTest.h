@@ -17,6 +17,7 @@
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
+using Mantid::Kernel::V3D;
 
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
@@ -143,18 +144,21 @@ public:
     TS_ASSERT_EQUALS(u3, "");
     const auto tofDelay =
         run.getPropertyValueAsType<double>("PSD.time_of_flight_2");
-    const auto u4 =
-        output->run().getProperty("VirtualChopper.chopper1_speed_average")->units();
+    const auto u4 = output->run()
+                        .getProperty("VirtualChopper.chopper1_speed_average")
+                        ->units();
     TS_ASSERT_EQUALS(u4, "");
     const auto chopper1Speed = run.getPropertyValueAsType<double>(
         "VirtualChopper.chopper1_speed_average");
-    const auto u5 =
-        output->run().getProperty("VirtualChopper.chopper1_phase_average")->units();
+    const auto u5 = output->run()
+                        .getProperty("VirtualChopper.chopper1_phase_average")
+                        ->units();
     TS_ASSERT_EQUALS(u5, "");
     const auto chopper1Phase = run.getPropertyValueAsType<double>(
         "VirtualChopper.chopper1_phase_average");
-    const auto u6 =
-        output->run().getProperty("VirtualChopper.chopper2_phase_average")->units();
+    const auto u6 = output->run()
+                        .getProperty("VirtualChopper.chopper2_phase_average")
+                        ->units();
     TS_ASSERT_EQUALS(u6, "");
     const auto chopper2Phase = run.getPropertyValueAsType<double>(
         "VirtualChopper.chopper2_phase_average");
@@ -170,7 +174,7 @@ public:
     const auto tof0 =
         tofDelay -
         60.e6 * (pOffset - 45. + chopper2Phase - chopper1Phase + openOffset) /
-            (2 * 360 * chopper1Speed);
+            (2. * 360. * chopper1Speed);
     TS_ASSERT_EQUALS(output->blocksize(), channelCount);
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       const auto &xs = output->x(i);
@@ -241,7 +245,8 @@ public:
     prop.emplace_back("Xunit", "TimeOfFlight");
     getWorkspaceFor(output, m_d17File, m_outWSName, prop);
     const auto &run = output->run();
-    const auto u1 = output->run().getProperty("VirtualChopper.dist_chop_samp")->units();
+    const auto u1 =
+        output->run().getProperty("VirtualChopper.dist_chop_samp")->units();
     TS_ASSERT_EQUALS(u1, "");
     const auto chopperCentre =
         run.getPropertyValueAsType<double>("VirtualChopper.dist_chop_samp");
@@ -270,17 +275,22 @@ public:
     prop.emplace_back("Xunit", "TimeOfFlight");
     getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
     const auto &run = output->run();
-    const auto u1 = output->run().getProperty("ChopperSetting.chopperpair_sample_distance")->units();
+    const auto u1 =
+        output->run()
+            .getProperty("ChopperSetting.chopperpair_sample_distance")
+            ->units();
     TS_ASSERT_EQUALS(u1, "mm");
     const auto chopperCentre =
         run.getPropertyValueAsType<double>(
             "ChopperSetting.chopperpair_sample_distance") *
         1.e-3;
-    const auto u2 = output->run().getProperty("CollAngle.actual_coll_angle")->units();
+    const auto u2 =
+        output->run().getProperty("CollAngle.actual_coll_angle")->units();
     TS_ASSERT_EQUALS(u2, "uu");
     const auto incomingDeflectionAngle =
         run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
-    const auto u3 = output->run().getProperty("Theta.sampleHorizontalOffset")->units();
+    const auto u3 =
+        output->run().getProperty("Theta.sampleHorizontalOffset")->units();
     TS_ASSERT_EQUALS(u3, "mm");
     const auto sampleZOffset =
         run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
@@ -368,12 +378,14 @@ public:
     const auto u5 = output->run().getProperty("SHT1.value")->units();
     TS_ASSERT_EQUALS(u5, "mm");
     const auto sht1 = run.getPropertyValueAsType<double>("SHT1.value") * 1.e-3;
-    const auto u6 = output->run().getProperty("Theta.sampleHorizontalOffset")->units();
+    const auto u6 =
+        output->run().getProperty("Theta.sampleHorizontalOffset")->units();
     TS_ASSERT_EQUALS(u6, "mm");
     const auto sampleZOffset =
         run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
         1e-3;
-    const auto u7 = output->run().getProperty("CollAngle.actual_coll_angle")->units();
+    const auto u7 =
+        output->run().getProperty("CollAngle.actual_coll_angle")->units();
     TS_ASSERT_EQUALS(u7, "uu");
     const auto collimationAngle =
         run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
@@ -587,6 +599,34 @@ public:
   // Except of edelay, all new variables can be computed from still existing
   // variables.
 
+  void testMovedNexusEntries() {
+    LoadILLReflectometry loader;
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", this->m_figarouptodateFile));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    const auto output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            this->m_outWSName);
+    TS_ASSERT(output);
+    const auto u0 =
+        output->run().getProperty("Distance.edelay_delay")->units();
+    TS_ASSERT_EQUALS(u0, "microsec"); // a time in the distance field!
+    const auto u1 =
+        output->run().getProperty("inter_slit_distance")->units();
+    TS_ASSERT_EQUALS(u1, "mm");
+    // moved and tested for figaro: Distance.dist_chop_samp
+    // D17:
+    // "Distance.dist_chop_samp", "VirtualChopper.dist_chop_samp"
+    // Figaro:
+    // "Distance.dist_chop_samp", "ChopperSetting.chopperpair_sample_distance"
+  }
+
   void testSourceAndSampleLocationsFigaro() {
     // In the following, all distance units are millimeter (proposed by NeXus)!
     using namespace NeXus;
@@ -600,9 +640,13 @@ public:
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        this->m_outWSName);
+    const auto output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            this->m_outWSName);
     TS_ASSERT(output);
+    const auto u0 =
+        output->run().getProperty("CollAngle.actual_coll_angle")->units();
+    TS_ASSERT_EQUALS(u0, "mm");
     const auto deflectionAngle = output->run().getPropertyValueAsType<double>(
                                      "CollAngle.actual_coll_angle") *
                                  M_PI / 180.;
@@ -613,7 +657,8 @@ public:
     const auto d1 = output->run().getPropertyValueAsType<double>("Distance.D1");
     const auto u2 = output->run().getProperty("DTR.value")->units();
     TS_ASSERT_EQUALS(u2, "mm");
-    const auto restZ = output->run().getPropertyValueAsType<double>("DTR.value");
+    const auto restZ =
+        output->run().getPropertyValueAsType<double>("DTR.value");
     // Motor DH1 vertical coordinate.
     const auto u3 = output->run().getProperty("DH1.value")->units();
     TS_ASSERT_EQUALS(u3, "mm");
@@ -634,7 +679,8 @@ public:
     const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
     const auto u5 = output->run().getProperty("SHT1.value")->units();
     TS_ASSERT_EQUALS(u5, "mm");
-    const auto sht1 = output->run().getPropertyValueAsType<double>("SHT1.value");
+    const auto sht1 =
+        output->run().getPropertyValueAsType<double>("SHT1.value");
     const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
     const auto d1ref = std::hypot(beamY - sht1, beamZ) -
                        sampleZOffset / std::cos(deflectionAngle);
@@ -643,7 +689,7 @@ public:
     TS_ASSERT_EQUALS(u6, "mm");
     const auto d0 = output->run().getPropertyValueAsType<double>("Distance.D0");
     const auto chopperDist = output->run().getPropertyValueAsType<double>(
-        "ChopperSetting.chopperpair_sample_distance");
+        "Distance.chopperpair_sample_distance");
     const auto d0ref = chopperDist + sampleZOffset / std::cos(deflectionAngle);
     TS_ASSERT_EQUALS(d0, d0ref);
     AnalysisDataService::Instance().clear();
@@ -661,23 +707,27 @@ public:
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        this->m_outWSName);
+    const auto output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            this->m_outWSName);
     TS_ASSERT(output);
     const auto u1 = output->run().getProperty("Distance.D1")->units();
     TS_ASSERT_EQUALS(u1, "");
     const auto d1 = output->run().getPropertyValueAsType<double>("Distance.D1");
     const auto u2 = output->run().getProperty("det.value")->units();
     TS_ASSERT_EQUALS(u2, "mm");
-    const auto d1ref = output->run().getPropertyValueAsType<double>("det.value");
+    const auto d1ref =
+        output->run().getPropertyValueAsType<double>("det.value");
     TS_ASSERT_EQUALS(d1, d1ref);
     const auto u3 = output->run().getProperty("Distance.D0")->units();
     TS_ASSERT_EQUALS(u3, "");
     const auto d0 = output->run().getPropertyValueAsType<double>("Distance.D0");
-    const auto u4 = output->run().getProperty("Distance.ChopperGap")->units();
+    const auto u4 = output->run().getProperty("Distance.dist_chop_samp")->units();
     TS_ASSERT_EQUALS(u4, "");
     const auto pairCentre = output->run().getPropertyValueAsType<double>(
-        "VirtualChopper.dist_chop_samp");
+        "Distances.dist_chop_samp");
+    const auto u5 = output->run().getProperty("Distance.ChopperGap")->units();
+    TS_ASSERT_EQUALS(u5, "");
     const auto pairSeparation =
         output->run().getPropertyValueAsType<double>("Distance.ChopperGap") *
         10; // still in cm?
@@ -687,7 +737,7 @@ public:
   }
 
   void testCurrentDoubleDefinitionsAndUnusedVariables() {
-    // Defined twice in Nexus
+    // Defined twice in Nexus figaro
     LoadILLReflectometry loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -698,8 +748,9 @@ public:
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        this->m_outWSName);
+    const auto output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            this->m_outWSName);
     TS_ASSERT(output);
     const auto v1 = output->run().getPropertyValueAsType<double>(
         "Theta.sampleHorizontalOffset");
@@ -713,16 +764,84 @@ public:
     const auto v4 =
         output->run().getPropertyValueAsType<double>("Theta.actual_directDh");
     TS_ASSERT_EQUALS(v4, 0.);
-    const auto v5 =
-        output->run().getPropertyValueAsType<double>("Theta.actual_reflectedDan");
+    const auto v5 = output->run().getPropertyValueAsType<double>(
+        "Theta.actual_reflectedDan");
     TS_ASSERT_EQUALS(v5, 0.);
-    const auto v6 =
-        output->run().getPropertyValueAsType<double>("Theta.actual_reflectedDh");
+    const auto v6 = output->run().getPropertyValueAsType<double>(
+        "Theta.actual_reflectedDh");
     TS_ASSERT_EQUALS(v6, 0.);
     AnalysisDataService::Instance().clear();
+    // Defined twice in Nexus D17
+    // Defined twice in Nexus
+    LoadILLReflectometry loaderD17;
+    loaderD17.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loaderD17.initialize());
+    TS_ASSERT(loaderD17.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        loaderD17.setPropertyValue("Filename", this->m_d17uptodateFile));
+    TS_ASSERT_THROWS_NOTHING(
+        loaderD17.setPropertyValue("OutputWorkspace", this->m_outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loaderD17.isExecuted());
+    const auto outputD17 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            this->m_outWSName);
+    TS_ASSERT(outputD17);
+    const auto v7 = outputD17->run().getPropertyValueAsType<double>(
+        "VirtualChopper.dist_chop_samp");
+    const auto v8 = outputD17->run().getPropertyValueAsType<double>(
+        "Distance.dist_chop_samp");
+    TS_ASSERT_EQUALS(v7, v8);
     // D17 Nexus no units declared
     // D17 Distance.ChopperGap in cm
     // All distance units can be m
+  }
+
+  void testSlitConfigurationD17() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_d17File, m_outWSName, emptyProperties());
+    auto instrument = output->getInstrument();
+    auto slit1 = instrument->getComponentByName("slit2");
+    auto slit2 = instrument->getComponentByName("slit3");
+    const auto u1 = output->run().getProperty("Distance.S2toSample")->units();
+    TS_ASSERT_EQUALS(u1, "mm");
+    const double S2z =
+        -output->run().getPropertyValueAsType<double>("Distance.S2toSample") *
+        1e-3;
+    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z));
+    const auto u2 = output->run().getProperty("Distance.S3toSample")->units();
+    TS_ASSERT_EQUALS(u2, "mm");
+    const double S3z =
+        -output->run().getPropertyValueAsType<double>("Distance.S3toSample") *
+        1e-3;
+    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z));
+  }
+
+  void testSlitConfigurationFigaro() {
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
+    auto instrument = output->getInstrument();
+    auto slit1 = instrument->getComponentByName("slit2");
+    auto slit2 = instrument->getComponentByName("slit3");
+    // The S3 position is missing in the NeXus file; use a hard-coded value.
+    const double collimationAngle =
+        output->run().getPropertyValueAsType<double>(
+            "CollAngle.actual_coll_angle") /
+        180. * M_PI;
+    const double sampleOffset = output->run().getPropertyValueAsType<double>(
+                                    "Theta.sampleHorizontalOffset") *
+                                1e-3;
+    const double slitZOffset = sampleOffset / std::cos(collimationAngle);
+    const double S3z = -0.368 - slitZOffset;
+    const auto u =
+        output->run().getProperty("Theta.inter-slit_distance")->units();
+    TS_ASSERT_EQUALS(u, "mm");
+    const double slitSeparation = output->run().getPropertyValueAsType<double>(
+                                      "Theta.inter-slit_distance") *
+                                  1e-3;
+    const double S2z = S3z - slitSeparation;
+    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z));
+    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z));
   }
 };
 

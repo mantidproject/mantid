@@ -43,7 +43,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 template <typename T> class DLLExport Matrix {
 public:
   /// Enable users to retrieve the element type
-  typedef T value_type;
+  using value_type = T;
 
 private:
   size_t m_numRows;    ///< Number of rows    (x coordinate)
@@ -194,9 +194,9 @@ private:
 // Typedefs
 //-------------------------------------------------------------------------
 /// A matrix of doubles
-typedef Mantid::Kernel::Matrix<double> DblMatrix;
+using DblMatrix = Mantid::Kernel::Matrix<double>;
 /// A matrix of ints
-typedef Mantid::Kernel::Matrix<int> IntMatrix;
+using IntMatrix = Mantid::Kernel::Matrix<int>;
 
 //-------------------------------------------------------------------------
 // Utility methods

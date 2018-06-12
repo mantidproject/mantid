@@ -68,7 +68,7 @@ public:
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch
-typedef boost::shared_ptr<IArchiveSearch> IArchiveSearch_sptr;
+using IArchiveSearch_sptr = boost::shared_ptr<IArchiveSearch>;
 }
 }
 

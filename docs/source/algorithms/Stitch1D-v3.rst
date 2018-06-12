@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -73,50 +73,68 @@ Usage
 -----
 **Example - a basic example using stitch1D to stitch two workspaces together.**
 
-.. testcode:: ExStitch1DSimple
+.. plot::
+   :include-source:
 
-    import numpy as np
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
 
-    def gaussian(x, mu, sigma):
-      """Creates a gaussian peak centered on mu and with width sigma."""
-      return (1/ sigma * np.sqrt(2 * np.pi)) * np.exp( - (x-mu)**2  / (2*sigma**2))
+   def gaussian(x, mu, sigma):
+     """Creates a gaussian peak centered on mu and with width sigma."""
+     return (1/ sigma * np.sqrt(2 * np.pi)) * np.exp( - (x-mu)**2  / (2*sigma**2))
 
-    #create two histograms with a single peak in each one
-    x1 = np.arange(-1, 1, 0.02)
-    x2 = np.arange(0.4, 1.6, 0.02)
-    ws1 = CreateWorkspace(UnitX="1/q", DataX=x1, DataY=gaussian(x1[:-1], 0, 0.1)+1)
-    ws2 = CreateWorkspace(UnitX="1/q", DataX=x2, DataY=gaussian(x2[:-1], 1, 0.05)+1)
+   #create two histograms with a single peak in each one
+   x1 = np.arange(-1, 1, 0.02)
+   x2 = np.arange(0.4, 1.6, 0.02)
+   ws1 = CreateWorkspace(UnitX="1/q", DataX=x1, DataY=gaussian(x1[:-1], 0, 0.1)+1)
+   ws2 = CreateWorkspace(UnitX="1/q", DataX=x2, DataY=gaussian(x2[:-1], 1, 0.05)+1)
 
-    #stitch the histograms together
-    stitched, scale = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2, StartOverlap=0.4, EndOverlap=0.6, Params=0.02)
+   #stitch the histograms together
+   stitched, scale = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2, StartOverlap=0.4, EndOverlap=0.6, Params=0.02)
 
-Output:
+   # plot the individual workspaces alongside the stitched one
+   fig, axs = plt.subplots(nrows=1, ncols=2, subplot_kw={'projection':'mantid'})
 
-.. image:: /images/Stitch1D1.png
-   :scale: 65 %
-   :alt: Stitch1D output
-   :align: center
+   axs[0].plot(mtd['ws1'], wkspIndex=0, label='ws1')
+   axs[0].plot(mtd['ws2'], wkspIndex=0, label='ws2')
+   axs[0].legend()
+   axs[1].plot(mtd['stitched'], wkspIndex=0, color='k', label='stitched')
+   axs[1].legend()
 
+   # uncomment the following line to show the plot window
+   #fig.show()
 
 **Example - a practical example using reflectometry data and a scale factor.**
 
-.. testcode:: ExStitch1DPractical
+.. plot::
+   :include-source:
 
-    trans1 = Load('INTER00013463')
-    trans2 = Load('INTER00013464')
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
 
-    trans1_wav = CreateTransmissionWorkspaceAuto(trans1)
-    trans2_wav = CreateTransmissionWorkspaceAuto(trans2)
+   trans1 = Load('INTER00013463')
+   trans2 = Load('INTER00013464')
 
-    stitched_wav, y = Stitch1D(trans1_wav, trans2_wav, UseManualScaleFactor=True, ManualScaleFactor=0.85)
+   trans1_wav = CreateTransmissionWorkspaceAuto(trans1)
+   trans2_wav = CreateTransmissionWorkspaceAuto(trans2)
 
-Output:
+   stitched_wav, y = Stitch1D(trans1_wav, trans2_wav, UseManualScaleFactor=True, ManualScaleFactor=0.85)
 
-.. image:: /images/Stitch1D2.png
-   :scale: 65 %
-   :alt: Stitch1D output
-   :align: center
+   # plot the individual and stitched workspaces next to each other
+   fig, axs = plt.subplots(nrows=1, ncols=2, subplot_kw={'projection':'mantid'})
 
+   axs[0].plot(trans1_wav, wkspIndex=0, label=str(trans1_wav))
+   axs[0].plot(trans2_wav, wkspIndex=0, label=str(trans2_wav))
+   axs[0].legend()
+   # use same y scale on both plots
+   ylimits = axs[0].get_ylim()
+   axs[1].plot(stitched_wav, wkspIndex=0, color='k', label='stitched')
+   axs[1].legend()
+   axs[1].set_ylim(ylimits)
+
+   # uncomment the following line to show the plot window
+   #fig.show()
 
 .. categories::
 

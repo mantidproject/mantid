@@ -25,7 +25,7 @@ class IComponent;
 class ParameterMap;
 
 /// Define a type for a unique component identifier.
-typedef IComponent *ComponentID;
+using ComponentID = IComponent *;
 
 /** @class IComponent
 @brief base class for Geometric IComponent
@@ -186,9 +186,9 @@ public:
 };
 
 /// Typedef of a shared pointer to a IComponent
-typedef boost::shared_ptr<IComponent> IComponent_sptr;
+using IComponent_sptr = boost::shared_ptr<IComponent>;
 /// Typdef of a shared pointer to a const IComponent
-typedef boost::shared_ptr<const IComponent> IComponent_const_sptr;
+using IComponent_const_sptr = boost::shared_ptr<const IComponent>;
 
 } // Namespace Geometry
 

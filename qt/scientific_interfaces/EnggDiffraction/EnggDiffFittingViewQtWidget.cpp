@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Poco/Path.h>
 
@@ -39,9 +40,6 @@ const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
     "(*.csv *.txt);;"
     "Other extensions/all files (*)";
 
-bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
-bool EnggDiffFittingViewQtWidget::m_fittingSingleRunMode = false;
-
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
 EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
@@ -52,13 +50,11 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
-      m_presenter(nullptr) {
+      m_presenter(boost::make_shared<EnggDiffFittingPresenter>(
+          this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
+          mainParam)) {
 
   initLayout();
-
-  m_presenter.reset(new EnggDiffFittingPresenter(
-      this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
-      mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
@@ -86,9 +82,6 @@ void EnggDiffFittingViewQtWidget::initLayout() {
 void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.pushButton_fitting_browse_run_num, SIGNAL(released()), this,
           SLOT(browseFitFocusedRun()));
-
-  connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(textEdited(const QString &)),
-          this, SLOT(resetFittingMode()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this,
           SLOT(loadClicked()));
@@ -260,13 +253,6 @@ void EnggDiffFittingViewQtWidget::removeRunClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::removeRun);
 }
 
-void EnggDiffFittingViewQtWidget::resetFittingMode() {
-  // resets the global variable so the list view widgets
-  // adds the run number to for single runs too
-  m_fittingMutliRunMode = false;
-  m_fittingSingleRunMode = false;
-}
-
 void EnggDiffFittingViewQtWidget::resetCanvas() {
   // clear vector and detach curves to avoid plot crash
   // when only plotting focused workspace
@@ -435,7 +421,6 @@ EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
-  resetFittingMode();
   QString prevPath = QString::fromStdString(focusingDir());
   if (prevPath.isEmpty()) {
     prevPath =
@@ -571,22 +556,6 @@ void EnggDiffFittingViewQtWidget::setFittingRunNumVec(
   // holds all the directories required
   m_fitting_runno_dir_vec.clear();
   m_fitting_runno_dir_vec = assignVec;
-}
-
-bool EnggDiffFittingViewQtWidget::getFittingSingleRunMode() {
-  return m_fittingSingleRunMode;
-}
-
-void EnggDiffFittingViewQtWidget::setFittingSingleRunMode(bool mode) {
-  m_fittingSingleRunMode = mode;
-}
-
-void EnggDiffFittingViewQtWidget::setFittingMultiRunMode(bool mode) {
-  m_fittingMutliRunMode = mode;
-}
-
-bool EnggDiffFittingViewQtWidget::getFittingMultiRunMode() {
-  return m_fittingMutliRunMode;
 }
 
 void EnggDiffFittingViewQtWidget::setPeakPick() {

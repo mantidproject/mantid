@@ -25,11 +25,12 @@ private slots:
   void rsRangeChangedLazy(double min, double max);
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
-  void calculateBinning();
+  void updateDisplayedBinParameters();
   void saveClicked();
   void plotClicked();
-  void PlotTiled();
+  void plotTiled();
 
+private:
 private:
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;

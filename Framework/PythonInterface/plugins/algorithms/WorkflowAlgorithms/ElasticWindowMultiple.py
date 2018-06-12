@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import *
+from mantid.simpleapi import AppendSpectra, CloneWorkspace, ElasticWindow, LoadLog, Logarithm, SortXAxis, Transpose
 from mantid.kernel import *
 from mantid.api import *
 
@@ -62,9 +62,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
                              doc='Name of the sample environment log entry')
 
-        sampEnvLogVal_type = ['last_value', 'average']
+        sample_environment_log_values = ['last_value', 'average']
         self.declareProperty('SampleEnvironmentLogValue', 'last_value',
-                             StringListValidator(sampEnvLogVal_type),
+                             StringListValidator(sample_environment_log_values),
                              doc='Value selection of the sample environment log entry')
 
         self.declareProperty(WorkspaceProperty('OutputInQ', '', Direction.Output),
@@ -97,14 +97,29 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         return issues
 
+    def _setup(self):
+        """
+        Gets algorithm properties.
+        """
+        self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
+        self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
+
+        self._input_workspaces = self.getProperty('InputWorkspaces').value
+        self._input_size = len(self._input_workspaces)
+        self._elf_ws_name = self.getPropertyValue('OutputELF')
+        self._elt_ws_name = self.getPropertyValue('OutputELT')
+
+        self._integration_range_start = self.getProperty('IntegrationRangeStart').value
+        self._integration_range_end = self.getProperty('IntegrationRangeEnd').value
+
+        self._background_range_start = self.getProperty('BackgroundRangeStart').value
+        self._background_range_end = self.getProperty('BackgroundRangeEnd').value
+
     def PyExec(self):
         from IndirectCommon import getInstrRun
 
         # Do setup
         self._setup()
-
-        # Get input workspaces
-        input_workspace_names = self._input_workspaces.getNames()
 
         # Lists of input and output workspaces
         q_workspaces = list()
@@ -115,37 +130,26 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         progress = Progress(self, 0.0, 0.05, 3)
 
         # Perform the ElasticWindow algorithms
-        for input_ws in input_workspace_names:
+        for input_ws in self._input_workspaces:
+            logger.information('Running ElasticWindow for workspace: {}'.format(input_ws.getName()))
+            progress.report('ElasticWindow for workspace: {}'.format(input_ws.getName()))
 
-            logger.information('Running ElasticWindow for workspace: %s' % input_ws)
-            progress.report('ElasticWindow for workspace: %s' % input_ws)
+            q_workspace, q2_workspace = ElasticWindow(InputWorkspace=input_ws,
+                                                      IntegrationRangeStart=self._integration_range_start,
+                                                      IntegrationRangeEnd=self._integration_range_end,
+                                                      BackgroundRangeStart=self._background_range_start,
+                                                      BackgroundRangeEnd=self._background_range_end,
+                                                      OutputInQ="__q", OutputInQSquared="__q2",
+                                                      StoreInADS=False, EnableLogging=False)
 
-            q_ws = '__' + input_ws + '_q'
-            q2_ws = '__' + input_ws + '_q2'
+            q2_workspace = Logarithm(InputWorkspace=q2_workspace, OutputWorkspace="__q2",
+                                     StoreInADS=False, EnableLogging=False)
 
-            elwin_alg = self.createChildAlgorithm("ElasticWindow", enableLogging=False)
-            elwin_alg.setProperty("InputWorkspace", input_ws)
-            elwin_alg.setProperty("IntegrationRangeStart", self._integration_range_start)
-            elwin_alg.setProperty("IntegrationRangeEnd", self._integration_range_end)
-            elwin_alg.setProperty("OutputInQ", q_ws)
-            elwin_alg.setProperty("OutputInQSquared", q2_ws)
-
-            if self._background_range_start != Property.EMPTY_DBL and self._background_range_end != Property.EMPTY_DBL:
-                elwin_alg.setProperty("BackgroundRangeStart", self._background_range_start)
-                elwin_alg.setProperty("BackgroundRangeEnd", self._background_range_end)
-
-            elwin_alg.execute()
-
-            log_alg = self.createChildAlgorithm("Logarithm", enableLogging=False)
-            log_alg.setProperty("InputWorkspace", elwin_alg.getProperty("OutputInQSquared").value)
-            log_alg.setProperty("OutputWorkspace", q2_ws)
-            log_alg.execute()
-
-            q_workspaces.append(elwin_alg.getProperty("OutputInQ").value)
-            q2_workspaces.append(log_alg.getProperty("OutputWorkspace").value)
+            q_workspaces.append(q_workspace)
+            q2_workspaces.append(q2_workspace)
 
             # Get the run number
-            run_no = getInstrRun(input_ws)[1]
+            run_no = getInstrRun(input_ws.getName())[1]
             run_numbers.append(run_no)
 
             # Get the sample environment unit
@@ -159,82 +163,40 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         logger.information('Creating Q and Q^2 workspaces')
         progress.report('Creating Q workspaces')
 
-        if len(input_workspace_names) == 1:
-            # Just rename single workspaces
-            self._q_workspace = elwin_alg.getProperty("OutputInQ").value
-            self._q2_workspace = log_alg.getProperty("OutputWorkspace").value
+        if self._input_size == 1:
+            q_workspace = q_workspaces[0]
+            q2_workspace = q2_workspaces[0]
         else:
-            # Append the spectra of the first two workspaces
-            append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
-            append_alg.setProperty("InputWorkspace1", q_workspaces[0])
-            append_alg.setProperty("InputWorkspace2", q_workspaces[1])
-            append_alg.setProperty("OutputWorkspace", self._q_workspace)
-            append_alg.execute()
-            self._q_workspace = append_alg.getProperty("OutputWorkspace").value
-            append_alg.setProperty("InputWorkspace1", q2_workspaces[0])
-            append_alg.setProperty("InputWorkspace2", q2_workspaces[1])
-            append_alg.setProperty("OutputWorkspace", self._q2_workspace)
-            append_alg.execute()
-            self._q2_workspace = append_alg.getProperty("OutputWorkspace").value
-
-            # Append to the spectra of each remaining workspace
-            for idx in range(2, len(input_workspace_names)):
-                append_alg.setProperty("InputWorkspace1", self._q_workspace)
-                append_alg.setProperty("InputWorkspace2", q_workspaces[idx])
-                append_alg.setProperty("OutputWorkspace", self._q_workspace)
-                append_alg.execute()
-                self._q_workspace = append_alg.getProperty("OutputWorkspace").value
-                append_alg.setProperty("InputWorkspace1", self._q2_workspace)
-                append_alg.setProperty("InputWorkspace2", q2_workspaces[idx])
-                append_alg.setProperty("OutputWorkspace", self._q2_workspace)
-                append_alg.execute()
-                self._q2_workspace = append_alg.getProperty("OutputWorkspace").value
+            q_workspace = _append_all(q_workspaces)
+            q2_workspace = _append_all(q2_workspaces)
 
         # Set the vertical axis units
-        v_axis_is_sample = len(input_workspace_names) == len(sample_param)
+        v_axis_is_sample = self._input_size == len(sample_param)
 
         if v_axis_is_sample:
-            logger.notice('Vertical axis is in units of %s' % unit)
+            logger.notice('Vertical axis is in units of {}'.format(unit))
             unit = (self._sample_log_name, unit)
+
+            def axis_value(index):
+                return float(sample_param[index])
         else:
             logger.notice('Vertical axis is in run number')
             unit = ('Run No', 'last 3 digits')
 
-        # Create a new vertical axis for the Q and Q**2 workspaces
-        q_ws_axis = NumericAxis.create(len(input_workspace_names))
-        q_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
+            def axis_value(index):
+                return float(run_numbers[index][-3:])
 
-        q2_ws_axis = NumericAxis.create(len(input_workspace_names))
-        q2_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
-
-        # Set the vertical axis values
-        for idx in range(0, len(input_workspace_names)):
-            if v_axis_is_sample:
-                q_ws_axis.setValue(idx, float(sample_param[idx]))
-                q2_ws_axis.setValue(idx, float(sample_param[idx]))
-            else:
-                q_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
-                q2_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
-
-        # Add the new vertical axis to each workspace
-        self._q_workspace.replaceAxis(1, q_ws_axis)
-        self._q2_workspace.replaceAxis(1, q2_ws_axis)
+        # Create and set new vertical axis for the Q and Q**2 workspaces
+        _set_numeric_y_axis(q_workspace, self._input_size, unit, axis_value)
+        _set_numeric_y_axis(q2_workspace, self._input_size, unit, axis_value)
 
         progress.report('Creating ELF workspaces')
-        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-        sort_alg = self.createChildAlgorithm("SortXAxis", enableLogging=False)
+
         # Process the ELF workspace
         if self._elf_ws_name != '':
             logger.information('Creating ELF workspace')
-            transpose_alg.setProperty("InputWorkspace", self._q_workspace)
-            transpose_alg.setProperty("OutputWorkspace", self._elf_ws_name)
-            transpose_alg.execute()
-
-            sort_alg.setProperty("InputWorkspace", transpose_alg.getProperty("OutputWorkspace").value)
-            sort_alg.setProperty("OutputWorkspace", self._elf_ws_name)
-            sort_alg.execute()
-
-            self.setProperty('OutputELF', sort_alg.getProperty("OutputWorkspace").value)
+            elf_workspace = _sort_x_axis(_transpose(q_workspace))
+            self.setProperty('OutputELF', elf_workspace)
 
         # Do temperature normalisation
         if self._elt_ws_name != '':
@@ -243,117 +205,143 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # If the ELF workspace was not created, create the ELT workspace
             # from the Q workspace. Else, clone the ELF workspace.
             if self._elf_ws_name == '':
-                transpose_alg.setProperty("InputWorkspace", self._q_workspace)
-                transpose_alg.setProperty("OutputWorkspace", self._elt_ws_name)
-                transpose_alg.execute()
-                sort_alg.setProperty("InputWorkspace", self._elt_ws_name)
-                sort_alg.setProperty("OutputWorkspace", self._elt_ws_name)
-                sort_alg.execute()
-                elt_workspace = sort_alg.getProperty("OutputWorkspace").value
+                elt_workspace = _sort_x_axis(_transpose(q_workspace))
             else:
-                clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
-                clone_alg.setProperty("InputWorkspace", self.getProperty("OutputELF").value)
-                clone_alg.setProperty("OutputWorkspace", self._elt_ws_name)
-                clone_alg.execute()
-                elt_workspace = clone_alg.getProperty("OutputWorkspace").value
+                elt_workspace = CloneWorkspace(InputWorkspace=elf_workspace, OutputWorkspace="__cloned",
+                                               StoreInADS=False, EnableLogging=False)
 
             _normalize_by_index(elt_workspace, np.argmin(sample_param))
 
             self.setProperty('OutputELT', elt_workspace)
 
         # Set the output workspace
-        self.setProperty('OutputInQ', self._q_workspace)
-        self.setProperty('OutputInQSquared', self._q2_workspace)
+        self.setProperty('OutputInQ', q_workspace)
+        self.setProperty('OutputInQSquared', q2_workspace)
 
-    def _setup(self):
-        """
-        Gets algorithm properties.
-        """
-
-        self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
-        self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
-
-        self._input_workspaces = self.getProperty('InputWorkspaces').value
-        self._q_workspace = self.getPropertyValue('OutputInQ')
-        self._q2_workspace = self.getPropertyValue('OutputInQSquared')
-        self._elf_ws_name = self.getPropertyValue('OutputELF')
-        self._elt_ws_name = self.getPropertyValue('OutputELT')
-
-        self._integration_range_start = self.getProperty('IntegrationRangeStart').value
-        self._integration_range_end = self.getProperty('IntegrationRangeEnd').value
-
-        self._background_range_start = self.getProperty('BackgroundRangeStart').value
-        self._background_range_end = self.getProperty('BackgroundRangeEnd').value
-
-    def _get_sample_units(self, ws_name):
+    def _get_sample_units(self, workspace):
         """
         Gets the sample environment units for a given workspace.
 
-        @param ws_name Name of workspace
+        @param workspace The workspace
         @returns sample in given units or None if not found
         """
         from IndirectCommon import getInstrRun
 
-        instr, run_number = getInstrRun(ws_name)
+        instr, run_number = getInstrRun(workspace.getName())
 
-        facility = config.getFacility()
-        pad_num = facility.instrument(instr).zeroPadding(int(run_number))
+        instrument = config.getFacility().instrument(instr)
+        pad_num = instrument.zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))
 
         run_name = instr + zero_padding + run_number
         log_filename = run_name.upper() + '.log'
 
-        run = mtd[ws_name].getRun()
+        run = workspace.getRun()
 
-        if self._sample_log_name == 'Position':
-            # Look for sample changer position in logs in workspace
-            if self._sample_log_name in run:
-                tmp = run[self._sample_log_name].value
-                value_action = {'last_value': lambda x: x[-1],
-                                'average': lambda x: x.mean()}
-                position = value_action['last_value'](tmp)
-                if position == 0:
-                    self._sample_log_name = 'Bot_Can_Top'
-                if position == 1:
-                    self._sample_log_name = 'Middle_Can_Top'
-                if position == 2:
-                    self._sample_log_name = 'Top_Can_Top'
-            else:
-                logger.information('Position not found in workspace.')
+        if self._sample_log_name.lower() == 'position':
+            self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, workspace.getInstrument())
 
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
-            tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[-1],
-                            'average': lambda x: x.mean()}
-            sample = value_action[self._sample_log_value](tmp)
-            unit = run[self._sample_log_name].units
-            logger.information('%d %s found for run: %s' % (sample, unit, run_name))
-            return sample, unit
+            if self._sample_log_value == 'last_value':
+                sample = run[self._sample_log_name].value[-1]
+            else:
+                sample = run[self._sample_log_name].value.mean()
 
+            unit = run[self._sample_log_name].units
         else:
             # Logs not in workspace, try loading from file
             logger.information('Log parameter not found in workspace. Searching for log file.')
-            log_path = FileFinder.getFullPath(log_filename)
+            sample, unit = _extract_temperature_from_log(workspace, self._sample_log_name, log_filename, run_name)
 
-            if log_path != '':
-                # Get temperature from log file
-                LoadLog(Workspace=ws_name, Filename=log_path)
-                run_logs = mtd[ws_name].getRun()
-                if self._sample_log_name in run_logs:
-                    tmp = run_logs[self._sample_log_name].value
-                    sample = tmp[len(tmp) - 1]
-                    unit = run[self._sample_log_name].units
-                    logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
-                    return sample, unit
-                else:
-                    logger.warning('Log entry %s for run %s not found' % (self._sample_log_name, run_name))
-            else:
-                logger.warning('Log file for run %s not found' % run_name)
+        if sample is not None and unit is not None:
+            logger.debug('{0} {1} found for run: {2}'.format(sample, unit, run_name))
+        else:
+            logger.warning('No sample units found for run: {}'.format(run_name))
+        return sample, unit
 
-        # Can't find log file
-        logger.warning('No sample units found for run: %s' % run_name)
+
+def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_name):
+    log_path = FileFinder.getFullPath(log_filename)
+
+    if not log_path:
+        logger.warning('Log file for run {} not found'.format(run_name))
         return None, None
+
+    LoadLog(Workspace=workspace, Filename=log_filename, EnableLogging=False)
+    run = workspace.getRun()
+
+    if sample_log_name in run:
+        temperature = run[sample_log_name].value[-1]
+        unit = run[sample_log_name].units
+        return temperature, unit
+
+    logger.warning('Log entry {0} for run {1} not found'.format(sample_log_name, run_name))
+    return None, None
+
+
+def _extract_sensor_name(sample_log_name, run, instrument):
+    default_names = ['Bot_Can_Top', 'Middle_Can_Top', 'Top_Can_Top']
+    sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")[0].split(',')
+    position = _extract_position_from_run(sample_log_name, run)
+
+    if position is not None:
+
+        if position < len(sensor_names) and sensor_names[position] in run:
+            return sensor_names[position]
+        elif position < len(default_names):
+            logger.warning("Position {0} not found within the instrument parameters, "
+                           "using default '{1}'.".format(position, default_names[position]))
+            return default_names[position]
+        else:
+            logger.warning('Invalid position ({}) found in workspace.'.format(position))
+    else:
+        logger.information('Position not found in sample logs, when using log name {}.'.format(sample_log_name))
+    return ''
+
+
+def _extract_position_from_run(sample_log_name, run):
+
+    if sample_log_name in run:
+        position = run[sample_log_name].value[-1]
+
+        if isinstance(position, str):
+            return {'B':0, 'M':1, 'T':2}.get(position[0], None)
+        else:
+            return int(position)
+    return None
+
+
+def _set_numeric_y_axis(workspace, length, unit, get_axis_value):
+    workspace_axis = NumericAxis.create(length)
+    workspace_axis.setUnit("Label").setLabel(unit[0], unit[1])
+
+    for index in range(length):
+        workspace_axis.setValue(index, get_axis_value(index))
+    workspace.replaceAxis(1, workspace_axis)
+
+
+def _append_all(workspaces):
+    initial_workspace = workspaces[0]
+
+    for workspace in workspaces[1:]:
+        initial_workspace = _append_spectra(initial_workspace, workspace)
+    return initial_workspace
+
+
+def _append_spectra(workspace1, workspace2):
+    return AppendSpectra(InputWorkspace1=workspace1, InputWorkspace2=workspace2,
+                         OutputWorkspace="__appended", StoreInADS=False, EnableLogging=False)
+
+
+def _transpose(workspace):
+    return Transpose(InputWorkspace=workspace, OutputWorkspace="__transposed",
+                     StoreInADS=False, EnableLogging=False)
+
+
+def _sort_x_axis(workspace):
+    return SortXAxis(InputWorkspace=workspace, OutputWorkspace="__sorted",
+                     StoreInADS=False, EnableLogging=False)
 
 
 # Register algorithm with Mantid

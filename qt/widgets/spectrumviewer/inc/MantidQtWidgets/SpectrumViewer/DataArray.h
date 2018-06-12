@@ -124,8 +124,8 @@ private:
   std::vector<float> m_data;
 };
 
-typedef boost::shared_ptr<DataArray> DataArray_sptr;
-typedef boost::shared_ptr<const DataArray> DataArray_const_sptr;
+using DataArray_sptr = boost::shared_ptr<DataArray>;
+using DataArray_const_sptr = boost::shared_ptr<const DataArray>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

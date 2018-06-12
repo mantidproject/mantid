@@ -4,8 +4,8 @@ and that mantid can be imported
 """
 import stresstesting
 
+from mantid.api import MatrixWorkspace # mantid must be imported first to set the script paths correctly
 from vesuvio.loading import VesuvioLoadHelper, VesuvioTOFFitInput
-from mantid.api import MatrixWorkspace
 
 
 class LoadSingleRunSingleSpectrumTest(stresstesting.MantidStressTest):

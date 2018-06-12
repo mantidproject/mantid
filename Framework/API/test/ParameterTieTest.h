@@ -179,25 +179,25 @@ public:
     TS_ASSERT_EQUALS(tie1.asString(mf2.get()), "f0.sig=sin(f0.sig)+f1.cen/2");
 
     ParameterTie tie2(&mfun, "f1.f0.sig", "123.4");
-    TS_ASSERT_EQUALS(tie2.asString(mf1.get()), "");
+    TS_ASSERT_THROWS(tie2.asString(mf1.get()), std::logic_error);
     TS_ASSERT_EQUALS(tie2.asString(&mfun), "f1.f0.sig=123.4");
     TS_ASSERT_EQUALS(tie2.asString(mf2.get()), "f0.sig=123.4");
     TS_ASSERT_EQUALS(tie2.asString(g1.get()), "sig=123.4");
 
     ParameterTie tie3(g1.get(), "sig", "123.4");
-    TS_ASSERT_EQUALS(tie3.asString(mf1.get()), "");
+    TS_ASSERT_THROWS(tie3.asString(mf1.get()), std::logic_error);
     TS_ASSERT_EQUALS(tie3.asString(&mfun), "f1.f0.sig=123.4");
     TS_ASSERT_EQUALS(tie3.asString(mf2.get()), "f0.sig=123.4");
     TS_ASSERT_EQUALS(tie3.asString(g1.get()), "sig=123.4");
 
     ParameterTie tie4(mf2.get(), "f0.sig", "123.4");
-    TS_ASSERT_EQUALS(tie4.asString(mf1.get()), "");
+    TS_ASSERT_THROWS(tie4.asString(mf1.get()), std::logic_error);
     TS_ASSERT_EQUALS(tie4.asString(&mfun), "f1.f0.sig=123.4");
     TS_ASSERT_EQUALS(tie4.asString(mf2.get()), "f0.sig=123.4");
     TS_ASSERT_EQUALS(tie4.asString(g1.get()), "sig=123.4");
 
     ParameterTie tie5(nth.get(), "a", "cos(B1e2Ta_)-sin(alpha12)");
-    TS_ASSERT_EQUALS(tie5.asString(mf1.get()), "");
+    TS_ASSERT_THROWS(tie5.asString(mf1.get()), std::logic_error);
     TS_ASSERT_EQUALS(tie5.asString(&mfun),
                      "f1.f2.a=cos(f1.f2.B1e2Ta_)-sin(f1.f2.alpha12)");
     TS_ASSERT_EQUALS(tie5.asString(mf2.get()),

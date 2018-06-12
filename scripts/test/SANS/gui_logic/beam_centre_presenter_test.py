@@ -53,20 +53,11 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter.on_update_rows()
         self.assertTrue(self.view.set_options.call_count == 2)
 
-    def test_that_set_scaling_is_called_on_update_rows_when_file_information_exists(self):
+    def test_that_set_scaling_is_called_on_update_instrument(self):
         self.presenter.set_view(self.view)
 
-        self.presenter.on_update_rows()
+        self.presenter.on_update_instrument(SANSInstrument.LARMOR)
         self.presenter._beam_centre_model.set_scaling.assert_called_once_with(SANSInstrument.LARMOR)
-
-    def test_that_set_scaling_is_not_called_when_file_information_does_not_exist(self):
-        self.parent_presenter._file_information = None
-        self.presenter = BeamCentrePresenter(self.parent_presenter, self.WorkHandler, self.BeamCentreModel,
-                                             self.SANSCentreFinder)
-        self.presenter.set_view(self.view)
-
-        self.presenter.on_update_rows()
-        self.presenter._beam_centre_model.set_scaling.assert_not_called()
 
     def test_that_on_processing_finished_updates_view_and_model(self):
         self.presenter.set_view(self.view)

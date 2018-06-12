@@ -22,12 +22,11 @@
 #include "MantidIndexing/IndexInfo.h"
 
 #include <boost/function.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <functional>
+#include <random>
 
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
@@ -318,7 +317,7 @@ void LoadEventNexus::setTopEntryName() {
     m_top_entry_name = nxentryProperty;
     return;
   }
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   try {
     string_map_t::const_iterator it;
     // assume we're at the top, otherwise: m_file->openPath("/");
@@ -1143,7 +1142,7 @@ bool LoadEventNexus::hasEventMonitors() {
   try {
     m_file->openPath("/" + m_top_entry_name);
     // Start with the base entry
-    typedef std::map<std::string, std::string> string_map_t;
+    using string_map_t = std::map<std::string, std::string>;
     // Now we want to go through and find the monitors
     string_map_t entries = m_file->getEntries();
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
@@ -1418,7 +1417,7 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
   m_file->openPath("/");
   m_file->openGroup(entry_name, "NXentry");
 
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = m_file->getEntries();
 
   if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
@@ -1551,7 +1550,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
   }
 
   // random number generator
-  boost::mt19937 rand_gen;
+  std::mt19937 rng;
 
   // loop over spectra
   for (size_t wi = start_wi; wi < end_wi; ++wi) {
@@ -1581,10 +1580,10 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
       if (m > 0) { // m events in this bin
         double left = double(tof[i - 1]);
         // spread the events uniformly inside the bin
-        boost::uniform_real<> distribution(left, right);
+        std::uniform_real_distribution<double> flat(left, right);
         std::vector<double> random_numbers(m);
         for (double &random_number : random_numbers) {
-          random_number = distribution(rand_gen);
+          random_number = flat(rng);
         }
         std::sort(random_numbers.begin(), random_numbers.end());
         auto it = random_numbers.begin();

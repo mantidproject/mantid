@@ -90,15 +90,24 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   const double height(0.05), innerRadius(0.0046), outerRadius(0.005);
   const V3D centre(0, 0, -0.5 * height), upAxis(0, 0, 1);
   // Container
-  auto can = boost::make_shared<Container>(ShapeFactory().createShape(
-      annulusXML(innerRadius, outerRadius, height, upAxis)));
-  can->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+  auto canShape = ShapeFactory().createShape(
+      annulusXML(innerRadius, outerRadius, height, upAxis));
+  // CSG Object assumed
+  if (auto csgObj =
+          boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(canShape)) {
+    csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+  }
+  auto can = boost::make_shared<Container>(canShape);
   auto environment =
       Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");
-  sampleCell->setMaterial(Material("Si", getNeutronAtom(14), 0.15));
+  // CSG Object assumed
+  if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(
+          sampleCell)) {
+    csgObj->setMaterial(Material("Si", getNeutronAtom(14), 0.15));
+  }
 
   // Sample object
   Sample testSample;
@@ -130,7 +139,11 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
     } else {
       throw std::invalid_argument("Unknown testing shape type requested");
     }
-    shape->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+    // CSG Object assumed
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
+      csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
+    }
     testSample.setShape(shape);
   }
   return testSample;

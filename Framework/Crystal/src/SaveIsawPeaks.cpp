@@ -62,8 +62,8 @@ void SaveIsawPeaks::exec() {
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  typedef std::map<int, std::vector<size_t>> bankMap_t;
-  typedef std::map<int, bankMap_t> runMap_t;
+  using bankMap_t = std::map<int, std::vector<size_t>>;
+  using runMap_t = std::map<int, bankMap_t>;
   std::set<int, std::less<int>> uniqueBanks;
   if (!inst)
     throw std::runtime_error(
@@ -259,13 +259,14 @@ void SaveIsawPeaks::exec() {
     qSign = 1.0;
   // ============================== Save all Peaks
   // =========================================
-  // Sequence number
-  int seqNum = 1;
 
   // Go in order of run numbers
+  int maxPeakNumb = 0;
+  int appendPeakNumb = 0;
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
+    appendPeakNumb += maxPeakNumb;
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 
@@ -310,7 +311,8 @@ void SaveIsawPeaks::exec() {
           Peak &p = peaks[wi];
 
           // Sequence (run) number
-          out << "3" << std::setw(7) << seqNum;
+          maxPeakNumb = std::max(maxPeakNumb, p.getPeakNumber());
+          out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
 
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
@@ -383,8 +385,6 @@ void SaveIsawPeaks::exec() {
               }
             }
           }
-          // Count the sequence
-          seqNum++;
         }
       }
     }

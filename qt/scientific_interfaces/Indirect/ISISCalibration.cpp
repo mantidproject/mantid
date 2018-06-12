@@ -1,16 +1,27 @@
 #include "ISISCalibration.h"
 
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/WorkspaceGroup.h"
-
+#include <QDebug>
 #include <QFileInfo>
+#include <stdexcept>
 
 using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISCalibration");
+
+template <typename Map, typename Key, typename Value>
+Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
+  try {
+    return map.at(key);
+  } catch (std::out_of_range &) {
+    return defaultValue;
+  }
 }
+
+} // namespace
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
@@ -166,125 +177,126 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
  */
 ISISCalibration::~ISISCalibration() {}
 
+std::pair<double, double> ISISCalibration::peakRange() const {
+  return std::make_pair(m_dblManager->value(m_properties["CalPeakMin"]),
+                        m_dblManager->value(m_properties["CalPeakMax"]));
+}
+
+std::pair<double, double> ISISCalibration::backgroundRange() const {
+  return std::make_pair(m_dblManager->value(m_properties["CalBackMin"]),
+                        m_dblManager->value(m_properties["CalBackMax"]));
+}
+
+std::pair<double, double> ISISCalibration::resolutionRange() const {
+  return std::make_pair(m_dblManager->value(m_properties["ResStart"]),
+                        m_dblManager->value(m_properties["ResEnd"]));
+}
+
+QString ISISCalibration::peakRangeString() const {
+  return m_properties["CalPeakMin"]->valueText() + "," +
+         m_properties["CalPeakMax"]->valueText();
+}
+
+QString ISISCalibration::backgroundRangeString() const {
+  return m_properties["CalBackMin"]->valueText() + "," +
+         m_properties["CalBackMax"]->valueText();
+}
+
+QString ISISCalibration::instrumentDetectorRangeString() const {
+  const auto details = getInstrumentDetails();
+  return details["spectra-min"] + "," + details["spectra-max"];
+}
+
+QString ISISCalibration::outputWorkspaceName() const {
+  const auto configuration = getInstrumentConfiguration();
+  auto name = QFileInfo(m_uiForm.leRunNo->getFirstFilename()).baseName();
+
+  if (m_uiForm.leRunNo->getFilenames().size() > 1)
+    name += "_multi";
+
+  return name + QString::fromStdString("_") + configuration->getAnalyserName() +
+         configuration->getReflectionName();
+}
+
+QString ISISCalibration::resolutionDetectorRangeString() const {
+  return QString::number(m_dblManager->value(m_properties["ResSpecMin"])) +
+         "," + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
+}
+
+QString ISISCalibration::rebinString() const {
+  return QString::number(m_dblManager->value(m_properties["ResELow"])) + "," +
+         QString::number(m_dblManager->value(m_properties["ResEWidth"])) + "," +
+         QString::number(m_dblManager->value(m_properties["ResEHigh"]));
+}
+
+QString ISISCalibration::backgroundString() const {
+  return QString::number(m_dblManager->value(m_properties["ResStart"])) + "," +
+         QString::number(m_dblManager->value(m_properties["ResEnd"]));
+}
+
+void ISISCalibration::setPeakRange(const double &minimumTof,
+                                   const double &maximumTof) {
+  auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
+  setRangeSelector(calibrationPeak, m_properties["CalPeakMin"],
+                   m_properties["CalPeakMax"],
+                   qMakePair(minimumTof, maximumTof));
+}
+
+void ISISCalibration::setBackgroundRange(const double &minimumTof,
+                                         const double &maximumTof) {
+  auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
+  setRangeSelector(background, m_properties["CalBackMin"],
+                   m_properties["CalBackMax"],
+                   qMakePair(minimumTof, maximumTof));
+}
+
+void ISISCalibration::setRangeLimits(
+    MantidWidgets::RangeSelector *rangeSelector, const double &minimum,
+    const double &maximum, const QString &minPropertyName,
+    const QString &maxPropertyName) {
+  setPlotPropertyRange(rangeSelector, m_properties[minPropertyName],
+                       m_properties[maxPropertyName],
+                       qMakePair(minimum, maximum));
+}
+
+void ISISCalibration::setPeakRangeLimits(const double &peakMin,
+                                         const double &peakMax) {
+  auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
+  setRangeLimits(calibrationPeak, peakMin, peakMax, "CalELow", "CalEHigh");
+}
+
+void ISISCalibration::setBackgroundRangeLimits(const double &backgroundMin,
+                                               const double &backgroundMax) {
+  auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
+  setRangeLimits(background, backgroundMin, backgroundMax, "CalStart",
+                 "CalEnd");
+}
+
+void ISISCalibration::setResolutionSpectraRange(const double &minimum,
+                                                const double &maximum) {
+  m_dblManager->setValue(m_properties["ResSpecMin"], minimum);
+  m_dblManager->setValue(m_properties["ResSpecMax"], maximum);
+}
+
 void ISISCalibration::setup() {}
 
 void ISISCalibration::run() {
   // Get properties
-  QStringList filenameList = m_uiForm.leRunNo->getFilenames();
-  QString filenames = filenameList.join(",");
-  QString rawFile = m_uiForm.leRunNo->getFirstFilename();
-  QFileInfo rawFileInfo(rawFile);
-  QString name = rawFileInfo.baseName();
+  const auto filenames = m_uiForm.leRunNo->getFilenames().join(",");
+  const auto outputWorkspaceNameStem = outputWorkspaceName().toLower();
 
-  auto instDetails = getInstrumentDetails();
-  QString instDetectorRange =
-      instDetails["spectra-min"] + "," + instDetails["spectra-max"];
-
-  QString peakRange = m_properties["CalPeakMin"]->valueText() + "," +
-                      m_properties["CalPeakMax"]->valueText();
-  QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," +
-                            m_properties["CalBackMax"]->valueText();
-
-  QString outputWorkspaceNameStem =
-      name + QString::fromStdString("_") +
-      getInstrumentConfiguration()->getAnalyserName() +
-      getInstrumentConfiguration()->getReflectionName();
-
-  outputWorkspaceNameStem = outputWorkspaceNameStem.toLower();
-
-  m_outputCalibrationName = outputWorkspaceNameStem;
-  if (filenameList.size() > 1)
-    m_outputCalibrationName += "_multi";
-  m_outputCalibrationName += "_calib";
-
-  bool loadLog = m_uiForm.ckLoadLogFiles->isChecked();
-  // Configure the calibration algorithm
-  IAlgorithm_sptr calibrationAlg =
-      AlgorithmManager::Instance().create("IndirectCalibration");
-  calibrationAlg->initialize();
-
-  calibrationAlg->setProperty("InputFiles", filenames.toStdString());
-  calibrationAlg->setProperty("OutputWorkspace",
-                              m_outputCalibrationName.toStdString());
-  calibrationAlg->setProperty("DetectorRange", instDetectorRange.toStdString());
-  calibrationAlg->setProperty("PeakRange", peakRange.toStdString());
-  calibrationAlg->setProperty("BackgroundRange", backgroundRange.toStdString());
-  calibrationAlg->setProperty("LoadLogFiles", loadLog);
-
-  if (m_uiForm.ckScale->isChecked()) {
-    double scale = m_uiForm.spScale->value();
-    calibrationAlg->setProperty("ScaleFactor", scale);
-  }
-  m_batchAlgoRunner->addAlgorithm(calibrationAlg);
+  m_outputCalibrationName = outputWorkspaceNameStem + "_calib";
+  m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
 
   // Initially take the calibration workspace as the result
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
-    m_outputResolutionName = outputWorkspaceNameStem;
-    if (filenameList.size() > 1)
-      m_outputResolutionName += "_multi";
-    m_outputResolutionName += "_res";
+    m_outputResolutionName = outputWorkspaceNameStem + "_res";
+    m_batchAlgoRunner->addAlgorithm(resolutionAlgorithm(filenames));
 
-    QString resDetectorRange =
-        QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + "," +
-        QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
-
-    QString rebinString =
-        QString::number(m_dblManager->value(m_properties["ResELow"])) + "," +
-        QString::number(m_dblManager->value(m_properties["ResEWidth"])) + "," +
-        QString::number(m_dblManager->value(m_properties["ResEHigh"]));
-
-    QString background =
-        QString::number(m_dblManager->value(m_properties["ResStart"])) + "," +
-        QString::number(m_dblManager->value(m_properties["ResEnd"]));
-
-    bool smooth = m_uiForm.ckSmoothResolution->isChecked();
-
-    IAlgorithm_sptr resAlg =
-        AlgorithmManager::Instance().create("IndirectResolution", -1);
-    resAlg->initialize();
-
-    resAlg->setProperty("InputFiles", filenames.toStdString());
-    resAlg->setProperty(
-        "Instrument",
-        getInstrumentConfiguration()->getInstrumentName().toStdString());
-    resAlg->setProperty(
-        "Analyser",
-        getInstrumentConfiguration()->getAnalyserName().toStdString());
-    resAlg->setProperty(
-        "Reflection",
-        getInstrumentConfiguration()->getReflectionName().toStdString());
-    resAlg->setProperty("RebinParam", rebinString.toStdString());
-    resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
-    resAlg->setProperty("BackgroundRange", background.toStdString());
-    resAlg->setProperty("LoadLogFiles", loadLog);
-
-    if (m_uiForm.ckResolutionScale->isChecked())
-      resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
-
-    if (smooth)
-      resAlg->setProperty("OutputWorkspace",
-                          m_outputResolutionName.toStdString() + "_pre_smooth");
-    else
-      resAlg->setProperty("OutputWorkspace",
-                          m_outputResolutionName.toStdString());
-
-    m_batchAlgoRunner->addAlgorithm(resAlg);
-
-    if (smooth) {
-      IAlgorithm_sptr smoothAlg =
-          AlgorithmManager::Instance().create("WienerSmooth");
-      smoothAlg->initialize();
-      smoothAlg->setProperty("OutputWorkspace",
-                             m_outputResolutionName.toStdString());
-
-      BatchAlgorithmRunner::AlgorithmRuntimeProps smoothAlgInputProps;
-      smoothAlgInputProps["InputWorkspace"] =
-          m_outputResolutionName.toStdString() + "_pre_smooth";
-
-      m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
-    }
+    if (m_uiForm.ckSmoothResolution->isChecked())
+      addRuntimeSmoothing(m_outputResolutionName);
 
     // When creating resolution file take the resolution workspace as the result
     m_pythonExportWsName = m_outputResolutionName.toStdString();
@@ -299,11 +311,10 @@ void ISISCalibration::run() {
  * @param error If the algorithms failed.
  */
 void ISISCalibration::algorithmComplete(bool error) {
-  if (error)
-    return;
-
-  m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
+  if (!error) {
+    m_uiForm.pbSave->setEnabled(true);
+    m_uiForm.pbPlot->setEnabled(true);
+  }
 }
 
 bool ISISCalibration::validate() {
@@ -311,22 +322,14 @@ bool ISISCalibration::validate() {
 
   uiv.checkMWRunFilesIsValid("Run", m_uiForm.leRunNo);
 
-  auto peakRange =
-      std::make_pair(m_dblManager->value(m_properties["CalPeakMin"]),
-                     m_dblManager->value(m_properties["CalPeakMax"]));
-  auto backRange =
-      std::make_pair(m_dblManager->value(m_properties["CalBackMin"]),
-                     m_dblManager->value(m_properties["CalBackMax"]));
-
-  uiv.checkValidRange("Peak Range", peakRange);
-  uiv.checkValidRange("Back Range", backRange);
-  uiv.checkRangesDontOverlap(peakRange, backRange);
+  auto rangeOfPeak = peakRange();
+  auto rangeOfBackground = backgroundRange();
+  uiv.checkValidRange("Peak Range", rangeOfPeak);
+  uiv.checkValidRange("Back Range", rangeOfBackground);
+  uiv.checkRangesDontOverlap(rangeOfPeak, rangeOfBackground);
 
   if (m_uiForm.ckCreateResolution->isChecked()) {
-    auto backgroundRange =
-        std::make_pair(m_dblManager->value(m_properties["ResStart"]),
-                       m_dblManager->value(m_properties["ResEnd"]));
-    uiv.checkValidRange("Background", backgroundRange);
+    uiv.checkValidRange("Background", resolutionRange());
 
     double eLow = m_dblManager->value(m_properties["ResELow"]);
     double eHigh = m_dblManager->value(m_properties["ResEHigh"]);
@@ -348,32 +351,29 @@ bool ISISCalibration::validate() {
  */
 void ISISCalibration::setDefaultInstDetails() {
   // Get spectra, peak and background details
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+  const auto instDetails = getInstrumentDetails();
 
   // Set the search instrument for runs
   m_uiForm.leRunNo->setInstrumentOverride(instDetails["instrument"]);
 
   // Set spectra range
-  m_dblManager->setValue(m_properties["ResSpecMin"],
-                         instDetails["spectra-min"].toDouble());
-  m_dblManager->setValue(m_properties["ResSpecMax"],
-                         instDetails["spectra-max"].toDouble());
+  setResolutionSpectraRange(instDetails["spectra-min"].toDouble(),
+                            instDetails["spectra-max"].toDouble());
 
   // Set peak and background ranges
-  std::map<std::string, double> ranges = getRangesFromInstrument();
+  const auto ranges = getRangesFromInstrument();
+  setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0),
+               getValueOr(ranges, "peak-end-tof", 0.0));
+  setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0),
+                     getValueOr(ranges, "back-end-tof", 0.0));
 
-  QPair<double, double> peakRange(ranges["peak-start-tof"],
-                                  ranges["peak-end-tof"]);
-  QPair<double, double> backgroundRange(ranges["back-start-tof"],
-                                        ranges["back-end-tof"]);
-
-  auto calPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
-  auto calBackground =
-      m_uiForm.ppCalibration->getRangeSelector("CalBackground");
-  setRangeSelector(calPeak, m_properties["CalPeakMin"],
-                   m_properties["CalPeakMax"], peakRange);
-  setRangeSelector(calBackground, m_properties["CalBackMin"],
-                   m_properties["CalBackMax"], backgroundRange);
+  if (instDetails.contains("resolution") &&
+      !instDetails["resolution"].isEmpty()) {
+    m_uiForm.ckCreateResolution->setEnabled(true);
+  } else {
+    m_uiForm.ckCreateResolution->setChecked(false);
+    m_uiForm.ckCreateResolution->setEnabled(false);
+  }
 }
 
 /**
@@ -389,11 +389,6 @@ void ISISCalibration::calPlotRaw() {
 
   m_lastCalPlotFilename = filename;
 
-  if (filename.isEmpty()) {
-    emit showMessageBox("Cannot plot raw data without filename");
-    return;
-  }
-
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
 
@@ -408,23 +403,16 @@ void ISISCalibration::calPlotRaw() {
     return;
   }
 
-  MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  const auto input = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(wsname.toStdString()));
-
-  const auto &dataX = input->x(0);
-  QPair<double, double> range(dataX.front(), dataX.back());
 
   m_uiForm.ppCalibration->clear();
   m_uiForm.ppCalibration->addSpectrum("Raw", input, 0);
   m_uiForm.ppCalibration->resizeX();
 
-  auto calPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
-  auto calBackground =
-      m_uiForm.ppCalibration->getRangeSelector("CalBackground");
-  setPlotPropertyRange(calPeak, m_properties["CalELow"],
-                       m_properties["CalEHigh"], range);
-  setPlotPropertyRange(calBackground, m_properties["CalStart"],
-                       m_properties["CalEnd"], range);
+  const auto &dataX = input->x(0);
+  setPeakRangeLimits(dataX.front(), dataX.back());
+  setBackgroundRangeLimits(dataX.front(), dataX.back());
 
   setDefaultInstDetails();
 
@@ -438,37 +426,9 @@ void ISISCalibration::calPlotRaw() {
  * Replots the energy mini plot
  */
 void ISISCalibration::calPlotEnergy() {
-  if (!m_uiForm.leRunNo->isValid()) {
-    emit showMessageBox("Run number not valid.");
-    return;
-  }
 
-  QString files = m_uiForm.leRunNo->getFilenames().join(",");
-
-  QFileInfo fi(m_uiForm.leRunNo->getFirstFilename());
-
-  QString detRange =
-      QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + "," +
-      QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
-
-  IAlgorithm_sptr reductionAlg =
-      AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
-  reductionAlg->initialize();
-  reductionAlg->setProperty(
-      "Instrument",
-      getInstrumentConfiguration()->getInstrumentName().toStdString());
-  reductionAlg->setProperty(
-      "Analyser",
-      getInstrumentConfiguration()->getAnalyserName().toStdString());
-  reductionAlg->setProperty(
-      "Reflection",
-      getInstrumentConfiguration()->getReflectionName().toStdString());
-  reductionAlg->setProperty("InputFiles", files.toStdString());
-  reductionAlg->setProperty("OutputWorkspace",
-                            "__IndirectCalibration_reduction");
-  reductionAlg->setProperty("SpectraRange", detRange.toStdString());
-  reductionAlg->setProperty("LoadLogFiles",
-                            m_uiForm.ckLoadLogFiles->isChecked());
+  const auto files = m_uiForm.leRunNo->getFilenames().join(",");
+  auto reductionAlg = energyTransferReductionAlgorithm(files);
   reductionAlg->execute();
 
   if (!reductionAlg->isExecuted()) {
@@ -479,7 +439,7 @@ void ISISCalibration::calPlotEnergy() {
   WorkspaceGroup_sptr reductionOutputGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           "__IndirectCalibration_reduction");
-  if (reductionOutputGroup->size() == 0) {
+  if (reductionOutputGroup->isEmpty()) {
     g_log.warning("No result workspaces, cannot plot energy preview.");
     return;
   }
@@ -526,7 +486,7 @@ void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws) {
     auto params = comp->getNumberParameter("resolution", true);
 
     // Set the default instrument resolution
-    if (params.size() > 0) {
+    if (!params.empty()) {
       double res = params[0];
 
       const auto energyRange = m_uiForm.ppResolution->getCurveRange("Energy");
@@ -634,11 +594,11 @@ void ISISCalibration::calUpdateRS(QtProperty *prop, double val) {
 }
 
 /**
-* This function enables/disables the display of the options involved in creating
-*the RES file.
-*
-* @param state :: whether checkbox is checked or unchecked
-*/
+ * This function enables/disables the display of the options involved in
+ *creating the RES file.
+ *
+ * @param state :: whether checkbox is checked or unchecked
+ */
 void ISISCalibration::resCheck(bool state) {
   m_uiForm.ppResolution->getRangeSelector("ResPeak")->setVisible(state);
   m_uiForm.ppResolution->getRangeSelector("ResBackground")->setVisible(state);
@@ -702,7 +662,8 @@ void ISISCalibration::plotClicked() {
   plotTimeBin(m_outputCalibrationName);
   checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), true);
   QStringList plotWorkspaces;
-  if (m_uiForm.ckCreateResolution->isChecked()) {
+  if (m_uiForm.ckCreateResolution->isChecked() &&
+      !m_outputResolutionName.isEmpty()) {
     checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), true);
     plotWorkspaces.append(m_outputResolutionName);
     if (m_uiForm.ckSmoothResolution->isChecked())
@@ -710,5 +671,95 @@ void ISISCalibration::plotClicked() {
   }
   plotSpectrum(plotWorkspaces);
 }
+
+void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
+  auto smoothAlg = AlgorithmManager::Instance().create("WienerSmooth");
+  smoothAlg->initialize();
+  smoothAlg->setProperty("OutputWorkspace", workspaceName.toStdString());
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps smoothAlgInputProps;
+  smoothAlgInputProps["InputWorkspace"] =
+      workspaceName.toStdString() + "_pre_smooth";
+  m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
+}
+
+IAlgorithm_sptr
+ISISCalibration::calibrationAlgorithm(const QString &inputFiles) const {
+  auto calibrationAlg =
+      AlgorithmManager::Instance().create("IndirectCalibration");
+  calibrationAlg->initialize();
+  calibrationAlg->setProperty("InputFiles", inputFiles.toStdString());
+  calibrationAlg->setProperty("OutputWorkspace",
+                              m_outputCalibrationName.toStdString());
+  calibrationAlg->setProperty("DetectorRange",
+                              instrumentDetectorRangeString().toStdString());
+  calibrationAlg->setProperty("PeakRange", peakRangeString().toStdString());
+  calibrationAlg->setProperty("BackgroundRange",
+                              backgroundRangeString().toStdString());
+  calibrationAlg->setProperty("LoadLogFiles",
+                              m_uiForm.ckLoadLogFiles->isChecked());
+
+  if (m_uiForm.ckScale->isChecked())
+    calibrationAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
+  return calibrationAlg;
+}
+
+IAlgorithm_sptr
+ISISCalibration::resolutionAlgorithm(const QString &inputFiles) const {
+  auto resAlg = AlgorithmManager::Instance().create("IndirectResolution", -1);
+  resAlg->initialize();
+  resAlg->setProperty("InputFiles", inputFiles.toStdString());
+  resAlg->setProperty(
+      "Instrument",
+      getInstrumentConfiguration()->getInstrumentName().toStdString());
+  resAlg->setProperty(
+      "Analyser",
+      getInstrumentConfiguration()->getAnalyserName().toStdString());
+  resAlg->setProperty(
+      "Reflection",
+      getInstrumentConfiguration()->getReflectionName().toStdString());
+  resAlg->setProperty("RebinParam", rebinString().toStdString());
+  resAlg->setProperty("DetectorRange",
+                      resolutionDetectorRangeString().toStdString());
+  resAlg->setProperty("BackgroundRange", backgroundString().toStdString());
+  resAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
+
+  if (m_uiForm.ckResolutionScale->isChecked())
+    resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
+
+  if (m_uiForm.ckSmoothResolution->isChecked())
+    resAlg->setProperty("OutputWorkspace",
+                        m_outputResolutionName.toStdString() + "_pre_smooth");
+  else
+    resAlg->setProperty("OutputWorkspace",
+                        m_outputResolutionName.toStdString());
+  return resAlg;
+}
+
+IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(
+    const QString &inputFiles) const {
+  IAlgorithm_sptr reductionAlg =
+      AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+  reductionAlg->initialize();
+  reductionAlg->setProperty(
+      "Instrument",
+      getInstrumentConfiguration()->getInstrumentName().toStdString());
+  reductionAlg->setProperty(
+      "Analyser",
+      getInstrumentConfiguration()->getAnalyserName().toStdString());
+  reductionAlg->setProperty(
+      "Reflection",
+      getInstrumentConfiguration()->getReflectionName().toStdString());
+  reductionAlg->setProperty("InputFiles", inputFiles.toStdString());
+  reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
+  reductionAlg->setProperty("OutputWorkspace",
+                            "__IndirectCalibration_reduction");
+  reductionAlg->setProperty("SpectraRange",
+                            resolutionDetectorRangeString().toStdString());
+  reductionAlg->setProperty("LoadLogFiles",
+                            m_uiForm.ckLoadLogFiles->isChecked());
+  return reductionAlg;
+}
+
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

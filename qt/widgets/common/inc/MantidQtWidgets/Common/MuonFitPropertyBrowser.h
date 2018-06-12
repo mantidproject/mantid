@@ -87,6 +87,8 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
+  /// returns true if the browser is set to multi fitting mode
+  bool isMultiFittingMode() const override;
 
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
@@ -118,6 +120,7 @@ public:
   void setChosenPeriods(const QString &period);
   void setSingleFitLabel(std::string name);
   void setNormalization(const std::string name);
+  void checkFitEnabled();
 public slots:
   /// Perform the fit algorithm
   void fit() override;
@@ -130,6 +133,8 @@ public slots:
   void generateBtnPressed();
   void combineBtnPressed();
   void setNumPeriods(size_t numPeriods);
+  void addPeriodCheckboxToMap(const QString &name);
+  void updatePeriods();
 
 signals:
   /// Emitted when sequential fit is requested by user
@@ -193,6 +198,8 @@ private:
   void setChosenPeriods(const QStringList &chosenPeriods);
   void clearPeriodCheckboxes();
   void addPeriodCheckbox(const QString &name);
+  void updatePeriods(const int j);
+  bool isPeriodValid(const QString &name);
 
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
@@ -230,6 +237,11 @@ private:
   QDialog *m_comboWindow;
 
   std::vector<std::string> m_groupsList;
+
+  // stores if this is in multi fitting mode
+  bool m_isMultiFittingMode;
+
+  QString m_autoBackground;
 };
 
 std::map<std::string, double> readMultipleNormalization();

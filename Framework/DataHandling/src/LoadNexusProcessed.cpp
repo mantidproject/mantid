@@ -55,7 +55,7 @@ using Mantid::Types::Event::TofEvent;
 namespace {
 
 // Helper typedef
-typedef boost::shared_array<int> IntArray_shared;
+using IntArray_shared = boost::shared_array<int>;
 
 // Struct to contain spectrum information.
 struct SpectraInfo {
@@ -83,7 +83,7 @@ struct SpectraInfo {
 };
 
 // Helper typdef.
-typedef boost::optional<SpectraInfo> SpectraInfo_optional;
+using SpectraInfo_optional = boost::optional<SpectraInfo>;
 
 /**
 * Extract ALL the detector, spectrum number and workspace index mapping
@@ -1154,6 +1154,14 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         int ival = nxInt[r];
         if (ival != -1)
           peakWS->getPeak(r).setRunNumber(ival);
+      }
+    } else if (str == "column_17") {
+      NXInt nxInt = nx_tw.openNXInt(str);
+      nxInt.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        peakWS->getPeak(r).setPeakNumber(ival);
       }
     } else if (str == "column_15") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);

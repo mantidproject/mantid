@@ -29,7 +29,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                        flags['ip_file'], flags.get('bin_parameters', None),
                                        _extract_bool_from_flags('load_log_files', flags))
     vesuvio_input = VesuvioTOFFitInput(runs, flags.get('container_runs', None),
-                                       flags['spectra'], vesuvio_loader)
+                                       flags.get('spectra', None), vesuvio_loader)
 
     if flags.get('ms_enabled', True):
         hydrogen_constraints = flags['ms_flags'].pop("HydrogenConstraints", None)
@@ -710,7 +710,7 @@ def _create_mass_profile(material_builder, mass_input):
     mass_value = _extract_mass_value(material_builder, mass_input)
     symbol = mass_input.pop('symbol', None)
     mass_function = _extract_mass_function(mass_input)
-    width = _extract_mass_width(mass_input)
+    width = mass_input.pop('width', None)
     return MassProfile(symbol, mass_value, mass_function, width, **mass_input)
 
 
@@ -721,15 +721,6 @@ def _extract_mass_function(mass_input):
         raise RuntimeError('Invalid mass specified - ' + str(mass_input)
                            + " - no function was given.")
     return mass_function
-
-
-def _extract_mass_width(mass_input):
-    mass_width = mass_input.pop('width', None)
-
-    if mass_width is None:
-        raise RuntimeError('Invalid mass specified - ' + str(mass_input)
-                           + " - no width was given.")
-    return mass_width
 
 
 def _extract_mass_value(material_builder, mass_input):
@@ -783,7 +774,8 @@ def _create_background_str(background_flags):
 
 
 def _create_function_str(function, **parameters):
-    parameter_string = ",".join(["{0}={1}".format(key, value) for key, value in parameters.items()])
+    parameter_string = ",".join(["{0}={1}".format(key, value) for key, value in parameters.items()
+                                 if value is not None])
     return "function=" + function + "," + parameter_string
 
 

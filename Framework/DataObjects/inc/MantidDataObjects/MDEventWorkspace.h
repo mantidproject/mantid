@@ -35,9 +35,9 @@ class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
 
 public:
   /// Typedef for a shared pointer of this kind of event workspace
-  typedef boost::shared_ptr<MDEventWorkspace<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDEventWorkspace<MDE, nd>>;
   /// Typedef to access the MDEventType.
-  typedef MDE MDEventType;
+  using MDEventType = MDE;
 
   MDEventWorkspace(Mantid::API::MDNormalization preferredNormalization =
                        Mantid::API::MDNormalization::VolumeNormalization,
@@ -73,7 +73,7 @@ public:
   uint64_t getNEvents() const override { return getNPoints(); }
 
   /// Creates a new iterator pointing to the first cell (box) in the workspace
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 

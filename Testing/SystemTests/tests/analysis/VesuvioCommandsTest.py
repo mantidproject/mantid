@@ -3,7 +3,6 @@
 and that mantid can be imported
 """
 import stresstesting
-import platform
 import numpy as np
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
@@ -13,20 +12,6 @@ from vesuvio.instrument import *
 
 
 # =====================================Helper Function=================================
-
-def _is_old_boost_version():
-    # It appears that a difference in boost version is causing different
-    # random number generation. As such an OS check is used.
-    # Older boost (earlier than 56): Ubuntu 14.04, RHEL7
-    dist = platform.linux_distribution()
-    if any(dist):
-        if 'Red Hat' in dist[0] and dist[1].startswith('7'):
-            return True
-        if dist[0] == 'Ubuntu' and dist[1] == '14.04':
-            return True
-
-    return False
-
 
 def _make_names_unique(names):
     name_count = dict()
@@ -95,7 +80,8 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
-    self.assertTrue(abs_difference <= abs(tolerance_value))
+    self.assertTrue(abs_difference <= abs(tolerance_value),
+                    msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected, actual, tolerance))
 
 
 def _get_peak_height_and_index(workspace, ws_index):
@@ -195,12 +181,10 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.013011414483
-        index_one_last = 0.00720741862173
-        index_two_first = 1.12713408816e-05
-        index_two_last = 6.90222280789e-05
-        if _is_old_boost_version():
-            index_one_first = 0.000631295911554
+        index_one_first = 0.000602
+        index_one_last = 0.007207
+        index_two_first = 1.127134e-05
+        index_two_last = 6.902223e-05
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
@@ -212,7 +196,8 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertEqual(14, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(1, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -275,12 +260,10 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.00553133541138
-        index_one_last = 0.00722053823154
-        calc_data_height_expected = 0.13302098172
+        index_one_first = 0.000602
+        index_one_last = 0.007221
+        calc_data_height_expected = 0.133021
         calc_data_bin_expected = 635
-        if _is_old_boost_version():
-            index_one_first = 0.000605572768745
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
@@ -294,7 +277,8 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertEqual(18, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(1, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -342,7 +326,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(8, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -390,7 +375,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(2, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -436,7 +422,8 @@ class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
         _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(2, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -486,7 +473,8 @@ class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
         _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, list))
+        self.assertTrue(isinstance(chisq_values, np.ndarray),
+                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(8, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -494,5 +482,5 @@ class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
 
         functions = ['GramCharlierComptonProfile', 'GaussianComptonProfile',
                      'GaussianComptonProfile', 'GaussianComptonProfile']
-        _test_caad_workspace(self, '15039-15045_normalised_iteration_' + str(exit_iteration), functions)
-        _test_caad_workspace(self, '15039-15045_sum_iteration_' + str(exit_iteration), functions)
+        _test_caad_workspace(self, '15039-15045_CAAD_normalised_iteration_' + str(exit_iteration), functions)
+        _test_caad_workspace(self, '15039-15045_CAAD_sum_iteration_' + str(exit_iteration), functions)

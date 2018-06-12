@@ -153,7 +153,7 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 
     if (inputWs && previewWs->getName() == inputWs->getName()) {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                                m_selectedSpectrum);
+                                static_cast<int>(m_selectedSpectrum));
     } else {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
@@ -162,7 +162,7 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
              boost::numeric_cast<size_t>(m_selectedSpectrum) <
                  inputWs->getNumberHistograms()) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
-                              m_selectedSpectrum);
+                              static_cast<int>(m_selectedSpectrum));
   }
 }
 
@@ -325,7 +325,7 @@ void IndirectDataAnalysisTab::updatePlot(
     setPreviewPlotWorkspace(outputWS);
     fitPreviewPlot->addSpectrum("Sample", outputWS, 0, Qt::black);
     fitPreviewPlot->addSpectrum("Fit", outputWS, 1, Qt::red);
-    diffPreviewPlot->addSpectrum("Diff", outputWS, 2, Qt::blue);
+    diffPreviewPlot->addSpectrum("Difference", outputWS, 2, Qt::blue);
   } else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }

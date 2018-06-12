@@ -14,7 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Typedef for width vector
-typedef std::vector<double> WidthVector;
+using WidthVector = std::vector<double>;
 
 class SmoothMDTest : public CxxTest::TestSuite {
 public:

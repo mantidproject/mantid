@@ -32,8 +32,8 @@
 //----------------------------------------------------------------------
 //	Basic types.
 //----------------------------------------------------------------------
-typedef void *PQinfo;  // info field is generic pointer
-typedef ANNdist PQkey; // key field is distance
+using PQinfo = void *; // info field is generic pointer
+using PQkey = ANNdist; // key field is distance
 
 //----------------------------------------------------------------------
 //	Priority queue

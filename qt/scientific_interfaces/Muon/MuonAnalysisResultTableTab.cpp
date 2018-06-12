@@ -305,11 +305,22 @@ MuonAnalysisResultTableTab::getMultipleFitWorkspaces(const QString &label,
 
   QStringList workspaces;
 
-  for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
-    if (!isFittedWs(*it))
-      continue; // Doesn't pass basic checks
+  for (auto subGroup = wsNames.begin(); subGroup != wsNames.end(); subGroup++) {
+    auto wsGroup = ads.retrieveWS<WorkspaceGroup>(*subGroup);
+    if (sequential) {
+      std::vector<std::string> tmpNames = wsGroup->getNames();
+      for (auto it = tmpNames.begin(); it != tmpNames.end(); it++) {
+        if (!isFittedWs(*it))
+          continue; // Doesn't pass basic checks
 
-    workspaces << QString::fromStdString(wsBaseName(*it));
+        workspaces << QString::fromStdString(wsBaseName(*it));
+      }
+    } else {
+      if (!isFittedWs(*subGroup))
+        continue; // Doesn't pass basic checks
+
+      workspaces << QString::fromStdString(wsBaseName(*subGroup));
+    }
   }
 
   return workspaces;

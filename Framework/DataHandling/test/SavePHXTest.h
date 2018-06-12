@@ -139,8 +139,8 @@ public:
         sample_value[0] = (float)spTW->rowCount();
       } else {
         size_t ii = 0;
-        for (size_t i = 0; i < column_name.size(); i++) {
-          sample_value[ii] = (spTW->cell_cast<float>(ic - 1, column_name[i]));
+        for (const auto &i : column_name) {
+          sample_value[ii] = (spTW->cell_cast<float>(ic - 1, i));
           ii++;
           if (ii == 1)
             ii = 2; // scip second column in the file, which contains 0;

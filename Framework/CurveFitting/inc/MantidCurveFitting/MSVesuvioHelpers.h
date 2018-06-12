@@ -1,11 +1,9 @@
 #ifndef MANTID_CURVEFITTING_MSVESUVIOHELPERS_H
 #define MANTID_CURVEFITTING_MSVESUVIOHELPERS_H
 
+#include "MantidKernel/normal_distribution.h"
+#include <random>
 #include <vector>
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/uniform_real.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -18,21 +16,17 @@ double finalEnergyAuYap(const double randv);
 double finalEnergyUranium(const double randv);
 
 // Ties together random numbers with various probability distributions
-// @todo: Should move to Kernel
-class RandomNumberGenerator {
-  typedef boost::uniform_real<double> uniform_double;
-  typedef boost::normal_distribution<double> gaussian_double;
-
+class RandomVariateGenerator {
 public:
-  RandomNumberGenerator(const int seed);
+  RandomVariateGenerator(const int seed);
   /// Returns a flat random number between 0.0 & 1.0
   double flat();
   /// Returns a random number distributed  by a normal distribution
   double gaussian(const double mean, const double sigma);
 
 private:
-  RandomNumberGenerator();
-  boost::mt19937 m_generator;
+  RandomVariateGenerator();
+  std::mt19937 m_engine;
 };
 
 // Stores counts for each scatter order

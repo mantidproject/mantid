@@ -289,19 +289,25 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
 
   if (analyser.size() > 0) {
     auto comp = inst->getComponentByName(analyser[0]);
-    auto params = comp->getNumberParameter("resolution", true);
 
-    // set the default instrument resolution
-    if (params.size() > 0) {
-      double res = params[0];
-      m_dblManager->setValue(m_properties["IntegrationStart"], -res);
-      m_dblManager->setValue(m_properties["IntegrationEnd"], res);
+    if (comp) {
+      auto params = comp->getNumberParameter("resolution", true);
 
-      m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
-      m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
+      // set the default instrument resolution
+      if (!params.empty()) {
+        double res = params[0];
+        m_dblManager->setValue(m_properties["IntegrationStart"], -res);
+        m_dblManager->setValue(m_properties["IntegrationEnd"], res);
+
+        m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
+        m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
+      } else {
+        m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
+        m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
+      }
     } else {
-      m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
-      m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
+      showMessageBox("Warning: The instrument definition file for the input "
+                     "workspace contains an invalid value.");
     }
   }
 }

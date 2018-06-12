@@ -10,8 +10,8 @@ namespace Geometry {
 
 class IsotropicAtomBraggScatterer;
 
-typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
-    IsotropicAtomBraggScatterer_sptr;
+using IsotropicAtomBraggScatterer_sptr =
+    boost::shared_ptr<IsotropicAtomBraggScatterer>;
 
 /** @class IsotropicAtomBraggScatterer
 
@@ -121,8 +121,8 @@ protected:
   std::string m_label;
 };
 
-typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
-    IsotropicAtomBraggScatterer_sptr;
+using IsotropicAtomBraggScatterer_sptr =
+    boost::shared_ptr<IsotropicAtomBraggScatterer>;
 
 class MANTID_GEOMETRY_DLL IsotropicAtomBraggScattererParser {
 public:

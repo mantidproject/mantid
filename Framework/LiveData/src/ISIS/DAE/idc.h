@@ -25,12 +25,12 @@
 * holds information about the DAE connection - defined fully in idc.c
 */
 struct idc_info;
-typedef struct idc_info *idc_handle_t;
+using idc_handle_t = struct idc_info *;
 
 /**
  * prototype for error reporting function passed to IDCsetreportfunc()
  */
-typedef void (*idc_error_report_t)(int status, int code, const char *messsage);
+using idc_error_report_t = void (*)(int, int, const char *);
 
 #ifdef __cplusplus
 #include <cstdint>

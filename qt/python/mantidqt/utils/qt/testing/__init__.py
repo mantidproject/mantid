@@ -20,6 +20,7 @@
 from __future__ import absolute_import
 
 from inspect import isfunction, ismethod
+import gc
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
@@ -74,6 +75,7 @@ def _requires_qapp_impl(test_method):
             QAPP = QApplication([''])
         test_method(self)
         QAPP.closeAllWindows()
+        gc.collect()
 
     return _wrapper
 

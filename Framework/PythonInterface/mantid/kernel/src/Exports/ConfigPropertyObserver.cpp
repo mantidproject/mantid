@@ -7,7 +7,6 @@
 
 using namespace boost::python;
 using Mantid::Kernel::ConfigPropertyObserver;
-using Mantid::PythonInterface::Environment::GlobalInterpreterLock;
 using Mantid::PythonInterface::Environment::callMethod;
 
 class ConfigPropertyObserverWrapper : public ConfigPropertyObserver {

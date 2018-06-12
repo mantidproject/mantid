@@ -71,6 +71,7 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<size_t>>()),
       m_parentComponentIndices(boost::make_shared<std::vector<size_t>>(
           m_orderedDetectorIds->size(), 0)),
+      m_children(boost::make_shared<std::vector<std::vector<size_t>>>()),
       m_detectorRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
@@ -178,6 +179,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
+  m_children->emplace_back(std::move(children));
   return componentIndex;
 }
 
@@ -205,6 +207,37 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
+  // Generic components are not assemblies and do not therefore have children.
+  m_children->emplace_back(std::vector<size_t>());
+  return componentIndex;
+}
+
+/**
+* @brief InstrumentVisitor::registerInfiniteComponent
+* @param component : IComponent being visited
+* @return Component index of this component
+*/
+size_t InstrumentVisitor::registerInfiniteComponent(
+    const Mantid::Geometry::IComponent &component) {
+  /*
+  * For a generic leaf component we extend the component ids list, but
+  * the detector indexes entries will of course be empty
+  */
+  m_detectorRanges->emplace_back(
+      std::make_pair(0, 0)); // Represents an empty range
+                             // Record the ID -> index mapping
+  const size_t componentIndex = commonRegistration(component);
+  m_componentType->push_back(Beamline::ComponentType::Infinite);
+
+  const size_t componentStart = m_assemblySortedComponentIndices->size();
+  m_componentRanges->emplace_back(
+      std::make_pair(componentStart, componentStart + 1));
+  m_assemblySortedComponentIndices->push_back(componentIndex);
+  // Unless this is the root component this parent is not correct and will be
+  // updated later in the register call of the parent.
+  m_parentComponentIndices->push_back(componentIndex);
+  // Generic components are not assemblies and do not therefore have children.
+  m_children->emplace_back(std::vector<size_t>());
   return componentIndex;
 }
 
@@ -221,14 +254,38 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
+* Register a structured bank
+* @param bank : Rectangular Detector
+* @return index assigned
+*/
+size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
+  auto index = registerComponentAssembly(bank);
+  size_t rangesIndex = index - m_orderedDetectorIds->size();
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Rectangular;
+  return index;
+}
+
+/**
+* @brief InstrumentVisitor::registerInfiniteObjComponent
+* @param objComponent : IObjComponent being visited
+* @return Component index of this component
+*/
+size_t InstrumentVisitor::registerInfiniteObjComponent(
+    const IObjComponent &objComponent) {
+  auto index = registerInfiniteComponent(objComponent);
+  (*m_shapes)[index] = objComponent.shape();
+  return index;
+}
+
+/**
  * Register a structured bank
- * @param bank : Rectangular Detector
+ * @param bank : Structured Detector
  * @return index assigned
  */
 size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Rectangular;
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Structured;
   return index;
 }
 
@@ -335,8 +392,8 @@ InstrumentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
-      m_componentType, m_names, m_sourceIndex, m_sampleIndex);
+      m_parentComponentIndices, m_children, m_positions, m_rotations,
+      m_scaleFactors, m_componentType, m_names, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>

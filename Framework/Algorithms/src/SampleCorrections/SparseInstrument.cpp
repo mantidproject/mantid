@@ -286,8 +286,8 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
     }
     const auto e = modelWS.getEFixed(detIDs[0]);
     const auto &sparseDetIDs = ws->detectorInfo().detectorIDs();
-    for (size_t i = 0; i < sparseDetIDs.size(); ++i) {
-      ws->setEFixed(sparseDetIDs[i], e);
+    for (int sparseDetID : sparseDetIDs) {
+      ws->setEFixed(sparseDetID, e);
     }
   }
   return API::MatrixWorkspace_uptr(ws.release());

@@ -33,8 +33,8 @@ using namespace Mantid::CurveFitting::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
 
-typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
-typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
+using WS_type = Mantid::DataObjects::Workspace2D_sptr;
+using TWS_type = Mantid::DataObjects::TableWorkspace_sptr;
 
 struct Fun {
   double operator()(double, int i) { return double(i + 1); }
@@ -496,10 +496,10 @@ public:
     TS_ASSERT(fits->getNames().size() == 2);
 
     auto wsNames = fits->getNames();
-    for (size_t i = 0; i < wsNames.size(); ++i) {
+    for (const auto &wsName : wsNames) {
       auto fit =
           AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-              wsNames[i]);
+              wsName);
       TS_ASSERT(fit);
       TS_ASSERT(fit->getNumberHistograms() == 5);
     }

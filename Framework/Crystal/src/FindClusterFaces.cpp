@@ -20,9 +20,9 @@ using namespace Mantid::API;
 namespace {
 using namespace Mantid::Crystal;
 // Map of label ids to peak index in peaks workspace.
-typedef std::map<int, int> LabelMap;
+using LabelMap = std::map<int, int>;
 // Optional set of labels
-typedef boost::optional<LabelMap> OptionalLabelPeakIndexMap;
+using OptionalLabelPeakIndexMap = boost::optional<LabelMap>;
 
 /**
 * Create an optional label set for filtering.
@@ -72,8 +72,8 @@ struct ClusterFace {
   double radius;
 };
 
-typedef std::deque<ClusterFace> ClusterFaces;
-typedef std::vector<ClusterFaces> VecClusterFaces;
+using ClusterFaces = std::deque<ClusterFace>;
+using VecClusterFaces = std::vector<ClusterFaces>;
 
 /**
 Check that the data point signal value is an integer.
@@ -331,7 +331,7 @@ void FindClusterFaces::exec() {
   for (int it = 0; it < nIterators; ++it) {
     PARALLEL_START_INTERUPT_REGION
     ClusterFaces &localClusterFaces = clusterFaces[it];
-    auto mdIterator = mdIterators[it];
+    auto mdIterator = mdIterators[it].get();
 
     if (usingFiltering) {
       executeFiltered(mdIterator, localClusterFaces, progress, clusterImage,

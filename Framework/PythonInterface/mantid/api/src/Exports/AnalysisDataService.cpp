@@ -11,8 +11,8 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(AnalysisDataServiceImpl)
 
 void export_AnalysisDataService() {
-  typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>
-      ADSExporter;
+  using ADSExporter =
+      DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
   pythonClass.def("Instance", &AnalysisDataService::Instance,
                   return_value_policy<reference_existing_object>(),

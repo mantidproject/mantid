@@ -634,7 +634,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
   }
 
   // sort intersections by final momentum
-  typedef std::vector<Mantid::Kernel::VMD>::iterator IterType;
+  using IterType = std::vector<Mantid::Kernel::VMD>::iterator;
   std::stable_sort<IterType, bool (*)(const Mantid::Kernel::VMD &,
                                       const Mantid::Kernel::VMD &)>(
       intersections.begin(), intersections.end(), compareMomentum);

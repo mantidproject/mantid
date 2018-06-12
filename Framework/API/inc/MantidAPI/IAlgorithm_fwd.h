@@ -34,13 +34,13 @@ namespace API {
 /// forward declare of Mantid::API::IAlgorithm
 class IAlgorithm;
 /// shared pointer to Mantid::API::IAlgorithm
-typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
+using IAlgorithm_sptr = boost::shared_ptr<IAlgorithm>;
 /// shared pointer to Mantid::API::IAlgorithm (const version)
-typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
+using IAlgorithm_const_sptr = boost::shared_ptr<const IAlgorithm>;
 /// unique pointer to Mantid::API::IAlgorithm
-typedef std::unique_ptr<IAlgorithm> IAlgorithm_uptr;
+using IAlgorithm_uptr = std::unique_ptr<IAlgorithm>;
 /// unique pointer to Mantid::API::IAlgorithm (const version)
-typedef std::unique_ptr<const IAlgorithm> IAlgorithm_const_uptr;
+using IAlgorithm_const_uptr = std::unique_ptr<const IAlgorithm>;
 
 } // namespace API
 } // namespace Mantid

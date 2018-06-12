@@ -65,12 +65,12 @@ void SignalRange::findFullRange(
  * @return the min/max range, or 0-1.0 if not found
  */
 QwtDoubleInterval SignalRange::getRange(
-    const std::vector<Mantid::API::IMDIterator *> &iterators) {
+    const std::vector<std::unique_ptr<Mantid::API::IMDIterator>> &iterators) {
   std::vector<QwtDoubleInterval> intervals(iterators.size());
   // cppcheck-suppress syntaxError
       PRAGMA_OMP( parallel for schedule(dynamic, 1))
       for (int i = 0; i < int(iterators.size()); i++) {
-        Mantid::API::IMDIterator *it = iterators[i];
+        auto it = iterators[i].get();
         intervals[i] = this->getRange(it);
         // don't delete iterator in parallel. MSVC doesn't like it
         // when the iterator points to a mock object.
@@ -80,8 +80,6 @@ QwtDoubleInterval SignalRange::getRange(
       double minSignal = DBL_MAX;
       double maxSignal = -DBL_MAX;
       for (size_t i = 0; i < iterators.size(); i++) {
-        delete iterators[i];
-
         double signal;
         signal = intervals[i].minValue();
         if (!std::isfinite(signal))

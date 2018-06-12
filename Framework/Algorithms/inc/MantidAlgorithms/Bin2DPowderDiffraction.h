@@ -40,6 +40,9 @@ class MANTID_ALGORITHMS_DLL Bin2DPowderDiffraction : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"Rebin2D"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
   /// Cross-check properties with each other @see IAlgorithm::validateInputs

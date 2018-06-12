@@ -53,7 +53,7 @@ public:
 
 protected:
   /// IMDIterator
-  mutable IMDIterator *m_iterator;
+  mutable std::unique_ptr<IMDIterator> m_iterator;
   /// start of the domain, 0 <= m_startIndex < m_iterator->getDataSize()
   const size_t m_startIndex;
   /// track the iterator's index, 0 <= m_currentIndex < m_size.

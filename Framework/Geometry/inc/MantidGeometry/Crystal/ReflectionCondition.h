@@ -168,7 +168,7 @@ public:
 };
 
 /// Shared pointer to a ReflectionCondition
-typedef boost::shared_ptr<ReflectionCondition> ReflectionCondition_sptr;
+using ReflectionCondition_sptr = boost::shared_ptr<ReflectionCondition>;
 
 MANTID_GEOMETRY_DLL std::vector<ReflectionCondition_sptr>
 getAllReflectionConditions();

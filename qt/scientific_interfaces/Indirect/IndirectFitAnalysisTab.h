@@ -201,6 +201,10 @@ protected:
     tab->properties->addWidget(m_fitPropertyBrowser);
   }
 
+  virtual int minimumSpectrum() const = 0;
+
+  virtual int maximumSpectrum() const = 0;
+
   void setDefaultPropertyValue(const QString &propertyName,
                                const double &propertyValue);
 
@@ -219,7 +223,7 @@ protected:
   void updatePlots(MantidWidgets::PreviewPlot *fitPreviewPlot,
                    MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  virtual void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   void updateGuessPlots(Mantid::API::IFunction_sptr guessFunction);
 
@@ -252,10 +256,10 @@ protected:
   void updatePlotOptions(QComboBox *cbPlotType);
 
   void setPlotOptions(QComboBox *cbPlotType,
-                      const std::vector<std::string> &parameters);
+                      const std::vector<std::string> &parameters) const;
 
-  virtual void setMaxIterations(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                                int maxIterations) const;
+  void setPlotOptions(QComboBox *cbPlotType,
+                      const QSet<QString> &options) const;
 
   virtual std::string createSequentialFitOutputName() const;
 
@@ -328,7 +332,7 @@ protected slots:
 private:
   /// Overidden by child class.
   void setup() override = 0;
-  void run() override = 0;
+  void run() override;
   void loadSettings(const QSettings &settings) override = 0;
   virtual void disablePlotGuess() = 0;
   virtual void enablePlotGuess() = 0;

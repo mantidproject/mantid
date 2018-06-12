@@ -96,10 +96,8 @@ void HRPDSlabCanAbsorption::exec() {
   const size_t specSize = workspace->blocksize();
 
   const auto &spectrumInfo = workspace->spectrumInfo();
-  //
   Progress progress(this, 0.91, 1.0, numHists);
   for (size_t i = 0; i < numHists; ++i) {
-    MantidVec &Y = workspace->dataY(i);
 
     if (!spectrumInfo.hasDetectors(i)) {
       // If a spectrum doesn't have an attached detector go to next one instead
@@ -122,6 +120,7 @@ void HRPDSlabCanAbsorption::exec() {
       angleFactor = 1.0 / std::abs(cos(theta));
     }
 
+    auto &Y = workspace->mutableY(i);
     const auto lambdas = workspace->points(i);
     for (size_t j = 0; j < specSize; ++j) {
       const double lambda = lambdas[j];
@@ -167,9 +166,9 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                         static_cast<uint16_t>(0), 0.0, 0.0, sigma_s, 0.0,
                         sigma_s, sigma_atten);
-    auto shape =
-        boost::shared_ptr<IObject>(m_inputWS->sample().getShape().clone());
-    shape->setMaterial(Material("SetInSphericalAbsorption", neutron, rho));
+    auto shape = boost::shared_ptr<IObject>(
+        m_inputWS->sample().getShape().cloneWithMaterial(
+            Material("SetInSphericalAbsorption", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
   }
 

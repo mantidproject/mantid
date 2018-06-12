@@ -10,7 +10,7 @@ namespace MantidWidgets {
 
 /// Add a range of x values for bin masking.
 void MaskBinsData::addXRange(double start, double end,
-                             const QList<int> &indices) {
+                             const std::vector<size_t> &indices) {
   BinMask range(start, end);
   range.spectra = indices;
   m_masks.append(range);
@@ -21,7 +21,10 @@ void MaskBinsData::addXRange(double start, double end,
 void MaskBinsData::mask(const std::string &wsName) const {
   for (auto mask = m_masks.begin(); mask != m_masks.end(); ++mask) {
     auto &spectra = mask->spectra;
-    std::vector<int> spectraList(spectra.begin(), spectra.end());
+    std::vector<int> spectraList(spectra.size());
+    std::transform(spectra.cbegin(), spectra.cend(), spectraList.begin(),
+                   [](const size_t spec)
+                       -> int { return static_cast<int>(spec); });
     auto alg = Mantid::API::AlgorithmManager::Instance().create("MaskBins", -1);
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setPropertyValue("OutputWorkspace", wsName);
@@ -69,12 +72,12 @@ void MaskBinsData::loadFromProject(const std::string &lines) {
     double start, end;
     mask >> start >> end;
 
-    QList<int> spectra;
+    std::vector<size_t> spectra;
     const size_t numSpectra = mask.values("Spectra").size();
     for (size_t i = 0; i < numSpectra; ++i) {
-      int spectrum;
+      size_t spectrum;
       mask >> spectrum;
-      spectra.append(spectrum);
+      spectra.push_back(spectrum);
     }
 
     addXRange(start, end, spectra);
@@ -90,7 +93,7 @@ std::string MaskBinsData::saveToProject() const {
     API::TSVSerialiser mask;
     mask.writeLine("Range") << binMask.start << binMask.end;
     mask.writeLine("Spectra");
-    for (const int spectrum : binMask.spectra) {
+    for (auto spectrum : binMask.spectra) {
       mask << spectrum;
     }
     tsv.writeSection("Mask", mask.outputLines());

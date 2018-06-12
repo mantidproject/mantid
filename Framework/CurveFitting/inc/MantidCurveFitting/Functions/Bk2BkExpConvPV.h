@@ -90,7 +90,7 @@ private:
 
 // typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
 
-typedef boost::shared_ptr<Bk2BkExpConvPV> Bk2BkExpConvPV_sptr;
+using Bk2BkExpConvPV_sptr = boost::shared_ptr<Bk2BkExpConvPV>;
 
 } // namespace Functions
 } // namespace CurveFitting

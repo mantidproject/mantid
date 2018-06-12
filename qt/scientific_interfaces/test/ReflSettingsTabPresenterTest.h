@@ -31,7 +31,10 @@ public:
 
   ReflSettingsTabPresenterTest() { FrameworkManager::Instance(); }
 
-  void test_instrument_name() {
+  void test_set_instrument_name() {
+    // Test setting the instrument name
+
+    // Set up settings presenters for 2 groups
     MockSettingsPresenter presenter_1;
     MockSettingsPresenter presenter_2;
     std::vector<IReflSettingsPresenter *> settingsPresenters;
@@ -39,6 +42,8 @@ public:
     settingsPresenters.push_back(&presenter_2);
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
+    // Should set the instrument name on the settings presenters for
+    // all groups
     EXPECT_CALL(presenter_1, setInstrumentName("INSTRUMENT_NAME")).Times(1);
     EXPECT_CALL(presenter_2, setInstrumentName("INSTRUMENT_NAME")).Times(1);
     presenter.setInstrumentName("INSTRUMENT_NAME");
@@ -47,7 +52,10 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
   }
 
-  void test_transmission_runs() {
+  void test_check_transmission_runs_per_angle() {
+    // Test checking whether transmission runs are available per angle
+
+    // Set up settings presenters for 3 groups
     MockSettingsPresenter presenter_0;
     MockSettingsPresenter presenter_1;
     MockSettingsPresenter presenter_2;
@@ -59,32 +67,87 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
-    EXPECT_CALL(presenter_0, getTransmissionRuns()).Times(1);
-    EXPECT_CALL(presenter_1, getTransmissionRuns()).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionRuns()).Times(0);
-    presenter.getTransmissionRuns(0);
+    // Should only call though to the settings presenter for
+    // the specified group
+    EXPECT_CALL(presenter_0, hasPerAngleOptions()).Times(1);
+    EXPECT_CALL(presenter_1, hasPerAngleOptions()).Times(0);
+    EXPECT_CALL(presenter_2, hasPerAngleOptions()).Times(0);
+    presenter.hasPerAngleOptions(0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
-    EXPECT_CALL(presenter_0, getTransmissionRuns()).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionRuns()).Times(1);
-    EXPECT_CALL(presenter_2, getTransmissionRuns()).Times(0);
-    presenter.getTransmissionRuns(1);
+    EXPECT_CALL(presenter_0, hasPerAngleOptions()).Times(0);
+    EXPECT_CALL(presenter_1, hasPerAngleOptions()).Times(1);
+    EXPECT_CALL(presenter_2, hasPerAngleOptions()).Times(0);
+    presenter.hasPerAngleOptions(1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
-    EXPECT_CALL(presenter_0, getTransmissionRuns()).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionRuns()).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionRuns()).Times(1);
-    presenter.getTransmissionRuns(2);
+    EXPECT_CALL(presenter_0, hasPerAngleOptions()).Times(0);
+    EXPECT_CALL(presenter_1, hasPerAngleOptions()).Times(0);
+    EXPECT_CALL(presenter_2, hasPerAngleOptions()).Times(1);
+    presenter.hasPerAngleOptions(2);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
+
+  void test_get_transmission_runs_for_angle() {
+    // Test getting the transmission runs for a particular angle
+
+    // Set up settings presenters for 3 groups
+    MockSettingsPresenter presenter_0;
+    MockSettingsPresenter presenter_1;
+    MockSettingsPresenter presenter_2;
+
+    std::vector<IReflSettingsPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_0);
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+
+    ReflSettingsTabPresenter presenter(settingsPresenters);
+    const double angle = 0.5;
+
+    // Should only call though to the settings presenter for
+    // the specified group
+    EXPECT_CALL(presenter_0, getOptionsForAngle(angle))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(0);
+    presenter.getOptionsForAngle(0, angle);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+
+    EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_1, getOptionsForAngle(angle))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(presenter_2, getOptionsForAngle(angle)).Times(0);
+    presenter.getOptionsForAngle(1, angle);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+
+    EXPECT_CALL(presenter_0, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_1, getOptionsForAngle(angle)).Times(0);
+    EXPECT_CALL(presenter_2, getOptionsForAngle(angle))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    presenter.getOptionsForAngle(2, angle);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
   }
 
   void test_transmission_options() {
+    // Test getting options for the preprocessing algorithm to
+    // create the transmission workspace
+
+    // Set up settings presenters for 3 groups
     MockSettingsPresenter presenter_0;
     MockSettingsPresenter presenter_1;
     MockSettingsPresenter presenter_2;
@@ -96,6 +159,8 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
+    // Should only call though to the settings presenter for
+    // the specified group
     EXPECT_CALL(presenter_0, getTransmissionOptions())
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
@@ -128,6 +193,9 @@ public:
   }
 
   void test_reduction_options() {
+    // Test getting options for the main reduction algorithm
+
+    // Set up settings presenters for 3 groups
     MockSettingsPresenter presenter_0;
     MockSettingsPresenter presenter_1;
     MockSettingsPresenter presenter_2;
@@ -139,6 +207,8 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
+    // Should only call though to the settings presenter for
+    // the specified group
     EXPECT_CALL(presenter_0, getReductionOptions())
         .Times(1)
         .WillOnce(Return(OptionsQMap()));
@@ -171,6 +241,10 @@ public:
   }
 
   void test_stitch_options() {
+    // Test getting options for the postprocessing algorithm
+    // to stitch workspaces
+
+    // Set up settings presenters for 3 groups
     MockSettingsPresenter presenter_0;
     MockSettingsPresenter presenter_1;
     MockSettingsPresenter presenter_2;
@@ -182,6 +256,8 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
+    // Should only call though to the settings presenter for
+    // the specified group
     EXPECT_CALL(presenter_0, getStitchOptions()).Times(1);
     EXPECT_CALL(presenter_1, getStitchOptions()).Times(0);
     EXPECT_CALL(presenter_2, getStitchOptions()).Times(0);

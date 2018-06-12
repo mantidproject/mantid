@@ -365,15 +365,15 @@ public:
   }
 
   void test_sptr() {
-    typedef MDBox<MDLeanEvent<3>, 3> mdbox3;
+    using mdbox3 = MDBox<MDLeanEvent<3>, 3>;
     TS_ASSERT_THROWS_NOTHING(mdbox3::sptr a(new mdbox3(sc.get()));)
   }
 
   void test_bad_splitter() {
     BoxController_sptr sc(new BoxController(4));
     sc->setSplitThreshold(10);
-    typedef MDBox<MDLeanEvent<3>, 3>
-        MACROS_ARE_DUMB; //...since they get confused by commas
+    using MACROS_ARE_DUMB =
+        MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
     TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()), std::invalid_argument);
   }
 
@@ -407,7 +407,7 @@ public:
     // First, a bin object that holds everything
     MDBin<MDLeanEvent<2>, 2> bin;
     // Perform the centerpoint binning
-    box.centerpointBin(bin, NULL);
+    box.centerpointBin(bin, nullptr);
     // 100 events = 100 weight.
     TS_ASSERT_DELTA(bin.m_signal, 100.0, 1e-4);
     TS_ASSERT_DELTA(bin.m_errorSquared, 150.0, 1e-4);
@@ -419,7 +419,7 @@ public:
     bin.m_max[0] = 6.0;
     bin.m_min[1] = 1.0;
     bin.m_max[1] = 3.0;
-    box.centerpointBin(bin, NULL);
+    box.centerpointBin(bin, nullptr);
     TS_ASSERT_DELTA(bin.m_signal, 4.0, 1e-4);
     TS_ASSERT_DELTA(bin.m_errorSquared, 6.0, 1e-4);
   }
@@ -585,8 +585,8 @@ public:
     coord_t centroid[2] = {0, 0};
     signal_t signal = 0.0;
     b.centroidSphere(sphere, 400., centroid, signal);
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] /= static_cast<coord_t>(signal);
+    for (float &d : centroid)
+      d /= static_cast<coord_t>(signal);
 
     // This should be the weighted centroid
     TS_ASSERT_DELTA(signal, 6.000, 0.001);
@@ -595,11 +595,11 @@ public:
 
     // --- Reset and reduce the radius ------
     signal = 0;
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] = 0.0;
+    for (float &d : centroid)
+      d = 0.0;
     b.centroidSphere(sphere, 16., centroid, signal);
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] /= static_cast<coord_t>(signal);
+    for (float &d : centroid)
+      d /= static_cast<coord_t>(signal);
     // Only one event was contained
     TS_ASSERT_DELTA(signal, 2.000, 0.001);
     TS_ASSERT_DELTA(centroid[0], 2.000, 0.001);

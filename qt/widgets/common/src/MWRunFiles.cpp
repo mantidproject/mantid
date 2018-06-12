@@ -478,6 +478,7 @@ QString MWRunFiles::getInstrumentOverride() { return m_defaultInstrumentName; }
  */
 void MWRunFiles::setInstrumentOverride(const QString &instName) {
   m_defaultInstrumentName = instName;
+  findFiles(true);
 }
 
 /**
@@ -511,11 +512,15 @@ void MWRunFiles::clear() {
 }
 
 /**
+* Finds the files if the user has changed the parameter text.
+*/
+void MWRunFiles::findFiles() { findFiles(m_uiForm.fileEditor->isModified()); }
+
+/**
 * Finds the files specified by the user in a background thread.
 */
-void MWRunFiles::findFiles() {
-  // Set the values for the thread, and start it running.
-  QString searchText = m_uiForm.fileEditor->text();
+void MWRunFiles::findFiles(bool isModified) {
+  auto searchText = m_uiForm.fileEditor->text();
 
   if (m_isForDirectory) {
     m_foundFiles.clear();
@@ -528,51 +533,65 @@ void MWRunFiles::findFiles() {
     return;
   }
 
-  if (m_uiForm.fileEditor->isModified()) {
+  if (isModified) {
     // Reset modified flag.
     m_uiForm.fileEditor->setModified(false);
-
-    emit findingFiles();
-
-    // If we have an override instrument then add it in appropriate places to
-    // the search text
-    if (!m_defaultInstrumentName.isEmpty()) {
-      // Regex to match a selection of run numbers as defined here:
-      // mantidproject.org/MultiFileLoading
-      // Also allowing spaces between delimiters as this seems to work fine
-      const std::string runNumberString =
-          "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
-      boost::regex runNumbers(runNumberString, boost::regex::extended);
-      // Regex to match a list of run numbers delimited by commas
-      const std::string runListString =
-          "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
-      boost::regex runNumberList(runListString, boost::regex::extended);
-
-      // See if we can just prepend the instrument and be done
-      if (boost::regex_match(searchText.toStdString(), runNumbers)) {
-        searchText = m_defaultInstrumentName + searchText;
-      }
-      // If it is a list we need to prepend the instrument to all run numbers
-      else if (boost::regex_match(searchText.toStdString(), runNumberList)) {
-        QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
-        QStringList newRunNumbers;
-
-        for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it)
-          newRunNumbers << m_defaultInstrumentName + (*it).simplified();
-
-        searchText = newRunNumbers.join(",");
-      }
-    }
-
-    if (!searchText.isEmpty()) {
-      const auto parameters =
-          createFindFilesSearchParameters(searchText.toStdString());
-      m_pool.createWorker(this, parameters);
-    }
-
+    searchText = findFilesGetSearchText(searchText);
+    runFindFiles(searchText);
   } else {
     // Make sure errors are correctly set if we didn't run
     inspectThreadResult(m_cachedResults);
+  }
+}
+
+/**
+* Gets the search text to find files with.
+* @param searchText :: text entered by user
+* @return search text to create search params with
+*/
+const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
+  // If we have an override instrument then add it in appropriate places to
+  // the search text
+  if (!m_defaultInstrumentName.isEmpty()) {
+    // Regex to match a selection of run numbers as defined here:
+    // mantidproject.org/MultiFileLoading
+    // Also allowing spaces between delimiters as this seems to work fine
+    const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
+    boost::regex runNumbers(runNumberString, boost::regex::extended);
+    // Regex to match a list of run numbers delimited by commas
+    const std::string runListString =
+        "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
+    boost::regex runNumberList(runListString, boost::regex::extended);
+
+    // See if we can just prepend the instrument and be done
+    if (boost::regex_match(searchText.toStdString(), runNumbers)) {
+      searchText = m_defaultInstrumentName + searchText;
+    }
+    // If it is a list we need to prepend the instrument to all run numbers
+    else if (boost::regex_match(searchText.toStdString(), runNumberList)) {
+      QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
+      QStringList newRunNumbers;
+
+      for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it)
+        newRunNumbers << m_defaultInstrumentName + (*it).simplified();
+
+      searchText = newRunNumbers.join(",");
+    }
+  }
+  return searchText;
+}
+
+/**
+* creates background thread for find files
+* @param searchText :: text to create search parameters from
+*/
+void MWRunFiles::runFindFiles(const QString &searchText) {
+  if (!searchText.isEmpty()) {
+    emit findingFiles();
+
+    const auto parameters =
+        createFindFilesSearchParameters(searchText.toStdString());
+    m_pool.createWorker(this, parameters);
   }
 }
 
@@ -596,24 +615,21 @@ IAlgorithm_const_sptr MWRunFiles::stopLiveAlgorithm() {
  * of the thread, and emits fileFound() if it has been successful.
  */
 void MWRunFiles::inspectThreadResult(const FindFilesSearchResults &results) {
-  // Unpack the search results
-  const auto error = results.error;
-  const auto filenames = results.filenames;
-  const auto valueForProperty = results.valueForProperty;
+  // Update caches before we might exit early
+  m_cachedResults = results;
+  m_valueForProperty = QString::fromStdString(results.valueForProperty);
+  m_foundFiles.clear();
+  m_lastFoundFiles.clear();
 
-  // Get results from the file finding thread.
-  if (!error.empty()) {
-    setFileProblem(QString::fromStdString(error));
+  // Early exit on failure
+  if (!results.error.empty()) {
+    setFileProblem(QString::fromStdString(results.error));
     emit fileInspectionFinished();
     return;
   }
 
-  m_valueForProperty = QString::fromStdString(valueForProperty);
-  m_lastFoundFiles = m_foundFiles;
-  m_foundFiles.clear();
-
-  for (size_t i = 0; i < filenames.size(); ++i) {
-    m_foundFiles.append(QString::fromStdString(filenames[i]));
+  for (const auto &filename : results.filenames) {
+    m_foundFiles.append(QString::fromStdString(filename));
   }
   if (m_foundFiles.isEmpty() && !isOptional()) {
     setFileProblem(
@@ -631,8 +647,6 @@ void MWRunFiles::inspectThreadResult(const FindFilesSearchResults &results) {
     emit filesFound();
   if (m_lastFoundFiles != m_foundFiles)
     emit filesFoundChanged();
-
-  m_cachedResults = results;
 }
 
 /**

@@ -72,7 +72,7 @@ public:
 
     std::cout << "\nTest I Is Completed\n";
 
-    if (ws1 == NULL) {
+    if (ws1 == nullptr) {
       std::cout << "\nWorkspace1 is NULL\n";
     }
 
@@ -100,13 +100,13 @@ public:
       ws4 = AnalysisDataService::Instance()
                 .retrieveWS<DataObjects::MaskWorkspace>(ws4name);
 
-      if (ws4 == NULL) {
+      if (ws4 == nullptr) {
         std::cout << "Workspace4 is NULL\n";
       } else {
         std::cout << "Workspace4 is good at output of NOT.  Number Histogram = "
                   << ws4->getNumberHistograms() << '\n';
       }
-      if (ws1 == NULL) {
+      if (ws1 == nullptr) {
         std::cout << "Workspace1 is NULL\n";
       } else {
         std::cout << "Workspace1 is good at output of NOT.  Number Histogram = "

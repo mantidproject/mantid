@@ -1,14 +1,17 @@
 #include "QtReflSettingsView.h"
-#include "ReflSettingsPresenter.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
-#include <QMessageBox>
-#include <boost/algorithm/string/join.hpp>
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "ReflSettingsPresenter.h"
+#include <QMessageBox>
+#include <QScrollBar>
+#include <boost/algorithm/string/join.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -35,6 +38,7 @@ Initialise the Interface
 */
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
+  initOptionsTable();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -44,8 +48,32 @@ void QtReflSettingsView::initLayout() {
           SLOT(setPolarisationOptionsEnabled(bool)));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(summationTypeChanged(int)));
+  connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
+          SLOT(addPerAngleOptionsTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
+}
+
+void QtReflSettingsView::initOptionsTable() {
+  auto table = m_ui.optionsTable;
+  m_columnProperties =
+      QStringList({"ThetaIn", "FirstTransmissionRun", "MomentumTransferMin",
+                   "MomentumTransferMax", "MomentumTransferStep", "ScaleFactor",
+                   "ProcessingInstructions"});
+  if (m_columnProperties.size() != table->columnCount())
+    throw std::runtime_error(
+        "Error setting up properties for per-angle options table");
+
+  // Set angle and scale columns to a small width so everything fits
+  table->resizeColumnsToContents();
+
+  auto header = table->horizontalHeader();
+  int totalRowHeight = 0;
+  for (int i = 0; i < table->rowCount(); ++i) {
+    totalRowHeight += table->rowHeight(i);
+  }
+  const int padding = 2;
+  table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
 void QtReflSettingsView::connectSettingsChange(QLineEdit &edit) {
@@ -65,6 +93,11 @@ void QtReflSettingsView::connectSettingsChange(QCheckBox &edit) {
 
 void QtReflSettingsView::connectSettingsChange(QGroupBox &edit) {
   connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QTableWidget &edit) {
+  connect(&edit, SIGNAL(cellChanged(int, int)), this,
+          SLOT(notifySettingsChanged()));
 }
 
 void QtReflSettingsView::disableAll() {
@@ -99,7 +132,6 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
   registerSettingWidget(*m_ui.lamMinEdit, "WavelengthMin", alg);
   registerSettingWidget(*m_ui.lamMaxEdit, "WavelengthMax", alg);
   registerSettingWidget(*m_ui.I0MonIndexEdit, "I0MonitorIndex", alg);
-  registerSettingWidget(*m_ui.procInstEdit, "ProcessingInstructions", alg);
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox,
                         "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors",
@@ -111,9 +143,8 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
 void QtReflSettingsView::registerExperimentSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
   connectSettingsChange(*m_ui.expSettingsGroup);
+  connectSettingsChange(*m_ui.optionsTable);
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
-  registerSettingWidget(*m_ui.transmissionRunsEdit, "FirstTransmissionRun",
-                        alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
@@ -121,9 +152,6 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.CAlphaEdit, "CAlpha", alg);
   registerSettingWidget(*m_ui.CApEdit, "CAp", alg);
   registerSettingWidget(*m_ui.CPpEdit, "CPp", alg);
-  registerSettingWidget(*m_ui.momentumTransferStepEdit, "MomentumTransferStep",
-                        alg);
-  registerSettingWidget(*m_ui.scaleFactorEdit, "ScaleFactor", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
 }
 
@@ -200,9 +228,16 @@ void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
   setText(*m_ui.CPpEdit, defaults.CPp);
   setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
   setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
-  setText(*m_ui.momentumTransferStepEdit, defaults.MomentumTransferStep);
-  setText(*m_ui.scaleFactorEdit, defaults.ScaleFactor);
   setText(stitchOptionsLineEdit(), defaults.StitchParams);
+  setText(*m_ui.optionsTable, "MomentumTransferMin",
+          defaults.MomentumTransferMin);
+  setText(*m_ui.optionsTable, "MomentumTransferMax",
+          defaults.MomentumTransferMax);
+  setText(*m_ui.optionsTable, "MomentumTransferStep",
+          defaults.MomentumTransferStep);
+  setText(*m_ui.optionsTable, "ScaleFactor", defaults.ScaleFactor);
+  setText(*m_ui.optionsTable, "ProcessingInstructions",
+          defaults.ProcessingInstructions);
 }
 
 void QtReflSettingsView::setSelected(QComboBox &box, std::string const &str) {
@@ -215,21 +250,18 @@ void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<double> value) {
   if (value)
     setText(lineEdit, value.get());
-  else
-    setText(lineEdit, "");
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<int> value) {
   if (value)
     setText(lineEdit, value.get());
-  else
-    setText(lineEdit, "");
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit,
                                  boost::optional<std::string> const &text) {
-  setText(lineEdit, value_or(text, ""));
+  if (text && !text->empty())
+    setText(lineEdit, text);
 }
 
 void QtReflSettingsView::setText(QLineEdit &lineEdit, double value) {
@@ -245,6 +277,58 @@ void QtReflSettingsView::setText(QLineEdit &lineEdit, int value) {
 void QtReflSettingsView::setText(QLineEdit &lineEdit, std::string const &text) {
   auto textAsQString = QString::fromStdString(text);
   lineEdit.setText(textAsQString);
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 boost::optional<double> value) {
+  if (value)
+    setText(table, propertyName, value.get());
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 double value) {
+  auto valueAsString = QString::number(value);
+  setText(table, propertyName, valueAsString);
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 boost::optional<std::string> text) {
+  if (text && !text->empty())
+    setText(table, propertyName, text.get());
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 std::string const &text) {
+  auto textAsQString = QString::fromStdString(text);
+  setText(table, propertyName, textAsQString);
+}
+
+void QtReflSettingsView::setText(QTableWidget &table,
+                                 std::string const &propertyName,
+                                 const QString &value) {
+  // Find the column with this property name
+  const auto columnIt =
+      std::find(m_columnProperties.begin(), m_columnProperties.end(),
+                QString::fromStdString(propertyName));
+  // Do nothing if column was not found
+  if (columnIt == m_columnProperties.end())
+    return;
+
+  const auto column = columnIt - m_columnProperties.begin();
+
+  // Set the value in this column for the first row. (We don't really know
+  // which row(s) the user might want updated so for now keep it simple.)
+  constexpr int row = 0;
+  auto cell = table.item(row, column);
+  if (!cell) {
+    cell = new QTableWidgetItem();
+    table.setItem(row, column, cell);
+  }
+  cell->setText(value);
 }
 
 void QtReflSettingsView::setChecked(QCheckBox &checkBox, bool checked) {
@@ -284,7 +368,6 @@ void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
                        defaults.I0MonitorIndex);
   setSelected(*m_ui.detectorCorrectionTypeComboBox,
               defaults.DetectorCorrectionType);
-  setText(*m_ui.procInstEdit, defaults.ProcessingInstructions);
   setChecked(*m_ui.correctDetectorsCheckBox, defaults.CorrectDetectors);
 }
 
@@ -315,6 +398,15 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
     m_ui.CApEdit->clear();
     m_ui.CPpEdit->clear();
   }
+}
+
+/** Add a new row to the transmission runs table
+ * */
+void QtReflSettingsView::addPerAngleOptionsTableRow() {
+  auto numRows = m_ui.optionsTable->rowCount() + 1;
+  m_ui.optionsTable->setRowCount(numRows);
+  // Select the first cell in the new row
+  m_ui.optionsTable->setCurrentCell(numRows - 1, 0);
 }
 
 std::string QtReflSettingsView::getText(QLineEdit const &lineEdit) const {
@@ -377,8 +469,7 @@ std::string QtReflSettingsView::getStitchOptions() const {
 }
 
 QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
-  auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
-  return *static_cast<QLineEdit *>(widget);
+  return *static_cast<QLineEdit *>(m_stitchEdit);
 }
 
 /** Creates hints for 'Stitch1DMany'
@@ -387,8 +478,15 @@ QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
 void QtReflSettingsView::createStitchHints(
     const std::map<std::string, std::string> &hints) {
 
-  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1,
-                                     3);
+  // We want to add the stitch params box next to the stitch
+  // label, so first find the label's position
+  auto stitchLabelIndex = m_ui.expSettingsLayout0->indexOf(m_ui.stitchLabel);
+  int row, col, rowSpan, colSpan;
+  m_ui.expSettingsLayout0->getItemPosition(stitchLabelIndex, &row, &col,
+                                           &rowSpan, &colSpan);
+  // Create the new edit box and add it to the right of the label
+  m_stitchEdit = new HintingLineEdit(this, hints);
+  m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1, 3);
 }
 
 /** Return selected analysis mode
@@ -398,11 +496,51 @@ std::string QtReflSettingsView::getAnalysisMode() const {
   return getText(*m_ui.analysisModeComboBox);
 }
 
-/** Return selected transmission run(s)
-* @return :: selected transmission run(s)
+/** Create the options map for a given row in the per-angle options table
+ * @param row [in] : the row index
+ */
+OptionsQMap QtReflSettingsView::createOptionsMapForRow(const int row) const {
+  OptionsQMap rowOptions;
+  const auto &table = m_ui.optionsTable;
+
+  for (int col = 1; col < table->columnCount(); ++col) {
+    auto colItem = table->item(row, col);
+    auto colValue = colItem ? colItem->text() : "";
+    if (!colValue.isEmpty()) {
+      rowOptions[m_columnProperties[col]] = colValue;
+    }
+  }
+  return rowOptions;
+}
+
+/** Return the per-angle options
+* @return :: return a map of angles to the options
 */
-std::string QtReflSettingsView::getTransmissionRuns() const {
-  return getText(*m_ui.transmissionRunsEdit);
+std::map<std::string, OptionsQMap>
+QtReflSettingsView::getPerAngleOptions() const {
+
+  const auto &table = m_ui.optionsTable;
+
+  // Check that we have at least 2 columns (the angle and some values)
+  if (table->columnCount() < 2)
+    throw std::runtime_error(
+        "Per-angle options table must have at least 2 columns");
+
+  // Return values in a map
+  std::map<std::string, OptionsQMap> results;
+
+  for (auto row = 0; row < table->rowCount(); ++row) {
+    auto angleItem = table->item(row, 0);
+    auto angle = angleItem ? angleItem->text() : "";
+    auto rowOptions = createOptionsMapForRow(row);
+    const bool emptyRow = angle.isEmpty() && rowOptions.isEmpty();
+    // Add the row options to the result. We could do with a better way to
+    // handle duplicate keys but for now it's ok to just ignore subsequent rows
+    // with the same angle
+    if (!emptyRow && !results.count(angle.toStdString()))
+      results[angle.toStdString()] = rowOptions;
+  }
+  return results;
 }
 
 /** Return start overlap
@@ -452,20 +590,6 @@ std::string QtReflSettingsView::getCAp() const {
 */
 std::string QtReflSettingsView::getCPp() const {
   return getText(*m_ui.CPpEdit);
-}
-
-/** Return momentum transfer limits
-* @return :: momentum transfer limits
-*/
-std::string QtReflSettingsView::getMomentumTransferStep() const {
-  return getText(*m_ui.momentumTransferStepEdit);
-}
-
-/** Return scale factor
-* @return :: scale factor
-*/
-std::string QtReflSettingsView::getScaleFactor() const {
-  return getText(*m_ui.scaleFactorEdit);
 }
 
 /** Return integrated monitors option
@@ -522,13 +646,6 @@ std::string QtReflSettingsView::getLambdaMax() const {
 */
 std::string QtReflSettingsView::getI0MonitorIndex() const {
   return getText(*m_ui.I0MonIndexEdit);
-}
-
-/** Return processing instructions
-* @return :: processing instructions
-*/
-std::string QtReflSettingsView::getProcessingInstructions() const {
-  return getText(*m_ui.procInstEdit);
 }
 
 std::string QtReflSettingsView::getReductionType() const {

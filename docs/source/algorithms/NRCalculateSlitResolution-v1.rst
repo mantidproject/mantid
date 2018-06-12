@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,7 +17,7 @@ using the theta log name provided.
 The effective inverse of this algorithm is :ref:`algm-CalculateSlits`.
 
 Beam Divergence
-***************
+###############
 
 .. figure:: ../images/collimation_diagram.png
    :scale: 50 %

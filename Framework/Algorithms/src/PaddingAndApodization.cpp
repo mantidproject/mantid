@@ -125,7 +125,7 @@ void PaddingAndApodization::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-typedef double (*fptr)(const double time, const double decayConstant);
+using fptr = double (*)(const double, const double);
 /**
 * Gets a pointer to the relevant
 * apodization function

@@ -61,7 +61,7 @@ Logger g_log("SANSRunWindow");
 /// static logger for centre finding
 Logger g_centreFinderLog("CentreFinder");
 
-typedef boost::shared_ptr<Kernel::PropertyManager> ReductionSettings_sptr;
+using ReductionSettings_sptr = boost::shared_ptr<Kernel::PropertyManager>;
 
 /**
  * Returns the PropertyManager object that is used to store the settings
@@ -912,6 +912,15 @@ bool SANSRunWindow::loadUserFile() {
           "print(i.ReductionSingleton().to_wavelen.wav_step)").trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
+  // RCut WCut
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().to_Q.r_cut)").toDouble();
+  m_uiForm.r_cut_line_edit->setText(QString::number(dbl_param * unit_conv));
+
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().to_Q.w_cut)").toDouble();
+  m_uiForm.w_cut_line_edit->setText(QString::number(dbl_param));
+
   // Q
   QString text =
       runReduceScriptFunction("print(i.ReductionSingleton().to_Q.binning)");
@@ -983,6 +992,23 @@ bool SANSRunWindow::loadUserFile() {
                                 "'FRONT').rescaleAndShift.qMax)").trimmed());
   } else
     m_uiForm.frontDetQrangeOnOff->setChecked(false);
+
+  QString qMergeRangeUserSelected =
+      runReduceScriptFunction("print("
+                              "i.ReductionSingleton().instrument.getDetector('"
+                              "FRONT').mergeRange.q_merge_range)").trimmed();
+  if (qMergeRangeUserSelected == "True") {
+    m_uiForm.mergeQRangeOnOff->setChecked(true);
+    m_uiForm.mergeQMin->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_min)").trimmed());
+    m_uiForm.mergeQMax->setText(
+        runReduceScriptFunction("print("
+                                "i.ReductionSingleton().instrument.getDetector("
+                                "'FRONT').mergeRange.q_max)").trimmed());
+  } else
+    m_uiForm.mergeQRangeOnOff->setChecked(false);
 
   // Monitor spectra
   m_uiForm.monitor_spec->setText(
@@ -2128,8 +2154,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
       m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
 
       using namespace boost;
-      typedef tuple<QLineEdit *, function<double(const Sample *)>, std::string>
-          GeomSampleInfo;
+      using GeomSampleInfo =
+          tuple<QLineEdit *, function<double(const Sample *)>, std::string>;
 
       std::vector<GeomSampleInfo> sampleInfoList;
       sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,
@@ -2232,6 +2258,14 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
       // to give the correct number of characters
       m_uiForm.rad_min->text() + " '+'" + m_uiForm.rad_max->text() +
       " '+'1', i.ReductionSingleton())\n";
+
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/RCut '+'" +
+      m_uiForm.r_cut_line_edit->text() + "', i.ReductionSingleton())\n";
+
+  exec_reduce +=
+      "i.ReductionSingleton().user_settings.readLimitValues('L/Q/WCut '+'" +
+      m_uiForm.w_cut_line_edit->text() + "', i.ReductionSingleton())\n";
 
   setStringSetting("events.binning", m_uiForm.l_events_binning->text());
 
@@ -4031,6 +4065,9 @@ void SANSRunWindow::setValidators() {
   m_uiForm.wav_min->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.wav_max->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.wav_dw->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.r_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.w_cut_line_edit->setValidator(m_doubleValidatorZeroToMax);
 
   m_uiForm.q_min->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.q_max->setValidator(m_doubleValidatorZeroToMax);

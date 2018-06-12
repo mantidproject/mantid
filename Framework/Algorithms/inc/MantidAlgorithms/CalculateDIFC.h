@@ -38,6 +38,9 @@ public:
   const std::string name() const override;
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertDiffCal"};
+  }
   const std::string category() const override;
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   const std::string summary() const override;

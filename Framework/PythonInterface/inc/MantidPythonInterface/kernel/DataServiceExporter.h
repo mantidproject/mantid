@@ -43,8 +43,8 @@ namespace PythonInterface {
  */
 template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   // typedef the type created by boost.python
-  typedef boost::python::class_<SvcType, boost::noncopyable> PythonType;
-  typedef boost::weak_ptr<typename SvcPtrType::element_type> WeakPtr;
+  using PythonType = boost::python::class_<SvcType, boost::noncopyable>;
+  using WeakPtr = boost::weak_ptr<typename SvcPtrType::element_type>;
 
   /**
    * Define the necessary boost.python framework to expor the templated

@@ -300,7 +300,7 @@ private:
   /// Creates workspace ready for analysis and plotting
   Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
-                                                      Muon::PlotType type,
+                                                      Muon::PlotType plotType,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
@@ -580,6 +580,8 @@ private:
 
   /// set the group/pair name
   std::string m_groupPairName;
+  int m_deadTimeIndex;
+  bool m_useDeadTime;
 };
 }
 }

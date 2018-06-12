@@ -87,8 +87,8 @@ private:
 };
 
 // The factory is just a specialisation of SingletonHolder
-typedef Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>
-    RemoteJobManagerFactory;
+using RemoteJobManagerFactory =
+    Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

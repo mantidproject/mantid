@@ -364,6 +364,10 @@ class ResolutionModel:
                 self.model = [self._makeModel(m, xstart, xend, accuracy) for m in model]
                 self.multi = True
                 return
+            elif hasattr(model[0], 'model'):
+                self.model = [m.model for m in model]
+                self.multi = True
+                return
             elif isinstance(model[0], tuple):
                 for m in model:
                     self._checkModel(m)

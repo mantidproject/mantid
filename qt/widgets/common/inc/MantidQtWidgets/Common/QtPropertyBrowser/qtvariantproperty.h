@@ -96,7 +96,7 @@
 QT_BEGIN_NAMESPACE
 #endif
 
-typedef QMap<int, QIcon> QtIconMap;
+using QtIconMap = QMap<int, QIcon>;
 
 class QtVariantPropertyManager;
 class QtVariantPropertyPrivate;

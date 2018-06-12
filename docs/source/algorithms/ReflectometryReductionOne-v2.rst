@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -254,10 +254,10 @@ Output:
 
 .. testoutput:: ExReflRedOneTrans
 
-   0.4592
+   0.4597
    0.4654
-   0.7278
-   1.0305
+   0.7203
+   1.0512
 
 .. categories::
 

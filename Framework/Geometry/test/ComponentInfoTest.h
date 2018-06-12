@@ -107,12 +107,13 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
   auto names = boost::make_shared<std::vector<std::string>>(1);
   using Mantid::Beamline::ComponentType;
-  auto isStructuredBank =
+  auto componentType =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+  auto children = boost::make_shared<std::vector<std::vector<size_t>>>(1);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, positions, rotations, scaleFactors, isStructuredBank,
-      names, -1, -1);
+      parentIndices, children, positions, rotations, scaleFactors,
+      componentType, names, -1, -1);
 }
 } // namespace
 
@@ -156,10 +157,12 @@ public:
     using Mantid::Beamline::ComponentType;
     auto isRectBank = boost::make_shared<std::vector<ComponentType>>(
         2, ComponentType::Generic);
+    auto children = boost::make_shared<std::vector<std::vector<size_t>>>(
+        1, std::vector<size_t>(1));
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, scaleFactors, isRectBank, names,
-        -1, -1);
+        parentIndices, children, positions, rotations, scaleFactors, isRectBank,
+        names, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -646,6 +649,47 @@ public:
                      V3D(0, 0, 0));
     TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 1}),
                      detectorPos);
+  }
+
+  void test_throws_if_ComponentType_is_not_Quadrilateral() {
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    // find quadrilateral component
+    size_t structuredIndex = componentInfo->root() - 3;
+    // Does not throw for valid index
+    TS_ASSERT_THROWS_NOTHING(
+        componentInfo->quadrilateralComponent(structuredIndex));
+    // Throws for other non quadrilateral component
+    TS_ASSERT_THROWS(
+        componentInfo->quadrilateralComponent(componentInfo->root() - 1),
+        std::runtime_error &);
+    // Throws for root
+    TS_ASSERT_THROWS(
+        componentInfo->quadrilateralComponent(componentInfo->root()),
+        std::runtime_error &);
+    // Throws for detector
+    TS_ASSERT_THROWS(componentInfo->quadrilateralComponent(0),
+                     std::runtime_error &);
+  }
+
+  void test_QuadrilateralComponent_for_single_rectangular_bank() {
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    // find quadrilateral component
+    size_t structuredIndex = componentInfo->root() - 3;
+    auto panel = componentInfo->quadrilateralComponent(structuredIndex);
+    TS_ASSERT_EQUALS(panel.nX, 4);
+    TS_ASSERT_EQUALS(panel.nY, 4);
+    TS_ASSERT_EQUALS(panel.bottomLeft, 0);
+    TS_ASSERT_EQUALS(panel.bottomRight, 12);
+    TS_ASSERT_EQUALS(panel.topLeft, 3);
+    TS_ASSERT_EQUALS(panel.topRight, 15);
   }
 };
 

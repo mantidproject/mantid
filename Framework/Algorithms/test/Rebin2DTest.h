@@ -126,8 +126,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
 
-    double errors[6] = {2.716615541, 2.50998008,  2.437211521,
-                        2.50998008,  2.716615541, 2.121320344};
+    double errors[6] = {3., 3., 3., 3., 3., 2.236067977};
 
     const double epsilon(1e-08);
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {

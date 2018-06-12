@@ -63,6 +63,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SmoothNeighbours"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Transforms\\Smoothing";
@@ -75,8 +78,8 @@ private:
   void exec() override;
   int validateSpectrumInGroup(size_t wi);
   // This map does not need to be ordered, just a lookup for udet
-  /// typedef for the storage of the UDET-group mapping
-  typedef std::map<detid_t, int> udet2groupmap;
+  /// type alias for the storage of the UDET-group mapping
+  using udet2groupmap = std::map<detid_t, int>;
   std::vector<int> udet2group;
   API::MatrixWorkspace_const_sptr inputWorkspace;
 };

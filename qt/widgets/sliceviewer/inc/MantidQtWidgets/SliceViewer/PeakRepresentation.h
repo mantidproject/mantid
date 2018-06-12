@@ -22,7 +22,7 @@ struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationViewInformation {
 class PeakBoundingBox;
 
 /// Alisas for a boost optional double.
-typedef boost::optional<double> optional_double;
+using optional_double = boost::optional<double>;
 
 /** PeakRepresentation : Allows the draw a general visual peak shape.
 
@@ -82,8 +82,8 @@ protected:
                       PeakRepresentationViewInformation viewInformation) = 0;
 };
 
-typedef std::shared_ptr<PeakRepresentation> PeakRepresentation_sptr;
-typedef std::vector<PeakRepresentation_sptr> VecPeakRepresentation;
+using PeakRepresentation_sptr = std::shared_ptr<PeakRepresentation>;
+using VecPeakRepresentation = std::vector<PeakRepresentation_sptr>;
 }
 }
 

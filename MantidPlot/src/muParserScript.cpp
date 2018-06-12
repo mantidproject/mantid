@@ -149,7 +149,7 @@ double muParserScript::col(const QString &arg) {
                                      .toAscii()
                                      .constData());
   if (table->text(row, col).isEmpty())
-    throw new EmptySourceError();
+    throw EmptySourceError();
   else {
     return table->cell(row, col);
   }
@@ -231,7 +231,7 @@ double muParserScript::tablecol(const QString &arg) {
                                      .toAscii()
                                      .constData());
   if (target_table->text(row, col).isEmpty())
-    throw new EmptySourceError();
+    throw EmptySourceError();
   else
     return target_table->cell(row, col);
 }
@@ -254,7 +254,7 @@ double muParserScript::cell(int row, int col) {
                                      .toAscii()
                                      .constData());
   if (matrix->text(row - 1, col - 1).isEmpty())
-    throw new EmptySourceError();
+    throw EmptySourceError();
   else
     return matrix->cell(row - 1, col - 1);
 }
@@ -277,7 +277,7 @@ double muParserScript::tableCell(int col, int row) {
                                      .toAscii()
                                      .constData());
   if (table->text(row - 1, col - 1).isEmpty())
-    throw new EmptySourceError();
+    throw EmptySourceError();
   else
     return table->cell(row - 1, col - 1);
 }
@@ -394,7 +394,7 @@ QString muParserScript::evalSingleLineToString(const QLocale &locale, char f,
   double val = 0.0;
   try {
     val = parser.Eval();
-  } catch (EmptySourceError *) {
+  } catch (EmptySourceError &) {
     return "";
   } catch (ParserError &) {
     return "";
@@ -406,7 +406,7 @@ double muParserScript::evalSingleLine() {
   double val = 0.0;
   try {
     val = parser.Eval();
-  } catch (EmptySourceError *) {
+  } catch (EmptySourceError &) {
     return GSL_NAN;
   } catch (ParserError &) {
     return GSL_NAN;
@@ -467,7 +467,7 @@ bool muParserScript::compileImpl() {
     parser.SetExpr(muCode[0].toAscii().constData());
     try {
       parser.Eval();
-    } catch (EmptySourceError *) {
+    } catch (EmptySourceError &) {
       QApplication::restoreOverrideCursor();
       return false;
     } catch (mu::ParserError &e) {
@@ -492,7 +492,7 @@ QVariant muParserScript::evaluateImpl() {
       parser.SetExpr(i->toAscii().constData());
       val = parser.Eval();
     }
-  } catch (EmptySourceError *) {
+  } catch (EmptySourceError &) {
     return QVariant("");
   } catch (ParserError &e) {
     emit error(e.GetMsg().c_str(), "", 0);
@@ -510,7 +510,7 @@ bool muParserScript::executeImpl() {
       parser.SetExpr(i->toAscii().constData());
       parser.Eval();
     }
-  } catch (EmptySourceError *) {
+  } catch (EmptySourceError &) {
     return true;
   } catch (mu::ParserError &e) {
     emit error(e.GetMsg().c_str(), "", 0);

@@ -52,7 +52,7 @@ private:
   }
 
 public:
-  typedef OptionalBool HeldType;
+  using HeldType = OptionalBool;
 
   /**
    * Set function to handle Python -> C++ calls and get the correct type

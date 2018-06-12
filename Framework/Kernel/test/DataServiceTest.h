@@ -295,8 +295,8 @@ public:
     svc.add("Four", four);
     svc.add("Two", two);
 
-    typedef Mantid::Kernel::DataServiceSort sortedEnum;
-    typedef Mantid::Kernel::DataServiceHidden hiddenEnum;
+    using sortedEnum = Mantid::Kernel::DataServiceSort;
+    using hiddenEnum = Mantid::Kernel::DataServiceHidden;
 
     // First assert that sort does not impact size
     TS_ASSERT_EQUALS(svc.getObjectNames(sortedEnum::Sorted).size(),

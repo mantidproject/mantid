@@ -52,13 +52,10 @@ using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
 using Types::Core::DateAndTime;
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using Types::Event::TofEvent;
-using std::cout;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -910,7 +907,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
   std::vector<DasEvent *> buffers;
 
   /// Pointer to the vector of events
-  typedef std::vector<TofEvent> *EventVector_pt;
+  using EventVector_pt = std::vector<TofEvent> *;
   /// Bare array of arrays of pointers to the EventVectors
   EventVector_pt **eventVectors;
 
@@ -1515,7 +1512,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
   std::vector<DasEvent *> buffers;
 
   /// Pointer to the vector of events
-  typedef std::vector<TofEvent> *EventVector_pt;
+  using EventVector_pt = std::vector<TofEvent> *;
   /// Bare array of arrays of pointers to the EventVectors
   EventVector_pt **eventVectors;
 

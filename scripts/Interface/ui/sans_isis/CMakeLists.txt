@@ -8,6 +8,7 @@ add_runs_page.ui
 run_selector_widget.ui
 summation_settings_widget.ui
 beam_centre.ui
+diagnostics_page.ui
  )
 
 UiToPy( UI_FILES CompileUISANSDataProcessorInterface)

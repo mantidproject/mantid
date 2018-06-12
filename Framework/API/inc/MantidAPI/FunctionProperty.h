@@ -45,7 +45,8 @@ class MANTID_API_DLL FunctionProperty
     : public Kernel::PropertyWithValue<boost::shared_ptr<IFunction>> {
 public:
   /// Constructor.
-  explicit FunctionProperty(const std::string &name);
+  FunctionProperty(const std::string &name,
+                   const unsigned int direction = Kernel::Direction::Input);
 
   /// Copy constructor
   FunctionProperty(const FunctionProperty &right);
@@ -56,7 +57,7 @@ public:
 
   /// Bring in the PropertyWithValue assignment operator explicitly (avoids
   /// VSC++ warning)
-  boost::shared_ptr<IFunction> &
+  FunctionProperty &
   operator=(const boost::shared_ptr<IFunction> &value) override;
 
   /// Add the value of another property

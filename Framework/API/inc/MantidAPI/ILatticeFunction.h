@@ -66,7 +66,7 @@ public:
   virtual Geometry::UnitCell getUnitCell() const = 0;
 };
 
-typedef boost::shared_ptr<ILatticeFunction> ILatticeFunction_sptr;
+using ILatticeFunction_sptr = boost::shared_ptr<ILatticeFunction>;
 
 } // namespace API
 } // namespace Mantid

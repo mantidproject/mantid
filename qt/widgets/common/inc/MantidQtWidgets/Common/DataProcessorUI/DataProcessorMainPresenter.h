@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <QSet>
 #include <QString>
@@ -66,6 +67,13 @@ public:
   virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type
   virtual QString getTimeSlicingType() const { return QString(); }
+  /// Return transmission runs for a particular angle
+  virtual OptionsQMap getOptionsForAngle(const double angle) const {
+    UNUSED_ARG(angle);
+    return OptionsQMap();
+  }
+  /// Return true if there are per-angle transmission runs set
+  virtual bool hasPerAngleOptions() const { return false; }
 
   /// Handle data reduction paused/resumed
   virtual void pause() const {}
@@ -74,6 +82,10 @@ public:
   /// Handle data reduction paused/resumed confirmation
   virtual void confirmReductionPaused(int group) { UNUSED_ARG(group); }
   virtual void confirmReductionResumed(int group) { UNUSED_ARG(group); }
+  virtual void completedGroupReductionSuccessfully(GroupData const &,
+                                                   std::string const &){};
+  virtual void completedRowReductionSuccessfully(GroupData const &,
+                                                 std::string const &){};
 };
 }
 }

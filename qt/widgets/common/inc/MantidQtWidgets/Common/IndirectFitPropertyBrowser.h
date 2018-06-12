@@ -183,6 +183,8 @@ private:
   void clearCustomFunctions(QtProperty *prop, bool emitSignals);
   void clearCustomFunctions(QtProperty *prop);
 
+  void customFunctionRemoved(QtProperty *property);
+
   QtProperty *
   createFunctionGroupProperty(const QString &groupName,
                               QtAbstractPropertyManager *propertyManager,

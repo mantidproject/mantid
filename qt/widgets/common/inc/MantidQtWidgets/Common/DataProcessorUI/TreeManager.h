@@ -84,8 +84,8 @@ public:
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
   /// Transfer new data to model
-  virtual void transfer(const std::vector<std::map<QString, QString>> &runs,
-                        const WhiteList &whitelist) = 0;
+  virtual void
+  transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
   /// Update row with new data
   virtual void update(int parent, int child, const QStringList &data) = 0;
   /// Get the number of rows of a given parent
@@ -102,7 +102,7 @@ public:
   virtual void setCell(int row, int column, int parentRow, int parentColumn,
                        const std::string &value) = 0;
   virtual std::string getCell(int row, int column, int parentRow,
-                              int parentColumn) = 0;
+                              int parentColumn) const = 0;
   virtual int getNumberOfRows() = 0;
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,

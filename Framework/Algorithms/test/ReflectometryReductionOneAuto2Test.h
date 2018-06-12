@@ -244,7 +244,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
-    alg.setProperty("ProcessingInstructions", "3:4");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
 
@@ -270,25 +270,16 @@ public:
     TS_ASSERT_EQUALS(instIn->getComponentByName("linear-detector")->getPos(),
                      instOut->getComponentByName("linear-detector")->getPos());
 
-    // Only 'point-detector' and 'point-detector2' should have been moved
-    // vertically (along Y)
+    // Only 'point-detector' should have been moved vertically (along Y)
 
     auto point1In = instIn->getComponentByName("point-detector")->getPos();
-    auto point2In = instIn->getComponentByName("point-detector2")->getPos();
     auto point1Out = instOut->getComponentByName("point-detector")->getPos();
-    auto point2Out = instOut->getComponentByName("point-detector2")->getPos();
 
     TS_ASSERT_EQUALS(point1In.X(), point1Out.X());
     TS_ASSERT_EQUALS(point1In.Z(), point1Out.Z());
-    TS_ASSERT_EQUALS(point2In.X(), point2Out.X());
-    TS_ASSERT_EQUALS(point2In.Z(), point2Out.Z());
     TS_ASSERT_DIFFERS(point1In.Y(), point1Out.Y());
-    TS_ASSERT_DIFFERS(point2In.Y(), point2Out.Y());
     TS_ASSERT_DELTA(point1Out.Y() /
                         (point1Out.Z() - instOut->getSample()->getPos().Z()),
-                    std::tan(theta * 2 * M_PI / 180), 1e-4);
-    TS_ASSERT_DELTA(point2Out.Y() /
-                        (point2Out.Z() - instOut->getSample()->getPos().Z()),
                     std::tan(theta * 2 * M_PI / 180), 1e-4);
   }
 
@@ -399,7 +390,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
-    alg.setProperty("ProcessingInstructions", "3:4");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -417,25 +408,17 @@ public:
     TS_ASSERT_EQUALS(instIn->getComponentByName("linear-detector")->getPos(),
                      instOut->getComponentByName("linear-detector")->getPos());
 
-    // Only 'point-detector' and 'point-detector2' should have been moved
+    // Only 'point-detector' should have been moved
     // vertically (along Y)
 
     auto point1In = instIn->getComponentByName("point-detector")->getPos();
-    auto point2In = instIn->getComponentByName("point-detector2")->getPos();
     auto point1Out = instOut->getComponentByName("point-detector")->getPos();
-    auto point2Out = instOut->getComponentByName("point-detector2")->getPos();
 
     TS_ASSERT_EQUALS(point1In.X(), point1Out.X());
     TS_ASSERT_EQUALS(point1In.Z(), point1Out.Z());
-    TS_ASSERT_EQUALS(point2In.X(), point2Out.X());
-    TS_ASSERT_EQUALS(point2In.Z(), point2Out.Z());
     TS_ASSERT_DIFFERS(point1In.Y(), point1Out.Y());
-    TS_ASSERT_DIFFERS(point2In.Y(), point2Out.Y());
     TS_ASSERT_DELTA(point1Out.Y() /
                         (point1Out.Z() - instOut->getSample()->getPos().Z()),
-                    std::tan(theta * 2 * M_PI / 180), 1e-4);
-    TS_ASSERT_DELTA(point2Out.Y() /
-                        (point2Out.Z() - instOut->getSample()->getPos().Z()),
                     std::tan(theta * 2 * M_PI / 180), 1e-4);
   }
 
@@ -452,7 +435,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
-    alg.setProperty("ProcessingInstructions", "3:4");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -463,12 +446,9 @@ public:
     // the detectors should not have been moved
 
     auto point1In = instIn->getComponentByName("point-detector")->getPos();
-    auto point2In = instIn->getComponentByName("point-detector2")->getPos();
     auto point1Out = instOut->getComponentByName("point-detector")->getPos();
-    auto point2Out = instOut->getComponentByName("point-detector2")->getPos();
 
     TS_ASSERT_EQUALS(point1In, point1Out);
-    TS_ASSERT_EQUALS(point2In, point2Out);
   }
 
   void test_sum_transmission_workspaces() {

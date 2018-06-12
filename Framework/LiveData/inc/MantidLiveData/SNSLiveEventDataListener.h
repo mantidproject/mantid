@@ -79,7 +79,7 @@ protected:
   bool rxPacket(const ADARA::VariableStringPkt &pkt) override;
   bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt) override;
   bool rxPacket(const ADARA::AnnotationPkt &pkt) override;
-  // virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
+  bool rxPacket(const ADARA::RunInfoPkt &pkt) override;
 
 private:
   // Workspace initialization needs to happen in 2 steps.  Part 1 must happen
@@ -180,7 +180,8 @@ private:
 
   // maps <device id, variable id> to variable name
   // (variable names are unique, so we don't need to worry about device names.)
-  typedef std::map<std::pair<unsigned, unsigned>, std::string> NameMapType;
+  using NameMapType =
+      std::map<std::pair<unsigned int, unsigned int>, std::string>;
   NameMapType m_nameMap;
 
   // ---------------------------------------------------------------------------
@@ -195,8 +196,8 @@ private:
 
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
-  typedef std::map<std::pair<unsigned, unsigned>,
-                   boost::shared_ptr<ADARA::Packet>> VariableMapType;
+  using VariableMapType = std::map<std::pair<unsigned int, unsigned int>,
+                                   boost::shared_ptr<ADARA::Packet>>;
   VariableMapType m_variableMap;
 
   // Process all the variable value packets stored in m_variableMap

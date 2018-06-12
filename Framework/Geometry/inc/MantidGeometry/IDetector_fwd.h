@@ -34,13 +34,13 @@ namespace Geometry {
 class IDetector;
 
 /// Shared pointer to an IDetector object
-typedef boost::shared_ptr<IDetector> IDetector_sptr;
+using IDetector_sptr = boost::shared_ptr<IDetector>;
 /// Shared pointer to an const IDetector object
-typedef boost::shared_ptr<const IDetector> IDetector_const_sptr;
+using IDetector_const_sptr = boost::shared_ptr<const IDetector>;
 /// unique pointer to an IDetector
-typedef std::unique_ptr<IDetector> IDetector_uptr;
+using IDetector_uptr = std::unique_ptr<IDetector>;
 /// unique pointer to an IDetector (const version)
-typedef std::unique_ptr<const IDetector> IDetector_const_uptr;
+using IDetector_const_uptr = std::unique_ptr<const IDetector>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -504,8 +504,15 @@ private:
         "f1.SigmaError", "f0.f1.Tau",      "f0.f1.TauError",
         "f1.f1.Tau",     "f1.f1.TauError", "Cost function value"};
     table->addColumn("str", "Label");
+    int k = 0;
     for (const auto &log : m_logs) {
-      table->addColumn("str", log.toStdString());
+      if (k == 2) {
+
+        table->addColumn("double", log.toStdString());
+      } else {
+        table->addColumn("str", log.toStdString());
+      }
+      k++;
     }
     for (const auto &title : titles) {
       table->addColumn("double", title);
@@ -516,16 +523,14 @@ private:
 
     firstRow << "Label"
              << "20918-20919"
-             << "0-1310"
-             << "100"
-             << "190-200" << 0.1 << err << 1.1 << err << 0.2 << err << 0.3
-             << 0.4 << err << 0.5 << err << 0.6 << err << 1.6 << err << 0.03;
+             << "0-1310" << 100.0 << "190-200" << 0.1 << err << 1.1 << err
+             << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6 << err
+             << 1.6 << err << 0.03;
     secondRow << "Label#2"
               << "20920-20921"
-              << "2620-3930"
-              << "100"
-              << "170-180" << 0.1 << err << 1.1 << err << 0.2 << err << 0.3
-              << 0.4 << err << 0.5 << err << 0.6 << err << 1.6 << err << 0.03;
+              << "2620-3930" << 100.0 << "170-180" << 0.1 << err << 1.1 << err
+              << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6 << err
+              << 1.6 << err << 0.03;
 
     return table;
   }

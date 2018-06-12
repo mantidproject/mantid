@@ -38,6 +38,9 @@ public:
   const std::string name() const override;
   const std::string summary() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"Comment"};
+  }
   const std::string category() const override;
 
 private:

@@ -20,6 +20,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
@@ -60,15 +61,16 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-IObject_sptr createCappedCylinder(double radius, double height,
-                                  const V3D &baseCentre, const V3D &axis,
-                                  const std::string &id) {
+boost::shared_ptr<CSGObject> createCappedCylinder(double radius, double height,
+                                                  const V3D &baseCentre,
+                                                  const V3D &axis,
+                                                  const std::string &id) {
   return ShapeFactory().createShape(
       cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
 void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
-                           std::string name = "moderator") {
+                           const std::string &name) {
   ObjComponent *source =
       new ObjComponent(name, IObject_sptr(new CSGObject), instrument.get());
   source->setPos(sourcePos);
@@ -105,16 +107,16 @@ std::string sphereXML(double radius, const V3D &centre, const std::string &id) {
 /**
  * Create a sphere object
  */
-IObject_sptr createSphere(double radius, const V3D &centre,
-                          const std::string &id) {
+boost::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
+                                          const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }
 
 //----------------------------------------------------------------------------------------------
 /** Create a cuboid shape for your pixels */
-IObject_sptr createCuboid(double x_side_length, double y_side_length,
-                          double z_side_length) {
+boost::shared_ptr<CSGObject>
+createCuboid(double x_side_length, double y_side_length, double z_side_length) {
   double szX = x_side_length;
   double szY = (y_side_length == -1.0 ? szX : y_side_length);
   double szZ = (z_side_length == -1.0 ? szX : z_side_length);
@@ -169,8 +171,8 @@ ObjComponent *createSingleObjectComponent() {
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-IObject_sptr createHollowShell(double innerRadius, double outerRadius,
-                               const V3D &centre) {
+boost::shared_ptr<CSGObject>
+createHollowShell(double innerRadius, double outerRadius, const V3D &centre) {
   std::string wholeXML = sphereXML(innerRadius, centre, "inner") + "\n" +
                          sphereXML(outerRadius, centre, "outer") + "\n" +
                          "<algebra val=\"(outer (# inner))\" />";

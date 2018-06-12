@@ -63,7 +63,7 @@ elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
 endif()
 
 # Add some options for debug build to help the Zoom profiler
-add_compile_options ( $<$<CONFIG:Debug>:-fno-omit-frame-pointer> )
+add_compile_options ( $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-fno-omit-frame-pointer> )
 
 option(WITH_ASAN "Enable address sanitizer" OFF)
 if(WITH_ASAN)

@@ -44,7 +44,7 @@ PropertyHandler::~PropertyHandler() {}
 /// overrides virtual init() which is called from IFunction::setHandler(...)
 void PropertyHandler::init() {
   m_browser->m_changeSlotsEnabled = false;
-  if (m_parent == NULL) { // the root composite function
+  if (m_parent == nullptr) { // the root composite function
     m_item = m_browser->m_functionsGroup;
   } else if (m_item == nullptr) {
     if (!m_parent->getHandler()) {
@@ -538,7 +538,7 @@ PropertyHandler::findCompositeFunction(QtBrowserItem *item) const {
   for (size_t i = 0; i < m_cf->nFunctions(); i++) {
     Mantid::API::CompositeFunction_const_sptr res =
         getHandler(i)->findCompositeFunction(item);
-    if (res != NULL)
+    if (res != nullptr)
       return res;
   }
   return Mantid::API::CompositeFunction_sptr();
@@ -555,7 +555,7 @@ PropertyHandler::findFunction(QtBrowserItem *item) const {
     return Mantid::API::IFunction_sptr();
   for (size_t i = 0; i < m_cf->nFunctions(); i++) {
     Mantid::API::IFunction_const_sptr res = getHandler(i)->findFunction(item);
-    if (res != NULL)
+    if (res != nullptr)
       return res;
   }
   return Mantid::API::IFunction_sptr();
@@ -927,9 +927,9 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
       f = Mantid::API::FunctionFactory::Instance().createFunction(
           fnName.toStdString());
     } catch (std::exception &e) {
-      QMessageBox::critical(NULL, "Mantid - Error", "Cannot create function " +
-                                                        fnName + "\n" +
-                                                        e.what());
+      QMessageBox::critical(nullptr, "Mantid - Error",
+                            "Cannot create function " + fnName + "\n" +
+                                e.what());
       return Mantid::API::IFunction_sptr();
     }
 

@@ -8,13 +8,15 @@ namespace Kernel {
  * Move constructor
  * @param src Constructor from this temporary
  */
-LibraryWrapper::LibraryWrapper(LibraryWrapper &&src) { *this = std::move(src); }
+LibraryWrapper::LibraryWrapper(LibraryWrapper &&src) noexcept {
+  *this = std::move(src);
+}
 
 /**
  * Move assignment
  * @param rhs Temporary object as source of assignment
  */
-LibraryWrapper &LibraryWrapper::operator=(LibraryWrapper &&rhs) {
+LibraryWrapper &LibraryWrapper::operator=(LibraryWrapper &&rhs) noexcept {
   using std::swap;
   swap(m_module, rhs.m_module);
   return *this;

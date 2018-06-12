@@ -56,6 +56,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 
+    def seeAlso(self):
+        return [ "AlignAndFocusPowder" ]
+
     def name(self):
         return "AlignAndFocusPowderFromFiles"
 

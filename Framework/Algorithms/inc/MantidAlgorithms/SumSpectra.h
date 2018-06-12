@@ -65,8 +65,13 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SumNeighbours"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Grouping"; }
+  /// Cross-input validation
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Handle logic for RebinnedOutput workspaces
@@ -80,7 +85,6 @@ private:
 
   // Overridden Algorithm methods
   void init() override;
-  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   void execEvent(API::MatrixWorkspace_sptr outputWorkspace,
                  API::Progress &progress, size_t &numSpectra, size_t &numMasked,

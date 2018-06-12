@@ -170,7 +170,7 @@ class FFTView(QtGui.QWidget):
         inputs['InputWorkspace'] = "__ReTmp__"#str( self.ws.currentText()).replace(";","; ")
         inputs['Real'] = 0 # always zero
         out = str( self.ws.currentText()).replace(";","; ")
-        inputs['OutputWorkspace'] = out+";FFT"
+        inputs['OutputWorkspace'] = self.getRunName()+";"+out+";FFT"
         inputs["AcceptXRoundingErrors"] = True
         return inputs
 

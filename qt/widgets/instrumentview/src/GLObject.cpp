@@ -2,7 +2,6 @@
 #include <windows.h>
 #endif
 #include "MantidQtWidgets/InstrumentView/GLObject.h"
-#include "MantidQtWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 

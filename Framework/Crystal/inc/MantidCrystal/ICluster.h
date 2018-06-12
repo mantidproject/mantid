@@ -39,7 +39,7 @@ namespace Crystal {
  */
 class DLLExport ICluster {
 public:
-  typedef boost::tuple<double, double> ClusterIntegratedValues;
+  using ClusterIntegratedValues = boost::tuple<double, double>;
 
   /// integrate the cluster
   virtual ClusterIntegratedValues integrate(

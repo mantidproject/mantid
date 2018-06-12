@@ -515,10 +515,10 @@ public:
         1.950190,    1.613562,    1.335208,    1.104734,    0.914043,
         0.756362,    0.000000};
 
-    for (size_t i = 0; i < vecY.size(); ++i) {
+    for (double y : vecY) {
       double e = 1.0;
-      if (vecY[i] > 1.0)
-        e = sqrt(vecY[i]);
+      if (y > 1.0)
+        e = sqrt(y);
       vecE.push_back(e);
     }
 
@@ -687,8 +687,8 @@ public:
     vecy.push_back(0.03096179);
     vece.push_back(0.00105191);
 
-    for (size_t i = 0; i < vecy.size(); ++i)
-      vecy[i] -= 0.02295189;
+    for (double &i : vecy)
+      i -= 0.02295189;
 
     return;
   }

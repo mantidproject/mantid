@@ -196,7 +196,7 @@ protected:
 };
 
 /// ListValidator<std::string> is used heavily
-typedef ListValidator<std::string> StringListValidator;
+using StringListValidator = ListValidator<std::string>;
 
 } // namespace Kernel
 } // namespace Mantid

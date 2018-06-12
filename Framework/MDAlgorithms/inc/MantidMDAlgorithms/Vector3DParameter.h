@@ -152,7 +152,7 @@ ElemType &Vector3DParameter<Derived, ElemType>::operator[](int index) {
   class classname                                                              \
       : public Mantid::MDAlgorithms::Vector3DParameter<classname, double> {    \
   public:                                                                      \
-    typedef Vector3DParameter<classname, type_> SuperType;                     \
+    using SuperType = Vector3DParameter<classname, type_> SuperType;           \
     static std::string parameterName() { return #classname; }                  \
     classname(type_ a, type_ b, type_ c) : SuperType(a, b, c) {}               \
     classname() : SuperType() {}                                               \

@@ -1053,7 +1053,7 @@ class Mask_ISIS(ReductionStep):
                     raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
         if len(self.spec_list) > 0:
-            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list)
+            MaskDetectors(Workspace=workspace, SpectraList=self.spec_list, ForceInstrumentMasking=True)
 
         if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(Workspace=workspace, ShapeXML=self._lim_phi_xml)
@@ -3351,6 +3351,8 @@ class UserFile(ReductionStep):
                 if det_specif == 'MERGE':
                     det_specif = 'MERGED'
                 reducer.instrument.setDetector(det_specif)
+            elif det_specif.startswith('OVERLAP'):
+                self.readFrontMergeRange(det_specif, reducer)
             else:
                 _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)
 
@@ -3718,6 +3720,24 @@ class UserFile(ReductionStep):
                     rAnds.shift = float(values[1])
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
+
+    def readFrontMergeRange(self, details, reducer):
+        """
+            Handle user commands of the type DET/OVERLAP [Q1 Q2] which are used to specify the range to merge
+
+            @param details: the contents of the line after DET/
+            @param reducer: the object that contains all the settings
+        """
+        values = details.split()
+        rAnds = reducer.instrument.getDetector('FRONT').mergeRange
+        rAnds.q_merge_range = False
+        if len(values) == 3:
+            rAnds.q_merge_range = True
+            rAnds.q_min = float(values[1])
+            rAnds.q_max = float(values[2])
+        else:
+            _issueWarning(
+                "Command: \"DET/" + details + "\" not valid. Expected format is /DET/OVERLAP q1 q2")
 
     def _read_back_line(self, arguments, reducer):
         """

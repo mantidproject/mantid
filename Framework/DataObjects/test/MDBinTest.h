@@ -13,7 +13,7 @@ using namespace Mantid::DataObjects;
 class MDBinTest : public CxxTest::TestSuite {
 public:
   void test_constructor() {
-    typedef MDLeanEvent<3> MDE;
+    using MDE = MDLeanEvent<3>;
     MDBin<MDE, 3> bin;
     for (size_t d = 0; d < 3; d++) {
       TS_ASSERT_EQUALS(bin.m_min[d], -std::numeric_limits<coord_t>::max());

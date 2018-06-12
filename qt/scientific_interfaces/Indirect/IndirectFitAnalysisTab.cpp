@@ -360,7 +360,10 @@ void IndirectFitAnalysisTab::setConvolveMembers(bool convolveMembers) {
  */
 void IndirectFitAnalysisTab::addTie(const QString &tieString) {
   const auto index = tieString.split(".").first().right(1).toInt();
-  m_fitPropertyBrowser->getHandler()->getHandler(index)->addTie(tieString);
+  const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
+
+  if (handler)
+    handler->addTie(tieString);
 }
 
 /**
@@ -373,8 +376,11 @@ void IndirectFitAnalysisTab::removeTie(const QString &parameterName) {
   const auto index = parts.first().right(1).toInt();
   const auto name = parts.last();
   const auto handler = m_fitPropertyBrowser->getHandler()->getHandler(index);
-  const auto tieProperty = handler->getTies()[name];
-  handler->removeTie(tieProperty, parameterName.toStdString());
+
+  if (handler) {
+    const auto tieProperty = handler->getTies()[name];
+    handler->removeTie(tieProperty, parameterName.toStdString());
+  }
 }
 
 /**
@@ -988,9 +994,15 @@ IAlgorithm_sptr IndirectFitAnalysisTab::sequentialFitAlgorithm() const {
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
 void IndirectFitAnalysisTab::executeSingleFit() {
-  const auto index = boost::numeric_cast<size_t>(selectedSpectrum());
-  m_outputFitPosition[index] = std::make_pair(0u, createSingleFitOutputName());
-  runFitAlgorithm(singleFitAlgorithm());
+  if (validateTab()) {
+    setMinimumSpectrum(minimumSpectrum());
+    setMaximumSpectrum(maximumSpectrum());
+
+    const auto index = boost::numeric_cast<size_t>(selectedSpectrum());
+    m_outputFitPosition[index] =
+        std::make_pair(0u, createSingleFitOutputName());
+    runFitAlgorithm(singleFitAlgorithm());
+  }
 }
 
 /**
@@ -998,13 +1010,18 @@ void IndirectFitAnalysisTab::executeSingleFit() {
  * tab.
  */
 void IndirectFitAnalysisTab::executeSequentialFit() {
-  const auto name = createSequentialFitOutputName();
-  for (auto i = minimumSpectrum(); i <= maximumSpectrum(); ++i) {
-    const auto index = boost::numeric_cast<size_t>(i - minimumSpectrum());
-    m_outputFitPosition[boost::numeric_cast<size_t>(i)] =
-        std::make_pair(index, name);
+  if (validateTab()) {
+    setMinimumSpectrum(minimumSpectrum());
+    setMaximumSpectrum(maximumSpectrum());
+
+    const auto name = createSequentialFitOutputName();
+    for (auto i = minimumSpectrum(); i <= maximumSpectrum(); ++i) {
+      const auto index = boost::numeric_cast<size_t>(i - minimumSpectrum());
+      m_outputFitPosition[boost::numeric_cast<size_t>(i)] =
+          std::make_pair(index, name);
+    }
+    runFitAlgorithm(sequentialFitAlgorithm());
   }
-  runFitAlgorithm(sequentialFitAlgorithm());
 }
 
 /**
@@ -1035,16 +1052,9 @@ MatrixWorkspace_sptr IndirectFitAnalysisTab::fitWorkspace() const {
 }
 
 /**
- * Sets the MaxIterations property of the specified algorithm, to the specified
- * integer value.
- *
- * @param fitAlgorithm  The fit algorithm whose MaxIterations property to set.
- * @param maxIterations The value to set.
+ * Called when the 'Run' button is called in the IndirectTab.
  */
-void IndirectFitAnalysisTab::setMaxIterations(IAlgorithm_sptr fitAlgorithm,
-                                              int maxIterations) const {
-  setAlgorithmProperty(fitAlgorithm, "MaxIterations", maxIterations);
-}
+void IndirectFitAnalysisTab::run() { executeSequentialFit(); }
 
 /*
  * Runs the specified fit algorithm and calls the algorithmComplete
@@ -1068,11 +1078,17 @@ void IndirectFitAnalysisTab::runFitAlgorithm(IAlgorithm_sptr fitAlgorithm) {
   setAlgorithmProperty(fitAlgorithm, "EndX", m_fitPropertyBrowser->endX());
   setAlgorithmProperty(fitAlgorithm, "Minimizer",
                        m_fitPropertyBrowser->minimizer(true));
-  setMaxIterations(fitAlgorithm, m_fitPropertyBrowser->maxIterations());
-  setAlgorithmProperty(fitAlgorithm, "Convolve",
+  setAlgorithmProperty(fitAlgorithm, "MaxIterations",
+                       m_fitPropertyBrowser->maxIterations());
+  setAlgorithmProperty(fitAlgorithm, "ConvolveMembers",
                        m_fitPropertyBrowser->convolveMembers());
   setAlgorithmProperty(fitAlgorithm, "PeakRadius",
                        m_fitPropertyBrowser->getPeakRadius());
+  setAlgorithmProperty(fitAlgorithm, "CostFunction",
+                       m_fitPropertyBrowser->costFunction());
+
+  if (m_fitPropertyBrowser->isHistogramFit())
+    setAlgorithmProperty(fitAlgorithm, "EvaluationType", "Histogram");
 
   auto fittingFunction = m_fitPropertyBrowser->getFittingFunction();
   m_appendResults = false;
@@ -1139,23 +1155,34 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
  * @param parameters  The parameters.
  */
 void IndirectFitAnalysisTab::setPlotOptions(
-    QComboBox *cbPlotType, const std::vector<std::string> &parameters) {
+    QComboBox *cbPlotType, const std::vector<std::string> &parameters) const {
   cbPlotType->clear();
   QSet<QString> plotOptions;
 
-  for (const auto parameter : parameters) {
+  for (const auto &parameter : parameters) {
     auto plotOption = QString::fromStdString(parameter);
     auto index = plotOption.lastIndexOf(".");
     if (index >= 0)
       plotOption = plotOption.remove(0, index + 1);
     plotOptions << plotOption;
   }
+  setPlotOptions(cbPlotType, plotOptions);
+}
+
+/**
+ * Fills the specified combo box, with the specified options.
+ *
+ * @param cbPlotType  The combo box.
+ * @param parameters  The options.
+ */
+void IndirectFitAnalysisTab::setPlotOptions(
+    QComboBox *cbPlotType, const QSet<QString> &options) const {
+  cbPlotType->clear();
 
   QStringList plotList;
-  if (!parameters.empty())
+  if (!options.isEmpty())
     plotList << "All";
-  plotList.append(plotOptions.toList());
-
+  plotList.append(options.toList());
   cbPlotType->addItems(plotList);
 }
 

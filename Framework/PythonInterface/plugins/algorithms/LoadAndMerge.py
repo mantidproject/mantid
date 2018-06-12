@@ -15,6 +15,9 @@ class LoadAndMerge(PythonAlgorithm):
     _prefix = ''
     _progress = None
 
+    def seeAlso(self):
+        return [ "Load","MergeRuns" ]
+
     def name(self):
         return "LoadMergeRuns"
 

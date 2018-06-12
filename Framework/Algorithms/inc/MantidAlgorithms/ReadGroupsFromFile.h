@@ -90,6 +90,11 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateDummyCalFile",   "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "LoadCalFile",          "SaveCalFile",
+            "MergeCalFiles"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Diffraction\\DataHandling\\CalFiles";
@@ -98,7 +103,7 @@ public:
 private:
   /// Map containing the detector entries found in the *.cal file. The key is
   /// the udet number, the value of is a pair of <group,selected>.
-  typedef std::unordered_map<int, std::pair<int, int>> calmap;
+  using calmap = std::unordered_map<int, std::pair<int, int>>;
   /// Initialisation code
   void init() override;
   /// Execution code

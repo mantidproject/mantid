@@ -83,7 +83,7 @@ std::string toString(const SequenceType &values) {
  */
 template <typename ElementType> struct std_vector_exporter {
   /// A typedef of a vector of template ElementTypes
-  typedef std::vector<ElementType> w_t;
+  using w_t = std::vector<ElementType>;
 
   static std::string to_string(const w_t &values) {
     if (values.empty())
@@ -111,8 +111,8 @@ template <typename ElementType> struct std_vector_exporter {
 // Found this at
 // http://cctbx.svn.sourceforge.net/viewvc/cctbx/trunk/scitbx/stl/set_wrapper.h?view=log
 template <typename ElementType> struct std_set_exporter {
-  typedef std::set<ElementType> w_t;
-  typedef ElementType e_t;
+  using w_t = std::set<ElementType>;
+  using e_t = ElementType;
 
   static void insert_element(w_t &self, e_t const &x) { self.insert(x); }
 

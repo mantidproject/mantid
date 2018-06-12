@@ -20,8 +20,10 @@
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "../ISISReflectometry/ExperimentOptionDefaults.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
+#include "../ISISReflectometry/IReflAsciiSaver.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
@@ -86,7 +88,6 @@ public:
   MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
@@ -94,8 +95,6 @@ public:
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
-  MOCK_CONST_METHOD0(getMomentumTransferStep, std::string());
-  MOCK_CONST_METHOD0(getScaleFactor, std::string());
   MOCK_CONST_METHOD0(getIntMonCheck, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());
@@ -104,9 +103,9 @@ public:
   MOCK_CONST_METHOD0(getLambdaMin, std::string());
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
-  MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
   MOCK_CONST_METHOD0(getSummationType, std::string());
   MOCK_CONST_METHOD0(getReductionType, std::string());
+  MOCK_CONST_METHOD0(getPerAngleOptions, std::map<std::string, OptionsQMap>());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_METHOD1(setReductionTypeEnabled, void(bool));
   MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
@@ -133,10 +132,15 @@ public:
 class MockEventView : public IReflEventView {
 public:
   // Global options
-  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
-  MOCK_METHOD0(enableAll, void());
-  MOCK_METHOD0(disableAll, void());
+  MOCK_METHOD1(enableSliceType, void(SliceType));
+  MOCK_METHOD1(disableSliceType, void(SliceType));
+  MOCK_METHOD0(enableSliceTypeSelection, void());
+  MOCK_METHOD0(disableSliceTypeSelection, void());
+  MOCK_CONST_METHOD0(getLogValueTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getCustomTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getUniformTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getUniformEvenTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getLogValueTimeSlicingType, std::string());
 
   // Calls we don't care about
   IReflEventPresenter *getPresenter() const override { return nullptr; }
@@ -160,9 +164,17 @@ public:
   MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD0(clearParametersList, void());
   MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
-
-  // Calls we don't care about
-  IReflSaveTabPresenter *getPresenter() const override { return nullptr; }
+  MOCK_CONST_METHOD0(getAutosavePrefixInput, std::string());
+  MOCK_METHOD1(subscribe, void(IReflSaveTabPresenter *));
+  MOCK_METHOD0(disallowAutosave, void());
+  MOCK_METHOD0(disableAutosaveControls, void());
+  MOCK_METHOD0(enableAutosaveControls, void());
+  MOCK_METHOD0(enableFileFormatAndLocationControls, void());
+  MOCK_METHOD0(disableFileFormatAndLocationControls, void());
+  MOCK_METHOD2(giveUserCritical,
+               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+  virtual ~MockSaveTabView() = default;
 };
 
 class MockMainWindowView : public IReflMainWindowView {
@@ -198,6 +210,7 @@ public:
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
   MOCK_METHOD0(onReductionPaused, void());
   MOCK_METHOD0(onReductionResumed, void());
+  MOCK_METHOD1(notifySliceTypeChanged, void(SliceType));
   ~MockEventPresenter() override{};
 };
 
@@ -220,7 +233,8 @@ public:
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
-  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
+  MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
   MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getReductionOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
@@ -237,7 +251,9 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
+  MOCK_CONST_METHOD2(getOptionsForAngle, OptionsQMap(int, const double));
+  MOCK_CONST_METHOD1(hasPerAngleOptions, bool(int));
+  MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
   MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
@@ -253,6 +269,12 @@ public:
 
 class MockSaveTabPresenter : public IReflSaveTabPresenter {
 public:
+  MOCK_METHOD2(completedRowReductionSuccessfully,
+               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
+                    std::string const &));
+  MOCK_METHOD2(completedGroupReductionSuccessfully,
+               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
+                    std::string const &));
   void notify(IReflSaveTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
@@ -265,12 +287,19 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
+  MOCK_CONST_METHOD2(getOptionsForAngle, OptionsQMap(int, const double));
+  MOCK_CONST_METHOD1(hasPerAngleOptions, bool(int));
   MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
+  MOCK_METHOD2(completedRowReductionSuccessfully,
+               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
+                    std::string const &));
+  MOCK_METHOD2(completedGroupReductionSuccessfully,
+               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
+                    std::string const &));
   MOCK_METHOD1(notify, void(IReflMainWindowPresenter::Flag));
   MOCK_METHOD1(notifyReductionPaused, void(int));
   MOCK_METHOD1(notifyReductionResumed, void(int));
@@ -320,6 +349,16 @@ public:
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
   MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
   ~MockICatalogInfo() override {}
+};
+
+class MockReflAsciiSaver : public IReflAsciiSaver {
+public:
+  MOCK_CONST_METHOD1(isValidSaveDirectory, bool(std::string const &));
+  MOCK_CONST_METHOD4(save,
+                     void(std::string const &, std::vector<std::string> const &,
+                          std::vector<std::string> const &,
+                          FileFormatOptions const &));
+  virtual ~MockReflAsciiSaver() = default;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

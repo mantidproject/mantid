@@ -21,6 +21,9 @@ class LoadFullprofFile(PythonAlgorithm):
         """
         return "Diffraction\\DataHandling"
 
+    def seeAlso(self):
+        return [ "LoadFullprofResolution" ]
+
     def name(self):
         """
         """

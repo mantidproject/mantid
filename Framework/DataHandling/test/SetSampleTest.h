@@ -110,8 +110,8 @@ public:
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
-    sampleShape->setID("mysample");
     Material alum("Al", getNeutronAtom(13), 2.6989);
+    sampleShape->setID("mysample");
     sampleShape->setMaterial(alum);
     inputWS->mutableSample().setShape(sampleShape);
 
@@ -213,7 +213,9 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = sampleShape.getShapeXML().find("cuboid");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+                   .getShapeXML()
+                   .find("cuboid");
     TS_ASSERT(tag != std::string::npos);
 
     // Center
@@ -237,7 +239,9 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = sampleShape.getShapeXML().find("cuboid");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+                   .getShapeXML()
+                   .find("cuboid");
     TS_ASSERT(tag != std::string::npos);
 
     // Center should be preserved inside the shape
@@ -263,7 +267,9 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    auto tag = sampleShape.getShapeXML().find("cylinder");
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+                   .getShapeXML()
+                   .find("cylinder");
     TS_ASSERT(tag != std::string::npos);
 
     TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));

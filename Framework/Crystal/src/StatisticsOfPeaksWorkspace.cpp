@@ -6,6 +6,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <fstream>
 
@@ -75,6 +76,22 @@ void StatisticsOfPeaksWorkspace::init() {
                   boost::make_shared<StringListValidator>(sortTypes),
                   "Sort the peaks by resolution shell in d-Spacing(default), "
                   "bank, run number, or only overall statistics.");
+  std::vector<std::string> equivTypes{"Mean", "Median"};
+  declareProperty("EquivalentIntensities", equivTypes[0],
+                  boost::make_shared<StringListValidator>(equivTypes),
+                  "Replace intensities by mean(default), "
+                  "or median.");
+  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+                      "SigmaCritical", 3.0, Direction::Input),
+                  "Removes peaks whose intensity deviates more than "
+                  "SigmaCritical from the mean (or median).");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "EquivalentsWorkspace", "EquivalentIntensities", Direction::Output),
+      "Output Equivalent Intensities");
+  declareProperty("WeightedZScore", false,
+                  "Use weighted ZScore if true.\n"
+                  "If false, standard ZScore (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -177,6 +194,9 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
   std::string latticeCentering = getPropertyValue("LatticeCentering");
   std::string wkspName = getPropertyValue("OutputWorkspace");
   std::string tableName = getPropertyValue("StatisticsTable");
+  std::string equivalentIntensities = getPropertyValue("EquivalentIntensities");
+  double sigmaCritical = getProperty("SigmaCritical");
+  bool weightedZ = getProperty("WeightedZScore");
   API::IAlgorithm_sptr statsAlg = createChildAlgorithm("SortHKL");
   statsAlg->setProperty("InputWorkspace", ws);
   statsAlg->setPropertyValue("OutputWorkspace", wkspName);
@@ -186,12 +206,17 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
   statsAlg->setProperty("RowName", runName);
   if (runName != "Overall")
     statsAlg->setProperty("Append", true);
+  statsAlg->setPropertyValue("EquivalentIntensities", equivalentIntensities);
+  statsAlg->setProperty("SigmaCritical", sigmaCritical);
+  statsAlg->setProperty("WeightedZScore", weightedZ);
   statsAlg->executeAsChildAlg();
   PeaksWorkspace_sptr statsWksp = statsAlg->getProperty("OutputWorkspace");
   ITableWorkspace_sptr tablews = statsAlg->getProperty("StatisticsTable");
+  MatrixWorkspace_sptr equivws = statsAlg->getProperty("EquivalentsWorkspace");
   if (runName == "Overall")
     setProperty("OutputWorkspace", statsWksp);
   setProperty("StatisticsTable", tablews);
+  setProperty("EquivalentsWorkspace", equivws);
 }
 
 } // namespace Mantid

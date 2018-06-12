@@ -128,11 +128,9 @@ void vtkMDHexFactory::doCreate(
 
         // If slicing down to 3D, specify which dimensions to keep.
         if (this->slice) {
-          coords = std::unique_ptr<coord_t[]>(
-              box->getVertexesArray(numVertexes, 3, this->sliceMask.get()));
+          coords = box->getVertexesArray(numVertexes, 3, this->sliceMask.get());
         } else {
-          coords =
-              std::unique_ptr<coord_t[]>(box->getVertexesArray(numVertexes));
+          coords = box->getVertexesArray(numVertexes);
         }
         if (numVertexes == 8) {
           std::copy_n(coords.get(), 24, std::next(pointsPtr, i * 24));

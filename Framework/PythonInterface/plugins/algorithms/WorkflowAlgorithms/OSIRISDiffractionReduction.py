@@ -480,6 +480,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     def category(self):
         return 'Diffraction\\Reduction'
 
+    def seeAlso(self):
+        return [ "ISISIndirectDiffractionReduction" ]
+
     def summary(self):
         return "This Python algorithm performs the operations necessary for the reduction of diffraction data " + \
                "from the Osiris instrument at ISIS " + \

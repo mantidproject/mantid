@@ -25,10 +25,10 @@ std::string
 EqualBinSizesValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (!value)
     return "Enter an existing workspace";
-  if (value->getNumberHistograms() == 0 || value->blocksize() == 0)
-    return "Enter a workspace with some data in it";
   if (!value->isCommonBins())
     return "The workspace must have common bin boundaries for all histograms";
+  if (value->getNumberHistograms() == 0 || value->blocksize() == 0)
+    return "Enter a workspace with some data in it";
 
   Kernel::EqualBinsChecker checker(value->readX(0), m_errorLevel,
                                    m_warningLevel);

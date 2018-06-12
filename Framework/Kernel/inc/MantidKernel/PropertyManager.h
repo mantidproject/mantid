@@ -135,7 +135,7 @@ private:
       const std::unordered_set<std::string> &ignoreProperties);
 
   /// typedef for the map holding the properties
-  typedef std::map<std::string, std::unique_ptr<Property>> PropertyMap;
+  using PropertyMap = std::map<std::string, std::unique_ptr<Property>>;
   /// The properties under management
   PropertyMap m_properties;
   /// Stores the order in which the properties were declared.
@@ -143,7 +143,7 @@ private:
 };
 
 /// Typedef for a shared pointer to a PropertyManager
-typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
+using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
 
 } // namespace Kernel
 } // namespace Mantid

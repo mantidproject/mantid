@@ -225,7 +225,7 @@ def SetMergeQRange(q_min=None, q_max=None):
         @param qMax: When set to None (default) then for merge use the overlapping q region of front and rear detectors
     """
     ReductionSingleton().instrument.getDetector('FRONT').mergeRange = ReductionSingleton().instrument. \
-        getDetector('FRONT')._MergeRange(q_max, q_min)
+        getDetector('FRONT')._MergeRange(q_min, q_max)
     _printMessage('#Set merge range values')
 
 

@@ -450,7 +450,7 @@ void MDNormDirectSC::calculateNormalization(
                                PhysicalConstants::meV * 1e-20 /
                                (PhysicalConstants::h * PhysicalConstants::h);
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
-  typedef Kernel::PropertyWithValue<std::vector<double>> VectorDoubleProperty;
+  using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
   auto *rubwLog =
       dynamic_cast<VectorDoubleProperty *>(exptInfoZero.getLog("RUBW_MATRIX"));
   if (!rubwLog) {

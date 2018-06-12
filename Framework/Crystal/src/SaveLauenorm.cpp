@@ -10,6 +10,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "boost/math/special_functions/round.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -66,6 +68,15 @@ void SaveLauenorm::init() {
                                                       Direction::Input),
       "Comma deliminated string of bank numbers to exclude for example 1,2,5");
   declareProperty("LaueScaleFormat", false, "New format for Lauescale");
+
+  declareProperty("CrystalSystem", m_typeList[0],
+                  boost::make_shared<Kernel::StringListValidator>(m_typeList),
+                  "The conventional cell type to use");
+
+  declareProperty(
+      "Centering", m_centeringList[0],
+      boost::make_shared<Kernel::StringListValidator>(m_centeringList),
+      "The centering for the conventional cell");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -86,7 +97,12 @@ void SaveLauenorm::exec() {
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
   bool newFormat = getProperty("LaueScaleFormat");
-
+  std::string cellType = getProperty("CrystalSystem");
+  auto iter = std::find(m_typeList.begin(), m_typeList.end(), cellType);
+  auto cellNo = 1 + std::distance(m_typeList.begin(), iter);
+  std::string cent = getProperty("Centering");
+  auto iter2 = std::find(m_centeringList.begin(), m_centeringList.end(), cent);
+  auto centerNo = 1 + std::distance(m_centeringList.begin(), iter2);
   // sequenceNo and run number
   int sequenceNo = 0;
   int oldSequence = -1;
@@ -124,7 +140,7 @@ void SaveLauenorm::exec() {
   auto inst = ws->getInstrument();
   OrientedLattice lattice;
   if (newFormat) {
-    type = "RunNumber";
+    type = "Both Bank and RunNumber";
     if (!ws->sample().hasOrientedLattice()) {
 
       const std::string fft("FindUBUsingIndexedPeaks");
@@ -312,11 +328,11 @@ void SaveLauenorm::exec() {
             << 1.0 / lattice.a() << std::setw(12) << std::setprecision(4)
             << 1.0 / lattice.b() << std::setw(12) << std::setprecision(4)
             << 1.0 / lattice.c() << std::setw(9)
-            << static_cast<int>(lattice.alpha() + 0.5) << std::setw(9)
-            << static_cast<int>(lattice.beta() + 0.5) << std::setw(9)
-            << static_cast<int>(lattice.gamma() + 0.5) << "\n";
-        std::vector<int> systemNo = crystalSystem(lattice, peaks);
-        out << "SYST    " << systemNo[0] << "   " << systemNo[1] << "   0   0"
+            << boost::math::iround(lattice.alpha()) << std::setw(9)
+            << boost::math::iround(lattice.beta()) << std::setw(9)
+            << boost::math::iround(lattice.gamma()) << '\n';
+
+        out << "SYST    " << cellNo << "   " << centerNo << "   1   3"
             << "\n";
         out << "RAST      0.050"
             << "\n";
@@ -362,10 +378,10 @@ void SaveLauenorm::exec() {
         out << "BULG    0.00000     0.00000     0.00000     0.00000     "
                "0.00000     0.00000 \n";
         out << "CTOF     " << L2 << "\n";
-        out << "YSCA     0.00000     0.00000     0.00000     0.00000     "
-               "0.00000     0.00000\n";
-        out << "CRAT     0.00000     0.00000     0.00000     0.00000     "
-               "0.00000     0.00000\n";
+        out << "YSCA     1.00000     1.00000     1.00000     1.00000     "
+               "1.00000     1.00000\n";
+        out << "CRAT     1.00000     1.00000     1.00000     1.00000     "
+               "1.00000     1.00000\n";
         out << "MINI          ";
         if (minIntensity != EMPTY_DBL()) {
           out << minIntensity << "\n";
@@ -418,7 +434,7 @@ void SaveLauenorm::exec() {
     out << std::setw(10) << std::fixed << std::setprecision(5) << lambda;
     if (newFormat) {
       // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
-      out << " 1 0 0 0 0 0 0 0 0 0 ";
+      out << " 1 0 0 0 0 0 0 0 0.0 0 ";
     }
 
     if (newFormat) {
@@ -505,102 +521,6 @@ void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nRows = static_cast<int>(grandchildren.size());
     nCols = static_cast<int>(children.size());
   }
-}
-std::vector<int> SaveLauenorm::crystalSystem(OrientedLattice lattice,
-                                             std::vector<Peak> peaks) {
-  std::vector<int> systemVec;
-  int alpha = static_cast<int>(lattice.alpha() + 0.5);
-  int beta = static_cast<int>(lattice.beta() + 0.5);
-  int gamma = static_cast<int>(lattice.gamma() + 0.5);
-  int a = static_cast<int>(lattice.a() * 1000 + 0.5);
-  int b = static_cast<int>(lattice.b() * 1000 + 0.5);
-  int c = static_cast<int>(lattice.c() * 1000 + 0.5);
-  if (alpha == 90 && beta == 90 && gamma == 90) {
-    if (a == b && a == c) {
-      systemVec.push_back(7); // cubic I,F
-    } else if (a == b) {
-      systemVec.push_back(4); // tetragonal I
-    } else {
-      systemVec.push_back(3); // orthorhombic I,A,B,C,F
-    }
-  } else if (alpha == 90 && beta == 90 && gamma == 120 && a == b) {
-    systemVec.push_back(6); // hexagonal
-  } else if ((alpha == 90 && beta == 90) || (alpha == 90 && gamma == 90) ||
-             (beta == 90 && gamma == 90)) {
-    systemVec.push_back(2); // monoclinic I,A,B,C
-  } else if (alpha == 90 && beta == 90 && gamma != 90 && a == b && a == c) {
-    systemVec.push_back(5); // rhombohedral R
-  } else {
-    systemVec.push_back(1); // triclinic
-  }
-  int i = 0;
-  int fp = 0;
-  int fm = 0;
-  int cc = 0;
-  int bc = 0;
-  int ac = 0;
-  int r = 0;
-  int total = 0;
-  for (size_t j = 0; j < peaks.size(); j++) {
-    int h = static_cast<int>(peaks[j].getH() + 0.5);
-    int k = static_cast<int>(peaks[j].getK() + 0.5);
-    int l = static_cast<int>(peaks[j].getL() + 0.5);
-    if (h + k + l == 0)
-      continue;
-    total++;
-    if ((h + k + l) % 2 == 0) {
-      i++;
-    }
-    if (h % 2 == 0 && k % 2 == 0 && l % 2 == 0) {
-      fp++;
-    }
-    if (h % 2 != 0 && k % 2 != 0 && l % 2 != 0) {
-      fm++;
-    }
-    if ((h + k) % 2 == 0) {
-      cc++;
-    }
-    if ((h + l) % 2 == 0) {
-      bc++;
-    }
-    if ((k + l) % 2 == 0) {
-      ac++;
-    }
-    if ((-h + k + l) % 3 == 0) {
-      r++;
-    }
-  }
-  int maxCen = 1;
-  int maxPeaks = 0;
-  if (maxPeaks < i) {
-    maxCen = 2; // I
-    maxPeaks = i;
-  }
-  if (maxPeaks < ac) {
-    maxCen = 3; // A
-    maxPeaks = ac;
-  }
-  if (maxPeaks < bc) {
-    maxCen = 4; // B
-    maxPeaks = bc;
-  }
-  if (maxPeaks < cc) {
-    maxCen = 5; // C
-    maxPeaks = cc;
-  }
-  if (maxPeaks < fp || maxPeaks < fm) {
-    maxCen = 6; // F
-    maxPeaks = std::max(fp, fm);
-  }
-  if (maxPeaks < r) {
-    maxCen = 7; // R
-    maxPeaks = r;
-  }
-  if (maxPeaks < 6 * total / 10) {
-    maxCen = 1; // P
-  }
-  systemVec.push_back(maxCen); // P
-  return systemVec;
 }
 
 } // namespace Mantid

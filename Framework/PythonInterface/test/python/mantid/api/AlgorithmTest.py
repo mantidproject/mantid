@@ -22,6 +22,7 @@ class AlgorithmTest(unittest.TestCase):
         self.assertEquals(1, len(self._load.categories()))
         self.assertEquals('DataHandling', self._load.categories()[0])
         self.assertEquals('', self._load.helpURL())
+        self.assertEquals(["LoadNexus", "LoadRaw", "LoadBBY"], self._load.seeAlso())
 
     def test_get_unknown_property_raises_error(self):
         self.assertRaises(RuntimeError, self._load.getProperty, "NotAProperty")

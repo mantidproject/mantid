@@ -142,14 +142,14 @@ const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
   return typeNames;
 }
 
-typedef Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
+using FunctionFactory = Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-typedef FunctionFactoryImpl::UpdateNotification
-    FunctionFactoryUpdateNotification;
+using FunctionFactoryUpdateNotification =
+    FunctionFactoryImpl::UpdateNotification;
 /// Convenient typedef for an UpdateNotification AutoPtr
-typedef const Poco::AutoPtr<FunctionFactoryUpdateNotification> &
-    FunctionFactoryUpdateNotification_ptr;
+using FunctionFactoryUpdateNotification_ptr =
+    const Poco::AutoPtr<FunctionFactoryUpdateNotification> &;
 } // namespace API
 } // namespace Mantid
 

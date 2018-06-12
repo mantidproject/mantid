@@ -2,9 +2,15 @@
 <parameter-file instrument="D20" valid-from="1900-01-31 23:59:59">
 	<component-link name="D20">
 
+		<!-- The detector name for the height axis used in SumOverlappingTubes -->
 		<parameter name="detector_for_height_axis" type="string">
 			<value val="panel_1" />
 		</parameter>
+
+		<!-- The flag for mirroring the angles in SumOverlappingTubes -->
+		<parameter name="mirror_scattering_angles" type="bool">
+			<value val="False" />
+	  </parameter>
 
 	</component-link>
 </parameter-file>

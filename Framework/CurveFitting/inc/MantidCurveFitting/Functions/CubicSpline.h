@@ -115,8 +115,8 @@ private:
   double splineEval(const double x) const;
 };
 
-typedef boost::shared_ptr<CubicSpline> CubicSpline_sptr;
-typedef const boost::shared_ptr<CubicSpline> CubicSpline_const_sptr;
+using CubicSpline_sptr = boost::shared_ptr<CubicSpline>;
+using CubicSpline_const_sptr = const boost::shared_ptr<CubicSpline>;
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -44,7 +44,7 @@ class MANTID_MDALGORITHMS_DLL ForegroundModelFactoryImpl
     : public Kernel::DynamicFactory<ForegroundModel> {
 private:
   /// Base-class type
-  typedef Kernel::DynamicFactory<ForegroundModel> BaseClass;
+  using BaseClass = Kernel::DynamicFactory<ForegroundModel>;
 
 public:
   /// A create method to ensure the model is initialized properly
@@ -69,8 +69,8 @@ private:
 };
 
 /// Typedef singleton instance to ForegroundFactory
-typedef Kernel::SingletonHolder<ForegroundModelFactoryImpl>
-    ForegroundModelFactory;
+using ForegroundModelFactory =
+    Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
 }
 }
 

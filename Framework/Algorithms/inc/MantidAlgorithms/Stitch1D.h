@@ -43,13 +43,16 @@ public:
   const std::string summary() const override {
     return "Stitches single histogram matrix workspaces together";
   }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Stitch1DMany"};
+  }
   /// Does the x-axis have non-zero errors
   bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
 
 private:
   /// Helper typedef. For storing indexes of special values per spectra per
   /// workspace.
-  typedef std::vector<std::vector<size_t>> SpecialTypeIndexes;
+  using SpecialTypeIndexes = std::vector<std::vector<size_t>>;
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method.

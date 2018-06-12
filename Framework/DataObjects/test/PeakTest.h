@@ -601,8 +601,7 @@ private:
   void check_Contributing_Detectors(const Peak &peak,
                                     const std::vector<int> &expected) {
     auto peakIDs = peak.getContributingDetIDs();
-    for (auto it = expected.begin(); it != expected.end(); ++it) {
-      const int id = *it;
+    for (int id : expected) {
       TSM_ASSERT_EQUALS("Expected " + boost::lexical_cast<std::string>(id) +
                             " in contribution list",
                         1, peakIDs.count(id))

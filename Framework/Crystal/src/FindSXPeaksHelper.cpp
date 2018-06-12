@@ -587,9 +587,9 @@ FindMaxReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
 }
 
 // Define some graph elements
-typedef adjacency_list<vecS, vecS, undirectedS, SXPeak *> PeakGraph;
-typedef boost::graph_traits<PeakGraph>::vertex_descriptor Vertex;
-typedef boost::graph_traits<PeakGraph>::edge_descriptor Edge;
+using PeakGraph = adjacency_list<vecS, vecS, undirectedS, SXPeak *>;
+using Vertex = boost::graph_traits<PeakGraph>::vertex_descriptor;
+using Edge = boost::graph_traits<PeakGraph>::edge_descriptor;
 
 std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
     const std::vector<SXPeak> &peakList,

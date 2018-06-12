@@ -95,11 +95,13 @@ class LRReflectivityOutputTest(stresstesting.MantidStressTest):
         # Read in the first line of the output file to determine success
         self._success = False
         if os.path.isfile(output_path):
-            fd = open(output_path, 'r')
-            content = fd.read()
-            if content.startswith('# Experiment IPTS-11601 Run 119814'):
-                self._success = True
+            with open(output_path, 'r') as fd:
+                content = fd.read()
+                if content.startswith('# Experiment IPTS-11601 Run 119814'):
+                    self._success = True
             os.remove(output_path)
+        else:
+            print("Error: expected output file '{}' not found.".format(output_path))
 
     def validate(self):
         return self._success

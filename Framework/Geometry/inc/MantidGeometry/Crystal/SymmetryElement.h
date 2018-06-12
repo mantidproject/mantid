@@ -65,7 +65,7 @@ protected:
   std::string m_hmSymbol;
 };
 
-typedef boost::shared_ptr<SymmetryElement> SymmetryElement_sptr;
+using SymmetryElement_sptr = boost::shared_ptr<SymmetryElement>;
 
 /** @class SymmetryElementIdentity
 
@@ -79,7 +79,7 @@ public:
   SymmetryElement_sptr clone() const override;
 };
 
-typedef boost::shared_ptr<SymmetryElementIdentity> SymmetryElementIdentity_sptr;
+using SymmetryElementIdentity_sptr = boost::shared_ptr<SymmetryElementIdentity>;
 
 /** @class SymmetryElementInversion
 
@@ -100,8 +100,8 @@ protected:
   V3R m_inversionPoint;
 };
 
-typedef boost::shared_ptr<SymmetryElementInversion>
-    SymmetryElementInversion_sptr;
+using SymmetryElementInversion_sptr =
+    boost::shared_ptr<SymmetryElementInversion>;
 
 /** @class SymmetryElementTranslation
 
@@ -122,8 +122,8 @@ protected:
   V3R m_translation;
 };
 
-typedef boost::shared_ptr<SymmetryElementTranslation>
-    SymmetryElementTranslation_sptr;
+using SymmetryElementTranslation_sptr =
+    boost::shared_ptr<SymmetryElementTranslation>;
 
 /** @class SymmetryElementWithAxis
 
@@ -150,7 +150,7 @@ protected:
   V3R m_translation;
 };
 
-typedef boost::shared_ptr<SymmetryElementWithAxis> SymmetryElementWithAxis_sptr;
+using SymmetryElementWithAxis_sptr = boost::shared_ptr<SymmetryElementWithAxis>;
 
 /** @class SymmetryElementRotation
 
@@ -183,7 +183,7 @@ protected:
   RotationSense m_rotationSense;
 };
 
-typedef boost::shared_ptr<SymmetryElementRotation> SymmetryElementRotation_sptr;
+using SymmetryElementRotation_sptr = boost::shared_ptr<SymmetryElementRotation>;
 
 /** @class SymmetryElementMirror
 
@@ -203,7 +203,7 @@ public:
   SymmetryElement_sptr clone() const override;
 };
 
-typedef boost::shared_ptr<SymmetryElementMirror> SymmetryElementMirror_sptr;
+using SymmetryElementMirror_sptr = boost::shared_ptr<SymmetryElementMirror>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -98,10 +98,10 @@ protected:
 };
 
 /// Underlying data type for the VMD type
-typedef float VMD_t;
+using VMD_t = float;
 
 /// Define the VMD as using the double or float data type.
-typedef VMDBase<VMD_t> VMD;
+using VMD = VMDBase<VMD_t>;
 
 // Overload operator <<
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,

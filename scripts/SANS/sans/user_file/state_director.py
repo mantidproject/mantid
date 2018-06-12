@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
 
-from sans.common.enums import (DetectorType, FitModeForMerge, RebinType, DataType, FitType)
+from sans.common.enums import (DetectorType, FitModeForMerge, RebinType, DataType, FitType, RangeStepType)
 from sans.common.file_information import find_full_file_path
 from sans.common.general_functions import (get_ranges_for_rebin_setting, get_ranges_for_rebin_array,
                                            get_ranges_from_event_slice_setting)
@@ -117,10 +117,27 @@ def set_wavelength_limits(builder, user_file_items):
         wavelength_limits = user_file_items[LimitsId.wavelength]
         check_if_contains_only_one_element(wavelength_limits, LimitsId.wavelength)
         wavelength_limits = wavelength_limits[-1]
-        builder.set_wavelength_low(wavelength_limits.start)
-        builder.set_wavelength_high(wavelength_limits.stop)
-        builder.set_wavelength_step(wavelength_limits.step)
-        builder.set_wavelength_step_type(wavelength_limits.step_type)
+
+        if wavelength_limits.step_type in [RangeStepType.RangeLin, RangeStepType.RangeLog]:
+            wavelength_range = user_file_items[OtherId.wavelength_range]
+            check_if_contains_only_one_element(wavelength_range, OtherId.wavelength_range)
+            wavelength_range = wavelength_range[-1]
+            wavelength_start, wavelength_stop = get_ranges_from_event_slice_setting(wavelength_range)
+            wavelength_start = [min(wavelength_start)] + wavelength_start
+            wavelength_stop = [max(wavelength_stop)] + wavelength_stop
+
+            wavelength_step_type = RangeStepType.Lin if wavelength_limits.step_type is RangeStepType.RangeLin \
+                else RangeStepType.Log
+
+            builder.set_wavelength_low(wavelength_start)
+            builder.set_wavelength_high(wavelength_stop)
+            builder.set_wavelength_step(wavelength_limits.step)
+            builder.set_wavelength_step_type(wavelength_step_type)
+        else:
+            builder.set_wavelength_low([wavelength_limits.start])
+            builder.set_wavelength_high([wavelength_limits.stop])
+            builder.set_wavelength_step(wavelength_limits.step)
+            builder.set_wavelength_step_type(wavelength_limits.step_type)
 
 
 def set_prompt_peak_correction(builder, user_file_items):
@@ -160,7 +177,7 @@ def set_single_entry(builder, method_name, tag, all_entries, apply_to_value=None
 
 
 class StateDirectorISIS(object):
-    def __init__(self, data_info):
+    def __init__(self, data_info, file_information):
         super(StateDirectorISIS, self).__init__()
         data_info.validate()
         self._data = data_info
@@ -174,7 +191,7 @@ class StateDirectorISIS(object):
         self._slice_event_builder = get_slice_event_builder(self._data)
         self._wavelength_builder = get_wavelength_builder(self._data)
         self._save_builder = get_save_builder(self._data)
-        self._scale_builder = get_scale_builder(self._data)
+        self._scale_builder = get_scale_builder(self._data, file_information)
 
         self._adjustment_builder = get_adjustment_builder(self._data)
         self._normalize_to_monitor_builder = get_normalize_to_monitor_builder(self._data)
@@ -514,9 +531,22 @@ class StateDirectorISIS(object):
         # -------------------------------
         # User masking
         # -------------------------------
-        set_single_entry(self._reduction_builder, "set_merge_mask", OtherId.merge_mask, user_file_items)
-        set_single_entry(self._reduction_builder, "set_merge_max", OtherId.merge_max, user_file_items)
-        set_single_entry(self._reduction_builder, "set_merge_min", OtherId.merge_min, user_file_items)
+        merge_min = None
+        merge_max = None
+        merge_mask = False
+        if DetectorId.merge_range in user_file_items:
+            merge_range = user_file_items[DetectorId.merge_range]
+            # Should the user have chosen several values, then the last element is selected
+            check_if_contains_only_one_element(merge_range, DetectorId.rescale_fit)
+            merge_range = merge_range[-1]
+            merge_min = merge_range.start
+            merge_max = merge_range.stop
+            merge_mask = merge_range.use_fit
+
+        self._reduction_builder.set_merge_mask(merge_mask)
+        self._reduction_builder.set_merge_min(merge_min)
+        self._reduction_builder.set_merge_max(merge_max)
+
         # -------------------------------
         # Fitting merged
         # -------------------------------
@@ -653,8 +683,8 @@ class StateDirectorISIS(object):
                     start_times_hab.append(times.start)
                     stop_times_hab.append(times.stop)
                 elif times.detector_type is DetectorType.LAB:
-                    start_times_hab.append(times.start)
-                    stop_times_hab.append(times.stop)
+                    start_times_lab.append(times.start)
+                    stop_times_lab.append(times.stop)
                 else:
                     RuntimeError("UserFileStateDirector: The specified detector {0} is not "
                                  "known".format(times.detector_type))
@@ -924,14 +954,7 @@ class StateDirectorISIS(object):
             self._mask_builder.set_radius_max(max_value)
 
     def _set_up_wavelength_state(self, user_file_items):
-        if LimitsId.wavelength in user_file_items:
-            wavelength_limits = user_file_items[LimitsId.wavelength]
-            check_if_contains_only_one_element(wavelength_limits, LimitsId.wavelength)
-            wavelength_limits = wavelength_limits[-1]
-            self._wavelength_builder.set_wavelength_low(wavelength_limits.start)
-            self._wavelength_builder.set_wavelength_high(wavelength_limits.stop)
-            self._wavelength_builder.set_wavelength_step(wavelength_limits.step)
-            self._wavelength_builder.set_wavelength_step_type(wavelength_limits.step_type)
+        set_wavelength_limits(self._wavelength_builder, user_file_items)
 
     def _set_up_slice_event_state(self, user_file_items):
         # Setting up the slice limits is current
@@ -1199,14 +1222,7 @@ class StateDirectorISIS(object):
                 self._calculate_transmission_builder.set_Can_wavelength_high(can_settings.stop)
 
         # Set the wavelength default configuration
-        if LimitsId.wavelength in user_file_items:
-            wavelength_limits = user_file_items[LimitsId.wavelength]
-            check_if_contains_only_one_element(wavelength_limits, LimitsId.wavelength)
-            wavelength_limits = wavelength_limits[-1]
-            self._calculate_transmission_builder.set_wavelength_low(wavelength_limits.start)
-            self._calculate_transmission_builder.set_wavelength_high(wavelength_limits.stop)
-            self._calculate_transmission_builder.set_wavelength_step(wavelength_limits.step)
-            self._calculate_transmission_builder.set_wavelength_step_type(wavelength_limits.step_type)
+        set_wavelength_limits(self._calculate_transmission_builder, user_file_items)
 
         # Set the full wavelength range. Note that this can currently only be set from the ISISCommandInterface
         if OtherId.use_full_wavelength_range in user_file_items:
@@ -1245,14 +1261,7 @@ class StateDirectorISIS(object):
                     lab_direct_entry.file_path)
 
         # Set up the wavelength
-        if LimitsId.wavelength in user_file_items:
-            wavelength_limits = user_file_items[LimitsId.wavelength]
-            check_if_contains_only_one_element(wavelength_limits, LimitsId.wavelength)
-            wavelength_limits = wavelength_limits[-1]
-            self._wavelength_and_pixel_adjustment_builder.set_wavelength_low(wavelength_limits.start)
-            self._wavelength_and_pixel_adjustment_builder.set_wavelength_high(wavelength_limits.stop)
-            self._wavelength_and_pixel_adjustment_builder.set_wavelength_step(wavelength_limits.step)
-            self._wavelength_and_pixel_adjustment_builder.set_wavelength_step_type(wavelength_limits.step_type)
+        set_wavelength_limits(self._wavelength_and_pixel_adjustment_builder, user_file_items)
 
     def _set_up_compatibility(self, user_file_items):
         if LimitsId.events_binning in user_file_items:

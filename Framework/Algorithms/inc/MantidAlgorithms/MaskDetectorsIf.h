@@ -57,6 +57,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"MaskDetectors"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Diffraction\\Masking;Transforms\\Masking";
@@ -66,7 +69,7 @@ private:
   /// Returns an allowed values statement to insert into decumentation
   std::string allowedValuesStatement(const std::vector<std::string> &vals);
   // Typedef for det to value map
-  typedef std::unordered_map<detid_t, bool> udet2valuem;
+  using udet2valuem = std::unordered_map<detid_t, bool>;
   /// A map of detector numbers to mask boolean
   udet2valuem umap;
   /// Get the properties

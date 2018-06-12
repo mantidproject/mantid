@@ -26,12 +26,12 @@ using namespace testing;
 using boost::regex;
 
 // Alias.
-typedef boost::shared_ptr<Mantid::API::MDGeometry> MDGeometry_sptr;
+using MDGeometry_sptr = boost::shared_ptr<Mantid::API::MDGeometry>;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
   /// Alias.
-  typedef boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>
-      ConcretePeaksPresenter_sptr;
+  using ConcretePeaksPresenter_sptr =
+      boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>;
 
   /// Helper method to create a good 'Integrated' peaks workspace
   Mantid::API::IPeaksWorkspace_sptr

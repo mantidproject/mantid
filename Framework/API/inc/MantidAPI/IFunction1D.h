@@ -80,6 +80,13 @@ public:
                                const size_t nData);
 
 protected:
+  template <typename FunctionType>
+  using Function1DMethod = void (FunctionType::*)(double *, const double *,
+                                                  const size_t) const;
+  /// Calculate a numerical derivative for the 1D data
+  template <typename EvaluationMethod>
+  void calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod func1D,
+                                 const double *xValues, const size_t nData);
   /// Calculate histogram data for the given bin boundaries.
   virtual void histogram1D(double *out, double left, const double *right,
                            const size_t nBins) const;
@@ -95,7 +102,7 @@ protected:
   friend class CurveFitting::Algorithms::Fit;
 };
 
-typedef boost::shared_ptr<IFunction1D> IFunction1D_sptr;
+using IFunction1D_sptr = boost::shared_ptr<IFunction1D>;
 
 } // namespace API
 } // namespace Mantid

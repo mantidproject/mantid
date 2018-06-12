@@ -62,6 +62,7 @@ Stretch::Stretch(QWidget *parent)
   // Connect preview spectrum spinner to handler
   connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(previewSpecChanged(int)));
+  m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   // Connect the plot and save push buttons
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
@@ -276,7 +277,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
-  m_uiForm.spPreviewSpectrum->setMaximum(spectra);
+  m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }
 
 /**

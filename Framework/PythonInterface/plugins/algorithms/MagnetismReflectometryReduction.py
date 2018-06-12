@@ -96,6 +96,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
         self.declareProperty("ConstQTrim", 0.5,
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
+        self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
         self.declareProperty("ConstantQBinning", False, doc="If true, we convert to Q before summing")
 
     #pylint: disable=too-many-locals
@@ -177,6 +178,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Avoid leaving trash behind
         AnalysisDataService.remove(str(normalized_data))
+
+        # Add dQ to each Q point
+        q_rebin = self.compute_resolution(q_rebin)
 
         self.setProperty('OutputWorkspace', q_rebin)
 
@@ -465,6 +469,52 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         self.write_meta_data(q_rebin)
         return q_rebin
+
+    def compute_resolution(self, ws):
+        """
+            Calculate dQ/Q using the slit information.
+            :param workspace ws: reflectivity workspace
+        """
+        sample_length = self.getProperty("SampleLength").value
+
+        # In newer data files, the slit distances are part of the logs
+        if ws.getRun().hasProperty("S1Distance"):
+            s1_dist = ws.getRun().getProperty("S1Distance").value
+            s2_dist = ws.getRun().getProperty("S2Distance").value
+            s3_dist = ws.getRun().getProperty("S3Distance").value
+        else:
+            s1_dist = -2600.
+            s2_dist = -2019.
+            s3_dist = -714.
+        slits =[[ws.getRun().getProperty("S1HWidth").getStatistics().mean, s1_dist],
+                [ws.getRun().getProperty("S2HWidth").getStatistics().mean, s2_dist],
+                [ws.getRun().getProperty("S3HWidth").getStatistics().mean, s3_dist]]
+        theta = ws.getRun().getProperty("two_theta").value/2.0 * np.pi / 180.0
+        res=[]
+        s_width=sample_length*np.sin(theta)
+        for width, dist in slits:
+            # Calculate the maximum opening angle dTheta
+            if s_width > 0.:
+                d_theta = np.arctan((s_width/2.*(1.+width/s_width))/dist)*2.
+            else:
+                d_theta = np.arctan(width/2./dist)*2.
+            # The standard deviation for a uniform angle distribution is delta/sqrt(12)
+            res.append(d_theta*0.28867513)
+
+        # Wavelength uncertainty
+        lambda_min = ws.getRun().getProperty("lambda_min").value
+        lambda_max = ws.getRun().getProperty("lambda_max").value
+        dq_over_q = min(res) / np.tan(theta)
+
+        data_x = ws.dataX(0)
+        data_dx = ws.dataDx(0)
+        dwl = (lambda_max - lambda_min) / len(data_x) / np.sqrt(12.0)
+        for i in range(len(data_x)):
+            dq_theta = data_x[i] * dq_over_q
+            dq_wl = data_x[i]**2 * dwl / (4.0*np.pi*np.sin(theta))
+            data_dx[i] = np.sqrt(dq_theta**2 + dq_wl**2)
+
+        return ws
 
     def calculate_scattering_angle(self, ws_event_data):
         """

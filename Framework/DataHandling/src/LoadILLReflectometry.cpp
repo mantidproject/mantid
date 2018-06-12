@@ -18,6 +18,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V3D.h"
 
 namespace {
 /// Component coordinates for Figaro, in meter.
@@ -266,10 +267,11 @@ void LoadILLReflectometry::exec() {
   root.close();
   firstEntry.close();
   initPixelWidth();
-  // Move components as if the sample was at the origin (it usually is).
+  // Move components.
   m_sampleZOffset = sampleHorizontalOffset();
   placeSource();
   placeDetector();
+  placeSlits();
   // When other components are in-place
   convertTofToWavelength();
   // Set the output workspace property
@@ -661,8 +663,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   auto maxFwhmIt = std::find_if(maxValueIt, ys.cend(), lessThanHalfMax);
   std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
   if (revMinFwhmIt == ys.crend() || maxFwhmIt == ys.cend()) {
-    g_log.warning()
-        << "Couldn't determine fwhm, using position of max value.\n";
+    g_log.warning() << "Couldn't determine fwhm of beam, using position of max "
+                       "value as beam center.\n";
     return centreByMax;
   }
   const double fwhm =
@@ -807,10 +809,38 @@ void LoadILLReflectometry::placeDetector() {
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 
+/// Update the slit positions.
+void LoadILLReflectometry::placeSlits() {
+  double slit1ToSample{0.0};
+  double slit2ToSample{0.0};
+  if (m_instrument == Supported::Figaro) {
+    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    const double offset = m_sampleZOffset / std::cos(inRad(deflectionAngle));
+    // For the moment, the position information for S3 is missing in the
+    // NeXus files of Figaro. Using a hard-coded distance; should be fixed
+    // when the NeXus files are
+    double slitSeparation;
+    try { // Valid from 2018.
+      slitSeparation = inMeter(doubleFromRun("Distances.inter-slit_distance"));
+    } catch (...) {
+      slitSeparation = inMeter(doubleFromRun("Theta.inter-slit_distance"));
+    } // Valid 2017.
+    slit2ToSample = 0.368 + offset;
+    slit1ToSample = slit2ToSample + slitSeparation;
+  } else {
+    slit1ToSample = inMeter(doubleFromRun("Distance.S2toSample"));
+    slit2ToSample = inMeter(doubleFromRun("Distance.S3toSample"));
+  }
+  V3D pos{0.0, 0.0, -slit1ToSample};
+  m_loader.moveComponent(m_localWorkspace, "slit2", pos);
+  pos = {0.0, 0.0, -slit2ToSample};
+  m_loader.moveComponent(m_localWorkspace, "slit3", pos);
+}
+
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
   double dist;
-  try { // Valif from 2018.
+  try { // Valid from 2018.
     dist = inMeter(doubleFromRun("Distance.D0"));
   } catch (...) { // Valid 2017.
     dist = sourceSampleDistance();

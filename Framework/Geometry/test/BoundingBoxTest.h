@@ -117,6 +117,9 @@ public:
     TS_ASSERT_EQUALS(
         bbox.doesLineIntersect(V3D(10.0, 10.0, 0.0), V3D(-1.0, -0.4, 0.0)),
         false);
+    TS_ASSERT_EQUALS(
+        bbox.doesLineIntersect(V3D(-10.0, -10.0, 0.0), V3D(1.0, 1.0, 0.0)),
+        true); // Hits box at edge
   }
 
   void
@@ -154,6 +157,9 @@ public:
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(
                          Track(V3D(10.0, 10.0, 0.0), V3D(-1.0, -0.4, 0.0))),
                      false);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
+                         Track(V3D(-10.0, -10.0, 0.0), V3D(1.0, 1.0, 0.0))),
+                     true); // Hits box at edge
   }
 
   void test_That_Angular_Width_From_Point_Outside_Bounding_Box_Is_Valid() {

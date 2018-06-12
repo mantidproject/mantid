@@ -9,7 +9,6 @@
 #include <set>
 #include <string>
 
-class AbstractTreeModel;
 namespace MantidQt {
 namespace MantidWidgets {
 class HintStrategy;
@@ -17,6 +16,7 @@ namespace DataProcessor {
 // Forward dec
 class Command;
 class DataProcessorPresenter;
+class AbstractTreeModel;
 
 /** @class DataProcessorView
 

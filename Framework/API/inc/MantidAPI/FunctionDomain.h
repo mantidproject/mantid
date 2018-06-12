@@ -56,7 +56,7 @@ public:
 };
 
 /// typedef for a shared pointer
-typedef boost::shared_ptr<FunctionDomain> FunctionDomain_sptr;
+using FunctionDomain_sptr = boost::shared_ptr<FunctionDomain>;
 
 } // namespace API
 } // namespace Mantid

@@ -34,6 +34,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+enum class SliceType { UniformEven, Uniform, Custom, LogValue };
+
 class IReflEventPresenter {
 public:
   virtual ~IReflEventPresenter(){};
@@ -45,6 +48,7 @@ public:
 
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
+  virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
 };
 }
 }

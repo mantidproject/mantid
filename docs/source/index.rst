@@ -17,12 +17,15 @@ Mantid Documentation
    :maxdepth: 1
 
    tutorials/index
+   tutorials/ill_training/index
    algorithms/index
    algorithms/*
    concepts/index
    interfaces/index
-   fitfunctions/index
-   fitminimizers/index
+   fitting/index
+   fitting/fitfunctions/index
+   fitting/fitfunctions/*
+   fitting/fitminimizers/index
    techniques/index
    api/index
    plotting/index
@@ -38,16 +41,21 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
-* :ref:`Training`
 * :ref:`Algorithms List`
+* :ref:`training`
+    - `Mantid Basic Course <http://www.mantidproject.org/Mantid_Basic_Course>`_
+    - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+    - `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
+    - `Extending Mantid With Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
+    - :ref:`ill_training`
 * :ref:`concepts contents`
 * :ref:`interfaces contents`
-* :ref:`Fit Functions List`
-* :ref:`fitminimizers contents`
+* :ref:`fitting contents`
+    - :ref:`Fit Functions List`
+    - :ref:`fitminimizers`
 * :ref:`techniques contents`
 * :ref:`api`
     - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* :ref:`Gallery <plotting>`
+* :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`
 * :ref:`release_notes`
-

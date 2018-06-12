@@ -3,9 +3,13 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 
 #include <gmock/gmock.h>
 
@@ -181,6 +185,53 @@ private:
   void clearTable() override {}
 
   std::map<QString, QVariant> m_options;
+};
+
+class MockTreeManager : public TreeManager {
+public:
+  MockTreeManager(){};
+  ~MockTreeManager() override{};
+  MOCK_METHOD1(selectedData, TreeData(bool));
+  // Calls we don't care about
+  std::vector<std::unique_ptr<Command>> publishCommands() override {
+    return std::vector<std::unique_ptr<Command>>();
+  };
+  bool isMultiLevel() const override { return false; }
+  void appendRow() override{};
+  void appendGroup() override{};
+  void deleteRow() override{};
+  void deleteGroup() override{};
+  void groupRows() override{};
+  std::set<int> expandSelection() override { return std::set<int>(); };
+  void clearSelected() override{};
+  QString copySelected() override { return QString(); };
+  void pasteSelected(const QString &) override{};
+  void newTable(const WhiteList &) override{};
+  void newTable(Mantid::API::ITableWorkspace_sptr,
+                const WhiteList &) override{};
+  void transfer(const std::vector<std::map<QString, QString>> &) override{};
+  void update(int, int, const QStringList &) override{};
+  int rowCount() const override { return 0; };
+  int rowCount(int) const override { return 0; };
+  bool isProcessed(int) const override { return false; };
+  bool isProcessed(int, int) const override { return false; };
+  void setProcessed(bool, int) override{};
+  void setProcessed(bool, int, int) override{};
+  void invalidateAllProcessed() override{};
+  void setCell(int, int, int, int, const std::string &) override{};
+  std::string getCell(int, int, int, int) const override {
+    return std::string();
+  };
+  int getNumberOfRows() override { return 0; };
+  bool isValidModel(Mantid::API::Workspace_sptr, size_t) const override {
+    return false;
+  };
+  boost::shared_ptr<AbstractTreeModel> getModel() override {
+    return boost::shared_ptr<QTwoLevelTreeModel>();
+  };
+  Mantid::API::ITableWorkspace_sptr getTableWorkspace() override {
+    return Mantid::API::ITableWorkspace_sptr();
+  };
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

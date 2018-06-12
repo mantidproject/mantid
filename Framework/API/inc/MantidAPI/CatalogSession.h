@@ -49,8 +49,8 @@ private:
   std::string m_endpoint;
 };
 
-typedef boost::shared_ptr<CatalogSession> CatalogSession_sptr;
-typedef boost::shared_ptr<const CatalogSession> CatalogSession_const_sptr;
+using CatalogSession_sptr = boost::shared_ptr<CatalogSession>;
+using CatalogSession_const_sptr = boost::shared_ptr<const CatalogSession>;
 }
 }
 

@@ -3,10 +3,10 @@
 
 #include <tuple>
 
-#include "MantidKernel/IndexSet.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/IndexSet.h"
 
 namespace Mantid {
 
@@ -56,14 +56,14 @@ private:
    *
    * Used for generating a sequence 0,1,2,.... for extracting arguments from
    * tuple. */
-  template <int...> struct seq {};
+  template <std::size_t...> struct seq {};
   // Doxygen does not like recursive types.
-  template <int N, int... S>
+  template <std::size_t N, std::size_t... S>
   struct gens                                     /** @cond */
       : gens<N - 1, N - 1, S...> /** @endcond */ {/** @cond */
   };
-  template <int... S> struct gens<0, S...> {/** @endcond */
-    typedef seq<S...> type;
+  template <std::size_t... S> struct gens<0, S...> {/** @endcond */
+    using type = seq<S...>;
   };
 
   /** Helpers for for_each(), struct contains and 2 specializations.
@@ -78,7 +78,7 @@ private:
   template <typename Tp> struct contains<Tp> : std::false_type {};
 
   /// Internal implementation of for_each().
-  template <class... Flags, class WS, class T, int... S, class OP>
+  template <class... Flags, class WS, class T, std::size_t... S, class OP>
   void for_each(WS &workspace, T getters, seq<S...>, const OP &operation) {
     // If we get the flag Indices::FromProperty we use a potential user-defined
     // range property, otherwise default to the full range of all histograms.
@@ -169,7 +169,7 @@ void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
     const DataObjects::EventWorkspace &workspace);
 
 /// Typedef for a shared pointer to a SpectrumAlgorithm
-typedef boost::shared_ptr<SpectrumAlgorithm> SpectrumAlgorithm_sptr;
+using SpectrumAlgorithm_sptr = boost::shared_ptr<SpectrumAlgorithm>;
 
 } // namespace Algorithms
 } // namespace Mantid

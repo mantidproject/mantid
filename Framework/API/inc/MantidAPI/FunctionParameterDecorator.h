@@ -150,8 +150,8 @@ protected:
   IFunction_sptr m_wrappedFunction;
 };
 
-typedef boost::shared_ptr<FunctionParameterDecorator>
-    FunctionParameterDecorator_sptr;
+using FunctionParameterDecorator_sptr =
+    boost::shared_ptr<FunctionParameterDecorator>;
 
 } // namespace API
 } // namespace Mantid

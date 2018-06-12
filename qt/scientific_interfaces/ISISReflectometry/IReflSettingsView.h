@@ -2,13 +2,14 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H
 
 #include "DllConfig.h"
+#include "ExperimentOptionDefaults.h"
+#include "GetInstrumentParameter.h"
+#include "InstrumentOptionDefaults.h"
+#include "InstrumentParameters.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include <map>
 #include <vector>
-#include "MantidAPI/Algorithm.h"
-#include "ExperimentOptionDefaults.h"
-#include "InstrumentOptionDefaults.h"
-#include "GetInstrumentParameter.h"
-#include "InstrumentParameters.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -58,7 +59,9 @@ public:
 
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
-  virtual std::string getTransmissionRuns() const = 0;
+  virtual std::map<std::string,
+                   MantidQt::MantidWidgets::DataProcessor::OptionsQMap>
+  getPerAngleOptions() const = 0;
   virtual std::string getStartOverlap() const = 0;
   virtual std::string getEndOverlap() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
@@ -66,8 +69,6 @@ public:
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
-  virtual std::string getMomentumTransferStep() const = 0;
-  virtual std::string getScaleFactor() const = 0;
   /// Instrument settings
   virtual std::string getIntMonCheck() const = 0;
   virtual std::string getMonitorIntegralMin() const = 0;
@@ -77,7 +78,6 @@ public:
   virtual std::string getLambdaMin() const = 0;
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
-  virtual std::string getProcessingInstructions() const = 0;
   virtual std::string getDetectorCorrectionType() const = 0;
   virtual std::string getSummationType() const = 0;
   virtual std::string getReductionType() const = 0;

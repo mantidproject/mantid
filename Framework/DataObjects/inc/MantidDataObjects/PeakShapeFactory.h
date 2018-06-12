@@ -48,9 +48,9 @@ public:
 };
 
 /// Helper typedef
-typedef boost::shared_ptr<PeakShapeFactory> PeakShapeFactory_sptr;
+using PeakShapeFactory_sptr = boost::shared_ptr<PeakShapeFactory>;
 /// Helper typedef
-typedef boost::shared_ptr<const PeakShapeFactory> PeakShapeFactory_const_sptr;
+using PeakShapeFactory_const_sptr = boost::shared_ptr<const PeakShapeFactory>;
 
 } // namespace DataObjects
 } // namespace Mantid

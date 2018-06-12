@@ -15,16 +15,20 @@ namespace CurveFitting {
 * @return A GSL status information
 */
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
-
+  assert(x->data);
   struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
 
   // update function parameters
-  if (x->data) {
-    size_t ia = 0;
-    for (size_t i = 0; i < p->function->nParams(); ++i) {
-      if (p->function->isActive(i)) {
+  size_t ia = 0;
+  for (size_t i = 0; i < p->function->nParams(); ++i) {
+    if (p->function->isActive(i)) {
+      if (ia < x->size) {
         p->function->setActiveParameter(i, x->data[ia]);
         ++ia;
+      } else {
+        // The number of active parameters now exceeds the space
+        // originally allocated
+        throw Kernel::Exception::FitSizeWarning(x->size);
       }
     }
   }
@@ -63,10 +67,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   for (size_t i = 0; i < p->n; i++) {
     f->data[i] = (values->getCalculated(i) - values->getFitData(i)) *
                  values->getFitWeight(i);
-    // std::cerr << values.getCalculated(i) << ' ' << values.getFitData(i) << '
-    // ' << values.getFitWeight(i) << '\n';
   }
-
   return GSL_SUCCESS;
 }
 

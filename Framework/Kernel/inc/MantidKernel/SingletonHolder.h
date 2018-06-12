@@ -34,7 +34,7 @@ namespace Mantid {
 namespace Kernel {
 
 /// prototype for function passed to atexit()
-typedef void (*atexit_func_t)();
+using atexit_func_t = void (*)();
 
 extern MANTID_KERNEL_DLL void CleanupSingletons();
 extern MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func);
@@ -43,7 +43,7 @@ extern MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func);
 template <typename T> class SingletonHolder {
 public:
   /// Allow users to access to the type returned by Instance()
-  typedef T HeldType;
+  using HeldType = T;
 
   static T &Instance();
 

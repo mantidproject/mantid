@@ -17,7 +17,7 @@ class DateAndTime;
 } // namespace Types
 namespace Kernel {
 class SplittingInterval;
-typedef std::vector<SplittingInterval> TimeSplitterType;
+using TimeSplitterType = std::vector<SplittingInterval>;
 class Unit;
 } // namespace Kernel
 namespace DataObjects {

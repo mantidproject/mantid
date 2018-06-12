@@ -152,7 +152,7 @@ int vtkSplatterPlot::RequestInformation(vtkInformation *,
       ADSWorkspaceProvider<IMDWorkspace> workspaceProvider;
       Workspace_sptr result = workspaceProvider.fetchWorkspace(m_wsName);
       m_presenter->initialize(result);
-    } catch (const std::runtime_error) {
+    } catch (const std::runtime_error &) {
       // Catch incase something goes wrong. It might be that the splatter
       // plot source is not yet setup correctly and we'll need to run this
       // call again later.

@@ -86,8 +86,8 @@ public:
   }
 
   // expose typedefs for the iterator types in the underlying container
-  typedef std::vector<double>::iterator iterator;
-  typedef std::vector<double>::const_iterator const_iterator;
+  using iterator = std::vector<double>::iterator;
+  using const_iterator = std::vector<double>::const_iterator;
 
 protected:
   ~Iterable() = default;

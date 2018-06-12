@@ -18,19 +18,37 @@ namespace VectorHelper {
  *,x_n-1,delta_n-1,x_n]
  *  @param[out] xnew   The newly created axis resulting from the input params
  *  @param[in] resize_xnew If false then the xnew vector is NOT resized. Useful
- *if on the number of bins needs determining. (Default=True)
+ *if the number of bins needs determining. (Default=True)
  *  @param[in] full_bins_only If true, bins of the size less than the current
- *step are not included
+ *step are not included. (Default=True)
+ *  @param[in] xMinHint x_1 if params contains only delta_1.
+ *  @param[in] xMaxHint x_2 if params contains only delta_1.
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
-                                        std::vector<double> &xnew,
-                                        const bool resize_xnew,
-                                        const bool full_bins_only) {
+int DLLExport
+createAxisFromRebinParams(const std::vector<double> &params,
+                          std::vector<double> &xnew, const bool resize_xnew,
+                          const bool full_bins_only, const double xMinHint,
+                          const double xMaxHint) {
+  std::vector<double> tmp;
+  const std::vector<double> &fullParams =
+      [&params, &tmp, xMinHint, xMaxHint]() {
+        if (params.size() == 1) {
+          if (std::isnan(xMinHint) || std::isnan(xMaxHint)) {
+            throw std::runtime_error("createAxisFromRebinParams: xMinHint and "
+                                     "xMaxHint must be supplied if params "
+                                     "contains only the bin width.");
+          }
+          tmp.resize(3);
+          tmp = {xMinHint, params.front(), xMaxHint};
+          return tmp;
+        }
+        return params;
+      }();
   double xs;
   int ibound(2), istep(1), inew(1);
-  int ibounds = static_cast<int>(
-      params.size()); // highest index in params array containing a bin boundary
+  // highest index in params array containing a bin boundary
+  int ibounds = static_cast<int>(fullParams.size());
   int isteps = ibounds - 1; // highest index in params array containing a step
   xnew.clear();
 
@@ -45,16 +63,16 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
     lastBinCoef = 1.0;
   }
 
-  double xcurr = params[0];
+  double xcurr = fullParams[0];
   if (resize_xnew)
     xnew.push_back(xcurr);
 
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
-    if (params[istep] >= 0.0)
-      xs = params[istep];
+    if (fullParams[istep] >= 0.0)
+      xs = fullParams[istep];
     else
-      xs = xcurr * fabs(params[istep]);
+      xs = xcurr * fabs(fullParams[istep]);
 
     if (fabs(xs) == 0.0) {
       // Someone gave a 0-sized step! What a dope.
@@ -62,7 +80,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
           "Invalid binning step provided! Can't creating binning axis.");
     }
 
-    if ((xcurr + xs * (1.0 + lastBinCoef)) <= params[ibound]) {
+    if ((xcurr + xs * (1.0 + lastBinCoef)) <= fullParams[ibound]) {
       // If we can still fit current bin _plus_ specified portion of a last bin,
       // continue
       xcurr += xs;
@@ -76,7 +94,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
       else
         // For non full_bins_only, finish by adding as mush as is left from the
         // range
-        xcurr = params[ibound];
+        xcurr = fullParams[ibound];
 
       ibound += 2;
       istep += 2;
@@ -84,14 +102,6 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
     if (resize_xnew)
       xnew.push_back(xcurr);
     inew++;
-
-    //    if (xnew.size() > 10000000)
-    //    {
-    //      //Max out at 1 million bins
-    //      throw std::runtime_error("Over ten million binning steps created.
-    //      Exiting to avoid infinite loops.");
-    //      return inew;
-    //    }
   }
 
   return inew;
@@ -211,7 +221,7 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
       }
     } else {
       // non-distribution, just square root final error value
-      typedef double (*pf)(double);
+      using pf = double (*)(double);
       pf uf = std::sqrt;
       std::transform(enew.begin(), enew.end(), enew.begin(), uf);
     }
@@ -322,7 +332,7 @@ void rebinHistogram(const std::vector<double> &xold,
                  // (should be done externally)
   {
     // Now take the root-square of the errors
-    typedef double (*pf)(double);
+    using pf = double (*)(double);
     pf uf = std::sqrt;
     std::transform(enew.begin(), enew.end(), enew.begin(), uf);
   }
@@ -523,7 +533,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
   // Split the string and turn it into a vector.
   std::vector<NumT> values;
 
-  typedef std::vector<std::string> split_vector_type;
+  using split_vector_type = std::vector<std::string>;
   split_vector_type strs;
 
   boost::split(strs, listString, boost::is_any_of(", "));

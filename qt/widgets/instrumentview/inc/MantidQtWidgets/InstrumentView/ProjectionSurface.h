@@ -109,13 +109,14 @@ public:
   virtual bool hasSelection() const;
 
   virtual int getDetectorID(int x, int y) const;
-  virtual const Mantid::Geometry::IDetector &getDetector(int x, int y) const;
+  virtual size_t getDetector(int x, int y) const;
   /// NULL deselects components and selects the whole instrument
-  virtual void componentSelected(Mantid::Geometry::ComponentID = nullptr) = 0;
-  /// fill in a list of detector ids which were selected by the selction tool
-  virtual void getSelectedDetectors(QList<int> &dets) = 0;
-  /// fill in a list of detector ids which were masked by the mask shapes
-  virtual void getMaskedDetectors(QList<int> &dets) const = 0;
+  virtual void componentSelected(size_t componentIndex) = 0;
+  /// fill in a list of detector indices which were selected by the selction
+  /// tool
+  virtual void getSelectedDetectors(std::vector<size_t> &detIndices) = 0;
+  /// fill in a list of detector indices which were masked by the mask shapes
+  virtual void getMaskedDetectors(std::vector<size_t> &detIndices) const = 0;
 
   virtual QString getInfoText() const;
   /// Change the interaction mode
@@ -380,7 +381,7 @@ private:
   mutable bool m_redrawPicking;
 };
 
-typedef boost::shared_ptr<ProjectionSurface> ProjectionSurface_sptr;
+using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;
 
 } // MantidWidgets
 } // MantidQt

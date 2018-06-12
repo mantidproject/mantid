@@ -4,10 +4,13 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,38 +42,26 @@ void SofQWPolygon::exec() {
         "The input workspace must have common binning across all spectra");
   }
 
-  MatrixWorkspace_sptr outputWS =
-      SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout,
-                                  getProperty("EAxisBinning"));
-  setProperty("OutputWorkspace", outputWS);
-  const size_t nenergyBins = inputWS->blocksize();
-
   // Progress reports & cancellation
   const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms() *
                                             inputWS->blocksize()));
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
-
   // Compute input caches
   this->initCachedValues(inputWS);
+
+  MatrixWorkspace_sptr outputWS =
+      SofQW::setUpOutputWorkspace<DataObjects::Workspace2D>(
+          *inputWS, getProperty("QAxisBinning"), m_Qout,
+          getProperty("EAxisBinning"), m_EmodeProperties);
+  setProperty("OutputWorkspace", outputWS);
+  const size_t nenergyBins = inputWS->blocksize();
 
   const size_t nTheta = m_thetaPts.size();
   const auto &X = inputWS->x(0);
 
   // Holds the spectrum-detector mapping
-  std::vector<specnum_t> specNumberMapping;
-  std::vector<detid_t> detIDMapping;
-
-  // Select the calculate Q method based on the mode
-  // rather than doing this repeatedly in the loop
-  typedef double (SofQWPolygon::*QCalculation)(double, double, double, double)
-      const;
-  QCalculation qCalculator;
-  if (m_EmodeProperties.m_emode == 1) {
-    qCalculator = &SofQWPolygon::calculateDirectQ;
-  } else {
-    qCalculator = &SofQWPolygon::calculateIndirectQ;
-  }
+  std::vector<SpectrumDefinition> detIDMapping(outputWS->getNumberHistograms());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
@@ -85,11 +76,11 @@ void SofQWPolygon::exec() {
     }
 
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    const auto &det = spectrumInfo.detector(i);
-    double halfWidth(0.5 * m_thetaWidth);
+    const auto *det =
+        m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
+    const double halfWidth(0.5 * m_thetaWidth);
     const double thetaLower = theta - halfWidth;
     const double thetaUpper = theta + halfWidth;
-    const double efixed = m_EmodeProperties.getEFixed(det);
 
     for (size_t j = 0; j < nenergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -98,17 +89,16 @@ void SofQWPolygon::exec() {
       const double dE_j = X[j];
       const double dE_jp1 = X[j + 1];
 
-      const double lrQ = (this->*qCalculator)(efixed, dE_jp1, thetaLower, 0.0);
+      const double lrQ = m_EmodeProperties.q(dE_jp1, thetaLower, det);
 
-      const V2D ll(dE_j, (this->*qCalculator)(efixed, dE_j, thetaLower, 0.0));
+      const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, det));
       const V2D lr(dE_jp1, lrQ);
-      const V2D ur(dE_jp1,
-                   (this->*qCalculator)(efixed, dE_jp1, thetaUpper, 0.0));
-      const V2D ul(dE_j, (this->*qCalculator)(efixed, dE_j, thetaUpper, 0.0));
+      const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
+      const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
       DataObjects::FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j,
-                                                      outputWS, m_Qout);
+                                                      *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
@@ -116,9 +106,11 @@ void SofQWPolygon::exec() {
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
-          specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
-          detIDMapping.push_back(det.getID());
+          // Could do a more complete merge of spectrum definitions here, but
+          // historically only the ID of the first detector in the spectrum is
+          // used, so I am keeping that for now.
+          detIDMapping[qIndex - 1].add(
+              spectrumInfo.spectrumDefinition(i)[0].first);
         }
       }
     }
@@ -131,8 +123,9 @@ void SofQWPolygon::exec() {
                                                     m_progress);
 
   // Set the output spectrum-detector mapping
-  SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
-  outputWS->updateSpectraUsing(outputDetectorMap);
+  auto outputIndices = outputWS->indexInfo();
+  outputIndices.setSpectrumDefinitions(std::move(detIDMapping));
+  outputWS->setIndexInfo(outputIndices);
 
   // Replace any NaNs in outputWorkspace with zeroes
   if (this->getProperty("ReplaceNaNs")) {
@@ -146,45 +139,6 @@ void SofQWPolygon::exec() {
     replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
     replaceNans->execute();
   }
-}
-
-/**
- * Calculate the Q value for a direct instrument
- * @param efixed An efixed value
- * @param deltaE The energy change
- * @param twoTheta The value of the scattering angle
- * @param psi The value of the azimuth
- * @return The value of Q
- */
-double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
-                                      const double twoTheta,
-                                      const double psi) const {
-  const double ki = std::sqrt(efixed * SofQW::energyToK());
-  const double kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
-  const double Qx = ki - kf * std::cos(twoTheta);
-  const double Qy = -kf * std::sin(twoTheta) * std::cos(psi);
-  const double Qz = -kf * std::sin(twoTheta) * std::sin(psi);
-  return std::sqrt(Qx * Qx + Qy * Qy + Qz * Qz);
-}
-
-/**
- * Calculate the Q value for a direct instrument
- * @param efixed An efixed value
- * @param deltaE The energy change
- * @param twoTheta The value of the scattering angle
- * @param psi The value of the azimuth
- * @return The value of Q
- */
-double SofQWPolygon::calculateIndirectQ(const double efixed,
-                                        const double deltaE,
-                                        const double twoTheta,
-                                        const double psi) const {
-  UNUSED_ARG(psi);
-  const double ki = std::sqrt((efixed + deltaE) * SofQW::energyToK());
-  const double kf = std::sqrt(efixed * SofQW::energyToK());
-  const double Qx = ki - kf * std::cos(twoTheta);
-  const double Qy = -kf * std::sin(twoTheta);
-  return std::sqrt(Qx * Qx + Qy * Qy);
 }
 
 /**

@@ -61,8 +61,8 @@ private:
   FuncMinimizerFactoryImpl();
 };
 
-typedef Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>
-    FuncMinimizerFactory;
+using FuncMinimizerFactory =
+    Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid

@@ -187,7 +187,7 @@ void SetSampleMaterial::exec() {
     throw std::runtime_error("InputWorkspace does not have a sample object");
   }
 
-  boost::scoped_ptr<Material> mat;
+  boost::scoped_ptr<Material> material;
   MaterialBuilder builder;
 
   // determine the material
@@ -226,36 +226,35 @@ void SetSampleMaterial::exec() {
       getProperty("ScatteringXSection")); // in barns
 
   // create the material
-  mat.reset(new Material(builder.build()));
+  material.reset(new Material(builder.build()));
 
   // calculate derived values
-  const double bcoh_avg_sq = mat->cohScatterLengthSqrd();   // <b>
-  const double btot_sq_avg = mat->totalScatterLengthSqrd(); // <b^2>
+  const double bcoh_avg_sq = material->cohScatterLengthSqrd();   // <b>
+  const double btot_sq_avg = material->totalScatterLengthSqrd(); // <b^2>
   double normalizedLaue = (btot_sq_avg - bcoh_avg_sq) / bcoh_avg_sq;
   if (btot_sq_avg == bcoh_avg_sq)
     normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
   auto shapeObject = boost::shared_ptr<Geometry::IObject>(
-      expInfo->sample().getShape().clone());
-  shapeObject->setMaterial(*mat);
+      expInfo->sample().getShape().cloneWithMaterial(*material));
   expInfo->mutableSample().setShape(shapeObject);
   g_log.information() << "Sample number density ";
-  if (isEmpty(mat->numberDensity())) {
+  if (isEmpty(material->numberDensity())) {
     g_log.information() << "was not specified\n";
   } else {
-    g_log.information() << "= " << mat->numberDensity()
+    g_log.information() << "= " << material->numberDensity()
                         << " atoms/Angstrom^3\n";
   }
   g_log.information() << "Cross sections for wavelength = "
                       << NeutronAtom::ReferenceLambda << " Angstroms\n"
-                      << "    Coherent " << mat->cohScatterXSection()
+                      << "    Coherent " << material->cohScatterXSection()
                       << " barns\n"
-                      << "    Incoherent " << mat->incohScatterXSection()
+                      << "    Incoherent " << material->incohScatterXSection()
                       << " barns\n"
-                      << "    Total " << mat->totalScatterXSection()
+                      << "    Total " << material->totalScatterXSection()
                       << " barns\n"
-                      << "    Absorption " << mat->absorbXSection()
+                      << "    Absorption " << material->absorbXSection()
                       << " barns\n"
                       << "PDF terms\n"
                       << "    <b_coh>^2 = " << bcoh_avg_sq << "\n"
@@ -265,8 +264,9 @@ void SetSampleMaterial::exec() {
   if (isEmpty(rho)) {
     g_log.information("Unknown value for number density");
   } else {
-    double smu = mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
-    double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    double smu =
+        material->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+    double amu = material->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     g_log.information() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
                         << "Anvred LinearAbsorptionCoef = " << amu << " 1/cm\n";
   }
