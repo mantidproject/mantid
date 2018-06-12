@@ -575,6 +575,48 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.300, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.0001);
   }
+
+  void test_TimeOffset_applied_correctly() {
+    // Time starts at zero
+    auto ws = createAsymmetryWorkspace(4, 10, yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(2, 2);
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->setProperty("TimeOffset", "0.5");
+    alg->execute();
+
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
+  }
 };
 
 #endif /* MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPING_H_ */

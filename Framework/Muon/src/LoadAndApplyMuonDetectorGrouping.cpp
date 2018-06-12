@@ -79,10 +79,16 @@ void LoadAndApplyMuonDetectorGrouping::init() {
                   "Rebin arguments. No rebinning if left empty.",
                   Direction::Input);
 
+  declareProperty("TimeOffset", 0.0,
+                  "Shift the times of all data by a fixed amount. The value "
+                  "given corresponds to the bin that will become 0.0 seconds.",
+                  Direction::Input);
+
   // Perform Group Associations.
 
   std::string analysisGrp("Analysis Options");
   setPropertyGroup("RebinArgs", analysisGrp);
+  setPropertyGroup("TimeOffset", analysisGrp);
 }
 
 /**
@@ -154,8 +160,8 @@ AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
   AnalysisOptions options;
   options.summedPeriods = "1";
   options.subtractedPeriods = "";
-  options.timeZero = 0;
-  options.loadedTimeZero = 0;
+  options.timeZero = 0.0;
+  options.loadedTimeZero = this->getProperty("TimeOffset");
   options.rebinArgs = this->getProperty("RebinArgs");
   options.plotType = Muon::PlotType::Counts;
   return options;
@@ -259,6 +265,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
 
     // Analysis options
     alg->setProperty("RebinArgs", options.rebinArgs);
+	alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
     alg->execute();
   }
 };
@@ -293,6 +300,7 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
 
     // Analysis options
     alg->setProperty("RebinArgs", options.rebinArgs);
+	alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
     alg->execute();
   };
 };
