@@ -86,6 +86,7 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
 IndirectSpectrumSelectionPresenter::~IndirectSpectrumSelectionPresenter() {}
 
 void IndirectSpectrumSelectionPresenter::disableView() {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_view);
   m_view->clear();
   m_view->setDisabled(true);
 }
