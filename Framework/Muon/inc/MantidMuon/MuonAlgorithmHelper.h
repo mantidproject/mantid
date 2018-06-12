@@ -108,12 +108,18 @@ DLLExport bool checkItemsInSet(const std::vector<int> &items,
 DLLExport Muon::DatasetParams parseWorkspaceName(const std::string &wsName);
 
 /// Parse run label into instrument and runs
-DLLExport void parseRunLabel(const std::string &label,
-	std::string &instrument,
-	std::vector<int> &runNumbers);
+DLLExport void parseRunLabel(const std::string &label, std::string &instrument,
+                             std::vector<int> &runNumbers);
 
-/// Checks that the names allow a pairing
-DLLExport bool checkValidPair(const std::string &name1, const std::string &name2);
+/// Checks that the workspace names allow a pairing
+DLLExport bool checkValidPair(const std::string &name1,
+                              const std::string &name2);
+
+/// Check whether a group or pair name is valid
+DLLExport bool checkValidGroupPairName(const std::string& name);
+
+/// Saves grouping to the XML file specified
+DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);
 
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid

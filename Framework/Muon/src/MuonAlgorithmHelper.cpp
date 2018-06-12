@@ -4,9 +4,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/XML/XMLWriter.h>
+
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -350,12 +358,12 @@ bool checkGroupDetectorsInWorkspace(const Grouping &grouping,
 // Checks that all of the entries of a vector are contained in a set, returns
 // true/false
 bool checkItemsInSet(const std::vector<int> &items, const std::set<int> &set) {
-	for (const auto item : items) {
-		if (set.find(item) == set.end()) {
-			return false;
-		}
-	}
-	return true;
+  for (const auto item : items) {
+    if (set.find(item) == set.end()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -487,13 +495,90 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
   }
 
   if (group1.plotType != Muon::PlotType::Counts ||
-	  group2.plotType != Muon::PlotType::Counts) {
-	  throw std::invalid_argument("Workspaces must be of Group type (not Asym)");
+      group2.plotType != Muon::PlotType::Counts) {
+    throw std::invalid_argument("Workspaces must be of Group type (not Asym)");
   }
 
   return true;
 }
 
+/**
+ * Save grouping to the XML file specified.
+ *
+ * @param grouping :: Struct with grouping information
+ * @param filename :: XML filename where information will be saved
+ */
+std::string
+MuonAlgorithmHelper::groupingToXML(const Mantid::API::Grouping &grouping) {
+
+  Poco::XML::DOMWriter writer;
+  writer.setNewLine("\n");
+  writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
+
+  Poco::AutoPtr<Poco::XML::Document> mDoc = new Poco::XML::Document();
+
+  // Create root element with a description
+  Poco::AutoPtr<Poco::XML::Element> rootElem =
+      mDoc->createElement("detector-grouping");
+  rootElem->setAttribute("description", grouping.description);
+  mDoc->appendChild(rootElem);
+
+  // Create group elements
+  for (size_t gi = 0; gi < grouping.groups.size(); gi++) {
+    Poco::AutoPtr<Poco::XML::Element> gElem = mDoc->createElement("group");
+    gElem->setAttribute("name", grouping.groupNames[gi]);
+    rootElem->appendChild(gElem);
+
+    Poco::AutoPtr<Poco::XML::Element> idsElem = mDoc->createElement("ids");
+    idsElem->setAttribute("val", grouping.groups[gi]);
+    gElem->appendChild(idsElem);
+  }
+
+  // Create pair elements
+  for (size_t pi = 0; pi < grouping.pairs.size(); pi++) {
+    Poco::AutoPtr<Poco::XML::Element> gElem = mDoc->createElement("pair");
+    gElem->setAttribute("name", grouping.pairNames[pi]);
+    rootElem->appendChild(gElem);
+
+    Poco::AutoPtr<Poco::XML::Element> fwElem =
+        mDoc->createElement("forward-group");
+    fwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].first]);
+    gElem->appendChild(fwElem);
+
+    Poco::AutoPtr<Poco::XML::Element> bwElem =
+        mDoc->createElement("backward-group");
+    bwElem->setAttribute("val", grouping.groupNames[grouping.pairs[pi].second]);
+    gElem->appendChild(bwElem);
+
+    Poco::AutoPtr<Poco::XML::Element> alphaElem = mDoc->createElement("alpha");
+    alphaElem->setAttribute(
+        "val", boost::lexical_cast<std::string>(grouping.pairAlphas[pi]));
+    gElem->appendChild(alphaElem);
+  }
+
+  // Create default group/pair name element
+  Poco::AutoPtr<Poco::XML::Element> gElem = mDoc->createElement("default");
+  gElem->setAttribute("name", grouping.defaultName);
+  rootElem->appendChild(gElem);
+
+  std::stringstream stream;
+  writer.writeNode(stream, mDoc);
+  return stream.str();
+}
+
+/// Check whether a group or pair name is valid
+bool MuonAlgorithmHelper::checkValidGroupPairName(const std::string &name) {
+  if (name.empty()) {
+    return false;
+  }
+  if (!std::all_of(std::begin(name), std::end(name), isalnum)) {
+    return false;
+  }
+  if (name == "Group" || name == "Pair") {
+	  return false;
+  }
+  return true;
+}
+
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid
-  

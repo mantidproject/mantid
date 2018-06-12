@@ -485,14 +485,17 @@ public:
   }
 
   void test_checkGroupDetectorsInWorkspaceFalse() {
-    API::Grouping grouping;
-    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9", "10"};
-    grouping.groups = groups;
-    Workspace_sptr ws =
-        createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
-    TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
+	  API::Grouping grouping;
+	  const std::vector<std::string> groups = { "1", "2", "3,4,5", "6-9", "10" };
+	  grouping.groups = groups;
+	  Workspace_sptr ws =
+		  createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 2, "group");
+	  TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
 
-    AnalysisDataService::Instance().clear();
+	  AnalysisDataService::Instance().clear();
+  };
+
+
   void test_parseWorkspaceNameParsesCorrectly() {
     const std::string workspaceName =
         "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
@@ -604,6 +607,23 @@ public:
 	  TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
 		  std::invalid_argument);
   }
+
+
+  void test_checkValidGroupPairName_invalid_names() {
+	  std::vector<std::string> badNames = { "","_name","name_","name;","#name", "Group", "Pair"};
+	  for (auto&& badName : badNames) {
+		  TS_ASSERT(!MuonAlgorithmHelper::checkValidGroupPairName(badName));
+	  }
+  }
+
+  void test_checkValidGroupPairName_valid_names() {
+	  std::vector<std::string> goodNames = { "name", "group", "pair", "123" };
+	  for (auto&& goodName : goodNames) {
+		  TS_ASSERT(MuonAlgorithmHelper::checkValidGroupPairName(goodName));
+	  }
+  }
+  
+
 };
 
 #endif /* MANTID_MUON_MUONALGOIRTHMHELPER_H_ */
