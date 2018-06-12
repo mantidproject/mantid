@@ -887,7 +887,9 @@ void ReflDataProcessorPresenter::plotRow() {
     return;
 
   // If slicing values are empty plot normally
-  if (!m_processingAsEventData) {
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues(m_group).toStdString();
+  if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
   }
@@ -934,7 +936,8 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  if (!m_processingAsEventData) {
+  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues(m_group);
+  if (timeSlicingValues.isEmpty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
   }
