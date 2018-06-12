@@ -53,7 +53,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                              doc="Name of the file to save to")
 
     def PyExec(self):
-        input_ws = mtd[self.getPropertyValue(self.PROP_INPUT_WS)]
+        input_ws = mtd[self.getProperty(self.PROP_INPUT_WS).value]
         spectrum_numbers = [bank.getSpectrum(0).getSpectrumNo() for bank in input_ws]
 
         gsas_filename = self.getProperty(self.PROP_GSAS_PARAM_FILE).value
@@ -68,28 +68,12 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
         num_banks = input_ws.getNumberOfEntries()
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
-            ###### !!!!!trying with average bank DIFCS
-            average_difcs = [678, 664, 746, 872, 888, 761, 1425, 1405, 1391, 1389, 1390, 1396, 1433, 1426, 2411, 2399,
-                             2378, 2363, 2425, 2372, 2383, 2426, 2417, 2423, 3141, 3125, 3106, 3093, 3091, 3098, 3114,
-                             3160, 3143, 3161, 4219, 4222, 4239, 4211, 4221, 4204, 4206, 4210, 4207, 4242, 4242, 4229,
-                             4226, 4223, 4757, 4761, 4782, 4742, 4752, 4736, 4736, 4741, 4739, 4763, 4776, 4765, 4763,
-                             4761, 5274, 5279, 5302, 5257, 5267, 5251, 5249, 5255, 5254, 5271, 5289, 5278, 5278, 5277,
-                             6176, 6179, 6178, 6179, 6168, 6161, 6159, 6164, 6162, 6163, 6160, 6166, 6171, 6182, 6178,
-                             6172, 6178, 6181, 6661, 6663, 6663, 6661, 6654, 6648, 6647, 6651, 6649, 6651, 6647, 6651,
-                             6651, 6664, 6663, 6657, 6662, 6661, 7110, 7127, 7111, 7109, 7106, 7100, 7099, 7104, 7101,
-                             7104, 7100, 7101, 7101, 7112, 7112, 7107, 7112, 7110, 9001, 9002, 9005, 9031, 9129, 9109,
-                             9051, 9007, 9003, 9005, 9001, 9000, 9000, 9000, 9015, 9015, 9013, 9014, 9017, 9018, 9020,
-                             9013, 9012, 9013, 9048, 9143, 9228, 9171, 9271, 9053, 9057, 9119, 9045, 9047]
-
             output_file.write(template.format(gsas_prm_file=gsas_filename,
                                               inst_counter_bank="Bank1",
                                               bank_ids="\n".join("Bank{}".format(i + 1) for i in range(num_banks)),
-                                              #difcs=self._format_param_list(difcs),
-                                              difas=self._format_param_list(average_difcs),
-                                              #difas=self._format_param_list(difas),
-                                              difcs=self._create_empty_param_list(num_banks),
-                                              #tzeros=self._format_param_list(tzeros),
-                                              tzeros=self._create_empty_param_list(num_banks),
+                                              difcs=self._format_param_list(difcs),
+                                              difas=self._format_param_list(difas),
+                                              tzeros=self._format_param_list(tzeros),
                                               thetas=self._format_param_list(two_thetas),
                                               etas=self._format_param_list(phis),
                                               dists=self._format_param_list(distances),
@@ -110,12 +94,12 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                                               func_2_gamma_zeros=self._create_empty_param_list(num_banks),
                                               func_2_gamma_ones=self._create_empty_param_list(num_banks),
                                               func_2_gamma_twos=self._create_empty_param_list(num_banks),
-                                              function_types=self._create_empty_param_list(num_banks, value="1")
+                                              function_types=self._create_empty_param_list(num_banks, default_value="1")
                                               ))
 
-    def _create_empty_param_list(self, num_banks, value="0"):
+    def _create_empty_param_list(self, num_banks, default_value="0"):
         # Generate a list of zeroes, as several parameters are just zeroed in the .maud file
-        return "\n".join(value for _ in range(num_banks))
+        return "\n".join("0" for _ in range(num_banks))
 
     def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers):
         return (bank_param_list[self.BANK_GROUPING[spec_num]] for spec_num in spectrum_numbers)
