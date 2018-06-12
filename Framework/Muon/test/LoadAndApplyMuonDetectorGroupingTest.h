@@ -348,7 +348,7 @@ public:
 
   void test_init() {
     Muon::LoadAndApplyMuonDetectorGrouping alg;
-	alg.setLogging(false);
+    alg.setLogging(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   };
@@ -364,7 +364,7 @@ public:
     std::string filename = file.getFileName();
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
-	alg.setLogging(false);
+    alg.setLogging(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
@@ -532,6 +532,48 @@ public:
     auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void test_rebinning_applied_correctly() {
+    // Bin widths of 0.1
+    auto ws = createAsymmetryWorkspace(4, 10, yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(2, 2);
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->setProperty("RebinArgs", "0.2");
+    alg->execute();
+
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.800, 0.001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+    // Asymmetry converted to point data
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.150, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.0001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
+    // Rebinning happens before conversion to point data
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.300, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.0001);
   }
 };
 

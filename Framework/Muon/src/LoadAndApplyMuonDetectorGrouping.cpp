@@ -51,6 +51,7 @@ namespace Muon {
 DECLARE_ALGORITHM(LoadAndApplyMuonDetectorGrouping)
 
 void LoadAndApplyMuonDetectorGrouping::init() {
+  std::string emptyString("");
 
   declareProperty(
       Mantid::Kernel::make_unique<FileProperty>(
@@ -71,6 +72,17 @@ void LoadAndApplyMuonDetectorGrouping::init() {
 
   declareProperty("ApplyAsymmetryToGroups", true,
                   "Whether to calculate asymmetry and store the workspaces.");
+
+  // Optional properties
+
+  declareProperty("RebinArgs", emptyString,
+                  "Rebin arguments. No rebinning if left empty.",
+                  Direction::Input);
+
+  // Perform Group Associations.
+
+  std::string analysisGrp("Analysis Options");
+  setPropertyGroup("RebinArgs", analysisGrp);
 }
 
 /**
@@ -144,7 +156,7 @@ AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
   options.subtractedPeriods = "";
   options.timeZero = 0;
   options.loadedTimeZero = 0;
-  options.rebinArgs = "";
+  options.rebinArgs = this->getProperty("RebinArgs");
   options.plotType = Muon::PlotType::Counts;
   return options;
 };
@@ -244,14 +256,17 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     alg->setProperty("GroupName", options.grouping.groupNames[i]);
     alg->setProperty("Grouping", options.grouping.groups[i]);
     alg->setProperty("AnalysisType", plotTypeToString(options.plotType));
+
+    // Analysis options
+    alg->setProperty("RebinArgs", options.rebinArgs);
     alg->execute();
   }
 };
 
 /**
-* Add all the supplied pairs to the ADS, inside wsGrouped, by
-* executing the ApplyMuonDetectorGroupPairing algorithm
-*/
+ * Add all the supplied pairs to the ADS, inside wsGrouped, by
+ * executing the ApplyMuonDetectorGroupPairing algorithm
+ */
 void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     const Mantid::Muon::AnalysisOptions &options,
     Mantid::API::Workspace_sptr ws,
@@ -276,6 +291,8 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     alg->setProperty("Group1", group1);
     alg->setProperty("Group2", group2);
 
+    // Analysis options
+    alg->setProperty("RebinArgs", options.rebinArgs);
     alg->execute();
   };
 };
