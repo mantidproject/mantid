@@ -7,13 +7,13 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
@@ -22,7 +22,6 @@
 namespace {
 /// Component coordinates for Figaro, in meter.
 namespace Figaro {
-constexpr double detectorRestY{0.509};
 constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
 constexpr double DH2Z{2.077}; // Motor DH2 horizontal position
 }
@@ -38,19 +37,19 @@ struct PeakInfo {
  *  @param x an angle in degrees
  *  @return the angle in radians
  */
-constexpr double inRad(const double x) { return x * M_PI / 180; }
+constexpr double inRad(const double x) { return x * M_PI / 180.; }
 
 /** Convert radians to degrees.
  *  @param x an angle in radians
  *  @return the angle in degrees
  */
-constexpr double inDeg(const double x) { return x * 180 / M_PI; }
+constexpr double inDeg(const double x) { return x * 180. / M_PI; }
 
 /** Convert millimeters to meters.
  *  @param x a distance in millimeters
  *  @return the distance in meters
  */
-constexpr double inMeter(const double x) { return x * 1e-3; }
+constexpr double inMeter(const double x) { return x * 1.e-3; }
 
 /** Create a table with data needed for detector angle calibration.
  * @param info data to be written to the table
@@ -245,15 +244,6 @@ void LoadILLReflectometry::init() {
                   "X unit of the OutputWorkspace");
 }
 
-/**
- * Validate inputs
- * @returns a string map containing the error messages
- */
-std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
-  std::map<std::string, std::string> result;
-  return result;
-}
-
 /// Execute the algorithm.
 void LoadILLReflectometry::exec() {
   // open the root node
@@ -424,9 +414,15 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
     m_numberOfChannels = size_t(timeOfFlight[1]);
     m_tofDelay = timeOfFlight[2];
     if (m_instrument == Supported::Figaro) {
-      NXFloat eDelay = entry.openNXFloat("instrument/Distance/edelay_delay");
-      eDelay.load();
-      m_tofDelay += static_cast<double>(eDelay[0]);
+      try { // Valid from 2018.
+        NXFloat eDelay = entry.openNXFloat("instrument/Distance/edelay_delay");
+        eDelay.load();
+        m_tofDelay += static_cast<double>(eDelay[0]);
+      } catch (...) { // Valid 2017.
+        NXFloat eDelay = entry.openNXFloat("instrument/Theta/edelay_delay");
+        eDelay.load();
+        m_tofDelay += static_cast<double>(eDelay[0]);
+      }
     }
   } else { // monochromatic mode
     m_numberOfChannels = 1;
@@ -788,7 +784,11 @@ void LoadILLReflectometry::initPixelWidth() {
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  m_detectorDistance = inMeter(doubleFromRun("Distance.D1"));
+  try { // Valid from 2018.
+    m_detectorDistance = inMeter(doubleFromRun("Distance.D1"));
+  } catch (...) { // Valid 2017.
+    m_detectorDistance = sampleDetectorDistance();
+  }
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance << "m.\n";
   const auto detectorRotationAngle = detectorRotation();
@@ -809,11 +809,42 @@ void LoadILLReflectometry::placeDetector() {
 
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
-  const double dist = inMeter(doubleFromRun("Distance.D0"));
+  double dist;
+  try { // Valif from 2018.
+    dist = inMeter(doubleFromRun("Distance.D0"));
+  } catch (...) { // Valid 2017.
+    dist = sourceSampleDistance();
+  }
   g_log.debug() << "Source-sample distance " << dist << "m.\n";
   const std::string source = "chopper1";
   const V3D newPos{0.0, 0.0, -dist};
   m_loader.moveComponent(m_localWorkspace, source, newPos);
+}
+
+/** Return the sample to detector distance for the current instrument.
+ *  Valid 2017.
+ *  @return the distance in meters
+ */
+double LoadILLReflectometry::sampleDetectorDistance() const {
+  if (m_instrument != Supported::Figaro) {
+    return inMeter(doubleFromRun("det.value"));
+  }
+  const double restZ = inMeter(doubleFromRun("DTR.value"));
+  // Motor DH1 vertical coordinate.
+  const double DH1Y = inMeter(doubleFromRun("DH1.value"));
+  const double detectorRestY = 0.509;
+  const double detAngle = detectorAngle();
+  const double detectorY =
+      std::sin(inRad(detAngle)) * (restZ - Figaro::DH1Z) + DH1Y - detectorRestY;
+  const double detectorZ =
+      std::cos(inRad(detAngle)) * (restZ - Figaro::DH1Z) + Figaro::DH1Z;
+  const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
+  const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
+  const double sht1 = inMeter(doubleFromRun("SHT1.value"));
+  const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
+  const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+  return std::hypot(beamY - sht1, beamZ) -
+         m_sampleZOffset / std::cos(inRad(deflectionAngle));
 }
 
 /// Return the incident neutron deflection angle.
@@ -857,7 +888,29 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
   if (m_instrument != Supported::Figaro) {
     return 0.;
   }
-  return inMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
+  try { // Valid from 2018.
+    return inMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
+  } catch (...) { // Valid 2017.
+    return inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
+  }
+}
+
+/** Return the source to sample distance for the current instrument.
+ *  Valid 2017.
+ *  @return the source to sample distance in meters
+ */
+double LoadILLReflectometry::sourceSampleDistance() const {
+  if (m_instrument != Supported::Figaro) {
+    const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
+    // Chopper pair separation is in cm in sample logs.
+    const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
+    return pairCentre - 0.5 * pairSeparation;
+  } else {
+    const double chopperDist =
+        inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    return chopperDist + m_sampleZOffset / std::cos(inRad(deflectionAngle));
+  }
 }
 
 } // namespace DataHandling

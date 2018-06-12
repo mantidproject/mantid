@@ -2,7 +2,9 @@
 #define MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -49,8 +51,6 @@ public:
     return "Loads an ILL reflectometry Nexus file (instrument D17 or "
            "Figaro).";
   }
-  /// Cross-check properties with each other @see IAlgorithm::validateInputs
-  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// ID tags for supported instruments.
@@ -84,7 +84,9 @@ private:
   double detectorAngle() const;
   double offsetAngle(const double peakCentre, const double detectorCentre,
                      const double detectorDistance) const;
+  double sampleDetectorDistance() const;
   double sampleHorizontalOffset() const;
+  double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   Supported m_instrument{Supported::D17}; ///< Name of the instrument
