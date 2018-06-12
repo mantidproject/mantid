@@ -98,7 +98,8 @@ void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectra() {
-  if (const auto workspace = m_model->getWorkspace(m_activeIndex)) {
+  const auto workspace = m_model->getWorkspace(m_activeIndex);
+  if (workspace) {
     MantidQt::API::SignalBlocker<QObject> blocker(this);
     setSpectraRange(0, workspace->getNumberHistograms() - 1);
     boost::apply_visitor(SetViewSpectra(m_view.get()),
