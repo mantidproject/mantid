@@ -9,9 +9,17 @@ Direct Inelastic Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-Algorithms
+Interfaces
 ----------
 
+Improvements
+############
+
+- :ref:`PyChop <PyChop>` has been updated to calculate rep-rate multiplication for MAPS and MARI. In addition, it now supports loading instrument parameters from a YAML file, and also plots the Q-E coverage.
+
+
+Algorithms
+----------
 
 New features
 ############
