@@ -290,6 +290,7 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
         m_mainPresenter->getTimeSlicingValues(m_group));
   } catch (const std::runtime_error &ex) {
     m_view->giveUserWarning(ex.what(), "Error");
+    endReduction(false);
     return;
   }
 
@@ -297,13 +298,17 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
     // Check if any input event workspaces still exist in ADS
     if (proceedIfWSTypeInADS(m_itemsToProcess, true)) {
       GenericDataProcessorPresenter::process(m_itemsToProcess);
+    } else {
+      endReduction(false);
     }
     return;
   }
 
   // Check if any input non-event workspaces exist in ADS
-  if (!proceedIfWSTypeInADS(m_itemsToProcess, false))
+  if (!proceedIfWSTypeInADS(m_itemsToProcess, false)) {
+    endReduction(false);
     return;
+  }
 
   // Progress report
   int progress = 0;
