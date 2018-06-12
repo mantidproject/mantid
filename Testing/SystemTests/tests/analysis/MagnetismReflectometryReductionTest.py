@@ -2,7 +2,7 @@
 import stresstesting
 from mantid import *
 from mantid.simpleapi import *
-
+import math
 
 class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
     def runTest(self):
@@ -180,3 +180,18 @@ class MRInspectionTest(stresstesting.MantidStressTest):
     def validate(self):
         # Simple test to verify that we flagged the data correctly
         return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"
+
+class MRGetThetaTest(stresstesting.MantidStressTest):
+    """ Test that the MRGetTheta algorithm produces correct results """
+    def runTest(self):
+        nxs_data = LoadEventNexus(Filename="REF_M_24949",
+                                  NXentryName="entry-Off_Off",
+                                  OutputWorkspace="r_24949")
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data, UseSANGLE=True), 0.606127/180.0*math.pi)
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data, UseSANGLE=True, AngleOffset=math.pi), 180.606127/180.0*math.pi)
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data, SpecularPixel=126.1), 0.61249193272/180.0*math.pi)
+        # In the present case, DANGLE = DANGLE0, so we expect 0 if nothing else is passed
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data), 0.0)
+
+    def validate(self):
+        return True
