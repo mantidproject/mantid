@@ -269,7 +269,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   // Check linear adjustments, we expect and even number of histograms
   // and if any, they must be sufficient for all spectra in input workspace,
   // if per spectrum reconstruction is done.
-  bool psr = getProperty("PerSpectrumReconstruction");
+  bool perSpec = getProperty("PerSpectrumReconstruction");
   MatrixWorkspace_sptr linAdj = getProperty("DataLinearAdj");
   size_t nAHistograms = 0;
   if (linAdj)
@@ -278,7 +278,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
     result["DataLinearAdj"] =
         "The number of histograms in the linear "
         "adjustments workspace must be even, because they are complex data";
-  else if (psr && nAHistograms > 0 && nAHistograms < nHistograms)
+  else if (perSpec && nAHistograms > 0 && nAHistograms < nHistograms)
     result["DataLinearAdj"] =
         "The number of histograms in the linear "
         "adjustments workspace is insufficient for the input workspace";
@@ -294,7 +294,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
     result["DataConstAdj"] =
         "The number of histograms in the constant "
         "adjustments workspace must be even, because they are complex data";
-  else if (psr && nAHistograms > 0 && nAHistograms < nHistograms)
+  else if (perSpec && nAHistograms > 0 && nAHistograms < nHistograms)
     result["DataConstAdj"] =
         "The number of histograms in the constant "
         "adjustments workspace is insufficient for the input workspace";
