@@ -86,6 +86,7 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
 IndirectSpectrumSelectionPresenter::~IndirectSpectrumSelectionPresenter() {}
 
 void IndirectSpectrumSelectionPresenter::disableView() {
+  m_view->clear();
   m_view->setDisabled(true);
 }
 
@@ -104,9 +105,9 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
     setSpectraRange(0, workspace->getNumberHistograms() - 1);
     boost::apply_visitor(SetViewSpectra(m_view.get()),
                          m_model->getSpectra(m_activeIndex));
-  }
-  m_view->clear();
-  m_view->setEnabled(workspace ? true : false);
+    enableView();
+  } else
+    disableView();
 }
 
 void IndirectSpectrumSelectionPresenter::setActiveModelIndex(
