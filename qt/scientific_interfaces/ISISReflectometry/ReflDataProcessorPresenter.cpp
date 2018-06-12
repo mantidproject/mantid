@@ -345,8 +345,11 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 
       if (!allEventWS)
         allGroupsWereEvent = false;
-
+    } catch (std::exception &e) {
+      handleError(groupIndex, e.what());
+      errors = true;
     } catch (...) {
+      handleError(groupIndex, "Unknown error");
       errors = true;
     }
     progressReporter.report();
@@ -379,28 +382,33 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
   std::set<QString> loadedRuns;
 
   for (const auto &row : group) {
-
-    // The run number
-    auto runNo = row.second->value(0);
-    // Try loading as event workspace
-    bool eventWS = loadEventRun(runNo);
-    if (!eventWS) {
-      // This run could not be loaded as event workspace. We need to load and
-      // process the whole group as non-event data.
-      for (const auto &rowNew : group) {
-        // The run number
-        auto runNo = rowNew.second->value(0);
-        // Load as non-event workspace
-        loadNonEventRun(runNo);
+    try {
+      // The run number
+      auto runNo = row.second->value(0);
+      // Try loading as event workspace
+      bool eventWS = loadEventRun(runNo);
+      if (!eventWS) {
+        // This run could not be loaded as event workspace. We need to load and
+        // process the whole group as non-event data.
+        for (const auto &rowNew : group) {
+          // The run number
+          auto runNo = rowNew.second->value(0);
+          // Load as non-event workspace
+          loadNonEventRun(runNo);
+        }
+        // Remove monitors which were loaded as separate workspaces
+        for (const auto &run : loadedRuns) {
+          AnalysisDataService::Instance().remove(
+              ("TOF_" + run + "_monitors").toStdString());
+        }
+        return false;
       }
-      // Remove monitors which were loaded as separate workspaces
-      for (const auto &run : loadedRuns) {
-        AnalysisDataService::Instance().remove(
-            ("TOF_" + run + "_monitors").toStdString());
-      }
-      return false;
+      loadedRuns.insert(runNo);
+    } catch (std::exception &e) {
+      handleError(row.second, e.what());
+    } catch (...) {
+      handleError(row.second, "Unknown error");
     }
-    loadedRuns.insert(runNo);
   }
   return true;
 }
