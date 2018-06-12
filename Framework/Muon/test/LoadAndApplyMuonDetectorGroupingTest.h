@@ -30,29 +30,45 @@ using Mantid::DataHandling::LoadMuonNexus2;
 
 namespace {
 
-ScopedFileHelper::ScopedFile createXML() {
-
+// Simplest possible grouping file, with only a single group
+ScopedFileHelper::ScopedFile createXMLSingleGroup(const std::string &groupName,
+                                                  const std::string &group) {
   std::string fileContents("");
   fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"test\"> \n";
-  fileContents += "\t\t<ids val=\"1,2,3\"/>\n";
-  fileContents += "\t</group>\n";
-  fileContents += "\t<default name=\"test\"/>\n";
-  fileContents += "</detector-grouping>";
-
-  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
-
-  return file;
-}
-
-ScopedFileHelper::ScopedFile createXMLSingleGroup(std::string &group) {
-
-  std::string fileContents("");
-  fileContents += "<detector-grouping description=\"test XML file\"> \n";
-  fileContents += "\t<group name=\"test\"> \n";
+  fileContents += "\t<group name=\"" + groupName + "\"> \n";
   fileContents += "\t\t<ids val=\"" + group + "\"/>\n";
   fileContents += "\t</group>\n";
-  fileContents += "\t<default name=\"test\"/>\n";
+  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
+  fileContents += "</detector-grouping>";
+
+  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
+  return file;
+}
+
+// Create an XML with two simple groups and a pair made from them. groupName
+// applies only to the pairing so that we can test a failure case
+ScopedFileHelper::ScopedFile createXMLSinglePair(const std::string &pairName,
+                                                 const std::string &groupName) {
+
+  std::string fileContents("");
+
+  fileContents += "<detector-grouping description=\"test XML file\"> \n";
+  fileContents += "\t<group name=\"group1\"> \n";
+  fileContents += "\t\t<ids val=\"1\"/>\n";
+  fileContents += "\t</group>\n";
+
+  fileContents += "<detector-grouping description=\"test XML file\"> \n";
+  fileContents += "\t<group name=\"group2\"> \n";
+  fileContents += "\t\t<ids val=\"2\"/>\n";
+  fileContents += "\t</group>\n";
+
+  fileContents += "\t<pair name=\"" + pairName + "\"> \n";
+  fileContents += "\t\t<forward-group val=\"group1\"/>\n";
+  fileContents += "\t\t<backward-group val=\"" + groupName + "\"/>\n";
+  fileContents += "\t\t<alpha val=\"1\"/>\n";
+  fileContents += "\t</pair>\n";
+
+  fileContents += "\t<default name=\"" + groupName + "\"/>\n";
   fileContents += "</detector-grouping>";
 
   ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
@@ -60,14 +76,73 @@ ScopedFileHelper::ScopedFile createXMLSingleGroup(std::string &group) {
   return file;
 }
 
-// Create fake muon data with exponential decay
-struct yDataAsymmetry {
-  double operator()(const double time, size_t specNum) {
-    double amplitude = (static_cast<double>(specNum) + 1) * 10.;
-    double tau = Mantid::PhysicalConstants::MuonLifetime *
-                 1e6; // Muon life time in microseconds
-    return (20. * (1.0 + amplitude * exp(-time / tau)));
+/**
+ * Create an XML file with grouping/pairing information. With nGroups = 3 and
+ * nDetectorPerGroup = 5 the grouping would be {"1-5","6-10","11-15"}.
+ *
+ * @param nGroups :: The number of groups to produce
+ * @param nDetectorsPerGroup ::  The number of detector IDs per group
+ * @return ScopedFile.
+ */
+ScopedFileHelper::ScopedFile
+createXMLwithPairsAndGroups(const int &nGroups = 1,
+                            const int &nDetectorsPerGroup = 1) {
+
+  API::Grouping grouping;
+  std::string groupIDs;
+  // groups
+  for (auto group = 1; group <= nGroups; group++) {
+    std::string groupName = "group" + std::to_string(group);
+    if (nGroups == 1) {
+      groupIDs = "1";
+    } else {
+      groupIDs = std::to_string((group - 1) * nDetectorsPerGroup + 1) + "-" +
+                 std::to_string(group * nDetectorsPerGroup);
+    }
+    grouping.groupNames.emplace_back(groupName);
+    grouping.groups.emplace_back(groupIDs);
   }
+  // pairs
+  for (auto pair = 1; pair < nGroups; pair++) {
+    std::string pairName = "pair" + std::to_string(pair);
+    std::pair<size_t, size_t> pairIndices;
+    pairIndices.first = 0;
+    pairIndices.second = pair;
+    grouping.pairNames.emplace_back(pairName);
+    grouping.pairAlphas.emplace_back(1.0);
+    grouping.pairs.emplace_back(pairIndices);
+  }
+
+  auto fileContents = MuonAlgorithmHelper::groupingToXML(grouping);
+  ScopedFileHelper::ScopedFile file(fileContents, "testXML_1.xml");
+  return file;
+}
+
+/**
+ * Create a fake muon dataset, each spectrum is offset by 4 degrees in phase
+ * and has a different normalization.
+ */
+struct yDataAsymmetry {
+  yDataAsymmetry() {
+    m_amp = 1.5;
+    m_phi = 0.1;
+  };
+  yDataAsymmetry(const double amp, const double phi) : m_amp(amp), m_phi(phi){};
+
+  double operator()(const double t, size_t spec) {
+    double e = exp(-t / tau);
+    double factor = (static_cast<double>(spec) + 1.0) * 0.5;
+    double phase_offset = 4 * M_PI / 180;
+    return (10. * factor *
+            (1.0 + m_amp * cos(m_omega * t + m_phi + spec * phase_offset)) * e);
+  }
+
+private:
+  double m_amp;         // Amplitude of the oscillations
+  double m_phi;         // Phase of the sinusoid
+  double m_omega = 5.0; // Frequency of the oscillations
+  double tau =
+      PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
 };
 
 struct yDataCounts {
@@ -92,11 +167,14 @@ struct eData {
  * Number of bins = maxt - 1 .
  * @return Pointer to the workspace.
  */
-MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec, size_t maxt) {
+template <typename Function = yDataAsymmetry>
+MatrixWorkspace_sptr
+createAsymmetryWorkspace(size_t nspec, size_t maxt,
+                         Function dataGenerator = yDataAsymmetry()) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataAsymmetry(), static_cast<int>(nspec), 0.0, 1.0,
+          dataGenerator, static_cast<int>(nspec), 0.0, 1.0,
           (1.0 / static_cast<double>(maxt)), true, eData());
 
   ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
@@ -110,6 +188,12 @@ MatrixWorkspace_sptr createAsymmetryWorkspace(size_t nspec, size_t maxt) {
 
   // Add number of good frames (required for Asymmetry calculation)
   ws->mutableRun().addProperty("goodfrm", 10);
+
+  boost::shared_ptr<Geometry::Instrument> inst1 =
+      boost::make_shared<Geometry::Instrument>();
+  inst1->setName("EMU");
+  ws->setInstrument(inst1);
+  ws->mutableRun().addProperty("run_number", 12345);
 
   return ws;
 }
@@ -142,6 +226,13 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
     spec.setSpectrumNo(g + 1);
     ws->mutableY(g) += seed;
   }
+
+  boost::shared_ptr<Geometry::Instrument> inst1 =
+      boost::make_shared<Geometry::Instrument>();
+  inst1->setName("EMU");
+  ws->setInstrument(inst1);
+  ws->mutableRun().addProperty("run_number", 12345);
+  ws->mutableRun().addProperty("goodfrm", 10);
 
   return ws;
 }
@@ -207,6 +298,37 @@ createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
   return wsGroup;
 }
 
+// Set algorithm properties to sensible defaults (assuming data with 10 groups)
+// Use when entering workspaces to pair
+Mantid::API::IAlgorithm_sptr
+algorithmWithPropertiesSet(const std::string &inputWSName,
+                           const std::string &filename) {
+  auto alg = boost::make_shared<Muon::LoadAndApplyMuonDetectorGrouping>();
+  alg->initialize();
+  alg->setProperty("InputWorkspace", inputWSName);
+  alg->setProperty("Filename", filename);
+  alg->setProperty("ApplyAsymmetryToGroups", true);
+  alg->setLogging(false);
+  return alg;
+}
+
+// Simple class to set up the ADS with the configuration required by the
+// algorithm (a MatrixWorkspace and an empty group).
+class setUpADSWithWorkspace {
+public:
+  setUpADSWithWorkspace(Workspace_sptr ws) {
+    AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
+    wsGroup = boost::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().addOrReplace(groupWSName, wsGroup);
+  };
+
+  ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
+  WorkspaceGroup_sptr wsGroup;
+
+  static constexpr const char *inputWSName = "inputData";
+  static constexpr const char *groupWSName = "inputGroup";
+};
+
 } // namespace
 
 class LoadAndApplyMuonDetectorGroupingTest : public CxxTest::TestSuite {
@@ -230,23 +352,19 @@ public:
     TS_ASSERT(alg.isInitialized());
   };
 
-  void test_workspaceProduced() {
-    // Simple XML with only one group, with only single detector
+  void test_init_and_exec_with_simple_properties() {
 
     auto ws = createCountsWorkspace(5, 10, 0.0);
     auto wsGroup = boost::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace("inputData", ws);
     AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
 
-    auto file = createXML();
+    auto file = createXMLSingleGroup("test", "1,2,3");
     std::string filename = file.getFileName();
-
-    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 0);
 
     Muon::LoadAndApplyMuonDetectorGrouping alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("WorkspaceGroup", wsGroup->getName()));
@@ -254,137 +372,128 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
-
-    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
-
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
-
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
-
-    // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
-
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 30, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 57, 0.0001);
-    // Errors added in quadrature.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
-
-    AnalysisDataService::Instance().clear();
   }
 
-  void test_workspaceOverwrite() {
-    // Simple XML with only one group, with only single detector.
-    // ensure overwrites a workspace with the same name
+  void test_workspaces_named_and_grouped_correctly() {
 
-    auto &ads = AnalysisDataService::Instance();
+    auto ws = createCountsWorkspace(10, 10, 0.0);
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(2, 5);
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->execute();
 
-    auto ws = createCountsWorkspace(5, 10, 0.0);
-    auto wsGroup = boost::make_shared<WorkspaceGroup>();
-    ads.addOrReplace("inputData", ws);
-    ads.addOrReplace("inputGroup", wsGroup);
-
-    auto ws1 = createCountsWorkspace(1, 20, 5.0);
-    auto ws2 = createCountsWorkspace(1, 20, 10.0);
-    ads.addOrReplace("inputGroup; Group; test; Counts; #1", ws1);
-    ads.addOrReplace("inputGroup; Group; test; Counts; #1_Raw", ws2);
-    wsGroup->add("inputGroup; Group; test; Counts; #1");
-    wsGroup->add("inputGroup; Group; test; Counts; #1_Raw");
-
-    auto file = createXML();
-    std::string filename = file.getFileName();
-
-    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
-
-    Muon::LoadAndApplyMuonDetectorGrouping alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("WorkspaceGroup", wsGroup->getName()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
-
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
-    TS_ASSERT(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
-
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
-
-    // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
-
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 30, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 57, 0.0001);
-    // Errors added in quadrature.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
-
-    AnalysisDataService::Instance().clear();
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("EMU00012345"));
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
+    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 10);
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Counts; #1"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Counts; #1_Raw"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
+    TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
   }
 
-  void test_workspaceGroupDefaultName() {
-    // Give no workspace group and check that the default
-    // name is correct.
+  void test_produces_workspaces_with_correct_entries() {
 
-    auto ws = createCountsWorkspace(5, 10, 0.0);
-    ws->mutableRun().addProperty("run_number", 10);
-    AnalysisDataService::Instance().addOrReplace("inputData", ws);
+    auto ws = createAsymmetryWorkspace(4, 10, yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(2, 2);
 
-    auto file = createXML();
-    std::string filename = file.getFileName();
-
-    Muon::LoadAndApplyMuonDetectorGrouping alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("basic010"));
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->execute();
 
     WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve("basic010"));
-
-    TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
-    TS_ASSERT(wsGroup->contains("basic010; Group; test; Counts; #1"));
-    TS_ASSERT(wsGroup->contains("basic010; Group; test; Counts; #1_Raw"));
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
 
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("basic010; Group; test; Counts; #1_Raw"));
+        wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 30, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 57, 0.0001);
-    // Errors added in quadrature.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 85.43223343, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.70842873, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 25.57248768, 0.0001);
+    // Sqrt(2) * 0.005.
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.007071, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.007071, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.007071, 0.00001);
 
-    AnalysisDataService::Instance().clear();
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 37.2468, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.2974, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 8.9759, 0.0001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+
+    // Asymmetry converts bin width to point data
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3928, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.5286, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.4804, 0.0001);
+
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.09699944, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.6524227, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.18874449, 0.00001);
+  }
+
+  void test_workspace_overwritten_if_name_is_duplicated() {
+
+    auto ws = createAsymmetryWorkspace(1, 10, yDataCounts());
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(1, 1);
+
+    // Add workspaces which should be overwritten
+    auto &ads = AnalysisDataService::Instance();
+    auto ws1 = createCountsWorkspace(1, 20, 5.0);
+    auto ws2 = createCountsWorkspace(1, 20, 10.0);
+    ads.addOrReplace("EMU00012345; Group; group1; Counts; #1", ws1);
+    ads.addOrReplace("EMU00012345; Group; group1; Counts; #1_Raw", ws2);
+    setup.wsGroup->add("EMU00012345; Group; group1; Counts; #1");
+    setup.wsGroup->add("EMU00012345; Group; group1; Counts; #1_Raw");
+
+    int numEntriesBefore = setup.wsGroup->getNumberOfEntries();
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->execute();
+
+    TS_ASSERT_EQUALS(setup.wsGroup->getNumberOfEntries(), numEntriesBefore);
+    TS_ASSERT(setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
+    TS_ASSERT(
+        setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+    TS_ASSERT_EQUALS(wsOut->readX(0).size(), 10 + 1);
+
+    ads.clear();
+  }
+
+  void test_default_workspace_name_correct_for_unrecongnized_instrument() {
+
+    auto ws = createCountsWorkspace(4, 2, 0.0);
+    boost::shared_ptr<Geometry::Instrument> inst1 =
+        boost::make_shared<Geometry::Instrument>();
+    inst1->setName("LHC");
+    ws->setInstrument(inst1);
+
+    auto file = createXMLwithPairsAndGroups(2, 2);
+
+    setUpADSWithWorkspace setup(ws);
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->execute();
+
+    auto names = AnalysisDataService::Instance().getObjectNames();
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("LHC12345"));
   }
 
   void test_correctGroupingTableProduced() {
@@ -392,47 +501,35 @@ public:
     // match the input group from file
   }
 
-  void test_singleGroupDoesntChangeData() {
-    // Simple XML with only one group, with only single detector.
-    // Ensure workspace is unaltered from the input data.
+  void test_throws_if_group_name_not_valid() {
+
+    auto ws = createAsymmetryWorkspace(4, 10, yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLSingleGroup("group_", "1-2");
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_groupingWithCounts() {}
+  void test_throws_if_pair_contains_non_existant_group() {
 
-  void test_fileWithGroupingOnly() {
-    // XML file with at least three groups. Check number of workspaces.
+    auto ws = createAsymmetryWorkspace(2, 10, yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLSinglePair("pair1", "nonExistantGroup");
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    TS_ASSERT_THROWS(alg->execute(), Mantid::Kernel::Exception::FileError);
   }
 
-  void test_fileWithPairing() {
-    // XML file with at least three groups and three pairs. Check number of
-    // workspaces.
-  }
-
-  void test_fileWithMisnamedGroup() {
-    // Deliberately reference a group by the wrong name. check throws error.
-  }
-
-  void test_fileWithTooManyDetectors() {
+  void test_throws_when_file_has_detectors_which_are_not_in_workspace() {
 
     auto ws = createCountsWorkspace(5, 3, 0.0);
-    auto wsGroup = boost::make_shared<WorkspaceGroup>();
-    AnalysisDataService::Instance().addOrReplace("inputData", ws);
-    AnalysisDataService::Instance().addOrReplace("inputGroup", wsGroup);
-
+    setUpADSWithWorkspace setup(ws);
     std::string group = "1-10";
-    auto file = createXMLSingleGroup(group);
-    std::string filename = file.getFileName();
+    auto file = createXMLSingleGroup("test", group);
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
 
-    Muon::LoadAndApplyMuonDetectorGrouping alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("WorkspaceGroup", wsGroup->getName()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ApplyAsymmetryToGroups", false));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 };
 
