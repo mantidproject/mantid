@@ -145,7 +145,7 @@ public:
     TS_ASSERT_DELTA(expectedAverageDeltaTByT, averageDeltaTByT, 1e-6);
   }
 
-  void test_dataIsCorrect() {
+  void test_dataIsCorrect(){
     SaveGDA testAlg;
     testAlg.initialize();
     testAlg.setProperty("InputWorkspace", INPUT_GROUP_NAME);
