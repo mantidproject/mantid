@@ -468,6 +468,8 @@ class PyChopGui(QtGui.QMainWindow):
                 newname = new_inst.name
         self.instruments[newname] = new_inst
         self.choppers[newname] = new_inst.getChopperNames()
+        self.minE[newname] = max([new_inst.emin, 0.01])
+        self.maxE[newname] = new_inst.emax
         self.updateInstrumentList()
 
     def _ask_overwrite(self):
