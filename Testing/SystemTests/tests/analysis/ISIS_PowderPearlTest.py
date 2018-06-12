@@ -59,6 +59,8 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
+        # Required for changes in MergeRuns rebinning behaviour
+        self.disableChecking.append("SpectraMap")
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
         return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode), \
                "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"
@@ -118,7 +120,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
 
     def validate(self):
-        self.tolerance = 1e-10  # Required for difference in spline data between operating systems
+        self.tolerance = 0.02  # Required for changes in MergeRuns rebinning behaviour
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
@@ -143,6 +145,9 @@ class FocusWithAbsorbCorrectionsTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus_with_absorb_corrections()
 
     def validate(self):
+        # Required for changes in MergeRuns rebinning behaviour
+        self.disableChecking.append("SpectraMap")
+        self.tolerance = 0.02
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70_absorb.nxs"
 
     def cleanup(self):
