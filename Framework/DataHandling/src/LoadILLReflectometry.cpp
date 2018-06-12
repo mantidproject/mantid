@@ -851,32 +851,6 @@ void LoadILLReflectometry::placeSource() {
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 
-/** Return the sample to detector distance for the current instrument.
- *  Valid 2017.
- *  @return the distance in meters
- */
-double LoadILLReflectometry::sampleDetectorDistance() const {
-  if (m_instrument != Supported::Figaro) {
-    return inMeter(doubleFromRun("det.value"));
-  }
-  const double restZ = inMeter(doubleFromRun("DTR.value"));
-  // Motor DH1 vertical coordinate.
-  const double DH1Y = inMeter(doubleFromRun("DH1.value"));
-  const double detectorRestY = 0.509;
-  const double detAngle = detectorAngle();
-  const double detectorY =
-      std::sin(inRad(detAngle)) * (restZ - Figaro::DH1Z) + DH1Y - detectorRestY;
-  const double detectorZ =
-      std::cos(inRad(detAngle)) * (restZ - Figaro::DH1Z) + Figaro::DH1Z;
-  const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
-  const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
-  const double sht1 = inMeter(doubleFromRun("SHT1.value"));
-  const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
-  const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
-  return std::hypot(beamY - sht1, beamZ) -
-         m_sampleZOffset / std::cos(inRad(deflectionAngle));
-}
-
 /// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const {
   if (m_instrument != Supported::Figaro) {
@@ -911,6 +885,32 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
   const auto sign = m_instrument == Supported::D17 ? 1. : -1.;
   const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
   return sign * inDeg(std::atan2(offsetWidth, detectorDistance));
+}
+
+/** Return the sample to detector distance for the current instrument.
+ *  Valid 2017.
+ *  @return the distance in meters
+ */
+double LoadILLReflectometry::sampleDetectorDistance() const {
+  if (m_instrument != Supported::Figaro) {
+    return inMeter(doubleFromRun("det.value"));
+  }
+  const double restZ = inMeter(doubleFromRun("DTR.value"));
+  // Motor DH1 vertical coordinate.
+  const double DH1Y = inMeter(doubleFromRun("DH1.value"));
+  const double detectorRestY = 0.509;
+  const double detAngle = detectorAngle();
+  const double detectorY =
+      std::sin(inRad(detAngle)) * (restZ - Figaro::DH1Z) + DH1Y - detectorRestY;
+  const double detectorZ =
+      std::cos(inRad(detAngle)) * (restZ - Figaro::DH1Z) + Figaro::DH1Z;
+  const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
+  const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
+  const double sht1 = inMeter(doubleFromRun("SHT1.value"));
+  const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
+  const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+  return std::hypot(beamY - sht1, beamZ) -
+         m_sampleZOffset / std::cos(inRad(deflectionAngle));
 }
 
 /// Return the horizontal offset along the z axis.
