@@ -516,13 +516,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.02195579, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.00420021, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 0.02306048, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.1297, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.1139, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.08961, 0.0001);
     // Errors are simply normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0000222282776, 0.0000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0000266671712, 0.0000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0000334823452, 0.0000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00001978, 0.0000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00002373, 0.0000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00002979, 0.0000001);
 
     AnalysisDataService::Instance().clear();
   }
@@ -578,13 +578,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.01162, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.00222, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 0.01221, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.12048, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.11211, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.09927, 0.00001);
     // Errors : quadrature addition + normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00000679, 0.00000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00000815, 0.00000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00001023, 0.00000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00000605, 0.00000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00000725, 0.00000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00000911, 0.00000001);
 
     AnalysisDataService::Instance().clear();
   }

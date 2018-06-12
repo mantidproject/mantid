@@ -92,7 +92,8 @@ void EnggDiffractionViewQtGUI::initLayout() {
       m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
-  m_gsasWidget = new EnggDiffGSASFittingViewQtWidget(sharedView, sharedView);
+  m_gsasWidget =
+      new EnggDiffGSASFittingViewQtWidget(sharedView, sharedView, fullPres);
   m_ui.tabMain->addTab(m_gsasWidget, QString("GSAS-II Refinement"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);

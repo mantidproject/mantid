@@ -9,6 +9,9 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+
+* :ref:`LoadILLSANS <algm-LoadILLSANS>` is upgraded to load the modern nexus files from instruments D11, D22 and D33 at the ILL.
+
 ISIS SANS Interface
 ----------------------------
 
@@ -29,7 +32,8 @@ Improvements
 
 Bug fixes
 #########
-* Fixed a bug where the beam stop arm was not being masked on LOQ.
+* Fixed a bug where the beam stop arm was not being masked on LOQ for the new backend.
+* Fixed a bug in the old backend where for LOQ the high angle bank was not being centered correctly in some cases.
 * Fixed a bug where userfiles specified in the batch file were not being loaded into the new GUI.
 
 Features Removed
