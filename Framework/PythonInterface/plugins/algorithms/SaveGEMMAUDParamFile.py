@@ -99,7 +99,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
     def _create_empty_param_list(self, num_banks, default_value="0"):
         # Generate a list of zeroes, as several parameters are just zeroed in the .maud file
-        return "\n".join("0" for _ in range(num_banks))
+        return "\n".join(default_value for _ in range(num_banks))
 
     def _expand_to_texture_bank(self, bank_param_list, spectrum_numbers):
         return (bank_param_list[self.BANK_GROUPING[spec_num]] for spec_num in spectrum_numbers)
