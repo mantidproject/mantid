@@ -25,6 +25,7 @@ E2V = np.sqrt((constants.e / 1000) * 2 / constants.neutron_mass) # v = E2V * sqr
 E2L = 1.e23 * constants.h**2 / (2 * constants.m_n * constants.e) # lam = sqrt(E2L / E)  lam in Angst, E in meV
 E2K = constants.e * 2 * constants.m_n / constants.hbar**2 / 1e23 # k = sqrt(E2K * E)    k in 1/Angst, E in meV
 
+
 def wrap_attributes(obj, inval, allowed_var_names):
     for key in allowed_var_names:
         if inval:
@@ -32,6 +33,7 @@ def wrap_attributes(obj, inval, allowed_var_names):
                 setattr(obj, key, getattr(inval, key))
             elif hasattr(inval, '__getitem__') and key in inval:
                 setattr(obj, key, inval[key])
+
 
 def argparser(args, kwargs, argnames, defaults=None):
     argdict = {key: val for key, val in zip(argnames, defaults if defaults else [None] * len(argnames))}
@@ -41,6 +43,7 @@ def argparser(args, kwargs, argnames, defaults=None):
         argdict[argnames[idx]] = args[idx]
     return argdict
 
+
 def _check_input(self, *args):
     vtype = ['Incident energy', 'Frequency']
     defval = [self.ei, self.frequency]
@@ -48,6 +51,7 @@ def _check_input(self, *args):
     if [v for v in retval if v is None]:
         raise ValueError('%s has not been specified.' % (vtype[[i for i in range(len(retval)) if retval[i] is None][0]]))
     return tuple(retval) if len(retval) > 1 else retval[0]
+
 
 def soft_hat(x, p):
     """
@@ -103,8 +107,8 @@ class ChopperSystem(object):
     """
 
     __allowed_var_names = ['name', 'chop_sam', 'sam_det', 'aperture_width', 'aperture_height', 'choppers', 'variants',
-                           'frequency_matrix', 'constant_frequencies', 'max_frequencies', 'default_frequencies', 
-                           'source_rep', 'n_frame', 'emission_time', 'overlap_ei_frac', 'ei_limits', 
+                           'frequency_matrix', 'constant_frequencies', 'max_frequencies', 'default_frequencies',
+                           'source_rep', 'n_frame', 'emission_time', 'overlap_ei_frac', 'ei_limits',
                            'flux_ref_slot', 'flux_ref_freq', 'frequency_names']
 
     def __init__(self, inval=None):
@@ -120,7 +124,7 @@ class ChopperSystem(object):
         self._parse_variants()
         self.phase = self.defaultPhase
         self.frequency = self.default_frequencies
-        
+
     def __repr__(self):
         return self.name if self.name else 'Undefined disk chopper system'
 
@@ -169,8 +173,8 @@ class ChopperSystem(object):
         self.defaultPhase = [self.defaultPhase[ii] for ii in self.isPhaseIndependent]
         self.phaseNames = [self.phaseNames[ii] for ii in self.isPhaseIndependent]
         source_rep = self.source_rep if (not hasattr(self, 'n_frame') or self.n_frame == 1) else [self.source_rep, self.n_frame]
-        self._instpar = [self.distance, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius, 
-                         self.numDisk, self.sam_det, self.chop_sam, source_rep, self.emission_time, 
+        self._instpar = [self.distance, self.nslot, self.slot_ang_pos, self.slot_width, self.guide_width, self.radius,
+                         self.numDisk, self.sam_det, self.chop_sam, source_rep, self.emission_time,
                          self.overlap_ei_frac, self.isPhaseIndependent]
         if self.isFermi:
             self.package = self.packages.keys()[0]
@@ -357,7 +361,7 @@ class ChopperSystem(object):
         idx = (Eis >= self.ei_limits[0]) * (Eis <= self.ei_limits[1])
         # Always keeps desired rep even if outside of range
         if Ei:
-            idx += ((np.abs(Eis - Ei) / np.abs(Eis)) < 0.1) 
+            idx += ((np.abs(Eis - Ei) / np.abs(Eis)) < 0.1)
         Eis = Eis[idx]
         lines = np.array(lines)[idx]
         return Eis, lines
@@ -436,7 +440,7 @@ class ChopperSystem(object):
         if value not in self.packages.keys():
             ky = [k for k in self.packages.keys() if value.upper() == k.upper()]
             if not ky:
-                raise ValueError('Fermi package ''%s'' not recognised. Allowed values are: %s' 
+                raise ValueError('Fermi package ''%s'' not recognised. Allowed values are: %s'
                                  % (value, ', '.join(self.packages.keys())))
             else:
                 value = ky[0]
@@ -462,7 +466,7 @@ class ChopperSystem(object):
         if value not in self.variants.keys():
             ky = [k for k in self.variants.keys() if value.upper() == k.upper()]
             if not ky:
-                raise ValueError('Variant ''%s'' not recognised. Allowed values are: %s' 
+                raise ValueError('Variant ''%s'' not recognised. Allowed values are: %s'
                                  % (value, ', '.join(self.variants.keys())))
             else:
                 value = ky[0]
@@ -487,11 +491,11 @@ class ChopperSystem(object):
     @property
     def emin(self):
         return self.ei_limits[0] if hasattr(self, 'ei_limits') and self.ei_limits else 0.1
-        
+
     @property
     def emax(self):
         return self.ei_limits[1] if hasattr(self, 'ei_limits') and self.ei_limits else 1000
-        
+
 
 class Moderator(object):
     """
@@ -646,7 +650,8 @@ class Instrument(object):
         if isinstance(instrument, string_types):
             # check if it is a file or instrument name we want
             if instrument.lower() in self.__known_instruments:
-                import os.path, sys
+                import os.path
+                import sys
                 folder = os.path.dirname(sys.modules[self.__module__].__file__)
                 instrument = os.path.join(folder, instrument.lower() + '.yaml')
             try:
@@ -655,7 +660,7 @@ class Instrument(object):
             except (OSError, IOError) as e:
                 raise RuntimeError('Cannot open file %s . Error is %s' % (instrument, e))
         if ((hasattr(instrument, 'moderator') or hasattr(instrument, 'chopper_system')) or
-            ('moderator' in instrument or 'chopper_system' in instrument)):
+           ('moderator' in instrument or 'chopper_system' in instrument)):
             wrap_attributes(self, instrument, self.__allowed_var_names)
             if isinstance(self.moderator, dict) and isinstance(self.chopper_system, dict):
                 for key in ['source_rep', 'n_frame', 'emission_time']:
@@ -664,11 +669,11 @@ class Instrument(object):
         else:
             raise RuntimeError('Input to Instrument must be an Instrument object, a dictionary or a filename string')
         # If we have just loaded a YAML file or constructed from a dictionary, need to convert to correct class
-        for elem_nm, classref in zip(['sample', 'chopper_system', 'moderator', 'detector'], 
+        for elem_nm, classref in zip(['sample', 'chopper_system', 'moderator', 'detector'],
                                      [Sample, ChopperSystem, Moderator, Detector]):
             try:
                 element = getattr(self, elem_nm)
-                if isinstance(element, dict): 
+                if isinstance(element, dict):
                     setattr(self, elem_nm, classref(element))
                 setattr(self, 'has_' + elem_nm, True)
             except AttributeError:
@@ -678,9 +683,9 @@ class Instrument(object):
         for method in self.__child_methods:
             setattr(self, method, getattr(self.chopper_system, method))
         for prop in self.__child_properties:
-            getter = lambda obj, prop=prop, self=self: ChopperSystem.__dict__[prop].__get__(self.chopper_system, ChopperSystem)
-            setter = lambda obj, val, prop=prop, self=self: ChopperSystem.__dict__[prop].__set__(self.chopper_system, val)
-            setattr(type(self), prop, property(getter, setter))
+            setattr(type(self), prop,
+                    property(lambda obj, prop=prop, self=self: ChopperSystem.__dict__[prop].__get__(self.chopper_system, ChopperSystem),
+                             lambda obj, val, prop=prop, self=self: ChopperSystem.__dict__[prop].__set__(self.chopper_system, val)))
         # Now reset default chopper/variant and frequency
         if chopper or freq:
             self.setChopper(chopper if chopper else self.getChopper(), freq if freq else self.frequency)
@@ -755,7 +760,7 @@ class Instrument(object):
         return van
 
     def getMultiRepResolution(self, Etrans=None, Ei_in=None, frequency=None):
-        """ Returns a list of FWHM in meV for all allowed Ei's in multirep mode (in same order as getAllowedEi) 
+        """ Returns a list of FWHM in meV for all allowed Ei's in multirep mode (in same order as getAllowedEi)
             The input energy transfer is interpreted as fractions of Ei. e.g. linspace(0,0.9,100) """
         Ei = _check_input(self.chopper_system, Ei_in)
         if Etrans is None:
@@ -827,7 +832,7 @@ class Instrument(object):
     @property
     def aperture_height(self):
         if hasattr(self.chopper_system, 'aperture_height') and self.chopper_system.aperture_height:
-            return self.chopper_system.aperture_height 
+            return self.chopper_system.aperture_height
         return 0.
 
     @property

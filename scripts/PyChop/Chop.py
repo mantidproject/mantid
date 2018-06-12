@@ -26,6 +26,7 @@ warnings.simplefilter('always', UserWarning)
 # Chopper functions
 # ------------------------------------------------------------------------------------------------- #
 
+
 def tchop(freq, Ei, pslit, radius, rho):
     """
     ! Calculates the time width of a Fermi chopper given its parameters, the Ei and frequency.

@@ -23,6 +23,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
 
+
 class PyChopGui(QtGui.QMainWindow):
     """
     GUI Class using PyQT for PyChop to help users plan inelastic neutron experiments
@@ -323,7 +324,7 @@ class PyChopGui(QtGui.QMainWindow):
             self.flxaxes2.hold(True)
             for ii, instrument in enumerate(tmpinst):
                 for ie, ei in enumerate(eis):
-                    with warnings.catch_warnings(record=True) as w:
+                    with warnings.catch_warnings(record=True):
                         warnings.simplefilter('always', UserWarning)
                         flux[ie] = instrument.getFlux(ei)
                         elres[ie] = instrument.getResolution(0., ei)[0]
@@ -332,7 +333,7 @@ class PyChopGui(QtGui.QMainWindow):
                 line.set_label(labels[ii])
         else:
             for ie, ei in enumerate(eis):
-                with warnings.catch_warnings(record=True) as w:
+                with warnings.catch_warnings(record=True):
                     warnings.simplefilter('always', UserWarning)
                     flux[ie] = self.engine.getFlux(ei)
                     elres[ie] = self.engine.getResolution(0., ei)[0]
@@ -398,7 +399,7 @@ class PyChopGui(QtGui.QMainWindow):
                 self.setFreq(manual_freq=[freq] + freq0[1:])
             else:
                 self.setFreq(manual_freq=freq)
-            with warnings.catch_warnings(record=True) as w:
+            with warnings.catch_warnings(record=True):
                 warnings.simplefilter('always', UserWarning)
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0., ei)[0]
@@ -477,6 +478,7 @@ class PyChopGui(QtGui.QMainWindow):
         buttons = [QtGui.QPushButton(label) for label in ['Load and overwrite', 'Cancel Load', 'Load and rename to']]
         locations = [[1, 0], [1, 1], [2, 0]]
         self.overwrite_flag = 1
+
         def overwriteCB(idx):
             self.overwrite_flag = idx
             msg.accept()
@@ -565,7 +567,7 @@ class PyChopGui(QtGui.QMainWindow):
         for ii in range(len(res)):
             ef = ei-en[ii]
             approx = (874.78672e-6/x2)*np.sqrt(ef**3 * ((v_mod*((x1/x0)+(x2/x0)*(ei/ef)**1.5))**2
-                                                       + (v_chop*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5))**2))
+                                                        + (v_chop*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5))**2))
             txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
         return txt
 

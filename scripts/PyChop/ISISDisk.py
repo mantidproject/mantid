@@ -127,48 +127,51 @@ class ISISDisk:
         """
         return self.variant
 
+    def _LETfreq(self, frequency):
+        if 'FLUX' in self.variant.upper():
+            if hasattr(frequency, "__len__"):
+                if len(frequency) == 1:
+                    self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                elif len(frequency) == 2:
+                    self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
+                elif len(frequency) == 5:
+                    self.freq = frequency
+                else:
+                    raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
+            else:
+                self.freq = [frequency/4., 10., frequency/4., frequency/2., frequency]
+        elif 'RES' in self.variant.upper():
+            if hasattr(frequency, "__len__"):
+                if len(frequency) == 1:
+                    self.freq = [frequency[0]/2., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                elif len(frequency) == 2:
+                    self.freq = [frequency[0]/2., 10., frequency[1], frequency[1], frequency[0]]
+                elif len(frequency) == 5:
+                    self.freq = frequency
+                else:
+                    raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
+            else:
+                self.freq = [frequency/2., 10., frequency/2., frequency/2., frequency]
+        else:
+            if hasattr(frequency, "__len__"):
+                if len(frequency) == 1:
+                    self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                elif len(frequency) == 2:
+                    self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
+                elif len(frequency) == 5:
+                    self.freq = frequency
+                else:
+                    raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
+            else:
+                self.freq = [frequency/4., 10., frequency/2., frequency/2., frequency]
+
     def setFrequency(self, frequency, **kwargs):
         """
         Sets the chopper frequencies, in Hz.
         If scalar, sets the resolution chopper freq to this and the pulse remover to freq/2
         """
         if 'LET' in self.instname:
-            if 'FLUX' in self.variant.upper():
-                if hasattr(frequency, "__len__"):
-                    if len(frequency) == 1:
-                        self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
-                    elif len(frequency) == 2:
-                        self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
-                    elif len(frequency) == 5:
-                        self.freq = frequency
-                    else:
-                        raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
-                else:
-                    self.freq = [frequency/4., 10., frequency/4., frequency/2., frequency]
-            elif 'RES' in self.variant.upper():
-                if hasattr(frequency, "__len__"):
-                    if len(frequency) == 1:
-                        self.freq = [frequency[0]/2., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
-                    elif len(frequency) == 2:
-                        self.freq = [frequency[0]/2., 10., frequency[1], frequency[1], frequency[0]]
-                    elif len(frequency) == 5:
-                        self.freq = frequency
-                    else:
-                        raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
-                else:
-                    self.freq = [frequency/2., 10., frequency/2., frequency/2., frequency]
-            else:
-                if hasattr(frequency, "__len__"):
-                    if len(frequency) == 1:
-                        self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
-                    elif len(frequency) == 2:
-                        self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
-                    elif len(frequency) == 5:
-                        self.freq = frequency
-                    else:
-                        raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
-                else:
-                    self.freq = [frequency/4., 10., frequency/2., frequency/2., frequency]
+            self._LET_freq(frequency)
             if 'Chopper2Phase' in kwargs.keys():
                 self.Chop2Phase = kwargs['Chopper2Phase']
         elif 'MERLIN' in self.instname:
