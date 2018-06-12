@@ -451,7 +451,10 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
   // the start/stop times of the current input workspace
   if (slicing.isUniform() || slicing.isUniformEven()) {
     slicing.clearSlices();
-    parseUniform(slicing, runName);
+    if (!parseUniform(slicing, runName)) {
+      handleError(rowData, "Failed to parse slices for workspace");
+      return false;
+    }
   }
 
   const auto slicedWorkspaceProperties = getSlicedWorkspacePropertyNames();
@@ -475,10 +478,10 @@ bool ReflDataProcessorPresenter::reduceRowAsEventWS(RowData_sptr rowData,
       // should always be the same.
       updateModelFromResults(alg, rowData);
     } catch (std::runtime_error &e) {
-      handleError(slice, e.what());
+      handleError(rowData, e.what());
       return false;
     } catch (...) {
-      handleError(slice, "Unexpected error while reducing slice");
+      handleError(rowData, "Unexpected error while reducing slice");
       return false;
     }
 
@@ -658,16 +661,20 @@ ReflDataProcessorPresenter::retrieveWorkspaceOrCritical(
   if (workspaceExists(name)) {
     auto mws = retrieveWorkspace(name);
     if (mws == nullptr) {
-      m_view->giveUserCritical("Workspace to slice " + name +
-                                   " is not an event workspace!",
-                               "Time slicing error");
+      if (promptUser()) {
+        m_view->giveUserCritical("Workspace to slice " + name +
+                                     " is not an event workspace!",
+                                 "Time slicing error");
+      }
       return nullptr;
     } else {
       return mws;
     }
   } else {
-    m_view->giveUserCritical("Workspace to slice not found: " + name,
-                             "Time slicing error");
+    if (promptUser()) {
+      m_view->giveUserCritical("Workspace to slice not found: " + name,
+                               "Time slicing error");
+    }
     return nullptr;
   }
 }
@@ -676,8 +683,9 @@ ReflDataProcessorPresenter::retrieveWorkspaceOrCritical(
  *
  * @param slicing :: Info about how time slicing should be performed
  * @param wsName :: The name of the workspace to be sliced
+ * @return :: true if successfull
  */
-void ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
+bool ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
                                               const QString &wsName) {
 
   IEventWorkspace_sptr mws = retrieveWorkspaceOrCritical(wsName);
@@ -702,7 +710,10 @@ void ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
       slicing.addSlice(sliceDuration * indexAsDouble,
                        sliceDuration * (indexAsDouble + 1));
     }
+    return true;
   }
+
+  return false;
 }
 
 bool ReflDataProcessorPresenter::workspaceExists(
@@ -1146,6 +1157,8 @@ void ReflDataProcessorPresenter::threadFinished(const int exitCode) {
  */
 bool ReflDataProcessorPresenter::workspaceIsOutputOfGroup(
     const GroupData &groupData, const std::string &workspaceName) const {
+  if (groupData.size() == 0)
+    return false;
 
   // If not time slicing, call base class
   if (!m_processingAsEventData) {

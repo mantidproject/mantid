@@ -351,12 +351,14 @@ void GenericDataProcessorPresenter::setGroupError(const int groupIndex,
 
 void GenericDataProcessorPresenter::setRowIsProcessed(RowData_sptr rowData,
                                                       const bool isProcessed) {
-  rowData->setProcessed(isProcessed);
+  if (rowData)
+    rowData->setProcessed(isProcessed);
 }
 
 void GenericDataProcessorPresenter::setRowError(RowData_sptr rowData,
                                                 const std::string &error) {
-  rowData->setError(error);
+  if (rowData)
+    rowData->setError(error);
 }
 
 /** Return true if the given workspace name is the output of a current
@@ -421,6 +423,9 @@ void GenericDataProcessorPresenter::handleAllWorkspacesRemoved(
 
 bool GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
     const GroupData &groupData, const std::string &workspaceName) const {
+  if (groupData.size() == 0)
+    return false;
+
   return hasPostprocessing() &&
          getPostprocessedWorkspaceName(groupData).toStdString() ==
              workspaceName;
@@ -428,6 +433,9 @@ bool GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
 
 bool GenericDataProcessorPresenter::workspaceIsOutputOfRow(
     RowData_sptr rowData, const std::string &workspaceName) const {
+  if (!rowData)
+    return false;
+
   // Only check the default output workspace (other output workspaces are
   // optional)
   return rowData->hasOutputWorkspaceWithNameAndPrefix(

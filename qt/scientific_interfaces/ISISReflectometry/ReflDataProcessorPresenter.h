@@ -140,7 +140,7 @@ private:
   bool processGroupAsNonEventWS(int groupID, GroupData &group);
 
   // Parse uniform / uniform even time slicing from input string
-  void parseUniform(TimeSlicingInfo &slicing, const QString &wsName);
+  bool parseUniform(TimeSlicingInfo &slicing, const QString &wsName);
   bool workspaceExists(QString const &workspaceName) const;
 
   // Load a run as event workspace
