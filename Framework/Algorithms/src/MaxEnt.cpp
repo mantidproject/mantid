@@ -269,7 +269,7 @@ std::map<std::string, std::string> MaxEnt::validateInputs() {
   // Check linear adjustments, we expect and even number of histograms
   // and if any, they must be sufficient for all spectra in input workspace,
   // if per spectrum reconstruction is done.
-  bool psr = getProperty("perSpectrumReconstruction");
+  bool psr = getProperty("PerSpectrumReconstruction");
   MatrixWorkspace_sptr linAdj = getProperty("DataLinearAdj");
   size_t nAHistograms = 0;
   if (linAdj)
