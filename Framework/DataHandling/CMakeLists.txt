@@ -145,7 +145,6 @@ set ( SRC_FILES
 	src/SaveFITS.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
-	src/SaveGDA.cpp
 	src/SaveGSASInstrumentFile.cpp
 	src/SaveGSS.cpp
 	src/SaveILLCosmosAscii.cpp
@@ -324,7 +323,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFITS.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
-	inc/MantidDataHandling/SaveGDA.h
 	inc/MantidDataHandling/SaveGSASInstrumentFile.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveILLCosmosAscii.h
