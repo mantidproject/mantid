@@ -258,10 +258,15 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   std::string wsNameStem = "MuonDataPeriod_";
   std::string wsName;
 
+  boost::shared_ptr<Geometry::Instrument> inst1 =
+      boost::make_shared<Geometry::Instrument>();
+  inst1->setName("EMU");
+
   for (int period = 1; period < nPeriods + 1; period++) {
     // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
     // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
     MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period);
+
     wsGroup->addWorkspace(ws);
     wsName = wsNameStem + std::to_string(period);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -616,6 +621,79 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
+  }
+
+  void test_multiple_period_data_summing_periods_gives_correct_result() {
+
+    auto ws = createMultiPeriodWorkspaceGroup(2, 4, 10, "MuonAnalysis");
+    setUpADSWithWorkspace setup(ws);
+    auto file = createXMLwithPairsAndGroups(2, 2);
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->setProperty("SummedPeriods", "1,2");
+    alg->execute();
+
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
+
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+	TS_ASSERT_DELTA(wsOut->readY(0)[0], 26, 0.1);
+	TS_ASSERT_DELTA(wsOut->readY(0)[1], 30, 0.001);
+	TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.001);
+
+	wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+
+	TS_ASSERT_DELTA(wsOut->readY(0)[0], 106, 0.1);
+	TS_ASSERT_DELTA(wsOut->readY(0)[1], 110, 0.001);
+	TS_ASSERT_DELTA(wsOut->readY(0)[4], 122, 0.001);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+	// Asymmetry on group 1 and 2
+	TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.6061, 0.1);
+	TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.5714, 0.001);
+	TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.4878, 0.001);
+
+  }
+
+  void test_multiple_period_data_subtracting_periods_gives_correct_result() {
+
+	  auto ws = createMultiPeriodWorkspaceGroup(2, 4, 10, "MuonAnalysis");
+	  setUpADSWithWorkspace setup(ws);
+	  auto file = createXMLwithPairsAndGroups(2, 2);
+
+	  auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+	  alg->setProperty("SummedPeriods", "1");
+	  alg->setProperty("SubtractedPeriods", "2");
+	  alg->execute();
+
+	  WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+		  AnalysisDataService::Instance().retrieve("EMU00012345"));
+
+	  auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		  wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+	  TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
+	  TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
+	  TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
+
+	  wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		  wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
+
+	  TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
+	  TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
+	  TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
+
+	  wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		  wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+
+	  TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.03676, 0.001);
+	  TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.03268, 0.001);
+	  TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.02382, 0.001);
+
   }
 };
 

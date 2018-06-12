@@ -84,11 +84,21 @@ void LoadAndApplyMuonDetectorGrouping::init() {
                   "given corresponds to the bin that will become 0.0 seconds.",
                   Direction::Input);
 
+  declareProperty("SummedPeriods", std::to_string(1),
+                  "A list of periods to sum in multiperiod data.",
+                  Direction::Input);
+
+  declareProperty("SubtractedPeriods", emptyString,
+                  "A list of periods to subtract in multiperiod data.",
+                  Direction::Input);
+
   // Perform Group Associations.
 
   std::string analysisGrp("Analysis Options");
   setPropertyGroup("RebinArgs", analysisGrp);
   setPropertyGroup("TimeOffset", analysisGrp);
+  setPropertyGroup("SummedPeriods", analysisGrp);
+  setPropertyGroup("SubtractedPeriods", analysisGrp);
 }
 
 /**
@@ -158,8 +168,8 @@ LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
 // Set the parameters in options to sensible defaults for this algorithm
 AnalysisOptions LoadAndApplyMuonDetectorGrouping::setDefaultOptions() {
   AnalysisOptions options;
-  options.summedPeriods = "1";
-  options.subtractedPeriods = "";
+  options.summedPeriods = this->getProperty("SummedPeriods");
+  options.subtractedPeriods = this->getProperty("SubtractedPeriods");
   options.timeZero = 0.0;
   options.loadedTimeZero = this->getProperty("TimeOffset");
   options.rebinArgs = this->getProperty("RebinArgs");
@@ -265,7 +275,9 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
 
     // Analysis options
     alg->setProperty("RebinArgs", options.rebinArgs);
-	alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
+    alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
+    alg->setProperty("SummedPeriods", options.summedPeriods);
+    alg->setProperty("SubtractedPeriods", options.subtractedPeriods);
     alg->execute();
   }
 };
@@ -300,7 +312,9 @@ void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
 
     // Analysis options
     alg->setProperty("RebinArgs", options.rebinArgs);
-	alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
+    alg->setProperty("TimeOffset", options.loadedTimeZero - options.timeZero);
+    alg->setProperty("SummedPeriods", options.summedPeriods);
+    alg->setProperty("SubtractedPeriods", options.subtractedPeriods);
     alg->execute();
   };
 };
