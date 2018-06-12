@@ -351,7 +351,6 @@ public:
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (const auto &outputwsname : outputwsnames) {
-      std::cout << "Delete output workspace name: " << outputwsname << "\n";
       AnalysisDataService::Instance().remove(outputwsname);
     }
 
@@ -1383,7 +1382,7 @@ public:
     Kernel::SplittingInterval interval0(t0, t1, 0);
     splitterws->addSplitter(interval0);
 
-    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 0 << "\n";
+    // std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 0 << "\n";
 
     // 2. Splitter 1: 3+ ~ 9+ (second pulse)
     t0 = t1;
@@ -1391,7 +1390,7 @@ public:
     Kernel::SplittingInterval interval1(t0, t1, 1);
     splitterws->addSplitter(interval1);
 
-    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 1 << "\n";
+    // std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 1 << "\n";
 
     // 3. Splitter 2: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
@@ -1399,7 +1398,8 @@ public:
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
-      std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 << "\n";
+      // std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 <<
+      // "\n";
     }
 
     return splitterws;
