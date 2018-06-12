@@ -71,6 +71,7 @@ public:
   void hideMaskBinErrorLabel();
 
   void setMaskSelectionEnabled(bool enabled);
+  void clear();
 
 public slots:
   void setMinimumSpectrum(std::size_t spectrum);

@@ -104,6 +104,7 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
     boost::apply_visitor(SetViewSpectra(m_view.get()),
                          m_model->getSpectra(m_activeIndex));
   }
+  m_view->clear();
   m_view->setEnabled(workspace ? true : false);
 }
 
