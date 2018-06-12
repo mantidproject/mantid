@@ -9,7 +9,7 @@ namespace CustomInterfaces {
 
 /** Constructor
 * @param view :: The view we are handling
-* @param gropu :: The group on the parent tab this belongs to
+* @param group :: The group on the parent tab this belongs to
 */
 ReflEventPresenter::ReflEventPresenter(IReflEventView *view, int group)
     : m_view(view), m_sliceType(SliceType::UniformEven), m_group(group) {
