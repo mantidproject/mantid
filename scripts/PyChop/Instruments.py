@@ -499,18 +499,30 @@ class Moderator(object):
     """
 
     __allowed_var_names = ['name', 'imod', 'ch_mod', 'mod_pars', 'mod_scale_fn', 'mod_scale_par', 'theta',
-                           'source_rep', 'n_frame', 'emission_time', 'measured_flux']
+                           'source_rep', 'n_frame', 'emission_time', 'measured_flux', 'measured_width']
 
     def __init__(self, inval=None):
         wrap_attributes(self, inval, self.__allowed_var_names)
-        if hasattr(self, 'measured_flux') and 'scale_factor' in self.measured_flux:
-            self.measured_flux['flux'] = np.array(self.measured_flux['flux']) * float(self.measured_flux['scale_factor'])
+        if hasattr(self, 'measured_flux') and self.measured_flux:
+            if 'scale_factor' in self.measured_flux:
+                self.measured_flux['flux'] = np.array(self.measured_flux['flux']) * float(self.measured_flux['scale_factor'])
+            self.flux_interp = interp1d(self.measured_flux['wavelength'], self.measured_flux['flux'], kind='cubic')
+            self.fmn, self.fmx = (min(self.measured_flux['wavelength']), max(self.measured_flux['wavelength']))
+        if hasattr(self, 'measured_width') and self.measured_width:
+            self.width_interp = interp1d(self.measured_width['wavelength'], self.measured_width['width'], kind='cubic')
+            self.wmn, self.wmx = (min(self.measured_width['wavelength']), max(self.measured_width['wavelength']))
+            if 'isSigma' not in self.measured_width.keys():
+                self.measured_width['isSigma'] = False
 
     def __repr__(self):
         return self.name if self.name else 'Undefined neutron moderator'
 
     def getWidthSquared(self, Ei):
-        """ Returns the squared time gaussian sigma width due to the sample in s^2 """
+        """ Returns the squared time gaussian FWHM width due to the sample in s^2 """
+        if hasattr(self, 'width_interp'):
+            wavelength = [min(max(l, self.wmn), self.wmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
+            width = self.width_interp(wavelength)**2
+            return (width * SIGMA2FWHMSQ) if self.measured_width['isSigma'] else width
         if self.imod == 0:
             # CHOP outputs the Gaussian sigma^2 in s^2, we want FWHM^2 in s^2
             tsqmod = Chop.tchi(self.mod_pars / 1000., Ei) * SIGMA2FWHMSQ
@@ -533,6 +545,10 @@ class Moderator(object):
 
     def getWidth(self, Ei):
         """ Calculates the moderator time width in seconds for a given neutron energy (Ei) """
+        if hasattr(self, 'width_interp'):
+            wavelength = [min(max(l, self.wmn), self.wmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
+            width = self.width_interp(wavelength)
+            return width * SIGMA2FWHM if self.measured_width['isSigma'] else width
         if self.imod == 3:
             # Mode for LET - output of polynomial is FWHM in us
             return np.polyval(self.mod_pars, np.sqrt(E2L / Ei)) / 1e6
@@ -541,7 +557,7 @@ class Moderator(object):
 
     def getFlux(self, Ei):
         """ Returns the white beam flux estimate from either measured data (prefered) or analytical model (backup) """
-        return self.getMeasuredFlux(Ei) if (hasattr(self, 'measured_flux') and self.measured_flux) else self.getAnalyticFlux(Ei)
+        return self.getMeasuredFlux(Ei) if hasattr(self, 'flux_interp') else self.getAnalyticFlux(Ei)
 
     def getAnalyticFlux(self, Ei):
         """ Estimate white beam flux from TGP's model of the moderators (ISIS TS1 only) """
@@ -551,12 +567,10 @@ class Moderator(object):
 
     def getMeasuredFlux(self, Ei):
         """ Interpolates flux from a table of measured flux """
-        if not self.measured_flux:
+        if not hasattr(self, 'flux_interp'):
             raise AttributeError('This instrument does not have a table of measured flux')
-        f = interp1d(self.measured_flux['wavelength'], self.measured_flux['flux'], kind='cubic')
-        mn, mx = (min(self.measured_flux['wavelength']), max(self.measured_flux['wavelength']))
-        wavelength = [min(max(l, mn), mx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
-        return f(wavelength)
+        wavelength = [min(max(l, self.fmn), self.fmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, '__len__') else [Ei]))]
+        return self.flux_interp(wavelength)
 
     @property
     def theta_m(self):
@@ -677,12 +691,12 @@ class Instrument(object):
 
     def getFlux(self, Ei_in=None, frequency=None):
         """ Returns the monochromatic flux estimate in n/cm^2/s """
-        Ei = _check_input(self, Ei_in)
+        Ei = _check_input(self.chopper_system, Ei_in)
         isHires = False if (self.isFermi or (self.getResolution(0., Ei) / Ei) > 0.02) else True
         return self.moderator.getFlux(Ei) * self.chopper_system.getTransmission(Ei, frequency, hires=isHires)
 
     def getMultiRepFlux(self, Ei_in=None, frequency=None):
-        Ei, _ = _check_input(self, Ei_in, frequency)
+        Ei, _ = _check_input(self.chopper_system, Ei_in, frequency)
         if frequency:
             oldfreq = self.frequency
             self.frequency = frequency
@@ -696,7 +710,7 @@ class Instrument(object):
 
     def getWidths(self, Ei_in=None, frequency=None):
         """ Returns the time FWHM of different components for one rep (Ei) in microseconds """
-        Ei = _check_input(self, Ei_in)
+        Ei = _check_input(self.chopper_system, Ei_in)
         try:
             widths = self.getVanVar(Ei, frequency)
         except ValueError:
@@ -706,7 +720,7 @@ class Instrument(object):
 
     def getMultiWidths(self, Ei_in=None, frequency=None):
         """ Returns the time FWHM of different components for each possible rep (Ei) in seconds"""
-        Ei = _check_input(self, Ei_in)
+        Ei = _check_input(self.chopper_system, Ei_in)
         Eis = self.getAllowedEi(Ei)
         outdic = {'Eis': Eis}
         widths = [self.getWidths(ei, frequency) for ei in Eis]
@@ -730,7 +744,7 @@ class Instrument(object):
         Output:
             van - the incoherent (Vanadium) energy FWHM at etrans in meV
         """
-        Ei = _check_input(self, Ei_in)
+        Ei = _check_input(self.chopper_system, Ei_in)
         # If not set, sets energy transfers to values to compare exactly to RAE's original implementation.
         if Etrans is None:
             Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
@@ -743,14 +757,14 @@ class Instrument(object):
     def getMultiRepResolution(self, Etrans=None, Ei_in=None, frequency=None):
         """ Returns a list of FWHM in meV for all allowed Ei's in multirep mode (in same order as getAllowedEi) 
             The input energy transfer is interpreted as fractions of Ei. e.g. linspace(0,0.9,100) """
-        Ei = _check_input(self, Ei_in)
+        Ei = _check_input(self.chopper_system, Ei_in)
         if Etrans is None:
             Etrans = np.linspace(0.05, 0.95, 19, endpoint=True)
         return [self.getResolution(Etrans * ei, ei, frequency) for ei in self.getAllowedEi(Ei)]
 
     def getVanVar(self, Ei_in=None, frequency=None, Etrans=0):
         """ Calculates the time squared FWHM in s^2 at the sample (Vanadium widths) for different components """
-        Ei, _ = _check_input(self, Ei_in, frequency)
+        Ei, _ = _check_input(self.chopper_system, Ei_in, frequency)
         Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
         if frequency:
             oldfreq = self.frequency

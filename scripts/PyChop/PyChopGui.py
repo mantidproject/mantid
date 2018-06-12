@@ -563,7 +563,7 @@ class PyChopGui(QtGui.QMainWindow):
             ef = ei-en[ii]
             approx = (874.78672e-6/x2)*np.sqrt(ef**3 * ((v_mod*((x1/x0)+(x2/x0)*(ei/ef)**1.5))**2
                                                        + (v_chop*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5))**2))
-            txt += '%12.5f %12.5f %12.5f %f\n' % (en[ii], res[ii], approx)
+            txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
         return txt
 
     def showText(self):

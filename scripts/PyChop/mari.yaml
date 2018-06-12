@@ -95,6 +95,8 @@ chopper_system:
     [600]                       # Maximum frequencies (Hz)
   default_frequencies:
     [400]
+  overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
+  ei_limits: [0, 2000]          # Limits on ei for multirep calculations (reps outside range ignored)
 
 sample: 
   name: MARI Sample Can

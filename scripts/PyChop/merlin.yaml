@@ -25,7 +25,7 @@ chopper_system:
       phaseName: 'Disk chopper phase delay time'
     -
       name: MERLIN Fermi
-      distance: 10.0            # Distance from moderator to this chopper in metres
+      distance: 10.1            # Distance from moderator to this chopper in metres
       aperture_distance: 7.19   # Distance from aperture (moderator face) to this chopper (only for Fermi)
       packages:                 # A hash of chopper packages
         G:
@@ -58,6 +58,8 @@ chopper_system:
     [600]                       # Maximum frequencies (Hz)
   default_frequencies:
     [400]
+  overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
+  ei_limits: [7, 2000]          # Limits on ei for multirep calculations (reps outside range ignored)
 
 sample: 
   name: MERLIN Sample Can
