@@ -69,6 +69,8 @@ Single Crystal Diffraction
 
 - New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
 
+- New algorithm :ref:`IntegratePeaksProfileFitting` to integrate peaks using 3D profile fitting in reciprocal space.
+
 Improvements
 ############
 
