@@ -128,9 +128,9 @@ private:
   using Mantid::API::Algorithm::validateInputs;
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
-  static void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
-                                   const API::MatrixWorkspace_const_sptr &ws2,
-                                   std::vector<double> &params);
+  static std::vector<double>
+  calculateRebinParams(const std::vector<double> &params,
+                       const API::MatrixWorkspace_const_sptr &ws);
   static void noOverlapParams(const HistogramData::HistogramX &X1,
                               const HistogramData::HistogramX &X2,
                               std::vector<double> &params);

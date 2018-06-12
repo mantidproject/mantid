@@ -15,6 +15,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -128,12 +129,38 @@ void MergeRuns::exec() {
     m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
 
     // Iterate over the collection of input workspaces
-    auto it = m_inMatrixWS.begin();
-
-    const size_t numberOfWSs = m_inMatrixWS.size();
 
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
+    auto it = m_inMatrixWS.cbegin();
+    std::vector<double> rebinParams;
+    std::vector<double> bins{outWS->x(0).rawData()};
+    bool rebinningNeeded{false};
+    for (++it; it != m_inMatrixWS.cend();) {
+      if (!WorkspaceHelpers::matchingBins(*m_inMatrixWS.front(), **it, true)) {
+        if (rebinBehaviour != REBIN_BEHAVIOUR) {
+          if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+            g_log.error() << "Could not merge run: " << (*it)->getName()
+                          << ". Binning is different from first workspace. "
+                             "MergeRuns will continue but this run will be "
+                             "skipped.\n";
+            it = m_inMatrixWS.erase(it);
+            continue;
+          } else {
+            throw std::invalid_argument(
+                "Could not merge run: " + it->get()->getName() +
+                ". Binning is different from first workspace.");
+          }
+        }
+        rebinningNeeded = true;
+        rebinParams = this->calculateRebinParams(bins, *it);
+        VectorHelper::createAxisFromRebinParams(rebinParams, bins);
+      }
+      ++it;
+    }
+    if (rebinningNeeded) {
+      outWS = this->rebinInput(outWS, rebinParams);
+    }
     Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
         *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
         sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
@@ -141,32 +168,15 @@ void MergeRuns::exec() {
 
     auto isScanning = outWS->detectorInfo().isScanning();
 
+    const size_t numberOfWSs = m_inMatrixWS.size();
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
+    it = m_inMatrixWS.begin();
     for (++it; it != m_inMatrixWS.end(); ++it) {
       MatrixWorkspace_sptr addee;
-      // Only do a rebinning if the bins don't already match - otherwise can
-      // just add (see the 'else')
-      if (!WorkspaceHelpers::matchingBins(*outWS, **it, true)) {
-        if (rebinBehaviour == REBIN_BEHAVIOUR) {
-          std::vector<double> rebinParams;
-          this->calculateRebinParams(outWS, *it, rebinParams);
-
-          // Rebin the two workspaces in turn to the same set of bins
-          outWS = this->rebinInput(outWS, rebinParams);
-          addee = this->rebinInput(*it, rebinParams);
-        } else if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-          g_log.error() << "Could not merge run: " << it->get()->getName()
-                        << ". Binning is different from first workspace. "
-                           "MergeRuns will continue but this run will be "
-                           "skipped.\n";
-          continue;
-        } else {
-          throw std::invalid_argument(
-              "Could not merge run: " + it->get()->getName() +
-              ". Binning is different from first workspace.");
-        }
+      if (rebinningNeeded) {
+        addee = this->rebinInput(*it, rebinParams);
       } else {
         addee = *it;
       }
@@ -485,43 +495,43 @@ bool MergeRuns::validateInputsForEventWorkspaces(
  *  @param ws2 ::    The second input workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
-                                     const API::MatrixWorkspace_const_sptr &ws2,
-                                     std::vector<double> &params) {
-  auto const &X1 = ws1->x(0);
-  auto const &X2 = ws2->x(0);
-  params.clear();
+std::vector<double>
+MergeRuns::calculateRebinParams(const std::vector<double> &oldParams,
+                                const API::MatrixWorkspace_const_sptr &ws) {
+  auto const &X = ws->x(0).rawData();
+  std::vector<double> newParams;
   // Try to reserve memory for the worst-case scenario: two non-overlapping
   // ranges.
-  params.reserve(1 + 2 * (X1.size() - 1) + 2 + 2 * (X2.size() - 1));
+  newParams.reserve(1 + 2 * (oldParams.size() - 1) + 2 + 2 * (X.size() - 1));
   // Sort by X axis which starts smaller
-  bool const firstIsFirst = X1.front() < X2.front();
-  auto const &smallerX = firstIsFirst ? X1 : X2;
-  auto const &greaterX = firstIsFirst ? X2 : X1;
+  bool const oldIsFirst = oldParams.front() < X.front();
+  auto const &smallerX = oldIsFirst ? oldParams : X;
+  auto const &greaterX = oldIsFirst ? X : oldParams;
   double const end1 = smallerX.back();
   double const start2 = greaterX.front();
   double const end2 = greaterX.back();
 
   if (end1 <= start2) {
     // First case is if there's no overlap between the workspaces
-    noOverlapParams(smallerX, greaterX, params);
+    noOverlapParams(smallerX, greaterX, newParams);
   } else {
     // Add the bins up to the start of the overlap
-    params.emplace_back(smallerX.front());
+    newParams.emplace_back(smallerX.front());
     int64_t i;
     for (i = 1; smallerX[i] <= start2; ++i) {
-      params.emplace_back(smallerX[i] - smallerX[i - 1]);
-      params.emplace_back(smallerX[i]);
+      newParams.emplace_back(smallerX[i] - smallerX[i - 1]);
+      newParams.emplace_back(smallerX[i]);
     }
     // If the range of one of the workspaces is completely within that
     // of the other, call the 'inclusion' routine.
     // Otherwise call the standard 'intersection' one.
     if (end1 < end2) {
-      intersectionParams(smallerX, i, greaterX, params);
+      intersectionParams(smallerX, i, greaterX, newParams);
     } else {
-      inclusionParams(smallerX, i, greaterX, params);
+      inclusionParams(smallerX, i, greaterX, newParams);
     }
   }
+  return newParams;
 }
 
 //------------------------------------------------------------------------------------------------
